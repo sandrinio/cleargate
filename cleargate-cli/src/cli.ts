@@ -1,16 +1,40 @@
-const version = '0.1.0-alpha.0';
+import { Command } from 'commander';
+import pkg from '../package.json' with { type: 'json' };
+import { stubHandler } from './commands/_stub.js';
 
-const args = process.argv.slice(2);
+const program = new Command();
 
-if (args.includes('--version') || args.includes('-V')) {
-  process.stdout.write(version + '\n');
-  process.exit(0);
-}
+program
+  .name('cleargate')
+  .description('ClearGate CLI — connects AI agent teams to the ClearGate MCP server')
+  .version(pkg.version, '-V, --version')
+  .option('--profile <name>', 'configuration profile to use', 'default')
+  .option('--mcp-url <url>', 'MCP server URL (overrides config file and env)')
+  .showHelpAfterError('(use `cleargate --help`)');
 
-if (args.includes('--help') || args.includes('-h')) {
-  process.stdout.write(`cleargate v${version}\n`);
-  process.exit(0);
-}
+program
+  .command('join')
+  .description('join a ClearGate workspace using an invite URL')
+  .action(stubHandler('join'));
 
-process.stderr.write(`cleargate v${version} — use --help for usage\n`);
-process.exit(1);
+program
+  .command('whoami')
+  .description('print the currently authenticated agent identity')
+  .action(stubHandler('whoami'));
+
+program
+  .command('stamp')
+  .description('stamp a delivery artifact into the MCP server')
+  .action(stubHandler('stamp'));
+
+program
+  .command('wiki')
+  .description('query or update the workspace wiki')
+  .action(stubHandler('wiki'));
+
+program
+  .command('admin')
+  .description('administrative operations (create-project, invite, issue-token, revoke-token)')
+  .action(stubHandler('admin'));
+
+void program.parseAsync(process.argv);
