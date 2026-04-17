@@ -1,0 +1,36 @@
+---
+story_id: "STORY-005-03"
+parent_epic_ref: "EPIC-005"
+status: "Draft"
+ambiguity: "🟢 Low"
+complexity_label: "L1"
+context_source: "PROPOSAL-003_MCP_Adapter.md"
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
+depends_on: ["STORY-004-04"]
+---
+
+# STORY-005-03: `cleargate-admin issue-token`
+
+**Complexity:** L1.
+
+## 1. The Spec
+Calls `POST /projects/:pid/tokens`; prints plaintext token with a prominent "save now, never shown again" warning.
+
+### Args
+`--project`, `--member-id`, `--name`
+
+## 2. Acceptance
+```gherkin
+Scenario: Issue
+  When cleargate-admin issue-token --project <id> --member-id <mid> --name "bot"
+  Then stdout contains plaintext token + warning
+```
+
+## 3. Implementation
+- `mcp/scripts/commands/issue-token.ts`
+
+## Ambiguity Gate
+🟢.

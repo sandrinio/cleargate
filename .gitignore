@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code local config (user-scoped permissions, not team-shared)
+.claude/
+
+# Node — per-package .gitignore files handle node_modules/dist/.env
+# but belt-and-suspenders at root:
+node_modules/
