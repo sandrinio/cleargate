@@ -6,7 +6,7 @@ approved: true
 approved_at: "2026-04-17T00:00:00Z"
 approved_by: "Vibe Coder (ssuladze@exadel.com)"
 created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-18T00:00:00Z"
 codebase_version: "strategy-phase-pre-init"
 depends_on: ["PROP-001"]
 ---
@@ -16,7 +16,7 @@ depends_on: ["PROP-001"]
 ## 1. Initiative & Context
 
 ### 1.1 Objective
-Add a compiled `.cleargate/wiki/` layer that Claude Code reads first at every triage, so the agent stays aware of existing work items across sessions without re-scanning the raw filesystem. The wiki is derived from raw state (`delivery/`, `plans/`) and maintained automatically by dedicated subagents following the Karpathy LLM-Wiki pattern.
+Add a compiled `.cleargate/wiki/` layer that Claude Code reads first at every triage, so the agent stays aware of project state across sessions without re-scanning the raw filesystem. The wiki covers four planes — **work items, sprints, product state, roadmap** — and is derived from raw state (`delivery/`, `plans/`, `strategy/work-items/`) and maintained automatically by dedicated subagents following the Karpathy LLM-Wiki pattern. Scope expanded 2026-04-18 from work-items-only to the full four-plane view (see §4 Q6 amendment).
 
 ### 1.2 The "Why"
 
@@ -37,41 +37,58 @@ Based on Andrej Karpathy's "LLM Wiki" pattern ([gist](https://gist.github.com/ka
 
 ```
 .cleargate/
-├── knowledge/                      # protocol (unchanged)
-├── templates/                      # blueprints (unchanged)
+├── knowledge/                      # protocol (unchanged, not in wiki)
+├── templates/                      # blueprints (unchanged, not in wiki)
 ├── delivery/
 │   ├── pending-sync/               # raw: hot drafts
 │   └── archive/                    # raw: shipped items w/ remote IDs
 ├── plans/                          # raw: pulled PM context
-└── wiki/                           # 🆕 compiled awareness layer
+└── wiki/                           # 🆕 compiled awareness layer (four planes)
     ├── index.md                    # primary: read at every triage
     ├── log.md                      # append-only YAML event log
+    │
+    ├── # Plane 1 — work items
     ├── initiatives/                # one page per pulled initiative
     ├── epics/                      # one page per epic (parent/child backlinks)
     ├── stories/                    # one page per story
     ├── bugs/                       # one page per bug
+    ├── proposals/                  # one page per proposal
     ├── crs/                        # one page per CR (tracks invalidation edges)
-    └── synthesis/                  # cross-cutting views (e.g., "active sprint")
+    │
+    ├── # Plane 2 — sprints
+    ├── sprints/                    # one page per sprint (DoD status + story list + progress %)
+    │
+    ├── # Plane 3 — product state & roadmap (synthesis)
+    ├── product-state.md            # shipped ✓ / in-flight 🟡 / planned ⬜
+    ├── roadmap.md                  # upcoming sprints + their epic/story composition
+    ├── active-sprint.md            # current sprint status + open gates + next story
+    ├── open-gates.md               # items blocking on human action
+    │
+    └── # Plane 4 — topics (Karpathy compounding loop)
+        topics/                     # filed-back synthesis from `wiki query --persist`
 ```
 
 ### 2.2 Subagents
 
 | Subagent | Model | Trigger | Responsibility |
 |---|---|---|---|
-| `cleargate-wiki-ingest` | Haiku | PostToolUse hook on Write/Edit in `delivery/**` or `plans/**` | Update the affected wiki page, append one `log.md` entry, refresh `index.md` |
-| `cleargate-wiki-query` | Haiku | Auto-invoked at triage (before any Proposal/Epic/Story drafting) | Read `index.md`, surface existing related work items |
-| `cleargate-wiki-lint` | Sonnet | Before Gate 1 (Proposal approval) and Gate 3 (Push). On-demand via `/cleargate:lint` | Detect contradictions, orphans, stale claims, broken backlinks. Refuse gate transition if drift found |
+| `cleargate-wiki-ingest` | Haiku | PostToolUse hook on Write/Edit in `delivery/**`, `plans/**`, or `strategy/work-items/**` | Update affected per-item page, append one `log.md` entry, refresh `index.md`, recompile affected synthesis pages (`product-state.md` / `roadmap.md` / `active-sprint.md` / `open-gates.md`) |
+| `cleargate-wiki-query` | Haiku | Auto-invoked at triage (read-only). Also invoked on user request with `--persist` flag to file synthesis back | Read-only mode: read `wiki/index.md` + relevant pages, surface existing related items. Persist mode: file the synthesized answer as `wiki/topics/<slug>.md` with frontmatter `cites: [...]` — the Karpathy compounding loop |
+| `cleargate-wiki-lint` | Sonnet | Before Gate 1 (Proposal approval) and Gate 3 (Push). On-demand via `/cleargate:lint`. Advisory mode via `--suggest` | Enforcement: detect contradictions, orphans, stale claims, broken backlinks, invalidated topic citations. Refuse gate transition if drift found. Advisory (`--suggest`): surface candidate cross-references ingest missed — non-blocking Karpathy discovery pass |
 
 ### 2.3 Conventions
 
 **Backlinks:** Obsidian-style `[[WORK-ITEM-ID]]` syntax. Every page links to its parent and children. Lint pass verifies bidirectional integrity.
 
 **`index.md` structure (canonical sections):**
-- Open Gates (items blocking on human action)
-- Active (in `pending-sync/`)
-- In Flight (pushed, remote ID assigned, not yet Done)
-- Archived (shipped)
-- CRs in effect (with invalidation edges)
+- **Synthesis pointers** (top of file, one-line each) → `[product-state.md]`, `[roadmap.md]`, `[active-sprint.md]`, `[open-gates.md]`
+- **Open Gates** (items blocking on human action)
+- **Active** (in `pending-sync/`)
+- **In Flight** (pushed, remote ID assigned, not yet Done)
+- **Sprints** (active + next planned — each links to `sprints/SPRINT-NN.md`)
+- **Archived** (shipped)
+- **CRs in effect** (with invalidation edges)
+- **Topics** (filed-back synthesis in `topics/`; listed newest-first)
 
 **Pagination:** When any status bucket exceeds 50 items, split into paginated files (`index-active.md`, `index-archive.md`, etc.) and keep `index.md` as the master TOC linking to them.
 
@@ -182,16 +199,18 @@ Once the npm package exists:
 
 ## 4. AI Interrogation Loop — RESOLVED
 
-All eight decisions resolved by Vibe Coder 2026-04-17, accepting AI recommendations.
+Q1–Q8 resolved by Vibe Coder 2026-04-17 (accepting AI recommendations). Q9–Q10 added 2026-04-18 during scope expansion to the full Karpathy pattern; Q6 and Q7 amended at the same time.
 
 1. **Wiki page content depth** — **Resolved:** metadata + summary + edges only. Raw content stays in the raw file. Keeps pages ~200 tokens each.
 2. **Git policy for `wiki/`** — **Resolved:** commit to git. Multi-dev coherence wins; `lint --rebuild` resolves conflicts.
 3. **Lint auto-refuse on drift** — **Resolved:** block Gate 1 and Gate 3 on drift. Silent drift defeats the purpose.
 4. **`query` auto-invocation** — **Resolved:** always auto-run at triage. Haiku + tiny context = negligible cost.
 5. **Hook vs. protocol-only** — **Resolved:** ship both. Hook is primary (deterministic); protocol rule is the fallback.
-6. **Wiki for `knowledge/` and `templates/`?** — **Resolved:** work items only. Protocol/templates are static, already loaded via CLAUDE.md.
-7. **Synthesis pages** — **Resolved:** ship `synthesis/active-sprint.md` and `synthesis/open-gates.md` as auto-maintained defaults. Users can add more.
+6. **Wiki for `knowledge/` and `templates/`?** — **Resolved (2026-04-17) / Amended (2026-04-18):** Wiki covers four planes — work items + sprints + product state + roadmap. Still excludes static protocol (`knowledge/`) and `templates/` — those are loaded via CLAUDE.md and don't change often enough to justify compile overhead. The amendment expands scope beyond work-items-only to match Karpathy's full pattern (the wiki IS the knowledge base, not just a TOC of one artifact type).
+7. **Synthesis pages** — **Resolved (2026-04-17) / Amended (2026-04-18):** Ship four auto-maintained synthesis pages at the wiki root (not under `synthesis/`): `active-sprint.md`, `open-gates.md`, `product-state.md`, `roadmap.md`. Per-sprint pages live at `sprints/SPRINT-NN.md`. User-added custom synthesis pages are v1.1.
 8. **Interaction with PROPOSAL-001 metadata** — **Resolved:** separate `last_ingest` field on wiki pages. Coexists with PROPOSAL-001's `updated_at`/`codebase_version` on raw files.
+9. **Query file-back loop** — **Resolved 2026-04-18:** `wiki query --persist` files synthesis into `wiki/topics/<slug>.md` with `cites: [[ID]]` frontmatter. Explicit `--persist` flag required in v1; implicit auto-persist deferred to v1.1. Reason: avoid low-value topic spam; learn which topics get re-queried before automating.
+10. **Lint discovery mode** — **Resolved 2026-04-18:** Ship `wiki lint --suggest` alongside enforcement mode. Advisory: exit 0, surfaces candidate cross-refs ingest missed. Enforcement (no flag): exit non-zero on drift, blocks gates. Karpathy's lint discovers; ours must too — but discovery can't block transitions, only inform the next ingest pass.
 
 ---
 
