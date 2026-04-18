@@ -1,20 +1,22 @@
 ---
-sprint_id: "SPRINT-04"
+sprint_id: "SPRINT-05"
 remote_id: null
 source_tool: "local"
 status: "Planned"
-start_date: "2026-04-18"
+start_date: null
 end_date: null
 activated_at: null
 completed_at: null
 synced_at: null
 created_at: "2026-04-18T18:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
+updated_at: "2026-04-19T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
+deferred_from: "SPRINT-04"
+deferred_reason: "EPIC-002 Knowledge Wiki prioritized into SPRINT-04 (no admin-UI deadline; wiki unblocks session-start awareness immediately)"
 ---
 
-# SPRINT-04: Admin UI (SvelteKit + DaisyUI + GitHub OAuth)
+# SPRINT-05: Admin UI (SvelteKit + DaisyUI + GitHub OAuth)
 
 ## Sprint Goal
 
