@@ -26,7 +26,7 @@ Scenario: §10 complete
 ```
 
 ## 3. Implementation
-Edit `strategy/knowledge/cleargate-protocol.md`.
+Edit `.cleargate/knowledge/cleargate-protocol.md`.
 
 ## Ambiguity Gate
 🟢.

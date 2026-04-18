@@ -115,16 +115,16 @@ These fields are not part of the native schema of Linear/Jira/GitHub. The adapte
 ### 3.1 Known Files — must be modified
 
 **Templates (add metadata fields to YAML frontmatter):**
-- `strategy/templates/initiative.md`
-- `strategy/templates/epic.md`
-- `strategy/templates/story.md`
-- `strategy/templates/Bug.md`
-- `strategy/templates/CR.md`
-- `strategy/templates/proposal.md`
-- `strategy/templates/Sprint Plan Template.md`
+- `.cleargate/templates/initiative.md`
+- `.cleargate/templates/epic.md`
+- `.cleargate/templates/story.md`
+- `.cleargate/templates/Bug.md`
+- `.cleargate/templates/CR.md`
+- `.cleargate/templates/proposal.md`
+- `.cleargate/templates/Sprint Plan Template.md`
 
 **Protocol (add §11 "Document Metadata Lifecycle"):**
-- `strategy/knowledge/cleargate-protocol.md`
+- `.cleargate/knowledge/cleargate-protocol.md`
 
 ### 3.2 Expected New Entities
 

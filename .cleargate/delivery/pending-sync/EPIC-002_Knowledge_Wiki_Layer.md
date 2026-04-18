@@ -21,7 +21,7 @@ resolved_by: "Vibe Coder (ssuladze@exadel.com)"
 <agent_context>
   <objective>Ship the Karpathy-style compiled awareness layer at .cleargate/wiki/. Three subagents (ingest/query/lint) maintain index.md + log.md + per-item pages + synthesis pages (product-state, roadmap, active-sprint, open-gates) + filed-back topic pages. PostToolUse hook + protocol rule trigger ingest; lint blocks Gate 1 and Gate 3 on drift.</objective>
   <architecture_rules>
-    <rule>Wiki is derived; raw files (.cleargate/delivery, .cleargate/plans, strategy/work-items) are source of truth. On conflict, lint rebuilds from raw.</rule>
+    <rule>Wiki is derived; raw files (.cleargate/delivery, .cleargate/plans) are source of truth. On conflict, lint rebuilds from raw.</rule>
     <rule>Raw → wiki is a compile step (Karpathy framing). Rebuild is always safe and idempotent.</rule>
     <rule>Wiki pages hold metadata + summary + edges only — NOT full raw content (PROP-002 Q1). Exception: wiki/topics/ pages hold synthesis prose filed back from query results.</rule>
     <rule>wiki/ is committed to git (PROP-002 Q2). Multi-dev conflicts resolve via lint --rebuild.</rule>
@@ -32,7 +32,7 @@ resolved_by: "Vibe Coder (ssuladze@exadel.com)"
     <rule>Backlinks use [[WORK-ITEM-ID]] wiki-link syntax.</rule>
   </architecture_rules>
   <target_files>
-    <file path="strategy/knowledge/cleargate-protocol.md" action="modify" />
+    <file path=".cleargate/knowledge/cleargate-protocol.md" action="modify" />
     <file path="cleargate-cli/assets/subagents/cleargate-wiki-ingest.md" action="create" />
     <file path="cleargate-cli/assets/subagents/cleargate-wiki-query.md" action="create" />
     <file path="cleargate-cli/assets/subagents/cleargate-wiki-lint.md" action="create" />
@@ -55,7 +55,7 @@ resolved_by: "Vibe Coder (ssuladze@exadel.com)"
 ## 1. Problem & Value
 
 **Why are we doing this?**
-Without a compiled index, Claude Code starts every session blind — it must grep `delivery/` + `archive/` + `plans/` + `strategy/work-items/` to know what exists, what's shipped, and what's next. That's slow, error-prone, and causes duplicate Proposals and misread roadmap state. The wiki is the awareness layer that fixes this in ~3k tokens at session start. It covers four planes: **work items** (epics/stories/bugs/proposals/CRs), **sprints**, **product state** (shipped vs. in-flight vs. planned), and **roadmap** (upcoming sprints and their composition).
+Without a compiled index, Claude Code starts every session blind — it must grep `delivery/` + `archive/` + `plans/` to know what exists, what's shipped, and what's next. That's slow, error-prone, and causes duplicate Proposals and misread roadmap state. The wiki is the awareness layer that fixes this in ~3k tokens at session start. It covers four planes: **work items** (epics/stories/bugs/proposals/CRs), **sprints**, **product state** (shipped vs. in-flight vs. planned), and **roadmap** (upcoming sprints and their composition).
 
 **Success Metrics (North Star):**
 - Starting a new session, Claude reads `wiki/index.md` first and correctly surfaces "an approved Proposal for X already exists, archived as LIN-987" without scanning directories.
@@ -152,7 +152,7 @@ end_date: null
 stories_total: 11
 stories_done: 5
 progress_pct: 45
-raw_path: "strategy/work-items/sprints/SPRINT-03_CLI_Packages.md"
+raw_path: ".cleargate/delivery/archive/SPRINT-03_CLI_Packages.md"
 last_ingest: "2026-04-18T12:00:00Z"
 ---
 

@@ -1,107 +1,107 @@
 ---
 created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-19T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
+updated_at_version: "post-phase-2c"
 ---
 
 # ClearGate Work-Items Index
 
-Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strategy/work-items/` because ClearGate isn't bootstrapped on itself yet. Once `npx cleargate init` runs against this repo, these items migrate to `.cleargate/delivery/pending-sync/`.
+Curated roadmap of Epics, Stories, Sprints, and Proposals. Raw files live in `pending-sync/` (active/planned/draft) or `archive/` (shipped/approved). Once EPIC-002 Knowledge Wiki ships (SPRINT-04), a compiled `.cleargate/wiki/index.md` will supersede this hand-curated index for day-to-day triage; this file will persist as the strategic overview.
 
 ## Proposal → Epic map
 
 | Source Proposal | Epic | Status | Priority |
 |---|---|---|---|
-| — | [EPIC-000: CLI Package Scaffold](epics/EPIC-000_CLI_Package_Scaffold.md) | ✅ Completed (SPRINT-03) | Prerequisite for EPIC-001, EPIC-002, EPIC-005 |
-| [PROP-001](../proposals/PROPOSAL-001_Document_Metadata.md) | [EPIC-001: Document Metadata Lifecycle](epics/EPIC-001_Document_Metadata_Lifecycle.md) | 🟢 Ready | Medium (blocked by EPIC-000 + cross-Epic dep on STORY-003-03) |
-| [PROP-002](../proposals/PROPOSAL-002_Knowledge_Wiki.md) | [EPIC-002: Knowledge Wiki Layer](epics/EPIC-002_Knowledge_Wiki_Layer.md) | 🟢 Ready — **SPRINT-04** | **High — active sprint** |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-003: MCP Server Core](epics/EPIC-003_MCP_Server_Core.md) | ✅ Completed (SPRINT-01 + SPRINT-03) | **High — shipped** |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](epics/EPIC-004_Admin_API.md) | ✅ Completed (SPRINT-02 + SPRINT-03) | Medium — shipped |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](epics/EPIC-005_Admin_CLI.md) | ✅ Completed (SPRINT-03) | Low — shipped (OAuth login deferred to SPRINT-05) |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-006: Admin UI (SvelteKit)](epics/EPIC-006_Admin_UI.md) | 🟢 Ready — SPRINT-05 | High — deferred one sprint |
+| — | [EPIC-000: CLI Package Scaffold](archive/EPIC-000_CLI_Package_Scaffold.md) | ✅ Completed (SPRINT-03) | Prerequisite for EPIC-001, EPIC-002, EPIC-005 |
+| [PROP-001](archive/PROPOSAL-001_Document_Metadata.md) | [EPIC-001: Document Metadata Lifecycle](pending-sync/EPIC-001_Document_Metadata_Lifecycle.md) | 🟢 Ready | Medium (blocked by EPIC-000 + cross-Epic dep on STORY-003-03) |
+| [PROP-002](archive/PROPOSAL-002_Knowledge_Wiki.md) | [EPIC-002: Knowledge Wiki Layer](pending-sync/EPIC-002_Knowledge_Wiki_Layer.md) | 🟢 Ready — **SPRINT-04** | **High — active sprint** |
+| [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-003: MCP Server Core](archive/EPIC-003_MCP_Server_Core.md) | ✅ Completed (SPRINT-01 + SPRINT-03) | **High — shipped** |
+| [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](archive/EPIC-004_Admin_API.md) | ✅ Completed (SPRINT-02 + SPRINT-03) | Medium — shipped |
+| [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](archive/EPIC-005_Admin_CLI.md) | ✅ Completed (SPRINT-03) | Low — shipped (OAuth login deferred to SPRINT-05) |
+| [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-006: Admin UI (SvelteKit)](pending-sync/EPIC-006_Admin_UI.md) | 🟢 Ready — SPRINT-05 | High — deferred one sprint |
 
 ## Story decomposition (57 Stories across 7 Epics)
 
 ### EPIC-000: CLI Package Scaffold (4)
-- [STORY-000-01: Package Scaffold](stories/STORY-000-01_Package_Scaffold.md) · L1
-- [STORY-000-02: Commander Entry](stories/STORY-000-02_Commander_Entry.md) · L1
-- [STORY-000-03: Config Loader](stories/STORY-000-03_Config_Loader.md) · L1
-- [STORY-000-04: Token Store (Keychain + File)](stories/STORY-000-04_Token_Store.md) · L2
+- [STORY-000-01: Package Scaffold](archive/STORY-000-01_Package_Scaffold.md) · L1
+- [STORY-000-02: Commander Entry](archive/STORY-000-02_Commander_Entry.md) · L1
+- [STORY-000-03: Config Loader](archive/STORY-000-03_Config_Loader.md) · L1
+- [STORY-000-04: Token Store (Keychain + File)](archive/STORY-000-04_Token_Store.md) · L2
 
 ### EPIC-001: Document Metadata Lifecycle (6)
-- [STORY-001-01: Template Metadata Fields](stories/STORY-001-01_Template_Metadata_Fields.md) · L1
-- [STORY-001-02: Protocol §11](stories/STORY-001-02_Protocol_Section_11.md) · L1
-- [STORY-001-03: codebase-version helper](stories/STORY-001-03_Codebase_Version_Helper.md) · L2
-- [STORY-001-04: stamp-frontmatter helper](stories/STORY-001-04_Stamp_Frontmatter_Helper.md) · L2
-- [STORY-001-05: `cleargate stamp` CLI](stories/STORY-001-05_Stamp_CLI.md) · L1
-- [STORY-001-06: MCP push_item writes server_pushed_at_version](stories/STORY-001-06_MCP_Pushed_At_Version.md) · L1 · depends on STORY-003-03
+- [STORY-001-01: Template Metadata Fields](pending-sync/STORY-001-01_Template_Metadata_Fields.md) · L1
+- [STORY-001-02: Protocol §11](pending-sync/STORY-001-02_Protocol_Section_11.md) · L1
+- [STORY-001-03: codebase-version helper](pending-sync/STORY-001-03_Codebase_Version_Helper.md) · L2
+- [STORY-001-04: stamp-frontmatter helper](pending-sync/STORY-001-04_Stamp_Frontmatter_Helper.md) · L2
+- [STORY-001-05: `cleargate stamp` CLI](pending-sync/STORY-001-05_Stamp_CLI.md) · L1
+- [STORY-001-06: MCP push_item writes server_pushed_at_version](pending-sync/STORY-001-06_MCP_Pushed_At_Version.md) · L1 · depends on STORY-003-03
 
 ### EPIC-002: Knowledge Wiki Layer (9)
-- [STORY-002-01: Protocol §10](stories/STORY-002-01_Protocol_Section_10.md) · L1
-- [STORY-002-02: wiki-ingest subagent](stories/STORY-002-02_Wiki_Ingest_Subagent.md) · L2
-- [STORY-002-03: wiki-query subagent](stories/STORY-002-03_Wiki_Query_Subagent.md) · L1
-- [STORY-002-04: wiki-lint subagent](stories/STORY-002-04_Wiki_Lint_Subagent.md) · L2
-- [STORY-002-05: init writes PostToolUse hook](stories/STORY-002-05_Init_Writes_Hook.md) · L2
-- [STORY-002-06: `cleargate wiki build` CLI](stories/STORY-002-06_Wiki_Build_CLI.md) · L2
-- [STORY-002-07: `cleargate wiki ingest` CLI](stories/STORY-002-07_Wiki_Ingest_CLI.md) · L2
-- [STORY-002-08: `cleargate wiki lint` CLI](stories/STORY-002-08_Wiki_Lint_CLI.md) · L2
-- [STORY-002-09: Synthesis templates](stories/STORY-002-09_Synthesis_Templates.md) · L1
+- [STORY-002-01: Protocol §10](pending-sync/STORY-002-01_Protocol_Section_10.md) · L1
+- [STORY-002-02: wiki-ingest subagent](pending-sync/STORY-002-02_Wiki_Ingest_Subagent.md) · L2
+- [STORY-002-03: wiki-query subagent](pending-sync/STORY-002-03_Wiki_Query_Subagent.md) · L1
+- [STORY-002-04: wiki-lint subagent](pending-sync/STORY-002-04_Wiki_Lint_Subagent.md) · L2
+- [STORY-002-05: init writes PostToolUse hook](pending-sync/STORY-002-05_Init_Writes_Hook.md) · L2
+- [STORY-002-06: `cleargate wiki build` CLI](pending-sync/STORY-002-06_Wiki_Build_CLI.md) · L2
+- [STORY-002-07: `cleargate wiki ingest` CLI](pending-sync/STORY-002-07_Wiki_Ingest_CLI.md) · L2
+- [STORY-002-08: `cleargate wiki lint` CLI](pending-sync/STORY-002-08_Wiki_Lint_CLI.md) · L2
+- [STORY-002-09: Synthesis templates](pending-sync/STORY-002-09_Synthesis_Templates.md) · L1
 
 ### EPIC-003: MCP Server Core (13) — the critical path
-- [STORY-003-01: DB schema + Drizzle migrations](stories/STORY-003-01_DB_Schema_Migrations.md) · L3
-- [STORY-003-02: JWT issue/verify/refresh](stories/STORY-003-02_JWT_Auth.md) · L3
-- [STORY-003-03: push_item + versioning + prune](stories/STORY-003-03_Push_Item.md) · L3
-- [STORY-003-04: pull_item](stories/STORY-003-04_Pull_Item.md) · L1
-- [STORY-003-05: list_items (cursor pagination)](stories/STORY-003-05_List_Items.md) · L2
-- [STORY-003-06: sync_status](stories/STORY-003-06_Sync_Status.md) · L1
-- [STORY-003-07: Rate-limit middleware](stories/STORY-003-07_Rate_Limit.md) · L2
-- [STORY-003-08: Idempotency middleware](stories/STORY-003-08_Idempotency.md) · L2
-- [STORY-003-09: Audit middleware](stories/STORY-003-09_Audit_Middleware.md) · L2
-- [STORY-003-10: Streamable HTTP transport](stories/STORY-003-10_Streamable_HTTP.md) · L3 · 🟡
-- [STORY-003-11: First-admin bootstrap](stories/STORY-003-11_Admin_Bootstrap.md) · L2
-- [STORY-003-12: Dockerfile + Coolify runbook](stories/STORY-003-12_Dockerfile_Coolify.md) · L2
-- [STORY-003-13: `POST /join/:invite_token` redemption](stories/STORY-003-13_Join_Redemption.md) · L2 · added post-SPRINT-02 · scheduled in SPRINT-03
+- [STORY-003-01: DB schema + Drizzle migrations](archive/STORY-003-01_DB_Schema_Migrations.md) · L3
+- [STORY-003-02: JWT issue/verify/refresh](archive/STORY-003-02_JWT_Auth.md) · L3
+- [STORY-003-03: push_item + versioning + prune](archive/STORY-003-03_Push_Item.md) · L3
+- [STORY-003-04: pull_item](archive/STORY-003-04_Pull_Item.md) · L1
+- [STORY-003-05: list_items (cursor pagination)](archive/STORY-003-05_List_Items.md) · L2
+- [STORY-003-06: sync_status](archive/STORY-003-06_Sync_Status.md) · L1
+- [STORY-003-07: Rate-limit middleware](archive/STORY-003-07_Rate_Limit.md) · L2
+- [STORY-003-08: Idempotency middleware](archive/STORY-003-08_Idempotency.md) · L2
+- [STORY-003-09: Audit middleware](archive/STORY-003-09_Audit_Middleware.md) · L2
+- [STORY-003-10: Streamable HTTP transport](archive/STORY-003-10_Streamable_HTTP.md) · L3 · 🟡
+- [STORY-003-11: First-admin bootstrap](archive/STORY-003-11_Admin_Bootstrap.md) · L2
+- [STORY-003-12: Dockerfile + Coolify runbook](archive/STORY-003-12_Dockerfile_Coolify.md) · L2
+- [STORY-003-13: `POST /join/:invite_token` redemption](archive/STORY-003-13_Join_Redemption.md) · L2 · added post-SPRINT-02 · scheduled in SPRINT-03
 
 ### EPIC-004: Admin API (8)
-- [STORY-004-01: Admin JWT middleware](stories/STORY-004-01_Admin_JWT_Middleware.md) · L2
-- [STORY-004-02: Projects CRUD](stories/STORY-004-02_Projects_CRUD.md) · L2
-- [STORY-004-03: Members CRUD](stories/STORY-004-03_Members_CRUD.md) · L2
-- [STORY-004-04: Tokens CRUD (one-time-display)](stories/STORY-004-04_Tokens_CRUD.md) · L2
-- [STORY-004-05: Audit log query](stories/STORY-004-05_Audit_Endpoint.md) · L2
-- [STORY-004-06: Stats endpoint](stories/STORY-004-06_Stats_Endpoint.md) · L2
-- [STORY-004-07: Invite storage retrofit (Redis → Postgres)](stories/STORY-004-07_Invite_Storage_Retrofit.md) · L2 · added post-SPRINT-02 · shipped in SPRINT-03
-- [STORY-004-08: `POST /admin-api/v1/auth/exchange` (session → admin JWT)](stories/STORY-004-08_Auth_Exchange.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
+- [STORY-004-01: Admin JWT middleware](archive/STORY-004-01_Admin_JWT_Middleware.md) · L2
+- [STORY-004-02: Projects CRUD](archive/STORY-004-02_Projects_CRUD.md) · L2
+- [STORY-004-03: Members CRUD](archive/STORY-004-03_Members_CRUD.md) · L2
+- [STORY-004-04: Tokens CRUD (one-time-display)](archive/STORY-004-04_Tokens_CRUD.md) · L2
+- [STORY-004-05: Audit log query](archive/STORY-004-05_Audit_Endpoint.md) · L2
+- [STORY-004-06: Stats endpoint](archive/STORY-004-06_Stats_Endpoint.md) · L2
+- [STORY-004-07: Invite storage retrofit (Redis → Postgres)](archive/STORY-004-07_Invite_Storage_Retrofit.md) · L2 · added post-SPRINT-02 · shipped in SPRINT-03
+- [STORY-004-08: `POST /admin-api/v1/auth/exchange` (session → admin JWT)](pending-sync/STORY-004-08_Auth_Exchange.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
 
 ### EPIC-005: Admin CLI + Client Bootstrap (6)
-- [STORY-005-01: `cleargate-admin create-project`](stories/STORY-005-01_Admin_CLI_Create_Project.md) · L1
-- [STORY-005-02: `cleargate-admin invite`](stories/STORY-005-02_Admin_CLI_Invite.md) · L1
-- [STORY-005-03: `cleargate-admin issue-token`](stories/STORY-005-03_Admin_CLI_Issue_Token.md) · L1
-- [STORY-005-04: `cleargate-admin revoke-token`](stories/STORY-005-04_Admin_CLI_Revoke.md) · L1
-- [STORY-005-05: `cleargate join`](stories/STORY-005-05_Cleargate_Join.md) · L2
-- [STORY-005-06: `cleargate-admin login` (GitHub OAuth device flow)](stories/STORY-005-06_Admin_CLI_Login.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
+- [STORY-005-01: `cleargate-admin create-project`](archive/STORY-005-01_Admin_CLI_Create_Project.md) · L1
+- [STORY-005-02: `cleargate-admin invite`](archive/STORY-005-02_Admin_CLI_Invite.md) · L1
+- [STORY-005-03: `cleargate-admin issue-token`](archive/STORY-005-03_Admin_CLI_Issue_Token.md) · L1
+- [STORY-005-04: `cleargate-admin revoke-token`](archive/STORY-005-04_Admin_CLI_Revoke.md) · L1
+- [STORY-005-05: `cleargate join`](archive/STORY-005-05_Cleargate_Join.md) · L2
+- [STORY-005-06: `cleargate-admin login` (GitHub OAuth device flow)](pending-sync/STORY-005-06_Admin_CLI_Login.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
 
 ### EPIC-006: Admin UI — SvelteKit (10)
-- [STORY-006-01: SvelteKit + DaisyUI + Tailwind scaffold](stories/STORY-006-01_SvelteKit_Scaffold.md) · L2
-- [STORY-006-02: GitHub OAuth + Redis session](stories/STORY-006-02_GitHub_OAuth_Session.md) · L3
-- [STORY-006-03: Dashboard](stories/STORY-006-03_Dashboard.md) · L1
-- [STORY-006-04: Project detail + members](stories/STORY-006-04_Project_Detail_Members.md) · L2
-- [STORY-006-05: Tokens page + one-time-display modal](stories/STORY-006-05_Tokens_Page.md) · L2
-- [STORY-006-06: Items browser + version history](stories/STORY-006-06_Items_Browser_History.md) · L2
-- [STORY-006-07: Audit viewer](stories/STORY-006-07_Audit_Viewer.md) · L2
-- [STORY-006-08: Stats page (Chart.js)](stories/STORY-006-08_Stats_Page.md) · L2
-- [STORY-006-09: Settings page (root only)](stories/STORY-006-09_Settings_Page.md) · L1
-- [STORY-006-10: Dockerfile + Coolify runbook](stories/STORY-006-10_Dockerfile_Coolify.md) · L2
+- [STORY-006-01: SvelteKit + DaisyUI + Tailwind scaffold](pending-sync/STORY-006-01_SvelteKit_Scaffold.md) · L2
+- [STORY-006-02: GitHub OAuth + Redis session](pending-sync/STORY-006-02_GitHub_OAuth_Session.md) · L3
+- [STORY-006-03: Dashboard](pending-sync/STORY-006-03_Dashboard.md) · L1
+- [STORY-006-04: Project detail + members](pending-sync/STORY-006-04_Project_Detail_Members.md) · L2
+- [STORY-006-05: Tokens page + one-time-display modal](pending-sync/STORY-006-05_Tokens_Page.md) · L2
+- [STORY-006-06: Items browser + version history](pending-sync/STORY-006-06_Items_Browser_History.md) · L2
+- [STORY-006-07: Audit viewer](pending-sync/STORY-006-07_Audit_Viewer.md) · L2
+- [STORY-006-08: Stats page (Chart.js)](pending-sync/STORY-006-08_Stats_Page.md) · L2
+- [STORY-006-09: Settings page (root only)](pending-sync/STORY-006-09_Settings_Page.md) · L1
+- [STORY-006-10: Dockerfile + Coolify runbook](pending-sync/STORY-006-10_Dockerfile_Coolify.md) · L2
 
 ## Sprint roadmap
 
 | Sprint | Epic(s) | Goal | Status |
 |---|---|---|---|
-| [SPRINT-01](sprints/SPRINT-01_MCP_v0.1.md) | EPIC-003 | MCP Server v0.1 — deployable, four tools, auth + middleware | **Completed** (2026-04-17) |
-| [SPRINT-02](sprints/SPRINT-02_Admin_API.md) | EPIC-004 | Admin API — CRUD + audit + stats | **Completed** (2026-04-17) |
-| [SPRINT-03](sprints/SPRINT-03_CLI_Packages.md) | EPIC-000 + EPIC-005 (+ STORY-003-13, STORY-004-07) | CLI package scaffold + admin CLI + `cleargate join` + MCP redemption route + invite storage retrofit | **Completed** (2026-04-18) — 11/11 stories; ops close-out tracked in [REPORT.md](../../.cleargate/sprint-runs/SPRINT-03/REPORT.md) |
-| [SPRINT-04](sprints/SPRINT-04_Knowledge_Wiki.md) | EPIC-002 | Knowledge Wiki Layer (Karpathy pattern) + subagents + PostToolUse hook — adapted for our three-repo case (git-SHA drift, dual-source ingest) | **Active** (start 2026-04-19) |
-| [SPRINT-05](sprints/SPRINT-05_Admin_UI.md) | EPIC-006 (+ auth/exchange + `cleargate-admin login`) | Admin UI (SvelteKit + Chart.js + GitHub OAuth) + deferred OAuth closeouts | Planned (deferred one sprint from SPRINT-04) |
+| [SPRINT-01](archive/SPRINT-01_MCP_v0.1.md) | EPIC-003 | MCP Server v0.1 — deployable, four tools, auth + middleware | **Completed** (2026-04-17) |
+| [SPRINT-02](archive/SPRINT-02_Admin_API.md) | EPIC-004 | Admin API — CRUD + audit + stats | **Completed** (2026-04-17) |
+| [SPRINT-03](archive/SPRINT-03_CLI_Packages.md) | EPIC-000 + EPIC-005 (+ STORY-003-13, STORY-004-07) | CLI package scaffold + admin CLI + `cleargate join` + MCP redemption route + invite storage retrofit | **Completed** (2026-04-18) — 11/11 stories; ops close-out tracked in [REPORT.md](../sprint-runs/SPRINT-03/REPORT.md) |
+| [SPRINT-04](pending-sync/SPRINT-04_Knowledge_Wiki.md) | EPIC-002 | Knowledge Wiki Layer (Karpathy pattern) + subagents + PostToolUse hook — adapted for our three-repo case (git-SHA drift, dual-source ingest) | **Active** (start 2026-04-19) |
+| [SPRINT-05](pending-sync/SPRINT-05_Admin_UI.md) | EPIC-006 (+ auth/exchange + `cleargate-admin login`) | Admin UI (SvelteKit + Chart.js + GitHub OAuth) + deferred OAuth closeouts | Planned (deferred one sprint from SPRINT-04) |
 | SPRINT-06 | EPIC-001 | Document metadata lifecycle (stamp CLI + MCP push-time version) — priority re-assessed post-SPRINT-04 since wiki uses git SHA, not stamp-frontmatter | Planned |
 | v1.1 batch | PM adapters, webhooks, OAuth 2.1, wiki-federation (cross-repo) | Deferred | Post-launch |
 
@@ -123,7 +123,7 @@ Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strat
 
 ## Storage provider
 
-**Postgres 18** (vendor-neutral via `DATABASE_URL`). Local Docker for dev, Coolify-managed for prod. **Redis 8** also Coolify-managed. See [PROPOSAL-003 §2.12](../proposals/PROPOSAL-003_MCP_Adapter.md) for the full stack table.
+**Postgres 18** (vendor-neutral via `DATABASE_URL`). Local Docker for dev, Coolify-managed for prod. **Redis 8** also Coolify-managed. See [PROPOSAL-003 §2.12](archive/PROPOSAL-003_MCP_Adapter.md) for the full stack table.
 
 ## Stack versions reference (verified April 2026)
 

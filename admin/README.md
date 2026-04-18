@@ -3,7 +3,7 @@
 SvelteKit web UI for managing ClearGate projects, members, tokens, and viewing audit logs + basic stats.
 
 ## Status
-[PROPOSAL-003](../strategy/proposals/PROPOSAL-003_MCP_Adapter.md) approved 2026-04-17. Full scaffold pending — will be added after `../mcp/` foundation is wired up.
+[PROPOSAL-003](../.cleargate/delivery/archive/PROPOSAL-003_MCP_Adapter.md) approved 2026-04-17. Full scaffold pending — will be added after `../mcp/` foundation is wired up.
 
 ## Architecture
 
@@ -30,7 +30,7 @@ Separate Coolify app that talks to `../mcp/`'s admin API. Deployed at `admin.cle
 /settings                       Admin user management (root only)
 ```
 
-See [PROPOSAL-003](../strategy/proposals/PROPOSAL-003_MCP_Adapter.md) §2.11 for detail.
+See [PROPOSAL-003](../.cleargate/delivery/archive/PROPOSAL-003_MCP_Adapter.md) §2.11 for detail.
 
 ## Sibling service
 [`../mcp/`](../mcp/) — the MCP server this UI administers.

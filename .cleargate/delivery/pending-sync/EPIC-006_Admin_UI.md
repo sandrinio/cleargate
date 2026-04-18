@@ -27,7 +27,7 @@ resolved_by: "Vibe Coder (ssuladze@exadel.com)"
     <rule>Admin JWT is short-lived (15 min) — fetched on login, refreshed silently via @auth/sveltekit middleware.</rule>
     <rule>Token plaintext shown exactly once, in a modal, with explicit "I've saved it" confirmation before dismissal.</rule>
     <rule>No PII stored beyond what admin API provides.</rule>
-    <rule>Visual language is defined by strategy/knowledge/design-guide.md — the custom DaisyUI `cleargate` theme, token palette, typography, spacing, and component patterns there are authoritative. Do not substitute stock DaisyUI themes.</rule>
+    <rule>Visual language is defined by knowledge/design-guide.md — the custom DaisyUI `cleargate` theme, token palette, typography, spacing, and component patterns there are authoritative. Do not substitute stock DaisyUI themes.</rule>
   </architecture_rules>
   <target_files>
     <file path="admin/package.json" action="create" />

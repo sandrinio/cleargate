@@ -16,7 +16,7 @@ depends_on: ["PROP-001"]
 ## 1. Initiative & Context
 
 ### 1.1 Objective
-Add a compiled `.cleargate/wiki/` layer that Claude Code reads first at every triage, so the agent stays aware of project state across sessions without re-scanning the raw filesystem. The wiki covers four planes — **work items, sprints, product state, roadmap** — and is derived from raw state (`delivery/`, `plans/`, `strategy/work-items/`) and maintained automatically by dedicated subagents following the Karpathy LLM-Wiki pattern. Scope expanded 2026-04-18 from work-items-only to the full four-plane view (see §4 Q6 amendment).
+Add a compiled `.cleargate/wiki/` layer that Claude Code reads first at every triage, so the agent stays aware of project state across sessions without re-scanning the raw filesystem. The wiki covers four planes — **work items, sprints, product state, roadmap** — and is derived from raw state (`delivery/`, `plans/`) and maintained automatically by dedicated subagents following the Karpathy LLM-Wiki pattern. Scope expanded 2026-04-18 from work-items-only to the full four-plane view (see §4 Q6 amendment).
 
 ### 1.2 The "Why"
 
@@ -72,7 +72,7 @@ Based on Andrej Karpathy's "LLM Wiki" pattern ([gist](https://gist.github.com/ka
 
 | Subagent | Model | Trigger | Responsibility |
 |---|---|---|---|
-| `cleargate-wiki-ingest` | Haiku | PostToolUse hook on Write/Edit in `delivery/**`, `plans/**`, or `strategy/work-items/**` | Update affected per-item page, append one `log.md` entry, refresh `index.md`, recompile affected synthesis pages (`product-state.md` / `roadmap.md` / `active-sprint.md` / `open-gates.md`) |
+| `cleargate-wiki-ingest` | Haiku | PostToolUse hook on Write/Edit in `delivery/**`, `plans/**` | Update affected per-item page, append one `log.md` entry, refresh `index.md`, recompile affected synthesis pages (`product-state.md` / `roadmap.md` / `active-sprint.md` / `open-gates.md`) |
 | `cleargate-wiki-query` | Haiku | Auto-invoked at triage (read-only). Also invoked on user request with `--persist` flag to file synthesis back | Read-only mode: read `wiki/index.md` + relevant pages, surface existing related items. Persist mode: file the synthesized answer as `wiki/topics/<slug>.md` with frontmatter `cites: [...]` — the Karpathy compounding loop |
 | `cleargate-wiki-lint` | Sonnet | Before Gate 1 (Proposal approval) and Gate 3 (Push). On-demand via `/cleargate:lint`. Advisory mode via `--suggest` | Enforcement: detect contradictions, orphans, stale claims, broken backlinks, invalidated topic citations. Refuse gate transition if drift found. Advisory (`--suggest`): surface candidate cross-references ingest missed — non-blocking Karpathy discovery pass |
 
@@ -157,7 +157,7 @@ Page body stays small — full content lives in the raw file. Wiki page is a **p
 ### 3.1 Known Files — must be modified
 
 **Protocol:**
-- `strategy/knowledge/cleargate-protocol.md` — add §10 "Knowledge Wiki Protocol" covering ingest/query/lint, gate enforcement, and backlink conventions.
+- `.cleargate/knowledge/cleargate-protocol.md` — add §10 "Knowledge Wiki Protocol" covering ingest/query/lint, gate enforcement, and backlink conventions.
 
 **None of the templates need to change.** Raw files keep their current YAML frontmatter (per PROPOSAL-001); the wiki derives from them.
 
