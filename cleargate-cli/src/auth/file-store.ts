@@ -80,7 +80,7 @@ export class FileTokenStore implements TokenStore {
       const versionCheck = (parsed as Record<string, unknown>)?.['version'];
       if (versionCheck !== 1) {
         throw new Error(
-          `Invalid auth file at ${this.filePath}: unsupported version ${String(versionCheck)}. Please upgrade \`@cleargate/cli\` to read this file.`,
+          `Invalid auth file at ${this.filePath}: unsupported version ${String(versionCheck)}. Please upgrade \`cleargate\` to read this file.`,
         );
       }
       throw new Error(

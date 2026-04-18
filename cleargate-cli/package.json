@@ -1,11 +1,11 @@
 {
-  "name": "@cleargate/cli",
-  "version": "0.1.0-alpha.0",
+  "name": "cleargate",
+  "version": "0.1.0-alpha.1",
   "private": false,
   "type": "module",
   "description": "ClearGate CLI — connects AI agent teams to the ClearGate MCP server",
   "bin": {
-    "cleargate": "./dist/cli.js"
+    "cleargate": "dist/cli.js"
   },
   "main": "./dist/cli.cjs",
   "module": "./dist/cli.js",

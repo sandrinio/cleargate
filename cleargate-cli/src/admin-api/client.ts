@@ -59,7 +59,7 @@ class AdminApiClientImpl implements AdminApiClient {
     this.token = opts.token;
     this.fetchFn = opts.fetch ?? globalThis.fetch;
     this.warn = opts.warn ?? defaultWarn;
-    this.userAgent = opts.userAgent ?? `@cleargate/cli`;
+    this.userAgent = opts.userAgent ?? `cleargate`;
   }
 
   private debugLog(method: string, path: string, status: number, body: unknown): void {

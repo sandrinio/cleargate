@@ -49,9 +49,9 @@ describe('cleargate CLI', () => {
   });
 
   describe('Scenario: Version flag', () => {
-    it('--version prints 0.1.0-alpha.0', () => {
+    it('--version prints 0.1.0-alpha.1', () => {
       const result = run(['--version']);
-      expect(result.stdout.trim()).toBe('0.1.0-alpha.0');
+      expect(result.stdout.trim()).toBe('0.1.0-alpha.1');
     });
   });
 
