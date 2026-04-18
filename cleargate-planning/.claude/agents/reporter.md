@@ -12,7 +12,7 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/REPORT.md`. It must serve 
 
 ## Inputs
 - Sprint ID (e.g. `SPRINT-03`)
-- Path to the sprint file (e.g. `strategy/work-items/sprints/SPRINT-03_CLI_Packages.md`)
+- Path to the sprint file (e.g. `.cleargate/delivery/archive/SPRINT-03_CLI_Packages.md`)
 - Path to the token ledger (e.g. `.cleargate/sprint-runs/SPRINT-03/token-ledger.jsonl`)
 - Path to flashcards file (`.cleargate/FLASHCARD.md`)
 - Worktree / branch list (for `git log` aggregation)

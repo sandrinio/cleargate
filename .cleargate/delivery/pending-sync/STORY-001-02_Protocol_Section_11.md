@@ -16,7 +16,7 @@ updated_at_version: "strategy-phase-pre-init"
 **Complexity:** L1.
 
 ## 1. The Spec
-Add §11 to `strategy/knowledge/cleargate-protocol.md` describing: field semantics, stamp invocation rule, dirty-SHA convention, archive immutability, git-absent fallback, stale-detection threshold (≥1 merge commit between `updated_at_version` and HEAD).
+Add §11 to `.cleargate/knowledge/cleargate-protocol.md` describing: field semantics, stamp invocation rule, dirty-SHA convention, archive immutability, git-absent fallback, stale-detection threshold (≥1 merge commit between `updated_at_version` and HEAD).
 
 ## 2. Acceptance
 ```gherkin
@@ -26,7 +26,7 @@ Scenario: §11 present and complete
 ```
 
 ## 3. Implementation
-Edit `strategy/knowledge/cleargate-protocol.md`.
+Edit `.cleargate/knowledge/cleargate-protocol.md`.
 
 ## 4. Quality Gates
 - Manual review for completeness

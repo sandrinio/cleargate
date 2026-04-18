@@ -1,6 +1,6 @@
 # ClearGate Meta-Repo
 
-This repository is the **ClearGate product itself** — the standalone framework that turns AI coding agents into disciplined engineering teams. It is *not yet bootstrapped on itself*; planning lives in `strategy/work-items/` instead of `.cleargate/delivery/pending-sync/`. Once `npx cleargate init` (shipped by EPIC-000) can run against this repo, those items migrate.
+This repository is the **ClearGate product itself** — the standalone framework that turns AI coding agents into disciplined engineering teams. Bootstrapped on itself as of 2026-04-19: raw work items live in `.cleargate/delivery/{pending-sync,archive}/`, scaffold canonical at `cleargate-planning/`, protocol at `.cleargate/knowledge/cleargate-protocol.md`.
 
 ## Product vision in one line
 Scaffold AI agents into a three-phase sync loop — **Plan** (PM tool → local markdown) → **Execute** (agent drafts via templates in `pending-sync/`) → **Deliver** (MCP adapter pushes native, no middleman DB). Full vision: see auto-memory `project_vision.md`.
@@ -8,37 +8,44 @@ Scaffold AI agents into a three-phase sync loop — **Plan** (PM tool → local 
 ## Repo layout
 
 ```
-strategy/              ← planning (human + orchestrator authored)
-  work-items/
-    INDEX.md           ← single source of truth for epics/stories/sprints/roadmap
-    sprints/SPRINT-*.md
-    epics/EPIC-*.md
-    stories/STORY-*.md
-  proposals/           ← pre-epic design docs
-  ClearGate CLAUDE.md  ← SPEC ONLY (what `cleargate init` injects into downstream users' CLAUDE.md — do not confuse with this file)
-
-mcp/                   ← MCP server implementation (EPIC-003, EPIC-004 shipped)
-cleargate-cli/         ← @cleargate/cli npm package (created by SPRINT-03 STORY-000-01; may not exist yet)
-admin/                 ← admin tooling stub
-
-.claude/               ← Claude Code runtime configuration
-  agents/              ← architect / developer / qa / reporter role definitions
-  hooks/token-ledger.sh
-  skills/flashcard/
-  settings.json        ← SubagentStop hook wiring
-  settings.local.json  ← user-local permissions
-
-.cleargate/            ← runtime artifacts (sprint outputs + learning)
-  FLASHCARD.md         ← append-only project lesson log (READ BEFORE WORK)
+.cleargate/              ← raw work items + orchestration artifacts
+  INDEX.md              (moved to delivery/INDEX.md; may drop once wiki ships)
+  FLASHCARD.md          ← append-only lesson log (READ BEFORE WORK)
+  knowledge/
+    cleargate-protocol.md  ← delivery protocol (non-negotiable rules)
+  templates/            ← blueprints: proposal/epic/story/CR/Bug/initiative/Sprint Plan
+  delivery/
+    INDEX.md            ← curated roadmap table (epic/sprint map)
+    pending-sync/       ← drafts + in-flight items (sprints, epics, stories, proposals)
+    archive/            ← items pushed to PM tool / completed
+  wiki/                 ← compiled awareness layer (ships in SPRINT-04 EPIC-002)
   sprint-runs/<id>/
-    plans/W<N>.md      ← Architect output per milestone
-    token-ledger.jsonl ← auto-populated by SubagentStop hook
-    REPORT.md          ← Reporter output at sprint end
+    plans/M<N>.md       ← Architect output per milestone
+    token-ledger.jsonl  ← auto-populated by SubagentStop hook
+    REPORT.md           ← Reporter output at sprint end
+  hook-log/             ← raw hook stdout/stderr
+
+cleargate-planning/     ← canonical scaffold source (what `cleargate init` installs)
+  CLAUDE.md             ← the injection spec
+  .claude/{agents,skills,hooks,settings.json}
+  .cleargate/{FLASHCARD.md,knowledge,templates,delivery}/  (empty skeleton)
+
+cleargate-cli/          ← @cleargate/cli npm package source (publishes `cleargate`)
+mcp/                    ← MCP server — nested separate git repo (sandrinio/cleargate-mcp)
+admin/                  ← admin tooling stub
+
+.claude/                ← LIVE dogfood instance (gitignored) — Claude Code reads here
+  agents/               ← four-agent role definitions
+  skills/flashcard/
+  hooks/token-ledger.sh
+  settings.json
+
+knowledge/              ← gitignored private reference docs (design-guide, architecture notes)
 ```
 
 ## How work gets done
 
-1. **Plan** lives in `strategy/work-items/`. A sprint file names its stories + milestones + DoD + risk table.
+1. **Plan** lives in `.cleargate/delivery/{pending-sync,archive}/`. A sprint file names its stories + milestones + DoD + risk table.
 2. **Execute** via the four-agent loop (`.claude/agents/`). I (the conversational agent) orchestrate; I do not write production code directly when a sprint is running.
 3. **Artifacts** land in `.cleargate/sprint-runs/<id>/`. Never edit the ledger by hand; the hook owns it.
 4. **Learning** accumulates in `.cleargate/FLASHCARD.md`. Every agent (and me) reads it at the start of non-trivial work.
@@ -69,9 +76,12 @@ Full role contracts in `.claude/agents/*.md`. Communication model: agents don't 
 
 ## Active state (as of 2026-04-18)
 
-- **Shipped:** SPRINT-01 (MCP v0.1, 12 stories), SPRINT-02 (Admin API, 6 stories). Deployed via Coolify at `https://cleargate-mcp.soula.ge/`.
-- **Planned (not started):** [SPRINT-03](strategy/work-items/sprints/SPRINT-03_CLI_Packages.md) — CLI packages (`cleargate-cli` scaffold + admin CLI + `cleargate join`) + STORY-003-13 (MCP redemption route) + STORY-004-07 (invite storage Redis → Postgres retrofit). 11 stories across 6 waves.
-- **Architectural decision locked (2026-04-18):** invite storage is **Postgres source of truth**, not Redis. Redis is cache-only in the invite flow. Reason: durability + auditability + admin-UI queryability. STORY-004-07 retrofits SPRINT-02's Redis-only shape.
+- **Shipped:** SPRINT-01 (MCP v0.1, 12 stories), SPRINT-02 (Admin API, 6 stories), [SPRINT-03](.cleargate/delivery/archive/SPRINT-03_CLI_Packages.md) (CLI packages + admin CLI + `cleargate join` + invite-storage retrofit, 11 stories). Deployed via Coolify at `https://cleargate-mcp.soula.ge/`.
+- **Active:** [SPRINT-04 Knowledge Wiki](.cleargate/delivery/pending-sync/SPRINT-04_Knowledge_Wiki.md) — 9 EPIC-002 stories. Karpathy-style wiki + wiki-ingest/query/lint subagents + PostToolUse hook + `cleargate wiki {build,ingest,query,lint}` CLI. Adapted for our 3-repo case (git-SHA drift, `repo:` tag).
+- **Planned next:** [SPRINT-05 Admin UI](.cleargate/delivery/pending-sync/SPRINT-05_Admin_UI.md) — deferred one sprint from SPRINT-04 to ship the wiki first.
+- **Architectural decisions locked:**
+  - **Invite storage (2026-04-18):** Postgres source of truth, Redis cache-only. Reason: durability + auditability + admin-UI queryability.
+  - **Wiki drift detection (2026-04-19):** git SHA (not content hash) — drops EPIC-001 dependency; accepts spurious-recompile tradeoff.
 
 ## Stack versions (canonical — see INDEX.md for full table)
 

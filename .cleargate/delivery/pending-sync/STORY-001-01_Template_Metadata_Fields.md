@@ -16,12 +16,12 @@ updated_at_version: "strategy-phase-pre-init"
 **Complexity:** L1 — purely file edits.
 
 ## 1. The Spec
-Add `created_at`, `updated_at`, `created_at_version`, `updated_at_version`, `server_pushed_at_version` (initially null) to the YAML frontmatter of every template in `strategy/templates/`.
+Add `created_at`, `updated_at`, `created_at_version`, `updated_at_version`, `server_pushed_at_version` (initially null) to the YAML frontmatter of every template in `.cleargate/templates/`.
 
 ## 2. Acceptance
 ```gherkin
 Scenario: All templates stamped
-  When I grep frontmatter of each template in strategy/templates/
+  When I grep frontmatter of each template in .cleargate/templates/
   Then all contain created_at, updated_at, created_at_version, updated_at_version fields
   And write templates (epic/story/bug/CR/proposal) also contain server_pushed_at_version: null
 ```

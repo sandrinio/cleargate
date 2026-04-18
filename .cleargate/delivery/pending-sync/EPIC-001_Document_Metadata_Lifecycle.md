@@ -29,14 +29,14 @@ resolved_by: "Vibe Coder (ssuladze@exadel.com)"
     <rule>Git-absent: fall back to package.json version; if both missing, "unknown" + warning.</rule>
   </architecture_rules>
   <target_files>
-    <file path="strategy/templates/initiative.md" action="modify" />
-    <file path="strategy/templates/epic.md" action="modify" />
-    <file path="strategy/templates/story.md" action="modify" />
-    <file path="strategy/templates/Bug.md" action="modify" />
-    <file path="strategy/templates/CR.md" action="modify" />
-    <file path="strategy/templates/proposal.md" action="modify" />
-    <file path="strategy/templates/Sprint Plan Template.md" action="modify" />
-    <file path="strategy/knowledge/cleargate-protocol.md" action="modify" />
+    <file path=".cleargate/templates/initiative.md" action="modify" />
+    <file path=".cleargate/templates/epic.md" action="modify" />
+    <file path=".cleargate/templates/story.md" action="modify" />
+    <file path=".cleargate/templates/Bug.md" action="modify" />
+    <file path=".cleargate/templates/CR.md" action="modify" />
+    <file path=".cleargate/templates/proposal.md" action="modify" />
+    <file path=".cleargate/templates/Sprint Plan Template.md" action="modify" />
+    <file path=".cleargate/knowledge/cleargate-protocol.md" action="modify" />
     <file path="cleargate-cli/src/utils/codebase-version.ts" action="create" />
     <file path="cleargate-cli/src/utils/stamp-frontmatter.ts" action="create" />
     <file path="cleargate-cli/src/commands/stamp.ts" action="create" />
@@ -104,8 +104,8 @@ pushed_at_version: null                 # populated by MCP on push; null for un-
 - Stale detection threshold (≥1 merge commit between `updated_at_version` and current HEAD)
 
 **Affected paths:**
-- All 7 template files in `strategy/templates/` (add frontmatter fields)
-- `strategy/knowledge/cleargate-protocol.md` (new §11)
+- All 7 template files in `.cleargate/templates/` (add frontmatter fields)
+- `.cleargate/knowledge/cleargate-protocol.md` (new §11)
 - New package `cleargate-cli/` with `codebase-version.ts`, `stamp-frontmatter.ts`, `commands/stamp.ts`
 - Existing `mcp/src/tools/push-item.ts` (modified once EPIC-003 creates it) to stamp `pushed_at_version`
 

@@ -247,5 +247,5 @@ Based on the 33 captured rows (architect only, W4 only): **~$768** at Opus 4 rat
 **Plans:** `.cleargate/sprint-runs/SPRINT-03/plans/{W1,W2,W3,W4}.md` (note: W2.md is untracked in git)
 **Flashcards added:** 13 (see `.cleargate/FLASHCARD.md`, newest-on-top)
 **Model rates used:** Opus 4 pricing as of 2026-04-18 (input $15/M · output $75/M · cache-create $18.75/M · cache-read $1.50/M)
-**Sprint file:** `strategy/work-items/sprints/SPRINT-03_CLI_Packages.md`
+**Sprint file:** `.cleargate/delivery/archive/SPRINT-03_CLI_Packages.md`
 **Report generated:** 2026-04-18 by Reporter agent

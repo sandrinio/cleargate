@@ -25,22 +25,22 @@ Ship **EPIC-006 (Admin UI)** end-to-end on SvelteKit 2 + Svelte 5 + Tailwind v4 
 ## Consolidated Deliverables
 
 ### EPIC-006 — Admin UI (10 stories)
-- [`STORY-006-01`](../stories/STORY-006-01_SvelteKit_Scaffold.md): SvelteKit + DaisyUI + Tailwind scaffold — `admin/` package, custom `cleargate` theme registered per Design Guide §2.2, Inter Variable self-hosted, shell layout (72px top bar + inset sidebar) per §7.1 · L2
-- [`STORY-006-02`](../stories/STORY-006-02_GitHub_OAuth_Session.md): GitHub OAuth + Redis session — `@auth/sveltekit` + custom Redis adapter (shared MCP Redis), session cookie → admin-JWT via `POST /admin-api/v1/auth/exchange` · L3
-- [`STORY-006-03`](../stories/STORY-006-03_Dashboard.md): Dashboard — `/` route listing projects with member counts + actionable empty state · L1
-- [`STORY-006-04`](../stories/STORY-006-04_Project_Detail_Members.md): Project detail + members — overview page + members page with invite modal (copyable URL) and remove-member flow · L2
-- [`STORY-006-05`](../stories/STORY-006-05_Tokens_Page.md): Tokens page + one-time-display modal — plaintext shown once, "I've saved it" gate + `beforeunload` warning · L2
-- [`STORY-006-06`](../stories/STORY-006-06_Items_Browser_History.md): Items browser + version history — paginated list + timeline view (last 10 versions) · L2
-- [`STORY-006-07`](../stories/STORY-006-07_Audit_Viewer.md): Audit log viewer — date-range picker, user + tool filters, cursor pagination · L2
-- [`STORY-006-08`](../stories/STORY-006-08_Stats_Page.md): Stats page — Chart.js bar chart (requests/day), error rate, top-10 items for 7d/30d/90d windows · L2
-- [`STORY-006-09`](../stories/STORY-006-09_Settings_Page.md): Settings page — root-only `admin_users` management; non-root 403 · L1
-- [`STORY-006-10`](../stories/STORY-006-10_Dockerfile_Coolify.md): Admin Dockerfile + Coolify runbook — Node 24 alpine multi-stage, `admin.cleargate.<domain>` TLS, env-var checklist, health endpoint · L2
+- [`STORY-006-01`](STORY-006-01_SvelteKit_Scaffold.md): SvelteKit + DaisyUI + Tailwind scaffold — `admin/` package, custom `cleargate` theme registered per Design Guide §2.2, Inter Variable self-hosted, shell layout (72px top bar + inset sidebar) per §7.1 · L2
+- [`STORY-006-02`](STORY-006-02_GitHub_OAuth_Session.md): GitHub OAuth + Redis session — `@auth/sveltekit` + custom Redis adapter (shared MCP Redis), session cookie → admin-JWT via `POST /admin-api/v1/auth/exchange` · L3
+- [`STORY-006-03`](STORY-006-03_Dashboard.md): Dashboard — `/` route listing projects with member counts + actionable empty state · L1
+- [`STORY-006-04`](STORY-006-04_Project_Detail_Members.md): Project detail + members — overview page + members page with invite modal (copyable URL) and remove-member flow · L2
+- [`STORY-006-05`](STORY-006-05_Tokens_Page.md): Tokens page + one-time-display modal — plaintext shown once, "I've saved it" gate + `beforeunload` warning · L2
+- [`STORY-006-06`](STORY-006-06_Items_Browser_History.md): Items browser + version history — paginated list + timeline view (last 10 versions) · L2
+- [`STORY-006-07`](STORY-006-07_Audit_Viewer.md): Audit log viewer — date-range picker, user + tool filters, cursor pagination · L2
+- [`STORY-006-08`](STORY-006-08_Stats_Page.md): Stats page — Chart.js bar chart (requests/day), error rate, top-10 items for 7d/30d/90d windows · L2
+- [`STORY-006-09`](STORY-006-09_Settings_Page.md): Settings page — root-only `admin_users` management; non-root 403 · L1
+- [`STORY-006-10`](STORY-006-10_Dockerfile_Coolify.md): Admin Dockerfile + Coolify runbook — Node 24 alpine multi-stage, `admin.cleargate.<domain>` TLS, env-var checklist, health endpoint · L2
 
 ### EPIC-004 — Admin API (1 closeout, deferred from SPRINT-03)
-- [`STORY-004-08`](../stories/STORY-004-08_Auth_Exchange.md): `POST /admin-api/v1/auth/exchange` — session cookie → short-lived admin JWT, sliding-session TTL bump, anonymous-bucket rate-limited · L2 · **blocks STORY-006-02**
+- [`STORY-004-08`](STORY-004-08_Auth_Exchange.md): `POST /admin-api/v1/auth/exchange` — session cookie → short-lived admin JWT, sliding-session TTL bump, anonymous-bucket rate-limited · L2 · **blocks STORY-006-02**
 
 ### EPIC-005 — Admin CLI (1 closeout, deferred from SPRINT-03)
-- [`STORY-005-06`](../stories/STORY-005-06_Admin_CLI_Login.md): `cleargate-admin login` — GitHub device flow + two backing MCP routes (`/auth/device/start`, `/auth/device/poll`); writes `~/.cleargate/admin-auth.json` · L2 · **parallelizable with EPIC-006; does not block UI**
+- [`STORY-005-06`](STORY-005-06_Admin_CLI_Login.md): `cleargate-admin login` — GitHub device flow + two backing MCP routes (`/auth/device/start`, `/auth/device/poll`); writes `~/.cleargate/admin-auth.json` · L2 · **parallelizable with EPIC-006; does not block UI**
 
 **Total: 12 stories across 3 Epics.**
 
@@ -80,7 +80,7 @@ Ship **EPIC-006 (Admin UI)** end-to-end on SvelteKit 2 + Svelte 5 + Tailwind v4 
 
 ### Relevant Context
 
-- **Design Guide:** `strategy/knowledge/design-guide.md` is authoritative for color tokens, typography, radius, elevation, and component patterns. Do not substitute stock DaisyUI themes. Every EPIC-006 story's Architect plan must cite the exact §-numbers it consumes.
+- **Design Guide:** `knowledge/design-guide.md` is authoritative for color tokens, typography, radius, elevation, and component patterns. Do not substitute stock DaisyUI themes. Every EPIC-006 story's Architect plan must cite the exact §-numbers it consumes.
 - **Admin API contract:** `mcp/src/admin-api/schemas.ts` (Zod source) + `mcp/src/admin-api/__snapshots__/openapi.test.ts.snap` (hand-authored OpenAPI 3.1) — the UI's typed `mcp-client.ts` imports request/response Zod schemas directly (same pattern as `cleargate-cli/src/admin-api/client.ts` from SPRINT-03 M3). Snapshot-drift test (`cleargate-cli/src/admin-api/__tests__/snapshot-drift.test.ts`) extends to cover the new auth endpoints.
 - **Session storage:** shared Redis instance with MCP (`REDIS_URL`). Key namespace: `cg_session:<cookie_value>` → JSON `{ github_handle, github_user_id, expires_at }`. Cookie name: `cg_session`. Adapter lives at `admin/src/lib/auth/redis-adapter.ts` (STORY-006-02 owns the shape; STORY-004-08 must read the same shape).
 - **Admin-JWT issuance:** existing `issueAdminToken()` in `mcp/src/auth/admin-jwt.ts` (STORY-004-01). STORY-004-08 and STORY-005-06 both reuse it — **do not duplicate JWT signing**.
