@@ -1,0 +1,5 @@
+{
+  "name": "cleargate-monorepo",
+  "private": true,
+  "workspaces": ["cleargate-cli", "mcp"]
+}
