@@ -191,3 +191,157 @@ Does an approved: true Proposal exist for this work?
                       ↓
              Human confirms push → cleargate_push_item → archive
 ```
+
+---
+
+## 10. Knowledge Wiki Protocol
+
+The Knowledge Wiki is the compiled awareness layer at `.cleargate/wiki/`. Read it before reading raw delivery files — it surfaces relationships and status that individual raw files do not expose. The wiki is always derived: when a raw file under `.cleargate/delivery/**` contradicts a wiki page, the raw file wins.
+
+---
+
+### §10.1 Directory Layout
+
+```
+.cleargate/wiki/
+  index.md            ← master page registry (one row per page)
+  log.md              ← append-only audit log of all ingest events
+  product-state.md    ← synthesised product health snapshot
+  roadmap.md          ← synthesised roadmap view
+  active-sprint.md    ← synthesised current-sprint progress
+  open-gates.md       ← synthesised blocked-item registry
+  epics/              ← one page per Epic (EPIC-NNN.md)
+  stories/            ← one page per Story (STORY-NNN-NN.md)
+  bugs/               ← one page per Bug
+  proposals/          ← one page per Proposal
+  crs/                ← one page per CR
+  sprints/            ← one page per Sprint
+  topics/             ← cross-cutting topic pages (written by query --persist only)
+```
+
+---
+
+### §10.2 Three Operations
+
+**ingest**
+
+Triggered automatically by a PostToolUse hook on Write or Edit operations under `.cleargate/delivery/**`. When the hook is unavailable, every agent that writes a raw delivery file must invoke the `cleargate-wiki-ingest` subagent directly (protocol-rule fallback — see §10.9). On each ingest: one per-item wiki page is created or updated, one YAML event is appended to `log.md`, and every synthesis page affected by the item is recompiled (`product-state.md`, `roadmap.md`, `active-sprint.md`, `open-gates.md`). Ingest is always safe to re-run.
+
+**query**
+
+Invoked automatically at triage (read-only). Searches the wiki index and existing pages to surface related work items before any new draft begins. Explicit queries use `cleargate wiki query <terms>`. Append `--persist` to write the result as a topic page at `wiki/topics/<slug>.md`. Topic pages are never written by ingest — only by `query --persist`.
+
+**lint**
+
+Enforcement run. Checks for drift between wiki pages and their raw source files. Exits non-zero on any violation; a non-zero exit halts Gate 1 (Proposal approval) and Gate 3 (Push). Run with `--suggest` to receive candidate cross-ref patches without blocking (exits 0).
+
+---
+
+### §10.3 Exclusions
+
+Ingest skips the following directories — they are static configuration or orchestration-only and must not generate wiki pages:
+
+- `.cleargate/knowledge/`
+- `.cleargate/templates/`
+- `.cleargate/sprint-runs/`
+- `.cleargate/hook-log/`
+
+---
+
+### §10.4 Page Schema
+
+Every wiki page has a YAML frontmatter block followed by a short prose body.
+
+```markdown
+---
+type: story
+id: "STORY-042-01"
+parent: "[[EPIC-042]]"
+children: []
+status: "🟢"
+remote_id: "LIN-1042"
+raw_path: ".cleargate/delivery/archive/STORY-042-01_name.md"
+last_ingest: "2026-04-19T10:00:00Z"
+last_ingest_commit: "a1b2c3d4e5f6..."
+repo: "planning"
+---
+
+# STORY-042-01: Short title
+
+Summary in one or two sentences.
+
+## Blast radius
+Affects: [[EPIC-042]], [[service-auth]]
+
+## Open questions
+None.
+```
+
+Field notes:
+
+- `last_ingest_commit` — the SHA returned by `git log -1 --format=%H -- <raw_path>` at ingest time. Used for idempotency (see §10.7).
+- `repo` — derived from `raw_path` prefix: `cleargate-cli/` → `cli`; `mcp/` → `mcp`; `.cleargate/` or `cleargate-planning/` → `planning`. Never manually set.
+
+---
+
+### §10.5 Backlink Syntax
+
+Use `[[WORK-ITEM-ID]]` (Obsidian-style double-bracket links) to express relationships between pages. Every parent/child pair declared in frontmatter must have a corresponding backlink in the body of each page. `cleargate wiki lint` verifies bidirectionality: a `parent:` entry without a matching `[[parent-id]]` reference in the parent's `children:` list is a lint violation.
+
+---
+
+### §10.6 `log.md` Event Shape
+
+One YAML list entry is appended to `wiki/log.md` on every ingest. Fields:
+
+```yaml
+- timestamp: "2026-04-19T10:00:00Z"
+  actor: "cleargate-draft-proposal"
+  action: "create"
+  target: "PROPOSAL-stripe-webhooks"
+  path: ".cleargate/delivery/pending-sync/PROPOSAL-stripe-webhooks.md"
+```
+
+- `timestamp` — ISO 8601 UTC.
+- `actor` — subagent name (e.g. `cleargate-wiki-ingest`) or `vibe-coder` for manual writes.
+- `action` — one of `create`, `update`, `delete`, `approve`.
+- `target` — work-item ID (e.g. `STORY-042-01`).
+- `path` — absolute path to the raw source file.
+
+---
+
+### §10.7 Idempotency Rule
+
+Re-ingesting a file is a no-op when **both** of the following are true:
+
+(a) The file content is byte-identical to the content at last ingest.
+(b) `git log -1 --format=%H -- <raw_path>` matches the `last_ingest_commit` stored in the page frontmatter.
+
+Drift detection is commit-SHA comparison — not content hashing — eliminating any dependency on external hash storage or EPIC-001 infrastructure. If either condition is false, ingest proceeds and the page is overwritten.
+
+---
+
+### §10.8 Gate Enforcement
+
+`cleargate wiki lint` exits non-zero and blocks execution at:
+
+- **Gate 1 (Proposal approval):** lint must pass before the agent may proceed past the Proposal halt.
+- **Gate 3 (Push):** lint must pass before `cleargate_push_item` is called.
+
+Lint checks performed:
+
+- Orphan pages — wiki pages whose `raw_path` no longer exists.
+- Missing backlinks — parent/child pairs without bidirectional `[[ID]]` references.
+- `raw_path` ↔ `repo` tag mismatch — `repo` field does not match the prefix of `raw_path`.
+- Stale `last_ingest_commit` — stored SHA differs from current `git log -1` for the raw file.
+- Invalidated topic citations — a `wiki/topics/*.md` page cites an item that has been archived or status-set to cancelled.
+
+---
+
+### §10.9 Fallback Chain
+
+Ingest reliability follows a three-level fallback:
+
+1. **PostToolUse hook (primary)** — fires automatically on every Write or Edit under `.cleargate/delivery/**`. No agent action required.
+2. **Protocol rule (secondary)** — when the hook is unavailable (e.g. non-Claude-Code environment), every agent that writes a raw delivery file must explicitly invoke the `cleargate-wiki-ingest` subagent before returning.
+3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 or Gate 3 and refuses to proceed until the page is up to date.
