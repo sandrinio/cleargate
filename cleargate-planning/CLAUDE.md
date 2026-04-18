@@ -7,26 +7,34 @@ This file is the content `cleargate init` injects into a downstream user's `CLAU
 <!-- CLEARGATE:START -->
 ## 🔄 ClearGate Planning Framework
 
-This repository uses **ClearGate** — a standalone planning framework for AI coding agents. ClearGate scaffolds *how work is planned* (proposals → epics → stories → sprints) and defines the four-agent loop that turns plans into shipped code. ClearGate does not run builds, tests, or deployments; execution tooling remains the target repo's own.
+This repository uses **ClearGate** — a standalone planning framework for AI coding agents. ClearGate scaffolds *how work is planned* (proposals → epics → stories → sprints) and defines a four-agent loop for execution. ClearGate does not run builds, tests, or deployments; execution tooling remains the target repo's own.
 
-**Before any non-trivial task, read these in order:**
-1. `.cleargate/knowledge/cleargate-protocol.md` — the non-negotiable delivery protocol (triage → draft → halt → sync → archive). All classification rules, phase gates, and scope discipline live here.
-2. `.cleargate/FLASHCARD.md` — prior lessons tagged by topic (`#schema`, `#auth`, `#test-harness`, etc.). Grep for your area before starting; append one-liners after any surprise.
+**Session-start orientation (read in this order):**
+1. `.cleargate/knowledge/cleargate-protocol.md` — delivery protocol (non-negotiable rules).
+2. `.cleargate/FLASHCARD.md` — lessons tagged by topic (`#schema`, `#auth`, etc.). Grep for your area before starting.
 
-**When drafting work items:**
+**Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
+
+**Duplicate check before drafting.** Before drafting a Proposal or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate.
+
+**Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` and explicit human confirmation (Gate 3).
+
+**Drafting work items:**
 - Use the templates in `.cleargate/templates/` (`proposal.md`, `epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
-- Save drafts to `.cleargate/delivery/pending-sync/` using the pattern `{TYPE}-{ID}-{Name}.md`.
-- After `cleargate_push_item` returns a Remote ID, move the file to `.cleargate/delivery/archive/`.
+- Save drafts to `.cleargate/delivery/pending-sync/{TYPE}-{ID}-{Name}.md`.
+- After `cleargate_push_item` returns a Remote ID, update the frontmatter AND move the file to `.cleargate/delivery/archive/` — these two happen atomically, never one without the other.
 
-**When executing a sprint (four-agent loop, roles in `.claude/agents/`):**
-- `architect.md` — produces one plan per milestone; no production code.
+**Four-agent loop (roles in `.claude/agents/`):**
+- `architect.md` — one plan per milestone; no production code.
 - `developer.md` — one Story end-to-end; one commit per Story; runs typecheck + tests before commit.
 - `qa.md` — independent verification gate; re-runs checks; never commits, never edits.
 - `reporter.md` — one sprint retrospective at sprint end; synthesizes token ledger + git log + flashcards into `REPORT.md`.
 
-**Support infrastructure:**
-- Flashcard protocol: `.claude/skills/flashcard/SKILL.md`
-- Token-ledger hook: `.claude/hooks/token-ledger.sh`, wired via `.claude/settings.json` (SubagentStop); auto-logs agent cost per sprint for the Reporter.
+**Conversational style.** Keep replies terse. Details live in the work-item file and `REPORT.md`, not in chat. State results and next steps; skip narration of your own thought process.
 
-**Scope reminder:** ClearGate is a *planning* framework. It scaffolds how work gets planned and how the four-agent loop runs. It does not replace your project's build system, CI, test runner, or deployment tooling.
+**Support infrastructure.** Flashcard protocol: `.claude/skills/flashcard/SKILL.md`. Token-ledger hook: `.claude/hooks/token-ledger.sh`, wired via `.claude/settings.json` (SubagentStop) — auto-logs agent cost per sprint for the Reporter.
+
+**Project overrides.** Content OUTSIDE this `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block takes precedence where it conflicts with ClearGate defaults.
+
+**Scope reminder.** ClearGate is a *planning* framework. It scaffolds how work gets planned and how the four-agent loop runs. It does not replace your project's build system, CI, test runner, or deployment tooling.
 <!-- CLEARGATE:END -->
