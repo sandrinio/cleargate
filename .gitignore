@@ -8,8 +8,12 @@ Thumbs.db
 *.swp
 *.swo
 
-# Claude Code local config (user-scoped permissions, not team-shared)
-.claude/
+# Claude Code local config (root-only — runtime instance is not team-shared;
+# canonical definitions live in cleargate-planning/.claude/ and ARE tracked)
+/.claude/
+
+# Private project notes (design guides, reference docs) — not shipped
+/knowledge/
 
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
