@@ -13,15 +13,15 @@ Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strat
 
 | Source Proposal | Epic | Status | Priority |
 |---|---|---|---|
-| — | [EPIC-000: CLI Package Scaffold](epics/EPIC-000_CLI_Package_Scaffold.md) | 🟢 Ready | Prerequisite for EPIC-001, EPIC-002, EPIC-005 |
+| — | [EPIC-000: CLI Package Scaffold](epics/EPIC-000_CLI_Package_Scaffold.md) | ✅ Completed (SPRINT-03) | Prerequisite for EPIC-001, EPIC-002, EPIC-005 |
 | [PROP-001](../proposals/PROPOSAL-001_Document_Metadata.md) | [EPIC-001: Document Metadata Lifecycle](epics/EPIC-001_Document_Metadata_Lifecycle.md) | 🟢 Ready | Medium (blocked by EPIC-000 + cross-Epic dep on STORY-003-03) |
 | [PROP-002](../proposals/PROPOSAL-002_Knowledge_Wiki.md) | [EPIC-002: Knowledge Wiki Layer](epics/EPIC-002_Knowledge_Wiki_Layer.md) | 🟢 Ready | Medium (blocked by EPIC-000) |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-003: MCP Server Core](epics/EPIC-003_MCP_Server_Core.md) | 🟢 Ready | **High — unblocks implementation now** |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](epics/EPIC-004_Admin_API.md) | 🟢 Ready | Medium (blocked by EPIC-003 🟢 impl) |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](epics/EPIC-005_Admin_CLI.md) | 🟢 Ready | Low (blocked by EPIC-004 + EPIC-000) |
-| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-006: Admin UI (SvelteKit)](epics/EPIC-006_Admin_UI.md) | 🟢 Ready | Low (blocked by EPIC-004 endpoints + OpenAPI) |
+| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-003: MCP Server Core](epics/EPIC-003_MCP_Server_Core.md) | ✅ Completed (SPRINT-01 + SPRINT-03) | **High — shipped** |
+| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](epics/EPIC-004_Admin_API.md) | ✅ Completed (SPRINT-02 + SPRINT-03) | Medium — shipped |
+| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](epics/EPIC-005_Admin_CLI.md) | ✅ Completed (SPRINT-03) | Low — shipped (OAuth login deferred to SPRINT-04) |
+| [PROP-003](../proposals/PROPOSAL-003_MCP_Adapter.md) | [EPIC-006: Admin UI (SvelteKit)](epics/EPIC-006_Admin_UI.md) | 🟢 Ready — **SPRINT-04** | **High — active sprint** |
 
-## Story decomposition (55 Stories across 7 Epics)
+## Story decomposition (57 Stories across 7 Epics)
 
 ### EPIC-000: CLI Package Scaffold (4)
 - [STORY-000-01: Package Scaffold](stories/STORY-000-01_Package_Scaffold.md) · L1
@@ -63,21 +63,23 @@ Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strat
 - [STORY-003-12: Dockerfile + Coolify runbook](stories/STORY-003-12_Dockerfile_Coolify.md) · L2
 - [STORY-003-13: `POST /join/:invite_token` redemption](stories/STORY-003-13_Join_Redemption.md) · L2 · added post-SPRINT-02 · scheduled in SPRINT-03
 
-### EPIC-004: Admin API (7)
+### EPIC-004: Admin API (8)
 - [STORY-004-01: Admin JWT middleware](stories/STORY-004-01_Admin_JWT_Middleware.md) · L2
 - [STORY-004-02: Projects CRUD](stories/STORY-004-02_Projects_CRUD.md) · L2
 - [STORY-004-03: Members CRUD](stories/STORY-004-03_Members_CRUD.md) · L2
 - [STORY-004-04: Tokens CRUD (one-time-display)](stories/STORY-004-04_Tokens_CRUD.md) · L2
 - [STORY-004-05: Audit log query](stories/STORY-004-05_Audit_Endpoint.md) · L2
 - [STORY-004-06: Stats endpoint](stories/STORY-004-06_Stats_Endpoint.md) · L2
-- [STORY-004-07: Invite storage retrofit (Redis → Postgres)](stories/STORY-004-07_Invite_Storage_Retrofit.md) · L2 · added post-SPRINT-02 · scheduled in SPRINT-03
+- [STORY-004-07: Invite storage retrofit (Redis → Postgres)](stories/STORY-004-07_Invite_Storage_Retrofit.md) · L2 · added post-SPRINT-02 · shipped in SPRINT-03
+- [STORY-004-08: `POST /admin-api/v1/auth/exchange` (session → admin JWT)](stories/STORY-004-08_Auth_Exchange.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
 
-### EPIC-005: Admin CLI + Client Bootstrap (5)
+### EPIC-005: Admin CLI + Client Bootstrap (6)
 - [STORY-005-01: `cleargate-admin create-project`](stories/STORY-005-01_Admin_CLI_Create_Project.md) · L1
 - [STORY-005-02: `cleargate-admin invite`](stories/STORY-005-02_Admin_CLI_Invite.md) · L1
 - [STORY-005-03: `cleargate-admin issue-token`](stories/STORY-005-03_Admin_CLI_Issue_Token.md) · L1
 - [STORY-005-04: `cleargate-admin revoke-token`](stories/STORY-005-04_Admin_CLI_Revoke.md) · L1
 - [STORY-005-05: `cleargate join`](stories/STORY-005-05_Cleargate_Join.md) · L2
+- [STORY-005-06: `cleargate-admin login` (GitHub OAuth device flow)](stories/STORY-005-06_Admin_CLI_Login.md) · L2 · added post-SPRINT-03 · scheduled in SPRINT-04
 
 ### EPIC-006: Admin UI — SvelteKit (10)
 - [STORY-006-01: SvelteKit + DaisyUI + Tailwind scaffold](stories/STORY-006-01_SvelteKit_Scaffold.md) · L2
@@ -97,8 +99,8 @@ Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strat
 |---|---|---|---|
 | [SPRINT-01](sprints/SPRINT-01_MCP_v0.1.md) | EPIC-003 | MCP Server v0.1 — deployable, four tools, auth + middleware | **Completed** (2026-04-17) |
 | [SPRINT-02](sprints/SPRINT-02_Admin_API.md) | EPIC-004 | Admin API — CRUD + audit + stats | **Completed** (2026-04-17) |
-| [SPRINT-03](sprints/SPRINT-03_CLI_Packages.md) | EPIC-000 + EPIC-005 (+ STORY-003-13, STORY-004-07) | CLI package scaffold + admin CLI + `cleargate join` + MCP redemption route + invite storage retrofit | Planned |
-| SPRINT-04 | EPIC-006 | Admin UI (SvelteKit + Chart.js + GitHub OAuth) | Planned |
+| [SPRINT-03](sprints/SPRINT-03_CLI_Packages.md) | EPIC-000 + EPIC-005 (+ STORY-003-13, STORY-004-07) | CLI package scaffold + admin CLI + `cleargate join` + MCP redemption route + invite storage retrofit | **Completed** (2026-04-18) — 11/11 stories; ops close-out tracked in [REPORT.md](../../.cleargate/sprint-runs/SPRINT-03/REPORT.md) |
+| [SPRINT-04](sprints/SPRINT-04_Admin_UI.md) | EPIC-006 (+ auth/exchange + `cleargate-admin login`) | Admin UI (SvelteKit + Chart.js + GitHub OAuth) + deferred OAuth closeouts | **Active** (start 2026-04-18) |
 | SPRINT-05 | EPIC-001 | Document metadata lifecycle (stamp CLI + MCP push-time version) | Planned |
 | SPRINT-06 | EPIC-002 | Knowledge wiki layer + subagents + hooks | Planned |
 | v1.1 batch | PM adapters, webhooks, OAuth 2.1 | Deferred | Post-launch |
@@ -116,8 +118,8 @@ Meta-staging for Epic/Story decomposition of approved Proposals. Lives in `strat
 ## Gate status
 
 - All three Proposals: ✅ Approved (Gate 1 passed).
-- Seven Epics: 🟢 Ready (Gate 2 passed 2026-04-17).
-- 55 Stories: drafted at 🟢 Low (53) and 🟡 Medium (2: STORY-000-04 keychain lib pick, STORY-002-05 hook syntax, STORY-003-10 SDK verify). STORY-003-13 🟢 and STORY-004-07 🟢 added 2026-04-18. All inherit resolved Epic context.
+- Seven Epics: ✅ EPIC-000, EPIC-003, EPIC-004 (pending STORY-004-08 in SPRINT-04), EPIC-005 (pending STORY-005-06 in SPRINT-04) Completed-or-nearly as of 2026-04-18; 🟢 Ready — EPIC-001, EPIC-002; **EPIC-006 active in SPRINT-04**.
+- 57 Stories: 29 shipped (SPRINT-01: 12, SPRINT-02: 6, SPRINT-03: 11); 12 scheduled in SPRINT-04 (10 EPIC-006 + STORY-004-08 + STORY-005-06); 16 remaining across EPIC-001 (6), EPIC-002 (9), plus STORY-001-06 cross-cut. Ambiguity at drafting: 🟢 Low (55), 🟡 Medium (2: STORY-002-05 hook syntax, STORY-003-10 SDK verify — STORY-003-10 now shipped; marker resolution pending close-out). STORY-000-04's 🟡 marker resolved in SPRINT-03 close-out (`@napi-rs/keyring@^1.2.0`).
 
 ## Storage provider
 
