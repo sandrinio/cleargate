@@ -32,6 +32,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@napi-rs/keyring": "^1.2.0",
     "commander": "^12",
     "zod": "^4.3.0"
   },
