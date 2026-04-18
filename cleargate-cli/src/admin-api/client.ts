@@ -99,7 +99,7 @@ class AdminApiClientImpl implements AdminApiClient {
         'network',
         null,
         err,
-        `Cannot reach ${this.baseUrl}: ${err instanceof Error ? err.message : String(err)}`,
+        `cannot reach ${this.baseUrl} (${err instanceof Error ? err.message : String(err)})`,
       );
     }
 
