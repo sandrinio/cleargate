@@ -1,12 +1,15 @@
 ---
 epic_id: "EPIC-004"
-status: "Ready"
+status: "Completed"
 ambiguity: "🟢 Low"
 context_source: "PROPOSAL-003_MCP_Adapter.md"
 owner: "Vibe Coder (ssuladze@exadel.com)"
-target_date: "TBD"
+target_date: "2026-04-18"
+completed_in_sprints: ["SPRINT-02", "SPRINT-03"]
+completed_at: "2026-04-18T13:00:00Z"
+completion_notes: "6/7 stories shipped in SPRINT-02; STORY-004-07 (invite storage retrofit to Postgres) closed in SPRINT-03."
 created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-18T18:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 resolved_at: "2026-04-17T00:00:00Z"

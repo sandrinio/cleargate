@@ -2,14 +2,14 @@
 sprint_id: "SPRINT-03"
 remote_id: null
 source_tool: "local"
-status: "Planned"
-start_date: "2026-04-18"
-end_date: null
-activated_at: null
-completed_at: null
+status: "Completed"
+start_date: "2026-04-17"
+end_date: "2026-04-18"
+activated_at: "2026-04-17T21:38:00Z"
+completed_at: "2026-04-18T17:37:00Z"
 synced_at: null
 created_at: "2026-04-18T00:00:00Z"
-updated_at: "2026-04-18T00:00:00Z"
+updated_at: "2026-04-18T18:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 ---
@@ -22,23 +22,29 @@ Ship the two CLI packages that make the MCP hub operable without the UI: (a) `cl
 ## Consolidated Deliverables
 
 ### EPIC-000 — `cleargate-cli` Package Scaffold (4 stories)
-- [`STORY-000-01`](../stories/STORY-000-01_Package_Scaffold.md): Package scaffold — `cleargate-cli/` sibling of `mcp/`, `@cleargate/cli` scoped name, `bin/cleargate`, tsup build, ESM + CJS dual emit · L1
-- [`STORY-000-02`](../stories/STORY-000-02_Commander_Entry.md): Commander entry — `cli.ts` with stub subcommands registered, `--help` / `--version` working · L1
-- [`STORY-000-03`](../stories/STORY-000-03_Config_Loader.md): Config loader — zod-validated, precedence = flags > env > `~/.cleargate/config.json` > defaults · L1
-- [`STORY-000-04`](../stories/STORY-000-04_Token_Store.md): TokenStore abstraction — Keychain + File fallback, `~/.cleargate/auth.json` chmod 600 · L2 · 🟡 keychain lib pick
+- [`STORY-000-01`](../stories/STORY-000-01_Package_Scaffold.md): Package scaffold — `cleargate-cli/` sibling of `mcp/`, `@cleargate/cli` scoped name, `bin/cleargate`, tsup build, ESM + CJS dual emit — ✅ Done 2026-04-17 (`3bcfcd4`)
+- [`STORY-000-02`](../stories/STORY-000-02_Commander_Entry.md): Commander entry — `cli.ts` with stub subcommands registered, `--help` / `--version` working — ✅ Done 2026-04-17 (`43c50c3`)
+- [`STORY-000-03`](../stories/STORY-000-03_Config_Loader.md): Config loader — zod-validated, precedence = flags > env > `~/.cleargate/config.json` > defaults — ✅ Done 2026-04-17 (`acde4ba`)
+- [`STORY-000-04`](../stories/STORY-000-04_Token_Store.md): TokenStore abstraction — Keychain + File fallback, `~/.cleargate/auth.json` chmod 600 — ✅ Done 2026-04-18 (`f97b3f1`) — `@napi-rs/keyring@^1.2.0` chosen; 🟡 marker resolved
 
 ### EPIC-003 — MCP Server Core (1 add-in, closing SPRINT-01 gap)
-- [`STORY-003-13`](../stories/STORY-003-13_Join_Redemption.md): `POST /join/:invite_token` — public MCP redemption route, atomic `UPDATE … RETURNING` against `invites` table, reuses STORY-003-02 refresh-token issuance · L2 · **depends on STORY-004-07, blocks STORY-005-05**
+- [`STORY-003-13`](../stories/STORY-003-13_Join_Redemption.md): `POST /join/:invite_token` — public MCP redemption route, atomic `UPDATE … RETURNING` against `invites` table, reuses STORY-003-02 refresh-token issuance — ✅ Done 2026-04-18 (`e3c2550`) — includes new anonymous rate-limit bucket (10 req / 15 min per IP)
 
 ### EPIC-004 — Admin API (1 retrofit, correcting SPRINT-02 Redis-only storage)
-- [`STORY-004-07`](../stories/STORY-004-07_Invite_Storage_Retrofit.md): Migrate invite storage from Redis to Postgres `invites` table — source of truth for durability, auditability, admin-UI queryability · L2 · **blocks STORY-003-13**
+- [`STORY-004-07`](../stories/STORY-004-07_Invite_Storage_Retrofit.md): Migrate invite storage from Redis to Postgres `invites` table — source of truth for durability, auditability, admin-UI queryability — ✅ Done 2026-04-18 (`bda4308`) — Redis dropped from invite path; LATERAL-join member-status derivation
 
 ### EPIC-005 — Admin CLI + Client Bootstrap (5 stories)
-- [`STORY-005-01`](../stories/STORY-005-01_Admin_CLI_Create_Project.md): `cleargate-admin create-project` — calls `POST /admin-api/v1/projects` · L1
-- [`STORY-005-02`](../stories/STORY-005-02_Admin_CLI_Invite.md): `cleargate-admin invite` — calls `POST /admin-api/v1/projects/:id/members`, prints invite URL · L1
-- [`STORY-005-03`](../stories/STORY-005-03_Admin_CLI_Issue_Token.md): `cleargate-admin issue-token` — calls `POST /admin-api/v1/projects/:id/tokens`, prints plaintext token once · L1
-- [`STORY-005-04`](../stories/STORY-005-04_Admin_CLI_Revoke.md): `cleargate-admin revoke-token` — calls `DELETE /admin-api/v1/tokens/:id`, idempotent · L1
-- [`STORY-005-05`](../stories/STORY-005-05_Cleargate_Join.md): `cleargate join <invite-url>` — redeems invite via STORY-003-13, seats refresh token via TokenStore · L2
+- [`STORY-005-01`](../stories/STORY-005-01_Admin_CLI_Create_Project.md): `cleargate-admin create-project` — calls `POST /admin-api/v1/projects` — ✅ Done 2026-04-18 (`a3d9227`; setup-fix `cad6638` for D6 baseUrl)
+- [`STORY-005-02`](../stories/STORY-005-02_Admin_CLI_Invite.md): `cleargate-admin invite` — calls `POST /admin-api/v1/projects/:id/members`, prints invite URL — ✅ Done 2026-04-18 (`a578d7f`)
+- [`STORY-005-03`](../stories/STORY-005-03_Admin_CLI_Issue_Token.md): `cleargate-admin issue-token` — calls `POST /admin-api/v1/projects/:id/tokens`, prints plaintext token once — ✅ Done 2026-04-18 (`fb7be36`)
+- [`STORY-005-04`](../stories/STORY-005-04_Admin_CLI_Revoke.md): `cleargate-admin revoke-token` — calls `DELETE /admin-api/v1/tokens/:id`, idempotent — ✅ Done 2026-04-18 (`85a5969`)
+- [`STORY-005-05`](../stories/STORY-005-05_Cleargate_Join.md): `cleargate join <invite-url>` — redeems invite via STORY-003-13, seats refresh token via TokenStore — ✅ Done 2026-04-18 (`13460ed`)
+
+### Setup commits (not stories)
+- M3 setup — npm workspaces + AdminApiClient + admin-auth + `cleargate-admin` scaffold: `50e29e0` (meta-repo) + `7e0e289` (mcp-repo)
+- Setup-fix — AdminApiClient network error includes `baseUrl` per D6: `cad6638` (meta-repo)
+
+**Summary:** 11/11 stories shipped, 14 commits total (11 stories + 2 setup + 1 setup-fix). Engineering DoD complete; 5 operational close-out items (install-matrix smoke, two-terminal E2E, README expansion, Coolify redeploy, first npm publish) tracked in [REPORT.md §Sprint DoD check](../../.cleargate/sprint-runs/SPRINT-03/REPORT.md).
 
 ## Risks & Dependencies
 

@@ -1,12 +1,15 @@
 ---
 story_id: "STORY-005-02"
 parent_epic_ref: "EPIC-005"
-status: "Draft"
+status: "Completed"
 ambiguity: "🟢 Low"
 complexity_label: "L1"
 context_source: "PROPOSAL-003_MCP_Adapter.md"
+sprint_id: "SPRINT-03"
+shipped_commit: "a578d7f"
+completed_at: "2026-04-18T11:00:00Z"
 created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-18T18:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 depends_on: ["STORY-004-03"]
