@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { stubHandler } from './commands/_stub.js';
+import { joinHandler } from './commands/join.js';
 
 const program = new Command();
 
@@ -13,9 +14,16 @@ program
   .showHelpAfterError('(use `cleargate --help`)');
 
 program
-  .command('join')
+  .command('join <invite-url>')
   .description('join a ClearGate workspace using an invite URL')
-  .action(stubHandler('join'));
+  .action(async (inviteUrl: string, _opts: Record<string, unknown>, command: Command) => {
+    const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await joinHandler({
+      inviteUrl,
+      profile: globals.profile,
+      mcpUrlFlag: globals.mcpUrl,
+    });
+  });
 
 program
   .command('whoami')

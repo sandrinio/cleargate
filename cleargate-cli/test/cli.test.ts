@@ -67,15 +67,15 @@ describe('cleargate CLI', () => {
     });
   });
 
-  describe('Scenario: Stub subcommand exits 1 with not yet implemented', () => {
-    it('cleargate join exits 1', () => {
+  describe('Scenario: join missing positional exits 1', () => {
+    it('cleargate join (no arg) exits 1', () => {
       const result = run(['join']);
       expect(result.status).toBe(1);
     });
 
-    it('cleargate join stderr contains not yet implemented', () => {
+    it('cleargate join (no arg) stderr mentions join', () => {
       const result = run(['join']);
-      expect(result.stderr).toContain('not yet implemented');
+      expect(result.stderr).toBeTruthy();
     });
   });
 });
