@@ -49,6 +49,8 @@ _No active epics._
 
 - [[EPIC-006]] — status: Ready
 
+- [[EPIC-007]] — status: Ready
+
 
 
 ## Shipped Epics
