@@ -33,6 +33,4 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[EPIC-006]] — status: Ready
 
-- [[EPIC-007]] — status: Ready
-
 

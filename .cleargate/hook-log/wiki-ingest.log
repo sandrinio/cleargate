@@ -3,3 +3,4 @@ wiki ingest: create stories/STORY-007-00.md
 wiki ingest: create stories/STORY-007-01.md
 wiki ingest: create stories/STORY-007-02.md
 wiki ingest: create stories/STORY-007-03.md
+wiki ingest: cannot determine bucket for /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md: deriveBucket: cannot determine bucket for filename: INDEX.md
