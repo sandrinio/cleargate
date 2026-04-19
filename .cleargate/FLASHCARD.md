@@ -5,6 +5,7 @@ Format: `YYYY-MM-DD · #tags · lesson`
 
 ---
 
+2026-04-19 · #reporting #hooks #ledger · token-ledger.sh routes via `ls -td sprint-runs/*/` and tags `story_id` from the FIRST `STORY-NNN-NN` it greps in the orchestrator transcript — SPRINT-04 rows landed in `SPRINT-03/token-ledger.jsonl` tagged `STORY-006-01`. Reporter cannot compute per-agent / per-story cost. Fix before next sprint (sentinel file or per-prompt header).
 2026-04-19 · #init #inject-claude-md #regex · CLAUDE.md bounded-block regex must be GREEDY (`[\s\S]*` not `[\s\S]*?`): the block body itself references both markers in prose (line 37 says "OUTSIDE this <!-- CLEARGATE:START -->...<!-- CLEARGATE:END --> block"), so non-greedy stops at the inline END before the real one.
 2026-04-19 · #tsup #bundle #import-meta · tsup single-bundle: all source modules' `import.meta.url` collapse to the bundle file (dist/cli.js); `resolveDefaultTemplateDir` must go 1 level UP from dist/ not 3 levels from src/wiki/synthesis/; always thread a `templateDir` test seam so tests bypass default resolution.
 2026-04-19 · #wiki #synthesis #corpus-shape · open-gates.ts filter `status.includes('🔴')` matches zero items in real corpus (statuses are textual `Draft`/`Ready`/`Active`); always validate synthesis filters against actual delivery/ data, not synthetic fixtures.

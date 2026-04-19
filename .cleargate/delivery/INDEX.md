@@ -15,7 +15,7 @@ Curated roadmap of Epics, Stories, Sprints, and Proposals. Raw files live in `pe
 |---|---|---|---|
 | — | [EPIC-000: CLI Package Scaffold](archive/EPIC-000_CLI_Package_Scaffold.md) | ✅ Completed (SPRINT-03) | Prerequisite for EPIC-001, EPIC-002, EPIC-005 |
 | [PROP-001](archive/PROPOSAL-001_Document_Metadata.md) | [EPIC-001: Document Metadata Lifecycle](pending-sync/EPIC-001_Document_Metadata_Lifecycle.md) | 🟢 Ready | Medium (blocked by EPIC-000 + cross-Epic dep on STORY-003-03) |
-| [PROP-002](archive/PROPOSAL-002_Knowledge_Wiki.md) | [EPIC-002: Knowledge Wiki Layer](pending-sync/EPIC-002_Knowledge_Wiki_Layer.md) | 🟢 Ready — **SPRINT-04** | **High — active sprint** |
+| [PROP-002](archive/PROPOSAL-002_Knowledge_Wiki.md) | [EPIC-002: Knowledge Wiki Layer](archive/EPIC-002_Knowledge_Wiki_Layer.md) | ✅ Completed (SPRINT-04) | **High — shipped** |
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-003: MCP Server Core](archive/EPIC-003_MCP_Server_Core.md) | ✅ Completed (SPRINT-01 + SPRINT-03) | **High — shipped** |
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](archive/EPIC-004_Admin_API.md) | ✅ Completed (SPRINT-02 + SPRINT-03) | Medium — shipped |
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](archive/EPIC-005_Admin_CLI.md) | ✅ Completed (SPRINT-03) | Low — shipped (OAuth login deferred to SPRINT-05) |
@@ -37,16 +37,16 @@ Curated roadmap of Epics, Stories, Sprints, and Proposals. Raw files live in `pe
 - [STORY-001-05: `cleargate stamp` CLI](pending-sync/STORY-001-05_Stamp_CLI.md) · L1
 - [STORY-001-06: MCP push_item writes server_pushed_at_version](pending-sync/STORY-001-06_MCP_Pushed_At_Version.md) · L1 · depends on STORY-003-03
 
-### EPIC-002: Knowledge Wiki Layer (9)
-- [STORY-002-01: Protocol §10](pending-sync/STORY-002-01_Protocol_Section_10.md) · L1
-- [STORY-002-02: wiki-ingest subagent](pending-sync/STORY-002-02_Wiki_Ingest_Subagent.md) · L2
-- [STORY-002-03: wiki-query subagent](pending-sync/STORY-002-03_Wiki_Query_Subagent.md) · L1
-- [STORY-002-04: wiki-lint subagent](pending-sync/STORY-002-04_Wiki_Lint_Subagent.md) · L2
-- [STORY-002-05: init writes PostToolUse hook](pending-sync/STORY-002-05_Init_Writes_Hook.md) · L2
-- [STORY-002-06: `cleargate wiki build` CLI](pending-sync/STORY-002-06_Wiki_Build_CLI.md) · L2
-- [STORY-002-07: `cleargate wiki ingest` CLI](pending-sync/STORY-002-07_Wiki_Ingest_CLI.md) · L2
-- [STORY-002-08: `cleargate wiki lint` CLI](pending-sync/STORY-002-08_Wiki_Lint_CLI.md) · L2
-- [STORY-002-09: Synthesis templates](pending-sync/STORY-002-09_Synthesis_Templates.md) · L1
+### EPIC-002: Knowledge Wiki Layer (9) — ✅ shipped in SPRINT-04
+- [STORY-002-01: Protocol §10](archive/STORY-002-01_Protocol_Section_10.md) · L1 · `aef73b1`
+- [STORY-002-02: wiki-ingest subagent](archive/STORY-002-02_Wiki_Ingest_Subagent.md) · L2 · `8c82e30`
+- [STORY-002-03: wiki-query subagent](archive/STORY-002-03_Wiki_Query_Subagent.md) · L1 · `8c82e30`
+- [STORY-002-04: wiki-lint subagent](archive/STORY-002-04_Wiki_Lint_Subagent.md) · L2 · `8c82e30`
+- [STORY-002-05: init writes PostToolUse hook](archive/STORY-002-05_Init_Writes_Hook.md) · L2 · `f98b2b8`
+- [STORY-002-06: `cleargate wiki build` CLI](archive/STORY-002-06_Wiki_Build_CLI.md) · L2 · `bee297e`
+- [STORY-002-07: `cleargate wiki ingest` CLI](archive/STORY-002-07_Wiki_Ingest_CLI.md) · L2 · `c890bb0`
+- [STORY-002-08: `cleargate wiki lint` CLI](archive/STORY-002-08_Wiki_Lint_CLI.md) · L2 · `7d5ebcb`
+- [STORY-002-09: Synthesis templates + open-gates corpus-shape fix](archive/STORY-002-09_Synthesis_Templates.md) · L1 · `8448039`
 
 ### EPIC-003: MCP Server Core (13) — the critical path
 - [STORY-003-01: DB schema + Drizzle migrations](archive/STORY-003-01_DB_Schema_Migrations.md) · L3
@@ -100,7 +100,7 @@ Curated roadmap of Epics, Stories, Sprints, and Proposals. Raw files live in `pe
 | [SPRINT-01](archive/SPRINT-01_MCP_v0.1.md) | EPIC-003 | MCP Server v0.1 — deployable, four tools, auth + middleware | **Completed** (2026-04-17) |
 | [SPRINT-02](archive/SPRINT-02_Admin_API.md) | EPIC-004 | Admin API — CRUD + audit + stats | **Completed** (2026-04-17) |
 | [SPRINT-03](archive/SPRINT-03_CLI_Packages.md) | EPIC-000 + EPIC-005 (+ STORY-003-13, STORY-004-07) | CLI package scaffold + admin CLI + `cleargate join` + MCP redemption route + invite storage retrofit | **Completed** (2026-04-18) — 11/11 stories; ops close-out tracked in [REPORT.md](../sprint-runs/SPRINT-03/REPORT.md) |
-| [SPRINT-04](pending-sync/SPRINT-04_Knowledge_Wiki.md) | EPIC-002 | Knowledge Wiki Layer (Karpathy pattern) + subagents + PostToolUse hook — adapted for our three-repo case (git-SHA drift, dual-source ingest) | **Active** (start 2026-04-19) |
+| [SPRINT-04](archive/SPRINT-04_Knowledge_Wiki.md) | EPIC-002 | Knowledge Wiki Layer (Karpathy pattern) + subagents + PostToolUse hook | **Completed** (2026-04-19) — 9/9 stories one-shot; ops close-out tracked in [REPORT.md](../sprint-runs/SPRINT-04/REPORT.md) |
 | [SPRINT-05](pending-sync/SPRINT-05_Admin_UI.md) | EPIC-006 (+ auth/exchange + `cleargate-admin login`) | Admin UI (SvelteKit + Chart.js + GitHub OAuth) + deferred OAuth closeouts | Planned (deferred one sprint from SPRINT-04) |
 | SPRINT-06 | EPIC-001 | Document metadata lifecycle (stamp CLI + MCP push-time version) — priority re-assessed post-SPRINT-04 since wiki uses git SHA, not stamp-frontmatter | Planned |
 | v1.1 batch | PM adapters, webhooks, OAuth 2.1, wiki-federation (cross-repo) | Deferred | Post-launch |

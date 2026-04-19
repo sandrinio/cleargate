@@ -2,11 +2,11 @@
 sprint_id: "SPRINT-04"
 remote_id: null
 source_tool: "local"
-status: "Planned"
+status: "Completed"
 start_date: "2026-04-19"
-end_date: null
-activated_at: null
-completed_at: null
+end_date: "2026-04-19"
+activated_at: "2026-04-19T02:37:00Z"
+completed_at: "2026-04-19T05:30:00Z"
 synced_at: null
 created_at: "2026-04-19T00:00:00Z"
 updated_at: "2026-04-19T00:00:00Z"

@@ -1,12 +1,15 @@
 ---
 story_id: "STORY-002-08"
 parent_epic_ref: "EPIC-002"
-status: "Draft"
+status: "Completed"
 ambiguity: "🟢 Low"
 complexity_label: "L2"
 context_source: "PROPOSAL-002_Knowledge_Wiki.md"
 created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
+shipped_commit: "7d5ebcb"
+completed_at: "2026-04-19T05:30:00Z"
+sprint_id: "SPRINT-04"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 ---
