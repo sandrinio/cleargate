@@ -15,6 +15,9 @@ Thumbs.db
 # Private project notes (design guides, reference docs) — not shipped
 /knowledge/
 
+# Active-sprint sentinel — per-machine runtime state, not team-shared
+.cleargate/sprint-runs/.active
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/
