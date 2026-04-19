@@ -506,3 +506,61 @@ Future `cleargate init` in the same dir detects this marker and offers restore.
 
 ### §13.6 Publishing notes
 `MANIFEST.json` is built at `npm run build` (prebuild step in `cleargate-cli/package.json`) and shipped in the npm tarball (`files[]`). Never computed at install time. `generate-changelog-diff.ts` diffs `MANIFEST.json` between the previous published version and the current one at release time; CHANGELOG.md auto-opens with a "Scaffold files changed" block per release. Content-identical entries (path-moved-only, metadata-changed-only) are collapsed to avoid noise.
+
+---
+
+## 14. Multi-Participant Sync
+
+### §14.1 Sync matrix & authority split
+
+**Rule:** Remote is authoritative for status, assignees, and comments; local is authoritative for work-item body.
+
+When both sides change the same field, the authoritative side wins without prompt (except body+body — see §14.2). This split prevents accidental overwrites of carefully authored local prose while still tracking PM-tool state transitions faithfully. Source: EPIC-010 §4 authority table; `cleargate-cli/src/commands/sync.ts` conflict-detector snapshot shape.
+
+### §14.2 Conflict resolution
+
+**Rule:** content+content → interactive 3-way merge prompt; status+status → remote-wins silently; delete+edit (either direction) → refuse; unrecognized conflict shape → `halt`.
+
+Nine conflict states are recognized (`content-content`, `status-status`, `remote-delete-local-edit`, `local-delete-remote-edit`, `remote-only`, `local-only`, `remote-status-only`, `local-content-only`, `unknown`). Resolution values are `three-way-merge`, `remote-wins`, `local-wins`, `refuse`, `halt`, `remote-only-apply`, `local-only-apply`. The `halt` resolution surfaces an actionable error rather than silently discarding data. Source: `cleargate-cli/src/lib/conflict-detector.ts`; `cleargate-cli/src/commands/sync.ts:307-367`.
+
+### §14.3 Sync ordering invariant
+
+**Rule:** `cleargate sync` MUST execute pull → classify → resolve → push in that order; reversal amplifies conflicts.
+
+Executing a push before all pulls are complete risks overwriting a remote state change that the local resolve step would have otherwise detected. The 6-step driver enforces this order at the code level; a unit test asserts step ordering as a dataflow invariant. Source: `cleargate-cli/src/commands/sync.ts` driver doc comment (steps 1–6); R2 mitigation.
+
+### §14.4 Identity resolution precedence
+
+**Rule:** `.cleargate/.participant.json` → `CLEARGATE_USER` env → `git config user.email` → `host+user` fallback.
+
+Identity is per-repo, not global, so two participants on the same machine with different `.participant.json` files get distinct attribution. The env var override allows CI or scripted sync. Source: `cleargate-cli/src/lib/identity.ts`; R5 mitigation.
+
+### §14.5 Stakeholder-authored proposal flow
+
+**Rule:** Remote items labeled `cleargate:proposal` (configurable via `CLEARGATE_PROPOSAL_LABEL` env) and absent locally land in `pending-sync/PROPOSAL-NNN-remote-<slug>.md` with `source: "remote-authored"` and `approved: false`.
+
+This prevents external stakeholders from bypassing the approval gate: the proposal arrives locally for human review before any push. The label name is configurable so teams can map to their own PM-tool taxonomy. Source: `cleargate-cli/src/lib/intake.ts`; `cleargate-cli/src/commands/sync.ts:167-183`.
+
+### §14.6 Comment policy
+
+**Rule:** Comments pull as read-only snapshots, active items only (current sprint + last 30 days), rendered under `## Remote comments` with literal-string delimiters. Never pushed upstream.
+
+Pulling comments for stale items wastes tokens and clutters archives; the 30-day window keeps recent feedback visible. The `## Remote comments` block uses byte-stable literal delimiters so repeated pulls are idempotent. A 429 rate-limit on any single item causes that item to be skipped silently. Source: `cleargate-cli/src/lib/wiki-comments-render.ts`; `cleargate-cli/src/lib/active-criteria.ts`; R4/R6 mitigations.
+
+### §14.7 Push preconditions
+
+**Rule:** `cleargate_push_item` requires `payload.approved === true` unless the caller passes `skipApprovedGate: true` (reserved for `sync_status` internal callers). `pushed_by` is stamped from `members.email` via JWT `sub` → member lookup, NOT the raw JWT `sub` value.
+
+The `skipApprovedGate` bypass is an internal escape hatch for status-only updates triggered by `cleargate_sync_status`; it is not exposed as a public CLI flag. The email lookup ensures human-readable attribution independent of UUID-based JWT subjects. Source: `mcp/src/tools/push-item.ts`; flashcard `#mcp #jwt #attribution`.
+
+### §14.8 Revert policy
+
+**Rule:** `cleargate push --revert <id>` soft-reverts by calling `cleargate_sync_status` with `new_status: "archived-without-shipping"`; it never deletes the remote item. `--force` is required when local `status: done`.
+
+Soft revert preserves audit history on the PM-tool side. Refusing to revert done items without `--force` prevents accidental archival of shipped work. Source: `cleargate-cli/src/commands/push.ts` revert branch; `cleargate-cli/src/cli.ts:268-273`.
+
+### §14.9 Sync cadence
+
+**Rule:** All sync actions are manual (`cleargate sync` / `cleargate pull <id>` / `cleargate push <file>`). The SessionStart hook SUGGESTS via `cleargate sync --check` — it never auto-pulls or auto-pushes. MCP probes are throttled to at most one per 24 hours per repo.
+
+Auto-push without human review would bypass the approval gate; auto-pull would overwrite in-progress local edits without conflict detection. The 24-hour throttle prevents session-start latency accumulation. Throttle state is stored in `.cleargate/.sync-marker.json` with schema `{ "last_check": "<ISO-8601>" }` (v1; unknown keys are ignored on read for forward compatibility). Source: `.claude/hooks/session-start.sh`; `.cleargate/.sync-marker.json`; R7 mitigation.

@@ -13,7 +13,7 @@ import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
 import { upgradeHandler } from './commands/upgrade.js';
 import { uninstallHandler } from './commands/uninstall.js';
-import { syncHandler } from './commands/sync.js';
+import { syncHandler, syncCheckHandler } from './commands/sync.js';
 import { pullHandler } from './commands/pull.js';
 import { pushHandler } from './commands/push.js';
 import { conflictsHandler } from './commands/conflicts.js';
@@ -241,7 +241,12 @@ program
   .command('sync')
   .description('pull remote updates, resolve conflicts, push local changes')
   .option('--dry-run', 'print plan without making any changes or sync-log entries')
-  .action(async (opts: { dryRun?: boolean }) => {
+  .option('--check', 'read-only drift probe — prints JSON, no mutation, hook-safe')
+  .action(async (opts: { dryRun?: boolean; check?: boolean }) => {
+    if (opts.check) {
+      await syncCheckHandler({});
+      return;
+    }
     await syncHandler({ dryRun: opts.dryRun ?? false });
   });
 

@@ -57,6 +57,118 @@ export interface SyncOptions {
   now?: () => string;
 }
 
+// ── SyncCheckOptions ──────────────────────────────────────────────────────────
+
+export interface SyncCheckOptions {
+  projectRoot?: string;
+  env?: NodeJS.ProcessEnv;
+  /** Test seam: inject McpClient directly */
+  mcp?: McpClient;
+  /** Test seam: stdout writer */
+  stdout?: (s: string) => void;
+  /** Test seam: override now() for timestamps */
+  now?: () => string;
+}
+
+/**
+ * syncCheckHandler — `cleargate sync --check`
+ *
+ * Hook-safe read-only drift probe. Exits 0 on ALL failure paths.
+ * Emits a single JSON line to stdout: {"updates":<N>,"since":"<iso>"} on success
+ * or {"updates":0,"error":"<msg>"} on failure.
+ *
+ * Never writes sync-log entries, never touches .conflicts.json, never pushes.
+ * Updates .cleargate/.sync-marker.json with last_check timestamp (even on error,
+ * to throttle repeat attempts).
+ *
+ * FLASHCARD: #hook-safe #sync-check #exit-code
+ * syncHandler exits 2 on missing token/URL/adapter. This handler MUST NOT.
+ */
+export async function syncCheckHandler(opts: SyncCheckOptions = {}): Promise<void> {
+  const projectRoot = opts.projectRoot ?? process.cwd();
+  const env = opts.env ?? process.env;
+  const stdout = opts.stdout ?? ((s: string) => process.stdout.write(s));
+  const nowFn = opts.now ?? (() => new Date().toISOString());
+
+  const markerPath = path.join(projectRoot, '.cleargate', '.sync-marker.json');
+
+  // Helper: write marker atomically, even on error (throttle repeat calls)
+  const updateMarker = async (nowIso: string): Promise<void> => {
+    try {
+      const content = JSON.stringify({ last_check: nowIso });
+      await fsPromises.mkdir(path.dirname(markerPath), { recursive: true });
+      const tmpPath = `${markerPath}.tmp.${Date.now()}`;
+      await fsPromises.writeFile(tmpPath, content, 'utf8');
+      await fsPromises.rename(tmpPath, markerPath);
+    } catch {
+      // Ignore marker write failures — do not surface to caller
+    }
+  };
+
+  // Helper: emit error JSON and exit 0
+  const emitError = async (msg: string, nowIso: string): Promise<void> => {
+    stdout(JSON.stringify({ updates: 0, error: msg.slice(0, 200) }) + '\n');
+    await updateMarker(nowIso);
+  };
+
+  const nowIso = nowFn();
+
+  // Read last_check from marker; fall back to epoch
+  let since = '1970-01-01T00:00:00.000Z';
+  try {
+    const raw = await fsPromises.readFile(markerPath, 'utf8');
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed['last_check'] === 'string') {
+      since = parsed['last_check'];
+    }
+  } catch {
+    // No marker file or parse error — use epoch
+  }
+
+  // Resolve MCP client
+  let mcp: McpClient;
+  if (opts.mcp) {
+    mcp = opts.mcp;
+  } else {
+    const token = env['CLEARGATE_MCP_TOKEN'];
+    if (!token || !token.trim()) {
+      await emitError('adapter-not-configured', nowIso);
+      return;
+    }
+    const baseUrl = env['CLEARGATE_MCP_URL'];
+    if (!baseUrl || !baseUrl.trim()) {
+      await emitError('adapter-not-configured', nowIso);
+      return;
+    }
+    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim() });
+  }
+
+  // Pre-flight: adapter info (but don't exit 2 — emit error JSON instead)
+  try {
+    const adapterInfo = await mcp.adapterInfo();
+    if (!adapterInfo.configured || adapterInfo.name === 'no-adapter-configured') {
+      await emitError('adapter-not-configured', nowIso);
+      return;
+    }
+  } catch {
+    // If adapterInfo fails, proceed — older MCP may not have this tool
+  }
+
+  // Call list_remote_updates
+  let refs: RemoteUpdateRef[];
+  try {
+    refs = await mcp.call<RemoteUpdateRef[]>('cleargate_list_remote_updates', { since });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await emitError(msg, nowIso);
+    return;
+  }
+
+  // Success path
+  stdout(JSON.stringify({ updates: refs.length, since }) + '\n');
+  await updateMarker(nowIso);
+}
+
 // ── ConflictJson shape ────────────────────────────────────────────────────────
 
 export interface ConflictEntry {
