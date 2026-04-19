@@ -57,3 +57,45 @@
 [2026-04-19T01:20:16Z] wrote row: agent=architect story=STORY-006-01 tokens=in:976/out:883071
 [2026-04-19T01:33:07Z] wrote row: agent=architect story=STORY-006-01 tokens=in:1008/out:907515
 [2026-04-19T01:57:40Z] no transcript_path (session=smoke)
+[2026-04-19T13:46:24Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T13:46:24Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T13:46:24Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:971/out:175735
+[2026-04-19T13:50:30Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T13:50:30Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T13:50:30Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:985/out:178829
+[2026-04-19T13:56:15Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T13:56:15Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T13:56:15Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1003/out:184940
+[2026-04-19T14:03:33Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:03:33Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:03:33Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1021/out:189959
+[2026-04-19T14:11:14Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:11:14Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:11:14Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1024/out:194507
+[2026-04-19T14:19:26Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:19:27Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:19:27Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1061/out:226861
+[2026-04-19T14:28:07Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:28:08Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:28:08Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1073/out:227583
+[2026-04-19T14:44:59Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:44:59Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:44:59Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1093/out:232282
+[2026-04-19T14:54:27Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T14:54:28Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T14:54:28Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1117/out:241914
+[2026-04-19T15:01:30Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T15:01:30Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T15:01:30Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1120/out:247188
+[2026-04-19T15:04:43Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T15:04:43Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T15:04:43Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1122/out:249584
+[2026-04-19T15:10:12Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T15:10:12Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T15:10:12Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1129/out:279971
+[2026-04-19T15:12:47Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T15:12:47Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T15:12:47Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1147/out:285473
+[2026-04-19T15:13:28Z] routing to sprint=SPRINT-05 (sentinel)
+[2026-04-19T15:13:28Z] work_item_id fallback grep: EPIC-002
+[2026-04-19T15:13:28Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1149/out:286667
