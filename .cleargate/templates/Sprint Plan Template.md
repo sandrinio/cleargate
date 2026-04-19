@@ -14,6 +14,10 @@ status: "Draft | Active | Completed"
 start_date: "{YYYY-MM-DD}"
 end_date: "{YYYY-MM-DD}"
 synced_at: "{ISO-8601 timestamp}"
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
 ---
 
 # SPRINT-{ID}: {Sprint Number / Name}

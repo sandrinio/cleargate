@@ -26,6 +26,11 @@ ambiguity: "🔴 High"
 context_source: "PROPOSAL-{ID}.md"
 actor: "{Persona Name}"
 complexity_label: "L2"
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
+server_pushed_at_version: null
 ---
 
 # STORY-{EpicID}-{StoryID}: {Story Name}

@@ -12,6 +12,10 @@ remote_id: "{PM_TOOL_ID}"
 source_tool: "linear | jira"
 status: "{PM native status}"
 synced_at: "{ISO-8601 timestamp}"
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
 ---
 
 # INIT-{ID}: {Initiative Name}

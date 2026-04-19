@@ -17,6 +17,11 @@ cr_id: "CR-{ID}"
 parent_ref: "EPIC-{ID} | STORY-{ID}"
 status: "Draft | In Review | Approved"
 approved: false
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
+server_pushed_at_version: null
 ---
 
 # CR-{ID}: {Change Request Name}
