@@ -1,0 +1,96 @@
+/**
+ * §10.4 Wiki Page Schema — exactly nine frontmatter fields.
+ * Lint will flag any extra or missing fields.
+ */
+
+export type WikiPageType = 'epic' | 'story' | 'sprint' | 'proposal' | 'cr' | 'bug' | 'topic';
+export type RepoTag = 'cli' | 'mcp' | 'planning';
+
+/** The nine-field frontmatter shape every wiki page must satisfy. */
+export interface WikiPage {
+  type: WikiPageType;
+  id: string;
+  parent: string;   // "[[EPIC-042]]" or "" if none
+  children: string[]; // ["[[STORY-042-01]]", ...]
+  status: string;
+  remote_id: string;
+  raw_path: string;
+  last_ingest: string;       // ISO 8601 UTC
+  last_ingest_commit: string; // git SHA or ""
+  repo: RepoTag;
+}
+
+/** Serialise a WikiPage frontmatter + body into a markdown string. */
+export function serializePage(page: WikiPage, body: string): string {
+  const childrenYaml =
+    page.children.length === 0
+      ? '[]'
+      : '\n' + page.children.map((c) => `  - "${c}"`).join('\n');
+
+  const fm = [
+    '---',
+    `type: ${page.type}`,
+    `id: "${page.id}"`,
+    `parent: "${page.parent}"`,
+    `children: ${childrenYaml}`,
+    `status: "${page.status}"`,
+    `remote_id: "${page.remote_id}"`,
+    `raw_path: "${page.raw_path}"`,
+    `last_ingest: "${page.last_ingest}"`,
+    `last_ingest_commit: "${page.last_ingest_commit}"`,
+    `repo: "${page.repo}"`,
+    '---',
+  ].join('\n');
+
+  return `${fm}\n\n${body}`;
+}
+
+/** Parse a serialised wiki page back into a WikiPage. Throws on schema violations. */
+export function parsePage(raw: string): WikiPage {
+  const { fm } = parseFmRaw(raw);
+
+  const type = fm['type'] as WikiPageType;
+  const id = String(fm['id'] ?? '');
+  const parent = String(fm['parent'] ?? '');
+  const rawChildren = fm['children'];
+  const children: string[] = Array.isArray(rawChildren)
+    ? (rawChildren as unknown[]).map(String)
+    : [];
+  const status = String(fm['status'] ?? '');
+  const remote_id = String(fm['remote_id'] ?? '');
+  const raw_path = String(fm['raw_path'] ?? '');
+  const last_ingest = String(fm['last_ingest'] ?? '');
+  const last_ingest_commit = String(fm['last_ingest_commit'] ?? '');
+  const repo = fm['repo'] as RepoTag;
+
+  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo };
+}
+
+function parseFmRaw(raw: string): { fm: Record<string, unknown>; body: string } {
+  const lines = raw.split('\n');
+  if (lines[0] !== '---') throw new Error('parsePage: missing opening ---');
+  let close = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === '---') { close = i; break; }
+  }
+  if (close === -1) throw new Error('parsePage: missing closing ---');
+  const fmLines = lines.slice(1, close);
+  const body = lines.slice(close + 1).join('\n').replace(/^\n/, '');
+  const fm: Record<string, unknown> = {};
+  for (const line of fmLines) {
+    const colon = line.indexOf(':');
+    if (colon === -1) continue;
+    const key = line.slice(0, colon).trim();
+    const val = line.slice(colon + 1).trim();
+    if (val === '[]') { fm[key] = []; continue; }
+    if (val === '') { fm[key] = []; continue; }
+    // inline list check
+    if (val.startsWith('[') && val.endsWith(']')) {
+      const inner = val.slice(1, -1);
+      fm[key] = inner.split(',').map((s) => s.trim().replace(/^["']|["']$/g, ''));
+      continue;
+    }
+    fm[key] = val.replace(/^["']|["']$/g, '');
+  }
+  return { fm, body };
+}

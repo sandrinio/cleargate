@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { stubHandler } from './commands/_stub.js';
 import { joinHandler } from './commands/join.js';
+import { wikiBuildHandler } from './commands/wiki-build.js';
 
 const program = new Command();
 
@@ -35,10 +36,39 @@ program
   .description('stamp a delivery artifact into the MCP server')
   .action(stubHandler('stamp'));
 
-program
+const wiki = program
   .command('wiki')
-  .description('query or update the workspace wiki')
-  .action(stubHandler('wiki'));
+  .description('query or update the workspace wiki');
+
+wiki
+  .command('build')
+  .description('full rebuild of .cleargate/wiki/ from raw delivery items')
+  .action(async () => {
+    await wikiBuildHandler();
+  });
+
+wiki
+  .command('ingest <file>')
+  .description('ingest a single raw delivery file into the wiki (STORY-002-07)')
+  .action(async (_file: string) => {
+    throw new Error('wiki ingest: not yet implemented (STORY-002-07)');
+  });
+
+wiki
+  .command('lint')
+  .description('check wiki pages for drift vs raw sources (STORY-002-08)')
+  .option('--suggest', 'advisory mode — exit 0, emit suggestions only')
+  .action(async () => {
+    throw new Error('wiki lint: not yet implemented (STORY-002-08)');
+  });
+
+wiki
+  .command('query <terms...>')
+  .description('search the wiki index (STORY-002-08)')
+  .option('--persist', 'write result as a topic page under wiki/topics/')
+  .action(async () => {
+    throw new Error('wiki query: not yet implemented (STORY-002-08)');
+  });
 
 program
   .command('admin')
