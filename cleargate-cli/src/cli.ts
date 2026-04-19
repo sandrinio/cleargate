@@ -40,8 +40,9 @@ program
   .command('init')
   .description('initialise a repo with ClearGate scaffold (CLAUDE.md block, hook config, agents, templates)')
   .option('--force', 'overwrite existing files that differ from the bundled payload')
-  .action(async (opts: { force?: boolean }) => {
-    await initHandler({ force: opts.force ?? false });
+  .option('--yes', 'non-interactive: accept all defaults without prompting')
+  .action(async (opts: { force?: boolean; yes?: boolean }) => {
+    await initHandler({ force: opts.force ?? false, yes: opts.yes ?? false });
   });
 
 program

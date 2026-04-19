@@ -18,7 +18,8 @@ import { mergeSettings, type SettingsJson } from '../init/merge-settings.js';
 import { injectClaudeMd, extractBlock } from '../init/inject-claude-md.js';
 import { wikiBuildHandler, type WikiBuildOptions } from './wiki-build.js';
 import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
-import { promptYesNo as defaultPromptYesNo } from '../lib/prompts.js';
+import { promptYesNo as defaultPromptYesNo, promptEmail as defaultPromptEmail } from '../lib/prompts.js';
+import { resolveIdentity, readParticipant, writeParticipant, type ResolveIdentityOpts } from '../lib/identity.js';
 
 /**
  * The PostToolUse hook config to merge — updated in STORY-008-06 to use
@@ -47,6 +48,8 @@ export interface InitOptions {
   cwd?: string;
   /** Overwrite files that differ from payload. Default: false */
   force?: boolean;
+  /** Accept all defaults non-interactively (same as stdin not a TTY). */
+  yes?: boolean;
   /** Test seam: path to bundled cleargate-planning/ payload directory */
   payloadDir?: string;
   /** Test seam: frozen ISO timestamp */
@@ -69,6 +72,21 @@ export interface InitOptions {
    * STORY-009-03: allows tests to supply a known ManifestFile without a real MANIFEST.json.
    */
   readInstallManifest?: () => ManifestFile;
+  /**
+   * Test seam: replaces the email prompt for participant identity flow.
+   * STORY-010-01: injectable so tests don't block on stdin.
+   */
+  promptEmail?: (question: string, defaultValue: string) => Promise<string>;
+  /**
+   * Test seam: identity resolver options (gitEmail, hostname, username, env overrides).
+   * STORY-010-01: used to inject a deterministic git email in tests.
+   */
+  identityOpts?: ResolveIdentityOpts;
+  /**
+   * Test seam: override process.stdin.isTTY for participant prompt decision.
+   * STORY-010-01: in test environment stdin is not a TTY; inject true to force interactive path.
+   */
+  stdinIsTTY?: boolean;
 }
 
 /** Shape of the .cleargate/.uninstalled marker written by STORY-009-07 `uninstall`. */
@@ -123,6 +141,7 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const runWikiBuild = opts.runWikiBuild ?? wikiBuildHandler;
   const promptYesNoFn = opts.promptYesNo ?? defaultPromptYesNo;
+  const promptEmailFn = opts.promptEmail ?? defaultPromptEmail;
 
   // Step 1: Validate cwd
   if (!fs.existsSync(cwd)) {
@@ -290,6 +309,43 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
       fs.unlinkSync(uninstalledMarkerPath);
     } catch (e) {
       stderr(`[cleargate init] WARNING: could not remove .uninstalled marker: ${String(e)}\n`);
+    }
+  }
+
+  // Step 7.5: Participant identity
+  // Skip if .cleargate/.participant.json already exists (idempotent re-init).
+  const existingParticipant = readParticipant(cwd);
+  if (existingParticipant === null) {
+    // Resolve git email as default (no env / host fallback during init — init needs a concrete prompt).
+    const identityOpts = opts.identityOpts ?? {};
+
+    // Resolve just the git rung: call resolveIdentity with env={} to skip env rung,
+    // then check the source.
+    const gitOnlyIdentity = resolveIdentity(cwd, {
+      ...identityOpts,
+      env: {}, // force skip env rung
+    });
+    const gitEmail =
+      gitOnlyIdentity.source === 'git' ? gitOnlyIdentity.email : null;
+
+    const stdinIsTTY = opts.stdinIsTTY ?? process.stdin.isTTY ?? false;
+    const isNonInteractive = opts.yes === true || !stdinIsTTY;
+
+    if (isNonInteractive) {
+      // Non-interactive: use git email; if unavailable use host fallback via resolveIdentity
+      const finalEmail =
+        gitEmail ??
+        resolveIdentity(cwd, identityOpts).email;
+
+      await writeParticipant(cwd, finalEmail, 'inferred', now);
+      stdout(`[cleargate init] Participant identity: ${finalEmail} (inferred)\n`);
+    } else {
+      // Interactive: prompt for email
+      const defaultEmail = gitEmail ?? 'user@localhost';
+      const question = `[cleargate init] Participant email [${defaultEmail}]:`;
+      const answer = await promptEmailFn(question, defaultEmail);
+      await writeParticipant(cwd, answer, 'prompted', now);
+      stdout(`[cleargate init] Participant identity: ${answer} (prompted)\n`);
     }
   }
 

@@ -18,6 +18,9 @@ Thumbs.db
 # Active-sprint sentinel — per-machine runtime state, not team-shared
 .cleargate/sprint-runs/.active
 
+# Per-participant identity file — personal email, not team-shared
+/.cleargate/.participant.json
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/

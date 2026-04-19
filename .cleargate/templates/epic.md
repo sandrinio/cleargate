@@ -38,6 +38,13 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+# Sync attribution (EPIC-010). Optional; stamped by `cleargate push` / `cleargate pull`.
+pushed_by: null            # STORY-010-07 writer / STORY-010-04 reader
+pushed_at: null            # STORY-010-07 writer / STORY-010-04 reader
+last_pulled_by: null       # STORY-010-04 writer / STORY-010-03 reader
+last_pulled_at: null       # STORY-010-04 writer / STORY-010-03 reader
+last_remote_update: null   # STORY-010-02 writer (from MCP) / STORY-010-03 reader
+source: "local-authored"   # STORY-010-05 flips to "remote-authored" on intake
 ---
 
 # EPIC-{ID}: {Epic Name}
