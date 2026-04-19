@@ -15,11 +15,14 @@
 #              misrouted SPRINT-04 firings to SPRINT-03 because ledger appends
 #              themselves bumped SPRINT-03's mtime. See REPORT.md SPRINT-04.
 #
-# Story ID detection (FIXED 2026-04-19):
+# Work-item ID detection (GENERALIZED 2026-04-19 STORY-008-04):
 #   Primary  : first user message in the transcript — that's the orchestrator's
-#              dispatch prompt, which by developer.md convention starts with
-#              `STORY=NNN-NN` verbatim.
-#   Fallback : grep first STORY-NNN-NN anywhere in the transcript.
+#              dispatch prompt, which by agent convention starts with
+#              `STORY=NNN-NN`, `PROPOSAL-NNN`, `EPIC-NNN`, `CR-NNN`, or `BUG-NNN`.
+#   Pattern  : (STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?
+#   Fallback : grep first match anywhere in the transcript.
+#   story_id : populated only when the match is a STORY-* (backward compat).
+#   work_item_id: always populated when detection succeeds; equals story_id for STORY items.
 #   (Removed): grep-first-anywhere as PRIMARY — it picked up SPRINT-05 mentions
 #              from architect plans being read by the subagent and mistagged
 #              every SPRINT-04 firing as STORY-006-01.
@@ -56,6 +59,7 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   if [[ -n "${SPRINT_ID}" ]]; then
     SPRINT_DIR="${REPO_ROOT}/.cleargate/sprint-runs/${SPRINT_ID}"
     mkdir -p "${SPRINT_DIR}"
+    printf '[%s] routing to sprint=%s (sentinel)\n' "$(date -u +%FT%TZ)" "${SPRINT_ID}" >> "${HOOK_LOG}"
   else
     # No active sprint: capture the row in an off-sprint ledger so we don't lose data.
     SPRINT_ID="_off-sprint"
@@ -102,27 +106,48 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     done
   fi
 
-  # --- detect story_id (PRIMARY: first user message; FALLBACK: anywhere-grep) ---
+  # --- detect work_item_id (PRIMARY: first user message; FALLBACK: anywhere-grep) ---
   # Orchestrator convention (.claude/agents/developer.md): the first line of the
   # dispatch prompt is `STORY=NNN-NN`. The first user message in the transcript
-  # is that prompt. Look there first to avoid picking up STORY mentions inside
+  # is that prompt. Look there first to avoid picking up work-item mentions inside
   # the subagent's later reads of plans, sprint files, etc.
-  STORY_ID="$(jq -rs '
+  #
+  # Pattern covers: STORY-NNN-NN, PROPOSAL-NNN, EPIC-NNN, CR-NNN, BUG-NNN
+  # (and = separator variants like STORY=008-04)
+  WORK_ITEM_RAW="$(jq -rs '
     [.[] | select(.type == "user")] | .[0].message.content
     | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
     | tostring
-    | scan("STORY[-=]([0-9]{3}-[0-9]{2})") | .[0]
+    | scan("(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
   ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
 
-  if [[ -n "${STORY_ID}" && "${STORY_ID}" != "null" ]]; then
-    STORY_ID="STORY-${STORY_ID}"
+  if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
+    # Normalize: replace any = separator with - in the result
+    WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
   else
-    # Fallback: grep anywhere (the old behavior — better than "none" if no
-    # explicit STORY= header was passed).
+    # Fallback: grep anywhere in the transcript
+    WORK_ITEM_ID="$(grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
+      | head -1 \
+      | sed 's/=/-/g')"
+    if [[ -n "${WORK_ITEM_ID}" ]]; then
+      printf '[%s] work_item_id fallback grep: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+    fi
+  fi
+  [[ -z "${WORK_ITEM_ID}" ]] && WORK_ITEM_ID=""
+
+  # story_id is populated only when the work item is a STORY-* (backward compat)
+  STORY_ID=""
+  if [[ "${WORK_ITEM_ID}" == STORY-* ]]; then
+    STORY_ID="${WORK_ITEM_ID}"
+  fi
+
+  # Legacy fallback: if no work_item_id found at all, fall back to old grep for story_id only
+  if [[ -z "${WORK_ITEM_ID}" ]]; then
     STORY_ID="$(grep -oE 'STORY[-=]?[0-9]{3}-[0-9]{2}' "${TRANSCRIPT_PATH}" 2>/dev/null \
       | head -1 \
       | sed -E 's/STORY[-=]?([0-9]{3}-[0-9]{2})/STORY-\1/')"
     [[ -z "${STORY_ID}" ]] && STORY_ID="none"
+    WORK_ITEM_ID="${STORY_ID}"
   fi
 
   # --- assemble ledger row ---
@@ -131,15 +156,16 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     --arg ts "${TS}" \
     --arg agent "${AGENT_TYPE}" \
     --arg story "${STORY_ID}" \
+    --arg work_item "${WORK_ITEM_ID}" \
     --arg session "${SESSION_ID}" \
     --arg transcript "${TRANSCRIPT_PATH}" \
     --arg sprint "${SPRINT_ID}" \
     --argjson usage "${USAGE_JSON}" \
-    '{ts: $ts, sprint_id: $sprint, agent_type: $agent, story_id: $story, session_id: $session, transcript: $transcript} + $usage')"
+    '{ts: $ts, sprint_id: $sprint, agent_type: $agent, story_id: $story, work_item_id: $work_item, session_id: $session, transcript: $transcript} + $usage')"
 
   printf '%s\n' "${ROW}" >> "${LEDGER}"
-  printf '[%s] wrote row: sprint=%s agent=%s story=%s tokens=in:%s/out:%s\n' \
-    "${TS}" "${SPRINT_ID}" "${AGENT_TYPE}" "${STORY_ID}" \
+  printf '[%s] wrote row: sprint=%s agent=%s work_item=%s story=%s tokens=in:%s/out:%s\n' \
+    "${TS}" "${SPRINT_ID}" "${AGENT_TYPE}" "${WORK_ITEM_ID}" "${STORY_ID}" \
     "$(printf '%s' "${USAGE_JSON}" | jq -r '.input')" \
     "$(printf '%s' "${USAGE_JSON}" | jq -r '.output')" \
     >> "${HOOK_LOG}"
