@@ -52,14 +52,26 @@ export interface ManifestFile {
   installed_at?: string;
 }
 
+export interface DriftMapEntry {
+  state: DriftState;
+  entry: ManifestEntry;
+  install_sha: string | null;
+  current_sha: string | null;
+  package_sha: string | null;
+}
+
 export interface DriftMap {
-  [filePath: string]: {
-    state: DriftState;
-    entry: ManifestEntry;
-    install_sha: string | null;
-    current_sha: string | null;
-    package_sha: string | null;
-  };
+  [filePath: string]: DriftMapEntry;
+}
+
+/**
+ * The on-disk shape of `.cleargate/.drift-state.json`.
+ * Wraps the DriftMap with a `last_refreshed` timestamp so the daily-throttle
+ * logic in `cleargate doctor --check-scaffold` can skip re-computation.
+ */
+export interface DriftStateFile {
+  last_refreshed: string;
+  drift: DriftMap;
 }
 
 // ─── Options ──────────────────────────────────────────────────────────────────
@@ -229,17 +241,67 @@ export function classify(
 }
 
 /**
+ * Options for writeDriftState.
+ */
+export interface WriteDriftStateOpts {
+  /**
+   * ISO-8601 timestamp to record as `last_refreshed` in the output file.
+   * When omitted, the current time is used (new Date().toISOString()).
+   * This seam is mandatory for deterministic tests.
+   */
+  lastRefreshed?: string;
+}
+
+/**
  * Atomically write the drift-state map to `<projectRoot>/.cleargate/.drift-state.json`.
+ *
+ * The on-disk format is wrapped: `{ last_refreshed: string, drift: DriftMap }`.
+ * This allows the daily-throttle logic in `cleargate doctor --check-scaffold`
+ * to read the timestamp without re-computing all SHAs.
  *
  * Uses write-temp-then-rename (atomic on POSIX; best-effort on Windows).
  * Ensures parent directory exists before writing.
+ *
+ * STORY-009-04 extended the signature from `(projectRoot, DriftMap)` to
+ * `(projectRoot, DriftMap, opts?)` — callers passing only two args continue to work.
  */
-export async function writeDriftState(projectRoot: string, state: DriftMap): Promise<void> {
+export async function writeDriftState(
+  projectRoot: string,
+  state: DriftMap,
+  opts?: WriteDriftStateOpts
+): Promise<void> {
   const cleargatDir = path.join(projectRoot, '.cleargate');
   const finalPath = path.join(cleargatDir, '.drift-state.json');
   const tmpPath = `${finalPath}.tmp`;
 
+  const lastRefreshed = opts?.lastRefreshed ?? new Date().toISOString();
+  const fileContent: DriftStateFile = { last_refreshed: lastRefreshed, drift: state };
+
   await mkdir(cleargatDir, { recursive: true });
-  await writeFile(tmpPath, JSON.stringify(state, null, 2) + '\n', 'utf-8');
+  await writeFile(tmpPath, JSON.stringify(fileContent, null, 2) + '\n', 'utf-8');
   await rename(tmpPath, finalPath);
+}
+
+/**
+ * Read the drift-state file written by `writeDriftState`.
+ * Returns null when the file does not exist or is malformed.
+ */
+export async function readDriftState(projectRoot: string): Promise<DriftStateFile | null> {
+  const driftPath = path.join(projectRoot, '.cleargate', '.drift-state.json');
+  try {
+    const raw = await readFile(driftPath, 'utf-8');
+    const parsed = JSON.parse(raw) as unknown;
+    // Accept both the new wrapped format {last_refreshed, drift} and the old flat format
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'last_refreshed' in parsed &&
+      'drift' in parsed
+    ) {
+      return parsed as DriftStateFile;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }

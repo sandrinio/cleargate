@@ -14,9 +14,11 @@ import {
   computeCurrentSha,
   classify,
   writeDriftState,
+  readDriftState,
   type ManifestEntry,
   type ManifestFile,
   type DriftMap,
+  type DriftStateFile,
   type Tier,
 } from '../../src/lib/manifest.js';
 import { hashNormalized } from '../../src/lib/sha256.js';
@@ -176,7 +178,7 @@ describe('classify', () => {
 // ─── writeDriftState ──────────────────────────────────────────────────────────
 
 describe('writeDriftState', () => {
-  it('writes .drift-state.json under <projectRoot>/.cleargate/', async () => {
+  it('writes .drift-state.json under <projectRoot>/.cleargate/ — wrapped format', async () => {
     const dir = makeTmpDir();
     const entry = makeEntry();
     const state: DriftMap = {
@@ -189,13 +191,14 @@ describe('writeDriftState', () => {
       },
     };
 
-    await writeDriftState(dir, state);
+    await writeDriftState(dir, state, { lastRefreshed: '2026-04-19T00:00:00.000Z' });
 
     const driftPath = path.join(dir, '.cleargate', '.drift-state.json');
     expect(fs.existsSync(driftPath)).toBe(true);
 
-    const parsed = JSON.parse(fs.readFileSync(driftPath, 'utf-8')) as DriftMap;
-    expect(parsed[entry.path].state).toBe('clean');
+    const parsed = JSON.parse(fs.readFileSync(driftPath, 'utf-8')) as DriftStateFile;
+    expect(parsed.last_refreshed).toBe('2026-04-19T00:00:00.000Z');
+    expect(parsed.drift[entry.path].state).toBe('clean');
   });
 
   it('atomic — .drift-state.json.tmp is absent after successful write', async () => {
@@ -212,7 +215,7 @@ describe('writeDriftState', () => {
       },
     };
 
-    await writeDriftState(dir, state);
+    await writeDriftState(dir, state, { lastRefreshed: '2026-04-19T00:00:00.000Z' });
 
     const tmpPath = path.join(dir, '.cleargate', '.drift-state.json.tmp');
     // After success: .tmp must NOT exist (was renamed to final path)
@@ -247,7 +250,7 @@ describe('writeDriftState', () => {
         package_sha: 'abc',
       },
     };
-    await writeDriftState(dir, stateA);
+    await writeDriftState(dir, stateA, { lastRefreshed: '2026-04-19T00:00:00.000Z' });
 
     const stateB: DriftMap = {
       [entry.path]: {
@@ -258,10 +261,68 @@ describe('writeDriftState', () => {
         package_sha: 'new',
       },
     };
-    await writeDriftState(dir, stateB);
+    await writeDriftState(dir, stateB, { lastRefreshed: '2026-04-19T01:00:00.000Z' });
 
     const driftPath = path.join(dir, '.cleargate', '.drift-state.json');
-    const parsed = JSON.parse(fs.readFileSync(driftPath, 'utf-8')) as DriftMap;
-    expect(parsed[entry.path].state).toBe('upstream-changed');
+    const parsed = JSON.parse(fs.readFileSync(driftPath, 'utf-8')) as DriftStateFile;
+    expect(parsed.drift[entry.path].state).toBe('upstream-changed');
+    expect(parsed.last_refreshed).toBe('2026-04-19T01:00:00.000Z');
+  });
+
+  it('uses current time when lastRefreshed not provided', async () => {
+    const dir = makeTmpDir();
+    const before = Date.now();
+
+    await writeDriftState(dir, {});
+
+    const after = Date.now();
+    const driftPath = path.join(dir, '.cleargate', '.drift-state.json');
+    const parsed = JSON.parse(fs.readFileSync(driftPath, 'utf-8')) as DriftStateFile;
+    const ts = new Date(parsed.last_refreshed).getTime();
+    expect(ts).toBeGreaterThanOrEqual(before);
+    expect(ts).toBeLessThanOrEqual(after);
+  });
+});
+
+// ─── readDriftState ───────────────────────────────────────────────────────────
+
+describe('readDriftState', () => {
+  it('returns null when .drift-state.json is absent', async () => {
+    const dir = makeTmpDir();
+    const result = await readDriftState(dir);
+    expect(result).toBeNull();
+  });
+
+  it('reads back the wrapped format written by writeDriftState', async () => {
+    const dir = makeTmpDir();
+    const entry = makeEntry();
+    const state: DriftMap = {
+      [entry.path]: {
+        state: 'user-modified',
+        entry,
+        install_sha: 'aaa',
+        current_sha: 'bbb',
+        package_sha: 'aaa',
+      },
+    };
+    await writeDriftState(dir, state, { lastRefreshed: '2026-04-19T12:00:00.000Z' });
+
+    const result = await readDriftState(dir);
+    expect(result).not.toBeNull();
+    expect(result!.last_refreshed).toBe('2026-04-19T12:00:00.000Z');
+    expect(result!.drift[entry.path].state).toBe('user-modified');
+  });
+
+  it('returns null for malformed / old flat-format file', async () => {
+    const dir = makeTmpDir();
+    fs.mkdirSync(path.join(dir, '.cleargate'), { recursive: true });
+    // Write old flat-format (no last_refreshed / drift wrapper)
+    fs.writeFileSync(
+      path.join(dir, '.cleargate', '.drift-state.json'),
+      JSON.stringify({ 'some/path': { state: 'clean' } }) + '\n',
+      'utf-8'
+    );
+    const result = await readDriftState(dir);
+    expect(result).toBeNull();
   });
 });

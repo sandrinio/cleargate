@@ -1,0 +1,304 @@
+/**
+ * doctor.ts — STORY-009-04
+ *
+ * `cleargate doctor` base command + `--check-scaffold` mode.
+ *
+ * EXTENSION NOTICE: STORY-008-06 (M3) extends this file to add `--session-start`
+ * and `--pricing` modes. Do NOT re-create or rename this file. Add new cases to
+ * the switch in `doctorHandler` and new flag keys to `DoctorFlags`.
+ *
+ * Dispatcher contract (for 008-06):
+ *  - `selectMode` throws when multiple mutually-exclusive flags are set.
+ *  - Default (no flag): returns 'hook-health' (minimal hook-config report).
+ *  - Modes are additive: 008-06 adds 'session-start' + 'pricing' by extending the switch.
+ *
+ * No top-level await (FLASHCARD #tsup #cjs #esm).
+ */
+
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import {
+  loadPackageManifest,
+  loadInstallSnapshot,
+  computeCurrentSha,
+  classify,
+  writeDriftState,
+  readDriftState,
+  type DriftMap,
+  type DriftMapEntry,
+  type DriftState,
+} from '../lib/manifest.js';
+import { shortHash } from '../lib/sha256.js';
+
+// ─── Public types ─────────────────────────────────────────────────────────────
+
+export interface DoctorCliOptions {
+  cwd?: string;
+  now?: () => Date;
+  stdout?: (s: string) => void;
+  stderr?: (s: string) => void;
+  exit?: (code: number) => never;
+  /** Override the package root for loadPackageManifest (test seam). */
+  packageRoot?: string;
+}
+
+/**
+ * Flags for `cleargate doctor`.
+ *
+ * Reserved keys for 008-06 (M3): sessionStart, pricing.
+ * All flags are mutually exclusive — selectMode throws when >1 is set.
+ */
+export interface DoctorFlags {
+  checkScaffold?: boolean;
+  /** Hidden flag: used by the M3 session-start hook; enables daily throttle. */
+  sessionStartMode?: boolean;
+  verbose?: boolean;
+  /** Reserved for 008-06: --session-start */
+  sessionStart?: boolean;
+  /** Reserved for 008-06: --pricing */
+  pricing?: boolean;
+}
+
+export type DoctorMode = 'check-scaffold' | 'session-start' | 'pricing' | 'hook-health';
+
+// ─── Mode dispatcher ──────────────────────────────────────────────────────────
+
+/**
+ * Determine which doctor mode to run based on flags.
+ *
+ * Throws when multiple mutually-exclusive mode flags are set.
+ * Returns 'hook-health' when no mode flag is set (default).
+ *
+ * Exported so STORY-008-06 can add cases without re-editing the switch.
+ */
+export function selectMode(flags: DoctorFlags): DoctorMode {
+  const modes: DoctorMode[] = [];
+  if (flags.checkScaffold) modes.push('check-scaffold');
+  if (flags.sessionStart) modes.push('session-start');
+  if (flags.pricing) modes.push('pricing');
+
+  if (modes.length > 1) {
+    throw new Error(
+      `cleargate doctor: mutually exclusive flags set: ${modes.join(', ')}. Use only one mode flag at a time.`
+    );
+  }
+
+  if (modes.length === 1) {
+    return modes[0]!;
+  }
+
+  return 'hook-health';
+}
+
+// ─── Hook-health default mode ─────────────────────────────────────────────────
+
+function runHookHealth(
+  stdout: (s: string) => void,
+  cwd: string
+): void {
+  // Minimal hook-config report: check that .claude/settings.json has the
+  // SubagentStop hook wired (if the .claude directory exists).
+  const settingsPath = path.join(cwd, '.claude', 'settings.json');
+  if (!fs.existsSync(settingsPath)) {
+    stdout('[doctor] No .claude/settings.json found — hook config unavailable.');
+    return;
+  }
+
+  try {
+    const raw = fs.readFileSync(settingsPath, 'utf-8');
+    const settings = JSON.parse(raw) as unknown;
+    const hasHooks =
+      typeof settings === 'object' &&
+      settings !== null &&
+      'hooks' in settings;
+    if (hasHooks) {
+      stdout('[doctor] Hook config present in .claude/settings.json.');
+    } else {
+      stdout('[doctor] .claude/settings.json found but no hooks key — SubagentStop hook not wired.');
+    }
+  } catch {
+    stdout('[doctor] .claude/settings.json is not valid JSON — cannot verify hook config.');
+  }
+}
+
+// ─── Check-scaffold mode ──────────────────────────────────────────────────────
+
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Throttle decision: returns true when the cache is fresh enough to skip
+ * re-computation.
+ *
+ * Fresh = `now - lastRefreshed < 24h`.
+ * Throttle only applies when `sessionStartMode` is set (non-interactive invocation).
+ * Exported for unit tests.
+ */
+export function shouldUseCache(
+  lastRefreshed: string,
+  now: Date,
+  sessionStartMode: boolean
+): boolean {
+  if (!sessionStartMode) {
+    // Interactive mode always recomputes.
+    return false;
+  }
+  const age = now.getTime() - new Date(lastRefreshed).getTime();
+  return age < TWENTY_FOUR_HOURS_MS;
+}
+
+/**
+ * Format a single non-clean file line for verbose output.
+ * `<path>  <state>  (<installed>→<current> vs <package>)`
+ * with 6-char short hashes.
+ */
+export function formatVerboseLine(
+  filePath: string,
+  entry: DriftMapEntry
+): string {
+  const inst = entry.install_sha ? shortHash(entry.install_sha).slice(0, 6) : 'null';
+  const curr = entry.current_sha ? shortHash(entry.current_sha).slice(0, 6) : 'null';
+  const pkg = entry.package_sha ? shortHash(entry.package_sha).slice(0, 6) : 'null';
+  return `  ${filePath}  ${entry.state}  (${inst}→${curr} vs ${pkg})`;
+}
+
+type CountsByState = Record<Exclude<DriftState, 'untracked'>, number> & { untracked: number };
+
+function zeroCounts(): CountsByState {
+  return {
+    'clean': 0,
+    'user-modified': 0,
+    'upstream-changed': 0,
+    'both-changed': 0,
+    'untracked': 0,
+  };
+}
+
+async function runCheckScaffold(
+  flags: DoctorFlags,
+  cli: DoctorCliOptions,
+  cwd: string,
+  now: Date,
+  stdout: (s: string) => void,
+  _stderr: (s: string) => void
+): Promise<void> {
+  // 1. Check daily throttle when in session-start mode
+  const sessionStartMode = flags.sessionStartMode ?? false;
+  const existingState = await readDriftState(cwd);
+
+  if (existingState && shouldUseCache(existingState.last_refreshed, now, sessionStartMode)) {
+    // Reuse cached result — emit summary from cached data
+    emitSummary(existingState.drift, flags.verbose ?? false, stdout);
+    return;
+  }
+
+  // 2. Load manifests
+  const pkgManifest = loadPackageManifest({ packageRoot: cli.packageRoot });
+  const installSnapshot = await loadInstallSnapshot(cwd);
+
+  // 3. Compute SHAs + classify
+  const driftMap: DriftMap = {};
+
+  await Promise.all(
+    pkgManifest.files.map(async (entry) => {
+      // Silently skip user-artifact tier (EPIC-009 §6 Q8)
+      if (entry.tier === 'user-artifact') {
+        return;
+      }
+
+      const currentSha = await computeCurrentSha(entry, cwd);
+      const installSha =
+        installSnapshot?.files.find((f) => f.path === entry.path)?.sha256 ?? null;
+      const pkgSha = entry.sha256;
+      const state = classify(pkgSha, installSha, currentSha, entry.tier);
+
+      driftMap[entry.path] = {
+        state,
+        entry,
+        install_sha: installSha,
+        current_sha: currentSha,
+        package_sha: pkgSha,
+      };
+    })
+  );
+
+  // 4. Write drift state atomically
+  await writeDriftState(cwd, driftMap, { lastRefreshed: now.toISOString() });
+
+  // 5. Emit summary
+  emitSummary(driftMap, flags.verbose ?? false, stdout);
+}
+
+function emitSummary(
+  driftMap: DriftMap,
+  verbose: boolean,
+  stdout: (s: string) => void
+): void {
+  const counts = zeroCounts();
+  for (const entry of Object.values(driftMap)) {
+    counts[entry.state]++;
+  }
+
+  stdout(
+    `Scaffold drift: ${counts['user-modified']} user-modified, ` +
+    `${counts['upstream-changed']} upstream-changed, ` +
+    `${counts['both-changed']} both-changed, ` +
+    `${counts['clean']} clean`
+  );
+
+  if (counts['upstream-changed'] > 0 || counts['both-changed'] > 0) {
+    stdout('Run cleargate upgrade to review.');
+  }
+
+  if (verbose) {
+    for (const [filePath, entry] of Object.entries(driftMap)) {
+      if (entry.state !== 'clean' && entry.state !== 'untracked') {
+        stdout(formatVerboseLine(filePath, entry));
+      }
+    }
+  }
+}
+
+// ─── Main handler ─────────────────────────────────────────────────────────────
+
+export async function doctorHandler(
+  flags: DoctorFlags,
+  cli?: DoctorCliOptions
+): Promise<void> {
+  const cwd = cli?.cwd ?? process.cwd();
+  const now = cli?.now ? cli.now() : new Date();
+  const stdout = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
+  const stderr = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
+  const exit = cli?.exit ?? ((code: number) => process.exit(code) as never);
+
+  let mode: DoctorMode;
+  try {
+    mode = selectMode(flags);
+  } catch (err) {
+    stderr((err as Error).message);
+    exit(1);
+    return;
+  }
+
+  switch (mode) {
+    case 'check-scaffold':
+      await runCheckScaffold(flags, cli ?? {}, cwd, now, stdout, stderr);
+      break;
+
+    case 'hook-health':
+      runHookHealth(stdout, cwd);
+      break;
+
+    // Reserved for STORY-008-06 (M3) — do NOT implement here:
+    case 'session-start':
+    case 'pricing':
+      stderr(`cleargate doctor: mode '${mode}' is not yet implemented (ships in STORY-008-06).`);
+      exit(1);
+      break;
+
+    default: {
+      const exhaustiveCheck: never = mode;
+      stderr(`cleargate doctor: unknown mode '${String(exhaustiveCheck)}'`);
+      exit(1);
+    }
+  }
+}

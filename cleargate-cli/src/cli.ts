@@ -7,6 +7,7 @@ import { wikiBuildHandler } from './commands/wiki-build.js';
 import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
+import { doctorHandler } from './commands/doctor.js';
 
 const program = new Command();
 
@@ -106,5 +107,28 @@ program
   .command('admin')
   .description('administrative operations (create-project, invite, issue-token, revoke-token)')
   .action(stubHandler('admin'));
+
+program
+  .command('doctor')
+  .description('diagnose scaffold drift and hook health')
+  .option('--check-scaffold', 'check scaffold files for drift against install snapshot')
+  .option('--session-start-mode', 'hidden: enables daily throttle (used by session-start hook)', false)
+  .option('-v, --verbose', 'show per-file drift detail')
+  .addHelpText('after', [
+    '',
+    'Modes (mutually exclusive):',
+    '  --check-scaffold    Compute drift for all tracked scaffold files.',
+    '                      Writes .cleargate/.drift-state.json.',
+    '  (default)           Print a minimal hook-config health report.',
+    '',
+    'STORY-008-06 (M3) adds --session-start and --pricing modes.',
+  ].join('\n'))
+  .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; verbose?: boolean }) => {
+    await doctorHandler({
+      checkScaffold: opts.checkScaffold,
+      sessionStartMode: opts.sessionStartMode,
+      verbose: opts.verbose,
+    });
+  });
 
 void program.parseAsync(process.argv);
