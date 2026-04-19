@@ -36,5 +36,18 @@ export default defineConfig({
       copyDirSync(srcTemplates, dstTemplates);
       console.log('tsup onSuccess: templates copied to dist/templates/');
     }
+
+    // Copy MANIFEST.json to dist/ so it ships with the npm package.
+    // prebuild generates cleargate-planning/MANIFEST.json; we propagate it here.
+    // dist/ is already in package.json files[], so no files[] change needed.
+    const metaRoot = path.resolve(pkgRoot, '..');
+    const srcManifest = path.join(metaRoot, 'cleargate-planning', 'MANIFEST.json');
+    const dstManifest = path.join(pkgRoot, 'dist', 'MANIFEST.json');
+    if (fs.existsSync(srcManifest)) {
+      fs.copyFileSync(srcManifest, dstManifest);
+      console.log('tsup onSuccess: MANIFEST.json copied to dist/MANIFEST.json');
+    } else {
+      console.warn('tsup onSuccess: cleargate-planning/MANIFEST.json not found — run npm run build to generate it');
+    }
   },
 });
