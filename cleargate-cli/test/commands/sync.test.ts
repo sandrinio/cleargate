@@ -720,3 +720,69 @@ describe('Scenario: sync --dry-run stdout format', () => {
     expect(typeof sh).toBe('function');
   });
 });
+
+// ── Test 6: Gherkin scenario 6 — intake surfaces in sync stdout ───────────────
+
+describe('Scenario: intake surfaces in sync stdout', () => {
+  let tmpDir: string;
+
+  beforeEach(() => { tmpDir = makeTmpDir(); });
+  afterEach(() => cleanup(tmpDir));
+
+  it('syncPrintsIntakeSummaryToStdout: live-path stdout contains emoji-prefixed intake line', async () => {
+    // Two new remote proposals returned by detect_new_items; no existing local counterparts.
+    const proposal1: RemoteItem = {
+      remote_id: 'LIN-101',
+      title: 'Enable SSO Login',
+      body: 'Users should be able to sign in via SSO.',
+      status: 'Draft',
+      assignees: [],
+      labels: ['cleargate:proposal'],
+      updated_at: '2026-04-19T10:00:00Z',
+      source_tool: 'linear',
+      raw: {},
+    };
+    const proposal2: RemoteItem = {
+      remote_id: 'LIN-102',
+      title: 'Dark Mode Support',
+      body: 'Add a dark mode toggle to the UI.',
+      status: 'Draft',
+      assignees: [],
+      labels: ['cleargate:proposal'],
+      updated_at: '2026-04-19T11:00:00Z',
+      source_tool: 'linear',
+      raw: {},
+    };
+
+    const mcp = makeMcpClient({
+      // No remote work-item updates → no pulls, no pushes, no conflicts
+      remoteRefs: [],
+      onCall: (tool, _args) => {
+        if (tool === 'cleargate_list_remote_updates') return [];
+        if (tool === 'cleargate_detect_new_items') return [proposal1, proposal2];
+        return null;
+      },
+    });
+
+    const stdoutLines: string[] = [];
+    // Live path — dryRun NOT set (defaults to false)
+    await syncHandler({
+      projectRoot: tmpDir,
+      mcp,
+      stdout: (s) => stdoutLines.push(s),
+      stderr: () => {},
+      exit: (c) => { throw new Error(`exit(${c})`); },
+      now: () => '2026-04-19T16:00:00Z',
+    });
+
+    const combined = stdoutLines.join('');
+
+    // Must contain the emoji-prefixed plural intake summary
+    expect(combined).toContain('📥 2 new stakeholder proposals pulled:');
+    // Must contain both proposals in the inline list
+    expect(combined).toContain("LIN-101 'Enable SSO Login'");
+    expect(combined).toContain("LIN-102 'Dark Mode Support'");
+    // Must contain the trailing detail line
+    expect(combined).toContain('— review at .cleargate/delivery/pending-sync/');
+  });
+});

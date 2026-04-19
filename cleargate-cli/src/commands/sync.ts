@@ -410,11 +410,11 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
   // Print intake summary (orchestrator stdout format)
   if (intakeResult.created > 0) {
     const plural = intakeResult.created === 1 ? 'proposal' : 'proposals';
-    stdout(`intake: ${intakeResult.created} new stakeholder ${plural} pulled\n`);
-    for (const item of intakeResult.items) {
-      stdout(`  ${item.proposalId} <- ${item.remoteId} "${item.title}"\n`);
-      stdout(`    ${item.path}\n`);
-    }
+    const inlineList = intakeResult.items
+      .map((item) => `${item.proposalId} (${item.remoteId} '${item.title}')`)
+      .join(', ');
+    stdout(`📥 ${intakeResult.created} new stakeholder ${plural} pulled: ${inlineList}\n`);
+    stdout(`  — review at .cleargate/delivery/pending-sync/\n`);
   }
 }
 
