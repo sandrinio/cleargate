@@ -29,6 +29,8 @@ export interface WikiIngestOptions {
   gitRunner?: GitRunner;
   /** Test seam: replaces fs.rename (for atomic index.md write test) */
   rename?: (src: string, dst: string) => void;
+  /** Test seam: override directory for synthesis templates (default resolved via import.meta.url) */
+  templateDir?: string;
 }
 
 /** Directories under .cleargate/ that are excluded from ingest per §10.3. */
@@ -59,6 +61,7 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const gitRunner = opts.gitRunner;
   const rename = opts.rename ?? fs.renameSync;
+  const templateDir = opts.templateDir;
 
   const rawPath = opts.rawPath;
 
@@ -200,7 +203,7 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   updateIndex(wikiRoot, { id, type, status: wikiPage.status, relRawPath, rename });
 
   // Step 8: Recompile affected synthesis pages (all four — M3 over-recompiles)
-  recompileSynthesis(wikiRoot, cwd);
+  recompileSynthesis(wikiRoot, cwd, templateDir);
 
   // Step 9: Print result
   stdout(`wiki ingest: ${action} ${bucket}/${id}.md\n`);
@@ -459,7 +462,7 @@ function buildMinimalIndex(id: string, type: string, status: string, relRawPath:
   return lines.join('\n');
 }
 
-function recompileSynthesis(wikiRoot: string, cwd: string): void {
+function recompileSynthesis(wikiRoot: string, cwd: string, templateDir?: string): void {
   // Recompile all four synthesis pages
   // Gather current state from wiki pages to pass to recipes
   const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
@@ -472,8 +475,8 @@ function recompileSynthesis(wikiRoot: string, cwd: string): void {
     }
   }
 
-  fs.writeFileSync(path.join(wikiRoot, 'active-sprint.md'), compileActiveSprint(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'open-gates.md'), compileOpenGates(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'product-state.md'), compileProductState(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'roadmap.md'), compileRoadmap(items), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'active-sprint.md'), compileActiveSprint(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'open-gates.md'), compileOpenGates(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'product-state.md'), compileProductState(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'roadmap.md'), compileRoadmap(items, templateDir), 'utf8');
 }

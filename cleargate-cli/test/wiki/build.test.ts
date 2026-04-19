@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as url from 'node:url';
 import * as crypto from 'node:crypto';
 import { wikiBuildHandler } from '../../src/commands/wiki-build.js';
 import { parseFrontmatter } from '../../src/wiki/parse-frontmatter.js';
@@ -17,12 +18,22 @@ import {
   storyContent,
   sprintContent,
   proposalContent,
+  ambiguousStoryContent,
+  readyItemContent,
+  activeSprintContent,
+  completedSprintContent,
   type Fixture,
 } from './_fixture.js';
 
 // ─── Test seam helpers ────────────────────────────────────────────────────────
 
 const FROZEN_NOW = '2026-04-19T12:00:00.000Z';
+
+// Resolve the templates directory from the cleargate-cli package root.
+// This seam ensures tests always find templates regardless of where vitest
+// resolves the source files (flashcard: #tsup #npm-publish #assets).
+const __testDirname = path.dirname(url.fileURLToPath(import.meta.url));
+const TEMPLATE_DIR = path.resolve(__testDirname, '../../templates/synthesis');
 
 function makeOpts(fixture: Fixture, overrides: Parameters<typeof wikiBuildHandler>[0] = {}) {
   const out: string[] = [];
@@ -39,6 +50,7 @@ function makeOpts(fixture: Fixture, overrides: Parameters<typeof wikiBuildHandle
         exitCode = c;
         throw new Error(`EXIT:${c}`);
       },
+      templateDir: TEMPLATE_DIR,
       ...overrides,
     },
     get stdout() { return out.join(''); },
@@ -551,5 +563,232 @@ describe('Scenario 11: topics/ dir created but no pages written', () => {
     const topicsDir = path.join(fixture.wikiRoot, 'topics');
     const entries = fs.readdirSync(topicsDir);
     expect(entries).toHaveLength(0);
+  });
+});
+
+// ─── Scenario 12: STORY-002-09 — open-gates corpus-shape fix ─────────────────
+// Verifies the emoji-filter bug is fixed: filters now use textual statuses.
+
+describe('Scenario 12: open-gates synthesis — textual status filters (corpus-shape fix)', () => {
+  let fixture: Fixture;
+
+  beforeEach(() => {
+    fixture = buildFixture([
+      // Gate 1: proposal with approved: false and status Draft
+      { subdir: 'pending-sync', filename: 'PROPOSAL-001_Draft.md', content: proposalContent('PROPOSAL-001', 'Draft') },
+      // Gate 2: story with 🟡 Medium ambiguity
+      { subdir: 'pending-sync', filename: 'STORY-001-01_Ambiguous.md', content: ambiguousStoryContent('STORY-001-01', 'EPIC-001', '🟡 Medium') },
+      // Gate 3: epic with status Ready and empty remote_id
+      { subdir: 'pending-sync', filename: 'EPIC-001_Ready.md', content: readyItemContent('EPIC-001') },
+      // Normal item that should NOT appear in any gate
+      { subdir: 'archive', filename: 'STORY-002-01_Done.md', content: storyContent('STORY-002-01', 'EPIC-001', 'Completed') },
+    ]);
+  });
+
+  afterEach(() => fixture.cleanup());
+
+  it('open-gates.md lists Gate 1 proposal with Draft status', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'open-gates.md'), 'utf8');
+    expect(content).toContain('PROPOSAL-001');
+  });
+
+  it('open-gates.md lists Gate 2 story with medium ambiguity', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'open-gates.md'), 'utf8');
+    expect(content).toContain('STORY-001-01');
+  });
+
+  it('open-gates.md lists Gate 3 epic that is Ready but not pushed', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'open-gates.md'), 'utf8');
+    expect(content).toContain('EPIC-001');
+  });
+
+  it('open-gates.md does NOT list completed story', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'open-gates.md'), 'utf8');
+    expect(content).not.toContain('STORY-002-01');
+  });
+
+  it('open-gates.md is non-empty (catches the 🔴 emoji-filter regression)', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'open-gates.md'), 'utf8');
+    // Should have actual items, not just "No items" messages
+    const hasItems = content.includes('PROPOSAL-001') || content.includes('STORY-001-01') || content.includes('EPIC-001');
+    expect(hasItems).toBe(true);
+  });
+});
+
+// ─── Scenario 13: STORY-002-09 — active-sprint partitions by activated_at ────
+
+describe('Scenario 13: active-sprint synthesis — sprint partitions', () => {
+  let fixture: Fixture;
+
+  beforeEach(() => {
+    fixture = buildFixture([
+      // In-flight sprint (activated_at set, completed_at null)
+      { subdir: 'pending-sync', filename: 'SPRINT-04_Active.md', content: activeSprintContent('SPRINT-04') },
+      // Planned sprint (neither set)
+      { subdir: 'pending-sync', filename: 'SPRINT-05_Planned.md', content: sprintContent('SPRINT-05', 'Planned') },
+      // Completed sprint
+      { subdir: 'archive', filename: 'SPRINT-03_Done.md', content: completedSprintContent('SPRINT-03') },
+    ]);
+  });
+
+  afterEach(() => fixture.cleanup());
+
+  it('active-sprint.md lists SPRINT-04 in current sprint section', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'active-sprint.md'), 'utf8');
+    expect(content).toContain('SPRINT-04');
+  });
+
+  it('active-sprint.md lists SPRINT-05 in planned section', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'active-sprint.md'), 'utf8');
+    expect(content).toContain('SPRINT-05');
+  });
+
+  it('active-sprint.md lists SPRINT-03 in completed section', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'active-sprint.md'), 'utf8');
+    expect(content).toContain('SPRINT-03');
+  });
+});
+
+// ─── Scenario 14: STORY-002-09 — roadmap partitions by status ─────────────────
+
+describe('Scenario 14: roadmap synthesis — three-bucket split for sprints and epics', () => {
+  let fixture: Fixture;
+
+  beforeEach(() => {
+    fixture = buildFixture([
+      { subdir: 'pending-sync', filename: 'SPRINT-04_Inflight.md', content: activeSprintContent('SPRINT-04') },
+      { subdir: 'pending-sync', filename: 'SPRINT-05_Planned.md', content: sprintContent('SPRINT-05', 'Planned') },
+      { subdir: 'archive', filename: 'SPRINT-03_Done.md', content: completedSprintContent('SPRINT-03') },
+      { subdir: 'pending-sync', filename: 'EPIC-002_Active.md', content: epicContent('EPIC-002', 'Active') },
+      { subdir: 'pending-sync', filename: 'EPIC-003_Ready.md', content: epicContent('EPIC-003', 'Ready') },
+      { subdir: 'archive', filename: 'EPIC-001_Done.md', content: epicContent('EPIC-001', 'Completed') },
+    ]);
+  });
+
+  afterEach(() => fixture.cleanup());
+
+  it('roadmap.md contains in-flight SPRINT-04', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('SPRINT-04');
+  });
+
+  it('roadmap.md contains planned SPRINT-05', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('SPRINT-05');
+  });
+
+  it('roadmap.md contains shipped SPRINT-03', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('SPRINT-03');
+  });
+
+  it('roadmap.md contains active epic EPIC-002', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('EPIC-002');
+  });
+
+  it('roadmap.md contains planned epic EPIC-003', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('EPIC-003');
+  });
+
+  it('roadmap.md contains shipped epic EPIC-001', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'roadmap.md'), 'utf8');
+    expect(content).toContain('EPIC-001');
+  });
+});
+
+// ─── Scenario 15: STORY-002-09 — product-state counts and lists ──────────────
+
+describe('Scenario 15: product-state synthesis — counts and shipped items', () => {
+  let fixture: Fixture;
+
+  beforeEach(() => {
+    fixture = buildFixture([
+      { subdir: 'pending-sync', filename: 'EPIC-001_Active.md', content: epicContent('EPIC-001', 'Active') },
+      { subdir: 'pending-sync', filename: 'EPIC-002_Planned.md', content: epicContent('EPIC-002', 'Ready') },
+      { subdir: 'archive', filename: 'EPIC-003_Done.md', content: epicContent('EPIC-003', 'Completed') },
+      { subdir: 'pending-sync', filename: 'STORY-001-01_Draft.md', content: storyContent('STORY-001-01', 'EPIC-001', 'Draft') },
+      { subdir: 'archive', filename: 'STORY-002-01_Done.md', content: storyContent('STORY-002-01', 'EPIC-001', 'Completed') },
+      { subdir: 'pending-sync', filename: 'SPRINT-04_Active.md', content: activeSprintContent('SPRINT-04') },
+    ]);
+  });
+
+  afterEach(() => fixture.cleanup());
+
+  it('product-state.md lists active epic EPIC-001', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'product-state.md'), 'utf8');
+    expect(content).toContain('EPIC-001');
+  });
+
+  it('product-state.md lists shipped item EPIC-003 in shipped section', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'product-state.md'), 'utf8');
+    expect(content).toContain('EPIC-003');
+  });
+
+  it('product-state.md shows correct epic total', async () => {
+    await runBuild(fixture);
+    const content = fs.readFileSync(path.join(fixture.wikiRoot, 'product-state.md'), 'utf8');
+    // 3 epics total
+    expect(content).toContain('| Epics | 3 |');
+  });
+});
+
+// ─── Scenario 16: STORY-002-09 — renderTemplate unit tests ──────────────────
+
+import { renderTemplate } from '../../src/wiki/synthesis/render.js';
+
+describe('Scenario 16: renderTemplate unit tests', () => {
+  it('substitutes {{var}} with value from data', () => {
+    const result = renderTemplate('Hello {{name}}!', { name: 'World' });
+    expect(result).toBe('Hello World!');
+  });
+
+  it('missing variable renders empty string', () => {
+    const result = renderTemplate('{{missing}}', {});
+    expect(result).toBe('');
+  });
+
+  it('{{#arr}}{{id}}{{/arr}} iterates array', () => {
+    const result = renderTemplate('{{#items}}{{id}},{{/items}}', {
+      items: [{ id: 'A' }, { id: 'B' }, { id: 'C' }],
+    });
+    expect(result).toBe('A,B,C,');
+  });
+
+  it('{{#arr}}...{{/arr}} with empty array produces empty string', () => {
+    const result = renderTemplate('{{#items}}{{id}}{{/items}}', { items: [] });
+    expect(result).toBe('');
+  });
+
+  it('{{#arr}}...{{/arr}} with single item renders once', () => {
+    const result = renderTemplate('{{#items}}{{id}}{{/items}}', { items: [{ id: 'X' }] });
+    expect(result).toBe('X');
+  });
+
+  it('unsupported tag type throws error', () => {
+    expect(() => renderTemplate('{{>partial}}', {})).toThrow();
+  });
+
+  it('same input produces identical output (determinism)', () => {
+    const tpl = '# Header\n{{#items}}- {{id}}\n{{/items}}';
+    const data = { items: [{ id: 'A' }, { id: 'B' }] };
+    expect(renderTemplate(tpl, data)).toBe(renderTemplate(tpl, data));
   });
 });

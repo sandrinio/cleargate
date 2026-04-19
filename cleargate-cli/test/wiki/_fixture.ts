@@ -111,3 +111,68 @@ approved: false
 A test proposal for unit testing.
 `;
 }
+
+/** A story with elevated ambiguity (gate-2 candidate) */
+export function ambiguousStoryContent(id: string, epicRef: string, ambiguity = '🟡 Medium'): string {
+  return `---
+story_id: "${id}"
+parent_epic_ref: "${epicRef}"
+status: "Draft"
+remote_id: ""
+ambiguity: "${ambiguity}"
+---
+
+# ${id}: Ambiguous Story
+
+A story with elevated ambiguity awaiting Gate 2 clearance.
+`;
+}
+
+/** An item with status: Ready and empty remote_id (gate-3 candidate) */
+export function readyItemContent(id: string, bucket = 'EPIC'): string {
+  return `---
+story_id: "${id}"
+parent_epic_ref: ""
+status: "Ready"
+remote_id: ""
+---
+
+# ${id}: Ready Item
+
+An item ready to push (Gate 3 candidate).
+`;
+}
+
+/** A sprint with activated_at set (in-flight) */
+export function activeSprintContent(id: string): string {
+  return `---
+sprint_id: "${id}"
+parent_epic_ref: ""
+status: "Active"
+remote_id: ""
+activated_at: "2026-04-01T00:00:00Z"
+completed_at: null
+---
+
+# ${id}: Active Sprint
+
+An in-flight sprint for testing.
+`;
+}
+
+/** A sprint with completed_at set (shipped) */
+export function completedSprintContent(id: string): string {
+  return `---
+sprint_id: "${id}"
+parent_epic_ref: ""
+status: "Completed"
+remote_id: ""
+activated_at: "2026-03-01T00:00:00Z"
+completed_at: "2026-03-31T00:00:00Z"
+---
+
+# ${id}: Completed Sprint
+
+A shipped sprint for testing.
+`;
+}

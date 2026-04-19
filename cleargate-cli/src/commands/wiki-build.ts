@@ -21,6 +21,8 @@ export interface WikiBuildOptions {
   exit?: (code: number) => never;
   /** Test seam: forwarded to getGitSha */
   gitRunner?: GitRunner;
+  /** Test seam: override directory for synthesis templates (default resolved via import.meta.url) */
+  templateDir?: string;
 }
 
 const BUCKET_ORDER = ['epics', 'stories', 'sprints', 'proposals', 'crs', 'bugs', 'topics'] as const;
@@ -41,6 +43,7 @@ export async function wikiBuildHandler(opts: WikiBuildOptions = {}): Promise<voi
   const stderr = opts.stderr ?? ((s) => process.stderr.write(s));
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const gitRunner = opts.gitRunner;
+  const templateDir = opts.templateDir;
 
   const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
   const wikiRoot = path.join(cwd, '.cleargate', 'wiki');
@@ -100,10 +103,10 @@ export async function wikiBuildHandler(opts: WikiBuildOptions = {}): Promise<voi
   fs.writeFileSync(path.join(wikiRoot, 'log.md'), logContent, 'utf8');
 
   // Step 6: write synthesis pages
-  fs.writeFileSync(path.join(wikiRoot, 'active-sprint.md'), compileActiveSprint(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'open-gates.md'), compileOpenGates(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'product-state.md'), compileProductState(items), 'utf8');
-  fs.writeFileSync(path.join(wikiRoot, 'roadmap.md'), compileRoadmap(items), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'active-sprint.md'), compileActiveSprint(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'open-gates.md'), compileOpenGates(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'product-state.md'), compileProductState(items, templateDir), 'utf8');
+  fs.writeFileSync(path.join(wikiRoot, 'roadmap.md'), compileRoadmap(items, templateDir), 'utf8');
 
   // Step 7: report
   stdout(`wiki build: OK (${pagesWritten} pages written)\n`);

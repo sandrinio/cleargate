@@ -5,6 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as url from 'node:url';
 import { wikiIngestHandler } from '../../src/commands/wiki-ingest.js';
 import { wikiBuildHandler } from '../../src/commands/wiki-build.js';
 import { parsePage } from '../../src/wiki/page-schema.js';
@@ -15,6 +16,10 @@ import {
   sprintContent,
   type Fixture,
 } from './_fixture.js';
+
+// Resolve the templates directory from the cleargate-cli package root (test seam).
+const __testDirname = path.dirname(url.fileURLToPath(import.meta.url));
+const TEMPLATE_DIR = path.resolve(__testDirname, '../../templates/synthesis');
 
 // ─── Test seam helpers ────────────────────────────────────────────────────────
 
@@ -48,6 +53,7 @@ function makeIngestOpts(
         if (args[0] === 'log') return FAKE_SHA + '\n';
         return '\0__NONZERO__'; // sentinel for non-zero (content-changed path)
       },
+      templateDir: TEMPLATE_DIR,
       ...overrides,
     },
     get stdout() { return out.join(''); },
@@ -85,6 +91,7 @@ async function runBuild(fixture: Fixture) {
         if (args[0] === 'log') return FAKE_SHA + '\n';
         return '';
       },
+      templateDir: TEMPLATE_DIR,
     });
   } catch (e) {
     if (e instanceof Error && e.message.startsWith('EXIT:')) return { stdout: out.join(''), stderr: err.join('') };
