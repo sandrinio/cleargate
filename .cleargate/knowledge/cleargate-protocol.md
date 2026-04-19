@@ -345,3 +345,82 @@ Ingest reliability follows a three-level fallback:
 1. **PostToolUse hook (primary)** — fires automatically on every Write or Edit under `.cleargate/delivery/**`. No agent action required.
 2. **Protocol rule (secondary)** — when the hook is unavailable (e.g. non-Claude-Code environment), every agent that writes a raw delivery file must explicitly invoke the `cleargate-wiki-ingest` subagent before returning.
 3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 or Gate 3 and refuses to proceed until the page is up to date.
+
+---
+
+## 11. Document Metadata Lifecycle
+
+Every work item file managed by ClearGate carries timestamp and version fields that track when it was created, last modified, and last pushed to the remote PM tool. This section defines those fields, how they are populated, and when they are frozen.
+
+---
+
+### §11.1 Field Semantics
+
+| Field | Type | Description |
+|---|---|---|
+| `created_at` | ISO 8601 UTC string | Timestamp set once on first `cleargate stamp` invocation. Never updated after creation. |
+| `updated_at` | ISO 8601 UTC string | Timestamp updated on every `cleargate stamp` invocation that changes the file. Equal to `created_at` at creation time. |
+| `created_at_version` | string | Codebase version string at time of first stamp. See §11.3 for format. Never updated after creation. |
+| `updated_at_version` | string | Codebase version string at time of most recent stamp. Equal to `created_at_version` at creation time. |
+| `server_pushed_at_version` | string \| null | Codebase version string at the time this file was last successfully pushed via `cleargate_push_item`. `null` until the first push succeeds. Present on write-template files (epic/story/bug/CR/proposal) only. |
+
+---
+
+### §11.2 Stamp Invocation Rule
+
+After any Write or Edit operation on a file under `.cleargate/delivery/`, the author must invoke:
+
+```
+cleargate stamp <path>
+```
+
+This updates `updated_at` and `updated_at_version` in place. The `created_at` and `created_at_version` fields are set on the first invocation and are never overwritten thereafter.
+
+In Claude Code environments, a PostToolUse hook fires automatically on Write/Edit under `.cleargate/delivery/**` and calls `cleargate stamp` without any agent action (hook wiring is STORY-008-06 scope, M3). Until that hook is active, every agent that writes a delivery file must call `cleargate stamp` explicitly before returning.
+
+---
+
+### §11.3 Dirty-SHA Convention
+
+The version string embedded in `created_at_version` and `updated_at_version` is produced by `getCodebaseVersion()` (STORY-001-03). Its format follows this precedence:
+
+1. If inside a git repo and `git status --porcelain` is non-empty (uncommitted changes present): `<short-sha>-dirty` (e.g. `a3f2e91-dirty`).
+2. If inside a git repo and the working tree is clean: `<short-sha>` (e.g. `a3f2e91`), where `<short-sha>` is the 7-character output of `git rev-parse --short HEAD`.
+3. If no git repo is present but a `package.json` is found in an ancestor directory: the `version` field value from that file (e.g. `1.4.2`).
+4. If neither is available: the literal string `"unknown"`, and a warning is emitted to stderr.
+
+The `-dirty` suffix signals that the version string was captured from a working tree with uncommitted changes. Consumers comparing version strings must treat `a3f2e91-dirty` and `a3f2e91` as belonging to the same base commit but different workspace states.
+
+---
+
+### §11.4 Archive Immutability
+
+Files that have been moved to `.cleargate/delivery/archive/` are frozen. `cleargate stamp` is a no-op on any path matching `.cleargate/delivery/archive/`. No fields are written, no file bytes change.
+
+Rationale: archived files represent the accepted state at push time. Retroactively updating their timestamps would break the audit trail used by the wiki lint stale-detection check (§11.6).
+
+---
+
+### §11.5 Git-Absent Fallback
+
+When `cleargate stamp` runs outside a git repository (e.g. a freshly unzipped scaffold before `git init`), the version resolution falls back in order:
+
+1. Walk up from the current working directory looking for a `package.json`. If found, use its `version` field as the version string.
+2. If no `package.json` ancestor exists, use the literal string `"unknown"` and emit a warning to stderr: `"cleargate stamp: cannot determine codebase version — no git repo or package.json found"`.
+
+The `"unknown"` value is valid frontmatter; downstream consumers (stamp, lint, wiki-ingest) must accept it without error.
+
+---
+
+### §11.6 Stale Detection Threshold
+
+A wiki page for a work item is considered **stale** when the following condition holds:
+
+> The number of merge commits in `git log --merges <updated_at_version>..HEAD -- <raw_path>` is ≥ 1.
+
+That is: if at least one merge commit has landed on the default branch since the file was last stamped, the wiki page is out of date and `cleargate wiki lint` reports a stale-detection violation.
+
+Implementation notes:
+- `updated_at_version` must be a resolvable git ref (short SHA or tag). If the value is `"unknown"` or `"strategy-phase-pre-init"`, lint skips the stale check for that file and emits a warning rather than an error.
+- The `-dirty` suffix is stripped before resolving the ref: `a3f2e91-dirty` → `a3f2e91`.
+- This check is consumed by `cleargate wiki lint` (STORY-008-07) and the wiki-ingest subagent's idempotency evaluation (§10.7).
