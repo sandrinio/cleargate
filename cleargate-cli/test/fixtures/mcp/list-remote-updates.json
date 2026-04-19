@@ -1,0 +1,16 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "[{\"remote_id\":\"LIN-1001\",\"updated_at\":\"2026-04-19T14:00:00Z\"},{\"remote_id\":\"LIN-1002\",\"updated_at\":\"2026-04-19T15:00:00Z\"}]"
+      }
+    ],
+    "structuredContent": [
+      { "remote_id": "LIN-1001", "updated_at": "2026-04-19T14:00:00Z" },
+      { "remote_id": "LIN-1002", "updated_at": "2026-04-19T15:00:00Z" }
+    ]
+  }
+}

@@ -25,6 +25,7 @@ export const R014 = 'sync-attribution-missing' as const;
 export type SyncLogOp =
   | 'push'
   | 'pull'
+  | 'pull-intake'    // STORY-010-05: stakeholder proposal intake
   | 'push-revert'
   | 'sync-status'
   | 'conflict-remote-wins'

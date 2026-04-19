@@ -35,6 +35,8 @@ last_pulled_by: null       # STORY-010-04 writer / STORY-010-03 reader
 last_pulled_at: null       # STORY-010-04 writer / STORY-010-03 reader
 last_remote_update: null   # STORY-010-02 writer (from MCP) / STORY-010-03 reader
 source: "local-authored"   # STORY-010-05 flips to "remote-authored" on intake
+last_synced_status: null   # STORY-010-04 writer; required for conflict-detector rule 6
+last_synced_body_sha: null # STORY-010-04 writer; sha256 of body at last sync
 PROPOSAL-{ID}: {Initiative Name}
 1. Initiative & Context
 1.1 Objective

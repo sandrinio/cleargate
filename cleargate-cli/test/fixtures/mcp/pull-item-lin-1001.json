@@ -1,0 +1,23 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"remote_id\":\"LIN-1001\",\"title\":\"Story 001\",\"body\":\"Remote body for LIN-1001\",\"status\":\"in-progress\",\"assignees\":[],\"labels\":[],\"updated_at\":\"2026-04-19T14:00:00Z\",\"source_tool\":\"linear\",\"raw\":{}}"
+      }
+    ],
+    "structuredContent": {
+      "remote_id": "LIN-1001",
+      "title": "Story 001",
+      "body": "Remote body for LIN-1001",
+      "status": "in-progress",
+      "assignees": [],
+      "labels": [],
+      "updated_at": "2026-04-19T14:00:00Z",
+      "source_tool": "linear",
+      "raw": {}
+    }
+  }
+}

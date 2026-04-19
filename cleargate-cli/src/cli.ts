@@ -13,6 +13,10 @@ import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
 import { upgradeHandler } from './commands/upgrade.js';
 import { uninstallHandler } from './commands/uninstall.js';
+import { syncHandler } from './commands/sync.js';
+import { pullHandler } from './commands/pull.js';
+import { conflictsHandler } from './commands/conflicts.js';
+import { syncLogHandler } from './commands/sync-log.js';
 
 const program = new Command();
 
@@ -229,6 +233,45 @@ program
       yes: opts.yes,
       path: opts.path,
       force: opts.force,
+    });
+  });
+
+program
+  .command('sync')
+  .description('pull remote updates, resolve conflicts, push local changes')
+  .option('--dry-run', 'print plan without making any changes or sync-log entries')
+  .action(async (opts: { dryRun?: boolean }) => {
+    await syncHandler({ dryRun: opts.dryRun ?? false });
+  });
+
+program
+  .command('pull <id-or-remote-id>')
+  .description('pull a single item from the remote PM tool by local ID or remote_id')
+  .option('--comments', 'also pull comments for this item (STORY-010-06; not yet implemented)')
+  .action(async (idOrRemoteId: string, opts: { comments?: boolean }) => {
+    await pullHandler(idOrRemoteId, { comments: opts.comments });
+  });
+
+program
+  .command('conflicts')
+  .description('list unresolved sync conflicts from .cleargate/.conflicts.json')
+  .action(async () => {
+    await conflictsHandler();
+  });
+
+program
+  .command('sync-log')
+  .description('filter and print sync-log entries')
+  .option('--actor <email>', 'filter by actor email')
+  .option('--op <op>', 'filter by operation (push|pull|pull-intake|...)')
+  .option('--target <id>', 'filter by target work item ID')
+  .option('--limit <n>', 'maximum number of entries to show (default 50)', '50')
+  .action(async (opts: { actor?: string; op?: string; target?: string; limit?: string }) => {
+    await syncLogHandler({
+      actor: opts.actor,
+      op: opts.op,
+      target: opts.target,
+      limit: opts.limit !== undefined ? parseInt(opts.limit, 10) : 50,
     });
   });
 
