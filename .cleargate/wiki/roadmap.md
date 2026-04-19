@@ -16,7 +16,7 @@ _No sprints currently in flight._
 Sprints not yet started (`activated_at` not set).
 
 
-- [[SPRINT-05]] — status: Planned
+- [[SPRINT-06]] — status: Planned
 
 
 
@@ -33,6 +33,8 @@ Sprints with `completed_at` set.
 
 - [[SPRINT-04]] — completed: 2026-04-19T05:30:00Z
 
+- [[SPRINT-05]] — completed: 2026-04-19T15:05:00Z
+
 
 
 ## Active Epics
@@ -48,6 +50,10 @@ _No active epics._
 - [[EPIC-001]] — status: Ready
 
 - [[EPIC-006]] — status: Ready
+
+- [[EPIC-008]] — status: Draft
+
+- [[EPIC-009]] — status: Draft
 
 
 

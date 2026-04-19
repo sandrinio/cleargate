@@ -6,8 +6,8 @@ children: []
 status: "Ready"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-006_Admin_UI.md"
-last_ingest: "2026-04-19T10:49:49.888Z"
-last_ingest_commit: "0679a23bcef759e5839ba588492b53f9cd5042a8"
+last_ingest: "2026-04-19T16:09:15.621Z"
+last_ingest_commit: "97d8be1dbf7926379be45440862e004a8ec6a730"
 repo: "planning"
 ---
 

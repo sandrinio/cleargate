@@ -1,0 +1,16 @@
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/TEST-999-smoke.md (TEST-999)
+Gate: story.ready-for-execution (enforcing)
+❌ parent-epic-ref-set: expected parent_epic_ref != "null", got undefined
+❌ implementation-files-declared: section 3 not found (body has 0 sections)
+❌ dod-declared: section 4 not found (body has 0 sections)
+❌ gherkin-present: 'Scenario:' not found in body
+wiki ingest: cannot determine bucket for /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/TEST-999-smoke.md: deriveBucket: cannot determine bucket for filename: TEST-999-smoke.md
+[2026-04-19T14:43:17Z] stamp=0 gate=1 ingest=1 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/TEST-999-smoke.md
+[stamp-tokens] error: cannot determine work_item_id from frontmatter or filename: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-05_ClearGate_Process_Refinement.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-05_ClearGate_Process_Refinement.md
+wiki ingest: update sprints/SPRINT-05.md
+[2026-04-19T16:05:49Z] stamp=1 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-05_ClearGate_Process_Refinement.md
+[stamp-tokens] error: cannot determine work_item_id from frontmatter or filename: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md
+wiki ingest: cannot determine bucket for /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md: deriveBucket: cannot determine bucket for filename: INDEX.md
+[2026-04-19T16:09:01Z] stamp=1 gate=1 ingest=1 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md

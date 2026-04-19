@@ -1,5 +1,5 @@
 ---
-sprint_id: "SPRINT-05"
+sprint_id: "SPRINT-06"
 remote_id: null
 source_tool: "local"
 status: "Planned"
@@ -11,12 +11,12 @@ synced_at: null
 created_at: "2026-04-18T18:00:00Z"
 updated_at: "2026-04-19T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-deferred_from: "SPRINT-04"
-deferred_reason: "EPIC-002 Knowledge Wiki prioritized into SPRINT-04 (no admin-UI deadline; wiki unblocks session-start awareness immediately)"
+updated_at_version: "post-SPRINT-04"
+deferred_from: ["SPRINT-04", "SPRINT-05"]
+deferred_reason: "First deferred SPRINT-04→SPRINT-05 for EPIC-002 Knowledge Wiki. Deferred SPRINT-05→SPRINT-06 on 2026-04-19 to ship the process-refinement trifecta (EPIC-001 + EPIC-008 + EPIC-009) first — auto-stamped frontmatter, cost visibility, and machine-checked readiness gates pay off immediately for the larger Admin UI sprint."
 ---
 
-# SPRINT-05: Admin UI (SvelteKit + DaisyUI + GitHub OAuth)
+# SPRINT-06: Admin UI (SvelteKit + DaisyUI + GitHub OAuth)
 
 ## Sprint Goal
 
@@ -160,6 +160,6 @@ One commit per Story = 12 commits. Tests must pass before each commit. Setup com
 
 ### Next Sprint Preview
 
-**SPRINT-05** = EPIC-001 (Document Metadata Lifecycle) — 6 Stories. `cleargate stamp` CLI + `stamp-frontmatter` helper + `codebase-version` helper + MCP push-time `server_pushed_at_version` + Protocol §11. After SPRINT-05, Sponsored-doc hooks carry frontmatter through the full Plan → Execute → Deliver loop.
+**SPRINT-07+** candidates: PROP-007 Multi-Participant MCP Sync (still in wait-and-observe per Q10 — earliest 2026-07); wiki federation (v1.1); PM adapters (v1.1). EPIC-001 + EPIC-008 + EPIC-009 shipped in SPRINT-05 (ClearGate Process Refinement trifecta).
 
 **SPRINT-06** = EPIC-002 (Knowledge Wiki Layer) — 9 Stories. `wiki-ingest` / `wiki-query` / `wiki-lint` subagents + `cleargate wiki {build,ingest,lint}` CLI + init-writes-PostToolUse-hook + synthesis templates + Protocol §10.
