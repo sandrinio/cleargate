@@ -10,6 +10,7 @@ import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
+import { stampTokensHandler } from './commands/stamp-tokens.js';
 
 const program = new Command();
 
@@ -126,6 +127,14 @@ gate
   .description('render cached gate result in ≤50 agent tokens (read-only)')
   .action(async (file: string) => {
     await gateExplainHandler(file);
+  });
+
+program
+  .command('stamp-tokens <file>')
+  .description('stamp draft_tokens from token-ledger into a work-item file (hook-invoked)')
+  .option('--dry-run', 'print planned changes without writing')
+  .action(async (file: string, opts: { dryRun?: boolean }) => {
+    await stampTokensHandler(file, { dryRun: opts.dryRun });
   });
 
 program
