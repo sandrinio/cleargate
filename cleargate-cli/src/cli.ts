@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { stubHandler } from './commands/_stub.js';
 import { joinHandler } from './commands/join.js';
+import { stampHandler } from './commands/stamp.js';
 import { initHandler } from './commands/init.js';
 import { wikiBuildHandler } from './commands/wiki-build.js';
 import { wikiIngestHandler } from './commands/wiki-ingest.js';
@@ -45,9 +46,12 @@ program
   .action(stubHandler('whoami'));
 
 program
-  .command('stamp')
-  .description('stamp a delivery artifact into the MCP server')
-  .action(stubHandler('stamp'));
+  .command('stamp <file>')
+  .description('stamp ClearGate metadata fields into a file\'s frontmatter')
+  .option('--dry-run', 'print planned changes without writing')
+  .action(async (file: string, opts: { dryRun?: boolean }) => {
+    await stampHandler(file, { dryRun: opts.dryRun });
+  });
 
 const wiki = program
   .command('wiki')
