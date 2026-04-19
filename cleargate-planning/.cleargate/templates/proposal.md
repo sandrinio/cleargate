@@ -12,6 +12,11 @@ CRITICAL PHASE GATE: Do NOT generate Epics or Stories, and do NOT invoke clearga
 Do NOT output these instructions. </instructions>
 
 proposal_id: "PROP-{ID}" status: "Draft / In Review / Approved" author: "{AI Agent / Vibe Coder}" approved: false
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
+server_pushed_at_version: null
 PROPOSAL-{ID}: {Initiative Name}
 1. Initiative & Context
 1.1 Objective

@@ -19,6 +19,11 @@ status: "Draft | Triaged | In Fix | Verified"
 severity: "P0-Critical | P1-High | P2-Medium | P3-Low"
 reporter: "{name}"
 approved: false
+created_at: "2026-04-17T00:00:00Z"
+updated_at: "2026-04-17T00:00:00Z"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
+server_pushed_at_version: null
 ---
 
 # BUG-{ID}: {Bug Name}
