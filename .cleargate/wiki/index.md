@@ -116,6 +116,7 @@
 | [[PROPOSAL-007]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md |
 
 ## CRs
+| [[CR-001]] | cr | Draft | .cleargate/delivery/pending-sync/CR-001_Flashcard_Triggers_And_Cleanup.md |
 
 _No items._
 

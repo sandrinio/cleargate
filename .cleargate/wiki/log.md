@@ -490,3 +490,8 @@
   action: "create"
   target: "STORY-009-08"
   path: ".cleargate/delivery/archive/STORY-009-08_Protocol_Section_13.md"
+- timestamp: "2026-04-19T18:23:32.125Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-001"
+  path: ".cleargate/delivery/pending-sync/CR-001_Flashcard_Triggers_And_Cleanup.md"

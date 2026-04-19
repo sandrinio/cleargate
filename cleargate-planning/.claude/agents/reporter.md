@@ -29,6 +29,12 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/REPORT.md`. It must serve 
 3. **Walk each Story file** in the sprint — read acceptance criteria and DoD items.
 4. **Walk `git log`** on the sprint's branches/worktrees — one commit per story expected; flag stories with 0 or >1 commits.
 5. **Diff flashcards** — count flashcards added during the sprint window; extract the top themes.
+5b. **Flashcard audit (cleanup pass).** For each card in `.cleargate/FLASHCARD.md` without a status marker (`[S]` or `[R]` — see flashcard SKILL.md Rule 7), extract concrete referenced symbols from the lesson body:
+    - file paths (regex: `\S+\.(ts|md|sh|py|sql|json|yaml|toml)`)
+    - identifier candidates (CamelCase ≥4 chars OR `snake_case_with_≥2_underscores`)
+    - CLI flags (regex: `--[a-z][a-z0-9-]+`)
+    - env-var candidates (regex: `[A-Z][A-Z0-9_]{3,}`)
+    For each extracted symbol, `Grep` the repo (excluding `.cleargate/FLASHCARD.md` itself and sprint-runs/*). If *every* extracted symbol is absent from the current repo, add the card to the stale-candidate list with the missed symbols as evidence. If a card has zero extractable symbols, skip it (unflaggable — leave active). Do NOT modify FLASHCARD.md. Output belongs in the report under "Flashcard audit"; a human approves the batch and applies markers separately.
 6. **Synthesize** the report in this structure:
 
 ```markdown
@@ -85,6 +91,15 @@ For each shipped story, one compact block:
 
 ### What the loop got wrong
 3-5 bullets — blockers, repeated mistakes, plan misses, QA kickback patterns. Each bullet points at a **concrete loop improvement** (flashcard, agent-definition tweak, hook adjustment, sprint-plan template change).
+
+### Flashcard audit
+Candidates for `[S]` (stale) marker — referenced symbols no longer present in the repo. Human approves the batch before markers are applied.
+
+| Card (date · lead-tag · lesson head) | Evidence (symbols not found) | Proposed marker |
+|---|---|---|
+| 2026-02-15 · #tsup · tsup single-bundle... | `tsup.config.ts`, `--bundle` | `[S]` |
+
+If zero candidates: state "No stale flashcards detected." If there are candidate supersede pairs (a newer card whose lesson directly contradicts an older card's advice), list them under a "Supersede candidates" sub-table with the proposed `[R] → superseded-by <short-ref>` marker for the older card.
 
 ### Open follow-ups
 Things deliberately deferred, with target sprint.

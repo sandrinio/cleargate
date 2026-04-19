@@ -14,3 +14,13 @@ wiki ingest: update sprints/SPRINT-05.md
 [cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md
 wiki ingest: cannot determine bucket for /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md: deriveBucket: cannot determine bucket for filename: INDEX.md
 [2026-04-19T16:09:01Z] stamp=1 gate=1 ingest=1 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/INDEX.md
+[stamped] /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-001-Resume_Landing_Page.md (PROP-001)
+Gate: proposal.ready-for-decomposition (advisory)
+✅ proposal.ready-for-decomposition passed (3 criteria)
+wiki ingest: /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-001-Resume_Landing_Page.md not under .cleargate/delivery/
+[2026-04-19T17:53:00Z] stamp=0 gate=0 ingest=2 file=/Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-001-Resume_Landing_Page.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-001_Flashcard_Triggers_And_Cleanup.md (CR-001)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: create crs/CR-001.md
+[2026-04-19T18:23:31Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-001_Flashcard_Triggers_And_Cleanup.md
