@@ -50,6 +50,60 @@ Re-running `cleargate init` is idempotent — updates the bounded block in place
 
 ## How it works
 
+```mermaid
+flowchart LR
+    Idea(["Vibe Coder<br/>'let's add X'"])
+
+    subgraph PLAN [Plan]
+        direction TB
+        P["Proposal<br/>(Gate 1)"]
+        E["Epic<br/>(Gate 2)"]
+        S["Story<br/>(Gate 2)"]
+        SP["Sprint"]
+        P -->|approved: true| E
+        E -->|ambiguity 🟢| S
+        S --> SP
+    end
+
+    subgraph EXECUTE [Execute — four-agent loop]
+        direction TB
+        A["Architect<br/>plans milestone"]
+        D["Developer<br/>codes / tests / commits"]
+        Q["QA<br/>independent verify"]
+        R["Reporter<br/>sprint retro"]
+        A --> D
+        D --> Q
+        Q -.kickback.-> D
+        Q -->|pass| R
+    end
+
+    subgraph DELIVER [Deliver]
+        direction TB
+        G3{"Gate 3<br/>push to PM?"}
+        MCP["cleargate_push_item<br/>→ Linear / Jira / GitHub"]
+        AR[("delivery/archive/<br/>+ remote_id")]
+        G3 -->|yes| MCP
+        MCP --> AR
+    end
+
+    W[(".cleargate/wiki/<br/>Karpathy awareness<br/>~3k tokens read at every<br/>session start")]
+
+    Idea --> P
+    SP --> A
+    R --> G3
+    P -.PostToolUse hook.-> W
+    S -.PostToolUse hook.-> W
+    AR -.PostToolUse hook.-> W
+    W -.session-start read.-> Idea
+
+    classDef gate fill:#fff3cd,stroke:#856404,color:#000
+    classDef agent fill:#d1ecf1,stroke:#0c5460,color:#000
+    classDef wiki fill:#e2e3e5,stroke:#383d41,color:#000
+    class P,E,S,G3 gate
+    class A,D,Q,R agent
+    class W wiki
+```
+
 **Plan → Execute → Deliver** is the three-phase loop:
 
 1. **Plan.** A vibe coder describes intent ("let's add OAuth"). Claude Code triages per the protocol, drafts a Proposal in `.cleargate/delivery/pending-sync/`, and halts at Gate 1 for human approval. Once approved, the Proposal decomposes into an Epic, then Stories. Each step has its own ambiguity gate; the AI cannot skip levels.
