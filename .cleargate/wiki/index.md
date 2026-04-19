@@ -75,6 +75,7 @@
 | [[STORY-006-09]] | story | Draft | .cleargate/delivery/pending-sync/STORY-006-09_Settings_Page.md |
 | [[STORY-006-10]] | story | Draft | .cleargate/delivery/pending-sync/STORY-006-10_Dockerfile_Coolify.md |
 | [[STORY-007-00]] | story | Completed | .cleargate/delivery/archive/STORY-007-00_Git_Remote_And_Initial_Push.md |
+| [[STORY-007-01]] | story | Completed | .cleargate/delivery/archive/STORY-007-01_GitHub_Metadata.md |
 
 ## Sprints
 
