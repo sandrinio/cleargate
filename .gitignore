@@ -21,6 +21,9 @@ Thumbs.db
 # Per-participant identity file — personal email, not team-shared
 /.cleargate/.participant.json
 
+# Sync drift marker — per-machine runtime state, not team-shared
+/.cleargate/.sync-marker.json
+
 # Comment snapshot cache — runtime-generated, not team-shared
 /.cleargate/.comments-cache/
 
