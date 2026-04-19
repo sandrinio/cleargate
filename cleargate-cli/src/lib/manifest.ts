@@ -44,6 +44,12 @@ export interface ManifestFile {
   cleargate_version: string;
   generated_at: string;
   files: ManifestEntry[];
+  /**
+   * Present only in `.cleargate/.install-manifest.json` (the install snapshot).
+   * Stamped by `cleargate init` as the FINAL step (STORY-009-03).
+   * Not present in the package-shipped MANIFEST.json.
+   */
+  installed_at?: string;
 }
 
 export interface DriftMap {

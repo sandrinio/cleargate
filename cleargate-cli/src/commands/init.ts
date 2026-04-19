@@ -17,6 +17,8 @@ import { copyPayload } from '../init/copy-payload.js';
 import { mergeSettings, type SettingsJson } from '../init/merge-settings.js';
 import { injectClaudeMd, extractBlock } from '../init/inject-claude-md.js';
 import { wikiBuildHandler, type WikiBuildOptions } from './wiki-build.js';
+import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
+import { promptYesNo as defaultPromptYesNo } from '../lib/prompts.js';
 
 /** The PostToolUse hook config to merge — verbatim from M1 plan (STORY-002-05). */
 const HOOK_ADDITION: SettingsJson = {
@@ -53,6 +55,23 @@ export interface InitOptions {
   exit?: (code: number) => never;
   /** Test seam: runs wiki build (default: wikiBuildHandler) */
   runWikiBuild?: (opts: WikiBuildOptions) => Promise<void>;
+  /**
+   * Test seam: replaces the real Y/n prompt for restore flow.
+   * STORY-009-03: injectable so integration tests don't block on stdin.
+   */
+  promptYesNo?: (question: string, defaultYes: boolean) => Promise<boolean>;
+  /**
+   * Test seam: replaces loadPackageManifest() call for snapshot step.
+   * STORY-009-03: allows tests to supply a known ManifestFile without a real MANIFEST.json.
+   */
+  readInstallManifest?: () => ManifestFile;
+}
+
+/** Shape of the .cleargate/.uninstalled marker written by STORY-009-07 `uninstall`. */
+interface UninstalledMarker {
+  uninstalled_at: string;
+  prior_version: string;
+  preserved: string[];
 }
 
 /** Resolve default payloadDir from the installed package structure.
@@ -99,6 +118,7 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   const stderr = opts.stderr ?? ((s: string) => process.stderr.write(s));
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const runWikiBuild = opts.runWikiBuild ?? wikiBuildHandler;
+  const promptYesNoFn = opts.promptYesNo ?? defaultPromptYesNo;
 
   // Step 1: Validate cwd
   if (!fs.existsSync(cwd)) {
@@ -131,6 +151,50 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   }
 
   // Step 3: Copy scaffold payload
+  // Step 3.5 (pre-copy): Detect .uninstalled marker and prompt restore.
+  // Must run before any writes so the user sees the restore prompt first.
+  const uninstalledMarkerPath = path.join(cwd, '.cleargate', '.uninstalled');
+  let uninstalledMarker: UninstalledMarker | null = null;
+  let userChoseRestore = false;
+
+  if (fs.existsSync(uninstalledMarkerPath)) {
+    try {
+      const raw = fs.readFileSync(uninstalledMarkerPath, 'utf8');
+      uninstalledMarker = JSON.parse(raw) as UninstalledMarker;
+    } catch {
+      stderr(`[cleargate init] WARNING: .uninstalled marker is malformed; ignoring it.\n`);
+    }
+
+    if (uninstalledMarker !== null) {
+      const { uninstalled_at, prior_version, preserved } = uninstalledMarker;
+      const question =
+        `[cleargate init] Detected previous ClearGate install` +
+        ` (uninstalled ${uninstalled_at}, prior version ${prior_version}).` +
+        ` Restore preserved items? [Y/n]`;
+      userChoseRestore = await promptYesNoFn(question, true);
+
+      if (userChoseRestore) {
+        // Blind copy: just verify each preserved file still exists on disk
+        // (it was preserved as intended). Log status; never touch content.
+        for (const preservedPath of preserved) {
+          const absPreserved = path.isAbsolute(preservedPath)
+            ? preservedPath
+            : path.join(cwd, preservedPath);
+          if (fs.existsSync(absPreserved)) {
+            stdout(`[cleargate init] [preserved] ${preservedPath}\n`);
+          } else {
+            stdout(`[cleargate init] [warn] preserved path missing on disk: ${preservedPath}\n`);
+          }
+        }
+      } else {
+        stdout(
+          `[cleargate init] discarding preservation; preserved files untouched on disk\n`,
+        );
+      }
+      // Marker removal happens AFTER bootstrap (Step 6) completes — tracked below.
+    }
+  }
+
   const copyReport = copyPayload(payloadDir, cwd, { force });
   for (const action of copyReport.actions) {
     const verb =
@@ -196,7 +260,36 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     stdout(`[cleargate init] Bootstrap: no items to ingest, skipping build\n`);
   }
 
-  // Step 7: Done
+  // Step 7: Write install snapshot atomically to .cleargate/.install-manifest.json.
+  // Must be the FINAL step after all scaffold files are written (blueprint §1.2).
+  const cleargateDir = path.join(cwd, '.cleargate');
+  fs.mkdirSync(cleargateDir, { recursive: true });
+
+  const snapshotPath = path.join(cleargateDir, '.install-manifest.json');
+  try {
+    const readManifest = opts.readInstallManifest ?? (() => loadPackageManifest({ packageRoot: payloadDir }));
+    const pkgManifest = readManifest();
+    const snapshot: ManifestFile = {
+      ...pkgManifest,
+      installed_at: now(),
+    };
+    writeAtomic(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n');
+    stdout(`[cleargate init] Wrote install snapshot: .cleargate/.install-manifest.json\n`);
+  } catch (e) {
+    stderr(`[cleargate init] WARNING: could not write install snapshot: ${String(e)}\n`);
+  }
+
+  // Remove .uninstalled marker AFTER bootstrap + snapshot complete (whether user chose Y or N).
+  // This prevents repeated prompting on subsequent init runs.
+  if (uninstalledMarker !== null && fs.existsSync(uninstalledMarkerPath)) {
+    try {
+      fs.unlinkSync(uninstalledMarkerPath);
+    } catch (e) {
+      stderr(`[cleargate init] WARNING: could not remove .uninstalled marker: ${String(e)}\n`);
+    }
+  }
+
+  // Step 8: Done
   stdout(
     `[cleargate init] Done. Read CLAUDE.md and .cleargate/knowledge/cleargate-protocol.md to learn the protocol.\n`,
   );
