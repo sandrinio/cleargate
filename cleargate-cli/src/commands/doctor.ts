@@ -330,24 +330,33 @@ interface BlockedItem {
 }
 
 /**
- * Parse `cached_gate_result` from a raw frontmatter string (opaque object form).
- * Returns null if absent or pass is not exactly false.
+ * Coerce `cached_gate_result` into a typed shape.
+ * Accepts both the current native-object form (parseFrontmatter via js-yaml)
+ * and the legacy JSON-in-a-string form (pre-BUG-001 files).
  */
 function parseCachedGateResult(
-  raw: string
+  raw: unknown
 ): { pass: boolean | null; failing_criteria: Array<{ id: string }> } | null {
-  try {
-    const parsed = JSON.parse(raw) as {
-      pass?: boolean | null;
-      failing_criteria?: Array<{ id: string }>;
-    };
-    return {
-      pass: parsed.pass ?? null,
-      failing_criteria: parsed.failing_criteria ?? [],
-    };
-  } catch {
+  if (raw == null) return null;
+
+  let parsed: { pass?: boolean | null; failing_criteria?: Array<{ id: string }> } | null = null;
+
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
+    parsed = raw as { pass?: boolean | null; failing_criteria?: Array<{ id: string }> };
+  } else if (typeof raw === 'string') {
+    try {
+      parsed = JSON.parse(raw) as { pass?: boolean | null; failing_criteria?: Array<{ id: string }> };
+    } catch {
+      return null;
+    }
+  } else {
     return null;
   }
+
+  return {
+    pass: parsed.pass ?? null,
+    failing_criteria: parsed.failing_criteria ?? [],
+  };
 }
 
 export async function runSessionStart(
@@ -386,10 +395,7 @@ export async function runSessionStart(
       continue;
     }
 
-    const gateRaw = fm['cached_gate_result'];
-    if (typeof gateRaw !== 'string') continue;
-
-    const gate = parseCachedGateResult(gateRaw);
+    const gate = parseCachedGateResult(fm['cached_gate_result']);
     if (!gate || gate.pass !== false) continue;
 
     // Determine item ID from frontmatter
@@ -485,16 +491,24 @@ export async function runPricing(
   }
 
   const draftTokensRaw = fm['draft_tokens'];
-  if (!draftTokensRaw || typeof draftTokensRaw !== 'string') {
+  if (!draftTokensRaw) {
     stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
     exit(1);
     return;
   }
 
   let draftTokens: DraftTokensInput & { model: string | null };
-  try {
-    draftTokens = JSON.parse(draftTokensRaw) as DraftTokensInput & { model: string | null };
-  } catch {
+  if (typeof draftTokensRaw === 'object' && !Array.isArray(draftTokensRaw)) {
+    draftTokens = draftTokensRaw as DraftTokensInput & { model: string | null };
+  } else if (typeof draftTokensRaw === 'string') {
+    try {
+      draftTokens = JSON.parse(draftTokensRaw) as DraftTokensInput & { model: string | null };
+    } catch {
+      stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+      exit(1);
+      return;
+    }
+  } else {
     stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
     exit(1);
     return;

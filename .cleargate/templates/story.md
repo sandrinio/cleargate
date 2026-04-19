@@ -15,6 +15,16 @@ L2: Standard — 2-3 files, known pattern, ~2-4hr (default)
 L3: Complex — Cross-cutting, spike may be needed, ~1-2 days
 L4: Uncertain — Requires probing/spiking, >2 days
 
+Granularity Rubric (run this check BEFORE emitting a story during epic-decomposition):
+A candidate story is too big — emit two stories instead, with consecutive IDs (e.g. STORY-007-03 and STORY-007-04, never 03a/03b) — if ANY signal trips:
+  • §1.2 Detailed Requirements joins unrelated user goals with "and also" / "additionally".
+  • §2.1 Gherkin would need >5 scenarios covering unrelated behaviors.
+  • §3.1 Files-to-touch span unrelated subsystems (e.g. API + UI + migration in one story).
+  • Complexity would land at L4 (>2 days). L4 is a planning smell — split, or carve out a spike as its own story.
+Also split the inverse: two candidate stories that each touch the same 1-2 files with overlapping scenarios should merge into one L1/L2.
+At epic-decomposition time there are no remote IDs yet — splits and merges are free. Prefer two focused L1/L2 stories over one L3. Prefer L3 over L4.
+When the rubric is ambiguous, surface the decision to the human as a one-liner ("candidate covers A+B — split into X and Y?") rather than guessing.
+
 Do NOT output these instructions.
 </instructions>
 

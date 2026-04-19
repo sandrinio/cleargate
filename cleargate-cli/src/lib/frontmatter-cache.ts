@@ -3,6 +3,10 @@
  * Reuses the shared frontmatter serializer from frontmatter-yaml.ts.
  *
  * writeCachedGate is byte-identical on re-run with identical inputs (same now + same result).
+ *
+ * Post-BUG-001: cached_gate_result is stored as a native YAML mapping
+ * (parseFrontmatter returns it as an object). Legacy flow-style strings are
+ * still accepted on read for backwards-compat with old files.
  */
 
 import * as fs from 'node:fs/promises';
@@ -35,27 +39,7 @@ export async function readCachedGate(absPath: string): Promise<CachedGate | null
     return null;
   }
 
-  const cached = fm['cached_gate_result'];
-  if (cached === undefined || cached === null) return null;
-
-  // If stored as an opaque string (inline flow YAML), parse it via js-yaml
-  if (typeof cached === 'string') {
-    return parseCachedGateString(cached);
-  }
-
-  // If already parsed as object (future-proofing)
-  if (typeof cached === 'object' && !Array.isArray(cached)) {
-    const c = cached as Record<string, unknown>;
-    return {
-      pass: Boolean(c['pass']),
-      failing_criteria: Array.isArray(c['failing_criteria'])
-        ? (c['failing_criteria'] as { id: string; detail: string }[])
-        : [],
-      last_gate_check: String(c['last_gate_check'] ?? ''),
-    };
-  }
-
-  return null;
+  return coerceCachedGate(fm['cached_gate_result']);
 }
 
 /**
@@ -92,37 +76,24 @@ export async function writeCachedGate(
   }
 
   // Idempotency check: compare existing cached_gate_result
-  const existingCached = fm['cached_gate_result'];
-  if (existingCached !== undefined && existingCached !== null) {
-    try {
-      const existingParsed = typeof existingCached === 'string'
-        ? parseCachedGateString(existingCached)
-        : null;
-      if (existingParsed && JSON.stringify(existingParsed) === JSON.stringify(newResult)) {
-        // Byte-identical: skip write
-        return;
-      }
-    } catch {
-      // Fall through to write
-    }
+  const existing = coerceCachedGate(fm['cached_gate_result']);
+  if (existing && JSON.stringify(existing) === JSON.stringify(newResult)) {
+    return;
   }
-
-  // Serialize cached_gate_result as inline flow YAML (opaque string)
-  const cachedStr = serializeCachedGate(newResult);
 
   // Build new frontmatter: preserve all existing keys, inject/update cached_gate_result
   const newFm: Record<string, unknown> = {};
   let inserted = false;
   for (const [k, v] of Object.entries(fm)) {
     if (k === 'cached_gate_result') {
-      newFm['cached_gate_result'] = cachedStr;
+      newFm['cached_gate_result'] = newResult as unknown as Record<string, unknown>;
       inserted = true;
     } else {
       newFm[k] = v;
     }
   }
   if (!inserted) {
-    newFm['cached_gate_result'] = cachedStr;
+    newFm['cached_gate_result'] = newResult as unknown as Record<string, unknown>;
   }
 
   const fmBlock = serializeFrontmatter(newFm);
@@ -134,39 +105,41 @@ export async function writeCachedGate(
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
 /**
- * Serialize a CachedGate to a compact inline YAML flow string.
- * Stored as an opaque string value in frontmatter (parseFrontmatter treats `{` as opaque).
+ * Coerce a frontmatter value (native object or legacy flow-style string) into
+ * a CachedGate. Returns null if absent or unrecognizable.
  */
-function serializeCachedGate(result: CachedGate): string {
-  const criteriaStr = result.failing_criteria.length === 0
-    ? '[]'
-    : '[' +
-      result.failing_criteria
-        .map((c) => `{id: ${JSON.stringify(c.id)}, detail: ${JSON.stringify(c.detail)}}`)
-        .join(', ') +
-      ']';
+function coerceCachedGate(val: unknown): CachedGate | null {
+  if (val === undefined || val === null) return null;
 
-  return `{pass: ${result.pass}, failing_criteria: ${criteriaStr}, last_gate_check: ${JSON.stringify(result.last_gate_check)}}`;
-}
-
-/**
- * Parse an opaque cached_gate_result string back to CachedGate.
- * The string is inline flow YAML which we parse via js-yaml.
- */
-function parseCachedGateString(s: string): CachedGate | null {
-  if (!s.startsWith('{')) return null;
-  try {
-    const parsed = yaml.load(s);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
-    const p = parsed as Record<string, unknown>;
+  // Native object (current format)
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const c = val as Record<string, unknown>;
     return {
-      pass: Boolean(p['pass']),
-      failing_criteria: Array.isArray(p['failing_criteria'])
-        ? (p['failing_criteria'] as { id: string; detail: string }[])
+      pass: Boolean(c['pass']),
+      failing_criteria: Array.isArray(c['failing_criteria'])
+        ? (c['failing_criteria'] as { id: string; detail: string }[])
         : [],
-      last_gate_check: String(p['last_gate_check'] ?? ''),
+      last_gate_check: String(c['last_gate_check'] ?? ''),
     };
-  } catch {
-    return null;
   }
+
+  // Legacy flow-style string "{pass: true, ...}" — parse via js-yaml
+  if (typeof val === 'string' && val.startsWith('{')) {
+    try {
+      const parsed = yaml.load(val, { schema: yaml.CORE_SCHEMA });
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
+      const p = parsed as Record<string, unknown>;
+      return {
+        pass: Boolean(p['pass']),
+        failing_criteria: Array.isArray(p['failing_criteria'])
+          ? (p['failing_criteria'] as { id: string; detail: string }[])
+          : [],
+        last_gate_check: String(p['last_gate_check'] ?? ''),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }

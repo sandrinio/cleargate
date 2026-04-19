@@ -20,6 +20,7 @@ import { stampTokensHandler, aggregateBuckets } from '../../src/commands/stamp-t
 import type { StampTokensCliOptions } from '../../src/commands/stamp-tokens.js';
 import type { LedgerRow } from '../../src/lib/ledger-reader.js';
 import type { SessionBucket } from '../../src/lib/ledger-reader.js';
+import { parseFrontmatter } from '../../src/wiki/parse-frontmatter.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -142,10 +143,8 @@ status: Active
     const written = fs.readFileSync(filePath, 'utf-8');
     expect(written).toContain('draft_tokens:');
 
-    // Parse the draft_tokens value (stored as JSON string)
-    const match = written.match(/draft_tokens: (\{.*\})/);
-    expect(match).not.toBeNull();
-    const tokens = JSON.parse(match![1]) as { input: number; sessions: unknown[] };
+    const { fm } = parseFrontmatter(written);
+    const tokens = fm['draft_tokens'] as { input: number; sessions: unknown[] };
 
     // Then: draft_tokens.input > 0
     expect(tokens.input).toBeGreaterThan(0);
@@ -254,9 +253,8 @@ status: Draft
     const written = fs.readFileSync(filePath, 'utf-8');
 
     // Then: draft_tokens.input is null
-    const match = written.match(/draft_tokens: (\{.*\})/);
-    expect(match).not.toBeNull();
-    const tokens = JSON.parse(match![1]) as { input: null | number };
+    const { fm } = parseFrontmatter(written);
+    const tokens = fm['draft_tokens'] as { input: null | number };
     expect(tokens.input).toBeNull();
 
     // And: stamp_error names the missing work_item_id

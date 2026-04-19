@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.2.0",
-  "generated_at": "2026-04-19T16:46:17.751Z",
+  "cleargate_version": "0.2.1",
+  "generated_at": "2026-04-19T18:33:06.178Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -46,7 +46,7 @@
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "a83497454969e81015e7d0415e86a3bcf48cafb13741ed7f18b603f9e54cfb80",
+      "sha256": "a9b7e248fd1baaef7fb0c23d4ba92bc94bcd46e9261a6dabbd183477fab96359",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -81,7 +81,7 @@
     },
     {
       "path": ".claude/skills/flashcard/SKILL.md",
-      "sha256": "56d6bf3797516ac26ada15876ef2f4cf43842b3af7300abef502a75bd177639e",
+      "sha256": "4c0fe5bb74697e1eb1f37203ff44b8e6a800f024a2f8c3fc8542aa206cd2c777",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -151,7 +151,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "3e722c51f706177f08c16b56ef984090c7841102f70384bb47d5442846991fe8",
+      "sha256": "6c32fcabc9332cb928ac3b8fbfe618751b0a4cb05cd0f16463c3c4e22f8a67f1",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

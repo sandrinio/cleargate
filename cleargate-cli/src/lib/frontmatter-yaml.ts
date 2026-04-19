@@ -1,62 +1,40 @@
 /**
- * Shared frontmatter YAML serializer.
- * Extracted from stamp-frontmatter.ts so that frontmatter-cache.ts (STORY-008-02)
- * and stamp-tokens.ts (STORY-008-05) can reuse without duplication.
+ * Frontmatter YAML serializer backed by js-yaml with CORE_SCHEMA.
  *
- * Supported value types: string | null | boolean | number | string[] | opaque-object-string.
- * Preserves the given key order exactly.
+ * Emits a `---\n<yaml>\n---` block. Preserves key insertion order (JS
+ * objects iterate non-numeric keys in insertion order by spec, and js-yaml
+ * follows Object.keys), nested maps, arrays, and native scalar types.
+ *
+ * Partner of parse-frontmatter.ts — the two round-trip losslessly.
  */
+
+import yaml from 'js-yaml';
 
 /**
  * Serialize a frontmatter record to a YAML block (including the --- delimiters).
  * Key order is preserved as supplied.
  */
 export function serializeFrontmatter(fm: Record<string, unknown>): string {
-  const lines: string[] = ['---'];
-  for (const [key, val] of Object.entries(fm)) {
-    if (val === null) {
-      lines.push(`${key}: null`);
-    } else if (typeof val === 'boolean') {
-      lines.push(`${key}: ${val}`);
-    } else if (typeof val === 'number') {
-      lines.push(`${key}: ${val}`);
-    } else if (Array.isArray(val)) {
-      if (val.length === 0) {
-        lines.push(`${key}: []`);
-      } else {
-        const items = val.map((v) => `"${String(v)}"`).join(', ');
-        lines.push(`${key}: [${items}]`);
-      }
-    } else {
-      // string (possibly an opaque nested-object string like `{input: 100, ...}`)
-      const s = String(val);
-      // Opaque object strings (start with `{`) — emit verbatim, no extra quoting
-      if (s.startsWith('{')) {
-        lines.push(`${key}: ${s}`);
-      } else {
-        // Quote if the value looks like it needs quoting
-        const needsQuotes =
-          /[:#\[\]{}&*!|>'"%@`\n]/.test(s) ||
-          s.trim() !== s ||
-          s === '' ||
-          s === 'null' ||
-          s === 'true' ||
-          s === 'false';
-        if (needsQuotes) {
-          lines.push(`${key}: "${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
-        } else {
-          lines.push(`${key}: ${s}`);
-        }
-      }
-    }
+  // Empty object → emit a two-delimiter block with no body
+  if (Object.keys(fm).length === 0) {
+    return '---\n---';
   }
-  lines.push('---');
-  return lines.join('\n');
+
+  const yamlBody = yaml.dump(fm, {
+    schema: yaml.CORE_SCHEMA,
+    lineWidth: -1,
+    noRefs: true,
+    noCompatMode: true,
+    quotingType: '"',
+    forceQuotes: false,
+  });
+
+  // js-yaml always ends with \n; trim so we control the framing
+  return `---\n${yamlBody.replace(/\n+$/, '')}\n---`;
 }
 
 /**
  * Format a Date as ISO 8601 UTC with second precision: "YYYY-MM-DDTHH:MM:SSZ"
- * Matches stamp-frontmatter.ts toIsoSecond convention.
  */
 export function toIsoSecond(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z');

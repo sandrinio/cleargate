@@ -1,14 +1,16 @@
 # ClearGate Flashcards
 
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
-Format: `YYYY-MM-DD · #tags · lesson`
+Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
+Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
 ---
 
+2026-04-19 · #yaml #frontmatter · [R] superseded-by BUG-001-fix · parseFrontmatter must use js-yaml CORE_SCHEMA — hand-rolled parser flattened indented maps to top-level keys and stringified null/bool; roundtrip is now lossless and draft_tokens/cached_gate_result are native nested objects on disk.
 2026-04-19 · #reporting #hooks #ledger #subagent-attribution · SubagentStop hook fires on orchestrator session not subagents; all 25 SPRINT-05 rows tagged against orchestrator (EPIC-002 from session init). Reporter can't compute per-story cost until hook reaches subagent transcripts OR per-Task sentinel is written.
 2026-04-19 · #concurrency #agents #shared-main · parallel Developer agents on main share a working tree — one's uncommitted edits are transiently visible to another's `npm test` (001-05 only passed because 008-02's parse-frontmatter change landed first). Bias worktree isolation or serialize shared-file stories.
 2026-04-19 · #uninstall #rmdir #empty-check · checking if .cleargate/ is empty via readdirSync misses subdirs left by file deletion; use removeAll flag + preserved-path membership check instead of dir-content scan.
-2026-04-19 · #wiki #lint #yaml · parseFrontmatter stores nested YAML as opaque string when value starts with `{`; lint checks reading cached_gate_result must call yaml.load() on that string — block-YAML form in test fixtures will NOT parse correctly.
+2026-04-19 · #wiki #lint #yaml · [R] superseded-by BUG-001-fix · parseFrontmatter stores nested YAML as opaque string when value starts with `{`; lint checks reading cached_gate_result must call yaml.load() on that string — block-YAML form in test fixtures will NOT parse correctly.
 2026-04-19 · #hooks #init #settings · init.ts has its own HOOK_ADDITION constant (SPRINT-04 legacy); when scaffold settings.json is updated, init.ts must also be updated or tests fail with 2 PostToolUse inner-hooks.
 2026-04-19 · #schema #manifest #upgrade · ManifestEntry.overwrite_policy uses 'skip' not 'never'; story/plan prose says "never-policy" but the TS type is 'always'|'merge-3way'|'skip'|'preserve'.
 2026-04-19 · #cli #gate #transition-inference · gate check infers transition from cached_gate_result.pass: no cache or fail → first transition; pass + multi-transition (Epic) → next. Single-transition types always return their only transition regardless of pass state.

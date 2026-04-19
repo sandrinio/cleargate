@@ -290,11 +290,9 @@ describe('Scenario: Check passing Epic', () => {
 
     // Verify frontmatter was updated with cached_gate_result
     const { fm } = parseFrontmatter(readFileStr(absPath));
-    const cached = fm['cached_gate_result'];
+    const cached = fm['cached_gate_result'] as { pass: boolean };
     expect(cached).toBeTruthy();
-    // The value is stored as an opaque string starting with {
-    const cachedStr = String(cached);
-    expect(cachedStr).toContain('pass: true');
+    expect(cached.pass).toBe(true);
 
     // stdout should contain the ✅ pass indicator
     expect(out.some((l) => l.includes('\u2705'))).toBe(true);
@@ -333,9 +331,9 @@ describe('Scenario: Check failing Story (enforcing)', () => {
 
     // cached_gate_result.pass = false
     const { fm } = parseFrontmatter(readFileStr(absPath));
-    const cachedStr = String(fm['cached_gate_result']);
-    expect(cachedStr).toContain('pass: false');
-    expect(cachedStr).toContain('affected-files-verified');
+    const cached = fm['cached_gate_result'] as { pass: boolean; failing_criteria: { id: string }[] };
+    expect(cached.pass).toBe(false);
+    expect(cached.failing_criteria.some((c) => c.id === 'affected-files-verified')).toBe(true);
   });
 });
 
@@ -370,9 +368,9 @@ describe('Scenario: Check failing Proposal (advisory)', () => {
 
     // cached_gate_result.pass = false (recorded but not enforced)
     const { fm } = parseFrontmatter(readFileStr(absPath));
-    const cachedStr = String(fm['cached_gate_result']);
-    expect(cachedStr).toContain('pass: false');
-    expect(cachedStr).toContain('no-tbds');
+    const cached = fm['cached_gate_result'] as { pass: boolean; failing_criteria: { id: string }[] };
+    expect(cached.pass).toBe(false);
+    expect(cached.failing_criteria.some((c) => c.id === 'no-tbds')).toBe(true);
   });
 });
 

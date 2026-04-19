@@ -459,11 +459,22 @@ describe('Scenario 8: parse-frontmatter unit tests', () => {
     expect(() => parseFrontmatter('---\nkey: val\n')).toThrow('missing closing ---');
   });
 
-  it('nested YAML {} stored as opaque string (STORY-008-02)', () => {
-    // Per orchestrator decision: nested { values are stored as opaque strings
-    // instead of throwing, to unblock draft_tokens / cached_gate_result writes.
+  it('nested YAML parsed natively (post-BUG-001)', () => {
+    // Pre-fix: parser returned `{a: 1}` as an opaque string.
+    // Post-fix: js-yaml parses flow-style as a native object.
     const { fm } = parseFrontmatter('---\nkey: {a: 1}\n---\n');
-    expect(fm['key']).toBe('{a: 1}');
+    expect(fm['key']).toEqual({ a: 1 });
+  });
+
+  it('block-style nested map parsed as nested object (post-BUG-001)', () => {
+    const { fm } = parseFrontmatter('---\ndraft_tokens:\n  input: 100\n  output: 50\n  model: null\n---\n');
+    expect(fm['draft_tokens']).toEqual({ input: 100, output: 50, model: null });
+  });
+
+  it('boolean and null scalars keep their types (post-BUG-001)', () => {
+    const { fm } = parseFrontmatter('---\napproved: false\nref: null\n---\n');
+    expect(fm['approved']).toBe(false);
+    expect(fm['ref']).toBeNull();
   });
 });
 

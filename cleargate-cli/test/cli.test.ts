@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { describe, it, expect } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
+import { readFileSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,9 +50,12 @@ describe('cleargate CLI', () => {
   });
 
   describe('Scenario: Version flag', () => {
-    it('--version prints 0.1.0-alpha.1', () => {
+    it('--version prints the package.json version', () => {
+      const pkg = JSON.parse(
+        readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'),
+      ) as { version: string };
       const result = run(['--version']);
-      expect(result.stdout.trim()).toBe('0.1.0-alpha.1');
+      expect(result.stdout.trim()).toBe(pkg.version);
     });
   });
 

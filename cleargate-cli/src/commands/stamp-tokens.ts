@@ -110,8 +110,9 @@ export async function stampTokensHandler(
     return;
   }
 
-  // Read existing draft_tokens from frontmatter (may be opaque JSON string)
-  const existingDraftTokens = parseDraftTokens(fm['draft_tokens']);
+  // Read existing draft_tokens from frontmatter (parsed as native nested object
+  // since parseFrontmatter now returns typed values)
+  const existingDraftTokens = coerceDraftTokens(fm['draft_tokens']);
   const existingLastStamp = existingDraftTokens?.last_stamp ?? null;
 
   // Read ledger
@@ -156,15 +157,13 @@ export async function stampTokensHandler(
     delete newFm['stamp_error'];
   }
 
-  // Serialize draft_tokens as inline flow-style YAML string (opaque object)
-  // parseFrontmatter treats `{...}` values as opaque strings — compatible.
   const serialized = buildSerializedContent(newFm, body);
 
   if (opts.dryRun) {
     // Print planned diff without writing
     stdoutFn(`[dry-run] stamp-tokens would write draft_tokens for ${workItemId}:`);
     const draftTokensVal = newFm['draft_tokens'];
-    stdoutFn(`  draft_tokens: ${String(draftTokensVal)}`);
+    stdoutFn(`  draft_tokens: ${JSON.stringify(draftTokensVal)}`);
     if (stampError) {
       stdoutFn(`  stamp_error: "${stampError}"`);
     }
@@ -221,21 +220,37 @@ function extractWorkItemId(fm: Record<string, unknown>, absPath: string): string
 }
 
 /**
- * Parse existing draft_tokens from frontmatter (stored as opaque JSON string).
- * Since we control the serialization (we write JSON via serializeDraftTokens),
- * JSON.parse is always sufficient.
+ * Coerce the existing draft_tokens value from frontmatter into a DraftTokens shape.
+ * Handles two on-disk shapes:
+ *   1. Native nested YAML map (current format, parsed by js-yaml as an object)
+ *   2. Legacy JSON-in-a-string, from pre-fix files written before BUG-001
  */
-function parseDraftTokens(val: unknown): DraftTokens | null {
+function coerceDraftTokens(val: unknown): DraftTokens | null {
   if (val == null) return null;
-  if (typeof val !== 'string') return null;
-  try {
-    // The value is stored as a JSON string (starts with `{`).
-    // parseFrontmatter reads it back as an opaque string value.
-    const parsed = JSON.parse(val) as DraftTokens;
-    return parsed;
-  } catch {
-    return null;
+
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const o = val as Record<string, unknown>;
+    return {
+      input: typeof o['input'] === 'number' ? o['input'] : null,
+      output: typeof o['output'] === 'number' ? o['output'] : null,
+      cache_creation: typeof o['cache_creation'] === 'number' ? o['cache_creation'] : null,
+      cache_read: typeof o['cache_read'] === 'number' ? o['cache_read'] : null,
+      model: typeof o['model'] === 'string' ? o['model'] : null,
+      last_stamp: typeof o['last_stamp'] === 'string' ? o['last_stamp'] : '',
+      sessions: Array.isArray(o['sessions']) ? (o['sessions'] as DraftTokensSession[]) : [],
+    };
   }
+
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val) as DraftTokens;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -295,8 +310,8 @@ export function aggregateBuckets(buckets: SessionBucket[], nowIso: string): Draf
 }
 
 /**
- * Build the new frontmatter record with draft_tokens as an opaque flow-style
- * YAML string (compatible with parseFrontmatter's `{` opaque handling).
+ * Build the new frontmatter record with draft_tokens as a native nested
+ * object. serializeFrontmatter (js-yaml) emits it as a block-style YAML map.
  */
 function buildNewFrontmatter(
   existingFm: Record<string, unknown>,
@@ -316,22 +331,10 @@ function buildNewFrontmatter(
     newFm['stamp_error'] = stampError;
   }
 
-  // Serialize draft_tokens as flow-style JSON string (opaque object)
-  // This is compatible with parseFrontmatter which treats { values as opaque strings
-  newFm['draft_tokens'] = serializeDraftTokens(tokens);
+  // Store as a plain object; serializer emits block-style YAML
+  newFm['draft_tokens'] = tokens as unknown as Record<string, unknown>;
 
   return newFm;
-}
-
-/**
- * Serialize DraftTokens to a JSON string that can be stored as an opaque
- * frontmatter value (starts with `{`).
- *
- * parseFrontmatter reads lines starting with `{` as opaque string values,
- * so this round-trips without nesting issues.
- */
-function serializeDraftTokens(tokens: DraftTokens): string {
-  return JSON.stringify(tokens);
 }
 
 /**

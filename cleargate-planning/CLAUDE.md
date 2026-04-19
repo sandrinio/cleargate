@@ -24,6 +24,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 - Use the templates in `.cleargate/templates/` (`proposal.md`, `epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
 - Save drafts to `.cleargate/delivery/pending-sync/{TYPE}-{ID}-{Name}.md`.
 - After `cleargate_push_item` returns a Remote ID, update the frontmatter AND move the file to `.cleargate/delivery/archive/` — these two happen atomically, never one without the other.
+- **Story granularity.** When decomposing an epic into stories, run the Granularity Rubric at the top of `story.md`. If a candidate story trips any signal (unrelated goals joined, >5 Gherkin scenarios, subsystems span, L4 complexity), emit two stories with consecutive IDs instead. Splits and merges are free at decomposition time — no remote IDs exist yet.
 
 **Four-agent loop (roles in `.claude/agents/`):**
 - `architect.md` — one plan per milestone; no production code.
