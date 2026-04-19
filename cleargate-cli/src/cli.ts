@@ -11,6 +11,7 @@ import { wikiQueryHandler } from './commands/wiki-query.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
+import { upgradeHandler } from './commands/upgrade.js';
 
 const program = new Command();
 
@@ -163,6 +164,26 @@ program
       sessionStartMode: opts.sessionStartMode,
       verbose: opts.verbose,
     });
+  });
+
+program
+  .command('upgrade')
+  .description('three-way merge scaffold files with upstream changes')
+  .option('--dry-run', 'print plan without making any changes')
+  .option('--yes', 'auto-accept "take theirs" for all merge-3way files (non-interactive)')
+  .option('--only <tier>', 'restrict to a specific scaffold tier (protocol/template/agent/hook/skill/cli-config)')
+  .addHelpText('after', [
+    '',
+    'Overwrite policies:',
+    '  always      — silent overwrite with package content',
+    '  never       — silent skip',
+    '  preserve    — silent skip',
+    '  merge-3way  — interactive: [k]eep mine / [t]ake theirs / [e]dit in $EDITOR',
+    '',
+    '--yes auto-accepts [t]ake theirs for all merge-3way files.',
+  ].join('\n'))
+  .action(async (opts: { dryRun?: boolean; yes?: boolean; only?: string }) => {
+    await upgradeHandler({ dryRun: opts.dryRun, yes: opts.yes, only: opts.only });
   });
 
 void program.parseAsync(process.argv);
