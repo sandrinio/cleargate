@@ -20,6 +20,7 @@ Curated roadmap of Epics, Stories, Sprints, and Proposals. Raw files live in `pe
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-004: Admin API](archive/EPIC-004_Admin_API.md) | ✅ Completed (SPRINT-02 + SPRINT-03) | Medium — shipped |
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-005: Admin CLI + Client Bootstrap](archive/EPIC-005_Admin_CLI.md) | ✅ Completed (SPRINT-03) | Low — shipped (OAuth login deferred to SPRINT-05) |
 | [PROP-003](archive/PROPOSAL-003_MCP_Adapter.md) | [EPIC-006: Admin UI (SvelteKit)](pending-sync/EPIC-006_Admin_UI.md) | 🟢 Ready — SPRINT-05 | High — deferred one sprint |
+| [PROP-004](archive/PROPOSAL-004_Public_Discoverability.md) | [EPIC-007: Public Discoverability](archive/EPIC-007_Public_Discoverability.md) | ✅ Completed (ad-hoc post-SPRINT-04, 2026-04-19) | High — repo published, SEO-optimized |
 
 ## Story decomposition (57 Stories across 7 Epics)
 

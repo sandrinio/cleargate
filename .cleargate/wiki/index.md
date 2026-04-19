@@ -14,7 +14,7 @@
 | [[EPIC-004]] | epic | Completed | .cleargate/delivery/archive/EPIC-004_Admin_API.md |
 | [[EPIC-005]] | epic | Completed | .cleargate/delivery/archive/EPIC-005_Admin_CLI.md |
 | [[EPIC-006]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-006_Admin_UI.md |
-| [[EPIC-007]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-007_Public_Discoverability.md |
+| [[EPIC-007]] | epic | Completed | .cleargate/delivery/archive/EPIC-007_Public_Discoverability.md |
 
 ## Stories
 

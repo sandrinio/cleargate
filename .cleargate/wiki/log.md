@@ -430,3 +430,8 @@
   action: "update"
   target: "STORY-007-03"
   path: ".cleargate/delivery/archive/STORY-007-03_CLI_README_And_Description.md"
+- timestamp: "2026-04-19T11:17:35.801Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "EPIC-007"
+  path: ".cleargate/delivery/archive/EPIC-007_Public_Discoverability.md"
