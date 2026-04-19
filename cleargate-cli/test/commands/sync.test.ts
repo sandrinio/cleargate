@@ -711,7 +711,7 @@ describe('Scenario: sync --dry-run stdout format', () => {
     });
 
     const combined = stdoutLines.join('');
-    expect(combined).toMatch(/Would pull: \d+, push: \d+, conflicts: \d+/);
+    expect(combined).toMatch(/Would pull: \d+, push: \d+, intake: \d+, conflicts: \d+/);
   });
 
   it('reads vitest successfully: placeholder test', async () => {

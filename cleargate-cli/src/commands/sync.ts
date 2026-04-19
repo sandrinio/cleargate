@@ -29,6 +29,8 @@ import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { serializeFrontmatter } from '../lib/frontmatter-yaml.js';
 import { createMcpClient } from '../lib/mcp-client.js';
 import type { McpClient, RemoteItem, RemoteUpdateRef } from '../lib/mcp-client.js';
+import { runIntakeBranch } from '../lib/intake.js';
+import type { IntakeResult } from '../lib/intake.js';
 
 // ── Public Options ─────────────────────────────────────────────────────────────
 
@@ -157,8 +159,28 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
     }
   }
 
-  // ── Step 3: STORY-010-05 insertion point ────────────────────────────────────
-  // runIntakeBranch(ctx) — inserted by STORY-010-05 between pull and classify
+  // ── Step 3: Stakeholder proposal intake (STORY-010-05) ──────────────────────
+  const labelFilter = (opts.env ?? process.env)['CLEARGATE_PROPOSAL_LABEL'] ?? 'cleargate:proposal';
+  let intakeResult: IntakeResult = { created: 0, items: [] };
+  try {
+    intakeResult = await runIntakeBranch({
+      mcp,
+      identity,
+      sprintRoot,
+      projectRoot,
+      dryRun,
+      labelFilter,
+      now: nowFn,
+    });
+  } catch (err) {
+    // Non-fatal: intake errors do not abort the main sync loop
+    stderr(`warn: intake branch failed: ${String(err)}\n`);
+  }
+
+  // Emit R10 warning if present
+  if (intakeResult.warning) {
+    stderr(`${intakeResult.warning}\n`);
+  }
 
   // ── Step 4: Classify local work items ───────────────────────────────────────
   const localItems = await scanLocalItems(projectRoot);
@@ -287,7 +309,10 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
 
   // ── dry-run summary and early exit ──────────────────────────────────────────
   if (dryRun) {
-    stdout(`Would pull: ${dryRunPulls}, push: ${dryRunPushes}, conflicts: ${dryRunConflicts}\n`);
+    stdout(
+      `Would pull: ${dryRunPulls}, push: ${dryRunPushes}, ` +
+      `intake: ${intakeResult.created}, conflicts: ${dryRunConflicts}\n`,
+    );
     return;
   }
 
@@ -381,6 +406,16 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
   const totalPushes = pushQueue.length;
   const totalConflicts = conflictsJson.length;
   stdout(`sync: pulled ${totalPulls}, pushed ${totalPushes}, conflicts ${totalConflicts}\n`);
+
+  // Print intake summary (orchestrator stdout format)
+  if (intakeResult.created > 0) {
+    const plural = intakeResult.created === 1 ? 'proposal' : 'proposals';
+    stdout(`intake: ${intakeResult.created} new stakeholder ${plural} pulled\n`);
+    for (const item of intakeResult.items) {
+      stdout(`  ${item.proposalId} <- ${item.remoteId} "${item.title}"\n`);
+      stdout(`    ${item.path}\n`);
+    }
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
