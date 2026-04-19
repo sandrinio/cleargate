@@ -418,6 +418,69 @@ describe('Scenario: last_synced_status dataflow', () => {
   });
 });
 
+// ── Test 4b: last_synced_status + last_synced_body_sha stamped on push apply ───
+
+describe('Scenario: last_synced fields stamped on push apply', () => {
+  let tmpDir: string;
+
+  beforeEach(() => { tmpDir = makeTmpDir(); });
+  afterEach(() => cleanup(tmpDir));
+
+  it('syncFieldsStampedOnPush: last_synced_status and last_synced_body_sha written after push', async () => {
+    // Trigger the 'local-only' → 'push' resolution (rule 2 in conflict-detector):
+    //   local.body_sha !== baseSha  (local has edits)
+    //   remote.body_sha === baseSha (remote body unchanged)
+    //   remote.status === local.status (no status divergence)
+    // Then classify() returns { resolution: 'push' } and approved:true lets it proceed.
+    const baseBody = 'Base body content for push stamp test';
+    const localBody = 'Locally modified body for push stamp test';
+    const baseBodySha = hashNormalized(baseBody);
+
+    const localPath = makeLocalFile(tmpDir, 'STORY-push-stamp.md', {
+      story_id: 'STORY-push-stamp',
+      remote_id: 'LIN-push-stamp',
+      status: 'in-progress',
+      last_pulled_at: '2026-04-18T00:00:00Z',
+      last_remote_update: '2026-04-18T00:00:00Z',
+      last_synced_body_sha: baseBodySha,  // base sha, not local sha → local has edits
+      last_synced_status: 'in-progress',  // same as current status (no status divergence)
+      approved: true,
+    }, localBody);  // local body differs from base → local-only change
+
+    // Remote item: same body as base + same status → no remote changes
+    const remoteItem = makeRemoteItem({
+      remote_id: 'LIN-push-stamp',
+      body: baseBody,                 // remote still at base — body_sha === baseSha
+      status: 'in-progress',         // matches local status → no status conflict
+      updated_at: '2026-04-18T00:00:00Z',  // same as last_remote_update (not newer)
+    });
+
+    const mcp = makeMcpClient({
+      remoteRefs: [{ remote_id: 'LIN-push-stamp', updated_at: '2026-04-18T00:00:00Z' }],
+      remoteItems: new Map([['LIN-push-stamp', remoteItem]]),
+    });
+
+    await syncHandler({
+      projectRoot: tmpDir,
+      mcp,
+      stdout: () => {},
+      stderr: () => {},
+      exit: (c) => { throw new Error(`exit(${c})`); },
+      now: () => '2026-04-19T16:00:00Z',
+    });
+
+    // Read back the local file and parse frontmatter
+    const content = fs.readFileSync(localPath, 'utf8');
+    const { parseFrontmatter: pfm } = await import('../../src/wiki/parse-frontmatter.js');
+    const { fm: resultFm } = pfm(content);
+
+    // last_synced_status must equal the status at push time ('in-progress')
+    expect(resultFm['last_synced_status']).toBe('in-progress');
+    // last_synced_body_sha must equal hashNormalized(body at push time)
+    expect(resultFm['last_synced_body_sha']).toBe(hashNormalized(localBody));
+  });
+});
+
 // ── Test 5: no-op-stub pre-flight ─────────────────────────────────────────────
 
 describe('Scenario: no-op-stub pre-flight refusal', () => {

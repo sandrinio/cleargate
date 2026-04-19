@@ -307,7 +307,7 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
     await appendSyncLog(sprintRoot, entry);
   }
 
-  for (const { localPath: _lp, fm, itemId } of pushQueue) {
+  for (const { localPath, fm, body, itemId } of pushQueue) {
     // Push item to MCP
     await mcp.call('push_item', {
       cleargate_id: itemId,
@@ -317,6 +317,16 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
         : 'story',
       payload: fm,
     });
+
+    // Stamp last_synced_status + last_synced_body_sha so classify() sees a clean
+    // baseline on the next sync run (mirrors the pull-apply path at applyPull:393-394).
+    const pushedFm: Record<string, unknown> = {
+      ...fm,
+      last_synced_status: fm['status'],
+      last_synced_body_sha: hashNormalized(body),
+    };
+    const newContent = serializeFrontmatter(pushedFm) + '\n\n' + body;
+    await writeAtomic(localPath, newContent);
 
     const entry: SyncLogEntry = {
       ts: nowFn(),
