@@ -9,6 +9,7 @@ import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
 import { doctorHandler } from './commands/doctor.js';
+import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
 
 const program = new Command();
 
@@ -105,6 +106,26 @@ wiki
       query: terms.join(' '),
       persist: opts.persist ?? false,
     });
+  });
+
+const gate = program
+  .command('gate')
+  .description('evaluate readiness gates for a ClearGate work-item file');
+
+gate
+  .command('check <file>')
+  .description('evaluate readiness criteria and write result to frontmatter')
+  .option('-v, --verbose', 'show full expected-vs-actual detail per criterion')
+  .option('--transition <name>', 'override auto-detected transition name')
+  .action(async (file: string, opts: { verbose?: boolean; transition?: string }) => {
+    await gateCheckHandler(file, { verbose: opts.verbose, transition: opts.transition });
+  });
+
+gate
+  .command('explain <file>')
+  .description('render cached gate result in ≤50 agent tokens (read-only)')
+  .action(async (file: string) => {
+    await gateExplainHandler(file);
   });
 
 program
