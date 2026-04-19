@@ -12,6 +12,7 @@ import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
 import { upgradeHandler } from './commands/upgrade.js';
+import { uninstallHandler } from './commands/uninstall.js';
 
 const program = new Command();
 
@@ -189,6 +190,45 @@ program
   ].join('\n'))
   .action(async (opts: { dryRun?: boolean; yes?: boolean; only?: string }) => {
     await upgradeHandler({ dryRun: opts.dryRun, yes: opts.yes, only: opts.only });
+  });
+
+program
+  .command('uninstall')
+  .description('remove ClearGate scaffold from a project (preservation-first)')
+  .option('--dry-run', 'preview planned actions without making any changes (CI-safe)')
+  .option('--preserve <tiers>', 'comma-separated tier ids to force-preserve (default: user-artifact)')
+  .option('--remove <tiers>', 'comma-separated tier ids to force-remove; use "all" to remove everything including user artifacts (DANGEROUS)')
+  .option('--yes', 'skip typed project-name confirmation (dangerous — use in scripts/CI)')
+  .option('--path <dir>', 'target directory (must contain .cleargate/.install-manifest.json); defaults to cwd')
+  .option('--force', 'bypass uncommitted-changes safety check (not applicable for non-git targets)')
+  .addHelpText('after', [
+    '',
+    'Preservation defaults:',
+    '  user-artifact tier  → kept (FLASHCARD.md, archive, pending-sync, sprint REPORT.md)',
+    '  framework tiers     → removed (protocol, template, agent, hook, skill, cli-config)',
+    '',
+    'Always removed (no prompt): .claude/agents/*.md, ClearGate hooks,',
+    '  .claude/skills/flashcard/, CLAUDE.md CLEARGATE block,',
+    '  @cleargate/cli from package.json, .install-manifest.json, .drift-state.json.',
+    '',
+    'Non-git targets: uncommitted-changes check is skipped silently.',
+  ].join('\n'))
+  .action(async (opts: {
+    dryRun?: boolean;
+    preserve?: string;
+    remove?: string;
+    yes?: boolean;
+    path?: string;
+    force?: boolean;
+  }) => {
+    await uninstallHandler({
+      dryRun: opts.dryRun,
+      preserve: opts.preserve ? opts.preserve.split(',').map((s) => s.trim()) : undefined,
+      remove: opts.remove ? opts.remove.split(',').map((s) => s.trim()) : undefined,
+      yes: opts.yes,
+      path: opts.path,
+      force: opts.force,
+    });
   });
 
 void program.parseAsync(process.argv);
