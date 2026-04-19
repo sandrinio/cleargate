@@ -30,6 +30,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "prebuild": "node scripts/copy-planning-payload.mjs",
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",

@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { stubHandler } from './commands/_stub.js';
 import { joinHandler } from './commands/join.js';
+import { initHandler } from './commands/init.js';
 import { wikiBuildHandler } from './commands/wiki-build.js';
 import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
@@ -27,6 +28,14 @@ program
       profile: globals.profile,
       mcpUrlFlag: globals.mcpUrl,
     });
+  });
+
+program
+  .command('init')
+  .description('initialise a repo with ClearGate scaffold (CLAUDE.md block, hook config, agents, templates)')
+  .option('--force', 'overwrite existing files that differ from the bundled payload')
+  .action(async (opts: { force?: boolean }) => {
+    await initHandler({ force: opts.force ?? false });
   });
 
 program
