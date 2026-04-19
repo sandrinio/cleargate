@@ -1,6 +1,6 @@
 # ClearGate
 
-**ClearGate** scaffolds Claude Code into a disciplined planning loop — proposals → epics → stories → sprints → execution via a four-agent team (architect / developer / qa / reporter). One command bootstraps a downstream repo:
+**ClearGate** gives Claude Code a disciplined ship-loop — proposals → epics → stories → sprints → four-agent execution (architect plans, developer codes, qa verifies, reporter retrospects). One command bootstraps a downstream repo:
 
 ```bash
 npx cleargate init
@@ -12,9 +12,9 @@ Includes a Karpathy-style awareness wiki so every session starts with full situa
 
 ## What it is
 
-A standalone planning framework for AI coding agents. ClearGate gives AI-driven development a structure that mirrors how disciplined human teams ship software: every change starts as a Proposal, ratifies into an Epic, decomposes into Stories, gets scheduled into a Sprint, and executes through a four-agent loop. A compiled wiki keeps every session aware of project state without re-deriving it from scratch.
+A standalone framework that gives AI coding agents (Claude Code, Codex, etc.) disciplined structure for shipping software. ClearGate scaffolds the full lifecycle — every change starts as a Proposal, ratifies into an Epic, decomposes into Stories, gets scheduled into a Sprint, and runs through a four-agent loop (Architect plans, Developer codes, QA verifies, Reporter retrospects). A compiled wiki keeps every session aware of project state without re-deriving it from scratch.
 
-What ClearGate is **not**: a build tool, a CI runner, a test runner, or a deployment system. It scaffolds *how work is planned*. Your project's existing tooling does the building, testing, and deploying.
+What ClearGate is **not**: a build tool, CI runner, test runner, or deployment system. The Developer agent invokes *your project's* `npm test`, `cargo build`, `pytest`, etc. — ClearGate orchestrates when and why those run; the toolchain itself stays yours.
 
 **Three concepts to know:**
 

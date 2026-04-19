@@ -1,6 +1,6 @@
 # cleargate
 
-**ClearGate** scaffolds Claude Code into a disciplined planning loop — proposals → epics → stories → sprints → execution via a four-agent team (architect / developer / qa / reporter). One command bootstraps a downstream repo:
+**ClearGate** gives Claude Code a disciplined ship-loop — proposals → epics → stories → sprints → four-agent execution (architect plans, developer codes, qa verifies, reporter retrospects). One command bootstraps a downstream repo:
 
 ```bash
 npx cleargate init
