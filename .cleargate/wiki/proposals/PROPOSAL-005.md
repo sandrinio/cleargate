@@ -3,11 +3,11 @@ type: proposal
 id: "PROPOSAL-005"
 parent: ""
 children: []
-status: "Draft"
+status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
-last_ingest: "2026-04-19T01:38:05.442Z"
-last_ingest_commit: "81c52ef03eb70b9b8c0a0c121d7f60f9b66df51d"
+last_ingest: "2026-04-19T10:49:49.888Z"
+last_ingest_commit: "b151c973e0d373aef2099df8da8c49981d8eb71e"
 repo: "planning"
 ---
 

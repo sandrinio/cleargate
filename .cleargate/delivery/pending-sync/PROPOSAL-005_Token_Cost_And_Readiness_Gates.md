@@ -1,8 +1,10 @@
 ---
 proposal_id: "PROP-005"
-status: "Draft"
+status: "Approved"
 author: "AI Agent (cleargate planning)"
-approved: false
+approved: true
+approved_at: "2026-04-19T00:00:00Z"
+approved_by: "Vibe Coder (sandro.suladze@gmail.com)"
 created_at: "2026-04-19T00:00:00Z"
 updated_at: "2026-04-19T00:00:00Z"
 codebase_version: "post-SPRINT-03"
@@ -228,40 +230,40 @@ Three hooks carry this feature; no new subagents and no new skills.
 *(The following are the AI's open questions on this Proposal. The Proposal stays at Draft until all are answered. Draft → In Review once the Vibe Coder has answered; In Review → Approved when `approved: true` is set.)*
 
 1. **Q — Scope of "work_item_id" in the hook.** Should the token-ledger hook generalize fully today (support PROP/EPIC/STORY/CR/BUG) or start Story-only (match today's behavior) and extend incrementally? Recommendation: full generalization is a one-line regex change — do it now.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Full generalization now** (2026-04-19). `.claude/hooks/token-ledger.sh` extends its `STORY_ID` detection to `(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?`, recording the match as `work_item_id` in the ledger row. `story_id` alias remains for backward compat on existing rows. Zero incremental cost; avoids a second migration.
 
 2. **Q — Readiness-gate authoring: declarative block vs. conventions-by-section.** §2.3 proposes a YAML `readiness_gate:` block per template. Alternative: hard-code the gate criteria in `readiness-gates.md` per work-item-type and keep templates lean. Tradeoff: inline is more flexible (per-document overrides) but more surface area to lint; centralized is simpler but rigid. Recommendation: centralized for v1, allow inline overrides in v1.1 only if a real need emerges.
    - **Human Answer:** **Centralized** (2026-04-19). Gates live in `.cleargate/knowledge/readiness-gates.md`; templates stay lean. Inline overrides deferred to v1.1.
 
 3. **Q — What happens on multi-session drafts with model changes?** If a draft is started on Sonnet and finished on Opus, do we store `model: "sonnet,opus"` (comma-joined like the existing hook) or `model: "mixed"` with per-session breakdown in `sessions:`? Recommendation: comma-joined for brevity + `sessions: [{model, tokens...}]` for detail.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Comma-joined `model` + `sessions[]` breakdown** (2026-04-19). Top-level `model:` is grep-friendly; `sessions: [{model, tokens, ts}]` gives Reporter the per-session detail when cost outliers warrant investigation.
 
 4. **Q — Should the token stamp include estimated cost in USD?** Pro: immediate Vibe-Coder feedback on expensive drafts. Con: prices drift; stamped cost becomes stale; forces repo-wide updates when prices change. Recommendation: raw tokens in frontmatter; Reporter computes $ at sprint end (prices versioned in Reporter config).
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Raw tokens + model only in frontmatter** (2026-04-19). `draft_tokens:` carries `{input, output, cache_read, cache_creation, model, sessions[]}` — no `usd_cost:` field. USD is a derived view computed by the Reporter at sprint end from a versioned price table (`cleargate-cli/src/lib/pricing.ts`); `cleargate doctor --pricing <file>` renders it on demand. Keeps archived items eternally accurate regardless of future Anthropic price changes.
 
 5. **Q — Gate failure rendering.** When `gate check` fails, should it print a compact one-line-per-criterion summary or a detailed diff showing the expected vs. actual state of each predicate? Recommendation: compact by default, detailed with `-v`.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Compact by default, `-v` for detailed** (2026-04-19). Default output is one line per failing criterion (e.g., `❌ no-tbds: 2 TBDs in §2`). `cleargate gate check -v` renders full expected-vs-actual diffs for debug use. Compact fits in agent context; detailed is the manual affordance.
 
 6. **Q — Enforcement severity at Gate 1 (Proposal approval).** Should a Proposal itself have a readiness gate (blocking the human from approving until criteria pass), or is Proposal approval purely a human judgment call with no pre-checks? Recommendation: *advisory* for Proposals (lint warns but does not block `approved: true`) — the Vibe Coder's judgment is the whole point of Gate 1. Enforcement kicks in at Epic/Story/CR/Bug where the criteria are structural.
    - **Human Answer:** **Advisory at Proposal, enforcing at Epic/Story/CR/Bug** (2026-04-19, Vibe Coder deferred to AI recommendation). Rationale: Proposal criteria are soft (is §2 "enough"?); a gate there would either pass trivially or block valid human judgment. At Epic and below, criteria are structural (files exist, §6 empty, TBDs gone) and gating works. `cleargate gate check` on a Proposal returns pass/warn/advisory signals — never blocks `approved: true` — while the same command on Epic/Story/CR/Bug is blocking. The ambiguity gate's anti-rubber-stamp value is strongest exactly where the criteria are mechanically checkable.
 
 7. **Q — Retroactive stamping.** Do we backfill `draft_tokens` for already-archived items using git log + saved transcripts, or leave history blank? Recommendation: leave blank. Retrofit is low-value and risks invalidating `created_at` immutability.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **No backfill** (2026-04-19). Archived items stay blank on `draft_tokens`. Preserves `created_at` immutability from PROP-001; historical cost is sunk. `draft_tokens` populates only from the go-live date forward.
 
 8. **Q — Epic has two transitions (decomposition, then coding).** Do we put both `readiness_gate` blocks in the Epic template or treat it as "the gate the Epic is currently asking about" (transition advances state)? Recommendation: both blocks, keyed by `transition:` — `cleargate gate check --transition ready-for-decomposition` vs. `--transition ready-for-coding`. Default transition = whichever the document has *not yet passed*.
    - **Human Answer:** **Both transitions, default = next-unpassed** (2026-04-19). Both Epic transitions (`ready-for-decomposition`, `ready-for-coding`) live as two entries in `readiness-gates.md`. `cleargate gate check EPIC-NNN.md` infers the next-unpassed transition and evaluates those criteria; `--transition <name>` is an explicit override for re-checking an earlier gate. One Epic document, one lifecycle, two checkpoint gates — no state fragmentation.
 
 9. **Q — Token stamp on Sprint files.** Sprint files are assembled from many sub-drafts over days; is stamping meaningful? Recommendation: stamp the *planning-phase* tokens only (the sprint plan drafting session), not aggregate of all stories within the sprint. Story tokens already attribute to the Story itself.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Planning-phase only** (2026-04-19). Sprint `draft_tokens:` records only the session(s) that drafted the sprint plan itself. Story tokens attribute to their own Story files. The Reporter produces a sprint-level view by summing Story tokens separately — no double-counting at the Sprint level.
 
 10. **Q — Gate check in wiki lint vs. MCP push.** Both are enforcement points. If `wiki lint` already checks gates, is MCP-side enforcement redundant? Recommendation: keep both. `wiki lint` runs at Gate 1/3 in the planning flow; MCP push is a last-mile backstop in case lint was skipped (e.g. CI without Claude Code). Belt + suspenders; cheap to maintain.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Ship `wiki lint` enforcement only in v1; defer MCP-side enforcement** (2026-04-19). Rationale: MCP push shape is still stabilizing and its multi-participant sync role is not yet designed (future PROP-007 "Multi-Participant MCP Sync"). Observe current MCP behavior through real use; wire gate enforcement into `cleargate_push_item` when that tool's contract is locked. v1 scope = single enforcement point (`wiki lint`), single failure mode — sufficient for Gate 1 and Gate 3 as they operate inside Claude Code sessions.
 
 11. **Q — Hook ordering with existing `wiki ingest` hook.** PROP-002 already installs a PostToolUse hook that runs `cleargate wiki ingest` on `.cleargate/delivery/**` writes. This proposal adds `stamp-tokens` + `gate check` on the same trigger. Options: (a) one combined hook script that chains all three; (b) three separate hook registrations firing in order. Recommendation: (a) — one `stamp-and-gate.sh` that chains the trio in a single process. Single log file, single failure mode, and ordering is guaranteed (stamp must precede gate-check because gate-check may read `draft_tokens`).
     - **Human Answer:** **Defer; rewrite later** (2026-04-19). Let SPRINT-04 ship the `wiki ingest` hook as-is. When PROP-005 lands, the implementing Story will add `stamp-tokens` + `gate check` to the same hook script (combined chain — rationale (a) still holds) as a refactor rather than blocking SPRINT-04. Confirmed by Vibe Coder: "split will help with this" — PROP-005 and PROP-002 sequence cleanly because they're now independent proposals.
 
 12. **Q — SessionStart cost discipline.** The SessionStart hook adds ~100 tokens to every session. Worth it? Recommendation: yes — it replaces the agent's implicit "scan pending-sync/" behavior which currently costs ~2–3k tokens via Read/Glob on every session boot. Net savings ~20×. Cap the summary at 10 items; if more are blocked, summarize as "12 items blocked — run `cleargate doctor` for full list".
-    - **Human Answer:** {Waiting}
+    - **Human Answer:** **Ship it, fully automatic** (2026-04-19). SessionStart hook registered in `.claude/settings.json` at `cleargate init` time — fires on every Claude Code session boot with zero Vibe-Coder action. The blocked-gate summary is in context by the time the first prompt lands. Cap at 10 items, overflow summarizes as "N items blocked — run `cleargate doctor` for full list". The Vibe Coder only runs `cleargate doctor` manually to force-refresh on demand (e.g. after approving a gate and wanting immediate updated state).
 
 ---
 

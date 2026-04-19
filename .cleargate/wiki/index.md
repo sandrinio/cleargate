@@ -88,8 +88,9 @@
 | [[PROPOSAL-002]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-002_Knowledge_Wiki.md |
 | [[PROPOSAL-003]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-003_MCP_Adapter.md |
 | [[PROPOSAL-004]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-004_Public_Discoverability.md |
-| [[PROPOSAL-005]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md |
-| [[PROPOSAL-006]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md |
+| [[PROPOSAL-005]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md |
+| [[PROPOSAL-006]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md |
+| [[PROPOSAL-007]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md |
 
 ## CRs
 
