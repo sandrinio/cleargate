@@ -17,6 +17,7 @@ import {
   selectMode,
   shouldUseCache,
   formatVerboseLine,
+  parseHookLogLine,
   type DoctorFlags,
   type DoctorCliOptions,
 } from '../../src/commands/doctor.js';
@@ -397,6 +398,84 @@ describe('shouldUseCache', () => {
     const now = new Date('2026-04-19T12:00:00.000Z');
     const twentyFiveHoursAgo = new Date(now.getTime() - 25 * 60 * 60 * 1000).toISOString();
     expect(shouldUseCache(twentyFiveHoursAgo, now, true)).toBe(false);
+  });
+});
+
+// ─── Scenario 5: Doctor reports hook health (STORY-008-06 Gherkin Scenario 5) ──
+
+describe('Scenario: Doctor reports hook health', () => {
+  it('hook-log failure within 24h is named with ISO timestamp; failures older than 24h are excluded', async () => {
+    // Gherkin: Given hook-log has a failure in the last 24h,
+    //          When cleargate doctor,
+    //          Then stdout names the failing hook + ISO timestamp.
+    const projectRoot = makeTmpDir();
+
+    // Set up .claude/settings.json (required for hook-health mode to proceed)
+    const clauDir = path.join(projectRoot, '.claude');
+    fs.mkdirSync(clauDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(clauDir, 'settings.json'),
+      JSON.stringify({ hooks: {} }),
+      'utf-8'
+    );
+
+    const logDir = path.join(projectRoot, '.cleargate', 'hook-log');
+    fs.mkdirSync(logDir, { recursive: true });
+
+    // "now" is pinned
+    const now = new Date('2026-04-19T12:00:00Z');
+
+    // 1h ago — failure (gate=1)
+    const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString();
+    // 1h ago — success (all zeros)
+    const oneHourAgoSuccess = new Date(now.getTime() - 1 * 60 * 60 * 1000 - 1000).toISOString();
+    // 30h ago — failure (outside 24h window, must be excluded)
+    const thirtyHoursAgo = new Date(now.getTime() - 30 * 60 * 60 * 1000).toISOString();
+
+    const logLines = [
+      `[${thirtyHoursAgo}] stamp=0 gate=1 ingest=0 file=.cleargate/delivery/pending-sync/OLD.md`,
+      `[${oneHourAgoSuccess}] stamp=0 gate=0 ingest=0 file=.cleargate/delivery/pending-sync/OK.md`,
+      `[${oneHourAgo}] stamp=0 gate=1 ingest=0 file=.cleargate/delivery/pending-sync/FAIL.md`,
+    ].join('\n') + '\n';
+
+    fs.writeFileSync(path.join(logDir, 'gate-check.log'), logLines, 'utf-8');
+
+    const cli = makeCliOpts({ cwd: projectRoot, now: () => now });
+    await doctorHandler({}, cli);
+
+    const output = cli.out.join('\n');
+
+    // Must include the 1h-ago failure with its ISO timestamp
+    expect(output).toContain(oneHourAgo);
+    expect(output).toContain('FAIL.md');
+    expect(output).toContain('gate=1');
+
+    // Must NOT include the 30h-ago failure
+    expect(output).not.toContain(thirtyHoursAgo);
+    expect(output).not.toContain('OLD.md');
+
+    // Success entry must NOT appear as a failure line
+    expect(output).not.toContain('OK.md');
+  });
+});
+
+// ─── parseHookLogLine unit tests ──────────────────────────────────────────────
+
+describe('parseHookLogLine', () => {
+  it('parses a valid log line', () => {
+    const line = '[2026-04-19T11:00:00Z] stamp=0 gate=1 ingest=0 file=.cleargate/delivery/pending-sync/FAIL.md';
+    const result = parseHookLogLine(line);
+    expect(result).not.toBeNull();
+    expect(result!.ts).toBe('2026-04-19T11:00:00Z');
+    expect(result!.stamp).toBe(0);
+    expect(result!.gate).toBe(1);
+    expect(result!.ingest).toBe(0);
+    expect(result!.file).toBe('.cleargate/delivery/pending-sync/FAIL.md');
+  });
+
+  it('returns null for a non-matching line (stdout noise from hook steps)', () => {
+    const line = 'some random output from stamp-tokens command';
+    expect(parseHookLogLine(line)).toBeNull();
   });
 });
 

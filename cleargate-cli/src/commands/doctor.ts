@@ -87,9 +87,40 @@ export function selectMode(flags: DoctorFlags): DoctorMode {
 
 // ─── Hook-health default mode ─────────────────────────────────────────────────
 
+const HOOK_LOG_24H_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Parse a single gate-check.log line.
+ * Format: [ISO_TS] stamp=N gate=N ingest=N file=<path>
+ * Returns null if the line does not match.
+ */
+export interface HookLogEntry {
+  ts: string;
+  stamp: number;
+  gate: number;
+  ingest: number;
+  file: string;
+}
+
+export function parseHookLogLine(line: string): HookLogEntry | null {
+  // [2026-04-19T12:00:00Z] stamp=0 gate=1 ingest=0 file=/some/path
+  const m = line.match(
+    /^\[([^\]]+)\]\s+stamp=(\d+)\s+gate=(\d+)\s+ingest=(\d+)\s+file=(.+)$/
+  );
+  if (!m) return null;
+  return {
+    ts: m[1]!,
+    stamp: parseInt(m[2]!, 10),
+    gate: parseInt(m[3]!, 10),
+    ingest: parseInt(m[4]!, 10),
+    file: m[5]!.trim(),
+  };
+}
+
 function runHookHealth(
   stdout: (s: string) => void,
-  cwd: string
+  cwd: string,
+  now?: Date
 ): void {
   // Minimal hook-config report: check that .claude/settings.json has the
   // SubagentStop hook wired (if the .claude directory exists).
@@ -113,6 +144,41 @@ function runHookHealth(
     }
   } catch {
     stdout('[doctor] .claude/settings.json is not valid JSON — cannot verify hook config.');
+  }
+
+  // Scan gate-check.log for recent failures
+  const logPath = path.join(cwd, '.cleargate', 'hook-log', 'gate-check.log');
+  if (!fs.existsSync(logPath)) {
+    return;
+  }
+
+  let logContent: string;
+  try {
+    logContent = fs.readFileSync(logPath, 'utf-8');
+  } catch {
+    return;
+  }
+
+  const nowMs = (now ?? new Date()).getTime();
+  const lines = logContent.split('\n').filter((l) => l.trim().length > 0);
+
+  for (const line of lines) {
+    const entry = parseHookLogLine(line);
+    if (!entry) continue;
+
+    const entryMs = new Date(entry.ts).getTime();
+    if (isNaN(entryMs)) continue;
+
+    // Only consider entries within the last 24h
+    if (nowMs - entryMs > HOOK_LOG_24H_MS) continue;
+
+    // A failure means ANY step exit code is non-zero
+    const isFailing = entry.stamp !== 0 || entry.gate !== 0 || entry.ingest !== 0;
+    if (!isFailing) continue;
+
+    stdout(
+      `\u26a0 hook failure at ${entry.ts}: stamp=${entry.stamp} gate=${entry.gate} ingest=${entry.ingest} file=${entry.file}`
+    );
   }
 }
 
@@ -491,7 +557,7 @@ export async function doctorHandler(
       break;
 
     case 'hook-health':
-      runHookHealth(stdout, cwd);
+      runHookHealth(stdout, cwd, now);
       break;
 
     case 'session-start':
