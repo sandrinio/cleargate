@@ -1,22 +1,15 @@
 /**
- * doctor.ts — STORY-009-04
+ * doctor.ts — STORY-009-04 + STORY-008-06
  *
- * `cleargate doctor` base command + `--check-scaffold` mode.
- *
- * EXTENSION NOTICE: STORY-008-06 (M3) extends this file to add `--session-start`
- * and `--pricing` modes. Do NOT re-create or rename this file. Add new cases to
- * the switch in `doctorHandler` and new flag keys to `DoctorFlags`.
- *
- * Dispatcher contract (for 008-06):
- *  - `selectMode` throws when multiple mutually-exclusive flags are set.
- *  - Default (no flag): returns 'hook-health' (minimal hook-config report).
- *  - Modes are additive: 008-06 adds 'session-start' + 'pricing' by extending the switch.
+ * `cleargate doctor` base command + `--check-scaffold` / `--session-start` / `--pricing` modes.
  *
  * No top-level await (FLASHCARD #tsup #cjs #esm).
  */
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
+import { computeUsd, type DraftTokensInput } from '../lib/pricing.js';
 import {
   loadPackageManifest,
   loadInstallSnapshot,
@@ -53,10 +46,12 @@ export interface DoctorFlags {
   /** Hidden flag: used by the M3 session-start hook; enables daily throttle. */
   sessionStartMode?: boolean;
   verbose?: boolean;
-  /** Reserved for 008-06: --session-start */
+  /** --session-start: emit blocked pending-sync items summary */
   sessionStart?: boolean;
-  /** Reserved for 008-06: --pricing */
+  /** --pricing: compute USD estimate for a work item */
   pricing?: boolean;
+  /** File path passed to --pricing <file> */
+  pricingFile?: string;
 }
 
 export type DoctorMode = 'check-scaffold' | 'session-start' | 'pricing' | 'hook-health';
@@ -258,6 +253,217 @@ function emitSummary(
   }
 }
 
+// ─── Session-start mode ───────────────────────────────────────────────────────
+
+const SESSION_START_MAX_ITEMS = 10;
+const SESSION_START_MAX_CHARS = 400;
+
+interface BlockedItem {
+  id: string;
+  firstCriterionId: string;
+}
+
+/**
+ * Parse `cached_gate_result` from a raw frontmatter string (opaque object form).
+ * Returns null if absent or pass is not exactly false.
+ */
+function parseCachedGateResult(
+  raw: string
+): { pass: boolean | null; failing_criteria: Array<{ id: string }> } | null {
+  try {
+    const parsed = JSON.parse(raw) as {
+      pass?: boolean | null;
+      failing_criteria?: Array<{ id: string }>;
+    };
+    return {
+      pass: parsed.pass ?? null,
+      failing_criteria: parsed.failing_criteria ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function runSessionStart(
+  cwd: string,
+  stdout: (s: string) => void
+): Promise<void> {
+  const pendingSyncDir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
+
+  let files: string[];
+  try {
+    files = fs
+      .readdirSync(pendingSyncDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => path.join(pendingSyncDir, f));
+  } catch {
+    // Directory doesn't exist or unreadable — nothing to report
+    return;
+  }
+
+  const blocked: BlockedItem[] = [];
+
+  for (const filePath of files) {
+    let raw: string;
+    try {
+      raw = fs.readFileSync(filePath, 'utf-8');
+    } catch {
+      continue;
+    }
+
+    if (!raw.trimStart().startsWith('---')) continue;
+
+    let fm: Record<string, unknown>;
+    try {
+      fm = parseFrontmatter(raw).fm;
+    } catch {
+      continue;
+    }
+
+    const gateRaw = fm['cached_gate_result'];
+    if (typeof gateRaw !== 'string') continue;
+
+    const gate = parseCachedGateResult(gateRaw);
+    if (!gate || gate.pass !== false) continue;
+
+    // Determine item ID from frontmatter
+    const idKeys = ['story_id', 'epic_id', 'proposal_id', 'cr_id', 'bug_id', 'sprint_id'];
+    let itemId = '';
+    for (const key of idKeys) {
+      const val = fm[key];
+      if (typeof val === 'string' && val.trim()) {
+        itemId = val.trim();
+        break;
+      }
+    }
+    if (!itemId) {
+      // Fallback: use filename stem
+      itemId = path.basename(filePath, '.md');
+    }
+
+    const firstCriterionId =
+      gate.failing_criteria.length > 0 ? (gate.failing_criteria[0]?.id ?? '') : '';
+
+    blocked.push({ id: itemId, firstCriterionId });
+  }
+
+  if (blocked.length === 0) {
+    return;
+  }
+
+  const overflow = blocked.length > SESSION_START_MAX_ITEMS
+    ? blocked.length - SESSION_START_MAX_ITEMS
+    : 0;
+  const visible = blocked.slice(0, SESSION_START_MAX_ITEMS);
+
+  const lines: string[] = [`${blocked.length} items blocked:`];
+  for (const item of visible) {
+    const line = item.firstCriterionId
+      ? `  ${item.id}: ${item.firstCriterionId}`
+      : `  ${item.id}`;
+    lines.push(line);
+  }
+  if (overflow > 0) {
+    lines.push(`…and ${overflow} more — run cleargate doctor for full list`);
+  }
+
+  let output = lines.join('\n');
+
+  // Cap at SESSION_START_MAX_CHARS (100-token proxy)
+  if (output.length > SESSION_START_MAX_CHARS) {
+    output = output.slice(0, SESSION_START_MAX_CHARS - 3) + '...';
+  }
+
+  stdout(output);
+}
+
+// ─── Pricing mode ─────────────────────────────────────────────────────────────
+
+export async function runPricing(
+  filePath: string,
+  cwd: string,
+  stdout: (s: string) => void,
+  stderr: (s: string) => void,
+  exit: (code: number) => never
+): Promise<void> {
+  if (!filePath) {
+    stderr('cleargate doctor --pricing: missing <file> argument');
+    exit(1);
+    return;
+  }
+
+  const absPath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath);
+
+  let raw: string;
+  try {
+    raw = fs.readFileSync(absPath, 'utf-8');
+  } catch {
+    stderr(`cleargate doctor --pricing: cannot read file: ${absPath}`);
+    exit(1);
+    return;
+  }
+
+  if (!raw.trimStart().startsWith('---')) {
+    stderr(`cleargate doctor --pricing: file has no frontmatter: ${absPath}`);
+    exit(1);
+    return;
+  }
+
+  let fm: Record<string, unknown>;
+  try {
+    fm = parseFrontmatter(raw).fm;
+  } catch {
+    stderr(`cleargate doctor --pricing: cannot parse frontmatter in: ${absPath}`);
+    exit(1);
+    return;
+  }
+
+  const draftTokensRaw = fm['draft_tokens'];
+  if (!draftTokensRaw || typeof draftTokensRaw !== 'string') {
+    stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    exit(1);
+    return;
+  }
+
+  let draftTokens: DraftTokensInput & { model: string | null };
+  try {
+    draftTokens = JSON.parse(draftTokensRaw) as DraftTokensInput & { model: string | null };
+  } catch {
+    stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    exit(1);
+    return;
+  }
+
+  // Check if tokens are actually populated
+  if (
+    draftTokens.input === null &&
+    draftTokens.output === null &&
+    draftTokens.cache_read === null &&
+    draftTokens.cache_creation === null
+  ) {
+    stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    exit(1);
+    return;
+  }
+
+  const { usd, unknownModel } = computeUsd(draftTokens);
+  const model = draftTokens.model ?? 'unknown';
+
+  if (unknownModel) {
+    stderr(`cleargate doctor --pricing: unknown model '${model}' — no pricing data available`);
+  }
+
+  const input = draftTokens.input ?? 0;
+  const output = draftTokens.output ?? 0;
+  const cacheRead = draftTokens.cache_read ?? 0;
+  const cacheCreation = draftTokens.cache_creation ?? 0;
+  const fileName = path.basename(absPath);
+
+  stdout(
+    `${fileName}: ${model} — input:${input} output:${output} cache_read:${cacheRead} cache_creation:${cacheCreation} ≈ $${usd.toFixed(4)}`
+  );
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function doctorHandler(
@@ -288,11 +494,12 @@ export async function doctorHandler(
       runHookHealth(stdout, cwd);
       break;
 
-    // Reserved for STORY-008-06 (M3) — do NOT implement here:
     case 'session-start':
+      await runSessionStart(cwd, stdout);
+      break;
+
     case 'pricing':
-      stderr(`cleargate doctor: mode '${mode}' is not yet implemented (ships in STORY-008-06).`);
-      exit(1);
+      await runPricing(flags.pricingFile ?? '', cwd, stdout, stderr, exit);
       break;
 
     default: {

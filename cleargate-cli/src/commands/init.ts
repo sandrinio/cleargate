@@ -20,7 +20,12 @@ import { wikiBuildHandler, type WikiBuildOptions } from './wiki-build.js';
 import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
 import { promptYesNo as defaultPromptYesNo } from '../lib/prompts.js';
 
-/** The PostToolUse hook config to merge — verbatim from M1 plan (STORY-002-05). */
+/**
+ * The PostToolUse hook config to merge — updated in STORY-008-06 to use
+ * stamp-and-gate.sh (replaces legacy SPRINT-04 inline wiki ingest command).
+ * Uses ${CLAUDE_PROJECT_DIR} so the path is project-relative at runtime.
+ * mergeSettings deduplicates by exact command string — safe to re-run.
+ */
 const HOOK_ADDITION: SettingsJson = {
   hooks: {
     PostToolUse: [
@@ -29,8 +34,7 @@ const HOOK_ADDITION: SettingsJson = {
         hooks: [
           {
             type: 'command',
-            command:
-              'FILE=$(jq -r \'.tool_input.file_path\'); case "$FILE" in *.cleargate/delivery/*) npx cleargate wiki ingest "$FILE" ;; esac',
+            command: '${CLAUDE_PROJECT_DIR}/.claude/hooks/stamp-and-gate.sh',
           },
         ],
       },

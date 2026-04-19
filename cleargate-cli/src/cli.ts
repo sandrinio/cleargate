@@ -145,23 +145,28 @@ program
 
 program
   .command('doctor')
-  .description('diagnose scaffold drift and hook health')
+  .description('diagnose scaffold drift, hook health, blocked items, and token cost')
   .option('--check-scaffold', 'check scaffold files for drift against install snapshot')
   .option('--session-start-mode', 'hidden: enables daily throttle (used by session-start hook)', false)
+  .option('--session-start', 'emit blocked pending-sync items summary (used by SessionStart hook)')
+  .option('--pricing <file>', 'compute USD cost estimate from a work item\'s draft_tokens')
   .option('-v, --verbose', 'show per-file drift detail')
   .addHelpText('after', [
     '',
     'Modes (mutually exclusive):',
     '  --check-scaffold    Compute drift for all tracked scaffold files.',
     '                      Writes .cleargate/.drift-state.json.',
+    '  --session-start     List blocked pending-sync items (≤10, ≤100 tokens).',
+    '  --pricing <file>    Compute USD estimate from a work item\'s draft_tokens.',
     '  (default)           Print a minimal hook-config health report.',
-    '',
-    'STORY-008-06 (M3) adds --session-start and --pricing modes.',
   ].join('\n'))
-  .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; verbose?: boolean }) => {
+  .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; sessionStart?: boolean; pricing?: string; verbose?: boolean }) => {
     await doctorHandler({
       checkScaffold: opts.checkScaffold,
       sessionStartMode: opts.sessionStartMode,
+      sessionStart: opts.sessionStart,
+      pricing: !!opts.pricing,
+      pricingFile: opts.pricing,
       verbose: opts.verbose,
     });
   });

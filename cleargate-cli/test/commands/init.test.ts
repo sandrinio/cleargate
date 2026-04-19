@@ -95,7 +95,7 @@ describe('cleargate init', () => {
       (e: { matcher?: string }) => e.matcher === 'Edit|Write',
     );
     expect(editWriteEntry).toBeDefined();
-    expect(editWriteEntry.hooks[0].command).toContain('npx cleargate wiki ingest');
+    expect(editWriteEntry.hooks[0].command).toContain('stamp-and-gate.sh');
 
     // Agents present
     expect(fs.existsSync(path.join(tmpDir, '.claude', 'agents', 'architect.md'))).toBe(true);
@@ -279,7 +279,7 @@ describe('cleargate init', () => {
 
     const editWriteEntry = postToolUse.find((e: { matcher?: string }) => e.matcher === 'Edit|Write');
     expect(editWriteEntry).toBeDefined();
-    expect(editWriteEntry.hooks[0].command).toContain('npx cleargate wiki ingest');
+    expect(editWriteEntry.hooks[0].command).toContain('stamp-and-gate.sh');
   });
 
   // ─── STORY-009-03 Scenario 1: Fresh init writes snapshot ────────────────────
