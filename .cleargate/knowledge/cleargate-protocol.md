@@ -109,6 +109,7 @@ There are three hard stops. You halt at each one and do not proceed until the hu
 - Only push when: the document is 🟢 AND the human has explicitly confirmed the push.
 
 > Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12.
+> (See §13 for scaffold lifecycle commands)
 
 ---
 
@@ -460,3 +461,48 @@ Two-capability bundle: (1) `draft_tokens` frontmatter stamp populated by a PostT
 ### §12.6 Cross-references
 - §4 Phase Gates: "Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12."
 - §10.8 Wiki-lint enforcement: extended by the gate-check hook; staleness check added per §12.4.
+
+---
+
+## 13. Scaffold Manifest & Uninstall
+
+### §13.1 Overview
+Three-surface model: package manifest (shipped in `@cleargate/cli`), install snapshot (`.cleargate/.install-manifest.json` written at init), current state (live FS). Drift is classified pairwise into 4 states (clean / user-modified / upstream-changed / both-changed) + `untracked` for user-artifact tier. SHA256 over normalized content (LF / UTF-8 no-BOM / trailing-newline) is the file identifier.
+
+### §13.2 Install
+`cleargate init` copies the bundled payload, then writes `.cleargate/.install-manifest.json`:
+
+```json
+{
+  "cleargate_version": "0.2.0",
+  "installed_at": "2026-04-19T10:00:00Z",
+  "files": [
+    {"path": ".cleargate/knowledge/cleargate-protocol.md", "sha256": "…", "tier": "protocol", "overwrite_policy": "merge-3way", "preserve_on_uninstall": "default-remove"}
+  ]
+}
+```
+
+If a `.cleargate/.uninstalled` marker exists at init time, init prompts "Detected previous ClearGate install … Restore preserved items? [Y/n]". Y = blind-copy preserved paths back into the new install (v1); mismatches log a warning and do not fail.
+
+### §13.3 Drift detection
+`cleargate doctor --check-scaffold` compares the three surfaces and writes `.cleargate/.drift-state.json` (daily-throttled refresh). SessionStart-triggered refresh runs at most once per day. Agent never auto-overwrites on upstream-changed drift — it emits a one-line advisory at triage; `cleargate upgrade` is always human-initiated. `user-artifact` tier (sha256: null) is silently skipped in drift output; surfaces only in uninstall preview.
+
+### §13.4 Upgrade
+`cleargate upgrade [--dry-run] [--yes] [--only <tier>]` drives a three-way merge for `merge-3way` policy files. Per-file prompt: `[k]eep mine / [t]ake theirs / [e]dit in $EDITOR`. Execution is incremental: successes are committed to disk + `.install-manifest.json` updated before the next file is processed; a mid-run error leaves earlier successes intact.
+
+### §13.5 Uninstall
+`cleargate uninstall [--dry-run] [--preserve …] [--remove …] [--yes] [--path <dir>] [--force]` is preservation-first. Defaults: `.cleargate/delivery/archive/**`, `FLASHCARD.md`, `sprint-runs/*/REPORT.md`, `pending-sync/**` → keep. `.cleargate/knowledge/`, `.cleargate/templates/`, `.cleargate/wiki/`, `.cleargate/hook-log/` → remove. Safety rails: typed confirmation (project name), single-target (no recursion into nested `.cleargate/`), refuse on uncommitted manifest-tracked changes without `--force`, CLAUDE.md marker-presence check. Always-removed (no prompt): `.claude/agents/*.md`, ClearGate hooks, `flashcard/` skill, CLAUDE.md CLEARGATE block, `@cleargate/cli` in `package.json`, `.install-manifest.json`, `.drift-state.json`. Writes `.cleargate/.uninstalled` marker:
+
+```json
+{
+  "uninstalled_at": "2026-04-19T11:00:00Z",
+  "prior_version": "0.2.0",
+  "preserved": [".cleargate/FLASHCARD.md", ".cleargate/delivery/archive/**"],
+  "removed": [".cleargate/knowledge/cleargate-protocol.md"]
+}
+```
+
+Future `cleargate init` in the same dir detects this marker and offers restore.
+
+### §13.6 Publishing notes
+`MANIFEST.json` is built at `npm run build` (prebuild step in `cleargate-cli/package.json`) and shipped in the npm tarball (`files[]`). Never computed at install time. `generate-changelog-diff.ts` diffs `MANIFEST.json` between the previous published version and the current one at release time; CHANGELOG.md auto-opens with a "Scaffold files changed" block per release. Content-identical entries (path-moved-only, metadata-changed-only) are collapsed to avoid noise.
