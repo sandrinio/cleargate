@@ -3,7 +3,7 @@
   "version": "0.1.0-alpha.1",
   "private": false,
   "type": "module",
-  "description": "ClearGate CLI — connects AI agent teams to the ClearGate MCP server",
+  "description": "Planning framework for Claude Code agents — sprint/epic/story protocol, four-agent loop (architect/developer/qa/reporter), Karpathy-style awareness wiki.",
   "bin": {
     "cleargate": "dist/cli.js"
   },

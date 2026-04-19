@@ -7,7 +7,7 @@
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
 | Epics | 8 | 0 | 5 |
-| Stories | 58 | 0 | 22 |
+| Stories | 60 | 0 | 24 |
 | Sprints | 5 | 0 | 4 |
 | Proposals | 7 | 0 | 4 |
 | CRs | 0 | 0 | 0 |
@@ -92,5 +92,9 @@ _No active epics._
 - [[STORY-007-00]] (stories) — Completed
 
 - [[STORY-007-01]] (stories) — Completed
+
+- [[STORY-007-02]] (stories) — Completed
+
+- [[STORY-007-03]] (stories) — Completed
 
 
