@@ -14,6 +14,7 @@
 | [[EPIC-004]] | epic | Completed | .cleargate/delivery/archive/EPIC-004_Admin_API.md |
 | [[EPIC-005]] | epic | Completed | .cleargate/delivery/archive/EPIC-005_Admin_CLI.md |
 | [[EPIC-006]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-006_Admin_UI.md |
+| [[EPIC-007]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-007_Public_Discoverability.md |
 
 ## Stories
 
@@ -73,6 +74,7 @@
 | [[STORY-006-08]] | story | Draft | .cleargate/delivery/pending-sync/STORY-006-08_Stats_Page.md |
 | [[STORY-006-09]] | story | Draft | .cleargate/delivery/pending-sync/STORY-006-09_Settings_Page.md |
 | [[STORY-006-10]] | story | Draft | .cleargate/delivery/pending-sync/STORY-006-10_Dockerfile_Coolify.md |
+| [[STORY-007-00]] | story | Ready | .cleargate/delivery/pending-sync/STORY-007-00_Git_Remote_And_Initial_Push.md |
 
 ## Sprints
 
