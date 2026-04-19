@@ -18,7 +18,9 @@ import { hashNormalized } from '../lib/sha256.js';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { serializeFrontmatter } from '../lib/frontmatter-yaml.js';
 import { createMcpClient } from '../lib/mcp-client.js';
-import type { McpClient, RemoteItem } from '../lib/mcp-client.js';
+import type { McpClient, RemoteItem, RemoteComment } from '../lib/mcp-client.js';
+import { writeCommentCache } from '../lib/comments-cache.js';
+import { renderCommentsSection } from '../lib/wiki-comments-render.js';
 
 export interface PullOptions {
   comments?: boolean;
@@ -43,13 +45,6 @@ export async function pullHandler(idOrRemoteId: string, opts: PullOptions = {}):
   const stderr = opts.stderr ?? ((s: string) => process.stderr.write(s));
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const nowFn = opts.now ?? (() => new Date().toISOString());
-
-  if (opts.comments) {
-    stderr(
-      '--comments: implemented in STORY-010-06; this run pulls item only\n',
-    );
-    // Proceed without comment pull
-  }
 
   // Identity
   const identity = resolveIdentity(projectRoot);
@@ -166,6 +161,26 @@ export async function pullHandler(idOrRemoteId: string, opts: PullOptions = {}):
   await appendSyncLog(sprintRoot, entry);
 
   stdout(`pull: ${remoteId} applied to ${path.relative(projectRoot, localPath)}\n`);
+
+  // ── --comments: pull comment snapshot for this item ──────────────────────
+  // Always pulls when flag is set (manual override; ignores active criteria).
+  if (opts.comments) {
+    const comments = await mcp.call<RemoteComment[]>(
+      'cleargate_pull_comments',
+      { remote_id: remoteId },
+    );
+    await writeCommentCache(projectRoot, remoteId, comments);
+
+    // Rebuild updatedFm as the local item state post-pull for wiki-render
+    const localItemForRender = { fm: { ...updatedFm, remote_id: remoteId } };
+    await renderCommentsSection({
+      projectRoot,
+      remoteId,
+      comments,
+      localItems: [localItemForRender],
+    });
+    stdout(`pull: ${remoteId} comments fetched (${comments.length})\n`);
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

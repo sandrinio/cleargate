@@ -197,15 +197,15 @@ describe('Scenario: Targeted pull updates frontmatter', () => {
   });
 });
 
-// ── Test 3: --comments flag ────────────────────────────────────────────────────
+// ── Test 3: --comments flag (STORY-010-06 — stub replaced with real implementation) ──
 
-describe('Scenario: --comments flag reserved', () => {
+describe('Scenario: --comments flag (STORY-010-06)', () => {
   let tmpDir: string;
 
   beforeEach(() => { tmpDir = makeTmpDir(); });
   afterEach(() => cleanup(tmpDir));
 
-  it('commentsWarning: --comments emits warning and proceeds without error', async () => {
+  it('commentsFlag: --comments triggers comment pull and completes without error (no-op item path)', async () => {
     const remoteBody = 'Remote body content';
     const remoteBodySha = hashNormalized(remoteBody);
     const remoteItem = makeRemoteItem({ body: remoteBody, status: 'in-progress' });
@@ -227,8 +227,9 @@ describe('Scenario: --comments flag reserved', () => {
       JSON.stringify({ email: 'test@example.com', set_at: '2026-04-19T00:00:00Z', source: 'prompted' }),
     );
 
+    // STORY-010-06: makeMcpClient returns null for cleargate_pull_comments (empty).
+    // Since item is a no-op (sha matches), --comments is not reached in the no-op path.
     const mcp = makeMcpClient(remoteItem);
-    const stderrLines: string[] = [];
     let errored = false;
 
     await pullHandler('LIN-1042', {
@@ -236,13 +237,12 @@ describe('Scenario: --comments flag reserved', () => {
       mcp,
       comments: true,
       stdout: () => {},
-      stderr: (s) => stderrLines.push(s),
+      stderr: () => {},
       exit: (c) => { errored = true; throw new Error(`exit(${c})`); },
       now: () => '2026-04-19T16:00:00Z',
     }).catch(() => { errored = true; });
 
+    // --comments flag: no longer emits a warning (stub replaced by STORY-010-06)
     expect(errored).toBe(false);
-    expect(stderrLines.join('')).toContain('--comments');
-    expect(stderrLines.join('')).toContain('STORY-010-06');
   });
 });

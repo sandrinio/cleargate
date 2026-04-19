@@ -31,6 +31,11 @@ import { createMcpClient } from '../lib/mcp-client.js';
 import type { McpClient, RemoteItem, RemoteUpdateRef } from '../lib/mcp-client.js';
 import { runIntakeBranch } from '../lib/intake.js';
 import type { IntakeResult } from '../lib/intake.js';
+import { resolveActiveItems } from '../lib/active-criteria.js';
+import type { LocalWorkItemRef } from '../lib/active-criteria.js';
+import { writeCommentCache } from '../lib/comments-cache.js';
+import { renderCommentsSection } from '../lib/wiki-comments-render.js';
+import type { RemoteComment } from '../lib/mcp-client.js';
 
 // ── Public Options ─────────────────────────────────────────────────────────────
 
@@ -182,8 +187,63 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
     stderr(`${intakeResult.warning}\n`);
   }
 
-  // ── Step 4: Classify local work items ───────────────────────────────────────
+  // ── Step 3b: Pull comments for active items (STORY-010-06) ─────────────────
+  // Load all local items first (needed for active-criteria + wiki render).
   const localItems = await scanLocalItems(projectRoot);
+
+  if (!dryRun) {
+    const localRefs: LocalWorkItemRef[] = localItems.map(({ fm }) => ({
+      primaryId: getItemId(fm),
+      remoteId: typeof fm['remote_id'] === 'string' && fm['remote_id'] ? fm['remote_id'] : undefined,
+      lastRemoteUpdate: typeof fm['last_remote_update'] === 'string' ? fm['last_remote_update'] : undefined,
+    }));
+
+    const activeSet = await resolveActiveItems(projectRoot, localRefs, nowFn);
+
+    for (const remoteId of activeSet) {
+      try {
+        const comments = await mcp.call<RemoteComment[]>(
+          'cleargate_pull_comments',
+          { remote_id: remoteId },
+        );
+        await writeCommentCache(projectRoot, remoteId, comments);
+        await renderCommentsSection({ projectRoot, remoteId, comments, localItems });
+      } catch (err: unknown) {
+        // R4 mitigation: per-item try/catch — do NOT break the outer loop
+        const errMsg = err instanceof Error ? err.message : String(err);
+        if (/MCP HTTP 429/.test(errMsg)) {
+          // Find primary ID for logging
+          const localRef = localRefs.find((r) => r.remoteId === remoteId);
+          const target = localRef?.primaryId ?? remoteId;
+          await appendSyncLog(sprintRoot, {
+            ts: nowFn(),
+            actor: identity.email,
+            op: 'pull-comments',
+            target,
+            remote_id: remoteId,
+            result: 'skipped-rate-limit',
+            detail: '429',
+          });
+        } else {
+          // Other errors: log as error-transport, continue
+          const localRef = localRefs.find((r) => r.remoteId === remoteId);
+          const target = localRef?.primaryId ?? remoteId;
+          await appendSyncLog(sprintRoot, {
+            ts: nowFn(),
+            actor: identity.email,
+            op: 'pull-comments',
+            target,
+            remote_id: remoteId,
+            result: 'error-transport',
+            detail: errMsg.slice(0, 200),
+          });
+        }
+      }
+    }
+  }
+
+  // ── Step 4: Classify local work items ───────────────────────────────────────
+  // localItems already loaded above for comment-pull; reuse here.
   const conflictsJson: ConflictEntry[] = [];
 
   // Maps for tracking what to apply

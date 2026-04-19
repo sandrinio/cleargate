@@ -21,6 +21,9 @@ Thumbs.db
 # Per-participant identity file — personal email, not team-shared
 /.cleargate/.participant.json
 
+# Comment snapshot cache — runtime-generated, not team-shared
+/.cleargate/.comments-cache/
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/

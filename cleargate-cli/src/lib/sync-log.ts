@@ -26,6 +26,7 @@ export type SyncLogOp =
   | 'push'
   | 'pull'
   | 'pull-intake'    // STORY-010-05: stakeholder proposal intake
+  | 'pull-comments'  // STORY-010-06: comment snapshot pull
   | 'push-revert'
   | 'sync-status'
   | 'conflict-remote-wins'
