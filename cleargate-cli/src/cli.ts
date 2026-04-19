@@ -15,6 +15,7 @@ import { upgradeHandler } from './commands/upgrade.js';
 import { uninstallHandler } from './commands/uninstall.js';
 import { syncHandler } from './commands/sync.js';
 import { pullHandler } from './commands/pull.js';
+import { pushHandler } from './commands/push.js';
 import { conflictsHandler } from './commands/conflicts.js';
 import { syncLogHandler } from './commands/sync-log.js';
 
@@ -250,6 +251,28 @@ program
   .option('--comments', 'also pull comments for this item (STORY-010-06; not yet implemented)')
   .action(async (idOrRemoteId: string, opts: { comments?: boolean }) => {
     await pullHandler(idOrRemoteId, { comments: opts.comments });
+  });
+
+program
+  .command('push <file>')
+  .description('push a local work item to the MCP server (requires approved: true in frontmatter)')
+  .option('--revert <id-or-remote-id>', 'soft-revert a pushed item by setting status to archived-without-shipping')
+  .option('--force', 'bypass the "done" status guard when reverting')
+  .addHelpText('after', [
+    '',
+    'Push mode:',
+    '  Reads local frontmatter. Requires approved: true — exits 1 without network call otherwise.',
+    '  On success: writes pushed_by + pushed_at from server back to local frontmatter.',
+    '  Appends sync-log entry op=push.',
+    '',
+    'Revert mode (--revert <id-or-remote-id>):',
+    '  Calls cleargate_sync_status with status=archived-without-shipping.',
+    '  Does NOT delete the remote item or remove local remote_id.',
+    '  Refuses if local status=done unless --force is passed.',
+    '  Appends sync-log entry op=push-revert.',
+  ].join('\n'))
+  .action(async (file: string, opts: { revert?: string; force?: boolean }) => {
+    await pushHandler(file, { revert: opts.revert, force: opts.force });
   });
 
 program
