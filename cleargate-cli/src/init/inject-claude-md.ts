@@ -2,7 +2,7 @@
  * inject-claude-md.ts — bounded-block injection for CLAUDE.md
  *
  * Block format: <!-- CLEARGATE:START -->\n<content>\n<!-- CLEARGATE:END -->
- * Detection regex: /<!-- CLEARGATE:START -->[\s\S]*?<!-- CLEARGATE:END -->/
+ * Detection regex: /<!-- CLEARGATE:START -->[\s\S]*<!-- CLEARGATE:END -->/  (greedy, see below)
  *
  * Rules:
  *   - If existing === null:  create file with block as full content (+ trailing newline)

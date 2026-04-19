@@ -9,9 +9,7 @@ Items awaiting human action at one of the three ClearGate review gates.
 Proposals with `approved: false` or `status: Draft` that have not yet been blessed.
 
 
-- [[PROPOSAL-005]] — status: Draft
-
-- [[PROPOSAL-006]] — status: Draft
+- [[PROPOSAL-007]] — status: Draft
 
 
 

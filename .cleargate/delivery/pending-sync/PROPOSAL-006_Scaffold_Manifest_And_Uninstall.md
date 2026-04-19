@@ -1,8 +1,10 @@
 ---
 proposal_id: "PROP-006"
-status: "Draft"
+status: "Approved"
 author: "AI Agent (cleargate planning)"
-approved: false
+approved: true
+approved_at: "2026-04-19T00:00:00Z"
+approved_by: "Vibe Coder (sandro.suladze@gmail.com)"
 created_at: "2026-04-19T00:00:00Z"
 updated_at: "2026-04-19T00:00:00Z"
 codebase_version: "post-SPRINT-03"
@@ -277,34 +279,34 @@ None. Manifest and uninstall are purely local-CLI concerns; MCP-pushed remote it
 *(Carried over from PROP-005's split on 2026-04-19. Numbering restarts at Q1 for this Proposal.)*
 
 1. **Q — Manifest generation timing.** Generate `MANIFEST.json` at `npm run build` (shipped artifact) vs. at `cleargate init` time (computed at install, captures local env quirks)? Recommendation: at build time, shipped in the package. Deterministic, reviewable in PR diffs, and the Vibe Coder never runs the hashing step. Install copies it into `.install-manifest.json` verbatim.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Build-time manifest, primarily internal with Vibe-Coder-facing derived views** (2026-04-19). The `MANIFEST.json` / `.install-manifest.json` files are machine-readable source-of-truth — Vibe Coders interact via derived commands (`cleargate doctor --check-scaffold`, `cleargate upgrade`, `cleargate uninstall` previews, auto-generated CHANGELOG entries). The raw JSON is available for debugging inspection but is not marketed as a user-facing artifact. Build-time generation keeps it deterministic and reviewable in PR diffs.
 
 2. **Q — File identifier: SHA256 vs. git blob hash vs. semver-per-file.** Recommendation: SHA256 over normalized content. Git blob hash ties us to git (fails on non-git installs); per-file semver creates a maintenance tax (who bumps `proposal.md` to 1.2.0?). SHA256 is automatic, deterministic, and opaque.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **SHA256 over normalized content** (2026-04-19). LF line endings, UTF-8 no-BOM, trailing-newline enforced. First 8 hex chars shown in human-readable output. Zero human overhead, no git dependency.
 
 3. **Q — Three-way merge UX on drift.** When `cleargate upgrade` hits a `both-changed` file, present diff inline in terminal, open `$EDITOR` with merge markers, or punt to a third-party merge tool? Recommendation: print a patch-style diff + three options (keep mine / take theirs / open in `$EDITOR` with conflict markers). Defer external merge-tool integration to v1.1.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Inline patch-style diff + three choices** (2026-04-19). Option (a) — terminal-rendered diff followed by `[k]eep mine / [t]ake theirs / [e]dit in $EDITOR`. No external merge-tool dependency in v1; `cleargate config merge-tool` knob considered for v1.1 if power users ask.
 
 4. **Q — Preservation defaults for pending drafts.** §2.8 #4 currently says **keep** (flipped from "prompt" during scoping). Confirm: is "keep with warning" correct, or should we prompt? Recommendation: **keep with warn**. Reasoning: the few users who *want* to wipe pending drafts can pass `--remove=pending-drafts`; the many who accidentally lose work cannot undo.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Keep with warn, confirmed** (2026-04-19). Pending drafts default to preserve; `--remove=pending-drafts` is the opt-out. Pending drafts are not in MCP (never pushed), so this is the primary unrecoverable-loss risk in an uninstall — default-keep is the safe posture.
 
 5. **Q — Uninstall in a nested-repo setup (meta-repo case).** This repo has `cleargate-planning/` as a dogfooded install plus `mcp/` as a nested git repo. Should `cleargate uninstall` refuse to run when multiple `.cleargate/` instances are detectable, to prevent accidentally nuking the wrong one? Recommendation: refuse by default; require `--path <dir>` to name the target install explicitly when ambiguity is detected.
    - **Human Answer:** **Drop the refuse-by-default guard. Allow uninstall to proceed.** (2026-04-19, Vibe Coder). Rationale: archived work items are recoverable via `cleargate_pull_initiative` from the MCP remote (unless the human also deleted the PM-tool project); FLASHCARD + pending drafts + sprint reports default to **keep** (§2.8); framework files are reinstallable via `cleargate init`. The actual blast radius of nuking the "wrong" install is bounded and recoverable. Keep the cheap safeguards that catch real mistakes: typed-confirmation ceremony (project name), `--dry-run` preview, default-keep on user artifacts. Add `--path <dir>` as an explicit-targeting affordance for scripted/CI use, not as a disambiguator. Uninstall operates on the `.cleargate/` at the resolved path; it does **not** recurse into nested `.cleargate/` instances — it's a single-target operation.
 
 6. **Q — Restore-from-`.uninstalled` fidelity.** If the Vibe Coder preserved FLASHCARD.md + archive, uninstalled, then reinstalls six months later on a newer ClearGate version, should the restore blindly copy files in or pass them through a migration hook? Recommendation: blind copy for v1 — these are user artifacts, not versioned framework files. Schema migration (e.g. frontmatter field renames) becomes a v1.1 concern if/when we actually change the schema.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Blind copy, v1** (2026-04-19). Vibe Coder note: cloud-sync contract is not yet defined — the multi-participant MCP sync story (future PROP-007) is still being observed. Until that contract exists, restore operates purely on local preserved artifacts, no schema migration. Schema-migration hooks get revisited in v1.1 alongside whatever the sync story decides about canonical frontmatter shapes.
 
 7. **Q — Drift refresh trigger.** When should `.drift-state.json` be recomputed? Options: (a) every SessionStart, (b) daily-throttled SessionStart, (c) only on explicit `cleargate doctor --check-scaffold`. Recommendation: (b) — daily-throttled on SessionStart. Rationale: upstream package-SHA changes rarely within a single day; paying the hash cost more often is wasteful, and a 24h staleness window is acceptable for advisory signal. Vibe Coder can force-refresh with `doctor --check-scaffold`.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Daily-throttled SessionStart + agent-driven refresh** (2026-04-19). Default: daily-throttled auto-refresh (as recommended). Addition: the agent itself can invoke `cleargate doctor --check-scaffold` when context warrants — e.g., Vibe Coder mentions running `npm update`, drift-state cache is approaching staleness before Gate 1/3, or the Vibe Coder asks a question whose answer depends on current scaffold state. The agent should also **proactively suggest** running the command when it notices upstream-changed entries that may be worth reviewing. `cleargate doctor --check-scaffold` must therefore be on the agent's permitted-tools list in `cleargate-planning/.claude/settings.json`.
 
 8. **Q — Drift granularity on `user-artifact` tier.** Files like `FLASHCARD.md` have `sha256: null` in the manifest (we don't claim to know their content). Should `doctor --check-scaffold` report them at all, or silently skip? Recommendation: silently skip. These are user-owned; surfacing them as "clean" or "modified" is noise. They appear only in uninstall's preservation preview.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Silently skip** (2026-04-19). `doctor --check-scaffold` ignores `user-artifact` tier entirely. They surface only in `uninstall` preservation previews where their identity matters.
 
 9. **Q — `cleargate upgrade` bundling.** Should upgrade be transactional (all-or-nothing: if one file's merge fails, roll back the others) or incremental (each file handled independently, survivors stick)? Recommendation: incremental. Simpler to implement, easier to recover from; the user can always re-run upgrade for the files that failed. Transactional upgrade adds complexity (shadow directory + atomic rename) for marginal safety gain.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Incremental** (2026-04-19). Each file handled independently; successes stick even if a later file fails. `cleargate doctor --check-scaffold` shows the mixed-state tree after any partial run; re-running `cleargate upgrade` is idempotent and resumes from where it stopped. Git provides the revert safety net for upgrades the Vibe Coder regrets. No shadow-directory machinery in v1.
 
 10. **Q — Manifest diff publishing.** Should `@cleargate/cli` release notes include a "files changed in this release" section auto-generated from package-manifest diff between versions? Recommendation: yes — one-line-per-file summary at the top of CHANGELOG entries. Cheap to generate from the manifest; gives Vibe Coders upgrading a preview of what drift their existing installs will show.
-    - **Human Answer:** {Waiting}
+    - **Human Answer:** **Yes, ship in v1** (2026-04-19). Each `@cleargate/cli` release's CHANGELOG entry auto-opens with a "Scaffold files changed" block generated from manifest diff vs. the previous version. Collapse content-identical entries (only path-moved or metadata-changed) to avoid noise. Gives Vibe Coders a preview of upcoming drift before running `cleargate upgrade`.
 
 ---
 
