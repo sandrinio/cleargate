@@ -9,7 +9,7 @@
 
 | [[EPIC-000]] | epic | Completed | .cleargate/delivery/archive/EPIC-000_CLI_Package_Scaffold.md |
 | [[EPIC-001]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-001_Document_Metadata_Lifecycle.md |
-| [[EPIC-002]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-002_Knowledge_Wiki_Layer.md |
+| [[EPIC-002]] | epic | Completed | .cleargate/delivery/archive/EPIC-002_Knowledge_Wiki_Layer.md |
 | [[EPIC-003]] | epic | Completed | .cleargate/delivery/archive/EPIC-003_MCP_Server_Core.md |
 | [[EPIC-004]] | epic | Completed | .cleargate/delivery/archive/EPIC-004_Admin_API.md |
 | [[EPIC-005]] | epic | Completed | .cleargate/delivery/archive/EPIC-005_Admin_CLI.md |
@@ -27,15 +27,15 @@
 | [[STORY-001-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-001-04_Stamp_Frontmatter_Helper.md |
 | [[STORY-001-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-001-05_Stamp_CLI.md |
 | [[STORY-001-06]] | story | Draft | .cleargate/delivery/pending-sync/STORY-001-06_MCP_Pushed_At_Version.md |
-| [[STORY-002-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-01_Protocol_Section_10.md |
-| [[STORY-002-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-02_Wiki_Ingest_Subagent.md |
-| [[STORY-002-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-03_Wiki_Query_Subagent.md |
-| [[STORY-002-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-04_Wiki_Lint_Subagent.md |
-| [[STORY-002-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-05_Init_Writes_Hook.md |
-| [[STORY-002-06]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-06_Wiki_Build_CLI.md |
-| [[STORY-002-07]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-07_Wiki_Ingest_CLI.md |
-| [[STORY-002-08]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-08_Wiki_Lint_CLI.md |
-| [[STORY-002-09]] | story | Draft | .cleargate/delivery/pending-sync/STORY-002-09_Synthesis_Templates.md |
+| [[STORY-002-01]] | story | Completed | .cleargate/delivery/archive/STORY-002-01_Protocol_Section_10.md |
+| [[STORY-002-02]] | story | Completed | .cleargate/delivery/archive/STORY-002-02_Wiki_Ingest_Subagent.md |
+| [[STORY-002-03]] | story | Completed | .cleargate/delivery/archive/STORY-002-03_Wiki_Query_Subagent.md |
+| [[STORY-002-04]] | story | Completed | .cleargate/delivery/archive/STORY-002-04_Wiki_Lint_Subagent.md |
+| [[STORY-002-05]] | story | Completed | .cleargate/delivery/archive/STORY-002-05_Init_Writes_Hook.md |
+| [[STORY-002-06]] | story | Completed | .cleargate/delivery/archive/STORY-002-06_Wiki_Build_CLI.md |
+| [[STORY-002-07]] | story | Completed | .cleargate/delivery/archive/STORY-002-07_Wiki_Ingest_CLI.md |
+| [[STORY-002-08]] | story | Completed | .cleargate/delivery/archive/STORY-002-08_Wiki_Lint_CLI.md |
+| [[STORY-002-09]] | story | Completed | .cleargate/delivery/archive/STORY-002-09_Synthesis_Templates.md |
 | [[STORY-003-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-003-01_DB_Schema_Migrations.md |
 | [[STORY-003-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-003-02_JWT_Auth.md |
 | [[STORY-003-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-003-03_Push_Item.md |
@@ -79,7 +79,7 @@
 | [[SPRINT-01]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-01_MCP_v0.1.md |
 | [[SPRINT-02]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-02_Admin_API.md |
 | [[SPRINT-03]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-03_CLI_Packages.md |
-| [[SPRINT-04]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-04_Knowledge_Wiki.md |
+| [[SPRINT-04]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-04_Knowledge_Wiki.md |
 | [[SPRINT-05]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-05_Admin_UI.md |
 
 ## Proposals
@@ -89,6 +89,7 @@
 | [[PROPOSAL-003]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-003_MCP_Adapter.md |
 | [[PROPOSAL-004]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-004_Public_Discoverability.md |
 | [[PROPOSAL-005]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md |
+| [[PROPOSAL-006]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md |
 
 ## CRs
 

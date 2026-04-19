@@ -6,10 +6,10 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 7 | 0 | 4 |
-| Stories | 56 | 0 | 11 |
-| Sprints | 5 | 0 | 3 |
-| Proposals | 5 | 0 | 4 |
+| Epics | 7 | 0 | 5 |
+| Stories | 56 | 0 | 20 |
+| Sprints | 5 | 0 | 4 |
+| Proposals | 6 | 0 | 4 |
 | CRs | 0 | 0 | 0 |
 | Bugs | 0 | 0 | 0 |
 
@@ -24,6 +24,8 @@ _No active epics._
 
 
 - [[EPIC-000]] (epics) — Completed
+
+- [[EPIC-002]] (epics) — Completed
 
 - [[EPIC-003]] (epics) — Completed
 
@@ -45,6 +47,8 @@ _No active epics._
 
 - [[SPRINT-03]] (sprints) — Completed
 
+- [[SPRINT-04]] (sprints) — Completed
+
 - [[STORY-000-01]] (stories) — Completed
 
 - [[STORY-000-02]] (stories) — Completed
@@ -52,6 +56,24 @@ _No active epics._
 - [[STORY-000-03]] (stories) — Completed
 
 - [[STORY-000-04]] (stories) — Completed
+
+- [[STORY-002-01]] (stories) — Completed
+
+- [[STORY-002-02]] (stories) — Completed
+
+- [[STORY-002-03]] (stories) — Completed
+
+- [[STORY-002-04]] (stories) — Completed
+
+- [[STORY-002-05]] (stories) — Completed
+
+- [[STORY-002-06]] (stories) — Completed
+
+- [[STORY-002-07]] (stories) — Completed
+
+- [[STORY-002-08]] (stories) — Completed
+
+- [[STORY-002-09]] (stories) — Completed
 
 - [[STORY-003-13]] (stories) — Completed
 

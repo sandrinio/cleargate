@@ -98,7 +98,16 @@ Example entry in `readiness-gates.md`:
       check: "§2 IN-SCOPE has ≥1 checked item AND §2 OUT-OF-SCOPE has ≥1 item"
 ```
 
-Each `check` is a tiny, deterministic predicate executable by `cleargate gate check <file>`. The command looks up the document's type + current transition, reads the matching criteria from `readiness-gates.md`, and evaluates them against the document. Exits 0 if all pass, non-zero with a readable diff otherwise. Predicates are a closed, documented set (see §2.4) — not arbitrary code — so readiness logic is auditable and portable across projects.
+Each `check` is a tiny, deterministic predicate executable by `cleargate gate check <file>`. The command looks up the document's type + current transition, reads the matching criteria from `readiness-gates.md`, and evaluates them against the document. Predicates are a closed, documented set (see §2.4) — not arbitrary code — so readiness logic is auditable and portable across projects.
+
+**Enforcement severity by work-item type (Q6 resolution):**
+
+| Type | `gate check` result | Blocks `approved: true` / push? |
+|---|---|---|
+| Proposal | **advisory** (pass / warn) — exit 0 always | ❌ No. Vibe Coder judgment owns Gate 1. |
+| Epic, Story, CR, Bug | **enforcing** — exit non-zero on any failing criterion | ✅ Yes. `wiki lint` and `cleargate_push_item` both refuse on failure. |
+
+Advisory mode still populates `cached_gate_result` in frontmatter; the agent reads it to surface warnings to the Vibe Coder at triage. It just doesn't block the transition.
 
 **Per-template gate specifications (summary):**
 
@@ -234,13 +243,13 @@ Three hooks carry this feature; no new subagents and no new skills.
    - **Human Answer:** {Waiting}
 
 6. **Q — Enforcement severity at Gate 1 (Proposal approval).** Should a Proposal itself have a readiness gate (blocking the human from approving until criteria pass), or is Proposal approval purely a human judgment call with no pre-checks? Recommendation: *advisory* for Proposals (lint warns but does not block `approved: true`) — the Vibe Coder's judgment is the whole point of Gate 1. Enforcement kicks in at Epic/Story/CR/Bug where the criteria are structural.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Advisory at Proposal, enforcing at Epic/Story/CR/Bug** (2026-04-19, Vibe Coder deferred to AI recommendation). Rationale: Proposal criteria are soft (is §2 "enough"?); a gate there would either pass trivially or block valid human judgment. At Epic and below, criteria are structural (files exist, §6 empty, TBDs gone) and gating works. `cleargate gate check` on a Proposal returns pass/warn/advisory signals — never blocks `approved: true` — while the same command on Epic/Story/CR/Bug is blocking. The ambiguity gate's anti-rubber-stamp value is strongest exactly where the criteria are mechanically checkable.
 
 7. **Q — Retroactive stamping.** Do we backfill `draft_tokens` for already-archived items using git log + saved transcripts, or leave history blank? Recommendation: leave blank. Retrofit is low-value and risks invalidating `created_at` immutability.
    - **Human Answer:** {Waiting}
 
 8. **Q — Epic has two transitions (decomposition, then coding).** Do we put both `readiness_gate` blocks in the Epic template or treat it as "the gate the Epic is currently asking about" (transition advances state)? Recommendation: both blocks, keyed by `transition:` — `cleargate gate check --transition ready-for-decomposition` vs. `--transition ready-for-coding`. Default transition = whichever the document has *not yet passed*.
-   - **Human Answer:** {Waiting}
+   - **Human Answer:** **Both transitions, default = next-unpassed** (2026-04-19). Both Epic transitions (`ready-for-decomposition`, `ready-for-coding`) live as two entries in `readiness-gates.md`. `cleargate gate check EPIC-NNN.md` infers the next-unpassed transition and evaluates those criteria; `--transition <name>` is an explicit override for re-checking an earlier gate. One Epic document, one lifecycle, two checkpoint gates — no state fragmentation.
 
 9. **Q — Token stamp on Sprint files.** Sprint files are assembled from many sub-drafts over days; is stamping meaningful? Recommendation: stamp the *planning-phase* tokens only (the sprint plan drafting session), not aggregate of all stories within the sprint. Story tokens already attribute to the Story itself.
    - **Human Answer:** {Waiting}

@@ -12,8 +12,6 @@ _No active sprint found._
 ## Planned Sprints
 
 
-- [[SPRINT-04]] — status: Planned
-
 - [[SPRINT-05]] — status: Planned
 
 

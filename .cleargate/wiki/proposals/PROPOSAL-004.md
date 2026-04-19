@@ -6,7 +6,7 @@ children: []
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-004_Public_Discoverability.md"
-last_ingest: "2026-04-19T01:20:51.440Z"
+last_ingest: "2026-04-19T01:38:05.442Z"
 last_ingest_commit: "ed8a5a9fff32c0fed9c1aa2f2a89c042d91a25ef"
 repo: "planning"
 ---
