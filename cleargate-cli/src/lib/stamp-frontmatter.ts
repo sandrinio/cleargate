@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import type { CodebaseVersion } from './codebase-version.js';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
+import { serializeFrontmatter, toIsoSecond } from './frontmatter-yaml.js';
 
 export interface StampOptions {
   now?: () => Date;
@@ -27,48 +28,6 @@ const WRITE_TEMPLATE_KEYS = new Set([
 
 const DEFAULT_ARCHIVE_MATCHER = (absPath: string): boolean =>
   /\/\.cleargate\/delivery\/archive\//.test(absPath);
-
-/**
- * Serialize a frontmatter record to YAML lines.
- * Supported value types: string | null | boolean | Date (ISO string).
- * Preserves the given key order exactly.
- */
-function serializeFrontmatter(fm: Record<string, unknown>): string {
-  const lines: string[] = ['---'];
-  for (const [key, val] of Object.entries(fm)) {
-    if (val === null) {
-      lines.push(`${key}: null`);
-    } else if (typeof val === 'boolean') {
-      lines.push(`${key}: ${val}`);
-    } else if (Array.isArray(val)) {
-      if (val.length === 0) {
-        lines.push(`${key}: []`);
-      } else {
-        const items = val.map((v) => `"${String(v)}"`).join(', ');
-        lines.push(`${key}: [${items}]`);
-      }
-    } else {
-      // string (possibly already quoted in original) — emit as quoted string
-      const s = String(val);
-      // Quote if the value looks like it needs quoting (has special chars, starts with special)
-      const needsQuotes = /[:#\[\]{}&*!|>'"%@`\n]/.test(s) || s.trim() !== s || s === '' || s === 'null' || s === 'true' || s === 'false';
-      if (needsQuotes) {
-        lines.push(`${key}: "${s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
-      } else {
-        lines.push(`${key}: ${s}`);
-      }
-    }
-  }
-  lines.push('---');
-  return lines.join('\n');
-}
-
-/**
- * Format a Date as ISO 8601 UTC with second precision: "YYYY-MM-DDTHH:MM:SSZ"
- */
-function toIsoSecond(d: Date): string {
-  return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
-}
 
 export async function stampFrontmatter(absPath: string, opts?: StampOptions): Promise<StampResult> {
   const isArchive = (opts?.archivePathMatcher ?? DEFAULT_ARCHIVE_MATCHER)(absPath);

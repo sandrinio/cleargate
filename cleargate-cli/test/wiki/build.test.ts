@@ -459,8 +459,11 @@ describe('Scenario 8: parse-frontmatter unit tests', () => {
     expect(() => parseFrontmatter('---\nkey: val\n')).toThrow('missing closing ---');
   });
 
-  it('nested YAML {} throws', () => {
-    expect(() => parseFrontmatter('---\nkey: {a: 1}\n---\n')).toThrow('nested YAML');
+  it('nested YAML {} stored as opaque string (STORY-008-02)', () => {
+    // Per orchestrator decision: nested { values are stored as opaque strings
+    // instead of throwing, to unblock draft_tokens / cached_gate_result writes.
+    const { fm } = parseFrontmatter('---\nkey: {a: 1}\n---\n');
+    expect(fm['key']).toBe('{a: 1}');
   });
 });
 

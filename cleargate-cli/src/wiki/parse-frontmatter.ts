@@ -41,7 +41,10 @@ export function parseFrontmatter(raw: string): { fm: Record<string, unknown>; bo
     }
 
     if (val.startsWith('{')) {
-      throw new Error(`parseFrontmatter: nested YAML objects not supported (key: ${key})`);
+      // Treat nested YAML objects as opaque string values (do not parse).
+      // This unblocks draft_tokens / cached_gate_result nested writes (STORY-008-02).
+      fm[key] = val;
+      continue;
     }
 
     fm[key] = val.replace(/^["']|["']$/g, '');
