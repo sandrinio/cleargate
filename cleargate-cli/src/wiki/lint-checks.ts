@@ -9,10 +9,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import yaml from 'js-yaml';
 import type { GitRunner } from './git-sha.js';
 import type { LoadedWikiPage } from './load-wiki.js';
 import { deriveRepo } from './derive-repo.js';
 import { parseFrontmatter } from './parse-frontmatter.js';
+import { detectWorkItemTypeFromFm } from '../lib/work-item-type.js';
 
 export interface LintFinding {
   category: string;
@@ -293,6 +295,141 @@ export function checkPaginationNeeded(pages: LoadedWikiPage[]): LintFinding[] {
     }
   }
   return findings;
+}
+
+/** Work-item types that trigger enforcing gate-failure lint (not advisory). */
+const ENFORCING_TYPES = new Set(['epic', 'story', 'cr', 'bug']);
+
+/** Status values considered "ready" (🟢-candidate). */
+const READY_STATUSES = new Set(['Ready', 'Active']);
+
+/**
+ * Parse the cached_gate_result from a raw frontmatter record.
+ * parseFrontmatter stores nested YAML objects as opaque strings starting with '{'.
+ * This helper resolves either form into a plain object or null.
+ */
+function parseCachedGateResult(
+  raw: unknown,
+): { pass: unknown; failing_criteria: unknown; last_gate_check: unknown } | null {
+  if (!raw || raw === null) return null;
+
+  // Opaque string form — inline flow YAML written by writeCachedGate
+  if (typeof raw === 'string') {
+    if (!raw.startsWith('{')) return null;
+    try {
+      const parsed = yaml.load(raw);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
+      const p = parsed as Record<string, unknown>;
+      return { pass: p['pass'], failing_criteria: p['failing_criteria'], last_gate_check: p['last_gate_check'] };
+    } catch {
+      return null;
+    }
+  }
+
+  // Already-parsed object form (future-proofing)
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
+    const p = raw as Record<string, unknown>;
+    return { pass: p['pass'], failing_criteria: p['failing_criteria'], last_gate_check: p['last_gate_check'] };
+  }
+
+  return null;
+}
+
+/**
+ * Check: gate-failure — 🟢-candidate Epic/Story/CR/Bug with cached_gate_result.pass === false.
+ * Reads the raw work-item file (not the wiki page).
+ * Proposal / Sprint / Initiative are advisory only → returns null (no enforcing block).
+ */
+export function checkGateFailure(page: LoadedWikiPage, repoRoot: string): LintFinding | null {
+  const rawPath = page.page.raw_path;
+  if (!rawPath) return null;
+
+  const absRaw = path.join(repoRoot, rawPath);
+  if (!fs.existsSync(absRaw)) return null;
+
+  let rawFm: Record<string, unknown>;
+  try {
+    const raw = fs.readFileSync(absRaw, 'utf8');
+    const { fm } = parseFrontmatter(raw);
+    rawFm = fm;
+  } catch {
+    return null;
+  }
+
+  const cgr = parseCachedGateResult(rawFm['cached_gate_result']);
+  if (!cgr || cgr.pass !== false) return null;
+
+  // Check if the work-item type is enforcing
+  const wiType = detectWorkItemTypeFromFm(rawFm);
+  if (!wiType || !ENFORCING_TYPES.has(wiType)) return null;
+
+  // Check if this is a 🟢-candidate (status Ready/Active or ambiguity 🟢 Low)
+  const status = String(rawFm['status'] ?? '');
+  const ambiguity = String(rawFm['ambiguity'] ?? '');
+  const isReadyCandidate = READY_STATUSES.has(status) || ambiguity === '🟢 Low';
+  if (!isReadyCandidate) return null;
+
+  // Collect failing criteria IDs
+  const failingCriteria = cgr.failing_criteria;
+  const criteriaIds: string[] = [];
+  if (Array.isArray(failingCriteria)) {
+    for (const criterion of failingCriteria as unknown[]) {
+      if (criterion && typeof criterion === 'object' && 'id' in (criterion as object)) {
+        criteriaIds.push(String((criterion as Record<string, unknown>)['id']));
+      } else if (typeof criterion === 'string') {
+        criteriaIds.push(criterion);
+      }
+    }
+  }
+
+  const criteriaStr = criteriaIds.length > 0 ? criteriaIds.join(', ') : 'unknown';
+  return {
+    category: 'gate-failure',
+    line: `gate-failure: ${rawPath} failed criteria: ${criteriaStr}`,
+  };
+}
+
+/**
+ * Check: gate-stale — cached_gate_result.last_gate_check < updated_at (ISO-8601 lexical compare).
+ * Applies to ALL work-item types (including Proposal/Sprint/Initiative).
+ * Reads the raw work-item file (not the wiki page).
+ */
+export function checkGateStaleness(page: LoadedWikiPage, repoRoot: string): LintFinding | null {
+  const rawPath = page.page.raw_path;
+  if (!rawPath) return null;
+
+  const absRaw = path.join(repoRoot, rawPath);
+  if (!fs.existsSync(absRaw)) return null;
+
+  let rawFm: Record<string, unknown>;
+  try {
+    const raw = fs.readFileSync(absRaw, 'utf8');
+    const { fm } = parseFrontmatter(raw);
+    rawFm = fm;
+  } catch {
+    return null;
+  }
+
+  const cgr = parseCachedGateResult(rawFm['cached_gate_result']);
+  if (!cgr) return null;
+
+  const lastGateCheck = cgr.last_gate_check;
+  if (!lastGateCheck || lastGateCheck === null) return null;
+
+  const updatedAt = rawFm['updated_at'];
+  if (!updatedAt) return null;
+
+  const lastCheckStr = String(lastGateCheck);
+  const updatedAtStr = String(updatedAt);
+
+  // ISO-8601 lexical compare: if last_gate_check < updated_at → stale
+  if (lastCheckStr < updatedAtStr) {
+    return {
+      category: 'gate-stale',
+      line: `gate-stale: ${rawPath} last_gate_check=${lastCheckStr} < updated_at=${updatedAtStr}`,
+    };
+  }
+  return null;
 }
 
 /**

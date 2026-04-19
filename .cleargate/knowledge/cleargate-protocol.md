@@ -108,6 +108,8 @@ There are three hard stops. You halt at each one and do not proceed until the hu
 - Never push a document that is 🔴 or 🟡.
 - Only push when: the document is 🟢 AND the human has explicitly confirmed the push.
 
+> Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12.
+
 ---
 
 ## 5. Delivery Workflow ("Local First, Sync, Update")
@@ -336,6 +338,8 @@ Lint checks performed:
 - Stale `last_ingest_commit` — stored SHA differs from current `git log -1` for the raw file.
 - Invalidated topic citations — a `wiki/topics/*.md` page cites an item that has been archived or status-set to cancelled.
 
+The gate-check hook (§12.5) runs before ingest; staleness (§12.4) is a lint error.
+
 ---
 
 ### §10.9 Fallback Chain
@@ -424,3 +428,35 @@ Implementation notes:
 - `updated_at_version` must be a resolvable git ref (short SHA or tag). If the value is `"unknown"` or `"strategy-phase-pre-init"`, lint skips the stale check for that file and emits a warning rather than an error.
 - The `-dirty` suffix is stripped before resolving the ref: `a3f2e91-dirty` → `a3f2e91`.
 - This check is consumed by `cleargate wiki lint` (STORY-008-07) and the wiki-ingest subagent's idempotency evaluation (§10.7).
+
+---
+
+## 12. Token Cost Stamping & Readiness Gates
+
+### §12.1 Overview
+Two-capability bundle: (1) `draft_tokens` frontmatter stamp populated by a PostToolUse hook from the sprint token ledger; (2) closed-set predicate engine + `cleargate gate check` CLI writing `cached_gate_result` into frontmatter, blocking wiki-lint on enforcing types (Epic/Story/CR/Bug), advising on Proposals.
+
+### §12.2 Token stamp semantics
+- Idempotent within a session (re-stamp = no-op when last_stamp + totals unchanged).
+- Accumulative across sessions: `sessions[]` gains one entry per session; top-level totals are sums; `model` is comma-joined across distinct values.
+- Missing ledger row → `draft_tokens:{…null…, stamp_error:"<reason>"}` — never fabricate.
+- Archive-path stamping is a no-op (freeze-on-archive).
+- Sprint files record only planning-phase tokens; story tokens attribute to their own files (no double-count).
+
+### §12.3 Readiness gates
+- Central definitions: `.cleargate/knowledge/readiness-gates.md` keyed by `{work_item_type, transition}`.
+- Predicates are a CLOSED set (6 shapes): `frontmatter(...)`, `body contains`, `section(N) has count`, `file-exists`, `link-target-exists`, `status-of`. No shell-out, no network.
+- Severity: Proposal = advisory (exit 0, records `pass:false` without blocking). Epic/Story/CR/Bug = enforcing (exit non-zero at CLI; wiki lint refuses).
+
+### §12.4 Enforcement points
+- v1: `wiki lint` only. MCP-side `push_item` enforcement is deferred post-PROP-007.
+- Staleness: `cached_gate_result.last_gate_check < updated_at` → lint error for ALL types (catches silent hook failures).
+
+### §12.5 Hook lifecycle
+- PostToolUse `stamp-and-gate.sh` chains `stamp-tokens → gate check → wiki ingest` on every Write/Edit under `.cleargate/delivery/**`. Exit always 0.
+- SessionStart `session-start.sh` pipes `cleargate doctor --session-start` (≤100 LLM-tokens, ≤10 items + overflow pointer) into context.
+- Every invocation logs to `.cleargate/hook-log/gate-check.log`; `cleargate doctor` surfaces last-24h failures.
+
+### §12.6 Cross-references
+- §4 Phase Gates: "Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12."
+- §10.8 Wiki-lint enforcement: extended by the gate-check hook; staleness check added per §12.4.

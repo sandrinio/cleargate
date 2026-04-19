@@ -23,6 +23,8 @@ import {
   checkInvalidatedCitations,
   checkExcludedPathIngested,
   checkPaginationNeeded,
+  checkGateFailure,
+  checkGateStaleness,
   discoverPlainTextMentions,
   type LintFinding,
 } from '../wiki/lint-checks.js';
@@ -84,6 +86,14 @@ export async function wikiLintHandler(opts: WikiLintOptions = {}): Promise<void>
     // (e) excluded-path-ingested
     const excludedPath = checkExcludedPathIngested(page, repoRoot);
     if (excludedPath) findings.push(excludedPath);
+
+    // (f) gate-failure — enforcing for Epic/Story/CR/Bug
+    const gateFail = checkGateFailure(page, repoRoot);
+    if (gateFail) findings.push(gateFail);
+
+    // (g) gate-stale — applies to ALL types
+    const gateStale = checkGateStaleness(page, repoRoot);
+    if (gateStale) findings.push(gateStale);
   }
 
   // Step 3: single index cross-check pass — broken backlinks
