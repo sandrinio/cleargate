@@ -16,6 +16,17 @@ created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
+draft_tokens:
+  input: null
+  output: null
+  cache_read: null
+  cache_creation: null
+  model: null
+  sessions: []
+cached_gate_result:
+  pass: null
+  failing_criteria: []
+  last_gate_check: null
 ---
 
 # INIT-{ID}: {Initiative Name}
