@@ -23,6 +23,8 @@ import {
   ItemVersionSchema,
   ItemsListResponseSchema,
   ItemVersionsResponseSchema,
+  DeviceStartResponseSchema,
+  DevicePollSuccessResponseSchema,
 } from '../../src/admin-api/responses.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -148,5 +150,23 @@ describe('snapshot-drift', () => {
     const itemVersionsResponseKeys = Object.keys(ItemVersionsResponseSchema.shape);
     const itemVersionsResponseSnapshotKeys = getSchemaProperties(snapshot, 'ItemVersionsResponse');
     expect(itemVersionsResponseKeys.sort()).toEqual(itemVersionsResponseSnapshotKeys.sort());
+
+    // DeviceStartResponse — STORY-005-06
+    const deviceStartKeys = Object.keys(DeviceStartResponseSchema.shape);
+    const deviceStartSnapshotKeys = getSchemaProperties(snapshot, 'DeviceStartResponse');
+    expect(deviceStartKeys.sort()).toEqual(deviceStartSnapshotKeys.sort());
+    const deviceStartRequired = getSchemaRequired(snapshot, 'DeviceStartResponse');
+    for (const key of deviceStartRequired) {
+      expect(deviceStartKeys).toContain(key);
+    }
+
+    // DevicePollSuccessResponse — STORY-005-06
+    const devicePollSuccessKeys = Object.keys(DevicePollSuccessResponseSchema.shape);
+    const devicePollSuccessSnapshotKeys = getSchemaProperties(snapshot, 'DevicePollSuccessResponse');
+    expect(devicePollSuccessKeys.sort()).toEqual(devicePollSuccessSnapshotKeys.sort());
+    const devicePollSuccessRequired = getSchemaRequired(snapshot, 'DevicePollSuccessResponse');
+    for (const key of devicePollSuccessRequired) {
+      expect(devicePollSuccessKeys).toContain(key);
+    }
   });
 });

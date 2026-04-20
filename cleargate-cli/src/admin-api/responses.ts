@@ -139,3 +139,37 @@ export const ItemVersionsResponseSchema = z
   .strict();
 
 export type ItemVersionsResponse = z.infer<typeof ItemVersionsResponseSchema>;
+
+// ── Device-flow schemas (STORY-005-06) ───────────────────────────────────────
+
+export const DeviceStartResponseSchema = z
+  .object({
+    device_code: z.string(),
+    user_code: z.string(),
+    verification_uri: z.string(),
+    expires_in: z.number().int(),
+    interval: z.number().int(),
+  })
+  .strict();
+
+export type DeviceStartResponse = z.infer<typeof DeviceStartResponseSchema>;
+
+export const DevicePollPendingResponseSchema = z
+  .object({
+    pending: z.literal(true),
+    retry_after: z.number().int().optional(),
+  })
+  .strict();
+
+export type DevicePollPendingResponse = z.infer<typeof DevicePollPendingResponseSchema>;
+
+export const DevicePollSuccessResponseSchema = z
+  .object({
+    pending: z.literal(false),
+    admin_token: z.string(),
+    expires_at: z.string(),
+    admin_user_id: z.string(),
+  })
+  .strict();
+
+export type DevicePollSuccessResponse = z.infer<typeof DevicePollSuccessResponseSchema>;

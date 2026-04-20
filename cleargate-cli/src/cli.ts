@@ -18,6 +18,7 @@ import { pullHandler } from './commands/pull.js';
 import { pushHandler } from './commands/push.js';
 import { conflictsHandler } from './commands/conflicts.js';
 import { syncLogHandler } from './commands/sync-log.js';
+import { adminLoginHandler } from './commands/admin-login.js';
 
 const program = new Command();
 
@@ -145,10 +146,23 @@ program
     await stampTokensHandler(file, { dryRun: opts.dryRun });
   });
 
-program
+const admin = program
   .command('admin')
-  .description('administrative operations (create-project, invite, issue-token, revoke-token)')
-  .action(stubHandler('admin'));
+  .description('administrative operations (login, create-project, invite, issue-token, revoke-token)');
+
+admin
+  .command('login')
+  .description('log in as a ClearGate admin via GitHub OAuth device flow')
+  .option('--mcp-url <url>', 'MCP server URL (overrides CLEARGATE_MCP_URL and config file)')
+  .action(async (opts: { mcpUrl?: string }, command: Command) => {
+    const globals = command.parent!.parent!.opts<{ mcpUrl?: string }>();
+    await adminLoginHandler({
+      mcpUrl: opts.mcpUrl ?? globals.mcpUrl,
+    });
+  });
+
+// Remaining admin subcommands are not yet implemented
+admin.action(stubHandler('admin'));
 
 program
   .command('doctor')
