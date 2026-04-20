@@ -564,3 +564,84 @@ Soft revert preserves audit history on the PM-tool side. Refusing to revert done
 **Rule:** All sync actions are manual (`cleargate sync` / `cleargate pull <id>` / `cleargate push <file>`). The SessionStart hook SUGGESTS via `cleargate sync --check` — it never auto-pulls or auto-pushes. MCP probes are throttled to at most one per 24 hours per repo.
 
 Auto-push without human review would bypass the approval gate; auto-pull would overwrite in-progress local edits without conflict detection. The 24-hour throttle prevents session-start latency accumulation. Throttle state is stored in `.cleargate/.sync-marker.json` with schema `{ "last_check": "<ISO-8601>" }` (v1; unknown keys are ignored on read for forward compatibility). Source: `.claude/hooks/session-start.sh`; `.cleargate/.sync-marker.json`; R7 mitigation.
+
+---
+
+## 15. Worktree Lifecycle (v2)
+
+**v1/v2 gating:** Under `execution_mode: v1` the rules in this section are **informational** — they document the intended workflow but are not enforced by any script. Under `execution_mode: v2` they are **mandatory**: every story transition that would run a Developer agent MUST follow these procedures before any file edits begin.
+
+### §15.1 Branch hierarchy
+
+The branch hierarchy for a sprint is:
+
+```
+main
+└── sprint/S-XX          ← cut at sprint start; never commit directly
+    └── story/STORY-NNN-NN   ← cut when story transitions Ready → Bouncing
+```
+
+- **Sprint branch** is cut from `main` once at the start of each sprint:
+  ```bash
+  git checkout -b sprint/S-XX main
+  ```
+- **Story branch** is cut from the active sprint branch when the story enters `Bouncing` state:
+  ```bash
+  git checkout sprint/S-XX
+  git checkout -b story/STORY-NNN-NN sprint/S-XX
+  ```
+- Story branches are **never** cut from `main` directly; they always track the sprint branch as parent.
+
+### §15.2 Worktree commands
+
+Per-story working trees live under `.worktrees/` at repo root. Each story gets its own isolated filesystem view.
+
+**Create worktree (story starts bouncing):**
+```bash
+git worktree add .worktrees/STORY-NNN-NN -b story/STORY-NNN-NN sprint/S-XX
+```
+
+**Verify worktree:**
+```bash
+git worktree list
+# .../repo            <sha>  [sprint/S-XX]
+# .../repo/.worktrees/STORY-NNN-NN  <sha>  [story/STORY-NNN-NN]
+```
+
+**Merge story back into sprint branch (story passes QA + Architect):**
+```bash
+git checkout sprint/S-XX
+git merge story/STORY-NNN-NN --no-ff -m "merge(story/STORY-NNN-NN): STORY-NNN-NN <title>"
+```
+
+**Remove worktree and story branch (after successful merge):**
+```bash
+git worktree remove .worktrees/STORY-NNN-NN
+git branch -d story/STORY-NNN-NN
+```
+
+**Prune stale worktree refs:**
+```bash
+git worktree prune
+```
+
+All commands must be run from the **repo root** (not from inside `.worktrees/`), except Developer Agent file edits which happen inside the assigned worktree path.
+
+### §15.3 MCP nested-repo rule
+
+**The `mcp/` directory is a nested independent git repository.** Running `git worktree add` inside `mcp/` would create a worktree scoped to the nested repo, not to the outer ClearGate repo. This is a git footgun: the outer repo cannot track, merge, or remove the inner worktree via its own git commands.
+
+**Rule:** Never run `git worktree add` inside `mcp/`. If a story requires edits to `mcp/`, the Developer Agent must edit `mcp/` from inside the outer worktree (`.worktrees/STORY-NNN-NN/mcp/...`) — the nested repo's files are visible there as a subdirectory, not as a separate git context. MCP-native worktree support is deferred to Q3.
+
+### §15.4 Local state.json is in-flight authority
+
+During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/state.json` is the single source of truth for story state. The MCP server is a **post-facto audit** channel: it receives state updates after each transition but is never consulted during execution. If MCP is unavailable, execution continues uninterrupted; state.json records the ground truth that MCP will eventually replicate. (Source: EPIC-013 Q7 resolution.)
+
+### §15.5 Enforcement gates
+
+| `execution_mode` | These rules are |
+|---|---|
+| `v1` | Informational — document intended workflow; not script-enforced |
+| `v2` | Mandatory — `validate_bounce_readiness.mjs` checks worktree isolation before any Developer Agent edit |
+
+Under v2, attempting to run a Developer Agent on a story without a matching `.worktrees/STORY-NNN-NN/` path present causes `validate_bounce_readiness.mjs` to exit non-zero and the orchestrator to halt the story transition.
