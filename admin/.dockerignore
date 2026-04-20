@@ -1,0 +1,14 @@
+node_modules
+.svelte-kit
+build
+tests
+e2e
+.git
+*.log
+.env*
+*.local
+.DS_Store
+coverage
+playwright-report
+test-results
+dist

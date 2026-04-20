@@ -1,43 +1,78 @@
-# Multi-stage Dockerfile — STORY-006-01 minimal stub
-# STORY-006-10 owns production-grade hardening (non-root user, health check, etc.)
+# syntax=docker/dockerfile:1.7
+#
+# Multi-stage Dockerfile for ClearGate Admin UI — STORY-006-10
+# Mirrors mcp/Dockerfile three-stage pattern: deps → builder → runtime
+# Base image: node:24-alpine | Non-root user: node | Port: 3000
 
-# --- Build stage ---
-FROM node:24-alpine AS build
-
+# ------ Production dependencies ------
+FROM node:24-alpine AS deps
 WORKDIR /app
 
-# Copy workspace root (needed for npm workspaces)
+# Copy workspace root manifests (npm workspaces requires root package-lock.json)
+COPY package.json package-lock.json ./
+
+# Copy only the package.json files needed for workspace resolution
+COPY admin/package.json ./admin/
+COPY cleargate-cli/package.json ./cleargate-cli/
+COPY mcp/package.json ./mcp/
+
+# Install production-only deps for the admin workspace.
+# --ignore-scripts blocks arbitrary postinstall code from transitive deps.
+RUN npm ci --workspace admin --omit=dev --ignore-scripts
+
+# ------ Build stage ------
+FROM node:24-alpine AS builder
+WORKDIR /app
+
+# Force devDeps even when build env sets NODE_ENV=production.
+# Coolify and many CI systems inject NODE_ENV=production at build time,
+# which otherwise silently strips TypeScript/svelte/vite, breaking npm run build.
+ENV NODE_ENV=development
+
+# Copy workspace root manifests
 COPY package.json package-lock.json ./
 COPY admin/package.json ./admin/
 COPY cleargate-cli/package.json ./cleargate-cli/
-COPY mcp/package.json ./mcp/ 2>/dev/null || true
+COPY mcp/package.json ./mcp/
 
-# Install all workspace deps
-RUN npm ci --workspace admin
+# Install all deps (including devDeps) for the admin workspace
+RUN npm ci --workspace admin --include=dev --ignore-scripts
 
-# Copy admin source
+# Copy source files
 COPY admin/ ./admin/
 COPY cleargate-cli/ ./cleargate-cli/
 
-# Build admin
+# Build — outputs to admin/build/
 RUN npm run build --workspace admin
 
-# --- Runtime stage ---
+# ------ Runtime stage ------
 FROM node:24-alpine AS runtime
-
 WORKDIR /app
 
-# Copy built output from build stage
-COPY --from=build /app/admin/build ./build
-COPY --from=build /app/admin/package.json ./
+ENV NODE_ENV=production
+ENV PORT=3000
 
-# Production dependencies only
-RUN npm install --omit=dev --ignore-scripts
+RUN apk add --no-cache dumb-init
+
+# Copy production node_modules from the deps stage
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=deps --chown=node:node /app/admin/node_modules ./admin/node_modules
+
+# Copy the SvelteKit adapter-node build output
+COPY --from=builder --chown=node:node /app/admin/build ./build
+
+# Copy package.json for adapter-node runtime metadata
+COPY --from=builder --chown=node:node /app/admin/package.json ./
+
+# Run as non-root user (uid=1000 in node:24-alpine)
+USER node
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV NODE_ENV=production
+# Coolify + Dockerfile HEALTHCHECK — hits our /health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/health || exit 1
 
-# adapter-node serves from build/
+ENTRYPOINT ["dumb-init", "--"]
+# adapter-node entry point (SvelteKit adapter-node convention)
 CMD ["node", "build"]

@@ -14,6 +14,7 @@
  * (for M1 Playwright smoke test compatibility — never set in production).
  */
 
+import './lib/server/env.js';
 import { SvelteKitAuth } from '@auth/sveltekit';
 import GitHub from '@auth/core/providers/github';
 import type { Handle } from '@sveltejs/kit';
