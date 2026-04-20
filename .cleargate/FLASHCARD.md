@@ -4,6 +4,7 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-21 · #mjs #jsdoc #syntax · glob pattern `foo/*/bar` inside a JSDoc block comment in .mjs causes SyntaxError at module load (Node parses `*` as multiply); use `<id>` placeholder instead.
 2026-04-21 · #worktree #mcp · never git worktree add inside nested mcp/ repo — edit mcp/ inside the outer worktree; nested-repo worktrees are a git footgun.
 2026-04-21 · #recipe #worktree #state-schema · V-Bounce port: state.json lives at `.cleargate/sprint-runs/<id>/state.json` (NOT `.vbounce/state.json`); init default state is "Ready to Bounce" (not "Draft"); auto-escalate on qa_bounces/arch_bounces==3 (V-Bounce does NOT — we diverge).
 2026-04-20 · #cli #test-seam #exit · exit seam throws in tests; if the throw propagates into `catch(err)`, the error-path fires — extract SQL into a value-returning fn, call exitFn only at handler top-level after cleanup.
