@@ -15,8 +15,9 @@
   import * as mcpClient from '$lib/mcp-client.js';
   import { toastStore } from '$lib/stores/toast.js';
 
-  // POST /projects returns the created project directly (no envelope)
-  const NewProjectResponseSchema = z.object({ project: ProjectSchema }).strict();
+  // POST /projects returns a bare ProjectDto (no { project: ... } envelope)
+  // Confirmed: mcp/src/admin-api/projects.ts:92-93 sends reply.code(201).send(toDto(project!))
+  const NewProjectResponseSchema = ProjectSchema;
 
   // Client-side validation constants
   const NAME_MAX = 100;
@@ -50,7 +51,7 @@
         NewProjectResponseSchema,
       );
       toastStore.success('Project created');
-      await goto(`/projects/${res.project.id}`);
+      await goto(`/projects/${res.id}`);
     } catch (err) {
       console.error('[new-project] create failed', err);
       toastStore.error('Failed to create project — please try again');
