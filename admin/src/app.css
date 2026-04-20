@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@plugin "daisyui" {
+  themes:
+    cleargate --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "cleargate";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #FFFFFF;       /* surface */
+  --color-base-200: #F7F5F1;       /* surface-muted */
+  --color-base-300: #F4F1EC;       /* canvas */
+  --color-base-content: #1A1F2E;   /* ink */
+  --color-primary: #E85C2F;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #7BA4D4;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #1A1F2E;         /* dark pills (value chips, primary buttons) */
+  --color-accent-content: #FFFFFF;
+  --color-neutral: #1A1F2E;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #7BA4D4;
+  --color-success: #2F9E6B;
+  --color-warning: #D89B2B;
+  --color-error: #C23A3A;
+  --radius-selector: 9999px;       /* pills */
+  --radius-field: 0.75rem;         /* inputs, small buttons */
+  --radius-box: 1.5rem;            /* cards */
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+html, body {
+  background: var(--color-base-300);
+  font-family: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Custom shadow token (Design Guide §5) */
+@theme {
+  --shadow-card: 0 1px 2px rgba(26, 31, 46, 0.04), 0 4px 16px rgba(26, 31, 46, 0.04);
+}
+
+/* Tabular numbers for stat cards (Design Guide §3) */
+.num {
+  font-variant-numeric: tabular-nums;
+}
