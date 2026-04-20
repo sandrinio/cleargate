@@ -26,6 +26,15 @@
   import ItemTimeline from '$lib/components/ItemTimeline.svelte';
   import PayloadViewer from '$lib/components/PayloadViewer.svelte';
   import { relative } from '$lib/utils/time-ago.js';
+  import { marked } from 'marked';
+  import DOMPurify from 'isomorphic-dompurify';
+
+  marked.setOptions({ gfm: true, breaks: false });
+
+  function renderMarkdown(md: string): string {
+    const html = marked.parse(md, { async: false }) as string;
+    return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+  }
 
   // ── State ────────────────────────────────────────────────────────────────────
 
@@ -199,7 +208,9 @@
     {#if typeof item.current_payload?.['body'] === 'string' && (item.current_payload['body'] as string).length > 0}
       <div class="bg-base-100 rounded-3xl shadow-card p-6">
         <h3 class="text-lg font-semibold text-base-content mb-4">Content (v{item.version})</h3>
-        <pre class="whitespace-pre-wrap break-words font-sans text-sm text-base-content leading-relaxed">{item.current_payload['body']}</pre>
+        <article class="cg-markdown text-sm text-base-content leading-relaxed">
+          {@html renderMarkdown(item.current_payload['body'] as string)}
+        </article>
       </div>
     {/if}
 
@@ -227,3 +238,28 @@
   {/if}
 
 </div>
+
+<style>
+  /* Scoped markdown typography — minimal, matches Design Guide color tokens. */
+  .cg-markdown :global(h1) { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+  .cg-markdown :global(h2) { font-size: 1.25rem; font-weight: 700; margin: 1.25rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid #ECE8E1; }
+  .cg-markdown :global(h3) { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+  .cg-markdown :global(h4) { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.5rem; }
+  .cg-markdown :global(p) { margin: 0.5rem 0; line-height: 1.6; }
+  .cg-markdown :global(ul), .cg-markdown :global(ol) { margin: 0.5rem 0 0.5rem 1.5rem; }
+  .cg-markdown :global(ul) { list-style: disc; }
+  .cg-markdown :global(ol) { list-style: decimal; }
+  .cg-markdown :global(li) { margin: 0.25rem 0; }
+  .cg-markdown :global(li > p) { margin: 0.1rem 0; }
+  .cg-markdown :global(a) { color: #E85C2F; text-decoration: underline; }
+  .cg-markdown :global(code) { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.85em; background: #F4F1EB; padding: 0.1em 0.35em; border-radius: 0.25rem; }
+  .cg-markdown :global(pre) { background: #F4F1EB; padding: 0.75rem 1rem; border-radius: 0.75rem; overflow-x: auto; margin: 0.75rem 0; font-size: 0.85rem; }
+  .cg-markdown :global(pre code) { background: transparent; padding: 0; }
+  .cg-markdown :global(blockquote) { border-left: 3px solid #ECE8E1; padding: 0 0 0 1rem; margin: 0.75rem 0; color: #6B7280; }
+  .cg-markdown :global(table) { border-collapse: collapse; margin: 0.75rem 0; width: 100%; font-size: 0.85rem; }
+  .cg-markdown :global(th), .cg-markdown :global(td) { border: 1px solid #ECE8E1; padding: 0.4rem 0.6rem; text-align: left; }
+  .cg-markdown :global(th) { background: #F4F1EB; font-weight: 600; }
+  .cg-markdown :global(hr) { border: 0; border-top: 1px solid #ECE8E1; margin: 1.25rem 0; }
+  .cg-markdown :global(strong) { font-weight: 600; }
+  .cg-markdown :global(em) { font-style: italic; }
+</style>
