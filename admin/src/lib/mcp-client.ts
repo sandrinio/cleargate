@@ -159,6 +159,40 @@ export async function post<T>(path: string, body: unknown, schema: ZodSchema<T>)
 }
 
 /**
+ * Authenticated DELETE with 401-retry-once pattern.
+ * DELETE often returns 204 No Content; schema is optional.
+ * Treat 200 and 204 both as success.
+ *
+ * Flat paths (e.g. /admin-api/v1/tokens/:tid) are supported —
+ * path is NOT prefixed with /projects/:pid.
+ */
+export async function del(path: string): Promise<void> {
+  if (!adminToken) await exchange();
+
+  const baseUrl = getBaseUrl();
+  let res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    credentials: 'include',
+  });
+
+  if (res.status === 401) {
+    // One retry after re-exchange
+    await exchange();
+    res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` },
+      credentials: 'include',
+    });
+    if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
+  }
+
+  if (res.status === 403) throw new ForbiddenError('forbidden', 'Forbidden');
+  // 204 No Content and 200 OK are both success; anything else is a NetworkError
+  if (res.status !== 204 && res.status !== 200) throw new NetworkError(res.status);
+}
+
+/**
  * Clear in-memory token and cancel proactive refresh timer.
  * Call on user sign-out or page unload.
  */
@@ -184,5 +218,6 @@ export const mcpClient = {
   exchange,
   get,
   post,
+  del,
   signOut,
 };

@@ -9,11 +9,11 @@
    *   §6.12 destructive copy — "Remove <email> from <project>? Their tokens will be revoked."
    *
    * DELETE /admin-api/v1/members/:mid — FLAT path per members.ts:224 + #flat-path flashcard.
-   * TODO: replace inline fetch with mcpClient.del() once STORY-006-05 adds it.
+   * Uses mcpClient.del() added in STORY-006-05.
    */
   import { page } from '$app/stores';
   import { getContext } from 'svelte';
-  import { get as mcpGet, getAdminToken } from '$lib/mcp-client.js';
+  import { get as mcpGet, del as mcpDel } from '$lib/mcp-client.js';
   import { MemberSchema } from 'cleargate/admin-api';
   import { toastStore } from '$lib/stores/toast.js';
   import { z } from 'zod';
@@ -87,22 +87,7 @@
     removing = true;
 
     try {
-      // TODO: replace with mcpClient.del() once STORY-006-05 adds it to mcp-client.ts
-      const baseUrl =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (import.meta as unknown as { env?: Record<string, string> }).env?.['VITE_MCP_URL'] ??
-        'http://localhost:3001';
-      const token = getAdminToken();
-
-      const res = await fetch(`${baseUrl}/admin-api/v1/members/${target.id}`, {
-        method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        credentials: 'include',
-      });
-
-      if (!res.ok && res.status !== 204) {
-        throw new Error(`DELETE failed with ${res.status}`);
-      }
+      await mcpDel(`/members/${target.id}`);
 
       // Optimistic row removal
       members = members.filter((m) => m.id !== target.id);

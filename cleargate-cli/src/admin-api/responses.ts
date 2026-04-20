@@ -27,7 +27,7 @@ export const MemberSchema = z
     role: z.string(),
     display_name: z.string().nullable().optional(),
     created_at: z.string(),
-    status: z.enum(['pending', 'active']),
+    status: z.enum(['pending', 'active', 'expired']),
   })
   .strict();
 

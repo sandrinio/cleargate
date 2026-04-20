@@ -8,6 +8,9 @@ export default defineConfig({
     alias: {
       // SvelteKit $lib alias — needed for components that use $lib/* imports
       $lib: path.resolve(__dirname, './src/lib'),
+      // SvelteKit $app/* stubs for unit tests (vitest does not run the SvelteKit plugin)
+      '$app/navigation': path.resolve(__dirname, './src/lib/__mocks__/app-navigation.ts'),
+      '$app/stores': path.resolve(__dirname, './src/lib/__mocks__/app-stores.ts'),
     },
     conditions: ['browser'],
   },
