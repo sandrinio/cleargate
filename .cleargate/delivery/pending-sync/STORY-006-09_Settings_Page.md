@@ -1,17 +1,22 @@
 ---
-story_id: "STORY-006-09"
-parent_epic_ref: "EPIC-006"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, EPIC-006, EPIC-003 (admin_users schema), STORY-003-11 (bootstrap)"
-design_guide_ref: "../../knowledge/design-guide.md"
-sprint_id: "SPRINT-04"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-006-02"]
+story_id: STORY-006-09
+parent_epic_ref: EPIC-006
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006, EPIC-003 (admin_users schema), STORY-003-11 (bootstrap)
+design_guide_ref: ../../knowledge/design-guide.md
+sprint_id: SPRINT-04
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-006-02
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-20T10:53:29Z
 ---
 
 # STORY-006-09: Settings Page (Root-Only Admin User Management)

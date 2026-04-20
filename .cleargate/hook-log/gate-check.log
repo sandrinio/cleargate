@@ -24,3 +24,13 @@ Gate: cr.ready-to-apply (enforcing)
 ✅ cr.ready-to-apply passed (3 criteria)
 wiki ingest: create crs/CR-001.md
 [2026-04-19T18:23:31Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-001_Flashcard_Triggers_And_Cleanup.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md (EPIC-011)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ interrogation-resolved: 1 occurrence at §9
+wiki ingest: create epics/EPIC-011.md
+[2026-04-20T13:11:12Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md (EPIC-011)
+Gate: epic.ready-for-decomposition (enforcing)
+✅ epic.ready-for-decomposition passed (5 criteria)
+wiki ingest: update epics/EPIC-011.md
+[2026-04-20T13:11:35Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md

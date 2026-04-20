@@ -1,17 +1,24 @@
 ---
-story_id: "STORY-006-10"
-parent_epic_ref: "EPIC-006"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6 Q7, STORY-003-12 (MCP Coolify precedent)"
-design_guide_ref: "../../knowledge/design-guide.md"
-sprint_id: "SPRINT-04"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-006-01", "STORY-006-02", "STORY-006-09"]
+story_id: STORY-006-10
+parent_epic_ref: EPIC-006
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6 Q7, STORY-003-12 (MCP Coolify precedent)
+design_guide_ref: ../../knowledge/design-guide.md
+sprint_id: SPRINT-04
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-006-01
+  - STORY-006-02
+  - STORY-006-09
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-20T11:26:35Z
 ---
 
 # STORY-006-10: Admin Dockerfile + Coolify Deploy Runbook
