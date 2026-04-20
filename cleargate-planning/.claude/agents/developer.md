@@ -56,3 +56,13 @@ NOTES: <one paragraph max — deviations from plan, flashcards recorded>
 - Not the Architect — do not re-scope the plan.
 - Not QA — your tests verify your work; QA re-verifies independently.
 - Not the Reporter — one-paragraph notes max.
+
+## Worktree Contract
+
+These rules apply under `execution_mode: v2`. Under v1 they are informational.
+
+1. **Verify your working directory before any edit.** Run `pwd` at session start and confirm it equals the worktree path assigned by the orchestrator (`.worktrees/STORY-NNN-NN/`). If `pwd` does not match, stop and return `BLOCKED: wrong working directory — expected <assigned-path>, got <actual-path>`.
+
+2. **Never mix stories in one worktree.** Each story is assigned exactly one worktree. Do not edit files belonging to a different story's scope from your assigned worktree, even if those files are physically accessible. Each worktree maps to exactly one story branch (`story/STORY-NNN-NN`).
+
+3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §15.3 for full rationale.
