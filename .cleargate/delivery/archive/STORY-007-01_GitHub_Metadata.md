@@ -1,16 +1,20 @@
 ---
-story_id: "STORY-007-01"
-parent_epic_ref: "EPIC-007"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-004_Public_Discoverability.md"
-created_at: "2026-04-19T15:30:00Z"
-updated_at: "2026-04-19T15:30:00Z"
-shipped_commit: "ce1467d24fcc98a90124328f01d7988c24bb16ff"
-completed_at: "2026-04-19T11:14:13Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
+story_id: STORY-007-01
+parent_epic_ref: EPIC-007
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-004_Public_Discoverability.md
+created_at: 2026-04-19T15:30:00Z
+updated_at: 2026-04-19T15:30:00Z
+shipped_commit: ce1467d24fcc98a90124328f01d7988c24bb16ff
+completed_at: 2026-04-19T11:14:13Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:51.547Z
+push_version: 3
 ---
 
 # STORY-007-01: GitHub Metadata — repo rename + description + topics

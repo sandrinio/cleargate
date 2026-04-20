@@ -1,18 +1,23 @@
 ---
-story_id: "STORY-004-07"
-parent_epic_ref: "EPIC-004"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, SPRINT-02 retrospective"
-sprint_id: "SPRINT-03"
-shipped_commit: "bda4308"
-completed_at: "2026-04-18T13:00:00Z"
-created_at: "2026-04-18T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-004-03"]
+story_id: STORY-004-07
+parent_epic_ref: EPIC-004
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, SPRINT-02 retrospective
+sprint_id: SPRINT-03
+shipped_commit: bda4308
+completed_at: 2026-04-18T13:00:00Z
+created_at: 2026-04-18T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-004-03
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:42:58.671Z
+push_version: 3
 ---
 
 # STORY-004-07: Retrofit Invite Storage to Postgres (Source of Truth)

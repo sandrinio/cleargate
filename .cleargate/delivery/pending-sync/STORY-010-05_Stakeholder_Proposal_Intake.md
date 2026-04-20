@@ -23,6 +23,10 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-19T20:05:46Z
   sessions: []
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:27.147Z
+push_version: 2
 ---
 
 # STORY-010-05: Stakeholder-Authored Proposal Intake via `cleargate:proposal` Label

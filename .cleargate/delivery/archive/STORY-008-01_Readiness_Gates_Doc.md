@@ -1,14 +1,18 @@
 ---
-story_id: "STORY-008-01"
-parent_epic_ref: "EPIC-008"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
+story_id: STORY-008-01
+parent_epic_ref: EPIC-008
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:22.126Z
+push_version: 3
 ---
 
 # STORY-008-01: Author `readiness-gates.md` (central gate specifications)

@@ -17,6 +17,8 @@ ships_before: "SPRINT-06"
 reorder_reason: "2026-04-19 — EPIC-010 Multi-Participant MCP Sync moved ahead of SPRINT-06 Admin UI. Business↔IT transparency is ClearGate's core value proposition; sync must exist before the Admin UI so Business stakeholders can participate from their PM tool natively, not via admin.cleargate.<domain>. Numeric sprint IDs preserved; ship order follows `execution_order`."
 context_source: "PROPOSAL-007_Multi_Participant_MCP_Sync.md"
 epics: ["EPIC-010"]
+approved: true
+
 ---
 
 # SPRINT-07: Multi-Participant MCP Sync v1

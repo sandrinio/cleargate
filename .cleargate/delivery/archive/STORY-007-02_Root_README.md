@@ -1,16 +1,20 @@
 ---
-story_id: "STORY-007-02"
-parent_epic_ref: "EPIC-007"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-004_Public_Discoverability.md"
-created_at: "2026-04-19T15:45:00Z"
-updated_at: "2026-04-19T15:45:00Z"
-shipped_commit: "c326e77daf35cb232d7bac4950ae1384a42809ae"
-completed_at: "2026-04-19T11:17:19Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
+story_id: STORY-007-02
+parent_epic_ref: EPIC-007
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-004_Public_Discoverability.md
+created_at: 2026-04-19T15:45:00Z
+updated_at: 2026-04-19T15:45:00Z
+shipped_commit: c326e77daf35cb232d7bac4950ae1384a42809ae
+completed_at: 2026-04-19T11:17:19Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:18.828Z
+push_version: 3
 ---
 
 # STORY-007-02: Root README — proper pitch + 3 sections

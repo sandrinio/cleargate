@@ -12,6 +12,8 @@ created_at: "2026-04-19T00:00:00Z"
 updated_at: "2026-04-19T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
+approved: true
+
 ---
 
 # SPRINT-04: Knowledge Wiki Layer (Karpathy pattern)

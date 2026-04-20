@@ -1,14 +1,18 @@
 ---
-story_id: "STORY-008-07"
-parent_epic_ref: "EPIC-008"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
+story_id: STORY-008-07
+parent_epic_ref: EPIC-008
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:03.288Z
+push_version: 3
 ---
 
 # STORY-008-07: Template Stubs + Protocol §12 + Wiki-Lint Enforcement

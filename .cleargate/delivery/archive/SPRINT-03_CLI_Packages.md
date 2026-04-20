@@ -12,6 +12,8 @@ created_at: "2026-04-18T00:00:00Z"
 updated_at: "2026-04-18T18:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
+approved: true
+
 ---
 
 # SPRINT-03: CLI Packages (`cleargate-cli` scaffold + Admin CLI + `cleargate join`)

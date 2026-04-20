@@ -1,16 +1,23 @@
 ---
-epic_id: "EPIC-008"
-status: "Draft"
-ambiguity: "🟢 Low"
-context_source: "PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
-owner: "Vibe Coder (sandro.suladze@gmail.com)"
-target_date: "TBD"
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
-depends_on_epics: ["EPIC-001"]
-related_epics: ["EPIC-002", "EPIC-009"]
+epic_id: EPIC-008
+status: Draft
+ambiguity: 🟢 Low
+context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
+owner: Vibe Coder (sandro.suladze@gmail.com)
+target_date: TBD
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+depends_on_epics:
+  - EPIC-001
+related_epics:
+  - EPIC-002
+  - EPIC-009
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:42:54.842Z
+push_version: 3
 ---
 
 # EPIC-008: Per-Work-Item Token Cost + Machine-Checkable Readiness Gates

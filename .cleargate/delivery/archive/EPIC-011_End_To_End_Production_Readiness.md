@@ -29,6 +29,10 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T13:11:35Z
   sessions: []
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:46:08.015Z
+push_version: 3
 ---
 
 # EPIC-011: End-to-End Production Readiness (Auth + Bootstrap + Deploy)

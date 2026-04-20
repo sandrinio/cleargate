@@ -1,17 +1,23 @@
 ---
-story_id: "STORY-006-08"
-parent_epic_ref: "EPIC-006"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6 Q2 (Chart.js override), STORY-004-06"
-design_guide_ref: "../../knowledge/design-guide.md"
-sprint_id: "SPRINT-04"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-006-02", "STORY-004-06"]
+story_id: STORY-006-08
+parent_epic_ref: EPIC-006
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6 Q2 (Chart.js override), STORY-004-06
+design_guide_ref: ../../knowledge/design-guide.md
+sprint_id: SPRINT-04
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-006-02
+  - STORY-004-06
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:46.483Z
+push_version: 2
 ---
 
 # STORY-006-08: Stats Page (Chart.js, Lazy-Loaded)
