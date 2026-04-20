@@ -11,6 +11,8 @@ Proposals with `approved: false` or `status: Draft` that have not yet been bless
 
 - [[PROPOSAL-007]] — status: Draft
 
+- [[PROPOSAL-008]] — status: Draft
+
 
 
 ## Gate 2 — Pending Story Ambiguity Clearance
@@ -32,5 +34,9 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 - [[EPIC-001]] — status: Ready
 
 - [[EPIC-006]] — status: Ready
+
+- [[EPIC-011]] — status: Ready
+
+- [[STORY-004-09]] — status: Ready
 
 

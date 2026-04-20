@@ -54,7 +54,14 @@ program
 program
   .command('whoami')
   .description('print the currently authenticated agent identity')
-  .action(stubHandler('whoami'));
+  .action(async () => {
+    const { whoamiHandler } = await import('./commands/whoami.js');
+    const parentOpts = program.opts<{ profile: string; mcpUrl?: string }>();
+    await whoamiHandler({
+      profile: parentOpts.profile,
+      mcpUrlFlag: parentOpts.mcpUrl,
+    });
+  });
 
 program
   .command('stamp <file>')

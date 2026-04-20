@@ -99,3 +99,72 @@
 [2026-04-19T15:13:28Z] routing to sprint=SPRINT-05 (sentinel)
 [2026-04-19T15:13:28Z] work_item_id fallback grep: EPIC-002
 [2026-04-19T15:13:28Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:1149/out:286667
+[2026-04-20T08:29:38Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T08:29:38Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-028.json agent=qa work_item=STORY-006-07 turn_index=0
+[2026-04-20T08:29:38Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-07 story=STORY-006-07 tokens=in:992/out:586713 delta_from=0
+[2026-04-20T08:29:48Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T08:29:49Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-026.json agent=qa work_item=STORY-004-09 turn_index=0
+[2026-04-20T08:29:49Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-004-09 story=STORY-004-09 tokens=in:992/out:586713 delta_from=0
+[2026-04-20T08:30:43Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T08:30:44Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-025.json agent=developer work_item=STORY-006-07 turn_index=0
+[2026-04-20T08:30:44Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-07 story=STORY-006-07 tokens=in:1016/out:587511 delta_from=0
+[2026-04-20T08:50:25Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T08:50:25Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-029.json agent=developer work_item=STORY-004-09 turn_index=0
+[2026-04-20T08:50:25Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-004-09 story=STORY-004-09 tokens=in:1030/out:591171 delta_from=0
+[2026-04-20T08:57:40Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T08:57:40Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-030.json agent=qa work_item=STORY-004-09 turn_index=0
+[2026-04-20T08:57:40Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-004-09 story=STORY-004-09 tokens=in:1045/out:593478 delta_from=0
+[2026-04-20T09:06:08Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:06:08Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-031.json agent=developer work_item=STORY-006-06 turn_index=0
+[2026-04-20T09:06:08Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-06 story=STORY-006-06 tokens=in:1050/out:598092 delta_from=0
+[2026-04-20T09:10:09Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:10:09Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-032.json agent=qa work_item=STORY-006-06 turn_index=0
+[2026-04-20T09:10:09Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-06 story=STORY-006-06 tokens=in:1069/out:602879 delta_from=0
+[2026-04-20T09:14:53Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:14:54Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-033.json agent=developer work_item=STORY-006-06 turn_index=0
+[2026-04-20T09:14:54Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-06 story=STORY-006-06 tokens=in:1073/out:606091 delta_from=0
+[2026-04-20T09:17:34Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:17:34Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-034.json agent=qa work_item=STORY-006-06 turn_index=0
+[2026-04-20T09:17:34Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-06 story=STORY-006-06 tokens=in:1086/out:608261 delta_from=0
+[2026-04-20T09:22:56Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:22:57Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-036.json agent=developer work_item=STORY-005-06 turn_index=0
+[2026-04-20T09:22:57Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-005-06 story=STORY-005-06 tokens=in:1094/out:613677 delta_from=0
+[2026-04-20T09:46:20Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T09:46:20Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-035.json agent=architect work_item=SPRINT-06-M5 turn_index=0
+[2026-04-20T09:46:20Z] wrote row: sprint=SPRINT-06 agent=architect work_item=SPRINT-06-M5 story= tokens=in:1099/out:630826 delta_from=0
+[2026-04-20T10:00:46Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:00:46Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-037.json agent=qa work_item=STORY-005-06 turn_index=0
+[2026-04-20T10:00:47Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-005-06 story=STORY-005-06 tokens=in:1166/out:643712 delta_from=0
+[2026-04-20T10:02:35Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:02:35Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-020.json agent=developer work_item=STORY-006-07 turn_index=0
+[2026-04-20T10:02:36Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-07 story=STORY-006-07 tokens=in:1166/out:643712 delta_from=0
+[2026-04-20T10:09:46Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:09:46Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-038.json agent=qa work_item=STORY-006-09 turn_index=0
+[2026-04-20T10:09:46Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-09 story=STORY-006-09 tokens=in:1180/out:649015 delta_from=0
+[2026-04-20T10:22:58Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:22:58Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-039.json agent=developer work_item=STORY-005-06 turn_index=0
+[2026-04-20T10:22:59Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-005-06 story=STORY-005-06 tokens=in:1212/out:652602 delta_from=0
+[2026-04-20T10:24:47Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:24:47Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-040.json agent=developer work_item=STORY-006-09 turn_index=0
+[2026-04-20T10:24:47Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-09 story=STORY-006-09 tokens=in:1233/out:657200 delta_from=0
+[2026-04-20T10:39:49Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:39:49Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-041.json agent=qa work_item=STORY-005-06 turn_index=0
+[2026-04-20T10:39:49Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-005-06 story=STORY-005-06 tokens=in:1247/out:659512 delta_from=0
+[2026-04-20T10:41:40Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:41:41Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-042.json agent=qa work_item=STORY-006-09 turn_index=0
+[2026-04-20T10:41:41Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-09 story=STORY-006-09 tokens=in:1261/out:661985 delta_from=0
+[2026-04-20T10:53:52Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T10:53:53Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-019.json agent=developer work_item=STORY-004-09 turn_index=0
+[2026-04-20T10:53:53Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-004-09 story=STORY-004-09 tokens=in:1328/out:674428 delta_from=0
+[2026-04-20T11:11:26Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T11:11:26Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-043.json agent=developer work_item=STORY-006-10 turn_index=0
+[2026-04-20T11:11:26Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-10 story=STORY-006-10 tokens=in:1369/out:682816 delta_from=0
+[2026-04-20T11:25:56Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T11:25:56Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-045.json agent=developer work_item=STORY-006-10 turn_index=0
+[2026-04-20T11:25:56Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-10 story=STORY-006-10 tokens=in:1415/out:697350 delta_from=0
+[2026-04-20T11:28:28Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T11:28:29Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-046.json agent=reporter work_item=SPRINT-06 turn_index=0
+[2026-04-20T11:28:29Z] wrote row: sprint=SPRINT-06 agent=reporter work_item=SPRINT-06 story= tokens=in:1439/out:708556 delta_from=0
+[2026-04-20T11:37:34Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T11:37:34Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-044.json agent=qa work_item=STORY-006-10 turn_index=0
+[2026-04-20T11:37:35Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-10 story=STORY-006-10 tokens=in:1440/out:712416 delta_from=0

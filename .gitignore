@@ -27,6 +27,10 @@ Thumbs.db
 # Comment snapshot cache — runtime-generated, not team-shared
 /.cleargate/.comments-cache/
 
+# Live-smoke harness output — PNG screenshots + JSON summaries per run,
+# ephemeral debugging artefacts, not source.
+/admin/scripts/smoke-output/
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/

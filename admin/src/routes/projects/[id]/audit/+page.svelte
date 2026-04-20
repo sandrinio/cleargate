@@ -80,11 +80,23 @@
   let loadingMore = $state(false);
   let clamped = $state(false);
 
-  // Parse filters from URL on reactive $page.url change
-  let filters = $state<AuditFilters>(defaultFilters());
+  // Stable defaults — computed ONCE at component init. Never recompute inside
+  // effects; fresh new Date() per effect run creates a fresh URL every tick
+  // and loops (effect_update_depth_exceeded).
+  const stableDefaults = defaultFilters();
 
-  // Separate tool single-select (not multiselect) value
-  let selectedTool = $state('');
+  // Filters are DERIVED from URL, not written imperatively — prevents the
+  // effect-reads-and-writes-same-state cycle Svelte flagged.
+  const filters = $derived.by<AuditFilters>(() => {
+    const parsed = parseFilters($page.url.searchParams);
+    if (!parsed.from && !parsed.to) {
+      return { ...stableDefaults, user: parsed.user, tool: parsed.tool, cursor: parsed.cursor };
+    }
+    return parsed;
+  });
+
+  const selectedTool = $derived(filters.tool ?? '');
+  const selectedActors = $derived<string[]>(filters.user ? [filters.user] : []);
 
   // UUID → email map for actor display
   const memberEmailMap = $derived(
@@ -95,9 +107,6 @@
   const actorOptions = $derived(
     members.map((m) => ({ value: m.id, label: m.email })),
   );
-
-  // Selected actor UUIDs (from filters.user, which may be comma-separated or single)
-  let selectedActors = $state<string[]>([]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -167,68 +176,45 @@
 
   // ── Event handlers ───────────────────────────────────────────────────────────
 
+  // All handlers write to the URL; filters/selectedActors/selectedTool re-derive
+  // from $page.url automatically. No direct $state writes.
+
   function handleDateChange(range: { from: string; to: string }) {
-    const newFilters: AuditFilters = { ...filters, from: range.from, to: range.to, cursor: null };
-    filters = newFilters;
-    selectedActors = selectedActors; // keep actors
-    updateUrl(newFilters);
+    updateUrl({ ...filters, from: range.from, to: range.to, cursor: null });
   }
 
   function handleActorChange(selected: string[]) {
-    selectedActors = selected;
-    const newFilters: AuditFilters = {
+    updateUrl({
       ...filters,
       user: selected.length > 0 ? selected[0] : null, // API supports single UUID per spec
       cursor: null,
-    };
-    filters = newFilters;
-    updateUrl(newFilters);
+    });
   }
 
   function handleToolChange(e: Event) {
     const val = (e.target as HTMLSelectElement).value;
-    selectedTool = val;
-    const newFilters: AuditFilters = { ...filters, tool: val || null, cursor: null };
-    filters = newFilters;
-    updateUrl(newFilters);
+    updateUrl({ ...filters, tool: val || null, cursor: null });
   }
 
   function handleReset() {
-    const def = defaultFilters();
-    filters = def;
-    selectedActors = [];
-    selectedTool = '';
     const base = `/projects/${projectId}/audit`;
     goto(base, { keepFocus: true, noScroll: true });
   }
 
   async function handleLoadMore() {
     if (!nextCursor) return;
-    const newFilters: AuditFilters = { ...filters, cursor: nextCursor };
-    filters = newFilters;
-    await fetchAudit(projectId, newFilters, true);
+    await fetchAudit(projectId, { ...filters, cursor: nextCursor }, true);
   }
 
   // ── Effect: re-fetch when URL changes ────────────────────────────────────────
+  //
+  // The effect now ONLY reads $derived state (filters/projectId) and calls an
+  // async fetch. No $state writes — Svelte's read-and-write loop detector is
+  // satisfied. Filter values are derived from $page.url.searchParams, so URL
+  // changes (via handleXxxChange → goto) are the sole trigger for re-fetch.
 
   $effect(() => {
-    const id = projectId;
-    const urlParams = $page.url.searchParams;
-    const parsed = parseFilters(urlParams);
-
-    // Apply defaults if no from/to in URL
-    if (!parsed.from && !parsed.to) {
-      const def = defaultFilters();
-      filters = { ...def, user: parsed.user, tool: parsed.tool, cursor: parsed.cursor };
-    } else {
-      filters = parsed;
-    }
-
-    // Sync selectedActors from URL user param
-    selectedActors = parsed.user ? [parsed.user] : [];
-    selectedTool = parsed.tool ?? '';
-
-    void fetchAudit(id, filters);
+    void fetchAudit(projectId, filters);
   });
 
   // ── Mount: fetch members for UUID→email map ───────────────────────────────────

@@ -1,16 +1,21 @@
 ---
-story_id: "STORY-005-06"
-parent_epic_ref: "EPIC-005"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, EPIC-005 §6.2, SPRINT-03 deferral"
-sprint_id: "SPRINT-04"
-created_at: "2026-04-18T18:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-000-04"]
+story_id: STORY-005-06
+parent_epic_ref: EPIC-005
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-005 §6.2, SPRINT-03 deferral
+sprint_id: SPRINT-04
+created_at: 2026-04-18T18:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-000-04
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-20T10:41:20Z
 ---
 
 # STORY-005-06: `cleargate-admin login` (GitHub OAuth Device Flow)

@@ -4,8 +4,15 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-20 · #svelte5 #runes #production-build · Svelte 5 `$state`/`$derived`/`$effect` don't work in plain `.ts` files — only `.svelte`/`.svelte.ts`/`.svelte.js`. Dev server (Vite preprocessor) silently works; adapter-node production build crashes with `ReferenceError: $state is not defined`. Unit tests that mock the store hide it. Always build the prod image + smoke `/` before shipping.
+2026-04-20 · #docker #workspace · `npm ci --workspace X` skips sibling workspace symlinks; use plain `npm ci` in builder so peer workspaces resolve (e.g. cleargate/admin-api).
+
 ---
 
+2026-04-19 · #vitest #vi-mock #sveltekit-endpoint · SvelteKit endpoints forbid non-HTTP-method named exports; extract test-seam functions to $lib/server/*.ts and mock ioredis with vi.hoisted() + vi.mock() pattern.
+2026-04-19 · #dockerfile #coolify #monorepo · Admin Dockerfile must force ENV NODE_ENV=development in builder stage; Coolify injects NODE_ENV=production at build time, silently stripping devDeps and breaking vite build.
+
+2026-04-19 · #device-flow #rate-limit #test-harness · Rate-limit integration tests for public routes must use a dedicated mini-app with mocked fetch; the shared `app` accumulates real GitHub 502s against the same rl:anon bucket across test cases, causing spurious 429s in the later rate-limit scenario.
 2026-04-19 · #yaml #frontmatter · [R] superseded-by BUG-001-fix · parseFrontmatter must use js-yaml CORE_SCHEMA — hand-rolled parser flattened indented maps to top-level keys and stringified null/bool; roundtrip is now lossless and draft_tokens/cached_gate_result are native nested objects on disk.
 2026-04-19 · #reporting #hooks #ledger #subagent-attribution · SubagentStop hook fires on orchestrator session not subagents; all 25 SPRINT-05 rows tagged against orchestrator (EPIC-002 from session init). Reporter can't compute per-story cost until hook reaches subagent transcripts OR per-Task sentinel is written.
 2026-04-19 · #concurrency #agents #shared-main · parallel Developer agents on main share a working tree — one's uncommitted edits are transiently visible to another's `npm test` (001-05 only passed because 008-02's parse-frontmatter change landed first). Bias worktree isolation or serialize shared-file stories.

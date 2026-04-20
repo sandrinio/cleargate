@@ -22,14 +22,15 @@ let _baseUrl: string = '';
 
 function getBaseUrl(): string {
   if (_baseUrl) return _baseUrl;
-  // In SvelteKit, PUBLIC_ env vars are available via $env/static/public.
-  // We read from import.meta.env for Vite builds, or process.env for tests.
+  // Vite statically replaces import.meta.env.KEY (dot-notation only) at build
+  // time. Bracket access stays as a runtime property lookup and returns
+  // undefined, silently falling back to the default. Use dot-notation here.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaEnv = (import.meta as unknown as { env?: Record<string, string> }).env;
+  const metaEnv = (import.meta as any).env;
   if (metaEnv) {
-    return metaEnv['VITE_MCP_URL'] ?? metaEnv['PUBLIC_MCP_URL'] ?? 'http://localhost:3001';
+    return metaEnv.VITE_MCP_URL ?? metaEnv.PUBLIC_MCP_URL ?? 'http://localhost:3000';
   }
-  return process.env['VITE_MCP_URL'] ?? process.env['PUBLIC_MCP_URL'] ?? 'http://localhost:3001';
+  return process.env['VITE_MCP_URL'] ?? process.env['PUBLIC_MCP_URL'] ?? 'http://localhost:3000';
 }
 
 /** Override base URL (used in tests) */
@@ -102,7 +103,7 @@ export async function get<T>(path: string, schema: ZodSchema<T>): Promise<T> {
   const baseUrl = getBaseUrl();
   let res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
     headers: { Authorization: `Bearer ${adminToken}` },
-    credentials: 'include',
+    credentials: 'omit',
   });
 
   if (res.status === 401) {
@@ -110,7 +111,7 @@ export async function get<T>(path: string, schema: ZodSchema<T>): Promise<T> {
     await exchange();
     res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
       headers: { Authorization: `Bearer ${adminToken}` },
-      credentials: 'include',
+      credentials: 'omit',
     });
     if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
   }
@@ -135,7 +136,7 @@ export async function post<T>(path: string, body: unknown, schema: ZodSchema<T>)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
-    credentials: 'include',
+    credentials: 'omit',
   });
 
   if (res.status === 401) {
@@ -147,7 +148,7 @@ export async function post<T>(path: string, body: unknown, schema: ZodSchema<T>)
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      credentials: 'include',
+      credentials: 'omit',
     });
     if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
   }
@@ -172,7 +173,7 @@ export async function patch<T>(path: string, body: unknown, schema: ZodSchema<T>
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
-    credentials: 'include',
+    credentials: 'omit',
   });
 
   if (res.status === 401) {
@@ -184,7 +185,7 @@ export async function patch<T>(path: string, body: unknown, schema: ZodSchema<T>
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      credentials: 'include',
+      credentials: 'omit',
     });
     if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
   }
@@ -210,7 +211,7 @@ export async function del(path: string): Promise<void> {
   let res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${adminToken}` },
-    credentials: 'include',
+    credentials: 'omit',
   });
 
   if (res.status === 401) {
@@ -219,7 +220,7 @@ export async function del(path: string): Promise<void> {
     res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${adminToken}` },
-      credentials: 'include',
+      credentials: 'omit',
     });
     if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
   }

@@ -29,6 +29,13 @@ WORKDIR /app
 # which otherwise silently strips TypeScript/svelte/vite, breaking npm run build.
 ENV NODE_ENV=development
 
+# PUBLIC_MCP_URL is baked into the client bundle by Vite at build time (SvelteKit
+# $env/static/public convention). Must be the URL the BROWSER uses to reach MCP,
+# not the URL the container uses. Pass at build time with:
+#   docker build --build-arg PUBLIC_MCP_URL=http://localhost:3000 ...
+ARG PUBLIC_MCP_URL=http://localhost:3000
+ENV PUBLIC_MCP_URL=$PUBLIC_MCP_URL
+
 # Copy workspace root manifests
 COPY package.json package-lock.json ./
 COPY admin/package.json ./admin/

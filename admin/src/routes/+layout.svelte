@@ -25,10 +25,11 @@
     });
   });
 
+  // Top-level `/projects` and `/audit` routes don't exist — the dashboard
+  // (/) IS the project list, and audit is per-project under /projects/[id]/audit.
+  // Removed until standalone pages land (future story).
   const baseNavLinks = [
     { href: '/', label: 'Dashboard' },
-    { href: '/projects', label: 'Projects' },
-    { href: '/audit', label: 'Audit' },
   ];
 
   // Computed: include Settings only for root admins
