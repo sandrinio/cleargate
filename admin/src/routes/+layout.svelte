@@ -1,12 +1,17 @@
 <script lang="ts">
   import '../app.css';
   import { page } from '$app/stores';
-  import { Menu, Settings, Bell } from 'lucide-svelte';
+  import { Menu, Settings, Bell, LogOut } from 'lucide-svelte';
   import IconButton from '$lib/components/IconButton.svelte';
+  import { signOut } from '$lib/mcp-client.js';
 
-  let { children } = $props();
+  let { children, data } = $props();
 
   let mobileMenuOpen = $state(false);
+  let avatarMenuOpen = $state(false);
+
+  const session = $derived(data?.session);
+  const isAuthenticated = $derived(!!session);
 
   const navLinks = [
     { href: '/', label: 'Dashboard' },
@@ -21,6 +26,19 @@
 
   function toggleMobileMenu() {
     mobileMenuOpen = !mobileMenuOpen;
+  }
+
+  function toggleAvatarMenu() {
+    avatarMenuOpen = !avatarMenuOpen;
+  }
+
+  async function handleSignOut() {
+    // Cancel proactive refresh timer
+    signOut();
+
+    // POST to logout route (deletes Redis session + clears cookie)
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/login';
   }
 </script>
 
@@ -74,13 +92,80 @@
       <Bell size={18} />
     </IconButton>
 
-    <!-- Avatar placeholder -->
-    <div
-      class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0"
-      aria-label="User menu"
-    >
-      <span class="text-sm font-semibold text-primary">U</span>
-    </div>
+    <!-- Avatar / user menu -->
+    {#if isAuthenticated && session}
+      <div class="relative">
+        <button
+          type="button"
+          class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          aria-label="User menu — {session.user.github_handle}"
+          aria-expanded={avatarMenuOpen}
+          aria-haspopup="true"
+          onclick={toggleAvatarMenu}
+        >
+          {#if session.user.avatar_url}
+            <img
+              src={session.user.avatar_url}
+              alt="{session.user.github_handle}'s avatar"
+              class="w-10 h-10 rounded-full object-cover"
+            />
+          {:else}
+            <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <span class="text-sm font-semibold text-primary">
+                {session.user.github_handle.slice(0, 1).toUpperCase()}
+              </span>
+            </div>
+          {/if}
+        </button>
+
+        <!-- Avatar dropdown -->
+        {#if avatarMenuOpen}
+          <!-- Backdrop -->
+          <div
+            class="fixed inset-0 z-40"
+            onclick={toggleAvatarMenu}
+            onkeydown={(e) => e.key === 'Escape' && toggleAvatarMenu()}
+            role="button"
+            tabindex="-1"
+            aria-label="Close user menu"
+          ></div>
+
+          <!-- Menu panel -->
+          <div
+            class="absolute right-0 top-12 z-50 w-56 bg-base-100 rounded-2xl shadow-card border border-[#ECE8E1] p-2"
+            role="menu"
+          >
+            <!-- User info -->
+            <div class="px-3 py-2 mb-1">
+              <p class="text-sm font-medium text-base-content">@{session.user.github_handle}</p>
+              {#if session.user.email}
+                <p class="text-xs text-[#6B7280] truncate">{session.user.email}</p>
+              {/if}
+            </div>
+            <div class="border-t border-[#ECE8E1] my-1"></div>
+
+            <!-- Sign out -->
+            <button
+              type="button"
+              class="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-[#6B7280] hover:bg-base-200 hover:text-base-content transition-colors"
+              role="menuitem"
+              onclick={handleSignOut}
+            >
+              <LogOut size={16} aria-hidden="true" />
+              Sign out
+            </button>
+          </div>
+        {/if}
+      </div>
+    {:else}
+      <!-- Unauthenticated avatar placeholder -->
+      <div
+        class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0"
+        aria-label="User menu"
+      >
+        <span class="text-sm font-semibold text-primary">U</span>
+      </div>
+    {/if}
 
     <!-- Mobile menu button -->
     <div class="lg:hidden">
