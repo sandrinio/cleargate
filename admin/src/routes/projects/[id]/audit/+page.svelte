@@ -25,6 +25,7 @@
   import EmptyState from '$lib/components/EmptyState.svelte';
   import { parseFilters, filtersToParams, defaultFilters, clamp30d } from '$lib/utils/url-state.js';
   import type { AuditFilters } from '$lib/utils/url-state.js';
+  import { formatTimestamp } from '$lib/utils/format-timestamp.js';
 
   // ── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -99,26 +100,6 @@
   let selectedActors = $state<string[]>([]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  /**
-   * Format ISO UTC timestamp for local display: "YYYY-MM-DD HH:mm:ss.SSS"
-   */
-  function formatTimestamp(iso: string): string {
-    try {
-      const d = new Date(iso);
-      const pad = (n: number, len = 2) => String(n).padStart(len, '0');
-      const YYYY = d.getFullYear();
-      const MM = pad(d.getMonth() + 1);
-      const DD = pad(d.getDate());
-      const HH = pad(d.getHours());
-      const mm = pad(d.getMinutes());
-      const ss = pad(d.getSeconds());
-      const ms = pad(d.getMilliseconds(), 3);
-      return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}.${ms}`;
-    } catch {
-      return iso;
-    }
-  }
 
   /**
    * Map acting_user or member_id to an email for display.

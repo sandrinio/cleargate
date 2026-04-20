@@ -226,6 +226,63 @@ test.describe('Audit Log Viewer (STORY-006-07)', () => {
     await expect(page).toHaveURL(/\/projects\/proj-audit-01\/audit$/, { timeout: 5_000 });
   });
 
+  test('Scenario: 30d clamp warning — wide date range shows inline clamp warning', async ({ page }) => {
+    const now = new Date();
+    const to = now.toISOString();
+    // 61 days back — exceeds the 30d cap
+    const from = new Date(now.getTime() - 61 * 24 * 60 * 60 * 1000).toISOString();
+
+    const auditResponse = { rows: [makeAuditRow()], next_cursor: null };
+    await setupCommonMocks(page, auditResponse);
+
+    await page.goto(
+      `/projects/proj-audit-01/audit?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    );
+
+    // clamp-warning must be visible and mention "30 days"
+    const warning = page.getByTestId('clamp-warning');
+    await expect(warning).toBeVisible({ timeout: 10_000 });
+    await expect(warning).toContainText('30 days');
+  });
+
+  test('Scenario: Last 24h preset — URL gains ?from= ~24h before ?to=', async ({ page }) => {
+    const auditResponse = { rows: [makeAuditRow()], next_cursor: null };
+    await setupCommonMocks(page, auditResponse);
+
+    await page.goto('/projects/proj-audit-01/audit');
+
+    // Wait for page to be ready
+    await expect(page.getByTestId('audit-page')).toBeVisible({ timeout: 10_000 });
+
+    const before = Date.now();
+    // Click the "Last 24h" preset button
+    await page.click('[data-testid="preset-24h"]');
+    const after = Date.now();
+
+    // URL must contain ?from=
+    await expect(page).toHaveURL(/from=/, { timeout: 5_000 });
+
+    const url = new URL(page.url());
+    const fromParam = url.searchParams.get('from');
+    const toParam = url.searchParams.get('to');
+
+    expect(fromParam).not.toBeNull();
+    expect(toParam).not.toBeNull();
+
+    const fromMs = new Date(fromParam!).getTime();
+    const toMs = new Date(toParam!).getTime();
+    const windowMs = toMs - fromMs;
+    const expected24h = 24 * 60 * 60 * 1000;
+
+    // Window should be ~24h ± 2s of clock drift
+    expect(windowMs).toBeGreaterThanOrEqual(expected24h - 2000);
+    expect(windowMs).toBeLessThanOrEqual(expected24h + 2000);
+
+    // "to" should be within the test execution window
+    expect(toMs).toBeGreaterThanOrEqual(before - 1000);
+    expect(toMs).toBeLessThanOrEqual(after + 5000);
+  });
+
   test('Scenario: Filter roundtrip — URL-synced filters preserved across reload', async ({ page }) => {
     const auditResponse = {
       rows: [makeAuditRow({ tool: 'list_items' })],
@@ -246,5 +303,34 @@ test.describe('Audit Log Viewer (STORY-006-07)', () => {
     // Tool select should reflect the URL filter
     const toolSelect = page.locator('[data-testid="tool-select"]');
     await expect(toolSelect).toHaveValue('list_items', { timeout: 5_000 });
+  });
+});
+
+// ── Mobile 390px — Scenario: responsive layout at narrow viewport ─────────────
+
+test.describe('Audit Log Viewer — Mobile 390px (STORY-006-07 QA Fix 3)', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('Scenario: Mobile viewport — mobile card stack visible, desktop table hidden, no horizontal overflow', async ({
+    page,
+  }) => {
+    const auditResponse = { rows: [makeAuditRow()], next_cursor: null };
+    await setupCommonMocks(page, auditResponse);
+
+    await page.goto('/projects/proj-audit-01/audit');
+
+    // Wait for data to load
+    await expect(page.getByTestId('audit-page')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('audit-card').first()).toBeVisible({ timeout: 10_000 });
+
+    // audit-table-mobile (md:hidden ≡ visible on 390px) must be visible
+    await expect(page.getByTestId('audit-table-mobile')).toBeVisible();
+
+    // audit-table-desktop (hidden md:block ≡ hidden on 390px) must NOT be visible
+    await expect(page.getByTestId('audit-table-desktop')).not.toBeVisible();
+
+    // No horizontal overflow
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(390);
   });
 });
