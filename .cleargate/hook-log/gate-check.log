@@ -34,3 +34,13 @@ Gate: epic.ready-for-decomposition (enforcing)
 ✅ epic.ready-for-decomposition passed (5 criteria)
 wiki ingest: update epics/EPIC-011.md
 [2026-04-20T13:11:35Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md
+[stamped] /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md (PROPOSAL-E2E-01)
+Gate: proposal.ready-for-decomposition (advisory)
+⚠ architecture-populated: section 2 has 0 listed-item (≥1 required) (advisory)
+wiki ingest: /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md not under .cleargate/delivery/
+[2026-04-20T17:29:13Z] stamp=0 gate=0 ingest=2 file=/Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md
+[stamped] /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md (PROPOSAL-E2E-01)
+Gate: proposal.ready-for-decomposition (advisory)
+✅ proposal.ready-for-decomposition passed (3 criteria)
+wiki ingest: /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md not under .cleargate/delivery/
+[2026-04-20T17:29:45Z] stamp=0 gate=0 ingest=2 file=/Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md

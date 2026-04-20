@@ -4,6 +4,7 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-20 · #cli #test-seam #exit · exit seam throws in tests; if the throw propagates into `catch(err)`, the error-path fires — extract SQL into a value-returning fn, call exitFn only at handler top-level after cleanup.
 2026-04-20 · #svelte5 #runes #production-build · Svelte 5 `$state`/`$derived`/`$effect` don't work in plain `.ts` files — only `.svelte`/`.svelte.ts`/`.svelte.js`. Dev server (Vite preprocessor) silently works; adapter-node production build crashes with `ReferenceError: $state is not defined`. Unit tests that mock the store hide it. Always build the prod image + smoke `/` before shipping.
 2026-04-20 · #docker #workspace · `npm ci --workspace X` skips sibling workspace symlinks; use plain `npm ci` in builder so peer workspaces resolve (e.g. cleargate/admin-api).
 
