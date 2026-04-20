@@ -348,6 +348,54 @@ describe('adminLoginHandler', () => {
     expect(stderrLines.join('\n')).toMatch(/not configured/i);
   });
 
+  // L-11: slow_down — interval bumps up, never down
+  it('L-11: slow_down — interval bumps up on retry_after increase, never decreases', async () => {
+    // Server responds: pending (retry_after=3s), pending (retry_after=6s slow_down), then success.
+    // We inject a sleepFn seam to capture each call's ms argument (no real waiting).
+    const sleepCalls: number[] = [];
+    const sleepFn = vi.fn().mockImplementation((ms: number) => {
+      sleepCalls.push(ms);
+      return Promise.resolve();
+    });
+
+    const pollBodies = [
+      { pending: true, retry_after: 3 },   // first poll: retry_after=3s → 3000ms > 100ms baseline → bump
+      { pending: true, retry_after: 6 },   // second poll: slow_down → 6000ms > 3000ms → bump again
+      POLL_SUCCESS_BODY,
+    ];
+
+    const { fetchMock } = buildFetch(START_SUCCESS_BODY, pollBodies);
+    const { stdout, stderr } = buildCollectors();
+    const exitMock = vi.fn() as unknown as (code: number) => never;
+    const authFilePath = path.join(tmpDir, 'admin-auth-L11.json');
+
+    await adminLoginHandler({
+      mcpUrl: MCP_BASE,
+      fetch: fetchMock,
+      stdout,
+      stderr,
+      exit: exitMock,
+      authFilePath,
+      intervalOverrideMs: 100, // baseline — bump logic applies because sleepFn is also provided
+      sleepFn,
+    });
+
+    expect(exitMock).not.toHaveBeenCalled();
+
+    // sleep should have been called 3 times (once per poll iteration before each fetch)
+    expect(sleepCalls).toHaveLength(3);
+
+    // First sleep uses baseline (100ms); subsequent ones are bumped by retry_after * 1000.
+    expect(sleepCalls[0]).toBe(100);    // baseline
+    expect(sleepCalls[1]).toBe(3000);   // bumped after first pending (retry_after=3 → 3000ms > 100ms)
+    expect(sleepCalls[2]).toBe(6000);   // bumped after second pending (retry_after=6 → 6000ms > 3000ms)
+
+    // Never-decrease guard: calls are strictly increasing — no value went down.
+    for (let i = 1; i < sleepCalls.length; i++) {
+      expect(sleepCalls[i]).toBeGreaterThanOrEqual(sleepCalls[i - 1]!);
+    }
+  });
+
   // L-10: admin-auth.json shape + chmod 600
   it('L-10: admin-auth.json has { version: 1, token } and is chmod 600', async () => {
     const { fetchMock } = buildFetch(START_SUCCESS_BODY, [POLL_SUCCESS_BODY]);

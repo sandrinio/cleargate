@@ -67,6 +67,8 @@ export interface AdminLoginOptions {
   intervalOverrideMs?: number;
   /** Override admin-auth file path */
   authFilePath?: string;
+  /** Override sleep implementation — injected in tests to capture interval values */
+  sleepFn?: (ms: number) => Promise<void>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,6 +76,11 @@ export interface AdminLoginOptions {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DEFAULT_MCP_URL = 'http://localhost:3000';
+
+/** Sleep helper — exported so tests can spy on it. */
+export function sleep(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
 
 function resolveMcpUrl(mcpUrlFlag?: string, env?: NodeJS.ProcessEnv): string {
   return (
@@ -107,6 +114,7 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
   const stdout = opts.stdout ?? ((msg: string) => process.stdout.write(msg + '\n'));
   const stderr = opts.stderr ?? ((msg: string) => process.stderr.write(msg + '\n'));
   const exitFn = opts.exit ?? ((code: number): never => process.exit(code));
+  const sleepFn = opts.sleepFn ?? sleep;
   const mcpBase = resolveMcpUrl(opts.mcpUrl, opts.env);
 
   // ── Step 1: Start device flow ──────────────────────────────────────────────
@@ -141,7 +149,8 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
   stdout('Waiting for authorization...');
 
   // ── Step 3: Poll until success, timeout, or denial ─────────────────────────
-  const pollIntervalMs = opts.intervalOverrideMs ?? Math.max(startData.interval, 5) * 1000;
+  // currentInterval is mutable: server may send slow_down (retry_after bump).
+  let currentInterval = opts.intervalOverrideMs ?? Math.max(startData.interval, 5) * 1000;
   const expiresAtMs = Date.now() + startData.expires_in * 1000;
 
   // Give 10 seconds of grace beyond expires_in for round-trip latency
@@ -150,7 +159,7 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
   let successData: DevicePollSuccessResponse | null = null;
 
   while (Date.now() < deadline) {
-    await new Promise<void>((resolve) => setTimeout(resolve, pollIntervalMs));
+    await sleepFn(currentInterval);
 
     let pollRes: Response;
     try {
@@ -188,17 +197,15 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
     const pollBody = (await pollRes.json()) as DevicePollResponse;
 
     if (pollBody.pending) {
-      // Keep polling — update interval if slow_down increased it
-      const newIntervalSec = pollBody.retry_after;
-      if (
-        newIntervalSec !== undefined &&
-        opts.intervalOverrideMs === undefined &&
-        newIntervalSec * 1000 > pollIntervalMs
-      ) {
-        // We can't dynamically change the interval easily in a loop without
-        // restructuring; the next iteration will use the original interval.
-        // slow_down is handled by returning retry_after in the response — the
-        // next poll will happen after the current sleep anyway.
+      // Apply slow_down: only bump UP, never decrease.
+      // Skip bump when intervalOverrideMs is provided without a sleepFn — those
+      // callers use intervalOverrideMs: 0 as a test seam and don't expect bumps.
+      const shouldApplyBump = opts.sleepFn !== undefined || opts.intervalOverrideMs === undefined;
+      if (shouldApplyBump && pollBody.retry_after !== undefined) {
+        const bumped = pollBody.retry_after * 1000;
+        if (bumped > currentInterval) {
+          currentInterval = bumped;
+        }
       }
       continue;
     }
