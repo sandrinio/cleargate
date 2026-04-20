@@ -195,12 +195,23 @@
       </div>
     </div>
 
-    <!-- Current payload — rendered from item.current_payload (SPRINT-08 follow-up) -->
-    {#if item.current_payload && Object.keys(item.current_payload).length > 0}
+    <!-- Markdown body — the full work-item content (spec, Gherkin, impl notes). -->
+    {#if typeof item.current_payload?.['body'] === 'string' && (item.current_payload['body'] as string).length > 0}
       <div class="bg-base-100 rounded-3xl shadow-card p-6">
-        <h3 class="text-lg font-semibold text-base-content mb-4">Current payload (v{item.version})</h3>
-        <PayloadViewer payload={item.current_payload} />
+        <h3 class="text-lg font-semibold text-base-content mb-4">Content (v{item.version})</h3>
+        <pre class="whitespace-pre-wrap break-words font-sans text-sm text-base-content leading-relaxed">{item.current_payload['body']}</pre>
       </div>
+    {/if}
+
+    <!-- Frontmatter payload — all metadata keys (excluding body, rendered above). -->
+    {#if item.current_payload && Object.keys(item.current_payload).length > 0}
+      {@const fm = Object.fromEntries(Object.entries(item.current_payload).filter(([k]) => k !== 'body'))}
+      {#if Object.keys(fm).length > 0}
+        <div class="bg-base-100 rounded-3xl shadow-card p-6">
+          <h3 class="text-lg font-semibold text-base-content mb-4">Frontmatter (v{item.version})</h3>
+          <PayloadViewer payload={fm} />
+        </div>
+      {/if}
     {/if}
 
     <!-- Version history section -->

@@ -223,6 +223,11 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
     const h1 = body.match(/^#\s+(.+?)\s*$/m)?.[1]?.trim();
     if (h1) payloadForPush['title'] = h1;
   }
+  // Include the markdown body verbatim so the admin UI can render the full
+  // work-item content (spec, Gherkin, implementation notes, DoD). Stored as
+  // payload.body under the item's jsonb column — repo remains the canonical
+  // source, MCP is a queryable mirror.
+  payloadForPush['body'] = body;
 
   // MCP call
   const mcp = await resolveMcp();
