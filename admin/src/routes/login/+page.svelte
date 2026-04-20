@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import Toast from '$lib/components/Toast.svelte';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { onMount } from 'svelte';
 
   const error = $derived($page.url.searchParams.get('error'));

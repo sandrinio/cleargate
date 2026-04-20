@@ -16,7 +16,7 @@
   import { ProjectSchema } from 'cleargate/admin-api';
   import type { Project } from 'cleargate/admin-api';
   import * as mcpClient from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import ProjectCard from '$lib/components/ProjectCard.svelte';
   import { FolderOpen } from 'lucide-svelte';

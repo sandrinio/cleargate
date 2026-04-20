@@ -13,7 +13,7 @@
   import { z } from 'zod';
   import { ProjectSchema } from 'cleargate/admin-api';
   import * as mcpClient from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
 
   // POST /projects returns a bare ProjectDto (no { project: ... } envelope)
   // Confirmed: mcp/src/admin-api/projects.ts:92-93 sends reply.code(201).send(toDto(project!))

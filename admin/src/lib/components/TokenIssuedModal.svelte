@@ -31,7 +31,7 @@
   import { onDestroy } from 'svelte';
   import { beforeNavigate } from '$app/navigation';
   import { copyToClipboard } from '$lib/utils/clipboard.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
 
   interface Props {
     open: boolean;

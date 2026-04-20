@@ -21,7 +21,7 @@
    */
   import { page } from '$app/stores';
   import { get as mcpGet, del as mcpDel } from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { TokenMetaSchema, MemberSchema } from 'cleargate/admin-api';
   import type { TokenMeta, TokenIssued, Member } from 'cleargate/admin-api';
   import { z } from 'zod';

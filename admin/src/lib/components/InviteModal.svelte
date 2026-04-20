@@ -10,7 +10,7 @@
    */
   import Modal from './Modal.svelte';
   import IconButton from './IconButton.svelte';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { post } from '$lib/mcp-client.js';
   import { InviteCreatedSchema } from 'cleargate/admin-api';
 

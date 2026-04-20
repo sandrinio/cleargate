@@ -15,7 +15,7 @@
   import { getContext } from 'svelte';
   import { get as mcpGet, del as mcpDel } from '$lib/mcp-client.js';
   import { MemberSchema } from 'cleargate/admin-api';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { z } from 'zod';
   import StatusPill from '$lib/components/StatusPill.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';

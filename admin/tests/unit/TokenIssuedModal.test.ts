@@ -40,7 +40,7 @@ vi.mock('$lib/utils/clipboard.js', () => ({
 }));
 
 // Mock toast store — $state rune cannot instantiate outside Svelte
-vi.mock('$lib/stores/toast.js', () => ({
+vi.mock('$lib/stores/toast.svelte.js', () => ({
   toastStore: {
     info: vi.fn(),
     success: vi.fn(),
@@ -53,7 +53,7 @@ vi.mock('$lib/stores/toast.js', () => ({
 }));
 
 import { copyToClipboard } from '$lib/utils/clipboard.js';
-import { toastStore } from '$lib/stores/toast.js';
+import { toastStore } from '$lib/stores/toast.svelte.js';
 import TokenIssuedModal from '../../src/lib/components/TokenIssuedModal.svelte';
 
 const mockCopy = copyToClipboard as unknown as ReturnType<typeof vi.fn>;

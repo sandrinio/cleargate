@@ -18,7 +18,7 @@
   import { onMount } from 'svelte';
   import { z } from 'zod';
   import { get as mcpGet } from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { MemberSchema } from 'cleargate/admin-api';
   import DateRangePicker from '$lib/components/DateRangePicker.svelte';
   import MultiSelect from '$lib/components/MultiSelect.svelte';

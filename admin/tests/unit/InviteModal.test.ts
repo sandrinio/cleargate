@@ -29,7 +29,7 @@ vi.mock('../../src/lib/mcp-client.js', () => ({
 }));
 
 // Mock toast store — $state rune can't be instantiated outside Svelte in vitest
-vi.mock('$lib/stores/toast.js', () => ({
+vi.mock('$lib/stores/toast.svelte.js', () => ({
   toastStore: {
     info: vi.fn(),
     success: vi.fn(),

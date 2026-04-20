@@ -16,7 +16,7 @@
   } from 'cleargate/admin-api';
   import type { AdminUser } from 'cleargate/admin-api';
   import { get, post, patch, del } from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { setCurrentUser } from '$lib/stores/current-user.js';
   import AdminUsersTable from '$lib/components/AdminUsersTable.svelte';
   import AddAdminModal from '$lib/components/AddAdminModal.svelte';

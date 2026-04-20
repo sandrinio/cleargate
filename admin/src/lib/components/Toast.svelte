@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { toastStore, type Toast } from '$lib/stores/toast';
+  import { toastStore, type Toast } from '$lib/stores/toast.svelte';
   import { X } from 'lucide-svelte';
 
   const borderColorMap: Record<Toast['variant'], string> = {

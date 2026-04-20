@@ -24,7 +24,7 @@
    * Default expiry: 30d. "Never" sends expires_at = undefined.
    */
   import { post as mcpPost } from '$lib/mcp-client.js';
-  import { toastStore } from '$lib/stores/toast.js';
+  import { toastStore } from '$lib/stores/toast.svelte.js';
   import { TokenIssuedSchema } from 'cleargate/admin-api';
   import type { TokenIssued } from 'cleargate/admin-api';
 
