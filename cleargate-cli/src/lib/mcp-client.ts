@@ -1,18 +1,17 @@
 /**
- * mcp-client.ts — STORY-010-04
+ * mcp-client.ts — STORY-010-04 / updated STORY-011-01
  *
  * Minimal JSON-RPC-over-HTTP client for ClearGate's MCP server.
  *
- * Token acquisition: reads CLEARGATE_MCP_TOKEN env var (dev short-circuit).
- * STORY-004-08 will replace this with a full /auth/exchange flow.
+ * Token acquisition: callers obtain a token via acquireAccessToken() from
+ * cleargate-cli/src/auth/acquire.ts and pass it via McpClientOptions.token.
+ * This file does NOT read CLEARGATE_MCP_TOKEN or call acquireAccessToken.
  *
- * MCP endpoint: reads CLEARGATE_MCP_URL env var or mcpUrl from ~/.cleargate/config.json.
+ * MCP endpoint: passed directly as McpClientOptions.baseUrl by the caller.
  *
  * Flashcard: no pre-existing MCP client in cleargate-cli — built from scratch here.
  * No top-level await (FLASHCARD #tsup #cjs #esm).
  */
-
-import { loadConfig } from '../config.js';
 
 // ── Wire types (re-exported for consumers) ───────────────────────────────────
 
@@ -179,50 +178,3 @@ export function createMcpClient(opts: McpClientOptions): McpClient {
   return { call, adapterInfo };
 }
 
-// ── URL + token resolution ────────────────────────────────────────────────────
-
-export interface ResolveMcpClientOpts {
-  env?: NodeJS.ProcessEnv;
-  /** Test seam: override fetch */
-  fetch?: typeof globalThis.fetch;
-}
-
-/**
- * Resolve base URL and JWT token from env, then create an McpClient.
- *
- * URL resolution: CLEARGATE_MCP_URL env > mcpUrl in ~/.cleargate/config.json (via loadConfig).
- * Token: CLEARGATE_MCP_TOKEN env (mandatory; no fallback; no prompt — orchestrator decision).
- *
- * Throws with a clear message on missing config so the CLI can exit(2).
- */
-export function resolveMcpClient(opts: ResolveMcpClientOpts = {}): McpClient {
-  const env = opts.env ?? process.env;
-
-  // Token — mandatory
-  const token = env['CLEARGATE_MCP_TOKEN'];
-  if (!token || !token.trim()) {
-    throw new Error(
-      'CLEARGATE_MCP_TOKEN is not set. ' +
-      'Export your MCP JWT before running sync: export CLEARGATE_MCP_TOKEN=<token>',
-    );
-  }
-
-  // URL — env first, then config file
-  let baseUrl: string | undefined = env['CLEARGATE_MCP_URL'];
-  if (!baseUrl || !baseUrl.trim()) {
-    try {
-      const cfg = loadConfig({ env });
-      baseUrl = cfg.mcpUrl;
-    } catch {
-      // Config file absent or invalid — fall through to error below
-    }
-  }
-
-  if (!baseUrl || !baseUrl.trim()) {
-    throw new Error(
-      'MCP URL not configured. Set CLEARGATE_MCP_URL env var or run `cleargate join <invite-url>`.',
-    );
-  }
-
-  return createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim(), fetch: opts.fetch });
-}

@@ -3,7 +3,9 @@
  *
  * Resolution order (first success wins):
  *   1. CLEARGATE_MCP_TOKEN env var — CI / dev short-circuit (assumed JWT, not verified locally).
- *   2. Stored refresh token (keychain/file) + POST /auth/refresh → rotates refresh token, returns access token.
+ *   2. In-memory single-flight cache (keyed by `${profile}::${mcpUrl}`) — returns cached token
+ *      if still valid (expires 60s before access token's `exp` claim).
+ *   3. Stored refresh token (keychain/file) + POST /auth/refresh → rotates refresh token, returns access token.
  *
  * Errors surface to caller with a clear message so command handlers can exit cleanly.
  *
@@ -13,15 +15,44 @@
 import { createTokenStore } from './factory.js';
 import type { TokenStore } from './token-store.js';
 
+// ── Single-flight in-memory cache ─────────────────────────────────────────────
+// Process-local; naturally cleared when the Node CLI exits.
+// Key: `${profile}::${mcpUrl}` — R1 mitigation: two profiles in same process never collide.
+// Env-token path (CLEARGATE_MCP_TOKEN) bypasses this cache entirely.
+
+const CACHE = new Map<string, { accessToken: string; expiresAtMs: number }>();
+
+/** Test seam: clear the acquire cache between tests. */
+export function __resetAcquireCache(): void {
+  CACHE.clear();
+}
+
+/** Decode a JWT payload without verifying the signature (CLI-side only). */
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 export interface AcquireOptions {
   mcpUrl: string;
   profile: string;
+  /** Force a fresh /auth/refresh even if the cache has a valid entry. */
+  forceRefresh?: boolean;
   /** Test seam: overrides globalThis.fetch */
   fetch?: typeof globalThis.fetch;
   /** Test seam: overrides createTokenStore */
   createStore?: () => Promise<TokenStore>;
   /** Test seam: overrides process.env lookup */
   env?: NodeJS.ProcessEnv;
+  /** Test seam: overrides Date.now() for expiry calculations. */
+  now?: () => number;
 }
 
 export class AcquireError extends Error {
@@ -47,14 +78,26 @@ export class AcquireError extends Error {
  */
 export async function acquireAccessToken(opts: AcquireOptions): Promise<string> {
   const env = opts.env ?? process.env;
+  const nowFn = opts.now ?? Date.now;
 
   // 1. Env short-circuit — CI / dev / manual paste. Assumed to be a valid JWT.
+  // Env tokens are NOT cached — they have no known exp without decoding + the
+  // env is set per-invocation in CI anyway.
   const envToken = env['CLEARGATE_MCP_TOKEN'];
   if (envToken && envToken.length > 0) {
     return envToken;
   }
 
-  // 2. Stored refresh token → POST /auth/refresh.
+  // 2. Single-flight cache check (skip when forceRefresh is set).
+  const cacheKey = `${opts.profile}::${opts.mcpUrl}`;
+  if (!opts.forceRefresh) {
+    const cached = CACHE.get(cacheKey);
+    if (cached && nowFn() < cached.expiresAtMs) {
+      return cached.accessToken;
+    }
+  }
+
+  // 3. Stored refresh token → POST /auth/refresh.
   const store = await (opts.createStore ?? createTokenStore)();
   const stored = await store.load(opts.profile);
   if (!stored) {
@@ -114,5 +157,16 @@ export async function acquireAccessToken(opts: AcquireOptions): Promise<string> 
   // Rotate — store the new refresh token so the next call uses a fresh jti.
   await store.save(opts.profile, body.refresh_token);
 
-  return body.access_token;
+  const accessToken = body.access_token;
+
+  // 4. Cache the new access token (expire 60s before the JWT exp claim).
+  const payload = decodeJwtPayload(accessToken);
+  const exp = payload?.exp;
+  if (typeof exp === 'number' && Number.isFinite(exp)) {
+    const expiresAtMs = (exp - 60) * 1000;
+    CACHE.set(cacheKey, { accessToken, expiresAtMs });
+  }
+  // If exp is missing or non-numeric, do NOT cache — next call will re-refresh.
+
+  return accessToken;
 }

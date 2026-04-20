@@ -19,6 +19,8 @@ import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { serializeFrontmatter } from '../lib/frontmatter-yaml.js';
 import { createMcpClient } from '../lib/mcp-client.js';
 import type { McpClient, RemoteItem, RemoteComment } from '../lib/mcp-client.js';
+import { acquireAccessToken, AcquireError } from '../auth/acquire.js';
+import { loadConfig } from '../config.js';
 import { writeCommentCache } from '../lib/comments-cache.js';
 import { renderCommentsSection } from '../lib/wiki-comments-render.js';
 
@@ -26,6 +28,8 @@ export interface PullOptions {
   comments?: boolean;
   projectRoot?: string;
   env?: NodeJS.ProcessEnv;
+  /** Profile for token acquisition. Defaults to 'default'. */
+  profile?: string;
   /** Test seam: inject McpClient directly */
   mcp?: McpClient;
   /** Test seam: stdout writer */
@@ -55,16 +59,16 @@ export async function pullHandler(idOrRemoteId: string, opts: PullOptions = {}):
   if (opts.mcp) {
     mcp = opts.mcp;
   } else {
-    const token = env['CLEARGATE_MCP_TOKEN'];
-    if (!token || !token.trim()) {
-      stderr(
-        'Error: CLEARGATE_MCP_TOKEN is not set. ' +
-        'Export your MCP JWT before running pull: export CLEARGATE_MCP_TOKEN=<token>\n',
-      );
-      exit(2);
-      return;
+    // Resolve base URL
+    let baseUrl: string | undefined = env['CLEARGATE_MCP_URL'];
+    if (!baseUrl || !baseUrl.trim()) {
+      try {
+        const cfg = loadConfig({ env });
+        baseUrl = cfg.mcpUrl;
+      } catch {
+        // Config absent — fall through
+      }
     }
-    const baseUrl = env['CLEARGATE_MCP_URL'];
     if (!baseUrl || !baseUrl.trim()) {
       stderr(
         'Error: MCP URL not configured. Set CLEARGATE_MCP_URL env var or run `cleargate join <invite-url>`.\n',
@@ -72,7 +76,24 @@ export async function pullHandler(idOrRemoteId: string, opts: PullOptions = {}):
       exit(2);
       return;
     }
-    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim() });
+    // Acquire token via keychain/env
+    let accessToken: string;
+    try {
+      accessToken = await acquireAccessToken({
+        mcpUrl: baseUrl.trim(),
+        profile: opts.profile ?? 'default',
+        env,
+      });
+    } catch (err) {
+      if (err instanceof AcquireError) {
+        stderr(`Error: ${err.message}\n`);
+      } else {
+        stderr(`Error: ${String(err)}\n`);
+      }
+      exit(2);
+      return;
+    }
+    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: accessToken });
   }
 
   // Resolve the remote_id to pull

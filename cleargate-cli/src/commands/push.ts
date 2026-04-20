@@ -34,6 +34,8 @@ import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { serializeFrontmatter } from '../lib/frontmatter-yaml.js';
 import { createMcpClient } from '../lib/mcp-client.js';
 import type { McpClient } from '../lib/mcp-client.js';
+import { acquireAccessToken, AcquireError } from '../auth/acquire.js';
+import { loadConfig } from '../config.js';
 
 // ── Response shapes ─────────────────────────────────────────────────────────────
 
@@ -53,6 +55,8 @@ export interface PushOptions {
   force?: boolean;
   projectRoot?: string;
   env?: NodeJS.ProcessEnv;
+  /** Profile for token acquisition. Defaults to 'default'. */
+  profile?: string;
   /** Test seam: inject McpClient directly (prevents token-from-env requirement) */
   mcp?: McpClient;
   /** Test seam: stdout writer */
@@ -79,20 +83,21 @@ export async function pushHandler(fileOrId: string, opts: PushOptions = {}): Pro
   const identity = resolveIdentity(projectRoot);
   const sprintRoot = resolveActiveSprintDir(projectRoot);
 
-  // MCP client — resolved lazily (not created when approved check fails below)
-  function resolveMcp(): McpClient {
+  // MCP client — resolved lazily and asynchronously via acquireAccessToken.
+  // STORY-011-01: approved gate in handlePush runs BEFORE this, so no network
+  // traffic happens on refusal (STORY-010-07 invariant preserved).
+  async function resolveMcp(): Promise<McpClient> {
     if (opts.mcp) return opts.mcp;
-    const token = env['CLEARGATE_MCP_TOKEN'];
-    if (!token || !token.trim()) {
-      stderr(
-        'Error: CLEARGATE_MCP_TOKEN is not set. ' +
-        'Export your MCP JWT before running push: export CLEARGATE_MCP_TOKEN=<token>\n',
-      );
-      exit(2);
-      // TypeScript: exit is typed as (code: number) => never but we annotate it here
-      throw new Error('unreachable');
+    // Resolve base URL
+    let baseUrl: string | undefined = env['CLEARGATE_MCP_URL'];
+    if (!baseUrl || !baseUrl.trim()) {
+      try {
+        const cfg = loadConfig({ env });
+        baseUrl = cfg.mcpUrl;
+      } catch {
+        // Config absent — fall through
+      }
     }
-    const baseUrl = env['CLEARGATE_MCP_URL'];
     if (!baseUrl || !baseUrl.trim()) {
       stderr(
         'Error: MCP URL not configured. Set CLEARGATE_MCP_URL env var or run `cleargate join <invite-url>`.\n',
@@ -100,7 +105,24 @@ export async function pushHandler(fileOrId: string, opts: PushOptions = {}): Pro
       exit(2);
       throw new Error('unreachable');
     }
-    return createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim() });
+    // Acquire token
+    let accessToken: string;
+    try {
+      accessToken = await acquireAccessToken({
+        mcpUrl: baseUrl.trim(),
+        profile: opts.profile ?? 'default',
+        env,
+      });
+    } catch (err) {
+      if (err instanceof AcquireError) {
+        stderr(`Error: ${err.message}\n`);
+      } else {
+        stderr(`Error: ${String(err)}\n`);
+      }
+      exit(2);
+      throw new Error('unreachable');
+    }
+    return createMcpClient({ baseUrl: baseUrl.trim(), token: accessToken });
   }
 
   // ── Revert path ───────────────────────────────────────────────────────────────
@@ -139,7 +161,7 @@ interface PushCtx {
   identity: { email: string };
   sprintRoot: string;
   nowFn: () => string;
-  resolveMcp: () => McpClient;
+  resolveMcp: () => Promise<McpClient>;
   stdout: (s: string) => void;
   stderr: (s: string) => void;
   exit: (code: number) => never;
@@ -193,7 +215,7 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
   }
 
   // MCP call
-  const mcp = resolveMcp();
+  const mcp = await resolveMcp();
 
   let result: PushItemResult;
   try {
@@ -243,7 +265,7 @@ interface RevertCtx {
   sprintRoot: string;
   nowFn: () => string;
   force: boolean;
-  resolveMcp: () => McpClient;
+  resolveMcp: () => Promise<McpClient>;
   stdout: (s: string) => void;
   stderr: (s: string) => void;
   exit: (code: number) => never;
@@ -272,7 +294,7 @@ async function handleRevert(idOrRemoteId: string, ctx: RevertCtx): Promise<void>
   }
 
   // Call sync_status with new_status='archived-without-shipping'
-  const mcp = resolveMcp();
+  const mcp = await resolveMcp();
   try {
     await mcp.call('sync_status', {
       cleargate_id: itemId,

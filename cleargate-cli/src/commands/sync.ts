@@ -29,6 +29,8 @@ import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { serializeFrontmatter } from '../lib/frontmatter-yaml.js';
 import { createMcpClient } from '../lib/mcp-client.js';
 import type { McpClient, RemoteItem, RemoteUpdateRef } from '../lib/mcp-client.js';
+import { acquireAccessToken, AcquireError } from '../auth/acquire.js';
+import { loadConfig } from '../config.js';
 import { runIntakeBranch } from '../lib/intake.js';
 import type { IntakeResult } from '../lib/intake.js';
 import { resolveActiveItems } from '../lib/active-criteria.js';
@@ -43,7 +45,9 @@ export interface SyncOptions {
   dryRun?: boolean;
   projectRoot?: string;
   env?: NodeJS.ProcessEnv;
-  /** Test seam: inject McpClient directly (bypasses resolveMcpClient) */
+  /** Profile for token acquisition. Defaults to 'default'. */
+  profile?: string;
+  /** Test seam: inject McpClient directly (bypasses acquireAccessToken) */
   mcp?: McpClient;
   /** Test seam: override process.stdin for merge prompt */
   stdin?: NodeJS.ReadableStream;
@@ -62,6 +66,8 @@ export interface SyncOptions {
 export interface SyncCheckOptions {
   projectRoot?: string;
   env?: NodeJS.ProcessEnv;
+  /** Profile for token acquisition. Defaults to 'default'. */
+  profile?: string;
   /** Test seam: inject McpClient directly */
   mcp?: McpClient;
   /** Test seam: stdout writer */
@@ -130,17 +136,37 @@ export async function syncCheckHandler(opts: SyncCheckOptions = {}): Promise<voi
   if (opts.mcp) {
     mcp = opts.mcp;
   } else {
-    const token = env['CLEARGATE_MCP_TOKEN'];
-    if (!token || !token.trim()) {
-      await emitError('adapter-not-configured', nowIso);
-      return;
+    // Resolve base URL
+    let baseUrl: string | undefined = env['CLEARGATE_MCP_URL'];
+    if (!baseUrl || !baseUrl.trim()) {
+      try {
+        const cfg = loadConfig({ env });
+        baseUrl = cfg.mcpUrl;
+      } catch {
+        // Config absent — fall through
+      }
     }
-    const baseUrl = env['CLEARGATE_MCP_URL'];
     if (!baseUrl || !baseUrl.trim()) {
       await emitError('adapter-not-configured', nowIso);
       return;
     }
-    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim() });
+    // Acquire token — hook-safe: any AcquireError → emitError, exit 0
+    let accessToken: string;
+    try {
+      accessToken = await acquireAccessToken({
+        mcpUrl: baseUrl.trim(),
+        profile: opts.profile ?? 'default',
+        env,
+      });
+    } catch (err) {
+      if (err instanceof AcquireError) {
+        await emitError('adapter-not-configured', nowIso);
+        return;
+      }
+      await emitError('adapter-not-configured', nowIso);
+      return;
+    }
+    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: accessToken });
   }
 
   // Pre-flight: adapter info (but don't exit 2 — emit error JSON instead)
@@ -207,16 +233,16 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
   if (opts.mcp) {
     mcp = opts.mcp;
   } else {
-    const token = env['CLEARGATE_MCP_TOKEN'];
-    if (!token || !token.trim()) {
-      stderr(
-        'Error: CLEARGATE_MCP_TOKEN is not set. ' +
-        'Export your MCP JWT before running sync: export CLEARGATE_MCP_TOKEN=<token>\n',
-      );
-      exit(2);
-      return;
+    // Resolve base URL
+    let baseUrl: string | undefined = env['CLEARGATE_MCP_URL'];
+    if (!baseUrl || !baseUrl.trim()) {
+      try {
+        const cfg = loadConfig({ env });
+        baseUrl = cfg.mcpUrl;
+      } catch {
+        // Config absent — fall through
+      }
     }
-    const baseUrl = env['CLEARGATE_MCP_URL'];
     if (!baseUrl || !baseUrl.trim()) {
       stderr(
         'Error: MCP URL not configured. Set CLEARGATE_MCP_URL env var or run `cleargate join <invite-url>`.\n',
@@ -224,7 +250,30 @@ export async function syncHandler(opts: SyncOptions = {}): Promise<void> {
       exit(2);
       return;
     }
-    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: token.trim() });
+    // Acquire token via keychain/env
+    let accessToken: string;
+    try {
+      accessToken = await acquireAccessToken({
+        mcpUrl: baseUrl.trim(),
+        profile: opts.profile ?? 'default',
+        env,
+      });
+    } catch (err) {
+      if (err instanceof AcquireError) {
+        if (err.code === 'token_revoked') {
+          stderr(`Error: ${err.message}\n`);
+        } else if (err.code === 'no_stored_token' || err.code === 'invalid_token') {
+          stderr(`Error: ${err.message}\n`);
+        } else {
+          stderr(`Error: ${err.message}\n`);
+        }
+      } else {
+        stderr(`Error: ${String(err)}\n`);
+      }
+      exit(2);
+      return;
+    }
+    mcp = createMcpClient({ baseUrl: baseUrl.trim(), token: accessToken });
   }
 
   // ── Pre-flight: adapter-info probe ──────────────────────────────────────────

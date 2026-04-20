@@ -263,20 +263,22 @@ program
   .description('pull remote updates, resolve conflicts, push local changes')
   .option('--dry-run', 'print plan without making any changes or sync-log entries')
   .option('--check', 'read-only drift probe — prints JSON, no mutation, hook-safe')
-  .action(async (opts: { dryRun?: boolean; check?: boolean }) => {
+  .action(async (opts: { dryRun?: boolean; check?: boolean }, command: Command) => {
+    const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
     if (opts.check) {
-      await syncCheckHandler({});
+      await syncCheckHandler({ profile: globals.profile });
       return;
     }
-    await syncHandler({ dryRun: opts.dryRun ?? false });
+    await syncHandler({ dryRun: opts.dryRun ?? false, profile: globals.profile });
   });
 
 program
   .command('pull <id-or-remote-id>')
   .description('pull a single item from the remote PM tool by local ID or remote_id')
   .option('--comments', 'also pull comments for this item (STORY-010-06; not yet implemented)')
-  .action(async (idOrRemoteId: string, opts: { comments?: boolean }) => {
-    await pullHandler(idOrRemoteId, { comments: opts.comments });
+  .action(async (idOrRemoteId: string, opts: { comments?: boolean }, command: Command) => {
+    const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await pullHandler(idOrRemoteId, { comments: opts.comments, profile: globals.profile });
   });
 
 program
@@ -297,15 +299,18 @@ program
     '  Refuses if local status=done unless --force is passed.',
     '  Appends sync-log entry op=push-revert.',
   ].join('\n'))
-  .action(async (file: string, opts: { revert?: string; force?: boolean }) => {
-    await pushHandler(file, { revert: opts.revert, force: opts.force });
+  .action(async (file: string, opts: { revert?: string; force?: boolean }, command: Command) => {
+    const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await pushHandler(file, { revert: opts.revert, force: opts.force, profile: globals.profile });
   });
 
 program
   .command('conflicts')
   .description('list unresolved sync conflicts from .cleargate/.conflicts.json')
-  .action(async () => {
-    await conflictsHandler();
+  .option('--refresh', 'force a new /auth/refresh even if the cached token is still valid')
+  .action(async (opts: { refresh?: boolean }, command: Command) => {
+    const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await conflictsHandler({ refresh: opts.refresh, profile: globals.profile });
   });
 
 program

@@ -609,20 +609,21 @@ describe('Scenario: missing CLEARGATE_MCP_TOKEN', () => {
   beforeEach(() => { tmpDir = makeTmpDir(); });
   afterEach(() => cleanup(tmpDir));
 
-  it('exits 2 when CLEARGATE_MCP_TOKEN is not set', async () => {
+  it('exits 2 when no MCP URL or token is configured', async () => {
     let exitCode: number | undefined;
     const stderrLines: string[] = [];
 
     await syncHandler({
       projectRoot: tmpDir,
-      env: {},  // No token
+      env: {},  // No token, no URL
       stdout: () => {},
       stderr: (s) => stderrLines.push(s),
       exit: (c) => { exitCode = c; return undefined as never; },
     });
 
     expect(exitCode).toBe(2);
-    expect(stderrLines.join('')).toContain('CLEARGATE_MCP_TOKEN');
+    // With acquireAccessToken wiring, URL check fires first when env is empty
+    expect(stderrLines.join('')).toMatch(/MCP URL not configured|CLEARGATE_MCP_TOKEN/);
   });
 });
 
