@@ -357,3 +357,219 @@ describe('token-ledger.sh: per-turn prompt wins over transcript-first grep', () 
     expect(row!['story_id']).toBe('STORY-008-04');
   });
 });
+
+// ─── NEW: per-task sentinel + delta model tests ───────────────────────────────
+// Added for CHORE=ledger-fix (2026-04-20):
+// These tests verify the sentinel-driven attribution and delta token accounting
+// that replaced the cumulative-sum bug (FLASHCARD 2026-04-20 #hooks #ledger #cumulative-sum).
+
+function writeSentinel(
+  sprintDir: string,
+  n: number,
+  data: { agent_type: string; work_item_id: string; turn_index: number; started_at: string }
+): string {
+  const sentinelPath = path.join(sprintDir, `.pending-task-${n}.json`);
+  fs.writeFileSync(sentinelPath, JSON.stringify(data), 'utf-8');
+  return sentinelPath;
+}
+
+function runHookWithSentinel(
+  env: HookEnv,
+  transcript: string,
+  sentinel: { agent_type: string; work_item_id: string; turn_index: number; started_at: string } | null,
+  sprintId: string,
+  sessionId = 'test-session-sentinel'
+): ReturnType<typeof runHook> {
+  // Ensure sprint dir exists before writing sentinel
+  const sprintDir = path.join(env.sprintRunsDir, sprintId);
+  fs.mkdirSync(sprintDir, { recursive: true });
+
+  if (sentinel !== null) {
+    writeSentinel(sprintDir, 1, sentinel);
+  }
+
+  return runHook(env, transcript, sessionId);
+}
+
+describe('token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix)', () => {
+  it('sentinel drives agent_type and work_item_id (overrides transcript grep)', () => {
+    // Transcript says STORY=005-01 in first user message, but sentinel says developer/STORY-006-01.
+    // Sentinel must win.
+    fs.writeFileSync(env.sentinelPath, 'SPRINT-06', 'utf-8');
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=005-01\n\nYou are the Developer agent.'),
+      makeAssistantTurn(100, 50),
+      makeAssistantTurn(200, 80),
+    ]);
+
+    const { getLastRow } = runHookWithSentinel(
+      env,
+      transcript,
+      { agent_type: 'developer', work_item_id: 'STORY-006-01', turn_index: 0, started_at: '2026-04-20T10:00:00Z' },
+      'SPRINT-06'
+    );
+
+    const row = getLastRow('SPRINT-06');
+    expect(row).not.toBeNull();
+    expect(row!['agent_type']).toBe('developer');
+    expect(row!['work_item_id']).toBe('STORY-006-01');
+    expect(row!['story_id']).toBe('STORY-006-01');
+  });
+
+  it('delta model: turn_index=1 skips first assistant turn, sums from index 1 onward', () => {
+    // Transcript: turn 0 (prior run) = 1000 input tokens, turn 1+ (this subagent) = 200 + 300 input.
+    // With turn_index=1: delta = 200 + 300 = 500 input tokens (NOT 1500 cumulative).
+    fs.writeFileSync(env.sentinelPath, 'SPRINT-06', 'utf-8');
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=006-01\n\nDispatch for this subagent.'),
+      makeAssistantTurn(1000, 400),  // index 0 — prior run, should be excluded
+      makeUserTurn('continuation'),
+      makeAssistantTurn(200, 80),   // index 1 — this subagent
+      makeUserTurn('continuation2'),
+      makeAssistantTurn(300, 120),  // index 2 — this subagent
+    ]);
+
+    const { getLastRow } = runHookWithSentinel(
+      env,
+      transcript,
+      { agent_type: 'architect', work_item_id: 'STORY-006-01', turn_index: 1, started_at: '2026-04-20T10:00:00Z' },
+      'SPRINT-06'
+    );
+
+    const row = getLastRow('SPRINT-06');
+    expect(row).not.toBeNull();
+    // Should be 200 + 300 = 500 input tokens, NOT 1000 + 200 + 300 = 1500
+    expect(row!['input']).toBe(500);
+    expect(row!['output']).toBe(200); // 80 + 120
+    expect(row!['delta_from_turn']).toBe(1);
+  });
+
+  it('two consecutive fires on same transcript produce non-overlapping token counts', () => {
+    // First fire: turn_index=0, covers turns 0..1 (2 turns: 100 + 200 input)
+    // Second fire: turn_index=2, covers turns 2..3 (2 turns: 300 + 400 input)
+    // Total = 1000 input; each fire sees 300 and 700 respectively.
+    fs.writeFileSync(env.sentinelPath, 'SPRINT-06', 'utf-8');
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=006-01\n\nDispatch.'),
+      makeAssistantTurn(100, 50),  // index 0
+      makeUserTurn('turn2'),
+      makeAssistantTurn(200, 60),  // index 1
+      makeUserTurn('turn4'),
+      makeAssistantTurn(300, 70),  // index 2
+      makeUserTurn('turn6'),
+      makeAssistantTurn(400, 80),  // index 3
+    ]);
+
+    // First fire: sentinel with turn_index=0
+    const sprintDir = path.join(env.sprintRunsDir, 'SPRINT-06');
+    fs.mkdirSync(sprintDir, { recursive: true });
+
+    writeSentinel(sprintDir, 1, {
+      agent_type: 'developer',
+      work_item_id: 'STORY-006-01',
+      turn_index: 0,
+      started_at: '2026-04-20T10:00:00Z',
+    });
+
+    const { getLastRow, ledgerPath } = runHook(env, transcript, 'session-fire1');
+
+    const row1 = getLastRow('SPRINT-06');
+    expect(row1).not.toBeNull();
+    expect(row1!['input']).toBe(1000); // 100+200+300+400 (turn_index=0, all turns)
+
+    // Verify sentinel was deleted
+    const sentinelExists = fs.existsSync(path.join(sprintDir, '.pending-task-1.json'));
+    expect(sentinelExists).toBe(false);
+
+    // Second fire: new sentinel with turn_index=2
+    writeSentinel(sprintDir, 2, {
+      agent_type: 'qa',
+      work_item_id: 'STORY-006-01',
+      turn_index: 2,
+      started_at: '2026-04-20T11:00:00Z',
+    });
+
+    runHook(env, transcript, 'session-fire2');
+
+    // Read ledger to get both rows
+    const ledger = ledgerPath('SPRINT-06');
+    const lines = fs.readFileSync(ledger, 'utf-8').trim().split('\n').filter(Boolean);
+    expect(lines.length).toBe(2);
+
+    const row2 = JSON.parse(lines[1]) as Record<string, unknown>;
+    // Second fire covers turns index 2..3: 300 + 400 = 700 input
+    expect(row2['input']).toBe(700);
+    expect(row2['agent_type']).toBe('qa');
+    expect(row2['delta_from_turn']).toBe(2);
+
+    // The two rows must not overlap: 1000 + 700 != 1700 (row1 cumulative includes all)
+    // More important: row2's input (700) does NOT equal row1's input (1000)
+    expect(row1!['input']).not.toBe(row2['input']);
+  });
+
+  it('sentinel is deleted after successful row write', () => {
+    fs.writeFileSync(env.sentinelPath, 'SPRINT-06', 'utf-8');
+
+    const sprintDir = path.join(env.sprintRunsDir, 'SPRINT-06');
+    fs.mkdirSync(sprintDir, { recursive: true });
+
+    const sentinelPath = writeSentinel(sprintDir, 42, {
+      agent_type: 'reporter',
+      work_item_id: 'STORY-006-02',
+      turn_index: 0,
+      started_at: '2026-04-20T10:00:00Z',
+    });
+
+    expect(fs.existsSync(sentinelPath)).toBe(true);
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=006-02\n\nYou are reporter.'),
+      makeAssistantTurn(50, 25),
+    ]);
+
+    runHook(env, transcript, 'session-sentinel-delete');
+
+    expect(fs.existsSync(sentinelPath)).toBe(false);
+  });
+
+  it('missing sentinel is a silent no-op that still writes a row using legacy detection', () => {
+    // No sentinel file: hook should exit 0 and still produce a row via transcript-grep.
+    fs.writeFileSync(env.sentinelPath, 'SPRINT-06', 'utf-8');
+
+    const sprintDir = path.join(env.sprintRunsDir, 'SPRINT-06');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    // Explicitly confirm no pending-task files exist
+    expect(
+      fs.readdirSync(sprintDir).filter((f) => f.startsWith('.pending-task-'))
+    ).toHaveLength(0);
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=006-03\n\nYou are the Developer agent.'),
+      makeAssistantTurn(150, 75),
+    ]);
+
+    // runHook should not throw
+    let threw = false;
+    try {
+      runHook(env, transcript, 'session-no-sentinel');
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(false);
+
+    // Row should still be written (using legacy transcript-grep for agent_type/work_item_id)
+    const ledger = path.join(sprintDir, 'token-ledger.jsonl');
+    expect(fs.existsSync(ledger)).toBe(true);
+    const lines = fs.readFileSync(ledger, 'utf-8').trim().split('\n').filter(Boolean);
+    expect(lines.length).toBeGreaterThanOrEqual(1);
+
+    const row = JSON.parse(lines[lines.length - 1]) as Record<string, unknown>;
+    // Legacy detection should find STORY-006-03 from first user message
+    expect(row['work_item_id']).toBe('STORY-006-03');
+    // delta_from_turn should be 0 (no sentinel, full transcript)
+    expect(row['delta_from_turn']).toBe(0);
+  });
+});
