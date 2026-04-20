@@ -35,8 +35,11 @@ COPY admin/package.json ./admin/
 COPY cleargate-cli/package.json ./cleargate-cli/
 COPY mcp/package.json ./mcp/
 
-# Install all deps (including devDeps) for the admin workspace
-RUN npm ci --workspace admin --include=dev --ignore-scripts
+# Install all workspace deps (including devDeps).
+# Must install all workspaces — not just admin — so that the `cleargate`
+# workspace package (cleargate-cli) gets symlinked into node_modules/cleargate.
+# Without this, Vite cannot resolve "cleargate/admin-api" at build time.
+RUN npm ci --ignore-scripts
 
 # Copy source files
 COPY admin/ ./admin/
@@ -56,7 +59,6 @@ RUN apk add --no-cache dumb-init
 
 # Copy production node_modules from the deps stage
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
-COPY --from=deps --chown=node:node /app/admin/node_modules ./admin/node_modules
 
 # Copy the SvelteKit adapter-node build output
 COPY --from=builder --chown=node:node /app/admin/build ./build
