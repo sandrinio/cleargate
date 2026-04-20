@@ -13,13 +13,24 @@
  *   9. Plaintext is rendered in the modal
  *  10. Copy button calls copyToClipboard and triggers success toast
  *  11. Toast text does NOT contain the token value
+ *  12. beforeNavigate auto-closes modal + zeroes plaintext (QA kickback fix)
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, waitFor } from '@testing-library/svelte';
 
-// Mock $app/navigation — beforeNavigate is not available in jsdom
+// Capture beforeNavigate callbacks so they can be invoked in tests.
+// vi.hoisted() runs before vi.mock() factory evaluation, making the array
+// accessible inside the hoisted factory scope.
+const { navigateCallbacks } = vi.hoisted(() => {
+  const navigateCallbacks: Array<(nav: { cancel: () => void }) => void> = [];
+  return { navigateCallbacks };
+});
+
+// Mock $app/navigation — capture registered beforeNavigate callbacks
 vi.mock('$app/navigation', () => ({
-  beforeNavigate: vi.fn(),
+  beforeNavigate: vi.fn((cb: (nav: { cancel: () => void }) => void) => {
+    navigateCallbacks.push(cb);
+  }),
   goto: vi.fn(),
 }));
 
@@ -62,6 +73,8 @@ describe('TokenIssuedModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset captured beforeNavigate callbacks between tests
+    navigateCallbacks.length = 0;
     addEventListenerSpy = vi.spyOn(window, 'addEventListener');
     removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
   });
@@ -221,5 +234,32 @@ describe('TokenIssuedModal', () => {
       props: { ...baseProps, open: false },
     });
     expect(queryByRole('alertdialog')).toBeNull();
+  });
+
+  // Scenario 12: beforeNavigate auto-closes modal + zeroes plaintext
+  it('beforeNavigate auto-closes modal + zeroes plaintext', async () => {
+    const onclose = vi.fn();
+    const { queryByRole, queryByText } = render(TokenIssuedModal, {
+      props: { ...baseProps, open: true, plaintext: SECRET_TOKEN, onclose },
+    });
+
+    // Modal should be visible with plaintext before navigation
+    expect(queryByRole('alertdialog')).toBeTruthy();
+    expect(queryByText(SECRET_TOKEN)).toBeTruthy();
+
+    // At least one beforeNavigate callback must have been captured
+    expect(navigateCallbacks.length).toBeGreaterThan(0);
+
+    // Invoke the captured callback — mimics SvelteKit triggering a navigation event
+    navigateCallbacks[0]?.({ cancel: vi.fn() });
+
+    // onclose must have been called by the navigation guard
+    expect(onclose).toHaveBeenCalledOnce();
+
+    // After onclose is called, the plaintext chip should no longer show the secret
+    // (the production guard zeroes _plaintext before calling onclose)
+    await waitFor(() => {
+      expect(queryByText(SECRET_TOKEN)).toBeNull();
+    });
   });
 });
