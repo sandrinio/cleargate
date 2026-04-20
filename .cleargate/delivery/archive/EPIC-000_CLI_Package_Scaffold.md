@@ -1,18 +1,22 @@
 ---
-epic_id: "EPIC-000"
-status: "Completed"
-ambiguity: "🟢 Low"
-context_source: "PROPOSAL-001_Document_Metadata.md, PROPOSAL-002_Knowledge_Wiki.md, PROPOSAL-003_MCP_Adapter.md"
-owner: "Vibe Coder (ssuladze@exadel.com)"
-target_date: "2026-04-18"
-completed_in_sprint: "SPRINT-03"
-completed_at: "2026-04-18T04:00:00Z"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-resolved_at: "2026-04-17T00:00:00Z"
-resolved_by: "Vibe Coder (ssuladze@exadel.com)"
+epic_id: EPIC-000
+status: Completed
+ambiguity: 🟢 Low
+context_source: PROPOSAL-001_Document_Metadata.md, PROPOSAL-002_Knowledge_Wiki.md, PROPOSAL-003_MCP_Adapter.md
+owner: Vibe Coder (ssuladze@exadel.com)
+target_date: 2026-04-18
+completed_in_sprint: SPRINT-03
+completed_at: 2026-04-18T04:00:00Z
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+resolved_at: 2026-04-17T00:00:00Z
+resolved_by: Vibe Coder (ssuladze@exadel.com)
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:11.157Z
+push_version: 3
 ---
 
 # EPIC-000: `cleargate-cli` Package Scaffold

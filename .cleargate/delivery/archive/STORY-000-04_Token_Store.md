@@ -1,18 +1,22 @@
 ---
-story_id: "STORY-000-04"
-parent_epic_ref: "EPIC-000"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-sprint_id: "SPRINT-03"
-shipped_commit: "f97b3f1"
-completed_at: "2026-04-18T04:00:00Z"
+story_id: STORY-000-04
+parent_epic_ref: EPIC-000
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md
+sprint_id: SPRINT-03
+shipped_commit: f97b3f1
+completed_at: 2026-04-18T04:00:00Z
 keychain_lib: "@napi-rs/keyring@^1.2.0"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:27.935Z
+push_version: 3
 ---
 
 # STORY-000-04: TokenStore Abstraction (Keychain + File Fallback)

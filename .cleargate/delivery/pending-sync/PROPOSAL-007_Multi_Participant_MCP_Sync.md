@@ -1,19 +1,31 @@
 ---
-proposal_id: "PROP-007"
-status: "Draft"
-author: "AI Agent (cleargate planning)"
-approved: false
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-codebase_version: "post-SPRINT-03"
-depends_on: ["PROP-003"]
-related: ["PROP-001", "PROP-002", "PROP-005", "PROP-006"]
+proposal_id: PROP-007
+status: Draft
+author: AI Agent (cleargate planning)
+approved: true
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+codebase_version: post-SPRINT-03
+depends_on:
+  - PROP-003
+related:
+  - PROP-001
+  - PROP-002
+  - PROP-005
+  - PROP-006
+stamp_error: no ledger rows for work_item_id PROP-007
 draft_tokens:
   input: null
   output: null
-  cache_read: null
   cache_creation: null
+  cache_read: null
   model: null
+  last_stamp: 2026-04-20T20:12:14Z
+  sessions: []
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-20T20:12:14Z
 ---
 
 # PROPOSAL-007: Multi-Participant MCP Sync

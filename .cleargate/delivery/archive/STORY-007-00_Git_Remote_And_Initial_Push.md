@@ -1,16 +1,20 @@
 ---
-story_id: "STORY-007-00"
-parent_epic_ref: "EPIC-007"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-004_Public_Discoverability.md"
-created_at: "2026-04-19T15:00:00Z"
-updated_at: "2026-04-19T15:00:00Z"
-shipped_commit: "e45d046816bb69af8ba82d76b472b5af8a486592"
-completed_at: "2026-04-19T11:05:43Z"
-created_at_version: "post-SPRINT-04"
-updated_at_version: "post-SPRINT-04"
+story_id: STORY-007-00
+parent_epic_ref: EPIC-007
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-004_Public_Discoverability.md
+created_at: 2026-04-19T15:00:00Z
+updated_at: 2026-04-19T15:00:00Z
+shipped_commit: e45d046816bb69af8ba82d76b472b5af8a486592
+completed_at: 2026-04-19T11:05:43Z
+created_at_version: post-SPRINT-04
+updated_at_version: post-SPRINT-04
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:00.685Z
+push_version: 3
 ---
 
 # STORY-007-00: Git Remote + Initial Push to GitHub

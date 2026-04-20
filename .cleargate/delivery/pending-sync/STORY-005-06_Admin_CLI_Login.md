@@ -16,6 +16,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-20T10:41:20Z
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:46:02.059Z
+push_version: 2
 ---
 
 # STORY-005-06: `cleargate-admin login` (GitHub OAuth Device Flow)

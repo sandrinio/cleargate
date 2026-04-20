@@ -23,6 +23,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-20T08:57:29Z
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:01.082Z
+push_version: 2
 ---
 
 # STORY-004-09: Items Admin API — list + version history

@@ -1,15 +1,20 @@
 ---
-story_id: "STORY-004-01"
-parent_epic_ref: "EPIC-004"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-003-02"]
+story_id: STORY-004-01
+parent_epic_ref: EPIC-004
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-003-02
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:53.356Z
+push_version: 2
 ---
 
 # STORY-004-01: Admin JWT Scope + Middleware

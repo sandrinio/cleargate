@@ -44,3 +44,65 @@ Gate: proposal.ready-for-decomposition (advisory)
 ✅ proposal.ready-for-decomposition passed (3 criteria)
 wiki ingest: /Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md not under .cleargate/delivery/
 [2026-04-20T17:29:45Z] stamp=0 gate=0 ingest=2 file=/Users/ssuladze/Documents/Dev/CG_TEST/.cleargate/delivery/pending-sync/PROPOSAL-E2E-01_Smoke_Test_Proposal.md
+node:internal/modules/cjs/loader:1459
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/dist/cli.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.14.0
+node:internal/modules/cjs/loader:1459
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/dist/cli.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.14.0
+node:internal/modules/cjs/loader:1459
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/dist/cli.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1456:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1066:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1071:22)
+    at Module._load (node:internal/modules/cjs/loader:1242:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.14.0
+[2026-04-20T20:11:11Z] stamp=1 gate=1 ingest=1 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md (EPIC-012)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: expected approved == true, got "false"
+wiki ingest: create epics/EPIC-012.md
+[2026-04-20T20:11:41Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md (PROP-007)
+Gate: proposal.ready-for-decomposition (advisory)
+✅ proposal.ready-for-decomposition passed (3 criteria)
+wiki ingest: update proposals/PROPOSAL-007.md
+[2026-04-20T20:12:14Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md

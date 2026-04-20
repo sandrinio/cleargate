@@ -1,15 +1,20 @@
 ---
-story_id: "STORY-004-04"
-parent_epic_ref: "EPIC-004"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-004-01"]
+story_id: STORY-004-04
+parent_epic_ref: EPIC-004
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-004-01
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:59.172Z
+push_version: 2
 ---
 
 # STORY-004-04: Tokens CRUD (One-Time-Display)

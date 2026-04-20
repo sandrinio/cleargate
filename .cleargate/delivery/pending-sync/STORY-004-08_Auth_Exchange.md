@@ -1,16 +1,21 @@
 ---
-story_id: "STORY-004-08"
-parent_epic_ref: "EPIC-004"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L2"
-context_source: "PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6.4, SPRINT-03 deferral"
-sprint_id: "SPRINT-04"
-created_at: "2026-04-18T18:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-004-01"]
+story_id: STORY-004-08
+parent_epic_ref: EPIC-004
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L2
+context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6.4, SPRINT-03 deferral
+sprint_id: SPRINT-04
+created_at: 2026-04-18T18:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-004-01
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:05.023Z
+push_version: 2
 ---
 
 # STORY-004-08: `POST /admin-api/v1/auth/exchange` (Session → Admin JWT)

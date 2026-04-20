@@ -5,11 +5,21 @@ status: Draft
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
 created_at_version: post-SPRINT-04
 updated_at_version: post-SPRINT-04
-cached_gate_result: {pass: false, failing_criteria: [{id: "no-tbds", detail: "2 occurrences at §2, §3"}, {id: "implementation-files-declared", detail: "section 3 has 0 listed-item (≥1 required)"}, {id: "dod-declared", detail: "section 4 has 0 listed-item (≥1 required)"}], last_gate_check: "2026-04-19T14:14:56Z"}
+cached_gate_result:
+  pass: false
+  failing_criteria:
+    - id: no-tbds
+      detail: 2 occurrences at §2, §3
+    - id: implementation-files-declared
+      detail: section 3 has 0 listed-item (≥1 required)
+    - id: dod-declared
+      detail: section 4 has 0 listed-item (≥1 required)
+  last_gate_check: 2026-04-20T19:22:06Z
+approved: true
 ---
 
 # STORY-008-03: `cleargate gate` Command (check + explain)

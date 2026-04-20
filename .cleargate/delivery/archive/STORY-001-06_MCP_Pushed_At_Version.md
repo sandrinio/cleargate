@@ -1,15 +1,20 @@
 ---
-story_id: "STORY-001-06"
-parent_epic_ref: "EPIC-001"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-001_Document_Metadata.md"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-depends_on: ["STORY-003-03"]
+story_id: STORY-001-06
+parent_epic_ref: EPIC-001
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-001_Document_Metadata.md
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+depends_on:
+  - STORY-003-03
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:43.616Z
+push_version: 3
 ---
 
 # STORY-001-06: MCP `push_item` Writes `server_pushed_at_version`

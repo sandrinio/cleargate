@@ -23,6 +23,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-20T13:31:51Z
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:08.850Z
+push_version: 5
 ---
 
 # STORY-011-01: Wire `acquireAccessToken` into all CLI commands

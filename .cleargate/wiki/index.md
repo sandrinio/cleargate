@@ -18,6 +18,7 @@
 | [[EPIC-008]] | epic | Draft | .cleargate/delivery/archive/EPIC-008_Token_Cost_And_Readiness_Gates.md |
 | [[EPIC-009]] | epic | Draft | .cleargate/delivery/archive/EPIC-009_Scaffold_Manifest_And_Uninstall.md |
 | [[EPIC-011]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-011_End_To_End_Production_Readiness.md |
+| [[EPIC-012]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md |
 
 ## Stories
 

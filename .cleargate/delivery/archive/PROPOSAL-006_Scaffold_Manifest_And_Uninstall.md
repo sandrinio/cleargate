@@ -1,21 +1,26 @@
 ---
-proposal_id: "PROP-006"
-status: "Approved"
-author: "AI Agent (cleargate planning)"
+proposal_id: PROP-006
+status: Approved
+author: AI Agent (cleargate planning)
 approved: true
-approved_at: "2026-04-19T00:00:00Z"
-approved_by: "Vibe Coder (sandro.suladze@gmail.com)"
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-codebase_version: "post-SPRINT-03"
-depends_on: ["PROP-001"]
-related: ["PROP-005"]
+approved_at: 2026-04-19T00:00:00Z
+approved_by: Vibe Coder (sandro.suladze@gmail.com)
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+codebase_version: post-SPRINT-03
+depends_on:
+  - PROP-001
+related:
+  - PROP-005
 draft_tokens:
   input: null
   output: null
   cache_read: null
   cache_creation: null
   model: null
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:35.760Z
+push_version: 3
 ---
 
 # PROPOSAL-006: Scaffold Manifest + Drift Detection + `cleargate uninstall`

@@ -1,14 +1,17 @@
 ---
-proposal_id: "PROP-004"
-status: "Approved"
-author: "AI Agent (cleargate planning)"
+proposal_id: PROP-004
+status: Approved
+author: AI Agent (cleargate planning)
 approved: true
-approved_at: "2026-04-19T03:30:00Z"
-approved_by: "Vibe Coder (ssuladze@exadel.com)"
-created_at: "2026-04-19T03:00:00Z"
-updated_at: "2026-04-19T03:30:00Z"
-codebase_version: "post-phase-2c"
+approved_at: 2026-04-19T03:30:00Z
+approved_by: Vibe Coder (ssuladze@exadel.com)
+created_at: 2026-04-19T03:00:00Z
+updated_at: 2026-04-19T03:30:00Z
+codebase_version: post-phase-2c
 depends_on: []
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:30.586Z
+push_version: 3
 ---
 
 # PROPOSAL-004: Public Discoverability — Repo Metadata + README Pitch

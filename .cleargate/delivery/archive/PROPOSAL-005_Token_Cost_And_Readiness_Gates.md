@@ -1,20 +1,25 @@
 ---
-proposal_id: "PROP-005"
-status: "Approved"
-author: "AI Agent (cleargate planning)"
+proposal_id: PROP-005
+status: Approved
+author: AI Agent (cleargate planning)
 approved: true
-approved_at: "2026-04-19T00:00:00Z"
-approved_by: "Vibe Coder (sandro.suladze@gmail.com)"
-created_at: "2026-04-19T00:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-codebase_version: "post-SPRINT-03"
-depends_on: ["PROP-001", "PROP-002"]
+approved_at: 2026-04-19T00:00:00Z
+approved_by: Vibe Coder (sandro.suladze@gmail.com)
+created_at: 2026-04-19T00:00:00Z
+updated_at: 2026-04-19T00:00:00Z
+codebase_version: post-SPRINT-03
+depends_on:
+  - PROP-001
+  - PROP-002
 draft_tokens:
   input: null
   output: null
   cache_read: null
   cache_creation: null
   model: null
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:04.645Z
+push_version: 3
 ---
 
 # PROPOSAL-005: Per-Work-Item Token Cost + Machine-Checkable Readiness Gates

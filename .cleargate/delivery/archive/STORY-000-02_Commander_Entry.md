@@ -1,17 +1,21 @@
 ---
-story_id: "STORY-000-02"
-parent_epic_ref: "EPIC-000"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-sprint_id: "SPRINT-03"
-shipped_commit: "43c50c3"
-completed_at: "2026-04-17T23:00:00Z"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
+story_id: STORY-000-02
+parent_epic_ref: EPIC-000
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-003_MCP_Adapter.md
+sprint_id: SPRINT-03
+shipped_commit: 43c50c3
+completed_at: 2026-04-17T23:00:00Z
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:42:45.045Z
+push_version: 3
 ---
 
 # STORY-000-02: Commander Entry Point

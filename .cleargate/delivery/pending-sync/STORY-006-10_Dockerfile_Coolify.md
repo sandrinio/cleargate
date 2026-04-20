@@ -19,6 +19,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-20T11:26:35Z
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:36.477Z
+push_version: 2
 ---
 
 # STORY-006-10: Admin Dockerfile + Coolify Deploy Runbook

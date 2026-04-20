@@ -1,17 +1,21 @@
 ---
-story_id: "STORY-002-01"
-parent_epic_ref: "EPIC-002"
-status: "Completed"
-ambiguity: "🟢 Low"
-complexity_label: "L1"
-context_source: "PROPOSAL-002_Knowledge_Wiki.md"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-shipped_commit: "aef73b1"
-completed_at: "2026-04-19T05:30:00Z"
-sprint_id: "SPRINT-04"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
+story_id: STORY-002-01
+parent_epic_ref: EPIC-002
+status: Completed
+ambiguity: 🟢 Low
+complexity_label: L1
+context_source: PROPOSAL-002_Knowledge_Wiki.md
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+shipped_commit: aef73b1
+completed_at: 2026-04-19T05:30:00Z
+sprint_id: SPRINT-04
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:16.343Z
+push_version: 3
 ---
 
 # STORY-002-01: Add §10 "Knowledge Wiki Protocol" to Protocol

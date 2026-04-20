@@ -23,6 +23,10 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T13:31:41Z
   sessions: []
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:46:00.103Z
+push_version: 3
 ---
 
 # STORY-011-04: Execute Coolify deploy of MCP + Admin behind TLS

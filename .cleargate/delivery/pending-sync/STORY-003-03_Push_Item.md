@@ -1,14 +1,18 @@
 ---
-story_id: "STORY-003-03"
-parent_epic_ref: "EPIC-003"
-status: "Draft"
-ambiguity: "🟢 Low"
-complexity_label: "L3"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
+story_id: STORY-003-03
+parent_epic_ref: EPIC-003
+status: Draft
+ambiguity: 🟢 Low
+complexity_label: L3
+context_source: PROPOSAL-003_MCP_Adapter.md
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:17.917Z
+push_version: 2
 ---
 
 # STORY-003-03: `push_item` Tool (Versioning + Prune)

@@ -1,14 +1,19 @@
 ---
-proposal_id: "PROP-003"
-status: "Approved"
-author: "AI Agent (cleargate planning)"
+proposal_id: PROP-003
+status: Approved
+author: AI Agent (cleargate planning)
 approved: true
-approved_at: "2026-04-17T00:00:00Z"
-approved_by: "Vibe Coder (ssuladze@exadel.com)"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
-codebase_version: "strategy-phase-pre-init"
-depends_on: ["PROP-001", "PROP-002"]
+approved_at: 2026-04-17T00:00:00Z
+approved_by: Vibe Coder (ssuladze@exadel.com)
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-17T00:00:00Z
+codebase_version: strategy-phase-pre-init
+depends_on:
+  - PROP-001
+  - PROP-002
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:44:01.279Z
+push_version: 3
 ---
 
 # PROPOSAL-003: ClearGate MCP — Remote Hub + Admin UI on Coolify VPS

@@ -174,3 +174,6 @@
 [2026-04-20T14:47:32Z] routing to sprint=SPRINT-06 (sentinel)
 [2026-04-20T14:47:32Z] work_item_id fallback grep: EPIC-010
 [2026-04-20T14:47:32Z] wrote row: sprint=SPRINT-06 agent=architect work_item=EPIC-010 story= tokens=in:2552/out:1150564 delta_from=0
+[2026-04-20T20:17:02Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T20:17:03Z] work_item_id fallback grep: EPIC-010
+[2026-04-20T20:17:03Z] wrote row: sprint=SPRINT-06 agent=architect work_item=EPIC-010 story= tokens=in:3546/out:1495444 delta_from=0

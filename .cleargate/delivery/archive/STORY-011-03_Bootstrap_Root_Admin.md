@@ -23,6 +23,10 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T13:53:02Z
   sessions: []
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:54.298Z
+push_version: 3
 ---
 
 # STORY-011-03: `cleargate admin bootstrap-root <handle>` — first-root seeding CLI

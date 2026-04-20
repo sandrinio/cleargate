@@ -1,19 +1,23 @@
 ---
-epic_id: "EPIC-005"
-status: "Completed"
-ambiguity: "🟢 Low"
-context_source: "PROPOSAL-003_MCP_Adapter.md"
-owner: "Vibe Coder (ssuladze@exadel.com)"
-target_date: "2026-04-18"
-completed_in_sprint: "SPRINT-03"
-completed_at: "2026-04-18T17:30:00Z"
-completion_notes: "All 5 stories shipped in SPRINT-03. `cleargate-admin login` (OAuth device flow) deferred to SPRINT-04 as a closeout item."
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-18T18:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "strategy-phase-pre-init"
-resolved_at: "2026-04-17T00:00:00Z"
-resolved_by: "Vibe Coder (ssuladze@exadel.com)"
+epic_id: EPIC-005
+status: Completed
+ambiguity: 🟢 Low
+context_source: PROPOSAL-003_MCP_Adapter.md
+owner: Vibe Coder (ssuladze@exadel.com)
+target_date: 2026-04-18
+completed_in_sprint: SPRINT-03
+completed_at: 2026-04-18T17:30:00Z
+completion_notes: All 5 stories shipped in SPRINT-03. `cleargate-admin login` (OAuth device flow) deferred to SPRINT-04 as a closeout item.
+created_at: 2026-04-17T00:00:00Z
+updated_at: 2026-04-18T18:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: strategy-phase-pre-init
+resolved_at: 2026-04-17T00:00:00Z
+resolved_by: Vibe Coder (ssuladze@exadel.com)
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:43:08.587Z
+push_version: 3
 ---
 
 # EPIC-005: Admin CLI + Client Bootstrap
