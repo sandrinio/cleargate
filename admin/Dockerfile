@@ -23,10 +23,12 @@ RUN npm ci --workspace admin --omit=dev --ignore-scripts
 FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Force devDeps even when build env sets NODE_ENV=production.
-# Coolify and many CI systems inject NODE_ENV=production at build time,
-# which otherwise silently strips TypeScript/svelte/vite, breaking npm run build.
-ENV NODE_ENV=development
+# Keep NODE_ENV=production so SvelteKit emits a prod SSR bundle that matches
+# Vite's prod client chunks (both use the hashed __sveltekit_XXX var name).
+# Forcing NODE_ENV=development here caused a split-brain: SSR used
+# __sveltekit_dev while client chunks used a hashed suffix, so the client
+# couldn't read $env/dynamic/public at runtime.
+ENV NODE_ENV=production
 
 # PUBLIC_MCP_URL is baked into the client bundle by Vite at build time (SvelteKit
 # $env/static/public convention). Must be the URL the BROWSER uses to reach MCP,
@@ -40,11 +42,13 @@ COPY package.json package-lock.json ./
 COPY admin/package.json ./admin/
 COPY cleargate-cli/package.json ./cleargate-cli/
 
-# Install all workspace deps (including devDeps).
-# Must install all workspaces — not just admin — so that the `cleargate`
-# workspace package (cleargate-cli) gets symlinked into node_modules/cleargate.
-# Without this, Vite cannot resolve "cleargate/admin-api" at build time.
-RUN npm ci --ignore-scripts
+# Install all workspace deps. --include=dev is explicit because NODE_ENV=production
+# (set above) would otherwise make npm ci omit devDependencies, stripping vite/
+# svelte/typescript and breaking the build. Must install all workspaces — not
+# just admin — so that the `cleargate` workspace package (cleargate-cli) gets
+# symlinked into node_modules/cleargate. Without this, Vite cannot resolve
+# "cleargate/admin-api" at build time.
+RUN npm ci --include=dev --ignore-scripts
 
 # Copy source files
 COPY admin/ ./admin/
