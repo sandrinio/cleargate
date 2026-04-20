@@ -49,8 +49,16 @@ RUN npm ci --ignore-scripts
 # Copy source files
 COPY admin/ ./admin/
 COPY cleargate-cli/ ./cleargate-cli/
+# cleargate-cli's prebuild copies meta-root cleargate-planning/ into its templates,
+# so the sibling source must be present in the build context.
+COPY cleargate-planning/ ./cleargate-planning/
 
-# Build — outputs to admin/build/
+# Build cleargate-cli FIRST — admin's vite imports `cleargate/admin-api`
+# which resolves via workspace symlink to cleargate-cli/dist/. dist/ is
+# gitignored, so fresh CI clones (Coolify) must compile it here.
+RUN npm run build --workspace cleargate-cli
+
+# Build admin — outputs to admin/build/
 RUN npm run build --workspace admin
 
 # ------ Runtime stage ------
