@@ -214,6 +214,16 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
     return;
   }
 
+  // Derive title from body's first H1 if frontmatter lacks one.
+  // ClearGate templates put the human-readable title in `# {ID}: {Name}`,
+  // not in a `title:` frontmatter field. Admin UI reads payload.title for
+  // item rows; without this, every row renders with an empty heading.
+  const payloadForPush: Record<string, unknown> = { ...fm };
+  if (typeof payloadForPush['title'] !== 'string' || payloadForPush['title'].length === 0) {
+    const h1 = body.match(/^#\s+(.+?)\s*$/m)?.[1]?.trim();
+    if (h1) payloadForPush['title'] = h1;
+  }
+
   // MCP call
   const mcp = await resolveMcp();
 
@@ -222,7 +232,7 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
     result = await mcp.call<PushItemResult>('push_item', {
       cleargate_id: itemId,
       type,
-      payload: fm,
+      payload: payloadForPush,
       ...(typeof fm['remote_id'] === 'string' ? { remote_id: fm['remote_id'] } : {}),
     });
   } catch (err) {
