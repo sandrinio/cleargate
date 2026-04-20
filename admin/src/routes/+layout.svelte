@@ -3,7 +3,10 @@
   import { page } from '$app/stores';
   import { Menu, Settings, Bell, LogOut } from 'lucide-svelte';
   import IconButton from '$lib/components/IconButton.svelte';
-  import { signOut } from '$lib/mcp-client.js';
+  import { signOut, get } from '$lib/mcp-client.js';
+  import { UsersMeResponseSchema } from 'cleargate/admin-api';
+  import { setCurrentUser, getCurrentUser, subscribeCurrentUser } from '$lib/stores/current-user.js';
+  import { onMount } from 'svelte';
 
   let { children, data } = $props();
 
@@ -13,11 +16,39 @@
   const session = $derived(data?.session);
   const isAuthenticated = $derived(!!session);
 
-  const navLinks = [
+  // Reactive current user: plain $state updated via subscriber
+  let currentUserValue = $state(getCurrentUser());
+
+  $effect(() => {
+    return subscribeCurrentUser(() => {
+      currentUserValue = getCurrentUser();
+    });
+  });
+
+  const baseNavLinks = [
     { href: '/', label: 'Dashboard' },
     { href: '/projects', label: 'Projects' },
     { href: '/audit', label: 'Audit' },
   ];
+
+  // Computed: include Settings only for root admins
+  const navLinks = $derived(
+    currentUserValue?.is_root
+      ? [...baseNavLinks, { href: '/settings', label: 'Settings' }]
+      : baseNavLinks
+  );
+
+  onMount(async () => {
+    if (isAuthenticated) {
+      try {
+        const me = await get('/users/me', UsersMeResponseSchema);
+        setCurrentUser({ id: me.id, github_handle: me.github_handle, is_root: me.is_root });
+      } catch {
+        // Non-fatal: settings tab just won't show
+        setCurrentUser(null);
+      }
+    }
+  });
 
   function isActive(href: string): boolean {
     if (href === '/') return $page.url.pathname === '/';

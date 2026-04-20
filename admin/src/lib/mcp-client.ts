@@ -159,6 +159,43 @@ export async function post<T>(path: string, body: unknown, schema: ZodSchema<T>)
 }
 
 /**
+ * Authenticated PATCH with 401-retry-once pattern.
+ */
+export async function patch<T>(path: string, body: unknown, schema: ZodSchema<T>): Promise<T> {
+  if (!adminToken) await exchange();
+
+  const baseUrl = getBaseUrl();
+  let res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${adminToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    credentials: 'include',
+  });
+
+  if (res.status === 401) {
+    await exchange();
+    res = await _fetch(`${baseUrl}/admin-api/v1${path}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      credentials: 'include',
+    });
+    if (res.status === 401) throw new AuthError('session_expired', 'Session expired after retry');
+  }
+
+  if (res.status === 403) throw new ForbiddenError('forbidden', 'Forbidden');
+  if (!res.ok) throw new NetworkError(res.status);
+
+  return schema.parse(await res.json());
+}
+
+/**
  * Authenticated DELETE with 401-retry-once pattern.
  * DELETE often returns 204 No Content; schema is optional.
  * Treat 200 and 204 both as success.
@@ -218,6 +255,7 @@ export const mcpClient = {
   exchange,
   get,
   post,
+  patch,
   del,
   signOut,
 };
