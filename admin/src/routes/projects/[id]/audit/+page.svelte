@@ -372,9 +372,17 @@
                   <span class="font-mono text-xs bg-base-200 rounded px-1.5 py-0.5">{row.tool}</span>
                 </td>
 
-                <!-- Target (plain text — items route not yet shipped) -->
+                <!-- Target — links to items detail page (STORY-006-06) -->
                 <td class="py-3 pr-4 text-sm text-[#6B7280] font-mono">
-                  {row.target_cleargate_id ?? '—'}
+                  {#if row.target_cleargate_id}
+                    <a
+                      href="/projects/{projectId}/items/{row.target_cleargate_id}"
+                      class="text-primary hover:underline"
+                      data-testid="target-link"
+                    >{row.target_cleargate_id}</a>
+                  {:else}
+                    —
+                  {/if}
                 </td>
 
                 <!-- Result pill -->
@@ -423,7 +431,11 @@
             <div class="flex flex-wrap gap-2 text-xs text-[#6B7280]">
               <span class="font-mono bg-base-200 rounded px-1.5 py-0.5">{row.tool}</span>
               {#if row.target_cleargate_id}
-                <span class="font-mono">{row.target_cleargate_id}</span>
+                <a
+                  href="/projects/{projectId}/items/{row.target_cleargate_id}"
+                  class="font-mono text-primary hover:underline"
+                  data-testid="target-link-mobile"
+                >{row.target_cleargate_id}</a>
               {/if}
             </div>
           </div>
