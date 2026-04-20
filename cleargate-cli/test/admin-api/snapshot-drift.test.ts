@@ -19,6 +19,10 @@ import {
   TokenIssuedSchema,
   TokenMetaSchema,
   AuthExchangeResponseSchema,
+  ItemSummarySchema,
+  ItemVersionSchema,
+  ItemsListResponseSchema,
+  ItemVersionsResponseSchema,
 } from '../../src/admin-api/responses.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -116,5 +120,33 @@ describe('snapshot-drift', () => {
     for (const key of authExchangeRequired) {
       expect(authExchangeKeys).toContain(key);
     }
+
+    // ItemSummary — STORY-004-09
+    const itemSummaryKeys = Object.keys(ItemSummarySchema.shape);
+    const itemSummarySnapshotKeys = getSchemaProperties(snapshot, 'ItemSummary');
+    expect(itemSummaryKeys.sort()).toEqual(itemSummarySnapshotKeys.sort());
+    const itemSummaryRequired = getSchemaRequired(snapshot, 'ItemSummary');
+    for (const key of itemSummaryRequired) {
+      expect(itemSummaryKeys).toContain(key);
+    }
+
+    // ItemVersion — STORY-004-09
+    const itemVersionKeys = Object.keys(ItemVersionSchema.shape);
+    const itemVersionSnapshotKeys = getSchemaProperties(snapshot, 'ItemVersion');
+    expect(itemVersionKeys.sort()).toEqual(itemVersionSnapshotKeys.sort());
+    const itemVersionRequired = getSchemaRequired(snapshot, 'ItemVersion');
+    for (const key of itemVersionRequired) {
+      expect(itemVersionKeys).toContain(key);
+    }
+
+    // ItemsListResponse — STORY-004-09 (top-level shape; items array is not drilled)
+    const itemsListKeys = Object.keys(ItemsListResponseSchema.shape);
+    const itemsListSnapshotKeys = getSchemaProperties(snapshot, 'ItemsListResponse');
+    expect(itemsListKeys.sort()).toEqual(itemsListSnapshotKeys.sort());
+
+    // ItemVersionsResponse — STORY-004-09
+    const itemVersionsResponseKeys = Object.keys(ItemVersionsResponseSchema.shape);
+    const itemVersionsResponseSnapshotKeys = getSchemaProperties(snapshot, 'ItemVersionsResponse');
+    expect(itemVersionsResponseKeys.sort()).toEqual(itemVersionsResponseSnapshotKeys.sort());
   });
 });

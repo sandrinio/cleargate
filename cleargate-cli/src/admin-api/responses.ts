@@ -91,3 +91,51 @@ export const ErrorBodySchema = z
   .strict();
 
 export type ErrorBody = z.infer<typeof ErrorBodySchema>;
+
+// ── Items admin API (STORY-004-09) ───────────────────────────────────────────
+
+export const ItemSummarySchema = z
+  .object({
+    id: z.string(),
+    cleargate_id: z.string(),
+    type: z.string(),
+    title: z.string(),
+    status: z.string(),
+    remote_id: z.string().nullable(),
+    last_pushed_at: z.string().nullable(),
+    pushed_by_member_id: z.string().nullable(),
+    version: z.number().int(),
+    updated_at: z.string(),
+  })
+  .strict();
+
+export type ItemSummary = z.infer<typeof ItemSummarySchema>;
+
+export const ItemsListResponseSchema = z
+  .object({
+    items: z.array(ItemSummarySchema),
+    next_cursor: z.string().nullable(),
+  })
+  .strict();
+
+export type ItemsListResponse = z.infer<typeof ItemsListResponseSchema>;
+
+export const ItemVersionSchema = z
+  .object({
+    version: z.number().int(),
+    pushed_by_member_id: z.string().nullable(),
+    pushed_at: z.string(),
+    status: z.string(),
+    diff_summary: z.string().nullable(),
+  })
+  .strict();
+
+export type ItemVersion = z.infer<typeof ItemVersionSchema>;
+
+export const ItemVersionsResponseSchema = z
+  .object({
+    versions: z.array(ItemVersionSchema),
+  })
+  .strict();
+
+export type ItemVersionsResponse = z.infer<typeof ItemVersionsResponseSchema>;
