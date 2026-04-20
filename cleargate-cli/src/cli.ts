@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
-import { stubHandler } from './commands/_stub.js';
 import { joinHandler } from './commands/join.js';
 import { stampHandler } from './commands/stamp.js';
 import { initHandler } from './commands/init.js';
@@ -168,8 +167,15 @@ admin
     });
   });
 
-// Remaining admin subcommands are not yet implemented
-admin.action(stubHandler('admin'));
+admin
+  .command('bootstrap-root <handle>')
+  .description('seed the first root admin in admin_users (idempotent)')
+  .option('--database-url <url>', 'Postgres connection string; falls back to DATABASE_URL env')
+  .option('--force', 'override second-root guard / promote non-root user to root')
+  .action(async (handle: string, opts: { databaseUrl?: string; force?: boolean }) => {
+    const { bootstrapRootHandler } = await import('./commands/bootstrap-root.js');
+    await bootstrapRootHandler({ handle, databaseUrl: opts.databaseUrl, force: opts.force ?? false });
+  });
 
 program
   .command('doctor')

@@ -164,7 +164,7 @@ Alternatively, revert the source commit and push to main — Coolify auto-redepl
 - [ ] `CLEARGATE_DISABLE_AUTH` is NOT set (or not `1`) in production env.
 - [ ] TLS cert issued by Let's Encrypt (Traefik auto-provisions — check Coolify's SSL tab).
 - [ ] HTTP → HTTPS redirect enforced (Traefik default).
-- [ ] Bootstrap admin account exists in MCP DB (run MCP bootstrap script if needed).
+- [ ] Bootstrap admin account exists in MCP DB: run `cleargate admin bootstrap-root <github-handle> --database-url <DATABASE_URL>` from any host that can reach the MCP Postgres. Idempotent — safe to re-run on redeploy.
 - [ ] `CLEARGATE_ADMIN_BOOTSTRAP_GH_USER` unset from MCP env after first boot.
 - [ ] Auto-deploy enabled in Coolify (push to main → rebuild).
 - [ ] Monitor logs via Coolify's built-in log viewer (pino JSON stdout → captured automatically).
@@ -186,7 +186,7 @@ Current v1 design assumes one Admin UI instance. SvelteKit adapter-node is state
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | 502 on `/auth/exchange` | MCP CORS misconfigured | Check `CLEARGATE_ADMIN_ORIGIN` on MCP service matches admin origin exactly (no trailing slash) |
-| "not authorized" on login | GitHub handle not in admin_users table | Run bootstrap: `docker exec <mcp-container> node scripts/bootstrap-admin.js <gh_handle>` |
+| "not authorized" on login | GitHub handle not in admin_users table | Run `cleargate admin bootstrap-root <github-handle> --database-url <DATABASE_URL>` from any host that can reach the MCP Postgres |
 | Stuck login loop | Stale `cg_session` cookie | Clear `cg_session` cookie in browser devtools; also flush Redis key if needed |
 | `/health` → 503 | Redis unreachable | Check `REDIS_URL` is correct internal Coolify URL; verify Redis service is running |
 | Container exits immediately | Missing required env var | Check container logs for `missing required env: <VAR>` line; add the missing var in Coolify |
