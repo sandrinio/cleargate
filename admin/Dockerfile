@@ -14,7 +14,6 @@ COPY package.json package-lock.json ./
 # Copy only the package.json files needed for workspace resolution
 COPY admin/package.json ./admin/
 COPY cleargate-cli/package.json ./cleargate-cli/
-COPY mcp/package.json ./mcp/
 
 # Install production-only deps for the admin workspace.
 # --ignore-scripts blocks arbitrary postinstall code from transitive deps.
@@ -40,7 +39,6 @@ ENV PUBLIC_MCP_URL=$PUBLIC_MCP_URL
 COPY package.json package-lock.json ./
 COPY admin/package.json ./admin/
 COPY cleargate-cli/package.json ./cleargate-cli/
-COPY mcp/package.json ./mcp/
 
 # Install all workspace deps (including devDeps).
 # Must install all workspaces — not just admin — so that the `cleargate`
