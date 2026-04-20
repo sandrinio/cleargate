@@ -40,7 +40,7 @@ function makeState(stories = {}, overrides = {}) {
   return {
     schema_version: 1,
     sprint_id: 'S-FAKE',
-    execution_mode: 'v2',
+    execution_mode: 'v1',
     sprint_status: 'Active',
     stories,
     last_action: 'init',

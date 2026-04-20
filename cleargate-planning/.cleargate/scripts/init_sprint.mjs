@@ -71,7 +71,7 @@ function main() {
   const state = {
     schema_version: SCHEMA_VERSION,
     sprint_id: sprintId,
-    execution_mode: 'v2',
+    execution_mode: 'v1',
     sprint_status: 'Active',
     stories,
     last_action: `Sprint ${sprintId} initialised`,
