@@ -57,3 +57,29 @@ test.describe('Shell scaffold smoke', () => {
     expect(googleFontRequests).toHaveLength(0);
   });
 });
+
+/**
+ * Mobile viewport test — STORY-006-01 QA kickback fix
+ * Asserts sidebar is hidden, mobile-menu button is visible, and no horizontal overflow at 390px.
+ */
+test.describe('Shell mobile viewport (390px)', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('sidebar hidden, mobile-menu button visible, no horizontal overflow at 390px', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    // 1. aside sidebar must NOT be visible at 390px (hidden lg:flex → hidden on mobile)
+    const sidebar = page.locator('aside');
+    await expect(sidebar).toBeHidden();
+
+    // 2. mobile-menu IconButton must be visible at 390px (lg:hidden → visible on mobile)
+    const mobileMenuBtn = page.getByRole('button', { name: 'Open navigation menu' });
+    await expect(mobileMenuBtn).toBeVisible();
+
+    // 3. no horizontal overflow — scrollWidth must not exceed viewport width
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(390);
+  });
+});
