@@ -18,6 +18,7 @@ import {
   InviteCreatedSchema,
   TokenIssuedSchema,
   TokenMetaSchema,
+  AuthExchangeResponseSchema,
 } from '../../src/admin-api/responses.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -105,6 +106,15 @@ describe('snapshot-drift', () => {
     expect(tokenIssuedKeys).toContain('token');
     for (const key of tokenMetaSnapshotKeys) {
       expect(tokenIssuedKeys).toContain(key);
+    }
+
+    // AuthExchangeResponse — STORY-004-08
+    const authExchangeKeys = Object.keys(AuthExchangeResponseSchema.shape);
+    const authExchangeSnapshotKeys = getSchemaProperties(snapshot, 'AuthExchangeResponse');
+    expect(authExchangeKeys.sort()).toEqual(authExchangeSnapshotKeys.sort());
+    const authExchangeRequired = getSchemaRequired(snapshot, 'AuthExchangeResponse');
+    for (const key of authExchangeRequired) {
+      expect(authExchangeKeys).toContain(key);
     }
   });
 });

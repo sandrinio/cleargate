@@ -74,6 +74,15 @@ export const TokenIssuedSchema = z
 
 export type TokenIssued = z.infer<typeof TokenIssuedSchema>;
 
+export const AuthExchangeResponseSchema = z
+  .object({
+    admin_token: z.string(),
+    expires_at: z.string(),
+  })
+  .strict();
+
+export type AuthExchangeResponse = z.infer<typeof AuthExchangeResponseSchema>;
+
 export const ErrorBodySchema = z
   .object({
     error: z.string(),
