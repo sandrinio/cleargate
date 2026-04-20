@@ -93,6 +93,49 @@ Each discovered during M4 execution and patched inside the sprint window.
 
 ---
 
+## Iteration Log (post-code-complete)
+
+Chronological account of what happened after M1/M2/M3 had shipped + QA-approved and we shifted to prod deploy. Each entry = one symptom → one diagnosis → one patch. The sequence matters because later entries only surfaced after earlier ones were fixed — a "peel the onion" pattern typical of first-ever prod smoke.
+
+**Phase 1 — Coolify build failures (zero-output admin service)**
+
+1. **Deploy 1 fail — `npm ci` EUSAGE, @linear/sdk missing from lockfile.** SPRINT-07 added `@linear/sdk` to `mcp/package.json` without regenerating the inner `mcp/package-lock.json`. Invisible on dev because `npm install` reconciles lazily; `npm ci` is strict. Fix: `rm package-lock.json && npm install --package-lock-only` inside `mcp/`. → `92dc75c` (mcp).
+2. **Deploy 2 fail — Dockerfile not found.** Coolify's default Dockerfile location was `/Dockerfile`; admin's lives at `admin/Dockerfile`. Fix: set Coolify field `Dockerfile Location = /admin/Dockerfile`. No commit (config only).
+3. **Deploy 3 fail — 1.27 KB build context, every `COPY cleargate-cli/…` missing.** Coolify auto-scoped Base Directory to `/admin/` when Dockerfile path was set. Fix: `Base Directory = /` so full monorepo root is sent.
+4. **Deploy 4 fail — `COPY mcp/package.json ./mcp/` file not found.** `mcp/` is a separate git repo (sandrinio/cleargate-mcp) not tracked in outer or in cleargate-admin mirror. Fix: drop `mcp` from root `workspaces` array + remove `COPY mcp/package.json` from both Dockerfile stages. → `87b4ff4`.
+5. **Deploy 5 fail — `vite`: "Rollup failed to resolve import cleargate/admin-api".** `cleargate-cli/dist/` is gitignored; fresh CI clone has no built output for admin's vite to resolve. Fix: add `RUN npm run build --workspace cleargate-cli` before admin's vite build; also `COPY cleargate-planning/` since cleargate-cli's prebuild reads from there. → `93ed1bb`. **Verified locally** with `rm -rf cleargate-cli/dist && docker build --no-cache` — green.
+
+**Phase 2 — Runtime reference errors after the bundle shipped**
+
+6. **Prod browser console: `POST http://localhost:3000/admin-api/v1/auth/exchange`** — client bundle baked the default ARG value because `getBaseUrl()` indirected through a local `const metaEnv = import.meta.env` which defeated Vite's AST-based static replacement. Fix: replace with `$env/dynamic/public` (SvelteKit canonical, read at runtime from container env). → `d8e3c2e`.
+7. **Prod browser console: `Cannot read properties of undefined (reading 'env')`** — the `$env/dynamic/public` module compiles into `globalThis.__sveltekit_<hash>.env` where `<hash>` depends on NODE_ENV at build time. Dockerfile's `ENV NODE_ENV=development` made SSR emit `__sveltekit_dev` while Vite client chunks emitted `__sveltekit_<hash>` → split-brain. Fix: `NODE_ENV=production` in builder + `--include=dev` on `npm ci`. Verified: HTML and all client chunks now share `__sveltekit_59w5iz`. → `7b65ada`.
+8. **Dashboard CORS + 401 on `/admin-api/v1/auth/exchange`.** Two separate issues stacked: (a) MCP's `CLEARGATE_ADMIN_ORIGIN` env was unset — no CORS allowlist → preflight blocked; (b) `cg_session` cookie was scoped to `admin.cleargate.soula.ge` only, never sent cross-subdomain to MCP. Fix (a): set `CLEARGATE_ADMIN_ORIGIN=https://admin.cleargate.soula.ge` on the MCP service (runtime env, restart). Fix (b): read `SESSION_COOKIE_DOMAIN` env in `hooks.server.ts` and pass as cookie `domain` attribute. → `d93600a`. User had to log out + log back in to acquire a fresh cookie with the new Domain.
+
+**Phase 3 — Data pipeline failures (bulk-push against prod)**
+
+9. **Attempt 1 — 65 / 65 failed, `Cannot find module 'cleargate-cli/dist/cli.js'`.** I had nuked `cleargate-cli/dist` during an earlier clean-docker-build test. Fix: `cd cleargate-cli && npm install && npm run build`.
+10. **Attempt 2 — 0 OK, 65 FAIL with `Failed query: insert into items ... params: service-token`.** The `updated_by_client_id` column is `uuid()` with FK to `clients.id`; service-token middleware was stamping the string `"service-token"` there. Postgres rejected the type. Fix: omit `client_id` from service-token synthetic claims → drizzle inserts NULL. → `0afa113` (mcp). Service-token traceability preserved via `pushed_by` (member email) + `tokens.last_used_at`.
+11. **Attempt 3 — 59 OK, 6 skip.** 5 sprint files (MCP push_item enum has no `"sprint"`) + 1 genuine gate-fail (STORY-008-03 has historical TBDs in body). Captured as EPIC-012 carry-forward.
+12. **Admin UI opens — all 64 items rendering with empty row headings.** Zero of 65 archive files had a `title:` frontmatter key; templates never required it and the human-readable title lives as body's H1 `# STORY-NNN: Name`. MCP's `items.ts` extracts `payload.title` → empty. Fix: CLI derives title from body H1 before sending payload. → `e9f6b76`. Re-pushed all 105 items with titles.
+13. **Re-push rate-limited 6 / 105 at 429.** Bulk loop fired faster than 60/min user bucket. Fix: add `sleep 1.5` between calls in retry loop. Operational, no commit.
+
+**Phase 4 — Admin UI content visibility (three polish passes)**
+
+14. **Users click an item → see only a header card, nothing else.** Admin UI's item-detail template had a TODO-style comment "ItemSummary doesn't carry payload" and a `PayloadViewer` import never used. Fix: extend MCP's `ItemSummaryDto` + `ItemSummarySchema` to include `current_payload: Record<string, unknown>`, wire PayloadViewer card into the detail page. → `b81f381` (mcp) + `e56b7b5`.
+15. **Admin UI `Failed to load items` — zod `unrecognized_keys: ["current_payload"]`.** Coolify redeployed MCP with the new field but admin bundle still had the old `.strict()` schema that rejected unknown keys. Fix: wait for Coolify to rebuild admin with updated cleargate-cli deps.
+16. **Payload card rendered, but only metadata — no markdown body.** By design, `cleargate push` sent only frontmatter. User requirement surfaced: body should sync too. Fix: CLI includes `payload.body = body` on push; admin UI renders it in a Content card above the PayloadViewer, body excluded from the frontmatter view. → `a853393`. Re-pushed all 105 items with bodies.
+17. **Content card showed raw markdown, not formatted.** Fix: add `marked` + `isomorphic-dompurify` to admin workspace; render via `{@html sanitize(marked(body))}` with scoped `.cg-markdown` CSS matching Design Guide tokens (cream backgrounds, primary orange links, ECE8E1 borders). Supports H1–H4, lists, fenced code, tables, blockquotes, links. → `07a9c03`.
+
+**Phase 5 — Sprint close-out**
+
+18. **PROPOSAL-007 flipped to `approved: true`** — was blocking EPIC-012's `proposal-approved` gate. SPRINT-07 shipped the work; approval flag was never flipped post-ship. Now correct.
+19. **EPIC-012 drafted** — captures all sprint-artifact gaps (sprint/report/plans/flashcard) surfaced by this sprint. Gate ✅ 2026-04-21. 5 stories scoped for SPRINT-09.
+20. **Operational scripts retained:** `/tmp/stamp-approved.mjs` (bulk-stamp `approved: true` on 59 archive items + 49 pending-sync items) and `admin/scripts/e2e-drive.mjs` (Playwright E2E harness validating M1+M2+M3 live). The latter committed to `admin/scripts/`; the former is a throwaway that SPRINT-09's EPIC-012 Story 4 will replace with a proper `cleargate flashcard push`-style ergonomic path.
+
+**Totals for post-execution work:** 11 hotfix commits (7 outer + 4 mcp), 3 phases of failed-attempt → diagnose → fix, 4 full re-pushes of the 105-item backlog as each missing field was discovered. The planning gate at sprint start did not anticipate any of phases 2, 3, or 4 — flashcard-worthy for future sprint planning (add "first-ever prod-smoke" as an explicit milestone with budget for N unknown-unknown hotfixes).
+
+---
+
 ## Closing
 
 SPRINT-08 shipped the production-readiness stretch it was planned to ship, on a one-day calendar, with all four risks that could have deferred M4 (R6, R7 especially) handled in-sprint. The four-agent loop produced M1–M3 cleanly; M4 was human-driven and surfaced 11 regressions that were all patched before sprint close. ClearGate v1-alpha is live.
