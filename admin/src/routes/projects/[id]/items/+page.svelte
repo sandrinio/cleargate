@@ -191,10 +191,12 @@
 
   <!-- Empty state -->
   {:else if items.length === 0}
-    <EmptyState
-      headline="No items synced yet."
-      supporting="Items appear here as agents call push_item."
-    />
+    <div data-testid="items-empty-state">
+      <EmptyState
+        headline="No items synced yet."
+        supporting="Items appear here as agents call push_item."
+      />
+    </div>
 
   <!-- Table -->
   {:else}

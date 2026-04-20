@@ -50,6 +50,7 @@
       // The list endpoint supports fetching all types; we search for the clid client-side
       // Since there's no single-item GET, we fetch the list and find the matching item.
       // Versions endpoint is flat: /items/:cleargate_id/versions
+      // TODO: replace list-and-filter-by-200 with GET /admin-api/v1/items/:cleargate_id when a future CR ships the single-item endpoint. Current approach silently misses items beyond position 200 in the project's sort order (rare: small projects).
       const [listData, versionsData] = await Promise.all([
         mcpGet(`/projects/${pid}/items?limit=200`, ItemsListResponseSchema),
         mcpGet(`/items/${encodeURIComponent(targetClid)}/versions`, ItemVersionsResponseSchema),
