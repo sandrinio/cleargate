@@ -25,6 +25,9 @@ import {
   ItemVersionsResponseSchema,
   DeviceStartResponseSchema,
   DevicePollSuccessResponseSchema,
+  AdminUserSchema,
+  AdminUsersListResponseSchema,
+  UsersMeResponseSchema,
 } from '../../src/admin-api/responses.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -167,6 +170,33 @@ describe('snapshot-drift', () => {
     const devicePollSuccessRequired = getSchemaRequired(snapshot, 'DevicePollSuccessResponse');
     for (const key of devicePollSuccessRequired) {
       expect(devicePollSuccessKeys).toContain(key);
+    }
+
+    // AdminUser — STORY-006-09
+    const adminUserKeys = Object.keys(AdminUserSchema.shape);
+    const adminUserSnapshotKeys = getSchemaProperties(snapshot, 'AdminUser');
+    expect(adminUserKeys.sort()).toEqual(adminUserSnapshotKeys.sort());
+    const adminUserRequired = getSchemaRequired(snapshot, 'AdminUser');
+    for (const key of adminUserRequired) {
+      expect(adminUserKeys).toContain(key);
+    }
+
+    // AdminUsersList — STORY-006-09
+    const adminUsersListKeys = Object.keys(AdminUsersListResponseSchema.shape);
+    const adminUsersListSnapshotKeys = getSchemaProperties(snapshot, 'AdminUsersList');
+    expect(adminUsersListKeys.sort()).toEqual(adminUsersListSnapshotKeys.sort());
+    const adminUsersListRequired = getSchemaRequired(snapshot, 'AdminUsersList');
+    for (const key of adminUsersListRequired) {
+      expect(adminUsersListKeys).toContain(key);
+    }
+
+    // UsersMe — STORY-006-09
+    const usersMeKeys = Object.keys(UsersMeResponseSchema.shape);
+    const usersMeSnapshotKeys = getSchemaProperties(snapshot, 'UsersMe');
+    expect(usersMeKeys.sort()).toEqual(usersMeSnapshotKeys.sort());
+    const usersMeRequired = getSchemaRequired(snapshot, 'UsersMe');
+    for (const key of usersMeRequired) {
+      expect(usersMeKeys).toContain(key);
     }
   });
 });

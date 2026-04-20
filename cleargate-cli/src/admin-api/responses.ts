@@ -173,3 +173,37 @@ export const DevicePollSuccessResponseSchema = z
   .strict();
 
 export type DevicePollSuccessResponse = z.infer<typeof DevicePollSuccessResponseSchema>;
+
+// ── Admin users API (STORY-006-09) ───────────────────────────────────────────
+
+export const AdminUserSchema = z
+  .object({
+    id: z.string(),
+    github_handle: z.string(),
+    github_user_id: z.string().nullable(),
+    is_root: z.boolean(),
+    disabled_at: z.string().nullable(),
+    created_at: z.string(),
+    created_by: z.string().nullable(),
+  })
+  .strict();
+
+export type AdminUser = z.infer<typeof AdminUserSchema>;
+
+export const AdminUsersListResponseSchema = z
+  .object({
+    admin_users: z.array(AdminUserSchema),
+  })
+  .strict();
+
+export type AdminUsersListResponse = z.infer<typeof AdminUsersListResponseSchema>;
+
+export const UsersMeResponseSchema = z
+  .object({
+    id: z.string(),
+    github_handle: z.string(),
+    is_root: z.boolean(),
+  })
+  .strict();
+
+export type UsersMeResponse = z.infer<typeof UsersMeResponseSchema>;
