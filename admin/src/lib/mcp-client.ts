@@ -10,6 +10,7 @@
  */
 import type { ZodSchema } from 'zod';
 import { AuthExchangeResponseSchema } from 'cleargate/admin-api';
+import { env as publicEnv } from '$env/dynamic/public';
 import { AuthError, ForbiddenError, NetworkError } from './errors.js';
 
 // Module-level state — never persisted to storage
@@ -22,15 +23,11 @@ let _baseUrl: string = '';
 
 function getBaseUrl(): string {
   if (_baseUrl) return _baseUrl;
-  // Vite statically replaces import.meta.env.KEY (dot-notation only) at build
-  // time. Bracket access stays as a runtime property lookup and returns
-  // undefined, silently falling back to the default. Use dot-notation here.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaEnv = (import.meta as any).env;
-  if (metaEnv) {
-    return metaEnv.VITE_MCP_URL ?? metaEnv.PUBLIC_MCP_URL ?? 'http://localhost:3000';
-  }
-  return process.env['VITE_MCP_URL'] ?? process.env['PUBLIC_MCP_URL'] ?? 'http://localhost:3000';
+  // Use SvelteKit's $env/dynamic/public — populated at server startup from
+  // PUBLIC_MCP_URL runtime env, injected into HTML for client hydration.
+  // Survives Coolify deploys where PUBLIC_MCP_URL is set as a runtime env
+  // var (no rebuild-on-URL-change requirement).
+  return publicEnv.PUBLIC_MCP_URL ?? 'http://localhost:3000';
 }
 
 /** Override base URL (used in tests) */
