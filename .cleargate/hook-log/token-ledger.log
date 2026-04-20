@@ -168,3 +168,9 @@
 [2026-04-20T11:37:34Z] routing to sprint=SPRINT-06 (sentinel)
 [2026-04-20T11:37:34Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-044.json agent=qa work_item=STORY-006-10 turn_index=0
 [2026-04-20T11:37:35Z] wrote row: sprint=SPRINT-06 agent=qa work_item=STORY-006-10 story=STORY-006-10 tokens=in:1440/out:712416 delta_from=0
+[2026-04-20T14:37:42Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T14:37:43Z] found sentinel=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-06/.pending-task-012.json agent=developer work_item=STORY-006-03 turn_index=0
+[2026-04-20T14:37:43Z] wrote row: sprint=SPRINT-06 agent=developer work_item=STORY-006-03 story=STORY-006-03 tokens=in:2532/out:1140990 delta_from=0
+[2026-04-20T14:47:32Z] routing to sprint=SPRINT-06 (sentinel)
+[2026-04-20T14:47:32Z] work_item_id fallback grep: EPIC-010
+[2026-04-20T14:47:32Z] wrote row: sprint=SPRINT-06 agent=architect work_item=EPIC-010 story= tokens=in:2552/out:1150564 delta_from=0
