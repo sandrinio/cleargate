@@ -63,6 +63,14 @@ const { handle: authHandle } = SvelteKitAuth({
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
+        // When admin + MCP are on different subdomains of the same parent
+        // domain (e.g., admin.cleargate.soula.ge + cleargate-mcp.soula.ge),
+        // set SESSION_COOKIE_DOMAIN=.soula.ge so the cookie is sent cross-
+        // subdomain to MCP's /admin-api/v1/auth/exchange. Unset locally
+        // (localhost:3003 ↔ localhost:3000 share host; no domain needed).
+        ...(process.env['SESSION_COOKIE_DOMAIN']
+          ? { domain: process.env['SESSION_COOKIE_DOMAIN'] }
+          : {}),
       },
     },
   },
