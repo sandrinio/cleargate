@@ -195,9 +195,13 @@
       </div>
     </div>
 
-    <!-- Current payload (if available via item) -->
-    <!-- The ItemSummary doesn't carry payload; the payload is in version history -->
-    <!-- PayloadViewer will be shown in expanded timeline entries -->
+    <!-- Current payload — rendered from item.current_payload (SPRINT-08 follow-up) -->
+    {#if item.current_payload && Object.keys(item.current_payload).length > 0}
+      <div class="bg-base-100 rounded-3xl shadow-card p-6">
+        <h3 class="text-lg font-semibold text-base-content mb-4">Current payload (v{item.version})</h3>
+        <PayloadViewer payload={item.current_payload} />
+      </div>
+    {/if}
 
     <!-- Version history section -->
     <div class="bg-base-100 rounded-3xl shadow-card p-6">

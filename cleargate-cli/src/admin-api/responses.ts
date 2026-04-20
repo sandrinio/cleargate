@@ -106,6 +106,7 @@ export const ItemSummarySchema = z
     pushed_by_member_id: z.string().nullable(),
     version: z.number().int(),
     updated_at: z.string(),
+    current_payload: z.record(z.string(), z.unknown()).default({}),
   })
   .strict();
 
