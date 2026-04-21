@@ -61,6 +61,28 @@ When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` 
 
 These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
+## Sprint Design Review
+
+Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §2 "Execution Strategy". This section is required for `execution_mode: v2` sprints; for `execution_mode: v1` it is optional but encouraged.
+
+**Trigger:** Orchestrator invokes you with all story files for the sprint milestone AND signals "Design Review requested". You produce §2 content and return it as a markdown block for the orchestrator to insert into the sprint plan file.
+
+**§2 Execution Strategy — four required subsections:**
+
+1. **§2.1 Phase Plan** — Group stories into parallel waves vs sequential chains. Source: `parallel_eligible` field on each story's frontmatter + dependency graph from `## 3. Implementation Guide`. Explicitly state which stories can run concurrently and which must be serialized.
+
+2. **§2.2 Merge Ordering** — Grep each story's "Files to modify" list for overlap. For every file touched by more than one story, determine which story lands first (typically the one that creates the section the other amends). Produce a table: `Shared File | Stories | Order | Rationale`.
+
+3. **§2.3 Shared-Surface Warnings** — For each pair of stories that touch the same file, flag the specific risk: section collision, rename hazard, append-vs-insert conflict. One bullet per risk pair.
+
+4. **§2.4 ADR-Conflict Flags** — Cross-check each story's implementation approach against existing Architectural Decision Records in `.cleargate/knowledge/` and prior sprint decisions captured in flashcards. Flag any story that diverges from a locked decision.
+
+**V-Bounce reference:** `skills/agent-team/SKILL.md` §"Architect Sprint Design Review (Phase 2 → Phase 3 transition)" at pinned SHA `2b8477ab65e39e594ee8b6d8cf13a210498eaded`.
+
+**Output:** A single markdown block (§§2.1–2.4 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
+
+These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
