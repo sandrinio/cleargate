@@ -178,8 +178,14 @@ sprint
 sprint
   .command('close <sprint-id>')
   .description('close a sprint — validates all stories are terminal, runs prefill + suggest_improvements')
-  .action((sprintId: string) => {
-    sprintCloseHandler({ sprintId });
+  .option('--assume-ack', 'skip the "waiting for Reporter" gate and flip state to Completed directly')
+  .action((sprintId: string, opts: { assumeAck?: boolean }) => {
+    const handlerOpts: { sprintId: string; assumeAck?: boolean } = { sprintId };
+    // FLASHCARD #cli #commander #optional-key: omit key when undefined
+    if (opts.assumeAck === true) {
+      handlerOpts.assumeAck = true;
+    }
+    sprintCloseHandler(handlerOpts);
   });
 
 const story = program
@@ -209,16 +215,26 @@ const state = program
 state
   .command('update <story-id> <new-state>')
   .description('update a story\'s state in state.json')
-  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup (overrides .active sentinel)')
   .action((storyId: string, newState: string, opts: { sprint?: string }) => {
-    stateUpdateHandler({ storyId, newState }, { sprintId: opts.sprint });
+    // FLASHCARD #cli #commander #optional-key: omit key when undefined
+    const cliOpts: Parameters<typeof stateUpdateHandler>[1] = {};
+    if (opts.sprint !== undefined) {
+      cliOpts.sprintId = opts.sprint;
+    }
+    stateUpdateHandler({ storyId, newState }, cliOpts);
   });
 
 state
   .command('validate <sprint-id>')
   .description('validate all story states in a sprint\'s state.json')
-  .action((sprintId: string) => {
-    stateValidateHandler({ sprintId });
+  .option('--sprint <id>', 'override sprint ID for execution_mode lookup')
+  .action((sprintId: string, opts: { sprint?: string }) => {
+    const cliOpts: Parameters<typeof stateValidateHandler>[1] = {};
+    if (opts.sprint !== undefined) {
+      cliOpts.sprintId = opts.sprint;
+    }
+    stateValidateHandler({ sprintId: opts.sprint ?? sprintId }, cliOpts);
   });
 
 program

@@ -21,6 +21,12 @@ export interface ExecutionModeOptions {
   sprintFilePath?: string;
   /** Working directory for relative-path resolution. Defaults to process.cwd(). */
   cwd?: string;
+  /**
+   * When true and sprintId is absent or 'SPRINT-UNKNOWN', read
+   * `.cleargate/sprint-runs/.active` for the sprint ID before falling through
+   * to v1-inert. Callers can also use `resolveSprintIdFromSentinel` directly.
+   */
+  sentinelFallback?: boolean;
 }
 
 /**
@@ -80,12 +86,34 @@ function discoverSprintFile(sprintId: string, cwd: string): string | null {
 }
 
 /**
+ * Read the active sprint ID from `.cleargate/sprint-runs/.active`.
+ * Returns null if the file does not exist or is empty after trim.
+ *
+ * This is the primary API for sentinel-based sprint discovery. Callers that
+ * need a fallback chain use:
+ *   const sprintId = argSprintId ?? resolveSprintIdFromSentinel(cwd);
+ *   const mode = readSprintExecutionMode(sprintId ?? 'SPRINT-UNKNOWN', { cwd });
+ */
+export function resolveSprintIdFromSentinel(cwd?: string): string | null {
+  const resolvedCwd = cwd ?? process.cwd();
+  const sentinelPath = path.join(resolvedCwd, '.cleargate', 'sprint-runs', '.active');
+  try {
+    const content = fs.readFileSync(sentinelPath, 'utf8').trim();
+    return content.length > 0 ? content : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Read the `execution_mode` field from a sprint file.
  *
  * Resolution order:
  * 1. If `opts.sprintFilePath` is set, use that directly.
  * 2. Otherwise, discover the file by sprintId in `.cleargate/delivery/`.
- * 3. If no file found, return "v1" (safe default per §19.5).
+ * 3. If `opts.sentinelFallback` is true and sprintId is absent or
+ *    'SPRINT-UNKNOWN', read `.cleargate/sprint-runs/.active` and substitute.
+ * 4. If no file found, return "v1" (safe default per §19.5).
  */
 export function readSprintExecutionMode(
   sprintId: string,
@@ -93,9 +121,18 @@ export function readSprintExecutionMode(
 ): ExecutionMode {
   const cwd = opts.cwd ?? process.cwd();
 
+  // Sentinel fallback: when sprintId is absent or unknown, try .active
+  let resolvedSprintId = sprintId;
+  if (opts.sentinelFallback && (!resolvedSprintId || resolvedSprintId === 'SPRINT-UNKNOWN')) {
+    const sentinelId = resolveSprintIdFromSentinel(cwd);
+    if (sentinelId) {
+      resolvedSprintId = sentinelId;
+    }
+  }
+
   let filePath: string | null = opts.sprintFilePath ?? null;
   if (!filePath) {
-    filePath = discoverSprintFile(sprintId, cwd);
+    filePath = discoverSprintFile(resolvedSprintId, cwd);
   }
 
   if (!filePath || !fs.existsSync(filePath)) {
