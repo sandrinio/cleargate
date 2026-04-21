@@ -11,7 +11,7 @@ sprint_id: "SPRINT-{ID}"
 remote_id: "{PM_TOOL_SPRINT_ID}"
 source_tool: "linear | jira"
 status: "Draft | Active | Completed"
-execution_mode: "v1"   # "v1" = advisory-only v2 rules; "v2" = all §§15–19 rules enforcing. Default "v1". Set to "v2" only after all M2 stories shipped and Sprint Design Review completed.
+execution_mode: "v1"   # Enum: "v1" | "v2". Default "v1". Under "v2", §§15–18 of cleargate-protocol.md are enforcing (worktree isolation, pre-gate scanning, bounce counters, flashcard gate, sprint-close pipeline). Under "v1", those sections are advisory only and all new CLI commands (sprint init|close, story start|complete, gate qa|arch, state update|validate) print an inert-mode message. Set to "v2" only after all EPIC-013 M2 stories have shipped and the Architect has completed a Sprint Design Review (see §19 of the protocol).
 start_date: "{YYYY-MM-DD}"
 end_date: "{YYYY-MM-DD}"
 synced_at: "{ISO-8601 timestamp}"

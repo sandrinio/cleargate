@@ -756,3 +756,43 @@ The orchestrator may reformat an entry that violates the format before appending
 ### §18.5 v1 dogfood note
 
 SPRINT-09 runs under `execution_mode: v1`. From STORY-013-06 merge onwards, the orchestrator applies the §18.2 processing loop manually as a dogfood check even though the rule is informational. This is recorded in the SPRINT-09 sprint plan (line 121).
+
+---
+
+## 19. Execution Mode Routing (v2)
+
+The `execution_mode` field in a Sprint Plan's frontmatter is the single switch that controls whether §§15–18 of this protocol are **enforcing** or **advisory** for that sprint.
+
+### §19.1 Flag semantics
+
+| `execution_mode` value | Effect |
+|---|---|
+| `"v1"` | All §§15–18 rules are **advisory** — document intended workflow; no CLI or script enforcement. New CLI commands (`sprint init|close`, `story start|complete`, `gate qa|arch`, `state update|validate`) print an inert-mode message and exit 0. |
+| `"v2"` | All §§15–18 rules are **mandatory** — CLI wrappers route to `run_script.sh` scripts; worktree isolation, pre-gate scanning, bounce counters, flashcard gate, and sprint-close pipeline are all enforced. |
+
+### §19.2 Sprint-scoped flag
+
+The `execution_mode` flag is **sprint-scoped**, not global. A project may run SPRINT-10 on `v2` while SPRINT-11 planning files default to `v1` until the Architect completes a Sprint Design Review (§15.1). Setting the flag on one sprint has no effect on any other sprint file.
+
+### §19.3 Orchestrator routing rule
+
+Before spawning any Developer, QA, or Reporter agent, the orchestrator MUST:
+
+1. Locate the active sprint file at `.cleargate/delivery/pending-sync/SPRINT-{ID}_*.md` (or the archived equivalent).
+2. Read the `execution_mode` frontmatter field. If absent, treat as `"v1"`.
+3. If `"v1"`: proceed with advisory-only loop. §§15–18 rules are informational.
+4. If `"v2"`: enforce §§15–18 before each agent spawn as mandatory gates.
+
+### §19.4 CLI inert-mode message
+
+When a v2-only CLI command is invoked and the active sprint's `execution_mode` is `"v1"`, the CLI MUST print exactly:
+
+```
+v1 mode active — command inert. Set execution_mode: v2 in sprint frontmatter to enable.
+```
+
+and exit 0. No subprocess is spawned. This preserves backward compatibility for users who have not yet migrated to v2.
+
+### §19.5 Default value
+
+The default value is `"v1"`. All sprint plans generated from the Sprint Plan Template default to `execution_mode: "v1"` until explicitly flipped. The flag should only be set to `"v2"` after all M2 EPIC-013 stories have shipped and the Architect has completed a Sprint Design Review (§15.1).
