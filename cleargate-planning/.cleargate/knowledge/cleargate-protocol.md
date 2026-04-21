@@ -798,3 +798,50 @@ and exit 0. No subprocess is spawned. This preserves backward compatibility for 
 ### §19.5 Default value
 
 The default value is `"v1"`. All sprint plans generated from the Sprint Plan Template default to `execution_mode: "v1"` until explicitly flipped. The flag should only be set to `"v2"` after all M2 EPIC-013 stories have shipped and the Architect has completed a Sprint Design Review (§15.1).
+
+---
+
+## 20. File-Surface Contract (v2)
+
+Under `execution_mode: v2`, each story's §3.1 "Context & Files" table is the **authoritative file surface** for that story's commit. The pre-commit hook enforces this contract automatically.
+
+### §20.1 Rule
+
+A Developer agent MUST NOT stage and commit any file not declared in the active story's §3.1 table, unless that file matches a whitelist entry in `.cleargate/scripts/surface-whitelist.txt`.
+
+Off-surface edits require one of:
+1. A CR:scope-change item approved before the commit, OR
+2. An updated §3.1 table committed in the same story (self-amending surface — rare, must be explicitly justified in the commit message).
+
+### §20.2 Hook mechanics
+
+The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/hooks/pre-commit-surface-gate.sh` and dispatched from `.claude/hooks/pre-commit.sh`. The dispatcher is symlinked to `.git/hooks/pre-commit`.
+
+- Under v2: off-surface files cause a non-zero exit — the commit is blocked.
+- Under v1: the hook prints a warning but exits 0 (advisory only).
+- `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
+
+### §20.3 §3.1 table contract
+
+The §3.1 table in `story.md` template uses a two-column `| Item | Value |` pipe table. The parser:
+- Scans between the `### 3.1` heading and the next `### ` heading.
+- Only processes rows where the Value cell contains `.` or `/` (path-shaped values).
+- Strips backticks from values.
+- Splits on `, ` to handle multiple paths in one cell.
+- Ignores header and separator rows.
+
+Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped.
+
+### §20.4 Whitelist
+
+`.cleargate/scripts/surface-whitelist.txt` declares auto-generated files that are always admitted regardless of story surface. Seed entries include: `cleargate-planning/MANIFEST.json`, `.cleargate/hook-log/*`, `.cleargate/sprint-runs/**/token-ledger.jsonl`, `.cleargate/sprint-runs/**/.pending-task-*.json`, `.cleargate/sprint-runs/**/state.json`.
+
+### §20.5 Install (dogfood)
+
+On `cleargate init`, the scaffold automatically installs the `.git/hooks/pre-commit` symlink. For existing dogfood repositories, install once by hand:
+
+```bash
+ln -sf ../../.claude/hooks/pre-commit.sh .git/hooks/pre-commit
+```
+
+Log this step in the sprint §4 Execution Log.
