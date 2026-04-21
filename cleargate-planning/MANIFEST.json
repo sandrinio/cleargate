@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.2.1",
-  "generated_at": "2026-04-21T08:32:52.324Z",
+  "generated_at": "2026-04-21T13:15:22.308Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -54,6 +54,13 @@
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
       "sha256": "33e711cb501b031be3eaacb73e26d80a49cf40317af985c08f0ad7d630a642f4",
+      "tier": "hook",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".claude/hooks/pre-commit-test-ratchet.sh",
+      "sha256": "67232d9d94817e512b2d66e020605b59e9795eb4a04005edf7ea75bf9a324848",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
