@@ -9,3 +9,6 @@
 
 # Unresolved conflicts cache — runtime-generated, not team-shared
 /.cleargate/.conflicts.json
+
+# Story worktrees — ephemeral per-story git worktrees (v2 execution)
+.worktrees/

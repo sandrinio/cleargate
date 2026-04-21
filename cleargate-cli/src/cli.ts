@@ -8,7 +8,10 @@ import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
 import { doctorHandler } from './commands/doctor.js';
-import { gateCheckHandler, gateExplainHandler } from './commands/gate.js';
+import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
+import { sprintInitHandler, sprintCloseHandler } from './commands/sprint.js';
+import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
+import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
 import { upgradeHandler } from './commands/upgrade.js';
 import { uninstallHandler } from './commands/uninstall.js';
@@ -142,6 +145,80 @@ gate
   .description('render cached gate result in ≤50 agent tokens (read-only)')
   .action(async (file: string) => {
     await gateExplainHandler(file);
+  });
+
+gate
+  .command('qa <worktree> <branch>')
+  .description('run QA pre-gate scanner on a story worktree (v2 only — inert under v1)')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .action((worktree: string, branch: string, opts: { sprint?: string }) => {
+    gateQaHandler({ worktree, branch }, { sprintId: opts.sprint });
+  });
+
+gate
+  .command('arch <worktree> <branch>')
+  .description('run Architect pre-gate scanner on a story worktree (v2 only — inert under v1)')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .action((worktree: string, branch: string, opts: { sprint?: string }) => {
+    gateArchHandler({ worktree, branch }, { sprintId: opts.sprint });
+  });
+
+const sprint = program
+  .command('sprint')
+  .description('sprint lifecycle commands (v2 only — inert under v1)');
+
+sprint
+  .command('init <sprint-id>')
+  .description('initialise a new sprint — creates state.json and worktree skeleton')
+  .requiredOption('--stories <csv>', 'comma-separated story IDs for this sprint')
+  .action((sprintId: string, opts: { stories: string }) => {
+    sprintInitHandler({ sprintId, stories: opts.stories });
+  });
+
+sprint
+  .command('close <sprint-id>')
+  .description('close a sprint — validates all stories are terminal, runs prefill + suggest_improvements')
+  .action((sprintId: string) => {
+    sprintCloseHandler({ sprintId });
+  });
+
+const story = program
+  .command('story')
+  .description('story lifecycle commands (v2 only — inert under v1)');
+
+story
+  .command('start <story-id>')
+  .description('create a git worktree for a story on the sprint branch')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .action((storyId: string, opts: { sprint?: string }) => {
+    storyStartHandler({ storyId }, { sprintId: opts.sprint });
+  });
+
+story
+  .command('complete <story-id>')
+  .description('mark a story complete and clean up its worktree (stub — requires complete_story.mjs)')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .action((storyId: string, opts: { sprint?: string }) => {
+    storyCompleteHandler({ storyId }, { sprintId: opts.sprint });
+  });
+
+const state = program
+  .command('state')
+  .description('state.json management commands (v2 only — inert under v1)');
+
+state
+  .command('update <story-id> <new-state>')
+  .description('update a story\'s state in state.json')
+  .option('--sprint <id>', 'sprint ID for execution_mode lookup')
+  .action((storyId: string, newState: string, opts: { sprint?: string }) => {
+    stateUpdateHandler({ storyId, newState }, { sprintId: opts.sprint });
+  });
+
+state
+  .command('validate <sprint-id>')
+  .description('validate all story states in a sprint\'s state.json')
+  .action((sprintId: string) => {
+    stateValidateHandler({ sprintId });
   });
 
 program

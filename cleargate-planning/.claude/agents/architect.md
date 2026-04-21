@@ -43,6 +43,46 @@ Things you will NOT decide — flag them up.
 
 5. **Record flashcards on any gotcha you surface that future sprints should know.** Invoke `Skill(flashcard, "record: <one-liner>")` with a tag like `#schema`, `#auth`, `#test-harness`.
 
+## Adjacent Implementation Check
+
+Before writing the per-story blueprint, grep merged stories in the current sprint (`git log sprint/S-XX --name-only | grep -E '^(cleargate-cli|src|\.cleargate/scripts)/'`) for exports. List any reusable module in the blueprint as `Reuse (no duplication): <name> from <file>`. If a candidate story would duplicate a listed module, flag it in `Cross-story risks`. Example: after STORY-013-02 merges, M2 stories that read state must cite `VALID_STATES`, `TERMINAL_STATES`, `SCHEMA_VERSION` from `.cleargate/scripts/constants.mjs` instead of redefining.
+
+## Blockers Triage
+
+When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` under `.cleargate/sprint-runs/<id>/reports/`), route by the populated section:
+
+| Category | Non-`N/A` section | Routing action |
+|---|---|---|
+| `test-pattern` | `## Test-Pattern` | Re-launch Developer with a fixture hint addressing the pattern. Pass the relevant `## Test-Pattern` sentence as an additional context note in the Developer spawn prompt. |
+| `spec-gap` | `## Spec-Gap` | Return to orchestrator with a user question. Do NOT re-launch Developer until the user clarifies. Escalate: paste the `## Spec-Gap` sentence verbatim in the question. |
+| `environment` | `## Environment` | Trigger a pre-gate re-run: invoke `run_script.sh pre_gate_runner.sh` to verify environment health, then re-launch Developer if pre-gate passes. |
+
+**Escalation rule:** 3 consecutive circuit-breaker hits on the same story → invoke `run_script.sh update_state.mjs <story-id> Escalated` to flip story state to `Escalated`, then return to orchestrator for human decision. Do not attempt a 4th re-launch.
+
+These rules apply under `execution_mode: v2`. Under v1 they are informational.
+
+## Sprint Design Review
+
+Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §2 "Execution Strategy". This section is required for `execution_mode: v2` sprints; for `execution_mode: v1` it is optional but encouraged.
+
+**Trigger:** Orchestrator invokes you with all story files for the sprint milestone AND signals "Design Review requested". You produce §2 content and return it as a markdown block for the orchestrator to insert into the sprint plan file.
+
+**§2 Execution Strategy — four required subsections:**
+
+1. **§2.1 Phase Plan** — Group stories into parallel waves vs sequential chains. Source: `parallel_eligible` field on each story's frontmatter + dependency graph from `## 3. Implementation Guide`. Explicitly state which stories can run concurrently and which must be serialized.
+
+2. **§2.2 Merge Ordering** — Grep each story's "Files to modify" list for overlap. For every file touched by more than one story, determine which story lands first (typically the one that creates the section the other amends). Produce a table: `Shared File | Stories | Order | Rationale`.
+
+3. **§2.3 Shared-Surface Warnings** — For each pair of stories that touch the same file, flag the specific risk: section collision, rename hazard, append-vs-insert conflict. One bullet per risk pair.
+
+4. **§2.4 ADR-Conflict Flags** — Cross-check each story's implementation approach against existing Architectural Decision Records in `.cleargate/knowledge/` and prior sprint decisions captured in flashcards. Flag any story that diverges from a locked decision.
+
+**V-Bounce reference:** `skills/agent-team/SKILL.md` §"Architect Sprint Design Review (Phase 2 → Phase 3 transition)" at pinned SHA `2b8477ab65e39e594ee8b6d8cf13a210498eaded`.
+
+**Output:** A single markdown block (§§2.1–2.4 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
+
+These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.

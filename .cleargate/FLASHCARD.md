@@ -4,6 +4,12 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-21 · #test-harness #scripts #env · close_sprint/suggest_improvements/prefill_report resolve sprint dir from REPO_ROOT by default; add CLEARGATE_SPRINT_DIR env override for test isolation.
+2026-04-21 · #protocol #section-numbering · stories drafted before a prior sprint's protocol edits go stale — §§ they cite (e.g. 'append §10') may already be occupied. Architect MUST audit actual current numbering before planning; use next free § after last-shipped section.
+2026-04-21 · #bash #macos #portability · macOS ships bash 3.2 as `/usr/bin/env bash`; `mapfile`/`readarray` are bash 4+ only. Under `set -u` the unbound array trips. Use portable `arr=(); while IFS= read -r x; do arr+=("$x"); done < <(cmd)` instead.
+2026-04-21 · #mjs #jsdoc #syntax · glob pattern `foo/*/bar` inside a JSDoc block comment in .mjs causes SyntaxError at module load (Node parses `*` as multiply); use `<id>` placeholder instead.
+2026-04-21 · #worktree #mcp · never git worktree add inside nested mcp/ repo — edit mcp/ inside the outer worktree; nested-repo worktrees are a git footgun.
+2026-04-21 · #recipe #worktree #state-schema · V-Bounce port: state.json lives at `.cleargate/sprint-runs/<id>/state.json` (NOT `.vbounce/state.json`); init default state is "Ready to Bounce" (not "Draft"); auto-escalate on qa_bounces/arch_bounces==3 (V-Bounce does NOT — we diverge).
 2026-04-20 · #cli #test-seam #exit · exit seam throws in tests; if the throw propagates into `catch(err)`, the error-path fires — extract SQL into a value-returning fn, call exitFn only at handler top-level after cleanup.
 2026-04-20 · #svelte5 #runes #production-build · Svelte 5 `$state`/`$derived`/`$effect` don't work in plain `.ts` files — only `.svelte`/`.svelte.ts`/`.svelte.js`. Dev server (Vite preprocessor) silently works; adapter-node production build crashes with `ReferenceError: $state is not defined`. Unit tests that mock the store hide it. Always build the prod image + smoke `/` before shipping.
 2026-04-20 · #docker #workspace · `npm ci --workspace X` skips sibling workspace symlinks; use plain `npm ci` in builder so peer workspaces resolve (e.g. cleargate/admin-api).
@@ -12,7 +18,9 @@ Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
 2026-04-19 · #vitest #vi-mock #sveltekit-endpoint · SvelteKit endpoints forbid non-HTTP-method named exports; extract test-seam functions to $lib/server/*.ts and mock ioredis with vi.hoisted() + vi.mock() pattern.
 2026-04-19 · #dockerfile #coolify #monorepo · Admin Dockerfile must force ENV NODE_ENV=development in builder stage; Coolify injects NODE_ENV=production at build time, silently stripping devDeps and breaking vite build.
-
+2026-04-19 · #gates #predicate #status-of · status-of([[ID]]) requires a literal ID — cannot dynamically ref story's parent_epic_ref; use frontmatter(.).parent_epic_ref != null as a proxy for "parent set" in story gate; 008-02 evaluator must handle this constraint.
+2026-04-19 · #cli #frontmatter #parse · parseFrontmatter strips one leading blank line from body; stamp-frontmatter write path must re-add blank separator between frontmatter block and body to preserve roundtrip bytes.
+2026-04-19 · #hooks #ledger #jq · jq `scan("(A|B)[-=]?([0-9]+(-[0-9]+)?)")` returns an array per match (all capture groups); use `.[0:2] | join("-")` to reconstruct TYPE-NUMBER from groups; plain `scan("regex")` with no groups returns the full match string directly — pick pattern based on whether you need subgroups.
 2026-04-19 · #device-flow #rate-limit #test-harness · Rate-limit integration tests for public routes must use a dedicated mini-app with mocked fetch; the shared `app` accumulates real GitHub 502s against the same rl:anon bucket across test cases, causing spurious 429s in the later rate-limit scenario.
 2026-04-19 · #yaml #frontmatter · [R] superseded-by BUG-001-fix · parseFrontmatter must use js-yaml CORE_SCHEMA — hand-rolled parser flattened indented maps to top-level keys and stringified null/bool; roundtrip is now lossless and draft_tokens/cached_gate_result are native nested objects on disk.
 2026-04-19 · #reporting #hooks #ledger #subagent-attribution · SubagentStop hook fires on orchestrator session not subagents; all 25 SPRINT-05 rows tagged against orchestrator (EPIC-002 from session init). Reporter can't compute per-story cost until hook reaches subagent transcripts OR per-Task sentinel is written.

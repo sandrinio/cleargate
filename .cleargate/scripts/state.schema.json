@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cleargate.dev/schemas/state.v1.json",
+  "title": "ClearGate Sprint State v1",
+  "description": "Schema for .cleargate/sprint-runs/<sprint-id>/state.json. schema_version=1 is LOCKED — any field addition or removal must bump schema_version.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sprint_id",
+    "execution_mode",
+    "sprint_status",
+    "stories",
+    "last_action",
+    "updated_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Must be 1 for v1 state files. Bump on any schema change."
+    },
+    "sprint_id": {
+      "type": "string",
+      "description": "Sprint identifier, e.g. S-09",
+      "examples": ["S-09", "S-10"]
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": ["v1", "v2"],
+      "description": "Execution mode for the sprint. v1 = legacy sequential; v2 = worktree-parallel."
+    },
+    "sprint_status": {
+      "type": "string",
+      "description": "Overall sprint status",
+      "examples": ["Active", "Closed"]
+    },
+    "stories": {
+      "type": "object",
+      "description": "Map of story ID to story state entry",
+      "additionalProperties": {
+        "$ref": "#/definitions/StoryEntry"
+      }
+    },
+    "last_action": {
+      "type": "string",
+      "description": "Human-readable description of the last operation performed"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of last top-level update"
+    }
+  },
+  "definitions": {
+    "StoryEntry": {
+      "type": "object",
+      "required": [
+        "state",
+        "qa_bounces",
+        "arch_bounces",
+        "worktree",
+        "updated_at",
+        "notes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "Ready to Bounce",
+            "Bouncing",
+            "QA Passed",
+            "Architect Passed",
+            "Sprint Review",
+            "Done",
+            "Escalated",
+            "Parking Lot"
+          ],
+          "description": "Current lifecycle state of the story"
+        },
+        "qa_bounces": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Number of QA bounce cycles. Reaching 3 triggers auto-escalation."
+        },
+        "arch_bounces": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Number of Architect bounce cycles. Reaching 3 triggers auto-escalation."
+        },
+        "worktree": {
+          "type": ["string", "null"],
+          "description": "Path to the story's git worktree checkout, or null if not in a worktree"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of last update to this story entry"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes for this story (escalation reason, QA comments, etc.)"
+        }
+      }
+    }
+  }
+}

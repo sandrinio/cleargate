@@ -1,8 +1,11 @@
 /**
- * gate.ts — `cleargate gate check|explain` command handlers.
+ * gate.ts — `cleargate gate check|explain|qa|arch` command handlers.
  *
  * STORY-008-03: Wires readiness-predicates.evaluate() + frontmatter-cache into
- * two Commander subcommands.
+ * two Commander subcommands (check + explain).
+ *
+ * STORY-013-08: Extends with gate qa|arch subcommands that shell out via
+ * run_script.sh to pre_gate_runner.sh. Both are v1-inert.
  *
  * FLASHCARD #cli #commander #optional-key: opts.transition may be undefined — strip key.
  * FLASHCARD #cli #determinism #test-seam: thread `now`, `exit`, `stdout`, `stderr` seams.
@@ -12,6 +15,12 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import {
+  readSprintExecutionMode,
+  printInertAndExit,
+  type ExecutionModeOptions,
+} from './execution-mode.js';
 import yaml from 'js-yaml';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { evaluate } from '../lib/readiness-predicates.js';
@@ -318,4 +327,109 @@ export async function gateExplainHandler(
     : `${detectedType}: ${statusStr} at ${cached.last_gate_check}`;
 
   stdoutFn(summary);
+}
+
+// ─── v2 gate qa|arch handlers ─────────────────────────────────────────────────
+
+/**
+ * Options for v2 gate subcommands (qa + arch).
+ * Extends GateCliOptions with execution-mode seams.
+ */
+export interface GateV2CliOptions extends GateCliOptions, ExecutionModeOptions {
+  /** Override path to run_script.sh (test seam). */
+  runScriptPath?: string;
+  /** Override spawnSync (test seam). */
+  spawnFn?: typeof spawnSync;
+  /** Sprint ID for execution_mode discovery. */
+  sprintId?: string;
+}
+
+function resolveRunScriptForGate(opts: GateV2CliOptions): string {
+  if (opts.runScriptPath) return opts.runScriptPath;
+  const cwd = opts.cwd ?? process.cwd();
+  return path.join(cwd, '.cleargate', 'scripts', 'run_script.sh');
+}
+
+/**
+ * `cleargate gate qa <worktree> <branch>`
+ *
+ * v1: print inert message, exit 0.
+ * v2: run `run_script.sh pre_gate_runner.sh qa <worktree> <branch>`
+ */
+export function gateQaHandler(
+  opts: { worktree: string; branch: string },
+  cli?: GateV2CliOptions,
+): void {
+  const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
+  const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
+  const exitFn: (code: number) => never =
+    cli?.exit ?? ((code: number) => process.exit(code) as never);
+  const spawnFn = cli?.spawnFn ?? spawnSync;
+
+  const sprintId = cli?.sprintId ?? 'SPRINT-UNKNOWN';
+  const mode = readSprintExecutionMode(sprintId, {
+    sprintFilePath: cli?.sprintFilePath,
+    cwd: cli?.cwd,
+  });
+
+  if (mode === 'v1') {
+    return printInertAndExit(stdoutFn, exitFn);
+  }
+
+  const runScript = resolveRunScriptForGate(cli ?? {});
+  const result = spawnFn(
+    'bash',
+    [runScript, 'pre_gate_runner.sh', 'qa', opts.worktree, opts.branch],
+    { stdio: 'inherit' },
+  );
+
+  if (result.error) {
+    stderrFn(`[cleargate gate qa] error: ${result.error.message}`);
+    return exitFn(1);
+  }
+
+  const code = result.status ?? 0;
+  return exitFn(code);
+}
+
+/**
+ * `cleargate gate arch <worktree> <branch>`
+ *
+ * v1: print inert message, exit 0.
+ * v2: run `run_script.sh pre_gate_runner.sh arch <worktree> <branch>`
+ */
+export function gateArchHandler(
+  opts: { worktree: string; branch: string },
+  cli?: GateV2CliOptions,
+): void {
+  const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
+  const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
+  const exitFn: (code: number) => never =
+    cli?.exit ?? ((code: number) => process.exit(code) as never);
+  const spawnFn = cli?.spawnFn ?? spawnSync;
+
+  const sprintId = cli?.sprintId ?? 'SPRINT-UNKNOWN';
+  const mode = readSprintExecutionMode(sprintId, {
+    sprintFilePath: cli?.sprintFilePath,
+    cwd: cli?.cwd,
+  });
+
+  if (mode === 'v1') {
+    return printInertAndExit(stdoutFn, exitFn);
+  }
+
+  const runScript = resolveRunScriptForGate(cli ?? {});
+  const result = spawnFn(
+    'bash',
+    [runScript, 'pre_gate_runner.sh', 'arch', opts.worktree, opts.branch],
+    { stdio: 'inherit' },
+  );
+
+  if (result.error) {
+    stderrFn(`[cleargate gate arch] error: ${result.error.message}`);
+    return exitFn(1);
+  }
+
+  const code = result.status ?? 0;
+  return exitFn(code);
 }
