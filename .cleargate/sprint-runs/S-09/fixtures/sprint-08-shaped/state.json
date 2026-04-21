@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "sprint_id": "S-09-fixture",
+  "execution_mode": "v1",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-013-01": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-04-21T10:00:00Z",
+      "notes": "Fixture story 1 (worktree branch hierarchy)"
+    },
+    "STORY-013-02": {
+      "state": "Done",
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-04-21T11:00:00Z",
+      "notes": "Fixture story 2 (state.json bounce counters)"
+    }
+  },
+  "last_action": "fixture: all stories Done",
+  "updated_at": "2026-04-21T12:00:00Z"
+}
