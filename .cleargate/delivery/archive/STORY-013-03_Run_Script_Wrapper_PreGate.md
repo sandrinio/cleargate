@@ -1,13 +1,14 @@
 ---
 story_id: STORY-013-03_Run_Script_Wrapper_PreGate
 parent_epic_ref: EPIC-013
-status: Ready
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 rows 'Pre-gate scanner' + 'run_script.sh wrapper' + V-Bounce Engine `scripts/{run_script.sh,pre_gate_runner.sh,pre_gate_common.sh,init_gate_config.sh}`
 actor: Orchestrator + Developer Agent
 complexity_label: L2
 approved: true
 approved_at: 2026-04-21T00:00:00Z
+completed_at: "2026-04-21T08:30:00Z"
 approved_by: sandro
 milestone: M1
 created_at: 2026-04-21T00:00:00Z

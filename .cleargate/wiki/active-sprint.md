@@ -5,14 +5,16 @@
 ## Current Sprint
 
 
-- [[SPRINT-05]] — status: Active
 
+_No active sprint found._
 
 
 ## Planned Sprints
 
 
 - [[SPRINT-06]] — status: Planned
+
+- [[SPRINT-07]] — status: Planned
 
 
 

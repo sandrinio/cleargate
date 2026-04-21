@@ -1,6 +1,7 @@
 ---
 epic_id: EPIC-013
-status: Approved
+status: Completed
+completed_at: 2026-04-21T08:30:00Z
 ambiguity: 🟢 Low
 approved: true
 approved_at: 2026-04-21T00:00:00Z
@@ -16,7 +17,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T22:25:30Z
+  last_gate_check: 2026-04-21T07:55:06Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-04-20T22:25:36.709Z
 last_pulled_by: null
@@ -25,16 +26,22 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id EPIC-013
-draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-04-20T22:25:28Z
-  sessions: []
 push_version: 1
+draft_tokens:
+  input: 942
+  output: 403148
+  cache_creation: 2362836
+  cache_read: 70099912
+  model: claude-opus-4-7
+  last_stamp: 2026-04-21T07:55:06Z
+  sessions:
+    - session: ededd9e9-caa1-4ce4-8e31-05880e2b5e85
+      model: claude-opus-4-7
+      input: 942
+      output: 403148
+      cache_read: 70099912
+      cache_creation: 2362836
+      ts: 2026-04-21T07:41:47Z
 ---
 
 # EPIC-013: Execution Phase v2 — Bounce Loop, Worktrees, Pre-Gates, Self-Improvement
