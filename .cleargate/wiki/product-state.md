@@ -6,10 +6,10 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 13 | 0 | 9 |
-| Stories | 88 | 0 | 45 |
-| Sprints | 8 | 1 | 5 |
-| Proposals | 8 | 0 | 6 |
+| Epics | 14 | 0 | 11 |
+| Stories | 97 | 0 | 58 |
+| Sprints | 9 | 0 | 7 |
+| Proposals | 10 | 0 | 7 |
 | CRs | 1 | 0 | 0 |
 | Bugs | 0 | 0 | 0 |
 
@@ -41,6 +41,10 @@ _No active epics._
 
 - [[EPIC-009]] (epics) — Draft
 
+- [[EPIC-011]] (epics) — Ready
+
+- [[EPIC-013]] (epics) — Completed
+
 - [[PROPOSAL-001]] (proposals) — Approved
 
 - [[PROPOSAL-002]] (proposals) — Approved
@@ -53,6 +57,8 @@ _No active epics._
 
 - [[PROPOSAL-006]] (proposals) — Approved
 
+- [[PROPOSAL-010]] (proposals) — Approved
+
 - [[SPRINT-01]] (sprints) — Completed
 
 - [[SPRINT-02]] (sprints) — Completed
@@ -62,6 +68,10 @@ _No active epics._
 - [[SPRINT-04]] (sprints) — Completed
 
 - [[SPRINT-05]] (sprints) — Completed
+
+- [[SPRINT-08]] (sprints) — Completed
+
+- [[SPRINT-09]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 
@@ -152,5 +162,31 @@ _No active epics._
 - [[STORY-009-07]] (stories) — Draft
 
 - [[STORY-009-08]] (stories) — Draft
+
+- [[STORY-011-01]] (stories) — Ready
+
+- [[STORY-011-02]] (stories) — Ready
+
+- [[STORY-011-03]] (stories) — Ready
+
+- [[STORY-011-04]] (stories) — Ready
+
+- [[STORY-013-01]] (stories) — Done
+
+- [[STORY-013-02]] (stories) — Done
+
+- [[STORY-013-03]] (stories) — Done
+
+- [[STORY-013-04]] (stories) — Done
+
+- [[STORY-013-05]] (stories) — Done
+
+- [[STORY-013-06]] (stories) — Done
+
+- [[STORY-013-07]] (stories) — Done
+
+- [[STORY-013-08]] (stories) — Done
+
+- [[STORY-013-09]] (stories) — Done
 
 

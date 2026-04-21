@@ -42,7 +42,11 @@ ACCEPTANCE_COVERAGE: N of M Gherkin scenarios have matching tests
 MISSING: <list of scenarios with no test, or "none">
 REGRESSIONS: <list, or "none">
 VERDICT: <one paragraph — what specifically to fix, or "ship it">
+flashcards_flagged:
+  - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
+
+`flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). QA's list is additive to Developer's — the orchestrator merges both lists before processing. The orchestrator reads this field after QA approval and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §18.
 
 ## Guardrails
 - **Never approve on Developer's word.** Re-run everything yourself.

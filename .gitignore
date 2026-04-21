@@ -31,6 +31,9 @@ Thumbs.db
 # ephemeral debugging artefacts, not source.
 /admin/scripts/smoke-output/
 
+# Story worktrees — ephemeral per-story git worktrees (v2 execution)
+.worktrees/
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/

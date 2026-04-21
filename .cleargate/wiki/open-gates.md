@@ -13,6 +13,8 @@ Proposals with `approved: false` or `status: Draft` that have not yet been bless
 
 - [[PROPOSAL-008]] — status: Draft
 
+- [[PROPOSAL-009]] — status: Draft
+
 
 
 ## Gate 2 — Pending Story Ambiguity Clearance
