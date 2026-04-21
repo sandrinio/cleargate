@@ -1,10 +1,30 @@
 {
-  "total": 833,
-  "passed": 828,
-  "failed": 1,
+  "total": 810,
+  "passed": 785,
+  "failed": 21,
   "skipped": 4,
-  "updated_at": "2026-04-21T17:08:00Z",
+  "updated_at": "2026-04-21T19:08:00.084Z",
   "failing_tests": [
-    "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-014-04/cleargate-cli/test/admin-api/snapshot-drift.test.ts::snapshot-drift > S-1: vendored Zod schemas field sets match OpenAPI snapshot"
+    "::cleargate CLI Scenario: Help lists all subcommands --help exits 0",
+    "::cleargate CLI Scenario: Help lists all subcommands --help stdout lists join",
+    "::cleargate CLI Scenario: Help lists all subcommands --help stdout lists whoami",
+    "::cleargate CLI Scenario: Help lists all subcommands --help stdout lists stamp",
+    "::cleargate CLI Scenario: Help lists all subcommands --help stdout lists wiki",
+    "::cleargate CLI Scenario: Help lists all subcommands --help stdout lists admin",
+    "::cleargate CLI Scenario: Version flag --version prints the package.json version",
+    "::cleargate CLI Scenario: Unknown subcommand errors cleanly cleargate nonsense stderr suggests cleargate --help",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) --help lists sprint command group",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) --help lists story command group",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) --help lists state command group",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) gate --help lists qa subcommand",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) gate --help lists arch subcommand",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) gate --help still lists check subcommand (no collision)",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) gate --help still lists explain subcommand (no collision)",
+    "::cleargate CLI Scenario: No CLI collision (STORY-013-08) no duplicate subcommand names in gate group",
+    "::cleargate CLI Scenario: All four wrappers are inert under v1 (STORY-013-08) sprint init with missing sprint file exits 0 with inert message",
+    "::cleargate CLI Scenario: All four wrappers are inert under v1 (STORY-013-08) sprint close with missing sprint file exits 0 with inert message",
+    "::cleargate CLI Scenario: All four wrappers are inert under v1 (STORY-013-08) state validate with missing sprint file exits 0 with inert message",
+    "::cleargate CLI Scenario: No direct node .mjs calls in CLI code (Scenario 4) dist/cli.js does not contain direct node .cleargate/scripts invocations",
+    "::snapshot-drift S-1: vendored Zod schemas field sets match OpenAPI snapshot"
   ]
 }
