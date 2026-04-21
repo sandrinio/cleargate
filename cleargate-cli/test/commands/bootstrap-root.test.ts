@@ -64,7 +64,13 @@ beforeEach(async () => {
   // Clean slate before each test — remove only test-inserted rows to avoid
   // touching FK-constrained production data in a shared DB. We use a reserved
   // test-handle prefix so cleanup is safe.
-  await pool.query(`DELETE FROM admin_users WHERE github_handle LIKE 'test-%' OR github_handle IN ('sandrinio', 'another-user', 'first-root', 'second-user')`);
+  //
+  // FK order matters: projects.created_by and invites.created_by reference
+  // admin_users.id with ON DELETE no action. Cascade-delete children first.
+  const testHandleFilter = `github_handle LIKE 'test-%' OR github_handle IN ('sandrinio', 'another-user', 'first-root', 'second-user')`;
+  await pool.query(`DELETE FROM invites WHERE created_by IN (SELECT id FROM admin_users WHERE ${testHandleFilter})`);
+  await pool.query(`DELETE FROM projects WHERE created_by IN (SELECT id FROM admin_users WHERE ${testHandleFilter})`);
+  await pool.query(`DELETE FROM admin_users WHERE ${testHandleFilter}`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
