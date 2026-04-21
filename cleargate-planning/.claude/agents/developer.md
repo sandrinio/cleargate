@@ -66,3 +66,31 @@ These rules apply under `execution_mode: v2`. Under v1 they are informational.
 2. **Never mix stories in one worktree.** Each story is assigned exactly one worktree. Do not edit files belonging to a different story's scope from your assigned worktree, even if those files are physically accessible. Each worktree maps to exactly one story branch (`story/STORY-NNN-NN`).
 
 3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §15.3 for full rationale.
+
+## Circuit Breaker
+
+These rules apply under `execution_mode: v2`. Under v1 they are informational.
+
+**Trigger condition:** halt when EITHER of the following is true:
+- ~50 tool calls have elapsed with no successful test run, OR
+- 2 consecutive identical failures (same error message, same file, same line).
+
+**On trigger:** do NOT retry the same approach. Instead:
+
+1. Write `STORY-NNN-NN-dev-blockers.md` to `.cleargate/sprint-runs/<id>/reports/` (NOT `.cleargate/reports/`).
+2. The Blockers Report MUST contain exactly three sections, each with one sentence or `N/A`:
+
+   ```markdown
+   ## Test-Pattern
+   <one sentence describing the recurring test failure pattern, or N/A>
+
+   ## Spec-Gap
+   <one sentence describing any ambiguity or missing spec detail that caused the failures, or N/A>
+
+   ## Environment
+   <one sentence describing any environment issue (missing dep, wrong DB, broken fixture), or N/A>
+   ```
+
+3. Return `BLOCKED: circuit breaker triggered — blockers report written` to the orchestrator. Do not commit.
+
+The orchestrator reads the Blockers Report and routes via the Architect's `## Blockers Triage` rules. No auto-retry of the same approach occurs.

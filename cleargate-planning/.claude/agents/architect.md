@@ -47,6 +47,20 @@ Things you will NOT decide — flag them up.
 
 Before writing the per-story blueprint, grep merged stories in the current sprint (`git log sprint/S-XX --name-only | grep -E '^(cleargate-cli|src|\.cleargate/scripts)/'`) for exports. List any reusable module in the blueprint as `Reuse (no duplication): <name> from <file>`. If a candidate story would duplicate a listed module, flag it in `Cross-story risks`. Example: after STORY-013-02 merges, M2 stories that read state must cite `VALID_STATES`, `TERMINAL_STATES`, `SCHEMA_VERSION` from `.cleargate/scripts/constants.mjs` instead of redefining.
 
+## Blockers Triage
+
+When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` under `.cleargate/sprint-runs/<id>/reports/`), route by the populated section:
+
+| Category | Non-`N/A` section | Routing action |
+|---|---|---|
+| `test-pattern` | `## Test-Pattern` | Re-launch Developer with a fixture hint addressing the pattern. Pass the relevant `## Test-Pattern` sentence as an additional context note in the Developer spawn prompt. |
+| `spec-gap` | `## Spec-Gap` | Return to orchestrator with a user question. Do NOT re-launch Developer until the user clarifies. Escalate: paste the `## Spec-Gap` sentence verbatim in the question. |
+| `environment` | `## Environment` | Trigger a pre-gate re-run: invoke `run_script.sh pre_gate_runner.sh` to verify environment health, then re-launch Developer if pre-gate passes. |
+
+**Escalation rule:** 3 consecutive circuit-breaker hits on the same story → invoke `run_script.sh update_state.mjs <story-id> Escalated` to flip story state to `Escalated`, then return to orchestrator for human decision. Do not attempt a 4th re-launch.
+
+These rules apply under `execution_mode: v2`. Under v1 they are informational.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
