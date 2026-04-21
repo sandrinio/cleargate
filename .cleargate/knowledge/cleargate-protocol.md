@@ -713,3 +713,46 @@ CR:scope-change 2026-04-21 — user requests audit log table (new STORY-013-11 c
 ### §17.3 Scope-change quarantine
 
 A `CR:scope-change` MUST NOT be folded into the current story's commit. Create a new Story file and handle in a future sprint or as a mid-sprint addition (requires orchestrator + user explicit sign-off to add mid-sprint).
+
+---
+
+## 18. Immediate Flashcard Gate (v2)
+
+**v1/v2 gating:** Under `execution_mode: v1` this section is **informational** — the gate is advisory and the orchestrator may proceed without processing flagged cards (though it is strongly encouraged). Under `execution_mode: v2` it is **mandatory**: the orchestrator MUST NOT create the next story's worktree until all `flashcards_flagged` entries from the prior story's dev + QA reports are processed.
+
+**V-Bounce reference:** `skills/agent-team/SKILL.md` §"Step 5.5: Immediate Flashcard Recording (Hard Gate)" at pinned SHA `2b8477ab65e39e594ee8b6d8cf13a210498eaded`.
+
+### §18.1 Trigger
+
+After story N's commit merges into `sprint/S-XX` and QA approves, the orchestrator collects `flashcards_flagged` from both:
+- `STORY-NNN-NN-dev.md` (Developer Agent output report)
+- `STORY-NNN-NN-qa.md` (QA Agent output report)
+
+The two lists are merged (union, deduplication by exact string match). If the combined list is empty, the gate passes immediately.
+
+### §18.2 Processing rule
+
+For each entry in the merged `flashcards_flagged` list, the orchestrator MUST take exactly one of two actions before creating story N+1's worktree:
+
+| Action | Effect | Record location |
+|---|---|---|
+| **Approve** | Append the one-liner verbatim to `.cleargate/FLASHCARD.md` (newest-first, per SKILL.md format) | The card itself is the record |
+| **Reject** | Discard the entry — do NOT append to `FLASHCARD.md` | Sprint §4 Execution Log: `FLASHCARD-REJECT YYYY-MM-DD — "<card text>" — reason: <one sentence>` |
+
+### §18.3 Worktree creation gate
+
+The orchestrator MUST NOT run `git worktree add .worktrees/STORY-NNN-NN ...` for story N+1 until the §18.2 processing loop is complete (every entry either approved or rejected). This is a blocking serial step, not a background task.
+
+### §18.4 Cards format
+
+Each entry in `flashcards_flagged` MUST conform to the format required by `.claude/skills/flashcard/SKILL.md`:
+
+```
+YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars
+```
+
+The orchestrator may reformat an entry that violates the format before appending, but must log the reformat in sprint §4 Execution Log.
+
+### §18.5 v1 dogfood note
+
+SPRINT-09 runs under `execution_mode: v1`. From STORY-013-06 merge onwards, the orchestrator applies the §18.2 processing loop manually as a dogfood check even though the rule is informational. This is recorded in the SPRINT-09 sprint plan (line 121).
