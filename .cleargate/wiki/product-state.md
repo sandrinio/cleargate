@@ -6,10 +6,10 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 14 | 0 | 11 |
+| Epics | 15 | 0 | 11 |
 | Stories | 97 | 0 | 58 |
 | Sprints | 9 | 0 | 7 |
-| Proposals | 10 | 0 | 7 |
+| Proposals | 11 | 0 | 7 |
 | CRs | 1 | 0 | 0 |
 | Bugs | 0 | 0 | 0 |
 

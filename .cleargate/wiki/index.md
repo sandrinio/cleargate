@@ -21,6 +21,7 @@
 | [[EPIC-011]] | epic | Ready | .cleargate/delivery/archive/EPIC-011_End_To_End_Production_Readiness.md |
 | [[EPIC-012]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md |
 | [[EPIC-013]] | epic | Completed | .cleargate/delivery/archive/EPIC-013_Execution_Phase_v2.md |
+| [[EPIC-014]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-014_Execution_V2_Polish.md |
 
 ## Stories
 
@@ -146,6 +147,7 @@
 | [[PROPOSAL-008]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-008_Project_Config_MCP_Authority.md |
 | [[PROPOSAL-009]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-009_Planning_Visibility_UX.md |
 | [[PROPOSAL-010]] | proposal | Approved | .cleargate/delivery/archive/PROPOSAL-010_Execution_Phase_v2.md |
+| [[PROPOSAL-011]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-011_Execution_V2_Polish.md |
 
 ## CRs
 

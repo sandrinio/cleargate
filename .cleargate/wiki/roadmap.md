@@ -86,4 +86,6 @@ _No active epics._
 
 - [[EPIC-013]] — status: Completed
 
+- [[EPIC-014]] — status: Approved
+
 
