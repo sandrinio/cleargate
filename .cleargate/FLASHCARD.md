@@ -4,6 +4,8 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-21 · #test-harness #scripts #env · close_sprint/suggest_improvements/prefill_report resolve sprint dir from REPO_ROOT by default; add CLEARGATE_SPRINT_DIR env override for test isolation.
+2026-04-21 · #protocol #section-numbering · stories drafted before a prior sprint's protocol edits go stale — §§ they cite (e.g. 'append §10') may already be occupied. Architect MUST audit actual current numbering before planning; use next free § after last-shipped section.
 2026-04-21 · #bash #macos #portability · macOS ships bash 3.2 as `/usr/bin/env bash`; `mapfile`/`readarray` are bash 4+ only. Under `set -u` the unbound array trips. Use portable `arr=(); while IFS= read -r x; do arr+=("$x"); done < <(cmd)` instead.
 2026-04-21 · #mjs #jsdoc #syntax · glob pattern `foo/*/bar` inside a JSDoc block comment in .mjs causes SyntaxError at module load (Node parses `*` as multiply); use `<id>` placeholder instead.
 2026-04-21 · #worktree #mcp · never git worktree add inside nested mcp/ repo — edit mcp/ inside the outer worktree; nested-repo worktrees are a git footgun.
