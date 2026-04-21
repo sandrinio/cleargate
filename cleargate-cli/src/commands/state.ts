@@ -13,6 +13,7 @@ import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
   readSprintExecutionMode,
+  resolveSprintIdFromSentinel,
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
@@ -62,13 +63,17 @@ export function stateUpdateHandler(
   const exitFn: (code: number) => never = cli?.exit ?? defaultExit;
   const spawnFn = cli?.spawnFn ?? spawnSync;
 
-  // Derive sprint ID from story ID: STORY-013-08 → sprint ID context
-  // Use provided sprintId or fall back to a safe default
-  const sprintId = cli?.sprintId ?? 'SPRINT-UNKNOWN';
+  // Sprint ID resolution order:
+  // 1. Explicit --sprint <id> from CLI (cli?.sprintId)
+  // 2. .cleargate/sprint-runs/.active sentinel
+  // 3. Fall through to SPRINT-UNKNOWN (v1-inert)
+  const cwd = cli?.cwd;
+  const sprintId =
+    cli?.sprintId ?? resolveSprintIdFromSentinel(cwd) ?? 'SPRINT-UNKNOWN';
 
   const mode = readSprintExecutionMode(sprintId, {
     sprintFilePath: cli?.sprintFilePath,
-    cwd: cli?.cwd,
+    cwd,
   });
 
   if (mode === 'v1') {

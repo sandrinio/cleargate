@@ -87,13 +87,13 @@ export function sprintInitHandler(
 // ─── sprintCloseHandler ───────────────────────────────────────────────────────
 
 /**
- * `cleargate sprint close <sprint-id>`
+ * `cleargate sprint close <sprint-id> [--assume-ack]`
  *
  * v1: print inert message, exit 0.
- * v2: run `run_script.sh close_sprint.mjs <sprint-id>`
+ * v2: run `run_script.sh close_sprint.mjs <sprint-id> [--assume-ack]`
  */
 export function sprintCloseHandler(
-  opts: { sprintId: string },
+  opts: { sprintId: string; assumeAck?: boolean },
   cli?: SprintCliOptions,
 ): void {
   const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
@@ -113,6 +113,11 @@ export function sprintCloseHandler(
   // v2: shell out via run_script.sh
   const runScript = resolveRunScript(cli ?? {});
   const args = ['close_sprint.mjs', opts.sprintId];
+  // FLASHCARD #cli #commander #optional-key: omit the key when undefined; only
+  // append --assume-ack when the flag was explicitly set (opts.assumeAck === true).
+  if (opts.assumeAck === true) {
+    args.push('--assume-ack');
+  }
 
   const result = spawnFn('bash', [runScript, ...args], { stdio: 'inherit' });
 
