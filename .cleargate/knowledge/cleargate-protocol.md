@@ -106,6 +106,8 @@ There are three hard stops. You halt at each one and do not proceed until the hu
 
 Under `execution_mode: "v1"` this rule is **advisory only** — the orchestrator surfaces the ambiguity level but does not block bounce start.
 
+**v2 story-file assertion:** Additionally for v2 sprints, `cleargate sprint init` asserts every story in §1 Consolidated Deliverables has a `pending-sync/STORY-*.md` file before writing `state.json`; missing files block init with an enumerated stderr list. Under v1 the assertion runs but only warns (does not block). The assertion is also available standalone: `node .cleargate/scripts/assert_story_files.mjs <sprint-file-path>`.
+
 ### Gate 3 — Push Gate
 
 - **Never call `cleargate_push_item` on a file where `approved: false`.**
