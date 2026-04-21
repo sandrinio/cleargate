@@ -111,6 +111,8 @@ Feature: {Story Name}
 
 ### 3.1 Context & Files
 
+> **v2 gate input:** under v2 execution mode, this table is a pre-commit gate input (protocol §20). Every file staged in this story's commit must appear in the Value column, or be covered by `.cleargate/scripts/surface-whitelist.txt`. Non-path rows (e.g. "Mirrors", "New Files Needed: Yes/No") are ignored by the parser.
+
 | Item | Value |
 |---|---|
 | Primary File | `{filepath/to/main/component.ts}` |
