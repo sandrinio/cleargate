@@ -122,6 +122,16 @@
 | [[STORY-013-07]] | story | Done | .cleargate/delivery/archive/STORY-013-07_Sprint_Report_Close_Pipeline.md |
 | [[STORY-013-08]] | story | Done | .cleargate/delivery/archive/STORY-013-08_Execution_Mode_Flag.md |
 | [[STORY-013-09]] | story | Done | .cleargate/delivery/archive/STORY-013-09_Sprint_Planning_v2.md |
+| [[STORY-014-01]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-01_File_Surface_Diff_Gate.md |
+| [[STORY-014-02]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-02_Gate2_Story_File_Assertion.md |
+| [[STORY-014-03]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-03_Flashcard_Gate_Enforcement.md |
+| [[STORY-014-04]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-04_Test_Failure_Ratchet.md |
+| [[STORY-014-05]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-05_Cross_Project_Ledger_Routing.md |
+| [[STORY-014-06]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-06_CLI_Flag_Plumbing.md |
+| [[STORY-014-07]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-07_Story_Start_Complete_Atomic.md |
+| [[STORY-014-08]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-08_Sprint_Archive_Wrapper.md |
+| [[STORY-014-09]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-09_Architect_Numbering_And_Split_Signal.md |
+| [[STORY-014-10]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-10_Reporter_Write_Seam.md |
 
 ## Sprints
 
