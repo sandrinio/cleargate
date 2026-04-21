@@ -645,3 +645,67 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 | `v2` | Mandatory — `validate_bounce_readiness.mjs` checks worktree isolation before any Developer Agent edit |
 
 Under v2, attempting to run a Developer Agent on a story without a matching `.worktrees/STORY-NNN-NN/` path present causes `validate_bounce_readiness.mjs` to exit non-zero and the orchestrator to halt the story transition.
+
+---
+
+## 16. User Walkthrough on Sprint Branch (v2)
+
+**v1/v2 gating:** Under `execution_mode: v1` this section is **informational**. Under `execution_mode: v2` it is **mandatory**: the sprint branch MUST NOT merge to `main` until the walkthrough is complete and all `UR:bug` items are resolved.
+
+### §16.1 Walkthrough trigger
+
+After all stories in the sprint are merged into `sprint/S-XX` (every story state ∈ `TERMINAL_STATES`) and before `sprint/S-XX` merges to `main`, the orchestrator invites the user to test the running application on the sprint branch.
+
+### §16.2 Feedback classification
+
+User feedback during the walkthrough is classified into exactly two event types:
+
+| Event type | Definition | Bug-Fix Tax effect |
+|---|---|---|
+| `UR:review-feedback` | Enhancement, polish, copy change, or UX preference — does NOT fix broken behavior | Does NOT increment Bug-Fix Tax |
+| `UR:bug` | Defect, crash, wrong output, or behavior broken relative to spec | DOES increment Bug-Fix Tax |
+
+**Classification rule:** when in doubt, ask the user one targeted question — "Is this broken relative to spec, or a preference?" Do not default to `UR:bug`.
+
+### §16.3 Logging
+
+Each piece of walkthrough feedback MUST be logged in the sprint markdown file under `## 4. Execution Log` with the event prefix:
+
+```
+UR:review-feedback 2026-04-21 — copy should say "Sign in" not "Log in" (resolved: STORY-013-09-dev.md commit abc123)
+UR:bug 2026-04-21 — create-project button 500s on submit (resolved: STORY-013-10-dev.md commit def456)
+```
+
+### §16.4 Resolution gate
+
+The sprint branch MUST NOT merge to `main` while any `UR:bug` item is unresolved. `UR:review-feedback` items MAY be deferred to the next sprint with orchestrator + user acknowledgment logged.
+
+---
+
+## 17. Mid-Sprint Change Request Triage (v2)
+
+**v1/v2 gating:** Under `execution_mode: v1` this section is **informational**. Under `execution_mode: v2` it is **mandatory**: every user-injected change during a bounce MUST be classified before routing.
+
+### §17.1 Classification table
+
+When the user injects new input during a QA bounce or active story execution, the orchestrator classifies the input into one of four categories:
+
+| Event type | Definition | Bounce-counter effect | Routing |
+|---|---|---|---|
+| `CR:bug` | Defect introduced by the current story's implementation | Counts toward Bug-Fix Tax; increments `qa_bounces` | Re-open story; Developer fixes; QA re-verifies |
+| `CR:spec-clarification` | Clarification of existing spec — no new scope, removes ambiguity | Does NOT increment any bounce counter | Update story acceptance criteria in place; re-run impacted test |
+| `CR:scope-change` | Net-new requirement or expansion of story scope | Deferred: create a new Story in `pending-sync/`; current story continues unchanged | New Story ID assigned; current bounce counter unaffected |
+| `CR:approach-change` | Switch implementation approach without changing functional spec | Does NOT increment bounce counter; resets Developer context | Re-spawn Developer with updated approach note; same story ID |
+
+### §17.2 Logging
+
+Each mid-sprint CR MUST be logged in the sprint markdown file under `## 4. Execution Log` with the event prefix:
+
+```
+CR:spec-clarification 2026-04-21 — endpoint must return project slug (clarified in STORY-013-05 §1.2; no new scope)
+CR:scope-change 2026-04-21 — user requests audit log table (new STORY-013-11 created in pending-sync/)
+```
+
+### §17.3 Scope-change quarantine
+
+A `CR:scope-change` MUST NOT be folded into the current story's commit. Create a new Story file and handle in a future sprint or as a mid-sprint addition (requires orchestrator + user explicit sign-off to add mid-sprint).
