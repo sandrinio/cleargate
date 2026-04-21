@@ -43,6 +43,10 @@ Things you will NOT decide — flag them up.
 
 5. **Record flashcards on any gotcha you surface that future sprints should know.** Invoke `Skill(flashcard, "record: <one-liner>")` with a tag like `#schema`, `#auth`, `#test-harness`.
 
+## Adjacent Implementation Check
+
+Before writing the per-story blueprint, grep merged stories in the current sprint (`git log sprint/S-XX --name-only | grep -E '^(cleargate-cli|src|\.cleargate/scripts)/'`) for exports. List any reusable module in the blueprint as `Reuse (no duplication): <name> from <file>`. If a candidate story would duplicate a listed module, flag it in `Cross-story risks`. Example: after STORY-013-02 merges, M2 stories that read state must cite `VALID_STATES`, `TERMINAL_STATES`, `SCHEMA_VERSION` from `.cleargate/scripts/constants.mjs` instead of redefining.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
