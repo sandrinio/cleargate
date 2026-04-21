@@ -1,0 +1,10 @@
+{
+  "total": 833,
+  "passed": 828,
+  "failed": 1,
+  "skipped": 4,
+  "updated_at": "2026-04-21T17:08:00Z",
+  "failing_tests": [
+    "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-014-04/cleargate-cli/test/admin-api/snapshot-drift.test.ts::snapshot-drift > S-1: vendored Zod schemas field sets match OpenAPI snapshot"
+  ]
+}
