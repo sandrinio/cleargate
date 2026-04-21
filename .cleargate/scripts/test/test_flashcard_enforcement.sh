@@ -114,22 +114,23 @@ flashcards_flagged: []
 EOF
 }
 
-# Patch REPO_ROOT in the live hook for test isolation.
+# Prepare hook invocation: no sed patching needed.
+# We use ORCHESTRATOR_PROJECT_DIR env override (added in STORY-014-05) to
+# redirect REPO_ROOT to the tmpdir.  This exercises the production override
+# path and is immune to future changes in the variable assignment form.
 patch_hook() {
-  local tmpdir="$1"
-  sed "s|REPO_ROOT=\"/Users/ssuladze/Documents/Dev/ClearGate\"|REPO_ROOT=\"${tmpdir}\"|g" \
-    "${LIVE_HOOK}" > "${tmpdir}/hook.sh"
-  chmod +x "${tmpdir}/hook.sh"
+  : # no-op — hook is invoked directly via env override in invoke_hook
 }
 
 # Invoke hook, capture stderr separately, return exit code via return value.
+# $1 = tmpdir (used as ORCHESTRATOR_PROJECT_DIR so the hook reads from it)
 LAST_STDERR=""
 invoke_hook() {
-  local hook_sh="$1"
+  local tmpdir="$1"
   local input_json='{"tool_name":"Task","tool_input":{"subagent_type":"developer","prompt":"STORY=099-02 test"},"transcript_path":"","session_id":"test","cwd":"/tmp"}'
   local stderr_file
   stderr_file="$(mktemp)"
-  printf '%s' "${input_json}" | bash "${hook_sh}" 2>"${stderr_file}"
+  printf '%s' "${input_json}" | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" bash "${LIVE_HOOK}" 2>"${stderr_file}"
   local rc=$?
   LAST_STDERR="$(cat "${stderr_file}")"
   rm -f "${stderr_file}"
@@ -146,7 +147,7 @@ mk_dev_report_md "${SPRINT_DIR1}" "099-01"
 patch_hook "${T1}"
 
 LAST_STDERR=""
-invoke_hook "${T1}/hook.sh"
+invoke_hook "${T1}"
 RC1=$?
 
 assert_eq "S1: exit code is 1 (blocked)" "1" "${RC1}"
@@ -167,7 +168,7 @@ touch "${SPRINT_DIR2}/.processed-${KNOWN_HASH}"
 patch_hook "${T2}"
 
 LAST_STDERR=""
-invoke_hook "${T2}/hook.sh"
+invoke_hook "${T2}"
 RC2=$?
 
 assert_eq "S2: exit code is 0 (allowed)" "0" "${RC2}"
@@ -186,7 +187,7 @@ mk_dev_report_md "${SPRINT_DIR3}" "099-01"
 patch_hook "${T3}"
 
 LAST_STDERR=""
-invoke_hook "${T3}/hook.sh"
+invoke_hook "${T3}"
 RC3=$?
 
 assert_eq "S3: exit code is 0 (advisory, not blocked)" "0" "${RC3}"
@@ -205,7 +206,7 @@ mk_dev_report_empty "${SPRINT_DIR4}" "099-01"
 patch_hook "${T4}"
 
 LAST_STDERR=""
-invoke_hook "${T4}/hook.sh"
+invoke_hook "${T4}"
 RC4=$?
 
 assert_eq "S4: exit code is 0 (empty list, no-op)" "0" "${RC4}"
