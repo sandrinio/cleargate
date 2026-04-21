@@ -102,6 +102,10 @@ There are three hard stops. You halt at each one and do not proceed until the hu
 4. Once §6 is empty and zero "TBDs" remain in the document, move the status to 🟢.
 5. Only documents at 🟢 may proceed to the Delivery phase.
 
+**v2 enforcement rule:** When the sprint frontmatter has `execution_mode: "v2"`, a 🔴 High-ambiguity Epic BLOCKS bounce start — the orchestrator MUST NOT transition the story to `Bouncing` state until the Epic reaches 🟢. To override: the sprint plan frontmatter MUST contain `human_override: true` AND a `human_override_reason` field captured in §0 Readiness Gate of the sprint plan, with explicit human sign-off recorded. Without both fields, the orchestrator halts and presents the block message: *"Gate 2 blocked: Epic {ID} is 🔴 High ambiguity under execution_mode: v2. Set human_override: true + human_override_reason in sprint §0 to proceed."*
+
+Under `execution_mode: "v1"` this rule is **advisory only** — the orchestrator surfaces the ambiguity level but does not block bounce start.
+
 ### Gate 3 — Push Gate
 
 - **Never call `cleargate_push_item` on a file where `approved: false`.**

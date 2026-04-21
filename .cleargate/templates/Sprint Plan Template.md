@@ -11,6 +11,7 @@ sprint_id: "SPRINT-{ID}"
 remote_id: "{PM_TOOL_SPRINT_ID}"
 source_tool: "linear | jira"
 status: "Draft | Active | Completed"
+execution_mode: "v1"   # "v1" = advisory-only v2 rules; "v2" = all §§15–19 rules enforcing. Default "v1". Set to "v2" only after all M2 stories shipped and Sprint Design Review completed.
 start_date: "{YYYY-MM-DD}"
 end_date: "{YYYY-MM-DD}"
 synced_at: "{ISO-8601 timestamp}"
@@ -36,11 +37,36 @@ cached_gate_result:
 ## Sprint Goal
 {One clear sentence describing the primary objective of this sprint, as defined in the PM tool.}
 
-## Consolidated Deliverables
+## 1. Consolidated Deliverables
 *(Pulled from PM tool. IDs are the remote PM entity IDs.)*
 
-- `{TASK-ID}`: {Title} — {Brief Description}
-- `{TASK-ID}`: {Title} — {Brief Description}
+| Story ID | Title | Milestone | Parallel? | Bounce Exposure |
+|---|---|---|---|---|
+| `{STORY-NNN-NN}` | {Title} | M{N} | y / n | low / med / high |
+
+## 2. Execution Strategy
+*(Written by Architect during Sprint Design Review. Required before `execution_mode: v2` sprint start. Under v1, this section may be omitted or left as a stub.)*
+
+### 2.1 Phase Plan
+{Parallel vs sequential story groups. List which stories run concurrently in each wave and which must be serialized.}
+Example:
+- Wave 1 (sequential): STORY-NNN-01 → STORY-NNN-02 (02 depends on 01's schema)
+- Wave 2 (parallel): STORY-NNN-03 ‖ STORY-NNN-04
+
+### 2.2 Merge Ordering (Shared-File Surface Analysis)
+{List files touched by more than one story. For each shared file, specify which story lands first and why.}
+
+| Shared File | Stories Touching It | Merge Order | Rationale |
+|---|---|---|---|
+| `.cleargate/knowledge/cleargate-protocol.md` | STORY-NNN-01, STORY-NNN-02 | 01 → 02 | 01 adds §16; 02 amends §16 |
+
+### 2.3 Shared-Surface Warnings
+{Explicit conflict risks. One bullet per risk. Cite file + story pair.}
+- None identified. (Replace with actual warnings if applicable.)
+
+### 2.4 ADR-Conflict Flags
+{Any story whose implementation conflicts with an Architectural Decision Record in `.cleargate/knowledge/` or prior sprint decisions. One bullet per flag.}
+- None identified. (Replace with actual flags if applicable.)
 
 ## Risks & Dependencies
 *(As defined in the PM tool.)*
