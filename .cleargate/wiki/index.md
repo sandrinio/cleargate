@@ -144,6 +144,7 @@
 | [[SPRINT-07]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-07_Multi_Participant_MCP_Sync.md |
 | [[SPRINT-08]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-08_End_To_End_Production_Readiness.md |
 | [[SPRINT-09]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-09_Execution_Phase_v2.md |
+| [[SPRINT-10]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-10_Execution_V2_Polish.md |
 
 ## Proposals
 

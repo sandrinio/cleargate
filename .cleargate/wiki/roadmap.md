@@ -20,6 +20,8 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-07]] — status: Planned
 
+- [[SPRINT-10]] — status: Planned
+
 
 
 ## Shipped Sprints
