@@ -26,7 +26,7 @@
 
 set -u
 
-REPO_ROOT="${CLAUDE_PROJECT_DIR}"
+REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"
 LOG_DIR="${REPO_ROOT}/.cleargate/hook-log"
 mkdir -p "${LOG_DIR}"
 HOOK_LOG="${LOG_DIR}/pending-task-sentinel.log"
