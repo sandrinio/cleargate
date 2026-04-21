@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-008_Project_Config_MCP_Authority.md"
-last_ingest: "2026-04-19T20:20:28.698Z"
-last_ingest_commit: ""
+last_ingest: "2026-04-21T07:56:08.891Z"
+last_ingest_commit: "98507d2e49e37035a6ee0a94546853a4488557e9"
 repo: "planning"
 ---
 

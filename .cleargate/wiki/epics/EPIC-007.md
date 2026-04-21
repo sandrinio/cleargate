@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-007_Public_Discoverability.md"
-last_ingest: "2026-04-19T16:09:15.621Z"
-last_ingest_commit: "4e2236c807c476411f06ab88cc277760d18f14be"
+last_ingest: "2026-04-21T07:56:08.891Z"
+last_ingest_commit: "39e586a19e43e231919ca6df42c66eb05b2df48c"
 repo: "planning"
 ---
 

@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-04-20T20:12:15.159Z"
-last_ingest_commit: "3a258dc8a75e23091777cd558aa325926fef4e62"
+last_ingest: "2026-04-21T07:56:08.891Z"
+last_ingest_commit: "39e586a19e43e231919ca6df42c66eb05b2df48c"
 repo: "planning"
 ---
 

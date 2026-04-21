@@ -1,13 +1,14 @@
 ---
 story_id: STORY-013-01_Worktree_Branch_Hierarchy
 parent_epic_ref: EPIC-013
-status: Ready
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 row 'Worktree per story' + V-Bounce Engine `skills/agent-team/SKILL.md` §§ 'Git Worktree Strategy' + 'Worktree Commands'
 actor: Developer Agent
 complexity_label: L3
 approved: true
 approved_at: 2026-04-21T00:00:00Z
+completed_at: "2026-04-21T08:30:00Z"
 approved_by: sandro
 milestone: M1
 created_at: 2026-04-21T00:00:00Z
