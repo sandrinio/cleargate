@@ -43,7 +43,11 @@ TYPECHECK: pass | fail
 TESTS: X passed, Y failed
 FILES_CHANGED: <list>
 NOTES: <one paragraph max — deviations from plan, flashcards recorded>
+flashcards_flagged:
+  - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
+
+`flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §18.
 
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.

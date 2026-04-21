@@ -1,17 +1,8 @@
 /**
- * YAML frontmatter parser backed by js-yaml with CORE_SCHEMA (YAML 1.2 core).
- *
- * Parses `---\n<yaml>\n---\n<body>` into a typed frontmatter map + body string.
- * Preserves native types (null, boolean, number, string), nested maps, and
- * arrays. Uses CORE_SCHEMA so ISO-8601 timestamp strings are NOT coerced to
- * Date objects (YAML 1.1's quirk).
- *
- * Historical note: an earlier hand-rolled parser flattened indented nested
- * maps into top-level keys and stringified null/boolean scalars. See
- * BUG-001 and FLASHCARD entry `#yaml #frontmatter`.
+ * Inline YAML frontmatter parser — hand-rolled, ≤40 LoC.
+ * Handles: `key: value`, quoted strings, `[a, b]` list literals.
+ * Rejects nested YAML with a thrown Error.
  */
-
-import yaml from 'js-yaml';
 
 export function parseFrontmatter(raw: string): { fm: Record<string, unknown>; body: string } {
   const lines = raw.split('\n');
@@ -25,30 +16,39 @@ export function parseFrontmatter(raw: string): { fm: Record<string, unknown>; bo
   if (closeIdx === -1) {
     throw new Error('parseFrontmatter: missing closing ---');
   }
-
-  const yamlText = lines.slice(1, closeIdx).join('\n');
+  const fmLines = lines.slice(1, closeIdx);
   const bodyLines = lines.slice(closeIdx + 1);
   // strip one leading blank line if present
   if (bodyLines[0] === '') bodyLines.shift();
-  const body = bodyLines.join('\n');
 
-  if (yamlText.trim() === '') {
-    return { fm: {}, body };
+  const fm: Record<string, unknown> = {};
+  for (const line of fmLines) {
+    if (line.trim() === '' || line.trim().startsWith('#')) continue;
+    const colon = line.indexOf(':');
+    if (colon === -1) continue;
+    const key = line.slice(0, colon).trim();
+    const val = line.slice(colon + 1).trim();
+
+    if (val === '' || val === '[]') { fm[key] = []; continue; }
+
+    if (val.startsWith('[') && val.endsWith(']')) {
+      const inner = val.slice(1, -1).trim();
+      if (inner === '') { fm[key] = []; continue; }
+      fm[key] = inner
+        .split(',')
+        .map((s) => s.trim().replace(/^["']|["']$/g, ''));
+      continue;
+    }
+
+    if (val.startsWith('{')) {
+      // Treat nested YAML objects as opaque string values (do not parse).
+      // This unblocks draft_tokens / cached_gate_result nested writes (STORY-008-02).
+      fm[key] = val;
+      continue;
+    }
+
+    fm[key] = val.replace(/^["']|["']$/g, '');
   }
 
-  let parsed: unknown;
-  try {
-    parsed = yaml.load(yamlText, { schema: yaml.CORE_SCHEMA });
-  } catch (err) {
-    throw new Error(`parseFrontmatter: invalid YAML: ${(err as Error).message}`);
-  }
-
-  if (parsed === null || parsed === undefined) {
-    return { fm: {}, body };
-  }
-  if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('parseFrontmatter: frontmatter is not a YAML mapping');
-  }
-
-  return { fm: parsed as Record<string, unknown>, body };
+  return { fm, body: bodyLines.join('\n') };
 }

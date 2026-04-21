@@ -5,7 +5,7 @@
 ## Current Sprint
 
 
-- [[SPRINT-08]] — status: Active
+- [[SPRINT-05]] — status: Active
 
 
 
@@ -13,8 +13,6 @@
 
 
 - [[SPRINT-06]] — status: Planned
-
-- [[SPRINT-07]] — status: Planned
 
 
 

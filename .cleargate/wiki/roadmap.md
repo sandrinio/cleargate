@@ -7,7 +7,7 @@
 Sprints currently active (`activated_at` set, `completed_at` not set).
 
 
-- [[SPRINT-08]] — activated: 2026-04-20T14:00:00Z
+- [[SPRINT-05]] — activated: 2026-04-19T12:25:00Z
 
 
 
@@ -17,8 +17,6 @@ Sprints not yet started (`activated_at` not set).
 
 
 - [[SPRINT-06]] — status: Planned
-
-- [[SPRINT-07]] — status: Planned
 
 
 
@@ -34,8 +32,6 @@ Sprints with `completed_at` set.
 - [[SPRINT-03]] — completed: 2026-04-18T17:37:00Z
 
 - [[SPRINT-04]] — completed: 2026-04-19T05:30:00Z
-
-- [[SPRINT-05]] — completed: 2026-04-19T15:05:00Z
 
 
 
@@ -56,12 +52,6 @@ _No active epics._
 - [[EPIC-008]] — status: Draft
 
 - [[EPIC-009]] — status: Draft
-
-- [[EPIC-010]] — status: Draft
-
-- [[EPIC-011]] — status: Ready
-
-- [[EPIC-012]] — status: Ready
 
 
 
