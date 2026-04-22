@@ -9,7 +9,7 @@ import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
-import { sprintInitHandler, sprintCloseHandler } from './commands/sprint.js';
+import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
 import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
 import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
@@ -186,6 +186,19 @@ sprint
       handlerOpts.assumeAck = true;
     }
     sprintCloseHandler(handlerOpts);
+  });
+
+sprint
+  .command('archive <sprint-id>')
+  .description('archive a completed sprint — move pending-sync files, clear .active, merge + delete sprint branch')
+  .option('--dry-run', 'print the archive plan without making any changes')
+  .action((sprintId: string, opts: { dryRun?: boolean }) => {
+    // FLASHCARD #cli #commander #optional-key: omit key when undefined
+    const handlerOpts: { sprintId: string; dryRun?: boolean } = { sprintId };
+    if (opts.dryRun === true) {
+      handlerOpts.dryRun = true;
+    }
+    sprintArchiveHandler(handlerOpts);
   });
 
 const story = program
