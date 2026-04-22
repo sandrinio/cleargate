@@ -1,10 +1,12 @@
 ---
-story_id: STORY-014-07
-sprint_id: SPRINT-10
-agent: developer
-status: done
-complexity: L3
-flashcards_flagged: []
+story_id: "STORY-014-07"
+sprint_id: "SPRINT-10"
+agent: "developer"
+status: "done"
+complexity: "L3"
+flashcards_flagged: "[]"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-014-07 Developer Report

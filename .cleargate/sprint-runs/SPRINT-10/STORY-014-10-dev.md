@@ -1,9 +1,12 @@
 ---
-story_id: STORY-014-10
-status: done
-execution_mode: v2
-executed_by: orchestrator (direct — Developer subagent quota exhausted)
-flashcards_flagged: []
+story_id: "STORY-014-10"
+status: "done"
+execution_mode: "v2"
+executed_by: "orchestrator (direct — Developer subagent quota exhausted)"
+flashcards_flagged: "[]"
+sprint_id: "SPRINT-10"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-014-10 — Dev Report
