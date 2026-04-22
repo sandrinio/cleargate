@@ -83,6 +83,38 @@ Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §
 
 These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
 
+## Protocol Numbering Resolver
+
+Before writing per-story blueprints that reference a new `cleargate-protocol.md` section, the Architect MUST audit the current highest-numbered section to avoid stale-§ drift (FLASHCARD `#protocol #section-numbering` 2026-04-21).
+
+**Step 1 — find the current max §:**
+
+```bash
+grep -n "^## [0-9]" .cleargate/knowledge/cleargate-protocol.md | sort -n -k2 | tail -1
+```
+
+This prints the last numbered heading. Extract the section number from the output (e.g. `842:## 20. File-Surface Contract (v2)` → max = **20**).
+
+**Step 2 — emit §(max+1) for any new append:**
+
+The next free section number is always `max + 1`. Never reuse an existing number, even if a section was removed.
+
+**Step 3 — rewrite stale references in story prose:**
+
+For each story in the milestone, grep the story file for `§\d+` references:
+
+```bash
+grep -oE '§[0-9]+' path/to/STORY-NNN-NN.md
+```
+
+If any cited § number is ≤ max AND the section text it describes does not match the actual heading at that number in the protocol, flag it as a stale reference. Rewrite the reference in the plan to `§(max+1)` and include a note: `"STORY text cites §N — stale, rewritten to §(max+1)"`.
+
+**Concrete example (post-SPRINT-10):**
+
+After SPRINT-10 ships, `max = 20`. A story drafted before SPRINT-10 might cite `§10` (meaning "append after §10"). That section is already occupied by `§10 Wiki Awareness Layer`. The plan must use `§21` (next free after `§20`) and note: _"STORY text cites §10 — stale, rewritten to §21"_.
+
+**Rule:** Never let a Developer emit a protocol section number that conflicts with an existing one. Audit first, emit second.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
