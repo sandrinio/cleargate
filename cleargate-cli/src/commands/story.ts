@@ -1,21 +1,29 @@
 /**
  * story.ts — `cleargate story start|complete` command handlers.
  *
- * STORY-013-08: CLI wrappers for story lifecycle.
- * All handlers are v1-inert: when execution_mode is "v1", they print the
- * inert-mode message and exit 0. Under "v2", they shell out via run_script.sh.
+ * STORY-014-07: atomic orchestration of worktree + branch + merge + state.
+ *
+ * Both handlers are v1-inert: when execution_mode is "v1", they print the
+ * inert-mode message and exit 0. Under "v2", they orchestrate the full
+ * worktree/merge sequence via `spawnSync` + a second-pass `state.json` write.
  *
  * `story start <story-id>`:
- *   Reads sprint branch from state.json, then runs `git worktree add` to
- *   create an isolated worktree at `.worktrees/<story-id>/`.
+ *   1. `git worktree add <cwd>/.worktrees/<ID> -b story/<ID> <sprintBranch>`
+ *   2. `bash run_script.sh update_state.mjs <ID> Bouncing`
+ *   3. Re-read `state.json`, set `stories[<ID>].worktree` field, atomic write.
  *
  * `story complete <story-id>`:
- *   Shells out via `run_script.sh complete_story.mjs` (script is a stub —
- *   full implementation is future work per EPIC-013 §0 out-of-scope note).
- *   If the script is absent, exit 1 with "not yet implemented" message.
+ *   1. `git rev-list --count <sprintBranch>..story/<ID>` — if 0 → abort.
+ *   2. `git -C <cwd> checkout <sprintBranch>`
+ *   3. `git merge story/<ID> --no-ff -m "merge: story/<ID> → <sprintBranch>"`
+ *      — on conflict: leave markers, print `git merge --abort` suggestion, exit 1.
+ *   4. `git worktree remove .worktrees/<ID>`
+ *   5. `git branch -d story/<ID>`
+ *   6. `bash run_script.sh update_state.mjs <ID> Done`
  *
  * EPIC-013 §0 rule 5: never invoke `node .cleargate/scripts/*.mjs` directly.
  * FLASHCARD #tsup #cjs #esm: no top-level await.
+ * FLASHCARD #cli #test-seam #exit: exitFn only at handler top-level.
  */
 
 import * as fs from 'node:fs';
@@ -23,6 +31,7 @@ import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
   readSprintExecutionMode,
+  resolveSprintIdFromSentinel,
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
@@ -39,7 +48,7 @@ export interface StoryCliOptions extends ExecutionModeOptions {
   spawnFn?: typeof spawnSync;
   /**
    * Sprint ID override for execution_mode discovery.
-   * If not set, the handler resolves the active sprint from state.json.
+   * If absent, the handler reads `.cleargate/sprint-runs/.active`.
    */
   sprintId?: string;
 }
@@ -57,28 +66,31 @@ function resolveRunScript(opts: StoryCliOptions): string {
 }
 
 /**
- * Derive the active sprint ID by looking for the most recently modified
- * sprint file in `.cleargate/delivery/pending-sync/` with status "Active".
- * Falls back to the first SPRINT-*.md found.
- * Returns null if nothing is found.
+ * Derive sprint branch from sprint ID.
+ * `SPRINT-10` → `sprint/S-10` (zero-padded 2-digit).
  */
-function resolveActiveSprintId(cwd: string): string | null {
-  const dir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
-  if (!fs.existsSync(dir)) return null;
-  let entries: string[];
-  try {
-    entries = fs.readdirSync(dir);
-  } catch {
-    return null;
-  }
-  const sprints = entries.filter(
-    (e) => e.startsWith('SPRINT-') && e.endsWith('.md'),
-  );
-  if (sprints.length === 0) return null;
-  // Extract sprint ID from filename like SPRINT-09_Execution_Phase.md
-  const first = sprints[0]!;
-  const match = /^(SPRINT-\d+)/.exec(first);
-  return match ? match[1]! : null;
+function deriveSprintBranch(sprintId: string): string {
+  const match = /^SPRINT-(\d+)/.exec(sprintId);
+  const branchNum = match ? match[1]!.replace(/^0+/, '') || '0' : sprintId;
+  return `sprint/S-${branchNum.padStart(2, '0')}`;
+}
+
+/**
+ * Atomic write: tmp + rename. Inlined per plan (do not import from .mjs).
+ * Caller passes the raw JSON-stringified text (or any string content).
+ */
+function atomicWriteString(filePath: string, text: string): void {
+  const tmpFile = `${filePath}.tmp.${process.pid}`;
+  fs.writeFileSync(tmpFile, text, 'utf8');
+  fs.renameSync(tmpFile, filePath);
+}
+
+/**
+ * Path to the sprint's state.json. The file may not exist yet under v2
+ * when the sprint was just initialized — callers must guard.
+ */
+function stateJsonPath(cwd: string, sprintId: string): string {
+  return path.join(cwd, '.cleargate', 'sprint-runs', sprintId, 'state.json');
 }
 
 // ─── storyStartHandler ────────────────────────────────────────────────────────
@@ -87,7 +99,7 @@ function resolveActiveSprintId(cwd: string): string | null {
  * `cleargate story start <story-id>`
  *
  * v1: print inert message, exit 0.
- * v2: create a git worktree at `.worktrees/<story-id>/` on the sprint branch.
+ * v2: 3-step spawn sequence + second-pass state.json mutation.
  */
 export function storyStartHandler(
   opts: { storyId: string },
@@ -99,9 +111,9 @@ export function storyStartHandler(
   const spawnFn = cli?.spawnFn ?? spawnSync;
   const cwd = cli?.cwd ?? process.cwd();
 
-  // Resolve sprint ID for execution_mode check
+  // Resolve sprint ID: explicit override, else sentinel-fallback via .active.
   const sprintId =
-    cli?.sprintId ?? resolveActiveSprintId(cwd) ?? 'SPRINT-UNKNOWN';
+    cli?.sprintId ?? resolveSprintIdFromSentinel(cwd) ?? 'SPRINT-UNKNOWN';
 
   const mode = readSprintExecutionMode(sprintId, {
     sprintFilePath: cli?.sprintFilePath,
@@ -112,30 +124,83 @@ export function storyStartHandler(
     return printInertAndExit(stdoutFn, exitFn);
   }
 
-  // v2: create worktree
-  // Sprint branch convention: sprint/S-NN
-  // Extract branch name from sprint ID: SPRINT-09 → sprint/S-09
-  const branchMatch = /^SPRINT-(\d+)/.exec(sprintId);
-  const branchNum = branchMatch ? branchMatch[1]!.replace(/^0+/, '') || '0' : sprintId;
-  const sprintBranch = `sprint/S-${branchNum.padStart(2, '0')}`;
-
+  // ── v2: 3-step orchestration ───────────────────────────────────────────────
+  const sprintBranch = deriveSprintBranch(sprintId);
   const worktreePath = path.join(cwd, '.worktrees', opts.storyId);
-  const result = spawnFn(
-    'git',
-    ['worktree', 'add', worktreePath, sprintBranch],
-    { stdio: 'inherit', cwd },
-  );
+  const storyBranch = `story/${opts.storyId}`;
 
-  if (result.error) {
-    stderrFn(`[cleargate story start] error: ${result.error.message}`);
+  // Step 1: git worktree add <path> -b story/<ID> <sprintBranch>
+  // FLASHCARD (plan): flag order matters on macOS git — PATH before -b.
+  const step1 = spawnFn(
+    'git',
+    ['worktree', 'add', worktreePath, '-b', storyBranch, sprintBranch],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step1.error) {
+    stderrFn(`[cleargate story start] step 1 (git worktree add) error: ${step1.error.message}`);
+    return exitFn(1);
+  }
+  if ((step1.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story start] step 1 (git worktree add) failed with exit ${step1.status}`);
+    if (step1.stderr) stderrFn(String(step1.stderr));
+    return exitFn(step1.status ?? 1);
+  }
+
+  // Step 2: run_script.sh update_state.mjs <ID> Bouncing
+  const runScript = resolveRunScript(cli ?? { cwd });
+  const step2 = spawnFn(
+    'bash',
+    [runScript, 'update_state.mjs', opts.storyId, 'Bouncing'],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step2.error) {
+    stderrFn(`[cleargate story start] step 2 (update_state.mjs) error: ${step2.error.message}`);
+    return exitFn(1);
+  }
+  if ((step2.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story start] step 2 (update_state.mjs) failed with exit ${step2.status}`);
+    if (step2.stderr) stderrFn(String(step2.stderr));
+    return exitFn(step2.status ?? 1);
+  }
+
+  // Step 3: re-read state.json (fresh bytes AFTER update_state.mjs), set
+  // stories[<ID>].worktree = ".worktrees/<ID>", atomic write.
+  const stateFile = stateJsonPath(cwd, sprintId);
+  if (!fs.existsSync(stateFile)) {
+    stderrFn(`[cleargate story start] step 3: state.json not found at ${stateFile}`);
+    return exitFn(1);
+  }
+  let state: {
+    stories?: Record<string, { worktree?: string | null } & Record<string, unknown>>;
+  } & Record<string, unknown>;
+  try {
+    state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+  } catch (err) {
+    stderrFn(`[cleargate story start] step 3: failed to parse state.json: ${(err as Error).message}`);
     return exitFn(1);
   }
 
-  const code = result.status ?? 0;
-  if (code === 0) {
-    stdoutFn(`worktree created at .worktrees/${opts.storyId} on branch ${sprintBranch}`);
+  state.stories = state.stories ?? {};
+  const existing = state.stories[opts.storyId] ?? {
+    state: 'Bouncing',
+    qa_bounces: 0,
+    arch_bounces: 0,
+    worktree: null,
+    updated_at: new Date().toISOString(),
+    notes: '',
+  };
+  existing.worktree = `.worktrees/${opts.storyId}`;
+  state.stories[opts.storyId] = existing;
+
+  try {
+    atomicWriteString(stateFile, JSON.stringify(state, null, 2) + '\n');
+  } catch (err) {
+    stderrFn(`[cleargate story start] step 3: atomic write failed: ${(err as Error).message}`);
+    return exitFn(1);
   }
-  return exitFn(code);
+
+  stdoutFn(`worktree created at .worktrees/${opts.storyId} on branch ${storyBranch}`);
+  return exitFn(0);
 }
 
 // ─── storyCompleteHandler ─────────────────────────────────────────────────────
@@ -144,8 +209,8 @@ export function storyStartHandler(
  * `cleargate story complete <story-id>`
  *
  * v1: print inert message, exit 0.
- * v2: shell out via `run_script.sh complete_story.mjs <story-id>`.
- *     If the script does not exist, prints "not yet implemented" and exits 1.
+ * v2: 6-step orchestration (pre-flight, checkout, merge, worktree remove,
+ *     branch -d, update_state.mjs Done).
  */
 export function storyCompleteHandler(
   opts: { storyId: string },
@@ -158,7 +223,7 @@ export function storyCompleteHandler(
   const cwd = cli?.cwd ?? process.cwd();
 
   const sprintId =
-    cli?.sprintId ?? resolveActiveSprintId(cwd) ?? 'SPRINT-UNKNOWN';
+    cli?.sprintId ?? resolveSprintIdFromSentinel(cwd) ?? 'SPRINT-UNKNOWN';
 
   const mode = readSprintExecutionMode(sprintId, {
     sprintFilePath: cli?.sprintFilePath,
@@ -169,27 +234,115 @@ export function storyCompleteHandler(
     return printInertAndExit(stdoutFn, exitFn);
   }
 
-  // v2: shell out via run_script.sh
-  const runScript = resolveRunScript(cli ?? { cwd });
-  const scriptPath = path.join(cwd, '.cleargate', 'scripts', 'complete_story.mjs');
+  // ── v2: 6-step orchestration ───────────────────────────────────────────────
+  const sprintBranch = deriveSprintBranch(sprintId);
+  const storyBranch = `story/${opts.storyId}`;
+  const worktreeRel = path.join('.worktrees', opts.storyId);
 
-  // Graceful stub: if complete_story.mjs doesn't exist yet, report not-yet-implemented
-  if (!fs.existsSync(scriptPath) && !cli?.runScriptPath) {
-    stderrFn(`[cleargate story complete] not yet implemented: complete_story.mjs is a stub`);
-    return exitFn(1);
-  }
-
-  const result = spawnFn(
-    'bash',
-    [runScript, 'complete_story.mjs', opts.storyId],
-    { stdio: 'inherit' },
+  // Step 1: pre-flight rev-list — refuse if 0 commits on story branch.
+  const step1 = spawnFn(
+    'git',
+    ['rev-list', '--count', `${sprintBranch}..${storyBranch}`],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
   );
-
-  if (result.error) {
-    stderrFn(`[cleargate story complete] error: ${result.error.message}`);
+  if (step1.error) {
+    stderrFn(`[cleargate story complete] step 1 (rev-list) error: ${step1.error.message}`);
+    return exitFn(1);
+  }
+  if ((step1.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] step 1 (rev-list) failed with exit ${step1.status}`);
+    if (step1.stderr) stderrFn(String(step1.stderr));
+    return exitFn(step1.status ?? 1);
+  }
+  const count = parseInt(String(step1.stdout ?? '0').trim(), 10);
+  if (!Number.isFinite(count) || count <= 0) {
+    stderrFn('no commits on story branch — nothing to merge');
     return exitFn(1);
   }
 
-  const code = result.status ?? 0;
-  return exitFn(code);
+  // Step 2: checkout sprint branch.
+  const step2 = spawnFn(
+    'git',
+    ['-C', cwd, 'checkout', sprintBranch],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step2.error) {
+    stderrFn(`[cleargate story complete] step 2 (checkout) error: ${step2.error.message}`);
+    return exitFn(1);
+  }
+  if ((step2.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] step 2 (checkout ${sprintBranch}) failed with exit ${step2.status}`);
+    if (step2.stderr) stderrFn(String(step2.stderr));
+    return exitFn(step2.status ?? 1);
+  }
+
+  // Step 3: merge story/<ID> --no-ff -m "..."
+  // On conflict: leave markers, print `git merge --abort` suggestion, exit 1.
+  const mergeMsg = `merge: ${storyBranch} → ${sprintBranch}`;
+  const step3 = spawnFn(
+    'git',
+    ['merge', storyBranch, '--no-ff', '-m', mergeMsg],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step3.error) {
+    stderrFn(`[cleargate story complete] step 3 (merge) error: ${step3.error.message}`);
+    return exitFn(1);
+  }
+  if ((step3.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] merge conflict — run \`git merge --abort\` then re-run after resolution`);
+    if (step3.stderr) stderrFn(String(step3.stderr));
+    return exitFn(1);
+  }
+
+  // Step 4: git worktree remove .worktrees/<ID>
+  const step4 = spawnFn(
+    'git',
+    ['worktree', 'remove', worktreeRel],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step4.error) {
+    stderrFn(`[cleargate story complete] step 4 (worktree remove) error: ${step4.error.message}`);
+    return exitFn(1);
+  }
+  if ((step4.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] step 4 (worktree remove ${worktreeRel}) failed with exit ${step4.status}`);
+    if (step4.stderr) stderrFn(String(step4.stderr));
+    return exitFn(step4.status ?? 1);
+  }
+
+  // Step 5: git branch -d story/<ID>
+  const step5 = spawnFn(
+    'git',
+    ['branch', '-d', storyBranch],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step5.error) {
+    stderrFn(`[cleargate story complete] step 5 (branch -d) error: ${step5.error.message}`);
+    return exitFn(1);
+  }
+  if ((step5.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] step 5 (branch -d ${storyBranch}) failed with exit ${step5.status}`);
+    if (step5.stderr) stderrFn(String(step5.stderr));
+    return exitFn(step5.status ?? 1);
+  }
+
+  // Step 6: run_script.sh update_state.mjs <ID> Done
+  const runScript = resolveRunScript(cli ?? { cwd });
+  const step6 = spawnFn(
+    'bash',
+    [runScript, 'update_state.mjs', opts.storyId, 'Done'],
+    { stdio: 'pipe', cwd, encoding: 'utf8' },
+  );
+  if (step6.error) {
+    stderrFn(`[cleargate story complete] step 6 (update_state.mjs) error: ${step6.error.message}`);
+    return exitFn(1);
+  }
+  if ((step6.status ?? 0) !== 0) {
+    stderrFn(`[cleargate story complete] step 6 (update_state.mjs) failed with exit ${step6.status}`);
+    if (step6.stderr) stderrFn(String(step6.stderr));
+    return exitFn(step6.status ?? 1);
+  }
+
+  stdoutFn(`merged ${storyBranch} → ${sprintBranch}; worktree + branch removed; state = Done`);
+  return exitFn(0);
 }

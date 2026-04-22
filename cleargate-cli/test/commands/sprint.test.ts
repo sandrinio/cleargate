@@ -304,3 +304,59 @@ describe('Missing sprint file defaults to v1', () => {
     expect(cap.getOut().join(' ')).toContain('v1 mode active');
   });
 });
+
+// ─── Scenario: sprint close --assume-ack propagates (STORY-014-06) ───────────
+
+describe('Scenario: sprint close --assume-ack propagates', () => {
+  it('spawns close_sprint.mjs with --assume-ack as the last arg', () => {
+    const { exitFn } = makeExitSeam();
+    const cap = makeCapture();
+    const spawnMock = vi.fn().mockReturnValue({ status: 0, error: null });
+
+    try {
+      sprintCloseHandler(
+        { sprintId: 'SPRINT-99', assumeAck: true },
+        {
+          sprintFilePath: FIXTURE_V2,
+          stdout: cap.stdout,
+          stderr: cap.stderr,
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          runScriptPath: '/fake/run_script.sh',
+        },
+      );
+    } catch {
+      // swallow exit
+    }
+
+    expect(spawnMock).toHaveBeenCalledOnce();
+    const [, args] = spawnMock.mock.calls[0] as [string, string[]];
+    expect(args[1]).toBe('close_sprint.mjs');
+    expect(args[2]).toBe('SPRINT-99');
+    expect(args[args.length - 1]).toBe('--assume-ack');
+  });
+
+  it('does not append --assume-ack when flag is absent', () => {
+    const { exitFn } = makeExitSeam();
+    const spawnMock = vi.fn().mockReturnValue({ status: 0, error: null });
+
+    try {
+      sprintCloseHandler(
+        { sprintId: 'SPRINT-99' },
+        {
+          sprintFilePath: FIXTURE_V2,
+          stdout: () => {},
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          runScriptPath: '/fake/run_script.sh',
+        },
+      );
+    } catch {
+      // swallow exit
+    }
+
+    expect(spawnMock).toHaveBeenCalledOnce();
+    const [, args] = spawnMock.mock.calls[0] as [string, string[]];
+    expect(args).not.toContain('--assume-ack');
+  });
+});
