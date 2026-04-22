@@ -1,14 +1,16 @@
 ---
-story_id: STORY-014-03
-sprint_id: SPRINT-10
-role: developer
-status: done
-commit: 7915d1e
-branch: story/STORY-014-03
-merged_to: sprint/SPRINT-10
+story_id: "STORY-014-03"
+sprint_id: "SPRINT-10"
+role: "developer"
+status: "done"
+commit: "7915d1e"
+branch: "story/STORY-014-03"
+merged_to: "sprint/SPRINT-10"
 flashcards_flagged:
 - "2026-04-21 · #hooks #bash #stderr-redirect · gate stderr inside {…} 2>>log block is swallowed; move enforcement blocks BEFORE the group so exit 1 + >&2 reach real stderr"
 - "2026-04-21 · #hooks #yaml #markdown · dev/qa reports use both YAML frontmatter flashcards_flagged: and markdown ## flashcards_flagged section; hook must parse both forms"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # Dev Report: STORY-014-03 Flashcard Gate Enforcement

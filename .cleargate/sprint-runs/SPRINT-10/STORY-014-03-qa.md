@@ -1,10 +1,12 @@
 ---
-story_id: STORY-014-03
-sprint_id: SPRINT-10
-role: qa
-verdict: kicked-back
-checked_at: 2026-04-21
-commit: 7915d1e
+story_id: "STORY-014-03"
+sprint_id: "SPRINT-10"
+role: "qa"
+verdict: "kicked-back"
+checked_at: "2026-04-21"
+commit: "7915d1e"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA Report: STORY-014-03 Flashcard Gate Enforcement

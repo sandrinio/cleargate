@@ -1,11 +1,13 @@
 ---
-story_id: STORY-014-04
-sprint_id: SPRINT-10
-agent: developer
-status: done
-commit: 900cfb0
-baseline_regenerated: 828
-flashcards_flagged: [vitest-outputfile]
+story_id: "STORY-014-04"
+sprint_id: "SPRINT-10"
+agent: "developer"
+status: "done"
+commit: "900cfb0"
+baseline_regenerated: "828"
+flashcards_flagged: "[vitest-outputfile]"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-014-04 Developer Report
