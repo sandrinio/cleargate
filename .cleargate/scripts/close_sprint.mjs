@@ -3,6 +3,7 @@
  * close_sprint.mjs — Six-step sprint close pipeline
  *
  * Usage: node close_sprint.mjs <sprint-id> [--assume-ack]
+ *        node close_sprint.mjs <sprint-id> --report-body-stdin   (STORY-014-10)
  *
  * Steps:
  *   1. Load and validate state.json via validateState
@@ -11,6 +12,11 @@
  *   4. Orchestrator spawns Reporter separately (script validates preconditions only)
  *   5. On Reporter success + user ack (or --assume-ack flag), flip sprint_status -> "Completed"
  *   6. Invoke suggest_improvements.mjs unconditionally
+ *
+ * Stdin fallback (STORY-014-10): when `--report-body-stdin` is passed, the script
+ * reads the full REPORT.md body from stdin and writes it atomically in lieu of
+ * waiting for a Reporter-produced file. Replaces the Step-4 gate; implies ack.
+ * Refuses empty stdin or pre-existing REPORT.md.
  *
  * Does NOT archive the sprint file (pending-sync -> archive stays human per EPIC-013 §4.5 step 7).
  *
@@ -32,10 +38,11 @@ const SCRIPTS_DIR = __dirname;
 
 function usage() {
   process.stderr.write(
-    'Usage: node close_sprint.mjs <sprint-id> [--assume-ack]\n' +
+    'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
     '\n' +
     'Options:\n' +
-    '  --assume-ack   Skip user acknowledgement prompt (for automated tests)\n'
+    '  --assume-ack           Skip user acknowledgement prompt (for automated tests)\n' +
+    '  --report-body-stdin    Read REPORT.md body from stdin; implies ack (STORY-014-10)\n'
   );
   process.exit(2);
 }
@@ -48,6 +55,18 @@ function usage() {
 function atomicWrite(filePath, data) {
   const tmpFile = `${filePath}.tmp.${process.pid}`;
   fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmpFile, filePath);
+}
+
+/**
+ * Atomic write for a string body. Separate from atomicWrite() so we don't
+ * accidentally JSON.stringify a markdown body.
+ * @param {string} filePath
+ * @param {string} body
+ */
+function atomicWriteString(filePath, body) {
+  const tmpFile = `${filePath}.tmp.${process.pid}`;
+  fs.writeFileSync(tmpFile, body, 'utf8');
   fs.renameSync(tmpFile, filePath);
 }
 
@@ -77,7 +96,8 @@ function main() {
   if (args.length < 1) usage();
 
   const sprintId = args[0];
-  const assumeAck = args.includes('--assume-ack');
+  const reportBodyStdin = args.includes('--report-body-stdin');
+  const assumeAck = args.includes('--assume-ack') || reportBodyStdin;
 
   const sprintDir = process.env.CLEARGATE_SPRINT_DIR
     ? path.resolve(process.env.CLEARGATE_SPRINT_DIR)
@@ -156,7 +176,35 @@ function main() {
 
   // Check if REPORT.md already exists (e.g., --assume-ack path in tests)
   const reportFile = path.join(sprintDir, 'REPORT.md');
-  if (!assumeAck) {
+
+  // ── Step 4.5 (STORY-014-10): --report-body-stdin fallback ────────────────
+  // Orchestrator pipes the Reporter's markdown body here when the Reporter's
+  // Write tool is blocked. Refuses empty stdin + pre-existing REPORT.md.
+  if (reportBodyStdin) {
+    if (fs.existsSync(reportFile)) {
+      process.stderr.write(
+        `Error: REPORT.md already exists at ${reportFile}\n` +
+        'Delete it or skip --report-body-stdin mode to use the primary Reporter-write path.\n'
+      );
+      process.exit(1);
+    }
+    let body;
+    try {
+      body = fs.readFileSync(0, 'utf8');
+    } catch (err) {
+      process.stderr.write(`Error: failed to read stdin: ${err.message}\n`);
+      process.exit(1);
+    }
+    if (!body || body.trim().length === 0) {
+      process.stderr.write('Error: empty report body — refusing to write.\n');
+      process.exit(1);
+    }
+    atomicWriteString(reportFile, body);
+    process.stdout.write(
+      `Step 4.5 (stdin mode): REPORT.md written (${body.length} bytes) at ${reportFile}\n`
+    );
+    // Fall through to Step 5 + 6 unconditionally — stdin mode implies ack.
+  } else if (!assumeAck) {
     if (!fs.existsSync(reportFile)) {
       process.stdout.write(
         '\nWaiting for Reporter to produce REPORT.md...\n' +

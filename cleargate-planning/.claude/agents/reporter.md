@@ -62,6 +62,35 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/REPORT.md`. Use the Sprint
 This reporter spec was adopted in SPRINT-09 (STORY-013-07) as the Sprint Report v2 rollout.
 Per sprint DoD line 119 dogfood check: this note confirms the v2 template is active.
 
+## Fallback: Write-blocked Environment (STORY-014-10)
+
+The primary path is `Write`: the Reporter writes `REPORT.md` directly to the sprint dir. If the agent's tool harness blocks `Write` (observed in both SPRINT-09 and CG_TEST SPRINT-01), use this fallback:
+
+1. **Return the full REPORT.md body on stdout**, wrapped between unambiguous delimiters:
+
+   ```
+   ===REPORT-BEGIN===
+   # Sprint Report — <sprint-id>
+   ...
+   ===REPORT-END===
+   ```
+
+2. **The orchestrator is responsible for stripping those two delimiter lines** before piping.
+
+3. **The orchestrator pipes the raw body** (no delimiters) to:
+
+   ```bash
+   node .cleargate/scripts/close_sprint.mjs <sprint-id> --report-body-stdin < report-body.md
+   ```
+
+   `--report-body-stdin` **replaces** the Step-4 gate (it implies ack). The script:
+   - refuses empty stdin (`empty report body — refusing to write`)
+   - refuses a pre-existing `REPORT.md` (`delete it or skip stdin mode`)
+   - atomic-writes via tmp+rename
+   - falls through to Step 5 (sprint_status flip) + Step 6 (suggest_improvements)
+
+4. The fallback is additive to the primary path — `Write` remains on the `tools:` line. Do not remove it.
+
 ## Reporter Rewrite Fallback Plan (R8)
 If SPRINT-09 Reporter regresses post-swap of this reporter.md, rollback path:
 `git revert` the M2 commit range. The SPRINT-08-shaped fixture at

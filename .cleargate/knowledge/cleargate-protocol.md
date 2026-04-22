@@ -106,6 +106,8 @@ There are three hard stops. You halt at each one and do not proceed until the hu
 
 Under `execution_mode: "v1"` this rule is **advisory only** — the orchestrator surfaces the ambiguity level but does not block bounce start.
 
+**v2 story-file assertion:** Additionally for v2 sprints, `cleargate sprint init` asserts every story in §1 Consolidated Deliverables has a `pending-sync/STORY-*.md` file before writing `state.json`; missing files block init with an enumerated stderr list. Under v1 the assertion runs but only warns (does not block). The assertion is also available standalone: `node .cleargate/scripts/assert_story_files.mjs <sprint-file-path>`.
+
 ### Gate 3 — Push Gate
 
 - **Never call `cleargate_push_item` on a file where `approved: false`.**
@@ -757,6 +759,44 @@ The orchestrator may reformat an entry that violates the format before appending
 
 SPRINT-09 runs under `execution_mode: v1`. From STORY-013-06 merge onwards, the orchestrator applies the §18.2 processing loop manually as a dogfood check even though the rule is informational. This is recorded in the SPRINT-09 sprint plan (line 121).
 
+### §18.6 PreToolUse hook enforcement (v2)
+
+Under `execution_mode: v2`, the `pending-task-sentinel.sh` PreToolUse hook automatically enforces the flashcard gate before every Task (subagent) dispatch. This is implemented by STORY-014-03.
+
+**Hash-marker convention:**
+
+Each `flashcards_flagged` card is identified by the first 12 hexadecimal characters of its SHA-1 hash (computed with `shasum -a 1`):
+
+```bash
+HASH="$(printf '%s' "<card text>" | shasum -a 1 | cut -c1-12)"
+```
+
+Hash stability: the same card string always produces the same hash. The hash is computed over the exact card string as it appears in the report's `flashcards_flagged` list (after stripping surrounding quotes).
+
+**Processed marker:**
+
+To mark a card as processed (approved or rejected by the orchestrator), touch the marker file:
+
+```bash
+touch .cleargate/sprint-runs/<sprint-id>/.processed-<hash>
+```
+
+The marker files are gitignored via the existing `.cleargate/sprint-runs/` gitignore rule and serve only as local bookkeeping.
+
+**Enforcement logic:**
+
+1. The hook globs `SPRINT_DIR/STORY-*-dev.md` and `SPRINT_DIR/STORY-*-qa.md` (flat layout — no `reports/` subdirectory).
+2. For each report file, it parses the `flashcards_flagged:` YAML list (inline `[]` and block `- "text"` forms both supported).
+3. For each card, it computes the 12-char SHA-1 hash and checks for the `.processed-<hash>` marker in `SPRINT_DIR`.
+4. If any card is unprocessed:
+   - **v2**: exits non-zero (blocks Task spawn) with stderr listing each unprocessed card and the `touch` command hint.
+   - **v1**: prints an advisory warning to stderr and exits 0 (does not block).
+5. If `flashcards_flagged: []` or no report files exist, the gate passes immediately.
+
+**Bypass:**
+
+Set `SKIP_FLASHCARD_GATE=1` in the environment to bypass the gate entirely (both v1 and v2). This bypass is intended for CI and bootstrap scenarios where the hook runs without sprint context. Bypasses should be disabled once M1 is closed; the orchestrator tracks this in the sprint §4 Execution Log.
+
 ---
 
 ## 19. Execution Mode Routing (v2)
@@ -796,3 +836,50 @@ and exit 0. No subprocess is spawned. This preserves backward compatibility for 
 ### §19.5 Default value
 
 The default value is `"v1"`. All sprint plans generated from the Sprint Plan Template default to `execution_mode: "v1"` until explicitly flipped. The flag should only be set to `"v2"` after all M2 EPIC-013 stories have shipped and the Architect has completed a Sprint Design Review (§15.1).
+
+---
+
+## 20. File-Surface Contract (v2)
+
+Under `execution_mode: v2`, each story's §3.1 "Context & Files" table is the **authoritative file surface** for that story's commit. The pre-commit hook enforces this contract automatically.
+
+### §20.1 Rule
+
+A Developer agent MUST NOT stage and commit any file not declared in the active story's §3.1 table, unless that file matches a whitelist entry in `.cleargate/scripts/surface-whitelist.txt`.
+
+Off-surface edits require one of:
+1. A CR:scope-change item approved before the commit, OR
+2. An updated §3.1 table committed in the same story (self-amending surface — rare, must be explicitly justified in the commit message).
+
+### §20.2 Hook mechanics
+
+The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/hooks/pre-commit-surface-gate.sh` and dispatched from `.claude/hooks/pre-commit.sh`. The dispatcher is symlinked to `.git/hooks/pre-commit`.
+
+- Under v2: off-surface files cause a non-zero exit — the commit is blocked.
+- Under v1: the hook prints a warning but exits 0 (advisory only).
+- `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
+
+### §20.3 §3.1 table contract
+
+The §3.1 table in `story.md` template uses a two-column `| Item | Value |` pipe table. The parser:
+- Scans between the `### 3.1` heading and the next `### ` heading.
+- Only processes rows where the Value cell contains `.` or `/` (path-shaped values).
+- Strips backticks from values.
+- Splits on `, ` to handle multiple paths in one cell.
+- Ignores header and separator rows.
+
+Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped.
+
+### §20.4 Whitelist
+
+`.cleargate/scripts/surface-whitelist.txt` declares auto-generated files that are always admitted regardless of story surface. Seed entries include: `cleargate-planning/MANIFEST.json`, `.cleargate/hook-log/*`, `.cleargate/sprint-runs/**/token-ledger.jsonl`, `.cleargate/sprint-runs/**/.pending-task-*.json`, `.cleargate/sprint-runs/**/state.json`.
+
+### §20.5 Install (dogfood)
+
+On `cleargate init`, the scaffold automatically installs the `.git/hooks/pre-commit` symlink. For existing dogfood repositories, install once by hand:
+
+```bash
+ln -sf ../../.claude/hooks/pre-commit.sh .git/hooks/pre-commit
+```
+
+Log this step in the sprint §4 Execution Log.
