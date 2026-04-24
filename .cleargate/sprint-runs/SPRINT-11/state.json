@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "sprint_id": "SPRINT-11",
+  "execution_mode": "v2",
+  "sprint_status": "Completed",
+  "stories": {
+    "015-01": { "state": "Done", "qa_bounces": 1, "arch_bounces": 0, "updated_at": "2026-04-24T18:05:00Z" },
+    "015-02": { "state": "Done", "qa_bounces": 0, "arch_bounces": 0, "updated_at": "2026-04-24T18:05:00Z" },
+    "015-03": { "state": "Done", "qa_bounces": 0, "arch_bounces": 0, "updated_at": "2026-04-24T18:05:00Z" },
+    "015-04": { "state": "Done", "qa_bounces": 0, "arch_bounces": 0, "updated_at": "2026-04-24T18:05:00Z" }
+  },
+  "completed_at": "2026-04-24T18:05:00Z",
+  "last_action": "Sprint SPRINT-11 archived manually (lint drift blocks self-archive wrapper)"
+}

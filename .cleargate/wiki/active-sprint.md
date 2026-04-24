@@ -18,7 +18,7 @@ _No active sprint found._
 
 - [[SPRINT-10]] — status: Planned
 
-- [[SPRINT-11]] — status: Planned
+- [[SPRINT-11]] — status: Completed
 
 
 

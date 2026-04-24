@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-015"
 parent: ""
 children: []
-status: "Approved"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-015_Wiki_Index_Hygiene_And_Scale.md"
-last_ingest: "2026-04-24T14:05:35.160Z"
-last_ingest_commit: "4539ed30a8a02cdc41c124cc8dca2fa3633374b7"
+raw_path: ".cleargate/delivery/archive/EPIC-015_Wiki_Index_Hygiene_And_Scale.md"
+last_ingest: "2026-04-24T14:15:04.947Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 

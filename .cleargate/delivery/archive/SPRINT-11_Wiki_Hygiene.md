@@ -1,7 +1,7 @@
 ---
 sprint_id: "SPRINT-11"
 source_tool: "local"
-status: "Planned"
+status: "Completed"
 start_date: null
 end_date: null
 activated_at: null

@@ -6,9 +6,9 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 17 | 0 | 11 |
-| Stories | 111 | 0 | 58 |
-| Sprints | 11 | 0 | 7 |
+| Epics | 17 | 0 | 12 |
+| Stories | 111 | 0 | 62 |
+| Sprints | 11 | 0 | 8 |
 | Proposals | 11 | 0 | 7 |
 | CRs | 1 | 0 | 0 |
 | Bugs | 0 | 0 | 0 |
@@ -45,6 +45,8 @@ _No active epics._
 
 - [[EPIC-013]] (epics) — Completed
 
+- [[EPIC-015]] (epics) — Completed
+
 - [[PROPOSAL-001]] (proposals) — Abandoned
 
 - [[PROPOSAL-002]] (proposals) — Abandoned
@@ -72,6 +74,8 @@ _No active epics._
 - [[SPRINT-08]] (sprints) — Completed
 
 - [[SPRINT-09]] (sprints) — Completed
+
+- [[SPRINT-11]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 
@@ -188,5 +192,13 @@ _No active epics._
 - [[STORY-013-08]] (stories) — Done
 
 - [[STORY-013-09]] (stories) — Done
+
+- [[STORY-015-01]] (stories) — Completed
+
+- [[STORY-015-02]] (stories) — Completed
+
+- [[STORY-015-03]] (stories) — Completed
+
+- [[STORY-015-04]] (stories) — Completed
 
 
