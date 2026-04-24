@@ -126,6 +126,49 @@ flowchart LR
 
 ---
 
+## Repo layout
+
+```
+.cleargate/              ← raw work items + orchestration artifacts
+  FLASHCARD.md          ← append-only lesson log (READ BEFORE WORK)
+  knowledge/
+    cleargate-protocol.md  ← delivery protocol (non-negotiable rules)
+  templates/            ← blueprints: proposal/epic/story/CR/Bug/Sprint Plan
+  delivery/
+    INDEX.md            ← curated roadmap table (epic/sprint map)
+    pending-sync/       ← drafts + in-flight items (sprints, epics, stories, proposals)
+    archive/            ← items pushed to PM tool / completed
+  wiki/                 ← compiled awareness layer
+  sprint-runs/<id>/
+    plans/M<N>.md       ← Architect output per milestone
+    token-ledger.jsonl  ← auto-populated by SubagentStop hook
+    REPORT.md           ← Reporter output at sprint end
+  hook-log/             ← raw hook stdout/stderr
+
+cleargate-planning/     ← canonical scaffold source (what `cleargate init` installs)
+  CLAUDE.md             ← the injection spec
+  .claude/{agents,skills,hooks,settings.json}
+  .cleargate/{FLASHCARD.md,knowledge,templates,delivery,config.example.yml}/
+
+cleargate-cli/          ← the `cleargate` npm package source
+mcp/                    ← MCP server (nested separate git repo)
+admin/                  ← admin tooling stub
+
+.claude/                ← LIVE dogfood instance (gitignored) — Claude Code reads here
+  agents/               ← four-agent role definitions + wiki subagents
+  skills/flashcard/
+  hooks/*.sh
+  settings.json
+```
+
+## Stack versions (this repo's own)
+
+Node 24 LTS · TypeScript ^5.8 · Fastify ^5.8 · Drizzle 0.45.2 · Zod ^4.3 · Postgres 18 · Redis 8 · SvelteKit ^2 (Svelte 5) · Tailwind ^4.2 · DaisyUI ^5.5.
+
+Note: ClearGate imposes none of these on downstream consumers. This list documents the meta-repo's own toolchain; downstream projects pick whatever stack they run and configure gate commands via `.cleargate/config.yml` accordingly.
+
+---
+
 ## Status
 
 ClearGate is at **v0.1-alpha** (not yet on npm — manual publish pending). The framework is dogfooded against itself: this repo's planning lives in `.cleargate/delivery/`, executed through the same four-agent loop the framework ships.

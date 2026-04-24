@@ -58,16 +58,18 @@ After `cleargate init` completes, ask Claude Code to begin. The session will rea
 
 6. **Run the Developer, QA, and Reporter agents** for each Story in sequence. Each Developer agent commits exactly one Story; QA re-verifies independently; Reporter writes the retrospective at sprint end.
 
-For gates configuration (what command `cleargate gate test` runs in your project), copy `.cleargate/config.example.yml` to `.cleargate/config.yml` and fill in your stack's commands:
+For gates configuration (what command `cleargate gate test` runs in your project), create `.cleargate/config.yml` at your repo root. `cleargate init` installs a documented example template at `.cleargate/config.example.yml` alongside — copy it and edit, or start from the skeleton below:
 
 ```yaml
-# .cleargate/config.yml — example for a Node project
+# .cleargate/config.yml — adjust commands to your stack
 gates:
-  precommit: "npm run typecheck && npm test"
+  precommit: "npm run typecheck && npm test"   # Node example
   test: "npm test"
   typecheck: "npm run typecheck"
   lint: "npm run lint"
 ```
+
+If a gate key is absent, `cleargate gate <name>` prints a friendly "not configured" message and exits 0 (non-blocking). Pass `--strict` to flip that to exit 1.
 
 ---
 
