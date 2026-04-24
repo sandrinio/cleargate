@@ -1,7 +1,7 @@
 ---
 story_id: STORY-008-01
 parent_epic_ref: EPIC-008
-status: Draft
+status: "Abandoned"
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md

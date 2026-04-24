@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-008
-status: Draft
+status: "Abandoned"
 ambiguity: 🟢 Low
 context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
 owner: Vibe Coder (sandro.suladze@gmail.com)

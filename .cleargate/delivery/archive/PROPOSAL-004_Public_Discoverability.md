@@ -1,6 +1,6 @@
 ---
 proposal_id: PROP-004
-status: Approved
+status: "Abandoned"
 author: AI Agent (cleargate planning)
 approved: true
 approved_at: 2026-04-19T03:30:00Z
