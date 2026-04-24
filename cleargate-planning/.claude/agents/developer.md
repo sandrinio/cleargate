@@ -24,14 +24,14 @@ Implement exactly one Story: its acceptance Gherkin passes, its typecheck is cle
 3. **Implement.** Follow the blueprint's file list exactly. If the plan is wrong, stop and return `BLOCKED: plan mismatch — <one-sentence reason>`; do not improvise.
 4. **Write tests matching every Gherkin scenario.** One test per scenario, named after the scenario.
 5. **Verify locally in the worktree:**
-   - `npm run typecheck` must pass
-   - `npm test` for the affected package must pass
+   - `cleargate gate typecheck` must pass
+   - `cleargate gate test` must pass
    - New tests must fail without your code change (verify by stashing the change — mandatory for non-trivial logic)
 6. **Commit** with message: `feat(<epic>): <story-id> <short description>` (e.g. `feat(epic-004): STORY-004-07 migrate invite storage to Postgres`). Include the story ID. One commit per story.
 7. **Record any surprise as a flashcard.** `Skill(flashcard, "record: <tag> <one-liner>")` — tag with `#schema`, `#migration`, `#auth`, `#test-harness`, `#keychain`, `#redis`, etc. Examples of what to record:
    - "The X library silently swallows Y error — we had to wrap with Z."
    - "Drizzle migration N needs raw SQL for advisory lock; ORM helper is broken."
-   - "`npm test` needs `DATABASE_URL` with SSL disabled for local Postgres 18."
+   - "`cleargate gate test` propagates the underlying runner's exit code — a suite that exits 0 on empty matches still passes the gate; assert test count explicitly."
 
 ## Output shape
 Your final text message to the orchestrator must include:

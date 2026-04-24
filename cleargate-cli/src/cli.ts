@@ -10,6 +10,7 @@ import { wikiQueryHandler } from './commands/wiki-query.js';
 import { wikiAuditStatusHandler } from './commands/wiki-audit-status.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
+import { gateRunHandler } from './commands/gate-run.js';
 import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
 import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
 import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
@@ -172,6 +173,14 @@ gate
   .option('--sprint <id>', 'sprint ID for execution_mode lookup')
   .action((worktree: string, branch: string, opts: { sprint?: string }) => {
     gateArchHandler({ worktree, branch }, { sprintId: opts.sprint });
+  });
+
+gate
+  .command('<name>')
+  .description('run a configured gate command (precommit | test | typecheck | lint)')
+  .option('--strict', 'exit non-zero if gate not configured')
+  .action((name: string, opts: { strict?: boolean }) => {
+    gateRunHandler(name, { strict: opts.strict === true ? true : undefined });
   });
 
 const sprint = program

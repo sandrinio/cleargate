@@ -1,0 +1,11 @@
+# ClearGate per-repo configuration.
+# See cleargate-planning/.cleargate/config.example.yml for the full schema.
+
+wiki:
+  index_token_ceiling: 8000
+
+gates:
+  precommit: "npm run typecheck --workspace=cleargate-cli && npm test"
+  test: "npm test --workspace=cleargate-cli"
+  typecheck: "npm run typecheck --workspace=cleargate-cli"
+  lint: "npx cleargate wiki lint"
