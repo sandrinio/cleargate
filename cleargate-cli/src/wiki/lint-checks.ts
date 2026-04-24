@@ -3,7 +3,7 @@
  * One exported function per category so they can be unit-tested in isolation.
  * Categories must use these exact strings (subagent + CLI agree):
  *   orphan, repo-mismatch, stale-commit, missing-ingest, broken-backlink,
- *   invalidated-citation, excluded-path-ingested, pagination-needed
+ *   invalidated-citation, excluded-path-ingested, pagination-needed, index-budget
  */
 
 import * as fs from 'node:fs';
@@ -467,4 +467,42 @@ export function discoverPlainTextMentions(pages: LoadedWikiPage[], repoRoot: str
   }
 
   return suggestions;
+}
+
+/**
+ * Check: index-budget — wiki/index.md approximate token count exceeds configured ceiling.
+ * Token heuristic: Math.round(bytes / 4). Returns null when index.md is absent.
+ * This check is a structural check, not a per-page check, so it takes repoRoot directly.
+ */
+export interface IndexBudgetResult {
+  /** Present when tokens > ceiling. Push this into findings array. */
+  finding: LintFinding | null;
+  /** Always populated when index.md exists; undefined when file absent. */
+  tokens?: number;
+  ceiling?: number;
+}
+
+export function checkIndexBudget(repoRoot: string, indexTokenCeiling: number): IndexBudgetResult {
+  const indexPath = path.join(repoRoot, '.cleargate', 'wiki', 'index.md');
+
+  if (!fs.existsSync(indexPath)) {
+    return { finding: null };
+  }
+
+  const bytes = fs.statSync(indexPath).size;
+  const tokens = Math.round(bytes / 4);
+  const ceiling = indexTokenCeiling;
+
+  if (tokens > ceiling) {
+    return {
+      finding: {
+        category: 'index-budget',
+        line: `index-budget: wiki/index.md exceeds token ceiling: ${tokens} > ${ceiling}. Shard or prune (see EPIC-015).`,
+      },
+      tokens,
+      ceiling,
+    };
+  }
+
+  return { finding: null, tokens, ceiling };
 }
