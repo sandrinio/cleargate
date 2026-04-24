@@ -1,7 +1,7 @@
 ---
 story_id: STORY-015-03
 parent_epic_ref: EPIC-015
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-015_Wiki_Index_Hygiene_And_Scale.md
 actor: Pre-push gate (human operator running `cleargate wiki lint`)

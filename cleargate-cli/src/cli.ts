@@ -7,6 +7,7 @@ import { wikiBuildHandler } from './commands/wiki-build.js';
 import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
+import { wikiAuditStatusHandler } from './commands/wiki-audit-status.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
 import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
@@ -127,6 +128,16 @@ wiki
     });
   });
 
+wiki
+  .command('audit-status')
+  .description('detect raw-item status/location drift; --fix applies safe corrections')
+  .option('--fix', 'apply safe status corrections to frontmatter')
+  .option('--yes', 'required together with --fix to confirm writes')
+  .option('--quiet', 'suppress diff output')
+  .action(async (opts: { fix?: boolean; yes?: boolean; quiet?: boolean }) => {
+    await wikiAuditStatusHandler(opts);
+  });
+
 const gate = program
   .command('gate')
   .description('evaluate readiness gates for a ClearGate work-item file');
@@ -192,13 +203,13 @@ sprint
   .command('archive <sprint-id>')
   .description('archive a completed sprint — move pending-sync files, clear .active, merge + delete sprint branch')
   .option('--dry-run', 'print the archive plan without making any changes')
-  .action((sprintId: string, opts: { dryRun?: boolean }) => {
+  .action(async (sprintId: string, opts: { dryRun?: boolean }) => {
     // FLASHCARD #cli #commander #optional-key: omit key when undefined
     const handlerOpts: { sprintId: string; dryRun?: boolean } = { sprintId };
     if (opts.dryRun === true) {
       handlerOpts.dryRun = true;
     }
-    sprintArchiveHandler(handlerOpts);
+    await sprintArchiveHandler(handlerOpts);
   });
 
 const story = program

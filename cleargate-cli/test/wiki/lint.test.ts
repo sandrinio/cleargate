@@ -546,7 +546,7 @@ describe('Scenario 9: Suggest mode', () => {
 
 // ─── Scenario 10: Literal-substring contract test (subagent ↔ CLI contract) ──
 
-describe('Scenario 10: Literal-substring contract test — all 8 category strings', () => {
+describe('Scenario 10: Literal-substring contract test — all 9 category strings', () => {
   let fixture: LintFixture;
   const STORED_SHA = 'aaaa0000aaaa0000aaaa0000aaaa0000aaaa0000';
   const CURRENT_SHA = 'bbbb1111bbbb1111bbbb1111bbbb1111bbbb1111';
@@ -747,6 +747,16 @@ describe('Scenario 10: Literal-substring contract test — all 8 category string
       gitRunner: () => CURRENT_SHA + '\n',
     });
     expect(result.stdout).toContain('pagination-needed:');
+  });
+
+  it('stdout contains literal "index-budget:" string (STORY-015-03, 9th category)', async () => {
+    // Write an over-ceiling index.md to trigger the new check
+    const indexPath = path.join(fixture.root, '.cleargate', 'wiki', 'index.md');
+    fs.writeFileSync(indexPath, 'a'.repeat(36000), 'utf8'); // 9000 tokens > 8000 default
+    const result = await runLint(fixture, {
+      gitRunner: () => CURRENT_SHA + '\n',
+    });
+    expect(result.stdout).toContain('index-budget:');
   });
 });
 
