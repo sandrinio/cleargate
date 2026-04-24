@@ -291,6 +291,7 @@ export async function sprintArchiveHandler(
   opts: { sprintId: string; dryRun?: boolean },
   cli?: SprintCliOptions,
 ): Promise<void> {
+  try {
   const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
   const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
   const exitFn: (code: number) => never = cli?.exit ?? defaultExit;
@@ -564,4 +565,13 @@ export async function sprintArchiveHandler(
       (mergeSha ? `, merge SHA: ${mergeSha}` : ''),
   );
   return exitFn(0);
+  } catch (e) {
+    // The exitFn seam throws `Error("exit:<n>")` as a synchronous control-flow
+    // shortcut so the handler bails without running further steps. Under an
+    // async handler that escapes as an unhandled rejection even when tests
+    // `getCode()` confirms the expected exit. Swallow the sentinel here; any
+    // other error re-throws.
+    if (e instanceof Error && /^exit:\d+$/.test(e.message)) return;
+    throw e;
+  }
 }
