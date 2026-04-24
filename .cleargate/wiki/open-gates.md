@@ -59,14 +59,4 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[STORY-014-10]] — status: Ready
 
-- [[STORY-018-01]] — status: Ready
-
-- [[STORY-018-02]] — status: Ready
-
-- [[STORY-018-03]] — status: Ready
-
-- [[STORY-018-04]] — status: Ready
-
-- [[STORY-018-05]] — status: Ready
-
 

@@ -12,12 +12,9 @@
 - [[EPIC-014]] (epic) — Approved
   - STORY-014-xx (10 stories) — 10 Ready
 - [[EPIC-016]] (epic) — Draft
-- [[EPIC-018]] (epic) — Approved
-  - STORY-018-xx (5 stories) — 5 Ready
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-10]] (sprint) — Planned
-- [[SPRINT-12]] (sprint) — Planned
 - [[PROPOSAL-007]] (proposal) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
@@ -50,7 +47,7 @@
 
 ## Archive
 
-- Epics: 10 Completed · 2 Abandoned · [expand](archive/epics.md)
-- Sprints: 8 Completed · [expand](archive/sprints.md)
+- Epics: 11 Completed · 2 Abandoned · [expand](archive/epics.md)
+- Sprints: 9 Completed · [expand](archive/sprints.md)
 - Proposals: 7 Abandoned · [expand](archive/proposals.md)
-- Stories: 40 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
+- Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)

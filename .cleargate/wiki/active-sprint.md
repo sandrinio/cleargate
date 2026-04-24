@@ -20,7 +20,7 @@ _No active sprint found._
 
 - [[SPRINT-11]] — status: Completed
 
-- [[SPRINT-12]] — status: Planned
+- [[SPRINT-12]] — status: Completed
 
 
 
