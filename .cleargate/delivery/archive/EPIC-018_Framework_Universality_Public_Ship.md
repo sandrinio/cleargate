@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-018
-status: Approved
+status: Completed
 ambiguity: 🟢 Low
 approved_at: 2026-04-24T00:00:00Z
 approved_by: sandro

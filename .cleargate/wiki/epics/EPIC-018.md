@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-018"
 parent: ""
 children: []
-status: "Approved"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-018_Framework_Universality_Public_Ship.md"
-last_ingest: "2026-04-24T19:52:18.291Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-018_Framework_Universality_Public_Ship.md"
+last_ingest: "2026-04-24T22:02:08.603Z"
+last_ingest_commit: "f37cfb4b828cd761cc330b30cc70029d692e1ff7"
 repo: "planning"
 ---
 

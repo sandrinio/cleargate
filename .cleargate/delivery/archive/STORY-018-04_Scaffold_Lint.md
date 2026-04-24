@@ -1,7 +1,7 @@
 ---
 story_id: STORY-018-04
 parent_epic_ref: EPIC-018
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-018_Framework_Universality_Public_Ship.md
 actor: CI pipeline / scaffold maintainer
