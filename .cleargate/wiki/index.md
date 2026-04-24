@@ -22,6 +22,8 @@
 | [[EPIC-012]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-012_Full_Stack_Sync_Coverage.md |
 | [[EPIC-013]] | epic | Completed | .cleargate/delivery/archive/EPIC-013_Execution_Phase_v2.md |
 | [[EPIC-014]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-014_Execution_V2_Polish.md |
+| [[EPIC-015]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-015_Wiki_Index_Hygiene_And_Scale.md |
+| [[EPIC-016]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-016_Upgrade_UX.md |
 
 ## Stories
 
@@ -132,6 +134,10 @@
 | [[STORY-014-08]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-08_Sprint_Archive_Wrapper.md |
 | [[STORY-014-09]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-09_Architect_Numbering_And_Split_Signal.md |
 | [[STORY-014-10]] | story | Ready | .cleargate/delivery/pending-sync/STORY-014-10_Reporter_Write_Seam.md |
+| [[STORY-015-01]] | story | Ready | .cleargate/delivery/pending-sync/STORY-015-01_Hierarchical_Index_Rendering.md |
+| [[STORY-015-02]] | story | Ready | .cleargate/delivery/pending-sync/STORY-015-02_Status_Audit_CLI.md |
+| [[STORY-015-03]] | story | Ready | .cleargate/delivery/pending-sync/STORY-015-03_Index_Token_Budget_Lint.md |
+| [[STORY-015-04]] | story | Ready | .cleargate/delivery/pending-sync/STORY-015-04_Abandoned_Status_And_Sprint_Close_Stamp.md |
 
 ## Sprints
 
@@ -145,6 +151,7 @@
 | [[SPRINT-08]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-08_End_To_End_Production_Readiness.md |
 | [[SPRINT-09]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-09_Execution_Phase_v2.md |
 | [[SPRINT-10]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-10_Execution_V2_Polish.md |
+| [[SPRINT-11]] | sprint | Planned | .cleargate/delivery/pending-sync/SPRINT-11_Wiki_Hygiene.md |
 
 ## Proposals
 
