@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-11"
 parent: ""
 children: []
-status: "Planned"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-11_Wiki_Hygiene.md"
-last_ingest: "2026-04-24T14:05:35.160Z"
-last_ingest_commit: "4539ed30a8a02cdc41c124cc8dca2fa3633374b7"
+raw_path: ".cleargate/delivery/archive/SPRINT-11_Wiki_Hygiene.md"
+last_ingest: "2026-04-24T14:15:04.947Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 
