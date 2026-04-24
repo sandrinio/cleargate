@@ -65,8 +65,6 @@ _No active epics._
 
 - [[EPIC-016]] — status: Draft
 
-- [[EPIC-017]] — status: Draft
-
 
 
 ## Shipped Epics
