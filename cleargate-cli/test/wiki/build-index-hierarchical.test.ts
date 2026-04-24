@@ -404,6 +404,38 @@ describe('Scenario 5 (Gherkin): Idempotent rebuild', () => {
   });
 });
 
+// ─── Golden-file: matches committed expected-index-hierarchical.md ───────────
+// DoD §4.1 — one E2E acceptance test comparing against a committed golden file.
+// Uses the same Scenario 5 fixture (EPIC-001..003 + 3 stories + SPRINT-01 + PROPOSAL-001).
+
+describe('golden-file: matches committed expected-index-hierarchical.md', () => {
+  let fixture: Fixture;
+
+  const GOLDEN_PATH = path.resolve(__testDirname, 'fixtures/expected-index-hierarchical.md');
+
+  beforeEach(() => {
+    fixture = buildFixture([
+      { subdir: 'pending-sync', filename: 'EPIC-001_Active.md',    content: epicContent('EPIC-001', 'Ready') },
+      { subdir: 'pending-sync', filename: 'EPIC-002_Active.md',    content: epicContent('EPIC-002', 'Draft') },
+      { subdir: 'archive',      filename: 'EPIC-003_Done.md',      content: epicContent('EPIC-003', 'Completed') },
+      { subdir: 'pending-sync', filename: 'STORY-001-01_S.md',     content: storyContent('STORY-001-01', 'EPIC-001', 'Ready') },
+      { subdir: 'pending-sync', filename: 'STORY-001-02_S.md',     content: storyContent('STORY-001-02', 'EPIC-001', 'Draft') },
+      { subdir: 'pending-sync', filename: 'STORY-001-03_S.md',     content: storyContent('STORY-001-03', 'EPIC-001', 'Ready') },
+      { subdir: 'pending-sync', filename: 'SPRINT-01_Active.md',   content: sprintContent('SPRINT-01', 'Active') },
+      { subdir: 'pending-sync', filename: 'PROPOSAL-001_Draft.md', content: proposalContent('PROPOSAL-001', 'Draft') },
+    ]);
+  });
+
+  afterEach(() => fixture.cleanup());
+
+  it('golden-file: matches committed expected-index-hierarchical.md', async () => {
+    await runBuild(fixture);
+    const actual = readIndex(fixture);
+    const expected = fs.readFileSync(GOLDEN_PATH, 'utf8');
+    expect(actual).toBe(expected);
+  });
+});
+
 // ─── Additional: Empty delivery → empty-state format ─────────────────────────
 
 describe('Additional: Empty delivery uses hierarchical empty-state format', () => {
