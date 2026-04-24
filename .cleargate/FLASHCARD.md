@@ -4,6 +4,11 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-24 · #wiki #index #worktree · worktree npm ci needed for typecheck — node_modules not shared with parent worktree; run `npm ci --workspace <pkg>` from worktree root before first typecheck.
+2026-04-24 · #audit-status #convergence · Rule C fix (sprint→Completed) on pending-sync sprints creates a new Rule B violation; E2E convergence tests must use only Rule A items or archive-resident sprints to guarantee exit-0 second run.
+2026-04-24 · #test-location #wiki #cli · wiki command tests live at `cleargate-cli/test/wiki/<cmd>.test.ts` (per-capability dir), NOT `test/commands/wiki-<cmd>.test.ts` — story bodies citing the commands/ path are wrong; co-locate new wiki tests alongside `build.test.ts` + `_fixture.ts`.
+2026-04-24 · #frontmatter #write-back · editing a single frontmatter field: read raw bytes, regex-replace the target line inside first `---` block; do NOT round-trip via parseFrontmatter+re-serialize — parse-frontmatter.ts strips one leading blank from body (L31-33), so write-back loses bytes.
+2026-04-24 · #wiki #bucket-inference · sprint/epic/proposal discrimination is via filename prefix through deriveBucket() (scan.ts:60), NOT frontmatter keys; existing fixture helpers use `story_id` even for sprint/epic files (test/wiki/_fixture.ts:55-100) — classify via `item.bucket`.
 2026-04-21 · #vitest #json #ci · vitest JSON via --outputFile beats stdout parsing — subprocess tests contaminate stdout; write to file then read atomically.
 2026-04-21 · #test-harness #hooks #sed · prefer env injection over sed-surgery for hook tests — sed breaks when hook variable assignment form changes (e.g. adding `${VAR:-default}`); use env override instead.
 2026-04-21 · #cli #sprint-close #assume-ack · `cleargate sprint close` CLI handler doesn't pass through `--assume-ack` to `close_sprint.mjs` — the flag exists on the script (flips state to Completed + runs suggest_improvements), but the CLI wrapper exits at Step 4 "waiting for Reporter". Orchestrator must invoke `run_script.sh close_sprint.mjs <id> --assume-ack` directly post-Reporter. Wire the flag through the CLI option in commands/sprint.ts.
