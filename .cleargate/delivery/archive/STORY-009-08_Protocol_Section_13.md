@@ -1,7 +1,7 @@
 ---
 story_id: STORY-009-08
 parent_epic_ref: EPIC-009
-status: Draft
+status: "Completed"
 ambiguity: 🟢 Low
 complexity_label: L1
 context_source: PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md

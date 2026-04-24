@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-001
-status: Ready
+status: "Abandoned"
 ambiguity: 🟢 Low
 context_source: PROPOSAL-001_Document_Metadata.md
 owner: Vibe Coder (ssuladze@exadel.com)
