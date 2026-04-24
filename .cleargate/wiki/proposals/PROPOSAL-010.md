@@ -3,11 +3,11 @@ type: proposal
 id: "PROPOSAL-010"
 parent: ""
 children: []
-status: "Approved"
+status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-010_Execution_Phase_v2.md"
-last_ingest: "2026-04-24T08:39:46.064Z"
-last_ingest_commit: "e554d06f7f94f1755c5c07ea5637b0024c3cbe65"
+last_ingest: "2026-04-24T08:58:07.235Z"
+last_ingest_commit: "ba28ba23a92e29313a183ff10202aeb98b0a3c69"
 repo: "planning"
 ---
 

@@ -25,7 +25,7 @@ _No active epics._
 
 - [[EPIC-000]] (epics) — Completed
 
-- [[EPIC-001]] (epics) — Ready
+- [[EPIC-001]] (epics) — Abandoned
 
 - [[EPIC-002]] (epics) — Completed
 
@@ -37,27 +37,27 @@ _No active epics._
 
 - [[EPIC-007]] (epics) — Completed
 
-- [[EPIC-008]] (epics) — Draft
+- [[EPIC-008]] (epics) — Abandoned
 
-- [[EPIC-009]] (epics) — Draft
+- [[EPIC-009]] (epics) — Completed
 
-- [[EPIC-011]] (epics) — Ready
+- [[EPIC-011]] (epics) — Completed
 
 - [[EPIC-013]] (epics) — Completed
 
-- [[PROPOSAL-001]] (proposals) — Approved
+- [[PROPOSAL-001]] (proposals) — Abandoned
 
-- [[PROPOSAL-002]] (proposals) — Approved
+- [[PROPOSAL-002]] (proposals) — Abandoned
 
-- [[PROPOSAL-003]] (proposals) — Approved
+- [[PROPOSAL-003]] (proposals) — Abandoned
 
-- [[PROPOSAL-004]] (proposals) — Approved
+- [[PROPOSAL-004]] (proposals) — Abandoned
 
-- [[PROPOSAL-005]] (proposals) — Approved
+- [[PROPOSAL-005]] (proposals) — Abandoned
 
-- [[PROPOSAL-006]] (proposals) — Approved
+- [[PROPOSAL-006]] (proposals) — Abandoned
 
-- [[PROPOSAL-010]] (proposals) — Approved
+- [[PROPOSAL-010]] (proposals) — Abandoned
 
 - [[SPRINT-01]] (sprints) — Completed
 
@@ -81,17 +81,17 @@ _No active epics._
 
 - [[STORY-000-04]] (stories) — Completed
 
-- [[STORY-001-01]] (stories) — Draft
+- [[STORY-001-01]] (stories) — Abandoned
 
-- [[STORY-001-02]] (stories) — Draft
+- [[STORY-001-02]] (stories) — Abandoned
 
-- [[STORY-001-03]] (stories) — Draft
+- [[STORY-001-03]] (stories) — Abandoned
 
-- [[STORY-001-04]] (stories) — Draft
+- [[STORY-001-04]] (stories) — Abandoned
 
-- [[STORY-001-05]] (stories) — Draft
+- [[STORY-001-05]] (stories) — Abandoned
 
-- [[STORY-001-06]] (stories) — Draft
+- [[STORY-001-06]] (stories) — Abandoned
 
 - [[STORY-002-01]] (stories) — Completed
 
@@ -133,43 +133,43 @@ _No active epics._
 
 - [[STORY-007-03]] (stories) — Completed
 
-- [[STORY-008-01]] (stories) — Draft
+- [[STORY-008-01]] (stories) — Abandoned
 
-- [[STORY-008-02]] (stories) — Draft
+- [[STORY-008-02]] (stories) — Abandoned
 
-- [[STORY-008-03]] (stories) — Draft
+- [[STORY-008-03]] (stories) — Abandoned
 
-- [[STORY-008-04]] (stories) — Draft
+- [[STORY-008-04]] (stories) — Abandoned
 
-- [[STORY-008-05]] (stories) — Draft
+- [[STORY-008-05]] (stories) — Abandoned
 
-- [[STORY-008-06]] (stories) — Draft
+- [[STORY-008-06]] (stories) — Abandoned
 
-- [[STORY-008-07]] (stories) — Draft
+- [[STORY-008-07]] (stories) — Abandoned
 
-- [[STORY-009-01]] (stories) — Draft
+- [[STORY-009-01]] (stories) — Completed
 
-- [[STORY-009-02]] (stories) — Draft
+- [[STORY-009-02]] (stories) — Completed
 
-- [[STORY-009-03]] (stories) — Draft
+- [[STORY-009-03]] (stories) — Completed
 
-- [[STORY-009-04]] (stories) — Draft
+- [[STORY-009-04]] (stories) — Completed
 
-- [[STORY-009-05]] (stories) — Draft
+- [[STORY-009-05]] (stories) — Completed
 
-- [[STORY-009-06]] (stories) — Draft
+- [[STORY-009-06]] (stories) — Completed
 
-- [[STORY-009-07]] (stories) — Draft
+- [[STORY-009-07]] (stories) — Completed
 
-- [[STORY-009-08]] (stories) — Draft
+- [[STORY-009-08]] (stories) — Completed
 
-- [[STORY-011-01]] (stories) — Ready
+- [[STORY-011-01]] (stories) — Completed
 
-- [[STORY-011-02]] (stories) — Ready
+- [[STORY-011-02]] (stories) — Completed
 
-- [[STORY-011-03]] (stories) — Ready
+- [[STORY-011-03]] (stories) — Completed
 
-- [[STORY-011-04]] (stories) — Ready
+- [[STORY-011-04]] (stories) — Completed
 
 - [[STORY-013-01]] (stories) — Done
 

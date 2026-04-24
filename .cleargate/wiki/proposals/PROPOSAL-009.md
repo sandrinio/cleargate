@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-009_Planning_Visibility_UX.md"
-last_ingest: "2026-04-24T08:39:46.064Z"
+last_ingest: "2026-04-24T08:58:07.235Z"
 last_ingest_commit: "e554d06f7f94f1755c5c07ea5637b0024c3cbe65"
 repo: "planning"
 ---

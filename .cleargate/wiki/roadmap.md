@@ -57,17 +57,9 @@ _No active epics._
 ## Planned Epics
 
 
-- [[EPIC-001]] — status: Ready
-
 - [[EPIC-006]] — status: Ready
 
-- [[EPIC-008]] — status: Draft
-
-- [[EPIC-009]] — status: Draft
-
 - [[EPIC-010]] — status: Draft
-
-- [[EPIC-011]] — status: Ready
 
 - [[EPIC-012]] — status: Ready
 
@@ -89,6 +81,10 @@ _No active epics._
 - [[EPIC-005]] — status: Completed
 
 - [[EPIC-007]] — status: Completed
+
+- [[EPIC-009]] — status: Completed
+
+- [[EPIC-011]] — status: Completed
 
 - [[EPIC-013]] — status: Completed
 

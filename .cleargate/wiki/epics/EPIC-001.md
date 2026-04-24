@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-001"
 parent: ""
 children: []
-status: "Ready"
+status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-001_Document_Metadata_Lifecycle.md"
-last_ingest: "2026-04-24T08:39:46.064Z"
-last_ingest_commit: "39e586a19e43e231919ca6df42c66eb05b2df48c"
+last_ingest: "2026-04-24T08:58:07.235Z"
+last_ingest_commit: "ba28ba23a92e29313a183ff10202aeb98b0a3c69"
 repo: "planning"
 ---
 
