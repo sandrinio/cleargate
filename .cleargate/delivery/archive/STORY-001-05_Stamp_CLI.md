@@ -1,7 +1,7 @@
 ---
 story_id: STORY-001-05
 parent_epic_ref: EPIC-001
-status: Draft
+status: "Abandoned"
 ambiguity: 🟢 Low
 complexity_label: L1
 context_source: PROPOSAL-001_Document_Metadata.md

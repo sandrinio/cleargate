@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-011
-status: Ready
+status: "Abandoned"
 ambiguity: 🟢 Low
 context_source: ../archive/PROPOSAL-003_MCP_Adapter.md
 owner: Vibe Coder (sandro.suladze@gmail.com)

@@ -1,7 +1,7 @@
 ---
 story_id: STORY-011-01
 parent_epic_ref: EPIC-011
-status: Ready
+status: "Abandoned"
 ambiguity: 🟢 Low
 complexity_label: L1
 context_source: ./EPIC-011_End_To_End_Production_Readiness.md
