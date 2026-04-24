@@ -1,0 +1,46 @@
+# scaffold-allowlist.txt
+# ClearGate dogfood repo — legitimate scaffold file entries that contain
+# blocklist terms as intentional content (flashcard tag examples, documentation,
+# etc). These entries suppress specific findings in `cleargate scaffold-lint`.
+#
+# Format: <term> [<file-glob>]
+# Lines starting with # are comments. Blank lines are ignored.
+# Term matching is case-insensitive substring. Glob is relative to repo root.
+# Absent glob = global suppression for that term.
+#
+# Last updated: STORY-018-04
+
+# ── developer.md — flashcard tag exemplars cited in the Developer agent def ──
+# Lines 30, 31, 33, 54 reference Postgres/Redis/Drizzle as example flashcard content.
+postgres cleargate-planning/.claude/agents/developer.md
+redis cleargate-planning/.claude/agents/developer.md
+drizzle cleargate-planning/.claude/agents/developer.md
+
+# ── SKILL.md — flashcard tag vocabulary (lines 32, 38, 41, 42, 47, 56, 57, 88, 89) ──
+# The flashcard SKILL file defines tag categories using real stack names as examples.
+# These are intentional and must stay.
+postgres cleargate-planning/.claude/skills/flashcard/SKILL.md
+redis cleargate-planning/.claude/skills/flashcard/SKILL.md
+drizzle cleargate-planning/.claude/skills/flashcard/SKILL.md
+svelte cleargate-planning/.claude/skills/flashcard/SKILL.md
+sveltekit cleargate-planning/.claude/skills/flashcard/SKILL.md
+tailwind cleargate-planning/.claude/skills/flashcard/SKILL.md
+daisyui cleargate-planning/.claude/skills/flashcard/SKILL.md
+
+# ── cleargate-wiki-query.md — "express" used as English verb ──
+express cleargate-planning/.claude/agents/cleargate-wiki-query.md
+
+# ── cleargate-protocol.md — "express" (English verb) + "bootstrap" (English verb) ──
+express cleargate-planning/.cleargate/knowledge/cleargate-protocol.md
+bootstrap cleargate-planning/.cleargate/knowledge/cleargate-protocol.md
+
+# ── readiness-gates.md — "express" used as English verb ──
+express cleargate-planning/.cleargate/knowledge/readiness-gates.md
+
+# ── test_ratchet.mjs — "postgres" and "bootstrap" as CI/test infrastructure refs ──
+# bootstrap-root.test.ts (bootstrap as test fixture name) and Postgres as live DB reference.
+postgres cleargate-planning/.cleargate/scripts/test_ratchet.mjs
+bootstrap cleargate-planning/.cleargate/scripts/test_ratchet.mjs
+
+# ── sprint_context.md — "hono" matches inside English word "honour" (false positive) ──
+hono cleargate-planning/.cleargate/templates/sprint_context.md
