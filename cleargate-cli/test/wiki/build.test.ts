@@ -104,10 +104,11 @@ describe('Scenario 1: Empty .cleargate/delivery/ → produces wiki skeleton', ()
     expect(fs.statSync(path.join(fixture.wikiRoot, 'topics')).isDirectory()).toBe(true);
   });
 
-  it('index.md says "no items"', async () => {
+  it('index.md says "no items" (hierarchical empty-state)', async () => {
     await runBuild(fixture);
     const content = fs.readFileSync(path.join(fixture.wikiRoot, 'index.md'), 'utf8');
-    expect(content).toContain('no items');
+    // New hierarchical format uses _No active items._ / _No archived items._
+    expect(content).toContain('No active items');
   });
 
   it('log.md is empty (no entries)', async () => {
