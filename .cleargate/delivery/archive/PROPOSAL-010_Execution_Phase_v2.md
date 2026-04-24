@@ -1,6 +1,6 @@
 ---
 proposal_id: PROPOSAL-010
-status: Approved
+status: "Abandoned"
 author: Vibe Coder (sandro)
 approved: true
 approved_at: 2026-04-21T00:00:00Z

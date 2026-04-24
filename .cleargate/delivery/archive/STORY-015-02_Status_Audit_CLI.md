@@ -1,7 +1,7 @@
 ---
 story_id: STORY-015-02
 parent_epic_ref: EPIC-015
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-015_Wiki_Index_Hygiene_And_Scale.md
 actor: Orchestrator agent (maintenance pass) / Human operator
