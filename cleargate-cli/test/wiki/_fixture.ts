@@ -176,3 +176,35 @@ completed_at: "2026-03-31T00:00:00Z"
 A shipped sprint for testing.
 `;
 }
+
+/** An epic with status "Abandoned" (used in audit-status tests and hierarchical rendering) */
+export function abandonedEpicContent(id: string): string {
+  return `---
+story_id: "${id}"
+parent_epic_ref: ""
+status: "Abandoned"
+remote_id: ""
+---
+
+# ${id}: Abandoned Epic
+
+An epic that was abandoned.
+`;
+}
+
+/** A sprint with an epics list (used in audit-status Rule C tests) */
+export function sprintContentWithEpics(id: string, epicIds: string[], sprintStatus = 'Planned'): string {
+  const epicsYaml = JSON.stringify(epicIds);
+  return `---
+story_id: "${id}"
+parent_epic_ref: ""
+status: "${sprintStatus}"
+remote_id: ""
+epics: ${epicsYaml}
+---
+
+# ${id}: Test Sprint With Epics
+
+A test sprint referencing epics for Rule C testing.
+`;
+}

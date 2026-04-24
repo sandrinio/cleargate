@@ -1,6 +1,6 @@
 ---
 proposal_id: PROP-003
-status: Approved
+status: "Abandoned"
 author: AI Agent (cleargate planning)
 approved: true
 approved_at: 2026-04-17T00:00:00Z
