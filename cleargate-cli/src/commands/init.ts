@@ -103,7 +103,7 @@ interface UninstalledMarker {
  * So dirname(import.meta.url) = dist/. One level up = package root.
  * See flashcard: #tsup #bundle #import-meta.
  */
-function resolveDefaultPayloadDir(): string {
+export function resolveDefaultPayloadDir(): string {
   const thisFile = fileURLToPath(import.meta.url);
   // dist/cli.js → dirname = dist/ → one level up = package root
   const pkgRoot = path.resolve(path.dirname(thisFile), '..');
