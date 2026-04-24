@@ -25,9 +25,11 @@ import {
   checkPaginationNeeded,
   checkGateFailure,
   checkGateStaleness,
+  checkIndexBudget,
   discoverPlainTextMentions,
   type LintFinding,
 } from '../wiki/lint-checks.js';
+import { loadWikiConfig } from '../lib/wiki-config.js';
 
 export interface WikiLintOptions {
   /** Test seam: working directory (defaults to process.cwd()) */
@@ -103,6 +105,23 @@ export async function wikiLintHandler(opts: WikiLintOptions = {}): Promise<void>
   // Step 4: topic-page invalidated-citation check
   const citationFindings = checkInvalidatedCitations(pages, repoRoot);
   findings.push(...citationFindings);
+
+  // Step 4.5: index token-budget check (STORY-015-03)
+  const wikiConfig = loadWikiConfig(cwd);
+  const indexBudget = checkIndexBudget(repoRoot, wikiConfig.wiki.index_token_ceiling);
+
+  // In suggest mode, always emit the usage line unconditionally (before advisory loop)
+  if (mode === 'suggest' && indexBudget.tokens !== undefined) {
+    const tokens = indexBudget.tokens;
+    const ceiling = indexBudget.ceiling!;
+    const pct = Math.round((tokens / ceiling) * 100);
+    stdout(`index token usage: ${tokens} / ${ceiling} (${pct}%)\n`);
+  }
+
+  // In enforce mode, push finding into findings array (will be emitted below)
+  if (mode === 'enforce' && indexBudget.finding !== null) {
+    findings.push(indexBudget.finding);
+  }
 
   const pageCount = pages.length;
   const findingCount = findings.length;
