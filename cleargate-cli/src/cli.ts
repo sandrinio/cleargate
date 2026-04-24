@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
+import { scaffoldLintHandler } from './commands/scaffold-lint.js';
 import { joinHandler } from './commands/join.js';
 import { stampHandler } from './commands/stamp.js';
 import { initHandler } from './commands/init.js';
@@ -188,6 +189,16 @@ for (const gateName of ['precommit', 'test', 'typecheck', 'lint'] as const) {
       gateRunHandler(gateName, { strict: opts.strict === true ? true : undefined });
     });
 }
+
+program
+  .command('scaffold-lint')
+  .description('grep cleargate-planning/ for stack-specific strings; fail on leaks')
+  .option('--fix-hint', 'emit placeholder suggestions per finding')
+  .option('--versions', 'also flag semver-shaped strings')
+  .option('--quiet', 'suppress per-finding output; exit code only')
+  .action(async (opts: { fixHint?: boolean; versions?: boolean; quiet?: boolean }) => {
+    await scaffoldLintHandler(opts);
+  });
 
 const sprint = program
   .command('sprint')
