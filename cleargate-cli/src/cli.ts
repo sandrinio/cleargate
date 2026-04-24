@@ -7,6 +7,7 @@ import { wikiBuildHandler } from './commands/wiki-build.js';
 import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
+import { wikiAuditStatusHandler } from './commands/wiki-audit-status.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
 import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
@@ -125,6 +126,16 @@ wiki
       query: terms.join(' '),
       persist: opts.persist ?? false,
     });
+  });
+
+wiki
+  .command('audit-status')
+  .description('detect raw-item status/location drift; --fix applies safe corrections')
+  .option('--fix', 'apply safe status corrections to frontmatter')
+  .option('--yes', 'required together with --fix to confirm writes')
+  .option('--quiet', 'suppress diff output')
+  .action(async (opts: { fix?: boolean; yes?: boolean; quiet?: boolean }) => {
+    await wikiAuditStatusHandler(opts);
   });
 
 const gate = program
