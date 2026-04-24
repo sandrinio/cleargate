@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
+import { scaffoldLintHandler } from './commands/scaffold-lint.js';
 import { joinHandler } from './commands/join.js';
 import { stampHandler } from './commands/stamp.js';
 import { initHandler } from './commands/init.js';
@@ -10,6 +11,7 @@ import { wikiQueryHandler } from './commands/wiki-query.js';
 import { wikiAuditStatusHandler } from './commands/wiki-audit-status.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
+import { gateRunHandler } from './commands/gate-run.js';
 import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
 import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
 import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
@@ -172,6 +174,30 @@ gate
   .option('--sprint <id>', 'sprint ID for execution_mode lookup')
   .action((worktree: string, branch: string, opts: { sprint?: string }) => {
     gateArchHandler({ worktree, branch }, { sprintId: opts.sprint });
+  });
+
+// STORY-018-03: config-driven gates. Commander v12 does NOT treat `<name>` as a
+// catch-all fallback when sibling literal subcommands exist (QA'd on 2026-04-25
+// — it emits "unknown command" before a parameterized handler can fire). Since
+// the gate names are a closed set, enumerate them explicitly.
+for (const gateName of ['precommit', 'test', 'typecheck', 'lint'] as const) {
+  gate
+    .command(gateName)
+    .description(`run the configured ${gateName} gate command`)
+    .option('--strict', 'exit non-zero if gate not configured')
+    .action((opts: { strict?: boolean }) => {
+      gateRunHandler(gateName, { strict: opts.strict === true ? true : undefined });
+    });
+}
+
+program
+  .command('scaffold-lint')
+  .description('grep cleargate-planning/ for stack-specific strings; fail on leaks')
+  .option('--fix-hint', 'emit placeholder suggestions per finding')
+  .option('--versions', 'also flag semver-shaped strings')
+  .option('--quiet', 'suppress per-finding output; exit code only')
+  .action(async (opts: { fixHint?: boolean; versions?: boolean; quiet?: boolean }) => {
+    await scaffoldLintHandler(opts);
   });
 
 const sprint = program

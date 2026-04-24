@@ -1,8 +1,9 @@
 /**
  * STORY-015-03: Per-repo wiki configuration loader.
+ * STORY-018-03: Extended to include `gates` map.
  *
  * Reads `.cleargate/config.yml` from the repo root.
- * Single responsibility: surface `wiki.index_token_ceiling`.
+ * Single responsibility: surface `wiki.index_token_ceiling` and `gates` map.
  * Missing file → defaults. Malformed YAML → throws with file path in message.
  */
 
@@ -10,10 +11,18 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import yaml from 'js-yaml';
 
+export interface GatesConfig {
+  precommit?: string;
+  test?: string;
+  typecheck?: string;
+  lint?: string;
+}
+
 export interface WikiConfig {
   wiki: {
     index_token_ceiling: number;
   };
+  gates: GatesConfig;
 }
 
 const DEFAULT_INDEX_TOKEN_CEILING = 8000;
@@ -27,7 +36,7 @@ export function loadWikiConfig(repoRoot: string): WikiConfig {
   const configPath = path.join(repoRoot, '.cleargate', 'config.yml');
 
   if (!fs.existsSync(configPath)) {
-    return { wiki: { index_token_ceiling: DEFAULT_INDEX_TOKEN_CEILING } };
+    return { wiki: { index_token_ceiling: DEFAULT_INDEX_TOKEN_CEILING }, gates: {} };
   }
 
   let raw: string;
@@ -45,11 +54,13 @@ export function loadWikiConfig(repoRoot: string): WikiConfig {
   }
 
   const ceiling = extractCeiling(parsed);
+  const gates = extractGates(parsed);
 
   return {
     wiki: {
       index_token_ceiling: ceiling,
     },
+    gates,
   };
 }
 
@@ -73,4 +84,27 @@ function extractCeiling(parsed: unknown): number {
   }
 
   return DEFAULT_INDEX_TOKEN_CEILING;
+}
+
+function extractGates(parsed: unknown): GatesConfig {
+  if (parsed === null || parsed === undefined || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return {};
+  }
+
+  const root = parsed as Record<string, unknown>;
+  const gates = root['gates'];
+
+  if (gates === null || gates === undefined || typeof gates !== 'object' || Array.isArray(gates)) {
+    return {};
+  }
+
+  const gatesObj = gates as Record<string, unknown>;
+  const result: GatesConfig = {};
+
+  if (typeof gatesObj['precommit'] === 'string') result.precommit = gatesObj['precommit'];
+  if (typeof gatesObj['test'] === 'string') result.test = gatesObj['test'];
+  if (typeof gatesObj['typecheck'] === 'string') result.typecheck = gatesObj['typecheck'];
+  if (typeof gatesObj['lint'] === 'string') result.lint = gatesObj['lint'];
+
+  return result;
 }

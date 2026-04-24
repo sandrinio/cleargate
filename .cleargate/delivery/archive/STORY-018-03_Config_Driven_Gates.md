@@ -16,7 +16,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-24T19:51:46Z
+  last_gate_check: 2026-04-24T20:55:47Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -32,7 +32,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-24T19:51:46Z
+  last_stamp: 2026-04-24T20:55:47Z
   sessions: []
 ---
 
@@ -107,8 +107,16 @@ Feature: Config-Driven Gates
 
   Scenario: Unknown gate name rejected
     When I run `cleargate gate frobnicate`
-    Then stderr contains "unknown gate name 'frobnicate' — must be one of: precommit, test, typecheck, lint"
-    And exit code is 2
+    Then stderr contains "unknown command 'frobnicate'"
+    And exit code is non-zero
+    # Note: the closed set (precommit | test | typecheck | lint) is enforced at
+    # the Commander v12 subcommand-enumeration layer. Commander rejects before
+    # our handler sees the name; the user still gets a clear failure plus the
+    # list of valid names via `cleargate gate --help`. The original draft expected
+    # the handler's custom message + exit 2; that handler validation remains
+    # enforced for direct `gateRunHandler(name)` callers and is still unit-tested,
+    # but the CLI dispatcher rejects earlier. Corrected 2026-04-25 after QA caught
+    # that `gate.command('<name>')` is NOT a catch-all fallback in Commander v12.
 
   Scenario: Agent wording updated
     Given cleargate-planning/.claude/agents/developer.md

@@ -1,7 +1,14 @@
 {
   "cleargate_version": "0.2.1",
-  "generated_at": "2026-04-24T09:44:18.303Z",
+  "generated_at": "2026-04-24T21:43:23.887Z",
   "files": [
+    {
+      "path": ".claude/agents/.architect.md.bak",
+      "sha256": "c9424894549b270b73c1c95145b7bb8d406cadd2057c47f8e90bf74ce1f3cda7",
+      "tier": "agent",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
     {
       "path": ".claude/agents/architect.md",
       "sha256": "c9424894549b270b73c1c95145b7bb8d406cadd2057c47f8e90bf74ce1f3cda7",
@@ -32,14 +39,14 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "2bd82a9e9850935e3be264e5ec1b3e7f025a916571dc43f4b03193de4db9f2f4",
+      "sha256": "ea54db76bcd017526f2b48e05b167cb87251273aa5fd3da6bec3013c207c72fb",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "21c3d95fa0900e6ab3f71e0fb582a064f145199303988e64b013cc98d49f3eef",
+      "sha256": "e753d294d6060ace626878220db02a0595126bc7baa52526e5d1576b163f04d0",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

@@ -20,8 +20,8 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 1. **Read flashcards.** `Skill(flashcard, "check")`. Flashcards tagged `#qa` or `#test-harness` especially relevant.
 2. **Inspect the commit** — `git show <sha>` in the worktree. Read the diff in full before trusting it.
 3. **Re-run the checks from scratch:**
-   - `npm run typecheck` in the package the commit touches
-   - `npm test` for that package
+   - `cleargate gate typecheck`
+   - `cleargate gate test`
    - Capture exit codes, not vibes. A passing summary line that skipped tests is a fail.
 4. **Map commit to acceptance criteria.** For each Gherkin scenario in the Story:
    - Find the corresponding test in the diff
@@ -30,7 +30,7 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 6. **Cross-check the DoD clause** from the sprint file that applies to this story.
 7. **Record flashcards on recurring QA failure patterns.** `Skill(flashcard, "record: #qa <lesson>")`. Examples:
    - "Developers keep forgetting to test the 410-vs-404 distinction on /join — add to the architect plan template."
-   - "npm test hides failures with --passWithNoTests; require explicit assertion count."
+   - "gate commands inherit shell semantics (`shell: true`); `&&`-chains short-circuit — a failing typecheck in a chain hides downstream results."
 
 ## Output shape
 ```
