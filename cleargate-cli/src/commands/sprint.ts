@@ -3,6 +3,7 @@
  *
  * STORY-013-08: CLI wrappers for sprint lifecycle scripts.
  * STORY-014-08: sprintArchiveHandler — final sprint close-out.
+ * STORY-015-04: stampSprintClose + rollback on wiki build/lint failure.
  *
  * All handlers are v1-inert: when execution_mode is "v1", they print the
  * inert-mode message and exit 0. Under "v2", they shell out via run_script.sh
@@ -23,6 +24,12 @@ import {
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
+import { wikiBuildHandler } from './wiki-build.js';
+import { wikiLintHandler } from './wiki-lint.js';
+
+// Terminal statuses — re-declared locally to avoid cross-module runtime import.
+// Keep in sync with TERMINAL_STATUSES in wiki-build.ts.
+const TERMINAL_STATUSES = new Set(['Completed', 'Done', 'Abandoned', 'Closed', 'Resolved']);
 
 // ─── Public CLI option types ───────────────────────────────────────────────────
 
@@ -34,6 +41,10 @@ export interface SprintCliOptions extends ExecutionModeOptions {
   runScriptPath?: string;
   /** Override spawnSync (test seam). */
   spawnFn?: typeof spawnSync;
+  /** Test seam: override wiki build invocation. Defaults to wikiBuildHandler. */
+  wikiBuildFn?: (cwd: string, stdout: (s: string) => void) => Promise<void>;
+  /** Test seam: override wiki lint invocation. Defaults to wikiLintHandler. */
+  wikiLintFn?: (cwd: string, stdout: (s: string) => void) => Promise<void>;
 }
 
 // ─── Shared run_script.sh resolution ─────────────────────────────────────────
@@ -212,6 +223,50 @@ function stampFile(raw: string, status: string, completedAt: string): string {
   return serializeFileContent(fm, body);
 }
 
+/**
+ * STORY-015-04: Stamp the sprint file's frontmatter with status="Completed"
+ * (if not already terminal) and completed_at (if absent). Writes atomically.
+ *
+ * Returns:
+ *   previousContent — original file bytes for rollback
+ *   stampedContent  — the content written to disk
+ *   didChange       — false if file was already terminal + completed_at set
+ */
+export function stampSprintClose(
+  sprintPath: string,
+  now: () => string,
+): { previousContent: string; stampedContent: string; didChange: boolean } {
+  const previousContent = fs.readFileSync(sprintPath, 'utf8');
+  const { fm, body } = parseFileFrontmatter(previousContent);
+
+  const currentStatus = typeof fm['status'] === 'string' ? fm['status'] : '';
+  const alreadyTerminal = TERMINAL_STATUSES.has(currentStatus);
+  const hasCompletedAt = typeof fm['completed_at'] === 'string' && fm['completed_at'].length > 0;
+
+  if (alreadyTerminal && hasCompletedAt) {
+    return { previousContent, stampedContent: previousContent, didChange: false };
+  }
+
+  if (!alreadyTerminal) {
+    fm['status'] = 'Completed';
+  }
+  if (!hasCompletedAt) {
+    fm['completed_at'] = now();
+  }
+
+  const stampedContent = serializeFileContent(fm, body);
+  atomicWriteStr(sprintPath, stampedContent);
+  return { previousContent, stampedContent, didChange: true };
+}
+
+/**
+ * STORY-015-04: Atomically restore a sprint file from a previously-snapshotted
+ * string (rollback after wiki build/lint failure).
+ */
+export function restoreSprintFile(sprintPath: string, original: string): void {
+  atomicWriteStr(sprintPath, original);
+}
+
 /** Return state.json story keys that belong to a given epic. */
 function storyKeysForEpic(
   stateStories: Record<string, unknown>,
@@ -229,17 +284,47 @@ function storyKeysForEpic(
  *   1. Read state.json — refuse if sprint_status !== 'Completed'.
  *   2. Resolve file set from sprint frontmatter + state.json + orphan scan.
  *   3. --dry-run: print plan; no writes.
- *   4. Live: stamp + move files, clear .active, git checkout main, merge, branch -d.
+ *   4. Live: stamp sprint file, wiki build+lint (if wiki initialised), then
+ *      move files, clear .active, git checkout main, merge, branch -d.
  */
-export function sprintArchiveHandler(
+export async function sprintArchiveHandler(
   opts: { sprintId: string; dryRun?: boolean },
   cli?: SprintCliOptions,
-): void {
+): Promise<void> {
+  try {
   const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
   const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
   const exitFn: (code: number) => never = cli?.exit ?? defaultExit;
   const spawnFn = cli?.spawnFn ?? spawnSync;
   const cwd = cli?.cwd ?? process.cwd();
+
+  // Wiki build/lint seam wrappers.
+  // wikiBuildHandler on success returns (no exit call); on failure calls exit(1) which throws.
+  // wikiLintHandler on success calls exit(0) which throws; on findings calls exit(1) which throws.
+  const wikiBuildFn: (wCwd: string, wStdout: (s: string) => void) => Promise<void> =
+    cli?.wikiBuildFn ??
+    (async (wCwd: string, wStdout: (s: string) => void) => {
+      const fakeExit = (code: number): never => { throw new Error(`wiki-build-exit:${code}`); };
+      try {
+        await wikiBuildHandler({ cwd: wCwd, stdout: wStdout, exit: fakeExit as never });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg.startsWith('wiki-build-exit:0')) return;
+        throw err;
+      }
+    });
+  const wikiLintFn: (wCwd: string, wStdout: (s: string) => void) => Promise<void> =
+    cli?.wikiLintFn ??
+    (async (wCwd: string, wStdout: (s: string) => void) => {
+      const fakeExit = (code: number): never => { throw new Error(`wiki-lint-exit:${code}`); };
+      try {
+        await wikiLintHandler({ cwd: wCwd, stdout: wStdout, exit: fakeExit as never });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg.startsWith('wiki-lint-exit:0')) return;
+        throw err;
+      }
+    });
 
   // Step 1: v1-inert check
   const mode = readSprintExecutionMode(opts.sprintId, {
@@ -393,7 +478,38 @@ export function sprintArchiveHandler(
     return exitFn(0);
   }
 
-  // Step 5: Live run — stamp + move each file
+  // Step 5a: Stamp the sprint file's frontmatter (status + completed_at)
+  let sprintFileSnapshot: string | null = null;
+  const wikiRoot = path.join(cwd, '.cleargate', 'wiki');
+  const wikiInitialised = fs.existsSync(wikiRoot);
+
+  if (sprintFile && fs.existsSync(sprintFile)) {
+    const { previousContent } = stampSprintClose(sprintFile, () => completedAt);
+    sprintFileSnapshot = previousContent;
+
+    // Step 5b: wiki build + lint — only if wiki has been initialised.
+    // Skip gracefully when .cleargate/wiki/ doesn't exist yet (wiki not built).
+    if (wikiInitialised) {
+      for (const [stepName, stepFn] of [
+        ['wiki build', () => wikiBuildFn(cwd, stdoutFn)] as const,
+        ['wiki lint', () => wikiLintFn(cwd, stdoutFn)] as const,
+      ]) {
+        try {
+          await stepFn();
+        } catch (err) {
+          // Rollback sprint file frontmatter
+          atomicWriteStr(sprintFile!, sprintFileSnapshot!);
+          stderrFn(
+            `[cleargate sprint archive] post-stamp ${stepName} failed — sprint frontmatter reverted`,
+          );
+          if (err instanceof Error) stderrFn(err.message);
+          return exitFn(1);
+        }
+      }
+    }
+  }
+
+  // Step 5c: Live run — stamp + move each file
   for (const entry of plan) {
     if (!fs.existsSync(entry.src)) {
       stderrFn(`[cleargate sprint archive] source not found: ${entry.src} — skipping`);
@@ -449,4 +565,13 @@ export function sprintArchiveHandler(
       (mergeSha ? `, merge SHA: ${mergeSha}` : ''),
   );
   return exitFn(0);
+  } catch (e) {
+    // The exitFn seam throws `Error("exit:<n>")` as a synchronous control-flow
+    // shortcut so the handler bails without running further steps. Under an
+    // async handler that escapes as an unhandled rejection even when tests
+    // `getCode()` confirms the expected exit. Swallow the sentinel here; any
+    // other error re-throws.
+    if (e instanceof Error && /^exit:\d+$/.test(e.message)) return;
+    throw e;
+  }
 }

@@ -4,6 +4,9 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-24 · #wiki-gate #sprint-archive · skip wiki build+lint in sprintArchiveHandler when `.cleargate/wiki/` dir is absent (wikiInitialised guard) — otherwise existing test suites without wiki fixture break after the stamp logic lands.
+2026-04-24 · #yaml #frontmatter #iso-date · js-yaml CORE_SCHEMA does NOT quote ISO strings in yaml.dump — `completed_at` serializes as unquoted `2026-01-01T...`; test assertions must not expect surrounding quotes.
+2026-04-24 · #wiki-build #async-exit-pattern · wikiBuildHandler returns on success (no exit(0) call); wikiLintHandler explicitly calls exit(0) on success — default wrappers in sprintArchiveHandler must use try/catch on a fakeExit-throw pattern, not Promise resolve/reject.
 2026-04-24 · #sprint-archive #file-location · sprint-archive wrapper is inline in cleargate-cli/src/commands/sprint.ts (sprintArchiveHandler at L234 + helpers), NOT cleargate-cli/src/lib/sprint-archive.ts — STORY-015-04 story body cites the wrong path; verify with Glob before editing.
 2026-04-24 · #wiki #index #worktree · worktree npm ci needed for typecheck — node_modules not shared with parent worktree; run `npm ci --workspace <pkg>` from worktree root before first typecheck.
 2026-04-24 · #audit-status #convergence · Rule C fix (sprint→Completed) on pending-sync sprints creates a new Rule B violation; E2E convergence tests must use only Rule A items or archive-resident sprints to guarantee exit-0 second run.

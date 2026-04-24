@@ -16,7 +16,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-24T08:12:39Z
+  last_gate_check: 2026-04-24T09:45:32Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -32,7 +32,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-24T08:12:39Z
+  last_stamp: 2026-04-24T09:45:32Z
   sessions: []
 ---
 
@@ -87,11 +87,13 @@ Feature: Abandoned Status + Sprint-Close Stamp
     And the command exits non-zero
     And git working tree has no sprint-file changes
 
-  Scenario: Unmerged sprint rejected
-    Given SPRINT-11 branch is not merged to main
+  Scenario: Not-yet-closed sprint rejected
+    Given SPRINT-11 state.json has sprint_status != "Completed" (sprint close not yet run)
     When I run `cleargate sprint-archive SPRINT-11`
-    Then the command exits non-zero with "sprint branch not merged"
+    Then the command exits non-zero with "sprint not closed"
     And no frontmatter changes
+    Note: Gherkin text corrected from "sprint branch not merged" — actual guard
+    is state.sprint_status !== "Completed"; no branch-merge check exists in code.
 ```
 
 ### 2.2 Verification Steps (Manual)

@@ -883,3 +883,33 @@ ln -sf ../../.claude/hooks/pre-commit.sh .git/hooks/pre-commit
 ```
 
 Log this step in the sprint §4 Execution Log.
+
+---
+
+## 21. Status Vocabulary
+
+Raw work-item frontmatter `status:` values must be drawn from this canonical set:
+
+| Status | Meaning |
+|---|---|
+| `Draft` | Newly authored; not yet ambiguity-gated |
+| `Ready` | Ambiguity gate passed; eligible for sprint planning |
+| `Approved` | Epic approved for execution |
+| `Planned` | Sprint planned; not yet started |
+| `Active` | Work in progress |
+| `Completed` | Shipped (sprints, epics) |
+| `Done` | Shipped (stories) — treated as alias of `Completed` for terminal-status checks |
+| `Abandoned` | Work deliberately stopped without shipping. The artifact stays in `archive/` for historical record. Not eligible for the Active index. |
+| `Closed` | Closed without shipping (administrative close) |
+| `Resolved` | Bug or CR confirmed resolved |
+
+### §21.1 Index Token Ceiling
+
+`cleargate wiki lint` enforces a ceiling on `.cleargate/wiki/index.md` size, measured as `bytes ÷ 4` approximate tokens. Default ceiling: `8000`. Override via `.cleargate/config.yml`:
+
+```yaml
+wiki:
+  index_token_ceiling: 8000
+```
+
+Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.

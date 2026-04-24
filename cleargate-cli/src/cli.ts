@@ -203,13 +203,13 @@ sprint
   .command('archive <sprint-id>')
   .description('archive a completed sprint — move pending-sync files, clear .active, merge + delete sprint branch')
   .option('--dry-run', 'print the archive plan without making any changes')
-  .action((sprintId: string, opts: { dryRun?: boolean }) => {
+  .action(async (sprintId: string, opts: { dryRun?: boolean }) => {
     // FLASHCARD #cli #commander #optional-key: omit key when undefined
     const handlerOpts: { sprintId: string; dryRun?: boolean } = { sprintId };
     if (opts.dryRun === true) {
       handlerOpts.dryRun = true;
     }
-    sprintArchiveHandler(handlerOpts);
+    await sprintArchiveHandler(handlerOpts);
   });
 
 const story = program
