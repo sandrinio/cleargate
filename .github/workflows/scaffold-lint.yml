@@ -24,3 +24,21 @@ jobs:
 
       - name: Run scaffold-lint
         run: node cleargate-cli/dist/cli.cjs scaffold-lint
+
+  foreign-repo-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci --workspace=cleargate-cli
+
+      - name: Build CLI
+        run: npm run build --workspace=cleargate-cli
+
+      - name: Run foreign-repo integration test
+        run: npm test --workspace=cleargate-cli -- test/integration/foreign-repo.test.ts
