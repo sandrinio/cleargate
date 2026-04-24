@@ -175,13 +175,19 @@ gate
     gateArchHandler({ worktree, branch }, { sprintId: opts.sprint });
   });
 
-gate
-  .command('<name>')
-  .description('run a configured gate command (precommit | test | typecheck | lint)')
-  .option('--strict', 'exit non-zero if gate not configured')
-  .action((name: string, opts: { strict?: boolean }) => {
-    gateRunHandler(name, { strict: opts.strict === true ? true : undefined });
-  });
+// STORY-018-03: config-driven gates. Commander v12 does NOT treat `<name>` as a
+// catch-all fallback when sibling literal subcommands exist (QA'd on 2026-04-25
+// — it emits "unknown command" before a parameterized handler can fire). Since
+// the gate names are a closed set, enumerate them explicitly.
+for (const gateName of ['precommit', 'test', 'typecheck', 'lint'] as const) {
+  gate
+    .command(gateName)
+    .description(`run the configured ${gateName} gate command`)
+    .option('--strict', 'exit non-zero if gate not configured')
+    .action((opts: { strict?: boolean }) => {
+      gateRunHandler(gateName, { strict: opts.strict === true ? true : undefined });
+    });
+}
 
 const sprint = program
   .command('sprint')
