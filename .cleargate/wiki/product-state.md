@@ -6,12 +6,12 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 17 | 0 | 12 |
-| Stories | 111 | 0 | 62 |
-| Sprints | 11 | 0 | 8 |
+| Epics | 18 | 0 | 12 |
+| Stories | 116 | 0 | 62 |
+| Sprints | 12 | 0 | 8 |
 | Proposals | 11 | 0 | 7 |
-| CRs | 1 | 0 | 0 |
-| Bugs | 0 | 0 | 0 |
+| CRs | 2 | 0 | 0 |
+| Bugs | 2 | 0 | 0 |
 
 ## Active Epics
 

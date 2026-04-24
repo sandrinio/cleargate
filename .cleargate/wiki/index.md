@@ -12,14 +12,20 @@
 - [[EPIC-014]] (epic) — Approved
   - STORY-014-xx (10 stories) — 10 Ready
 - [[EPIC-016]] (epic) — Draft
+- [[EPIC-018]] (epic) — Approved
+  - STORY-018-xx (5 stories) — 5 Ready
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-10]] (sprint) — Planned
+- [[SPRINT-12]] (sprint) — Planned
 - [[PROPOSAL-007]] (proposal) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-011]] (proposal) — Approved
 - [[CR-001]] (cr) — Draft
+- [[CR-002]] (cr) — Draft
+- [[BUG-002]] (bug) — Draft
+- [[BUG-003]] (bug) — Draft
 - [[STORY-003-01]] (story) — Draft
 - [[STORY-003-02]] (story) — Draft
 - [[STORY-003-03]] (story) — Draft
