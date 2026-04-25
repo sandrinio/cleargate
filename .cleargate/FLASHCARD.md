@@ -4,6 +4,7 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-04-25 · #schema #migrations #drizzle-kit · drizzle-kit db:generate emits DDL only (no TRUNCATE/DELETE); hand-prepend DML after generate — regen clobbers hand edits.
 2026-04-25 · #cli #commander #subcommand-routing · Commander v12 `.command('<name>')` is NOT a catch-all fallback when sibling literal subcommands exist — it emits `unknown command` before the parameterized handler fires. For a closed set, enumerate each name explicitly (`.command('test').action(() => handler('test', ...))`).
 2026-04-24 · #wiki-gate #sprint-archive · skip wiki build+lint in sprintArchiveHandler when `.cleargate/wiki/` dir is absent (wikiInitialised guard) — otherwise existing test suites without wiki fixture break after the stamp logic lands.
 2026-04-24 · #yaml #frontmatter #iso-date · js-yaml CORE_SCHEMA does NOT quote ISO strings in yaml.dump — `completed_at` serializes as unquoted `2026-01-01T...`; test assertions must not expect surrounding quotes.
