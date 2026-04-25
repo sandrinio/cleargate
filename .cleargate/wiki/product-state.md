@@ -10,7 +10,7 @@
 | Stories | 116 | 0 | 67 |
 | Sprints | 13 | 0 | 10 |
 | Proposals | 11 | 0 | 7 |
-| CRs | 6 | 0 | 4 |
+| CRs | 7 | 0 | 5 |
 | Bugs | 3 | 0 | 0 |
 
 ## Active Epics
@@ -30,6 +30,8 @@ _No active epics._
 - [[CR-005]] (crs) — Completed
 
 - [[CR-006]] (crs) — Completed
+
+- [[CR-007]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 
