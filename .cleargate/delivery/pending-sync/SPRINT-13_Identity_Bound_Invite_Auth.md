@@ -125,7 +125,7 @@ Note: this sprint executes **CRs, not Stories** — at user direction (2026-04-2
   - [x] Resend creds documented in `mcp/.env.example` (done this turn)
   - [ ] DNS records for `soula.ge` (SPF: `v=spf1 include:resend.com ~all`; DKIM + DMARC per Resend dashboard instructions)
   - [ ] Resend domain `soula.ge` verified in Resend dashboard
-  - [ ] Decision: reuse existing `CLEARGATE_GITHUB_CLI_CLIENT_ID` for member flow, or register a separate OAuth app? Default: reuse if scopes suffice. Architect confirms during M2 plan.
+  - [x] Decision (2026-04-25): **REUSE** existing `CLEARGATE_GITHUB_CLI_CLIENT_ID` for member flow. CR-004 must verify the existing OAuth app has scopes `read:user` + `user:email`; if not, append them in the GitHub OAuth-app settings (not register a new app).
   - [ ] Confirm: pre-prod truncation OK — no live invites in DB. Run: `psql -c "SELECT count(*) FROM invites WHERE consumed_at IS NULL;"` → expect 0 (or "we don't care if they break").
 
 - **Starting Point (M1 / CR-003):** Architect produces `plans/M1.md` first. Developer implements CR-003 against that plan. Three sequential checkpoints inside CR-003: (a) schema migration + Drizzle types compile; (b) `IdentityProvider` interface + registry skeleton with a test-only `FakeProvider`; (c) `/join/:token/challenge` + `/join/:token/complete` endpoints with the FakeProvider proving the round-trip. QA runs against the FakeProvider.
