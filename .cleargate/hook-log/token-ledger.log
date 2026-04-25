@@ -101,3 +101,45 @@
 [2026-04-19T13:39:12Z] routing to sprint=SPRINT-05 (sentinel)
 [2026-04-19T13:39:12Z] work_item_id fallback grep: EPIC-002
 [2026-04-19T13:39:13Z] wrote row: sprint=SPRINT-05 agent=architect work_item=EPIC-002 story= tokens=in:948/out:162166
+[2026-04-24T23:32:23Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-24T23:32:24Z] work_item_id fallback grep: BUG-002
+[2026-04-24T23:32:24Z] wrote row: sprint=_off-sprint agent=unknown work_item=BUG-002 story= tokens=in:14/out:1612 delta_from=0
+[2026-04-24T23:40:00Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-24T23:40:00Z] work_item_id fallback grep: BUG-002
+[2026-04-24T23:40:00Z] wrote row: sprint=_off-sprint agent=unknown work_item=BUG-002 story= tokens=in:29/out:5141 delta_from=0
+[2026-04-25T00:29:25Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T00:29:26Z] work_item_id fallback grep: BUG-002
+[2026-04-25T00:29:26Z] wrote row: sprint=_off-sprint agent=developer work_item=BUG-002 story= tokens=in:452/out:192837 delta_from=0
+[2026-04-25T06:56:40Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T06:56:40Z] work_item_id fallback grep: BUG-002
+[2026-04-25T06:56:40Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:64/out:53632 delta_from=0
+[2026-04-25T07:03:41Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:03:42Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:03:42Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:69/out:61546 delta_from=0
+[2026-04-25T07:14:00Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:14:01Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:14:01Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:75/out:77584 delta_from=0
+[2026-04-25T07:28:43Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:28:43Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:28:43Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:86/out:102385 delta_from=0
+[2026-04-25T07:40:37Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:40:37Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:40:37Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:90/out:105757 delta_from=0
+[2026-04-25T07:51:15Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:51:15Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:51:15Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:101/out:115844 delta_from=0
+[2026-04-25T07:59:50Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T07:59:50Z] work_item_id fallback grep: BUG-002
+[2026-04-25T07:59:50Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:103/out:122092 delta_from=0
+[2026-04-25T08:05:45Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T08:05:45Z] work_item_id fallback grep: BUG-002
+[2026-04-25T08:05:45Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:239/out:140495 delta_from=0
+[2026-04-25T09:19:04Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T09:19:04Z] work_item_id fallback grep: BUG-002
+[2026-04-25T09:19:04Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:280/out:167078 delta_from=0
+[2026-04-25T09:59:48Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T09:59:48Z] work_item_id fallback grep: BUG-002
+[2026-04-25T09:59:48Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:298/out:173863 delta_from=0
+[2026-04-25T10:07:03Z] no .active sentinel — bucketing as _off-sprint
+[2026-04-25T10:07:03Z] work_item_id fallback grep: BUG-002
+[2026-04-25T10:07:03Z] wrote row: sprint=_off-sprint agent=architect work_item=BUG-002 story= tokens=in:347/out:180272 delta_from=0

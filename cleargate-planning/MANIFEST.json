@@ -1,14 +1,7 @@
 {
-  "cleargate_version": "0.2.1",
-  "generated_at": "2026-04-24T21:43:23.887Z",
+  "cleargate_version": "0.3.0",
+  "generated_at": "2026-04-25T09:53:08.744Z",
   "files": [
-    {
-      "path": ".claude/agents/.architect.md.bak",
-      "sha256": "c9424894549b270b73c1c95145b7bb8d406cadd2057c47f8e90bf74ce1f3cda7",
-      "tier": "agent",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
     {
       "path": ".claude/agents/architect.md",
       "sha256": "c9424894549b270b73c1c95145b7bb8d406cadd2057c47f8e90bf74ce1f3cda7",

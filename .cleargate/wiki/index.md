@@ -23,6 +23,7 @@
 - [[CR-002]] (cr) — Draft
 - [[BUG-002]] (bug) — Draft
 - [[BUG-003]] (bug) — Draft
+- [[BUG-005]] (bug) — Draft
 - [[STORY-003-01]] (story) — Draft
 - [[STORY-003-02]] (story) — Draft
 - [[STORY-003-03]] (story) — Draft
@@ -47,22 +48,8 @@
 
 ## Archive
 
-- Epics: 11 Completed · 2 Abandoned · [expand](archive/epics.md)
-- Sprints: 9 Completed · [expand](archive/sprints.md)
+- Epics: 12 Completed · 2 Abandoned · [expand](archive/epics.md)
+- Sprints: 10 Completed · [expand](archive/sprints.md)
 - Proposals: 7 Abandoned · [expand](archive/proposals.md)
+- CRs: 4 Completed · [expand](archive/crs.md)
 - Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
-## Epics
-
-| [[EPIC-019]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md |
-## CRs
-
-| [[CR-003]] | cr | Approved | .cleargate/delivery/pending-sync/CR-003_Identity_Bound_Invite_Redemption.md |
-| [[CR-004]] | cr | Approved | .cleargate/delivery/pending-sync/CR-004_GitHub_OAuth_Identity_Provider.md |
-| [[CR-005]] | cr | Approved | .cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md |
-| [[CR-006]] | cr | Approved | .cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md |
-## Sprints
-
-| [[SPRINT-13]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md |
-## Bugs
-
-| [[BUG-005]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-005_Sprint_Orchestration_CR_Prefix_Blind.md |

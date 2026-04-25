@@ -1,10 +1,11 @@
 ---
 cr_id: CR-005
 parent_ref: EPIC-019
-status: Approved
+status: Completed
 approved: true
+completed_at: 2026-04-25T13:59:00Z
 created_at: 2026-04-25T00:00:00Z
-updated_at: 2026-04-25T00:00:00Z
+updated_at: 2026-04-25T13:59:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
@@ -13,7 +14,7 @@ cached_gate_result:
   failing_criteria:
     - id: no-tbds
       detail: 3 occurrences at §2, §4
-  last_gate_check: 2026-04-25T00:05:38Z
+  last_gate_check: 2026-04-25T10:10:43Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
