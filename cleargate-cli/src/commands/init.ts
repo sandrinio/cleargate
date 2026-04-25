@@ -340,9 +340,21 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
       await writeParticipant(cwd, finalEmail, 'inferred', now);
       stdout(`[cleargate init] Participant identity: ${finalEmail} (inferred)\n`);
     } else {
-      // Interactive: prompt for email
-      const defaultEmail = gitEmail ?? 'user@localhost';
-      const question = `[cleargate init] Participant email [${defaultEmail}]:`;
+      // Interactive: prompt for email.
+      // BUG-007: the prior prompt reused the `[cleargate init]` info-log prefix
+      // and was followed by a newline, so it visually merged with preceding log
+      // lines and the cursor sat on a blank line below — users walked away
+      // believing install had finished. Fix:
+      //   1. Drop the `[cleargate init]` prefix on the prompt itself so it
+      //      reads as an interactive question, not a status message.
+      //   2. Print a blank separator line above so the eye catches the change.
+      //   3. Reject GitHub `users.noreply.github.com` git emails as a default —
+      //      they're unrouteable identities; users who blindly press Enter end
+      //      up with a participant identity that can't receive invites.
+      const isNoreply = gitEmail !== null && /@users\.noreply\.github\.com$/i.test(gitEmail);
+      const defaultEmail = (gitEmail !== null && !isNoreply) ? gitEmail : 'user@localhost';
+      stdout('\n');
+      const question = `Participant email (press Enter for default) [${defaultEmail}]:`;
       const answer = await promptEmailFn(question, defaultEmail);
       await writeParticipant(cwd, answer, 'prompted', now);
       stdout(`[cleargate init] Participant identity: ${answer} (prompted)\n`);

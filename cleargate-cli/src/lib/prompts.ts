@@ -28,7 +28,10 @@ export async function promptYesNo(
   opts?: PromptOptions,
 ): Promise<boolean> {
   const stdoutFn = opts?.stdout ?? ((s: string) => process.stdout.write(s));
-  stdoutFn(question + '\n');
+  // Trailing space (not newline) keeps the cursor inline with the prompt so
+  // the user's typed input is visible adjacent to the question — matches every
+  // other CLI prompt convention. See BUG-007.
+  stdoutFn(question + ' ');
 
   const inputStream = opts?.stdin ?? process.stdin;
 
@@ -77,7 +80,8 @@ export async function promptEmail(
   opts?: PromptOptions,
 ): Promise<string> {
   const stdoutFn = opts?.stdout ?? ((s: string) => process.stdout.write(s));
-  stdoutFn(question + '\n');
+  // Trailing space (not newline) — see promptYesNo above and BUG-007.
+  stdoutFn(question + ' ');
 
   const inputStream = opts?.stdin ?? process.stdin;
 
