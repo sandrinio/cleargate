@@ -6,8 +6,8 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md"
-last_ingest: "2026-04-25T00:17:57.068Z"
-last_ingest_commit: ""
+last_ingest: "2026-04-25T00:24:47.489Z"
+last_ingest_commit: "14606b8ff852ff40dcbe581a7c73038960baf301"
 repo: "planning"
 ---
 

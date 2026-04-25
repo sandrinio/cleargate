@@ -1,6 +1,9 @@
 ---
 epic_id: EPIC-019
 status: Approved
+approved: true
+approved_at: 2026-04-25T00:00:00Z
+approved_by: sandrinio
 ambiguity: 🟡 Medium
 context_source: "conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver)."
 owner: sandrinio
@@ -19,7 +22,7 @@ cached_gate_result:
       detail: 1 occurrence at §10
     - id: affected-files-declared
       detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-25T00:05:49Z
+  last_gate_check: 2026-04-25T00:24:58Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -35,7 +38,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-25T00:05:49Z
+  last_stamp: 2026-04-25T00:24:58Z
   sessions: []
 ---
 

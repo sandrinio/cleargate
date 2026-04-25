@@ -63,3 +63,6 @@
 ## Sprints
 
 | [[SPRINT-13]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md |
+## Bugs
+
+| [[BUG-005]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-005_Sprint_Orchestration_CR_Prefix_Blind.md |
