@@ -24,6 +24,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { startDeviceFlow, DeviceFlowError } from '../auth/identity-flow.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -114,7 +115,6 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
   const stdout = opts.stdout ?? ((msg: string) => process.stdout.write(msg + '\n'));
   const stderr = opts.stderr ?? ((msg: string) => process.stderr.write(msg + '\n'));
   const exitFn = opts.exit ?? ((code: number): never => process.exit(code));
-  const sleepFn = opts.sleepFn ?? sleep;
   const mcpBase = resolveMcpUrl(opts.mcpUrl, opts.env);
 
   // ── Step 1: Start device flow ──────────────────────────────────────────────
@@ -148,88 +148,92 @@ export async function adminLoginHandler(opts: AdminLoginOptions = {}): Promise<v
   stdout(`  (Code expires in ${Math.floor(startData.expires_in / 60)} minutes)`);
   stdout('Waiting for authorization...');
 
-  // ── Step 3: Poll until success, timeout, or denial ─────────────────────────
-  // currentInterval is mutable: server may send slow_down (retry_after bump).
-  let currentInterval = opts.intervalOverrideMs ?? Math.max(startData.interval, 5) * 1000;
-  const expiresAtMs = Date.now() + startData.expires_in * 1000;
+  // ── Step 3: Poll via identity-flow.startDeviceFlow with captured success body ─
+  // We wrap fetchPoll to capture the full DevicePollSuccessResponse (which includes
+  // expires_at + admin_user_id needed for the success stdout message) since
+  // startDeviceFlow only returns { accessToken }.
+  let capturedSuccessBody: DevicePollSuccessResponse | null = null;
 
-  // Give 10 seconds of grace beyond expires_in for round-trip latency
-  const deadline = expiresAtMs + 10_000;
-
-  let successData: DevicePollSuccessResponse | null = null;
-
-  while (Date.now() < deadline) {
-    await sleepFn(currentInterval);
-
-    let pollRes: Response;
-    try {
-      pollRes = await fetchFn(`${mcpBase}/admin-api/v1/auth/device/poll`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ device_code: startData.device_code }),
-      });
-    } catch (err) {
-      stderr(`cleargate: error: network error while polling (${err instanceof Error ? err.message : String(err)})`);
-      return exitFn(3);
-    }
-
-    // Handle terminal error responses
-    if (pollRes.status === 403) {
-      const body = (await pollRes.json().catch(() => ({}))) as { error?: string };
-      if (body.error === 'access_denied') {
-        stderr('cleargate: error: access denied — you declined authorization in the browser.');
-        return exitFn(5);
-      }
-      // not_admin
-      stderr('cleargate: error: your GitHub account is not authorized as an admin user.');
-      return exitFn(4);
-    }
-    if (pollRes.status === 410) {
-      stderr('cleargate: error: device code expired — please run `cleargate admin login` again.');
-      return exitFn(5);
-    }
-    if (!pollRes.ok) {
-      const body = (await pollRes.json().catch(() => ({}))) as { error?: string };
-      stderr(`cleargate: error: unexpected server response ${pollRes.status}: ${body.error ?? 'unknown'}`);
-      return exitFn(6);
-    }
-
-    const pollBody = (await pollRes.json()) as DevicePollResponse;
-
-    if (pollBody.pending) {
-      // Apply slow_down: only bump UP, never decrease.
-      // Skip bump when intervalOverrideMs is provided without a sleepFn — those
-      // callers use intervalOverrideMs: 0 as a test seam and don't expect bumps.
-      const shouldApplyBump = opts.sleepFn !== undefined || opts.intervalOverrideMs === undefined;
-      if (shouldApplyBump && pollBody.retry_after !== undefined) {
-        const bumped = pollBody.retry_after * 1000;
-        if (bumped > currentInterval) {
-          currentInterval = bumped;
+  const fetchPollCapture = async (deviceCode: string) => {
+    const res = await fetchFn(`${mcpBase}/admin-api/v1/auth/device/poll`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ device_code: deviceCode }),
+    });
+    // Capture the success body before startDeviceFlow consumes it.
+    // We intercept by wrapping json() to also store the body when pending=false.
+    const originalJson = res.json.bind(res);
+    return {
+      status: res.status,
+      json: async () => {
+        const body = (await originalJson()) as Record<string, unknown>;
+        if (body['pending'] === false) {
+          capturedSuccessBody = body as unknown as DevicePollSuccessResponse;
         }
-      }
-      continue;
-    }
+        return body;
+      },
+    };
+  };
 
-    // Success!
-    successData = pollBody;
-    break;
+  try {
+    await startDeviceFlow({
+      deviceCode: startData.device_code,
+      interval: startData.interval,
+      expiresIn: startData.expires_in,
+      fetchPoll: fetchPollCapture,
+      // Only pass sleepFn if the caller explicitly injected one (test seam).
+      // When sleepFn is omitted, startDeviceFlow uses its own defaultSleep.
+      // This preserves the original bump-suppression logic:
+      // shouldApplyBump = (sleepFn provided) || (intervalOverrideMs not set).
+      ...(opts.sleepFn !== undefined ? { sleepFn: opts.sleepFn } : {}),
+      ...(opts.intervalOverrideMs !== undefined ? { intervalOverrideMs: opts.intervalOverrideMs } : {}),
+      deadlineGraceMs: 10_000,
+    });
+  } catch (err) {
+    if (err instanceof DeviceFlowError) {
+      switch (err.code) {
+        case 'access_denied':
+          stderr('cleargate: error: access denied — you declined authorization in the browser.');
+          return exitFn(5);
+        case 'not_admin':
+          stderr('cleargate: error: your GitHub account is not authorized as an admin user.');
+          return exitFn(4);
+        case 'expired_token':
+          stderr('cleargate: error: device code expired — please run `cleargate admin login` again.');
+          return exitFn(5);
+        case 'timeout':
+          stderr('cleargate: error: timed out waiting for authorization. Please try again.');
+          return exitFn(5);
+        case 'unreachable':
+          stderr(`cleargate: error: network error while polling`);
+          return exitFn(3);
+        default:
+          stderr(`cleargate: error: unexpected server response`);
+          return exitFn(6);
+      }
+    }
+    stderr(`cleargate: error: unexpected error during device flow`);
+    return exitFn(6);
   }
 
-  if (!successData) {
+  if (!capturedSuccessBody) {
     stderr('cleargate: error: timed out waiting for authorization. Please try again.');
     return exitFn(5);
   }
 
+  // Extract fields with explicit typing to avoid TypeScript discriminated union narrowing
+  const successBody = capturedSuccessBody as DevicePollSuccessResponse;
+
   // ── Step 4: Write admin-auth.json ──────────────────────────────────────────
   const authFilePath = resolveAuthFilePath(opts);
   try {
-    writeAdminAuth(authFilePath, successData.admin_token);
+    writeAdminAuth(authFilePath, successBody.admin_token);
   } catch (err) {
     stderr(`cleargate: error: failed to write ${authFilePath}: ${err instanceof Error ? err.message : String(err)}`);
     return exitFn(99);
   }
 
   // ── Step 5: Success message (no secrets in output) ─────────────────────────
-  stdout(`Logged in successfully. Token expires ${successData.expires_at}.`);
+  stdout(`Logged in successfully. Token expires ${successBody.expires_at}.`);
   stdout(`Credentials saved to ${authFilePath} (chmod 600).`);
 }

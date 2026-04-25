@@ -7,8 +7,8 @@
 Sprints currently active (`activated_at` set, `completed_at` not set).
 
 
-- [[SPRINT-13]] — activated: 2026-04-25T00:00:00Z
 
+_No sprints currently in flight._
 
 
 ## Planned Sprints
@@ -46,6 +46,8 @@ Sprints with `completed_at` set.
 - [[SPRINT-08]] — completed: 2026-04-21T10:30:00Z
 
 - [[SPRINT-09]] — completed: 2026-04-21T08:30:00Z
+
+- [[SPRINT-13]] — completed: 2026-04-25T13:59:00Z
 
 
 
@@ -96,6 +98,6 @@ _No active epics._
 
 - [[EPIC-018]] — status: Completed
 
-- [[EPIC-019]] — status: Approved
+- [[EPIC-019]] — status: Completed
 
 

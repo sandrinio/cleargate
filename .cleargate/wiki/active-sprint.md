@@ -5,8 +5,8 @@
 ## Current Sprint
 
 
-- [[SPRINT-13]] — status: Active
 
+_No active sprint found._
 
 
 ## Planned Sprints

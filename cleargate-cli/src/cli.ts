@@ -38,12 +38,20 @@ program
 program
   .command('join <invite-url>')
   .description('join a ClearGate workspace using an invite URL')
+  .option('--auth <provider>', 'identity provider: github | email')
+  .option('--non-interactive', 'fail instead of prompting (CI mode)')
+  .option('--code <code>', 'OTP code for non-interactive email auth')
   .action(async (inviteUrl: string, _opts: Record<string, unknown>, command: Command) => {
     const globals = command.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    const cmdOpts = command.opts<{ auth?: string; nonInteractive?: boolean; code?: string }>();
     await joinHandler({
       inviteUrl,
       profile: globals.profile,
       mcpUrlFlag: globals.mcpUrl,
+      // FLASHCARD #cli #commander #optional-key: only set keys when defined
+      ...(cmdOpts.auth !== undefined ? { auth: cmdOpts.auth } : {}),
+      ...(cmdOpts.nonInteractive === true ? { nonInteractive: true } : {}),
+      ...(cmdOpts.code !== undefined ? { code: cmdOpts.code } : {}),
     });
   });
 
