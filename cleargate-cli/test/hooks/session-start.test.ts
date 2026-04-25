@@ -80,9 +80,17 @@ function runHook(tmpDir: string, timeoutMs: number = 10_000): { exitCode: number
   fs.writeFileSync(patchedHookPath, patched, 'utf-8');
   fs.chmodSync(patchedHookPath, 0o755);
 
+  // Filter node_modules/.bin out of PATH so the hook's resolver falls through
+  // to the test's fake dist stub at ${tmpDir}/cleargate-cli/dist/cli.js
+  // instead of the workspace-linked real cleargate binary (BUG-006 fix).
+  const filteredPath = (process.env.PATH ?? '')
+    .split(':')
+    .filter((d) => !d.includes('node_modules/.bin'))
+    .join(':');
   const result = spawnSync('/usr/bin/env', ['bash', patchedHookPath], {
     encoding: 'utf-8',
     timeout: timeoutMs,
+    env: { ...process.env, PATH: filteredPath },
   });
 
   return {

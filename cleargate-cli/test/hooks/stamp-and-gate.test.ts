@@ -91,6 +91,13 @@ if (sub === 'gate') {
   fs.chmodSync(modifiedHook, 0o755);
 
   const stdin = JSON.stringify({ tool_input: { file_path: filePath } });
+  // Filter node_modules/.bin out of PATH so the hook's resolver falls through
+  // to the test's fake dist stub at ${tmpDir}/cleargate-cli/dist/cli.js
+  // instead of the workspace-linked real cleargate binary (BUG-006 fix).
+  const filteredPath = (process.env.PATH ?? '')
+    .split(':')
+    .filter((d) => !d.includes('node_modules/.bin'))
+    .join(':');
   const result = spawnSync(
     '/usr/bin/env',
     ['bash', modifiedHook],
@@ -98,6 +105,7 @@ if (sub === 'gate') {
       input: stdin,
       encoding: 'utf-8',
       timeout: 10_000,
+      env: { ...process.env, PATH: filteredPath },
     }
   );
 

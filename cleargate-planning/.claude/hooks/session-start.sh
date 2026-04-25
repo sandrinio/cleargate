@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 set -u
 REPO_ROOT="${CLAUDE_PROJECT_DIR}"
-node "${REPO_ROOT}/cleargate-cli/dist/cli.js" doctor --session-start 2>/dev/null || true
+
+# Resolve cleargate CLI: prefer on-PATH binary, fall back to meta-repo-local
+# dist. If neither is present, this hook is a no-op (BUG-006).
+if command -v cleargate >/dev/null 2>&1; then
+  CG=(cleargate)
+elif [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
+  CG=(node "${REPO_ROOT}/cleargate-cli/dist/cli.js")
+else
+  exit 0
+fi
+
+"${CG[@]}" doctor --session-start 2>/dev/null || true
 
 # ── §14.9 SessionStart sync nudge (STORY-010-08) ─────────────────────────────
 # Daily-throttled: probe remote for updates at most once per 24h.
@@ -26,9 +37,9 @@ else
     # Cross-platform 3-second timeout: prefer `timeout` (Linux); fall back to
     # background-process kill (macOS where GNU coreutils may be absent).
     if command -v timeout > /dev/null 2>&1; then
-      timeout 3 node "${REPO_ROOT}/cleargate-cli/dist/cli.js" sync --check > "${RESULT_FILE}" 2>/dev/null || true
+      timeout 3 "${CG[@]}" sync --check > "${RESULT_FILE}" 2>/dev/null || true
     else
-      node "${REPO_ROOT}/cleargate-cli/dist/cli.js" sync --check > "${RESULT_FILE}" 2>/dev/null &
+      "${CG[@]}" sync --check > "${RESULT_FILE}" 2>/dev/null &
       _PROBE_PID=$!
       (sleep 3 && kill "${_PROBE_PID}" 2>/dev/null) &
       _KILL_PID=$!
