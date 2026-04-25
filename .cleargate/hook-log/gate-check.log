@@ -106,3 +106,155 @@ Gate: proposal.ready-for-decomposition (advisory)
 ✅ proposal.ready-for-decomposition passed (3 criteria)
 wiki ingest: update proposals/PROPOSAL-007.md
 [2026-04-20T20:12:14Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 2 occurrences at §5, §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: create epics/EPIC-019.md
+[2026-04-24T23:51:49Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-003_Identity_Bound_Invite_Redemption.md (CR-003)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: create crs/CR-003.md
+[2026-04-24T23:52:36Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-003_Identity_Bound_Invite_Redemption.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-004_GitHub_OAuth_Identity_Provider.md (CR-004)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 1 occurrence at §4
+wiki ingest: create crs/CR-004.md
+[2026-04-24T23:53:18Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-004_GitHub_OAuth_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md (CR-005)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 3 occurrences at §2, §4
+wiki ingest: create crs/CR-005.md
+[2026-04-24T23:54:02Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md (CR-006)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: create crs/CR-006.md
+[2026-04-24T23:54:49Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:00:30Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:00:52Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:01:16Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md (CR-005)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 3 occurrences at §2, §4
+wiki ingest: update crs/CR-005.md
+[2026-04-25T00:01:42Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md (CR-006)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: update crs/CR-006.md
+[2026-04-25T00:01:58Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:03:51Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-003_Identity_Bound_Invite_Redemption.md (CR-003)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: update crs/CR-003.md
+[2026-04-25T00:03:55Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-003_Identity_Bound_Invite_Redemption.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-004_GitHub_OAuth_Identity_Provider.md (CR-004)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 1 occurrence at §4
+wiki ingest: update crs/CR-004.md
+[2026-04-25T00:03:58Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-004_GitHub_OAuth_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md (CR-005)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 3 occurrences at §2, §4
+wiki ingest: update crs/CR-005.md
+[2026-04-25T00:04:02Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md (CR-006)
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: update crs/CR-006.md
+[2026-04-25T00:05:28Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-006_CLI_Join_Provider_Selection_UX.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md (CR-005)
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 3 occurrences at §2, §4
+wiki ingest: update crs/CR-005.md
+[2026-04-25T00:05:38Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-005_Email_Magic_Link_Identity_Provider.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:05:49Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamp-tokens] error: cannot determine work_item_id from frontmatter or filename: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+wiki ingest: create sprints/SPRINT-13.md
+[2026-04-25T00:10:31Z] stamp=1 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[stamp-tokens] error: cannot determine work_item_id from frontmatter or filename: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+wiki ingest: update sprints/SPRINT-13.md
+[2026-04-25T00:17:56Z] stamp=1 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[stamp-tokens] error: cannot determine work_item_id from frontmatter or filename: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+wiki ingest: update sprints/SPRINT-13.md
+[2026-04-25T00:24:47Z] stamp=1 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/SPRINT-13_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md (EPIC-019)
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T00:24:57Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/BUG-005_Sprint_Orchestration_CR_Prefix_Blind.md (BUG-005)
+Gate: bug.ready-for-fix (enforcing)
+❌ repro-steps-deterministic: section 2 has 0 listed-item (≥3 required)
+wiki ingest: create bugs/BUG-005.md
+[2026-04-25T00:27:04Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/BUG-005_Sprint_Orchestration_CR_Prefix_Blind.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-003_Identity_Bound_Invite_Redemption.md
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: update crs/CR-003.md
+[2026-04-25T10:10:39Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-003_Identity_Bound_Invite_Redemption.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-004_GitHub_OAuth_Identity_Provider.md
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 1 occurrence at §4
+wiki ingest: update crs/CR-004.md
+[2026-04-25T10:10:41Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-004_GitHub_OAuth_Identity_Provider.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-005_Email_Magic_Link_Identity_Provider.md
+Gate: cr.ready-to-apply (enforcing)
+❌ no-tbds: 3 occurrences at §2, §4
+wiki ingest: update crs/CR-005.md
+[2026-04-25T10:10:43Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-005_Email_Magic_Link_Identity_Provider.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-006_CLI_Join_Provider_Selection_UX.md
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: update crs/CR-006.md
+[2026-04-25T10:10:45Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-006_CLI_Join_Provider_Selection_UX.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+Gate: epic.ready-for-decomposition (enforcing)
+❌ proposal-approved: linked file not found: conversation 2026-04-25 — direct user intent: bind invite tokens to verified identity; introduce pluggable auth providers; do not lock to GitHub. Proposal step waived per direct-approval pattern (memory: feedback_proposal_gate_waiver).
+❌ no-tbds: 1 occurrence at §10
+❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)
+wiki ingest: update epics/EPIC-019.md
+[2026-04-25T10:10:47Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md
+[cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md
+wiki ingest: update sprints/SPRINT-13.md
+[2026-04-25T10:10:50Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md

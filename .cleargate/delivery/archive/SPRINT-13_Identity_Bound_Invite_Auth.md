@@ -1,13 +1,13 @@
 ---
 sprint_id: "SPRINT-13"
 source_tool: "local"
-status: "Active"
+status: "Completed"
 start_date: "2026-04-28"
 end_date: "2026-05-09"
 activated_at: "2026-04-25T00:00:00Z"
-completed_at: null
+completed_at: "2026-04-25T13:59:00Z"
 created_at: "2026-04-25T00:00:00Z"
-updated_at: "2026-04-25T00:00:00Z"
+updated_at: "2026-04-25T13:59:00Z"
 context_source: "EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md"
 epics: ["EPIC-019"]
 approved: true
