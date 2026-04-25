@@ -258,3 +258,12 @@ wiki ingest: update epics/EPIC-019.md
 [cleargate gate] error: unable to detect work-item type from frontmatter in: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md
 wiki ingest: update sprints/SPRINT-13.md
 [2026-04-25T10:10:50Z] stamp=0 gate=1 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md
+[stamped] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-007_Resend_HTTP_API_Mailer.md (CR-007)
+[cleargate gate] error: readiness-gates.md not found at: /Users/ssuladze/Documents/Dev/ClearGate/mcp/.cleargate/knowledge/readiness-gates.md
+wiki ingest: /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-007_Resend_HTTP_API_Mailer.md not under .cleargate/delivery/
+[2026-04-25T13:16:27Z] stamp=0 gate=1 ingest=2 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/pending-sync/CR-007_Resend_HTTP_API_Mailer.md
+[frozen] /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-007_Resend_HTTP_API_Mailer.md
+Gate: cr.ready-to-apply (enforcing)
+✅ cr.ready-to-apply passed (3 criteria)
+wiki ingest: create crs/CR-007.md
+[2026-04-25T13:30:34Z] stamp=0 gate=0 ingest=0 file=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/delivery/archive/CR-007_Resend_HTTP_API_Mailer.md

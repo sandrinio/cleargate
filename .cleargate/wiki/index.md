@@ -51,5 +51,5 @@
 - Epics: 12 Completed · 2 Abandoned · [expand](archive/epics.md)
 - Sprints: 10 Completed · [expand](archive/sprints.md)
 - Proposals: 7 Abandoned · [expand](archive/proposals.md)
-- CRs: 4 Completed · [expand](archive/crs.md)
+- CRs: 5 Completed · [expand](archive/crs.md)
 - Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
