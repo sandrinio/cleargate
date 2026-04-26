@@ -68,18 +68,30 @@
 | [[STORY-020-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-01_Contradict_Subagent_And_Schema_Delta.md |
 | [[STORY-020-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-02_Ingest_Phase4_And_Advisory_Log.md |
 | [[STORY-020-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-03_CLI_Wiki_Contradict_Subcommand.md |
+| [[STORY-022-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-01_Architect_Lane_Classification_And_Protocol_Section_14.md |
+| [[STORY-022-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-02_State_Json_Schema_V2_Migration.md |
+| [[STORY-022-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-03_Templates_Lane_Fields.md |
+| [[STORY-022-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-04_Pre_Gate_Runner_Demotion_LD_Event.md |
+| [[STORY-022-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-05_Developer_Agent_Lane_Aware_Execution.md |
+| [[STORY-022-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-06_Hotfix_Lane_Template_CLI_Ledger.md |
 ## Bugs
 
 | [[BUG-006]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-006_Init_Scaffold_Hooks_Reference_Nonexistent_CLI_Path.md |
 | [[BUG-007]] | bug | Verified | .cleargate/delivery/archive/BUG-007_Init_Participant_Email_Prompt_Invisible.md |
 | [[BUG-008]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-008_Gate_Check_Criteria_Over_Match.md |
 | [[BUG-009]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-009_Token_Ledger_Missing_CR_PROP_Rows.md |
+| [[BUG-010]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-010_Token_Ledger_Detector_Mis_Attribution.md |
 ## CRs
 
 | [[CR-008]] | cr | Approved | .cleargate/delivery/pending-sync/CR-008_Planning_First_Enforcement.md |
 | [[CR-009]] | cr | Approved | .cleargate/delivery/pending-sync/CR-009_Hook_CLI_Resolution_Pin_NPX.md |
 | [[CR-010]] | cr | Approved | .cleargate/delivery/pending-sync/CR-010_Advisory_Readiness_Gates_On_Push.md |
 | [[CR-011]] | cr | Draft | .cleargate/delivery/pending-sync/CR-011_Capability_Gating_By_Membership.md |
+| [[CR-012]] | cr | Draft | .cleargate/delivery/pending-sync/CR-012_Surface_Ingest_Result_To_Chat.md |
 ## Sprints
 
 | [[SPRINT-14]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-14_Process_v2.md |
+
+## Hotfix Ledger
+
+- [[topics/hotfix-ledger]] — Append-only audit log of merged hotfixes. Reporter aggregates entries by sprint window at sprint close.
