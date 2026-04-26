@@ -53,9 +53,13 @@ export interface DoctorFlags {
   pricing?: boolean;
   /** File path passed to --pricing <file> */
   pricingFile?: string;
+  /** CR-008: --can-edit <file>: exits 0 if allowed, 1 if would-block */
+  canEdit?: boolean;
+  /** CR-008: the file path argument for --can-edit */
+  canEditFile?: string;
 }
 
-export type DoctorMode = 'check-scaffold' | 'session-start' | 'pricing' | 'hook-health';
+export type DoctorMode = 'check-scaffold' | 'session-start' | 'pricing' | 'hook-health' | 'can-edit';
 
 // ─── Mode dispatcher ──────────────────────────────────────────────────────────
 
@@ -72,6 +76,7 @@ export function selectMode(flags: DoctorFlags): DoctorMode {
   if (flags.checkScaffold) modes.push('check-scaffold');
   if (flags.sessionStart) modes.push('session-start');
   if (flags.pricing) modes.push('pricing');
+  if (flags.canEdit) modes.push('can-edit');
 
   if (modes.length > 1) {
     throw new Error(
@@ -415,6 +420,17 @@ export function emitResolverStatusLine(
   }
 }
 
+/**
+ * CR-008: planning-first reminder block text.
+ * Emitted when pending-sync has zero approved stories AND no sprint-active sentinel.
+ */
+export const PLANNING_FIRST_REMINDER = `Triage first, draft second:
+Before any Edit/Write that creates user-facing code, you must:
+  (1) classify the request (Epic / Story / CR / Bug),
+  (2) draft a work item under .cleargate/delivery/pending-sync/ from .cleargate/templates/,
+  (3) halt at Gate 1 (Proposal approval) for human sign-off.
+Bypass this only if the user has explicitly waived planning in this conversation.`;
+
 export async function runSessionStart(
   cwd: string,
   stdout: (s: string) => void
@@ -436,6 +452,7 @@ export async function runSessionStart(
   }
 
   const blocked: BlockedItem[] = [];
+  let hasApprovedStory = false;
 
   for (const filePath of files) {
     let raw: string;
@@ -452,6 +469,11 @@ export async function runSessionStart(
       fm = parseFrontmatter(raw).fm;
     } catch {
       continue;
+    }
+
+    // CR-008: track approved stories for planning-first gate
+    if (fm['approved'] === true) {
+      hasApprovedStory = true;
     }
 
     const gate = parseCachedGateResult(fm['cached_gate_result']);
@@ -476,6 +498,20 @@ export async function runSessionStart(
       gate.failing_criteria.length > 0 ? (gate.failing_criteria[0]?.id ?? '') : '';
 
     blocked.push({ id: itemId, firstCriterionId });
+  }
+
+  // CR-008: check sprint-active sentinel
+  const activesentinel = path.join(cwd, '.cleargate', 'sprint-runs', '.active');
+  const sprintActive = fs.existsSync(activesentinel);
+
+  // CR-008: emit planning-first reminder when no approved stories AND no active sprint
+  const shouldRemind = !hasApprovedStory && !sprintActive;
+  if (shouldRemind) {
+    stdout(PLANNING_FIRST_REMINDER);
+    if (blocked.length > 0) {
+      // Separator before blocked items
+      stdout('');
+    }
   }
 
   if (blocked.length === 0) {
@@ -603,6 +639,139 @@ export async function runPricing(
   );
 }
 
+// ─── Can-edit mode (CR-008 Phase B) ──────────────────────────────────────────
+
+/**
+ * CR-008: reasons why an edit would be blocked.
+ */
+export type CanEditBlockReason = 'no_approved_stories' | 'file_not_in_implementation_files';
+
+/**
+ * CR-008: result of the can-edit check.
+ */
+export interface CanEditResult {
+  allowed: boolean;
+  reason?: CanEditBlockReason;
+}
+
+/**
+ * CR-008: simple glob-style match.
+ * Supports `*` (any characters except `/`) and `**` (any characters including `/`).
+ */
+export function globMatch(pattern: string, filePath: string): boolean {
+  // Normalise separators
+  const normalPattern = pattern.replace(/\\/g, '/');
+  const normalFile = filePath.replace(/\\/g, '/');
+
+  // Escape regex specials except * and ?
+  const regexStr = normalPattern
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, ' ') // placeholder for **
+    .replace(/\*/g, '[^/]*')
+    .replace(/ /g, '.*');
+
+  const re = new RegExp(`^${regexStr}$`);
+  return re.test(normalFile);
+}
+
+/**
+ * CR-008: check whether editing `filePath` is permitted.
+ *
+ * Logic:
+ *  1. If sprint-active sentinel exists → always allowed.
+ *  2. Read pending-sync/*.md; for each with approved: true:
+ *     a. If no implementation_files field → treat as "any approved story → allow".
+ *     b. If implementation_files present → glob-match filePath against each pattern.
+ *  3. If zero approved stories → block with reason 'no_approved_stories'.
+ *  4. If approved stories exist but filePath not covered → block with 'file_not_in_implementation_files'.
+ */
+export async function runCanEdit(
+  filePath: string,
+  cwd: string,
+  stdout: (s: string) => void,
+  exit: (code: number) => never
+): Promise<void> {
+  // Sprint-active sentinel → always allow
+  const activeSentinel = path.join(cwd, '.cleargate', 'sprint-runs', '.active');
+  if (fs.existsSync(activeSentinel)) {
+    stdout('allowed: sprint active');
+    return;
+  }
+
+  const pendingSyncDir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
+
+  let files: string[];
+  try {
+    files = fs
+      .readdirSync(pendingSyncDir)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => path.join(pendingSyncDir, f));
+  } catch {
+    // No pending-sync dir → no approved stories
+    stdout('blocked: no_approved_stories');
+    exit(1);
+    return;
+  }
+
+  let hasApprovedStory = false;
+  let coveredByStory = false;
+
+  for (const storyPath of files) {
+    let raw: string;
+    try {
+      raw = fs.readFileSync(storyPath, 'utf-8');
+    } catch {
+      continue;
+    }
+
+    if (!raw.trimStart().startsWith('---')) continue;
+
+    let fm: Record<string, unknown>;
+    try {
+      fm = parseFrontmatter(raw).fm;
+    } catch {
+      continue;
+    }
+
+    if (fm['approved'] !== true) continue;
+
+    hasApprovedStory = true;
+
+    const implFilesRaw = fm['implementation_files'];
+    if (implFilesRaw === undefined || implFilesRaw === null) {
+      // No implementation_files field → any approved story covers any file
+      coveredByStory = true;
+      break;
+    }
+
+    if (Array.isArray(implFilesRaw)) {
+      for (const pattern of implFilesRaw) {
+        if (typeof pattern !== 'string') continue;
+        if (globMatch(pattern, filePath)) {
+          coveredByStory = true;
+          break;
+        }
+      }
+    }
+
+    if (coveredByStory) break;
+  }
+
+  if (!hasApprovedStory) {
+    stdout('blocked: no_approved_stories');
+    exit(1);
+    return;
+  }
+
+  if (!coveredByStory) {
+    stdout('blocked: file_not_in_implementation_files');
+    exit(1);
+    return;
+  }
+
+  stdout('allowed');
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function doctorHandler(
@@ -639,6 +808,10 @@ export async function doctorHandler(
 
     case 'pricing':
       await runPricing(flags.pricingFile ?? '', cwd, stdout, stderr, exit);
+      break;
+
+    case 'can-edit':
+      await runCanEdit(flags.canEditFile ?? '', cwd, stdout, exit);
       break;
 
     default: {

@@ -30,6 +30,17 @@ import { resolveIdentity, readParticipant, writeParticipant, type ResolveIdentit
  */
 const HOOK_ADDITION: SettingsJson = {
   hooks: {
+    PreToolUse: [
+      {
+        matcher: 'Edit|Write',
+        hooks: [
+          {
+            type: 'command',
+            command: '${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-edit-gate.sh',
+          },
+        ],
+      },
+    ],
     PostToolUse: [
       {
         matcher: 'Edit|Write',

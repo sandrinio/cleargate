@@ -682,11 +682,14 @@ describe('cleargate init', () => {
     expect(rendered).toBe(locked);
   });
 
-  // ─── CR-009 Scenario 7: Snapshot lock — session-start.sh byte-equals cr-009 lock ─
+  // ─── CR-008 Scenario: Snapshot lock — session-start.sh byte-equals cr-008 lock ──
+  // CR-008 drops `2>/dev/null` on the doctor call (Phase A stdout routing).
+  // The cr-009 lock is retained as a historical baseline; this test asserts the
+  // post-CR-008 rendered state matches the cr-008 lock.
 
-  it('CR-009 scenario 7: rendered session-start.sh byte-equals the cr-009 snapshot lock', async () => {
+  it('CR-008 snapshot: rendered session-start.sh byte-equals the cr-008 snapshot lock', async () => {
     const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
-    const lockPath = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'session-start.cr-009.sh');
+    const lockPath = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'session-start.cr-008.sh');
 
     const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
       ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
@@ -707,6 +710,75 @@ describe('cleargate init', () => {
     );
     const locked = fs.readFileSync(lockPath, 'utf8');
     expect(rendered).toBe(locked);
+  });
+
+  // ─── CR-008 Collision check: cr-008 vs cr-009 diff is exactly one line ────────
+
+  it('CR-008 collision-check: session-start.cr-008.sh differs from cr-009 by exactly one line (line 18)', () => {
+    const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
+    const cr009Path = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'session-start.cr-009.sh');
+    const cr008Path = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'session-start.cr-008.sh');
+
+    const cr009Lines = fs.readFileSync(cr009Path, 'utf8').split('\n');
+    const cr008Lines = fs.readFileSync(cr008Path, 'utf8').split('\n');
+
+    // Same line count
+    expect(cr008Lines).toHaveLength(cr009Lines.length);
+
+    // Find differing lines
+    const diffingLines: number[] = [];
+    for (let i = 0; i < cr009Lines.length; i++) {
+      if (cr009Lines[i] !== cr008Lines[i]) {
+        diffingLines.push(i + 1); // 1-indexed line numbers
+      }
+    }
+
+    // Exactly one line differs
+    expect(diffingLines).toHaveLength(1);
+    // The differing line is line 18 (the doctor call)
+    expect(diffingLines[0]).toBe(18);
+    // CR-009 has 2>/dev/null; CR-008 does not
+    expect(cr009Lines[17]).toContain('2>/dev/null');
+    expect(cr008Lines[17]).not.toContain('2>/dev/null');
+  });
+
+  // ─── CR-008 Snapshot: pre-edit-gate.sh byte-equals cr-008 lock ──────────────
+
+  it('CR-008 snapshot: rendered pre-edit-gate.sh byte-equals the cr-008 snapshot lock', async () => {
+    const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
+    const lockPath = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'pre-edit-gate.cr-008.sh');
+
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    const cap = makeCapture();
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const rendered = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'pre-edit-gate.sh'),
+      'utf8',
+    );
+    const locked = fs.readFileSync(lockPath, 'utf8');
+    expect(rendered).toBe(locked);
+  });
+
+  // ─── CR-008 Snapshot: stamp-and-gate.cr-008 equals cr-009 (CR-008 unchanged) ─
+
+  it('CR-008 snapshot: stamp-and-gate.cr-008.sh is byte-identical to cr-009 lock (CR-008 does not touch it)', () => {
+    const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
+    const cr009Path = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'stamp-and-gate.cr-009.sh');
+    const cr008Path = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'stamp-and-gate.cr-008.sh');
+
+    const cr009 = fs.readFileSync(cr009Path, 'utf8');
+    const cr008 = fs.readFileSync(cr008Path, 'utf8');
+    expect(cr008).toBe(cr009);
   });
 
   // ─── Scenario 7: Bootstrap with existing items ───────────────────────────────

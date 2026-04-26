@@ -1,7 +1,8 @@
 /**
- * doctor-session-start.test.ts — STORY-008-06 + CR-009
+ * doctor-session-start.test.ts — STORY-008-06 + CR-009 + CR-008
  *
- * Tests for `cleargate doctor --session-start` mode and CR-009 resolver-status line.
+ * Tests for `cleargate doctor --session-start` mode, CR-009 resolver-status line,
+ * and CR-008 planning-first reminder block.
  * Named cases follow the Gherkin scenarios from the story.
  */
 
@@ -9,7 +10,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { runSessionStart, emitResolverStatusLine } from '../../src/commands/doctor.js';
+import { runSessionStart, emitResolverStatusLine, PLANNING_FIRST_REMINDER } from '../../src/commands/doctor.js';
 
 const tmpDirs: string[] = [];
 
@@ -63,15 +64,52 @@ function writePendingSyncItemPassing(dir: string, name: string, id: string): voi
     last_gate_check: '2026-04-19T10:00:00Z',
   });
 
+  // CR-008: items that pass all gate criteria are also marked approved: true,
+  // which suppresses the planning-first reminder (they have a ready work item).
   const content = `---
 story_id: "${id}"
 status: "Draft"
+approved: true
 cached_gate_result: ${gateResult}
 ---
 
 # ${name}
 `;
   fs.writeFileSync(path.join(pendingDir, `${name}.md`), content, 'utf-8');
+}
+
+/**
+ * CR-008: write a pending-sync item with approved: true (planning-first gate suppressor).
+ */
+function writeApprovedStory(dir: string, name: string, id: string, implementationFiles?: string[]): void {
+  const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+  fs.mkdirSync(pendingDir, { recursive: true });
+
+  const implFilesBlock = implementationFiles
+    ? `implementation_files:\n${implementationFiles.map((f) => `  - "${f}"`).join('\n')}\n`
+    : '';
+
+  const content = `---
+story_id: "${id}"
+status: "Approved"
+approved: true
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+${implFilesBlock}---
+
+# ${name}
+`;
+  fs.writeFileSync(path.join(pendingDir, `${name}.md`), content, 'utf-8');
+}
+
+/**
+ * CR-008: create the sprint-active sentinel.
+ */
+function writeSprintActiveSentinel(dir: string): void {
+  const sentinelDir = path.join(dir, '.cleargate', 'sprint-runs');
+  fs.mkdirSync(sentinelDir, { recursive: true });
+  fs.writeFileSync(path.join(sentinelDir, '.active'), 'SPRINT-14\n', 'utf-8');
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -135,8 +173,11 @@ describe('doctor --session-start', () => {
     await runSessionStart(dir, (s) => out.push(s));
 
     // CR-009: resolver-status line is the first item; blocked-items text is after it.
-    // The 400-char cap applies to the blocked-items chunk, not the resolver line.
-    const blockedOutput = out.filter((l) => !l.includes('cleargate CLI:')).join('\n');
+    // CR-008: planning-first reminder may also be emitted (no approved stories).
+    // The 400-char cap applies to the blocked-items chunk only.
+    const blockedOutput = out
+      .filter((l) => !l.includes('cleargate CLI:') && !l.includes('Triage first') && l !== '')
+      .join('\n');
     expect(blockedOutput.length).toBeLessThanOrEqual(400);
   });
 
@@ -170,9 +211,11 @@ describe('doctor --session-start', () => {
     const out: string[] = [];
     await runSessionStart(dir, (s) => out.push(s));
 
-    // CR-009: resolver-status line is always emitted; null-pass items are not blocked
-    const blockedLines = out.filter((l) => !l.includes('cleargate CLI:'));
-    expect(blockedLines).toHaveLength(0);
+    // CR-009: resolver-status line is always emitted; null-pass items are not blocked.
+    // CR-008: the planning-first reminder MAY appear (item has no approved: true).
+    // The key check: no "N items blocked:" lines.
+    const blockedCountLines = out.filter((l) => l.includes('items blocked:'));
+    expect(blockedCountLines).toHaveLength(0);
   });
 
   // ─── CR-009: resolver-status line is prepended to output ─────────────────────
@@ -235,6 +278,108 @@ describe('CR-009 emitResolverStatusLine', () => {
 
     // Either "PATH" (if cleargate is globally installed) or npx@1.2.3 (if not)
     // Either way, a resolver-status line must be emitted
+    expect(out[0]).toContain('cleargate CLI:');
+  });
+});
+
+// ─── CR-008 Phase A: planning-first reminder block ────────────────────────────
+
+describe('CR-008 Phase A: planning-first reminder block', () => {
+  it('CR-008 scenario 1: empty pending-sync + no .active sentinel → planning-first reminder emitted', async () => {
+    const dir = makeTmpDir();
+    // Create empty pending-sync dir (no approved stories)
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+    const output = out.join('\n');
+
+    expect(output).toContain('Triage first, draft second:');
+    expect(output).toContain('(1) classify the request');
+    expect(output).toContain('(2) draft a work item');
+    expect(output).toContain('(3) halt at Gate 1');
+  });
+
+  it('CR-008 scenario 2: one approved story in pending-sync → planning-first reminder suppressed', async () => {
+    const dir = makeTmpDir();
+    writeApprovedStory(dir, 'STORY-001', 'STORY-001');
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+    const output = out.join('\n');
+
+    expect(output).not.toContain('Triage first, draft second:');
+  });
+
+  it('CR-008 scenario 3: sprint-active sentinel present + empty pending-sync → planning-first reminder suppressed', async () => {
+    const dir = makeTmpDir();
+    // Empty pending-sync
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    // Sprint active sentinel
+    writeSprintActiveSentinel(dir);
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+    const output = out.join('\n');
+
+    expect(output).not.toContain('Triage first, draft second:');
+  });
+
+  it('CR-008: planning-first reminder is emitted when pending-sync has items but none approved', async () => {
+    const dir = makeTmpDir();
+    // Add a failing (non-approved) item
+    writePendingSyncItem(dir, 'STORY-001', 'STORY-001', false, ['no-tbds']);
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+    const output = out.join('\n');
+
+    // Reminder fires (no approved stories)
+    expect(output).toContain('Triage first, draft second:');
+    // Blocked items also present
+    expect(output).toContain('1 items blocked:');
+  });
+
+  it('CR-008: planning-first reminder text matches PLANNING_FIRST_REMINDER constant', async () => {
+    const dir = makeTmpDir();
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+
+    // The reminder text should be in the output
+    const output = out.join('\n');
+    expect(output).toContain(PLANNING_FIRST_REMINDER);
+  });
+
+  it('CR-008: resolver-status line is still first even when reminder fires', async () => {
+    const dir = makeTmpDir();
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+
+    // First emitted line is always the resolver-status
+    expect(out[0]).toContain('cleargate CLI:');
+    // Second emitted line starts the planning-first reminder
+    expect(out[1]).toContain('Triage first, draft second:');
+  });
+
+  it('CR-008: pending-sync dir absent → planning-first reminder is NOT emitted (early return path)', async () => {
+    const dir = makeTmpDir();
+    // No pending-sync dir at all
+
+    const out: string[] = [];
+    await runSessionStart(dir, (s) => out.push(s));
+    const output = out.join('\n');
+
+    // Only the resolver-status line; no reminder (dir missing = early return)
+    expect(output).not.toContain('Triage first, draft second:');
+    // But resolver line still emitted
     expect(out[0]).toContain('cleargate CLI:');
   });
 });

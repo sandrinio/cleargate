@@ -336,6 +336,8 @@ program
   .option('--session-start-mode', 'hidden: enables daily throttle (used by session-start hook)', false)
   .option('--session-start', 'emit blocked pending-sync items summary (used by SessionStart hook)')
   .option('--pricing <file>', 'compute USD cost estimate from a work item\'s draft_tokens')
+  .option('--can-edit <file>', 'CR-008: exit 0 if editing file is allowed, exit 1 if planning required')
+  .option('--cwd <dir>', 'working directory for the doctor check (default: process.cwd())')
   .option('-v, --verbose', 'show per-file drift detail')
   .addHelpText('after', [
     '',
@@ -344,17 +346,20 @@ program
     '                      Writes .cleargate/.drift-state.json.',
     '  --session-start     List blocked pending-sync items (≤10, ≤100 tokens).',
     '  --pricing <file>    Compute USD estimate from a work item\'s draft_tokens.',
+    '  --can-edit <file>   Check if editing a file requires a planning work item.',
     '  (default)           Print a minimal hook-config health report.',
   ].join('\n'))
-  .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; sessionStart?: boolean; pricing?: string; verbose?: boolean }) => {
+  .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; sessionStart?: boolean; pricing?: string; canEdit?: string; cwd?: string; verbose?: boolean }) => {
     await doctorHandler({
       checkScaffold: opts.checkScaffold,
       sessionStartMode: opts.sessionStartMode,
       sessionStart: opts.sessionStart,
       pricing: !!opts.pricing,
       pricingFile: opts.pricing,
+      canEdit: !!opts.canEdit,
+      canEditFile: opts.canEdit,
       verbose: opts.verbose,
-    });
+    }, opts.cwd ? { cwd: opts.cwd } : undefined);
   });
 
 program

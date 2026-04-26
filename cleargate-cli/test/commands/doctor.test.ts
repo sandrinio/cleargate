@@ -18,6 +18,8 @@ import {
   shouldUseCache,
   formatVerboseLine,
   parseHookLogLine,
+  runCanEdit,
+  globMatch,
   type DoctorFlags,
   type DoctorCliOptions,
 } from '../../src/commands/doctor.js';
@@ -498,5 +500,161 @@ describe('formatVerboseLine', () => {
     expect(line).toContain('user-modified');
     // Should have 6-char hex fragments
     expect(line).toMatch(/bbbb22→cccc33 vs aaaa11/);
+  });
+});
+
+// ─── CR-008 Phase B: runCanEdit + globMatch ────────────────────────────────────
+
+describe('CR-008 globMatch', () => {
+  it('matches exact file names', () => {
+    expect(globMatch('src/foo.ts', 'src/foo.ts')).toBe(true);
+  });
+
+  it('does not match different file names', () => {
+    expect(globMatch('src/foo.ts', 'src/bar.ts')).toBe(false);
+  });
+
+  it('matches wildcard * within a directory segment', () => {
+    expect(globMatch('src/*.ts', 'src/foo.ts')).toBe(true);
+  });
+
+  it('wildcard * does not cross directory boundaries', () => {
+    expect(globMatch('src/*.ts', 'src/subdir/foo.ts')).toBe(false);
+  });
+
+  it('matches double-star ** across directories', () => {
+    expect(globMatch('src/**', 'src/subdir/foo.ts')).toBe(true);
+  });
+
+  it('returns false when no match on **', () => {
+    expect(globMatch('lib/**', 'src/foo.ts')).toBe(false);
+  });
+});
+
+describe('CR-008 runCanEdit', () => {
+  const tmpDirsCanEdit: string[] = [];
+
+  afterEach(() => {
+    for (const d of tmpDirsCanEdit.splice(0)) {
+      fs.rmSync(d, { recursive: true, force: true });
+    }
+  });
+
+  function makeDir(): string {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-can-edit-'));
+    tmpDirsCanEdit.push(d);
+    return d;
+  }
+
+  function writeApprovedStory(dir: string, implFiles?: string[]): void {
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+
+    const implBlock = implFiles
+      ? `implementation_files:\n${implFiles.map((f) => `  - "${f}"`).join('\n')}\n`
+      : '';
+
+    const content = `---
+story_id: "STORY-001"
+approved: true
+${implBlock}---
+
+# Story
+`;
+    fs.writeFileSync(path.join(pendingDir, 'STORY-001.md'), content, 'utf-8');
+  }
+
+  function writeActiveSentinel(dir: string): void {
+    const sentDir = path.join(dir, '.cleargate', 'sprint-runs');
+    fs.mkdirSync(sentDir, { recursive: true });
+    fs.writeFileSync(path.join(sentDir, '.active'), 'SPRINT-14\n', 'utf-8');
+  }
+
+  it('CR-008 Gate A: no approved stories → exits 1, reason no_approved_stories', async () => {
+    const dir = makeDir();
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toContain(1);
+    expect(out.join(' ')).toContain('no_approved_stories');
+  });
+
+  it('CR-008 Gate A: no pending-sync dir → exits 1, reason no_approved_stories', async () => {
+    const dir = makeDir();
+    // No pending-sync dir at all
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toContain(1);
+    expect(out.join(' ')).toContain('no_approved_stories');
+  });
+
+  it('CR-008 Gate B: approved story with implementation_files not covering file → exits 1', async () => {
+    const dir = makeDir();
+    writeApprovedStory(dir, ['src/bar.ts']);
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toContain(1);
+    expect(out.join(' ')).toContain('file_not_in_implementation_files');
+  });
+
+  it('CR-008 Gate B: approved story covers file → exits 0 (allowed)', async () => {
+    const dir = makeDir();
+    writeApprovedStory(dir, ['src/foo.ts']);
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toHaveLength(0);
+    expect(out.join(' ')).toContain('allowed');
+  });
+
+  it('CR-008: approved story with no implementation_files → any file is allowed', async () => {
+    const dir = makeDir();
+    writeApprovedStory(dir); // no implementation_files field
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toHaveLength(0);
+    expect(out.join(' ')).toContain('allowed');
+  });
+
+  it('CR-008: sprint-active sentinel → always allowed regardless of stories', async () => {
+    const dir = makeDir();
+    // No approved stories
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    writeActiveSentinel(dir);
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/any-file.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toHaveLength(0);
+    expect(out.join(' ')).toContain('allowed');
+  });
+
+  it('CR-008: approved story covers file via glob wildcard → allowed', async () => {
+    const dir = makeDir();
+    writeApprovedStory(dir, ['src/*.ts']);
+
+    const out: string[] = [];
+    const codes: number[] = [];
+    await runCanEdit('src/foo.ts', dir, (s) => out.push(s), (c) => { codes.push(c); return undefined as never; });
+
+    expect(codes).toHaveLength(0);
+    expect(out.join(' ')).toContain('allowed');
   });
 });
