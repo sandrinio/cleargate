@@ -15,13 +15,21 @@
 #              misrouted SPRINT-04 firings to SPRINT-03 because ledger appends
 #              themselves bumped SPRINT-03's mtime. See REPORT.md SPRINT-04.
 #
-# Work-item ID detection (GENERALIZED 2026-04-19 STORY-008-04):
+# Work-item ID detection (GENERALIZED 2026-04-19 STORY-008-04, SCOPED 2026-04-26 BUG-010):
 #   Primary  : first user message in the transcript — that's the orchestrator's
 #              dispatch prompt, which by agent convention starts with
 #              `STORY=NNN-NN`, `PROPOSAL-NNN`, `EPIC-NNN`, `CR-NNN`, or `BUG-NNN`.
-#   Pattern  : (STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?
+#   Scoping  : look ONLY at lines whose FIRST CHARACTER matches the dispatch-marker
+#              pattern (line-anchored). The SessionStart hook emits a "blocked items"
+#              reminder that lists work-item IDs in prose/bullets — those lines start
+#              with "- " or whitespace, never with the marker prefix. Scanning the full
+#              content caused BUG-010: all SPRINT-14 rows tagged BUG-002 (first item in
+#              the reminder list). Fix: join content with \n, split, filter line-starts.
+#   Pattern  : ^(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=][0-9]...
 #              PROP-NNN is normalised to PROPOSAL-NNN after match (BUG-009, 2026-04-26)
-#   Fallback : grep first match anywhere in the transcript.
+#   Tie-break: when multiple dispatch-marker lines appear in the first user message,
+#              the FIRST line wins (deterministic; orchestrator puts the marker first).
+#   Fallback : grep first line-start match anywhere in the transcript.
 #   story_id : populated only when the match is a STORY-* (backward compat).
 #   work_item_id: always populated when detection succeeds; equals story_id for STORY items.
 #   (Removed): grep-first-anywhere as PRIMARY — it picked up SPRINT-05 mentions
@@ -108,27 +116,40 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
 
   # --- detect work_item_id (PRIMARY: first user message; FALLBACK: anywhere-grep) ---
-  # Orchestrator convention (.claude/agents/developer.md): the first line of the
-  # dispatch prompt is `STORY=NNN-NN`. The first user message in the transcript
-  # is that prompt. Look there first to avoid picking up work-item mentions inside
-  # the subagent's later reads of plans, sprint files, etc.
+  # Orchestrator convention (.claude/agents/developer.md): the FIRST LINE of the
+  # dispatch prompt is `STORY=NNN-NN` (or CR=NNN, BUG=NNN, EPIC=NNN, PROPOSAL=NNN,
+  # PROP=NNN). The SessionStart hook injects a "blocked items" reminder whose lines
+  # start with "- " or whitespace — never with the marker prefix. We therefore
+  # ONLY match lines whose first character is the start of the marker (line-anchored).
+  #
+  # BUG-010 (2026-04-26): joined with " " (space) before — scan() found BUG-002 from
+  # the reminder text. Fix: join with "\n" so line-anchored regex works.
   #
   # Pattern covers: STORY-NNN-NN, PROPOSAL-NNN, EPIC-NNN, CR-NNN, BUG-NNN
   # (and = separator variants like STORY=008-04)
+  # Tie-break: first line matching the anchor wins (orchestrator puts marker first).
   WORK_ITEM_RAW="$(jq -rs '
     [.[] | select(.type == "user")] | .[0].message.content
-    | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
+    | if type == "array" then map(.text? // "") | join("\n") else (. // "") end
     | tostring
-    | scan("(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
+    | split("\n")
+    | map(select(test("^(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=][0-9]")))
+    | .[0] // ""
+    | capture("^(?<kind>STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=](?<id>[0-9]+(-[0-9]+)?)")
+    | (.kind + "-" + .id)
   ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
 
   if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
     # Normalize: replace any = separator with - in the result
     # Then normalize PROP-NNN → PROPOSAL-NNN (canonical form matches wiki/proposals/PROPOSAL-NNN.md filenames)
+    # BUG-009 (2026-04-26): PROP↔PROPOSAL normalization — PRESERVED BY BUG-010.
     WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g' | sed 's/^PROP-/PROPOSAL-/')"
   else
-    # Fallback: grep anywhere in the transcript
-    WORK_ITEM_ID="$(grep -oE '(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
+    # Fallback: grep for line-start dispatch markers anywhere in the transcript.
+    # Line-anchored (^) so that "- BUG-002:" reminder bullet lines are not matched —
+    # only lines whose first character starts the marker prefix.
+    # BUG-009 normalization preserved: sed 's/=/-/g' | sed 's/^PROP-/PROPOSAL-/'
+    WORK_ITEM_ID="$(grep -oE '^(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=][0-9][0-9]*(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
       | head -1 \
       | sed 's/=/-/g' | sed 's/^PROP-/PROPOSAL-/')"
     if [[ -n "${WORK_ITEM_ID}" ]]; then
