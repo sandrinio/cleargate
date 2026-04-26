@@ -19,7 +19,8 @@
 #   Primary  : first user message in the transcript — that's the orchestrator's
 #              dispatch prompt, which by agent convention starts with
 #              `STORY=NNN-NN`, `PROPOSAL-NNN`, `EPIC-NNN`, `CR-NNN`, or `BUG-NNN`.
-#   Pattern  : (STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?
+#   Pattern  : (STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?
+#              PROP-NNN is normalised to PROPOSAL-NNN after match (BUG-009, 2026-04-26)
 #   Fallback : grep first match anywhere in the transcript.
 #   story_id : populated only when the match is a STORY-* (backward compat).
 #   work_item_id: always populated when detection succeeds; equals story_id for STORY items.
@@ -118,17 +119,18 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     [.[] | select(.type == "user")] | .[0].message.content
     | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
     | tostring
-    | scan("(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
+    | scan("(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
   ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
 
   if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
     # Normalize: replace any = separator with - in the result
-    WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
+    # Then normalize PROP-NNN → PROPOSAL-NNN (canonical form matches wiki/proposals/PROPOSAL-NNN.md filenames)
+    WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g' | sed 's/^PROP-/PROPOSAL-/')"
   else
     # Fallback: grep anywhere in the transcript
-    WORK_ITEM_ID="$(grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
+    WORK_ITEM_ID="$(grep -oE '(STORY|PROPOSAL|PROP|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
       | head -1 \
-      | sed 's/=/-/g')"
+      | sed 's/=/-/g' | sed 's/^PROP-/PROPOSAL-/')"
     if [[ -n "${WORK_ITEM_ID}" ]]; then
       printf '[%s] work_item_id fallback grep: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
     fi
