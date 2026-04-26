@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://cleargate.dev/schemas/state.v1.json",
-  "title": "ClearGate Sprint State v1",
-  "description": "Schema for .cleargate/sprint-runs/<sprint-id>/state.json. schema_version=1 is LOCKED — any field addition or removal must bump schema_version.",
+  "$id": "https://cleargate.dev/schemas/state.v2.json",
+  "title": "ClearGate Sprint State v2",
+  "description": "Schema for .cleargate/sprint-runs/<sprint-id>/state.json. schema_version=2 adds per-story lane fields (lane, lane_assigned_by, lane_demoted_at, lane_demotion_reason). Migrated from v1 on first read by update_state.mjs.",
   "type": "object",
   "required": [
     "schema_version",
@@ -13,12 +13,12 @@
     "last_action",
     "updated_at"
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "schema_version": {
       "type": "integer",
-      "const": 1,
-      "description": "Schema version. Must be 1 for v1 state files. Bump on any schema change."
+      "const": 2,
+      "description": "Schema version. Must be 2 for v2 state files. Bumped from v1 by migration in update_state.mjs."
     },
     "sprint_id": {
       "type": "string",
@@ -61,9 +61,13 @@
         "arch_bounces",
         "worktree",
         "updated_at",
-        "notes"
+        "notes",
+        "lane",
+        "lane_assigned_by",
+        "lane_demoted_at",
+        "lane_demotion_reason"
       ],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "state": {
           "type": "string",
@@ -103,6 +107,25 @@
         "notes": {
           "type": "string",
           "description": "Free-form notes for this story (escalation reason, QA comments, etc.)"
+        },
+        "lane": {
+          "type": "string",
+          "enum": ["standard", "fast"],
+          "description": "Execution lane for this story. Default 'standard'. Set by Architect at sprint design or via --lane flag."
+        },
+        "lane_assigned_by": {
+          "type": "string",
+          "enum": ["architect", "human-override", "migration-default"],
+          "description": "Who assigned the lane value. 'migration-default' for stories migrated from v1."
+        },
+        "lane_demoted_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO-8601 timestamp when the story was demoted from fast to standard, or null if never demoted."
+        },
+        "lane_demotion_reason": {
+          "type": ["string", "null"],
+          "description": "Human-readable reason for lane demotion, or null if never demoted."
         }
       }
     }

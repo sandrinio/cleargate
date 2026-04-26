@@ -75,13 +75,13 @@ function buildFixture(opts: FixtureOptions = {}): Fixture {
 
   // state.json
   const stateJson = {
-    schema_version: 1,
+    schema_version: 2,
     sprint_id: 'SPRINT-99',
     execution_mode: 'v2',
     sprint_status: sprintStatus,
     stories: {
-      'STORY-099-01': { state: 'Done', qa_bounces: 0, arch_bounces: 0, worktree: null, updated_at: '2026-01-01T00:00:00.000Z', notes: '' },
-      'STORY-099-02': { state: 'Done', qa_bounces: 0, arch_bounces: 0, worktree: null, updated_at: '2026-01-01T00:00:00.000Z', notes: '' },
+      'STORY-099-01': { state: 'Done', qa_bounces: 0, arch_bounces: 0, worktree: null, updated_at: '2026-01-01T00:00:00.000Z', notes: '', lane: 'standard', lane_assigned_by: 'migration-default', lane_demoted_at: null, lane_demotion_reason: null },
+      'STORY-099-02': { state: 'Done', qa_bounces: 0, arch_bounces: 0, worktree: null, updated_at: '2026-01-01T00:00:00.000Z', notes: '', lane: 'standard', lane_assigned_by: 'migration-default', lane_demoted_at: null, lane_demotion_reason: null },
     },
   };
   fs.writeFileSync(path.join(sprintRunsDir, 'state.json'), JSON.stringify(stateJson, null, 2));

@@ -64,7 +64,7 @@ function seedTempSprintState(sprintId: string, storyId: string): {
   fs.mkdirSync(runDir, { recursive: true });
   const stateFile = path.join(runDir, 'state.json');
   const initial = {
-    schema_version: 1,
+    schema_version: 2,
     sprint_id: sprintId,
     execution_mode: 'v2',
     sprint_status: 'Active',
@@ -76,6 +76,10 @@ function seedTempSprintState(sprintId: string, storyId: string): {
         worktree: null,
         updated_at: '2026-04-21T10:00:00Z',
         notes: '',
+        lane: 'standard',
+        lane_assigned_by: 'migration-default',
+        lane_demoted_at: null,
+        lane_demotion_reason: null,
       },
     },
     last_action: 'test-seed',
