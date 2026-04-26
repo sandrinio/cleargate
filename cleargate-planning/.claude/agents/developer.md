@@ -71,6 +71,30 @@ These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §15.3 for full rationale.
 
+## Lane-Aware Execution
+
+These rules apply under `execution_mode: v2`. Under v1 they are informational.
+
+**On spawn:** read `.cleargate/sprint-runs/<sprint-id>/state.json` for the current sprint (locate the active sprint via `.cleargate/sprint-runs/.active`). Look up the story's `lane` field under `state.json.stories[<story-id>].lane`. Default to `"standard"` if the field is absent, the story key is missing, or `state.json` does not exist.
+
+**lane=fast behavior:**
+
+- Skip writing the architect-plan-citation block. No plan exists for fast-lane stories; the orchestrator dispatched without one.
+- The pre-gate scanner (`pre_gate_runner.sh`) is **never skipped** on lane=fast — that routing contract belongs to `pre_gate_runner.sh` (STORY-022-04). The Developer's commit MUST still pass typecheck + tests, and the single-commit rule is fully preserved.
+- All other guardrails (no `--no-verify`, no scope bleed, no mocked DB) remain in force regardless of lane.
+
+**lane=standard behavior (or lane absent / state.json missing):**
+
+- Follow the existing four-agent contract verbatim: read the Architect's plan, cite it in your blueprint section, implement against it.
+
+**Demotion handler:**
+
+If `state.json` lane flips from `"fast"` to `"standard"` mid-sprint (`lane_demoted_at` populated by `pre_gate_runner.sh` after a fast-lane scanner failure), the orchestrator re-dispatches the story with the architect plan attached. The Developer treats the new dispatch as a fresh spawn and follows the lane=standard contract — there is no state machine or continuation logic on the Developer side.
+
+**First-line marker contract preserved:**
+
+The Developer's first response line still emits `STORY=NNN-NN` (or `CR=NNN`, `BUG=NNN`, `EPIC=NNN`, `PROPOSAL=NNN` / `PROP=NNN`) per BUG-010's detector contract. Lane is **NOT** part of the first-line marker.
+
 ## Circuit Breaker
 
 These rules apply under `execution_mode: v2`. Under v1 they are informational.
