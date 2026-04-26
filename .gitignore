@@ -18,6 +18,9 @@ Thumbs.db
 # Active-sprint sentinel — per-machine runtime state, not team-shared
 .cleargate/sprint-runs/.active
 
+# Hook execution log — per-machine runtime, dirties git status on every session
+/.cleargate/hook-log/
+
 # Per-participant identity file — personal email, not team-shared
 /.cleargate/.participant.json
 
