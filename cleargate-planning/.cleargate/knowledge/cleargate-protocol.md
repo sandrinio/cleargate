@@ -949,3 +949,20 @@ Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='o
 - `0` — clean. No blockers, no config errors. Stdout MAY include informational lines.
 - `1` — blocked items or advisory issues (gate failures, stamp errors, drifted SHAs, missing ledger rows). Stdout lists each blocker.
 - `2` — ClearGate misconfigured or partially installed (missing `.cleargate/`, missing `MANIFEST.json`, missing `auth.json`, hook resolver failure). Stdout emits a remediation hint. See `cleargate doctor --help`.
+
+---
+
+## 24. Lane Routing
+
+A story is eligible for `lane: fast` only if all seven checks pass (any false → `standard`):
+1. **Size cap.** ≤2 files AND ≤50 LOC net (tests count; generated files do not).
+2. **No forbidden surfaces.** Story does not modify: `mcp/src/db/` / `**/migrations/` (schema); `mcp/src/auth/` / `mcp/src/admin-api/auth-*` (auth); `cleargate.config.json` / `mcp/src/config.ts` (runtime config); `mcp/src/adapters/` (adapter API); `cleargate-planning/MANIFEST.json` (scaffold manifest); security-relevant code (token handling, invite verification, gate enforcement).
+3. **No new dependency.** No new package added to any `package.json`.
+4. **Single acceptance scenario or doc-only.** Exactly one `Scenario:` block (or zero for doc-only). `Scenario Outline:` or multiple scenarios → `standard`.
+5. **Existing tests cover the runtime change.** Named test file exists and includes the affected module, OR story is doc/comment/non-runtime config only.
+6. **`expected_bounce_exposure: low`.** `med` or `high` is auto-`standard`.
+7. **No epic-spanning subsystem touches.** All affected files live under the parent epic's declared scope directories.
+
+**Demotion mechanics.** Demotion is one-way (`fast → standard`). Trigger: pre-gate scanner failure OR post-merge test failure on a fast-lane story. On demotion: set `lane = "standard"`, write `lane_demoted_at` (ISO-8601), `lane_demotion_reason`, reset `qa_bounces = 0` and `arch_bounces = 0` (see STORY-022-02 schema). Architect plan is invoked and QA spawned per standard contract.
+
+Event-type `LD` (Lane Demotion) is recorded in sprint markdown §4 alongside existing `UR` and `CR` events; Reporter aggregates into §3 Execution Metrics > Fast-Track Demotion Rate.
