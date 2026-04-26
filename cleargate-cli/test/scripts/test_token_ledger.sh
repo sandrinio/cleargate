@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# test_token_ledger.sh — BUG-009: table-driven bash tests for token-ledger.sh
+# test_token_ledger.sh — BUG-009 + BUG-010: table-driven bash tests for token-ledger.sh
 #
-# Verifies work_item_id detection across all supported id shapes including
-# PROP=NNN / PROP-NNN normalization to PROPOSAL-NNN (BUG-009, 2026-04-26).
+# BUG-009 (2026-04-26): Verifies PROP=NNN / PROP-NNN normalization to PROPOSAL-NNN.
+# BUG-010 (2026-04-26): Verifies line-anchored dispatch-marker detection so that
+#   SessionStart "blocked items" reminder text does NOT pollute work_item_id.
+#   Cases 11-18 (BUG-010 regression cases). Fixtures under test/scripts/fixtures/.
 #
 # Per FLASHCARD 2026-04-21 #test-harness #hooks #sed: use env injection, not sed-surgery.
 #
@@ -13,6 +15,7 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 HOOK="${REPO_ROOT}/cleargate-planning/.claude/hooks/token-ledger.sh"
+FIXTURES_DIR="${REPO_ROOT}/cleargate-cli/test/scripts/fixtures"
 PASS=0
 FAIL=0
 ERRORS=()
@@ -28,6 +31,46 @@ make_transcript() {
     "$(printf '%s' "${first_user_msg}" | jq -Rs '.')")"
   asst_turn='{"type":"assistant","message":{"content":"response","model":"claude-sonnet-4-6","usage":{"input_tokens":100,"output_tokens":50,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}'
   printf '%s\n%s\n' "${user_turn}" "${asst_turn}"
+}
+
+# Run the hook with a pre-built fixture transcript file and return work_item_id.
+# Args: $1=tmpdir, $2=fixture_file_path, $3=sprint_id (empty = no sentinel)
+run_hook_from_fixture() {
+  local tmpdir="$1"
+  local fixture_file="$2"
+  local sprint_id="${3:-}"
+
+  # Set up .cleargate/sprint-runs structure
+  local sprint_runs_dir="${tmpdir}/.cleargate/sprint-runs"
+  mkdir -p "${sprint_runs_dir}"
+  if [[ -n "${sprint_id}" ]]; then
+    printf '%s' "${sprint_id}" > "${sprint_runs_dir}/.active"
+    mkdir -p "${sprint_runs_dir}/${sprint_id}"
+  fi
+  mkdir -p "${tmpdir}/.cleargate/hook-log"
+
+  # Build hook input payload pointing at the fixture file
+  local payload
+  payload="$(printf '{"session_id":"test-session-bug010","transcript_path":"%s","hook_event_name":"SubagentStop"}' \
+    "${fixture_file}")"
+
+  # Run the hook — env injection (FLASHCARD 2026-04-21 #test-harness #hooks #sed)
+  CLAUDE_PROJECT_DIR="${tmpdir}" bash "${HOOK}" <<< "${payload}" 2>/dev/null
+
+  # Extract work_item_id from the ledger
+  local ledger_dir
+  if [[ -n "${sprint_id}" ]]; then
+    ledger_dir="${sprint_runs_dir}/${sprint_id}"
+  else
+    ledger_dir="${sprint_runs_dir}/_off-sprint"
+  fi
+
+  local ledger="${ledger_dir}/token-ledger.jsonl"
+  if [[ -f "${ledger}" ]]; then
+    tail -1 "${ledger}" | jq -r '.work_item_id // ""'
+  else
+    printf ''
+  fi
 }
 
 # Run the hook with a synthetic transcript and return the last row's work_item_id.
@@ -210,6 +253,95 @@ else
   FAIL=$((FAIL + 1))
   ERRORS+=("Case 10: sprint routing")
 fi
+
+# ─── BUG-010 Cases ────────────────────────────────────────────────────────────
+# These cases verify that a SessionStart "blocked items" reminder (listing BUG-002,
+# BUG-003, CR-005, etc. in bullet lines starting with "- ") does NOT pollute the
+# work_item_id. Only lines whose FIRST CHARACTER starts the dispatch-marker prefix
+# are considered. The orchestrator convention places the dispatch marker on the very
+# first line of the dispatch prompt (e.g. "CR=009\n...").
+#
+# Fixture transcripts are at cleargate-cli/test/scripts/fixtures/transcript-bug-010-*.jsonl
+# Each fixture has: SessionStart reminder block (with BUG-002 listed first) → blank line
+# → dispatch line (e.g. CR=009) → rest of dispatch prompt.
+#
+# PRE-FIX (BUG-009 state): all these would return "BUG-002" (the bug).
+# POST-FIX (BUG-010 state): each returns the dispatch-line marker (the fix).
+
+printf '\n'
+printf 'BUG-010 token-ledger.sh tests (line-anchored dispatch-marker detection)\n'
+printf '=========================================================================\n'
+
+# ── BUG-010 Case 11 (R-BUG-002 regression): reminder + CR=009 → CR-009 ────────
+assert_work_item "BUG-010 Case 11: SessionStart reminder + CR=009 → CR-009 (not BUG-002)" "CR-009" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case1-cr009.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 12: reminder + STORY=014-01 → STORY-014-01 ──────────────────
+assert_work_item "BUG-010 Case 12: SessionStart reminder + STORY=014-01 → STORY-014-01" "STORY-014-01" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case2-story014.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 13: reminder + BUG=008 → BUG-008 ────────────────────────────
+assert_work_item "BUG-010 Case 13: SessionStart reminder + BUG=008 → BUG-008 (not BUG-002)" "BUG-008" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case3-bug008.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 14: reminder + EPIC=022 → EPIC-022 ──────────────────────────
+assert_work_item "BUG-010 Case 14: SessionStart reminder + EPIC=022 → EPIC-022" "EPIC-022" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case4-epic022.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 15: reminder + PROPOSAL=013 → PROPOSAL-013 ──────────────────
+assert_work_item "BUG-010 Case 15: SessionStart reminder + PROPOSAL=013 → PROPOSAL-013" "PROPOSAL-013" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case5-proposal013.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 16: reminder + PROP=013 → PROPOSAL-013 (BUG-009 normalize) ──
+assert_work_item "BUG-010 Case 16: SessionStart reminder + PROP=013 → PROPOSAL-013 (BUG-009 preserved)" "PROPOSAL-013" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case6-prop013.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
+
+# ── BUG-010 Case 17 (negative): ONLY SessionStart reminder, no dispatch line ──
+# With the fix, the primary jq finds no line-start marker and returns empty.
+# The fallback grep (now line-anchored) also finds nothing in the JSONL (reminder
+# items are "- BUG-002:" mid-line, not line-start). Legacy STORY fallback also
+# finds nothing. Final result: "none" (per hook's STORY_ID="none" fallback).
+# This is an intentional behavior change from BUG-009 (which returned "BUG-002").
+# The old BUG-009 behavior was itself incorrect (it was the bug being fixed).
+_tmpdir17=$(mktemp -d)
+_result17=$(run_hook_from_fixture "${_tmpdir17}" "${FIXTURES_DIR}/transcript-bug-010-case7-no-dispatch.jsonl" "SPRINT-14")
+rm -rf "${_tmpdir17}"
+if [[ "${_result17}" == "" || "${_result17}" == "none" ]]; then
+  printf '  ✓ BUG-010 Case 17: no dispatch line → empty/none (fallback, no false-positive)\n'
+  PASS=$((PASS + 1))
+else
+  printf '  ✗ BUG-010 Case 17: no dispatch line → expected "" or "none", got "%s"\n' "${_result17}"
+  FAIL=$((FAIL + 1))
+  ERRORS+=("BUG-010 Case 17: no dispatch line fallback")
+fi
+
+# ── BUG-010 Case 18 (tie-break): multiple dispatch markers → first line wins ──
+# Tie-break rule: when multiple lines in the first user message start with a
+# dispatch-marker prefix, the FIRST such line is used. This matches the orchestrator
+# convention of placing the primary dispatch marker on the very first line.
+assert_work_item "BUG-010 Case 18: multiple dispatch markers → first (STORY-014-01) wins" "STORY-014-01" "$(
+  tmpdir=$(mktemp -d)
+  run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case8-multi-dispatch.jsonl" "SPRINT-14"
+  rm -rf "${tmpdir}"
+)"
 
 # ─── Summary ──────────────────────────────────────────────────────────────────
 

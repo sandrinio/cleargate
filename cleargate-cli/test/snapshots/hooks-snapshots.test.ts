@@ -1,12 +1,22 @@
 /**
- * Byte-equality snapshot regression lock for hook scripts.
+ * Byte-equality snapshot regression locks for hook scripts.
  *
- * BUG-009 (2026-04-26): Locks the post-fix state of token-ledger.sh.
- * If the live cleargate-planning/.claude/hooks/token-ledger.sh drifts beyond
- * the BUG-009 fix surface, this test fails and QA reviews the diff.
+ * BUG-009 (2026-04-26): Historical baseline — PROP↔PROPOSAL normalization fix.
+ *   Snapshot: token-ledger.bug-009.sh
+ *   NOTE: After BUG-010, the live hook diverges from the BUG-009 snapshot.
+ *   The BUG-009 snapshot is kept as a historical baseline for audit purposes
+ *   but the live-vs-bug-009 equality test is INTENTIONALLY SKIPPED (it would
+ *   always fail post BUG-010 fix). The BUG-010 snapshot is the authoritative
+ *   current baseline.
  *
- * Pattern: copy-on-fix — snapshot was taken immediately after BUG-009 fix.
- * To update the snapshot intentionally: cp <live-hook> <snapshot-path>
+ * BUG-010 (2026-04-26): Locks the post-fix state of token-ledger.sh.
+ *   Fix: line-anchored dispatch-marker detection — SessionStart reminder text
+ *   is no longer scanned (it contains "- BUG-002:" bullets that polluted
+ *   work_item_id for all SPRINT-14 rows).
+ *   Snapshot: token-ledger.bug-010.sh
+ *
+ * Pattern: copy-on-fix — snapshot was taken immediately after each fix.
+ * To update the active snapshot intentionally: cp <live-hook> <snapshot-path>
  * then document the change in a new BUG/CR/STORY.
  *
  * DO NOT modify the snapshot file without a corresponding work item —
@@ -21,7 +31,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 describe('hook snapshot regression locks', () => {
-  it('token-ledger.sh matches BUG-009 snapshot byte-for-byte', () => {
+  it('BUG-009 snapshot file exists (historical baseline — not asserted against live after BUG-010)', () => {
+    // BUG-009 snapshot is retained for audit/forensic purposes.
+    // After BUG-010, the live hook is intentionally different from the BUG-009 snapshot.
+    // We assert the snapshot file exists but do NOT assert live == bug-009.
+    const snapshotPath = path.join(
+      __dirname,
+      'hooks',
+      'token-ledger.bug-009.sh'
+    );
+    expect(fs.existsSync(snapshotPath), `BUG-009 snapshot not found: ${snapshotPath}`).toBe(true);
+  });
+
+  it('token-ledger.sh matches BUG-010 snapshot byte-for-byte', () => {
     const livePath = path.join(
       REPO_ROOT,
       'cleargate-planning',
@@ -32,11 +54,11 @@ describe('hook snapshot regression locks', () => {
     const snapshotPath = path.join(
       __dirname,
       'hooks',
-      'token-ledger.bug-009.sh'
+      'token-ledger.bug-010.sh'
     );
 
     expect(fs.existsSync(livePath), `live hook not found: ${livePath}`).toBe(true);
-    expect(fs.existsSync(snapshotPath), `snapshot not found: ${snapshotPath}`).toBe(true);
+    expect(fs.existsSync(snapshotPath), `BUG-010 snapshot not found: ${snapshotPath}`).toBe(true);
 
     const live = fs.readFileSync(livePath);
     const snapshot = fs.readFileSync(snapshotPath);
