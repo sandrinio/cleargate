@@ -4,6 +4,14 @@ Do NOT draft this file manually. Do NOT invoke cleargate_push_item on this file.
 The Vibe Coder may annotate the "Execution Guidelines" section locally — this section is never pushed.
 Output location: .cleargate/plans/SPRINT-{ID}.md
 Do NOT output these instructions.
+
+§1 Lane column placement: "Lane" is inserted between "Title" and "Milestone" in the Consolidated Deliverables
+table (§1). This positions lane as a planning signal adjacent to the story title, which is where the Architect
+most naturally reads it during Sprint Design Review. Values are "standard" (default) or "fast" (see protocol §24).
+
+§2.4 Lane Audit: The Architect populates one row per fast-lane story during Sprint Design Review. Empty by default.
+Rows are added only for non-`standard` lanes. The subsection is numbered 2.4; the former §2.4 ADR-Conflict Flags
+is renumbered to §2.5.
 </instructions>
 
 ---
@@ -40,9 +48,9 @@ cached_gate_result:
 ## 1. Consolidated Deliverables
 *(Pulled from PM tool. IDs are the remote PM entity IDs.)*
 
-| Story ID | Title | Milestone | Parallel? | Bounce Exposure |
-|---|---|---|---|---|
-| `{STORY-NNN-NN}` | {Title} | M{N} | y / n | low / med / high |
+| Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
+|---|---|---|---|---|---|
+| `{STORY-NNN-NN}` | {Title} | standard / fast | M{N} | y / n | low / med / high |
 
 ## 2. Execution Strategy
 *(Written by Architect during Sprint Design Review. Required before `execution_mode: v2` sprint start. Under v1, this section may be omitted or left as a stub.)*
@@ -64,7 +72,14 @@ Example:
 {Explicit conflict risks. One bullet per risk. Cite file + story pair.}
 - None identified. (Replace with actual warnings if applicable.)
 
-### 2.4 ADR-Conflict Flags
+### 2.4 Lane Audit
+{Architect populates one row per fast-lane story during Sprint Design Review. Empty by default — rows added only for non-`standard` lanes.}
+
+| Story | Lane | Rationale (≤80 chars) |
+|---|---|---|
+| `STORY-NNN-NN` | fast | <one-line rationale> |
+
+### 2.5 ADR-Conflict Flags
 {Any story whose implementation conflicts with an Architectural Decision Record in `.cleargate/knowledge/` or prior sprint decisions. One bullet per flag.}
 - None identified. (Replace with actual flags if applicable.)
 
