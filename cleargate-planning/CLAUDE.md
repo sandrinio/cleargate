@@ -18,7 +18,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Duplicate check before drafting.** Before drafting a Proposal or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate.
 
-**Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` and explicit human confirmation (Gate 3).
+**Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` (hard reject) and explicit human confirmation. Readiness gates (`cached_gate_result.pass`) are advisory by default — the push proceeds and the item body receives an `[advisory: gate_failed — <criteria>]` prefix; opt into hard-reject via `STRICT_PUSH_GATES=true` on the MCP server.
 
 **Drafting work items:**
 - Use the templates in `.cleargate/templates/` (`proposal.md`, `epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
