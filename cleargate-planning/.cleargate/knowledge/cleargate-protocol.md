@@ -940,3 +940,13 @@ Set `STRICT_PUSH_GATES=true` on the MCP server to restore pre-CR-010 hard-reject
 
 Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='ok'` — the push succeeded. The `failing_criteria` are surfaced in the push response shape, not in a new audit column. No schema migration is required.
 **Rationale:** PM-tool answer-collection requires items to land before readiness answers arrive; advisory mode enables this. See CR-010 §0 for full evidence.
+
+---
+
+## 23. Doctor Exit-Code Semantics
+
+`cleargate doctor` exits with one of three codes. Hooks branch on the integer, not on stdout parsing.
+- `0` — clean. No blockers, no config errors. Stdout MAY include informational lines.
+- `1` — blocked items or advisory issues (gate failures, stamp errors, drifted SHAs, missing ledger rows). Stdout lists each blocker.
+- `2` — ClearGate misconfigured or partially installed (missing `.cleargate/`, missing `MANIFEST.json`, missing `auth.json`, hook resolver failure). Stdout emits a remediation hint.
+Applies to all modes: default, `--session-start`, `--can-edit`, `--check-scaffold`, `--pricing`.
