@@ -105,6 +105,80 @@ detect_stack() {
 }
 
 # ---------------------------------------------------------------------------
+# resolve_story_id_from_branch <branch>
+# Extracts story/CR/bug ID from a branch name like story/STORY-022-04.
+# Pattern (per M4 plan §1): (story|cr|bug)/([A-Z-]+-[0-9]+(-[0-9]+)?)
+# Returns the ID (group 2) on stdout, or empty string on no match.
+# Cross-OS: bash 3.2+, POSIX ERE grep -E, quoted expansions, no sed -E extensions.
+# ---------------------------------------------------------------------------
+resolve_story_id_from_branch() {
+  local branch="$1"
+  # Match the full pattern and extract just the ID part after the slash
+  local matched
+  matched="$(printf '%s\n' "${branch}" | grep -oE '(story|cr|bug)/[A-Z][A-Z-]*[A-Z]-[0-9]+(-[0-9]+)?' | head -1 || true)"
+  if [[ -n "${matched}" ]]; then
+    # Strip the (story|cr|bug)/ prefix — everything up to and including first /
+    printf '%s\n' "${matched#*/}"
+  else
+    printf ''
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# resolve_lane <state_json_path> <story_id>
+# Reads the lane field for a story from state.json.
+# Returns "standard" if story absent, lane absent, or jq fails.
+# jq 1.5+ syntax. Cross-OS portable.
+# ---------------------------------------------------------------------------
+resolve_lane() {
+  local state_json="$1"
+  local story_id="$2"
+  if [[ ! -f "${state_json}" ]]; then
+    printf 'standard\n'
+    return
+  fi
+  local lane
+  lane="$(jq -r --arg sid "${story_id}" '.stories[$sid].lane // "standard"' "${state_json}" 2>/dev/null || printf 'standard')"
+  if [[ -z "${lane}" || "${lane}" = "null" ]]; then
+    lane="standard"
+  fi
+  printf '%s\n' "${lane}"
+}
+
+# ---------------------------------------------------------------------------
+# append_ld_event <sprint_md_path> <story_id> <reason>
+# Appends an LD event row to the sprint markdown §4 Events section.
+# If "## 4. Events" heading absent, creates it with table header first.
+# Idempotent by design (orchestrator calls once per demotion).
+# Cross-OS: bash 3.2+, portable date, printf.
+# ---------------------------------------------------------------------------
+append_ld_event() {
+  local sprint_md="$1"
+  local story_id="$2"
+  local reason="$3"
+  local timestamp
+  timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  # Truncate reason to 80 chars
+  reason="$(printf '%s' "${reason}" | cut -c1-80)"
+
+  if [[ ! -f "${sprint_md}" ]]; then
+    printf 'append_ld_event: sprint markdown not found: %s\n' "${sprint_md}" >&2
+    return 1
+  fi
+
+  local row
+  row="$(printf '| LD | %s | %s | %s |' "${story_id}" "${timestamp}" "${reason}")"
+
+  if grep -q '^## 4\. Events' "${sprint_md}" 2>/dev/null; then
+    # Section exists: append row only
+    printf '\n%s\n' "${row}" >> "${sprint_md}"
+  else
+    # Section absent: append heading + table header + row
+    printf '\n## 4. Events\n\n| Event | Story | Timestamp | Reason |\n|---|---|---|---|\n%s\n' "${row}" >> "${sprint_md}"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # diff_package_json <worktree_path> <branch>
 # Prints new runtime deps (non-dev) introduced vs <branch>^.
 # Returns lines like: "new runtime dep: <name>"
