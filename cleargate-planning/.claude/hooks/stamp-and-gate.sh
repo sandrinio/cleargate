@@ -4,16 +4,17 @@ REPO_ROOT="${CLAUDE_PROJECT_DIR}"
 LOG="${REPO_ROOT}/.cleargate/hook-log/gate-check.log"
 mkdir -p "$(dirname "$LOG")"
 
-# Resolve cleargate CLI: prefer on-PATH binary (`npm i -g cleargate` / `npx`),
-# fall back to a meta-repo-local dist (dogfood case). If neither is present,
-# log a remediation message and exit 0 (BUG-006).
-if command -v cleargate >/dev/null 2>&1; then
-  CG=(cleargate)
-elif [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
+# cleargate-pin: __CLEARGATE_VERSION__
+# Resolve cleargate CLI (three-branch resolver — CR-009):
+#   1. meta-repo dogfood dist (fastest; only present in ClearGate's own repo)
+#   2. on-PATH binary (global install or shim)
+#   3. pinned npx invocation (always works wherever Node is present)
+if [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
   CG=(node "${REPO_ROOT}/cleargate-cli/dist/cli.js")
+elif command -v cleargate >/dev/null 2>&1; then
+  CG=(cleargate)
 else
-  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] cleargate CLI not found — install with 'npm i -g cleargate' or run via 'npx cleargate'. Hook skipped." >>"$LOG"
-  exit 0
+  CG=(npx -y "@cleargate/cli@__CLEARGATE_VERSION__")
 fi
 
 FILE=$(jq -r '.tool_input.file_path' 2>/dev/null || echo "")
