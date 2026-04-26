@@ -10,7 +10,12 @@ import { describe, it, expect, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
-import { runSessionStart, emitResolverStatusLine, PLANNING_FIRST_REMINDER } from '../../src/commands/doctor.js';
+import {
+  runSessionStart,
+  emitResolverStatusLine,
+  PLANNING_FIRST_REMINDER,
+  type DoctorOutcome,
+} from '../../src/commands/doctor.js';
 
 const tmpDirs: string[] = [];
 
@@ -381,5 +386,70 @@ describe('CR-008 Phase A: planning-first reminder block', () => {
     expect(output).not.toContain('Triage first, draft second:');
     // But resolver line still emitted
     expect(out[0]).toContain('cleargate CLI:');
+  });
+});
+
+// ─── STORY-014-01: --session-start exit-code hierarchy ───────────────────────
+
+describe('STORY-014-01: --session-start mode preserves exit-code hierarchy', () => {
+  it('outcome.blocker is set when runSessionStart encounters blocked items', async () => {
+    const dir = makeTmpDir();
+
+    // Write a blocked item
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    const gateResult = JSON.stringify({
+      pass: false,
+      failing_criteria: [{ id: 'no-tbds' }],
+      last_gate_check: '2026-04-26T10:00:00Z',
+    });
+    const content = `---
+story_id: "STORY-014-01-TEST"
+status: "Draft"
+approved: true
+cached_gate_result: ${gateResult}
+---
+
+# Blocked story for exit-code test
+`;
+    fs.writeFileSync(path.join(pendingDir, 'STORY-014-01-TEST.md'), content, 'utf-8');
+
+    const out: string[] = [];
+    const outcome: DoctorOutcome = { configError: false, blocker: false };
+    await runSessionStart(dir, (s) => out.push(s), outcome);
+
+    // Blocked item must set outcome.blocker
+    expect(outcome.blocker).toBe(true);
+    // Resolver-status line still emitted first
+    expect(out[0]).toContain('cleargate CLI:');
+    // Blocked item listed in output
+    expect(out.join('\n')).toContain('STORY-014-01-TEST');
+  });
+
+  it('outcome.blocker is false when no blocked items exist', async () => {
+    const dir = makeTmpDir();
+
+    // Write a passing item
+    const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingDir, { recursive: true });
+    const content = `---
+story_id: "STORY-PASS"
+status: "Approved"
+approved: true
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+---
+
+# Passing story
+`;
+    fs.writeFileSync(path.join(pendingDir, 'STORY-PASS.md'), content, 'utf-8');
+
+    const out: string[] = [];
+    const outcome: DoctorOutcome = { configError: false, blocker: false };
+    await runSessionStart(dir, (s) => out.push(s), outcome);
+
+    expect(outcome.blocker).toBe(false);
+    expect(outcome.configError).toBe(false);
   });
 });

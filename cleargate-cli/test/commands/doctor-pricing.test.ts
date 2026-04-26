@@ -154,7 +154,7 @@ describe('doctor --pricing', () => {
     expect(out.join('\n')).toContain('$0.0000');
   });
 
-  it('exits 1 with error when file does not exist', async () => {
+  it('exits 2 with error when file does not exist (STORY-014-01: file-not-found is config-error)', async () => {
     const dir = makeTmpDir();
     let exitCode = -1;
     const err: string[] = [];
@@ -171,11 +171,11 @@ describe('doctor --pricing', () => {
       // Expected
     }
 
-    expect(exitCode).toBe(1);
+    expect(exitCode).toBe(2);
     expect(err.join('\n')).toContain('cannot read file');
   });
 
-  it('exits 1 with error when filePath is empty string', async () => {
+  it('exits 2 with error when filePath is empty string (STORY-014-01: missing arg is config-error)', async () => {
     const dir = makeTmpDir();
     let exitCode = -1;
     const err: string[] = [];
@@ -192,7 +192,7 @@ describe('doctor --pricing', () => {
       // Expected
     }
 
-    expect(exitCode).toBe(1);
+    expect(exitCode).toBe(2);
     expect(err.join('\n')).toContain('missing <file>');
   });
 });

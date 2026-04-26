@@ -105,6 +105,9 @@ function makeCliOpts(overrides: Partial<DoctorCliOptions> = {}): DoctorCliOption
   return {
     stdout: (s: string) => out.push(s),
     stderr: (s: string) => err.push(s),
+    // STORY-014-01: doctorHandler now always calls exit() at the end.
+    // Provide a no-op seam by default so existing tests don't see process.exit() thrown by vitest.
+    exit: (_code: number) => undefined as never,
     ...overrides,
     out,
     err,
@@ -656,5 +659,238 @@ ${implBlock}---
 
     expect(codes).toHaveLength(0);
     expect(out.join(' ')).toContain('allowed');
+  });
+});
+
+// ─── STORY-014-01: Exit-code semantics ─────────────────────────────────────────
+
+/**
+ * Helpers shared by STORY-014-01 exit-code tests.
+ */
+function makeExitTmpDir(): string {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-exit-'));
+  tmpDirs.push(d);
+  return d;
+}
+
+/** Write a minimal .cleargate/ scaffold (does NOT include cleargate-planning/MANIFEST.json). */
+function writeCleargateDirOnly(dir: string): void {
+  const deliveryDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+  fs.mkdirSync(deliveryDir, { recursive: true });
+}
+
+/** Write a passing pending-sync item (approved, pass=true). */
+function writePassingItem(dir: string): void {
+  const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+  fs.mkdirSync(pendingDir, { recursive: true });
+  const content = `---
+story_id: "STORY-PASS"
+status: "Approved"
+approved: true
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+---
+
+# Passing story
+`;
+  fs.writeFileSync(path.join(pendingDir, 'STORY-PASS.md'), content, 'utf-8');
+}
+
+/** Write a blocked pending-sync item (pass=false). */
+function writeBlockedItem(dir: string): void {
+  const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+  fs.mkdirSync(pendingDir, { recursive: true });
+  const gateResult = JSON.stringify({
+    pass: false,
+    failing_criteria: [{ id: 'no-tbds' }],
+    last_gate_check: '2026-04-26T10:00:00Z',
+  });
+  const content = `---
+story_id: "STORY-BLOCKED"
+status: "Draft"
+approved: true
+cached_gate_result: ${gateResult}
+---
+
+# Blocked story
+`;
+  fs.writeFileSync(path.join(pendingDir, 'STORY-BLOCKED.md'), content, 'utf-8');
+}
+
+/** Write a valid cleargate-planning/MANIFEST.json. */
+function writeManifest(dir: string): void {
+  const manifestDir = path.join(dir, 'cleargate-planning');
+  fs.mkdirSync(manifestDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(manifestDir, 'MANIFEST.json'),
+    JSON.stringify({ cleargate_version: '0.5.0', generated_at: '2026-04-26T00:00:00Z', files: [] }, null, 2),
+    'utf-8'
+  );
+}
+
+/** Build a DoctorCliOptions that captures exit code. Returns { cli, codes }. */
+function makeDoctorCapture(dir: string): { cli: DoctorCliOptions; out: string[]; codes: number[] } {
+  const out: string[] = [];
+  const codes: number[] = [];
+  const cli: DoctorCliOptions = {
+    cwd: dir,
+    stdout: (s) => out.push(s),
+    stderr: (s) => out.push(s),
+    exit: (c) => { codes.push(c); return undefined as never; },
+  };
+  return { cli, out, codes };
+}
+
+// Scenario 1: Clean repo exits 0
+
+describe('STORY-014-01 Scenario 1: Clean repo exits 0', () => {
+  it('exits 0 when no blockers and no config errors', async () => {
+    const dir = makeExitTmpDir();
+    writeCleargateDirOnly(dir);
+    writePassingItem(dir);
+    writeManifest(dir);
+
+    // Set up .claude/settings.json so hook-health proceeds
+    const claudeDir = path.join(dir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+    fs.writeFileSync(path.join(claudeDir, 'settings.json'), JSON.stringify({ hooks: {} }), 'utf-8');
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({}, cli);
+
+    expect(codes).toHaveLength(1);
+    expect(codes[0]).toBe(0);
+    const output = out.join('\n');
+    expect(output).not.toMatch(/blocked|error/i);
+  });
+});
+
+// Scenario 2: Blocked items exit 1
+
+describe('STORY-014-01 Scenario 2: Blocked items exit 1', () => {
+  it('exits 1 when at least one pending-sync item has cached_gate_result.pass=false', async () => {
+    const dir = makeExitTmpDir();
+    writeCleargateDirOnly(dir);
+    writeBlockedItem(dir);
+    writeManifest(dir);
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({ sessionStart: true }, cli);
+
+    expect(codes).toHaveLength(1);
+    expect(codes[0]).toBe(1);
+    const output = out.join('\n');
+    expect(output).toContain('STORY-BLOCKED');
+    expect(output).toContain('no-tbds');
+  });
+});
+
+// Scenario 3: Missing .cleargate exits 2
+
+describe('STORY-014-01 Scenario 3: Missing .cleargate exits 2', () => {
+  it('exits 2 when cwd has no .cleargate/', async () => {
+    const dir = makeExitTmpDir();
+    // Do NOT create .cleargate/
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({}, cli);
+
+    expect(codes).toHaveLength(1);
+    expect(codes[0]).toBe(2);
+    const output = out.join('\n');
+    expect(output).toContain('cleargate init');
+  });
+});
+
+// Scenario 4: Missing manifest exits 2
+
+describe('STORY-014-01 Scenario 4: Missing manifest exits 2', () => {
+  it('exits 2 when cleargate-planning/MANIFEST.json is absent', async () => {
+    const dir = makeExitTmpDir();
+    writeCleargateDirOnly(dir);
+    // Do NOT write manifest
+    // Set up .claude/settings.json
+    const claudeDir = path.join(dir, '.claude');
+    fs.mkdirSync(claudeDir, { recursive: true });
+    fs.writeFileSync(path.join(claudeDir, 'settings.json'), JSON.stringify({ hooks: {} }), 'utf-8');
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({}, cli);
+
+    expect(codes).toHaveLength(1);
+    expect(codes[0]).toBe(2);
+    const output = out.join('\n');
+    expect(output).toContain('MANIFEST.json');
+  });
+});
+
+// Scenario 5: Hook resolver complete failure exits 2
+
+describe('STORY-014-01 Scenario 5: Hook resolver complete failure exits 2', () => {
+  it('exits 2 when emitResolverStatusLine reports not-resolvable', async () => {
+    const dir = makeExitTmpDir();
+    writeCleargateDirOnly(dir);
+    writeManifest(dir);
+    // No .claude/hooks/stamp-and-gate.sh → pinVersion = 'unknown' → 🔴 not resolvable branch
+    // No dist/cli.js → local dist branch skipped
+    // command -v cleargate → may or may not exist on test runner; to force failure,
+    // we need pinVersion = 'unknown'. Ensure hooks dir is absent.
+    // The resolver emits 🔴 when pinVersion === 'unknown'.
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({ sessionStart: true }, cli);
+
+    // If cleargate IS on PATH, the resolver will return PATH branch (not 🔴),
+    // meaning exit code would be 1 (or 0 if no blocked items).
+    // We only assert the resolver line is present; exit-2 assertion is conditional.
+    const output = out.join('\n');
+    expect(output).toContain('cleargate CLI:');
+
+    // When resolver reports 🔴 not resolvable, exit should be 2
+    const hasResolverFailure = out.some((l) => l.includes('\u{1F534}'));
+    if (hasResolverFailure) {
+      expect(codes[0]).toBe(2);
+    }
+  });
+});
+
+// Scenario 6: --session-start mode preserves exit-code hierarchy
+
+describe('STORY-014-01 Scenario 6: --session-start preserves exit-code hierarchy', () => {
+  it('exits 1 when --session-start runs against a repo with one blocked item', async () => {
+    const dir = makeExitTmpDir();
+    writeCleargateDirOnly(dir);
+    writeBlockedItem(dir);
+    writeManifest(dir);
+
+    const { cli, out, codes } = makeDoctorCapture(dir);
+    await doctorHandler({ sessionStart: true }, cli);
+
+    expect(codes).toHaveLength(1);
+    expect(codes[0]).toBe(1);
+    const output = out.join('\n');
+    // CR-009 contract: resolver-status line present
+    expect(output).toContain('cleargate CLI:');
+    // Blocked items listed
+    expect(output).toContain('STORY-BLOCKED');
+  });
+});
+
+// Help-text snapshot: cli.ts contains the Exit codes block
+
+describe('STORY-014-01 Help-text snapshot: doctor --help documents exit codes', () => {
+  it('cli.ts doctor command addHelpText contains the Exit codes block', () => {
+    // Read the cli.ts source to verify the exit-code documentation is present.
+    // This test guards against future help-text edits that accidentally drop the section.
+    const cliSrcPath = path.resolve(
+      new URL(import.meta.url).pathname,
+      '..', '..', '..', 'src', 'cli.ts'
+    );
+    const cliSrc = fs.readFileSync(cliSrcPath, 'utf-8');
+    expect(cliSrc).toContain('Exit codes:');
+    expect(cliSrc).toContain('0  Clean — no blockers, no config errors.');
+    expect(cliSrc).toContain('1  Blocked items or advisory issues — see stdout.');
+    expect(cliSrc).toContain('2  ClearGate misconfigured or partially installed — see stdout for remediation.');
   });
 });

@@ -348,6 +348,11 @@ program
     '  --pricing <file>    Compute USD estimate from a work item\'s draft_tokens.',
     '  --can-edit <file>   Check if editing a file requires a planning work item.',
     '  (default)           Print a minimal hook-config health report.',
+    '',
+    'Exit codes:',
+    '  0  Clean — no blockers, no config errors.',
+    '  1  Blocked items or advisory issues — see stdout.',
+    '  2  ClearGate misconfigured or partially installed — see stdout for remediation.',
   ].join('\n'))
   .action(async (opts: { checkScaffold?: boolean; sessionStartMode?: boolean; sessionStart?: boolean; pricing?: string; canEdit?: string; cwd?: string; verbose?: boolean }) => {
     await doctorHandler({

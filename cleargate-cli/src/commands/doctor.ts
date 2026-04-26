@@ -37,6 +37,16 @@ export interface DoctorCliOptions {
 }
 
 /**
+ * STORY-014-01: Accumulator passed by reference through all mode handlers.
+ * Top-level doctorHandler reads at the end and exits per §3.2 pseudocode:
+ *   configError → exit(2), blocker → exit(1), else → exit(0).
+ */
+export interface DoctorOutcome {
+  configError: boolean;
+  blocker: boolean;
+}
+
+/**
  * Flags for `cleargate doctor`.
  *
  * Reserved keys for 008-06 (M3): sessionStart, pricing.
@@ -126,8 +136,25 @@ export function parseHookLogLine(line: string): HookLogEntry | null {
 function runHookHealth(
   stdout: (s: string) => void,
   cwd: string,
-  now?: Date
+  now?: Date,
+  outcome?: DoctorOutcome
 ): void {
+  // STORY-014-01: config-error — missing .cleargate/ directory
+  const cleargateDir = path.join(cwd, '.cleargate');
+  if (!fs.existsSync(cleargateDir)) {
+    stdout('cleargate misconfigured: no .cleargate/ found. Run: cleargate init');
+    if (outcome) outcome.configError = true;
+    return;
+  }
+
+  // STORY-014-01: config-error — missing cleargate-planning/MANIFEST.json
+  const manifestPath = path.join(cwd, 'cleargate-planning', 'MANIFEST.json');
+  if (!fs.existsSync(manifestPath)) {
+    stdout(`cleargate misconfigured: cleargate-planning/MANIFEST.json not found. Run: cleargate init`);
+    if (outcome) outcome.configError = true;
+    // Do not return — continue with remaining checks
+  }
+
   // Minimal hook-config report: check that .claude/settings.json has the
   // SubagentStop hook wired (if the .claude directory exists).
   const settingsPath = path.join(cwd, '.claude', 'settings.json');
@@ -433,10 +460,20 @@ Bypass this only if the user has explicitly waived planning in this conversation
 
 export async function runSessionStart(
   cwd: string,
-  stdout: (s: string) => void
+  stdout: (s: string) => void,
+  outcome?: DoctorOutcome
 ): Promise<void> {
   // CR-009: emit resolver-status line ALWAYS (before the blocked-items list).
-  emitResolverStatusLine(cwd, stdout);
+  // STORY-014-01: if resolver is "not resolvable", set configError.
+  const resolverLines: string[] = [];
+  emitResolverStatusLine(cwd, (line) => {
+    stdout(line);
+    resolverLines.push(line);
+  });
+  // Check if resolver completely failed (🔴 not resolvable branch)
+  if (outcome && resolverLines.some((l) => l.includes('\u{1F534}'))) {
+    outcome.configError = true;
+  }
 
   const pendingSyncDir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
 
@@ -518,6 +555,9 @@ export async function runSessionStart(
     return;
   }
 
+  // STORY-014-01: blocked items present → set blocker flag
+  if (outcome) outcome.blocker = true;
+
   const overflow = blocked.length > SESSION_START_MAX_ITEMS
     ? blocked.length - SESSION_START_MAX_ITEMS
     : 0;
@@ -551,11 +591,14 @@ export async function runPricing(
   cwd: string,
   stdout: (s: string) => void,
   stderr: (s: string) => void,
-  exit: (code: number) => never
+  exit: (code: number) => never,
+  outcome?: DoctorOutcome
 ): Promise<void> {
   if (!filePath) {
+    // STORY-014-01: missing <file> argument is a config/input error → exit(2)
     stderr('cleargate doctor --pricing: missing <file> argument');
-    exit(1);
+    if (outcome) outcome.configError = true;
+    exit(2);
     return;
   }
 
@@ -565,14 +608,18 @@ export async function runPricing(
   try {
     raw = fs.readFileSync(absPath, 'utf-8');
   } catch {
+    // STORY-014-01: cannot read file is a config error → exit(2)
     stderr(`cleargate doctor --pricing: cannot read file: ${absPath}`);
-    exit(1);
+    if (outcome) outcome.configError = true;
+    exit(2);
     return;
   }
 
   if (!raw.trimStart().startsWith('---')) {
+    // STORY-014-01: file has no frontmatter is a config error → exit(2)
     stderr(`cleargate doctor --pricing: file has no frontmatter: ${absPath}`);
-    exit(1);
+    if (outcome) outcome.configError = true;
+    exit(2);
     return;
   }
 
@@ -580,14 +627,18 @@ export async function runPricing(
   try {
     fm = parseFrontmatter(raw).fm;
   } catch {
+    // STORY-014-01: cannot parse frontmatter is a config error → exit(2)
     stderr(`cleargate doctor --pricing: cannot parse frontmatter in: ${absPath}`);
-    exit(1);
+    if (outcome) outcome.configError = true;
+    exit(2);
     return;
   }
 
   const draftTokensRaw = fm['draft_tokens'];
   if (!draftTokensRaw) {
+    // STORY-014-01: draft_tokens unpopulated is a blocker (content exists, state incomplete) → exit(1)
     stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
@@ -599,12 +650,16 @@ export async function runPricing(
     try {
       draftTokens = JSON.parse(draftTokensRaw) as DraftTokensInput & { model: string | null };
     } catch {
+      // STORY-014-01: unparseable draft_tokens is a blocker → exit(1)
       stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+      if (outcome) outcome.blocker = true;
       exit(1);
       return;
     }
   } else {
+    // STORY-014-01: unexpected type is a blocker → exit(1)
     stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
@@ -616,7 +671,9 @@ export async function runPricing(
     draftTokens.cache_read === null &&
     draftTokens.cache_creation === null
   ) {
+    // STORY-014-01: all null values → blocker → exit(1)
     stdout('draft_tokens unpopulated — run cleargate stamp-tokens first');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
@@ -689,7 +746,8 @@ export async function runCanEdit(
   filePath: string,
   cwd: string,
   stdout: (s: string) => void,
-  exit: (code: number) => never
+  exit: (code: number) => never,
+  outcome?: DoctorOutcome
 ): Promise<void> {
   // Sprint-active sentinel → always allow
   const activeSentinel = path.join(cwd, '.cleargate', 'sprint-runs', '.active');
@@ -707,8 +765,9 @@ export async function runCanEdit(
       .filter((f) => f.endsWith('.md'))
       .map((f) => path.join(pendingSyncDir, f));
   } catch {
-    // No pending-sync dir → no approved stories
+    // No pending-sync dir → no approved stories → blocker → exit(1)
     stdout('blocked: no_approved_stories');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
@@ -758,13 +817,17 @@ export async function runCanEdit(
   }
 
   if (!hasApprovedStory) {
+    // STORY-014-01: blocked items → exit(1)
     stdout('blocked: no_approved_stories');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
 
   if (!coveredByStory) {
+    // STORY-014-01: blocked items → exit(1)
     stdout('blocked: file_not_in_implementation_files');
+    if (outcome) outcome.blocker = true;
     exit(1);
     return;
   }
@@ -784,12 +847,26 @@ export async function doctorHandler(
   const stderr = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
   const exit = cli?.exit ?? ((code: number) => process.exit(code) as never);
 
+  // STORY-014-01: outcome accumulator — each mode pushes booleans here.
+  // At the end, we exit per §3.2 pseudocode:
+  //   configError → exit(2), blocker → exit(1), else → exit(0).
+  const outcome: DoctorOutcome = { configError: false, blocker: false };
+
+  // Track whether exit() was already called by a mode (e.g. runPricing early error)
+  // so we don't double-exit from the final outcome block.
+  let exitedEarly = false;
+  const wrappedExit = (code: number): never => {
+    exitedEarly = true;
+    return exit(code);
+  };
+
   let mode: DoctorMode;
   try {
     mode = selectMode(flags);
   } catch (err) {
+    // STORY-014-01: mutually exclusive flags is a config error → exit(2)
     stderr((err as Error).message);
-    exit(1);
+    exit(2);
     return;
   }
 
@@ -799,25 +876,39 @@ export async function doctorHandler(
       break;
 
     case 'hook-health':
-      runHookHealth(stdout, cwd, now);
+      runHookHealth(stdout, cwd, now, outcome);
       break;
 
     case 'session-start':
-      await runSessionStart(cwd, stdout);
+      await runSessionStart(cwd, stdout, outcome);
       break;
 
     case 'pricing':
-      await runPricing(flags.pricingFile ?? '', cwd, stdout, stderr, exit);
+      await runPricing(flags.pricingFile ?? '', cwd, stdout, stderr, wrappedExit, outcome);
       break;
 
     case 'can-edit':
-      await runCanEdit(flags.canEditFile ?? '', cwd, stdout, exit);
+      await runCanEdit(flags.canEditFile ?? '', cwd, stdout, wrappedExit, outcome);
       break;
 
     default: {
       const exhaustiveCheck: never = mode;
       stderr(`cleargate doctor: unknown mode '${String(exhaustiveCheck)}'`);
-      exit(1);
+      // STORY-014-01: unknown mode is a config error → exit(2)
+      exit(2);
+      return;
     }
+  }
+
+  // STORY-014-01: §3.2 pseudocode exit-code computation.
+  // If a mode called exit() early (e.g. runPricing on bad input), don't double-exit.
+  if (exitedEarly) return;
+
+  if (outcome.configError) {
+    exit(2);
+  } else if (outcome.blocker) {
+    exit(1);
+  } else {
+    exit(0);
   }
 }
