@@ -934,16 +934,9 @@ When `cached_gate_result.pass === false`, the push proceeds in default advisory 
 
 Body content beyond the advisory prefix is byte-identical to the input. The push result includes `gate_status: 'open'` and `failing_criteria: [...]` as response metadata (not persisted to the DB schema).
 
-### §22.2 Strict-mode opt-in
+### §22.2 Strict-mode opt-in and audit log
 
-Set the env var `STRICT_PUSH_GATES=true` on the MCP server to restore pre-CR-010 behavior: `cached_gate_result.pass === false` throws `PushGateFailedError` and no DB write occurs.
-
-Default: `STRICT_PUSH_GATES=false` (advisory mode).
-
-### §22.3 Audit log behavior
+Set `STRICT_PUSH_GATES=true` on the MCP server to restore pre-CR-010 hard-reject behavior (`PushGateFailedError`, no DB write). Default: `false` (advisory mode).
 
 Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='ok'` — the push succeeded. The `failing_criteria` are surfaced in the push response shape, not in a new audit column. No schema migration is required.
-
-### §22.4 Rationale
-
-The 22 items blocked in the dogfood meta-repo on 2026-04-26 (CR-010 §0 evidence) showed that readiness answers often require non-coding stakeholders. Hard-rejecting at push time prevents the PM tool — the natural answer-collection surface — from receiving the item at all. Advisory mode ships items with open questions visible as body annotations; PM-tool users can answer inline, and a subsequent push with `cached_gate_result.pass=true` removes the advisory prefix. Source: CR-010.
+**Rationale:** PM-tool answer-collection requires items to land before readiness answers arrive; advisory mode enables this. See CR-010 §0 for full evidence.
