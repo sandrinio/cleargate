@@ -1,10 +1,18 @@
 /**
- * scaffold-cli-resolution.test.ts — BUG-006 contract
+ * scaffold-cli-resolution.test.ts — BUG-006 + CR-009 contract
  *
- * `cleargate init` must produce hook scripts that resolve the cleargate CLI
- * via PATH first, falling back to a meta-repo-local dist only as a dogfood
- * convenience. They must NOT bare-reference `${REPO_ROOT}/cleargate-cli/dist/cli.js`
- * — that path does not exist in any downstream repo bootstrapped via `cleargate init`.
+ * `cleargate init` must produce hook scripts with a three-branch resolver:
+ *   1. meta-repo-local dist (dogfood — fast path for the meta-repo)
+ *   2. on-PATH binary (`npm i -g cleargate` / shim)
+ *   3. pinned npx invocation (always works wherever Node is present — CR-009)
+ *
+ * The scripts must NOT silent-exit when no branch resolves (CR-009 replaced
+ * the old BUG-006 `exit 0` silent-no-op with the npx tail-branch).
+ *
+ * Note: CR-009 intentionally places the dist check FIRST (not second as in
+ * the pre-CR-009 BUG-006 resolver), because the dist path is the fastest
+ * resolution path in the meta-repo dogfood case and is always absent in
+ * non-dogfood repos (making it a safe first-check).
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -34,10 +42,12 @@ function makeTmpDir(): string {
 
 const HOOKS_THAT_INVOKE_CLI = ['stamp-and-gate.sh', 'session-start.sh'];
 
-describe('cleargate init scaffold — CLI resolution (BUG-006)', () => {
-  it('every CLI-invoking hook prefers an on-PATH cleargate before any dist fallback', () => {
+describe('cleargate init scaffold — CLI resolution (BUG-006 + CR-009)', () => {
+  it('CR-009: every CLI-invoking hook has a three-branch resolver (dist → PATH → npx)', () => {
     const tmp = makeTmpDir();
-    copyPayload(PAYLOAD_DIR, tmp, { force: true });
+    // copyPayload without pinVersion leaves __CLEARGATE_VERSION__ placeholder intact
+    // (that is expected in the template; init substitutes it at runtime)
+    copyPayload(PAYLOAD_DIR, tmp, { force: true, pinVersion: '0.5.0' });
 
     for (const hookFile of HOOKS_THAT_INVOKE_CLI) {
       const body = fs.readFileSync(
@@ -45,33 +55,58 @@ describe('cleargate init scaffold — CLI resolution (BUG-006)', () => {
         'utf8',
       );
 
-      // Resolver must consult PATH.
+      // Branch 1: dist check
+      expect(body, `${hookFile} missing dist check`).toContain(
+        'cleargate-cli/dist/cli.js',
+      );
+
+      // Branch 2: PATH check
       expect(body, `${hookFile} missing 'command -v cleargate' resolver`).toMatch(
         /command -v cleargate/,
       );
 
-      // The dist path may appear ONLY inside the elif fallback — never as a
-      // bare top-level invocation. We assert that any `cleargate-cli/dist/cli.js`
-      // mention is preceded somewhere earlier in the file by `command -v cleargate`.
-      const distRefs = [
-        ...body.matchAll(/cleargate-cli\/dist\/cli\.js/g),
-      ];
-      if (distRefs.length > 0) {
-        const firstDistIdx = distRefs[0].index ?? 0;
-        const resolverIdx = body.indexOf('command -v cleargate');
-        expect(
-          resolverIdx,
-          `${hookFile}: 'command -v cleargate' must appear before any dist reference`,
-        ).toBeGreaterThanOrEqual(0);
-        expect(
-          resolverIdx,
-          `${hookFile}: 'command -v cleargate' (idx ${resolverIdx}) must precede first dist ref (idx ${firstDistIdx})`,
-        ).toBeLessThan(firstDistIdx);
-      }
+      // Branch 3: npx tail — must not be exit 0 (the old BUG-006 no-op)
+      expect(body, `${hookFile} must not have silent exit 0 as fallback`).not.toMatch(
+        /^else\s*\n\s*exit 0/m,
+      );
+      expect(body, `${hookFile} missing npx tail-branch`).toContain('npx -y');
+
+      // Pin comment present (required by R-12 / sed-rewrite contract)
+      expect(body, `${hookFile} missing cleargate-pin comment`).toContain(
+        '# cleargate-pin:',
+      );
     }
   });
 
-  it('init payload does not bundle the CLI dist (target repos resolve via PATH or fallback)', () => {
+  it('CR-009: dist branch appears before PATH branch in resolver chain', () => {
+    const tmp = makeTmpDir();
+    copyPayload(PAYLOAD_DIR, tmp, { force: true, pinVersion: '0.5.0' });
+
+    for (const hookFile of HOOKS_THAT_INVOKE_CLI) {
+      const body = fs.readFileSync(
+        path.join(tmp, '.claude/hooks', hookFile),
+        'utf8',
+      );
+
+      const distIdx = body.indexOf('cleargate-cli/dist/cli.js');
+      const pathIdx = body.indexOf('command -v cleargate');
+
+      expect(
+        distIdx,
+        `${hookFile}: dist branch must appear in file`,
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        pathIdx,
+        `${hookFile}: PATH branch must appear in file`,
+      ).toBeGreaterThanOrEqual(0);
+      expect(
+        distIdx,
+        `${hookFile}: dist branch (idx ${distIdx}) must precede PATH branch (idx ${pathIdx})`,
+      ).toBeLessThan(pathIdx);
+    }
+  });
+
+  it('init payload does not bundle the CLI dist (target repos resolve via PATH or npx)', () => {
     const tmp = makeTmpDir();
     copyPayload(PAYLOAD_DIR, tmp, { force: true });
     expect(

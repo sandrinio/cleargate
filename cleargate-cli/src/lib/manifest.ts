@@ -36,7 +36,7 @@ export interface ManifestEntry {
   path: string;
   sha256: string | null;
   tier: Tier;
-  overwrite_policy: 'always' | 'merge-3way' | 'skip' | 'preserve';
+  overwrite_policy: 'always' | 'merge-3way' | 'skip' | 'preserve' | 'pin-aware';
   preserve_on_uninstall: boolean;
 }
 

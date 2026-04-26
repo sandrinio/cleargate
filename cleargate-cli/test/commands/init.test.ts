@@ -1,7 +1,8 @@
 /**
  * init.test.ts — integration tests for `cleargate init` command
  *
- * Original 7 scenarios from M4 blueprint + 5 new STORY-009-03 snapshot/restore scenarios.
+ * Original 7 scenarios from M4 blueprint + 5 new STORY-009-03 snapshot/restore scenarios
+ * + CR-009 scenarios for hook resolver pin and probe.
  * Uses real fs with tmpdir — no mocks per project policy.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -9,6 +10,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as url from 'node:url';
+import type { SpawnSyncReturns } from 'node:child_process';
 import { initHandler } from '../../src/commands/init.js';
 import type { WikiBuildOptions } from '../../src/commands/wiki-build.js';
 
@@ -505,6 +507,206 @@ describe('cleargate init', () => {
 
     // Marker removed
     expect(fs.existsSync(markerPath)).toBe(false);
+  });
+
+  // ─── CR-009 Scenario 1: No __CLEARGATE_VERSION__ placeholder remains ──────────
+
+  it('CR-009 scenario 1: stamp-and-gate.sh has no __CLEARGATE_VERSION__ placeholder after init', async () => {
+    const cap = makeCapture();
+
+    // Stub the probe so test does not require real npx
+    const probeStub = (cmd: string): SpawnSyncReturns<string> => {
+      void cmd;
+      return { status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined };
+    };
+
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const hookContent = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'stamp-and-gate.sh'),
+      'utf8',
+    );
+    // (a) placeholder fully substituted
+    expect(hookContent).not.toContain('__CLEARGATE_VERSION__');
+    // (b) third resolver branch contains the pinned version
+    expect(hookContent).toContain('npx -y "@cleargate/cli@0.5.0"');
+    // (c) pin comment present for sed-rewrite contract
+    expect(hookContent).toContain('# cleargate-pin: 0.5.0');
+  });
+
+  // ─── CR-009 Scenario 2: session-start.sh has no placeholder ─────────────────
+
+  it('CR-009 scenario 2: session-start.sh has no __CLEARGATE_VERSION__ placeholder after init', async () => {
+    const cap = makeCapture();
+
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const hookContent = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'session-start.sh'),
+      'utf8',
+    );
+    expect(hookContent).not.toContain('__CLEARGATE_VERSION__');
+    expect(hookContent).toContain('npx -y "@cleargate/cli@0.5.0"');
+  });
+
+  // ─── CR-009 Scenario 3: --pin override stamps custom version ────────────────
+
+  it('CR-009 scenario 3: --pin 0.6.0-beta stamps the custom version in both hooks', async () => {
+    const cap = makeCapture();
+
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.6.0-beta', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.6.0-beta',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const stampHook = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'stamp-and-gate.sh'),
+      'utf8',
+    );
+    const sessionHook = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'session-start.sh'),
+      'utf8',
+    );
+    expect(stampHook).toContain('@cleargate/cli@0.6.0-beta');
+    expect(sessionHook).toContain('@cleargate/cli@0.6.0-beta');
+    expect(stampHook).not.toContain('@cleargate/cli@0.5.0');
+  });
+
+  // ─── CR-009 Scenario 4: Probe success — prints green line ───────────────────
+
+  it('CR-009 scenario 4: probe success (status=0) — init prints green status line', async () => {
+    const cap = makeCapture();
+
+    // Stub probe to succeed (status 0)
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const outJoined = cap.out.join('');
+    // Green status line
+    expect(outJoined).toContain('\u{1F7E2}');
+    // Exits normally — Done message present
+    expect(outJoined).toContain('Done.');
+  });
+
+  // ─── CR-009 Scenario 5: Probe failure — prints red line and exits 1 ─────────
+
+  it('CR-009 scenario 5: probe failure (status=1) — init prints red banner and calls exit(1)', async () => {
+    const cap = makeCapture();
+
+    // Stub probe to fail (status non-zero) for ALL calls
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 1, stdout: '', stderr: 'error', pid: 0, output: [], signal: null, error: undefined });
+
+    let exitCode: number | undefined;
+    const exitStub = (code: number): never => {
+      exitCode = code;
+      throw new Error(`exit(${code})`);
+    };
+
+    try {
+      await initHandler({
+        cwd: tmpDir,
+        payloadDir: META_ROOT_PLANNING,
+        stdout: cap.stdout,
+        stderr: cap.stderr,
+        pin: '0.5.0',
+        spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+        exit: exitStub,
+      });
+    } catch {
+      // exit throws in test seam
+    }
+
+    const outJoined = cap.out.join('');
+    expect(outJoined).toContain('\u{1F534}');
+    expect(exitCode).toBe(1);
+  });
+
+  // ─── CR-009 Scenario 6: Snapshot lock — stamp-and-gate.sh byte-equals cr-009 lock ─
+
+  it('CR-009 scenario 6: rendered stamp-and-gate.sh byte-equals the cr-009 snapshot lock', async () => {
+    const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
+    const lockPath = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'stamp-and-gate.cr-009.sh');
+
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    const cap = makeCapture();
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const rendered = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'stamp-and-gate.sh'),
+      'utf8',
+    );
+    const locked = fs.readFileSync(lockPath, 'utf8');
+    expect(rendered).toBe(locked);
+  });
+
+  // ─── CR-009 Scenario 7: Snapshot lock — session-start.sh byte-equals cr-009 lock ─
+
+  it('CR-009 scenario 7: rendered session-start.sh byte-equals the cr-009 snapshot lock', async () => {
+    const __testDir = path.dirname(url.fileURLToPath(import.meta.url));
+    const lockPath = path.resolve(__testDir, '..', 'snapshots', 'hooks', 'session-start.cr-009.sh');
+
+    const probeStub = (_cmd: string): SpawnSyncReturns<string> =>
+      ({ status: 0, stdout: '0.5.0', stderr: '', pid: 0, output: [], signal: null, error: undefined });
+
+    const cap = makeCapture();
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+    });
+
+    const rendered = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'hooks', 'session-start.sh'),
+      'utf8',
+    );
+    const locked = fs.readFileSync(lockPath, 'utf8');
+    expect(rendered).toBe(locked);
   });
 
   // ─── Scenario 7: Bootstrap with existing items ───────────────────────────────

@@ -8,6 +8,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { computeUsd, type DraftTokensInput } from '../lib/pricing.js';
 import {
@@ -359,10 +360,68 @@ function parseCachedGateResult(
   };
 }
 
+/**
+ * CR-009: Probe the three-branch resolver chain at runtime and emit one
+ * `cleargate CLI: <branch> — <one-line>` status line to stdout.
+ * This line is emitted ALWAYS (success or failure) so Claude sees which resolver
+ * the hooks will use before any hook fires.
+ */
+export function emitResolverStatusLine(
+  cwd: string,
+  stdout: (s: string) => void
+): void {
+  const distCliPath = path.join(cwd, 'cleargate-cli', 'dist', 'cli.js');
+
+  if (fs.existsSync(distCliPath)) {
+    stdout(`cleargate CLI: local dist — ${distCliPath}`);
+    return;
+  }
+
+  // Check PATH
+  const whichResult = spawnSync('command', ['-v', 'cleargate'], {
+    shell: true,
+    encoding: 'utf8',
+    timeout: 3000,
+  });
+  if (whichResult.status === 0) {
+    stdout('cleargate CLI: PATH (global install) — cleargate');
+    return;
+  }
+
+  // Try to read the pinned version from the live hook script
+  let pinVersion = 'unknown';
+  const hookPath = path.join(cwd, '.claude', 'hooks', 'stamp-and-gate.sh');
+  if (fs.existsSync(hookPath)) {
+    try {
+      const hookContent = fs.readFileSync(hookPath, 'utf-8');
+      // Pattern: # cleargate-pin: 0.5.0
+      const pinMatch = hookContent.match(/^#\s*cleargate-pin:\s*(\S+)\s*$/m);
+      if (pinMatch?.[1]) {
+        pinVersion = pinMatch[1];
+      } else {
+        // Fallback: look for npx -y "@cleargate/cli@X.Y.Z"
+        const npxMatch = hookContent.match(/@cleargate\/cli@([^\s"']+)/);
+        if (npxMatch?.[1]) pinVersion = npxMatch[1];
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (pinVersion === 'unknown') {
+    stdout('cleargate CLI: \u{1F534} not resolvable — hooks will no-op. Fix: npm i -g cleargate or npx cleargate doctor');
+  } else {
+    stdout(`cleargate CLI: npx @cleargate/cli@${pinVersion} (cold-start ~600ms first call)`);
+  }
+}
+
 export async function runSessionStart(
   cwd: string,
   stdout: (s: string) => void
 ): Promise<void> {
+  // CR-009: emit resolver-status line ALWAYS (before the blocked-items list).
+  emitResolverStatusLine(cwd, stdout);
+
   const pendingSyncDir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
 
   let files: string[];

@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.5.0",
-  "generated_at": "2026-04-25T21:53:30.430Z",
+  "generated_at": "2026-04-26T09:27:29.473Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -81,16 +81,16 @@
     },
     {
       "path": ".claude/hooks/session-start.sh",
-      "sha256": "ddaa1a461e6730db0ca7312ee44d66b78379250ba8b30a04125b37dc49350479",
+      "sha256": "f18ca557d4b48dd8e4ba5f0f84bae07580a4656e0d135ed2d83d84caf9278f41",
       "tier": "hook",
-      "overwrite_policy": "always",
+      "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/hooks/stamp-and-gate.sh",
-      "sha256": "3f64faff6d142b9ec997480944fc709aed8ed44c3f2adca026804f1e64946059",
+      "sha256": "a61b12aa15aab3276bce3df76bb61584f8ba5d87e0415953996e3d5c88533c82",
       "tier": "hook",
-      "overwrite_policy": "always",
+      "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
     },
     {

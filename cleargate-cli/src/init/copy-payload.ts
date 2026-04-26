@@ -20,7 +20,20 @@ export interface CopyReport {
 
 export interface CopyPayloadOptions {
   force: boolean;
+  /**
+   * CR-009: When set, substitute `__CLEARGATE_VERSION__` placeholder in hook scripts
+   * with this version string. Applies to `.claude/hooks/stamp-and-gate.sh` and
+   * `.claude/hooks/session-start.sh`. Use a sed-friendly format: `0.5.0`.
+   */
+  pinVersion?: string;
 }
+
+/** Hook files that carry the `__CLEARGATE_VERSION__` placeholder (CR-009). */
+const PIN_PLACEHOLDER = '__CLEARGATE_VERSION__';
+const HOOK_FILES_WITH_PIN = new Set([
+  '.claude/hooks/stamp-and-gate.sh',
+  '.claude/hooks/session-start.sh',
+]);
 
 /**
  * Recursively enumerate files under `dir`.
@@ -68,11 +81,20 @@ export function copyPayload(
     // Ensure target directory exists
     fs.mkdirSync(path.dirname(dstPath), { recursive: true });
 
-    const srcContent = fs.readFileSync(srcPath);
+    let srcContent: Buffer | string = fs.readFileSync(srcPath);
+
+    // CR-009: substitute __CLEARGATE_VERSION__ placeholder in hook scripts
+    if (opts.pinVersion && HOOK_FILES_WITH_PIN.has(relPath)) {
+      const text = srcContent.toString('utf8').replaceAll(PIN_PLACEHOLDER, opts.pinVersion);
+      srcContent = text;
+    }
+
+    // Compare: convert srcContent to Buffer for comparison when it's a string
+    const srcBuffer = typeof srcContent === 'string' ? Buffer.from(srcContent, 'utf8') : srcContent;
 
     if (fs.existsSync(dstPath)) {
       const dstContent = fs.readFileSync(dstPath);
-      if (srcContent.equals(dstContent)) {
+      if (srcBuffer.equals(dstContent)) {
         // Identical — skip silently even with force (idempotent)
         report.skipped++;
         report.actions.push({ action: 'skipped', relPath });
@@ -85,12 +107,12 @@ export function copyPayload(
         continue;
       }
       // Different + force — overwrite
-      fs.writeFileSync(dstPath, srcContent);
+      fs.writeFileSync(dstPath, srcBuffer);
       report.overwritten++;
       report.actions.push({ action: 'overwritten', relPath });
     } else {
       // New file
-      fs.writeFileSync(dstPath, srcContent);
+      fs.writeFileSync(dstPath, srcBuffer);
       report.created++;
       report.actions.push({ action: 'created', relPath });
     }

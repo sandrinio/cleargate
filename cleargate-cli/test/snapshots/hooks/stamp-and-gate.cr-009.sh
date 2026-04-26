@@ -4,7 +4,7 @@ REPO_ROOT="${CLAUDE_PROJECT_DIR}"
 LOG="${REPO_ROOT}/.cleargate/hook-log/gate-check.log"
 mkdir -p "$(dirname "$LOG")"
 
-# cleargate-pin: __CLEARGATE_VERSION__
+# cleargate-pin: 0.5.0
 # Resolve cleargate CLI (three-branch resolver — CR-009):
 #   1. meta-repo dogfood dist (fastest; only present in ClearGate's own repo)
 #   2. on-PATH binary (global install or shim)
@@ -14,7 +14,7 @@ if [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
 elif command -v cleargate >/dev/null 2>&1; then
   CG=(cleargate)
 else
-  CG=(npx -y "@cleargate/cli@__CLEARGATE_VERSION__")
+  CG=(npx -y "@cleargate/cli@0.5.0")
 fi
 
 FILE=$(jq -r '.tool_input.file_path' 2>/dev/null || echo "")

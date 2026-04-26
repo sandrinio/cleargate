@@ -60,8 +60,9 @@ program
   .description('initialise a repo with ClearGate scaffold (CLAUDE.md block, hook config, agents, templates)')
   .option('--force', 'overwrite existing files that differ from the bundled payload')
   .option('--yes', 'non-interactive: accept all defaults without prompting')
-  .action(async (opts: { force?: boolean; yes?: boolean }) => {
-    await initHandler({ force: opts.force ?? false, yes: opts.yes ?? false });
+  .option('--pin <ver>', 'CR-009: pin hook resolver to a specific cleargate CLI version (default: package version)')
+  .action(async (opts: { force?: boolean; yes?: boolean; pin?: string }) => {
+    await initHandler({ force: opts.force ?? false, yes: opts.yes ?? false, pin: opts.pin });
   });
 
 program

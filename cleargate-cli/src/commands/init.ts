@@ -13,6 +13,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { copyPayload } from '../init/copy-payload.js';
 import { mergeSettings, type SettingsJson } from '../init/merge-settings.js';
 import { injectClaudeMd, extractBlock } from '../init/inject-claude-md.js';
@@ -87,6 +88,17 @@ export interface InitOptions {
    * STORY-010-01: in test environment stdin is not a TTY; inject true to force interactive path.
    */
   stdinIsTTY?: boolean;
+  /**
+   * CR-009: pin version to stamp into hook scripts. Overrides the default of
+   * reading the version from `cleargate-cli/package.json`. Supports
+   * `cleargate init --pin 0.6.0-beta` and test seam injection.
+   */
+  pin?: string;
+  /**
+   * Test seam: replaces child_process.spawnSync for the resolver probe (Step 7.6).
+   * Injected in tests to avoid real npx invocations.
+   */
+  spawnSyncFn?: typeof spawnSync;
 }
 
 /** Shape of the .cleargate/.uninstalled marker written by STORY-009-07 `uninstall`. */
@@ -132,6 +144,23 @@ function writeAtomic(filePath: string, content: string): void {
   fs.renameSync(tmpPath, filePath);
 }
 
+/**
+ * CR-009: Read the version from a package.json file at `packageJsonPath`.
+ * Returns null when the file is absent or malformed.
+ */
+function readPackageVersion(packageJsonPath: string): string | null {
+  try {
+    const raw = fs.readFileSync(packageJsonPath, 'utf8');
+    const pkg = JSON.parse(raw) as { version?: unknown };
+    if (typeof pkg.version === 'string' && pkg.version.length > 0) {
+      return pkg.version;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export async function initHandler(opts: InitOptions = {}): Promise<void> {
   const cwd = opts.cwd ?? process.cwd();
   const force = opts.force ?? false;
@@ -142,6 +171,7 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   const runWikiBuild = opts.runWikiBuild ?? wikiBuildHandler;
   const promptYesNoFn = opts.promptYesNo ?? defaultPromptYesNo;
   const promptEmailFn = opts.promptEmail ?? defaultPromptEmail;
+  const spawnSyncFn = opts.spawnSyncFn ?? spawnSync;
 
   // Step 1: Validate cwd
   if (!fs.existsSync(cwd)) {
@@ -218,7 +248,21 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     }
   }
 
-  const copyReport = copyPayload(payloadDir, cwd, { force });
+  // CR-009: Resolve pin version for hook script substitution.
+  // Priority: explicit --pin flag → package.json next to payloadDir → package.json next to dist → fallback 'latest'
+  let pinVersion: string | undefined;
+  if (opts.pin) {
+    pinVersion = opts.pin;
+  } else {
+    // payloadDir is `.../templates/cleargate-planning`; package.json is at `.../package.json`
+    const payloadParent = path.resolve(payloadDir, '..', '..');
+    pinVersion =
+      readPackageVersion(path.join(payloadParent, 'package.json')) ??
+      readPackageVersion(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'package.json')) ??
+      'latest';
+  }
+
+  const copyReport = copyPayload(payloadDir, cwd, { force, pinVersion });
   for (const action of copyReport.actions) {
     const verb =
       action.action === 'created'
@@ -309,6 +353,60 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
       fs.unlinkSync(uninstalledMarkerPath);
     } catch (e) {
       stderr(`[cleargate init] WARNING: could not remove .uninstalled marker: ${String(e)}\n`);
+    }
+  }
+
+  // Step 7.6 (CR-009): Resolver probe — run the three-branch resolver and print
+  // a visible green/red status line. Converts "invisible silent no-op at first
+  // hook fire" into "loud failure at install time, when the user is watching".
+  {
+    const distCliPath = path.join(cwd, 'cleargate-cli', 'dist', 'cli.js');
+
+    type ResolverBranch = { cmd: string; args: string[] } | null;
+
+    // Mirror the bash resolver order: dist first (dogfood), then PATH, then npx.
+    let branch: ResolverBranch = null;
+    let branchLabel = '';
+
+    if (fs.existsSync(distCliPath)) {
+      branch = { cmd: 'node', args: [distCliPath, '--version'] };
+      branchLabel = `local dist (${distCliPath})`;
+    } else {
+      // Try `cleargate --version` via PATH
+      const whichResult = spawnSyncFn('command', ['-v', 'cleargate'], {
+        shell: true,
+        encoding: 'utf8',
+        timeout: 3000,
+      });
+      if (whichResult.status === 0) {
+        branch = { cmd: 'cleargate', args: ['--version'] };
+        branchLabel = 'PATH (global install)';
+      } else {
+        // Fall back to npx invocation
+        branch = { cmd: 'npx', args: ['-y', `@cleargate/cli@${pinVersion}`, '--version'] };
+        branchLabel = `npx @cleargate/cli@${pinVersion} (cold-start ~600ms first call)`;
+      }
+    }
+
+    if (branch !== null) {
+      const probeResult = spawnSyncFn(branch.cmd, branch.args, {
+        encoding: 'utf8',
+        timeout: 15000,
+      });
+
+      if (probeResult.status === 0) {
+        stdout(`[cleargate init] \u{1F7E2} cleargate CLI resolved via ${branchLabel}\n`);
+      } else {
+        // Resolver chain exhausted — the hooks will not work.
+        stdout(
+          `[cleargate init] \u{1F534} cleargate CLI: not resolvable — hooks will no-op.\n` +
+          `[cleargate init]   Attempted: ${branchLabel}\n` +
+          `[cleargate init]   Fix: npm i -g cleargate@${pinVersion}  or  npx cleargate@${pinVersion} doctor\n`,
+        );
+        // Non-zero exit per M1 plan §1 "exits zero on at least one branch resolving → exits non-zero on probe failure"
+        exit(1);
+        return;
+      }
     }
   }
 

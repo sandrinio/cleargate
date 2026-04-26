@@ -100,7 +100,26 @@ export const TIER_RULES: readonly TierRule[] = Object.freeze([
     exclude: false,
   },
 
-  // Hooks
+  // CR-009: Pin-aware hooks — `cleargate upgrade` re-stamps the version line;
+  // treated as always-equivalent in v0.5.0 (upgrade driver lands in EPIC-009).
+  {
+    pattern: '.claude/hooks/stamp-and-gate.sh',
+    tier: 'hook',
+    overwrite_policy: 'pin-aware',
+    preserve_on_uninstall: false,
+    nullSha: false,
+    exclude: false,
+  },
+  {
+    pattern: '.claude/hooks/session-start.sh',
+    tier: 'hook',
+    overwrite_policy: 'pin-aware',
+    preserve_on_uninstall: false,
+    nullSha: false,
+    exclude: false,
+  },
+
+  // Hooks (general)
   {
     pattern: '.claude/hooks/**',
     tier: 'hook',
