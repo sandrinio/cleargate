@@ -3,14 +3,15 @@ sprint_id: "SPRINT-NN"
 status: "Draft"
 generated_at: "<ISO-8601>"
 generated_by: "Reporter agent"
-template_version: 1
+template_version: 2
 ---
 
-<!-- Sprint Report v2 Template — template_version: 1 -->
+<!-- Sprint Report v2 Template — template_version: 2 -->
 <!-- Event-type vocabulary (STORY-013-05 / protocol §§16–17):
      User-Review: UR:review-feedback | UR:bug
      Change-Request: CR:bug | CR:spec-clarification | CR:scope-change | CR:approach-change
      Circuit-breaker: test-pattern | spec-gap | environment
+     Lane-Demotion: LD
      These tokens appear verbatim in §2 CR Change Log and §3 Execution Metrics tallies. -->
 
 # SPRINT-<NN> Report: <Sprint Title>
@@ -74,6 +75,12 @@ template_version: 1
 | Stories shipped (Done) | N |
 | Stories escalated | N |
 | Stories carried over | N |
+| Fast-Track Ratio | N% |
+| Fast-Track Demotion Rate | N% |
+| Hotfix Count (sprint window) | N |
+| Hotfix-to-Story Ratio | N |
+| Hotfix Cap Breaches | N |
+| LD events | N |
 | Total QA bounces | N |
 | Total Arch bounces | N |
 | CR:bug events | N |
@@ -156,6 +163,29 @@ If zero candidates: No stale flashcards detected.
 | Bounce cap respected | Green/Yellow/Red | |
 | Three-surface landing compliance | Green/Yellow/Red | |
 | Circuit-breaker fires (if any) | Green/Yellow/Red | |
+
+### Lane Audit
+<!-- Filled by Reporter at sprint close. One row per fast-lane story. -->
+
+| Story | Files touched | LOC | Demoted? | In retrospect, was fast correct? (y/n) | Notes |
+|---|---|---|---|---|---|
+| `STORY-NNN-NN` | N | N | y / n | y / n | |
+
+### Hotfix Audit
+<!-- Filled by Reporter at sprint close. One row per hotfix merged during the sprint window. -->
+
+| Hotfix ID | Originating signal | Files touched | LOC | Resolved-by SHA | Could this have been a sprint story? (y/n) | If y — why was it missed at planning? |
+|---|---|---|---|---|---|---|
+| `HOTFIX-NN` | <signal> | N | N | `<sha>` | y / n | |
+
+### Hotfix Trend
+<!-- Filled by Reporter at sprint close. -->
+
+<!-- TBD: Reporter fills at sprint close -->
+
+<Reporter writes a one-paragraph narrative summarising the rolling 4-sprint hotfix count
+and a monotonic-increase flag (yes/no). Empty by default — leave the placeholder text
+intact for sprints with no hotfixes.>
 
 ### Tooling
 | Item | Rating | Notes |

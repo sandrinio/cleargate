@@ -29,7 +29,8 @@ When the rubric is ambiguous, surface the decision to the human as a one-liner (
 §0.1 v2 Decomposition Signals:
   `parallel_eligible`: "y" if this story can run concurrently with other stories in the same milestone; "n" if it has a strict predecessor dependency. Default "y". Set by Architect during Sprint Design Review.
   `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones in a v2 sprint to surface risk early.
-  Both fields are v2-only signals. Under v1 sprints they are informational; defaults apply for stories authored before SPRINT-09.
+  `lane`: "standard" | "fast" — Architect-set during Sprint Design Review per the seven-check rubric in protocol §24. Default "standard". Absent in pre-EPIC-022 stories means standard per the migration default in update_state.mjs.
+  All three fields are v2-only signals. Under v1 sprints they are informational; defaults apply for stories authored before SPRINT-09.
 
 Do NOT output these instructions.
 </instructions>
@@ -44,6 +45,7 @@ actor: "{Persona Name}"
 complexity_label: "L2"
 parallel_eligible: "y"
 expected_bounce_exposure: "low"
+lane: "standard"
 created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"

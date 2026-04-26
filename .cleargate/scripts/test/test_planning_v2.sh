@@ -187,6 +187,53 @@ else
 fi
 
 echo
+# ---------------------------------------------------------------------------
+# STORY-022-03 Scenario 1: Sprint Plan Template has Lane column + §2.4 Lane Audit
+# ---------------------------------------------------------------------------
+echo "STORY-022-03 Scenario 1: Sprint Plan Template Lane column + §2.4 Lane Audit"
+
+for f in "$LIVE_SPT" "$MIRROR_SPT"; do
+  label="$(basename "$(dirname "$f")")/$(basename "$f")"
+  if grep -q '| Lane |' "$f"; then
+    pass "$label: '| Lane |' column header present in §1 table"
+  else
+    fail "$label: '| Lane |' column header missing from §1 table"
+  fi
+  if grep -q '^### 2.4 Lane Audit' "$f"; then
+    pass "$label: '### 2.4 Lane Audit' subsection present"
+  else
+    fail "$label: '### 2.4 Lane Audit' subsection missing"
+  fi
+  if grep -q '### 2.5 ADR-Conflict Flags' "$f"; then
+    pass "$label: '### 2.5 ADR-Conflict Flags' (renumbered from 2.4) present"
+  else
+    fail "$label: '### 2.5 ADR-Conflict Flags' renumbering missing"
+  fi
+done
+
+echo
+
+# ---------------------------------------------------------------------------
+# STORY-022-03 Scenario 2: story.md frontmatter declares lane field
+# ---------------------------------------------------------------------------
+echo "STORY-022-03 Scenario 2: story.md frontmatter has lane: \"standard\" + documentation"
+
+for f in "$LIVE_STORY" "$MIRROR_STORY"; do
+  label="$(basename "$(dirname "$f")")/$(basename "$f")"
+  if grep -q 'lane: "standard"' "$f"; then
+    pass "$label: 'lane: \"standard\"' default present in frontmatter"
+  else
+    fail "$label: 'lane: \"standard\"' missing from frontmatter"
+  fi
+  if grep -q 'protocol §24' "$f"; then
+    pass "$label: lane field documented with protocol §24 reference"
+  else
+    fail "$label: lane field documentation (protocol §24 reference) missing"
+  fi
+done
+
+echo
+
 echo "=== Results: $PASS passed, $FAIL failed ==="
 
 if [ "$FAIL" -gt 0 ]; then
