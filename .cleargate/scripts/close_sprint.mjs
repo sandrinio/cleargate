@@ -31,6 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { TERMINAL_STATES } from './constants.mjs';
 import { validateState } from './validate_state.mjs';
+import { migrateV1ToV2 } from './update_state.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -127,6 +128,12 @@ function main() {
   } catch (err) {
     process.stderr.write(`Error: failed to parse state.json: ${err.message}\n`);
     process.exit(1);
+  }
+
+  // Migrate v1 → v2 if needed before strict validation
+  if (state.schema_version === 1) {
+    state = migrateV1ToV2(state);
+    atomicWrite(stateFile, state);
   }
 
   const { valid, errors } = validateState(state);

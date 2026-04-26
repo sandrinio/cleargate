@@ -162,6 +162,10 @@ function main() {
       worktree: null,
       updated_at: now,
       notes: '',
+      lane: 'standard',
+      lane_assigned_by: 'migration-default',
+      lane_demoted_at: null,
+      lane_demotion_reason: null,
     };
   }
 

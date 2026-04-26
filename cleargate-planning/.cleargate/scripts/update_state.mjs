@@ -3,9 +3,11 @@
  * update_state.mjs — Atomic state/counter update for a story in state.json
  *
  * Usage:
- *   node update_state.mjs <STORY-ID> <new-state>   — transition to a new state
- *   node update_state.mjs <STORY-ID> --qa-bounce   — increment qa_bounces counter
- *   node update_state.mjs <STORY-ID> --arch-bounce — increment arch_bounces counter
+ *   node update_state.mjs <STORY-ID> <new-state>          — transition to a new state
+ *   node update_state.mjs <STORY-ID> --qa-bounce          — increment qa_bounces counter
+ *   node update_state.mjs <STORY-ID> --arch-bounce        — increment arch_bounces counter
+ *   node update_state.mjs <STORY-ID> --lane <standard|fast> — set lane for a story
+ *   node update_state.mjs <STORY-ID> --lane-demote <reason> — demote story from fast lane
  *
  * Atomic write: write to .tmp.<pid> file, then rename to final path.
  * Idempotent: if new state equals current (for state transitions) and
@@ -13,13 +15,16 @@
  *
  * Auto-escalation: when qa_bounces or arch_bounces reaches BOUNCE_CAP (3),
  *   state is automatically set to "Escalated".
+ *
+ * Migration: reads v1 state.json transparently; upgrades to v2 on first touch
+ *   (injects lane fields with defaults; emits one stderr log line).
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES, BOUNCE_CAP } from './constants.mjs';
-import { validateState } from './validate_state.mjs';
+import { validateState, validateShapeIgnoringVersion } from './validate_state.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -29,9 +34,34 @@ function usage() {
     'Usage:\n' +
     '  node update_state.mjs <STORY-ID> <new-state>\n' +
     '  node update_state.mjs <STORY-ID> --qa-bounce\n' +
-    '  node update_state.mjs <STORY-ID> --arch-bounce\n'
+    '  node update_state.mjs <STORY-ID> --arch-bounce\n' +
+    '  node update_state.mjs <STORY-ID> --lane <standard|fast>\n' +
+    '  node update_state.mjs <STORY-ID> --lane-demote <reason>\n'
   );
   process.exit(2);
+}
+
+/**
+ * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
+ * Mutates the state object in-place and returns it.
+ * Emits a single stderr log line describing the migration.
+ * @param {object} state - Parsed v1 state object
+ * @returns {object} - The mutated (now v2) state object
+ */
+export function migrateV1ToV2(state) {
+  state.schema_version = 2;
+  const storyIds = Object.keys(state.stories || {});
+  for (const id of storyIds) {
+    const story = state.stories[id];
+    if (story.lane == null) story.lane = 'standard';
+    if (story.lane_assigned_by == null) story.lane_assigned_by = 'migration-default';
+    if (story.lane_demoted_at === undefined) story.lane_demoted_at = null;
+    if (story.lane_demotion_reason === undefined) story.lane_demotion_reason = null;
+  }
+  process.stderr.write(
+    `migration: schema_version 1 → 2 for sprint ${state.sprint_id} (${storyIds.length} stories defaulted to lane: standard)\n`
+  );
+  return state;
 }
 
 function resolveStateFile() {
@@ -71,10 +101,24 @@ function main() {
     process.exit(1);
   }
 
-  // Validate existing state before modifications
+  // Pre-migration: validate shape (ignoring version) before potentially migrating
+  const preCheck = validateShapeIgnoringVersion(state);
+  if (!preCheck.valid) {
+    process.stderr.write(`Error: state.json is invalid:\n`);
+    for (const e of preCheck.errors) process.stderr.write(`  - ${e}\n`);
+    process.exit(1);
+  }
+
+  // Migrate v1 → v2 if needed; write atomically so subsequent reads see v2
+  if (state.schema_version === 1) {
+    state = migrateV1ToV2(state);
+    atomicWrite(stateFile, state);
+  }
+
+  // Post-migration strict validation
   const { valid, errors } = validateState(state);
   if (!valid) {
-    process.stderr.write(`Error: state.json is invalid:\n`);
+    process.stderr.write(`Error: state.json is invalid after migration:\n`);
     for (const e of errors) process.stderr.write(`  - ${e}\n`);
     process.exit(1);
   }
@@ -86,7 +130,48 @@ function main() {
 
   const story = state.stories[storyId];
 
-  if (action === '--qa-bounce') {
+  if (action === '--lane') {
+    const laneValue = args[2];
+    if (!laneValue || !['standard', 'fast'].includes(laneValue)) {
+      process.stderr.write(
+        `Error: --lane requires a value of "standard" or "fast"\n`
+      );
+      process.exit(2);
+    }
+    // TODO(STORY-022-04): cross-read sprint plan to enforce rubric §6 contradiction check
+    // (expected_bounce_exposure: med|high + lane: fast is a contradiction per PROPOSAL-013 §2.3 #6)
+    story.lane = laneValue;
+    story.lane_assigned_by = 'human-override';
+    story.updated_at = new Date().toISOString();
+    state.last_action = `lane-set ${storyId}: lane=${laneValue} (human-override)`;
+    state.updated_at = story.updated_at;
+    atomicWrite(stateFile, state);
+    process.stdout.write(
+      `Updated ${storyId}: lane="${laneValue}", lane_assigned_by="human-override"\n`
+    );
+
+  } else if (action === '--lane-demote') {
+    const reason = args[2];
+    if (!reason) {
+      process.stderr.write(
+        `Error: --lane-demote requires a reason string\n`
+      );
+      process.exit(2);
+    }
+    story.lane = 'standard';
+    story.lane_demoted_at = new Date().toISOString();
+    story.lane_demotion_reason = reason;
+    story.qa_bounces = 0;
+    story.arch_bounces = 0;
+    story.updated_at = story.lane_demoted_at;
+    state.last_action = `lane-demote ${storyId}: "${reason}"`;
+    state.updated_at = story.updated_at;
+    atomicWrite(stateFile, state);
+    process.stdout.write(
+      `Updated ${storyId}: lane="standard", lane_demoted_at="${story.lane_demoted_at}", qa_bounces=0, arch_bounces=0\n`
+    );
+
+  } else if (action === '--qa-bounce') {
     if (story.state === 'Escalated') {
       process.stderr.write(`Error: story ${storyId} is already Escalated\n`);
       process.exit(1);
