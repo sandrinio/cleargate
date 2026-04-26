@@ -24,6 +24,7 @@ import { pushHandler } from './commands/push.js';
 import { conflictsHandler } from './commands/conflicts.js';
 import { syncLogHandler } from './commands/sync-log.js';
 import { adminLoginHandler } from './commands/admin-login.js';
+import { hotfixNewHandler } from './commands/hotfix.js';
 
 const program = new Command();
 
@@ -495,6 +496,21 @@ program
       target: opts.target,
       limit: opts.limit !== undefined ? parseInt(opts.limit, 10) : 50,
     });
+  });
+
+const hotfix = program
+  .command('hotfix')
+  .description('hotfix lane commands (off-sprint trivial fix scaffolding)');
+
+// FLASHCARD #cli #commander #subcommand-routing (2026-04-25): Commander v12
+// does NOT treat `<verb>` as a catch-all fallback when sibling literal
+// subcommands exist. Since `new` is the only verb for now, enumerate it
+// explicitly as a literal subcommand.
+hotfix
+  .command('new <slug>')
+  .description('scaffold a new HOTFIX-NNN_<slug>.md in pending-sync/')
+  .action((slug: string) => {
+    hotfixNewHandler({ slug });
   });
 
 void program.parseAsync(process.argv);

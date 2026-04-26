@@ -20,9 +20,13 @@ const TEMPLATE_NAMES = [
   'initiative.md',
   'proposal.md',
   'story.md',
+  // STORY-022-06: hotfix lane template. Note: live dir has 9 templates total
+  // (sprint_context.md and sprint_report.md are not yet listed here — pre-existing
+  // 7-vs-9 drift; fixing those is out of scope for this story).
+  'hotfix.md',
 ];
 
-describe('Scenario: All 7 live templates have draft_tokens + cached_gate_result stubs', () => {
+describe('Scenario: All 8 live templates have draft_tokens + cached_gate_result stubs', () => {
   for (const name of TEMPLATE_NAMES) {
     it(`live template ${name} contains draft_tokens and cached_gate_result`, () => {
       const filePath = path.join(LIVE_TEMPLATES_DIR, name);
@@ -33,7 +37,7 @@ describe('Scenario: All 7 live templates have draft_tokens + cached_gate_result 
   }
 });
 
-describe('Scenario: All 7 mirror templates have draft_tokens + cached_gate_result stubs', () => {
+describe('Scenario: All 8 mirror templates have draft_tokens + cached_gate_result stubs', () => {
   for (const name of TEMPLATE_NAMES) {
     it(`mirror template ${name} contains draft_tokens and cached_gate_result`, () => {
       const filePath = path.join(MIRROR_TEMPLATES_DIR, name);

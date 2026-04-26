@@ -1,10 +1,10 @@
 {
   "cleargate_version": "0.5.0",
-  "generated_at": "2026-04-26T11:46:42.205Z",
+  "generated_at": "2026-04-26T22:52:26.319Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "c9424894549b270b73c1c95145b7bb8d406cadd2057c47f8e90bf74ce1f3cda7",
+      "sha256": "297020d3344d9122c0ff95e00b436cb83640acbc78377684c04f6af8fb6fbcc4",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -32,7 +32,7 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "ea54db76bcd017526f2b48e05b167cb87251273aa5fd3da6bec3013c207c72fb",
+      "sha256": "602b8ef4ca0f8bc11472a612744535d1a6794533ceaf97587d5d421c4fc49b77",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -102,7 +102,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "be2b2eaa02cc30387601285160d6fe1c90ea76b37ec6cae2b7c9537f66f22783",
+      "sha256": "45113b3c3f3a78e350e112665c1aadf74a246bb4ebfe514ea7230d6bd3fa01c1",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -130,14 +130,14 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "8f017b0c54a9e8db0c184f4a0158bccef30015123a12f8263cc491f66ef1d576",
+      "sha256": "f9ca14eaa5f034ce5ec159bd8e2abf3e824c6b0338864ae8bead7faf6316754b",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
-      "sha256": "0d5d254bb6c464c5cfa675927b5b358590cfbf8d2b1c7179519ef4780bb8da7f",
+      "sha256": "d7a79a50e3cb5fd42735b017d3d88dff0fa443444951e717013e423770bad87b",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -164,6 +164,13 @@
       "preserve_on_uninstall": false
     },
     {
+      "path": ".cleargate/templates/hotfix.md",
+      "sha256": "2a7c745b0d46f4a092c507d6b427c15d64540e332f9544bc572451a313f4e5cc",
+      "tier": "template",
+      "overwrite_policy": "merge-3way",
+      "preserve_on_uninstall": false
+    },
+    {
       "path": ".cleargate/templates/initiative.md",
       "sha256": "9bf4a5a5ff7af0938ff48d5eaa182f227195d101ba9de4d56123b4fc211b8cac",
       "tier": "template",
@@ -179,7 +186,7 @@
     },
     {
       "path": ".cleargate/templates/Sprint Plan Template.md",
-      "sha256": "9f87539691b910193c55fb9a637975de738dda181baa7e68fc48297993389613",
+      "sha256": "583f71c76c0b3c8cb219183f5881250219cec2719c909abf4d3069beed8cad51",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -193,14 +200,14 @@
     },
     {
       "path": ".cleargate/templates/sprint_report.md",
-      "sha256": "5f3dfdbc7a1dde26758871b358be00d543e9669ab34ca3c7ead765ee6e182bcb",
+      "sha256": "e73126842e219d856d32c4cb72e0a98066ea9ad4993e3f3919f9c8296d73afdf",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "266b7e2b0526c4fe37620baf9344521e98ee5e7363661d390ef90068798f9bfe",
+      "sha256": "f46364178f09d2514405723e53d5e388ab41bce5e2b318dc1aed8743500f042f",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
