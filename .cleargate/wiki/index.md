@@ -53,3 +53,33 @@
 - Proposals: 7 Abandoned · [expand](archive/proposals.md)
 - CRs: 5 Completed · [expand](archive/crs.md)
 - Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
+## Proposals
+
+| [[PROPOSAL-012]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-012_Wiki_Contradiction_Detection.md |
+| [[PROPOSAL-013]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-013_Sprint_Planning_Fast_Track.md |
+## Epics
+
+| [[EPIC-020]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-020_Wiki_Contradiction_Detection.md |
+| [[EPIC-021]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-021_Solo_Onboarding_DX.md |
+| [[EPIC-022]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md |
+## Stories
+
+| [[STORY-014-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-014-01_Doctor_Exit_Code_Semantics.md |
+| [[STORY-020-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-01_Contradict_Subagent_And_Schema_Delta.md |
+| [[STORY-020-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-02_Ingest_Phase4_And_Advisory_Log.md |
+| [[STORY-020-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-03_CLI_Wiki_Contradict_Subcommand.md |
+## Bugs
+
+| [[BUG-006]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-006_Init_Scaffold_Hooks_Reference_Nonexistent_CLI_Path.md |
+| [[BUG-007]] | bug | Verified | .cleargate/delivery/archive/BUG-007_Init_Participant_Email_Prompt_Invisible.md |
+| [[BUG-008]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-008_Gate_Check_Criteria_Over_Match.md |
+| [[BUG-009]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-009_Token_Ledger_Missing_CR_PROP_Rows.md |
+## CRs
+
+| [[CR-008]] | cr | Approved | .cleargate/delivery/pending-sync/CR-008_Planning_First_Enforcement.md |
+| [[CR-009]] | cr | Approved | .cleargate/delivery/pending-sync/CR-009_Hook_CLI_Resolution_Pin_NPX.md |
+| [[CR-010]] | cr | Approved | .cleargate/delivery/pending-sync/CR-010_Advisory_Readiness_Gates_On_Push.md |
+| [[CR-011]] | cr | Draft | .cleargate/delivery/pending-sync/CR-011_Capability_Gating_By_Membership.md |
+## Sprints
+
+| [[SPRINT-14]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-14_Process_v2.md |

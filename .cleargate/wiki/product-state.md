@@ -6,12 +6,12 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 19 | 0 | 14 |
-| Stories | 116 | 0 | 67 |
-| Sprints | 13 | 0 | 10 |
-| Proposals | 11 | 0 | 7 |
-| CRs | 7 | 0 | 5 |
-| Bugs | 3 | 0 | 0 |
+| Epics | 22 | 0 | 14 |
+| Stories | 120 | 0 | 67 |
+| Sprints | 14 | 0 | 10 |
+| Proposals | 13 | 0 | 7 |
+| CRs | 11 | 0 | 5 |
+| Bugs | 7 | 0 | 2 |
 
 ## Active Epics
 
@@ -22,6 +22,10 @@ _No active epics._
 
 ## Shipped This Cycle
 
+
+- [[BUG-006]] (bugs) — Completed
+
+- [[BUG-007]] (bugs) — Verified
 
 - [[CR-003]] (crs) — Completed
 

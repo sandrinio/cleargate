@@ -1,21 +1,25 @@
 ---
 bug_id: BUG-006
 parent_ref: EPIC-009
-status: Draft
+status: Completed
 severity: P1-High
 reporter: sandro
-approved: false
+approved: true
+approved_at: 2026-04-26T00:00:00Z
+approved_by: sandrinio
+completed_at: 2026-04-26T00:00:00Z
+completion_commit: a0d8acc
 created_at: 2026-04-26T00:00:00Z
 updated_at: 2026-04-26T00:00:00Z
 created_at_version: cleargate@0.4.0
-updated_at_version: cleargate@0.4.0
+updated_at_version: cleargate@0.5.0
 server_pushed_at_version: null
 cached_gate_result:
   pass: false
   failing_criteria:
     - id: repro-steps-deterministic
       detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-04-25T21:35:02Z
+  last_gate_check: 2026-04-26T08:49:03Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -39,7 +43,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-25T21:35:02Z
+  last_stamp: 2026-04-26T08:49:03Z
   sessions: []
 ---
 
