@@ -557,3 +557,211 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
     expect(typeof result.detail).toBe('string');
   });
 });
+
+// ─── BUG-008 regression tests ─────────────────────────────────────────────────
+
+// Sub-fix #1: proposal-approved prose-vs-path heuristic
+
+describe('BUG-008 sub-fix #1 — proposal-approved prose-vs-path heuristic', () => {
+  it('R-08: context_source is prose with approved_by + approved_at → pass', () => {
+    const dir = makeTmpDir();
+    const docPath = path.join(dir, 'EPIC-021.md');
+    const doc = makeDoc(
+      {
+        context_source:
+          'User direct request 2026-04-25 — proposal gate waived (sharp intent + inline references). ' +
+          'All interrogation questions ratified.',
+        approved_by: 'sandrinio',
+        approved_at: '2026-04-25T00:00:00Z',
+      },
+      'body text',
+      docPath
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/prose.*waiver|waiver.*prose/i);
+  });
+
+  it('R-08: context_source is prose WITHOUT waiver fields → fail', () => {
+    const dir = makeTmpDir();
+    const docPath = path.join(dir, 'EPIC-014.md');
+    const doc = makeDoc(
+      {
+        context_source:
+          'User direct request 2026-04-14 — some prose explanation without proper waiver fields.',
+      },
+      'body text',
+      docPath
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toMatch(/no proposal_gate_waiver/i);
+  });
+
+  it('R-08 regression: context_source is "PROPOSAL-999.md" (no spaces, file does NOT exist) → fail even with waiver fields', () => {
+    // This is the critical regression test: a path-like value must still fail
+    // when the referenced file does not exist, even if waiver fields are present.
+    const dir = makeTmpDir();
+    const docPath = path.join(dir, 'EPIC-TEST.md');
+    const doc = makeDoc(
+      {
+        context_source: 'PROPOSAL-999.md',
+        approved_by: 'sandrinio',
+        approved_at: '2026-04-25T00:00:00Z',
+      },
+      'body text',
+      docPath
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toMatch(/linked file not found/i);
+  });
+
+  it('R-08 happy path: context_source is "PROPOSAL-001.md" and file exists with approved: true → pass', () => {
+    const dir = makeTmpDir();
+    const proposalFile = path.join(dir, 'PROPOSAL-001.md');
+    fs.writeFileSync(proposalFile, '---\napproved: true\n---\n\nProposal body.', 'utf8');
+    const docPath = path.join(dir, 'EPIC-001.md');
+    const doc = makeDoc({ context_source: 'PROPOSAL-001.md' }, 'body', docPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  it('R-08 sandbox: path traversal "../../../etc/passwd" does not pass via prose heuristic', () => {
+    // "../../../etc/passwd" has no space/em-dash/etc — looks like a path → falls through to resolveLinkedPath
+    // resolveLinkedPath rejects it as outside projectRoot (sandbox violation) → returns null → fail
+    const dir = makeTmpDir();
+    const docPath = path.join(dir, 'EPIC-X.md');
+    const doc = makeDoc(
+      { context_source: '../../../etc/passwd', approved_by: 'attacker', approved_at: '2026-01-01' },
+      'body',
+      docPath
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(false);
+  });
+});
+
+// Sub-fix #2: no-tbds marker semantics
+
+describe('BUG-008 sub-fix #2 — no-tbds marker semantics', () => {
+  it('body containing "TBD: <reason>" → fails (genuine marker with colon)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nTBD: figure out the architecture.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(false);
+    expect(result.detail).toMatch(/occurrence/);
+  });
+
+  it('body containing "(TBD)" → fails (parens-bound)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nThis feature is (TBD) pending review.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(false);
+  });
+
+  it('body containing bare line "TBD" → fails (entire trimmed line)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nTBD\n\nMore text.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(false);
+  });
+
+  it('body containing prose "TBD resolution" → passes (noun usage, not a marker)', () => {
+    // This is the CR-010 false-positive case
+    const doc = makeDoc({}, '## Section 2\n\nThis CR drives TBD resolution across all open work items.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(true);
+  });
+
+  it('body containing "TBDs" (plural) → passes (not a marker)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nThe following TBDs were addressed in this sprint.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(true);
+  });
+
+  it('template self-reference line "- [x] 0 "TBDs" exist in the document." → passes (boilerplate excluded)', () => {
+    // This is the EPIC-020 false-positive case
+    const doc = makeDoc({}, '## Pass Criteria\n\n- [x] 0 "TBDs" exist in the document.\n- [x] All done.\n');
+    const result = evaluate("body does not contain marker 'TBD'", doc);
+    expect(result.pass).toBe(true);
+  });
+
+  it('body containing "TODO:" → fails (TODO marker with colon)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nTODO: implement this function\n');
+    const result = evaluate("body does not contain marker 'TODO'", doc);
+    expect(result.pass).toBe(false);
+  });
+
+  it('body containing "FIXME:" → fails (FIXME marker with colon)', () => {
+    const doc = makeDoc({}, '## Section 1\n\nFIXME: broken logic here\n');
+    const result = evaluate("body does not contain marker 'FIXME'", doc);
+    expect(result.pass).toBe(false);
+  });
+});
+
+// parsePredicate: marker-absence shape
+
+describe('BUG-008 sub-fix #2 — parsePredicate marker-absence shape', () => {
+  it('parses "body does not contain marker \'TBD\'" correctly', () => {
+    const p = parsePredicate("body does not contain marker 'TBD'");
+    expect(p.kind).toBe('marker-absence');
+    if (p.kind === 'marker-absence') {
+      expect(p.marker).toBe('TBD');
+    }
+  });
+
+  it('parses "body does not contain marker \'TODO\'" correctly', () => {
+    const p = parsePredicate("body does not contain marker 'TODO'");
+    expect(p.kind).toBe('marker-absence');
+    if (p.kind === 'marker-absence') {
+      expect(p.marker).toBe('TODO');
+    }
+  });
+
+  it('throws on unsupported marker "UNKNOWN"', () => {
+    expect(() => parsePredicate("body does not contain marker 'UNKNOWN'")).toThrow('unsupported predicate shape');
+  });
+});
+
+// Sub-fix #3: blast-radius-populated section index
+
+describe('BUG-008 sub-fix #3 — blast-radius-populated section index', () => {
+  it('CR fixture with §1 containing bullets AND §2 empty → fails (blast-radius targets §2)', () => {
+    // Original bug: section(1) had items but gate expected blast-radius in §2
+    const body = `## 1. The Context Override (Old vs. New)
+
+- Old: we used Stripe
+- New: we use PayPal
+
+## 2. Blast Radius & Invalidation
+
+(empty — no blast radius items listed)
+
+## 3. Execution Sandbox
+
+- src/payments.ts
+`;
+    const doc = makeDoc({}, body);
+    // gate definition now uses section(2), so §2 empty → fail
+    const result = evaluate('section(2) has ≥1 listed-item', doc);
+    expect(result.pass).toBe(false);
+    expect(result.detail).toMatch(/section 2/);
+  });
+
+  it('CR fixture with §2 containing ≥1 bullet → passes', () => {
+    const body = `## 1. The Context Override (Old vs. New)
+
+- Old: we used Stripe
+
+## 2. Blast Radius & Invalidation
+
+- STORY-003-05: payment flow must be re-tested
+- EPIC-007: pricing epic needs review
+
+## 3. Execution Sandbox
+
+- src/payments.ts
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(2) has ≥1 listed-item', doc);
+    expect(result.pass).toBe(true);
+  });
+});

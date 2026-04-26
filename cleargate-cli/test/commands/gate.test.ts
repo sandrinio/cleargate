@@ -619,3 +619,233 @@ describe('transition-inference', () => {
     expect(out.some((l) => l.includes('ready-for-coding'))).toBe(true);
   });
 });
+
+// ─── BUG-008 smoke: readiness-gates.md after fix parses cleanly ───────────────
+
+describe('BUG-008 smoke: readiness-gates.md after fix parses cleanly', () => {
+  const REAL_GATES_PATH = '/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/knowledge/readiness-gates.md';
+  const PROJECT_ROOT = '/Users/ssuladze/Documents/Dev/ClearGate';
+
+  it('readiness-gates.md parses all 6 gate blocks with no errors', async () => {
+    const yaml = await import('js-yaml');
+    const raw = fs.readFileSync(REAL_GATES_PATH, 'utf8');
+    const fenceRe = /```yaml\n([\s\S]*?)```/g;
+    const blocks: unknown[] = [];
+    let match;
+    while ((match = fenceRe.exec(raw)) !== null) {
+      blocks.push(yaml.load(match[1]!));
+    }
+    expect(blocks).toHaveLength(6);
+  });
+
+  it('all criterion check strings in readiness-gates.md parse via parsePredicate without throwing', async () => {
+    const { parsePredicate: pp } = await import('../../src/lib/readiness-predicates.js');
+    const yaml = await import('js-yaml');
+    const raw = fs.readFileSync(REAL_GATES_PATH, 'utf8');
+    const fenceRe = /```yaml\n([\s\S]*?)```/g;
+    let match;
+    while ((match = fenceRe.exec(raw)) !== null) {
+      const block = (yaml.load(match[1]!) as unknown[])[0] as { criteria: { id: string; check: string }[] };
+      for (const criterion of block.criteria) {
+        expect(() => pp(criterion.check)).not.toThrow();
+      }
+    }
+  });
+
+  it('EPIC-021-style fixture: prose context_source with approved_by + approved_at passes proposal-approved', async () => {
+    // Simulates the real EPIC-021 scenario: context_source is long prose with em-dash,
+    // and the epic has approved_by + approved_at waiver fields.
+    const EPIC_LIKE_FIXTURE = `---
+epic_id: "EPIC-021-sim"
+status: "Ready"
+context_source: "User direct request 2026-04-25 — proposal gate waived (sharp intent + inline references). All interrogation questions ratified by user."
+owner: sandrinio
+approved_by: sandrinio
+approved_at: 2026-04-25T00:00:00Z
+---
+
+# EPIC-021: Token-First Onboarding
+
+## 1. Context
+
+Intro text for the epic.
+
+## 2. Scope-In
+
+- Token-based bearer auth as default path
+- Admin panel token issuance
+
+## 3. Stories
+
+Initial story decomposition TBD.
+
+## 4. Affected Files
+
+- cleargate-cli/src/commands/join.ts
+
+## 5. Gherkin
+
+Scenario: happy path
+Given a user with an invite URL
+When they run cleargate join
+Then they are authenticated
+
+Scenario: Error case
+Given a user with expired invite
+When they run cleargate join
+Then an Error is shown
+`;
+    const { dir, absPath, gatesDocPath } = setupEnv(EPIC_LIKE_FIXTURE, 'EPIC-021-sim.md');
+
+    const out: string[] = [];
+    const exitCodes: number[] = [];
+
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-for-decomposition' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch {
+      // Other criteria may fail — only proposal-approved matters for this smoke test
+    }
+
+    const combined = out.join('\n');
+    // proposal-approved should emit a [pass] line, NOT a ❌ line
+    // The gate output format is: "✅ proposal-approved: ..." for pass
+    //                        or "❌ proposal-approved: ..." for fail
+    expect(combined).not.toMatch(/❌ proposal-approved/);
+  });
+
+  it('CR-010-style fixture: prose "TBD resolution" in body passes no-tbds marker predicate', async () => {
+    // Simulates CR-010 scenario: the body contains "TBD resolution" as a noun phrase,
+    // not as a TBD marker. The marker-aware predicate should NOT flag this.
+    const CR_LIKE_FIXTURE = `---
+cr_id: "CR-010-sim"
+parent_ref: "EPIC-008"
+status: "Approved"
+approved: true
+approved_by: sandrinio
+approved_at: 2026-04-26T00:00:00Z
+---
+
+# CR-010-sim: Advisory Readiness Gates
+
+## 1. The Context Override (Old vs. New)
+
+**Obsolete Logic:**
+- Gate failures cause hard push rejection.
+
+**New Logic:**
+- Gate failures become advisory; push proceeds with a note.
+
+## 2. Blast Radius & Invalidation
+
+- [x] No downstream items invalidated; this is purely additive.
+- [x] The "TBD resolution" workflow for open-question tracking is unaffected.
+
+## 3. Execution Sandbox
+
+- cleargate-cli/src/commands/gate.ts
+`;
+    const { dir, absPath, gatesDocPath } = setupEnv(CR_LIKE_FIXTURE, 'CR-010-sim.md');
+
+    const out: string[] = [];
+    const exitCodes: number[] = [];
+
+    // Provide the REAL gates doc to use the marker-based predicate
+    const realGatesDoc = fs.readFileSync(REAL_GATES_PATH, 'utf8');
+    const realGatesDocInDir = path.join(dir, 'real-readiness-gates.md');
+    fs.writeFileSync(realGatesDocInDir, realGatesDoc, 'utf8');
+
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-to-apply' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath: realGatesDocInDir,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch {
+      // Other criteria may fail — only no-tbds matters for this smoke test
+    }
+
+    const combined = out.join('\n');
+    // no-tbds should pass (not appear as ❌)
+    expect(combined).not.toMatch(/❌ no-tbds/);
+  });
+
+  it('CR-011-style fixture: §2 Blast Radius with items passes blast-radius-populated', async () => {
+    // Simulates CR-011 scenario: the CR has items in §2 (Blast Radius).
+    // The old gate was checking section(1) which returned 0 items even when §1 had bullets.
+    // The fix points to section(2) which correctly targets the Blast Radius section.
+    const CR_11_LIKE_FIXTURE = `---
+cr_id: "CR-011-sim"
+parent_ref: "EPIC-021"
+status: "Draft"
+approved: false
+---
+
+# CR-011-sim: Capability Gating
+
+## 1. The Context Override (Old vs. New)
+
+**Obsolete Logic:**
+- All commands shown regardless of membership state.
+
+**New Logic:**
+- Pre-member surface is limited to init/join/whoami/wiki/gate/doctor.
+
+## 2. Blast Radius & Invalidation
+
+- [x] STORY-019-XX: acceptance criteria need capability-gating contract
+- [x] EPIC-021: parent epic must reference this CR
+
+## 3. Execution Sandbox
+
+- cleargate-cli/src/cli.ts
+`;
+    const { dir, absPath, gatesDocPath } = setupEnv(CR_11_LIKE_FIXTURE, 'CR-011-sim.md');
+
+    const out: string[] = [];
+    const exitCodes: number[] = [];
+
+    // Provide the REAL gates doc to use section(2) for blast-radius-populated
+    const realGatesDoc = fs.readFileSync(REAL_GATES_PATH, 'utf8');
+    const realGatesDocInDir = path.join(dir, 'real-readiness-gates.md');
+    fs.writeFileSync(realGatesDocInDir, realGatesDoc, 'utf8');
+
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-to-apply' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath: realGatesDocInDir,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch {
+      // Other criteria may fail — only blast-radius-populated matters for this smoke test
+    }
+
+    const combined = out.join('\n');
+    // blast-radius-populated should pass (not appear as ❌)
+    expect(combined).not.toMatch(/❌ blast-radius-populated/);
+  });
+});

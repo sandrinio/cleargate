@@ -12,6 +12,7 @@ import * as path from 'node:path';
 export type ParsedPredicate =
   | { kind: 'frontmatter'; ref: string; field: string; op: '==' | '!=' | '>=' | '<='; value: string | number | boolean }
   | { kind: 'body-contains'; needle: string; negated: boolean }
+  | { kind: 'marker-absence'; marker: 'TBD' | 'TODO' | 'FIXME' }
   | { kind: 'section'; index: number; count: { op: '>=' | '==' | '>'; n: number }; itemType: 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item' }
   | { kind: 'file-exists'; path: string }
   | { kind: 'link-target-exists'; id: string }
@@ -52,13 +53,23 @@ export function parsePredicate(src: string): ParsedPredicate {
     return { kind: 'frontmatter', ref, field, op, value };
   }
 
-  // 2a. body does not contain '<needle>'
+  // 2a. body does not contain marker '<id>' — new marker-absence shape
+  const markerNotMatch = s.match(/^body does not contain marker ['"]([A-Z]+)['"]$/);
+  if (markerNotMatch) {
+    const marker = markerNotMatch[1]!;
+    if (marker !== 'TBD' && marker !== 'TODO' && marker !== 'FIXME') {
+      throw new Error(`unsupported predicate shape: ${src}`);
+    }
+    return { kind: 'marker-absence', marker };
+  }
+
+  // 2b. body does not contain '<needle>'
   const bodyNotMatch = s.match(/^body does not contain ['"](.+)['"]$/);
   if (bodyNotMatch) {
     return { kind: 'body-contains', needle: bodyNotMatch[1]!, negated: true };
   }
 
-  // 2b. body contains '<needle>'
+  // 2c. body contains '<needle>'
   const bodyMatch = s.match(/^body contains ['"](.+)['"]$/);
   if (bodyMatch) {
     return { kind: 'body-contains', needle: bodyMatch[1]!, negated: false };
@@ -134,6 +145,8 @@ export function evaluate(
       return evalFrontmatter(parsed, doc, projectRoot);
     case 'body-contains':
       return evalBodyContains(parsed, doc);
+    case 'marker-absence':
+      return evalMarkerAbsence(parsed, doc);
     case 'section':
       return evalSection(parsed, doc);
     case 'file-exists':
@@ -165,6 +178,45 @@ function evalFrontmatter(
         detail: `frontmatter key '${parsed.ref}' is missing or null in ${doc.absPath}`,
       };
     }
+
+    // Sub-fix #1 (BUG-008): prose-vs-path heuristic.
+    // If the value looks like prose (contains a space, em-dash, en-dash, colon, parens,
+    // newline, or exceeds 200 chars), it is not a file path. In that case, pass the gate
+    // only when the parent document declares an explicit proposal-gate waiver via any of:
+    //   - proposal_gate_waiver: <truthy>  — explicit opt-in waiver field
+    //   - approved_by: <non-empty> AND approved_at: <non-empty>  — existing approval fields
+    // A plain path like "PROPOSAL-999.md" (no spaces, ≤200 chars, no special prose chars)
+    // still falls through to the existing resolveLinkedPath logic — preserving the R-08
+    // regression guarantee that broken file references still fail.
+    const refStr = String(refVal);
+    const looksLikeProse =
+      refStr.length > 200 ||
+      /[ —–:()\n]/.test(refStr); // space, em-dash, en-dash, colon, parens, newline
+    if (looksLikeProse) {
+      // Signal 1: explicit proposal_gate_waiver field
+      const waiver = doc.fm['proposal_gate_waiver'];
+      const hasExplicitWaiver =
+        waiver !== null && waiver !== undefined && waiver !== false &&
+        String(waiver).trim() !== '' && String(waiver).trim() !== 'false';
+      // Signal 2: approved_by + approved_at both set (existing approval fields)
+      const approvedBy = doc.fm['approved_by'];
+      const approvedAt = doc.fm['approved_at'];
+      const hasApprovalFields =
+        approvedBy !== null && approvedBy !== undefined && String(approvedBy).trim() !== '' &&
+        approvedAt !== null && approvedAt !== undefined && String(approvedAt).trim() !== '';
+      const hasWaiver = hasExplicitWaiver || hasApprovalFields;
+      if (hasWaiver) {
+        return {
+          pass: true,
+          detail: `context_source is prose; proposal-gate waiver per frontmatter approved_by/approved_at`,
+        };
+      }
+      return {
+        pass: false,
+        detail: `context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter`,
+      };
+    }
+
     // Resolve the path
     const linkedPath = resolveLinkedPath(String(refVal), doc.absPath, projectRoot);
     if (!linkedPath) {
@@ -316,6 +368,78 @@ function evalBodyContains(
     }
     return { pass: false, detail: `'${needle}' not found in body` };
   }
+}
+
+// ─── Marker-absence evaluator ─────────────────────────────────────────────────
+
+/**
+ * Sub-fix #2 (BUG-008): Evaluates "body does not contain marker '<id>'".
+ * A marker is counted only when it appears in a syntactic role:
+ *   1. Followed immediately by a colon: TBD: ...
+ *   2. Wrapped in parens: (TBD) or square brackets: [TBD]
+ *   3. The entire trimmed line equals the marker: bare TBD on its own line
+ *   4. Preceded by a code-comment prefix: // TBD or # TBD
+ *
+ * NOT counted:
+ *   - TBD as part of another word (TBDs, TBDish, TBD's)
+ *   - TBD inside quotes in prose ("TBD resolution")
+ *   - Template self-reference lines: "- [x] 0 "TBDs" exist" / "- [ ] 0 "TBDs" exist"
+ */
+function evalMarkerAbsence(
+  parsed: Extract<ParsedPredicate, { kind: 'marker-absence' }>,
+  doc: ParsedDoc
+): { pass: boolean; detail: string } {
+  const { marker } = parsed;
+  const lines = doc.body.split('\n');
+
+  // Template self-reference lines to exclude (BUG-008 spec: "- [x] 0 "TBDs" exist")
+  const templateSelfRefRe = /^\s*-\s*\[[x ]\]\s*0\s*"TBDs?"\s*exist/i;
+
+  // Regex: marker in a syntactic role.
+  // Matches: (MARKER) | [MARKER] | MARKER: | // MARKER | # MARKER | bare MARKER line
+  // The (?<!\w) and (?!\w) prevent matching inside longer words.
+  const markerRe = new RegExp(
+    `(?:^|(?<=\\())${marker}(?=:)|` +     // MARKER: (colon follows)
+    `\\(${marker}\\)|` +                   // (MARKER) parens
+    `\\[${marker}\\]|` +                   // [MARKER] square brackets
+    `(?<=//\\s*)${marker}(?!\\w)|` +       // // MARKER (comment)
+    `(?<=#\\s*)${marker}(?!\\w)`,          // # MARKER (comment)
+    'g'
+  );
+
+  // Also check bare-line: entire trimmed line is just the marker
+  const bareLineRe = new RegExp(`^${marker}$`);
+
+  const violations: number[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+
+    // Skip template self-reference boilerplate
+    if (templateSelfRefRe.test(line)) continue;
+
+    const trimmed = line.trim();
+
+    // Check bare line
+    if (bareLineRe.test(trimmed)) {
+      violations.push(i + 1);
+      continue;
+    }
+
+    // Check syntactic marker roles via regex
+    markerRe.lastIndex = 0;
+    if (markerRe.test(line)) {
+      violations.push(i + 1);
+    }
+  }
+
+  if (violations.length > 0) {
+    return {
+      pass: false,
+      detail: `${violations.length} marker occurrence${violations.length === 1 ? '' : 's'} of '${marker}' at line${violations.length === 1 ? '' : 's'} ${violations.join(', ')}`,
+    };
+  }
+  return { pass: true, detail: `no '${marker}' markers found in body` };
 }
 
 // ─── Section evaluator ────────────────────────────────────────────────────────

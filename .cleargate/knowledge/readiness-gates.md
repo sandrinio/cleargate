@@ -52,7 +52,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: touched-files-populated
       check: "section(3) has ≥1 listed-item"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
 ```
 
 ```yaml
@@ -63,7 +63,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: proposal-approved
       check: "frontmatter(context_source).approved == true"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
     - id: scope-in-populated
       check: "section(2) has ≥1 listed-item"
     - id: affected-files-declared
@@ -84,7 +84,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: gherkin-error-path
       check: "body contains 'Error'"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
 ```
@@ -97,7 +97,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: parent-epic-ref-set
       check: "frontmatter(.).parent_epic_ref != null"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
     - id: implementation-files-declared
       check: "section(3) has ≥1 listed-item"
     - id: dod-declared
@@ -112,9 +112,9 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: blast-radius-populated
-      check: "section(1) has ≥1 listed-item"
+      check: "section(2) has ≥1 listed-item"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
     - id: sandbox-paths-declared
       check: "section(2) has ≥1 listed-item"
 ```
@@ -129,5 +129,5 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: severity-set
       check: "frontmatter(.).severity != null"
     - id: no-tbds
-      check: "body does not contain 'TBD'"
+      check: "body does not contain marker 'TBD'"
 ```
