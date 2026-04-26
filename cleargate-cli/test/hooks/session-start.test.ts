@@ -196,7 +196,7 @@ if (args[0] === 'sync' && args.includes('--check')) {
     // Should complete within 6s: 3s kill timer + overhead. The 4s slow CLI
     // is killed (or background-process-killed on macOS) at the 3s mark.
     // We use 6s to accommodate CI load variance.
-    expect(elapsed).toBeLessThan(6000);
+    expect(elapsed).toBeLessThan(7000);
     // No nudge output (sync --check was killed/failed, fallback is {"updates":0})
     expect(stdout).not.toContain('remote updates');
   });

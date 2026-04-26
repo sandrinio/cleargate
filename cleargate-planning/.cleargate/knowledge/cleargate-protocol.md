@@ -945,8 +945,7 @@ Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='o
 
 ## 23. Doctor Exit-Code Semantics
 
-`cleargate doctor` exits with one of three codes. Hooks branch on the integer, not on stdout parsing.
+`cleargate doctor` exits with one of three codes (all modes: default, `--session-start`, `--can-edit`, `--check-scaffold`, `--pricing`). Hooks branch on the integer, not on stdout.
 - `0` — clean. No blockers, no config errors. Stdout MAY include informational lines.
 - `1` — blocked items or advisory issues (gate failures, stamp errors, drifted SHAs, missing ledger rows). Stdout lists each blocker.
-- `2` — ClearGate misconfigured or partially installed (missing `.cleargate/`, missing `MANIFEST.json`, missing `auth.json`, hook resolver failure). Stdout emits a remediation hint.
-Applies to all modes: default, `--session-start`, `--can-edit`, `--check-scaffold`, `--pricing`.
+- `2` — ClearGate misconfigured or partially installed (missing `.cleargate/`, missing `MANIFEST.json`, missing `auth.json`, hook resolver failure). Stdout emits a remediation hint. See `cleargate doctor --help`.

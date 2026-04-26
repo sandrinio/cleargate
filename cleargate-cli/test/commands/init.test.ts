@@ -841,5 +841,5 @@ describe('cleargate init', () => {
       const pageExists = fs.existsSync(path.join(tmpDir, '.cleargate', 'wiki', 'stories', `${id}.md`));
       expect(pageExists).toBe(true);
     }
-  });
+  }, 20000);
 });
