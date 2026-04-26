@@ -913,3 +913,37 @@ wiki:
 ```
 
 Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.
+
+---
+
+## 22. Advisory Readiness Gates on Push (v2) — CR-010
+
+### §22.1 Two-tier push gate semantics
+
+Push-time gate enforcement uses two distinct tiers:
+
+**Tier 1 — `approved: true` (hard reject, unchanged):**
+`cleargate_push_item` throws `PushNotApprovedError` when `payload.approved !== true`. This is the human go/no-go gate. No advisory mode or env knob overrides it.
+
+**Tier 2 — `cached_gate_result` (advisory by default):**
+When `cached_gate_result.pass === false`, the push proceeds in default advisory mode. The pushed item's body receives a single advisory prefix line placed immediately after the H1 heading (or as the first line if no H1 exists):
+
+```
+[advisory: gate_failed — <comma-separated criterion ids>]
+```
+
+Body content beyond the advisory prefix is byte-identical to the input. The push result includes `gate_status: 'open'` and `failing_criteria: [...]` as response metadata (not persisted to the DB schema).
+
+### §22.2 Strict-mode opt-in
+
+Set the env var `STRICT_PUSH_GATES=true` on the MCP server to restore pre-CR-010 behavior: `cached_gate_result.pass === false` throws `PushGateFailedError` and no DB write occurs.
+
+Default: `STRICT_PUSH_GATES=false` (advisory mode).
+
+### §22.3 Audit log behavior
+
+Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='ok'` — the push succeeded. The `failing_criteria` are surfaced in the push response shape, not in a new audit column. No schema migration is required.
+
+### §22.4 Rationale
+
+The 22 items blocked in the dogfood meta-repo on 2026-04-26 (CR-010 §0 evidence) showed that readiness answers often require non-coding stakeholders. Hard-rejecting at push time prevents the PM tool — the natural answer-collection surface — from receiving the item at all. Advisory mode ships items with open questions visible as body annotations; PM-tool users can answer inline, and a subsequent push with `cached_gate_result.pass=true` removes the advisory prefix. Source: CR-010.
