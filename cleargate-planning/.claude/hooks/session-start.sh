@@ -15,7 +15,7 @@ else
   CG=(npx -y "@cleargate/cli@__CLEARGATE_VERSION__")
 fi
 
-"${CG[@]}" doctor --session-start 2>/dev/null || true
+"${CG[@]}" doctor --session-start || true
 
 # ── §14.9 SessionStart sync nudge (STORY-010-08) ─────────────────────────────
 # Daily-throttled: probe remote for updates at most once per 24h.
