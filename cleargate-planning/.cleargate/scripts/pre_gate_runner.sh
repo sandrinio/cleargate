@@ -304,4 +304,68 @@ esac
 
 cat "$REPORT_FILE" >&2
 
-exit $OVERALL_EXIT
+# ---------------------------------------------------------------------------
+# Lane-aware post-scan routing (STORY-022-04)
+# Resolve REPO_ROOT from SCRIPT_DIR (scripts/ lives two levels below repo root)
+# ---------------------------------------------------------------------------
+REPO_ROOT_FOR_LANE="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+ACTIVE_FILE="${REPO_ROOT_FOR_LANE}/.cleargate/sprint-runs/.active"
+
+STORY_ID=""
+if [[ -n "${BRANCH:-}" ]]; then
+  STORY_ID="$(resolve_story_id_from_branch "${BRANCH}")"
+fi
+
+STATE_JSON=""
+SPRINT_ID=""
+SPRINT_MD=""
+if [[ -f "${ACTIVE_FILE}" ]]; then
+  SPRINT_ID="$(cat "${ACTIVE_FILE}" | tr -d '[:space:]')"
+  STATE_JSON="${REPO_ROOT_FOR_LANE}/.cleargate/sprint-runs/${SPRINT_ID}/state.json"
+  # Sprint markdown lives in delivery/pending-sync/
+  SPRINT_MD="$(ls "${REPO_ROOT_FOR_LANE}/.cleargate/delivery/pending-sync/${SPRINT_ID}_"*.md 2>/dev/null | head -1 || true)"
+fi
+
+LANE="standard"
+if [[ -n "${STORY_ID}" && -n "${STATE_JSON}" ]]; then
+  LANE="$(resolve_lane "${STATE_JSON}" "${STORY_ID}")"
+fi
+
+if [[ "${LANE}" = "fast" ]]; then
+  if [[ "${OVERALL_EXIT}" -eq 0 ]]; then
+    # Fast lane + scanner pass: skip QA spawn signal
+    printf 'pre-gate: lane=fast -> skipping QA spawn for %s\n' "${STORY_ID}"
+    if [[ -n "${STATE_JSON}" ]]; then
+      # Positional invocation: node update_state.mjs <STORY-ID> <new-state>
+      CLEARGATE_STATE_FILE="${STATE_JSON}" \
+        node "${SCRIPT_DIR}/update_state.mjs" "${STORY_ID}" "Architect Passed" \
+        > /dev/null 2>&1 || true
+    fi
+    exit 0
+  else
+    # Fast lane + scanner fail: auto-demote + LD event
+    SCANNER_FAIL_REASON="pre-gate scanner failed (exit ${OVERALL_EXIT})"
+    if [[ -n "${STATE_JSON}" ]]; then
+      # Positional invocation: node update_state.mjs <STORY-ID> --lane-demote <reason>
+      # Capture exit independently per FLASHCARD #hooks #bash #exit-capture 2026-04-26
+      _tmp_demote_out="$(mktemp)"
+      CLEARGATE_STATE_FILE="${STATE_JSON}" \
+        node "${SCRIPT_DIR}/update_state.mjs" "${STORY_ID}" --lane-demote \
+        "${SCANNER_FAIL_REASON}" > "${_tmp_demote_out}" 2>&1
+      _demote_exit=$?
+      rm -f "${_tmp_demote_out}"
+      if [[ ${_demote_exit} -ne 0 ]]; then
+        printf 'pre-gate: warn: lane-demote failed (exit %s) for %s\n' \
+          "${_demote_exit}" "${STORY_ID}" >&2
+      fi
+    fi
+    if [[ -n "${SPRINT_MD}" ]]; then
+      append_ld_event "${SPRINT_MD}" "${STORY_ID}" "${SCANNER_FAIL_REASON}"
+    fi
+    # Exit with the original scanner exit code so orchestrator routes to QA
+    exit "${OVERALL_EXIT}"
+  fi
+fi
+
+# lane=standard (or unknown/missing): existing behaviour
+exit "${OVERALL_EXIT}"
