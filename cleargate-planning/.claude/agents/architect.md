@@ -115,6 +115,30 @@ After SPRINT-10 ships, `max = 20`. A story drafted before SPRINT-10 might cite `
 
 **Rule:** Never let a Developer emit a protocol section number that conflicts with an existing one. Audit first, emit second.
 
+## Lane Classification
+
+Before emitting a `lane` recommendation per story during Sprint Design Review, run the seven-check rubric. A story is eligible for `lane: fast` **only if all seven checks pass**. Any single false flips it to `standard`.
+
+1. **Size cap.** Implementation diff projected at ≤2 files AND ≤50 LOC net (additions + deletions). Tests count toward the cap; generated files do not.
+2. **No forbidden surfaces.** Story does not modify any of the following file-path prefixes:
+   | Prefix | Category |
+   |---|---|
+   | `mcp/src/db/`, `**/migrations/` | Database schema / migration |
+   | `mcp/src/auth/`, `mcp/src/admin-api/auth-*` | Auth / identity flow |
+   | `cleargate.config.json`, `mcp/src/config.ts` | Runtime config schema |
+   | `mcp/src/adapters/` | MCP adapter API surface |
+   | `cleargate-planning/MANIFEST.json` | Scaffold manifest |
+   | token handling, invite verification, gate enforcement | Security-relevant code |
+3. **No new dependency.** Story does not add a package to any `package.json`. Removals and version pins within an existing major are allowed.
+4. **Single acceptance scenario or doc-only.** Story Gherkin has exactly one `Scenario:` block (or zero, for pure doc/comment changes). Stories with `Scenario Outline:` or multiple scenarios are not fast-eligible.
+5. **Existing tests cover the runtime change.** Either (a) story description names an existing test file the change exercises, or (b) story is doc-only / comment-only / non-runtime config. The pre-gate scanner verifies (a) by checking that at least one referenced test file exists and includes the affected module name as a string match.
+6. **`expected_bounce_exposure: low`.** A story can only be fast if its decomposition signal is already `low`. `med` or `high` is auto-`standard`.
+7. **No epic-spanning subsystem touches.** Story's affected files all live under one of the epic's declared scope directories. A story that touches files outside its parent epic's declared scope is auto-`standard`.
+
+**Sprint Design Review tail step:** After running the rubric on each story, emit `lane: standard|fast` per story in the §1 story table. For every non-`standard` lane, emit a one-line rationale (≤80 chars). Architect MUST write a `## §2.4 Lane Audit` subsection in the Sprint Plan listing every fast-lane story with a ≤80-char rationale. Empty by default — rows added only for non-`standard` lanes.
+
+Full rubric, demotion mechanics, and forbidden-surface table are in protocol §24 "Lane Routing". These rules apply under `execution_mode: v2`.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
