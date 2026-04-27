@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.8.1",
-  "generated_at": "2026-04-27T09:03:42.064Z",
+  "cleargate_version": "0.8.2",
+  "generated_at": "2026-04-27T09:39:12.477Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -144,28 +144,28 @@
     },
     {
       "path": ".cleargate/templates/Bug.md",
-      "sha256": "3ba6e72bd2bc01cf8d0ea06390f8ea511bef3a421a33c48de033051f844dfa0e",
+      "sha256": "54660457a8b7f5c9f1a286993e2d83d46fef880a3d65086421d8db815a9c01ec",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/CR.md",
-      "sha256": "58ea4badb03991d119f8aa8870992a8239c8df6ad198e0d9ca04a805756e4bac",
+      "sha256": "e4cff0314217d649177a3dd1603c510d2f5246c1cf297baaa91d5941c1eedc91",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/epic.md",
-      "sha256": "6c85e4c9602af657e6778af9009a67936c27e47331479d0c246cdf1242177c82",
+      "sha256": "fa0e5bf85b50bee11d38646b2606652999ac2ff7c649810408c35ff25d7a025c",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/hotfix.md",
-      "sha256": "2a7c745b0d46f4a092c507d6b427c15d64540e332f9544bc572451a313f4e5cc",
+      "sha256": "93c6690a23bcfca98697048b7f1c2c5c76ee16c2d295a53ced8471e8c4eb78d3",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/templates/proposal.md",
-      "sha256": "e8055dac81ecf94d01fe610e8cdaf4fa73a2f8d9953e4db90b91a20a8c81460d",
+      "sha256": "227907f5de028453168c487e9c4ec4d4acd578298d13d658f7a7b63ef76dc23d",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -207,7 +207,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "f46364178f09d2514405723e53d5e388ab41bce5e2b318dc1aed8743500f042f",
+      "sha256": "0817454195b1c3ddb7a2559a0295273082fb621cdfd7a77594414876da28c620",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

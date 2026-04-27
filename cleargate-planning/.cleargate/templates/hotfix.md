@@ -20,7 +20,7 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
-# Sync attribution (EPIC-010). Optional; stamped by `cleargate push` / `cleargate pull`.
+# Sync attribution. Optional; stamped by `cleargate push` / `cleargate pull`.
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

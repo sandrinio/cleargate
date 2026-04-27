@@ -33,15 +33,15 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
-# Sync attribution (EPIC-010). Optional; stamped by `cleargate push` / `cleargate pull`.
-pushed_by: null            # STORY-010-07 writer / STORY-010-04 reader
-pushed_at: null            # STORY-010-07 writer / STORY-010-04 reader
-last_pulled_by: null       # STORY-010-04 writer / STORY-010-03 reader
-last_pulled_at: null       # STORY-010-04 writer / STORY-010-03 reader
-last_remote_update: null   # STORY-010-02 writer (from MCP) / STORY-010-03 reader
-source: "local-authored"   # STORY-010-05 flips to "remote-authored" on intake
-last_synced_status: null   # STORY-010-04 writer; required for conflict-detector rule 6
-last_synced_body_sha: null # STORY-010-04 writer; sha256 of body at last sync
+# Sync attribution. Optional; stamped by `cleargate push` / `cleargate pull`.
+pushed_by: null            # set by push: which user pushed
+pushed_at: null            # set by push: ISO-8601 timestamp
+last_pulled_by: null       # set by pull: which user pulled
+last_pulled_at: null       # set by pull: ISO-8601 timestamp
+last_remote_update: null   # set by pull: server's last-modified timestamp
+source: "local-authored"   # flips to "remote-authored" on intake
+last_synced_status: null   # required for conflict-detector; status at last sync
+last_synced_body_sha: null # sha256 of body at last sync
 ---
 
 # CR-{ID}: {Change Request Name}
