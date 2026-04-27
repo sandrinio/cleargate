@@ -36,6 +36,19 @@ const HOOK_FILES_WITH_PIN = new Set([
 ]);
 
 /**
+ * Files that copyPayload must NOT copy verbatim. The init pipeline owns these
+ * via a downstream step that strips canonical-source preamble or otherwise
+ * transforms content. Listing here ensures `listFilesRecursive` skips them.
+ *
+ * - CLAUDE.md (BUG-016): top-level CLAUDE.md in cleargate-planning/ carries a
+ *   meta-doc preamble describing the bounded-block contract. Step 5 of init
+ *   (`injectClaudeMd`) writes only `extractBlock(src)`. Copying the raw source
+ *   here would leave the preamble in the user repo because step 5 only
+ *   replaces the inner block region.
+ */
+const SKIP_FILES = new Set<string>(['CLAUDE.md']);
+
+/**
  * Recursively enumerate files under `dir`.
  * Returns paths relative to `dir`.
  */
@@ -72,7 +85,7 @@ export function copyPayload(
     throw new Error(`copyPayload: payloadDir does not exist: ${payloadDir}`);
   }
 
-  const files = listFilesRecursive(payloadDir);
+  const files = listFilesRecursive(payloadDir).filter((r) => !SKIP_FILES.has(r));
 
   for (const relPath of files) {
     const srcPath = path.join(payloadDir, relPath);

@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.6.1",
-  "generated_at": "2026-04-27T06:46:42.294Z",
+  "cleargate_version": "0.6.2",
+  "generated_at": "2026-04-27T07:21:39.697Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",

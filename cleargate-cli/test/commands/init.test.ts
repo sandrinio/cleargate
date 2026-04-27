@@ -83,6 +83,14 @@ describe('cleargate init', () => {
     expect(claudeMd).toContain('<!-- CLEARGATE:START -->');
     expect(claudeMd).toContain('<!-- CLEARGATE:END -->');
     expect(claudeMd).toContain('ClearGate');
+    // BUG-016: scaffold must NOT carry the canonical-source preamble.
+    // The preamble starts with the H1 title only present in cleargate-planning/CLAUDE.md
+    // and the meta sentence describing the bounded-block contract.
+    expect(claudeMd).not.toContain('Injected CLAUDE.md Block');
+    expect(claudeMd).not.toContain('This file is the content `cleargate init` injects');
+    // First non-empty line must be the START marker (no preamble above it).
+    const firstNonEmpty = claudeMd.split('\n').find((l) => l.trim().length > 0);
+    expect(firstNonEmpty).toBe('<!-- CLEARGATE:START -->');
 
     // .claude/settings.json has BOTH SubagentStop (from payload) AND PostToolUse (added programmatically)
     const settings = JSON.parse(
