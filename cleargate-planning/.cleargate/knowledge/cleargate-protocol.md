@@ -108,6 +108,8 @@ Under `execution_mode: "v1"` this rule is **advisory only** — the orchestrator
 
 **v2 story-file assertion:** Additionally for v2 sprints, `cleargate sprint init` asserts every story in §1 Consolidated Deliverables has a `pending-sync/STORY-*.md` file before writing `state.json`; missing files block init with an enumerated stderr list. Under v1 the assertion runs but only warns (does not block). The assertion is also available standalone: `node .cleargate/scripts/assert_story_files.mjs <sprint-file-path>`.
 
+As of cleargate@0.6.x, sprint-init asserts all six work-item id shapes (STORY/CR/BUG/EPIC/PROPOSAL/HOTFIX). v2 mode hard-blocks on missing OR unapproved OR stub-empty items; v1 warns-only (backwards compat).
+
 ### Gate 3 — Push Gate
 
 - **Never call `cleargate_push_item` on a file where `approved: false`.**
