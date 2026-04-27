@@ -408,15 +408,19 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
       if (probeResult.status === 0) {
         stdout(`[cleargate init] \u{1F7E2} cleargate CLI resolved via ${branchLabel}\n`);
       } else {
-        // Resolver chain exhausted — the hooks will not work.
+        // Resolver chain exhausted — the hooks will no-op until cleargate is reachable.
+        // Per BUG-015 (2026-04-27): convert from exit(1) to warn-not-block. The probe is a
+        // best-effort signal; transient registry issues (CI race conditions, network blips)
+        // shouldn't hard-fail init. Hooks will surface their own resolver-failure banners
+        // at runtime if the issue persists. User can run `cleargate doctor` to investigate.
         stdout(
-          `[cleargate init] \u{1F534} cleargate CLI: not resolvable — hooks will no-op.\n` +
+          `[cleargate init] \u{1F7E1} cleargate CLI: not resolvable in this environment.\n` +
           `[cleargate init]   Attempted: ${branchLabel}\n` +
+          `[cleargate init]   This is a warning, not a fatal error. Hooks will no-op until resolved.\n` +
           `[cleargate init]   Fix: npm i -g cleargate@${pinVersion}  or  npx cleargate@${pinVersion} doctor\n`,
         );
-        // Non-zero exit per M1 plan §1 "exits zero on at least one branch resolving → exits non-zero on probe failure"
-        exit(1);
-        return;
+        // Continue init. The resolver-status was emitted; hooks will surface their own
+        // failure banners at runtime if needed.
       }
     }
   }

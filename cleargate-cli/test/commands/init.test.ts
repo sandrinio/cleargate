@@ -623,7 +623,7 @@ describe('cleargate init', () => {
 
   // ─── CR-009 Scenario 5: Probe failure — prints red line and exits 1 ─────────
 
-  it('CR-009 scenario 5: probe failure (status=1) — init prints red banner and calls exit(1)', async () => {
+  it('CR-009 scenario 5 (post-BUG-015): probe failure prints yellow warning and continues init (no exit)', async () => {
     const cap = makeCapture();
 
     // Stub probe to fail (status non-zero) for ALL calls
@@ -636,23 +636,23 @@ describe('cleargate init', () => {
       throw new Error(`exit(${code})`);
     };
 
-    try {
-      await initHandler({
-        cwd: tmpDir,
-        payloadDir: META_ROOT_PLANNING,
-        stdout: cap.stdout,
-        stderr: cap.stderr,
-        pin: '0.5.0',
-        spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
-        exit: exitStub,
-      });
-    } catch {
-      // exit throws in test seam
-    }
+    // Post-BUG-015: probe failure is warn-not-block. init should NOT exit; should
+    // print the yellow warning banner and continue scaffolding.
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.5.0',
+      spawnSyncFn: probeStub as Parameters<typeof initHandler>[0]['spawnSyncFn'],
+      exit: exitStub,
+    });
 
     const outJoined = cap.out.join('');
-    expect(outJoined).toContain('\u{1F534}');
-    expect(exitCode).toBe(1);
+    expect(outJoined).toContain('\u{1F7E1}'); // yellow warning, not red 🔴
+    expect(outJoined).toContain('not resolvable in this environment');
+    expect(outJoined).toContain('warning, not a fatal error');
+    expect(exitCode).toBeUndefined(); // init should NOT have called exit()
   });
 
   // ─── CR-009 Scenario 6: Snapshot lock — stamp-and-gate.sh byte-equals cr-009 lock ─
