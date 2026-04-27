@@ -139,8 +139,12 @@ function main() {
       if (executionMode === 'v2') {
         // Hard block: do not create state.json
         process.stderr.write(stderr);
+        // Count categories from structured stderr lines
+        const missingCount = (stderr.match(/^MISSING \((\d+)\):/m) ?? [])[1] ?? '0';
+        const unapprovedCount = (stderr.match(/^UNAPPROVED \((\d+)\):/m) ?? [])[1] ?? '0';
+        const emptyCount = (stderr.match(/^STUB-EMPTY \((\d+)\):/m) ?? [])[1] ?? '0';
         process.stderr.write(
-          `ERROR: v2 sprint init blocked — story files missing. Fix the above, then re-run init.\n`
+          `ERROR: v2 sprint init blocked — ${missingCount} items missing, ${unapprovedCount} unapproved, ${emptyCount} stub-empty. Fix the above, then re-run init.\n`
         );
         process.exit(1);
       } else {
