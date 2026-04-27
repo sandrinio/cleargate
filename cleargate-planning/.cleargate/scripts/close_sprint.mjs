@@ -32,6 +32,29 @@ import { execSync } from 'node:child_process';
 import { TERMINAL_STATES } from './constants.mjs';
 import { validateState } from './validate_state.mjs';
 
+/**
+ * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
+ * Inlined from update_state.mjs:migrateV1ToV2 to avoid triggering that
+ * script's CLI main() on import (update_state.mjs has no module guard).
+ * @param {object} state - Parsed v1 state object
+ * @returns {object} - The mutated (now v2) state object
+ */
+function migrateV1ToV2(state) {
+  state.schema_version = 2;
+  const storyIds = Object.keys(state.stories || {});
+  for (const id of storyIds) {
+    const story = state.stories[id];
+    if (story.lane == null) story.lane = 'standard';
+    if (story.lane_assigned_by == null) story.lane_assigned_by = 'migration-default';
+    if (story.lane_demoted_at === undefined) story.lane_demoted_at = null;
+    if (story.lane_demotion_reason === undefined) story.lane_demotion_reason = null;
+  }
+  process.stderr.write(
+    `migration: schema_version 1 → 2 for sprint ${state.sprint_id} (${storyIds.length} stories defaulted to lane: standard)\n`
+  );
+  return state;
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SCRIPTS_DIR = __dirname;
@@ -129,6 +152,12 @@ function main() {
     process.exit(1);
   }
 
+  // Migrate v1 → v2 if needed before strict validation
+  if (state.schema_version === 1) {
+    state = migrateV1ToV2(state);
+    atomicWrite(stateFile, state);
+  }
+
   const { valid, errors } = validateState(state);
   if (!valid) {
     process.stderr.write('Error: state.json validation failed:\n');
@@ -153,6 +182,70 @@ function main() {
   }
 
   process.stdout.write(`Step 1-2 passed: all ${Object.keys(state.stories || {}).length} stories are terminal.\n`);
+
+  // ── Step 2.5: v2.1 validation — activation-gated ──────────────────────────
+  // Activation gate: schema_version >= 2 AND at least one story has lane: 'fast'
+  const isV2 = (state.schema_version || 1) >= 2;
+  const hasFastLane = isV2 && Object.values(state.stories || {}).some(
+    (s) => /** @type {any} */ (s).lane === 'fast'
+  );
+
+  if (isV2 && hasFastLane) {
+    // Naming convention: sprint dir must match ^SPRINT-\d{2,3}$
+    const sprintDirName = path.basename(sprintDir);
+    if (!/^SPRINT-\d{2,3}$/.test(sprintDirName)) {
+      process.stderr.write(
+        `close_sprint: sprint dir "${sprintDirName}" does not match ^SPRINT-\\d{2,3}$\n` +
+        `  Expected format: SPRINT-NN or SPRINT-NNN (e.g. SPRINT-14)\n` +
+        `  Got: "${sprintDirName}" at path: ${sprintDir}\n`
+      );
+      process.exit(1);
+    }
+
+    // Read REPORT.md
+    const reportFile2 = path.join(sprintDir, 'REPORT.md');
+    if (!fs.existsSync(reportFile2)) {
+      process.stderr.write(
+        `close_sprint: v2.1 validation requires REPORT.md at ${reportFile2}\n` +
+        '  Run the Reporter agent first, then re-run close_sprint.mjs.\n'
+      );
+      process.exit(1);
+    }
+    const report = fs.readFileSync(reportFile2, 'utf8');
+
+    // Check required §3 metric rows
+    const requiredMetricRows = [
+      /Fast-Track Ratio/,
+      /Fast-Track Demotion Rate/,
+      /Hotfix Count/,
+      /Hotfix-to-Story Ratio/,
+      /Hotfix Cap Breaches/,
+      /LD events/,
+    ];
+    const missingMetrics = requiredMetricRows.filter((rx) => !rx.test(report));
+    if (missingMetrics.length > 0) {
+      process.stderr.write(
+        `close_sprint: §3 missing rows: ${missingMetrics.map((rx) => rx.source).join(', ')}\n`
+      );
+      process.exit(1);
+    }
+
+    // Check required §5 sections
+    const requiredSections = [
+      /Lane Audit/,
+      /Hotfix Audit/,
+      /Hotfix Trend/,
+    ];
+    const missingSections = requiredSections.filter((rx) => !rx.test(report));
+    if (missingSections.length > 0) {
+      process.stderr.write(
+        `close_sprint: §5 missing: ${missingSections.map((rx) => rx.source).join(', ')}\n`
+      );
+      process.exit(1);
+    }
+
+    process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
+  }
 
   // ── Step 3: Invoke prefill_report.mjs ─────────────────────────────────────
   process.stdout.write('Step 3: running prefill_report.mjs...\n');

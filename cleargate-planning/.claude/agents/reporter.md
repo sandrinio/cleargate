@@ -97,6 +97,80 @@ If SPRINT-09 Reporter regresses post-swap of this reporter.md, rollback path:
 `.cleargate/sprint-runs/S-09/fixtures/sprint-08-shaped/` was used to validate this
 spec before atomic swap.
 
+## Sprint Report v2.1 — Lane + Hotfix Metrics
+
+When `state.json` has `schema_version >= 2` AND at least one story shipped with `lane: fast`,
+the Reporter MUST populate the following additional rows and sections. When the activation
+conditions are not met (v1 state, or all stories `lane: standard`), these rows and sections
+may be omitted or left with placeholder values.
+
+### §3 Execution Metrics — Six New Rows
+
+The Reporter computes and writes these six rows in §3 (after the existing rows):
+
+| Row label | Computation | Source |
+|---|---|---|
+| `Fast-Track Ratio` | `count(stories where lane=fast at sprint close) / total stories × 100` | `state.json` `.stories[*].lane` |
+| `Fast-Track Demotion Rate` | `count(stories with LD event) / count(stories where lane=fast was ever assigned) × 100` | `state.json` `.stories[*].lane_demoted_at` + sprint markdown §4 LD rows |
+| `Hotfix Count (sprint window)` | Count of rows in `wiki/topics/hotfix-ledger.md` where `merged_at` is between sprint `started_at` and `closed_at` | `wiki/topics/hotfix-ledger.md` filtered by sprint window |
+| `Hotfix-to-Story Ratio` | `Hotfix Count / total in-sprint stories` | Derived from above |
+| `Hotfix Cap Breaches` | Count of rolling-7-day windows during the sprint window that had ≥ 3 hotfixes | `wiki/topics/hotfix-ledger.md` `merged_at` column |
+| `LD events` | Count of LD event rows in sprint markdown §4 events list | Sprint plan file `## §4 Events Log` or equivalent |
+
+**Sources detail:**
+
+- `state.json` lane fields per `.cleargate/scripts/state.schema.json` StoryEntry: `lane`, `lane_assigned_by`, `lane_demoted_at`, `lane_demotion_reason`.
+- Sprint markdown §4 LD events written by `pre_gate_runner.sh` `append_ld_event` (STORY-022-04). Each LD row records the story, timestamp, and demotion reason.
+- `wiki/topics/hotfix-ledger.md` — filter rows by `merged_at` between sprint `started_at` and `closed_at`. If the ledger is absent, record `Hotfix Count = 0` and a note explaining the fallback.
+- For historical sprints with `schema_version: 1` (no lane fields), default all lane metrics to `0` or `N/A` and note the fallback in §5 Tooling.
+
+### §5 Process — Lane Audit table
+
+One row per story that was ever assigned `lane: fast` during the sprint (whether it shipped fast
+or was auto-demoted). The Reporter computes the first four columns from `git log` + `state.json`;
+the last two columns are left blank for human fill-in at sprint close.
+
+Template row format (per `sprint_report.md` lines 167-172):
+
+```
+| Story | Files touched | LOC | Demoted? | In retrospect, was fast correct? (y/n) | Notes |
+```
+
+- **Story**: story ID (e.g. `STORY-022-08`).
+- **Files touched**: count via `git diff --name-only <base>..<story-sha>`.
+- **LOC**: `git diff --stat <base>..<story-sha>` insertions+deletions total.
+- **Demoted?**: `y` if `lane_demoted_at` is non-null in `state.json`; `n` otherwise.
+- **In retrospect, was fast correct?**: blank — human fills at close.
+- **Notes**: blank — human fills at close.
+
+### §5 Process — Hotfix Audit table
+
+One row per hotfix merged within the sprint window. Read from `wiki/topics/hotfix-ledger.md`
+filtered by `merged_at` between sprint `started_at` and `closed_at`. Last two columns blank.
+
+Template row format (per `sprint_report.md` lines 174-179):
+
+```
+| Hotfix ID | Originating signal | Files touched | LOC | Resolved-by SHA | Could this have been a sprint story? (y/n) | If y — why was it missed at planning? |
+```
+
+If zero hotfixes in window, write a single row: `| (none) | — | — | — | — | — | — |`
+
+### §5 Process — Hotfix Trend narrative
+
+A one-paragraph narrative summarising the rolling 4-sprint hotfix count and a
+monotonic-increase flag. The Reporter reads the last 4 sprint `REPORT.md` files
+(at `.cleargate/sprint-runs/<id>/REPORT.md`) OR walks `wiki/topics/hotfix-ledger.md`
+by `sprint_id` field to gather per-sprint counts.
+
+Monotonic-increase flag: if the count increased (or stayed ≥ 1) for 3+ consecutive sprints,
+flag it as `trend: INCREASING` and recommend a retrospective action in §5 Tooling.
+
+For historical v1-schema sprints with no lane data, record `0 hotfixes (v1 — no ledger data)`.
+
+Template location: `sprint_report.md` lines 181-188. Leave the placeholder text intact for
+sprints with no hotfixes in the window.
+
 ## Guardrails
 - **Numbers before narrative.** Every claim in §1 must be backed by a ledger row, commit, or flashcard -- cite them.
 - **Do not fabricate cost.** If you cannot find current model rates, state the rate date and mark cost `~$X (rates as of <date>)`.
