@@ -93,14 +93,19 @@ describe('cleargate init', () => {
     expect(firstNonEmpty).toBe('<!-- CLEARGATE:START -->');
 
     // BUG-017 + BUG-019: .mcp.json registers cleargate as a stdio MCP server
-    // pointing at `cleargate mcp serve` (handles auth + token refresh).
+    // spawned via `npx -y cleargate@<pin> mcp serve` (handles auth + refresh).
+    // npx form chosen so users without a global cleargate install also get a
+    // working spawn (most onboard via `npx cleargate init`).
     const mcpJsonPath = path.join(tmpDir, '.mcp.json');
     expect(fs.existsSync(mcpJsonPath)).toBe(true);
     const mcpJson = JSON.parse(fs.readFileSync(mcpJsonPath, 'utf8')) as {
       mcpServers?: Record<string, { command?: string; args?: string[] }>;
     };
-    expect(mcpJson.mcpServers?.cleargate?.command).toBe('cleargate');
-    expect(mcpJson.mcpServers?.cleargate?.args).toEqual(['mcp', 'serve']);
+    expect(mcpJson.mcpServers?.cleargate?.command).toBe('npx');
+    const args = mcpJson.mcpServers?.cleargate?.args ?? [];
+    expect(args[0]).toBe('-y');
+    expect(args[1]).toMatch(/^cleargate@/);
+    expect(args.slice(2)).toEqual(['mcp', 'serve']);
 
     // BUG-018: hook scripts land with +x set (skip on Windows).
     if (process.platform !== 'win32') {

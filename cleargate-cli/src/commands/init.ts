@@ -329,12 +329,13 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     stdout(`[cleargate init] CLAUDE.md unchanged (block already up to date)\n`);
   }
 
-  // Step 5b (BUG-017 + BUG-019): register cleargate in `.mcp.json` as a stdio
-  // MCP server pointing at `cleargate mcp serve`. The shim handles Bearer
-  // auth + token refresh against the canonical hosted endpoint. Users with a
-  // self-hosted MCP can override via CLEARGATE_MCP_URL.
+  // Step 5b (BUG-017 + BUG-019 + post-0.8.0): register cleargate in `.mcp.json`
+  // as a stdio MCP server. Use `npx -y cleargate@<pin> mcp serve` so users
+  // without a global install (i.e. anyone who ran `npx cleargate init`) still
+  // get a working spawn. Pin to the cleargate version that wrote the entry,
+  // matching the CR-009 hook resolver pattern.
   try {
-    const action = injectMcpJson(cwd);
+    const action = injectMcpJson(cwd, pinVersion ?? 'latest');
     if (action === 'created') {
       stdout(
         `[cleargate init] Created .mcp.json (cleargate MCP server registered) — restart Claude Code to load it.\n`,

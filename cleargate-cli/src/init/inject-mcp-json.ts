@@ -43,33 +43,43 @@ export function mergeMcpJson(existing: McpJsonShape | null, entry: McpServerEntr
 }
 
 /**
- * Stdio entry pointing the user's Claude Code at `cleargate mcp serve`.
- * BUG-019: HTTP transport entry could not authenticate; stdio shim handles
- * Bearer auth + token refresh in-process.
+ * Build the stdio entry for a given pinned cleargate version.
  *
- * Exported separately for tests + future override (self-hosters can write
- * their own entry).
+ * BUG-019 + post-0.8.0 fix: prior 0.8.0 used `command: "cleargate"` which
+ * required a global install. Most users `npx cleargate init` — no global
+ * binary on PATH — so Claude Code's spawn failed. Switching to `npx -y
+ * cleargate@<pin>` works for both populations (cached after first hit).
+ * Pinning the version is the CR-009 resolver pattern: `.mcp.json` doesn't
+ * float past the cleargate version that wrote it.
  */
-export const STDIO_ENTRY: McpServerEntry = {
-  command: 'cleargate',
-  args: ['mcp', 'serve'],
-};
+export function buildStdioEntry(pinVersion: string): McpServerEntry {
+  return {
+    command: 'npx',
+    args: ['-y', `cleargate@${pinVersion}`, 'mcp', 'serve'],
+  };
+}
+
+/**
+ * Default stdio entry exported for tests. Production callers should pass an
+ * explicit pin (init reads pkg.version).
+ */
+export const STDIO_ENTRY_DEFAULT: McpServerEntry = buildStdioEntry('latest');
 
 /**
  * Filesystem-side entry point. Reads `<cwd>/.mcp.json` if present, merges,
  * writes back. Returns one of {created, updated, unchanged} for caller logging.
  *
- * `_unusedUrl` is retained for the public signature so existing callers stay
- * source-compatible across the 0.7→0.8 change. The URL is now baked into the
- * stdio shim (`cleargate mcp serve` reads it from CLEARGATE_MCP_URL or its
- * canonical default).
+ * @param cwd          target directory
+ * @param pinVersion   cleargate version to pin in the npx invocation; the
+ *                     init pipeline passes pkg.version. Defaults to `latest`
+ *                     for callers that don't have a version handy (tests).
  */
 export function injectMcpJson(
   cwd: string,
-  _unusedUrl?: string,
+  pinVersion: string = 'latest',
 ): 'created' | 'updated' | 'unchanged' {
   const dst = path.join(cwd, '.mcp.json');
-  const entry: McpServerEntry = STDIO_ENTRY;
+  const entry: McpServerEntry = buildStdioEntry(pinVersion);
 
   let existing: McpJsonShape | null = null;
   let existingRaw: string | null = null;
