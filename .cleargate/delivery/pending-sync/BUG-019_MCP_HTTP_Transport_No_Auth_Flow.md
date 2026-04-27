@@ -1,14 +1,14 @@
 ---
 bug_id: BUG-019
 parent_ref: EPIC-019
-status: Triaged
+status: Verified
 severity: P0-Critical
 reporter: sandrinio
-sprint: SPRINT-15
-milestone: TBD
-approved: false
-approved_at: null
-approved_by: null
+sprint: off-sprint
+milestone: post-SPRINT-14
+approved: true
+approved_at: 2026-04-27T00:00:00Z
+approved_by: sandrinio
 created_at: 2026-04-27T00:00:00Z
 updated_at: 2026-04-27T00:00:00Z
 created_at_version: cleargate@0.6.2
@@ -48,7 +48,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-27T08:32:56Z
+  last_stamp: 2026-04-27T08:55:20Z
   sessions: []
 ---
 
