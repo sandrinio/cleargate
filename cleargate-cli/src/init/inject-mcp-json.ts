@@ -43,15 +43,33 @@ export function mergeMcpJson(existing: McpJsonShape | null, entry: McpServerEntr
 }
 
 /**
+ * Stdio entry pointing the user's Claude Code at `cleargate mcp serve`.
+ * BUG-019: HTTP transport entry could not authenticate; stdio shim handles
+ * Bearer auth + token refresh in-process.
+ *
+ * Exported separately for tests + future override (self-hosters can write
+ * their own entry).
+ */
+export const STDIO_ENTRY: McpServerEntry = {
+  command: 'cleargate',
+  args: ['mcp', 'serve'],
+};
+
+/**
  * Filesystem-side entry point. Reads `<cwd>/.mcp.json` if present, merges,
  * writes back. Returns one of {created, updated, unchanged} for caller logging.
+ *
+ * `_unusedUrl` is retained for the public signature so existing callers stay
+ * source-compatible across the 0.7→0.8 change. The URL is now baked into the
+ * stdio shim (`cleargate mcp serve` reads it from CLEARGATE_MCP_URL or its
+ * canonical default).
  */
 export function injectMcpJson(
   cwd: string,
-  url: string,
+  _unusedUrl?: string,
 ): 'created' | 'updated' | 'unchanged' {
   const dst = path.join(cwd, '.mcp.json');
-  const entry: McpServerEntry = { type: 'http', url };
+  const entry: McpServerEntry = STDIO_ENTRY;
 
   let existing: McpJsonShape | null = null;
   let existingRaw: string | null = null;

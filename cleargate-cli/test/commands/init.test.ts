@@ -92,14 +92,15 @@ describe('cleargate init', () => {
     const firstNonEmpty = claudeMd.split('\n').find((l) => l.trim().length > 0);
     expect(firstNonEmpty).toBe('<!-- CLEARGATE:START -->');
 
-    // BUG-017: .mcp.json must be created with the cleargate MCP server registered.
+    // BUG-017 + BUG-019: .mcp.json registers cleargate as a stdio MCP server
+    // pointing at `cleargate mcp serve` (handles auth + token refresh).
     const mcpJsonPath = path.join(tmpDir, '.mcp.json');
     expect(fs.existsSync(mcpJsonPath)).toBe(true);
     const mcpJson = JSON.parse(fs.readFileSync(mcpJsonPath, 'utf8')) as {
-      mcpServers?: Record<string, { url?: string; type?: string }>;
+      mcpServers?: Record<string, { command?: string; args?: string[] }>;
     };
-    expect(mcpJson.mcpServers?.cleargate?.url).toBe('https://cleargate-mcp.soula.ge/mcp');
-    expect(mcpJson.mcpServers?.cleargate?.type).toBe('http');
+    expect(mcpJson.mcpServers?.cleargate?.command).toBe('cleargate');
+    expect(mcpJson.mcpServers?.cleargate?.args).toEqual(['mcp', 'serve']);
 
     // BUG-018: hook scripts land with +x set (skip on Windows).
     if (process.platform !== 'win32') {

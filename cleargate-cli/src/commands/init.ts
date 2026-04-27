@@ -329,12 +329,12 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     stdout(`[cleargate init] CLAUDE.md unchanged (block already up to date)\n`);
   }
 
-  // Step 5b (BUG-017): register cleargate in `.mcp.json` so Claude Code surfaces
-  // `cleargate_*` MCP tools after a session restart. URL is the canonical hosted
-  // server; users on a self-hosted MCP can edit `.mcp.json` post-init.
-  // BUG-019 still blocks auth against this URL until a stdio shim ships.
+  // Step 5b (BUG-017 + BUG-019): register cleargate in `.mcp.json` as a stdio
+  // MCP server pointing at `cleargate mcp serve`. The shim handles Bearer
+  // auth + token refresh against the canonical hosted endpoint. Users with a
+  // self-hosted MCP can override via CLEARGATE_MCP_URL.
   try {
-    const action = injectMcpJson(cwd, 'https://cleargate-mcp.soula.ge/mcp');
+    const action = injectMcpJson(cwd);
     if (action === 'created') {
       stdout(
         `[cleargate init] Created .mcp.json (cleargate MCP server registered) — restart Claude Code to load it.\n`,

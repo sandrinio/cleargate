@@ -26,6 +26,7 @@ import { conflictsHandler } from './commands/conflicts.js';
 import { syncLogHandler } from './commands/sync-log.js';
 import { adminLoginHandler } from './commands/admin-login.js';
 import { hotfixNewHandler } from './commands/hotfix.js';
+import { mcpServeHandler } from './commands/mcp-serve.js';
 
 const program = new Command();
 
@@ -512,6 +513,22 @@ hotfix
   .description('scaffold a new HOTFIX-NNN_<slug>.md in pending-sync/')
   .action((slug: string) => {
     hotfixNewHandler({ slug });
+  });
+
+// BUG-019: stdio↔HTTP MCP proxy with auto-refresh auth.
+const mcp = program
+  .command('mcp')
+  .description('MCP-server bridge commands (stdio shim, registration helpers)');
+
+mcp
+  .command('serve')
+  .description('run a stdio MCP server that proxies to the cleargate HTTP /mcp endpoint with auto-refresh Bearer auth')
+  .action(async (_opts, command: Command) => {
+    const globals = command.parent!.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await mcpServeHandler({
+      profile: globals.profile,
+      ...(globals.mcpUrl !== undefined ? { mcpUrlFlag: globals.mcpUrl } : {}),
+    });
   });
 
 void program.parseAsync(process.argv);
