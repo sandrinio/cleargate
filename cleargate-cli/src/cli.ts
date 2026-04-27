@@ -1,3 +1,4 @@
+// SPRINT-14 M5 dogfood smoke — STORY-099-01
 import { Command } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { scaffoldLintHandler } from './commands/scaffold-lint.js';
