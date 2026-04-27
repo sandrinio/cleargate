@@ -17,6 +17,7 @@ import { spawnSync } from 'node:child_process';
 import { copyPayload } from '../init/copy-payload.js';
 import { mergeSettings, type SettingsJson } from '../init/merge-settings.js';
 import { injectClaudeMd, extractBlock } from '../init/inject-claude-md.js';
+import { injectMcpJson } from '../init/inject-mcp-json.js';
 import { wikiBuildHandler, type WikiBuildOptions } from './wiki-build.js';
 import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
 import { promptYesNo as defaultPromptYesNo, promptEmail as defaultPromptEmail } from '../lib/prompts.js';
@@ -326,6 +327,27 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     stdout(`[cleargate init] Updated CLAUDE.md (bounded block injected/replaced)\n`);
   } else {
     stdout(`[cleargate init] CLAUDE.md unchanged (block already up to date)\n`);
+  }
+
+  // Step 5b (BUG-017): register cleargate in `.mcp.json` so Claude Code surfaces
+  // `cleargate_*` MCP tools after a session restart. URL is the canonical hosted
+  // server; users on a self-hosted MCP can edit `.mcp.json` post-init.
+  // BUG-019 still blocks auth against this URL until a stdio shim ships.
+  try {
+    const action = injectMcpJson(cwd, 'https://cleargate-mcp.soula.ge/mcp');
+    if (action === 'created') {
+      stdout(
+        `[cleargate init] Created .mcp.json (cleargate MCP server registered) — restart Claude Code to load it.\n`,
+      );
+    } else if (action === 'updated') {
+      stdout(
+        `[cleargate init] Updated .mcp.json (cleargate MCP server entry merged) — restart Claude Code to pick up changes.\n`,
+      );
+    } else {
+      stdout(`[cleargate init] .mcp.json unchanged (cleargate entry already present)\n`);
+    }
+  } catch (e) {
+    stderr(`[cleargate init] WARNING: ${String(e instanceof Error ? e.message : e)}\n`);
   }
 
   // Step 6: Bootstrap pass

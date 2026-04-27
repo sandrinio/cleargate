@@ -105,10 +105,20 @@ export function copyPayload(
     // Compare: convert srcContent to Buffer for comparison when it's a string
     const srcBuffer = typeof srcContent === 'string' ? Buffer.from(srcContent, 'utf8') : srcContent;
 
+    // BUG-018: preserve executable bit. Source `.sh` files are 0o755 in the bundled
+    // payload but `fs.writeFileSync` defaults to 0o644 — SessionStart fired
+    // "Permission denied". Read source mode and propagate any +x bits.
+    const srcMode = fs.statSync(srcPath).mode;
+    const needsExec = (srcMode & 0o111) !== 0 || relPath.endsWith('.sh');
+
     if (fs.existsSync(dstPath)) {
       const dstContent = fs.readFileSync(dstPath);
       if (srcBuffer.equals(dstContent)) {
-        // Identical — skip silently even with force (idempotent)
+        // Identical — skip the write but still re-assert exec bit; the user may
+        // have lost it via copy/chmod outside our control.
+        if (needsExec && process.platform !== 'win32') {
+          fs.chmodSync(dstPath, 0o755);
+        }
         report.skipped++;
         report.actions.push({ action: 'skipped', relPath });
         continue;
@@ -121,11 +131,17 @@ export function copyPayload(
       }
       // Different + force — overwrite
       fs.writeFileSync(dstPath, srcBuffer);
+      if (needsExec && process.platform !== 'win32') {
+        fs.chmodSync(dstPath, 0o755);
+      }
       report.overwritten++;
       report.actions.push({ action: 'overwritten', relPath });
     } else {
       // New file
       fs.writeFileSync(dstPath, srcBuffer);
+      if (needsExec && process.platform !== 'win32') {
+        fs.chmodSync(dstPath, 0o755);
+      }
       report.created++;
       report.actions.push({ action: 'created', relPath });
     }

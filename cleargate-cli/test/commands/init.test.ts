@@ -92,6 +92,21 @@ describe('cleargate init', () => {
     const firstNonEmpty = claudeMd.split('\n').find((l) => l.trim().length > 0);
     expect(firstNonEmpty).toBe('<!-- CLEARGATE:START -->');
 
+    // BUG-017: .mcp.json must be created with the cleargate MCP server registered.
+    const mcpJsonPath = path.join(tmpDir, '.mcp.json');
+    expect(fs.existsSync(mcpJsonPath)).toBe(true);
+    const mcpJson = JSON.parse(fs.readFileSync(mcpJsonPath, 'utf8')) as {
+      mcpServers?: Record<string, { url?: string; type?: string }>;
+    };
+    expect(mcpJson.mcpServers?.cleargate?.url).toBe('https://cleargate-mcp.soula.ge/mcp');
+    expect(mcpJson.mcpServers?.cleargate?.type).toBe('http');
+
+    // BUG-018: hook scripts land with +x set (skip on Windows).
+    if (process.platform !== 'win32') {
+      const sessionStart = fs.statSync(path.join(tmpDir, '.claude', 'hooks', 'session-start.sh'));
+      expect((sessionStart.mode & 0o111) !== 0).toBe(true);
+    }
+
     // .claude/settings.json has BOTH SubagentStop (from payload) AND PostToolUse (added programmatically)
     const settings = JSON.parse(
       fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf8'),

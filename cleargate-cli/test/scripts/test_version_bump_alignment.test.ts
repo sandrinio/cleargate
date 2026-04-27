@@ -33,7 +33,10 @@ const MCP_PKG_JSON = path.join(REPO_ROOT, 'mcp', 'package.json');
 const SEMVER = /^\d+\.\d+\.\d+(-[\w.]+)?$/;
 
 /** Allowed (cli major.minor, mcp major.minor) pairs. Extend on minor bump. */
-const SUPPORTED_PAIRS: ReadonlyArray<readonly [string, string]> = [['0.6', '0.2']];
+const SUPPORTED_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['0.6', '0.2'],
+  ['0.7', '0.2'], // BUG-017 + BUG-018 patch bumps to cli 0.7.x with no mcp change
+];
 
 function majorMinor(v: string): string {
   const [ma, mi] = v.split('.');
