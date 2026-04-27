@@ -12,7 +12,7 @@ if [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
 elif command -v cleargate >/dev/null 2>&1; then
   CG=(cleargate)
 else
-  CG=(npx -y "@cleargate/cli@0.5.0")
+  CG=(npx -y "cleargate@0.5.0")
 fi
 
 "${CG[@]}" doctor --session-start 2>/dev/null || true

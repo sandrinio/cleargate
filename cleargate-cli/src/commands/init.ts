@@ -394,8 +394,8 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
         branchLabel = 'PATH (global install)';
       } else {
         // Fall back to npx invocation
-        branch = { cmd: 'npx', args: ['-y', `@cleargate/cli@${pinVersion}`, '--version'] };
-        branchLabel = `npx @cleargate/cli@${pinVersion} (cold-start ~600ms first call)`;
+        branch = { cmd: 'npx', args: ['-y', `cleargate@${pinVersion}`, '--version'] };
+        branchLabel = `npx cleargate@${pinVersion} (cold-start ~600ms first call)`;
       }
     }
 

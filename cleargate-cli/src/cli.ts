@@ -406,7 +406,7 @@ program
     '',
     'Always removed (no prompt): .claude/agents/*.md, ClearGate hooks,',
     '  .claude/skills/flashcard/, CLAUDE.md CLEARGATE block,',
-    '  @cleargate/cli from package.json, .install-manifest.json, .drift-state.json.',
+    '  `cleargate` from package.json, .install-manifest.json, .drift-state.json.',
     '',
     'Non-git targets: uncommitted-changes check is skipped silently.',
   ].join('\n'))

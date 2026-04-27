@@ -101,12 +101,12 @@ else
   HOOK_SH="${REPO_ROOT}/.claude/hooks/stamp-and-gate.sh"
   if [ -f "${HOOK_SH}" ]; then
     HOOK_PIN=$(grep -oP '(?<=# cleargate-pin: )[\S]+' "${HOOK_SH}" 2>/dev/null || \
-               grep -oE '@cleargate/cli@[^"]+' "${HOOK_SH}" 2>/dev/null | head -1 | sed 's/.*@//' || true)
+               grep -oE 'cleargate@[^"]+' "${HOOK_SH}" 2>/dev/null | head -1 | sed 's/.*@//' || true)
   fi
   if [ -z "${HOOK_PIN}" ]; then
     HOOK_PIN="__CLEARGATE_VERSION__"
   fi
-  CG=(npx -y "@cleargate/cli@${HOOK_PIN}")
+  CG=(npx -y "cleargate@${HOOK_PIN}")
 fi
 
 # ── 5. Read user prompt snippet for log context (optional; best-effort) ───────

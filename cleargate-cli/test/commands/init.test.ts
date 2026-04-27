@@ -536,7 +536,7 @@ describe('cleargate init', () => {
     // (a) placeholder fully substituted
     expect(hookContent).not.toContain('__CLEARGATE_VERSION__');
     // (b) third resolver branch contains the pinned version
-    expect(hookContent).toContain('npx -y "@cleargate/cli@0.5.0"');
+    expect(hookContent).toContain('npx -y "cleargate@0.5.0"');
     // (c) pin comment present for sed-rewrite contract
     expect(hookContent).toContain('# cleargate-pin: 0.5.0');
   });
@@ -563,7 +563,7 @@ describe('cleargate init', () => {
       'utf8',
     );
     expect(hookContent).not.toContain('__CLEARGATE_VERSION__');
-    expect(hookContent).toContain('npx -y "@cleargate/cli@0.5.0"');
+    expect(hookContent).toContain('npx -y "cleargate@0.5.0"');
   });
 
   // ─── CR-009 Scenario 3: --pin override stamps custom version ────────────────
@@ -591,9 +591,9 @@ describe('cleargate init', () => {
       path.join(tmpDir, '.claude', 'hooks', 'session-start.sh'),
       'utf8',
     );
-    expect(stampHook).toContain('@cleargate/cli@0.6.0-beta');
-    expect(sessionHook).toContain('@cleargate/cli@0.6.0-beta');
-    expect(stampHook).not.toContain('@cleargate/cli@0.5.0');
+    expect(stampHook).toContain('cleargate@0.6.0-beta');
+    expect(sessionHook).toContain('cleargate@0.6.0-beta');
+    expect(stampHook).not.toContain('cleargate@0.5.0');
   });
 
   // ─── CR-009 Scenario 4: Probe success — prints green line ───────────────────

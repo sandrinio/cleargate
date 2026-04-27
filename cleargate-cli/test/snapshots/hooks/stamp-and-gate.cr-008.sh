@@ -14,7 +14,7 @@ if [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
 elif command -v cleargate >/dev/null 2>&1; then
   CG=(cleargate)
 else
-  CG=(npx -y "@cleargate/cli@0.5.0")
+  CG=(npx -y "cleargate@0.5.0")
 fi
 
 FILE=$(jq -r '.tool_input.file_path' 2>/dev/null || echo "")

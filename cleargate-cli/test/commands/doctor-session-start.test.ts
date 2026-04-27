@@ -270,7 +270,7 @@ describe('CR-009 emitResolverStatusLine', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-resolver-'));
     const hooksDir = path.join(dir, '.claude', 'hooks');
     fs.mkdirSync(hooksDir, { recursive: true });
-    const hookContent = `#!/usr/bin/env bash\n# cleargate-pin: 1.2.3\nCG=(npx -y "@cleargate/cli@1.2.3")\n`;
+    const hookContent = `#!/usr/bin/env bash\n# cleargate-pin: 1.2.3\nCG=(npx -y "cleargate@1.2.3")\n`;
     fs.writeFileSync(path.join(hooksDir, 'stamp-and-gate.sh'), hookContent, 'utf-8');
 
     // Ensure no dist/cli.js so we fall through to the hook-parse branch
