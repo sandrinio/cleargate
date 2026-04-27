@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "sprint_id": "SPRINT-TEST",
+  "execution_mode": "v2",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-TEST-01": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-01-01T00:00:00.000Z",
+      "notes": ""
+    }
+  },
+  "last_action": "init",
+  "updated_at": "2026-01-01T00:00:00.000Z"
+}
