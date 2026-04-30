@@ -22,6 +22,7 @@ import { stampTokensHandler } from './commands/stamp-tokens.js';
 import { upgradeHandler } from './commands/upgrade.js';
 import { uninstallHandler } from './commands/uninstall.js';
 import { syncHandler, syncCheckHandler } from './commands/sync.js';
+import { syncWorkItemsHandler } from './commands/sync-work-items.js';
 import { pullHandler } from './commands/pull.js';
 import { pushHandler } from './commands/push.js';
 import { conflictsHandler } from './commands/conflicts.js';
@@ -547,9 +548,9 @@ program
     });
   });
 
-program
+const syncCmd = program
   .command('sync')
-  .description('pull remote updates, resolve conflicts, push local changes')
+  .description('pull remote updates, resolve conflicts, push local changes (or `sync work-items` to push items to MCP)')
   .option('--dry-run', 'print plan without making any changes or sync-log entries')
   .option('--check', 'read-only drift probe — prints JSON, no mutation, hook-safe')
   .action(async (opts: { dryRun?: boolean; check?: boolean }, command: Command) => {
@@ -559,6 +560,15 @@ program
       return;
     }
     await syncHandler({ dryRun: opts.dryRun ?? false, profile: globals.profile });
+  });
+
+// STORY-023-01: `cleargate sync work-items` — push all local work items to MCP
+syncCmd
+  .command('work-items')
+  .description('push all local work items (every status) to the MCP server (status-blind, idempotent)')
+  .action(async (_opts: Record<string, unknown>, command: Command) => {
+    const globals = command.parent!.parent!.opts<{ profile: string; mcpUrl?: string }>();
+    await syncWorkItemsHandler({ profile: globals.profile });
   });
 
 program
