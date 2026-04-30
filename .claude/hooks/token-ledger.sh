@@ -93,12 +93,49 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
   LEDGER="${SPRINT_DIR}/token-ledger.jsonl"
 
-  # --- per-task sentinel: find newest .pending-task-*.json in sprint dir ---
-  SENTINEL_FILE=""
+  # --- dispatch-marker attribution (CR-016, highest priority) ---
+  # Before each Task() spawn the orchestrator calls write_dispatch.sh which writes
+  #   .cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json
+  # with { work_item_id, agent_type, spawned_at, session_id, writer }.
+  # Reading this file (if present) gives accurate attribution; falls back to the
+  # per-task pending-task sentinel (second priority) and transcript-scan (third).
+  #
+  # Atomicity: rename to .processed-$$ before reading, then delete post-row-write.
+  # This prevents stale dispatch files from leaking attribution to a later subagent.
   SENTINEL_AGENT_TYPE=""
   SENTINEL_WORK_ITEM_ID=""
+
+  DISPATCH_FILE="${SPRINT_DIR}/.dispatch-${SESSION_ID}.json"
+  if [[ -f "${DISPATCH_FILE}" ]]; then
+    DISPATCH_PROCESSED="${DISPATCH_FILE%.json}.processed-$$"
+    if mv "${DISPATCH_FILE}" "${DISPATCH_PROCESSED}" 2>/dev/null; then
+      DISPATCH_JSON="$(cat "${DISPATCH_PROCESSED}" 2>/dev/null)"
+      DISPATCH_AGENT="$(printf '%s' "${DISPATCH_JSON}" | jq -r '.agent_type // empty' 2>/dev/null)"
+      DISPATCH_WORK_ITEM="$(printf '%s' "${DISPATCH_JSON}" | jq -r '.work_item_id // empty' 2>/dev/null)"
+      if [[ -n "${DISPATCH_AGENT}" && -n "${DISPATCH_WORK_ITEM}" ]]; then
+        SENTINEL_AGENT_TYPE="${DISPATCH_AGENT}"
+        SENTINEL_WORK_ITEM_ID="${DISPATCH_WORK_ITEM}"
+        printf '[%s] dispatch-marker: session=%s work_item=%s agent=%s\n' \
+          "$(date -u +%FT%TZ)" "${SESSION_ID}" "${SENTINEL_WORK_ITEM_ID}" "${SENTINEL_AGENT_TYPE}" >> "${HOOK_LOG}"
+      else
+        printf '[%s] warn: dispatch file malformed or missing fields, falling back: %s\n' \
+          "$(date -u +%FT%TZ)" "${DISPATCH_PROCESSED}" >> "${HOOK_LOG}"
+      fi
+    else
+      printf '[%s] warn: could not rename dispatch file %s (race?), skipping\n' \
+        "$(date -u +%FT%TZ)" "${DISPATCH_FILE}" >> "${HOOK_LOG}"
+    fi
+  fi
+  # DISPATCH_PROCESSED is deleted after row-write (see "delete processed dispatch" block below).
+
+  # --- per-task sentinel: find newest .pending-task-*.json in sprint dir ---
+  # Second-priority fallback when dispatch-marker is absent or malformed.
+  # When dispatch-marker already populated SENTINEL_AGENT_TYPE + SENTINEL_WORK_ITEM_ID,
+  # still read the pending-task sentinel to get turn_index + started_at for delta accounting.
+  SENTINEL_FILE=""
   SENTINEL_TURN_INDEX=0
   SENTINEL_STARTED_AT=""
+  # Preserve SENTINEL_AGENT_TYPE / SENTINEL_WORK_ITEM_ID from dispatch block above.
 
   if [[ -d "${SPRINT_DIR}" ]]; then
     # Find newest pending-task sentinel (ls -t sorts newest first)
@@ -107,8 +144,13 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
 
   if [[ -n "${SENTINEL_FILE}" && -f "${SENTINEL_FILE}" ]]; then
     SENTINEL_JSON="$(cat "${SENTINEL_FILE}" 2>/dev/null)"
-    SENTINEL_AGENT_TYPE="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.agent_type // empty' 2>/dev/null)"
-    SENTINEL_WORK_ITEM_ID="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.work_item_id // empty' 2>/dev/null)"
+    # Only use attribution from pending-task if dispatch-marker did not already provide it.
+    if [[ -z "${SENTINEL_AGENT_TYPE}" ]]; then
+      SENTINEL_AGENT_TYPE="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.agent_type // empty' 2>/dev/null)"
+    fi
+    if [[ -z "${SENTINEL_WORK_ITEM_ID}" ]]; then
+      SENTINEL_WORK_ITEM_ID="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.work_item_id // empty' 2>/dev/null)"
+    fi
     SENTINEL_TURN_INDEX="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.turn_index // 0' 2>/dev/null)"
     SENTINEL_STARTED_AT="$(printf '%s' "${SENTINEL_JSON}" | jq -r '.started_at // empty' 2>/dev/null)"
     printf '[%s] found sentinel=%s agent=%s work_item=%s turn_index=%s\n' \
@@ -252,6 +294,11 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   # --- delete processed sentinel ---
   if [[ -n "${PROCESSED_FILE}" && -f "${PROCESSED_FILE}" ]]; then
     rm -f "${PROCESSED_FILE}"
+  fi
+
+  # --- delete processed dispatch file ---
+  if [[ -n "${DISPATCH_PROCESSED:-}" && -f "${DISPATCH_PROCESSED}" ]]; then
+    rm -f "${DISPATCH_PROCESSED}"
   fi
 } 2>> "${HOOK_LOG}"
 
