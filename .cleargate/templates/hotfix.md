@@ -1,5 +1,7 @@
 ---
 hotfix_id: "{ID}"
+parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
+sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 status: "Draft"
 severity: "P2"
 originating_signal: "user-report"
