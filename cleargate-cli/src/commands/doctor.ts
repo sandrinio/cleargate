@@ -8,6 +8,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { computeUsd, type DraftTokensInput } from '../lib/pricing.js';
@@ -24,6 +25,11 @@ import {
 } from '../lib/manifest.js';
 import { shortHash } from '../lib/sha256.js';
 import { getMembershipState } from '../lib/membership.js';
+import {
+  checkLatestVersion as defaultCheckLatestVersion,
+  compareSemver,
+  type CheckResult,
+} from '../lib/registry-check.js';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -39,6 +45,10 @@ export interface DoctorCliOptions {
   cleargateHome?: string;
   /** CR-011: profile to pass to getMembershipState. */
   profile?: string;
+  /** STORY-016-02: test seam — override checkLatestVersion for deterministic notifier tests. */
+  checkLatestVersion?: () => Promise<CheckResult>;
+  /** STORY-016-02: test seam — override the installed CLI version string for notifier tests. */
+  installedVersion?: string;
 }
 
 /**
@@ -496,6 +506,57 @@ export async function runSessionStart(
   if (outcome && resolverLines.some((l) => l.includes('\u{1F534}'))) {
     outcome.configError = true;
   }
+
+  // STORY-016-02: emit update notifier BEFORE the pending-sync read so fresh installs
+  // (no pending-sync/ dir) see the notice. Silent no-op on any error; never touches outcome.
+  await (async () => {
+    try {
+      const checkFn = cli?.checkLatestVersion ?? defaultCheckLatestVersion;
+      const result = await checkFn();
+      if (result.latest !== null && result.from !== 'opt-out') {
+        // Resolve installed version: test seam takes priority; fall back to reading
+        // package.json alongside the compiled file (dist/../package.json in production).
+        let installed: string;
+        if (cli?.installedVersion !== undefined) {
+          installed = cli.installedVersion;
+        } else {
+          installed = '0.0.0';
+          try {
+            // Resolve package.json in both environments:
+            //   production (tsup flat dist/): dist/../package.json = cleargate-cli/package.json (1 level up)
+            //   vitest (source):              src/commands/../../package.json = cleargate-cli/package.json (2 levels up)
+            // Try 1 level up first (production); fall back to 2 levels up (vitest source).
+            const thisDir = path.dirname(fileURLToPath(import.meta.url));
+            const candidates = [
+              path.join(thisDir, '..', 'package.json'),
+              path.join(thisDir, '..', '..', 'package.json'),
+            ];
+            for (const pkgJsonPath of candidates) {
+              try {
+                const raw = fs.readFileSync(pkgJsonPath, 'utf-8');
+                const pkg = JSON.parse(raw) as { version?: unknown };
+                if (typeof pkg.version === 'string' && pkg.version.length > 0) {
+                  installed = pkg.version;
+                  break;
+                }
+              } catch {
+                // Try next candidate
+              }
+            }
+          } catch {
+            // Ignore — 0.0.0 fallback means any real release looks "newer" (safe default).
+          }
+        }
+        if (compareSemver(result.latest, installed) > 0) {
+          stdout(
+            `cleargate ${result.latest} available (current: ${installed}) — run \`cleargate upgrade\` or see CHANGELOG`
+          );
+        }
+      }
+    } catch {
+      // Silent no-op on any error (offline, timeout, etc.)
+    }
+  })();
 
   const pendingSyncDir = path.join(cwd, '.cleargate', 'delivery', 'pending-sync');
 
