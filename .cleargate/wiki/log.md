@@ -1110,3 +1110,8 @@
   action: "create"
   target: "STORY-099-01"
   path: ".cleargate/delivery/archive/STORY-099-01_Dogfood_Lane_Fast_Smoke.md"
+- timestamp: "2026-04-30T12:45:42.501Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-002"
+  path: ".cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md"
