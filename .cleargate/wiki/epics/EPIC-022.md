@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-022"
 parent: ""
 children: []
-status: "Ready"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md"
-last_ingest: "2026-04-26T08:52:48.008Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md"
+last_ingest: "2026-04-30T07:13:37.657Z"
+last_ingest_commit: "c162bc87eacb125f3085697456af3b117af5c186"
 repo: "planning"
 ---
 
