@@ -15,6 +15,8 @@ Do NOT output these instructions.
 ---
 bug_id: "BUG-{ID}"
 parent_ref: "EPIC-{ID} | STORY-{ID}"
+parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
+sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 status: "Draft | Triaged | In Fix | Verified"
 severity: "P0-Critical | P1-High | P2-Medium | P3-Low"
 reporter: "{name}"

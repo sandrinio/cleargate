@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.8.2",
-  "generated_at": "2026-04-30T08:07:20.462Z",
+  "generated_at": "2026-04-30T08:19:12.003Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -151,28 +151,28 @@
     },
     {
       "path": ".cleargate/templates/Bug.md",
-      "sha256": "54660457a8b7f5c9f1a286993e2d83d46fef880a3d65086421d8db815a9c01ec",
+      "sha256": "8a88ec4b2f2e496870da4260f8dcb45edab84802f2e5cb79d169aa17bf895d0d",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/CR.md",
-      "sha256": "e4cff0314217d649177a3dd1603c510d2f5246c1cf297baaa91d5941c1eedc91",
+      "sha256": "4feabd902dba430f0258e7b4e58e56842e4e0272c6423b88f9e9d9d98c6be4ce",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/epic.md",
-      "sha256": "fa0e5bf85b50bee11d38646b2606652999ac2ff7c649810408c35ff25d7a025c",
+      "sha256": "b2a037fa07a43fb5ba595af51d2612aa62147ea46ab517898896774d3e68e1e3",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/hotfix.md",
-      "sha256": "93c6690a23bcfca98697048b7f1c2c5c76ee16c2d295a53ced8471e8c4eb78d3",
+      "sha256": "c21f16a29fee188171b5984d205a234bf14c6d4c4cd24d4993f7d2b0af234be7",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -193,7 +193,7 @@
     },
     {
       "path": ".cleargate/templates/Sprint Plan Template.md",
-      "sha256": "583f71c76c0b3c8cb219183f5881250219cec2719c909abf4d3069beed8cad51",
+      "sha256": "80045ea33bebba20f3c7349e87c28573747926f7670576e0e990a1e45d544a17",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -214,7 +214,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "0817454195b1c3ddb7a2559a0295273082fb621cdfd7a77594414876da28c620",
+      "sha256": "9bd29c800d883e11f2ce5e0b4c28fece0bdab6aaadab4766b73e11d6899c4b7d",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

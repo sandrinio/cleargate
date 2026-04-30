@@ -38,6 +38,8 @@ Do NOT output these instructions.
 ---
 story_id: "STORY-{EpicID}-{StoryID}-{StoryName}"
 parent_epic_ref: "EPIC-{ID}"
+parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
+sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 status: "Draft"
 ambiguity: "🔴 High"
 context_source: "PROPOSAL-{ID}.md"
