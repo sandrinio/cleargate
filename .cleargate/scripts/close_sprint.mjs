@@ -247,6 +247,62 @@ function main() {
     process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
   }
 
+  // ── Step 2.6: Lifecycle Reconciliation (CR-017) ──────────────────────────
+  // Block close if any artifact referenced in this sprint's commits is still
+  // non-terminal in pending-sync (excluding carry_over: true).
+  // Invokes `cleargate sprint reconcile-lifecycle <sprint-id>` CLI wrapper.
+  // Fail-open if CLI binary is unavailable (non-blocking for test environments).
+  process.stdout.write('Step 2.6: running lifecycle reconciliation...\n');
+  try {
+    // Resolve CLI binary: prefer local dist/
+    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+
+    if (fs.existsSync(cliBin)) {
+      // Read sprint start_date from frontmatter for the --since arg
+      let sinceArg = '';
+      try {
+        const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
+        if (fs.existsSync(pendingDir)) {
+          const entries = fs.readdirSync(pendingDir);
+          const sprintFile = entries.find(
+            (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
+          );
+          if (sprintFile) {
+            const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
+            const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
+            if (startDateMatch && startDateMatch[1]) {
+              sinceArg = `--since ${startDateMatch[1].trim()}`;
+            }
+          }
+        }
+      } catch { /* ignore */ }
+
+      const reconcileArgs = [
+        'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
+      ];
+      if (sinceArg) reconcileArgs.push(sinceArg);
+      const reconcileCmd = reconcileArgs.join(' ');
+
+      try {
+        execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
+        process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
+      } catch (_reconcileErr) {
+        // Exit code 1 from reconcile-lifecycle means drift found
+        process.stderr.write(
+          'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
+          '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
+          '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
+        );
+        process.exit(1);
+      }
+    } else {
+      process.stdout.write('Step 2.6 skipped: CLI binary not found at cleargate-cli/dist/cli.js (non-fatal).\n');
+    }
+  } catch (step26Err) {
+    // Unexpected error — fail-open (log but do not block)
+    process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
+  }
+
   // ── Step 3: Invoke prefill_report.mjs ─────────────────────────────────────
   process.stdout.write('Step 3: running prefill_report.mjs...\n');
   try {

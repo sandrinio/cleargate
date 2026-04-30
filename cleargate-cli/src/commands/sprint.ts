@@ -4,6 +4,7 @@
  * STORY-013-08: CLI wrappers for sprint lifecycle scripts.
  * STORY-014-08: sprintArchiveHandler — final sprint close-out.
  * STORY-015-04: stampSprintClose + rollback on wiki build/lint failure.
+ * CR-017: lifecycle reconciliation gate + decomposition gate at sprint init.
  *
  * All handlers are v1-inert: when execution_mode is "v1", they print the
  * inert-mode message and exit 0. Under "v2", they shell out via run_script.sh
@@ -26,6 +27,11 @@ import {
 } from './execution-mode.js';
 import { wikiBuildHandler } from './wiki-build.js';
 import { wikiLintHandler } from './wiki-lint.js';
+import {
+  reconcileLifecycle,
+  reconcileDecomposition,
+  checkVerbMismatch,
+} from '../lib/lifecycle-reconcile.js';
 
 // Terminal statuses — re-declared locally to avoid cross-module runtime import.
 // Keep in sync with TERMINAL_STATUSES in wiki-build.ts.
@@ -45,6 +51,17 @@ export interface SprintCliOptions extends ExecutionModeOptions {
   wikiBuildFn?: (cwd: string, stdout: (s: string) => void) => Promise<void>;
   /** Test seam: override wiki lint invocation. Defaults to wikiLintHandler. */
   wikiLintFn?: (cwd: string, stdout: (s: string) => void) => Promise<void>;
+  /**
+   * CR-017: --allow-drift flag.
+   * When true at sprint init, lifecycle drift is warned but does not block.
+   * Does NOT waive the decomposition gate (decomposition is always block-by-default).
+   */
+  allowDrift?: boolean;
+  /**
+   * CR-017 test seam: override git runner for reconcileLifecycle.
+   * Used in tests to inject fake git log output.
+   */
+  gitRunner?: (cmd: string, args: string[]) => string;
 }
 
 // ─── Shared run_script.sh resolution ─────────────────────────────────────────
@@ -66,23 +83,150 @@ function defaultExit(code: number): never {
  *
  * v1: print inert message, exit 0.
  * v2: run `run_script.sh init_sprint.mjs <sprint-id> --stories <csv>`
+ *
+ * CR-017: before shelling out, run two gates (v2 only):
+ *   1. reconcileLifecycle — warn-only in v1-mode sprint; block when lifecycle_init_mode === "block"
+ *   2. reconcileDecomposition — block-by-default; no --allow-drift waiver
  */
 export function sprintInitHandler(
-  opts: { sprintId: string; stories: string },
+  opts: { sprintId: string; stories: string; allowDrift?: boolean },
   cli?: SprintCliOptions,
 ): void {
   const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
   const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
   const exitFn: (code: number) => never = cli?.exit ?? defaultExit;
   const spawnFn = cli?.spawnFn ?? spawnSync;
+  const cwd = cli?.cwd ?? process.cwd();
+  const allowDrift = opts.allowDrift ?? cli?.allowDrift ?? false;
 
   const mode = readSprintExecutionMode(opts.sprintId, {
     sprintFilePath: cli?.sprintFilePath,
-    cwd: cli?.cwd,
+    cwd,
   });
 
   if (mode === 'v1') {
     return printInertAndExit(stdoutFn, exitFn);
+  }
+
+  // ── CR-017 Gate 1: Lifecycle Reconciliation ───────────────────────────────
+  // Runs BEFORE init_sprint.mjs to prevent state.json mutation on gate failure.
+  // warn-only in v1-like sprint (lifecycle_init_mode === "warn"), block in "block" mode.
+  const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
+
+  // Find the sprint plan file to read lifecycle_init_mode
+  let lifecycleInitMode: 'warn' | 'block' = 'warn'; // default: warn-only
+  let sprintPlanPath: string | null = null;
+  const pendingDir = path.join(deliveryRoot, 'pending-sync');
+
+  try {
+    const entries = fs.readdirSync(pendingDir);
+    const sprintFile = entries.find(
+      (e) => (e.startsWith(`${opts.sprintId}_`) || e === `${opts.sprintId}.md`) && e.endsWith('.md'),
+    );
+    if (sprintFile) {
+      sprintPlanPath = path.join(pendingDir, sprintFile);
+      const raw = fs.readFileSync(sprintPlanPath, 'utf8');
+      const { fm } = parseFileFrontmatter(raw);
+      if (fm['lifecycle_init_mode'] === 'block') {
+        lifecycleInitMode = 'block';
+      }
+    }
+  } catch {
+    // If we can't read the sprint file, default to warn-only
+  }
+
+  // Run lifecycle reconciliation: look back 30 days as a reasonable prior-sprint window
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const until = new Date();
+
+  try {
+    const lifecycleResult = reconcileLifecycle({
+      since,
+      until,
+      deliveryRoot,
+      repoRoot: cwd,
+      gitRunner: cli?.gitRunner,
+    });
+
+    if (lifecycleResult.drift.length > 0) {
+      // Emit punch list
+      stderrFn('[cleargate sprint init] lifecycle reconciliation: unreconciled artifacts found:');
+      for (const item of lifecycleResult.drift) {
+        const warnTag = checkVerbMismatch(
+          item.commit_shas.length > 0 ? '' : '',
+          item.type,
+        );
+        stderrFn(
+          `  DRIFT: ${item.id} status=${item.actual_status ?? 'missing'} in ${item.in_archive ? 'archive' : 'pending-sync'}, expected ${item.expected_status}` +
+          ` (commit ${item.commit_shas[0] ?? 'unknown'})`,
+        );
+        if (warnTag) stderrFn(`  WARN: ${warnTag}`);
+      }
+
+      if (allowDrift) {
+        // --allow-drift passed: record waiver in context_source (best-effort)
+        stderrFn('[cleargate sprint init] lifecycle drift waived via --allow-drift flag');
+        if (sprintPlanPath) {
+          try {
+            const rawSprint = fs.readFileSync(sprintPlanPath, 'utf8');
+            const { fm, body } = parseFileFrontmatter(rawSprint);
+            const waiverLine = `lifecycle waiver: ${new Date().toISOString().split('T')[0]} for ${lifecycleResult.drift.map((d) => d.id).join(', ')}`;
+            const currentContextSource = typeof fm['context_source'] === 'string'
+              ? fm['context_source']
+              : '';
+            fm['context_source'] = currentContextSource
+              ? `${currentContextSource}\n${waiverLine}`
+              : waiverLine;
+            atomicWriteStr(sprintPlanPath, serializeFileContent(fm, body));
+          } catch {
+            // best-effort; don't block on write failure
+          }
+        }
+      } else if (lifecycleInitMode === 'block') {
+        stderrFn(
+          '[cleargate sprint init] lifecycle drift blocks sprint activation (lifecycle_init_mode: block)',
+        );
+        stderrFn('  To waive: pass --allow-drift flag. To fix: archive artifacts and set status to terminal.');
+        return exitFn(1);
+      } else {
+        // warn-only mode: print warning but proceed
+        stderrFn('[cleargate sprint init] WARNING: lifecycle drift detected (warn-only mode — proceeding)');
+        stderrFn('  Set lifecycle_init_mode: block in sprint frontmatter for SPRINT-16+ to enforce blocking.');
+      }
+    }
+  } catch {
+    // Lifecycle gate failure should not block sprint init — log and proceed
+    stderrFn('[cleargate sprint init] lifecycle reconciliation unavailable (proceeding without gate)');
+  }
+
+  // ── CR-017 Gate 2: Decomposition Gate ────────────────────────────────────
+  // Block-by-default; no --allow-drift waiver.
+  if (sprintPlanPath) {
+    try {
+      const decompResult = reconcileDecomposition({
+        sprintPlanPath,
+        deliveryRoot,
+      });
+
+      if (decompResult.missing.length > 0) {
+        if (allowDrift) {
+          // --allow-drift does NOT waive decomposition gate
+          stderrFn('decomposition gate cannot be waived; complete the decomposition or push start_date.');
+        } else {
+          stderrFn('[cleargate sprint init] decomposition gate: missing decompositions:');
+        }
+        for (const item of decompResult.missing) {
+          stderrFn(`  MISSING: ${item.id} (${item.type}) — ${item.reason}`);
+          for (const f of item.expected_files) {
+            stderrFn(`    expected: ${f}`);
+          }
+        }
+        return exitFn(1);
+      }
+    } catch {
+      // If we can't run decomposition check (e.g., no sprint plan), skip gate
+      stderrFn('[cleargate sprint init] decomposition gate unavailable (proceeding without check)');
+    }
   }
 
   // v2: shell out via run_script.sh
@@ -144,6 +288,89 @@ export function sprintCloseHandler(
 
   const code = result.status ?? 0;
   return exitFn(code);
+}
+
+// ─── reconcileLifecycleCliHandler ─────────────────────────────────────────────
+
+/**
+ * CR-017: `cleargate sprint reconcile-lifecycle <sprint-id>`
+ *
+ * Pure wrapper around reconcileLifecycle. Used by close_sprint.mjs (Step 2.6)
+ * to check lifecycle status at sprint close.
+ *
+ * Exits 0 if clean; exits 1 with punch list if drift found.
+ * The sprint ID is used to derive the git date range from sprint frontmatter.
+ * Falls back to last 90 days if frontmatter cannot be read.
+ */
+export function reconcileLifecycleCliHandler(
+  opts: { sprintId: string; since?: string; until?: string },
+  cli?: SprintCliOptions,
+): void {
+  const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
+  const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
+  const exitFn: (code: number) => never = cli?.exit ?? defaultExit;
+  const cwd = cli?.cwd ?? process.cwd();
+
+  const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
+
+  // Determine date range: from CLI flags or from sprint frontmatter
+  let since: Date;
+  let until: Date;
+
+  if (opts.since) {
+    since = new Date(opts.since);
+  } else {
+    // Try to read sprint start_date from frontmatter
+    try {
+      const pendingDir = path.join(deliveryRoot, 'pending-sync');
+      const entries = fs.readdirSync(pendingDir);
+      const sprintFile = entries.find(
+        (e) => (e.startsWith(`${opts.sprintId}_`) || e === `${opts.sprintId}.md`) && e.endsWith('.md'),
+      );
+      if (sprintFile) {
+        const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
+        const { fm } = parseFileFrontmatter(raw);
+        const startDate = fm['start_date'];
+        since = typeof startDate === 'string' ? new Date(startDate) : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      } else {
+        since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      }
+    } catch {
+      since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  until = opts.until ? new Date(opts.until) : new Date();
+
+  try {
+    const result = reconcileLifecycle({
+      since,
+      until,
+      deliveryRoot,
+      repoRoot: cwd,
+      gitRunner: cli?.gitRunner,
+    });
+
+    if (result.drift.length === 0) {
+      stdoutFn(`lifecycle: clean (${result.clean} artifacts reconciled)`);
+      return exitFn(0);
+    }
+
+    stderrFn(`lifecycle: DRIFT detected (${result.drift.length} unreconciled artifacts):`);
+    for (const item of result.drift) {
+      stderrFn(
+        `  DRIFT: ${item.id} status=${item.actual_status ?? 'missing'} in ${item.in_archive ? 'archive' : 'pending-sync'}, expected ${item.expected_status}` +
+        ` (commit ${item.commit_shas[0] ?? 'unknown'})`,
+      );
+      stderrFn(
+        `    Remediation: git mv .cleargate/delivery/pending-sync/${item.file_path?.replace('pending-sync/', '') ?? item.id + '_*.md'} .cleargate/delivery/archive/ && update status: ${item.expected_status}`,
+      );
+    }
+    return exitFn(1);
+  } catch (err) {
+    stderrFn(`lifecycle reconciliation error: ${err instanceof Error ? err.message : String(err)}`);
+    return exitFn(1);
+  }
 }
 
 // ─── sprintArchiveHandler ─────────────────────────────────────────────────────

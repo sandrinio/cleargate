@@ -15,7 +15,7 @@ import { wikiContradictHandler } from './commands/wiki-contradict.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
 import { gateRunHandler } from './commands/gate-run.js';
-import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler } from './commands/sprint.js';
+import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler, reconcileLifecycleCliHandler } from './commands/sprint.js';
 import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
 import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
@@ -326,8 +326,9 @@ sprint
   .command('init <sprint-id>')
   .description('initialise a new sprint — creates state.json and worktree skeleton')
   .requiredOption('--stories <csv>', 'comma-separated story IDs for this sprint')
-  .action((sprintId: string, opts: { stories: string }) => {
-    sprintInitHandler({ sprintId, stories: opts.stories });
+  .option('--allow-drift', 'CR-017: permit lifecycle drift at sprint kickoff (v1 warn-only); does NOT waive decomposition gate')
+  .action((sprintId: string, opts: { stories: string; allowDrift?: boolean }) => {
+    sprintInitHandler({ sprintId, stories: opts.stories, allowDrift: opts.allowDrift });
   });
 
 sprint
@@ -341,6 +342,17 @@ sprint
       handlerOpts.assumeAck = true;
     }
     sprintCloseHandler(handlerOpts);
+  });
+
+// CR-017: `cleargate sprint reconcile-lifecycle <sprint-id>`
+// Pure wrapper around reconcileLifecycle. Used by close_sprint.mjs (Step 2.6).
+sprint
+  .command('reconcile-lifecycle <sprint-id>')
+  .description('CR-017: check lifecycle status of artifacts referenced in this sprint\'s commits (exits 1 on drift)')
+  .option('--since <iso-date>', 'start of git log range (default: sprint start_date or 90 days ago)')
+  .option('--until <iso-date>', 'end of git log range (default: now)')
+  .action((sprintId: string, opts: { since?: string; until?: string }) => {
+    reconcileLifecycleCliHandler({ sprintId, since: opts.since, until: opts.until });
   });
 
 sprint

@@ -25,6 +25,7 @@ approved_at: 2026-04-30T00:00:00Z
 approved_by: sandrinio
 activated_at: 2026-04-30T00:00:00Z
 execution_mode: v2
+lifecycle_init_mode: "warn"  # grace period: SPRINT-15 already in-flight; SPRINT-16+ uses "block"
 human_override: false
 draft_tokens:
   input: null
