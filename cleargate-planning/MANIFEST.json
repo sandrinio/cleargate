@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.8.2",
-  "generated_at": "2026-04-30T09:07:17.643Z",
+  "cleargate_version": "0.9.0",
+  "generated_at": "2026-04-30T09:29:25.066Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -53,7 +53,7 @@
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "c2f6e9db07c737ada4c2f76497d08e0f881bc8f0fceb073b9479753d33c4ecf4",
+      "sha256": "18bedbaa238fa1cfa8ab173171fbd9b9db602904c7174e966e2b0b5704e55bbc",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -109,7 +109,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "51e66ffec6b5182e0fcd1fcad1a17efdcf79538afc5e243322689bd0a4b5d6e8",
+      "sha256": "a9f9ca7dfcc6a71f0b0360a8e5f89a1dde06f67fc009402a58f767adda03fe3b",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
