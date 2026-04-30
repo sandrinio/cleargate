@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.8.2",
-  "generated_at": "2026-04-30T08:19:12.003Z",
+  "generated_at": "2026-04-30T09:07:17.643Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -18,7 +18,7 @@
     },
     {
       "path": ".claude/agents/cleargate-wiki-ingest.md",
-      "sha256": "cd0388be7b7a24233305937665f3333a9dc2d5e0c7f88eaf26433fe7796e289a",
+      "sha256": "4b14aed168d30807a1325de8c065bb57e2bc66271a0cffc71a21481c227b453b",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -109,7 +109,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "45113b3c3f3a78e350e112665c1aadf74a246bb4ebfe514ea7230d6bd3fa01c1",
+      "sha256": "51e66ffec6b5182e0fcd1fcad1a17efdcf79538afc5e243322689bd0a4b5d6e8",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -137,7 +137,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "21d9717136f4a1d77f6c1c4b369d09a5a66fe83a683cb22142b166c05e6dfc86",
+      "sha256": "03d56ddd3556f66d881480e4e7327bc9958978ae13de5db96adda34a3e050fb0",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

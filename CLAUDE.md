@@ -122,6 +122,8 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 - `qa.md` — independent verification gate; re-runs checks; never commits, never edits.
 - `reporter.md` — one sprint retrospective at sprint end; synthesizes token ledger + git log + flashcards into `REPORT.md`.
 
+**Orchestrator Dispatch Convention.** Before each `Task()` spawn, write an explicit dispatch marker so the token-ledger hook can attribute tokens to the correct work item and agent without relying on transcript-grep heuristics. Call `bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>` immediately before the `Task()` call; the hook reads `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`, uses `work_item_id` + `agent_type` verbatim, then deletes the file. Example: `bash .cleargate/scripts/write_dispatch.sh STORY-020-02 developer`.
+
 **Conversational style.** Keep replies terse. Details live in the work-item file and `REPORT.md`, not in chat. State results and next steps; skip narration of your own thought process.
 
 **Support infrastructure.** Flashcard protocol: `.claude/skills/flashcard/SKILL.md`. Token-ledger hook: `.claude/hooks/token-ledger.sh`, wired via `.claude/settings.json` (SubagentStop) — auto-logs agent cost per sprint for the Reporter.
