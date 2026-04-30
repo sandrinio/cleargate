@@ -53,6 +53,9 @@ try {
 // ── Args ──────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
+// Optional positional: <dir> — walk only that directory (for tests/CI targeting a tmpdir).
+// Default (no arg): walk canonical pending-sync + archive.
+const DIR_ARG = args.find((a) => !a.startsWith('--'));
 
 // ── Paths ─────────────────────────────────────────────────────────────────────
 const PENDING_SYNC = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
@@ -205,7 +208,11 @@ function collectMd(dir) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-const files = [...collectMd(PENDING_SYNC), ...collectMd(ARCHIVE)];
+// When a <dir> arg is given, walk only that dir (used by integration tests).
+// Otherwise walk the canonical corpus.
+const files = DIR_ARG
+  ? collectMd(path.resolve(DIR_ARG))
+  : [...collectMd(PENDING_SYNC), ...collectMd(ARCHIVE)];
 
 let written = 0;
 let skipped = 0;
