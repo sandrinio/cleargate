@@ -124,7 +124,12 @@ export function copyPayload(
         continue;
       }
       if (!opts.force) {
-        // Different content, no force — skip
+        // Different content, no force — skip the write but still re-assert exec bit
+        // for the same reason as the identical-content skip above (BUG-018 follow-up,
+        // HOTFIX-001): a previous in-place edit may have stripped +x.
+        if (needsExec && process.platform !== 'win32') {
+          fs.chmodSync(dstPath, 0o755);
+        }
         report.skipped++;
         report.actions.push({ action: 'skipped', relPath });
         continue;

@@ -57,4 +57,29 @@ describe('copyPayload — BUG-018 executable-bit preservation', () => {
     const hook = fs.statSync(path.join(target, '.claude', 'hooks', 'session-start.sh'));
     expect((hook.mode & 0o111) !== 0).toBe(true);
   });
+
+  it.skipIf(SKIP)(
+    'HOTFIX-001: drifted hook (different content) + no-force → +x preserved, content unchanged',
+    () => {
+      // First init: create the hook in target with canonical content
+      copyPayload(payload, target, { force: false });
+
+      // Simulate drift: user edited the live hook (different content) and lost +x
+      const dstHook = path.join(target, '.claude', 'hooks', 'session-start.sh');
+      const driftedContent = '#!/bin/bash\necho DRIFTED\n';
+      fs.writeFileSync(dstHook, driftedContent);
+      fs.chmodSync(dstHook, 0o644);
+
+      // Second init without --force: should skip the write but re-assert +x
+      copyPayload(payload, target, { force: false });
+
+      // +x must be re-asserted
+      const hook = fs.statSync(dstHook);
+      expect((hook.mode & 0o111) !== 0).toBe(true);
+
+      // Content must be preserved (no-force means no overwrite)
+      const content = fs.readFileSync(dstHook, 'utf8');
+      expect(content).toBe(driftedContent);
+    },
+  );
 });
