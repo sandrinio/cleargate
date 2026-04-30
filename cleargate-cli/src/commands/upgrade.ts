@@ -23,6 +23,7 @@
  * (FLASHCARD #cli #determinism #test-seam).
  */
 
+import * as fs from 'node:fs';
 import * as fsp from 'node:fs/promises';
 import * as path from 'node:path';
 import {
@@ -36,6 +37,7 @@ import {
   type DriftMap,
   type Tier,
 } from '../lib/manifest.js';
+import { sliceChangelog } from '../lib/changelog.js';
 import { hashNormalized } from '../lib/sha256.js';
 import { readBlock, writeBlock } from '../lib/claude-md-surgery.js';
 import { removeClearGateHooks, type ClaudeSettings } from '../lib/settings-json-surgery.js';
@@ -344,6 +346,36 @@ export async function upgradeHandler(
   const snapshotByPath = new Map<string, string | null>();
   for (const entry of installSnapshot?.files ?? []) {
     snapshotByPath.set(entry.path, entry.sha256);
+  }
+
+  // ─── 1b. Print CHANGELOG delta ───────────────────────────────────────────────
+
+  {
+    const installedVersion = installSnapshot?.cleargate_version ?? pkgManifest.cleargate_version;
+    const targetVersion = pkgManifest.cleargate_version;
+
+    // Only print delta when there's actually a version change
+    if (installedVersion !== targetVersion) {
+      // Resolve CHANGELOG.md path from package root (same resolution as loadPackageManifest)
+      const pkgRoot = cli?.packageRoot ?? path.join(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+      const changelogPath = path.join(pkgRoot, 'CHANGELOG.md');
+
+      try {
+        const changelogContent = fs.readFileSync(changelogPath, 'utf-8');
+        const sections = sliceChangelog(changelogContent, installedVersion, targetVersion);
+
+        if (sections.length > 0) {
+          // Emit all matching sections verbatim, separated by blank lines between sections
+          // (each section body already includes the heading + content)
+          const deltaText = sections.map((s) => s.body).join('\n\n');
+          stdout(deltaText);
+          stdout('\n---');
+        }
+      } catch {
+        // ENOENT or any read error — warn on stderr and continue; never block upgrade
+        stderr('cleargate: CHANGELOG.md not readable; skipping release notes');
+      }
+    }
   }
 
   // ─── 2. Apply --only <tier> filter ──────────────────────────────────────────
