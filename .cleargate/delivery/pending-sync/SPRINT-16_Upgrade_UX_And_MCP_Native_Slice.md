@@ -1,21 +1,21 @@
 ---
 sprint_id: "SPRINT-16"
 source_tool: "local"
-status: "Draft"
+status: "Approved"
 start_date: "2026-05-13"
 end_date: "2026-05-26"
 created_at: "2026-04-29T00:00:00Z"
-updated_at: "2026-04-29T00:00:00Z"
+updated_at: "2026-04-30T00:00:00Z"
 created_at_version: "cleargate@0.8.2"
 updated_at_version: "cleargate@0.8.2"
-context_source: "Conversation 2026-04-29 — two-decision evolution. (1) SPRINT-15 right-sizing: EPIC-016 (Upgrade UX, 6 stories) deferred from SPRINT-15 to here end-to-end (over-sizing fix). (2) Decomposition discipline (CR-017 protocol §26): proposals/epics must be fully decomposed BEFORE the sprint executing them activates. PROPOSAL-013 → EPIC-023 → sub-epic 1 stories are between-sprints transition work performed by Architect post-SPRINT-15 close, pre-SPRINT-16 activation. SPRINT-16 cannot activate until EPIC-023 file + sub-epic 1 stories exist and are gate-clean (CR-017 sprint-init gate enforces). M2 is pure execution, not decomposition."
+context_source: "Conversation 2026-04-29 — two-decision evolution. (1) SPRINT-15 right-sizing: EPIC-016 (Upgrade UX, 6 stories) deferred from SPRINT-15 to here end-to-end (over-sizing fix). (2) Decomposition discipline (CR-017 protocol §26): proposals/epics must be fully decomposed BEFORE the sprint executing them activates. PROPOSAL-013 → EPIC-023 → EPIC-023 stories are between-sprints transition work performed by Architect post-SPRINT-15 close, pre-SPRINT-16 activation. SPRINT-16 cannot activate until EPIC-023 file + EPIC-023 stories exist and are gate-clean (CR-017 sprint-init gate enforces). M2 is pure execution, not decomposition."
 epics: ["EPIC-016", "EPIC-023"]
 crs: ["CR-019"]
 bugs: []
 proposals: []
-approved: false
-approved_at: null
-approved_by: null
+approved: true
+approved_at: "2026-04-30T00:00:00Z"
+approved_by: "sandrinio"
 activated_at: null
 execution_mode: "v2"
 human_override: false
@@ -40,7 +40,7 @@ sprint_cleargate_id: "SPRINT-16"
 Two anchor epics, each previously locked at the architectural level, now executing:
 
 1. **Upgrade UX (EPIC-016)** — close the three gaps EPIC-009 left open. Users on N-1 see an "available" notice within 24h; `cleargate upgrade` prints release narrative before the merge loop; the meta-repo installs through `--from-source` and runs the same scaffold-clean validation downstream users hit. Six stories pre-decomposed during SPRINT-15 prep; spec stable. Ships **0.10.0** (CHANGELOG ships in tarball + registry-check + delta print + dogfood path).
-2. **EPIC-023 sub-epic 1 — Work-Item Sync v2** — first slice of PROPOSAL-013's "MCP as native source of truth" reframe. Replaces the `PmAdapter` noop indirection with direct `cleargate sync` for work items. Status-blind sync per PROPOSAL-013 §2.1 (Drafts and unapproved items ARE the in-progress thinking, belong in the source of truth). Story files (STORY-023-01-NN) are drafted by the Architect as **between-sprints transition work** (post-SPRINT-15 close, pre-SPRINT-16 activation) per CR-017 §26 — they exist in pending-sync, gate-clean, before this sprint activates. M2 is pure execution.
+2. **EPIC-023 — Work-Item Sync v2** — first slice of PROPOSAL-013's "MCP as native source of truth" reframe. Replaces the `PmAdapter` noop indirection with direct `cleargate sync` for work items. Status-blind sync per PROPOSAL-013 §2.1 (Drafts and unapproved items ARE the in-progress thinking, belong in the source of truth). Story files (STORY-023-NN) are drafted by the Architect as **between-sprints transition work** (post-SPRINT-15 close, pre-SPRINT-16 activation) per CR-017 §26 — they exist in pending-sync, gate-clean, before this sprint activates. M2 is pure execution.
 
 This is **the first sprint to exercise CR-017's full enforcement at close**: lifecycle reconciler (block-mode) + decomposition gate (block-mode at sprint init for SPRINT-17's anchor decomposition). Validates both gates.
 
@@ -54,17 +54,19 @@ This is **the first sprint to exercise CR-017's full enforcement at close**: lif
 | `STORY-016-04` | Story | `cleargate upgrade` prints CHANGELOG delta before merge loop (consumes 016-03) | standard | L2 | n | med | M1 |
 | `STORY-016-05` | Story | `cleargate init --from-source <path>` for meta-repo dogfood | standard | L2 | y | med | M1 |
 | `STORY-016-06` | Story | E2E integration test — dogfood install → `doctor --check-scaffold` clean (consumes 016-05) | standard | L2 | n | med | M1 |
-| `STORY-023-01-NN` | Story | EPIC-023 sub-epic 1 (Work-Item Sync v2) — **drafted as between-sprints transition work; concrete IDs assigned at draft time**. Expected ~3 stories from PROPOSAL-013 §2.2 (CLI sync command + MCP server-side recv handler + conflict-detector wiring). | standard | L2–L3 | n | med | M2 |
+| `STORY-023-NN` | Story | EPIC-023 (Work-Item Sync v2) — **drafted as between-sprints transition work; concrete IDs assigned at draft time**. Expected ~4 stories from PROPOSAL-013 §2.2 (CLI sync command + MCP server-side recv handler + conflict-detector wiring + admin-URL helper & sync-output link). | standard | L1–L3 | n | med | M2 |
 | [`CR-019`](CR-019_Sprint_Close_Requires_Explicit_Human_Ack.md) | CR | Sprint close requires explicit human ack — orchestrator MUST NOT pass `--assume-ack`; protocol §27 + CLAUDE.md guardrail + `close_sprint.mjs` usage doc | fast | L1 | y | low | M0 |
 
-**Estimated totals (firm after between-sprints decomp completes):** EPIC-016 = 6 stories + EPIC-023 sub-epic 1 = ~3 stories + CR-019 = **~10 items**. Complexity preview: ~3×L1 + ~6×L2 + 0–1×L3 + CR-019 (L1 fast). Lane mix preview: ~2 fast / ~8 standard.
+**Estimated totals (firm after between-sprints decomp completes):** EPIC-016 = 6 stories + EPIC-023 sub-epic 1 = ~4 stories + CR-019 = **~11 items**. Complexity preview: ~4×L1 + ~6×L2 + 0–1×L3 + CR-019 (L1 fast). Lane mix preview: ~2–3 fast / ~8 standard.
+
+**Admin-URL helper (added to sub-epic 1, 2026-04-30):** new `cleargate-cli/src/lib/admin-url.ts` returns base URL for the deployed admin UI (default `https://admin.cleargate.soula.ge/`, override via `CLEARGATE_ADMIN_URL` env var, optional project-scoped path from `~/.cleargate/` config). `cleargate sync` prints `→ View synced items: <url>` after a successful run. Single source of truth: future commands (push, doctor, join) can adopt the helper without re-hardcoding the URL. Architect drafts as 4th story of sub-epic 1 during between-sprints transition window.
 
 **CR-019 origin (added 2026-04-30 retroactively):** filed immediately after SPRINT-15 close, when the conversational orchestrator passed `--assume-ack` to `close_sprint.mjs` autonomously without surfacing the script's `"Review the report, then confirm close by re-running with --assume-ack"` prompt to the human. CR-019 codifies the rule that was implicit in `close_sprint.mjs`'s design but not encoded in protocol or CLAUDE.md. Doc-only fix: protocol §27 + 1 CLAUDE.md bullet (×2 mirror) + 2-line usage docstring edit. Fast lane on M0; ships before M1 kicks off so SPRINT-16 close itself follows the corrected protocol.
 
 **Between-sprints transition work (must complete before SPRINT-16 activation; not story-tracked, not a SPRINT-16 deliverable):**
 - SPRINT-15 close passes its lifecycle reconciler gate (CR-017 layer 1 — first real test).
 - Architect drafts `EPIC-023_MCP_Native_Source_Of_Truth.md` (4 sub-epics scoped per PROPOSAL-013 §2.5).
-- Architect drafts `STORY-023-01-NN_*.md` files (~3) for sub-epic 1 with full §2.1 Gherkin + §3 Implementation Guide + lane assignments.
+- Architect drafts `STORY-023-NN_*.md` files (~4) for sub-epic 1 with full §2.1 Gherkin + §3 Implementation Guide + lane assignments. Includes the admin-URL helper + sync-output link story.
 - Status flips Draft → Approved on STORY-016-01..06 + new STORY-023 files + EPIC-016 + EPIC-023.
 - Gate-readiness pass: every item has `approved: true`, `cached_gate_result.pass: true`.
 - `cleargate sprint init SPRINT-16` runs CR-017 layer 2 — decomposition gate verifies all `epics:` and proposed-deliverables-table items have files + stories + approval. Block-mode by 2026-05-13 (SPRINT-16's start_date).
@@ -80,7 +82,7 @@ This is **the first sprint to exercise CR-017's full enforcement at close**: lif
 - All three tracks run in parallel. Three Developer agents in worktrees.
 
 **M2 — Work-Item Sync v2 (EPIC-023 sub-epic 1, parallel with M1):**
-- Stories STORY-023-01-NN already exist in pending-sync (drafted as between-sprints transition work; gate-clean by activation). M2 is **pure execution**, not decomposition.
+- Stories STORY-023-NN already exist in pending-sync (drafted as between-sprints transition work; gate-clean by activation). M2 is **pure execution**, not decomposition.
 - Stories execute per the Architect's pre-drafted phase plan recorded in EPIC-023 §2 (likely sequential — CLI surface + MCP server-side handler share the wire format, must serialize).
 - M2 runs in parallel with M1 — disjoint surfaces (CLI sync + mcp/ vs CLI doctor/upgrade/init).
 
@@ -94,8 +96,9 @@ This is **the first sprint to exercise CR-017's full enforcement at close**: lif
 | `cleargate-cli/CHANGELOG.md` | STORY-016-03 | — | New file. |
 | `cleargate-cli/package.json` | STORY-016-03 (`files` array), STORY-016-04 (no edit), 0.10.0 bump | sprint-close | Single version bump at sprint close (0.9.x → 0.10.0). |
 | `cleargate-cli/src/lib/{registry-check,changelog,scaffold-source}.ts` | STORY-016-01, -04, -05 | parallel | Three new lib files; disjoint. |
-| `cleargate-cli/src/commands/sync.ts` (new) | STORY-023-01-NN (TBD) | — | New CLI surface for work-item sync. |
-| `mcp/src/...` | STORY-023-01-NN (TBD) | — | Server-side handler additions. |
+| `cleargate-cli/src/commands/sync-work-items.ts` (new — renamed from sync.ts to avoid collision with existing STORY-010-04 sync command; surface as `cleargate sync work-items` subcommand) | STORY-023-01 | sync-cmd → admin-url-print | Admin URL print is the last line of a successful run; story consumes the helper. |
+| `cleargate-cli/src/lib/admin-url.ts` (new) | STORY-023-NN (admin-URL helper) | — | New file. Single source of truth for the deployed admin URL; consumed by `sync.ts`. |
+| `mcp/src/...` | STORY-023-NN (TBD) | — | Server-side handler additions. |
 
 ### 2.3 Shared-Surface Warnings
 
@@ -110,7 +113,7 @@ This is **the first sprint to exercise CR-017's full enforcement at close**: lif
 |---|---|---|
 | `STORY-016-03` | fast | CHANGELOG.md authoring + one-line package.json edit; doc-only |
 
-All other items run `standard`. EPIC-023 sub-epic 1 stories' lanes assigned during between-sprints decomposition; reflected in this table once stories are drafted (concrete IDs replace `STORY-023-01-NN`).
+All other items run `standard`. EPIC-023 EPIC-023 stories' lanes assigned during between-sprints decomposition; reflected in this table once stories are drafted (concrete IDs replace `STORY-023-NN`).
 
 ### 2.5 ADR-Conflict Flags
 
@@ -120,8 +123,8 @@ All other items run `standard`. EPIC-023 sub-epic 1 stories' lanes assigned duri
 
 | Risk | Mitigation |
 |---|---|
-| EPIC-023 + sub-epic 1 stories not drafted before SPRINT-16 activation date | CR-017 decomposition gate at `cleargate sprint init SPRINT-16` blocks activation. Architect's between-sprints transition window is 2026-05-12 (SPRINT-15 close) → 2026-05-13 (SPRINT-16 start) — tight; if not feasible, push SPRINT-16 start by N days rather than relax the gate. |
-| Sub-epic 1 decomp reveals L4 stories or scope creep during transition | Cap at ~3 stories; if Architect needs more, drop to 2 stories + carry remainder to SPRINT-17. Detected at decomp time (transition), not at sprint kickoff (too late). EPIC-023 is multi-sprint by design. |
+| EPIC-023 + EPIC-023 stories not drafted before SPRINT-16 activation date | CR-017 decomposition gate at `cleargate sprint init SPRINT-16` blocks activation. Architect's between-sprints transition window is 2026-05-12 (SPRINT-15 close) → 2026-05-13 (SPRINT-16 start) — tight; if not feasible, push SPRINT-16 start by N days rather than relax the gate. |
+| Sub-epic 1 decomp reveals L4 stories or scope creep during transition | Cap at ~4 stories; if Architect needs more, drop to 3 stories + carry remainder to SPRINT-17. Detected at decomp time (transition), not at sprint kickoff (too late). EPIC-023 is multi-sprint by design. |
 | STORY-016-01 registry-check API churns mid-execution, bouncing 016-02 | Architect locks signature in 016-01's §3.1 before spawning 016-02. |
 | STORY-016-03 CHANGELOG backfill incomplete (git-archeology error) | Format-test catches structural drift; bullet accuracy verified manually pre-Approved. |
 | STORY-016-06 E2E test flaky in CI | Test sets `CLEARGATE_NO_UPDATE_CHECK=1`, spawns CLI via local `dist/cli.js`, runtime-budget ≤30s. |
@@ -134,10 +137,11 @@ All other items run `standard`. EPIC-023 sub-epic 1 stories' lanes assigned duri
   - `cleargate upgrade` prints release narrative for every intermediate version (STORY-016-04).
   - Meta-repo install path exercised E2E on every release (STORY-016-05/-06).
   - `cleargate sync` ships work items to MCP without `PmAdapter` indirection (EPIC-023 sub-epic 1).
+  - After a successful `cleargate sync`, users see a clickable `→ View synced items: https://admin.cleargate.soula.ge/...` link; the URL has one definition (`lib/admin-url.ts`), env-overridable, ready for adoption by other commands.
   - 0.10.0 release cut.
   - First clean SPRINT close under CR-017's lifecycle reconciler (validates the gate).
 - **Priority Alignment:** Closes the EPIC-016 deferral from SPRINT-15; starts EPIC-023 execution per PROPOSAL-013.
-- **Lane Distribution Target:** 15–20% fast lane (~1 of ~9 items = ~11% — slightly under target; STORY-023-01-NN decomp may add fast candidates).
+- **Lane Distribution Target:** 15–20% fast lane (~1–2 of ~11 items = ~9–18%; admin-URL helper story is a fast-lane candidate per L1 sizing — decomp confirms).
 
 ---
 

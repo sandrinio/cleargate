@@ -24,7 +24,7 @@
 
 - [[SPRINT-12]] — status: Completed
 
-- [[SPRINT-16]] — status: Draft
+- [[SPRINT-16]] — status: Approved
 
 
 
