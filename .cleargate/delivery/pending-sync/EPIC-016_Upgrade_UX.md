@@ -1,6 +1,9 @@
 ---
 epic_id: EPIC-016
 status: Draft
+approved: true
+approved_at: 2026-04-30T00:00:00Z
+approved_by: sandrinio
 ambiguity: 🟡 Medium
 context_source: "Direct-epic waiver (2026-04-24 conversation on ClearGate versioning). No separate PROPOSAL filed. Inline references: (a) cleargate@0.2.1 currently on npm with install-manifest + merge-3way upgrade flow shipped in EPIC-009 (STORY-009-01..08); (b) verified gaps — no npm-registry notifier, no CHANGELOG surface, and the meta-repo bypasses `cleargate init`/`upgrade` entirely (edits cleargate-planning/ in place); (c) relevant code: cleargate-cli/src/commands/upgrade.ts, doctor.ts (--check-scaffold, --session-start), lib/manifest.ts (Tier + overwrite_policy)."
 owner: sandro

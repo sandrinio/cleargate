@@ -55,25 +55,37 @@
 - Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
 ## Proposals
 
+| [[PROPOSAL-007]] | proposal | Abandoned | .cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md |
 | [[PROPOSAL-012]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-012_Wiki_Contradiction_Detection.md |
-| [[PROPOSAL-013]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-013_Sprint_Planning_Fast_Track.md |
+| [[PROPOSAL-013]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-013_Cleargate_MCP_Native_Source_Of_Truth.md |
 ## Epics
 
-| [[EPIC-020]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-020_Wiki_Contradiction_Detection.md |
+| [[EPIC-020]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-020_Wiki_Contradiction_Detection.md |
 | [[EPIC-021]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-021_Solo_Onboarding_DX.md |
 | [[EPIC-022]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md |
 ## Stories
 
 | [[STORY-014-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-014-01_Doctor_Exit_Code_Semantics.md |
-| [[STORY-020-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-01_Contradict_Subagent_And_Schema_Delta.md |
-| [[STORY-020-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-02_Ingest_Phase4_And_Advisory_Log.md |
-| [[STORY-020-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-020-03_CLI_Wiki_Contradict_Subcommand.md |
+| [[STORY-015-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-015-01_Hierarchy_Frontmatter_Keys.md |
+| [[STORY-015-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-015-02_Push_And_Ingest_Hierarchy_Extraction.md |
+| [[STORY-015-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-015-05_Hierarchy_Frontmatter_Keys.md |
+| [[STORY-015-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-015-06_Push_And_Ingest_Hierarchy_Extraction.md |
+| [[STORY-016-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-01_Registry_Check_Library_And_Cache.md |
+| [[STORY-016-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-02_Doctor_Session_Start_Notifier.md |
+| [[STORY-016-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-03_Changelog_Backfill_And_Tarball.md |
+| [[STORY-016-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-04_Upgrade_Prints_Changelog_Delta.md |
+| [[STORY-016-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-05_Init_From_Source_Meta_Repo_Dogfood.md |
+| [[STORY-016-06]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-06_Dogfood_Integration_Test.md |
+| [[STORY-020-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-01_Contradict_Subagent_And_Schema_Delta.md |
+| [[STORY-020-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-02_Ingest_Phase4_And_Advisory_Log.md |
+| [[STORY-020-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-03_CLI_Wiki_Contradict_Subcommand.md |
 | [[STORY-022-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-01_Architect_Lane_Classification_And_Protocol_Section_14.md |
 | [[STORY-022-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-02_State_Json_Schema_V2_Migration.md |
 | [[STORY-022-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-03_Templates_Lane_Fields.md |
 | [[STORY-022-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-04_Pre_Gate_Runner_Demotion_LD_Event.md |
 | [[STORY-022-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-05_Developer_Agent_Lane_Aware_Execution.md |
 | [[STORY-022-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-06_Hotfix_Lane_Template_CLI_Ledger.md |
+| [[STORY-099-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-099-01_Dogfood_Lane_Fast_Smoke.md |
 ## Bugs
 
 | [[BUG-006]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-006_Init_Scaffold_Hooks_Reference_Nonexistent_CLI_Path.md |
@@ -81,16 +93,31 @@
 | [[BUG-008]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-008_Gate_Check_Criteria_Over_Match.md |
 | [[BUG-009]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-009_Token_Ledger_Missing_CR_PROP_Rows.md |
 | [[BUG-010]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-010_Token_Ledger_Detector_Mis_Attribution.md |
+| [[BUG-017]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-017_Init_Does_Not_Register_MCP_Server.md |
+| [[BUG-018]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-018_Init_Strips_Executable_Bit_From_Hooks.md |
+| [[BUG-019]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-019_MCP_HTTP_Transport_No_Auth_Flow.md |
+| [[BUG-020]] | bug | Verified | .cleargate/delivery/pending-sync/BUG-020_Templates_Carry_Cleargate_Internal_Cross_Refs.md |
+| [[BUG-021]] | bug | Abandoned | .cleargate/delivery/pending-sync/BUG-021_Token_Ledger_Detector_Still_Mis_Attributes_Post_Template_Strip.md |
+| [[BUG-022]] | bug | Abandoned | .cleargate/delivery/pending-sync/BUG-022_Token_Ledger_Rows_Are_Cumulative_Not_Delta.md |
 ## CRs
 
+| [[CR-001]] | cr | Completed | .cleargate/delivery/archive/CR-001_Flashcard_Triggers_And_Cleanup.md |
+| [[CR-002]] | cr | Approved | .cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md |
 | [[CR-008]] | cr | Approved | .cleargate/delivery/pending-sync/CR-008_Planning_First_Enforcement.md |
 | [[CR-009]] | cr | Approved | .cleargate/delivery/pending-sync/CR-009_Hook_CLI_Resolution_Pin_NPX.md |
 | [[CR-010]] | cr | Approved | .cleargate/delivery/pending-sync/CR-010_Advisory_Readiness_Gates_On_Push.md |
-| [[CR-011]] | cr | Draft | .cleargate/delivery/pending-sync/CR-011_Capability_Gating_By_Membership.md |
-| [[CR-012]] | cr | Draft | .cleargate/delivery/pending-sync/CR-012_Surface_Ingest_Result_To_Chat.md |
+| [[CR-011]] | cr | Approved | .cleargate/delivery/pending-sync/CR-011_Capability_Gating_By_Membership.md |
+| [[CR-012]] | cr | Approved | .cleargate/delivery/pending-sync/CR-012_Surface_Ingest_Result_To_Chat.md |
+| [[CR-014]] | cr | Approved | .cleargate/delivery/pending-sync/CR-014_Sprint_Init_Gate_Multi_Type_Decomposition_Check.md |
+| [[CR-015]] | cr | Approved | .cleargate/delivery/pending-sync/CR-015_Flashcard_Discipline_In_Agent_Role_Contracts.md |
+| [[CR-016]] | cr | Approved | .cleargate/delivery/pending-sync/CR-016_Token_Ledger_Hook_v2.md |
+| [[CR-017]] | cr | Approved | .cleargate/delivery/pending-sync/CR-017_Lifecycle_Status_Reconciliation_At_Sprint_Boundaries.md |
+| [[CR-018]] | cr | Approved | .cleargate/delivery/pending-sync/CR-018_Token_Ledger_Per_Turn_Delta_Math.md |
 ## Sprints
 
 | [[SPRINT-14]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-14_Process_v2.md |
+| [[SPRINT-15]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md |
+| [[SPRINT-16]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md |
 
 ## Hotfix Ledger
 

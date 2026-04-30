@@ -2,7 +2,7 @@
 proposal_id: PROP-008
 status: Draft
 author: AI Agent (cleargate planning)
-approved: false
+approved: true
 created_at: 2026-04-20T00:00:00Z
 updated_at: 2026-04-20T00:00:00Z
 codebase_version: post-SPRINT-05

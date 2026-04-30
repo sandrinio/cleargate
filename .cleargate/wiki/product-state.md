@@ -6,12 +6,12 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 22 | 0 | 14 |
-| Stories | 120 | 0 | 67 |
-| Sprints | 14 | 0 | 10 |
-| Proposals | 13 | 0 | 7 |
-| CRs | 11 | 0 | 5 |
-| Bugs | 7 | 0 | 2 |
+| Epics | 22 | 0 | 16 |
+| Stories | 138 | 0 | 109 |
+| Sprints | 16 | 1 | 12 |
+| Proposals | 14 | 0 | 10 |
+| CRs | 17 | 0 | 11 |
+| Bugs | 15 | 0 | 14 |
 
 ## Active Epics
 
@@ -23,9 +23,35 @@ _No active epics._
 ## Shipped This Cycle
 
 
+- [[BUG-002]] (bugs) — Verified
+
+- [[BUG-003]] (bugs) — Verified
+
+- [[BUG-005]] (bugs) — Verified
+
 - [[BUG-006]] (bugs) — Completed
 
 - [[BUG-007]] (bugs) — Verified
+
+- [[BUG-008]] (bugs) — Verified
+
+- [[BUG-009]] (bugs) — Verified
+
+- [[BUG-010]] (bugs) — Verified
+
+- [[BUG-017]] (bugs) — Verified
+
+- [[BUG-018]] (bugs) — Verified
+
+- [[BUG-019]] (bugs) — Verified
+
+- [[BUG-020]] (bugs) — Verified
+
+- [[BUG-021]] (bugs) — Abandoned
+
+- [[BUG-022]] (bugs) — Abandoned
+
+- [[CR-001]] (crs) — Completed
 
 - [[CR-003]] (crs) — Completed
 
@@ -36,6 +62,16 @@ _No active epics._
 - [[CR-006]] (crs) — Completed
 
 - [[CR-007]] (crs) — Completed
+
+- [[CR-008]] (crs) — Completed
+
+- [[CR-009]] (crs) — Completed
+
+- [[CR-010]] (crs) — Completed
+
+- [[CR-014]] (crs) — Approved
+
+- [[CR-015]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 
@@ -59,11 +95,15 @@ _No active epics._
 
 - [[EPIC-013]] (epics) — Completed
 
+- [[EPIC-014]] (epics) — Completed
+
 - [[EPIC-015]] (epics) — Completed
 
 - [[EPIC-018]] (epics) — Completed
 
 - [[EPIC-019]] (epics) — Completed
+
+- [[EPIC-022]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 
@@ -77,7 +117,13 @@ _No active epics._
 
 - [[PROPOSAL-006]] (proposals) — Abandoned
 
+- [[PROPOSAL-007]] (proposals) — Abandoned
+
 - [[PROPOSAL-010]] (proposals) — Abandoned
+
+- [[PROPOSAL-011]] (proposals) — Completed
+
+- [[PROPOSAL-013]] (proposals) — Completed
 
 - [[SPRINT-01]] (sprints) — Completed
 
@@ -93,11 +139,15 @@ _No active epics._
 
 - [[SPRINT-09]] (sprints) — Completed
 
+- [[SPRINT-10]] (sprints) — Completed
+
 - [[SPRINT-11]] (sprints) — Completed
 
 - [[SPRINT-12]] (sprints) — Completed
 
 - [[SPRINT-13]] (sprints) — Completed
+
+- [[SPRINT-14]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 
@@ -137,9 +187,49 @@ _No active epics._
 
 - [[STORY-002-09]] (stories) — Completed
 
+- [[STORY-003-01]] (stories) — Abandoned
+
+- [[STORY-003-02]] (stories) — Abandoned
+
+- [[STORY-003-03]] (stories) — Abandoned
+
+- [[STORY-003-04]] (stories) — Abandoned
+
+- [[STORY-003-05]] (stories) — Abandoned
+
+- [[STORY-003-06]] (stories) — Abandoned
+
+- [[STORY-003-07]] (stories) — Abandoned
+
+- [[STORY-003-08]] (stories) — Abandoned
+
+- [[STORY-003-09]] (stories) — Abandoned
+
+- [[STORY-003-10]] (stories) — Abandoned
+
+- [[STORY-003-11]] (stories) — Abandoned
+
+- [[STORY-003-12]] (stories) — Abandoned
+
 - [[STORY-003-13]] (stories) — Completed
 
+- [[STORY-004-01]] (stories) — Abandoned
+
+- [[STORY-004-02]] (stories) — Abandoned
+
+- [[STORY-004-03]] (stories) — Abandoned
+
+- [[STORY-004-04]] (stories) — Abandoned
+
+- [[STORY-004-05]] (stories) — Abandoned
+
+- [[STORY-004-06]] (stories) — Abandoned
+
 - [[STORY-004-07]] (stories) — Completed
+
+- [[STORY-004-08]] (stories) — Completed
+
+- [[STORY-004-09]] (stories) — Completed
 
 - [[STORY-005-01]] (stories) — Completed
 
@@ -150,6 +240,8 @@ _No active epics._
 - [[STORY-005-04]] (stories) — Completed
 
 - [[STORY-005-05]] (stories) — Completed
+
+- [[STORY-005-06]] (stories) — Completed
 
 - [[STORY-007-00]] (stories) — Completed
 
@@ -215,6 +307,30 @@ _No active epics._
 
 - [[STORY-013-09]] (stories) — Done
 
+- [[STORY-014-01]] (stories) — Completed
+
+- [[STORY-014-01]] (stories) — Completed
+
+- [[STORY-014-02]] (stories) — Completed
+
+- [[STORY-014-02]] (stories) — Completed
+
+- [[STORY-014-03]] (stories) — Completed
+
+- [[STORY-014-04]] (stories) — Completed
+
+- [[STORY-014-05]] (stories) — Completed
+
+- [[STORY-014-06]] (stories) — Completed
+
+- [[STORY-014-07]] (stories) — Completed
+
+- [[STORY-014-08]] (stories) — Completed
+
+- [[STORY-014-09]] (stories) — Completed
+
+- [[STORY-014-10]] (stories) — Completed
+
 - [[STORY-015-01]] (stories) — Completed
 
 - [[STORY-015-02]] (stories) — Completed
@@ -232,5 +348,23 @@ _No active epics._
 - [[STORY-018-04]] (stories) — Completed
 
 - [[STORY-018-05]] (stories) — Completed
+
+- [[STORY-022-01]] (stories) — Completed
+
+- [[STORY-022-02]] (stories) — Completed
+
+- [[STORY-022-03]] (stories) — Completed
+
+- [[STORY-022-04]] (stories) — Completed
+
+- [[STORY-022-05]] (stories) — Completed
+
+- [[STORY-022-06]] (stories) — Completed
+
+- [[STORY-022-07]] (stories) — Completed
+
+- [[STORY-022-08]] (stories) — Completed
+
+- [[STORY-099-01]] (stories) — Completed
 
 
