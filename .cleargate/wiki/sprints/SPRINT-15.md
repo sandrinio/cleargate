@@ -6,8 +6,8 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md"
-last_ingest: "2026-04-30T05:51:58.624Z"
-last_ingest_commit: ""
+last_ingest: "2026-04-30T07:13:37.657Z"
+last_ingest_commit: "c162bc87eacb125f3085697456af3b117af5c186"
 repo: "planning"
 ---
 

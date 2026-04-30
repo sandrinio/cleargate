@@ -100,8 +100,6 @@ _No active epics._
 
 - [[EPIC-014]] — status: Completed
 
-- [[EPIC-015]] — status: Completed
-
 - [[EPIC-018]] — status: Completed
 
 - [[EPIC-019]] — status: Completed

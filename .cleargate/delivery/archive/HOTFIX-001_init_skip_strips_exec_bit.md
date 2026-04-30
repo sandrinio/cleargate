@@ -7,7 +7,7 @@ created_at: "2026-04-30T08:00:40.505Z"
 created_at_version: "cleargate@0.8.2"
 merged_at: "2026-04-30T08:05:40Z"
 commit_sha: "4ceff09"
-verified_by: null
+verified_by: "qa"
 lane: "hotfix"
 draft_tokens:
   input: null
