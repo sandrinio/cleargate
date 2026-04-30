@@ -1069,3 +1069,20 @@ If the Architect cannot deliver the decomposition before the activating sprint's
 ### §26.4 Invocation
 
 `cleargate sprint init` calls `reconcileDecomposition()` BEFORE shelling out to `init_sprint.mjs`. A non-empty `missing[]` result exits 1 with a punch list. The gate is dormant under `execution_mode: v1` (the entire `sprintInitHandler` is v1-inert).
+
+---
+
+## 27. Gate 3.5 — Sprint Close Acknowledgement (CR-019)
+
+### §27.1 Gate Posture
+
+Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_item` push-approval (§4 Gate 3), which already requires `approved: true` + explicit human confirmation. Authorising the execution loop ("start sprint NN") does NOT authorise the close. Close requires its own dedicated human approval.
+
+### §27.2 Two-Step Protocol
+
+1. **Step A — Orchestrator:** runs `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags. The script validates Steps 1–2.6, prefills the report stub if missing, and exits 0 with the exact prompt: `Review the report, then confirm close by re-running with --assume-ack`. The orchestrator surfaces this prompt verbatim to the human and **halts**.
+2. **Step B — Human:** reviews `REPORT.md`, then either runs `node .cleargate/scripts/close_sprint.mjs <sprint-id> --assume-ack` themselves, or explicitly tells the orchestrator "approved, close it" — at which point the orchestrator may pass the flag on the human's behalf.
+
+### §27.3 Flag Reservation
+
+`--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-3 breach equivalent to calling `cleargate_push_item` without `approved: true`.
