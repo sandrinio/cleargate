@@ -1,8 +1,10 @@
 ---
 cr_id: CR-002
 parent_ref: EPIC-015
-status: Draft
-approved: false
+status: Approved
+approved: true
+approved_at: 2026-04-29T00:00:00Z
+approved_by: sandrinio
 created_at: 2026-04-24T00:00:00Z
 updated_at: 2026-04-24T00:00:00Z
 created_at_version: strategy-phase-pre-init
@@ -11,7 +13,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-24T14:22:22Z
+  last_gate_check: 2026-04-29T11:17:11Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -27,7 +29,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-24T14:22:22Z
+  last_stamp: 2026-04-29T11:17:11Z
   sessions: []
 ---
 

@@ -1,6 +1,9 @@
 ---
 epic_id: EPIC-015
 status: Completed
+approved: true
+approved_at: 2026-04-30T00:00:00Z
+approved_by: sandrinio
 ambiguity: 🟢 Low
 approved_at: 2026-04-24T00:00:00Z
 approved_by: sandro

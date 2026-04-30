@@ -5,7 +5,9 @@
 ## Current Sprint
 
 
-- [[SPRINT-14]] — status: Draft
+- [[SPRINT-14]] — status: Completed
+
+- [[SPRINT-15]] — status: Active
 
 
 
@@ -16,11 +18,13 @@
 
 - [[SPRINT-07]] — status: Planned
 
-- [[SPRINT-10]] — status: Planned
+- [[SPRINT-10]] — status: Completed
 
 - [[SPRINT-11]] — status: Completed
 
 - [[SPRINT-12]] — status: Completed
+
+- [[SPRINT-16]] — status: Draft
 
 
 

@@ -3,10 +3,10 @@ type: proposal
 id: "PROPOSAL-007"
 parent: ""
 children: []
-status: "Draft"
+status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-04-25T13:30:35.772Z"
+last_ingest: "2026-04-30T05:49:20.623Z"
 last_ingest_commit: "39e586a19e43e231919ca6df42c66eb05b2df48c"
 repo: "planning"
 ---

@@ -9,8 +9,6 @@ Items awaiting human action at one of the three ClearGate review gates.
 Proposals with `approved: false` or `status: Draft` that have not yet been blessed.
 
 
-- [[PROPOSAL-007]] — status: Draft
-
 - [[PROPOSAL-008]] — status: Draft
 
 - [[PROPOSAL-009]] — status: Draft
@@ -38,29 +36,5 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 - [[EPIC-012]] — status: Ready
 
 - [[EPIC-021]] — status: Ready
-
-- [[EPIC-022]] — status: Ready
-
-- [[STORY-004-09]] — status: Ready
-
-- [[STORY-014-01]] — status: Ready
-
-- [[STORY-014-02]] — status: Ready
-
-- [[STORY-014-03]] — status: Ready
-
-- [[STORY-014-04]] — status: Ready
-
-- [[STORY-014-05]] — status: Ready
-
-- [[STORY-014-06]] — status: Ready
-
-- [[STORY-014-07]] — status: Ready
-
-- [[STORY-014-08]] — status: Ready
-
-- [[STORY-014-09]] — status: Ready
-
-- [[STORY-014-10]] — status: Ready
 
 
