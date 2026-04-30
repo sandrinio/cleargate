@@ -169,7 +169,7 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     [[ -z "${AGENT_TYPE}" || "${AGENT_TYPE}" == "null" ]] && AGENT_TYPE="unknown"
 
     if [[ "${AGENT_TYPE}" == "unknown" ]]; then
-      for role in architect developer qa reporter; do
+      for role in architect developer qa reporter cleargate-wiki-contradict; do
         if grep -qiE "\\b${role}\\b agent|role: ${role}|you are the ${role}" "${TRANSCRIPT_PATH}" 2>/dev/null; then
           AGENT_TYPE="${role}"
           break
