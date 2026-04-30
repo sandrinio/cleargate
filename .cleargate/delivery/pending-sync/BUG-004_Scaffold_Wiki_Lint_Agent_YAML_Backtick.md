@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-004
 parent_ref: EPIC-018
+parent_cleargate_id: "EPIC-018"
+sprint_cleargate_id: "SPRINT-12"
 status: Draft
 severity: P2-Medium
 reporter: sandro (via QA STORY-018-05)

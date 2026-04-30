@@ -1,6 +1,7 @@
 ---
 cr_id: CR-011
 parent_ref: EPIC-021
+parent_cleargate_id: "EPIC-021"
 status: Approved
 approved: true
 approved_at: 2026-04-29T00:00:00Z

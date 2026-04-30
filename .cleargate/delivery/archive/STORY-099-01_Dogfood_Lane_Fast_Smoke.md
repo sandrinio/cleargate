@@ -1,6 +1,8 @@
 ---
 story_id: STORY-099-01
 parent_epic_ref: EPIC-022
+parent_cleargate_id: "EPIC-022"
+sprint_cleargate_id: "SPRINT-14"
 status: Completed
 lane: fast
 expected_bounce_exposure: low

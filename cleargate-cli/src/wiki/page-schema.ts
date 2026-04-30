@@ -1,12 +1,13 @@
 /**
- * §10.4 Wiki Page Schema — nine required frontmatter fields plus one optional.
- * Lint will flag any extra or missing required fields; last_contradict_sha is optional.
+ * §10.4 Wiki Page Schema — nine required frontmatter fields plus three optional.
+ * Lint will flag any extra or missing required fields; last_contradict_sha,
+ * parent_cleargate_id, and sprint_cleargate_id are optional.
  */
 
 export type WikiPageType = 'epic' | 'story' | 'sprint' | 'proposal' | 'cr' | 'bug' | 'topic';
 export type RepoTag = 'cli' | 'mcp' | 'planning';
 
-/** The nine required + one optional frontmatter fields every wiki page must satisfy. */
+/** The nine required + three optional frontmatter fields every wiki page must satisfy. */
 export interface WikiPage {
   type: WikiPageType;
   id: string;
@@ -20,6 +21,10 @@ export interface WikiPage {
   repo: RepoTag;
   /** Optional — populated by ingest Phase 4 (§10.10). SHA of raw file at last contradict check. */
   last_contradict_sha?: string;
+  /** Optional — canonical cleargate-id of the parent work item (§11.7). */
+  parent_cleargate_id?: string;
+  /** Optional — canonical cleargate-id of the owning sprint (§11.7). */
+  sprint_cleargate_id?: string;
 }
 
 /** Serialise a WikiPage frontmatter + body into a markdown string. */
@@ -42,9 +47,15 @@ export function serializePage(page: WikiPage, body: string): string {
     `last_ingest_commit: "${page.last_ingest_commit}"`,
     `repo: "${page.repo}"`,
   ];
-  // Emit optional field only when present
+  // Emit optional fields only when present
   if (page.last_contradict_sha !== undefined) {
     lines.push(`last_contradict_sha: "${page.last_contradict_sha}"`);
+  }
+  if (page.parent_cleargate_id !== undefined) {
+    lines.push(`parent_cleargate_id: "${page.parent_cleargate_id}"`);
+  }
+  if (page.sprint_cleargate_id !== undefined) {
+    lines.push(`sprint_cleargate_id: "${page.sprint_cleargate_id}"`);
   }
   lines.push('---');
 
@@ -73,8 +84,15 @@ export function parsePage(raw: string): WikiPage {
   const last_contradict_sha = fm['last_contradict_sha'] !== undefined
     ? String(fm['last_contradict_sha'])
     : undefined;
+  // Optional hierarchy keys (§11.7)
+  const parent_cleargate_id = fm['parent_cleargate_id'] !== undefined
+    ? String(fm['parent_cleargate_id'])
+    : undefined;
+  const sprint_cleargate_id = fm['sprint_cleargate_id'] !== undefined
+    ? String(fm['sprint_cleargate_id'])
+    : undefined;
 
-  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo, last_contradict_sha };
+  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo, last_contradict_sha, parent_cleargate_id, sprint_cleargate_id };
 }
 
 function parseFmRaw(raw: string): { fm: Record<string, unknown>; body: string } {

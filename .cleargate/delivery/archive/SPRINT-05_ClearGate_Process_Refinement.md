@@ -15,6 +15,7 @@ updated_at_version: "post-SPRINT-05"
 epics: ["EPIC-001", "EPIC-008", "EPIC-009"]
 story_count: 21
 approved: true
+sprint_cleargate_id: "SPRINT-05"
 
 ---
 

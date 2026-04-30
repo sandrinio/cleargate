@@ -1,6 +1,8 @@
 ---
 story_id: STORY-015-02
 parent_epic_ref: EPIC-015
+parent_cleargate_id: "EPIC-015"
+sprint_cleargate_id: "SPRINT-10"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-015_Wiki_Index_Hygiene_And_Scale.md

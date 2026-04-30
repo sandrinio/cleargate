@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-018
 parent_ref: EPIC-019
+parent_cleargate_id: "EPIC-019"
+sprint_cleargate_id: "off-sprint"
 status: Verified
 severity: P1-High
 reporter: sandrinio

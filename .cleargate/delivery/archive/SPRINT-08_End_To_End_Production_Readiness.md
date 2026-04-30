@@ -15,6 +15,7 @@ updated_at_version: "post-SPRINT-06"
 context_source: "EPIC-011_End_To_End_Production_Readiness.md"
 epics: ["EPIC-011"]
 approved: true
+sprint_cleargate_id: "SPRINT-08"
 
 ---
 

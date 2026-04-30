@@ -1,6 +1,7 @@
 ---
 story_id: STORY-013-05_Orchestrator_Interrupt_Handling
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
 status: Done
 ambiguity: 🟢 Low
 context_source: "EPIC-013_Execution_Phase_v2.md §4.2 rows 'Circuit breaker' + 'User walkthrough on sprint branch' + 'Mid-sprint CR triage'; V-Bounce Engine skills/agent-team/SKILL.md §§ 'Step 2f: Green Phase Circuit Breaker', 'Step 5.7: User Walkthrough', 'Mid-Sprint Change Requests' at HEAD 2b8477ab"

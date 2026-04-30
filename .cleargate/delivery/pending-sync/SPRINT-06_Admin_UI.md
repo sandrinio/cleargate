@@ -15,6 +15,7 @@ updated_at_version: "post-SPRINT-04"
 deferred_from: ["SPRINT-04", "SPRINT-05"]
 deferred_reason: "First deferred SPRINT-04→SPRINT-05 for EPIC-002 Knowledge Wiki. Deferred SPRINT-05→SPRINT-06 on 2026-04-19 to ship the process-refinement trifecta (EPIC-001 + EPIC-008 + EPIC-009) first — auto-stamped frontmatter, cost visibility, and machine-checked readiness gates pay off immediately for the larger Admin UI sprint."
 approved: true
+sprint_cleargate_id: "SPRINT-06"
 
 ---
 

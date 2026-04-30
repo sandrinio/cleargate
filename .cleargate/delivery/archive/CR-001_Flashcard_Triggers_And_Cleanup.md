@@ -1,6 +1,7 @@
 ---
 cr_id: CR-001
 parent_ref: META (bootstrap — flashcard skill + reporter agent, pre-sprint)
+parent_cleargate_id: "META (bootstrap — flashcard skill + reporter agent, pre-sprint)"
 status: Completed
 shipped_in_commit: 54e0a1a
 shipped_at: 2026-04-19T22:34:07+04:00

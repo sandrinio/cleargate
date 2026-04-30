@@ -42,6 +42,7 @@ draft_tokens:
       cache_read: 70099912
       cache_creation: 2362836
       ts: 2026-04-21T07:41:47Z
+sprint_cleargate_id: "SPRINT-01"
 ---
 
 # EPIC-013: Execution Phase v2 — Bounce Loop, Worktrees, Pre-Gates, Self-Improvement

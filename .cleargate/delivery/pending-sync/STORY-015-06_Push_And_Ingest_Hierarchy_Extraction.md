@@ -1,6 +1,8 @@
 ---
 story_id: STORY-015-06
 parent_epic_ref: SPRINT-15
+parent_cleargate_id: "SPRINT-15"
+sprint_cleargate_id: "SPRINT-15"
 status: Approved
 approved: true
 approved_at: 2026-04-29T00:00:00Z

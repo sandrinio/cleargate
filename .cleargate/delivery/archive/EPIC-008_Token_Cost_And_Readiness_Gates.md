@@ -18,6 +18,7 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:42:54.842Z
 push_version: 3
+sprint_cleargate_id: "SPRINT-04"
 ---
 
 # EPIC-008: Per-Work-Item Token Cost + Machine-Checkable Readiness Gates

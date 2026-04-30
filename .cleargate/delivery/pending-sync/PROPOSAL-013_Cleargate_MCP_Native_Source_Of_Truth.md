@@ -40,6 +40,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-28T12:59:43Z
   sessions: []
+sprint_cleargate_id: "SPRINT-001"
 ---
 
 # PROPOSAL-013: ClearGate MCP as the native source of truth (sync everything that matters)

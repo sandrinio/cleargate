@@ -1,6 +1,7 @@
 ---
 story_id: STORY-020-01
 parent_epic_ref: EPIC-020
+parent_cleargate_id: "EPIC-020"
 status: Approved
 approved: true
 approved_at: 2026-04-29T00:00:00Z

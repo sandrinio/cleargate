@@ -13,6 +13,7 @@ updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 approved: true
+sprint_cleargate_id: "SPRINT-02"
 
 ---
 

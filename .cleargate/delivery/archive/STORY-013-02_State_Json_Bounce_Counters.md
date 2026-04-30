@@ -1,6 +1,7 @@
 ---
 story_id: STORY-013-02_State_Json_Bounce_Counters
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 row 'state.json + bounce counters' + V-Bounce Engine `scripts/{init_sprint,update_state,validate_state,validate_bounce_readiness,constants}.mjs`

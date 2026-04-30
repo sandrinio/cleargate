@@ -20,6 +20,7 @@ draft_tokens:
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:43:04.645Z
 push_version: 3
+sprint_cleargate_id: "SPRINT-04"
 ---
 
 # PROPOSAL-005: Per-Work-Item Token Cost + Machine-Checkable Readiness Gates

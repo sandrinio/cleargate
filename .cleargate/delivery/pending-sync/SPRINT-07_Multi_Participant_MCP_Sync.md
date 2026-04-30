@@ -18,6 +18,7 @@ reorder_reason: "2026-04-19 — EPIC-010 Multi-Participant MCP Sync moved ahead 
 context_source: "PROPOSAL-007_Multi_Participant_MCP_Sync.md"
 epics: ["EPIC-010"]
 approved: true
+sprint_cleargate_id: "SPRINT-07"
 
 ---
 

@@ -1,6 +1,8 @@
 ---
 story_id: STORY-008-06
 parent_epic_ref: EPIC-008
+parent_cleargate_id: "EPIC-008"
+sprint_cleargate_id: "SPRINT-04"
 status: "Abandoned"
 ambiguity: 🟢 Low
 complexity_label: L2

@@ -1,6 +1,8 @@
 ---
 cr_id: CR-015
 parent_ref: SPRINT-001
+parent_cleargate_id: "SPRINT-001"
+sprint_cleargate_id: "SPRINT-15"
 status: Completed
 severity: P2-Medium
 reporter: sandrinio

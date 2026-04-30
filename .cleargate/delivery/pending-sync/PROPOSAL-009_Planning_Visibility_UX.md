@@ -29,6 +29,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T21:13:10Z
   sessions: []
+sprint_cleargate_id: "SPRINT-06"
 ---
 
 # PROPOSAL-009: Planning Visibility UX — Sprints, Epic Hierarchy, Activity

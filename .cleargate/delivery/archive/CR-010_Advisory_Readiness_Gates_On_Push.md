@@ -1,6 +1,8 @@
 ---
 cr_id: CR-010
 parent_ref: EPIC-008
+parent_cleargate_id: "EPIC-008"
+sprint_cleargate_id: "SPRINT-14"
 status: Completed
 sprint: SPRINT-14
 milestone: M1

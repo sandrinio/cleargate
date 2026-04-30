@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-10
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
+sprint_cleargate_id: "SPRINT-09"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE C4 + SPRINT-09 + CG_TEST Reporter runs both hit the Write harness guard

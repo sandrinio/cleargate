@@ -1,6 +1,7 @@
 ---
 story_id: STORY-011-02
 parent_epic_ref: EPIC-011
+parent_cleargate_id: "EPIC-011"
 status: "Completed"
 ambiguity: 🟢 Low
 complexity_label: L2

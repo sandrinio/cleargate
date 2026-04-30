@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-02
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
+sprint_cleargate_id: "SPRINT-09"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE B2 + SPRINT-09 REPORT.md §5 Templates 🟡 (M2 Gate-2 story-file gap)

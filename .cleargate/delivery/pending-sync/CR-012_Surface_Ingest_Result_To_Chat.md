@@ -1,6 +1,8 @@
 ---
 cr_id: CR-012
 parent_ref: EPIC-002
+parent_cleargate_id: "EPIC-002"
+sprint_cleargate_id: "SPRINT-15"
 status: Approved
 sprint: SPRINT-15
 milestone: M4

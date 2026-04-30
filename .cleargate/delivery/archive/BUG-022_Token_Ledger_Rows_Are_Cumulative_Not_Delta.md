@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-022
 parent_ref: BUG-021
+parent_cleargate_id: "BUG-021"
+sprint_cleargate_id: "SPRINT-15"
 superseded_by: CR-018
 status: Abandoned
 severity: P2-Medium

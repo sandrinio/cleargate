@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-01
 parent_epic_ref: SPRINT-14
+parent_cleargate_id: "SPRINT-14"
+sprint_cleargate_id: "SPRINT-14"
 status: Completed
 ambiguity: 🟢 Low
 context_source: SPRINT-14_Process_v2.md §1 (M2 small-wins) + Architect M1 §7 forward-flag

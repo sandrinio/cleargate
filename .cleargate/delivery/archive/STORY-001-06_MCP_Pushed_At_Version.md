@@ -1,6 +1,7 @@
 ---
 story_id: STORY-001-06
 parent_epic_ref: EPIC-001
+parent_cleargate_id: "EPIC-001"
 status: "Abandoned"
 ambiguity: 🟢 Low
 complexity_label: L1

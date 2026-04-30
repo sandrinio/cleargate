@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-010
 parent_ref: BUG-009
+parent_cleargate_id: "BUG-009"
+sprint_cleargate_id: "SPRINT-14"
 status: Verified
 severity: P1-High
 reporter: orchestrator

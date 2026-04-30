@@ -1,6 +1,8 @@
 ---
 cr_id: CR-018
 parent_ref: STORY-014-05
+parent_cleargate_id: "STORY-014-05"
+sprint_cleargate_id: "SPRINT-15"
 status: Approved
 approved: true
 approved_at: 2026-04-28T00:00:00Z

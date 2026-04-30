@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-04
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
+sprint_cleargate_id: "SPRINT-05"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE B4 + SPRINT-09 close retrospective (24 failures rode 3 sprints before fix)

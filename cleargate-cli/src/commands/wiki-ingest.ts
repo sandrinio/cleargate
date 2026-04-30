@@ -232,6 +232,9 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
     repo,
     // Carry forward last_contradict_sha so Phase 4 idempotency survives re-ingest
     ...(existingLastContradictSha !== undefined ? { last_contradict_sha: existingLastContradictSha } : {}),
+    // Hierarchy keys (§11.7): read from raw fm — stamped at raw-side, not wiki-side
+    ...(typeof fm['parent_cleargate_id'] === 'string' ? { parent_cleargate_id: fm['parent_cleargate_id'] } : {}),
+    ...(typeof fm['sprint_cleargate_id'] === 'string' ? { sprint_cleargate_id: fm['sprint_cleargate_id'] } : {}),
   };
 
   const pageBody = buildPageBody({ id, fm, body });

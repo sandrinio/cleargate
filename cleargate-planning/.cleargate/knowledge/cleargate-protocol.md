@@ -460,6 +460,21 @@ Implementation notes:
 
 ---
 
+### §11.7 Hierarchy Keys
+
+Two optional frontmatter keys declare canonical hierarchy for every work item (STORY-015-06):
+
+- `parent_cleargate_id: <string | null>` — the canonical ClearGate ID of the parent work item (e.g. `"EPIC-022"`). Use for items that belong to an epic or parent story. Null for top-level items.
+- `sprint_cleargate_id: <string | null>` — the canonical ClearGate ID of the owning sprint (e.g. `"SPRINT-15"`). Null for off-sprint or speculative items.
+
+**Relationship to legacy keys.** The existing fields `parent_ref`, `parent_epic_ref`, `sprint_id`, and `sprint` remain the **authoritative** source of parent/sprint membership until a future deprecation sprint explicitly retires them. `parent_cleargate_id` and `sprint_cleargate_id` are additive mirrors — consumers must not assume both forms are always present simultaneously. A future deprecation notice will be added to this section when the legacy keys are retired.
+
+**Propagation.** The `cleargate push` command forwards both keys into the `cleargate_push_item` MCP call payload via the existing `payload.*` shallow-clone path. The `cleargate wiki ingest` command copies them verbatim into the compiled wiki page frontmatter. The backfill script `.cleargate/scripts/backfill_hierarchy.mjs` sniffs legacy keys to populate missing values one-time on existing corpus files.
+
+**Idempotency contract.** Both keys default to `null` in templates. The backfill script skips any file where both keys are already non-null. Re-running the backfill is a byte-identical no-op.
+
+---
+
 ## 12. Token Cost Stamping & Readiness Gates
 
 ### §12.1 Overview

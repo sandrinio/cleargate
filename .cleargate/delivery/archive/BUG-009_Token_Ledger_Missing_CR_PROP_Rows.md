@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-009
 parent_ref: EPIC-009
+parent_cleargate_id: "EPIC-009"
+sprint_cleargate_id: "SPRINT-14"
 status: Verified
 severity: P2-Medium
 reporter: orchestrator
