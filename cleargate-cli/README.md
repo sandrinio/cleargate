@@ -33,6 +33,17 @@ cleargate join <invite-url>         # join an existing ClearGate workspace via M
 
 After `init`, edits to `.cleargate/delivery/**` auto-trigger `wiki ingest` via the PostToolUse hook. The wiki stays fresh; no manual maintenance.
 
+### Dogfood
+
+ClearGate framework maintainers who work directly in the meta-repo can install the scaffold from the local `cleargate-planning/` directory instead of the published npm package:
+
+```bash
+# In a fresh target directory:
+cleargate init --from-source /path/to/cleargate-repo/cleargate-planning
+```
+
+This routes through the same `copyPayload` code path that downstream users hit, closing the dogfood gap where the meta-repo previously edited `cleargate-planning/` in place and never exercised the `cleargate init` flow. All other `init` behaviour (MANIFEST.json generation, overwrite policies, prompt flow, exit codes) is identical. The `--from-source` path must contain `.claude/`, `.cleargate/`, and `CLAUDE.md` at its root; the command exits 2 with a clear error if any are missing.
+
 ## Requirements
 
 Node ≥ 24 LTS. `git` available on PATH (for content-hash drift detection).

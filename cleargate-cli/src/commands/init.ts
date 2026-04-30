@@ -22,6 +22,7 @@ import { wikiBuildHandler, type WikiBuildOptions } from './wiki-build.js';
 import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
 import { promptYesNo as defaultPromptYesNo, promptEmail as defaultPromptEmail } from '../lib/prompts.js';
 import { resolveIdentity, readParticipant, writeParticipant, type ResolveIdentityOpts } from '../lib/identity.js';
+import { resolveScaffoldRoot, ScaffoldSourceError } from '../lib/scaffold-source.js';
 
 /**
  * The PostToolUse hook config to merge — updated in STORY-008-06 to use
@@ -111,6 +112,12 @@ export interface InitOptions {
    * Injected in tests to avoid real npx invocations.
    */
   spawnSyncFn?: typeof spawnSync;
+  /**
+   * STORY-016-05: install scaffold from a local directory instead of the published npm package.
+   * Resolved relative to `cwd` (or process.cwd()). Requires `.claude/`, `.cleargate/`, and
+   * `CLAUDE.md` at the path root. Enables meta-repo dogfood: `cleargate init --from-source ./cleargate-planning`.
+   */
+  fromSource?: string;
 }
 
 /** Shape of the .cleargate/.uninstalled marker written by STORY-009-07 `uninstall`. */
@@ -206,7 +213,27 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   stdout(`[cleargate init] Target: ${cwd}\n`);
 
   // Step 2: Resolve payloadDir
-  const payloadDir = opts.payloadDir ?? resolveDefaultPayloadDir();
+  // STORY-016-05: when --from-source is provided, use the local path instead of the npm package.
+  let payloadDir: string;
+  if (opts.payloadDir) {
+    // Explicit test-seam override — highest priority, used by existing tests.
+    payloadDir = opts.payloadDir;
+  } else if (opts.fromSource) {
+    // --from-source flag: validate and use the local path.
+    try {
+      const resolved = resolveScaffoldRoot({ fromSource: opts.fromSource, cwd });
+      payloadDir = resolved.payloadDir;
+    } catch (e) {
+      if (e instanceof ScaffoldSourceError) {
+        stderr(`${e.message}\n`);
+        exit(2);
+        return;
+      }
+      throw e;
+    }
+  } else {
+    payloadDir = resolveDefaultPayloadDir();
+  }
 
   if (!fs.existsSync(payloadDir)) {
     stderr(`[cleargate init] ERROR: payload directory not found: ${payloadDir}\n`);
