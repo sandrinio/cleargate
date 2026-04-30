@@ -62,3 +62,9 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## CRs
 
 | [[CR-002]] | cr | Completed | .cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md |
+## Bugs
+
+| [[BUG-022]] | bug | Verified | .cleargate/delivery/archive/BUG-022_Token_Ledger_Rows_Are_Cumulative_Not_Delta.md |
+## Sprints
+
+| [[SPRINT-15]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md |

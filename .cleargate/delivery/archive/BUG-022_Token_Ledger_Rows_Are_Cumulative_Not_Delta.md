@@ -1,10 +1,10 @@
 ---
 bug_id: BUG-022
 parent_ref: BUG-021
-parent_cleargate_id: "BUG-021"
-sprint_cleargate_id: "SPRINT-15"
+parent_cleargate_id: BUG-021
+sprint_cleargate_id: SPRINT-15
 superseded_by: CR-018
-status: Abandoned
+status: Verified
 severity: P2-Medium
 reporter: sandrinio
 sprint: SPRINT-15
@@ -22,7 +22,7 @@ cached_gate_result:
   failing_criteria:
     - id: repro-steps-deterministic
       detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-04-28T17:59:14Z
+  last_gate_check: 2026-04-30T13:01:17Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
