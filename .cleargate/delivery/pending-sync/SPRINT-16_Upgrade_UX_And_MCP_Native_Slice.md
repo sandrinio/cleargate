@@ -10,7 +10,7 @@ created_at_version: "cleargate@0.8.2"
 updated_at_version: "cleargate@0.8.2"
 context_source: "Conversation 2026-04-29 — two-decision evolution. (1) SPRINT-15 right-sizing: EPIC-016 (Upgrade UX, 6 stories) deferred from SPRINT-15 to here end-to-end (over-sizing fix). (2) Decomposition discipline (CR-017 protocol §26): proposals/epics must be fully decomposed BEFORE the sprint executing them activates. PROPOSAL-013 → EPIC-023 → sub-epic 1 stories are between-sprints transition work performed by Architect post-SPRINT-15 close, pre-SPRINT-16 activation. SPRINT-16 cannot activate until EPIC-023 file + sub-epic 1 stories exist and are gate-clean (CR-017 sprint-init gate enforces). M2 is pure execution, not decomposition."
 epics: ["EPIC-016", "EPIC-023"]
-crs: []
+crs: ["CR-019"]
 bugs: []
 proposals: []
 approved: false
@@ -55,8 +55,11 @@ This is **the first sprint to exercise CR-017's full enforcement at close**: lif
 | `STORY-016-05` | Story | `cleargate init --from-source <path>` for meta-repo dogfood | standard | L2 | y | med | M1 |
 | `STORY-016-06` | Story | E2E integration test — dogfood install → `doctor --check-scaffold` clean (consumes 016-05) | standard | L2 | n | med | M1 |
 | `STORY-023-01-NN` | Story | EPIC-023 sub-epic 1 (Work-Item Sync v2) — **drafted as between-sprints transition work; concrete IDs assigned at draft time**. Expected ~3 stories from PROPOSAL-013 §2.2 (CLI sync command + MCP server-side recv handler + conflict-detector wiring). | standard | L2–L3 | n | med | M2 |
+| [`CR-019`](CR-019_Sprint_Close_Requires_Explicit_Human_Ack.md) | CR | Sprint close requires explicit human ack — orchestrator MUST NOT pass `--assume-ack`; protocol §27 + CLAUDE.md guardrail + `close_sprint.mjs` usage doc | fast | L1 | y | low | M0 |
 
-**Estimated totals (firm after between-sprints decomp completes):** EPIC-016 = 6 stories + EPIC-023 sub-epic 1 = ~3 stories = **~9 items**. Complexity preview: ~3×L1 + ~6×L2 + 0–1×L3. Lane mix preview: ~1 fast / ~8 standard.
+**Estimated totals (firm after between-sprints decomp completes):** EPIC-016 = 6 stories + EPIC-023 sub-epic 1 = ~3 stories + CR-019 = **~10 items**. Complexity preview: ~3×L1 + ~6×L2 + 0–1×L3 + CR-019 (L1 fast). Lane mix preview: ~2 fast / ~8 standard.
+
+**CR-019 origin (added 2026-04-30 retroactively):** filed immediately after SPRINT-15 close, when the conversational orchestrator passed `--assume-ack` to `close_sprint.mjs` autonomously without surfacing the script's `"Review the report, then confirm close by re-running with --assume-ack"` prompt to the human. CR-019 codifies the rule that was implicit in `close_sprint.mjs`'s design but not encoded in protocol or CLAUDE.md. Doc-only fix: protocol §27 + 1 CLAUDE.md bullet (×2 mirror) + 2-line usage docstring edit. Fast lane on M0; ships before M1 kicks off so SPRINT-16 close itself follows the corrected protocol.
 
 **Between-sprints transition work (must complete before SPRINT-16 activation; not story-tracked, not a SPRINT-16 deliverable):**
 - SPRINT-15 close passes its lifecycle reconciler gate (CR-017 layer 1 — first real test).
