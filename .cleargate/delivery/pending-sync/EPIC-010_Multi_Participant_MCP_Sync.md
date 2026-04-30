@@ -39,6 +39,15 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:45:19.944Z
 push_version: 2
+children:
+  - "[[STORY-010-01]]"
+  - "[[STORY-010-02]]"
+  - "[[STORY-010-03]]"
+  - "[[STORY-010-04]]"
+  - "[[STORY-010-05]]"
+  - "[[STORY-010-06]]"
+  - "[[STORY-010-07]]"
+  - "[[STORY-010-08]]"
 ---
 
 # EPIC-010: Multi-Participant MCP Sync (v1)

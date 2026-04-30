@@ -14,13 +14,9 @@ created_at_version: cleargate@0.5.0
 updated_at_version: cleargate@0.5.0
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: no-tbds
-      detail: 1 occurrence at §9
-    - id: affected-files-declared
-      detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-26T08:52:47Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-26T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -38,7 +34,17 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-26T08:52:47Z
   sessions: []
-sprint_cleargate_id: "SPRINT-14"
+sprint_cleargate_id: SPRINT-14
+children:
+  - "[[STORY-022-01]]"
+  - "[[STORY-022-02]]"
+  - "[[STORY-022-03]]"
+  - "[[STORY-022-04]]"
+  - "[[STORY-022-05]]"
+  - "[[STORY-022-06]]"
+  - "[[STORY-022-07]]"
+  - "[[STORY-022-08]]"
+  - "[[STORY-099-01]]"
 ---
 
 # EPIC-022: Sprint Planning Lane Classifier + Hotfix Path

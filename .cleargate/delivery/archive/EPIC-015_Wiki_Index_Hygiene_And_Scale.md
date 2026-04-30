@@ -4,9 +4,7 @@ status: Completed
 approved: true
 approved_at: 2026-04-30T00:00:00Z
 approved_by: sandrinio
-ambiguity: 🟢 Low
-approved_at: 2026-04-24T00:00:00Z
-approved_by: sandro
+ambiguity: null
 context_source: "Direct-epic waiver (2026-04-24 conversation). No separate PROPOSAL filed. Inline references: (a) Karpathy LLM Wiki scale breakpoints — flat index breaks at ~200–500 documents (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f, https://atlan.com/know/llm-wiki-vs-rag-knowledge-base/); (b) current state: .cleargate/wiki/index.md is 15 KB / ~4k tokens with 151 pages, projected to cross 8k tokens at ~300 pages; (c) stale entries observed — SPRINT-10 frontmatter still 'Planned' despite merge to main, EPIC-001/008/009 marked Ready/Draft while archived, stories 001-0x/008-0x/009-0x listed as Draft but abandoned; (d) no retrieval augmentation (BM25/vector) exists or is planned — verified."
 owner: sandro
 target_date: 2026-05-15
@@ -15,16 +13,17 @@ updated_at: 2026-04-24T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
+children:
+  - "[[STORY-015-01]]"
+  - "[[STORY-015-02]]"
+  - "[[STORY-015-03]]"
+  - "[[STORY-015-04]]"
 cached_gate_result:
   pass: false
   failing_criteria:
-    - id: proposal-approved
-      detail: "linked file not found: Direct-epic waiver (2026-04-24 conversation). No separate PROPOSAL filed. Inline references: (a) Karpathy LLM Wiki scale breakpoints — flat index breaks at ~200–500 documents (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f, https://atlan.com/know/llm-wiki-vs-rag-knowledge-base/); (b) current state: .cleargate/wiki/index.md is 15 KB / ~4k tokens with 151 pages, projected to cross 8k tokens at ~300 pages; (c) stale entries observed — SPRINT-10 frontmatter still 'Planned' despite merge to main, EPIC-001/008/009 marked Ready/Draft while archived, stories 001-0x/008-0x/009-0x listed as Draft but abandoned; (d) no retrieval augmentation (BM25/vector) exists or is planned — verified."
-    - id: no-tbds
-      detail: 1 occurrence at §10
     - id: affected-files-declared
       detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-24T08:12:20Z
+  last_gate_check: 2026-04-30T11:06:15Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -42,6 +41,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-24T08:12:20Z
   sessions: []
+sprint_cleargate_id: "SPRINT-10"
 ---
 
 # EPIC-015: Wiki Index Hygiene & Scale

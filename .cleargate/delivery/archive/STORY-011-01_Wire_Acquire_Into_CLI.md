@@ -1,8 +1,8 @@
 ---
 story_id: STORY-011-01
 parent_epic_ref: EPIC-011
-parent_cleargate_id: "EPIC-011"
-status: "Completed"
+parent_cleargate_id: EPIC-011
+status: Completed
 ambiguity: 🟢 Low
 complexity_label: L1
 context_source: ./EPIC-011_End_To_End_Production_Readiness.md
@@ -23,7 +23,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T13:31:51Z
+  last_gate_check: 2026-04-20T13:45:01Z
 approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:45:08.850Z

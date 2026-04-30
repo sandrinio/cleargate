@@ -15,6 +15,17 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:44:40.339Z
 push_version: 2
+children:
+  - "[[STORY-006-01]]"
+  - "[[STORY-006-02]]"
+  - "[[STORY-006-03]]"
+  - "[[STORY-006-04]]"
+  - "[[STORY-006-05]]"
+  - "[[STORY-006-06]]"
+  - "[[STORY-006-07]]"
+  - "[[STORY-006-08]]"
+  - "[[STORY-006-09]]"
+  - "[[STORY-006-10]]"
 ---
 
 # EPIC-006: Admin UI (SvelteKit)

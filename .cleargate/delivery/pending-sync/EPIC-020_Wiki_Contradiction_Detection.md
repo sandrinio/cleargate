@@ -34,6 +34,10 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-29T11:16:42Z
   sessions: []
+children:
+  - "[[STORY-020-01]]"
+  - "[[STORY-020-02]]"
+  - "[[STORY-020-03]]"
 ---
 
 # EPIC-020: Wiki Contradiction Detection (Advisory v1)

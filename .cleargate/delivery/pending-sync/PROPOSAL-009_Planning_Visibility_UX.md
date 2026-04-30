@@ -11,7 +11,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T21:13:11Z
+  last_gate_check: 2026-04-21T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -29,7 +29,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T21:13:10Z
   sessions: []
-sprint_cleargate_id: "SPRINT-06"
+sprint_cleargate_id: SPRINT-06
 ---
 
 # PROPOSAL-009: Planning Visibility UX — Sprints, Epic Hierarchy, Activity

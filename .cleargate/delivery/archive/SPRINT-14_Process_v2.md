@@ -1,23 +1,30 @@
 ---
-sprint_id: "SPRINT-14"
-source_tool: "local"
-status: "Completed"
-start_date: "2026-04-27"
-end_date: "2026-05-10"
-created_at: "2026-04-26T00:00:00Z"
-updated_at: "2026-04-26T00:00:00Z"
-created_at_version: "cleargate@0.5.0"
-updated_at_version: "cleargate@0.5.0"
+sprint_id: SPRINT-14
+source_tool: local
+status: Completed
+start_date: 2026-04-27
+end_date: 2026-05-10
+created_at: 2026-04-26T00:00:00Z
+updated_at: 2026-04-26T00:00:00Z
+created_at_version: cleargate@0.5.0
+updated_at_version: cleargate@0.5.0
 context_source: "Conversation 2026-04-26 — user requested process-tightening sprint. Path A (ambitious) chosen: 3 process CRs + EPIC-022 (PROPOSAL-013 → Lane Classifier) + small-wins sweep. PROPOSAL-013 hard prereq EPIC-013 verified Completed 2026-04-21. PROPOSAL-013 awaits Gate 1 approval at sprint kickoff."
-epics: ["EPIC-022"]
-crs: ["CR-008", "CR-009", "CR-010"]
-bugs: ["BUG-008", "BUG-009"]
-proposals: ["PROPOSAL-013"]
+epics:
+  - EPIC-022
+crs:
+  - CR-008
+  - CR-009
+  - CR-010
+bugs:
+  - BUG-008
+  - BUG-009
+proposals:
+  - PROPOSAL-013
 approved: true
-approved_at: "2026-04-26T00:00:00Z"
-approved_by: "sandrinio"
-activated_at: "2026-04-26T00:00:00Z"
-execution_mode: "v2"
+approved_at: 2026-04-26T00:00:00Z
+approved_by: sandrinio
+activated_at: 2026-04-26T00:00:00Z
+execution_mode: v2
 human_override: false
 draft_tokens:
   input: null
@@ -30,7 +37,10 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
-sprint_cleargate_id: "SPRINT-14"
+sprint_cleargate_id: SPRINT-14
+children:
+  - "[[STORY-014-01]]"
+  - "[[STORY-014-02]]"
 ---
 
 # SPRINT-14: Process v2 — Planning-First Enforcement, Lane Classifier, Advisory Gates

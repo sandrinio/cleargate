@@ -1,8 +1,8 @@
 ---
 story_id: STORY-014-02
 parent_epic_ref: SPRINT-14
-parent_cleargate_id: "SPRINT-14"
-sprint_cleargate_id: "SPRINT-14"
+parent_cleargate_id: SPRINT-14
+sprint_cleargate_id: SPRINT-14
 status: Completed
 ambiguity: 🟢 Low
 context_source: SPRINT-14_Process_v2.md §M5 + R-10/R-11/R-12
@@ -23,7 +23,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-26T23:01:22Z
+  last_gate_check: 2026-04-27T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

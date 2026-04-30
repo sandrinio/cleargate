@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-001
-status: "Abandoned"
+status: Abandoned
 ambiguity: 🟢 Low
 context_source: PROPOSAL-001_Document_Metadata.md
 owner: Vibe Coder (ssuladze@exadel.com)
@@ -15,6 +15,13 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:43:39.712Z
 push_version: 3
+children:
+  - "[[STORY-001-01]]"
+  - "[[STORY-001-02]]"
+  - "[[STORY-001-03]]"
+  - "[[STORY-001-04]]"
+  - "[[STORY-001-05]]"
+  - "[[STORY-001-06]]"
 ---
 
 # EPIC-001: Document Metadata Lifecycle

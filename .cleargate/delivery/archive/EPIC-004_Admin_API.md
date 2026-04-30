@@ -20,6 +20,16 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:43:37.681Z
 push_version: 3
+children:
+  - "[[STORY-004-01]]"
+  - "[[STORY-004-02]]"
+  - "[[STORY-004-03]]"
+  - "[[STORY-004-04]]"
+  - "[[STORY-004-05]]"
+  - "[[STORY-004-06]]"
+  - "[[STORY-004-07]]"
+  - "[[STORY-004-08]]"
+  - "[[STORY-004-09]]"
 ---
 
 # EPIC-004: Admin API

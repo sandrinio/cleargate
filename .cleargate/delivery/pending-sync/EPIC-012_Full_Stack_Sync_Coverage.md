@@ -17,7 +17,7 @@ scope_version: v1
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T20:12:15Z
+  last_gate_check: 2026-04-21T10:00:01Z
 approved: true
 stamp_error: no ledger rows for work_item_id EPIC-012
 draft_tokens:
@@ -28,7 +28,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T20:11:41Z
   sessions: []
-sprint_cleargate_id: "SPRINT-08"
+sprint_cleargate_id: SPRINT-08
 ---
 
 # EPIC-012: Full-Stack Sync Coverage (Sprints, Reports, Plans, Flashcards)

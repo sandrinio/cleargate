@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-04_Knowledge_Wiki.md"
-last_ingest: "2026-04-30T07:13:37.657Z"
-last_ingest_commit: "39e586a19e43e231919ca6df42c66eb05b2df48c"
+last_ingest: "2026-04-30T11:32:26.913Z"
+last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
 repo: "planning"
 ---
 

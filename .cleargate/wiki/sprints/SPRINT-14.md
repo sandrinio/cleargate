@@ -2,12 +2,14 @@
 type: sprint
 id: "SPRINT-14"
 parent: ""
-children: []
+children: 
+  - "[[STORY-014-01]]"
+  - "[[STORY-014-02]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-14_Process_v2.md"
-last_ingest: "2026-04-30T07:13:37.657Z"
-last_ingest_commit: "c162bc87eacb125f3085697456af3b117af5c186"
+last_ingest: "2026-04-30T11:32:26.913Z"
+last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
 repo: "planning"
 ---
 
@@ -16,7 +18,7 @@ repo: "planning"
 # SPRINT-14: Process v2 — Planning-First Enforcement, Lane Classifier, Advisory Gates
 
 ## Blast radius
-Affects: None.
+Affects: [[STORY-014-01]], [[STORY-014-02]]
 
 ## Open questions
 None.

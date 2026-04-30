@@ -1,8 +1,8 @@
 ---
 story_id: STORY-014-09
 parent_epic_ref: EPIC-014
-parent_cleargate_id: "EPIC-014"
-sprint_cleargate_id: "SPRINT-09"
+parent_cleargate_id: EPIC-014
+sprint_cleargate_id: SPRINT-09
 status: Completed
 ambiguity: 🟢 Low
 context_source: "EPIC-014 §2 IN-SCOPE C1+C2 + SPRINT-09 REPORT.md §5 Handoffs (stream-timeouts on L3) + FLASHCARD.md `#protocol #section-numbering`"
@@ -24,11 +24,9 @@ draft_tokens:
   last_stamp: 2026-04-21T12:44:46Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T12:44:46Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-30T11:01:46Z
 ---
 
 # STORY-014-09: Architect numbering resolver + L3-split signal in story template

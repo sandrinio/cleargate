@@ -3,6 +3,8 @@
 
 wiki:
   index_token_ceiling: 8000
+  # CR-002: raised from default 50 to accommodate the full story corpus (136 stories).
+  bucket_pagination_ceiling: 200
 
 gates:
   precommit: "npm run typecheck --workspace=cleargate-cli && npm test"

@@ -1,8 +1,8 @@
 ---
 bug_id: BUG-004
 parent_ref: EPIC-018
-parent_cleargate_id: "EPIC-018"
-sprint_cleargate_id: "SPRINT-12"
+parent_cleargate_id: EPIC-018
+sprint_cleargate_id: SPRINT-12
 status: Draft
 severity: P2-Medium
 reporter: sandro (via QA STORY-018-05)
@@ -17,7 +17,7 @@ cached_gate_result:
   failing_criteria:
     - id: repro-steps-deterministic
       detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-04-24T22:00:56Z
+  last_gate_check: 2026-04-25T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

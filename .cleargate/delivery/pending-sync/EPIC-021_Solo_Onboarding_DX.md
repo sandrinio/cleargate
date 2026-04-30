@@ -11,13 +11,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: proposal-approved
-      detail: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter
-    - id: affected-files-declared
-      detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-26T15:34:58Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-25T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

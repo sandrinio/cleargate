@@ -17,6 +17,11 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:44:11.157Z
 push_version: 3
+children:
+  - "[[STORY-000-01]]"
+  - "[[STORY-000-02]]"
+  - "[[STORY-000-03]]"
+  - "[[STORY-000-04]]"
 ---
 
 # EPIC-000: `cleargate-cli` Package Scaffold

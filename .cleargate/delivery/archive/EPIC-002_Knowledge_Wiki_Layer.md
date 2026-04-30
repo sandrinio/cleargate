@@ -17,6 +17,16 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:44:05.274Z
 push_version: 3
+children:
+  - "[[STORY-002-01]]"
+  - "[[STORY-002-02]]"
+  - "[[STORY-002-03]]"
+  - "[[STORY-002-04]]"
+  - "[[STORY-002-05]]"
+  - "[[STORY-002-06]]"
+  - "[[STORY-002-07]]"
+  - "[[STORY-002-08]]"
+  - "[[STORY-002-09]]"
 ---
 
 # EPIC-002: Knowledge Wiki Layer

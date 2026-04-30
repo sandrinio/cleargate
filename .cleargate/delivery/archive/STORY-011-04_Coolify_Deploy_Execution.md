@@ -1,9 +1,9 @@
 ---
 story_id: STORY-011-04
 parent_epic_ref: EPIC-011
-parent_cleargate_id: "EPIC-011"
-sprint_cleargate_id: "SPRINT-06"
-status: "Completed"
+parent_cleargate_id: EPIC-011
+sprint_cleargate_id: SPRINT-06
+status: Completed
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: ./EPIC-011_End_To_End_Production_Readiness.md
@@ -15,7 +15,7 @@ updated_at_version: post-SPRINT-06
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T13:31:51Z
+  last_gate_check: 2026-04-20T13:58:01Z
 stamp_error: no ledger rows for work_item_id STORY-011-04
 draft_tokens:
   input: null

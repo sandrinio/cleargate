@@ -16,7 +16,7 @@ related:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-19T20:20:28Z
+  last_gate_check: 2026-04-20T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -32,7 +32,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-19T20:20:28Z
   sessions: []
-sprint_cleargate_id: "SPRINT-06"
+sprint_cleargate_id: SPRINT-06
 ---
 
 # PROPOSAL-008: Project Config as MCP-Authoritative, UI-Editable, Pulled to Local

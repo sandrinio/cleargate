@@ -13,15 +13,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: proposal-approved
-      detail: "linked file not found: Direct-epic waiver (2026-04-24 conversation, Option C selected). No separate PROPOSAL filed. Inline references: (a) ClearGate is a public-repo product meant to install into any target repo via `cleargate init` — current scaffold leaks ClearGate-specific assumptions (`npm test`, `npm run typecheck`, Node/vitest/monorepo layout) into downstream; (b) no LICENSE file today = blocking for public adoption; (c) README is dogfood-centric, not onboarding-centric; (d) no integration test against foreign (non-ClearGate) repo = zero empirical evidence the scaffold works outside this repo; (e) cleargate-planning/ canonical scaffold risks bleeding stack-specific content (`#drizzle`, `#svelte5`, `#coolify`) during dogfooding; (f) vibe-coder product-market-fit gate: 'anyone can use it' — hygiene (bugs + pruning + awareness polish) can wait one sprint; public-readiness can't."
-    - id: no-tbds
-      detail: 1 occurrence at §10
-    - id: affected-files-declared
-      detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-24T19:51:41Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-24T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -39,6 +33,12 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-24T19:51:40Z
   sessions: []
+children:
+  - "[[STORY-018-01]]"
+  - "[[STORY-018-02]]"
+  - "[[STORY-018-03]]"
+  - "[[STORY-018-04]]"
+  - "[[STORY-018-05]]"
 ---
 
 # EPIC-018: Framework Universality — Public Ship

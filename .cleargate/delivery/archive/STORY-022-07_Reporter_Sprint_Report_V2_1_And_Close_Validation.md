@@ -1,8 +1,8 @@
 ---
 story_id: STORY-022-07
 parent_epic_ref: EPIC-022
-parent_cleargate_id: "EPIC-022"
-sprint_cleargate_id: "SPRINT-14"
+parent_cleargate_id: EPIC-022
+sprint_cleargate_id: SPRINT-14
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md
@@ -23,7 +23,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-26T23:00:04Z
+  last_gate_check: 2026-04-27T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

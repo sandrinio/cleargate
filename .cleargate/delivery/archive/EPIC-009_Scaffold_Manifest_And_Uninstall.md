@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-009
-status: "Completed"
+status: Completed
 ambiguity: 🟢 Low
 context_source: PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md
 owner: Vibe Coder (sandro.suladze@gmail.com)
@@ -17,6 +17,15 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:44:32.628Z
 push_version: 3
+children:
+  - "[[STORY-009-01]]"
+  - "[[STORY-009-02]]"
+  - "[[STORY-009-03]]"
+  - "[[STORY-009-04]]"
+  - "[[STORY-009-05]]"
+  - "[[STORY-009-06]]"
+  - "[[STORY-009-07]]"
+  - "[[STORY-009-08]]"
 ---
 
 # EPIC-009: Scaffold Manifest + Drift Detection + `cleargate uninstall`

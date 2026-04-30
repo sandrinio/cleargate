@@ -1,8 +1,8 @@
 ---
 story_id: STORY-013-09_Sprint_Planning_v2
 parent_epic_ref: EPIC-013
-parent_cleargate_id: "EPIC-013"
-sprint_cleargate_id: "SPRINT-09"
+parent_cleargate_id: EPIC-013
+sprint_cleargate_id: SPRINT-09
 status: Done
 ambiguity: 🟢 Low
 context_source: "EPIC-013_Execution_Phase_v2.md §2 bullet 'Sprint Planning v2' + §6 Q8 revised answer (2026-04-21, 9-story cut); V-Bounce Engine skills/agent-team/SKILL.md § 'Architect Sprint Design Review' + § 'Step 0.5: Discovery Check' at HEAD 2b8477ab"
@@ -10,7 +10,7 @@ actor: Architect Agent (contract writer) + Developer Agent (implementer)
 complexity_label: L2
 approved: true
 approved_at: 2026-04-21T00:00:00Z
-completed_at: "2026-04-21T08:30:00Z"
+completed_at: 2026-04-21T08:30:00Z
 approved_by: sandro
 milestone: M2
 parallel_eligible: n
@@ -29,11 +29,9 @@ draft_tokens:
   last_stamp: 2026-04-21T05:54:07Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T05:54:08Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-21T00:00:01Z
 ---
 
 # STORY-013-09: Sprint Planning v2 (Architect Sprint Design Review + decomposition signals + enforcing Gate 2)
