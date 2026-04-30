@@ -1003,3 +1003,69 @@ A story is eligible for `lane: fast` only if all seven checks pass (any false �
 **Demotion mechanics.** Demotion is one-way (`fast → standard`). Trigger: pre-gate scanner failure OR post-merge test failure on a fast-lane story. On demotion: set `lane = "standard"`, write `lane_demoted_at` (ISO-8601), `lane_demotion_reason`, reset `qa_bounces = 0` and `arch_bounces = 0` (see STORY-022-02 schema). Architect plan is invoked and QA spawned per standard contract.
 
 Event-type `LD` (Lane Demotion) is recorded in sprint markdown §4 alongside existing `UR` and `CR` events; Reporter aggregates into §3 Execution Metrics > Fast-Track Demotion Rate.
+
+---
+
+## 25. Lifecycle Reconciliation (CR-017)
+
+### §25.1 Purpose
+
+Artifact lifecycle drift occurs when a Developer agent commits `feat(STORY-NNN-NN): ...` but the artifact's `status:` field is never advanced and the file is never moved to `archive/`. CR-017 enforces status reconciliation at two sprint boundaries: sprint close and sprint kickoff.
+
+### §25.2 Verb-to-Status Map (v1)
+
+| Commit verb pattern | Applies to types | Expected terminal status | Expected location |
+|---|---|---|---|
+| `feat(STORY-NNN-NN): ...` | STORY | `Done` | `archive/` |
+| `feat(<TYPE>-NNN): ...` where TYPE ∈ {EPIC, CR} | EPIC, CR | `Completed` OR `Done` | `archive/` |
+| `fix(BUG-NNN): ...` | BUG | `Verified` | `archive/` |
+| `fix(HOTFIX-NNN-NN): ...` | HOTFIX | `Verified`, `Done`, OR `Completed` | `archive/` |
+| `merge: <TYPE>-NNN → ...` | any | ignored — merge commits carry no expectation | n/a |
+| `chore(...)`, `docs:`, `refactor:`, `test:`, `file(...)`, `plan(...)` | n/a | no expectation | n/a |
+| `feat(BUG-NNN): ...` (verb mismatch) | BUG | soft warning only — does NOT block in v1 | n/a |
+
+Multi-ID commits: scanner parses subject + first non-empty body line for ALL ID patterns matching `(STORY-\d{3}-\d{2}|CR-\d{3}|BUG-\d{3}|EPIC-\d{3}|HOTFIX-\d{3}-\d{2})`. Each ID gets independent validation. Unknown IDs (no file found) are skipped silently.
+
+### §25.3 Carry-Over Semantics
+
+An artifact with `carry_over: true` in its frontmatter is silently skipped by the lifecycle reconciler — it does not appear in `drift` or `clean` counts. Carry-over is set **explicitly by the human at sprint close** as a deliberate "keep open across boundary" signal. It is never auto-inferred. `close_sprint.mjs` does NOT auto-promote `carry_over: true` artifacts into the next sprint plan.
+
+### §25.4 Invocation Points and Gate Mode
+
+| Phase | Invocation | Mode |
+|---|---|---|
+| **Sprint close** | `close_sprint.mjs` Step 2.6 via `cleargate sprint reconcile-lifecycle <id>` | Block-by-default. Drift → exit 1 with punch list. |
+| **Sprint kickoff — lifecycle layer** | `cleargate sprint init` before `init_sprint.mjs` | **warn-only** when `lifecycle_init_mode: "warn"` in sprint frontmatter (default for SPRINT-15); **block** when `lifecycle_init_mode: "block"` (SPRINT-16+). `--allow-drift` flag skips the warn/block but records a waiver in `context_source:`. |
+| **v1 dormancy** | Both gates are dormant under `execution_mode: v1`. | n/a |
+
+### §25.5 v2 Escalation Path
+
+`lifecycle_init_mode: "warn"` was the grace setting for SPRINT-15 (already-in-flight artifacts). Starting with SPRINT-16, set `lifecycle_init_mode: "block"` in the sprint frontmatter to enforce hard blocking at kickoff. After one clean SPRINT-15 close, the `warn` grace period ends.
+
+---
+
+## 26. Decomposition Gate (CR-017)
+
+### §26.1 Purpose
+
+A sprint that references `epics: ["EPIC-X"]` in its plan cannot activate until EPIC-X has been decomposed into at least one `STORY-X-NN_*.md` file with `parent_epic_ref: EPIC-X`. Similarly, a `proposals: ["PROPOSAL-Z"]` reference requires that an EPIC file citing PROPOSAL-Z in its `context_source:` exists. Decomposition is between-sprints transition work — not story-tracked, no Gherkin on the decomposition itself, no QA — but the gate at `cleargate sprint init` verifies the output.
+
+### §26.2 Gate Rules
+
+1. **Epic → stories.** For each ID in sprint frontmatter `epics:`, a file `EPIC-NNN_*.md` must exist in `pending-sync/` AND at least one `STORY-NNN-NN_*.md` must have `parent_epic_ref: EPIC-NNN` in its frontmatter. Violation: `reason: 'no-child-stories'`.
+2. **Proposal → epic.** For each ID in sprint frontmatter `proposals:`, a file `EPIC-NNN_*.md` must exist in `pending-sync/` with `context_source:` containing the proposal ID string. Violation: `reason: 'no-decomposed-epic'`.
+3. **Anchor file missing.** If the referenced file does not exist at all: `reason: 'file-missing'`.
+
+### §26.3 No-Waiver Policy
+
+The decomposition gate cannot be waived with `--allow-drift`. Passing `--allow-drift` with an outstanding decomposition failure still exits 1 and emits:
+
+```
+decomposition gate cannot be waived; complete the decomposition or push start_date.
+```
+
+If the Architect cannot deliver the decomposition before the activating sprint's `start_date`, push `start_date` — do not relax the gate.
+
+### §26.4 Invocation
+
+`cleargate sprint init` calls `reconcileDecomposition()` BEFORE shelling out to `init_sprint.mjs`. A non-empty `missing[]` result exits 1 with a punch list. The gate is dormant under `execution_mode: v1` (the entire `sprintInitHandler` is v1-inert).

@@ -17,6 +17,7 @@ cr_id: "CR-{ID}"
 parent_ref: "EPIC-{ID} | STORY-{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
+carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft | In Review | Approved"
 approved: false
 created_at: "2026-04-17T00:00:00Z"
