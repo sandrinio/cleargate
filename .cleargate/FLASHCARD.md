@@ -3,6 +3,9 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-04-30 · #wiki #lint #PostToolUse · PostToolUse gate-check hook re-runs on every delivery file edit; setting cached_gate_result.pass=true is overwritten immediately — change ambiguity: null instead to suppress gate-failure lint for Completed items.
+2026-04-30 · #wiki #lint #pagination · checkPaginationNeeded MAX_BUCKET_ENTRIES=50 is hardcoded; fix via wiki.bucket_pagination_ceiling in config.yml + pass ceiling param to check function — not a code-change-free fix.
+2026-04-30 · #wiki #backlink #children · wiki build reads children: from raw EPIC/SPRINT files (not inferred from child parent_epic_ref) — broken-backlinks require adding children: arrays to every raw EPIC file, not just EPIC-013/-014.
 2026-04-30 · #init #hooks #exec-bit · BUG-018 missed the no-force-skip branch; every skip branch that may encounter an existing file must also re-assert chmodSync(0o755) if needsExec — not just the identical-content branch.
 2026-04-30 · #frontmatter #hierarchy #backfill · pending-sync corpus uses `parent_epic_ref:` (33 files) NOT `parent_ref:` (4 files); sprint membership is `sprint_id:` (14) NOT `sprint:` (4) — backfill scripts must sniff BOTH variants in priority order or 90% of items skip.
 2026-04-30 · #wiki #ledger #role-attribution · token-ledger.sh role-grep loop is hard-coded at line 172; new subagent roles (e.g. cleargate-wiki-contradict) must be added there or tokens land as "unknown".

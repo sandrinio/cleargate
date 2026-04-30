@@ -20,17 +20,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
-implementation_files:
-  - ".cleargate/scripts/gate-checks.json"
-  - ".cleargate/scripts/init_gate_config.sh"
-  - ".cleargate/scripts/pre_gate_common.sh"
-  - ".cleargate/scripts/pre_gate_runner.sh"
-  - ".cleargate/scripts/run_script.sh"
-  - "cleargate-planning/.cleargate/scripts/gate-checks.json"
-  - "cleargate-planning/.cleargate/scripts/init_gate_config.sh"
-  - "cleargate-planning/.cleargate/scripts/pre_gate_common.sh"
-  - "cleargate-planning/.cleargate/scripts/pre_gate_runner.sh"
-  - "cleargate-planning/.cleargate/scripts/run_script.sh"
 stamp_error: no ledger rows for work_item_id STORY-013-03_Run_Script_Wrapper_PreGate
 draft_tokens:
   input: null

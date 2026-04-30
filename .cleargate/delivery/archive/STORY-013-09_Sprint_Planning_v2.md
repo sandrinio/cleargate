@@ -32,8 +32,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
-implementation_files:
-  - "cleargate-planning/.claude/agents/architect.md"
 ---
 
 # STORY-013-09: Sprint Planning v2 (Architect Sprint Design Review + decomposition signals + enforcing Gate 2)

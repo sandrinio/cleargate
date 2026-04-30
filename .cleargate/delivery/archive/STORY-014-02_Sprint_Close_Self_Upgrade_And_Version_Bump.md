@@ -24,8 +24,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-27T00:00:01Z
-implementation_files:
-  []
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

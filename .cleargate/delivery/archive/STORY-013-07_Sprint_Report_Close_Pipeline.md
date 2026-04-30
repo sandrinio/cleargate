@@ -32,14 +32,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
-implementation_files:
-  - ".cleargate/scripts/close_sprint.mjs"
-  - ".cleargate/scripts/prefill_report.mjs"
-  - ".cleargate/scripts/suggest_improvements.mjs"
-  - "cleargate-planning/.claude/agents/reporter.md"
-  - "cleargate-planning/.cleargate/scripts/close_sprint.mjs"
-  - "cleargate-planning/.cleargate/scripts/prefill_report.mjs"
-  - "cleargate-planning/.cleargate/scripts/suggest_improvements.mjs"
 ---
 
 # STORY-013-07: Sprint Report v2 Template + Close Pipeline

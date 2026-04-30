@@ -106,7 +106,7 @@ _No active epics._
 
 - [[EPIC-019]] — status: Completed
 
-- [[EPIC-020]] — status: Completed
+- [[EPIC-020]] — status: Approved
 
 - [[EPIC-022]] — status: Completed
 

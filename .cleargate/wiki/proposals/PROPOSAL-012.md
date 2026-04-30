@@ -5,9 +5,9 @@ parent: ""
 children: []
 status: "Approved"
 remote_id: ""
-raw_path: ".cleargate/delivery/archive/PROPOSAL-012_Wiki_Contradiction_Detection.md"
-last_ingest: "2026-04-30T12:30:39.621Z"
-last_ingest_commit: "d0836d2090936805038cbd9b3a2426c266ddef2e"
+raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-012_Wiki_Contradiction_Detection.md"
+last_ingest: "2026-04-30T11:32:26.913Z"
+last_ingest_commit: "c162bc87eacb125f3085697456af3b117af5c186"
 repo: "planning"
 ---
 
