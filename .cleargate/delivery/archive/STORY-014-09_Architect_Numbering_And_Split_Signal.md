@@ -27,6 +27,8 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
+implementation_files:
+  - "cleargate-planning/.claude/agents/architect.md"
 ---
 
 # STORY-014-09: Architect numbering resolver + L3-split signal in story template

@@ -24,6 +24,9 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-26T11:34:24Z
+implementation_files:
+  - "cleargate-cli/src/cli.ts"
+  - "cleargate-cli/src/commands/doctor.ts"
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

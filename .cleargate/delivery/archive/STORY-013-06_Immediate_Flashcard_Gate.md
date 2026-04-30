@@ -31,6 +31,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
+implementation_files:
+  - "cleargate-cli/src/wiki/parse-frontmatter.ts"
+  - "cleargate-planning/.claude/agents/developer.md"
+  - "cleargate-planning/.claude/agents/qa.md"
 ---
 
 # STORY-013-06: Immediate Flashcard Hard-Gate Between Stories

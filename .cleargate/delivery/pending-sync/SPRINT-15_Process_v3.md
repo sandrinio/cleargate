@@ -9,7 +9,8 @@ updated_at: 2026-04-28T00:00:00Z
 created_at_version: cleargate@0.8.2
 updated_at_version: cleargate@0.8.2
 context_source: "Conversation 2026-04-28 — user asked for a process-refinement sprint. Picked Option A expanded: Wiki contradiction (EPIC-020) + ledger hook v2 (CR-016) + hierarchy frontmatter (PROPOSAL-009 schema half) + Upgrade UX (EPIC-016 decomp) + 4 process CRs + PROPOSAL-013 Approved this sprint, decomposed for SPRINT-16. SPRINT-14 cohort archive sweep + STORY-003/004/005 ghost audit + Approved-bug triage are M0 hygiene."
-epics:
+epics: []
+completed_epics:
   - EPIC-020
 crs:
   - CR-002

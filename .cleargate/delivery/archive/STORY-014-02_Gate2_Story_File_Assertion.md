@@ -27,6 +27,11 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
+implementation_files:
+  - ".cleargate/scripts/assert_story_files.mjs"
+  - ".cleargate/scripts/init_sprint.mjs"
+  - "cleargate-planning/.cleargate/scripts/assert_story_files.mjs"
+  - "cleargate-planning/.cleargate/scripts/init_sprint.mjs"
 ---
 
 # STORY-014-02: Gate-2 story-file existence assertion
