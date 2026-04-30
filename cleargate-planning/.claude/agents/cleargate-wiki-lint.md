@@ -167,10 +167,11 @@ raw_path: ".cleargate/delivery/archive/STORY-042-01_name.md"
 last_ingest: "2026-04-19T10:00:00Z"
 last_ingest_commit: "a1b2c3d4e5f6..."
 repo: "planning"
+last_contradict_sha: ""  # optional — populated by ingest Phase 4 (§10.10)
 ---
 ```
 
-Exactly nine fields. Lint rejects pages with extra fields (drift from §10.4) or missing fields.
+Nine required fields plus one optional (`last_contradict_sha`). Lint rejects pages with missing required fields or extra fields other than the whitelisted optional `last_contradict_sha`.
 
 ## §10.3 Exclusion List (inline)
 
@@ -196,6 +197,10 @@ Plus two checks mandated by Sprint-04 risk table (not in §10.8 enumerated list)
 
 - Missing-ingest — raw file mtime newer than wiki page mtime (Sprint-04 risk row 7).
 - Excluded-path-ingested — a wiki page exists for a raw file under an §10.3 excluded directory.
+
+Optional field allowance (§10.10):
+
+- `last_contradict_sha` (optional) — populated by ingest Phase 4. Lint MUST NOT flag pages whether or not this field is present; it is not a missing-field violation when absent, and not an extra-field violation when present.
 
 ## §10.7 Idempotency Rule (inline)
 

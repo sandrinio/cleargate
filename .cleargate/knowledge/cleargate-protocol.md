@@ -275,6 +275,7 @@ raw_path: ".cleargate/delivery/archive/STORY-042-01_name.md"
 last_ingest: "2026-04-19T10:00:00Z"
 last_ingest_commit: "a1b2c3d4e5f6..."
 repo: "planning"
+last_contradict_sha: ""  # optional — populated by ingest Phase 4 (§10.10)
 ---
 
 # STORY-042-01: Short title
@@ -292,6 +293,7 @@ Field notes:
 
 - `last_ingest_commit` — the SHA returned by `git log -1 --format=%H -- <raw_path>` at ingest time. Used for idempotency (see §10.7).
 - `repo` — derived from `raw_path` prefix: `cleargate-cli/` → `cli`; `mcp/` → `mcp`; `.cleargate/` or `cleargate-planning/` → `planning`. Never manually set.
+- `last_contradict_sha` (optional) — populated by ingest Phase 4 (§10.10). Pages without this field MUST continue to pass lint. Value is the SHA returned by `git log -1 --format=%H -- <raw_path>` at the moment Phase 4 last ran.
 
 ---
 
@@ -358,6 +360,24 @@ Ingest reliability follows a three-level fallback:
 1. **PostToolUse hook (primary)** — fires automatically on every Write or Edit under `.cleargate/delivery/**`. No agent action required.
 2. **Protocol rule (secondary)** — when the hook is unavailable (e.g. non-Claude-Code environment), every agent that writes a raw delivery file must explicitly invoke the `cleargate-wiki-ingest` subagent before returning.
 3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 or Gate 3 and refuses to proceed until the page is up to date.
+
+---
+
+### §10.10 Wiki Contradiction Detection
+
+After each ingest pass recompiles synthesis pages (Phase 3), the ingest subagent runs an optional Phase 4 contradiction check on any freshly ingested page whose `status` is `Draft` or `In Review`. Phase 4 is synchronous and advisory — it never blocks ingest, never causes a non-zero exit, and never modifies anything other than the wiki page's `last_contradict_sha` field and the append-only `wiki/contradictions.md` log.
+
+Rules:
+
+- **Trigger point.** Phase 4 fires after Phase 3 (synthesis recompile) completes, once per ingested page, only when the page status is `Draft` or `In Review`. All other statuses (`Approved`, `Done`, `Active`, etc.) are skipped silently.
+- **Neighborhood rule.** The neighborhood for a given draft page consists of: (1) all pages explicitly cited via `[[ID]]` in the raw draft body, (2) the draft's parent epic page, and (3) any sibling stories under the same parent epic. The neighborhood is capped at 12 pages; when more than 12 qualify, the closest-cited pages take priority and the finding record sets `truncated: true`.
+- **Idempotency rule.** Phase 4 is skipped when `last_contradict_sha` stored on the wiki page equals `git log -1 --format=%H -- <raw_path>` at the moment Phase 4 would run. A match means the draft has not changed since the last contradiction check; no re-check is needed.
+- **Status filter.** Only `Draft` and `In Review` raw-file statuses trigger Phase 4. The filter reads the raw frontmatter `status` field, not the wiki page's emoji status field.
+- **Advisory exit.** Phase 4 always exits 0. Contradiction findings are written to `wiki/contradictions.md` as an append-only YAML log (see §10.10 schema). No gate is blocked. A future enforcing-mode proposal must clear the calibration precondition (see below) before Phase 4 may exit non-zero.
+- **Subagent contract.** Phase 4 invokes the `cleargate-wiki-contradict` subagent with `{ draft_path, neighborhood: string[] }` inputs. The subagent emits zero or more `contradiction: <draft-id> vs <neighbor-id> · <claim-summary ≤80 chars>` lines plus one paragraph of reasoning per finding, then exits 0.
+- **Log schema.** Each finding appended to `wiki/contradictions.md` has the keys: `draft`, `neighbor`, `claim`, `ingest_sha`, `truncated`, `label`. The `label` field is `null` until a human applies `true-positive`, `false-positive`, or `nitpick`.
+
+**Calibration plan.** Phase 4 enters advisory-only mode unconditionally for an initial 30-day calibration window. A future enforcing-mode proposal may be filed only after the advisory log contains at least 20 human-labeled findings with a true-positive rate of ≥ 80%. Until that precondition is met, any proposal to make Phase 4 exit non-zero is out of scope.
 
 ---
 
