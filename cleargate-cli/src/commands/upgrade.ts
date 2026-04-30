@@ -403,7 +403,8 @@ export async function upgradeHandler(
         return;
       }
 
-      const currentSha = await computeCurrentSha(entry, cwd);
+      // BUG-023: pass pinVersion so pin-aware hook files are reverse-substituted before hashing.
+      const currentSha = await computeCurrentSha(entry, cwd, { pinVersion: installSnapshot?.pin_version });
       const installSha = snapshotByPath.get(entry.path) ?? null;
 
       let action: FileWork['action'];
@@ -484,8 +485,9 @@ export async function upgradeHandler(
       }
     }
 
-    // Re-compute current sha after potential mutation (for drift map)
-    const postSha = await computeCurrentSha(entry, cwd);
+    // Re-compute current sha after potential mutation (for drift map).
+    // BUG-023: pass pinVersion for pin-aware files.
+    const postSha = await computeCurrentSha(entry, cwd, { pinVersion: installSnapshot?.pin_version });
     driftMap[entry.path] = {
       state: classify(entry.sha256, installSha, postSha, entry.tier),
       entry,

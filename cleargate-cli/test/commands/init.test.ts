@@ -871,4 +871,31 @@ describe('cleargate init', () => {
       expect(pageExists).toBe(true);
     }
   }, 20000);
+
+  // ─── BUG-023: init stamps pin_version into install snapshot ─────────────────
+
+  it('BUG-023: init writes pin_version into install snapshot', async () => {
+    // Gherkin: BUG-023 — install snapshot carries the pin version used for hook substitution
+    const cap = makeCapture();
+
+    await initHandler({
+      cwd: tmpDir,
+      payloadDir: META_ROOT_PLANNING,
+      stdout: cap.stdout,
+      stderr: cap.stderr,
+      pin: '0.9.0',
+      readInstallManifest: () => ({
+        cleargate_version: '0.9.0',
+        generated_at: '2026-04-30T00:00:00.000Z',
+        files: [],
+      }),
+    });
+
+    const snapshotPath = path.join(tmpDir, '.cleargate', '.install-manifest.json');
+    expect(fs.existsSync(snapshotPath)).toBe(true);
+
+    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8')) as { pin_version?: string };
+    // BUG-023 fix: pin_version must be present and equal to the pin used
+    expect(snapshot.pin_version).toBe('0.9.0');
+  });
 });

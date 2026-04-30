@@ -400,6 +400,9 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
     const snapshot: ManifestFile = {
       ...pkgManifest,
       installed_at: now(),
+      // BUG-023: stamp the pin version so computeCurrentSha can reverse-substitute
+      // the placeholder when classifying pin-aware hook files during doctor --check-scaffold.
+      pin_version: pinVersion,
     };
     writeAtomic(snapshotPath, JSON.stringify(snapshot, null, 2) + '\n');
     stdout(`[cleargate init] Wrote install snapshot: .cleargate/.install-manifest.json\n`);

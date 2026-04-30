@@ -314,7 +314,8 @@ async function runCheckScaffold(
         return;
       }
 
-      const currentSha = await computeCurrentSha(entry, cwd);
+      // BUG-023: pass pinVersion so pin-aware hook files are reverse-substituted before hashing.
+      const currentSha = await computeCurrentSha(entry, cwd, { pinVersion: installSnapshot?.pin_version });
       const installSha =
         installSnapshot?.files.find((f) => f.path === entry.path)?.sha256 ?? null;
       const pkgSha = entry.sha256;

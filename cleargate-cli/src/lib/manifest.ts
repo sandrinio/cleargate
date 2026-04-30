@@ -50,6 +50,15 @@ export interface ManifestFile {
    * Not present in the package-shipped MANIFEST.json.
    */
   installed_at?: string;
+  /**
+   * BUG-023: The pin version that was substituted into hook scripts during install.
+   * Present only in install snapshots — not in the package-shipped MANIFEST.json.
+   * Used by `computeCurrentSha` to reverse-substitute pin-aware hook files before
+   * hashing, so drift classification compares apples to apples.
+   * Absent in snapshots predating this fix — backwards-compatible (old installs
+   * continue to report user-modified until the user re-runs `cleargate init`).
+   */
+  pin_version?: string;
 }
 
 export interface DriftMapEntry {
@@ -169,16 +178,43 @@ export async function loadInstallSnapshot(projectRoot: string): Promise<Manifest
 }
 
 /**
+ * BUG-023: Reverse the pin substitution that `copyPayload` applied to hook scripts.
+ *
+ * `copyPayload` replaces `__CLEARGATE_VERSION__` with `pinVersion` in HOOK_FILES_WITH_PIN.
+ * To compare the installed file's content to the package SHA (which uses the placeholder),
+ * we must reverse that substitution before hashing.
+ *
+ * Exported for unit tests.
+ */
+export function reverseSubstitutePinAware(
+  content: Buffer | string,
+  pinVersion: string
+): string {
+  const text = Buffer.isBuffer(content) ? content.toString('utf-8') : content;
+  return text.replaceAll(pinVersion, '__CLEARGATE_VERSION__');
+}
+
+/**
  * Compute the SHA256 of a tracked file in the current working tree.
  * Returns null when the file does not exist on disk.
+ *
+ * BUG-023: When `opts.pinVersion` is provided and `file.overwrite_policy === 'pin-aware'`,
+ * reverse-substitute `pinVersion` → `__CLEARGATE_VERSION__` before hashing.
+ * This ensures that a freshly-installed hook file (which has the real version baked in)
+ * hashes identically to the package's SHA (computed from the placeholder form).
  */
 export async function computeCurrentSha(
   file: ManifestEntry,
-  projectRoot: string
+  projectRoot: string,
+  opts?: { pinVersion?: string }
 ): Promise<string | null> {
   const filePath = path.join(projectRoot, file.path);
   try {
     const raw = await readFile(filePath);
+    if (file.overwrite_policy === 'pin-aware' && opts?.pinVersion) {
+      const reversed = reverseSubstitutePinAware(raw, opts.pinVersion);
+      return hashNormalized(reversed);
+    }
     return hashNormalized(raw);
   } catch {
     return null;

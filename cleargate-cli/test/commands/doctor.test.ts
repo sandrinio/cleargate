@@ -877,6 +877,107 @@ describe('STORY-014-01 Scenario 6: --session-start preserves exit-code hierarchy
   });
 });
 
+// ─── BUG-023 regression: pin-aware hook files reported clean after fresh install ─
+
+describe('BUG-023 regression: pin-aware hook files classified clean after fresh install', () => {
+  it('pin-aware hook file is classified clean when install snapshot carries pin_version', async () => {
+    // Gherkin: BUG-023 — freshly-installed pin-aware hook file must be "clean", not "user-modified"
+    const projectRoot = makeTmpDir();
+    const pkgRoot = makeTmpDir();
+
+    const pinVersion = '0.9.0';
+    const placeholder = '__CLEARGATE_VERSION__';
+
+    // Package manifest SHA is computed from the placeholder form (as stored in MANIFEST.json)
+    const packageContent = `#!/usr/bin/env bash\n# cleargate-pin: ${placeholder}\nnpx -y "@cleargate/cli@${placeholder}" doctor\n`;
+    const pkgSha = hashNormalized(packageContent);
+
+    // Hook file on disk: has the real version substituted (what copyPayload writes)
+    const installedContent = packageContent.replaceAll(placeholder, pinVersion);
+    const hookRelPath = '.claude/hooks/stamp-and-gate.sh';
+    writeTrackedFile(projectRoot, hookRelPath, installedContent);
+
+    // Package manifest: hook entry uses placeholder-based SHA + pin-aware policy
+    const hookEntry = makeEntry({
+      path: hookRelPath,
+      sha256: pkgSha,
+      overwrite_policy: 'pin-aware' as const,
+      tier: 'hook' as const,
+    });
+
+    // Install snapshot: carries pin_version field (the BUG-023 fix)
+    const installManifest: ManifestFile = {
+      cleargate_version: '0.9.0',
+      generated_at: '2026-04-19T00:00:00Z',
+      files: [{ ...hookEntry, sha256: pkgSha }],
+      installed_at: '2026-04-30T00:00:00Z',
+      pin_version: pinVersion,
+    };
+
+    writePackageManifest(pkgRoot, makeManifest([hookEntry]));
+    writeInstallSnapshot(projectRoot, installManifest);
+
+    const now = new Date('2026-04-30T00:00:00.000Z');
+    const cli = makeCliOpts({ cwd: projectRoot, packageRoot: pkgRoot, now: () => now });
+
+    await doctorHandler({ checkScaffold: true }, cli);
+
+    const output = cli.out.join('\n');
+    // Before fix: 1 user-modified. After fix: 0 user-modified, 1 clean.
+    expect(output).toContain('0 user-modified');
+    expect(output).toContain('1 clean');
+
+    const driftState = await readDriftState(projectRoot);
+    expect(driftState).not.toBeNull();
+    const fileEntry = driftState!.drift[hookRelPath];
+    expect(fileEntry).toBeDefined();
+    expect(fileEntry!.state).toBe('clean');
+  });
+
+  it('pin-aware hook file without pin_version in snapshot falls back to reporting user-modified (backwards compat)', async () => {
+    // Gherkin: BUG-023 backwards compat — old snapshots without pin_version still report user-modified
+    const projectRoot = makeTmpDir();
+    const pkgRoot = makeTmpDir();
+
+    const pinVersion = '0.9.0';
+    const placeholder = '__CLEARGATE_VERSION__';
+    const packageContent = `#!/usr/bin/env bash\n# cleargate-pin: ${placeholder}\n`;
+    const pkgSha = hashNormalized(packageContent);
+
+    const installedContent = packageContent.replaceAll(placeholder, pinVersion);
+    const hookRelPath = '.claude/hooks/stamp-and-gate.sh';
+    writeTrackedFile(projectRoot, hookRelPath, installedContent);
+
+    const hookEntry = makeEntry({
+      path: hookRelPath,
+      sha256: pkgSha,
+      overwrite_policy: 'pin-aware' as const,
+      tier: 'hook' as const,
+    });
+
+    // Old snapshot: NO pin_version field
+    const oldInstallManifest: ManifestFile = {
+      cleargate_version: '0.9.0',
+      generated_at: '2026-04-19T00:00:00Z',
+      files: [{ ...hookEntry, sha256: pkgSha }],
+      installed_at: '2026-04-30T00:00:00Z',
+      // pin_version intentionally absent (old install)
+    };
+
+    writePackageManifest(pkgRoot, makeManifest([hookEntry]));
+    writeInstallSnapshot(projectRoot, oldInstallManifest);
+
+    const now = new Date('2026-04-30T00:00:00.000Z');
+    const cli = makeCliOpts({ cwd: projectRoot, packageRoot: pkgRoot, now: () => now });
+
+    await doctorHandler({ checkScaffold: true }, cli);
+
+    const output = cli.out.join('\n');
+    // Without reverse substitution, the file hashes differently → user-modified (accepted per spec)
+    expect(output).toContain('1 user-modified');
+  });
+});
+
 // Help-text snapshot: cli.ts contains the Exit codes block
 
 describe('STORY-014-01 Help-text snapshot: doctor --help documents exit codes', () => {

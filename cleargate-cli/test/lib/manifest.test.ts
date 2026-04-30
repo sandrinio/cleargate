@@ -15,6 +15,7 @@ import {
   classify,
   writeDriftState,
   readDriftState,
+  reverseSubstitutePinAware,
   type ManifestEntry,
   type ManifestFile,
   type DriftMap,
@@ -324,5 +325,120 @@ describe('readDriftState', () => {
     );
     const result = await readDriftState(dir);
     expect(result).toBeNull();
+  });
+});
+
+// ─── BUG-023: reverseSubstitutePinAware ──────────────────────────────────────
+
+describe('reverseSubstitutePinAware', () => {
+  it('replaces pinVersion with __CLEARGATE_VERSION__ in a string', () => {
+    // Gherkin: BUG-023 — basic reverse substitution
+    const input = '#!/usr/bin/env bash\n# cleargate-pin: 0.9.0\nnpx -y "@cleargate/cli@0.9.0" doctor\n';
+    const result = reverseSubstitutePinAware(input, '0.9.0');
+    expect(result).toBe('#!/usr/bin/env bash\n# cleargate-pin: __CLEARGATE_VERSION__\nnpx -y "@cleargate/cli@__CLEARGATE_VERSION__" doctor\n');
+  });
+
+  it('is a no-op when pinVersion is not present in content', () => {
+    // Gherkin: BUG-023 — no-op when placeholder absent
+    const input = '#!/usr/bin/env bash\n# cleargate-pin: __CLEARGATE_VERSION__\n';
+    const result = reverseSubstitutePinAware(input, '0.9.0');
+    // 0.9.0 not present — output unchanged
+    expect(result).toBe(input);
+  });
+
+  it('replaces all occurrences (multi-occurrence)', () => {
+    // Gherkin: BUG-023 — multi-occurrence replacement
+    const input = 'version=0.9.0 other=0.9.0 label=0.9.0';
+    const result = reverseSubstitutePinAware(input, '0.9.0');
+    expect(result).toBe('version=__CLEARGATE_VERSION__ other=__CLEARGATE_VERSION__ label=__CLEARGATE_VERSION__');
+  });
+
+  it('accepts Buffer input and converts to string before substitution', () => {
+    // Gherkin: BUG-023 — Buffer input
+    const text = '# cleargate-pin: 1.2.3\n';
+    const result = reverseSubstitutePinAware(Buffer.from(text, 'utf-8'), '1.2.3');
+    expect(result).toBe('# cleargate-pin: __CLEARGATE_VERSION__\n');
+  });
+});
+
+// ─── BUG-023: computeCurrentSha with pin-aware entry ─────────────────────────
+
+describe('computeCurrentSha — BUG-023 pin-aware reverse substitution', () => {
+  it('produces same SHA as pkgSha when pinVersion provided for pin-aware file', async () => {
+    // Gherkin: BUG-023 — freshly-installed pin-aware file is classified clean
+    const dir = makeTmpDir();
+    const pinVersion = '0.9.0';
+    const placeholder = '__CLEARGATE_VERSION__';
+
+    // Simulate package content (what MANIFEST.json sha256 was computed from):
+    const packageContent = `#!/usr/bin/env bash\n# cleargate-pin: ${placeholder}\nnpx -y "@cleargate/cli@${placeholder}" doctor\n`;
+    const pkgSha = hashNormalized(packageContent);
+
+    // Simulate what copyPayload writes: version substituted
+    const installedContent = packageContent.replaceAll(placeholder, pinVersion);
+    const hookRelPath = '.claude/hooks/stamp-and-gate.sh';
+    const hookAbsPath = path.join(dir, hookRelPath);
+    fs.mkdirSync(path.dirname(hookAbsPath), { recursive: true });
+    fs.writeFileSync(hookAbsPath, installedContent, 'utf-8');
+
+    const entry = makeEntry({
+      path: hookRelPath,
+      sha256: pkgSha,
+      overwrite_policy: 'pin-aware',
+      tier: 'hook',
+    });
+
+    // Without pinVersion: SHA differs from pkgSha (the bug)
+    const shaWithoutPin = await computeCurrentSha(entry, dir);
+    expect(shaWithoutPin).not.toBe(pkgSha);
+
+    // With pinVersion: SHA matches pkgSha (the fix)
+    const shaWithPin = await computeCurrentSha(entry, dir, { pinVersion });
+    expect(shaWithPin).toBe(pkgSha);
+  });
+
+  it('falls through to normal hashing for non-pin-aware files even when pinVersion provided', async () => {
+    // Gherkin: BUG-023 — non-pin-aware files are unaffected
+    const dir = makeTmpDir();
+    const content = 'protocol content\n';
+    fs.writeFileSync(path.join(dir, 'file.md'), content, 'utf-8');
+
+    const entry = makeEntry({ path: 'file.md', overwrite_policy: 'merge-3way' });
+    const sha = await computeCurrentSha(entry, dir, { pinVersion: '0.9.0' });
+    expect(sha).toBe(hashNormalized(content));
+  });
+
+  it('falls through to normal hashing when pinVersion not provided (backwards-compat)', async () => {
+    // Gherkin: BUG-023 — backwards compat: old snapshots without pin_version skip reverse-sub
+    const dir = makeTmpDir();
+    const content = 'some hook content\n';
+    fs.writeFileSync(path.join(dir, 'hook.sh'), content, 'utf-8');
+
+    const entry = makeEntry({ path: 'hook.sh', overwrite_policy: 'pin-aware', tier: 'hook' });
+    const sha = await computeCurrentSha(entry, dir, { pinVersion: undefined });
+    expect(sha).toBe(hashNormalized(content));
+  });
+});
+
+// ─── BUG-023: regression — freshly-installed pin-aware file classified clean ──
+
+describe('classify — BUG-023 regression: fresh install with pin_version is clean', () => {
+  it('clean — install SHA == current SHA == package SHA for a pin-aware file after reverse-sub', () => {
+    // Gherkin: BUG-023 regression — when currentSha has been reverse-substituted,
+    // it should equal pkgSha and installSha → classify returns 'clean'.
+    const pkgSha = hashNormalized('#!/usr/bin/env bash\n# cleargate-pin: __CLEARGATE_VERSION__\n');
+    // After reverse substitution, currentSha == pkgSha == installSha → clean
+    expect(classify(pkgSha, pkgSha, pkgSha, 'hook')).toBe('clean');
+  });
+
+  it('user-modified — without reverse-sub, pin-aware file appears user-modified (the original bug)', () => {
+    // Gherkin: BUG-023 regression — demonstrates what happened before the fix.
+    // pkgSha was computed from placeholder form; currentSha (without reverse-sub) differs → user-modified.
+    const pkgSha = hashNormalized('#!/usr/bin/env bash\n# cleargate-pin: __CLEARGATE_VERSION__\n');
+    const currentShaWithoutFix = hashNormalized('#!/usr/bin/env bash\n# cleargate-pin: 0.9.0\n');
+    // They differ — which is the bug condition
+    expect(pkgSha).not.toBe(currentShaWithoutFix);
+    // classify would incorrectly return 'user-modified'
+    expect(classify(pkgSha, pkgSha, currentShaWithoutFix, 'hook')).toBe('user-modified');
   });
 });
