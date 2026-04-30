@@ -27,9 +27,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
-implementation_files:
-  - "cleargate-cli/src/cli.ts"
-  - "cleargate-cli/src/commands/sprint.ts"
 ---
 
 # STORY-014-08: `cleargate sprint archive` wrapper

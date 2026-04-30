@@ -6,11 +6,11 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 22 | 0 | 17 |
-| Stories | 138 | 0 | 114 |
+| Epics | 22 | 0 | 16 |
+| Stories | 138 | 0 | 109 |
 | Sprints | 16 | 1 | 12 |
-| Proposals | 14 | 0 | 12 |
-| CRs | 17 | 1 | 16 |
+| Proposals | 14 | 0 | 10 |
+| CRs | 17 | 0 | 11 |
 | Bugs | 15 | 0 | 14 |
 
 ## Active Epics
@@ -69,19 +69,9 @@ _No active epics._
 
 - [[CR-010]] (crs) — Completed
 
-- [[CR-011]] (crs) — Completed
-
-- [[CR-012]] (crs) — Completed
-
 - [[CR-014]] (crs) — Approved
 
 - [[CR-015]] (crs) — Completed
-
-- [[CR-016]] (crs) — Completed
-
-- [[CR-017]] (crs) — Completed
-
-- [[CR-018]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 
@@ -113,8 +103,6 @@ _No active epics._
 
 - [[EPIC-019]] (epics) — Completed
 
-- [[EPIC-020]] (epics) — Completed
-
 - [[EPIC-022]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
@@ -134,10 +122,6 @@ _No active epics._
 - [[PROPOSAL-010]] (proposals) — Abandoned
 
 - [[PROPOSAL-011]] (proposals) — Completed
-
-- [[PROPOSAL-012]] (proposals) — Approved
-
-- [[PROPOSAL-013]] (proposals) — Approved
 
 - [[PROPOSAL-013]] (proposals) — Completed
 
@@ -355,10 +339,6 @@ _No active epics._
 
 - [[STORY-015-04]] (stories) — Completed
 
-- [[STORY-015-05]] (stories) — Done
-
-- [[STORY-015-06]] (stories) — Done
-
 - [[STORY-018-01]] (stories) — Completed
 
 - [[STORY-018-02]] (stories) — Completed
@@ -368,12 +348,6 @@ _No active epics._
 - [[STORY-018-04]] (stories) — Completed
 
 - [[STORY-018-05]] (stories) — Completed
-
-- [[STORY-020-01]] (stories) — Done
-
-- [[STORY-020-02]] (stories) — Done
-
-- [[STORY-020-03]] (stories) — Done
 
 - [[STORY-022-01]] (stories) — Completed
 

@@ -20,19 +20,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
-implementation_files:
-  - ".cleargate/scripts/constants.mjs"
-  - ".cleargate/scripts/init_sprint.mjs"
-  - ".cleargate/scripts/state.schema.json"
-  - ".cleargate/scripts/update_state.mjs"
-  - ".cleargate/scripts/validate_bounce_readiness.mjs"
-  - ".cleargate/scripts/validate_state.mjs"
-  - "cleargate-planning/.cleargate/scripts/constants.mjs"
-  - "cleargate-planning/.cleargate/scripts/init_sprint.mjs"
-  - "cleargate-planning/.cleargate/scripts/state.schema.json"
-  - "cleargate-planning/.cleargate/scripts/update_state.mjs"
-  - "cleargate-planning/.cleargate/scripts/validate_bounce_readiness.mjs"
-  - "cleargate-planning/.cleargate/scripts/validate_state.mjs"
 stamp_error: no ledger rows for work_item_id STORY-013-02_State_Json_Bounce_Counters
 draft_tokens:
   input: null

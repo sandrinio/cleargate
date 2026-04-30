@@ -26,11 +26,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
-implementation_files:
-  - ".cleargate/scripts/file_surface_diff.sh"
-  - "cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh"
-  - "cleargate-planning/.claude/hooks/pre-commit.sh"
-  - "cleargate-planning/.cleargate/scripts/file_surface_diff.sh"
 ---
 
 # STORY-014-01: File-surface diff pre-commit gate

@@ -1,8 +1,8 @@
 ---
 cr_id: CR-011
 parent_ref: EPIC-021
-parent_cleargate_id: "EPIC-021"
-status: Approved
+parent_cleargate_id: EPIC-021
+status: Completed
 approved: true
 approved_at: 2026-04-29T00:00:00Z
 approved_by: sandrinio
@@ -14,7 +14,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-29T11:17:13Z
+  last_gate_check: 2026-04-30T11:52:13Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

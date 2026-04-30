@@ -11,8 +11,8 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-018_Framework_Universality_Public_Ship.md"
-last_ingest: "2026-04-30T12:30:39.621Z"
-last_ingest_commit: "161cc1023dd5d8a469151ca2cb3ef7ce561081f7"
+last_ingest: "2026-04-30T11:32:26.913Z"
+last_ingest_commit: "46360273061515645a3493f282fa225fff6d2989"
 repo: "planning"
 ---
 
