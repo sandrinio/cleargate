@@ -14,7 +14,7 @@ Append-only audit log of merged hotfixes. Reporter aggregates entries by sprint 
   title: "copy-payload re-asserts +x on no-force content-divergence skip (BUG-018 follow-up)"
   severity: "P2"
   status: "Verified"
-  commit_sha: "pending"
+  commit_sha: "4ceff09"
   merged_at: "2026-04-30T08:05:40Z"
   lane: "hotfix"
   predecessor: "BUG-018 (aaf0ef2)"
