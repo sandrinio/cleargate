@@ -16,6 +16,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { vi } from 'vitest';
 import * as url from 'node:url';
 import { pushHandler } from '../../src/commands/push.js';
@@ -391,6 +392,88 @@ describe('Hierarchy keys — backfill script', () => {
     const sprint = sniffSprint(fmText, ['# PROPOSAL-012: Test', '', 'Some proposal body.']);
     expect(parent).toBeNull();
     expect(sprint).toBeNull();
+  });
+
+  // ── Real-script integration tests (Scenarios 4, 5 write-back + Scenario 7 stderr) ──
+
+  // Scenario 4 + 5: Backfill runs real script against tmpdir — file GAINS parent_cleargate_id
+  // and sprint_cleargate_id via write-back; body is byte-unchanged.
+  it('Scenario: Backfill real script write-back — file gains parent_cleargate_id + sprint_cleargate_id', () => {
+    const scriptPath = path.resolve(
+      __testDirname,
+      '../../../.cleargate/scripts/backfill_hierarchy.mjs',
+    );
+
+    // Write a fixture with parent_epic_ref (sniffable parent) + sprint_id (sniffable sprint),
+    // but NO parent_cleargate_id / sprint_cleargate_id yet.
+    const fixturePath = path.join(tmpDir, 'STORY-XXX-YY_test.md');
+    const body = '# STORY-XXX-YY: Test\n\nBody content here.\n';
+    const originalContent = [
+      '---',
+      'story_id: STORY-XXX-YY',
+      'parent_epic_ref: BUG-021',
+      'sprint_id: SPRINT-15',
+      'status: Draft',
+      '---',
+      '',
+      body,
+    ].join('\n');
+    fs.writeFileSync(fixturePath, originalContent, 'utf8');
+
+    // spawnSync imported at top-level
+    const result = spawnSync('node', [scriptPath, tmpDir], {
+      encoding: 'utf8',
+      timeout: 15000,
+    });
+
+    // Script may exit non-zero for unrelated reasons (other files in real corpus) — only
+    // care about our fixture file.
+    const afterContent = fs.readFileSync(fixturePath, 'utf8');
+
+    // frontmatter must now contain both new keys
+    expect(afterContent).toContain('parent_cleargate_id: "BUG-021"');
+    expect(afterContent).toContain('sprint_cleargate_id: "SPRINT-15"');
+
+    // body must be byte-unchanged — everything after the closing --- is preserved
+    const bodyStart = afterContent.indexOf('\n---\n', afterContent.indexOf('---') + 3) + 5;
+    const bodyAfter = afterContent.slice(bodyStart);
+    expect(bodyAfter).toBe('\n' + body);
+  });
+
+  // Scenario 7: Real script — unsniffable file emits a stderr note naming the file;
+  // frontmatter is byte-unchanged (no null-key insertion).
+  it('Scenario: Backfill real script emits stderr for unsniffable file, leaves frontmatter unchanged', () => {
+    const scriptPath = path.resolve(
+      __testDirname,
+      '../../../.cleargate/scripts/backfill_hierarchy.mjs',
+    );
+
+    // Write a fixture with NO parent_ref, NO parent_epic_ref, NO sprint_id, NO sprint.
+    // Body has no SPRINT- mention either. Fully unsniffable.
+    const fixturePath = path.join(tmpDir, 'EPIC-999_unsniffable.md');
+    const originalContent = [
+      '---',
+      'epic_id: EPIC-999',
+      'status: Draft',
+      '---',
+      '',
+      '# EPIC-999: No sprint or parent info here.',
+      '',
+    ].join('\n');
+    fs.writeFileSync(fixturePath, originalContent, 'utf8');
+
+    // spawnSync imported at top-level
+    const result = spawnSync('node', [scriptPath, tmpDir], {
+      encoding: 'utf8',
+      timeout: 15000,
+    });
+
+    // stderr must mention the fixture file (by basename or path fragment)
+    expect(result.stderr).toContain('EPIC-999_unsniffable.md');
+
+    // frontmatter must be byte-unchanged — no null keys injected
+    const afterContent = fs.readFileSync(fixturePath, 'utf8');
+    expect(afterContent).toBe(originalContent);
   });
 
   // E2E: push + ingest — payload carries hierarchy, wiki page captures it
