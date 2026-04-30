@@ -163,9 +163,11 @@ describe('doctor --session-start', () => {
     const out: string[] = [];
     await runSessionStart(dir, (s) => out.push(s));
 
-    // CR-009: resolver-status line is always emitted; no blocked-items lines
-    expect(out).toHaveLength(1);
-    expect(out[0]).toContain('cleargate CLI:');
+    // CR-011: state banner is the first line; CR-009: resolver-status line is second.
+    // No blocked-items lines beyond these two.
+    expect(out).toHaveLength(2);
+    expect(out[0]).toContain('ClearGate state:');
+    expect(out[1]).toContain('cleargate CLI:');
   });
 
   it('blocked-items output is ≤ 400 chars (100-token proxy) for 3 failing items', async () => {
@@ -193,9 +195,10 @@ describe('doctor --session-start', () => {
     const out: string[] = [];
     await runSessionStart(dir, (s) => out.push(s));
 
-    // CR-009: resolver-status line is always emitted
-    expect(out).toHaveLength(1);
-    expect(out[0]).toContain('cleargate CLI:');
+    // CR-011: state banner is first; CR-009: resolver-status line is second.
+    expect(out).toHaveLength(2);
+    expect(out[0]).toContain('ClearGate state:');
+    expect(out[1]).toContain('cleargate CLI:');
   });
 
   it('includes first failing criterion id in per-item line', async () => {
@@ -225,17 +228,17 @@ describe('doctor --session-start', () => {
 
   // ─── CR-009: resolver-status line is prepended to output ─────────────────────
 
-  it('CR-009: resolver-status line is the first line emitted by runSessionStart', async () => {
+  it('CR-009: resolver-status line is emitted by runSessionStart (CR-011: after state banner)', async () => {
     const dir = makeTmpDir();
     writePendingSyncItem(dir, 'STORY-001', 'STORY-001', false, ['no-tbds']);
 
     const out: string[] = [];
     await runSessionStart(dir, (s) => out.push(s));
 
-    // Output must be non-empty (blocked item + resolver line)
-    expect(out.length).toBeGreaterThanOrEqual(1);
-    // First emitted line must be the resolver-status line
-    expect(out[0]).toContain('cleargate CLI:');
+    // CR-011: state banner is now first; CR-009: resolver-status line is second.
+    expect(out.length).toBeGreaterThanOrEqual(2);
+    expect(out[0]).toContain('ClearGate state:');
+    expect(out[1]).toContain('cleargate CLI:');
   });
 
   it('CR-009: resolver-status line is emitted even when zero items are blocked', async () => {
@@ -360,7 +363,7 @@ describe('CR-008 Phase A: planning-first reminder block', () => {
     expect(output).toContain(PLANNING_FIRST_REMINDER);
   });
 
-  it('CR-008: resolver-status line is still first even when reminder fires', async () => {
+  it('CR-008: resolver-status line is emitted before reminder (CR-011: state banner is first)', async () => {
     const dir = makeTmpDir();
     const pendingDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
     fs.mkdirSync(pendingDir, { recursive: true });
@@ -368,10 +371,13 @@ describe('CR-008 Phase A: planning-first reminder block', () => {
     const out: string[] = [];
     await runSessionStart(dir, (s) => out.push(s));
 
-    // First emitted line is always the resolver-status
-    expect(out[0]).toContain('cleargate CLI:');
-    // Second emitted line starts the planning-first reminder
-    expect(out[1]).toContain('Triage first, draft second:');
+    // CR-011: state banner is first
+    expect(out[0]).toContain('ClearGate state:');
+    // CR-009: resolver-status is second
+    expect(out[1]).toContain('cleargate CLI:');
+    // CR-008: planning-first reminder appears after resolver
+    const reminderIdx = out.findIndex((l) => l.includes('Triage first, draft second:'));
+    expect(reminderIdx).toBeGreaterThan(1);
   });
 
   it('CR-008: pending-sync dir absent → planning-first reminder is NOT emitted (early return path)', async () => {
@@ -382,10 +388,11 @@ describe('CR-008 Phase A: planning-first reminder block', () => {
     await runSessionStart(dir, (s) => out.push(s));
     const output = out.join('\n');
 
-    // Only the resolver-status line; no reminder (dir missing = early return)
+    // No reminder (dir missing = early return after resolver line)
     expect(output).not.toContain('Triage first, draft second:');
-    // But resolver line still emitted
-    expect(out[0]).toContain('cleargate CLI:');
+    // CR-011: state banner is first; CR-009: resolver line is second
+    expect(out[0]).toContain('ClearGate state:');
+    expect(out[1]).toContain('cleargate CLI:');
   });
 });
 
@@ -420,8 +427,9 @@ cached_gate_result: ${gateResult}
 
     // Blocked item must set outcome.blocker
     expect(outcome.blocker).toBe(true);
-    // Resolver-status line still emitted first
-    expect(out[0]).toContain('cleargate CLI:');
+    // CR-011: state banner is first; resolver-status is second
+    expect(out[0]).toContain('ClearGate state:');
+    expect(out[1]).toContain('cleargate CLI:');
     // Blocked item listed in output
     expect(out.join('\n')).toContain('STORY-014-01-TEST');
   });

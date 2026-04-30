@@ -3,32 +3,31 @@
  * can be exchanged for a short-lived MCP access token, decodes the JWT payload
  * (no verification — just introspection), and prints identity fields.
  *
+ * CR-011: adds --json mode. When --json flag is present, skip network entirely;
+ * call getMembershipState() and emit JSON to stdout. Existing non-JSON path
+ * (network whoami) remains unchanged for backward compat.
+ *
  * This is the first command to exercise the acquireAccessToken flow end-to-end;
  * sync/pull/push will be wired in follow-up stories.
  */
-import { Buffer } from 'node:buffer';
 import { loadConfig, requireMcpUrl } from '../config.js';
 import { acquireAccessToken, AcquireError } from '../auth/acquire.js';
+import { decodeJwtPayload, getMembershipState } from '../lib/membership.js';
 
 export interface WhoamiOptions {
   profile: string;
   mcpUrlFlag?: string;
+  /** CR-011: emit JSON state instead of making a network call */
+  json?: boolean;
   /** Test seam: replaces globalThis.fetch */
   fetch?: typeof globalThis.fetch;
   stdout?: (s: string) => void;
   stderr?: (s: string) => void;
   exit?: (code: number) => never;
-}
-
-function decodeJwtPayload(jwt: string): Record<string, unknown> | null {
-  const parts = jwt.split('.');
-  if (parts.length !== 3) return null;
-  try {
-    const json = Buffer.from(parts[1]!, 'base64url').toString('utf8');
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
+  /** Test seam: override ~/.cleargate home path for getMembershipState */
+  cleargateHome?: string;
+  /** Test seam: override clock for expiry check */
+  now?: () => number;
 }
 
 export async function whoamiHandler(opts: WhoamiOptions): Promise<void> {
@@ -36,6 +35,18 @@ export async function whoamiHandler(opts: WhoamiOptions): Promise<void> {
   const stderr = opts.stderr ?? ((s) => process.stderr.write(s));
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
 
+  // CR-011: --json mode — cheap-path, no network call.
+  if (opts.json) {
+    const state = getMembershipState({
+      profile: opts.profile,
+      cleargateHome: opts.cleargateHome,
+      now: opts.now,
+    });
+    stdout(JSON.stringify(state) + '\n');
+    return;
+  }
+
+  // Existing network path (backward compat).
   const cfg = loadConfig({ flags: { profile: opts.profile, mcpUrl: opts.mcpUrlFlag } });
   let mcpUrl: string;
   try {
@@ -75,10 +86,10 @@ export async function whoamiHandler(opts: WhoamiOptions): Promise<void> {
     [
       `mcp_url:    ${mcpUrl}`,
       `profile:    ${opts.profile}`,
-      `member_id:  ${claims.sub ?? '?'}`,
-      `project_id: ${claims.project_id ?? '?'}`,
-      `role:       ${claims.role ?? '?'}`,
-      `expires_at: ${typeof claims.exp === 'number' ? new Date(claims.exp * 1000).toISOString() : '?'}`,
+      `member_id:  ${claims['sub'] ?? '?'}`,
+      `project_id: ${claims['project_id'] ?? '?'}`,
+      `role:       ${claims['role'] ?? '?'}`,
+      `expires_at: ${typeof claims['exp'] === 'number' ? new Date(claims['exp'] as number * 1000).toISOString() : '?'}`,
       '',
     ].join('\n'),
   );

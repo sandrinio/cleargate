@@ -1,5 +1,6 @@
 // SPRINT-14 M5 dogfood smoke — STORY-099-01
-import { Command } from 'commander';
+// CR-011: preAction membership gating + --all flag + help-text filtering
+import { Command, type Command as CommandType } from 'commander';
 import pkg from '../package.json' with { type: 'json' };
 import { scaffoldLintHandler } from './commands/scaffold-lint.js';
 import { joinHandler } from './commands/join.js';
@@ -28,6 +29,34 @@ import { syncLogHandler } from './commands/sync-log.js';
 import { adminLoginHandler } from './commands/admin-login.js';
 import { hotfixNewHandler } from './commands/hotfix.js';
 import { mcpServeHandler } from './commands/mcp-serve.js';
+import { getMembershipState } from './lib/membership.js';
+
+// CR-011: commands that are gated (require membership).
+// All other commands are in the open subset.
+const GATED_COMMANDS = new Set([
+  'push',
+  'pull',
+  'sync',
+  'sync check',
+  'sync-log',
+  'conflicts',
+  'admin bootstrap-root',
+  'admin create-project',
+  'admin invite',
+  'admin issue-token',
+  'admin revoke-token',
+]);
+
+// CR-011: resolve the full subcommand name from a Commander command.
+// Handles nested subcommands like `admin login`, `wiki build`, etc.
+function resolveCommandName(cmd: CommandType): string {
+  const name = cmd.name();
+  const parent = cmd.parent;
+  if (parent && parent.name() !== 'cleargate' && parent.name() !== '') {
+    return `${parent.name()} ${name}`;
+  }
+  return name;
+}
 
 const program = new Command();
 
@@ -37,7 +66,57 @@ program
   .version(pkg.version, '-V, --version')
   .option('--profile <name>', 'configuration profile to use', 'default')
   .option('--mcp-url <url>', 'MCP server URL (overrides config file and env)')
+  .option('--all', 'show all commands in help, including those requiring membership')
   .showHelpAfterError('(use `cleargate --help`)');
+
+// CR-011: preAction membership gating hook.
+// Fires before every command action. Reads program-level --profile (globals).
+// FLASHCARD #cli #commander: read program.opts().profile NOT cmd.opts().profile —
+// Commander v12 places global options on program, not on subcommands.
+program.hook('preAction', (_thisCommand: CommandType, actionCommand: CommandType) => {
+  const cmdName = resolveCommandName(actionCommand);
+
+  // Only gate commands in the GATED_COMMANDS set.
+  if (!GATED_COMMANDS.has(cmdName)) return;
+
+  // Read profile from program-level globals (Commander v12: globals live on program).
+  const programOpts = program.opts<{ profile: string }>();
+  const profile = programOpts.profile ?? 'default';
+
+  const membershipState = getMembershipState({ profile });
+  if (membershipState.state === 'pre-member') {
+    process.stderr.write(
+      `cleargate ${cmdName}: requires membership. Run: cleargate join <invite-url>\n`
+    );
+    process.exit(2);
+  }
+});
+
+// CR-011: help-text filtering.
+// When state is pre-member (and --all is NOT set), hide gated commands from help.
+program.configureHelp({
+  visibleCommands: (cmd: CommandType): CommandType[] => {
+    // cmd.commands returns readonly Command[]; spread to get a mutable copy.
+    const allCommands: CommandType[] = [...cmd.commands];
+    const programOpts = program.opts<{ all?: boolean; profile?: string }>();
+
+    // If --all flag is present, show everything.
+    if (programOpts.all) return allCommands;
+
+    // Check membership state (cheap-path, no network).
+    const profile = programOpts.profile ?? 'default';
+    const membershipState = getMembershipState({ profile });
+
+    // In member state, show all commands.
+    if (membershipState.state === 'member') return allCommands;
+
+    // In pre-member state, hide gated top-level commands.
+    // Gated top-level command names (first word only for top-level filtering).
+    const gatedTopLevel = new Set(['push', 'pull', 'sync', 'sync-log', 'conflicts', 'admin']);
+
+    return allCommands.filter((c) => !gatedTopLevel.has(c.name()));
+  },
+});
 
 program
   .command('join <invite-url>')
@@ -72,12 +151,14 @@ program
 program
   .command('whoami')
   .description('print the currently authenticated agent identity')
-  .action(async () => {
+  .option('--json', 'CR-011: emit membership state as JSON (no network call)')
+  .action(async (opts: { json?: boolean }) => {
     const { whoamiHandler } = await import('./commands/whoami.js');
     const parentOpts = program.opts<{ profile: string; mcpUrl?: string }>();
     await whoamiHandler({
       profile: parentOpts.profile,
       mcpUrlFlag: parentOpts.mcpUrl,
+      json: opts.json,
     });
   });
 

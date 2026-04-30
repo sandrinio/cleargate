@@ -43,8 +43,8 @@ describe('cleargate CLI', () => {
       expect(result.stdout).toContain('wiki');
     });
 
-    it('--help stdout lists admin', () => {
-      const result = run(['--help']);
+    it('--help --all stdout lists admin (CR-011: admin hidden in pre-member state; visible with --all)', () => {
+      const result = run(['--help', '--all']);
       expect(result.stdout).toContain('admin');
     });
   });

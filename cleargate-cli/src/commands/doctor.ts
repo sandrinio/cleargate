@@ -23,6 +23,7 @@ import {
   type DriftState,
 } from '../lib/manifest.js';
 import { shortHash } from '../lib/sha256.js';
+import { getMembershipState } from '../lib/membership.js';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -34,6 +35,10 @@ export interface DoctorCliOptions {
   exit?: (code: number) => never;
   /** Override the package root for loadPackageManifest (test seam). */
   packageRoot?: string;
+  /** CR-011: override ~/.cleargate home path for getMembershipState (test seam). */
+  cleargateHome?: string;
+  /** CR-011: profile to pass to getMembershipState. */
+  profile?: string;
 }
 
 /**
@@ -461,8 +466,25 @@ Bypass this only if the user has explicitly waived planning in this conversation
 export async function runSessionStart(
   cwd: string,
   stdout: (s: string) => void,
-  outcome?: DoctorOutcome
+  outcome?: DoctorOutcome,
+  cli?: DoctorCliOptions
 ): Promise<void> {
+  // CR-011: emit membership state banner as the FIRST line of --session-start output.
+  // Placed before the resolver-status line so it is the first thing the agent sees.
+  const membershipState = getMembershipState({
+    cleargateHome: cli?.cleargateHome,
+    profile: cli?.profile,
+  });
+  if (membershipState.state === 'member') {
+    stdout(
+      `ClearGate state: member (project: ${membershipState.project_id}) — full surface enabled.`
+    );
+  } else {
+    stdout(
+      'ClearGate state: pre-member — local planning enabled, sync requires join.'
+    );
+  }
+
   // CR-009: emit resolver-status line ALWAYS (before the blocked-items list).
   // STORY-014-01: if resolver is "not resolvable", set configError.
   const resolverLines: string[] = [];
@@ -880,7 +902,7 @@ export async function doctorHandler(
       break;
 
     case 'session-start':
-      await runSessionStart(cwd, stdout, outcome);
+      await runSessionStart(cwd, stdout, outcome, cli);
       break;
 
     case 'pricing':
