@@ -1,23 +1,30 @@
 ---
-sprint_id: "SPRINT-15"
-source_tool: "local"
-status: "Active"
-start_date: "2026-04-28"
-end_date: "2026-05-12"
-created_at: "2026-04-28T00:00:00Z"
-updated_at: "2026-04-28T00:00:00Z"
-created_at_version: "cleargate@0.8.2"
-updated_at_version: "cleargate@0.8.2"
+sprint_id: SPRINT-15
+source_tool: local
+status: Active
+start_date: 2026-04-28
+end_date: 2026-05-12
+created_at: 2026-04-28T00:00:00Z
+updated_at: 2026-04-28T00:00:00Z
+created_at_version: cleargate@0.8.2
+updated_at_version: cleargate@0.8.2
 context_source: "Conversation 2026-04-28 — user asked for a process-refinement sprint. Picked Option A expanded: Wiki contradiction (EPIC-020) + ledger hook v2 (CR-016) + hierarchy frontmatter (PROPOSAL-009 schema half) + Upgrade UX (EPIC-016 decomp) + 4 process CRs + PROPOSAL-013 Approved this sprint, decomposed for SPRINT-16. SPRINT-14 cohort archive sweep + STORY-003/004/005 ghost audit + Approved-bug triage are M0 hygiene."
-epics: ["EPIC-020"]
-crs: ["CR-002", "CR-011", "CR-012", "CR-016", "CR-017", "CR-018"]
+epics:
+  - EPIC-020
+crs:
+  - CR-002
+  - CR-011
+  - CR-012
+  - CR-016
+  - CR-017
+  - CR-018
 bugs: []
 proposals: []
 approved: true
 approved_at: 2026-04-30T00:00:00Z
 approved_by: sandrinio
 activated_at: 2026-04-30T00:00:00Z
-execution_mode: "v2"
+execution_mode: v2
 human_override: false
 draft_tokens:
   input: null
@@ -30,7 +37,10 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
-sprint_cleargate_id: "SPRINT-15"
+sprint_cleargate_id: SPRINT-15
+children:
+  - "[[STORY-015-05]]"
+  - "[[STORY-015-06]]"
 ---
 
 # SPRINT-15: Process v3 — Awareness, Ledger, Hierarchy, Upgrade

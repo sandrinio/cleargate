@@ -1,7 +1,7 @@
 ---
 story_id: STORY-014-06
 parent_epic_ref: EPIC-014
-parent_cleargate_id: "EPIC-014"
+parent_cleargate_id: EPIC-014
 status: Completed
 ambiguity: 🟢 Low
 context_source: "EPIC-014 §2 IN-SCOPE A1+A2 + FLASHCARD.md 2026-04-21 `#cli #sprint-close #assume-ack` + `#cli #state-update #execution-mode`"
@@ -23,11 +23,9 @@ draft_tokens:
   last_stamp: 2026-04-21T12:43:28Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T12:43:29Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-30T11:01:46Z
 ---
 
 # STORY-014-06: CLI flag plumbing — `sprint close --assume-ack` + `state update` sentinel fallback

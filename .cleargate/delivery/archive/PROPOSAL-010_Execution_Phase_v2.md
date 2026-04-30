@@ -1,6 +1,6 @@
 ---
 proposal_id: PROPOSAL-010
-status: "Abandoned"
+status: Abandoned
 author: Vibe Coder (sandro)
 approved: true
 approved_at: 2026-04-21T00:00:00Z
@@ -13,7 +13,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T22:25:41Z
+  last_gate_check: 2026-04-21T00:00:01Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-04-20T22:25:42.439Z
 last_pulled_by: null
@@ -32,7 +32,7 @@ draft_tokens:
   last_stamp: 2026-04-20T22:22:49Z
   sessions: []
 push_version: 1
-sprint_cleargate_id: "SPRINT-01"
+sprint_cleargate_id: SPRINT-01
 ---
 
 # PROPOSAL-010: Execution Phase v2 (Gate Waiver Record)

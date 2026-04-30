@@ -58,13 +58,16 @@ export async function wikiLintHandler(opts: WikiLintOptions = {}): Promise<void>
   const wikiRoot = path.join(cwd, '.cleargate', 'wiki');
   const repoRoot = cwd;
 
+  // Load wiki config early — used for pagination ceiling and index-budget ceiling
+  const wikiConfig = loadWikiConfig(cwd);
+
   // Step 1: load all wiki pages (single discovery pass)
   let pages = loadWikiPages(wikiRoot);
 
   const findings: LintFinding[] = [];
 
-  // Meta-check: pagination-needed (fires on bucket > 50 entries)
-  const paginationFindings = checkPaginationNeeded(pages);
+  // Meta-check: pagination-needed (fires on bucket > configured ceiling, default 50)
+  const paginationFindings = checkPaginationNeeded(pages, wikiConfig.wiki.bucket_pagination_ceiling);
   findings.push(...paginationFindings);
 
   // Step 2: per-page checks (O(n))
@@ -107,7 +110,6 @@ export async function wikiLintHandler(opts: WikiLintOptions = {}): Promise<void>
   findings.push(...citationFindings);
 
   // Step 4.5: index token-budget check (STORY-015-03)
-  const wikiConfig = loadWikiConfig(cwd);
   const indexBudget = checkIndexBudget(repoRoot, wikiConfig.wiki.index_token_ceiling);
 
   // In suggest mode, always emit the usage line unconditionally (before advisory loop)

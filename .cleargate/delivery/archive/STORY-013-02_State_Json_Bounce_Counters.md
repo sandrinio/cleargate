@@ -1,7 +1,7 @@
 ---
 story_id: STORY-013-02_State_Json_Bounce_Counters
 parent_epic_ref: EPIC-013
-parent_cleargate_id: "EPIC-013"
+parent_cleargate_id: EPIC-013
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 row 'state.json + bounce counters' + V-Bounce Engine `scripts/{init_sprint,update_state,validate_state,validate_bounce_readiness,constants}.mjs`
@@ -9,7 +9,7 @@ actor: Orchestrator (conversational Claude)
 complexity_label: L3
 approved: true
 approved_at: 2026-04-21T00:00:00Z
-completed_at: "2026-04-21T08:30:00Z"
+completed_at: 2026-04-21T08:30:00Z
 approved_by: sandro
 milestone: M1
 created_at: 2026-04-21T00:00:00Z
@@ -19,7 +19,7 @@ updated_at_version: post-SPRINT-08
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T22:27:02Z
+  last_gate_check: 2026-04-21T00:00:01Z
 stamp_error: no ledger rows for work_item_id STORY-013-02_State_Json_Bounce_Counters
 draft_tokens:
   input: null

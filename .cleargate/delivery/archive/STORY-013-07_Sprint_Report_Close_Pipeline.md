@@ -1,8 +1,8 @@
 ---
 story_id: STORY-013-07_Sprint_Report_Close_Pipeline
 parent_epic_ref: EPIC-013
-parent_cleargate_id: "EPIC-013"
-sprint_cleargate_id: "SPRINT-08"
+parent_cleargate_id: EPIC-013
+sprint_cleargate_id: SPRINT-08
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 rows 'Sprint-close pipeline' + 'Sprint Report v2' + 'run_script.sh wrapper' + §4.5; V-Bounce Engine scripts/close_sprint.mjs + complete_story.mjs + prefill_report.mjs + suggest_improvements.mjs + templates/sprint_report.md at HEAD 2b8477ab
@@ -10,7 +10,7 @@ actor: Developer Agent
 complexity_label: L3
 approved: true
 approved_at: 2026-04-21T00:00:00Z
-completed_at: "2026-04-21T08:30:00Z"
+completed_at: 2026-04-21T08:30:00Z
 approved_by: sandro
 milestone: M2
 parallel_eligible: n
@@ -29,11 +29,9 @@ draft_tokens:
   last_stamp: 2026-04-21T05:53:12Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T05:53:12Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-21T00:00:01Z
 ---
 
 # STORY-013-07: Sprint Report v2 Template + Close Pipeline

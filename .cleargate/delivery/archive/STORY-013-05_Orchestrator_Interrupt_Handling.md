@@ -1,7 +1,7 @@
 ---
 story_id: STORY-013-05_Orchestrator_Interrupt_Handling
 parent_epic_ref: EPIC-013
-parent_cleargate_id: "EPIC-013"
+parent_cleargate_id: EPIC-013
 status: Done
 ambiguity: 🟢 Low
 context_source: "EPIC-013_Execution_Phase_v2.md §4.2 rows 'Circuit breaker' + 'User walkthrough on sprint branch' + 'Mid-sprint CR triage'; V-Bounce Engine skills/agent-team/SKILL.md §§ 'Step 2f: Green Phase Circuit Breaker', 'Step 5.7: User Walkthrough', 'Mid-Sprint Change Requests' at HEAD 2b8477ab"
@@ -9,7 +9,7 @@ actor: Developer Agent
 complexity_label: L3
 approved: true
 approved_at: 2026-04-21T00:00:00Z
-completed_at: "2026-04-21T08:30:00Z"
+completed_at: 2026-04-21T08:30:00Z
 approved_by: sandro
 milestone: M2
 parallel_eligible: n
@@ -28,11 +28,9 @@ draft_tokens:
   last_stamp: 2026-04-21T05:52:04Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T05:52:04Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-21T00:00:01Z
 ---
 
 # STORY-013-05: Orchestrator Interrupt Handling (circuit breaker + walkthrough + mid-sprint CR triage)

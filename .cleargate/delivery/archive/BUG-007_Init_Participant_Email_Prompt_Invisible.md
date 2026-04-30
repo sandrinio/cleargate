@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-007
 parent_ref: STORY-010-01
-parent_cleargate_id: "STORY-010-01"
+parent_cleargate_id: STORY-010-01
 status: Verified
 severity: P2-Medium
 reporter: sandrinio
@@ -16,7 +16,7 @@ cached_gate_result:
   failing_criteria:
     - id: repro-steps-deterministic
       detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-04-25T22:12:44Z
+  last_gate_check: 2026-04-26T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

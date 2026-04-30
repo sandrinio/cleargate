@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-008
-status: "Abandoned"
+status: Abandoned
 ambiguity: 🟢 Low
 context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
 owner: Vibe Coder (sandro.suladze@gmail.com)
@@ -18,7 +18,15 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:42:54.842Z
 push_version: 3
-sprint_cleargate_id: "SPRINT-04"
+sprint_cleargate_id: SPRINT-04
+children:
+  - "[[STORY-008-01]]"
+  - "[[STORY-008-02]]"
+  - "[[STORY-008-03]]"
+  - "[[STORY-008-04]]"
+  - "[[STORY-008-05]]"
+  - "[[STORY-008-06]]"
+  - "[[STORY-008-07]]"
 ---
 
 # EPIC-008: Per-Work-Item Token Cost + Machine-Checkable Readiness Gates

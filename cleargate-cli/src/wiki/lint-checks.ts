@@ -30,8 +30,8 @@ const EXCLUDED_DIRS = [
   '.cleargate/wiki/',
 ];
 
-/** Maximum entries per bucket before pagination-needed fires. */
-const MAX_BUCKET_ENTRIES = 50;
+/** Default maximum entries per bucket before pagination-needed fires (overridable via wiki config). */
+const DEFAULT_MAX_BUCKET_ENTRIES = 50;
 
 /**
  * Check (a): Orphan — wiki page's raw_path doesn't exist on disk.
@@ -275,9 +275,11 @@ export function checkExcludedPathIngested(page: LoadedWikiPage, repoRoot: string
 }
 
 /**
- * Meta-check: pagination-needed — fires if any bucket has more than 50 entries.
+ * Meta-check: pagination-needed — fires if any bucket has more than `ceiling` entries.
+ * @param ceiling Maximum entries per bucket; defaults to DEFAULT_MAX_BUCKET_ENTRIES=50.
+ *                Configure via `.cleargate/config.yml` → `wiki.bucket_pagination_ceiling`.
  */
-export function checkPaginationNeeded(pages: LoadedWikiPage[]): LintFinding[] {
+export function checkPaginationNeeded(pages: LoadedWikiPage[], ceiling: number = DEFAULT_MAX_BUCKET_ENTRIES): LintFinding[] {
   // Count by bucket (derived from absPath directory name)
   const bucketCounts = new Map<string, number>();
   for (const p of pages) {
@@ -287,10 +289,10 @@ export function checkPaginationNeeded(pages: LoadedWikiPage[]): LintFinding[] {
 
   const findings: LintFinding[] = [];
   for (const [bucket, count] of bucketCounts) {
-    if (count > MAX_BUCKET_ENTRIES) {
+    if (count > ceiling) {
       findings.push({
         category: 'pagination-needed',
-        line: `pagination-needed: ${bucket} (${count} entries, max ${MAX_BUCKET_ENTRIES} per bucket)`,
+        line: `pagination-needed: ${bucket} (${count} entries, max ${ceiling} per bucket)`,
       });
     }
   }

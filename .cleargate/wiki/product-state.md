@@ -6,7 +6,7 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 21 | 0 | 15 |
+| Epics | 22 | 0 | 16 |
 | Stories | 138 | 0 | 109 |
 | Sprints | 16 | 1 | 12 |
 | Proposals | 14 | 0 | 10 |
@@ -96,6 +96,8 @@ _No active epics._
 - [[EPIC-013]] (epics) — Completed
 
 - [[EPIC-014]] (epics) — Completed
+
+- [[EPIC-015]] (epics) — Completed
 
 - [[EPIC-018]] (epics) — Completed
 

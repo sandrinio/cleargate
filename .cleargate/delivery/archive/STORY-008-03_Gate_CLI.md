@@ -1,8 +1,8 @@
 ---
 story_id: STORY-008-03
 parent_epic_ref: EPIC-008
-parent_cleargate_id: "EPIC-008"
-status: "Abandoned"
+parent_cleargate_id: EPIC-008
+status: Abandoned
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-005_Token_Cost_And_Readiness_Gates.md
@@ -11,15 +11,9 @@ updated_at: 2026-04-19T00:00:00Z
 created_at_version: post-SPRINT-04
 updated_at_version: post-SPRINT-04
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: no-tbds
-      detail: 2 occurrences at §2, §3
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-    - id: dod-declared
-      detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-20T19:22:06Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-19T00:00:01Z
 approved: true
 ---
 

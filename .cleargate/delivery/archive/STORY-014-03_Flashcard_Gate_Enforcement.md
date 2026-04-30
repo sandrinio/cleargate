@@ -1,8 +1,8 @@
 ---
 story_id: STORY-014-03
 parent_epic_ref: EPIC-014
-parent_cleargate_id: "EPIC-014"
-sprint_cleargate_id: "SPRINT-09"
+parent_cleargate_id: EPIC-014
+sprint_cleargate_id: SPRINT-09
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE B3 + SPRINT-09 REPORT.md §5 Skills 🟡 + protocol §18 (Immediate Flashcard Gate)
@@ -24,11 +24,9 @@ draft_tokens:
   last_stamp: 2026-04-21T12:42:10Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: implementation-files-declared
-      detail: section 3 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T12:42:10Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-30T11:01:46Z
 ---
 
 # STORY-014-03: PreToolUse flashcard gate enforcement

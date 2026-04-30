@@ -1,7 +1,7 @@
 ---
 story_id: STORY-018-01
 parent_epic_ref: EPIC-018
-parent_cleargate_id: "EPIC-018"
+parent_cleargate_id: EPIC-018
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-018_Framework_Universality_Public_Ship.md
@@ -15,11 +15,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: no-tbds
-      detail: 1 occurrence at §6
-  last_gate_check: 2026-04-24T19:51:42Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-24T00:00:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

@@ -1,7 +1,7 @@
 ---
 cr_id: CR-004
 parent_ref: EPIC-019
-parent_cleargate_id: "EPIC-019"
+parent_cleargate_id: EPIC-019
 status: Completed
 approved: true
 completed_at: 2026-04-25T13:59:00Z
@@ -15,7 +15,7 @@ cached_gate_result:
   failing_criteria:
     - id: no-tbds
       detail: 1 occurrence at §4
-  last_gate_check: 2026-04-25T10:10:42Z
+  last_gate_check: 2026-04-25T13:59:01Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

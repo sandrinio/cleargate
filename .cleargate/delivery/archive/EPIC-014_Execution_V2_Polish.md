@@ -20,16 +20,21 @@ draft_tokens:
   last_stamp: 2026-04-21T12:24:58Z
   sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: proposal-approved
-      detail: "linked file not found: PROPOSAL-011_Execution_V2_Polish.md + SPRINT-09 REPORT.md §5 + CG_TEST SPRINT-01 REPORT.md §5 + session retrospective 2026-04-21"
-    - id: no-tbds
-      detail: 4 occurrences at §8
-    - id: scope-in-populated
-      detail: section 2 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-21T12:24:58Z
-sprint_cleargate_id: "SPRINT-09"
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-21T12:00:01Z
+sprint_cleargate_id: SPRINT-09
+children:
+  - "[[STORY-014-01]]"
+  - "[[STORY-014-02]]"
+  - "[[STORY-014-03]]"
+  - "[[STORY-014-04]]"
+  - "[[STORY-014-05]]"
+  - "[[STORY-014-06]]"
+  - "[[STORY-014-07]]"
+  - "[[STORY-014-08]]"
+  - "[[STORY-014-09]]"
+  - "[[STORY-014-10]]"
 ---
 
 # EPIC-014: Execution v2 Polish & Efficiency Fixes

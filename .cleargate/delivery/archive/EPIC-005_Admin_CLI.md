@@ -18,6 +18,13 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:43:08.587Z
 push_version: 3
+children:
+  - "[[STORY-005-01]]"
+  - "[[STORY-005-02]]"
+  - "[[STORY-005-03]]"
+  - "[[STORY-005-04]]"
+  - "[[STORY-005-05]]"
+  - "[[STORY-005-06]]"
 ---
 
 # EPIC-005: Admin CLI + Client Bootstrap

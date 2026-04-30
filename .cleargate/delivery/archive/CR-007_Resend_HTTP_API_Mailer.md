@@ -1,7 +1,7 @@
 ---
 cr_id: CR-007
 parent_ref: EPIC-019
-parent_cleargate_id: "EPIC-019"
+parent_cleargate_id: EPIC-019
 status: Completed
 approved: true
 approved_at: 2026-04-25T15:30:00Z
@@ -23,7 +23,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-25T13:30:34Z
+  last_gate_check: 2026-04-25T17:30:01Z
 ---
 
 # CR-007: Switch ResendMailer from SMTP to Resend HTTP API

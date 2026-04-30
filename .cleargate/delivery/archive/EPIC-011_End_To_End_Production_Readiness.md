@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-011
-status: "Completed"
+status: Completed
 ambiguity: 🟢 Low
 context_source: ../archive/PROPOSAL-003_MCP_Adapter.md
 owner: Vibe Coder (sandro.suladze@gmail.com)
@@ -19,7 +19,7 @@ scope_version: v1
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-20T13:11:40Z
+  last_gate_check: 2026-04-20T13:30:01Z
 stamp_error: no ledger rows for work_item_id EPIC-011
 draft_tokens:
   input: null
@@ -33,7 +33,12 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:46:08.015Z
 push_version: 3
-sprint_cleargate_id: "SPRINT-06"
+sprint_cleargate_id: SPRINT-06
+children:
+  - "[[STORY-011-01]]"
+  - "[[STORY-011-02]]"
+  - "[[STORY-011-03]]"
+  - "[[STORY-011-04]]"
 ---
 
 # EPIC-011: End-to-End Production Readiness (Auth + Bootstrap + Deploy)

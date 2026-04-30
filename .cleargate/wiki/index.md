@@ -9,123 +9,53 @@
 - [[EPIC-010]] (epic) — Draft
   - STORY-010-xx (8 stories) — 8 Draft
 - [[EPIC-012]] (epic) — Ready
-- [[EPIC-014]] (epic) — Approved
-  - STORY-014-xx (10 stories) — 10 Ready
 - [[EPIC-016]] (epic) — Draft
+  - STORY-016-xx (6 stories) — 6 Draft
+- [[EPIC-020]] (epic) — Approved
+  - STORY-020-xx (3 stories) — 3 Approved
+- [[EPIC-021]] (epic) — Ready
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
-- [[SPRINT-10]] (sprint) — Planned
-- [[PROPOSAL-007]] (proposal) — Draft
+- [[SPRINT-15]] (sprint) — Active
+- [[SPRINT-16]] (sprint) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
-- [[PROPOSAL-011]] (proposal) — Approved
-- [[CR-001]] (cr) — Draft
-- [[CR-002]] (cr) — Draft
-- [[BUG-002]] (bug) — Draft
-- [[BUG-003]] (bug) — Draft
-- [[BUG-005]] (bug) — Draft
-- [[STORY-003-01]] (story) — Draft
-- [[STORY-003-02]] (story) — Draft
-- [[STORY-003-03]] (story) — Draft
-- [[STORY-003-04]] (story) — Draft
-- [[STORY-003-05]] (story) — Draft
-- [[STORY-003-06]] (story) — Draft
-- [[STORY-003-07]] (story) — Draft
-- [[STORY-003-08]] (story) — Draft
-- [[STORY-003-09]] (story) — Draft
-- [[STORY-003-10]] (story) — Draft
-- [[STORY-003-11]] (story) — Draft
-- [[STORY-003-12]] (story) — Draft
-- [[STORY-004-01]] (story) — Draft
-- [[STORY-004-02]] (story) — Draft
-- [[STORY-004-03]] (story) — Draft
-- [[STORY-004-04]] (story) — Draft
-- [[STORY-004-05]] (story) — Draft
-- [[STORY-004-06]] (story) — Draft
-- [[STORY-004-08]] (story) — Draft
-- [[STORY-004-09]] (story) — Ready
-- [[STORY-005-06]] (story) — Draft
+- [[PROPOSAL-012]] (proposal) — Approved
+- [[PROPOSAL-013]] (proposal) — Approved
+- [[CR-002]] (cr) — Approved
+- [[CR-011]] (cr) — Approved
+- [[CR-012]] (cr) — Approved
+- [[CR-014]] (cr) — Approved
+- [[CR-016]] (cr) — Approved
+- [[CR-017]] (cr) — Approved
+- [[CR-018]] (cr) — Approved
+- [[BUG-002]] (bug) — Verified
+- [[BUG-003]] (bug) — Verified
+- [[BUG-004]] (bug) — Draft
+- [[BUG-005]] (bug) — Verified
+- [[BUG-007]] (bug) — Verified
+- [[BUG-008]] (bug) — Verified
+- [[BUG-009]] (bug) — Verified
+- [[BUG-010]] (bug) — Verified
+- [[BUG-017]] (bug) — Verified
+- [[BUG-018]] (bug) — Verified
+- [[BUG-019]] (bug) — Verified
+- [[BUG-020]] (bug) — Verified
+- [[STORY-015-05]] (story) — Approved
+- [[STORY-015-06]] (story) — Approved
 
 ## Archive
 
-- Epics: 12 Completed · 2 Abandoned · [expand](archive/epics.md)
-- Sprints: 10 Completed · [expand](archive/sprints.md)
-- Proposals: 7 Abandoned · [expand](archive/proposals.md)
-- CRs: 5 Completed · [expand](archive/crs.md)
-- Stories: 45 Completed · 13 Abandoned · 9 Done · [expand](archive/stories.md)
-## Proposals
-
-| [[PROPOSAL-007]] | proposal | Abandoned | .cleargate/delivery/pending-sync/PROPOSAL-007_Multi_Participant_MCP_Sync.md |
-| [[PROPOSAL-012]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-012_Wiki_Contradiction_Detection.md |
-| [[PROPOSAL-013]] | proposal | Approved | .cleargate/delivery/pending-sync/PROPOSAL-013_Cleargate_MCP_Native_Source_Of_Truth.md |
-## Epics
-
-| [[EPIC-020]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-020_Wiki_Contradiction_Detection.md |
-| [[EPIC-021]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-021_Solo_Onboarding_DX.md |
-| [[EPIC-022]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md |
-## Stories
-
-| [[STORY-014-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-014-01_Doctor_Exit_Code_Semantics.md |
-| [[STORY-015-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-015-01_Hierarchy_Frontmatter_Keys.md |
-| [[STORY-015-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-015-02_Push_And_Ingest_Hierarchy_Extraction.md |
-| [[STORY-015-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-015-05_Hierarchy_Frontmatter_Keys.md |
-| [[STORY-015-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-015-06_Push_And_Ingest_Hierarchy_Extraction.md |
-| [[STORY-016-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-01_Registry_Check_Library_And_Cache.md |
-| [[STORY-016-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-02_Doctor_Session_Start_Notifier.md |
-| [[STORY-016-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-03_Changelog_Backfill_And_Tarball.md |
-| [[STORY-016-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-04_Upgrade_Prints_Changelog_Delta.md |
-| [[STORY-016-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-05_Init_From_Source_Meta_Repo_Dogfood.md |
-| [[STORY-016-06]] | story | Draft | .cleargate/delivery/pending-sync/STORY-016-06_Dogfood_Integration_Test.md |
-| [[STORY-020-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-01_Contradict_Subagent_And_Schema_Delta.md |
-| [[STORY-020-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-02_Ingest_Phase4_And_Advisory_Log.md |
-| [[STORY-020-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-020-03_CLI_Wiki_Contradict_Subcommand.md |
-| [[STORY-022-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-01_Architect_Lane_Classification_And_Protocol_Section_14.md |
-| [[STORY-022-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-02_State_Json_Schema_V2_Migration.md |
-| [[STORY-022-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-03_Templates_Lane_Fields.md |
-| [[STORY-022-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-04_Pre_Gate_Runner_Demotion_LD_Event.md |
-| [[STORY-022-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-05_Developer_Agent_Lane_Aware_Execution.md |
-| [[STORY-022-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-022-06_Hotfix_Lane_Template_CLI_Ledger.md |
-| [[STORY-099-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-099-01_Dogfood_Lane_Fast_Smoke.md |
-## Bugs
-
-| [[BUG-006]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-006_Init_Scaffold_Hooks_Reference_Nonexistent_CLI_Path.md |
-| [[BUG-007]] | bug | Verified | .cleargate/delivery/archive/BUG-007_Init_Participant_Email_Prompt_Invisible.md |
-| [[BUG-008]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-008_Gate_Check_Criteria_Over_Match.md |
-| [[BUG-009]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-009_Token_Ledger_Missing_CR_PROP_Rows.md |
-| [[BUG-010]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-010_Token_Ledger_Detector_Mis_Attribution.md |
-| [[BUG-017]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-017_Init_Does_Not_Register_MCP_Server.md |
-| [[BUG-018]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-018_Init_Strips_Executable_Bit_From_Hooks.md |
-| [[BUG-019]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-019_MCP_HTTP_Transport_No_Auth_Flow.md |
-| [[BUG-020]] | bug | Verified | .cleargate/delivery/pending-sync/BUG-020_Templates_Carry_Cleargate_Internal_Cross_Refs.md |
-| [[BUG-021]] | bug | Abandoned | .cleargate/delivery/pending-sync/BUG-021_Token_Ledger_Detector_Still_Mis_Attributes_Post_Template_Strip.md |
-| [[BUG-022]] | bug | Abandoned | .cleargate/delivery/pending-sync/BUG-022_Token_Ledger_Rows_Are_Cumulative_Not_Delta.md |
-## CRs
-
-| [[CR-001]] | cr | Completed | .cleargate/delivery/archive/CR-001_Flashcard_Triggers_And_Cleanup.md |
-| [[CR-002]] | cr | Approved | .cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md |
-| [[CR-008]] | cr | Approved | .cleargate/delivery/pending-sync/CR-008_Planning_First_Enforcement.md |
-| [[CR-009]] | cr | Approved | .cleargate/delivery/pending-sync/CR-009_Hook_CLI_Resolution_Pin_NPX.md |
-| [[CR-010]] | cr | Approved | .cleargate/delivery/pending-sync/CR-010_Advisory_Readiness_Gates_On_Push.md |
-| [[CR-011]] | cr | Approved | .cleargate/delivery/pending-sync/CR-011_Capability_Gating_By_Membership.md |
-| [[CR-012]] | cr | Approved | .cleargate/delivery/pending-sync/CR-012_Surface_Ingest_Result_To_Chat.md |
-| [[CR-014]] | cr | Approved | .cleargate/delivery/pending-sync/CR-014_Sprint_Init_Gate_Multi_Type_Decomposition_Check.md |
-| [[CR-015]] | cr | Approved | .cleargate/delivery/pending-sync/CR-015_Flashcard_Discipline_In_Agent_Role_Contracts.md |
-| [[CR-016]] | cr | Approved | .cleargate/delivery/pending-sync/CR-016_Token_Ledger_Hook_v2.md |
-| [[CR-017]] | cr | Approved | .cleargate/delivery/pending-sync/CR-017_Lifecycle_Status_Reconciliation_At_Sprint_Boundaries.md |
-| [[CR-018]] | cr | Approved | .cleargate/delivery/pending-sync/CR-018_Token_Ledger_Per_Turn_Delta_Math.md |
-## Sprints
-
-| [[SPRINT-14]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-14_Process_v2.md |
-| [[SPRINT-15]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md |
-| [[SPRINT-16]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md |
+- Epics: 14 Completed · 2 Abandoned · [expand](archive/epics.md)
+- Sprints: 12 Completed · [expand](archive/sprints.md)
+- Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
+- CRs: 10 Completed · [expand](archive/crs.md)
+- Bugs: 2 Abandoned · 1 Completed · [expand](archive/bugs.md)
+- Stories: 69 Completed · 31 Abandoned · 9 Done · [expand](archive/stories.md)
 
 ## Contradictions
 
-Advisory log of detected contradictions between wiki pages. Populated by ingest Phase 4 (§10.10).
+Advisory log of detected contradictions between wiki pages. Populated by ingest Phase 4.
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-
-## Hotfix Ledger
-
-- [[topics/hotfix-ledger]] — Append-only audit log of merged hotfixes. Reporter aggregates entries by sprint window at sprint close.
