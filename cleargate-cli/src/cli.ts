@@ -10,6 +10,7 @@ import { wikiIngestHandler } from './commands/wiki-ingest.js';
 import { wikiLintHandler } from './commands/wiki-lint.js';
 import { wikiQueryHandler } from './commands/wiki-query.js';
 import { wikiAuditStatusHandler } from './commands/wiki-audit-status.js';
+import { wikiContradictHandler } from './commands/wiki-contradict.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
 import { gateRunHandler } from './commands/gate-run.js';
@@ -150,6 +151,30 @@ wiki
   .option('--quiet', 'suppress diff output')
   .action(async (opts: { fix?: boolean; yes?: boolean; quiet?: boolean }) => {
     await wikiAuditStatusHandler(opts);
+  });
+
+wiki
+  .command('contradict <file>')
+  .description('run the wiki contradiction check against a single page (advisory)')
+  .option('--dry-run', 'print findings without mutating wiki/contradictions.md or stamping last_contradict_sha')
+  .addHelpText('after', [
+    '',
+    'Two-step flow (Mode A — in-agent-session):',
+    '  1. cleargate wiki contradict <file>',
+    '     Runs deterministic prep (status filter, SHA idempotency, neighborhood',
+    '     collection, prompt) and emits a `phase4:` JSON line to stdout.',
+    '     The calling agent reads this, spawns cleargate-wiki-contradict via Task,',
+    '     and receives findings.',
+    '  2. The agent calls commitPhase4Findings (or a follow-up commit subcommand)',
+    '     to write findings to wiki/contradictions.md and stamp last_contradict_sha.',
+    '',
+    'With --dry-run: print findings (or skipped notice) without any state mutation.',
+  ].join('\n'))
+  .action(async (file: string, opts: { dryRun?: boolean }) => {
+    await wikiContradictHandler({
+      filePath: file,
+      ...(opts.dryRun === true ? { dryRun: true } : {}),
+    });
   });
 
 const gate = program
