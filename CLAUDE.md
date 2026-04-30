@@ -93,6 +93,7 @@ Node 24 LTS · TypeScript ^5.8 · Fastify ^5.8 · Drizzle 0.45.2 · Zod ^4.3 · 
 - Before destructive ops (force push, reset --hard, dropping tables, deleting branches, killing untracked work): ask.
 - Sprint execution runs through the four-agent loop — do not implement stories yourself in the main conversation when a sprint is active.
 - Keep conversational output terse. Details live in the sprint file and REPORT.md, not in chat.
+- Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.
 
 <!-- CLEARGATE:START -->
 ## 🔄 ClearGate Planning Framework

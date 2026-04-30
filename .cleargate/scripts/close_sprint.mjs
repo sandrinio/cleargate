@@ -64,7 +64,7 @@ function usage() {
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
     '\n' +
     'Options:\n' +
-    '  --assume-ack           Skip user acknowledgement prompt (for automated tests)\n' +
+    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this)\n' +
     '  --report-body-stdin    Read REPORT.md body from stdin; implies ack (STORY-014-10)\n'
   );
   process.exit(2);

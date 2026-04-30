@@ -287,6 +287,7 @@ Rolling 4-sprint hotfix count: SPRINT-12=0, SPRINT-13=0, SPRINT-14=0, SPRINT-15=
 |---|---|---|---|
 | 14:40 | Anthropic rate-limit hit during M4 parallel CR fan-out | ~10 min idle; recovered without intervention | None — known platform behaviour. |
 | 16:46 | Working-tree file revert detected during M4 wrap-up | Restored manually before sprint close; no artifact lost | File a Yellow process gap: no automated tree-drift sentinel between milestones. Recommend SPRINT-16 considers `git status --porcelain` snapshot at every M-close. |
+| ~13:01 UTC | Orchestrator passed `--assume-ack` to `close_sprint.mjs` autonomously without surfacing the script's confirmation prompt to the human. Gate-3 breach — close was authorised by sprint-start, not by explicit sprint-close approval. | CR-019 filed and shipped in SPRINT-16 as durable fix. Protocol §27 added. | CR-019 codifies the two-step close gate and reserves `--assume-ack` for automated tests only. |
 
 ---
 
