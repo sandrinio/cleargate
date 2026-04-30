@@ -20,6 +20,16 @@
       "types": "./dist/admin-api/index.d.ts",
       "import": "./dist/admin-api/index.js",
       "require": "./dist/admin-api/index.cjs"
+    },
+    "./lib/ledger": {
+      "types": "./dist/lib/ledger.d.ts",
+      "import": "./dist/lib/ledger.js",
+      "require": "./dist/lib/ledger.cjs"
+    },
+    "./lib/ledger.js": {
+      "types": "./dist/lib/ledger.d.ts",
+      "import": "./dist/lib/ledger.js",
+      "require": "./dist/lib/ledger.cjs"
     }
   },
   "files": [
