@@ -14,15 +14,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: proposal-approved
-      detail: "linked file not found: Direct-epic waiver (2026-04-24 conversation on ClearGate versioning). No separate PROPOSAL filed. Inline references: (a) cleargate@0.2.1 currently on npm with install-manifest + merge-3way upgrade flow shipped in EPIC-009 (STORY-009-01..08); (b) verified gaps — no npm-registry notifier, no CHANGELOG surface, and the meta-repo bypasses `cleargate init`/`upgrade` entirely (edits cleargate-planning/ in place); (c) relevant code: cleargate-cli/src/commands/upgrade.ts, doctor.ts (--check-scaffold, --session-start), lib/manifest.ts (Tier + overwrite_policy)."
-    - id: no-tbds
-      detail: 1 occurrence at §10
-    - id: affected-files-declared
-      detail: section 4 has 0 listed-item (≥1 required)
-  last_gate_check: 2026-04-24T08:21:25Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-04-30T16:29:46Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

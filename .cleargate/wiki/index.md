@@ -62,9 +62,26 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## CRs
 
 | [[CR-002]] | cr | Completed | .cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md |
+| [[CR-019]] | cr | Approved | .cleargate/delivery/pending-sync/CR-019_Sprint_Close_Requires_Explicit_Human_Ack.md |
 ## Bugs
 
 | [[BUG-022]] | bug | Verified | .cleargate/delivery/archive/BUG-022_Token_Ledger_Rows_Are_Cumulative_Not_Delta.md |
 ## Sprints
 
 | [[SPRINT-15]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md |
+| [[SPRINT-16]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md |
+## Epics
+
+| [[EPIC-023]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-023_MCP_Native_Source_Of_Truth.md |
+| [[EPIC-024]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-024_AI_Orientation_Surface_Slim.md |
+## Stories
+
+| [[STORY-023-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01_CLI_Sync_Work_Items_Command.md |
+| [[STORY-023-01-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-01_CLI_Sync_Work_Items_Command.md |
+| [[STORY-023-01-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-02_MCP_Sync_Work_Items_Handler.md |
+| [[STORY-023-01-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-03_Conflict_Detector_Wiring.md |
+| [[STORY-023-01-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-04_Admin_URL_Helper_And_Sync_Output_Link.md |
+| [[STORY-023-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-04_Admin_URL_Helper_And_Sync_Output_Link.md |
+| [[STORY-024-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-01_Architect_Plan_Slim.md |
+| [[STORY-024-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-02_Protocol_Split_And_Citation_Rewrite.md |
+| [[STORY-024-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-03_CLAUDE_md_Gap_Fill.md |
