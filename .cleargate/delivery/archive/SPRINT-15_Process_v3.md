@@ -1,9 +1,9 @@
 ---
 sprint_id: SPRINT-15
 source_tool: local
-status: Active
+status: Completed
 start_date: 2026-04-28
-end_date: 2026-05-12
+end_date: 2026-04-30
 created_at: 2026-04-28T00:00:00Z
 updated_at: 2026-04-28T00:00:00Z
 created_at_version: cleargate@0.8.2

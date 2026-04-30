@@ -7,7 +7,7 @@
 
 - [[SPRINT-14]] — status: Completed
 
-- [[SPRINT-15]] — status: Active
+- [[SPRINT-15]] — status: Completed
 
 
 
