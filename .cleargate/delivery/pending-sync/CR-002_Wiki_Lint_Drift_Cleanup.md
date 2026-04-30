@@ -1,6 +1,8 @@
 ---
 cr_id: CR-002
 parent_ref: EPIC-015
+parent_cleargate_id: "EPIC-015"
+sprint_cleargate_id: "SPRINT-09"
 status: Approved
 approved: true
 approved_at: 2026-04-29T00:00:00Z

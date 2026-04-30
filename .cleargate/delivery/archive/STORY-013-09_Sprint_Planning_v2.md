@@ -1,6 +1,8 @@
 ---
 story_id: STORY-013-09_Sprint_Planning_v2
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
+sprint_cleargate_id: "SPRINT-09"
 status: Done
 ambiguity: 🟢 Low
 context_source: "EPIC-013_Execution_Phase_v2.md §2 bullet 'Sprint Planning v2' + §6 Q8 revised answer (2026-04-21, 9-story cut); V-Bounce Engine skills/agent-team/SKILL.md § 'Architect Sprint Design Review' + § 'Step 0.5: Discovery Check' at HEAD 2b8477ab"

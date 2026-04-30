@@ -30,6 +30,7 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+sprint_cleargate_id: "SPRINT-15"
 ---
 
 # SPRINT-15: Process v3 — Awareness, Ledger, Hierarchy, Upgrade

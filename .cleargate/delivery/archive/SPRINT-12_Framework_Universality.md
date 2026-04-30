@@ -15,6 +15,7 @@ approved_at: "2026-04-24T00:00:00Z"
 approved_by: "sandro"
 execution_mode: "v2"
 human_override: false
+sprint_cleargate_id: "SPRINT-12"
 ---
 
 # SPRINT-12: Framework Universality — Public Ship

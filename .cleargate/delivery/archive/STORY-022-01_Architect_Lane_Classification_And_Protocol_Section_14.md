@@ -1,6 +1,8 @@
 ---
 story_id: STORY-022-01
 parent_epic_ref: EPIC-022
+parent_cleargate_id: "EPIC-022"
+sprint_cleargate_id: "SPRINT-14"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md

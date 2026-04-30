@@ -30,6 +30,7 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+sprint_cleargate_id: "SPRINT-14"
 ---
 
 # SPRINT-14: Process v2 — Planning-First Enforcement, Lane Classifier, Advisory Gates

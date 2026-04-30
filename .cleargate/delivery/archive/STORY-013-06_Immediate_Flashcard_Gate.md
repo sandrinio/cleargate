@@ -1,6 +1,7 @@
 ---
 story_id: STORY-013-06_Immediate_Flashcard_Gate
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
 status: Done
 ambiguity: 🟢 Low
 context_source: "EPIC-013_Execution_Phase_v2.md §4.2 row 'Immediate flashcard gate'; V-Bounce Engine skills/agent-team/SKILL.md § 'Step 5.5: Immediate Flashcard Recording (Hard Gate)' at HEAD 2b8477ab"

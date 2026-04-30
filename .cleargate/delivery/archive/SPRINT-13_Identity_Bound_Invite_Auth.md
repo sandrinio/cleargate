@@ -15,6 +15,7 @@ approved_at: "2026-04-25T00:00:00Z"
 approved_by: "sandrinio"
 execution_mode: "v2"
 human_override: false
+sprint_cleargate_id: "SPRINT-13"
 ---
 
 # SPRINT-13: Identity-Bound Invite Auth

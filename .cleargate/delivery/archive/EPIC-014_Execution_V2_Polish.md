@@ -29,6 +29,7 @@ cached_gate_result:
     - id: scope-in-populated
       detail: section 2 has 0 listed-item (≥1 required)
   last_gate_check: 2026-04-21T12:24:58Z
+sprint_cleargate_id: "SPRINT-09"
 ---
 
 # EPIC-014: Execution v2 Polish & Efficiency Fixes

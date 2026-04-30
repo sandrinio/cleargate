@@ -1,6 +1,7 @@
 ---
 story_id: STORY-018-04
 parent_epic_ref: EPIC-018
+parent_cleargate_id: "EPIC-018"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-018_Framework_Universality_Public_Ship.md

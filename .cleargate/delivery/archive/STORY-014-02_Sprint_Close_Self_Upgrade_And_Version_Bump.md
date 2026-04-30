@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-02
 parent_epic_ref: SPRINT-14
+parent_cleargate_id: "SPRINT-14"
+sprint_cleargate_id: "SPRINT-14"
 status: Completed
 ambiguity: 🟢 Low
 context_source: SPRINT-14_Process_v2.md §M5 + R-10/R-11/R-12

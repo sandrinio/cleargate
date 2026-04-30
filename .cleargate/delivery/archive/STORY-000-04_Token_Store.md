@@ -1,6 +1,8 @@
 ---
 story_id: STORY-000-04
 parent_epic_ref: EPIC-000
+parent_cleargate_id: "EPIC-000"
+sprint_cleargate_id: "SPRINT-03"
 status: Completed
 ambiguity: 🟢 Low
 complexity_label: L2

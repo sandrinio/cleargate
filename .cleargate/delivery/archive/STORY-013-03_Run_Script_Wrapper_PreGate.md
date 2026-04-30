@@ -1,6 +1,7 @@
 ---
 story_id: STORY-013-03_Run_Script_Wrapper_PreGate
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 rows 'Pre-gate scanner' + 'run_script.sh wrapper' + V-Bounce Engine `scripts/{run_script.sh,pre_gate_runner.sh,pre_gate_common.sh,init_gate_config.sh}`

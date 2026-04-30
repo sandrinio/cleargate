@@ -1,6 +1,7 @@
 ---
 story_id: STORY-014-07
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE A3+A4 + manual bash choreography observed across SPRINT-09 + CG_TEST SPRINT-01

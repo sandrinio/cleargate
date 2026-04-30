@@ -1,6 +1,8 @@
 ---
 story_id: STORY-013-08_Execution_Mode_Flag
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
+sprint_cleargate_id: "SPRINT-09"
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §6 Q2 Opt-in rollout (execution_mode flag) + §4.2 row 'Sprint Planning v2' (frontmatter)

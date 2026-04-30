@@ -1,6 +1,8 @@
 ---
 bug_id: BUG-006
 parent_ref: EPIC-009
+parent_cleargate_id: "EPIC-009"
+sprint_cleargate_id: "SPRINT-15"
 status: Completed
 severity: P1-High
 reporter: sandro

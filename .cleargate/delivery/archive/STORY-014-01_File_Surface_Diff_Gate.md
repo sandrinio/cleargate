@@ -1,6 +1,7 @@
 ---
 story_id: STORY-014-01
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE B1 + SPRINT-09 REPORT.md §5 Process 🔴 (013-06 collateral damage incident)

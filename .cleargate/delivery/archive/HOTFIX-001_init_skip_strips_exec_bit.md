@@ -29,6 +29,7 @@ last_remote_update: null
 source: "local-authored"
 last_synced_status: null
 last_synced_body_sha: null
+sprint_cleargate_id: "SPRINT-14"
 ---
 
 # HOTFIX-001: copy-payload re-asserts +x on no-force content-divergence skip (BUG-018 follow-up)

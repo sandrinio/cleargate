@@ -1,6 +1,7 @@
 ---
 story_id: STORY-010-02
 parent_epic_ref: EPIC-010
+parent_cleargate_id: "EPIC-010"
 status: Draft
 ambiguity: 🟢 Low
 complexity_label: L3

@@ -1,6 +1,8 @@
 ---
 story_id: STORY-013-04_Sprint_Context_Adjacent_Impl
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
+sprint_cleargate_id: "SPRINT-09"
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 rows 'Sprint context file' + 'Adjacent implementation check' + V-Bounce Engine `skills/agent-team/SKILL.md` Step 7 + `templates/sprint_context.md`

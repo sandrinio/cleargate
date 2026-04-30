@@ -56,9 +56,9 @@ Given one absolute path to a raw work-item file under `.cleargate/delivery/**`, 
    | `.cleargate/` | `planning` |
    | `cleargate-planning/` | `planning` |
 
-6. **Parse raw frontmatter.** Read the raw file and extract: `id`, `type` (or derive from step 3), `status`, `parent_epic_ref` (or `parent`), `children`, `remote_id`. These become inputs to the wiki page frontmatter.
+6. **Parse raw frontmatter.** Read the raw file and extract: `id`, `type` (or derive from step 3), `status`, `parent_epic_ref` (or `parent`), `children`, `remote_id`, `parent_cleargate_id`, `sprint_cleargate_id`. These become inputs to the wiki page frontmatter.
 
-7. **Write the wiki page** at `.cleargate/wiki/<bucket>/<id>.md`. Use exactly the §10.4 page schema — no additional fields, no omitted fields:
+7. **Write the wiki page** at `.cleargate/wiki/<bucket>/<id>.md`. Use the §10.4 page schema plus two optional hierarchy fields (§11.7) when present in raw frontmatter:
 
    ```markdown
    ---
@@ -72,6 +72,8 @@ Given one absolute path to a raw work-item file under `.cleargate/delivery/**`, 
    last_ingest: "2026-04-19T10:00:00Z"
    last_ingest_commit: "a1b2c3d4e5f6..."
    repo: "planning"
+   parent_cleargate_id: "EPIC-042"
+   sprint_cleargate_id: "SPRINT-14"
    ---
 
    # STORY-042-01: Short title
@@ -96,6 +98,8 @@ Given one absolute path to a raw work-item file under `.cleargate/delivery/**`, 
    - `last_ingest` — current time in ISO 8601 UTC format.
    - `last_ingest_commit` — the SHA from `git log -1 --format=%H -- <raw_path>` (step 4).
    - `repo` — derived in step 5; never manually set.
+   - `parent_cleargate_id` — copy verbatim from raw frontmatter when present as a non-null string (§11.7). Omit the field entirely when absent or null.
+   - `sprint_cleargate_id` — copy verbatim from raw frontmatter when present as a non-null string (§11.7). Omit the field entirely when absent or null.
 
    Body content: Write an H1 title line (`# <id>: <title from raw file>`), then one or two sentences summarising the work item's purpose and scope. Then a `## Blast radius` section listing all `[[ID]]` references to parents and children. Then `## Open questions` section (content `None.` if the raw frontmatter has no open questions).
 
@@ -178,7 +182,7 @@ Phase 4 runs AFTER step 10 (synthesis recompile), BEFORE the agent returns. It i
 - **Never modify the raw file itself.** This subagent is read-only with respect to `.cleargate/delivery/**`.
 - **Exit non-zero only on filesystem errors.** Status-quo no-ops (SKIP, NOOP) exit 0. The hook must not re-trigger on exit 0 + no write.
 - **One ingest = one wiki page write + one log.md append + one index.md update + one recompile invocation.** No batching, no fan-out. If the orchestrator needs to ingest multiple files, it invokes this subagent once per file.
-- **Schema conformance is strict.** The §10.4 nine-field frontmatter is the only allowed shape. Do not add fields; do not remove fields. The wiki-lint agent will flag any deviation.
+- **Schema conformance.** The §10.4 nine required fields are the mandatory shape. Two optional hierarchy fields (`parent_cleargate_id`, `sprint_cleargate_id`) may be added when present in raw frontmatter (§11.7). Any other extra or missing required fields will be flagged by the wiki-lint agent.
 
 ## What you are NOT
 

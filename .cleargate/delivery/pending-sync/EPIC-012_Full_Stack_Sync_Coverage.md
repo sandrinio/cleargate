@@ -28,6 +28,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-20T20:11:41Z
   sessions: []
+sprint_cleargate_id: "SPRINT-08"
 ---
 
 # EPIC-012: Full-Stack Sync Coverage (Sprints, Reports, Plans, Flashcards)

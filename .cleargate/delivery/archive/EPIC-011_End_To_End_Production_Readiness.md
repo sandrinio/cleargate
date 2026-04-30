@@ -33,6 +33,7 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:46:08.015Z
 push_version: 3
+sprint_cleargate_id: "SPRINT-06"
 ---
 
 # EPIC-011: End-to-End Production Readiness (Auth + Bootstrap + Deploy)

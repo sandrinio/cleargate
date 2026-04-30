@@ -18,6 +18,7 @@ approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:43:29.856Z
 push_version: 3
+sprint_cleargate_id: "SPRINT-04"
 ---
 
 # EPIC-007: Public Discoverability — git push + GitHub metadata + READMEs

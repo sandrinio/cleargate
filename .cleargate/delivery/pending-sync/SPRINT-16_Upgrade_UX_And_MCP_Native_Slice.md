@@ -30,6 +30,7 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+sprint_cleargate_id: "SPRINT-16"
 ---
 
 # SPRINT-16: Upgrade UX + MCP-Native Source of Truth (slice 1)

@@ -29,6 +29,7 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+sprint_cleargate_id: "SPRINT-09"
 ---
 
 # SPRINT-09: Execution Phase v2 — Bounce Loop, Worktrees, Pre-Gates, Self-Improvement

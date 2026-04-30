@@ -1,6 +1,7 @@
 ---
 story_id: STORY-014-06
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
 status: Completed
 ambiguity: 🟢 Low
 context_source: "EPIC-014 §2 IN-SCOPE A1+A2 + FLASHCARD.md 2026-04-21 `#cli #sprint-close #assume-ack` + `#cli #state-update #execution-mode`"

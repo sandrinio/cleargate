@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-05
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
+sprint_cleargate_id: "SPRINT-01"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE C3 + CG_TEST SPRINT-01 REPORT.md §5 Tooling 🟡 (token ledger routed to orchestrator's project, not target)

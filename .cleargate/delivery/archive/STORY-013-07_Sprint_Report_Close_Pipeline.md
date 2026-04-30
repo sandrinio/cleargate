@@ -1,6 +1,8 @@
 ---
 story_id: STORY-013-07_Sprint_Report_Close_Pipeline
 parent_epic_ref: EPIC-013
+parent_cleargate_id: "EPIC-013"
+sprint_cleargate_id: "SPRINT-08"
 status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-013_Execution_Phase_v2.md §4.2 rows 'Sprint-close pipeline' + 'Sprint Report v2' + 'run_script.sh wrapper' + §4.5; V-Bounce Engine scripts/close_sprint.mjs + complete_story.mjs + prefill_report.mjs + suggest_improvements.mjs + templates/sprint_report.md at HEAD 2b8477ab

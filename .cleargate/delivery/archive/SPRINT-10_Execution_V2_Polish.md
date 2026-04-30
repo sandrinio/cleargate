@@ -15,6 +15,7 @@ approved_at: "2026-04-21T12:30:00Z"
 approved_by: "sandro"
 execution_mode: "v2"
 human_override: false
+sprint_cleargate_id: "SPRINT-10"
 ---
 
 # SPRINT-10: Execution v2 Polish & Efficiency Fixes

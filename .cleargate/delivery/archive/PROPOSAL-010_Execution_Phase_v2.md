@@ -32,6 +32,7 @@ draft_tokens:
   last_stamp: 2026-04-20T22:22:49Z
   sessions: []
 push_version: 1
+sprint_cleargate_id: "SPRINT-01"
 ---
 
 # PROPOSAL-010: Execution Phase v2 (Gate Waiver Record)

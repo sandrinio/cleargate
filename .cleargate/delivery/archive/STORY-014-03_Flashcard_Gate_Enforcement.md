@@ -1,6 +1,8 @@
 ---
 story_id: STORY-014-03
 parent_epic_ref: EPIC-014
+parent_cleargate_id: "EPIC-014"
+sprint_cleargate_id: "SPRINT-09"
 status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-014 §2 IN-SCOPE B3 + SPRINT-09 REPORT.md §5 Skills 🟡 + protocol §18 (Immediate Flashcard Gate)

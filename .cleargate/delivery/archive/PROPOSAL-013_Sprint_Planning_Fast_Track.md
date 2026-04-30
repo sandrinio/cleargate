@@ -36,6 +36,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-04-26T08:49:56Z
   sessions: []
+sprint_cleargate_id: "SPRINT-12"
 ---
 
 # PROPOSAL-013: Sprint Planning Fast-Track Lane
