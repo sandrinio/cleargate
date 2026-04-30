@@ -1,9 +1,9 @@
 ---
 cr_id: CR-002
 parent_ref: EPIC-015
-parent_cleargate_id: "EPIC-015"
-sprint_cleargate_id: "SPRINT-09"
-status: Approved
+parent_cleargate_id: EPIC-015
+sprint_cleargate_id: SPRINT-09
+status: Active
 approved: true
 approved_at: 2026-04-29T00:00:00Z
 approved_by: sandrinio
@@ -31,7 +31,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-29T11:17:11Z
+  last_stamp: 2026-04-30T12:27:09Z
   sessions: []
 ---
 

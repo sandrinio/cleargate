@@ -21,6 +21,8 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
+implementation_files:
+  - "cleargate-planning/.claude/agents/developer.md"
 stamp_error: no ledger rows for work_item_id STORY-013-01_Worktree_Branch_Hierarchy
 draft_tokens:
   input: null

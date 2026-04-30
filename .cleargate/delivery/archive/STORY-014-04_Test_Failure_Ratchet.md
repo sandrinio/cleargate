@@ -27,6 +27,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
+implementation_files:
+  - ".cleargate/scripts/test_ratchet.mjs"
+  - "cleargate-planning/.claude/hooks/pre-commit-test-ratchet.sh"
+  - "cleargate-planning/.cleargate/scripts/test_ratchet.mjs"
 ---
 
 # STORY-014-04: Pre-existing test-failure ratchet

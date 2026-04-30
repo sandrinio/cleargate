@@ -27,6 +27,10 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
+implementation_files:
+  - ".cleargate/scripts/close_sprint.mjs"
+  - "cleargate-planning/.claude/agents/reporter.md"
+  - "cleargate-planning/.cleargate/scripts/close_sprint.mjs"
 ---
 
 # STORY-014-10: Reporter Write-seam fix (`--report-body-stdin`)

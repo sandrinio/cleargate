@@ -32,6 +32,15 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-21T00:00:01Z
+implementation_files:
+  - "cleargate-cli/src/cli.ts"
+  - "cleargate-cli/src/commands/execution-mode.ts"
+  - "cleargate-cli/src/commands/fixtures/SPRINT-99-v1.md"
+  - "cleargate-cli/src/commands/fixtures/SPRINT-99-v2.md"
+  - "cleargate-cli/src/commands/gate.ts"
+  - "cleargate-cli/src/commands/sprint.ts"
+  - "cleargate-cli/src/commands/state.ts"
+  - "cleargate-cli/src/commands/story.ts"
 ---
 
 # STORY-013-08: execution_mode Flag + CLI Wrappers (flips v2 routing — last M2 story)

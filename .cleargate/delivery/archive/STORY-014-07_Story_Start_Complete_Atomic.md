@@ -26,6 +26,8 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-30T11:01:46Z
+implementation_files:
+  - "cleargate-cli/src/commands/story.ts"
 ---
 
 # STORY-014-07: `cleargate story start` + `story complete` atomic operations

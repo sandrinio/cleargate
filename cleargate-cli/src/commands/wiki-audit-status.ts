@@ -26,7 +26,9 @@ export interface WikiAuditStatusOptions {
   promptReader?: () => Promise<string>;
 }
 
-const TERMINAL = new Set(['Completed', 'Done', 'Abandoned', 'Closed', 'Resolved']);
+// Terminal statuses: items whose lifecycle is conclusively closed (no further work expected).
+// 'Verified' covers QA-verified bugs; 'Approved' covers CRs/proposals formally accepted with no separate Completed step.
+const TERMINAL = new Set(['Completed', 'Done', 'Abandoned', 'Closed', 'Resolved', 'Verified', 'Approved']);
 
 interface DriftItem {
   id: string;

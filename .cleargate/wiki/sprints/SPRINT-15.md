@@ -8,8 +8,8 @@ children:
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md"
-last_ingest: "2026-04-30T11:32:26.913Z"
-last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
+last_ingest: "2026-04-30T12:27:50.166Z"
+last_ingest_commit: "8410509361b8dabf5121a3d9f02e21552ea82044"
 repo: "planning"
 ---
 
