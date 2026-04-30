@@ -268,8 +268,86 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     fi
   fi
 
-  # --- assemble ledger row ---
+  # --- per-turn delta math (CR-018) ---
+  # USAGE_JSON (computed above) is the intra-fire cumulative session total from the transcript.
+  # We maintain .session-totals.json keyed by session_id with the last-known cumulative totals.
+  # Cross-fire delta = current_session_total − prior_session_total.
+  # For the first fire of a session, delta == session_total.
+  #
+  # Atomic update via mktemp + mv (POSIX rename is atomic on the same filesystem).
+  # Concurrent-fire safety: two worktree SubagentStop fires may race. The atomic rename
+  # ensures one writer wins; the other sees the updated file on its next read.
+  SESSION_TOTALS_FILE="${SPRINT_DIR}/.session-totals.json"
+
+  # Read current session totals (or empty object if file absent)
+  PRIOR_SESSION_JSON="{}"
+  if [[ -f "${SESSION_TOTALS_FILE}" ]]; then
+    PRIOR_SESSION_JSON="$(cat "${SESSION_TOTALS_FILE}" 2>/dev/null || printf '{}')"
+    [[ -z "${PRIOR_SESSION_JSON}" ]] && PRIOR_SESSION_JSON="{}"
+  fi
+
+  # Compute current intra-fire totals from USAGE_JSON
+  CURRENT_IN="$(printf '%s' "${USAGE_JSON}" | jq -r '.input // 0')"
+  CURRENT_OUT="$(printf '%s' "${USAGE_JSON}" | jq -r '.output // 0')"
+  CURRENT_CC="$(printf '%s' "${USAGE_JSON}" | jq -r '.cache_creation // 0')"
+  CURRENT_CR="$(printf '%s' "${USAGE_JSON}" | jq -r '.cache_read // 0')"
+  CURRENT_MODEL="$(printf '%s' "${USAGE_JSON}" | jq -r '.model // ""')"
+  CURRENT_TURNS="$(printf '%s' "${USAGE_JSON}" | jq -r '.turns // 0')"
+
+  # Look up prior totals for this session_id
+  PRIOR_IN="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -r --arg sid "${SESSION_ID}" '.[$sid].input // 0' 2>/dev/null || printf '0')"
+  PRIOR_OUT="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -r --arg sid "${SESSION_ID}" '.[$sid].output // 0' 2>/dev/null || printf '0')"
+  PRIOR_CC="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -r --arg sid "${SESSION_ID}" '.[$sid].cache_creation // 0' 2>/dev/null || printf '0')"
+  PRIOR_CR="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -r --arg sid "${SESSION_ID}" '.[$sid].cache_read // 0' 2>/dev/null || printf '0')"
+
+  # Compute delta = current − prior (floor at 0 to guard against transcript-reread edge cases)
+  DELTA_IN=$(( CURRENT_IN - PRIOR_IN ))
+  DELTA_OUT=$(( CURRENT_OUT - PRIOR_OUT ))
+  DELTA_CC=$(( CURRENT_CC - PRIOR_CC ))
+  DELTA_CR=$(( CURRENT_CR - PRIOR_CR ))
+  [[ "${DELTA_IN}" -lt 0 ]] && DELTA_IN=0
+  [[ "${DELTA_OUT}" -lt 0 ]] && DELTA_OUT=0
+  [[ "${DELTA_CC}" -lt 0 ]] && DELTA_CC=0
+  [[ "${DELTA_CR}" -lt 0 ]] && DELTA_CR=0
+
+  # Build delta and session_total JSON blocks
+  DELTA_JSON="$(jq -cn \
+    --argjson in "${DELTA_IN}" \
+    --argjson out "${DELTA_OUT}" \
+    --argjson cc "${DELTA_CC}" \
+    --argjson cr "${DELTA_CR}" \
+    '{input: $in, output: $out, cache_creation: $cc, cache_read: $cr}')"
+
+  SESSION_TOTAL_JSON="$(jq -cn \
+    --argjson in "${CURRENT_IN}" \
+    --argjson out "${CURRENT_OUT}" \
+    --argjson cc "${CURRENT_CC}" \
+    --argjson cr "${CURRENT_CR}" \
+    '{input: $in, output: $out, cache_creation: $cc, cache_read: $cr}')"
+
+  # Atomically update .session-totals.json with new totals for this session_id
   TS="$(date -u +%FT%TZ)"
+  NEW_SESSION_TOTALS="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -c \
+    --arg sid "${SESSION_ID}" \
+    --argjson in "${CURRENT_IN}" \
+    --argjson out "${CURRENT_OUT}" \
+    --argjson cc "${CURRENT_CC}" \
+    --argjson cr "${CURRENT_CR}" \
+    --arg ts "${TS}" \
+    --argjson ti "${SENTINEL_TURN_INDEX}" \
+    '.[$sid] = {input: $in, output: $out, cache_creation: $cc, cache_read: $cr, last_ts: $ts, last_turn_index: $ti}' \
+    2>/dev/null)"
+
+  if [[ -n "${NEW_SESSION_TOTALS}" ]]; then
+    SESSION_TOTALS_TMP="$(mktemp "${SESSION_TOTALS_FILE}.tmp.XXXXXX" 2>/dev/null)"
+    if [[ -n "${SESSION_TOTALS_TMP}" ]]; then
+      printf '%s\n' "${NEW_SESSION_TOTALS}" > "${SESSION_TOTALS_TMP}"
+      mv "${SESSION_TOTALS_TMP}" "${SESSION_TOTALS_FILE}" 2>/dev/null || \
+        printf '[%s] warn: could not atomic-rename session-totals\n' "${TS}" >> "${HOOK_LOG}"
+    fi
+  fi
+
+  # --- assemble ledger row (v2 schema: delta + session_total replace flat input/output/cache_*) ---
   ROW="$(jq -cn \
     --arg ts "${TS}" \
     --arg agent "${AGENT_TYPE}" \
@@ -280,14 +358,17 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     --arg sprint "${SPRINT_ID}" \
     --arg sentinel_started_at "${SENTINEL_STARTED_AT}" \
     --argjson turn_index "${SENTINEL_TURN_INDEX}" \
-    --argjson usage "${USAGE_JSON}" \
-    '{ts: $ts, sprint_id: $sprint, agent_type: $agent, story_id: $story, work_item_id: $work_item, session_id: $session, transcript: $transcript, sentinel_started_at: $sentinel_started_at, delta_from_turn: $turn_index} + $usage')"
+    --argjson delta "${DELTA_JSON}" \
+    --argjson session_total "${SESSION_TOTAL_JSON}" \
+    --arg model "${CURRENT_MODEL}" \
+    --argjson turns "${CURRENT_TURNS}" \
+    '{ts: $ts, sprint_id: $sprint, story_id: $story, work_item_id: $work_item, agent_type: $agent, session_id: $session, transcript: $transcript, sentinel_started_at: $sentinel_started_at, delta_from_turn: $turn_index, delta: $delta, session_total: $session_total, model: $model, turns: $turns}')"
 
   printf '%s\n' "${ROW}" >> "${LEDGER}"
-  printf '[%s] wrote row: sprint=%s agent=%s work_item=%s story=%s tokens=in:%s/out:%s delta_from=%s\n' \
+  printf '[%s] wrote row: sprint=%s agent=%s work_item=%s story=%s delta=in:%s/out:%s session_total=in:%s/out:%s delta_from=%s\n' \
     "${TS}" "${SPRINT_ID}" "${AGENT_TYPE}" "${WORK_ITEM_ID}" "${STORY_ID}" \
-    "$(printf '%s' "${USAGE_JSON}" | jq -r '.input')" \
-    "$(printf '%s' "${USAGE_JSON}" | jq -r '.output')" \
+    "${DELTA_IN}" "${DELTA_OUT}" \
+    "${CURRENT_IN}" "${CURRENT_OUT}" \
     "${SENTINEL_TURN_INDEX}" \
     >> "${HOOK_LOG}"
 

@@ -440,9 +440,14 @@ describe('token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix)', ()
 
     const row = getLastRow('SPRINT-06');
     expect(row).not.toBeNull();
-    // Should be 200 + 300 = 500 input tokens, NOT 1000 + 200 + 300 = 1500
-    expect(row!['input']).toBe(500);
-    expect(row!['output']).toBe(200); // 80 + 120
+    // CR-018 schema: intra-fire slice (500 input) is stored in session_total.*;
+    // delta.* = session_total - prior (no prior state → delta == session_total).
+    // Should be 200 + 300 = 500 input tokens (NOT 1000 + 200 + 300 = 1500).
+    const delta = row!['delta'] as Record<string, number>;
+    const sessionTotal = row!['session_total'] as Record<string, number>;
+    expect(sessionTotal['input']).toBe(500);
+    expect(delta['input']).toBe(500);  // first fire: delta == session_total
+    expect(sessionTotal['output']).toBe(200); // 80 + 120
     expect(row!['delta_from_turn']).toBe(1);
   });
 
@@ -478,13 +483,21 @@ describe('token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix)', ()
 
     const row1 = getLastRow('SPRINT-06');
     expect(row1).not.toBeNull();
-    expect(row1!['input']).toBe(1000); // 100+200+300+400 (turn_index=0, all turns)
+    // CR-018 schema: session_total reflects intra-fire transcript slice (turn_index=0, all turns).
+    // delta == session_total for first fire (no prior .session-totals.json state).
+    const row1SessionTotal = row1!['session_total'] as Record<string, number>;
+    const row1Delta = row1!['delta'] as Record<string, number>;
+    expect(row1SessionTotal['input']).toBe(1000); // 100+200+300+400 (turn_index=0, all turns)
+    expect(row1Delta['input']).toBe(1000); // first fire: delta == session_total
 
     // Verify sentinel was deleted
     const sentinelExists = fs.existsSync(path.join(sprintDir, '.pending-task-1.json'));
     expect(sentinelExists).toBe(false);
 
     // Second fire: new sentinel with turn_index=2
+    // IMPORTANT: second fire uses a DIFFERENT session_id ('session-fire2').
+    // The hook's delta math is keyed by session_id; 'session-fire2' has no prior state
+    // → delta == session_total for its slice (turns 2..3: 300+400 = 700).
     writeSentinel(sprintDir, 2, {
       agent_type: 'qa',
       work_item_id: 'STORY-006-01',
@@ -501,13 +514,15 @@ describe('token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix)', ()
 
     const row2 = JSON.parse(lines[1]) as Record<string, unknown>;
     // Second fire covers turns index 2..3: 300 + 400 = 700 input
-    expect(row2['input']).toBe(700);
+    const row2SessionTotal = row2['session_total'] as Record<string, number>;
+    const row2Delta = row2['delta'] as Record<string, number>;
+    expect(row2SessionTotal['input']).toBe(700);
+    expect(row2Delta['input']).toBe(700); // different session, first fire for session-fire2
     expect(row2['agent_type']).toBe('qa');
     expect(row2['delta_from_turn']).toBe(2);
 
-    // The two rows must not overlap: 1000 + 700 != 1700 (row1 cumulative includes all)
-    // More important: row2's input (700) does NOT equal row1's input (1000)
-    expect(row1!['input']).not.toBe(row2['input']);
+    // The two rows must not overlap: session_total.input values differ (1000 vs 700)
+    expect(row1SessionTotal['input']).not.toBe(row2SessionTotal['input']);
   });
 
   it('sentinel is deleted after successful row write', () => {

@@ -37,6 +37,7 @@ const SUPPORTED_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['0.6', '0.2'],
   ['0.7', '0.2'], // BUG-017 + BUG-018 patch bumps to cli 0.7.x with no mcp change
   ['0.8', '0.2'], // BUG-019 stdio shim — cli adds `mcp serve`, mcp server unchanged
+  ['0.9', '0.2'], // CR-018 per-turn delta math + Reporter contract + 0.9.0 bump (closes BUG-022)
 ];
 
 function majorMinor(v: string): string {
