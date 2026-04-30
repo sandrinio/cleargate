@@ -130,6 +130,48 @@ Given one absolute path to a raw work-item file under `.cleargate/delivery/**`, 
 
     This CLI command (shipped by M3 STORY-002-07) recompiles `wiki/active-sprint.md`, `wiki/open-gates.md`, `wiki/product-state.md`, and `wiki/roadmap.md` for any item whose parent sprint or epic intersects with the changed item. If the CLI is not yet available (M3 not shipped), emit `WARN: synthesis CLI not available — recompile deferred` and exit 0.
 
+## Phase 4 — Contradiction Check (§10.10, STORY-020-02)
+
+Phase 4 runs AFTER step 10 (synthesis recompile), BEFORE the agent returns. It is advisory — never causes ingest to exit non-zero.
+
+**The TS-side CLI (`cleargate wiki ingest`) performs the deterministic steps and emits a `phase4:` JSON signal on stdout if Phase 4 should proceed.** This agent then orchestrates the LLM call via Task.
+
+### Phase 4 algorithm
+
+1. **Status filter.** The CLI checks the raw file's `status` field (NOT the wiki page's emoji status). If `status` is not `Draft` or `In Review`, Phase 4 is skipped. No subagent spawn, no log append, no `last_contradict_sha` stamp.
+
+2. **SHA idempotency.** The CLI computes `current_sha = git log -1 --format=%H -- <raw_path>`. If the page's `last_contradict_sha` equals `current_sha`, Phase 4 is skipped. No LLM call, no log append, frontmatter left untouched.
+
+3. **Neighborhood collection (deterministic, done by CLI):**
+   1. Parse the raw draft body for `[[ID]]` mentions; resolve each to a wiki page path.
+   2. Add the draft's `parent` page (from frontmatter `parent_epic_ref`).
+   3. Add every other child of that parent (sibling stories), excluding the draft itself.
+   4. Add every `wiki/topics/*.md` page whose `cites:` list includes the draft's parent.
+   5. Deduplicate. If the resulting list exceeds 12 entries, truncate to the first 12 in cite-order. Note `truncated: true` in the finding output if truncation occurred.
+
+4. **Subagent invocation.** When the CLI emits a `phase4:` JSON line, this agent:
+   a. Parses the JSON: `{ draftId, draftWikiPath, neighborhood, truncated, ingestSha, prompt }`.
+   b. Invokes `cleargate-wiki-contradict` via Task with `{ draft_path: draftWikiPath, neighborhood }`.
+   c. Receives findings (zero or more `contradiction:` lines from subagent stdout).
+   d. Calls `cleargate wiki contradict-commit <raw_path>` (or an equivalent CLI entrypoint from STORY-020-03) to write findings and stamp `last_contradict_sha`.
+
+5. **Advisory log writer.** For every finding returned, one YAML entry is appended to `.cleargate/wiki/contradictions.md`. Ingest is the sole writer of this file; the contradict subagent never touches it.
+
+6. **Stamp.** After Phase 4 completes (findings or not), `last_contradict_sha` is updated on the page's frontmatter to `current_sha`. This is the only frontmatter mutation Phase 4 makes.
+
+7. **Advisory exit.** Phase 4 never causes ingest to exit non-zero. Findings are informational only.
+
+### Finding entry schema
+
+```yaml
+- draft: "[[STORY-020-02]]"
+  neighbor: "[[STORY-Y-01]]"
+  claim: "auth flow expects JWT vs neighbor mandates OAuth client_credentials"
+  ingest_sha: "abc1234"
+  truncated: false
+  label: null
+```
+
 ## Guardrails
 
 - **Never write to `.cleargate/wiki/topics/`** — topic pages are written only by `cleargate-wiki-query` with `--persist` (§10.1 line 219). If the derived bucket is `topics`, treat as an exclusion and exit 0.

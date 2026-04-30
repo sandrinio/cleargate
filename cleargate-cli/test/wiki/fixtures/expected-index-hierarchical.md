@@ -13,3 +13,10 @@
 ## Archive
 
 - Epics: 1 Completed · [expand](archive/epics.md)
+
+## Contradictions
+
+Advisory log of detected contradictions between wiki pages. Populated by ingest Phase 4.
+
+See [contradictions.md](contradictions.md) for the append-only finding log.
+Human applies `label: true-positive | false-positive | nitpick` per entry.

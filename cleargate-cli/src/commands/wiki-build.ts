@@ -327,7 +327,18 @@ function buildIndex(items: RawItem[]): string {
 
   archiveLines.push('');
 
-  return [...header, ...activeLines, ...archiveLines].join('\n');
+  // 6. Emit ## Contradictions section — links to advisory log
+  const contradictionLines: string[] = [
+    '## Contradictions',
+    '',
+    'Advisory log of detected contradictions between wiki pages. Populated by ingest Phase 4.',
+    '',
+    'See [contradictions.md](contradictions.md) for the append-only finding log.',
+    'Human applies `label: true-positive | false-positive | nitpick` per entry.',
+    '',
+  ];
+
+  return [...header, ...activeLines, ...archiveLines, ...contradictionLines].join('\n');
 }
 
 function buildLog(items: RawItem[], timestamp: string): string {

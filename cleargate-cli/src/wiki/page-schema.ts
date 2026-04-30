@@ -1,12 +1,12 @@
 /**
- * §10.4 Wiki Page Schema — exactly nine frontmatter fields.
- * Lint will flag any extra or missing fields.
+ * §10.4 Wiki Page Schema — nine required frontmatter fields plus one optional.
+ * Lint will flag any extra or missing required fields; last_contradict_sha is optional.
  */
 
 export type WikiPageType = 'epic' | 'story' | 'sprint' | 'proposal' | 'cr' | 'bug' | 'topic';
 export type RepoTag = 'cli' | 'mcp' | 'planning';
 
-/** The nine-field frontmatter shape every wiki page must satisfy. */
+/** The nine required + one optional frontmatter fields every wiki page must satisfy. */
 export interface WikiPage {
   type: WikiPageType;
   id: string;
@@ -18,6 +18,8 @@ export interface WikiPage {
   last_ingest: string;       // ISO 8601 UTC
   last_ingest_commit: string; // git SHA or ""
   repo: RepoTag;
+  /** Optional — populated by ingest Phase 4 (§10.10). SHA of raw file at last contradict check. */
+  last_contradict_sha?: string;
 }
 
 /** Serialise a WikiPage frontmatter + body into a markdown string. */
@@ -27,7 +29,7 @@ export function serializePage(page: WikiPage, body: string): string {
       ? '[]'
       : '\n' + page.children.map((c) => `  - "${c}"`).join('\n');
 
-  const fm = [
+  const lines = [
     '---',
     `type: ${page.type}`,
     `id: "${page.id}"`,
@@ -39,9 +41,14 @@ export function serializePage(page: WikiPage, body: string): string {
     `last_ingest: "${page.last_ingest}"`,
     `last_ingest_commit: "${page.last_ingest_commit}"`,
     `repo: "${page.repo}"`,
-    '---',
-  ].join('\n');
+  ];
+  // Emit optional field only when present
+  if (page.last_contradict_sha !== undefined) {
+    lines.push(`last_contradict_sha: "${page.last_contradict_sha}"`);
+  }
+  lines.push('---');
 
+  const fm = lines.join('\n');
   return `${fm}\n\n${body}`;
 }
 
@@ -62,8 +69,12 @@ export function parsePage(raw: string): WikiPage {
   const last_ingest = String(fm['last_ingest'] ?? '');
   const last_ingest_commit = String(fm['last_ingest_commit'] ?? '');
   const repo = fm['repo'] as RepoTag;
+  // Optional field — only populated when present (§10.10 Phase 4)
+  const last_contradict_sha = fm['last_contradict_sha'] !== undefined
+    ? String(fm['last_contradict_sha'])
+    : undefined;
 
-  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo };
+  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo, last_contradict_sha };
 }
 
 function parseFmRaw(raw: string): { fm: Record<string, unknown>; body: string } {

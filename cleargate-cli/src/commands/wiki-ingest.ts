@@ -12,6 +12,43 @@ import { compile as compileProductState } from '../wiki/synthesis/product-state.
 import { compile as compileRoadmap } from '../wiki/synthesis/roadmap.js';
 import { scanRawItems, type RawItem } from '../wiki/scan.js';
 
+// ─── Phase 4 types ───────────────────────────────────────────────────────────
+
+/** Statuses for which Phase 4 (contradiction check) should run. */
+const PHASE4_TRIGGER_STATUSES = new Set(['Draft', 'In Review']);
+
+/** A single contradiction finding from the contradict subagent. */
+export interface ContradictFinding {
+  draft: string;
+  neighbor: string;
+  claim: string;
+}
+
+/** Returned by preparePhase4 when Phase 4 should be skipped. */
+export interface Phase4Skip {
+  skip: true;
+  reason: string;
+}
+
+/** Returned by preparePhase4 when Phase 4 should proceed. */
+export interface Phase4Ready {
+  skip: false;
+  /** ID of the draft item being ingested. */
+  draftId: string;
+  /** Absolute path to the just-written wiki page for the draft. */
+  draftWikiPath: string;
+  /** Neighborhood page paths (wiki pages, relative to wiki root). */
+  neighborhood: string[];
+  /** Whether neighborhood was truncated to 12. */
+  truncated: boolean;
+  /** Git SHA of the raw file at this moment. */
+  ingestSha: string;
+  /** Prompt string to pass to the contradict subagent. */
+  prompt: string;
+}
+
+export type Phase4Result = Phase4Skip | Phase4Ready;
+
 export interface WikiIngestOptions {
   /** Absolute path to the raw delivery file to ingest */
   rawPath: string;
@@ -31,6 +68,14 @@ export interface WikiIngestOptions {
   rename?: (src: string, dst: string) => void;
   /** Test seam: override directory for synthesis templates (default resolved via import.meta.url) */
   templateDir?: string;
+  /**
+   * Test seam: stub for Phase 4 subagent invocation.
+   * When provided, replaces the stdout signal (agent-workflow invocation) with a
+   * direct call — returning findings synchronously. Used in unit tests only.
+   * In production, Phase 4 emits a `phase4:` JSON line; the calling agent reads it
+   * and spawns the contradict subagent via Task, then calls commitPhase4Findings.
+   */
+  phase4SubagentStub?: (draftWikiPath: string, neighborhood: string[]) => ContradictFinding[];
 }
 
 /** Directories under .cleargate/ that are excluded from ingest per §10.3. */
@@ -172,6 +217,19 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   // Determine action
   const action = pageExists ? 'update' : 'create';
 
+  // Preserve last_contradict_sha from the existing wiki page (Phase 4 stamps it there;
+  // we must carry it forward when re-writing the page so idempotency survives re-ingest).
+  let existingLastContradictSha: string | undefined;
+  if (pageExists) {
+    try {
+      const existingPageContent = fs.readFileSync(pagePath, 'utf8');
+      const existingPage = parsePage(existingPageContent);
+      existingLastContradictSha = existingPage.last_contradict_sha;
+    } catch {
+      // If parse fails, leave undefined
+    }
+  }
+
   // Step 5: Build new WikiPage and write it
   const parent = buildParentRef(fm);
   const children = buildChildrenRefs(fm);
@@ -188,6 +246,8 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
     last_ingest: timestamp,
     last_ingest_commit: currentSha,
     repo,
+    // Carry forward last_contradict_sha so Phase 4 idempotency survives re-ingest
+    ...(existingLastContradictSha !== undefined ? { last_contradict_sha: existingLastContradictSha } : {}),
   };
 
   const pageBody = buildPageBody({ id, fm, body });
@@ -205,7 +265,48 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   // Step 8: Recompile affected synthesis pages (all four — M3 over-recompiles)
   recompileSynthesis(wikiRoot, cwd, templateDir);
 
-  // Step 9: Print result
+  // Step 9: Phase 4 — Contradiction Check (advisory, never exits non-zero)
+  const phase4Result = preparePhase4({
+    absRawPath,
+    relRawPath,
+    wikiRoot,
+    id,
+    fm,
+    body,
+    currentSha,
+    gitRunner,
+  });
+
+  if (!phase4Result.skip) {
+    const phase4SeamStub = opts.phase4SubagentStub;
+    if (phase4SeamStub) {
+      // Test seam: synchronously call the stub instead of emitting a signal
+      const findings = phase4SeamStub(phase4Result.draftWikiPath, phase4Result.neighborhood);
+      commitPhase4Findings({
+        absRawPath,
+        wikiRoot,
+        findings,
+        ingestSha: phase4Result.ingestSha,
+        truncated: phase4Result.truncated,
+        draftId: phase4Result.draftId,
+        now,
+      });
+    } else {
+      // Production path: emit a signal line for the calling agent to act on.
+      // The agent (cleargate-wiki-ingest) reads this JSON, spawns cleargate-wiki-contradict
+      // via Task, and calls `cleargate wiki contradict-commit <rawPath> < findings.json`.
+      stdout(`phase4: ${JSON.stringify({
+        draftId: phase4Result.draftId,
+        draftWikiPath: phase4Result.draftWikiPath,
+        neighborhood: phase4Result.neighborhood,
+        truncated: phase4Result.truncated,
+        ingestSha: phase4Result.ingestSha,
+        prompt: phase4Result.prompt,
+      })}\n`);
+    }
+  }
+
+  // Step 10: Print result
   stdout(`wiki ingest: ${action} ${bucket}/${id}.md\n`);
 }
 
@@ -459,6 +560,347 @@ function buildMinimalIndex(id: string, type: string, status: string, relRawPath:
   lines.push('');
 
   void label; // suppress
+  return lines.join('\n');
+}
+
+// ─── Phase 4: preparePhase4 ──────────────────────────────────────────────────
+
+interface PreparePhase4Opts {
+  absRawPath: string;
+  relRawPath: string;
+  wikiRoot: string;
+  id: string;
+  fm: Record<string, unknown>;
+  body: string;
+  currentSha: string;
+  gitRunner?: GitRunner;
+}
+
+/**
+ * Deterministic Phase 4 prep (no LLM).
+ *
+ * Returns `{ skip: true, reason }` when Phase 4 should not run (status filter
+ * or SHA idempotency). Returns `{ skip: false, ... }` with the neighborhood
+ * and prompt when Phase 4 should proceed.
+ *
+ * Exported for unit tests and for the `cleargate wiki contradict` subcommand (STORY-020-03).
+ */
+export function preparePhase4(opts: PreparePhase4Opts): Phase4Result {
+  const { relRawPath, wikiRoot, id, fm, body, currentSha } = opts;
+
+  // 1. Status filter — only Draft / In Review
+  const rawStatus = String(fm['status'] ?? '');
+  if (!PHASE4_TRIGGER_STATUSES.has(rawStatus)) {
+    return { skip: true, reason: `status=${rawStatus}` };
+  }
+
+  // 2. SHA idempotency — check existing wiki page's last_contradict_sha
+  const bucket = getBucketFromId(id);
+  const pagePath = path.join(wikiRoot, bucket, `${id}.md`);
+  if (fs.existsSync(pagePath)) {
+    try {
+      const existingContent = fs.readFileSync(pagePath, 'utf8');
+      const existingPage = parsePage(existingContent);
+      if (existingPage.last_contradict_sha && existingPage.last_contradict_sha === currentSha) {
+        return { skip: true, reason: `sha-idempotent sha=${currentSha.slice(0, 8)}` };
+      }
+    } catch {
+      // If parse fails, proceed with Phase 4
+    }
+  }
+
+  // 3. Build neighborhood (deterministic)
+  const neighborhood = collectNeighborhood({ fm, body, wikiRoot });
+  const truncated = neighborhood.length > 12;
+  const trimmedNeighborhood = truncated ? neighborhood.slice(0, 12) : neighborhood;
+
+  // 4. Build prompt for the contradict subagent
+  const draftWikiPath = pagePath;
+  const prompt = buildContradictPrompt({ id, draftWikiPath, neighborhood: trimmedNeighborhood, relRawPath });
+
+  return {
+    skip: false,
+    draftId: id,
+    draftWikiPath,
+    neighborhood: trimmedNeighborhood,
+    truncated,
+    ingestSha: currentSha,
+    prompt,
+  };
+}
+
+/** Collect the contradiction-check neighborhood for a draft (§1.2 STORY-020-02). */
+function collectNeighborhood(opts: {
+  fm: Record<string, unknown>;
+  body: string;
+  wikiRoot: string;
+}): string[] {
+  const { fm, body, wikiRoot } = opts;
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  function addPath(wikiRelPath: string): void {
+    const abs = path.join(wikiRoot, wikiRelPath);
+    if (!seen.has(wikiRelPath) && fs.existsSync(abs)) {
+      seen.add(wikiRelPath);
+      result.push(wikiRelPath);
+    }
+  }
+
+  // Step a: [[ID]] mentions in raw body
+  const idMentions = extractIdMentions(body);
+  for (const mentionedId of idMentions) {
+    const bucket = getBucketFromId(mentionedId);
+    addPath(`${bucket}/${mentionedId}.md`);
+  }
+
+  // Step b: parent page (from frontmatter parent_epic_ref or parent)
+  const parentRaw = String(fm['parent_epic_ref'] ?? fm['parent'] ?? '');
+  const parentId = parentRaw.replace(/^\[\[|\]\]$/g, '').trim();
+  if (parentId) {
+    const parentBucket = getBucketFromId(parentId);
+    addPath(`${parentBucket}/${parentId}.md`);
+
+    // Step c: siblings (other children of the parent epic)
+    const parentPagePath = path.join(wikiRoot, parentBucket, `${parentId}.md`);
+    if (fs.existsSync(parentPagePath)) {
+      try {
+        const parentContent = fs.readFileSync(parentPagePath, 'utf8');
+        const parentPage = parsePage(parentContent);
+        for (const childRef of parentPage.children) {
+          const childId = childRef.replace(/^\[\[|\]\]$/g, '').trim();
+          if (childId) {
+            const childBucket = getBucketFromId(childId);
+            addPath(`${childBucket}/${childId}.md`);
+          }
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+
+    // Step d: topic pages that cite this parent
+    const topicsDir = path.join(wikiRoot, 'topics');
+    if (fs.existsSync(topicsDir)) {
+      try {
+        const topicFiles = fs.readdirSync(topicsDir).filter((f) => f.endsWith('.md'));
+        for (const tf of topicFiles) {
+          const topicPath = path.join(topicsDir, tf);
+          try {
+            const topicContent = fs.readFileSync(topicPath, 'utf8');
+            const { fm: topicFm } = parseFrontmatter(topicContent);
+            const cites = topicFm['cites'];
+            const citesArr = Array.isArray(cites) ? cites : cites ? [cites] : [];
+            const citesParent = citesArr.some((c) => {
+              const s = String(c).replace(/^\[\[|\]\]$/g, '').trim();
+              return s === parentId;
+            });
+            if (citesParent) {
+              addPath(`topics/${tf}`);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  return result;
+}
+
+/** Extract [[ID]] references from raw markdown body text. */
+function extractIdMentions(body: string): string[] {
+  const re = /\[\[([A-Z][A-Z0-9-]+)\]\]/g;
+  const seen = new Set<string>();
+  const results: string[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(body)) !== null) {
+    const id = m[1];
+    if (!seen.has(id)) {
+      seen.add(id);
+      results.push(id);
+    }
+  }
+  return results;
+}
+
+/** Build the prompt string for the contradict subagent. */
+function buildContradictPrompt(opts: {
+  id: string;
+  draftWikiPath: string;
+  neighborhood: string[];
+  relRawPath: string;
+}): string {
+  const { id, draftWikiPath, neighborhood, relRawPath } = opts;
+  return [
+    `Check draft ${id} for contradictions against its neighborhood.`,
+    `Draft wiki page: ${draftWikiPath}`,
+    `Raw source: ${relRawPath}`,
+    `Neighborhood pages (${neighborhood.length}): ${neighborhood.join(', ')}`,
+    `For each contradiction found, emit one line: contradiction: ${id} vs <neighbor-id> · <claim-summary (≤80 chars)>`,
+    `Follow each finding with one reasoning paragraph. Always exit 0.`,
+  ].join('\n');
+}
+
+// ─── Phase 4: commitPhase4Findings ───────────────────────────────────────────
+
+interface CommitPhase4Opts {
+  /** Absolute path to the raw delivery file (for raw frontmatter stamp). */
+  absRawPath: string;
+  /** Absolute path to wiki root. */
+  wikiRoot: string;
+  /** Draft item ID (used to locate wiki page for idempotency stamp). */
+  draftId: string;
+  /** Findings from the contradict subagent. */
+  findings: ContradictFinding[];
+  /** Git SHA used for idempotency stamping. */
+  ingestSha: string;
+  /** Whether neighborhood was truncated. */
+  truncated: boolean;
+  /** Frozen timestamp generator. */
+  now: () => string;
+}
+
+/**
+ * Commit Phase 4 findings: append to contradictions.md and stamp last_contradict_sha.
+ *
+ * Stamps `last_contradict_sha` on BOTH:
+ * 1. The wiki page (`.cleargate/wiki/<bucket>/<id>.md`) — used by `preparePhase4` for
+ *    idempotency on the next ingest run.
+ * 2. The raw delivery file — informational, mirrors the wiki page stamp.
+ *
+ * Always exits cleanly — advisory only.
+ *
+ * Exported for unit tests and for the `cleargate wiki contradict` subcommand (STORY-020-03).
+ */
+export function commitPhase4Findings(opts: CommitPhase4Opts): void {
+  const { absRawPath, wikiRoot, findings, ingestSha, truncated, draftId, now } = opts;
+
+  const contradictionsPath = path.join(wikiRoot, 'contradictions.md');
+
+  // Append findings to contradictions.md
+  if (findings.length > 0) {
+    const entries = findings.map((f) =>
+      [
+        `- draft: "[[${f.draft || draftId}]]"`,
+        `  neighbor: "[[${f.neighbor}]]"`,
+        `  claim: ${JSON.stringify(f.claim)}`,
+        `  ingest_sha: "${ingestSha}"`,
+        `  truncated: ${truncated}`,
+        `  label: null`,
+      ].join('\n'),
+    );
+
+    if (fs.existsSync(contradictionsPath)) {
+      const existing = fs.readFileSync(contradictionsPath, 'utf8');
+      // Append entries after existing findings: block (trimEnd + newline + entries)
+      const newContent = existing.trimEnd() + '\n' + entries.join('\n') + '\n';
+      fs.writeFileSync(contradictionsPath, newContent, 'utf8');
+    } else {
+      // Create skeleton + entries
+      fs.mkdirSync(wikiRoot, { recursive: true });
+      const skeleton = buildContradictionsSkeletonWithFindings(now(), entries);
+      fs.writeFileSync(contradictionsPath, skeleton, 'utf8');
+    }
+  } else {
+    // No findings — ensure contradictions.md exists (create skeleton if not)
+    if (!fs.existsSync(contradictionsPath)) {
+      fs.mkdirSync(wikiRoot, { recursive: true });
+      fs.writeFileSync(contradictionsPath, buildContradictionsSkeleton(now()), 'utf8');
+    }
+  }
+
+  // Stamp last_contradict_sha on the WIKI PAGE (primary — used by preparePhase4 idempotency)
+  const wikiPageBucket = getBucketFromId(draftId);
+  const wikiPagePath = path.join(wikiRoot, wikiPageBucket, `${draftId}.md`);
+  stampContradictSha(wikiPagePath, ingestSha);
+
+  // Also stamp on the raw file (informational mirror)
+  stampContradictSha(absRawPath, ingestSha);
+}
+
+/** Build the initial contradictions.md skeleton with findings. */
+function buildContradictionsSkeletonWithFindings(timestamp: string, entries: string[]): string {
+  return [
+    '---',
+    `type: "synthesis"`,
+    `id: "contradictions"`,
+    `generated_at: "${timestamp}"`,
+    '---',
+    '',
+    '# Wiki Contradictions — Advisory Log',
+    '',
+    '(Append-only. Each entry is one YAML record. Human applies label: true-positive | false-positive | nitpick.)',
+    '',
+    'findings:',
+    ...entries,
+    '',
+  ].join('\n');
+}
+
+/** Build the initial contradictions.md skeleton without findings. */
+function buildContradictionsSkeleton(timestamp: string): string {
+  return [
+    '---',
+    `type: "synthesis"`,
+    `id: "contradictions"`,
+    `generated_at: "${timestamp}"`,
+    '---',
+    '',
+    '# Wiki Contradictions — Advisory Log',
+    '',
+    '(Append-only. Each entry is one YAML record. Human applies label: true-positive | false-positive | nitpick.)',
+    '',
+    'findings: []',
+    '',
+  ].join('\n');
+}
+
+/** Stamp last_contradict_sha into the raw file's frontmatter. */
+function stampContradictSha(absRawPath: string, sha: string): void {
+  try {
+    const raw = fs.readFileSync(absRawPath, 'utf8');
+    const stamped = upsertFrontmatterField(raw, 'last_contradict_sha', sha);
+    fs.writeFileSync(absRawPath, stamped, 'utf8');
+  } catch {
+    // Advisory — never throws
+  }
+}
+
+/**
+ * Upsert a single string field in the first frontmatter block.
+ * Reads raw bytes, regex-replaces target line in first --- block.
+ * Per FLASHCARD #frontmatter #write-back: do NOT round-trip via parseFrontmatter+re-serialize.
+ */
+function upsertFrontmatterField(raw: string, key: string, value: string): string {
+  const lines = raw.split('\n');
+  if (lines[0] !== '---') return raw;
+
+  let closeIdx = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === '---') { closeIdx = i; break; }
+  }
+  if (closeIdx === -1) return raw;
+
+  // Check if field already exists in frontmatter block
+  const keyPrefix = `${key}:`;
+  let found = false;
+  for (let i = 1; i < closeIdx; i++) {
+    if (lines[i].startsWith(keyPrefix)) {
+      lines[i] = `${key}: "${value}"`;
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    // Insert before closing ---
+    lines.splice(closeIdx, 0, `${key}: "${value}"`);
+  }
+
   return lines.join('\n');
 }
 
