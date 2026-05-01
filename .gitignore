@@ -15,6 +15,9 @@ Thumbs.db
 # Private project notes (design guides, reference docs) — not shipped
 /knowledge/
 
+# Working notes / brainstorm drafts — local-only, not team-shared
+/.cleargate/scratch/
+
 # Active-sprint sentinel — per-machine runtime state, not team-shared
 .cleargate/sprint-runs/.active
 
