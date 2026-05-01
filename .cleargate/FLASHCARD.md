@@ -3,6 +3,7 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-01 · #scaffold #mirror #prebuild · cleargate-cli/templates/cleargate-planning/ is DERIVED — copy-planning-payload.mjs rmSync+rebuilds it from cleargate-planning/ on every prebuild. Never hand-edit the cli-bundled tree; edit canonical mirror then run npm run prebuild.
 2026-05-01 · #vitest #leak #posttest · vitest spawns 5–9 tinypool workers (~4GB each) that survive the parent if not explicitly closed. Run `pkill -f vitest || true` after every test invocation; observed ~30GB orphan RAM after a single uncleaned run.
 2026-05-01 · #templates #frontmatter #proposal_gate_waiver · `proposal_gate_waiver` field never lived in any template — only in in-flight artifacts. CR-020's "drop from templates" was a no-op verify, not a removal.
 2026-05-01 · #mirror #parity · CLAUDE.md live↔canonical pre-divergent by 4 canonical-only bullets since pre-EPIC-024. Edit-parity invariant applies per-edit, not whole-file — never reconcile pre-existing divergence as a side effect.

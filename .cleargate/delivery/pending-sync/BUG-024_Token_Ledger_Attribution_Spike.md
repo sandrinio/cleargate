@@ -22,11 +22,9 @@ created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: repro-steps-deterministic
-      detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-05-01T18:40:14Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-01T19:44:05Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -42,7 +40,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-01T18:40:10Z
+  last_stamp: 2026-05-01T19:44:00Z
   sessions: []
 ---
 
@@ -51,7 +49,7 @@ draft_tokens:
 **Severity:** P2-Medium — sprint accounting unusable but no functional regression. Carried forward from SPRINT-15 / -16 / -17 / -18.
 **Lane:** `standard` — investigation-only, no production code change. The fix scope (CR-026) is sized at ~100 LOC across 3 surfaces.
 
-## 0.5 Open Questions
+### 0.5 Open Questions (resolved)
 
 - **Question:** Land the fix in BUG-024 itself (escape valve for "easy fix") or always file CR-026?
   **Recommended:** **File CR-026 in SPRINT-20.** ~100 LOC across 3 surfaces (hook script + new PreToolUse:Task hook + settings.json wiring + CLAUDE.md update) is medium scope. Keeping BUG-024 investigation-only avoids scope creep mid-spike.

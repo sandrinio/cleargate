@@ -54,3 +54,7 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## Bugs
+
+| [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
+| [[BUG-024]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-024_Token_Ledger_Attribution_Spike.md |
