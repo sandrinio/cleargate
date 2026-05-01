@@ -28,7 +28,8 @@ Thumbs.db
 /.cleargate/.participant.json
 
 # Sync drift marker — per-machine runtime state, not team-shared
-.cleargate/.sync-marker.json
+# (anchored at any depth — also catches cleargate-cli/.cleargate/.sync-marker.json)
+**/.cleargate/.sync-marker.json
 
 # Comment snapshot cache — runtime-generated, not team-shared
 /.cleargate/.comments-cache/
