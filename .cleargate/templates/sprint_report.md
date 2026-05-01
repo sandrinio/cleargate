@@ -7,7 +7,7 @@ template_version: 2
 ---
 
 <!-- Sprint Report v2 Template — template_version: 2 -->
-<!-- Event-type vocabulary (STORY-013-05 / protocol §§16–17):
+<!-- Event-type vocabulary (STORY-013-05 / protocol §§2–17):
      User-Review: UR:review-feedback | UR:bug
      Change-Request: CR:bug | CR:spec-clarification | CR:scope-change | CR:approach-change
      Circuit-breaker: test-pattern | spec-gap | environment
