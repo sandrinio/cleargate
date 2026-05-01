@@ -52,7 +52,7 @@ JSON
 # Stub prefill + suggest scripts so close_sprint.mjs doesn't explode.
 # CLEARGATE_SPRINT_DIR is honored by the script for both state + output paths.
 
-echo "Scenario 1: valid body piped in → REPORT.md written + state flipped"
+echo "Scenario 1: valid body piped in → SPRINT-99_REPORT.md written + state flipped"
 fixture=$(setup_fixture)
 body="# Sprint Report — SPRINT-99
 ## §1 What Was Delivered
@@ -77,8 +77,8 @@ printf '%s' "$body" | node "$CLOSE_SCRIPT" SPRINT-99 --report-body-stdin >/dev/n
 rc=$?
 unset CLEARGATE_SPRINT_DIR
 check "exit 0 on valid stdin" test "$rc" -eq 0
-check "REPORT.md written"       test -f "${fixture}/REPORT.md"
-check "REPORT.md content matches" test "$(cat "${fixture}/REPORT.md")" = "$body"
+check "SPRINT-99_REPORT.md written"       test -f "${fixture}/SPRINT-99_REPORT.md"
+check "SPRINT-99_REPORT.md content matches" test "$(cat "${fixture}/SPRINT-99_REPORT.md")" = "$body"
 check "state flipped to Completed" grep -q '"sprint_status": "Completed"' "${fixture}/state.json"
 rm -rf "$fixture"
 
@@ -91,20 +91,20 @@ rc=$?
 unset CLEARGATE_SPRINT_DIR
 check "exit non-zero on empty stdin"    test "$rc" -ne 0
 check "stderr names 'empty report body'" bash -c "printf '%s' \"\$1\" | grep -q 'empty report body'" _ "$err"
-check "REPORT.md NOT written"            test ! -f "${fixture}/REPORT.md"
+check "SPRINT-99_REPORT.md NOT written"  test ! -f "${fixture}/SPRINT-99_REPORT.md"
 rm -rf "$fixture"
 
 echo
-echo "Scenario 3: pre-existing REPORT.md → exit non-zero + refuse message"
+echo "Scenario 3: pre-existing SPRINT-99_REPORT.md → exit non-zero + refuse message"
 fixture=$(setup_fixture)
-printf 'pre-existing content\n' > "${fixture}/REPORT.md"
+printf 'pre-existing content\n' > "${fixture}/SPRINT-99_REPORT.md"
 export CLEARGATE_SPRINT_DIR="$fixture"
 err=$({ printf 'attempted body\n' | node "$CLOSE_SCRIPT" SPRINT-99 --report-body-stdin; } 2>&1 >/dev/null)
 rc=$?
 unset CLEARGATE_SPRINT_DIR
-check "exit non-zero on pre-existing REPORT.md"  test "$rc" -ne 0
+check "exit non-zero on pre-existing SPRINT-99_REPORT.md"  test "$rc" -ne 0
 check "stderr names 'already exists'"             bash -c "printf '%s' \"\$1\" | grep -q 'already exists'" _ "$err"
-check "pre-existing content preserved"            test "$(tr -d '\n' < "${fixture}/REPORT.md")" = "pre-existing content"
+check "pre-existing content preserved"            test "$(tr -d '\n' < "${fixture}/SPRINT-99_REPORT.md")" = "pre-existing content"
 rm -rf "$fixture"
 
 echo
