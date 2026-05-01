@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * close_sprint.mjs — Six-step sprint close pipeline
+ * close_sprint.mjs — Seven-step sprint close pipeline
  *
  * Usage: node close_sprint.mjs <sprint-id> [--assume-ack]
  *        node close_sprint.mjs <sprint-id> --report-body-stdin   (STORY-014-10)
@@ -9,14 +9,22 @@
  *   1. Load and validate state.json via validateState
  *   2. Refuse if any story state is not in TERMINAL_STATES (exit non-zero, list offenders)
  *   3. Invoke prefill_report.mjs on all agent reports
+ *   3.5 Build curated Reporter context bundle via prep_reporter_context.mjs (non-fatal)
  *   4. Orchestrator spawns Reporter separately (script validates preconditions only)
  *   5. On Reporter success + user ack (or --assume-ack flag), flip sprint_status -> "Completed"
  *   6. Invoke suggest_improvements.mjs unconditionally
+ *   7. Auto-push per-artifact status updates to MCP via cleargate sync work-items (non-fatal)
+ *
+ * Report filename: SPRINT-<#>_REPORT.md for new sprints (SPRINT-18+).
+ *   Backwards-compat: if SPRINT-<#>_REPORT.md is absent but REPORT.md exists (legacy
+ *   SPRINT-01..17), fall back to REPORT.md for read operations. New writes always
+ *   use SPRINT-<#>_REPORT.md when the sprint-id carries a numeric portion.
+ *   If the sprint-id has no numeric portion (e.g. SPRINT-TEST), plain REPORT.md is used.
  *
  * Stdin fallback (STORY-014-10): when `--report-body-stdin` is passed, the script
- * reads the full REPORT.md body from stdin and writes it atomically in lieu of
+ * reads the full SPRINT-<#>_REPORT.md body from stdin and writes it atomically in lieu of
  * waiting for a Reporter-produced file. Replaces the Step-4 gate; implies ack.
- * Refuses empty stdin or pre-existing REPORT.md.
+ * Refuses empty stdin or pre-existing report file.
  *
  * Does NOT archive the sprint file (pending-sync -> archive stays human per EPIC-013 §4.5 step 7).
  *
@@ -64,10 +72,49 @@ function usage() {
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
     '\n' +
     'Options:\n' +
-    '  --assume-ack           Skip user acknowledgement prompt (for automated tests)\n' +
-    '  --report-body-stdin    Read REPORT.md body from stdin; implies ack (STORY-014-10)\n'
+    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this)\n' +
+    '  --report-body-stdin    Read SPRINT-<#>_REPORT.md body from stdin; implies ack (STORY-014-10)\n'
   );
   process.exit(2);
+}
+
+/**
+ * Compute the report filename for a given sprint directory + sprint ID.
+ *
+ * New naming (SPRINT-18+): SPRINT-<#>_REPORT.md where <#> is the numeric portion
+ * of the sprint-id (e.g. "18" for "SPRINT-18").
+ * If sprint-id has no numeric portion (e.g. "SPRINT-TEST"), falls back to plain REPORT.md.
+ *
+ * Backwards-compat read-fallback (CR-021 §2.3): for read operations on legacy sprints,
+ * if SPRINT-<#>_REPORT.md is absent but REPORT.md exists, return the legacy path.
+ * This covers SPRINT-01..17 archives that were written before the naming change.
+ * MUST NOT rename or rewrite those pre-existing files.
+ *
+ * @param {string} sprintDirPath - absolute path to the sprint directory
+ * @param {string} sprintId - e.g. "SPRINT-18" or "SPRINT-TEST"
+ * @param {{ forRead?: boolean }} [opts] - if forRead=true, apply legacy fallback
+ * @returns {string} absolute path to the report file
+ */
+function reportFilename(sprintDirPath, sprintId, opts) {
+  const numMatch = sprintId.match(/^SPRINT-(\d+)$/);
+  if (!numMatch) {
+    // No numeric portion — use plain REPORT.md (e.g. SPRINT-TEST)
+    return path.join(sprintDirPath, 'REPORT.md');
+  }
+  const sprintNumber = numMatch[1];
+  const newName = path.join(sprintDirPath, `SPRINT-${sprintNumber}_REPORT.md`);
+
+  // Read-fallback: if the new-name file doesn't exist but legacy REPORT.md does, use legacy.
+  if (opts && opts.forRead) {
+    if (!fs.existsSync(newName)) {
+      const legacyName = path.join(sprintDirPath, 'REPORT.md');
+      if (fs.existsSync(legacyName)) {
+        return legacyName;
+      }
+    }
+  }
+
+  return newName;
 }
 
 /**
@@ -202,11 +249,11 @@ function main() {
       process.exit(1);
     }
 
-    // Read REPORT.md
-    const reportFile2 = path.join(sprintDir, 'REPORT.md');
+    // Read SPRINT-<#>_REPORT.md (with legacy REPORT.md fallback for pre-CR-021 sprints)
+    const reportFile2 = reportFilename(sprintDir, sprintId, { forRead: true });
     if (!fs.existsSync(reportFile2)) {
       process.stderr.write(
-        `close_sprint: v2.1 validation requires REPORT.md at ${reportFile2}\n` +
+        `close_sprint: v2.1 validation requires ${path.basename(reportFile2)} at ${reportFile2}\n` +
         '  Run the Reporter agent first, then re-run close_sprint.mjs.\n'
       );
       process.exit(1);
@@ -247,6 +294,62 @@ function main() {
     process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
   }
 
+  // ── Step 2.6: Lifecycle Reconciliation (CR-017) ──────────────────────────
+  // Block close if any artifact referenced in this sprint's commits is still
+  // non-terminal in pending-sync (excluding carry_over: true).
+  // Invokes `cleargate sprint reconcile-lifecycle <sprint-id>` CLI wrapper.
+  // Fail-open if CLI binary is unavailable (non-blocking for test environments).
+  process.stdout.write('Step 2.6: running lifecycle reconciliation...\n');
+  try {
+    // Resolve CLI binary: prefer local dist/
+    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+
+    if (fs.existsSync(cliBin)) {
+      // Read sprint start_date from frontmatter for the --since arg
+      let sinceArg = '';
+      try {
+        const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
+        if (fs.existsSync(pendingDir)) {
+          const entries = fs.readdirSync(pendingDir);
+          const sprintFile = entries.find(
+            (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
+          );
+          if (sprintFile) {
+            const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
+            const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
+            if (startDateMatch && startDateMatch[1]) {
+              sinceArg = `--since ${startDateMatch[1].trim()}`;
+            }
+          }
+        }
+      } catch { /* ignore */ }
+
+      const reconcileArgs = [
+        'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
+      ];
+      if (sinceArg) reconcileArgs.push(sinceArg);
+      const reconcileCmd = reconcileArgs.join(' ');
+
+      try {
+        execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
+        process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
+      } catch (_reconcileErr) {
+        // Exit code 1 from reconcile-lifecycle means drift found
+        process.stderr.write(
+          'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
+          '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
+          '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
+        );
+        process.exit(1);
+      }
+    } else {
+      process.stdout.write('Step 2.6 skipped: CLI binary not found at cleargate-cli/dist/cli.js (non-fatal).\n');
+    }
+  } catch (step26Err) {
+    // Unexpected error — fail-open (log but do not block)
+    process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
+  }
+
   // ── Step 3: Invoke prefill_report.mjs ─────────────────────────────────────
   process.stdout.write('Step 3: running prefill_report.mjs...\n');
   try {
@@ -259,24 +362,37 @@ function main() {
     process.exit(1);
   }
 
+  // ── Step 3.5: Build curated Reporter context bundle ───────────────────────
+  process.stdout.write('Step 3.5: building Reporter context bundle...\n');
+  try {
+    invokeScript('prep_reporter_context.mjs', [sprintId], {
+      CLEARGATE_STATE_FILE: stateFile,
+      CLEARGATE_SPRINT_DIR: sprintDir,
+    });
+    process.stdout.write(`Step 3.5 passed: ${sprintDir}/.reporter-context.md ready.\n`);
+  } catch (err) {
+    // Non-fatal — Reporter falls back to source files
+    process.stderr.write(`Step 3.5 warning: prep_reporter_context.mjs failed: ${/** @type {Error} */ (err).message}\n`);
+    process.stderr.write('Reporter will fall back to broad-fetch context loading.\n');
+  }
+
   // ── Step 4: Orchestrator spawns Reporter separately ───────────────────────
   // This script only validates preconditions; it does NOT fork the Reporter agent.
+  const reportFile = reportFilename(sprintDir, sprintId);
+  const reportBasename = path.basename(reportFile);
   process.stdout.write(
     'Step 4: preconditions satisfied — orchestrator should now spawn the Reporter agent.\n' +
-    '        The Reporter writes REPORT.md using the sprint_report.md template.\n' +
-    `        Expected output: ${path.join(sprintDir, 'REPORT.md')}\n`
+    `        The Reporter writes ${reportBasename} using the sprint_report.md template.\n` +
+    `        Expected output: ${reportFile}\n`
   );
-
-  // Check if REPORT.md already exists (e.g., --assume-ack path in tests)
-  const reportFile = path.join(sprintDir, 'REPORT.md');
 
   // ── Step 4.5 (STORY-014-10): --report-body-stdin fallback ────────────────
   // Orchestrator pipes the Reporter's markdown body here when the Reporter's
-  // Write tool is blocked. Refuses empty stdin + pre-existing REPORT.md.
+  // Write tool is blocked. Refuses empty stdin + pre-existing report file.
   if (reportBodyStdin) {
     if (fs.existsSync(reportFile)) {
       process.stderr.write(
-        `Error: REPORT.md already exists at ${reportFile}\n` +
+        `Error: ${reportBasename} already exists at ${reportFile}\n` +
         'Delete it or skip --report-body-stdin mode to use the primary Reporter-write path.\n'
       );
       process.exit(1);
@@ -285,7 +401,7 @@ function main() {
     try {
       body = fs.readFileSync(0, 'utf8');
     } catch (err) {
-      process.stderr.write(`Error: failed to read stdin: ${err.message}\n`);
+      process.stderr.write(`Error: failed to read stdin: ${/** @type {Error} */ (err).message}\n`);
       process.exit(1);
     }
     if (!body || body.trim().length === 0) {
@@ -294,20 +410,22 @@ function main() {
     }
     atomicWriteString(reportFile, body);
     process.stdout.write(
-      `Step 4.5 (stdin mode): REPORT.md written (${body.length} bytes) at ${reportFile}\n`
+      `Step 4.5 (stdin mode): ${reportBasename} written (${body.length} bytes) at ${reportFile}\n`
     );
-    // Fall through to Step 5 + 6 unconditionally — stdin mode implies ack.
+    // Fall through to Step 5 + 6 + 7 unconditionally — stdin mode implies ack.
   } else if (!assumeAck) {
-    if (!fs.existsSync(reportFile)) {
+    // Apply read-fallback for legacy sprints (e.g. SPRINT-15 with plain REPORT.md)
+    const reportFileForCheck = reportFilename(sprintDir, sprintId, { forRead: true });
+    if (!fs.existsSync(reportFileForCheck)) {
       process.stdout.write(
-        '\nWaiting for Reporter to produce REPORT.md...\n' +
+        `\nWaiting for Reporter to produce ${reportBasename}...\n` +
         'After Reporter succeeds, re-run with --assume-ack to complete the close.\n'
       );
       process.exit(0);
     }
-    // In non-assume-ack mode with existing REPORT.md, prompt user
+    // In non-assume-ack mode with existing report, prompt user
     process.stdout.write(
-      `\nREPORT.md found at ${reportFile}\n` +
+      `\n${reportBasename} found at ${reportFileForCheck}\n` +
       'Review the report, then confirm close by re-running with --assume-ack\n'
     );
     process.exit(0);
@@ -331,12 +449,36 @@ function main() {
     });
   } catch (err) {
     // suggest_improvements failure is non-fatal — log but do not abort
-    process.stderr.write(`Warning: suggest_improvements.mjs failed: ${err.message}\n`);
+    process.stderr.write(`Warning: suggest_improvements.mjs failed: ${/** @type {Error} */ (err).message}\n`);
     process.stderr.write('Sprint is still marked Completed; improvement suggestions may be incomplete.\n');
+  }
+
+  // ── Step 7: Auto-push per-artifact status updates to MCP ─────────────────
+  // Runs after Gate 4 ack succeeds. Non-fatal: sprint stays Completed on failure.
+  process.stdout.write('Step 7: pushing per-artifact status updates to MCP...\n');
+  try {
+    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+    if (fs.existsSync(cliBin)) {
+      // cleargate sync work-items takes ZERO positional args (verified cli.ts:592-598).
+      // CR-021 §3.2.3 spec shows a sprint-id arg — that is spec drift; drop it.
+      execSync(`node ${JSON.stringify(cliBin)} sync work-items`, {
+        stdio: 'inherit',
+        env: process.env,
+        timeout: 30000,
+      });
+      process.stdout.write('Step 7 passed: work-item statuses synced.\n');
+    } else {
+      process.stdout.write('Step 7 skipped: CLI binary not found (non-fatal).\n');
+    }
+  } catch (err) {
+    // Non-fatal — sprint stays Completed; sync can be retried manually
+    process.stderr.write(`Step 7 warning: sync work-items failed: ${/** @type {Error} */ (err).message}\n`);
+    process.stderr.write('Run `cleargate sync work-items` manually to retry.\n');
   }
 
   process.stdout.write(`\nSprint ${sprintId} close pipeline complete.\n`);
   process.stdout.write(`  state.json: sprint_status = Completed\n`);
+  process.stdout.write(`  report: ${reportFile}\n`);
   process.stdout.write(`  improvement-suggestions.md: ${path.join(sprintDir, 'improvement-suggestions.md')}\n`);
 }
 

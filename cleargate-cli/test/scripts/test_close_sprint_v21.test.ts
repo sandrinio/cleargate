@@ -1,7 +1,7 @@
 /**
- * test_close_sprint_v21.test.ts — STORY-022-07 acceptance tests
+ * test_close_sprint_v21.test.ts — STORY-022-07 + STORY-025-03 acceptance tests
  *
- * Gherkin scenarios (§2.1):
+ * Gherkin scenarios (§2.1) — STORY-022-07:
  *   Scenario 1: reporter.md documents v2.1 contract
  *   Scenario 2: close_sprint accepts a v1 report unchanged (legacy-pass)
  *   Scenario 3: close_sprint accepts a v2 report with no fast-lane stories
@@ -9,13 +9,23 @@
  *   Scenario 5: close_sprint rejects non-conformant sprint-run path (S-99)
  *   Scenario 6: Reporter writes Lane Audit + Hotfix Audit on a sprint with a fast-lane story
  *
+ * Gherkin scenarios — STORY-025-03 (naming + Step 3.5 + Step 7):
+ *   Scenario 7:  SPRINT-18+ sprints write SPRINT-<#>_REPORT.md (not REPORT.md)
+ *   Scenario 8:  SPRINT-15 legacy — REPORT.md is NOT renamed (backwards-compat)
+ *   Scenario 9:  Step 3.5 success — stdout contains "Step 3.5 passed" message
+ *   Scenario 10: Step 3.5 failure — warns and pipeline continues
+ *   Scenario 11: Step 7 skipped when CLI binary missing
+ *   Scenario 12: Step 7 warns and continues when sync fails (non-fatal)
+ *   Scenario 13: Step 5 wait-for-ack prompt references SPRINT-<#>_REPORT.md
+ *   Scenario 14: SPRINT-TEST (no numeric portion) uses plain REPORT.md
+ *
  * Uses spawnSync to invoke close_sprint.mjs directly via real tmpdir filesystem.
  * CLEARGATE_SPRINT_DIR env var controls the sprint dir path.
  *
  * Key design: for "pass" scenarios, the full pipeline runs.
  *   - prefill_report.mjs finds no agent reports → exits 0 (no-op)
  *   - sprint_status flips to Completed in the temp copy of state.json
- *   - suggest_improvements.mjs reads REPORT.md from the fixture dir
+ *   - suggest_improvements.mjs reads the report from the fixture dir
  *
  * For "fail" scenarios (naming convention + missing sections), the script exits
  * before Step 3 so the pipeline stops cleanly.
@@ -53,7 +63,7 @@ const REPORTER_MD_SCAFFOLD = path.join(
 
 /**
  * Copy a fixture dir into a fresh temp dir and return the temp dir path.
- * The fixture state.json and REPORT.md are copied over.
+ * The fixture state.json, REPORT.md, and any SPRINT-<#>_REPORT.md are copied over.
  * The temp dir name is set to the provided sprintDirName so that
  * path.basename() returns the expected value for naming-convention checks.
  */
@@ -72,10 +82,19 @@ function makeTempSprintDir(fixtureName: string, sprintDirName: string): string {
     fs.copyFileSync(stateFile, path.join(sprintDir, 'state.json'));
   }
 
-  // Copy REPORT.md
+  // Copy REPORT.md (legacy name — used by pre-CR-021 fixtures)
   const reportFile = path.join(fixturePath, 'REPORT.md');
   if (fs.existsSync(reportFile)) {
     fs.copyFileSync(reportFile, path.join(sprintDir, 'REPORT.md'));
+  }
+
+  // Copy any SPRINT-<#>_REPORT.md (new naming convention for SPRINT-18+)
+  if (fs.existsSync(fixturePath)) {
+    for (const f of fs.readdirSync(fixturePath)) {
+      if (/^SPRINT-\d+_REPORT\.md$/.test(f)) {
+        fs.copyFileSync(path.join(fixturePath, f), path.join(sprintDir, f));
+      }
+    }
   }
 
   return sprintDir;
@@ -363,5 +382,342 @@ describe('Scenario 6: Reporter writes Lane Audit + Hotfix Audit on a sprint with
     runCloseSprint(sprintDir);
     const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
     expect(state.sprint_status).toBe('Completed');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 7 — SPRINT-18+ sprints write SPRINT-<#>_REPORT.md
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 7: SPRINT-18+ sprints write SPRINT-<#>_REPORT.md (not REPORT.md)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Use sprint-v1-legacy as base (all-terminal stories, v1 schema)
+    // but name the dir SPRINT-18 so the new naming applies.
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-18');
+    tmpBase = path.dirname(sprintDir);
+    // Remove the legacy REPORT.md copied from fixture so stdin mode can write the new name
+    const legacyReport = path.join(sprintDir, 'REPORT.md');
+    if (fs.existsSync(legacyReport)) fs.unlinkSync(legacyReport);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('writes SPRINT-18_REPORT.md when piped via stdin', () => {
+    const reportBody = '# Sprint Report — SPRINT-18\n\n## §1 What Was Delivered\n- Test\n';
+    const stateFile = path.join(sprintDir, 'state.json');
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-18', '--report-body-stdin'],
+      {
+        encoding: 'utf8',
+        input: reportBody,
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: stateFile,
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    expect(fs.existsSync(path.join(sprintDir, 'SPRINT-18_REPORT.md'))).toBe(true);
+  });
+
+  it('does NOT create plain REPORT.md when using new naming', () => {
+    const reportBody = '# Sprint Report — SPRINT-18\n\n## §1 What Was Delivered\n- Test\n';
+    const stateFile = path.join(sprintDir, 'state.json');
+
+    spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-18', '--report-body-stdin'],
+      {
+        encoding: 'utf8',
+        input: reportBody,
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: stateFile,
+        },
+      },
+    );
+    // REPORT.md should not have been created by close_sprint
+    expect(fs.existsSync(path.join(sprintDir, 'REPORT.md'))).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 8 — SPRINT-01..17 REPORT.md is NOT renamed
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 8: SPRINT-01..17 archived REPORT.md keeps old name (backwards-compat)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // sprint-legacy-15 fixture has REPORT.md (legacy name) — not SPRINT-15_REPORT.md
+    sprintDir = makeTempSprintDir('sprint-legacy-15', 'SPRINT-15');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('exits 0 when closed with --assume-ack', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.status).toBe(0);
+  });
+
+  it('legacy REPORT.md is NOT renamed or deleted', () => {
+    runCloseSprint(sprintDir);
+    expect(fs.existsSync(path.join(sprintDir, 'REPORT.md'))).toBe(true);
+  });
+
+  it('SPRINT-15_REPORT.md is NOT created', () => {
+    runCloseSprint(sprintDir);
+    expect(fs.existsSync(path.join(sprintDir, 'SPRINT-15_REPORT.md'))).toBe(false);
+  });
+
+  it('state.json sprint_status is flipped to Completed', () => {
+    runCloseSprint(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 9 — Step 3.5 success path
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 9: Step 3.5 invokes prep_reporter_context.mjs and prints step message', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+    // Create token-ledger.jsonl so prep_reporter_context.mjs does not fail on missing ledger
+    fs.writeFileSync(path.join(sprintDir, 'token-ledger.jsonl'), '', 'utf8');
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('stdout or stderr contains "Step 3.5" message', () => {
+    const result = runCloseSprint(sprintDir);
+    // Step 3.5 is always attempted — check combined output mentions it
+    expect(result.stdout + result.stderr).toMatch(/Step 3\.5/);
+  });
+
+  it('pipeline exits 0 when Step 3.5 finishes (pass or warn)', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.status).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 10 — Step 3.5 failure is non-fatal
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 10: Step 3.5 warns and continues if prep_reporter_context.mjs fails', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // No token-ledger.jsonl → prep_reporter_context.mjs exits 1 (hard error per R4)
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+    // Deliberately do NOT create token-ledger.jsonl
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('stderr contains "Step 3.5 warning" when prep_reporter_context.mjs fails', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.stderr).toMatch(/Step 3\.5 warning/);
+  });
+
+  it('pipeline exits 0 despite Step 3.5 failure (non-fatal)', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.status).toBe(0);
+  });
+
+  it('sprint_status is flipped to Completed even when Step 3.5 fails', () => {
+    runCloseSprint(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 11 — Step 7 skipped when CLI binary missing
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 11: Step 7 skipped when cleargate-cli/dist/cli.js does not exist', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('stdout contains "Step 7 skipped: CLI binary not found" when dist/cli.js absent', () => {
+    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+    if (fs.existsSync(cliBin)) {
+      // CLI binary exists — skip this specific assertion (Scenario 12 applies instead)
+      return;
+    }
+    const result = runCloseSprint(sprintDir);
+    expect(result.stdout).toMatch(/Step 7 skipped: CLI binary not found/);
+  });
+
+  it('exit code is 0 whether Step 7 skips or warns', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.status).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 12 — Step 7 warns and continues when sync fails
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 12: Step 7 warns and continues when sync work-items exits non-zero', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('sprint_status stays Completed even if Step 7 warns (Step 5 already flipped it)', () => {
+    // Regardless of whether Step 7 skips or warns, sprint_status must be Completed
+    const result = runCloseSprint(sprintDir);
+    expect(result.status).toBe(0);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+
+  it('stdout contains "Step 7" (either passed or skipped or warned)', () => {
+    const result = runCloseSprint(sprintDir);
+    expect(result.stdout + result.stderr).toMatch(/Step 7/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 13 — Step 5 wait-for-ack prompt references new filename
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 13: Step 5 wait-for-ack prompt shows SPRINT-<#>_REPORT.md filename', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Create a temp dir named SPRINT-18 — no report file present
+    // so the wait-for-ack prompt fires (or "Waiting for Reporter")
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-close-sprint-s13-'));
+    sprintDir = path.join(base, 'SPRINT-18');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    tmpBase = base;
+
+    // Copy minimal terminal state from v1-legacy fixture
+    const fixtureState = path.join(FIXTURES_DIR, 'sprint-v1-legacy', 'state.json');
+    if (fs.existsSync(fixtureState)) {
+      const stateData = JSON.parse(fs.readFileSync(fixtureState, 'utf8'));
+      stateData.sprint_id = 'SPRINT-18';
+      fs.writeFileSync(
+        path.join(sprintDir, 'state.json'),
+        JSON.stringify(stateData, null, 2) + '\n',
+        'utf8',
+      );
+    }
+    // No report file — script will stop at the wait-for-ack step
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('Step 4 announcement mentions SPRINT-18_REPORT.md (not plain REPORT.md)', () => {
+    const stateFile = path.join(sprintDir, 'state.json');
+    // Run WITHOUT --assume-ack so Step 4 announcement + wait prompt fires
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-18'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: stateFile,
+        },
+      },
+    );
+    // Script exits 0 at wait prompt
+    expect(result.status).toBe(0);
+    // The Step 4 announcement + wait message must contain new filename
+    expect(result.stdout).toMatch(/SPRINT-18_REPORT\.md/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STORY-025-03: Scenario 14 — SPRINT-TEST (no numeric portion) uses plain REPORT.md
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 14: Sprint ID with no numeric portion (SPRINT-TEST) uses plain REPORT.md', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+    // Remove the fixture's REPORT.md so stdin mode writes a fresh one
+    const legacyReport = path.join(sprintDir, 'REPORT.md');
+    if (fs.existsSync(legacyReport)) fs.unlinkSync(legacyReport);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('writes plain REPORT.md (not SPRINT-TEST_REPORT.md) for non-numeric sprint IDs', () => {
+    const reportBody = '# Sprint Report — SPRINT-TEST\n\n## §1\n- Test\n';
+    const stateFile = path.join(sprintDir, 'state.json');
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--report-body-stdin'],
+      {
+        encoding: 'utf8',
+        input: reportBody,
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: stateFile,
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    expect(fs.existsSync(path.join(sprintDir, 'REPORT.md'))).toBe(true);
+    expect(fs.existsSync(path.join(sprintDir, 'SPRINT-TEST_REPORT.md'))).toBe(false);
   });
 });

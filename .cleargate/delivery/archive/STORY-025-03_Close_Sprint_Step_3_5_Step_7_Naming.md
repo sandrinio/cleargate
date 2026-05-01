@@ -1,6 +1,7 @@
 ---
 story_id: STORY-025-03
 parent_epic_ref: EPIC-025
+parent_cleargate_id: "EPIC-025"
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false

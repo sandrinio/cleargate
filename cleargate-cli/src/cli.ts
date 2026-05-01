@@ -15,7 +15,7 @@ import { wikiContradictHandler } from './commands/wiki-contradict.js';
 import { doctorHandler } from './commands/doctor.js';
 import { gateCheckHandler, gateExplainHandler, gateQaHandler, gateArchHandler } from './commands/gate.js';
 import { gateRunHandler } from './commands/gate-run.js';
-import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler, reconcileLifecycleCliHandler } from './commands/sprint.js';
+import { sprintInitHandler, sprintCloseHandler, sprintArchiveHandler, reconcileLifecycleCliHandler, sprintPreflightHandler } from './commands/sprint.js';
 import { storyStartHandler, storyCompleteHandler } from './commands/story.js';
 import { stateUpdateHandler, stateValidateHandler } from './commands/state.js';
 import { stampTokensHandler } from './commands/stamp-tokens.js';
@@ -368,6 +368,31 @@ sprint
       handlerOpts.dryRun = true;
     }
     await sprintArchiveHandler(handlerOpts);
+  });
+
+// CR-021: `cleargate sprint preflight <sprint-id>`
+// Runs the four Gate 3 (Sprint Execution) environment-health checks.
+sprint
+  .command('preflight <sprint-id>')
+  .description('CR-021: run four Gate 3 checks before transitioning a sprint Ready → Active')
+  .addHelpText('after', [
+    '',
+    'Checks (run in order):',
+    '  1. Previous sprint Completed — no prior sprint may be in Active/Ready state.',
+    '  2. No leftover worktrees — .worktrees/STORY-* directories must not exist.',
+    '  3. sprint/S-NN ref free — the sprint branch ref must not already exist in git.',
+    '  4. main is clean — working tree on main must have no uncommitted changes.',
+    '',
+    'Exit codes:',
+    '  0  All four checks pass.',
+    '  1  One or more checks failed (punch list printed to stderr).',
+    '  2  Usage error (missing or invalid sprint-id argument).',
+    '',
+    'Example:',
+    '  cleargate sprint preflight SPRINT-18',
+  ].join('\n'))
+  .action((sprintId: string) => {
+    sprintPreflightHandler({ sprintId });
   });
 
 const story = program
