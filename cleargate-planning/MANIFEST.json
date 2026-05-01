@@ -4,7 +4,7 @@
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "297020d3344d9122c0ff95e00b436cb83640acbc78377684c04f6af8fb6fbcc4",
+      "sha256": "5aad465eb55edca6496231eacdf4890ccdd7e29d335a2af1bc13304a96bba373",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
