@@ -7,7 +7,7 @@ Do NOT output these instructions.
 
 §1 Lane column placement: "Lane" is inserted between "Title" and "Milestone" in the Consolidated Deliverables
 table (§1). This positions lane as a planning signal adjacent to the story title, which is where the Architect
-most naturally reads it during Sprint Design Review. Values are "standard" (default) or "fast" (see protocol §9).
+most naturally reads it during Sprint Design Review. Values are "standard" (default) or "fast" (see cleargate-enforcement.md §9).
 
 §2.4 Lane Audit: The Architect populates one row per fast-lane story during Sprint Design Review. Empty by default.
 Rows are added only for non-`standard` lanes. The subsection is numbered 2.4; the former §2.4 ADR-Conflict Flags

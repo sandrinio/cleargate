@@ -1,4 +1,16 @@
 /**
+ * ARCHIVED 2026-05-01 (CR-023). §24 "Lane Routing" was moved from
+ * cleargate-protocol.md to cleargate-enforcement.md §9 by EPIC-024
+ * (STORY-024-02). This test file is preserved here for historical
+ * reference; a rewritten enforcement-md-aware test is out of scope
+ * for CR-023 and will be drafted as a future cleanup item per
+ * STORY-025-06 §4.1 carve-out.
+ *
+ * DO NOT rerun under vitest — this directory is excluded by
+ * vitest.config.ts via `exclude: ['**/_archive/**']`.
+ */
+
+/**
  * protocol-section-24.test.ts — STORY-022-01
  *
  * Verifies that §24 "Lane Routing" is present in BOTH:
