@@ -1,6 +1,7 @@
 ---
 cr_id: CR-021
 parent_ref: EPIC-025 (decomposition wrapper); cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates
+parent_cleargate_id: "EPIC-025 (decomposition wrapper); cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates"
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
