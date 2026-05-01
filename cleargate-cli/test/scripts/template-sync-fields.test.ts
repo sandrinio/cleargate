@@ -32,8 +32,8 @@ const NEW_FIELDS = [
 // Templates with proper ---...--- YAML frontmatter blocks (parseable via parseFrontmatter)
 const PARSEABLE_TEMPLATES = ['epic.md', 'story.md', 'CR.md', 'Bug.md'] as const;
 
-// All 5 work-item templates touched by STORY-010-01
-const ALL_TEMPLATES = ['proposal.md', 'epic.md', 'story.md', 'CR.md', 'Bug.md'] as const;
+// All 4 work-item templates (proposal.md removed by CR-025 M3)
+const ALL_TEMPLATES = ['epic.md', 'story.md', 'CR.md', 'Bug.md'] as const;
 
 /**
  * Extract the YAML block from a template file.
