@@ -94,7 +94,7 @@ function resolveTestSynthesisTemplateDir(): string {
 function assertScaffoldShape(tmp: string): void {
   // .cleargate scaffold files
   expect(fs.existsSync(path.join(tmp, '.cleargate', 'knowledge', 'cleargate-protocol.md')), '.cleargate/knowledge/cleargate-protocol.md').toBe(true);
-  expect(fs.existsSync(path.join(tmp, '.cleargate', 'templates', 'proposal.md')), '.cleargate/templates/proposal.md').toBe(true);
+  expect(fs.existsSync(path.join(tmp, '.cleargate', 'templates', 'initiative.md')), '.cleargate/templates/initiative.md').toBe(true);
   expect(fs.existsSync(path.join(tmp, '.cleargate', 'templates', 'epic.md')), '.cleargate/templates/epic.md').toBe(true);
   expect(fs.existsSync(path.join(tmp, '.cleargate', 'templates', 'story.md')), '.cleargate/templates/story.md').toBe(true);
   expect(fs.existsSync(path.join(tmp, '.cleargate', 'templates', 'CR.md')), '.cleargate/templates/CR.md').toBe(true);
