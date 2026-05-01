@@ -7,11 +7,10 @@ children:
   - "[[STORY-015-06]]"
 status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md"
-last_ingest: "2026-04-30T13:01:43.034Z"
-last_ingest_commit: "0803834ee8c8f372dfe7f329c2f0dd4015793f69"
+raw_path: ".cleargate/delivery/archive/SPRINT-15_Process_v3.md"
+last_ingest: "2026-05-01T09:50:05.461Z"
+last_ingest_commit: "b16f0f6720a132a92e6f88b35e1a45694f1ed5ed"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-15"
 ---
 
 # SPRINT-15: SPRINT-15

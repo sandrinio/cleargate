@@ -6,7 +6,7 @@ children: []
 status: "Planned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-06_Admin_UI.md"
-last_ingest: "2026-04-30T11:32:26.913Z"
+last_ingest: "2026-05-01T09:50:05.461Z"
 last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
 repo: "planning"
 ---

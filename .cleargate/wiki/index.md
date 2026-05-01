@@ -11,24 +11,18 @@
 - [[EPIC-012]] (epic) — Ready
 - [[EPIC-016]] (epic) — Draft
   - STORY-016-xx (6 stories) — 6 Draft
-- [[EPIC-020]] (epic) — Approved
-  - STORY-020-xx (3 stories) — 3 Approved
 - [[EPIC-021]] (epic) — Ready
+- [[EPIC-023]] (epic) — Approved
+  - STORY-023-xx (4 stories) — 4 Approved
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
-- [[SPRINT-15]] (sprint) — Active
-- [[SPRINT-16]] (sprint) — Draft
+- [[SPRINT-16]] (sprint) — Approved
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
-- [[CR-002]] (cr) — Approved
-- [[CR-011]] (cr) — Approved
-- [[CR-012]] (cr) — Approved
 - [[CR-014]] (cr) — Approved
-- [[CR-016]] (cr) — Approved
-- [[CR-017]] (cr) — Approved
-- [[CR-018]] (cr) — Approved
+- [[CR-019]] (cr) — Approved
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -41,17 +35,19 @@
 - [[BUG-018]] (bug) — Verified
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
-- [[STORY-015-05]] (story) — Approved
-- [[STORY-015-06]] (story) — Approved
+- [[BUG-022]] (bug) — Verified
+- [[STORY-024-01]] (story) — Approved
+- [[STORY-024-02]] (story) — Approved
+- [[STORY-024-03]] (story) — Approved
 
 ## Archive
 
-- Epics: 14 Completed · 2 Abandoned · [expand](archive/epics.md)
-- Sprints: 12 Completed · [expand](archive/sprints.md)
+- Epics: 15 Completed · 2 Abandoned · [expand](archive/epics.md)
+- Sprints: 13 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 10 Completed · [expand](archive/crs.md)
-- Bugs: 2 Abandoned · 1 Completed · [expand](archive/bugs.md)
-- Stories: 69 Completed · 31 Abandoned · 9 Done · [expand](archive/stories.md)
+- CRs: 16 Completed · [expand](archive/crs.md)
+- Bugs: 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
+- Stories: 69 Completed · 31 Abandoned · 14 Done · [expand](archive/stories.md)
 
 ## Contradictions
 
@@ -59,29 +55,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-002]] | cr | Completed | .cleargate/delivery/pending-sync/CR-002_Wiki_Lint_Drift_Cleanup.md |
-| [[CR-019]] | cr | Approved | .cleargate/delivery/pending-sync/CR-019_Sprint_Close_Requires_Explicit_Human_Ack.md |
-## Bugs
-
-| [[BUG-022]] | bug | Verified | .cleargate/delivery/archive/BUG-022_Token_Ledger_Rows_Are_Cumulative_Not_Delta.md |
-## Sprints
-
-| [[SPRINT-15]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-15_Process_v3.md |
-| [[SPRINT-16]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md |
-## Epics
-
-| [[EPIC-023]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-023_MCP_Native_Source_Of_Truth.md |
-| [[EPIC-024]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-024_AI_Orientation_Surface_Slim.md |
-## Stories
-
-| [[STORY-023-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01_CLI_Sync_Work_Items_Command.md |
-| [[STORY-023-01-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-01_CLI_Sync_Work_Items_Command.md |
-| [[STORY-023-01-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-02_MCP_Sync_Work_Items_Handler.md |
-| [[STORY-023-01-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-03_Conflict_Detector_Wiring.md |
-| [[STORY-023-01-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-01-04_Admin_URL_Helper_And_Sync_Output_Link.md |
-| [[STORY-023-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-023-04_Admin_URL_Helper_And_Sync_Output_Link.md |
-| [[STORY-024-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-01_Architect_Plan_Slim.md |
-| [[STORY-024-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-02_Protocol_Split_And_Citation_Rewrite.md |
-| [[STORY-024-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-024-03_CLAUDE_md_Gap_Fill.md |

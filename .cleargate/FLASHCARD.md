@@ -3,6 +3,18 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-01 · #vitest #leak #posttest · vitest spawns 5–9 tinypool workers (~4GB each) that survive the parent if not explicitly closed. Run `pkill -f vitest || true` after every test invocation; observed ~30GB orphan RAM after a single uncleaned run.
+2026-05-01 · #templates #frontmatter #proposal_gate_waiver · `proposal_gate_waiver` field never lived in any template — only in in-flight artifacts. CR-020's "drop from templates" was a no-op verify, not a removal.
+2026-05-01 · #mirror #parity · CLAUDE.md live↔canonical pre-divergent by 4 canonical-only bullets since pre-EPIC-024. Edit-parity invariant applies per-edit, not whole-file — never reconcile pre-existing divergence as a side effect.
+2026-05-01 · #manifest #prebuild · `cleargate-planning/MANIFEST.json` SHAs change after every protocol/template edit; regenerate via `npm run build` (or doctor's auto-regen path) in the SAME commit or doctor flags drift on next session.
+2026-05-01 · #commit-format #dod · DoD §4.2 specifies `feat(<epic>):` but Developers default to `feat(<sprint>):`. Three deviations observed in SPRINT-17. Codify the discrepancy in protocol or enforce in pre-commit lint.
+2026-05-01 · #migration #script #ordering · Multi-phase doc-migration scripts MUST read all source content into memory before any writes — partial-write race observed during the 127-citation rewrite when intermediate state was re-read mid-pass.
+2026-05-01 · #closeout #script #fallback · Sprint frontmatter `start_date` is the *planned* date — for closed sprints whose commits pre-date the planned start, use Strategy 3 `git log --grep "<sprint-id>"` as the reliable fallback in changed-file discovery.
+2026-05-01 · #test #protocol-section #stale · `protocol-section-N.test.ts` files reference numeric §-IDs that go stale when EPIC-024-style slimming moves sections to enforcement.md. Update or archive these tests in the same wave that moves the §.
+2026-05-01 · #wiki-lint #baseline · `cleargate wiki lint` exits 1 even for pre-existing findings; "no regression" gates need a pre/post baseline diff so the gate fails only on NEW findings.
+2026-05-01 · #qa #vitest #npx · `npx ETIMEDOUT` in QA shells when registry is blocked — invoke repo-local `node_modules/.bin/vitest` directly instead.
+2026-05-01 · #citation-rewrite #scope-gap · M2 citation-rewrite surface omitted `.cleargate/templates/` — surfaced post-CR-020 as `Sprint Plan Template.md` / `sprint_report.md` / `story.md` line 32+120 stale `§24`/`§20`. Always include `.cleargate/templates/` in §-grep surfaces.
+2026-05-01 · #worktree #vitest #cleanup · `git worktree remove --force --force` does NOT kill detached vitest worker pools — they persist as orphan node processes pointing at deleted dirs (~3GB each). Run `pkill -9 -f "node.*vitest"` BEFORE removing worktrees that ran `npm test`.
 2026-04-30 · #cli #vitest #import-meta · import.meta.url in vitest source-mode resolves to src/commands/*.ts not dist/; try ../package.json AND ../../package.json candidates for worktree-safe version reads.
 2026-04-30 · #cli #registry-check #env · CLEARGATE_NO_UPDATE_CHECK=1 suppresses all checkLatestVersion network + cache paths; hard contract once 016-01 ships.
 2026-04-30 · #worktree #npm · worktrees share no node_modules with parent; run `npm ci --workspace <pkg>` before first typecheck/test in a new worktree.
