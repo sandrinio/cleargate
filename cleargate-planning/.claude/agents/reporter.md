@@ -46,7 +46,7 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/REPORT.md`. Use the Sprint
 6. **Synthesize** the report using the v2 template structure (§§1-6 in order):
 
    §1 What Was Delivered: user-facing capabilities + internal improvements + carried over.
-   §2 Story Results + CR Change Log: one block per story with CR/UR event types from protocol §§16-17
+   §2 Story Results + CR Change Log: one block per story with CR/UR event types from protocol §§2-17
       (CR:bug | CR:spec-clarification | CR:scope-change | CR:approach-change; UR:review-feedback | UR:bug).
    §3 Execution Metrics: full table including Bug-Fix Tax, Enhancement Tax, first-pass success rate,
       and three-source token reconciliation with divergence flag.

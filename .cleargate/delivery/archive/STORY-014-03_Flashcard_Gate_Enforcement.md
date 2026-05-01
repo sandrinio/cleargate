@@ -35,14 +35,14 @@ cached_gate_result:
 ## 1. The Spec
 
 ### 1.1 User Story
-As an orchestrator, I want the PreToolUse hook on `Task` (subagent dispatch) to refuse the spawn when the prior story's dev/qa reports have unprocessed `flashcards_flagged` entries, so protocol §18 (Immediate Flashcard Gate) is enforced automatically instead of relying on orchestrator discipline.
+As an orchestrator, I want the PreToolUse hook on `Task` (subagent dispatch) to refuse the spawn when the prior story's dev/qa reports have unprocessed `flashcards_flagged` entries, so protocol §4 (Immediate Flashcard Gate) is enforced automatically instead of relying on orchestrator discipline.
 
 ### 1.2 Detailed Requirements
 - Extend `.claude/hooks/pending-task-sentinel.sh` (from SPRINT-09): before writing the new sentinel, scan the active sprint's `reports/` dir for the most recent dev + qa reports' `flashcards_flagged` YAML list.
 - For each flagged card, check if a `.processed-<card-hash>` marker file exists in the sprint dir. If any card is unprocessed, exit non-zero under v2 (blocks Task spawn). Under v1, log a warning and exit 0.
 - Emit diagnostic to stderr naming each unprocessed card + the processing command: `touch .cleargate/sprint-runs/<id>/.processed-<hash>` OR record via `cleargate flashcard process <hash>` (if added later).
 - Card hash: SHA-1 of the card string (first 12 chars).
-- Update `cleargate-protocol.md` §18 with the enforcement details + hash-marker convention.
+- Update `cleargate-enforcement.md` §4 with the enforcement details + hash-marker convention.
 - Three-surface landing: hook + mirror + protocol + mirror.
 
 ### 1.3 Out of Scope
@@ -90,7 +90,7 @@ Feature: PreToolUse flashcard gate
 | Item | Value |
 |---|---|
 | Modified hook | `.claude/hooks/pending-task-sentinel.sh` |
-| Modified protocol | `.cleargate/knowledge/cleargate-protocol.md` §18 |
+| Modified protocol | `.cleargate/knowledge/cleargate-enforcement.md` §4 |
 | Mirrors | `cleargate-planning/.claude/hooks/pending-task-sentinel.sh` + protocol mirror |
 | Test | `.cleargate/scripts/test/test_flashcard_enforcement.sh` |
 

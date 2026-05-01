@@ -137,7 +137,14 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "a4d3bbb78b3d44099d223cc73b87d4799500cb8432f91ae702270679adc3e404",
+      "sha256": "f2d28bddff68419848a93104506c1e242f06a0edd622d72b264b18eb7bfaac43",
+      "tier": "protocol",
+      "overwrite_policy": "merge-3way",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/knowledge/cleargate-enforcement.md",
+      "sha256": "7cebb92e026b58cddea305d49a7d59aab56df4f0b0647cb7c8e24ae8cdd5fe00",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

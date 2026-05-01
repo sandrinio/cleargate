@@ -44,7 +44,7 @@ As a ClearGate orchestrator, I want to be blocked from creating the next story's
 ### 1.2 Detailed Requirements
 - **Output-shape field** on `.claude/agents/developer.md`: add `flashcards_flagged:` (YAML list of strings) to the Developer report frontmatter contract. Default `[]`. When non-empty, each string matches `YYYY-MM-DD · #tag1 #tag2 · lesson` per `.claude/skills/flashcard/SKILL.md`.
 - **Output-shape field** on `.claude/agents/qa.md`: same `flashcards_flagged:` field. QA's list is additive to Developer's.
-- **Protocol §18 "Immediate Flashcard Gate (v2)"** (next free section after STORY-013-05's §§16–17): rule — after story N merges into `sprint/S-XX`, orchestrator MUST process all `flashcards_flagged` entries from story N's dev + qa reports (approve → append to `.cleargate/FLASHCARD.md`; reject → discard with reason in sprint §4 Execution Log) BEFORE creating story N+1's worktree. Informational under v1, enforcing under v2.
+- **Protocol §4 "Immediate Flashcard Gate (v2)"** (next free section after STORY-013-05's §§2–17): rule — after story N merges into `sprint/S-XX`, orchestrator MUST process all `flashcards_flagged` entries from story N's dev + qa reports (approve → append to `.cleargate/FLASHCARD.md`; reject → discard with reason in sprint §4 Execution Log) BEFORE creating story N+1's worktree. Informational under v1, enforcing under v2.
 - **Three-surface landing** on all three files.
 
 ### 1.3 Out of Scope
@@ -76,7 +76,7 @@ Feature: Immediate flashcard hard-gate between stories
 
 ## 3. The Implementation Guide
 
-See **M2 plan §STORY-013-06** at `.cleargate/sprint-runs/S-09/plans/M2.md` (lines 130–156). Plan specifies: protocol §18 numbering (NOT §11 as story text said — that number is occupied), field shape (YAML list of strings, flat), reuse of SKILL.md format, and dogfood note (flashcards processed manually between 013-06 merge and 013-08 start).
+See **M2 plan §STORY-013-06** at `.cleargate/sprint-runs/S-09/plans/M2.md` (lines 130–156). Plan specifies: protocol §4 numbering (NOT §11 as story text said — that number is occupied), field shape (YAML list of strings, flat), reuse of SKILL.md format, and dogfood note (flashcards processed manually between 013-06 merge and 013-08 start).
 
 ### 3.1 Context & Files
 
@@ -113,6 +113,6 @@ No code. YAML frontmatter field + protocol rule + mock test. Orchestrator enforc
 **Current Status: 🟢 Low Ambiguity (Ready for Execution)**
 
 - [x] Gherkin scenario covers §1.2 requirements.
-- [x] Protocol § numbering explicit (§18, not §11).
+- [x] Protocol § numbering explicit (§4, not §11).
 - [x] Field shape explicit (flat YAML list of strings).
 - [x] Dogfood handoff to orchestrator documented.

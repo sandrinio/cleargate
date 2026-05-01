@@ -61,9 +61,9 @@ All 5 stories marked `parallel_eligible: y`. Under v2 they can execute in parall
 
 | Story | Files touched | Shared with |
 |---|---|---|
-| 014-01 | `.cleargate/scripts/file_surface_diff.sh` (new), protocol §20 | — |
+| 014-01 | `.cleargate/scripts/file_surface_diff.sh` (new), protocol §6 | — |
 | 014-02 | `assert_story_files.mjs` (new), `init_sprint.mjs`, protocol §2 | 014-01 (same protocol file) |
-| 014-03 | `.claude/hooks/pending-task-sentinel.sh`, protocol §18 | 014-05 (same hook) |
+| 014-03 | `.claude/hooks/pending-task-sentinel.sh`, protocol §4 | 014-05 (same hook) |
 | 014-04 | `test_ratchet.mjs` (new), new pre-commit hook, `test-baseline.json` | — |
 | 014-05 | `.claude/hooks/pending-task-sentinel.sh` + `token-ledger.sh`, CLAUDE.md | 014-03 (sentinel hook) |
 | 014-06 | `cleargate-cli/src/commands/sprint.ts`, `state.ts`, `execution-mode.ts` | 014-07, 014-08 (sprint.ts) |
@@ -72,7 +72,7 @@ All 5 stories marked `parallel_eligible: y`. Under v2 they can execute in parall
 | 014-09 | `architect.md`, `story.md` template | — |
 | 014-10 | `reporter.md`, `close_sprint.mjs` | — |
 
-**Merge order within M1:** 01 → 02 (protocol sections don't overlap — §20 vs §2 — but serialize to avoid hook-log churn). 03 ships before 05 so 05's env-routing change lands on top of the flashcard-gate extension cleanly.
+**Merge order within M1:** 01 → 02 (protocol sections don't overlap — §6 vs §2 — but serialize to avoid hook-log churn). 03 ships before 05 so 05's env-routing change lands on top of the flashcard-gate extension cleanly.
 
 **Merge order within M2:** 06 first (unblocks 07/08). 07 before 08 (both touch sprint.ts — 08 is additive). 09/10 parallel, either order fine.
 
@@ -81,7 +81,7 @@ All 5 stories marked `parallel_eligible: y`. Under v2 they can execute in parall
 - `.claude/hooks/pending-task-sentinel.sh` is touched by BOTH 014-03 (flashcard gate check) and 014-05 (env routing). **Serialize.** 03 first, then 05 rebases.
 - `cleargate-cli/src/commands/sprint.ts` is touched by 014-06 (close --assume-ack), 014-08 (archive subcommand). **Serialize.** 06 first.
 - `.cleargate/scripts/close_sprint.mjs` is touched by 014-10 (stdin mode) — no other story touches it. Safe.
-- `cleargate-protocol.md` is touched by 014-01 (§20 append) and 014-02 (§2 amendment). **Serialize** — different sections but same file. 01 first, 02 rebases.
+- `cleargate-enforcement.md` is touched by 014-01 (§6 append) and 014-02 (§2 amendment). **Serialize** — different sections but same file. 01 first, 02 rebases.
 
 ### 2.4 ADR-Conflict Flags
 
@@ -141,4 +141,4 @@ Sprint-level DoD (in addition to per-story DoD):
 ---
 
 ## Execution Log
-<!-- UR and CR events append here per protocol §§16-17. -->
+<!-- UR and CR events append here per protocol §§2-17. -->

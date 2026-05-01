@@ -216,7 +216,7 @@ Estimated: 11 stories total, ~2 sprints of work.
 
 ### Documentation / protocol
 
-- `.cleargate/knowledge/cleargate-protocol.md` — add §27 "Sync model: native MCP, no external PM in CLI loop".
+- `.cleargate/knowledge/cleargate-enforcement.md` — add §12 "Sync model: native MCP, no external PM in CLI loop".
 - `.cleargate/FLASHCARD.md` — file lessons from each EPIC's QA bounces here when they happen.
 
 ---

@@ -43,7 +43,7 @@ draft_tokens:
   sessions: []
 ---
 
-# STORY-022-01: Architect Lane Classification — rubric in `architect.md` + protocol §24
+# STORY-022-01: Architect Lane Classification — rubric in `architect.md` + protocol §9
 **Complexity:** L2 — two synchronized surfaces (agent file + protocol section), one new rubric, no new code paths.
 
 ## 1. The Spec (The Contract)
@@ -57,7 +57,7 @@ As the orchestrator, I want the Architect agent to emit a `lane: standard | fast
 Two synchronised surfaces land:
 
 1. **`.claude/agents/architect.md`** — append §"Lane Classification" with the seven-check rubric from PROPOSAL-013 §2.3 (LOC cap, forbidden surfaces, no new dependency, single acceptance scenario, existing tests cover, expected_bounce_exposure: low, no epic-spanning subsystem touches). The Architect's Sprint Design Review tail step (defined by STORY-013-09) gains the lane-emission contract: write a §2.4 "Lane Audit" subsection in the Sprint Plan listing every fast-lane story with a ≤80-char rationale.
-2. **`.cleargate/knowledge/cleargate-protocol.md`** + scaffold mirror — append §24 "Lane Routing" with the rubric, demotion mechanics (one-way `fast → standard`), forbidden-surface file-path prefix list, AND register the `LD` (Lane Demotion) event-type AS A SELF-CONTAINED SENTENCE WITHIN §24 ITSELF (per Architect M3 §6 #3 — §10 is wiki-protocol, not events; STORY-022-03 handles the parallel sprint_report.md vocabulary registration). ≤30 lines per the protocol section-length convention. Both files (live + `cleargate-planning/.cleargate/knowledge/cleargate-protocol.md`) MUST stay byte-identical.
+2. **`.cleargate/knowledge/cleargate-enforcement.md`** + scaffold mirror — append §9 "Lane Routing" with the rubric, demotion mechanics (one-way `fast → standard`), forbidden-surface file-path prefix list, AND register the `LD` (Lane Demotion) event-type AS A SELF-CONTAINED SENTENCE WITHIN §9 ITSELF (per Architect M3 §6 #3 — §10 is wiki-protocol, not events; STORY-022-03 handles the parallel sprint_report.md vocabulary registration). ≤30 lines per the protocol section-length convention. Both files (live + `cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md`) MUST stay byte-identical.
 
 The forbidden-surface list (per PROPOSAL-013 §2.3 check #2):
 - Database schema/migration (anything under `mcp/src/db/`, `**/migrations/`).
@@ -75,7 +75,7 @@ The forbidden-surface list (per PROPOSAL-013 §2.3 check #2):
 - Developer agent reading lane (STORY-022-05 owns).
 - Hotfix lane (STORY-022-06 owns).
 - Reporter contract (STORY-022-07 owns).
-- §24 self-disabling rubric after 3 consecutive "n" retrospect answers (deferred per EPIC-022 §2 OUT-OF-SCOPE — observe drift signal in practice first).
+- §9 self-disabling rubric after 3 consecutive "n" retrospect answers (deferred per EPIC-022 §2 OUT-OF-SCOPE — observe drift signal in practice first).
 
 ## 2. The Truth (Executable Tests)
 
@@ -91,18 +91,18 @@ Feature: Architect Lane Classification
     And each check restates the corresponding rule from PROPOSAL-013 §2.3
     And the section also documents the §2.4 Lane Audit emission contract
 
-  Scenario: Protocol §24 documents the rubric, demotion, forbidden surfaces, and LD event
+  Scenario: Protocol §9 documents the rubric, demotion, forbidden surfaces, and LD event
     Given `.cleargate/knowledge/cleargate-protocol.md`
-    When a reader navigates to §24 "Lane Routing"
-    Then the section contains: the rubric (mirrored from agent file), demotion mechanics, forbidden-surface table, and the LD event-type registered as a self-contained sentence within §24
+    When a reader navigates to §9 "Lane Routing"
+    Then the section contains: the rubric (mirrored from agent file), demotion mechanics, forbidden-surface table, and the LD event-type registered as a self-contained sentence within §9
 
   Scenario: Protocol byte-equality is preserved
     Given `.cleargate/knowledge/cleargate-protocol.md` and `cleargate-planning/.cleargate/knowledge/cleargate-protocol.md`
     When `diff` is run between the two files
     Then the diff is empty
 
-  Scenario: §24 length conforms to protocol section-length convention
-    Given §24 in either protocol file
+  Scenario: §9 length conforms to protocol section-length convention
+    Given §9 in either protocol file
     When the section line count is measured
     Then it is ≤30 lines (heading + content)
 ```
@@ -110,7 +110,7 @@ Feature: Architect Lane Classification
 ### 2.2 Manual Verification
 
 - Read `.claude/agents/architect.md` — confirm "Lane Classification" section present and matches the rubric.
-- Read either protocol file at §24 — confirm it documents the same rubric verbatim plus demotion + LD event.
+- Read either protocol file at §9 — confirm it documents the same rubric verbatim plus demotion + LD event.
 - Run any existing protocol byte-equality test in the cleargate-cli test suite — must pass.
 
 ## 3. Implementation Guide
@@ -125,7 +125,7 @@ Feature: Architect Lane Classification
 
 No code paths change. This is documentation-as-contract: the Architect agent reads its own definition file and applies the rubric during Sprint Design Review. The protocol section is the single-source-of-truth spec; the agent file is the runtime instruction.
 
-§24 numbering: STORY-014-01 took §23 in M2; CR-010 took §22 in M1. This story takes §24 (the original protocol slot reserved for lane routing). Confirm by reading the post-M2 protocol file and finding the next available slot — if §24 is already taken by something unexpected, either renumber to the next available OR escalate.
+§9 numbering: STORY-014-01 took §8 in M2; CR-010 took §7 in M1. This story takes §9 (the original protocol slot reserved for lane routing). Confirm by reading the post-M2 protocol file and finding the next available slot — if §9 is already taken by something unexpected, either renumber to the next available OR escalate.
 
 ### 3.3 API / CLI Contract
 
@@ -136,18 +136,18 @@ No CLI surface change. The Architect agent's emission contract is an artifact (S
 ### 4.1 Test Expectations
 
 - Protocol byte-equality test passes (existing test from STORY-014-01 round 2 — preserve).
-- ≥1 test or grep-based assertion that §24 exists with the seven-check rubric. If the cleargate-cli test suite has a "protocol section presence" pattern, follow it; otherwise add a small test under `cleargate-cli/test/lib/` that reads the protocol file and asserts the section heading.
+- ≥1 test or grep-based assertion that §9 exists with the seven-check rubric. If the cleargate-cli test suite has a "protocol section presence" pattern, follow it; otherwise add a small test under `cleargate-cli/test/lib/` that reads the protocol file and asserts the section heading.
 - Manual smoke: read the Sprint Design Review section of `architect.md` and verify the lane-emission contract is referenced.
 
 ### 4.2 Definition of Done
 
 - [ ] §"Lane Classification" added to `cleargate-planning/.claude/agents/architect.md` (and reflected in the live `.claude/agents/architect.md`).
-- [ ] §24 "Lane Routing" added to BOTH protocol files, byte-identical.
-- [ ] §24 length ≤30 lines.
-- [ ] LD event type registered as a self-contained sentence within §24 (NOT in §10 — §10 is wiki protocol per Architect M3 §6 #3; sprint_report.md vocabulary is STORY-022-03's responsibility).
+- [ ] §9 "Lane Routing" added to BOTH protocol files, byte-identical.
+- [ ] §9 length ≤30 lines.
+- [ ] LD event type registered as a self-contained sentence within §9 (NOT in §10 — §10 is wiki protocol per Architect M3 §6 #3; sprint_report.md vocabulary is STORY-022-03's responsibility).
 - [ ] Protocol byte-equality test passes.
 - [ ] Forbidden-surface list explicit per §1.2.
 - [ ] `npm run typecheck` clean for cleargate-cli.
 - [ ] `npm test` green for cleargate-cli.
-- [ ] Commit message: `feat(STORY-022-01): SPRINT-14 M3 — Architect Lane Classification rubric + protocol §24`.
+- [ ] Commit message: `feat(STORY-022-01): SPRINT-14 M3 — Architect Lane Classification rubric + protocol §9`.
 - [ ] One commit. NEVER `--no-verify`.

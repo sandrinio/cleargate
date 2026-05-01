@@ -29,7 +29,7 @@ cached_gate_result:
 ---
 
 # STORY-014-01: File-surface diff pre-commit gate
-**Complexity:** L2 — one new bash script + pre-commit wire + template §3.1 contract extension + protocol §20 append.
+**Complexity:** L2 — one new bash script + pre-commit wire + template §3.1 contract extension + protocol §6 append.
 
 ## 1. The Spec
 
@@ -96,7 +96,7 @@ Feature: File-surface diff pre-commit gate
 | New script | `.cleargate/scripts/file_surface_diff.sh` |
 | New hook wrapper | `.claude/hooks/pre-commit-surface-gate.sh` (gitignored live; commit scaffold mirror) |
 | New whitelist | `.cleargate/scripts/surface-whitelist.txt` |
-| Modified protocol | `.cleargate/knowledge/cleargate-protocol.md` — append §20 |
+| Modified protocol | `.cleargate/knowledge/cleargate-enforcement.md` — append §6 |
 | Modified template | `.cleargate/templates/story.md` — note in §3.1 heading |
 | Mirrors | `cleargate-planning/` copies of all above |
 | Test | `.cleargate/scripts/test/test_file_surface.sh` |

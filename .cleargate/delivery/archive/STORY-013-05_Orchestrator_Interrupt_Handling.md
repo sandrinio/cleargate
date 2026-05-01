@@ -44,8 +44,8 @@ As a ClearGate orchestrator running under `execution_mode: v2`, I want explicit 
 ### 1.2 Detailed Requirements
 - **Circuit breaker** in `developer.md`: after ~50 tool calls with no successful test run OR 2 consecutive identical failures, Developer halts and writes `STORY-NNN-NN-dev-blockers.md` to `.cleargate/sprint-runs/<id>/reports/` with three required sections: `## Test-Pattern`, `## Spec-Gap`, `## Environment` (one sentence or `N/A` each). Rule is informational under v1, enforcing under v2.
 - **Blockers triage** in `architect.md`: category routing — Test-Pattern → re-launch Developer with fixture hint; Spec-Gap → return to orchestrator with user question; Environment → pre-gate re-run. 3 consecutive circuit-breaker hits on same story → state flips to `Escalated` via `update_state.mjs` (reuse M1 script).
-- **Protocol §16 "User Walkthrough on Sprint Branch (v2)"**: after all stories merged into `sprint/S-XX` and before sprint→main merge, user tests running app. Feedback split into `UR:review-feedback` (enhancement, does NOT count against correction tax) and `UR:bug` (DOES count against Bug-Fix Tax). Each logged in sprint markdown §4 Execution Log with `UR` event prefix.
-- **Protocol §17 "Mid-Sprint Change Request Triage (v2)"**: user input during a bounce is classified into one of four categories — `CR:bug`, `CR:spec-clarification`, `CR:scope-change`, `CR:approach-change` — each with defined routing and bounce-counter effect. Table ports V-Bounce `mid-sprint-triage.md` at pinned SHA.
+- **Protocol §2 "User Walkthrough on Sprint Branch (v2)"**: after all stories merged into `sprint/S-XX` and before sprint→main merge, user tests running app. Feedback split into `UR:review-feedback` (enhancement, does NOT count against correction tax) and `UR:bug` (DOES count against Bug-Fix Tax). Each logged in sprint markdown §4 Execution Log with `UR` event prefix.
+- **Protocol §3 "Mid-Sprint Change Request Triage (v2)"**: user input during a bounce is classified into one of four categories — `CR:bug`, `CR:spec-clarification`, `CR:scope-change`, `CR:approach-change` — each with defined routing and bounce-counter effect. Table ports V-Bounce `mid-sprint-triage.md` at pinned SHA.
 - **Event-type vocabulary is locked by this story.** Every subsequent M2 story consumes these exact tokens (cross-story risk #2 in M2 plan).
 - **Three-surface landing (R9)** for all five touched files (developer.md + architect.md + protocol.md + 3 cleargate-planning/ mirrors).
 
@@ -79,9 +79,9 @@ Feature: Orchestrator interrupt handling
 
   Scenario: Mid-sprint change request classified
     Given user injects feedback "this endpoint needs to also return the project slug" during a QA bounce
-    When orchestrator invokes protocol §17 triage
+    When orchestrator invokes protocol §3 triage
     Then the event is classified as CR:scope-change
-    And its bounce-counter effect matches the §17 table entry
+    And its bounce-counter effect matches the §3 table entry
     And the event is logged in sprint markdown §4 with CR event prefix
 ```
 
@@ -94,7 +94,7 @@ Feature: Orchestrator interrupt handling
 
 ## 3. The Implementation Guide
 
-See **M2 plan §STORY-013-05** at `.cleargate/sprint-runs/S-09/plans/M2.md` (lines 25–57). Plan specifies append sites (developer.md line 68, architect.md after line 48, protocol.md after §15), exact section numbering (§§16–17, NOT "§§12–13" from stale story text), and the Blockers Report directory path `.cleargate/sprint-runs/<id>/reports/` (distinct from pre-gate scanner's `.cleargate/reports/`).
+See **M2 plan §STORY-013-05** at `.cleargate/sprint-runs/S-09/plans/M2.md` (lines 25–57). Plan specifies append sites (developer.md line 68, architect.md after line 48, protocol.md after §1), exact section numbering (§§2–17, NOT "§§12–13" from stale story text), and the Blockers Report directory path `.cleargate/sprint-runs/<id>/reports/` (distinct from pre-gate scanner's `.cleargate/reports/`).
 
 ### 3.1 Context & Files
 

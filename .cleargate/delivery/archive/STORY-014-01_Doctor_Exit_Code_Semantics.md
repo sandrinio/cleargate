@@ -62,7 +62,7 @@ Pin the exit-code hierarchy to exactly three values:
 - **`1` — blocked items / advisory issues.** At least one blocked work-item OR one advisory issue (gate failures, stamp errors, drifted SHAs, missing ledger rows). Doctor stdout MUST list each blocker with item-id + criterion. Hooks treat exit=1 as "show the user what's wrong" but do NOT halt their own execution.
 - **`2` — config / install error.** ClearGate is misconfigured or partially installed: missing `.cleargate/` directory, missing `cleargate-planning/MANIFEST.json`, missing `~/.cleargate/auth.json` for a sync-required operation, hook resolver completely fails. Doctor stdout MUST emit a remediation hint (`Run: cleargate init` or `Run: cleargate join <url>` or similar). Hooks treat exit=2 as "this isn't a content issue, it's a setup issue" — typically halt with a loud error.
 
-Document this hierarchy in `cleargate doctor --help` output and in `cleargate-planning/.cleargate/knowledge/cleargate-protocol.md` (one-line addition under §6 MCP Tools Reference, or a fresh §23 if no fit).
+Document this hierarchy in `cleargate doctor --help` output and in `cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md` (one-line addition under §6 MCP Tools Reference, or a fresh §8 if no fit).
 
 ### 1.3 Out of Scope
 
@@ -171,7 +171,7 @@ Exit codes:
 - [ ] Top-level exit-code computation matches the §3.2 pseudocode.
 - [ ] All 6 Gherkin scenarios have passing tests.
 - [ ] `cleargate doctor --help` documents the three exit codes.
-- [ ] Protocol §6 (or §23) carries a one-line cross-reference.
+- [ ] Protocol §6 (or §8) carries a one-line cross-reference.
 - [ ] `npm run typecheck` clean for cleargate-cli.
 - [ ] `npm test` green for cleargate-cli.
 - [ ] Commit message: `feat(STORY-014-01): SPRINT-14 M2 — doctor exit-code semantics (0 clean / 1 blocked / 2 config-error)`.

@@ -43,7 +43,7 @@ cached_gate_result:
 As a ClearGate user running `cleargate-cli`, I want opt-in v2 routing via `execution_mode: v1 | v2` on the Sprint Plan frontmatter, plus four new CLI command groups (`sprint init|close`, `story start|complete`, `gate qa|arch`, `state update|validate`) that shell out through `run_script.sh` to the M1/013-07 scripts, so that existing v1 workflows are unchanged (under v1 the new commands print an inert-mode message) and v2 behavior is a single-line frontmatter flip per sprint.
 
 ### 1.2 Detailed Requirements
-- **Protocol §19 "Execution Mode Routing (v2)"**: orchestrator reads Sprint Plan frontmatter `execution_mode`; if `v2`, all §§15–18 rules are enforcing; if `v1`, advisory. Flag is sprint-scoped, not global.
+- **Protocol §5 "Execution Mode Routing (v2)"**: orchestrator reads Sprint Plan frontmatter `execution_mode`; if `v2`, all §§1–18 rules are enforcing; if `v1`, advisory. Flag is sprint-scoped, not global.
 - **Sprint Plan Template frontmatter**: enum constraint on `execution_mode` ∈ {`v1`, `v2`} — STORY-013-09 may add the field; STORY-013-08 owns the enum + routing documentation.
 - **`cleargate sprint <init|close>`** in `cleargate-cli/src/commands/sprint.ts`:
   - `sprint init <sprint-id> --stories <csv>` — shells out via `run_script.sh init_sprint.mjs`.
@@ -106,7 +106,7 @@ Feature: execution_mode flag + CLI wrappers
 - [ ] `npm run build` in `cleargate-cli/` clean + MANIFEST.json SHA updates.
 - [ ] `npm run typecheck` + `npm test` in `cleargate-cli/` both green.
 - [ ] `diff` protocol.md + Sprint Plan Template live vs mirror — empty.
-- [ ] `grep "execution_mode" .cleargate/knowledge/cleargate-protocol.md` — finds §19.
+- [ ] `grep "execution_mode" .cleargate/knowledge/cleargate-enforcement.md` — finds §5.
 
 ## 3. The Implementation Guide
 

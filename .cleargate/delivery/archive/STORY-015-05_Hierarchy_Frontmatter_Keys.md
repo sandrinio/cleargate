@@ -133,7 +133,7 @@ For Sprint Plan Template.md, only `parent_cleargate_id` is meaningful (a sprint 
 - [x] Six templates updated with both keys.
 - [x] Existing `parent_ref` keys preserved.
 - [x] §2.1 grep scenarios all pass.
-- [ ] Peer/Architect Review passed (fast-lane: skipped — single-surface doc edit per protocol §24).
+- [ ] Peer/Architect Review passed (fast-lane: skipped — single-surface doc edit per protocol §9).
 
 ---
 
@@ -143,4 +143,4 @@ For Sprint Plan Template.md, only `parent_cleargate_id` is meaningful (a sprint 
 - [x] Gherkin scenarios cover all detailed requirements in §1.2.
 - [x] Implementation Guide maps to specific verified file paths.
 - [x] No TBDs.
-- [x] Lane = fast, justified per protocol §24 rubric: single-subsystem (templates), doc-only, no schema, no auth, deterministic verify, low bounce exposure.
+- [x] Lane = fast, justified per protocol §9 rubric: single-subsystem (templates), doc-only, no schema, no auth, deterministic verify, low bounce exposure.

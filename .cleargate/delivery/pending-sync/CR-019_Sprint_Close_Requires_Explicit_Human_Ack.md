@@ -79,7 +79,7 @@ Exact file paths to modify:
 
 | Path | Change |
 |---|---|
-| `.cleargate/knowledge/cleargate-protocol.md` | Append `### §27. Gate 3.5 — Sprint Close Acknowledgement` (or extend §4 Gate 3 with a sub-section). 6-10 lines: orchestrator runs no-flag, surfaces prompt verbatim, halts. Human runs `--assume-ack`. List the equivalent gate posture as `cleargate_push_item` push-approval. |
+| `.cleargate/knowledge/cleargate-enforcement.md` | Append `### §12. Gate 3.5 — Sprint Close Acknowledgement` (or extend §4 Gate 3 with a sub-section). 6-10 lines: orchestrator runs no-flag, surfaces prompt verbatim, halts. Human runs `--assume-ack`. List the equivalent gate posture as `cleargate_push_item` push-approval. |
 | `cleargate-planning/.cleargate/knowledge/cleargate-protocol.md` | Mirror edit (byte-identical; enforced by `protocol-section-*.test.ts`). |
 | `cleargate-planning/CLAUDE.md` | Append one bullet under "Guardrails for the conversational agent" inside the `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block: `Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.` |
 | `/Users/ssuladze/Documents/Dev/ClearGate/CLAUDE.md` (live mirror) | Same bullet (byte-identical to canonical inside the CLEARGATE block). |
@@ -92,7 +92,7 @@ Exact file paths to modify:
 
 How to confirm new logic works and old logic is fully evicted.
 
-1. - [ ] **Protocol section present.** `grep -nE "^### §27\\.|Gate 3.5" .cleargate/knowledge/cleargate-protocol.md` returns the heading. Mirror diff `diff .cleargate/knowledge/cleargate-protocol.md cleargate-planning/.cleargate/knowledge/cleargate-protocol.md` is empty.
+1. - [ ] **Protocol section present.** `grep -nE "^### §12\\.|Gate 3.5" .cleargate/knowledge/cleargate-enforcement.md` returns the heading. Mirror diff `diff .cleargate/knowledge/cleargate-enforcement.md cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md` is empty.
 2. - [ ] **CLAUDE.md guardrail present (both copies).** `grep -nE "Sprint close requires explicit human ack" CLAUDE.md cleargate-planning/CLAUDE.md` returns one match per file.
 3. - [ ] **`close_sprint.mjs` usage updated.** `grep -nE "automated tests ONLY" .cleargate/scripts/close_sprint.mjs` returns at least one match in the usage block.
 4. - [ ] **No-flag run unchanged.** Spawn a fresh-state SPRINT-NN fixture; run `node .cleargate/scripts/close_sprint.mjs SPRINT-NN`; confirm exit 0 + stdout contains `Review the report, then confirm close by re-running with --assume-ack`.
