@@ -515,7 +515,7 @@ function storyKeysForEpic(
  *      move files, clear .active, git checkout main, merge, branch -d.
  */
 export async function sprintArchiveHandler(
-  opts: { sprintId: string; dryRun?: boolean },
+  opts: { sprintId: string; dryRun?: boolean; allowWikiLintDebt?: boolean },
   cli?: SprintCliOptions,
 ): Promise<void> {
   try {
@@ -724,6 +724,12 @@ export async function sprintArchiveHandler(
         try {
           await stepFn();
         } catch (err) {
+          // CR-022 M5: --allow-wiki-lint-debt waives lint failure but NOT build failure.
+          if (stepName === 'wiki lint' && opts.allowWikiLintDebt === true) {
+            stderrFn('[cleargate sprint archive] wiki-lint debt waived via --allow-wiki-lint-debt flag');
+            if (err instanceof Error) stderrFn(`  (lint output: ${err.message})`);
+            continue;
+          }
           // Rollback sprint file frontmatter
           atomicWriteStr(sprintFile!, sprintFileSnapshot!);
           stderrFn(

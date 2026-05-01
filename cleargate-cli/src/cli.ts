@@ -361,11 +361,15 @@ sprint
   .command('archive <sprint-id>')
   .description('archive a completed sprint — move pending-sync files, clear .active, merge + delete sprint branch')
   .option('--dry-run', 'print the archive plan without making any changes')
-  .action(async (sprintId: string, opts: { dryRun?: boolean }) => {
+  .option('--allow-wiki-lint-debt', 'CR-022 M5: waive wiki-lint findings during archive (mirrors --allow-drift pattern)')
+  .action(async (sprintId: string, opts: { dryRun?: boolean; allowWikiLintDebt?: boolean }) => {
     // FLASHCARD #cli #commander #optional-key: omit key when undefined
-    const handlerOpts: { sprintId: string; dryRun?: boolean } = { sprintId };
+    const handlerOpts: { sprintId: string; dryRun?: boolean; allowWikiLintDebt?: boolean } = { sprintId };
     if (opts.dryRun === true) {
       handlerOpts.dryRun = true;
+    }
+    if (opts.allowWikiLintDebt === true) {
+      handlerOpts.allowWikiLintDebt = true;
     }
     await sprintArchiveHandler(handlerOpts);
   });
