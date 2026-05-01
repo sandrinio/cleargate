@@ -5,7 +5,7 @@ parent_cleargate_id: "SPRINT-17 cleanup follow-ups; cleargate-protocol.md (citat
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: "SPRINT-17 REPORT.md §5 Tooling rows + flashcard candidates surfaced 2026-05-01. Four cleanup items folded into one fast-lane CR per user 2026-05-01 ('we need it in the sprint'). Items: (a) stale §-citations in .cleargate/templates/ that M2 citation-rewrite scope missed; (b) pre-existing CLAUDE.md mirror divergence (4 canonical-only bullets); (c) stale protocol-section-N.test.ts files referencing pre-slim §-IDs; (d) vitest worker-leak hygiene (close-sprint tests fail in full-suite due to worker contention, pass in isolation)."
 proposal_gate_waiver:
