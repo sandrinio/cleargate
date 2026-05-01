@@ -1,17 +1,39 @@
 <instructions>
-This is a READ artifact. It is written by cleargate_pull_initiative when syncing a Sprint from the remote PM tool.
-Do NOT draft this file manually. Do NOT invoke cleargate_push_item on this file.
-The Vibe Coder may annotate the "Execution Guidelines" section locally — this section is never pushed.
-Output location: .cleargate/plans/SPRINT-{ID}.md
+This template is actively authored during the Prepare phase.
+
+WHAT TO GATHER
+  - Sprint number — read .cleargate/wiki/active-sprint.md, scan pending-sync/SPRINT-*.md, emit max(N) + 1
+  - Available work items — pending-sync/{EPIC,STORY,CR,BUG,HOTFIX}-*.md filtered ambiguity:🟢 + status:Ready
+  - Human-set priorities — frontmatter `priority` field per item
+  - Cross-item dependencies — `parent_epic_ref:` + shared file-surface analysis
+
+HOW TO GATHER
+  - Read for sprint-runs/, Grep for pending-sync/, scripts/wiki-query for awareness layer
+  - cleargate-cli/src/lib/admin-url.ts for any admin-link references
+
+ANALYSIS REQUIRED
+  - Propose priority reordering for technical reasons (dep chains, shared-surface conflicts, fast-lane bundling). One-line rationale per change.
+  - Flag missing decomposition (epics with no child stories) — must resolve before Gate 2 passes.
+  - Trigger Architect Sprint Design Review (writes §2 Execution Strategy) once scope is locked.
+
+WHERE TO WRITE
+  - .cleargate/delivery/pending-sync/SPRINT-<#>_<name>.md
+
+POST-WRITE BRIEF
+  Render in chat with these sections:
+    - Sprint Goal (1 sentence)
+    - Selected items (table: id / type / lane / milestone / parallel? / bounce-exposure)
+    - Recommended priority changes (with one-line rationale per change)
+    - Open questions for human (with recommended answers)
+    - Risks (with mitigations)
+    - Current ambiguity + Gate 2 readiness checklist (decomposed? all 🟢? SDR §2 written?)
+  Halt for human review. When ambiguity reaches 🟢 AND Gate 2 conditions satisfy, proceed to call cleargate_push_item.
+
+DUAL-AUDIENCE STRUCTURE
+  Top of body: Stakeholder/Sponsor view (Sprint Goal, Business Outcome, Risks/Mitigations, Metrics).
+  Bottom of body: AI-execution view (Phase Plan, Merge Ordering, Lane Audit, ADR-Conflict Flags, Decomposition Status).
+
 Do NOT output these instructions.
-
-§1 Lane column placement: "Lane" is inserted between "Title" and "Milestone" in the Consolidated Deliverables
-table (§1). This positions lane as a planning signal adjacent to the story title, which is where the Architect
-most naturally reads it during Sprint Design Review. Values are "standard" (default) or "fast" (see protocol §24).
-
-§2.4 Lane Audit: The Architect populates one row per fast-lane story during Sprint Design Review. Empty by default.
-Rows are added only for non-`standard` lanes. The subsection is numbered 2.4; the former §2.4 ADR-Conflict Flags
-is renumbered to §2.5.
 </instructions>
 
 ---
@@ -19,11 +41,11 @@ sprint_id: "SPRINT-{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
-lifecycle_init_mode: "warn"  # "warn" | "block" — controls sprint-init lifecycle gate (§25.4); use "block" for SPRINT-16+
+lifecycle_init_mode: "warn"  # "warn" | "block" — controls sprint-init lifecycle gate (§10.4); use "block" for SPRINT-16+
 remote_id: "{PM_TOOL_SPRINT_ID}"
 source_tool: "linear | jira"
 status: "Draft | Active | Completed"
-execution_mode: "v1"   # Enum: "v1" | "v2". Default "v1". Under "v2", §§15–18 of cleargate-protocol.md are enforcing (worktree isolation, pre-gate scanning, bounce counters, flashcard gate, sprint-close pipeline). Under "v1", those sections are advisory only and all new CLI commands (sprint init|close, story start|complete, gate qa|arch, state update|validate) print an inert-mode message. Set to "v2" only after all EPIC-013 M2 stories have shipped and the Architect has completed a Sprint Design Review (see §19 of the protocol).
+execution_mode: "v1"   # Enum: "v1" | "v2". Default "v1". Under "v2", §§1–18 of cleargate-enforcement.md are enforcing (worktree isolation, pre-gate scanning, bounce counters, flashcard gate, sprint-close pipeline). Under "v1", those sections are advisory only and all new CLI commands (sprint init|close, story start|complete, gate qa|arch, state update|validate) print an inert-mode message. Set to "v2" only after all EPIC-013 M2 stories have shipped and the Architect has completed a Sprint Design Review (see §5 of the protocol).
 start_date: "{YYYY-MM-DD}"
 end_date: "{YYYY-MM-DD}"
 synced_at: "{ISO-8601 timestamp}"
@@ -45,6 +67,14 @@ cached_gate_result:
 ---
 
 # SPRINT-{ID}: {Sprint Number / Name}
+
+## 0. Stakeholder Brief
+*(Sponsor-readable summary. Pushed to PM tool. Pair with §3 Risks below.)*
+
+- **Sprint Goal:** {1 sentence}
+- **Business Outcome:** {what the user / sponsor gets}
+- **Risks (top 3):** {bullet list, see §3 for full table}
+- **Metrics:** {expected impact / KPIs}
 
 ## Sprint Goal
 {One clear sentence describing the primary objective of this sprint, as defined in the PM tool.}
@@ -70,7 +100,7 @@ Example:
 
 | Shared File | Stories Touching It | Merge Order | Rationale |
 |---|---|---|---|
-| `.cleargate/knowledge/cleargate-protocol.md` | STORY-NNN-01, STORY-NNN-02 | 01 → 02 | 01 adds §16; 02 amends §16 |
+| `.cleargate/knowledge/cleargate-enforcement.md` | STORY-NNN-01, STORY-NNN-02 | 01 → 02 | 01 adds §2; 02 amends §2 |
 
 ### 2.3 Shared-Surface Warnings
 {Explicit conflict risks. One bullet per risk. Cite file + story pair.}

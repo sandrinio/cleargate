@@ -7,7 +7,7 @@ template_version: 2
 ---
 
 <!-- Sprint Report v2 Template — template_version: 2 -->
-<!-- Event-type vocabulary (STORY-013-05 / protocol §§16–17):
+<!-- Event-type vocabulary (STORY-013-05 / protocol §§2–17):
      User-Review: UR:review-feedback | UR:bug
      Change-Request: CR:bug | CR:spec-clarification | CR:scope-change | CR:approach-change
      Circuit-breaker: test-pattern | spec-gap | environment
@@ -103,7 +103,26 @@ template_version: 2
 
 ---
 
-## §4 Lessons
+## §4 Observe Phase Findings
+
+> Populated from sprint plan §4 Execution Log entries dated within the Observe window
+> [last-story-merge-timestamp, sprint-close-timestamp]. Reporter date-filters and groups by event type.
+>
+> SKIP THIS SECTION ENTIRELY (no header, no body) if all three subsections are empty.
+> Output a single line in its place: "Observe phase: no findings."
+
+### 4.1 Bugs Found (UR:bug)
+| Date | Description | Resolution | Commit |
+
+### 4.2 Hotfixes Triggered
+| ID | Trigger | Resolution | Commit |
+
+### 4.3 Review Feedback (UR:review-feedback)
+| Date | Description | Status (folded / deferred) | Deferred to / Rationale |
+
+---
+
+## §5 Lessons
 
 <!-- Flashcards added during this sprint window, grouped by tag.
      Preserve the stale-detection pass from reporter.md §5b — stale-candidate symbols
@@ -132,7 +151,7 @@ If zero candidates: No stale flashcards detected.
 
 ---
 
-## §5 Framework Self-Assessment
+## §6 Framework Self-Assessment
 
 <!-- Rate each dimension: Green (working well) / Yellow (friction) / Red (blocking).
      "Tooling" subsection MUST include token-divergence finding if §3 divergence flag = YES. -->
@@ -196,7 +215,7 @@ intact for sprints with no hotfixes.>
 
 ---
 
-## §6 Change Log
+## §7 Change Log
 
 <!-- Append one line per material revision to this report after initial generation. -->
 
