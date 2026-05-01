@@ -3,6 +3,8 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-02 · #vitest #ram #pool · Cap forks pool via vitest.config.ts `poolOptions.forks.maxForks=2` — CLI flag `--pool-options.forks.maxForks=N` collides with tinypool minThreads validation when pool=forks.
+2026-05-01 · #cli #sprint #scripts · `cleargate story start <id>` requires CLEARGATE_STATE_FILE env — run_script.sh omits it; without it step 2 fails.
 2026-05-01 · #scaffold #mirror #prebuild · cleargate-cli/templates/cleargate-planning/ is DERIVED — copy-planning-payload.mjs rmSync+rebuilds it from cleargate-planning/ on every prebuild. Never hand-edit the cli-bundled tree; edit canonical mirror then run npm run prebuild.
 2026-05-01 · #vitest #leak #posttest · vitest spawns 5–9 tinypool workers (~4GB each) that survive the parent if not explicitly closed. Run `pkill -f vitest || true` after every test invocation; observed ~30GB orphan RAM after a single uncleaned run.
 2026-05-01 · #templates #frontmatter #proposal_gate_waiver · `proposal_gate_waiver` field never lived in any template — only in in-flight artifacts. CR-020's "drop from templates" was a no-op verify, not a removal.
