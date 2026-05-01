@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.9.0",
-  "generated_at": "2026-04-30T17:05:02.641Z",
+  "generated_at": "2026-05-01T07:12:14.116Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -145,6 +145,13 @@
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
       "sha256": "d7a79a50e3cb5fd42735b017d3d88dff0fa443444951e717013e423770bad87b",
+      "tier": "protocol",
+      "overwrite_policy": "merge-3way",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/knowledge/sprint-closeout-checklist.md",
+      "sha256": "d44f57445188bdefb18b39c6c121a1f52d32d9ca6122df91e54855e87fc2233e",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
