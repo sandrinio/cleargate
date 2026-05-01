@@ -1,10 +1,8 @@
 ---
 cr_id: CR-021
-parent_ref: cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates
-parent_cleargate_id: "cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates"
-sprint_cleargate_id: "SPRINT-18"
+parent_ref: EPIC-025 (decomposition wrapper); cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-18
 carry_over: false
 status: Draft
 ambiguity: 🟢 Low
@@ -23,7 +21,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-04-30T23:09:13Z
+  last_gate_check: 2026-05-01T10:09:16Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -39,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-30T23:09:13Z
+  last_stamp: 2026-05-01T10:09:16Z
   sessions: []
 ---
 
