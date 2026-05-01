@@ -3,3 +3,4 @@ dist
 *.log
 .env
 templates/cleargate-planning/
+package-lock.json
