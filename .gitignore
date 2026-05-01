@@ -41,6 +41,9 @@ Thumbs.db
 # Story worktrees — ephemeral per-story git worktrees (v2 execution)
 .worktrees/
 
+# MCP server — nested separate git repo (sandrinio/cleargate-mcp), not a submodule
+/mcp/
+
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/
