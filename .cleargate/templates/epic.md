@@ -1,17 +1,30 @@
 <instructions>
 FOLLOW THIS EXACT STRUCTURE. Output sections in order.
-YAML Frontmatter: Epic ID, Status, Ambiguity, Context Source (MUST link to approved proposal.md), Owner, Target Date.
+YAML Frontmatter: Epic ID, Status, Ambiguity, Context Source, Owner, Target Date.
 §0 Agent Handoff: XML block specifically formulated for AI coding agents to ingest.
 §1 Problem & Value: Why (problem), What (solution), Success Metrics.
 §2 Scope Boundaries: IN-SCOPE checkboxes, OUT-OF-SCOPE list.
 §3 The Reality Check (Context): Constraints table.
-§4 Technical Grounding: Verified files and data changes. Copied strictly from approved proposal.md.
+§4 Technical Grounding: Verified files and data changes.
 §5 Acceptance Criteria: Gherkin scenarios (happy path + error cases).
 §6 AI Interrogation Loop: Explicit questions the Planning AI needs the Human to answer.
 Output location: .cleargate/delivery/pending-sync/EPIC-{NNN}_{epic_name}.md
 
 Codebase research is mandatory. Do NOT guess at affected files.
-You MUST base this strictly on an approved: true proposal document.
+
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
+
+  - Summary        ← §1 Problem & Value
+  - Open Questions ← §6 AI Interrogation Loop
+  - Edge Cases     ← §2 OUT-OF-SCOPE list + §5 error scenarios
+  - Risks          ← §3 The Reality Check
+  - Ambiguity      ← bottom-of-doc ambiguity gate block
+
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
+
 Do NOT output these instructions.
 </instructions>
 

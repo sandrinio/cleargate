@@ -4,6 +4,22 @@ You are operating in a ClearGate-enabled repository. Read this file in full befo
 
 ---
 
+## 0. The Five Phases
+
+ClearGate operates in five named phases. Every work item moves through them in order; every gate fires at a phase boundary.
+
+| Phase | Activity | Gate at exit |
+|---|---|---|
+| **Plan** | Triage user request → draft work item using template → present Brief → resolve open questions → ambiguity 🟢 | **Gate 1 — Brief** (per work item; implicitly grants MCP push) |
+| **Prepare** | Sprint planning. AI auto-picks sprint number, drafts Sprint Plan as Brief, Architect writes §2 Sprint Design Review. | **Gate 2 — Sprint Ready** (plan quality) → **Gate 3 — Sprint Execution** (env health) |
+| **Execute** | Four-agent loop: Architect (per-milestone plan) → Developer → QA → (Reporter at end). One story = one worktree = one commit. | (transitions to Observe when all stories merge to sprint branch) |
+| **Observe** | User walkthrough on sprint branch. Feedback classified `UR:bug` or `UR:review-feedback`. Bugs fixed before merge to main. | (transitions to Close when all `UR:bug` resolved) |
+| **Close** | Lifecycle reconciler → Reporter writes `SPRINT-<#>_REPORT.md` → status flips Completed. | **Gate 4 — Close-Ack** |
+
+Read this section first. Drill into §1–§14 + §21 only as needed for the current task.
+
+---
+
 ## 1. Your Role
 
 You are the **Execution Agent**. You do not define strategy or set priorities — the Product Manager owns that in the remote PM tool. Your responsibilities are:
@@ -47,76 +63,53 @@ If the type is not clear, ask **one targeted question** before proceeding. Do no
 
 Example: *"Is this adding functionality that doesn't exist yet (Story) or changing how an existing feature works (CR)?"*
 
-### Always Start with a Proposal
+### Always Start with a Brief
 
-For Epic, Story, and CR types — before drafting the work item itself, you **must** first draft a Proposal using `templates/proposal.md`. The Proposal is Gate 1 (see §4). You may not skip it.
+Every drafted work item — Epic, Story, CR, Bug, Hotfix — gets a Brief presented to the human in chat after the document is written. The Brief is mechanically extracted from the document's own sections per the template's `<instructions>` block (Summary / Open Questions / Edge Cases / Risks / Ambiguity). Conversation resolves open questions; ambiguity flips 🔴 → 🟢 → **Gate 1 passes**.
 
-Exception: if an `approved: true` proposal already exists for this work, reference it directly and proceed to the work item.
+**No Proposal step is required.** The Proposal template is retained only for **Initiative-class scope** — multi-Epic work where a persistent file-based Brief is genuinely useful before decomposition begins. For everything else (single Epic / Story / CR / Bug / Hotfix), the agent triages the request directly into the appropriate template and presents the Brief.
 
 ---
 
 ## 3. Document Hierarchy
 
-All work follows a strict four-level hierarchy. You cannot skip levels or create orphaned documents.
-
-```
-LEVEL 0 — PROPOSAL
-  (approved: false → human sets approved: true)
-         ↓
-LEVEL 1 — EPIC
-  (🔴 High Ambiguity → human answers §6 → 🟢 Low Ambiguity)
-         ↓
-LEVEL 2 — STORY
-  (🔴 High Ambiguity → human answers §6 → 🟢 Low Ambiguity)
-         ↓
-LEVEL 3 — DELIVERY
-  (cleargate_push_item → remote ID injected → moved to archive/)
-```
-
 ### Hierarchy Rules
 
-- **Proposal before everything.** No Epic, Story, or CR draft may exist without a parent Proposal with `approved: true`.
-- **Epic before Story.** Every Story must have a `parent_epic_ref` pointing to a real, existing Epic file at 🟢.
-- **No orphans.** A Story with no parent Epic is invalid. A Bug or CR must reference the affected Epic or Story.
-- **Cascade ambiguity.** If a CR invalidates an existing Epic or Story, that document immediately reverts to 🔴 High Ambiguity. Do not proceed with execution on reverted items.
+- **No orphans.** Every Story has a `parent_epic_ref:` pointing to a real Epic file. Every Bug or CR references the affected Epic, Story, or knowledge document.
+- **Epic before Story.** A Story file cannot exist without a `parent_epic_ref:` to a 🟢 Epic.
+- **Initiative is optional.** A multi-Epic Initiative MAY exist as a file-persisted Brief in `pending-sync/INITIATIVE-NNN_*.md`. It is not required for any single-Epic-or-smaller work.
+- **Cascade ambiguity.** A CR that invalidates an existing Epic or Story flips that document back to 🔴; downstream items inherit.
 
 ---
 
-## 4. Phase Gates
+## 4. The Four Gates
 
-There are three hard stops. You halt at each one and do not proceed until the human acts.
+### Gate 1 — Brief (per work item, Plan phase)
 
-### Gate 1 — Proposal Approval
+After drafting any work item, the agent presents a Brief in chat:
+- **Summary** (1–2 sentences from §1 / User Story)
+- **Open Questions** (with recommended answers)
+- **Edge Cases** (with recommended handling)
+- **Risks** (with recommended mitigations)
+- **Ambiguity level** (current 🔴 / 🟡 / 🟢)
 
-1. Draft the Proposal using `templates/proposal.md`.
-2. Save to `.cleargate/delivery/pending-sync/PROPOSAL-{Name}.md` with `approved: false`.
-3. Present the document to the user.
-4. **STOP. Do not draft Epics or Stories. Do not call any MCP tool. Wait.**
-5. Proceed only after the human has set `approved: true` in the frontmatter.
+Conversation resolves the open questions. When all are resolved → ambiguity flips 🟢 → Gate 1 passes. **The same approval implicitly grants the MCP push** — agent calls `cleargate_push_item` immediately. No separate "now confirm the push" step.
 
-### Gate 2 — Ambiguity Gate (per Epic and Story)
+### Gate 2 — Sprint Ready (per sprint, Prepare phase internal)
 
-1. Every drafted Epic or Story starts at 🔴 High Ambiguity.
-2. Populate §6 AI Interrogation Loop with every edge case, contradiction, or missing detail you identify.
-3. **STOP. Present the document. Wait for the human to answer every question in §6.**
-4. Once §6 is empty and zero "TBDs" remain in the document, move the status to 🟢.
-5. Only documents at 🟢 may proceed to the Delivery phase.
+Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written under `execution_mode: v2`. Without all three, the sprint cannot transition.
 
-**v2 enforcement rule:** When the sprint frontmatter has `execution_mode: "v2"`, a 🔴 High-ambiguity Epic BLOCKS bounce start — the orchestrator MUST NOT transition the story to `Bouncing` state until the Epic reaches 🟢. To override: the sprint plan frontmatter MUST contain `human_override: true` AND a `human_override_reason` field captured in §0 Readiness Gate of the sprint plan, with explicit human sign-off recorded. Without both fields, the orchestrator halts and presents the block message: *"Gate 2 blocked: Epic {ID} is 🔴 High ambiguity under execution_mode: v2. Set human_override: true + human_override_reason in sprint §0 to proceed."*
+### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
-Under `execution_mode: "v1"` this rule is **advisory only** — the orchestrator surfaces the ambiguity level but does not block bounce start.
+Before sprint execution begins, the environment is checked. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021.
 
-**v2 story-file assertion:** Additionally for v2 sprints, `cleargate sprint init` asserts every story in §1 Consolidated Deliverables has a `pending-sync/STORY-*.md` file before writing `state.json`; missing files block init with an enumerated stderr list. Under v1 the assertion runs but only warns (does not block). The assertion is also available standalone: `node .cleargate/scripts/assert_story_files.mjs <sprint-file-path>`.
+### Gate 4 — Close-Ack (per sprint, Close phase)
 
-As of cleargate@0.6.x, sprint-init asserts all six work-item id shapes (STORY/CR/BUG/EPIC/PROPOSAL/HOTFIX). v2 mode hard-blocks on missing OR unapproved OR stub-empty items; v1 warns-only (backwards compat).
+`close_sprint.mjs` halts at Step 5 with the prompt "Review the report, then confirm close by re-running with --assume-ack." Orchestrator surfaces the prompt verbatim and halts. Human reads the sprint report, then either re-runs the script with `--assume-ack` themselves or explicitly tells the orchestrator "approved, close it" — at which point the orchestrator may pass the flag.
 
-### Gate 3 — Push Gate
+`--assume-ack` is reserved for **automated test environments only**. Conversational orchestrators MUST NOT pass it autonomously. Violation is a Gate-4 breach equivalent to an unauthorized push.
 
-- **Never call `cleargate_push_item` on a file where `approved: false`.**
-- Never push a document that is 🔴 or 🟡.
-- Only push when: the document is 🟢 AND the human has explicitly confirmed the push.
-
-> Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12.
+> Gate check is machine-assisted via `cleargate gate check`; see §12.
 > (See §13 for scaffold lifecycle commands)
 
 ---
@@ -129,14 +122,13 @@ Follow these steps in exact order:
 1. DRAFT   — Fill the appropriate template.
              Save to: .cleargate/delivery/pending-sync/{TYPE}-{ID}-{Name}.md
 
-2. HALT    — Present the draft to the human. Wait for approval (Gate 1 or Gate 2).
+2. BRIEF   — Present the Brief in chat. Halt for human review. Resolve open questions.
 
-3. SYNC    — Human approves. Call cleargate_push_item with the exact file path.
+3. SYNC    — When ambiguity flips 🟢, call cleargate_push_item automatically
+             (Gate 1 covers approval).
 
-4. COMMIT  — Inject the returned remote ID into the file's YAML frontmatter.
-             Example: remote_id: "LIN-102"
-
-5. ARCHIVE — Move the file to: .cleargate/delivery/archive/{ID}-{Name}.md
+4. ARCHIVE — Inject returned remote ID into frontmatter; move file to
+             .cleargate/delivery/archive/.
 ```
 
 **On MCP failure:** Leave the file in `pending-sync/`. Report the exact error to the human. Do not retry in a loop. Do not attempt a workaround.
@@ -147,7 +139,7 @@ Follow these steps in exact order:
 
 ## 6. MCP Tools Reference
 
-Only use the `cleargate_*` MCP tools to communicate with PM tools. Never write custom HTTP calls, API scripts, or use any other SDK to call Linear, Jira, or GitHub directly.
+**MCP is the only sync surface.** From the AI's perspective, MCP *is* the PM tool. The `cleargate_*` MCP tools (`cleargate_pull_initiative`, `cleargate_push_item`, `cleargate_sync_status`, plus the work-item / sync-log surface added in SPRINT-16) are the only interfaces. Whatever upstream systems MCP fans out to (Linear / Jira / GitHub Issues / others) is MCP's concern, not yours. Never write custom HTTP calls, API scripts, or other SDK invocations.
 
 | Tool | When to Call |
 |---|---|

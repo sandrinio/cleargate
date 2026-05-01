@@ -1,6 +1,6 @@
 <instructions>
 FOLLOW THIS EXACT STRUCTURE. Output sections in order 1-4.
-YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source (MUST link to approved proposal.md), Actor, Complexity Label.
+YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Actor, Complexity Label.
 §1 The Spec: User Story + Detailed Requirements + Out of Scope.
 §2 The Truth: Gherkin acceptance criteria + manual verification steps.
 §3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from approved proposal.md.
@@ -31,6 +31,19 @@ When the rubric is ambiguous, surface the decision to the human as a one-liner (
   `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones in a v2 sprint to surface risk early.
   `lane`: "standard" | "fast" — Architect-set during Sprint Design Review per the seven-check rubric in protocol §24. Default "standard". Absent in pre-EPIC-022 stories means standard per the migration default in update_state.mjs.
   All three fields are v2-only signals. Under v1 sprints they are informational; defaults apply for stories authored before SPRINT-09.
+
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
+
+  - Summary        ← §1.1 User Story
+  - Open Questions ← §1.4 Open Questions
+  - Edge Cases     ← §2.1 Gherkin error scenarios
+  - Risks          ← §1.5 Risks
+  - Ambiguity      ← bottom-of-doc ambiguity gate block
+
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
 
 Do NOT output these instructions.
 </instructions>
@@ -90,6 +103,21 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 
 ### 1.3 Out of Scope
 {What this story explicitly does NOT do.}
+
+### 1.4 Open Questions
+
+> Resolve every entry before flipping ambiguity to 🟢. Each entry pairs a question with a recommended answer.
+
+- **Question:** {edge case, contradiction, or missing detail surfaced during drafting}
+- **Recommended:** {agent's proposed answer}
+- **Human decision:** {populated during Brief review}
+
+### 1.5 Risks
+
+> Risks specific to this Story (cross-story risks belong in the milestone plan).
+
+- **Risk:** {what could go wrong}
+- **Mitigation:** {agent's proposed mitigation}
 
 ## 2. The Truth (Executable Tests)
 

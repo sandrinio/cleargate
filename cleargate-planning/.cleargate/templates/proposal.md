@@ -1,15 +1,28 @@
-<instructions> FOLLOW THIS EXACT STRUCTURE. Output sections in order 1-4.
+<instructions>
+USE THIS TEMPLATE FOR INITIATIVE-CLASS SCOPE ONLY — multi-Epic work where a persistent file-based Brief is genuinely useful before decomposition begins. For single Epic / Story / CR / Bug / Hotfix, triage directly into the appropriate template; no Proposal step is needed.
+
+FOLLOW THIS EXACT STRUCTURE. Output sections in order 1-4.
 YAML Frontmatter: Proposal ID, Status, Author, and the crucial approved boolean.
 §1 Initiative & Context: The "Why" and "What".
 §2 Technical Architecture & Constraints: Architecture constraints, data flow, dependencies.
 §3 Touched Files: Real files that will need modification.
 Output location: .cleargate/delivery/pending-sync/PROPOSAL-{Name}.md
 
-Document Hierarchy Position: LEVEL 0 (Proposal → Epic → Story)
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
 
-CRITICAL PHASE GATE: Do NOT generate Epics or Stories, and do NOT invoke cleargate_push_item, until the Human has reviewed this document and manually changed approved: false to approved: true in the frontmatter.
+  - Summary        ← §1 Initiative & Context
+  - Open Questions ← (new — add §1.4 Open Questions if multi-Epic scope is ambiguous)
+  - Edge Cases     ← (new — add §3.3 Edge Cases)
+  - Risks          ← §2 Constraints
+  - Ambiguity      ← bottom-of-doc ambiguity gate block
 
-Do NOT output these instructions. </instructions>
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
+
+Do NOT output these instructions.
+</instructions>
 
 proposal_id: "PROP-{ID}" status: "Draft / In Review / Approved" author: "{AI Agent / Vibe Coder}" approved: false
 created_at: "2026-04-17T00:00:00Z"

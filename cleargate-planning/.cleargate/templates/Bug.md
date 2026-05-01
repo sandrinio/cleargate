@@ -8,7 +8,19 @@ YAML Frontmatter: Bug ID, Parent Ref, Status, Severity, Reporter, Approved gate.
 §5 Verification Protocol: The failing test that proves the bug exists and proves the fix resolves it.
 Output location: .cleargate/delivery/pending-sync/BUG-{ID}.md
 
-CRITICAL PHASE GATE: Do NOT invoke cleargate_push_item until reproduction steps are 100% deterministic and a failing test is attached.
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
+
+  - Summary        ← §1 The Anomaly (repro)
+  - Open Questions ← §0.5 Open Questions
+  - Edge Cases     ← §2 Impact (edge conditions)
+  - Risks          ← §2 Impact
+  - Ambiguity      ← bottom-of-doc ambiguity gate block
+
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
+
 Do NOT output these instructions.
 </instructions>
 
@@ -50,6 +62,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 ---
 
 # BUG-{ID}: {Bug Name}
+
+## 0.5 Open Questions
+
+> Populate during drafting. Resolve every entry before flipping ambiguity to 🟢.
+
+- **Question:** {edge case, contradiction, or missing detail}
+- **Recommended:** {agent's proposed answer}
+- **Human decision:** {populated during Brief review}
 
 ## 1. The Anomaly (Expected vs. Actual)
 **Expected Behavior:** {What the system should do under normal conditions.}
