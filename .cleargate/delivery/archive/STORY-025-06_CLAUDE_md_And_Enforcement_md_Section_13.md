@@ -2,10 +2,9 @@
 story_id: STORY-025-06
 parent_epic_ref: EPIC-025
 parent_cleargate_id: "EPIC-025"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-025 + CR-021 §3.2.8 (CLAUDE.md sprint-preflight bullet update) + CR-021 §3.2.9 (cleargate-enforcement.md §13 spec). M6 of CR-021's milestone plan — depends on STORY-025-02 (the CLAUDE.md bullet must reference a live subcommand).
 actor: Conversational orchestrator + AI session-start reader

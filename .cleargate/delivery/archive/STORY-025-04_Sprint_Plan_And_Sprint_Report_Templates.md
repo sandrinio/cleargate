@@ -2,10 +2,9 @@
 story_id: STORY-025-04
 parent_epic_ref: EPIC-025
 parent_cleargate_id: "EPIC-025"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-025 + CR-021 §3.2.1 (Sprint Plan reframe spec) + CR-021 §3.2.2 (Sprint Report §4 Observe + skip-pattern + renumber spec). M4 of CR-021's milestone plan — parallel-developable with M1/M2/M3.
 actor: Orchestrator (drafting Sprint Plans) + Reporter (writing Sprint Reports)

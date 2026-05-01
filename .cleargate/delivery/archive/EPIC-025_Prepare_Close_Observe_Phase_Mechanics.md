@@ -3,7 +3,7 @@ epic_id: EPIC-025
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: "Decomposition wrapper for CR-021 (Prepare/Close/Observe-Phase Mechanics). CR-021 is the design spec; EPIC-025 lists the 6 child stories that execute it. Charter: .cleargate/scratch/SDLC_brainstorm.md §2.4 — three-sprint sequential roadmap (Sprint 2 of 3). Direct approval of Option A by user 2026-05-01 (verbatim: 'go for option a'); decomposition into stories approved by user 2026-05-01 (verbatim: 'decompose please' + 'go with epic and break it down to crs or stories'). Gate 1 (Brief) waived for the umbrella — sharp intent + inline references in CR-021."
 proposal_gate_waiver:

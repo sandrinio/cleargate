@@ -2,10 +2,9 @@
 story_id: STORY-025-01
 parent_epic_ref: EPIC-025
 parent_cleargate_id: "EPIC-025"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-025 (decomposition wrapper) + CR-021 §3.2.4 (prep_reporter_context.mjs spec) + CR-021 §3.2.5 (count_tokens.mjs spec). M1 of CR-021's milestone plan — foundational scripts.
 actor: Reporter agent

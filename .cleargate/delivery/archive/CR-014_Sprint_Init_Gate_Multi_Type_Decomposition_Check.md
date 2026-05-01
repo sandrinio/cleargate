@@ -3,7 +3,7 @@ cr_id: CR-014
 parent_ref: EPIC-013
 parent_cleargate_id: "EPIC-013"
 sprint_cleargate_id: "SPRINT-13"
-status: Approved
+status: Done
 sprint: null
 milestone: null
 complexity: L2

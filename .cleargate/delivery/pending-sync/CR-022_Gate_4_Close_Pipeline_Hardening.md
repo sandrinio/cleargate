@@ -115,7 +115,7 @@ draft_tokens:
 - [ ] No schema/migration impact on state.json or sprint frontmatter.
 - [ ] No agent-prompt changes (Reporter / Architect / Developer / QA all unchanged).
 
-**Downstream invalidation:** None of the in-flight SPRINT-19 work items get blast-radius'd. CR-024 + CR-025 + BUG-023 (the other SPRINT-19 anchors) touch QA / Initiative / token-ledger surfaces — disjoint from close-pipeline territory.
+**Downstream invalidation:** None of the in-flight SPRINT-19 work items get blast-radius'd. CR-024 + CR-025 + BUG-024 (the other SPRINT-19 anchors) touch QA / Initiative / token-ledger surfaces — disjoint from close-pipeline territory.
 
 ## 3. Execution Sandbox
 

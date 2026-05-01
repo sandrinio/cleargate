@@ -1,5 +1,6 @@
 ---
 story_id: STORY-001-05
+carry_over: true
 parent_epic_ref: EPIC-001
 parent_cleargate_id: "EPIC-001"
 status: "Abandoned"
