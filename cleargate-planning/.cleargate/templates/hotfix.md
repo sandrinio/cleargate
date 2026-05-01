@@ -1,3 +1,31 @@
+<instructions>
+USE THIS TEMPLATE FOR EMERGENCY HOTFIXES ONLY — production anomalies requiring immediate fix outside the sprint cycle. Hotfix discipline: ≤2 files, ≤30 LOC net.
+
+FOLLOW THIS EXACT STRUCTURE. Output sections in order 0.5–4.
+YAML Frontmatter: Hotfix ID, severity, originating signal, lane: "hotfix".
+§0.5 Open Questions: Capture any remaining ambiguity before merge.
+§1 Anomaly: Expected vs. Actual behavior.
+§2 Files Touched: ≤2 files (constraint from EPIC-022 §3).
+§3 Verification Steps: Non-empty before merging (blocks merge if empty).
+§4 Rollback: Git revert instructions.
+Output location: .cleargate/delivery/pending-sync/HOTFIX-{ID}-{Slug}.md
+
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
+
+  - Summary        ← §1 Anomaly (Problem)
+  - Open Questions ← §0.5 Open Questions
+  - Edge Cases     ← §3 Files Affected (risk of adjacent regression)
+  - Risks          ← §4 Verification + risk-of-missing
+  - Ambiguity      ← bottom-of-doc ClearGate Ambiguity Gate block
+
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
+
+Do NOT output these instructions.
+</instructions>
+
 ---
 hotfix_id: "{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
@@ -36,6 +64,14 @@ last_synced_body_sha: null
 
 # {ID}: {SLUG}
 
+## 0.5 Open Questions
+
+> Populate during drafting. Resolve every entry before flipping ambiguity to 🟢.
+
+- **Question:** {edge case, contradiction, or missing detail}
+- **Recommended:** {agent's proposed answer}
+- **Human decision:** {populated during Brief review}
+
 ## 1. Anomaly
 
 **Expected Behavior:** {What the system should do under normal conditions.}
@@ -59,3 +95,14 @@ Hotfix discipline: ≤2 files, ≤30 LOC net (EPIC-022 §3).
 ## 4. Rollback
 
 If the hotfix introduces a regression, revert by running `git revert <commit-sha>` on the sprint or main branch. The original anomaly will reappear; escalate to a sprint story for a permanent fix. No data migrations are involved unless noted in §2 above.
+
+---
+
+## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
+**Current Status: 🔴 High Ambiguity**
+
+Requirements to pass to Green (Ready for Merge):
+- [ ] Anomaly is deterministically reproducible (§1 filled).
+- [ ] Files Touched list is ≤2 files (§2 filled).
+- [ ] Verification Steps (§3) are non-empty.
+- [ ] `approved: true` is set in the YAML frontmatter.

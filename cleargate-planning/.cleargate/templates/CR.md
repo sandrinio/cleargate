@@ -8,7 +8,19 @@ Use this template when CHANGING an existing feature. For net-new functionality, 
 §4 Verification Protocol: How to confirm new logic works and old logic is fully evicted.
 Output location: .cleargate/delivery/pending-sync/CR-{ID}.md
 
-CRITICAL PHASE GATE: Do NOT invoke cleargate_push_item until all impacted downstream Epics/Stories are identified and reverted to 🔴 High Ambiguity.
+POST-WRITE BRIEF
+After Writing this document, render a Brief in chat with the following sections,
+mechanically extracted from the document's own structure:
+
+  - Summary        ← §1 The Context Override
+  - Open Questions ← §0.5 Open Questions
+  - Edge Cases     ← §2 Blast Radius & Invalidation
+  - Risks          ← §2 Blast Radius (downstream invalidation = risk)
+  - Ambiguity      ← bottom-of-doc ambiguity gate block
+
+Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
+Do NOT ask separately for push confirmation — Brief approval covers it.
+
 Do NOT output these instructions.
 </instructions>
 
@@ -48,6 +60,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 ---
 
 # CR-{ID}: {Change Request Name}
+
+## 0.5 Open Questions
+
+> Populate during drafting. Resolve every entry before flipping ambiguity to 🟢.
+
+- **Question:** {edge case, contradiction, or missing detail}
+- **Recommended:** {agent's proposed answer}
+- **Human decision:** {populated during Brief review}
 
 ## 1. The Context Override (Old vs. New)
 *(AI agents hallucinate when old context conflicts with new requests. Explicitly declare what to evict.)*
