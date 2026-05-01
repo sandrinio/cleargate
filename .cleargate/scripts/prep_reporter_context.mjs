@@ -36,7 +36,7 @@
  *   STORY-025-03 invokes this from close_sprint.mjs Step 3.5.
  *   Do NOT add required flags without updating that invocation.
  *
- * Bundle-size budget: ≤80KB target (R3). If exceeded, a warning is logged to stderr
+ * Bundle-size budget: ≤160KB target (CR-022 M5 raised from 80KB; R3 superseded). If exceeded, a warning is logged to stderr
  * but the file is still written (do NOT truncate — partial bundles are worse than oversized).
  */
 
@@ -45,6 +45,9 @@ import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseJsonl } from './lib/ledger-digest.mjs';
+
+// Bundle-size budget: ≤160KB target (CR-022 M5 raise from 80KB; SPRINT-18 hit 138KB).
+const MAX_BUNDLE_BYTES = 160 * 1024; // 163840
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -450,9 +453,9 @@ function main() {
   atomicWrite(outputPath, bundle);
 
   const kb = Math.round(bundleBytes / 1024);
-  if (bundleBytes > 81920) {
+  if (bundleBytes > MAX_BUNDLE_BYTES) {
     process.stderr.write(
-      `Warning: bundle exceeds 80KB target (${kb}KB) — consider trimming sprint-plan §2 in-place\n`
+      `Warning: bundle exceeds 160KB target (${kb}KB) — consider trimming sprint-plan §2 in-place\n`
     );
   }
 
