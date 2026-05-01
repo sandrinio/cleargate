@@ -13,12 +13,21 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 1. `.cleargate/wiki/index.md` — compiled awareness layer (~3k tokens). Lists active sprint, in-flight items, recent shipments, open gates, planned work, and topic synthesis pages. **Read this first** to know what exists before grepping raw files. If absent, run `cleargate wiki build`.
 2. `.cleargate/knowledge/cleargate-protocol.md` — delivery protocol (non-negotiable rules).
 3. `.cleargate/FLASHCARD.md` — lessons tagged by topic (`#schema`, `#auth`, etc.). Grep for your area before starting.
+4. `.cleargate/knowledge/cleargate-enforcement.md` — hook-enforced rules (worktree mechanics, file-surface contract, lifecycle reconciler, lane rubric, doctor exit codes, etc.). Read only when a CLI hook surfaces an error or when triaging a v2-mode question.
 
 **Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
 **Duplicate check before drafting.** Before drafting a Proposal or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate.
 
 **Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` (hard reject) and explicit human confirmation. Readiness gates (`cached_gate_result.pass`) are advisory by default — the push proceeds and the item body receives an `[advisory: gate_failed — <criteria>]` prefix; opt into hard-reject via `STRICT_PUSH_GATES=true` on the MCP server.
+
+**Sprint mode.** Read `execution_mode:` in the active sprint's frontmatter before spawning Developer/QA. `v1` = advisory; `v2` = enforce the worktree, pre-gate scan, flashcard gate, and file-surface contract rules in `cleargate-enforcement.md`. Default `v1`.
+
+**Architect runs twice per sprint.** (1) **Sprint Design Review** — writes the sprint plan's phase plan (Merge Ordering, Shared-Surface Warnings, Lane Audit, ADR-Conflict Flags) before human confirm. (2) **Per-milestone plan** — writes `.cleargate/sprint-runs/<id>/plans/M<N>.md` before Developer agents start that milestone (cross-story coupling, gotchas, test scenarios, reuse map; plan length is scope-driven, no cap).
+
+**Boundary gates (CR-017).** `cleargate sprint init` runs the **decomposition gate** — every `epics:` ref in the sprint plan must have child story files with `parent_epic_ref:` pointing at it. `close_sprint.mjs` runs the **lifecycle reconciler** — commit verbs (`feat(STORY-…)`, `fix(BUG-…)`, etc.) must match each artifact's `status:` field per the verb-to-status map. Both block in v2.
+
+**Sprint close is Gate-3-class (CR-019).** Run `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags first; surface the "re-run with --assume-ack" prompt verbatim; halt. Never pass `--assume-ack` autonomously — that flag is reserved for automated test environments only.
 
 **Drafting work items:**
 - Use the templates in `.cleargate/templates/` (`proposal.md`, `epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
