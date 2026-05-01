@@ -18,7 +18,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawnSync, execSync } from 'node:child_process';
 import yaml from 'js-yaml';
 import {
   readSprintExecutionMode,
@@ -801,4 +801,303 @@ export async function sprintArchiveHandler(
     if (e instanceof Error && /^exit:\d+$/.test(e.message)) return;
     throw e;
   }
+}
+
+// ─── sprintPreflightHandler ───────────────────────────────────────────────────
+
+/**
+ * CR-021: `cleargate sprint preflight <sprint-id>`
+ *
+ * Runs the four Gate 3 (Sprint Execution) environment-health checks. All four
+ * checks always run (operator sees full punch list in one pass). Reports
+ * pass/skip/fail per check.
+ *
+ * Checks:
+ *   1. Previous sprint is Completed (skipped for SPRINT-01)
+ *   2. No leftover .worktrees/STORY-* paths
+ *   3. sprint/S-NN ref does NOT exist
+ *   4. main is clean (no uncommitted changes)
+ *
+ * Exit codes:
+ *   0 — all checks pass (or skipped where applicable)
+ *   1 — one or more checks failed; stderr lists each failure with hint
+ *   2 — usage error (missing/malformed sprint-id arg)
+ *
+ * Implementation note: uses execSync (node:child_process) per Architect plan M2
+ * decision. Synchronous handler — mirrors sprintCloseHandler pattern.
+ */
+
+/** Result of a single preflight check. */
+interface PreflightCheckResult {
+  name: string;
+  pass: boolean;
+  skipped: boolean;
+  message: string;
+  hint?: string;
+}
+
+/** Options for sprintPreflightHandler — test seams for cwd and execSync. */
+export interface SprintPreflightOptions {
+  /** Working directory for git commands (default: process.cwd()). */
+  cwd?: string;
+  /** Test seam: override stdout sink (default: process.stdout.write). */
+  stdout?: (s: string) => void;
+  /** Test seam: override stderr sink (default: process.stderr.write). */
+  stderr?: (s: string) => void;
+  /** Test seam: override process.exit. Throws Error("exit:<n>") in tests. */
+  exit?: (code: number) => never;
+  /**
+   * Test seam: override execSync. Receives the full shell command string.
+   * Should throw on non-zero exit (matching real execSync behaviour).
+   */
+  execFn?: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string;
+}
+
+/** Derive the sprint/S-NN branch name from a SPRINT-NN id. */
+function deriveSprintBranchForPreflight(sprintId: string): string {
+  const match = /^SPRINT-(\d+)/.exec(sprintId);
+  const num = match ? parseInt(match[1]!, 10) : NaN;
+  if (isNaN(num)) return `sprint/${sprintId}`;
+  return `sprint/S-${String(num).padStart(2, '0')}`;
+}
+
+/** Parse a numeric sprint sequence number from SPRINT-NN. Returns NaN if invalid. */
+function parseSprintNum(sprintId: string): number {
+  const m = /^SPRINT-(\d+)$/.exec(sprintId);
+  return m ? parseInt(m[1]!, 10) : NaN;
+}
+
+/** Check 1: previous sprint is Completed (skip for SPRINT-01). */
+function checkPrevSprintCompleted(
+  sprintId: string,
+  cwd: string,
+): PreflightCheckResult {
+  const name = 'Previous sprint Completed';
+  const sprintNum = parseSprintNum(sprintId);
+  if (isNaN(sprintNum) || sprintNum <= 1) {
+    return { name, pass: true, skipped: true, message: 'skipped (no preceding sprint)' };
+  }
+
+  const prevNum = sprintNum - 1;
+  const prevId = `SPRINT-${String(prevNum).padStart(2, '0')}`;
+  // Also try without zero-pad (e.g. SPRINT-9 not SPRINT-09)
+  const prevIdAlt = `SPRINT-${prevNum}`;
+
+  const sprintRunsBase = path.join(cwd, '.cleargate', 'sprint-runs');
+
+  // Try both padded and unpadded forms
+  let stateJson: { sprint_status?: string } | null = null;
+  let resolvedPrevId = prevId;
+
+  for (const pid of [prevId, prevIdAlt]) {
+    const stateFile = path.join(sprintRunsBase, pid, 'state.json');
+    if (fs.existsSync(stateFile)) {
+      try {
+        const raw = fs.readFileSync(stateFile, 'utf8');
+        stateJson = JSON.parse(raw) as { sprint_status?: string };
+        resolvedPrevId = pid;
+        break;
+      } catch {
+        // continue trying alternate form
+      }
+    }
+  }
+
+  if (stateJson === null) {
+    // No state.json found — treat as skipped (prev sprint may not have one yet)
+    return {
+      name,
+      pass: true,
+      skipped: true,
+      message: `skipped (no state.json found for ${prevId})`,
+    };
+  }
+
+  const status = stateJson.sprint_status ?? 'unknown';
+  if (status === 'Completed') {
+    return { name, pass: true, skipped: false, message: `${resolvedPrevId} status is "Completed"` };
+  }
+
+  return {
+    name,
+    pass: false,
+    skipped: false,
+    message: `Previous sprint not Completed`,
+    hint: `${resolvedPrevId} status is "${status}". Run \`cleargate sprint close ${resolvedPrevId}\` first.`,
+  };
+}
+
+/** Check 2: no leftover .worktrees/STORY-* paths. */
+function checkNoLeftoverWorktrees(
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+): PreflightCheckResult {
+  const name = 'No leftover worktrees';
+
+  let output = '';
+  try {
+    output = execFn('git worktree list --porcelain', { cwd, encoding: 'utf8' });
+  } catch {
+    // If git worktree list fails, skip this check
+    return { name, pass: true, skipped: true, message: 'skipped (git worktree list unavailable)' };
+  }
+
+  // Parse line-by-line for "worktree <path>" prefix
+  const leftover: string[] = [];
+  for (const line of output.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('worktree ')) continue;
+    const wtPath = trimmed.slice('worktree '.length);
+    // Match paths ending in /.worktrees/STORY-* (any STORY-NNN-NN pattern)
+    if (/[/\\]\.worktrees[/\\]STORY-/.test(wtPath)) {
+      // Normalize to a relative-looking display path: extract .worktrees/STORY-* suffix
+      const m = /(\.(worktrees)[/\\]STORY-.+)$/.exec(wtPath);
+      leftover.push(m ? m[1] : wtPath);
+    }
+  }
+
+  if (leftover.length === 0) {
+    return { name, pass: true, skipped: false, message: 'no leftover .worktrees/STORY-* paths' };
+  }
+
+  return {
+    name,
+    pass: false,
+    skipped: false,
+    message: `Leftover worktree: ${leftover[0]}`,
+    hint: `Run \`git worktree remove ${leftover[0]}\` if abandoned, or merge if work in progress.`,
+  };
+}
+
+/** Check 3: sprint/S-NN ref does NOT exist. */
+function checkSprintBranchRefFree(
+  sprintId: string,
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+): PreflightCheckResult {
+  const branch = deriveSprintBranchForPreflight(sprintId);
+  const ref = `refs/heads/${branch}`;
+  const name = 'Sprint branch ref free';
+
+  try {
+    execFn(`git show-ref --verify --quiet ${ref}`, { cwd, encoding: 'utf8' });
+    // show-ref returned 0 — ref EXISTS (bad)
+    return {
+      name,
+      pass: false,
+      skipped: false,
+      message: `Sprint branch ref already exists: ${ref}`,
+      hint: `Investigate; force-deletion only with explicit human approval.`,
+    };
+  } catch {
+    // Non-zero exit from show-ref means ref does NOT exist (good)
+    return {
+      name,
+      pass: true,
+      skipped: false,
+      message: `${ref} does not exist`,
+    };
+  }
+}
+
+/** Check 4: main is clean (no uncommitted changes). */
+function checkMainClean(
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+): PreflightCheckResult {
+  const name = 'main is clean';
+
+  let output = '';
+  try {
+    output = execFn('git status --porcelain', { cwd, encoding: 'utf8' }).trim();
+  } catch {
+    return { name, pass: true, skipped: true, message: 'skipped (git status unavailable)' };
+  }
+
+  if (output === '') {
+    return { name, pass: true, skipped: false, message: 'main is clean' };
+  }
+
+  // Report the first dirty line for context
+  const firstLine = output.split('\n')[0] ?? output;
+  return {
+    name,
+    pass: false,
+    skipped: false,
+    message: `main is dirty`,
+    hint: `Uncommitted changes detected:\n      ${firstLine}\n    Commit, stash, or discard before starting a sprint.`,
+  };
+}
+
+/**
+ * Emit the punch list to stdout (on pass) or stderr (on failure).
+ * Format matches §1.2 R4 of STORY-025-02.
+ */
+function emitPunchList(
+  sprintId: string,
+  results: PreflightCheckResult[],
+  stdoutFn: (s: string) => void,
+  stderrFn: (s: string) => void,
+): void {
+  const failures = results.filter((r) => !r.pass && !r.skipped);
+
+  if (failures.length === 0) {
+    stdoutFn(`cleargate sprint preflight: all four checks pass for ${sprintId}`);
+    return;
+  }
+
+  stderrFn(`cleargate sprint preflight: ${failures.length}/${results.length} checks failed for ${sprintId}`);
+  stderrFn('');
+  for (const r of results) {
+    if (r.pass || r.skipped) {
+      stderrFn(`  ✓ ${r.name} — ${r.message}`);
+    } else {
+      stderrFn(`  ✗ ${r.message}`);
+      if (r.hint) {
+        stderrFn(`    ${r.hint}`);
+      }
+    }
+  }
+}
+
+/**
+ * Main handler for `cleargate sprint preflight <sprint-id>`.
+ *
+ * Synchronous. All four checks always run before exitFn is called
+ * (so the operator sees the full punch list on a single invocation).
+ */
+export function sprintPreflightHandler(
+  opts: { sprintId: string },
+  cli?: SprintPreflightOptions,
+): void {
+  const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
+  const stderrFn = cli?.stderr ?? ((s: string) => process.stderr.write(s + '\n'));
+  const exitFn: (code: number) => never = cli?.exit ?? ((code: number): never => process.exit(code) as never);
+  const cwd = cli?.cwd ?? process.cwd();
+
+  // Validate sprint-id format: SPRINT-NN or SPRINT-NNN
+  if (!/^SPRINT-\d{2,3}$/.test(opts.sprintId)) {
+    stderrFn('Usage: cleargate sprint preflight <sprint-id>');
+    stderrFn('  <sprint-id> must match SPRINT-NN or SPRINT-NNN (e.g. SPRINT-18)');
+    return exitFn(2);
+  }
+
+  // Default execFn uses execSync from node:child_process.
+  // execSync throws on non-zero exit, matching check contract.
+  const execFn = cli?.execFn ?? ((cmd: string, execOpts: { cwd: string; encoding: 'utf8' }) =>
+    execSync(cmd, { ...execOpts, stdio: 'pipe' })
+  );
+
+  // Run all four checks — all run regardless of individual failures
+  const results: PreflightCheckResult[] = [
+    checkPrevSprintCompleted(opts.sprintId, cwd),
+    checkNoLeftoverWorktrees(cwd, execFn),
+    checkSprintBranchRefFree(opts.sprintId, cwd, execFn),
+    checkMainClean(cwd, execFn),
+  ];
+
+  emitPunchList(opts.sprintId, results, stdoutFn, stderrFn);
+
+  const allPass = results.every((r) => r.pass || r.skipped);
+  return exitFn(allPass ? 0 : 1);
 }
