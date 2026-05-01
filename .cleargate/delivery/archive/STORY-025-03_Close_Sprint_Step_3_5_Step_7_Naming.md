@@ -2,10 +2,9 @@
 story_id: STORY-025-03
 parent_epic_ref: EPIC-025
 parent_cleargate_id: "EPIC-025"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-025 + CR-021 §3.2.3 (close_sprint.mjs Step 3.5 + Step 7 + naming spec). M3 of CR-021's milestone plan — depends on STORY-025-01 (prep_reporter_context.mjs script must exist before Step 3.5 can invoke it).
 actor: Sprint close pipeline

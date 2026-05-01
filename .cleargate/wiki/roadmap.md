@@ -116,6 +116,4 @@ _No active epics._
 
 - [[EPIC-023]] — status: Approved
 
-- [[EPIC-025]] — status: Approved
-
 

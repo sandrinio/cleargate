@@ -2,10 +2,9 @@
 story_id: STORY-025-02
 parent_epic_ref: EPIC-025
 parent_cleargate_id: "EPIC-025"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-025 + CR-021 §3.2.7 (cleargate sprint preflight subcommand spec). M2 of CR-021's milestone plan — independent CLI surface.
 actor: Orchestrator agent (transitioning sprint Ready → Active)

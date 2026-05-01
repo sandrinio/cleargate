@@ -3,10 +3,10 @@ type: epic
 id: "EPIC-024"
 parent: ""
 children: []
-status: "Ready"
+status: "Done"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-024_AI_Orientation_Surface_Slim.md"
-last_ingest: "2026-05-01T06:04:44.719Z"
+raw_path: ".cleargate/delivery/archive/EPIC-024_AI_Orientation_Surface_Slim.md"
+last_ingest: "2026-05-01T18:55:03.427Z"
 last_ingest_commit: ""
 repo: "planning"
 ---

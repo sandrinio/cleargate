@@ -94,7 +94,7 @@ draft_tokens:
 - [ ] No schema/migration on state.json or sprint frontmatter.
 - [ ] No test-file changes for runtime behavior. Doc-lint tests (per DoD §4.1) verify the post-edit content.
 
-**Downstream invalidation:** None of the in-flight SPRINT-19 work items get blast-radius'd. CR-022 + CR-024 + BUG-023 (the other SPRINT-19 anchors) touch close-pipeline + QA + token-ledger surfaces — disjoint from Initiative / Plan-phase territory.
+**Downstream invalidation:** None of the in-flight SPRINT-19 work items get blast-radius'd. CR-022 + CR-024 + BUG-024 (the other SPRINT-19 anchors) touch close-pipeline + QA + token-ledger surfaces — disjoint from Initiative / Plan-phase territory.
 
 ## 3. Execution Sandbox
 
