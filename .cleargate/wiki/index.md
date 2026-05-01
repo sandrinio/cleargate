@@ -55,3 +55,21 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## CRs
+
+| [[CR-021]] | cr | Draft | .cleargate/delivery/pending-sync/CR-021_Prepare_Close_Observe_Phase_Mechanics.md |
+| [[CR-023]] | cr | Approved | .cleargate/delivery/pending-sync/CR-023_SPRINT_17_Cleanup_Stale_Citations_And_Test_Hygiene.md |
+## Epics
+
+| [[EPIC-025]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-025_Prepare_Close_Observe_Phase_Mechanics.md |
+## Stories
+
+| [[STORY-025-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-01_Reporter_Context_Bundle_Scripts.md |
+| [[STORY-025-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-02_Cleargate_Sprint_Preflight_CLI.md |
+| [[STORY-025-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-03_Close_Sprint_Step_3_5_Step_7_Naming.md |
+| [[STORY-025-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-04_Sprint_Plan_And_Sprint_Report_Templates.md |
+| [[STORY-025-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-05_Reporter_Agent_Capability_Surface.md |
+| [[STORY-025-06]] | story | Approved | .cleargate/delivery/pending-sync/STORY-025-06_CLAUDE_md_And_Enforcement_md_Section_13.md |
+## Sprints
+
+| [[SPRINT-18]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-18_Prepare_Close_Observe_Mechanics.md |

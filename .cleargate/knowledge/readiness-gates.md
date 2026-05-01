@@ -65,9 +65,9 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: scope-in-populated
-      check: "section(2) has ≥1 listed-item"
+      check: "section(3) has ≥1 listed-item"
     - id: affected-files-declared
-      check: "section(4) has ≥1 listed-item"
+      check: "section(5) has ≥1 listed-item"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
 ```

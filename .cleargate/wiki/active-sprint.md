@@ -26,6 +26,8 @@
 
 - [[SPRINT-16]] — status: Approved
 
+- [[SPRINT-18]] — status: Approved
+
 
 
 ## Recently Completed Sprints
