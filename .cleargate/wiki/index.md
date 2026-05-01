@@ -59,6 +59,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[CR-021]] | cr | Draft | .cleargate/delivery/pending-sync/CR-021_Prepare_Close_Observe_Phase_Mechanics.md |
 | [[CR-023]] | cr | Approved | .cleargate/delivery/pending-sync/CR-023_SPRINT_17_Cleanup_Stale_Citations_And_Test_Hygiene.md |
+| [[CR-024]] | cr | Draft | .cleargate/delivery/pending-sync/CR-024_QA_Context_Pack_And_Lane_Playbook.md |
 ## Epics
 
 | [[EPIC-025]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-025_Prepare_Close_Observe_Phase_Mechanics.md |

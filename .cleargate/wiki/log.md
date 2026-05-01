@@ -1300,3 +1300,8 @@
   action: "update"
   target: "SPRINT-18"
   path: ".cleargate/delivery/pending-sync/SPRINT-18_Prepare_Close_Observe_Mechanics.md"
+- timestamp: "2026-05-01T12:37:18.773Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-024"
+  path: ".cleargate/delivery/pending-sync/CR-024_QA_Context_Pack_And_Lane_Playbook.md"

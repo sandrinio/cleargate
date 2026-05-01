@@ -110,7 +110,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Duplicate check before drafting.** Before drafting a Proposal or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate.
 
-**Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` and explicit human confirmation (Gate 3).
+**Halt at gates.** You halt at Gate 1 (Proposal approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` (hard reject) and explicit human confirmation. Readiness gates (`cached_gate_result.pass`) are advisory by default — the push proceeds and the item body receives an `[advisory: gate_failed — <criteria>]` prefix; opt into hard-reject via `STRICT_PUSH_GATES=true` on the MCP server.
 
 **Sprint mode.** Read `execution_mode:` in the active sprint's frontmatter before spawning Developer/QA. `v1` = advisory; `v2` = enforce the rules in `cleargate-enforcement.md`. Default `v1`.
 
@@ -120,7 +120,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Boundary gates (CR-017).** `cleargate sprint init` runs the decomposition gate; `close_sprint.mjs` runs the lifecycle reconciler. Both block in v2.
 
-**Sprint Execution Gate (CR-021).** Before transitioning Ready → Active, the environment must pass: previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean. See `cleargate sprint preflight`.
+**Sprint Execution Gate.** Before transitioning Ready → Active, run `cleargate sprint preflight <id>`. The four checks (previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean) must all pass. Halt and ask the human for resolution on any failure.
 
 **Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously.
 
@@ -136,15 +136,22 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 - `qa.md` — independent verification gate; re-runs checks; never commits, never edits.
 - `reporter.md` — one sprint retrospective at sprint end; synthesizes token ledger + git log + flashcards into `REPORT.md`.
 
+**State-aware surface.** At session start, `cleargate doctor --session-start` (invoked by the SessionStart hook) emits one banner line before any other output: `ClearGate state: pre-member — local planning enabled, sync requires join.` OR `ClearGate state: member (project: <project_id>) — full surface enabled.` In **pre-member** state (no valid join token on disk), only local-planning commands are reachable: `init`, `join`, `whoami`, `wiki *`, `gate *`, `stamp`, `doctor`, `scaffold-lint`, `sprint *`, `story *`, `state *`, `upgrade`, `uninstall`. Commands `push`, `pull`, `sync`, `sync-log`, `conflicts`, and `admin *` (except `admin login`) require membership and exit 2 with a redirect: `Run: cleargate join <invite-url>`. If the SessionStart banner says `pre-member`, do not suggest push/pull/sync to the user — instead ask for an invite URL and direct them to `cleargate join`.
+
 **Orchestrator Dispatch Convention.** Before each `Task()` spawn, write an explicit dispatch marker so the token-ledger hook can attribute tokens to the correct work item and agent without relying on transcript-grep heuristics. Call `bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>` immediately before the `Task()` call; the hook reads `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`, uses `work_item_id` + `agent_type` verbatim, then deletes the file. Example: `bash .cleargate/scripts/write_dispatch.sh STORY-020-02 developer`.
 
 **Conversational style.** Keep replies terse. Details live in the work-item file and `REPORT.md`, not in chat. State results and next steps; skip narration of your own thought process. After Writing or Editing any file under `.cleargate/delivery/**`, briefly note the ingest result if the PostToolUse hook surfaced one — one short sentence (`✅ ingested as <bucket>/<id>.md` / `⚠️ gate failed: <criterion>` / `🔴 ingest error — see .cleargate/hook-log/gate-check.log`). Do not narrate when nothing fired (skip-excluded paths). This is conversational confirmation, not retry logic.
 
 **Support infrastructure.** Flashcard protocol: `.claude/skills/flashcard/SKILL.md`. Token-ledger hook: `.claude/hooks/token-ledger.sh`, wired via `.claude/settings.json` (SubagentStop) — auto-logs agent cost per sprint for the Reporter.
 
+**Cross-project orchestration.** When running an orchestrator from one project's repo against another project's sprint tree, export `ORCHESTRATOR_PROJECT_DIR=/absolute/path/to/target/repo` in the shell before launching the session. Overrides `CLAUDE_PROJECT_DIR`; sentinel + ledger writes route into the target's `.cleargate/sprint-runs/` tree. If the target has no `.cleargate/sprint-runs/.active` sentinel, writes land in the target's `_off-sprint` bucket — not the orchestrator's own repo.
+
 **Project overrides.** Content OUTSIDE this `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block takes precedence where it conflicts with ClearGate defaults.
 
 **Scope reminder.** ClearGate is a *planning* framework. It scaffolds how work gets planned and how the four-agent loop runs. It does not replace your project's build system, CI, test runner, or deployment tooling.
+
+**Guardrails for the conversational agent:**
+- Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.
 
 **Doc & metadata refresh on close.** During Gate 4 ack, read `.cleargate/sprint-runs/<id>/.doc-refresh-checklist.md` (generated by `prep_doc_refresh.mjs`) and apply or punt each `- [ ]` item per the canonical list at `.cleargate/knowledge/sprint-closeout-checklist.md`. Items already marked `- [x]` indicate "no changes detected, skip."
 <!-- CLEARGATE:END -->
