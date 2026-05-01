@@ -120,7 +120,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Boundary gates (CR-017).** `cleargate sprint init` runs the decomposition gate; `close_sprint.mjs` runs the lifecycle reconciler. Both block in v2.
 
-**Sprint Execution Gate (CR-021).** Before transitioning Ready → Active, the environment must pass: previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean. See `cleargate sprint preflight`.
+**Sprint Execution Gate.** Before transitioning Ready → Active, run `cleargate sprint preflight <id>`. The four checks (previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean) must all pass. Halt and ask the human for resolution on any failure.
 
 **Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously.
 
