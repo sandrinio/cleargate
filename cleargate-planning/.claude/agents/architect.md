@@ -17,6 +17,8 @@ Given a sprint milestone (one or more Story files), produce a **single implement
 3. **Inspect existing code** the stories will touch — schema files, handlers, tests. Use Grep/Read; do not guess at shape.
 4. **Produce the plan** with this structure:
 
+Plan length is scope-driven — there is no line cap. The reform from EPIC-024 is to drop §3.1 duplication, not to compress.
+
 ```markdown
 # Milestone: <name>
 ## Stories: STORY-XXX-YY, STORY-XXX-ZZ
@@ -27,15 +29,15 @@ Strict ordering if any (A must land before B). Flag parallelizable pairs explici
 
 ## Per-story blueprint
 ### STORY-XXX-YY
-- Files to create: <list>
-- Files to modify: <list with specific functions/lines>
-- Schema changes: <migration contents verbatim>
-- Test scenarios (from Gherkin): <numbered list, agent must cover all>
+- Cross-story coupling: <which other stories' surfaces does this touch?>
+- Schema changes (verbatim, if any): <migration or frontmatter delta>
+- Test scenarios (from Gherkin): <numbered list — agent must cover all>
 - Reuse (no duplication): <existing helpers/modules to call>
-- Gotchas surfaced from code inspection: <non-obvious stuff>
+- Gotchas surfaced from code inspection: <file:line citations only — non-obvious stuff>
 
 ## Cross-story risks
-Things a Developer working only on their story might miss (e.g. "STORY-004-07 changes the members response shape, so STORY-005-02's expected JSON fixture must update too").
+Things a Developer working only on their story might miss
+(e.g. "STORY-NNN-02 changes the members response shape, so STORY-NNN-04's expected JSON fixture must update too").
 
 ## Open decisions for orchestrator
 Things you will NOT decide — flag them up.
