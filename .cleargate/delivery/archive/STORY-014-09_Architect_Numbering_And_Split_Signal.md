@@ -41,7 +41,7 @@ As an Architect agent producing a milestone plan, I want a rule that says "befor
 - Append `## Protocol Numbering Resolver` section to `.claude/agents/architect.md`:
   - Rule: grep `.cleargate/knowledge/cleargate-protocol.md` for `^## (\d+)\. ` and take max.
   - For each story in the milestone, grep the story file for `§\d+` references in prose; if any reference a section ≤ the current max but the section text doesn't match, flag as "stale § reference" and rewrite in the plan.
-  - Include a short example: "Story text says §10 but max is §15; use §16 (next free) in the plan."
+  - Include a short example: "Story text says §10 but max is §1; use §2 (next free) in the plan."
 - Extend `.cleargate/templates/story.md` Granularity Rubric (§0 instructions block):
   - Existing rubric already flags L4 as split-candidate. ADD: "AND: `complexity_label: L3` + `expected_bounce_exposure: high` → consider splitting into two L2 stories. Rationale: L3+high stories hit wall-time limits during developer agent runs (observed in SPRINT-09 on stories 013-02, 013-03, 013-04)."
 - Three-surface landing: architect.md mirror + story.md mirror.
@@ -58,9 +58,9 @@ As an Architect agent producing a milestone plan, I want a rule that says "befor
 Feature: Architect numbering + L3 split signal
 
   Scenario: Architect resolves stale §§ references
-    Given story text cites "protocol §10" and protocol's highest shipped section is §15
+    Given story text cites "protocol §10" and protocol's highest shipped section is §1
     When Architect produces the milestone plan
-    Then the plan references §16 (next free)
+    Then the plan references §2 (next free)
     And includes a note: "STORY text cites §10 — stale, rewritten to §16"
 
   Scenario: Rubric flags L3 + high exposure

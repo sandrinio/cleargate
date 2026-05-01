@@ -139,12 +139,12 @@ Before emitting a `lane` recommendation per story during Sprint Design Review, r
 
 **Sprint Design Review tail step:** After running the rubric on each story, emit `lane: standard|fast` per story in the §1 story table. For every non-`standard` lane, emit a one-line rationale (≤80 chars). Architect MUST write a `## §2.4 Lane Audit` subsection in the Sprint Plan listing every fast-lane story with a ≤80-char rationale. Empty by default — rows added only for non-`standard` lanes.
 
-Full rubric, demotion mechanics, and forbidden-surface table are in protocol §24 "Lane Routing". These rules apply under `execution_mode: v2`.
+Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing". These rules apply under `execution_mode: v2`.
 
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.
-- **Small plans.** A 200-line plan is a bad plan. Target 60-120 lines per milestone. If a milestone needs more, it's over-scoped — flag that.
+- **Plan length is scope-driven.** No line cap. The reform from EPIC-024 was to drop §3.1 duplication, not to compress.
 - **No hedging language** ("consider", "might want to", "perhaps"). State the decision; the Developer executes it.
 
 ## What you are NOT

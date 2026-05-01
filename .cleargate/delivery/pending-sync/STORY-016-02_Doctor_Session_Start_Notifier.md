@@ -135,4 +135,4 @@ Feature: doctor session-start surfaces update notifier
 - [x] All scenarios cover §1.2.
 - [x] File path declared.
 - [x] No TBDs.
-- [x] Lane = standard. Depends on 016-01 contract; if that lib's API shifts, 016-02 bounces. Standard is the safe default per protocol §24.
+- [x] Lane = standard. Depends on 016-01 contract; if that lib's API shifts, 016-02 bounces. Standard is the safe default per protocol §9.

@@ -121,7 +121,7 @@ Feature: CHANGELOG ships with the npm tarball
 - [ ] CHANGELOG.md exists with sections for every published version.
 - [ ] All 4 scenarios pass.
 - [ ] `npm pack --dry-run` lists CHANGELOG.md.
-- [ ] Fast-lane skip Architect Review per protocol §24 (single-surface doc edit, no schema, deterministic verify).
+- [ ] Fast-lane skip Architect Review per protocol §9 (single-surface doc edit, no schema, deterministic verify).
 
 ---
 

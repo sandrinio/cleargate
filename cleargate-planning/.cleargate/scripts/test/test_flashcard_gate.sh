@@ -4,7 +4,7 @@
 #
 # Strategy: grep-based. Creates a synthetic dev-report fixture with
 # flashcards_flagged, simulates a mock worktree-creation step, and asserts
-# the gate contract documented in protocol §18 and the agent output-shape
+# the gate contract documented in protocol §4 and the agent output-shape
 # blocks in developer.md + qa.md.
 #
 # Usage: bash .cleargate/scripts/test/test_flashcard_gate.sh
@@ -30,14 +30,14 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
 #   And upon approval each card is appended to .cleargate/FLASHCARD.md
 #   And only then does worktree creation proceed
 #
-# This script validates the contract (protocol §18 + output-shape fields)
+# This script validates the contract (protocol §4 + output-shape fields)
 # that makes the scenario enforceable. The gate logic itself is orchestrator-
 # out-of-band (v1: informational; v2: mandatory). The test therefore checks:
 #   (a) developer.md output-shape contains flashcards_flagged field
 #   (b) qa.md output-shape contains flashcards_flagged field
-#   (c) protocol.md §18 exists with the correct heading
-#   (d) §18 specifies the approve/reject processing rule
-#   (e) §18 specifies the worktree creation gate
+#   (c) protocol.md §4 exists with the correct heading
+#   (d) §4 specifies the approve/reject processing rule
+#   (e) §4 specifies the worktree creation gate
 #   (f) live vs mirror diff is empty for all three files
 
 DEV_MD="$REPO_ROOT/.claude/agents/developer.md"
@@ -62,25 +62,25 @@ else
   fail "qa.md missing flashcards_flagged field in output-shape"
 fi
 
-# (c) protocol.md §18 heading exists
+# (c) protocol.md §4 heading exists
 if grep -q "^## 18. Immediate Flashcard Gate (v2)" "$PROTOCOL_MD"; then
   pass "protocol.md contains ## 18. Immediate Flashcard Gate (v2)"
 else
   fail "protocol.md missing ## 18. Immediate Flashcard Gate (v2)"
 fi
 
-# (d) §18 specifies approve + reject processing
+# (d) §4 specifies approve + reject processing
 if grep -q "Approve" "$PROTOCOL_MD" && grep -q "Reject" "$PROTOCOL_MD"; then
-  pass "protocol §18 documents Approve/Reject processing rule"
+  pass "protocol §4 documents Approve/Reject processing rule"
 else
-  fail "protocol §18 missing Approve/Reject processing rule"
+  fail "protocol §4 missing Approve/Reject processing rule"
 fi
 
-# (e) §18 specifies the worktree creation gate
+# (e) §4 specifies the worktree creation gate
 if grep -q "Worktree creation gate\|worktree creation gate\|MUST NOT.*worktree\|worktree.*MUST NOT" "$PROTOCOL_MD"; then
-  pass "protocol §18 documents worktree creation gate"
+  pass "protocol §4 documents worktree creation gate"
 else
-  fail "protocol §18 missing worktree creation gate rule"
+  fail "protocol §4 missing worktree creation gate rule"
 fi
 
 # (f) qa.md says QA list is additive to Developer's
@@ -90,18 +90,18 @@ else
   fail "qa.md missing note that flashcards_flagged is additive"
 fi
 
-# (g) developer.md references protocol §18
-if grep -q "protocol §18\|§18" "$DEV_MD"; then
-  pass "developer.md references protocol §18"
+# (g) developer.md references protocol §4
+if grep -q "protocol §4\|§4" "$DEV_MD"; then
+  pass "developer.md references protocol §4"
 else
-  fail "developer.md does not reference protocol §18"
+  fail "developer.md does not reference protocol §4"
 fi
 
-# (h) qa.md references protocol §18
-if grep -q "protocol §18\|§18" "$QA_MD"; then
-  pass "qa.md references protocol §18"
+# (h) qa.md references protocol §4
+if grep -q "protocol §4\|§4" "$QA_MD"; then
+  pass "qa.md references protocol §4"
 else
-  fail "qa.md does not reference protocol §18"
+  fail "qa.md does not reference protocol §4"
 fi
 
 # (i) three-surface diff: live developer.md vs mirror

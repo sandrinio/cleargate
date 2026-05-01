@@ -132,7 +132,7 @@ SPRINT-09 built v2. This epic makes v2 actually ergonomic. Current per-sprint fr
 - `.claude/agents/architect.md` — append `## Protocol Numbering Resolver` subsection (C1).
 - `.claude/agents/reporter.md` — clarify Write requirement + allowed-tools (C4).
 - `.cleargate/templates/story.md` — §0 Granularity Rubric extension for L3/high-exposure split signal (C2).
-- `.cleargate/knowledge/cleargate-protocol.md` — §2 Gate 2 amended to cite the v2 story-file assertion; §20 "File-Surface Contract" appended (B1).
+- `.cleargate/knowledge/cleargate-enforcement.md` — §2 Gate 2 amended to cite the v2 story-file assertion; §6 "File-Surface Contract" appended (B1).
 - `cleargate-planning/` mirrors for every file above.
 
 **Data changes:** None to state.json schema (v1 remains locked). New files: `test-baseline.json` at repo root (gitignored snapshot).
@@ -196,9 +196,9 @@ Feature: Planning quality improvements
 
   Scenario: Architect rewrites stale protocol §§ references
     Given story text cites "protocol §10"
-    And cleargate-protocol.md's highest shipped section is §15
+    And cleargate-enforcement.md's highest shipped section is §1
     When Architect produces the milestone plan
-    Then the plan cites §16 (next free)
+    Then the plan cites §2 (next free)
     And flags the story-text drift as a fixup note
 
   Scenario: L3 + high exposure triggers split recommendation

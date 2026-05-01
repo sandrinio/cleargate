@@ -271,7 +271,7 @@ Feature: cleargate sync — work items (sub-epic 1)
 | R-1 | CLI and server handler diverge on `file_sha` computation (different serialization order) | EPIC-023 §2.3 pins the sha computation: `sha256(body + YAML-serialized frontmatter)` with `serializeFrontmatter` from `cleargate-cli/src/lib/frontmatter-yaml.ts`. Server must implement identical ordering. Tested via integration test fixture. |
 | R-2 | `cleargate_sync_work_items` name conflicts with an existing tool | Verified: no such tool exists in `mcp/src/mcp/register-tools.ts` (lines 89–289 inspected 2026-04-30). Safe to register. |
 | R-3 | Large projects (500+ items) time out on single batch sync | Batch size cap: 100 items per request. CLI splits larger item sets and makes N requests. First version: no progress bar; just per-batch stdout line. |
-| R-4 | Status-blind sync surfaces Draft items to admin-panel stakeholders unexpectedly | Admin panel must filter by status at read time. Document the contract: "saving a Draft = visible to admin-panel; gate is at read surface, not write surface." Add to protocol §27 (next free section after §26 per audit 2026-04-30). |
+| R-4 | Status-blind sync surfaces Draft items to admin-panel stakeholders unexpectedly | Admin panel must filter by status at read time. Document the contract: "saving a Draft = visible to admin-panel; gate is at read surface, not write surface." Add to protocol §12 (next free section after §11 per audit 2026-04-30). |
 
 ---
 

@@ -44,7 +44,7 @@ context_source: |
   Decomposition is between-sprints transition work, not story-tracked.
   CR-017 extended to enforce this — the same sprint-init gate now validates
   decomposition completeness alongside lifecycle reconciliation. Protocol
-  gains §26 "Decomposition Gate" alongside §25 "Lifecycle Reconciliation".
+  gains §11 "Decomposition Gate" alongside §10 "Lifecycle Reconciliation".
 stamp_error: no ledger rows for work_item_id CR-017
 draft_tokens:
   input: null
@@ -95,8 +95,8 @@ draft_tokens:
 - [x] **Reset gate on EPIC-022** (Sprint Lane Classifier + Hotfix Path, shipped). CR-017's sprint-kickoff hook lives in the same `cleargate sprint init` surface that EPIC-022's lane-classifier work modified. Surface coexistence verified — lane-classifier writes `state.json` v2; lifecycle-reconciler reads git log + frontmatter. Disjoint concerns.
 - [x] **Database schema impacts?** No. Both validators are CLI-side; no MCP table touched.
 - [x] **Protocol amendments.** `.cleargate/knowledge/cleargate-protocol.md` gains:
-  - **§25 Lifecycle Reconciliation** — verb-to-status mapping, carry-over flag, block-vs-warn semantics per phase.
-  - **§26 Decomposition Gate** — proposals must be decomposed (Epic file in pending-sync citing the proposal) before any sprint activates against them; epics must have ≥1 child story file (with `parent_epic_ref:` matching) before the executing sprint activates. Decomposition is between-sprints transition work; not story-tracked. Verified at `cleargate sprint init` via `reconcileDecomposition`.
+  - **§10 Lifecycle Reconciliation** — verb-to-status mapping, carry-over flag, block-vs-warn semantics per phase.
+  - **§11 Decomposition Gate** — proposals must be decomposed (Epic file in pending-sync citing the proposal) before any sprint activates against them; epics must have ≥1 child story file (with `parent_epic_ref:` matching) before the executing sprint activates. Decomposition is between-sprints transition work; not story-tracked. Verified at `cleargate sprint init` via `reconcileDecomposition`.
 - [x] **Templates touch.** `epic.md`, `story.md`, `CR.md`, `Bug.md`, `hotfix.md` gain the optional top-level frontmatter key `carry_over: false` (default false). Sprint Plan Template gets `--allow-drift waiver` field guidance in §1 instructions. (STORY-015-05 also touches templates this sprint — coordinate via §3.2 merge ordering with that story.)
 - [x] **No version bump on its own.** CR-017 ships within whatever 0.9.x cycle CR-016 anchors. If CR-016 ships first this sprint, CR-017 lands as 0.9.1; if CR-017 ships first, 0.9.0 carries both.
 
@@ -107,8 +107,8 @@ draft_tokens:
 - `.cleargate/scripts/close_sprint.mjs` — add Phase: `reconcileLifecycle` call after Reporter-section validation; block on drift; print punch list with offending commit SHA + suggested remediation (e.g., `git mv pending-sync/CR-001_*.md archive/ && update status: Completed`).
 - `cleargate-cli/src/commands/sprint.ts` (or wherever `cleargate sprint init` is wired — verify path during dev) — add TWO calls at the top of init flow before any state.json mutation: (a) `reconcileLifecycle()` warn-only in v1; honors `--allow-drift`; (b) `reconcileDecomposition()` block-by-default in v1; no waiver flag (the only exit is doing the decomposition).
 - `.cleargate/knowledge/cleargate-protocol.md` — append:
-  - **§25 Lifecycle Reconciliation** with the verb→status table, carry-over semantics, and v1-vs-v2 block-mode policy.
-  - **§26 Decomposition Gate** describing the rule (proposals → Epic files; epics → story files), the between-sprints transition concept, and the gate's invocation at `cleargate sprint init`.
+  - **§10 Lifecycle Reconciliation** with the verb→status table, carry-over semantics, and v1-vs-v2 block-mode policy.
+  - **§11 Decomposition Gate** describing the rule (proposals → Epic files; epics → story files), the between-sprints transition concept, and the gate's invocation at `cleargate sprint init`.
 - `.cleargate/templates/{epic,story,CR,Bug,hotfix}.md` — add `carry_over: false` (default) as a top-level frontmatter key. Coordinate merge with STORY-015-05's templates touch — this CR's edit lands AFTER 015-05's so the file already has the new YAML structure to extend.
 
 **Create:**

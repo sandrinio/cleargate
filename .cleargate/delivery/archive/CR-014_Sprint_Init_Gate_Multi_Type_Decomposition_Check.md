@@ -82,12 +82,12 @@ Under `execution_mode: v1`, missing/unapproved/empty items emit warnings only (p
 ## 2. Blast Radius & Invalidation
 
 - [ ] Invalidate/Update Story: none — STORY-013-09 (Sprint Planning v2 Sprint Design Review) is unaffected by this CR; the Architect's emission contract doesn't change. The SDR still produces decomposed stories; this CR just enforces them at sprint init.
-- [ ] Invalidate/Update Epic: EPIC-013 §15 (sprint-init contract) gets a one-line note in `.cleargate/knowledge/cleargate-protocol.md` that `assert_story_files` now covers all six id shapes. ≤3 lines added; both protocol mirrors stay byte-equal.
+- [ ] Invalidate/Update Epic: EPIC-013 §1 (sprint-init contract) gets a one-line note in `.cleargate/knowledge/cleargate-enforcement.md` that `assert_story_files` now covers all six id shapes. ≤3 lines added; both protocol mirrors stay byte-equal.
 - [ ] Database schema impacts? **No.** Pure script-level change in `.cleargate/scripts/`.
 - [ ] Audit log: no change.
 - [ ] FLASHCARD impact: add card on completion — *"assert_story_files.mjs covers all six id shapes (STORY/CR/BUG/EPIC/PROPOSAL/PROP/HOTFIX) under v2; v1 still warns-only for backwards compat."*
 - [ ] Manifest impact: `.cleargate/scripts/assert_story_files.mjs` — content sha changes; the prebuild on commit recomputes. No new files.
-- [x] All impacted downstream items identified — STORY-013-09 unchanged; EPIC-013 §15 minor doc edit only.
+- [x] All impacted downstream items identified — STORY-013-09 unchanged; EPIC-013 §1 minor doc edit only.
 
 ## 3. Execution Sandbox
 
@@ -108,7 +108,7 @@ Under `execution_mode: v1`, missing/unapproved/empty items emit warnings only (p
   - One-line change to the v2 hard-block message: `"v2 sprint init blocked — N items missing, N unapproved, N stub-empty. Fix the above, then re-run init."`
 - `cleargate-planning/.cleargate/scripts/assert_story_files.mjs`: scaffold mirror — keep byte-identical to live.
 - `cleargate-planning/.cleargate/scripts/init_sprint.mjs`: scaffold mirror — keep byte-identical to live.
-- `.cleargate/knowledge/cleargate-protocol.md` + scaffold mirror: §15 (or wherever the EPIC-013 sprint-init contract lives) gains a 2-line note: *"As of cleargate@0.6.x, sprint-init asserts all six work-item id shapes. v2 mode hard-blocks on missing OR unapproved OR stub-empty items; v1 warns-only."* Both protocol mirrors must stay byte-equal post-edit (per STORY-014-01 round 2 lesson).
+- `.cleargate/knowledge/cleargate-enforcement.md` + scaffold mirror: §1 (or wherever the EPIC-013 sprint-init contract lives) gains a 2-line note: *"As of cleargate@0.6.x, sprint-init asserts all six work-item id shapes. v2 mode hard-blocks on missing OR unapproved OR stub-empty items; v1 warns-only."* Both protocol mirrors must stay byte-equal post-edit (per STORY-014-01 round 2 lesson).
 - `.cleargate/FLASHCARD.md`: append the lesson card on commit (one line, dated 2026-04-27).
 
 **Tests required:**

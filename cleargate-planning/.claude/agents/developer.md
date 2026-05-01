@@ -47,7 +47,7 @@ flashcards_flagged:
   - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
 
-`flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §18.
+`flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
@@ -69,7 +69,7 @@ These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 2. **Never mix stories in one worktree.** Each story is assigned exactly one worktree. Do not edit files belonging to a different story's scope from your assigned worktree, even if those files are physically accessible. Each worktree maps to exactly one story branch (`story/STORY-NNN-NN`).
 
-3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §15.3 for full rationale.
+3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §1.3 for full rationale.
 
 ## Lane-Aware Execution
 
