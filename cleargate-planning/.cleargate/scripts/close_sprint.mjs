@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { TERMINAL_STATES } from './constants.mjs';
 import { validateState } from './validate_state.mjs';
+import { reportFilename } from './lib/report-filename.mjs';
 
 /**
  * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
@@ -78,44 +79,6 @@ function usage() {
   process.exit(2);
 }
 
-/**
- * Compute the report filename for a given sprint directory + sprint ID.
- *
- * New naming (SPRINT-18+): SPRINT-<#>_REPORT.md where <#> is the numeric portion
- * of the sprint-id (e.g. "18" for "SPRINT-18").
- * If sprint-id has no numeric portion (e.g. "SPRINT-TEST"), falls back to plain REPORT.md.
- *
- * Backwards-compat read-fallback (CR-021 §2.3): for read operations on legacy sprints,
- * if SPRINT-<#>_REPORT.md is absent but REPORT.md exists, return the legacy path.
- * This covers SPRINT-01..17 archives that were written before the naming change.
- * MUST NOT rename or rewrite those pre-existing files.
- *
- * @param {string} sprintDirPath - absolute path to the sprint directory
- * @param {string} sprintId - e.g. "SPRINT-18" or "SPRINT-TEST"
- * @param {{ forRead?: boolean }} [opts] - if forRead=true, apply legacy fallback
- * @returns {string} absolute path to the report file
- */
-function reportFilename(sprintDirPath, sprintId, opts) {
-  const numMatch = sprintId.match(/^SPRINT-(\d+)$/);
-  if (!numMatch) {
-    // No numeric portion — use plain REPORT.md (e.g. SPRINT-TEST)
-    return path.join(sprintDirPath, 'REPORT.md');
-  }
-  const sprintNumber = numMatch[1];
-  const newName = path.join(sprintDirPath, `SPRINT-${sprintNumber}_REPORT.md`);
-
-  // Read-fallback: if the new-name file doesn't exist but legacy REPORT.md does, use legacy.
-  if (opts && opts.forRead) {
-    if (!fs.existsSync(newName)) {
-      const legacyName = path.join(sprintDirPath, 'REPORT.md');
-      if (fs.existsSync(legacyName)) {
-        return legacyName;
-      }
-    }
-  }
-
-  return newName;
-}
 
 /**
  * Atomic write using tmp+rename pattern (per M1 update_state.mjs convention).
