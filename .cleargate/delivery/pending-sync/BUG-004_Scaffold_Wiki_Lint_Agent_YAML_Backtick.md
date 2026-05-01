@@ -13,11 +13,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: repro-steps-deterministic
-      detail: section 2 has 0 listed-item (≥3 required)
-  last_gate_check: 2026-04-25T00:00:01Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-01T19:44:21Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -26,15 +24,70 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id BUG-004
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-04-24T22:00:56Z
-  sessions: []
+  input: 2061
+  output: 1033718
+  cache_creation: 6303363
+  cache_read: 70122563
+  model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+  last_stamp: 2026-05-01T19:44:17Z
+  sessions:
+    - session: b01e84b6-4e1a-42fc-95df-09aba928f166
+      model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+      input: 2061
+      output: 1033718
+      cache_read: 70122563
+      cache_creation: 6303363
+      ts: 2026-04-30T06:26:39Z
+    - session: 38f336f0-4722-4213-91ae-13ec63702623
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-04-30T15:49:49Z
+    - session: a5fe9811-3bef-44f1-b9c3-bf3121e9594b
+      model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-04-30T16:49:00Z
+    - session: 313615e8-3686-4bc4-9c1b-cf27cf3913d2
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-01T05:55:18Z
+    - session: 7585ce22-2277-4caf-ad49-b127f3455ea2
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-01T06:12:40Z
+    - session: b1b93311-7c24-4370-964a-182a74879391
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-01T10:52:07Z
+    - session: 42bd30eb-614b-4718-aae7-1aa48a7674dd
+      model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-01T11:40:26Z
+    - session: 9ec729a0-a1c1-45a6-8414-d2cc1318768e
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-01T19:03:45Z
 ---
 
 # BUG-004: Scaffold `cleargate-wiki-lint.md` Frontmatter YAML Backtick Breaks Strict Parser
@@ -49,9 +102,9 @@ All scaffolded agent-definition files under `cleargate-planning/.claude/agents/*
 
 ## 2. Reproduction Protocol
 
-1. `cd <repo-root>`
-2. `node -e "const y=require('js-yaml');const fs=require('fs');const t=fs.readFileSync('cleargate-planning/.claude/agents/cleargate-wiki-lint.md','utf8');const fm=t.match(/^---\n([\s\S]*?)\n---/)[1];y.load(fm);"` — throws `YAMLException: bad indentation of a mapping entry`.
-3. Conversely, the same load works for `architect.md`, `developer.md`, `qa.md`, `reporter.md` etc.
+- **Step 1 — Position at repo root.** `cd <repo-root>`.
+- **Step 2 — Attempt YAML parse of the offending agent frontmatter.** Run `node -e "const y=require('js-yaml');const fs=require('fs');const t=fs.readFileSync('cleargate-planning/.claude/agents/cleargate-wiki-lint.md','utf8');const fm=t.match(/^---\n([\s\S]*?)\n---/)[1];y.load(fm);"` — throws `YAMLException: bad indentation of a mapping entry`.
+- **Step 3 — Confirm peer agent files parse cleanly.** The same load works for `architect.md`, `developer.md`, `qa.md`, `reporter.md` etc., so the defect is isolated to `cleargate-wiki-lint.md`'s `description:` value.
 
 ## 3. Evidence & Context
 
