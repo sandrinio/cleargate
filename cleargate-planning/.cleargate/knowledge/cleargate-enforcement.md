@@ -468,3 +468,33 @@ Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_it
 
 `--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-3 breach equivalent to calling `cleargate_push_item` without `approved: true`.
 
+## 13. Sprint Execution Gate (Gate 3) (source: new in CR-021)
+
+Before sprint state transitions Ready → Active, the orchestrator MUST invoke
+`cleargate sprint preflight <sprint-id>` and verify all four checks pass:
+
+1. **Previous sprint Completed.** Scan `.cleargate/wiki/active-sprint.md` and
+   `pending-sync/SPRINT-*.md`. The sprint immediately preceding `<sprint-id>`
+   in the linear sequence must have `sprint_status: "Completed"` in its
+   `state.json`. Skip the check if there is no preceding sprint (SPRINT-01).
+
+2. **No leftover worktrees.** Run `git worktree list` and verify no path
+   matches `.worktrees/STORY-*`. Leftover worktrees indicate a story from a
+   prior sprint that wasn't merged or removed cleanly.
+
+3. **Sprint branch ref free.** Run `git show-ref refs/heads/sprint/S-NN`. The
+   ref must NOT exist (we're about to cut it). If it exists, the sprint
+   was previously started or the prior cleanup didn't complete.
+
+4. **`main` is clean.** Run `git status --porcelain` on a `main` checkout.
+   No uncommitted changes (modified, untracked, staged) may exist.
+
+On any failure, the script exits 1 with a punch list. The orchestrator surfaces
+the failure verbatim to the human and halts. Resolution is per-item:
+- Prev sprint not closed → run `cleargate sprint close <prev-id>` first
+- Leftover worktree → `git worktree remove` if abandoned, or merge if work in progress
+- Branch ref exists → investigate; force-deletion only with explicit human approval
+- Dirty main → human commits / stashes / discards as appropriate
+
+This gate is **enforcing under `execution_mode: v2`** and **advisory under v1**.
+
