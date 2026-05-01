@@ -10,10 +10,9 @@ children:
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-023_MCP_Native_Source_Of_Truth.md"
-last_ingest: "2026-04-30T17:36:22.471Z"
-last_ingest_commit: ""
+last_ingest: "2026-05-01T09:50:05.461Z"
+last_ingest_commit: "b16f0f6720a132a92e6f88b35e1a45694f1ed5ed"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-16"
 ---
 
 # EPIC-023: EPIC-023
