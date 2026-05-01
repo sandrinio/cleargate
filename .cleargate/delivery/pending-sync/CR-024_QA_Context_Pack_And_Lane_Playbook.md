@@ -5,14 +5,14 @@ parent_cleargate_id: "CR-021 §3.2.4 / §3.2.5 (Reporter context-bundle pattern,
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
 context_source: "SPRINT-18 mid-execution observation 2026-05-01: QA pass-1 for STORY-025-04 only caught the silent R4 scope-drop because the orchestrator manually surfaced the missing context in the QA prompt; in a normal flow it would have green-lit the drop. Current QA cycle is 'tests pass + structural conformance' which catches structural defects but misses semantic ones. Conversation 2026-05-01 mapped the gaps (semantic correctness past Gherkin, adversarial probe, DoD §2.2 audit, spec-vs-impl drift, cross-story integration, regression boundary, lane-aware depth) and the recommended fix (script-built objective context pack + dev-emitted subjective handoff + lane-aware QA playbook). User 2026-05-01: 'agree with recommandation. please create CR and put it in the next sprint'."
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-05-01T22:00:00Z
   reason: Direct approval pattern. Recommendation laid out in conversation (script + handoff + lane playbook) and approved verbatim. No new design decisions; the CR maps 1:1 to two stories spelled out in chat.
-approved: false
+approved: true
 owner: sandrinio
 target_date: SPRINT-19
 created_at: 2026-05-01T22:00:00Z

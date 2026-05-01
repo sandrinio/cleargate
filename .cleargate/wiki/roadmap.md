@@ -32,6 +32,8 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-18]] — status: Approved
 
+- [[SPRINT-19]] — status: Approved
+
 
 
 ## Shipped Sprints

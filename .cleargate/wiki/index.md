@@ -58,8 +58,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## CRs
 
 | [[CR-021]] | cr | Draft | .cleargate/delivery/pending-sync/CR-021_Prepare_Close_Observe_Phase_Mechanics.md |
+| [[CR-022]] | cr | Approved | .cleargate/delivery/pending-sync/CR-022_Gate_4_Close_Pipeline_Hardening.md |
 | [[CR-023]] | cr | Approved | .cleargate/delivery/pending-sync/CR-023_SPRINT_17_Cleanup_Stale_Citations_And_Test_Hygiene.md |
 | [[CR-024]] | cr | Draft | .cleargate/delivery/pending-sync/CR-024_QA_Context_Pack_And_Lane_Playbook.md |
+| [[CR-025]] | cr | Approved | .cleargate/delivery/pending-sync/CR-025_Initiative_Rename_And_MCP_Pull_Flow.md |
 ## Epics
 
 | [[EPIC-025]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-025_Prepare_Close_Observe_Phase_Mechanics.md |
@@ -74,3 +76,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Sprints
 
 | [[SPRINT-18]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-18_Prepare_Close_Observe_Mechanics.md |
+| [[SPRINT-19]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-19_Gate_4_Close_QA_Context_Initiative.md |
+## Bugs
+
+| [[BUG-023]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-023_Token_Ledger_Attribution_Spike.md |
