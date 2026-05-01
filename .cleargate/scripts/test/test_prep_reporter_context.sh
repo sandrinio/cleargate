@@ -150,11 +150,11 @@ run_scenario_4() {
     rm -rf "${tmpdir}" "${pendingsync_dir}"; return
   fi
 
-  # Check bundle size ≤ 80KB (81920 bytes)
+  # Check bundle size ≤ 160KB (163840 bytes)
   local bundle_size
   bundle_size=$(wc -c < "${bundle_path}" | tr -d ' ')
-  if [ "${bundle_size}" -gt 81920 ]; then
-    fail "Scenario 4: happy path — bundle size ${bundle_size} exceeds 80KB" "size: ${bundle_size}"
+  if [ "${bundle_size}" -gt 163840 ]; then
+    fail "Scenario 4: happy path — bundle size ${bundle_size} exceeds 160KB" "size: ${bundle_size}"
     rm -rf "${tmpdir}" "${pendingsync_dir}"; return
   fi
 

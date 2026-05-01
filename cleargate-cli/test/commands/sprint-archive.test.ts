@@ -519,6 +519,96 @@ describe('Scenario: v1 inert', () => {
   });
 });
 
+// ─── Scenario 5: --allow-wiki-lint-debt waives lint failure ──────────────────
+
+describe('Scenario: --allow-wiki-lint-debt waives wiki-lint failure', () => {
+  let fixture: Fixture;
+  beforeEach(() => { fixture = buildFixture(); });
+  afterEach(() => fixture.cleanup());
+
+  it('exits 0, emits waiver message, and still archives sprint file', async () => {
+    const { exitFn, getCode } = makeExitSeam();
+    const cap = makeCapture();
+    const spawnMock = () => ({ status: 0, error: null, stdout: '', stderr: '' });
+
+    // Create wiki dir so wikiInitialised === true
+    const wikiRoot = path.join(fixture.cwd, '.cleargate', 'wiki');
+    fs.mkdirSync(wikiRoot, { recursive: true });
+    fs.writeFileSync(path.join(wikiRoot, 'index.md'), '# Index\n\n(empty)\n');
+
+    try {
+      await sprintArchiveHandler(
+        { sprintId: 'SPRINT-99', allowWikiLintDebt: true },
+        {
+          sprintFilePath: fixture.sprintFilePath,
+          cwd: fixture.cwd,
+          stdout: cap.stdout,
+          stderr: cap.stderr,
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          wikiBuildFn: async () => { /* ok */ },
+          wikiLintFn: async () => { throw new Error('broken-backlink: cleargate-protocol.md → §11.4 (target missing)'); },
+        },
+      );
+    } catch { /* expected exit */ }
+
+    expect(getCode()).toBe(0);
+    const errOut = cap.getErr().join('\n');
+    expect(errOut).toContain('wiki-lint debt waived via --allow-wiki-lint-debt flag');
+    expect(errOut).toContain('broken-backlink: cleargate-protocol.md');
+    const archived = fs.readdirSync(fixture.archiveDir);
+    expect(archived).toContain('SPRINT-99_Test_Sprint.md');
+    const sprintArchived = fs.readFileSync(
+      path.join(fixture.archiveDir, 'SPRINT-99_Test_Sprint.md'),
+      'utf8',
+    );
+    expect(sprintArchived).toContain('status: Completed');
+  });
+});
+
+// ─── Scenario 6: Without --allow-wiki-lint-debt, lint failure still blocks ────
+
+describe('Scenario: without --allow-wiki-lint-debt, lint failure still blocks', () => {
+  let fixture: Fixture;
+  beforeEach(() => { fixture = buildFixture(); });
+  afterEach(() => fixture.cleanup());
+
+  it('exits 1, reverts frontmatter, does not archive sprint file', async () => {
+    const { exitFn, getCode } = makeExitSeam();
+    const cap = makeCapture();
+    const spawnMock = () => ({ status: 0, error: null, stdout: '', stderr: '' });
+
+    // Create wiki dir so wikiInitialised === true
+    const wikiRoot = path.join(fixture.cwd, '.cleargate', 'wiki');
+    fs.mkdirSync(wikiRoot, { recursive: true });
+    fs.writeFileSync(path.join(wikiRoot, 'index.md'), '# Index\n\n(empty)\n');
+
+    try {
+      await sprintArchiveHandler(
+        { sprintId: 'SPRINT-99' /* no allowWikiLintDebt */ },
+        {
+          sprintFilePath: fixture.sprintFilePath,
+          cwd: fixture.cwd,
+          stdout: cap.stdout,
+          stderr: cap.stderr,
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          wikiBuildFn: async () => { /* ok */ },
+          wikiLintFn: async () => { throw new Error('broken-backlink: cleargate-protocol.md → §11.4 (target missing)'); },
+        },
+      );
+    } catch { /* expected exit */ }
+
+    expect(getCode()).toBe(1);
+    const errOut = cap.getErr().join('\n');
+    expect(errOut).toContain('post-stamp wiki lint failed — sprint frontmatter reverted');
+    expect(errOut).not.toContain('wiki-lint debt waived');
+    const archived = fs.readdirSync(fixture.archiveDir);
+    expect(archived).not.toContain('SPRINT-99_Test_Sprint.md');
+    expect(fs.existsSync(fixture.sprintFilePath)).toBe(true);
+  });
+});
+
 // ─── Scenario: Orphan mid-sprint story WARN + archive ────────────────────────
 
 describe('Scenario: orphan mid-sprint story — WARN but still archive', () => {
