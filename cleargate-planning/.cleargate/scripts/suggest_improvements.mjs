@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { reportFilename } from './lib/report-filename.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -133,11 +134,11 @@ function main() {
     process.exit(1);
   }
 
-  const reportFile = path.join(sprintDir, 'REPORT.md');
+  const reportFile = reportFilename(sprintDir, sprintId, { forRead: true });
   const suggestionsFile = path.join(sprintDir, 'improvement-suggestions.md');
 
   if (!fs.existsSync(reportFile)) {
-    process.stderr.write(`Error: REPORT.md not found at ${reportFile}\n`);
+    process.stderr.write(`Error: report file not found at ${reportFile}\n`);
     process.stderr.write('Run the Reporter agent first to generate the report.\n');
     process.exit(1);
   }
