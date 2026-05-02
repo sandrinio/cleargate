@@ -1,5 +1,5 @@
 /**
- * test_close_sprint_v21.test.ts — STORY-022-07 + STORY-025-03 acceptance tests
+ * test_close_sprint_v21.test.ts — STORY-022-07 + STORY-025-03 + CR-022-M4 acceptance tests
  *
  * Gherkin scenarios (§2.1) — STORY-022-07:
  *   Scenario 1: reporter.md documents v2.1 contract
@@ -1661,5 +1661,124 @@ describe('Scenario 26: Step 6.7 surfaces stale candidate when keyword has zero g
     const content = fs.readFileSync(suggestionsFile, 'utf8');
     expect(content).toMatch(/CAND-SPRINT-19-F\d+/);
     expect(content).toMatch(/stale/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CR-022-M4: Scenario 27 — Step 8 prints 6-item handoff list
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 27: Step 8 prints 6-item handoff list (CR-022 §3 M4)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-19');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('stdout contains all 6 handoff list items', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-19', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    // Item 1: Review REPORT.md
+    expect(result.stdout).toMatch(/1\. Review .+REPORT\.md/);
+    // Item 2: Review improvement-suggestions.md
+    expect(result.stdout).toMatch(/2\. Review improvement-suggestions\.md/);
+    // Item 3: Skill Candidates
+    expect(result.stdout).toMatch(/3\. Approve or reject Skill Candidates/);
+    // Item 4: FLASHCARD cleanup
+    expect(result.stdout).toMatch(/4\. Approve or reject FLASHCARD cleanup entries/);
+    // Item 5: MCP sync
+    expect(result.stdout).toMatch(/5\. Push approved status changes to MCP/);
+    // Item 6: Initialize next sprint
+    expect(result.stdout).toMatch(/6\. Initialize next sprint/);
+  });
+
+  it('Step 8 header line contains sprint ID "SPRINT-19 closed"', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-19', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/SPRINT-19 closed\. Next steps:/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CR-022-M4: Scenario 28 — Step 8 next-sprint ID increments correctly
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 28: Step 8 mentions incremented next-sprint ID (CR-022 §3 M4)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-19');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('item 6 contains SPRINT-20 as next sprint ID', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-19', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/cleargate sprint init SPRINT-20/);
   });
 });
