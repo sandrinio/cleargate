@@ -71,7 +71,7 @@ function extractDeliverablesSection(content) {
  *
  * STORY before CR/BUG/EPIC/HOTFIX, PROPOSAL before PROP — BUG-010 longest-first rule.
  */
-function extractWorkItemIds(text) {
+export function extractWorkItemIds(text) {
   const re = /(STORY-\d+-\d+|(CR|BUG|EPIC|HOTFIX)-\d+|(PROPOSAL|PROP)-\d+)/g;
   const raw = [];
   let m;
@@ -87,7 +87,7 @@ function extractWorkItemIds(text) {
  * Check whether pending-sync OR archive contains a file matching <ID>_*.md
  * Returns the matching absolute path or null.
  */
-function findWorkItemFile(repoRoot, workItemId) {
+export function findWorkItemFile(repoRoot, workItemId) {
   const searchDirs = [
     path.join(repoRoot, '.cleargate', 'delivery', 'pending-sync'),
     path.join(repoRoot, '.cleargate', 'delivery', 'archive'),
@@ -206,6 +206,28 @@ function main() {
   if (args.length === 0 || args[0].startsWith('--')) usage();
 
   const sprintFilePath = path.resolve(args[0]);
+
+  // CR-027: --emit-json flag — extract work-item IDs and print JSON to stdout.
+  // Used by sprint.ts checkPerItemReadinessGates (path-a shell-out protocol).
+  // When this flag is present, skip the file-presence/approval triage and exit 0.
+  if (args.includes('--emit-json')) {
+    let content;
+    try {
+      content = fs.readFileSync(sprintFilePath, 'utf8');
+    } catch (err) {
+      process.stderr.write(`Error: cannot read sprint file: ${err.message}\n`);
+      process.exit(2);
+    }
+    const section = extractDeliverablesSection(content);
+    if (section === null) {
+      // No §1 section found — emit empty list (not an error for this flag)
+      process.stdout.write(JSON.stringify({ workItemIds: [] }) + '\n');
+      process.exit(0);
+    }
+    const workItemIds = extractWorkItemIds(section);
+    process.stdout.write(JSON.stringify({ workItemIds }) + '\n');
+    process.exit(0);
+  }
 
   // Allow test-isolation override of execution_mode
   const execMode = process.env.CLEARGATE_EXEC_MODE ?? 'v2';
