@@ -178,6 +178,61 @@ describe('Scenario: v2 mode routes to script (sprint init)', () => {
   });
 });
 
+// ─── STORY-026-01: skill load directive on sprint init ───────────────────────
+
+describe('Scenario (STORY-026-01): sprint init success emits skill load directive', () => {
+  it('stdout contains "→ Load skill: sprint-execution" when init script exits 0', () => {
+    const { exitFn } = makeExitSeam();
+    const cap = makeCapture();
+    const spawnMock = vi.fn().mockReturnValue({ status: 0, error: null });
+
+    try {
+      sprintInitHandler(
+        { sprintId: 'SPRINT-99', stories: 'STORY-99-01' },
+        {
+          sprintFilePath: FIXTURE_V2,
+          stdout: cap.stdout,
+          stderr: cap.stderr,
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          runScriptPath: '/fake/run_script.sh',
+        },
+      );
+    } catch {
+      // swallow exit
+    }
+
+    expect(cap.getOut().join(' ')).toContain('→ Load skill: sprint-execution');
+  });
+});
+
+describe('Scenario (STORY-026-01): sprint init failure stays quiet on skill directive', () => {
+  it('stdout does NOT contain "Load skill: sprint-execution" when init script exits non-zero', () => {
+    const { exitFn, getCode } = makeExitSeam();
+    const cap = makeCapture();
+    const spawnMock = vi.fn().mockReturnValue({ status: 1, error: null });
+
+    try {
+      sprintInitHandler(
+        { sprintId: 'SPRINT-99', stories: 'STORY-99-01' },
+        {
+          sprintFilePath: FIXTURE_V2,
+          stdout: cap.stdout,
+          stderr: cap.stderr,
+          exit: exitFn,
+          spawnFn: spawnMock as never,
+          runScriptPath: '/fake/run_script.sh',
+        },
+      );
+    } catch {
+      // swallow exit
+    }
+
+    expect(getCode()).toBe(1);
+    expect(cap.getOut().join(' ')).not.toContain('Load skill: sprint-execution');
+  });
+});
+
 // ─── Sprint close v1-inert ────────────────────────────────────────────────────
 
 describe('sprint close — v1-inert path', () => {
