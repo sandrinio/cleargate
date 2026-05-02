@@ -340,3 +340,31 @@ describe('Scenario: skip prev-sprint check for SPRINT-01', () => {
     expect(cap.getErr()).toContain('main is dirty');
   });
 });
+
+// ─── STORY-026-01: skill load directive on preflight ─────────────────────────
+
+describe('Scenario (STORY-026-01): preflight success emits skill load directive', () => {
+  it('stdout last line is "→ Load skill: sprint-execution" when all four checks pass', () => {
+    buildCleanFixture(fixtureDir, 'SPRINT-18', 'Completed');
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-18', fixtureDir, cap);
+
+    expect(code).toBe(0);
+    const lines = cap.getOut().split('\n').filter((l) => l.trim() !== '');
+    expect(lines[lines.length - 1]).toBe('→ Load skill: sprint-execution');
+  });
+});
+
+describe('Scenario (STORY-026-01): preflight failure stays quiet on skill directive', () => {
+  it('stdout does NOT contain "Load skill: sprint-execution" when a check fails', () => {
+    // prev sprint Active → check 1 fails → partial failure → no skill directive
+    buildCleanFixture(fixtureDir, 'SPRINT-19', 'Active');
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-19', fixtureDir, cap);
+
+    expect(code).toBe(1);
+    expect(cap.getOut()).not.toContain('Load skill: sprint-execution');
+  });
+});

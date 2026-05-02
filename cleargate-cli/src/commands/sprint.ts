@@ -241,6 +241,7 @@ export function sprintInitHandler(
   }
 
   const code = result.status ?? 0;
+  if (code === 0) { stdoutFn('→ Load skill: sprint-execution'); }
   return exitFn(code);
 }
 
@@ -1105,5 +1106,6 @@ export function sprintPreflightHandler(
   emitPunchList(opts.sprintId, results, stdoutFn, stderrFn);
 
   const allPass = results.every((r) => r.pass || r.skipped);
+  if (allPass) { stdoutFn('→ Load skill: sprint-execution'); }
   return exitFn(allPass ? 0 : 1);
 }

@@ -222,3 +222,65 @@ if (args[0] === 'sync' && args.includes('--check')) {
     expect(stdout).not.toContain('remote updates');
   });
 });
+
+// ─── STORY-026-01: skill auto-load directive ──────────────────────────────────
+
+describe('session-start.sh §026-01 skill auto-load directive', () => {
+  /**
+   * Scenario 1: Banner emits load directive when sprint is active.
+   * .cleargate/sprint-runs/.active contains "SPRINT-20" → directive printed.
+   */
+  it('Scenario 1: sprint active (.active has content) → emits skill load directive and exits 0', () => {
+    const tmpDir = makeTmpDir();
+    // Write a valid .active sentinel
+    const sprintRunsDir = path.join(tmpDir, '.cleargate', 'sprint-runs');
+    fs.mkdirSync(sprintRunsDir, { recursive: true });
+    fs.writeFileSync(path.join(sprintRunsDir, '.active'), 'SPRINT-20\n', 'utf8');
+
+    // Marker within 24h to suppress sync nudge (keeps stdout clean for assertion)
+    writeMarker(tmpDir, isoSecondsAgo(3600));
+    makeFakeCli(tmpDir, { syncCheckOutput: '{"updates":0}' });
+
+    const { exitCode, stdout } = runHook(tmpDir);
+
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain('→ Active sprint detected. Load skill: sprint-execution');
+  });
+
+  /**
+   * Scenario 2a: Banner stays quiet when .active is MISSING.
+   */
+  it('Scenario 2a: .active missing → no load directive, exits 0', () => {
+    const tmpDir = makeTmpDir();
+    // Ensure .cleargate/sprint-runs/ exists but no .active file
+    fs.mkdirSync(path.join(tmpDir, '.cleargate', 'sprint-runs'), { recursive: true });
+
+    writeMarker(tmpDir, isoSecondsAgo(3600));
+    makeFakeCli(tmpDir, { syncCheckOutput: '{"updates":0}' });
+
+    const { exitCode, stdout } = runHook(tmpDir);
+
+    expect(exitCode).toBe(0);
+    expect(stdout).not.toContain('Load skill: sprint-execution');
+  });
+
+  /**
+   * Scenario 2b: Banner stays quiet when .active exists but is whitespace-only.
+   * This tests the tr -d '[:space:]' guard — a single newline MUST NOT trigger emit.
+   */
+  it('Scenario 2b: .active is whitespace-only (single newline) → no load directive, exits 0', () => {
+    const tmpDir = makeTmpDir();
+    const sprintRunsDir = path.join(tmpDir, '.cleargate', 'sprint-runs');
+    fs.mkdirSync(sprintRunsDir, { recursive: true });
+    // Write a file that is non-zero size but only whitespace
+    fs.writeFileSync(path.join(sprintRunsDir, '.active'), '\n', 'utf8');
+
+    writeMarker(tmpDir, isoSecondsAgo(3600));
+    makeFakeCli(tmpDir, { syncCheckOutput: '{"updates":0}' });
+
+    const { exitCode, stdout } = runHook(tmpDir);
+
+    expect(exitCode).toBe(0);
+    expect(stdout).not.toContain('Load skill: sprint-execution');
+  });
+});
