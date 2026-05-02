@@ -1,8 +1,8 @@
 ---
 cr_id: CR-029
 parent_ref: cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md
-parent_cleargate_id: "cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md"
-sprint_cleargate_id: "SPRINT-20"
+parent_cleargate_id: cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md
+sprint_cleargate_id: SPRINT-20
 carry_over: false
 status: Approved
 ambiguity: 🟢 Low
@@ -20,9 +20,9 @@ created_at_version: cleargate@0.9.0
 updated_at_version: cleargate@0.9.0
 server_pushed_at_version: null
 cached_gate_result:
-  pass: null
+  pass: true
   failing_criteria: []
-  last_gate_check: null
+  last_gate_check: 2026-05-02T14:08:21Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -38,7 +38,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T13:16:36Z
+  last_stamp: 2026-05-02T14:08:21Z
   sessions: []
 ---
 
@@ -69,6 +69,18 @@ draft_tokens:
 - **Question:** Drop `cleargate-cli/vitest.config.ts` and the `vitest` devDependency in this CR, or keep them around for emergency rollback?
   **Recommended:** **Drop both.** Rollback is `git revert <commit>` — that's what version control is for. Keeping the dep around "just in case" is dead weight and signals indecision; the same logic would apply to the next migration too. If the migration fails verification, we revert before merge.
   **Human decision:** ✅ **Drop both** (2026-05-02).
+
+## 0.6 Mid-SPRINT-20 Split Decision (2026-05-02)
+
+User decided 2026-05-02 mid-SPRINT-20 to **split CR-029 across the SPRINT-20→SPRINT-21 boundary**:
+
+- **Phase E partial — SHIPPED in SPRINT-20:** the developer-agent prompt update (the "Inner-loop test runner" paragraph) lands in both live `.claude/agents/developer.md` AND canonical `cleargate-planning/.claude/agents/developer.md` BEFORE Wave 2 dispatches. This ensures Wave 2 Dev agents (CR-027, CR-028) write any NEW test files in `node:test` style — no codemod needed for them later.
+- **Phases A–D — DEFERRED to SPRINT-20 close → SPRINT-21 window:** pilot conversion, jscodeshift codemod, long-tail manual cleanup, full-suite flake hunting. Original §3.4 plan stands — `cr-029/vitest-to-node-test` branch off `main` AFTER SPRINT-20 closes.
+- **Phase E remainder (CHANGELOG entry, FLASHCARD entries, version bump) — DEFERRED:** lands with Phases A–D, since the version bump signals the runtime cut.
+
+**Rationale for split:** user asked to run CR-029 as a hotfix mid-sprint, before next dev writes tests. Surfaced 3 options (full mid-sprint hotfix / scaffold-only now / defer entirely). User picked scaffold-only — captures ~80% of the intent (no new vitest tests authored if we know we're migrating away) at ~5% of the cost (one paragraph edit), with zero impact on Wave 2 timing.
+
+**Effect on Wave 2:** CR-027 + CR-028 Devs read the updated developer.md; their new test files will be node:test format from the start. Existing test files they modify stay vitest-style.
 
 ## 1. The Context Override
 

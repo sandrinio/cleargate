@@ -1470,3 +1470,8 @@
   action: "update"
   target: "SPRINT-20"
   path: ".cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md"
+- timestamp: "2026-05-02T14:08:21.528Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-029"
+  path: ".cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md"
