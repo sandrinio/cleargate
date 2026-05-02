@@ -2,7 +2,6 @@
 cr_id: CR-022
 parent_ref: SDLC brainstorm charter §1.8 (Gate 4 expanded close pipeline) + §2.4 (Sprint 3 of 3); CR-021 (SPRINT-18 Prepare/Close/Observe mechanics, shipped); SPRINT-18 REPORT.md §6 Tooling (lessons folded in)
 parent_cleargate_id: "SDLC brainstorm charter §1.8 (Gate 4 expanded close pipeline) + §2.4 (Sprint 3 of 3); CR-021 (SPRINT-18 Prepare/Close/Observe mechanics, shipped); SPRINT-18 REPORT.md §6 Tooling (lessons folded in)"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
 status: Done

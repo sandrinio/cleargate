@@ -58,3 +58,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
 | [[BUG-024]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-024_Token_Ledger_Attribution_Spike.md |
+| [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
+## Epics
+
+| [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |
+## Sprints
+
+| [[SPRINT-20]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
