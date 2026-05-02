@@ -957,3 +957,251 @@ describe('Scenario 17: Step 2.7 advisory under v1 — warn + continue (CLEARGATE
     expect(state.sprint_status).toBe('Completed');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CR-022 M2: Step 2.8 sprint-merged-to-main verify
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 18: Step 2.8 skipped via CLEARGATE_SKIP_MERGE_CHECK=1 (test seam)', () => {
+  // Validates the skip seam: when CLEARGATE_SKIP_MERGE_CHECK=1 is set, Step 2.8
+  // emits a skip message and the pipeline continues to Step 3.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v2-no-fast', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithSkipMergeCheck(sprintDirPath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+        },
+      },
+    );
+  }
+
+  it('stdout contains "Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam)"', () => {
+    const result = runWithSkipMergeCheck(sprintDir);
+    expect(result.stdout).toMatch(/Step 2\.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set \(test seam\)/);
+  });
+
+  it('exit code is 0 when Step 2.8 skips via test seam', () => {
+    const result = runWithSkipMergeCheck(sprintDir);
+    expect(result.status).toBe(0);
+  });
+
+  it('pipeline proceeds past Step 2.8 (Step 3 message also appears)', () => {
+    const result = runWithSkipMergeCheck(sprintDir);
+    expect(result.stdout).toMatch(/Step 3/);
+  });
+
+  it('state.json sprint_status is flipped to Completed', () => {
+    runWithSkipMergeCheck(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+});
+
+describe('Scenario 19: Step 2.8 blocks under v2 when sprint branch unmerged (CLEARGATE_FORCE_MERGE_STATUS=unmerged seam)', () => {
+  // Uses CLEARGATE_FORCE_MERGE_STATUS=unmerged to simulate an unmerged sprint branch
+  // without needing a real git repo. Under v2 execution_mode, Step 2.8 must exit 1.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Use SPRINT-19 (numeric portion) so the sprintNumMatch fires and Step 2.8 runs.
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-close-sprint-s19-'));
+    sprintDir = path.join(base, 'SPRINT-19');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    tmpBase = base;
+    const stateV2 = {
+      schema_version: 2,
+      sprint_id: 'SPRINT-19',
+      execution_mode: 'v2',
+      sprint_status: 'Active',
+      stories: {
+        'STORY-019-01': {
+          state: 'Done',
+          qa_bounces: 0,
+          arch_bounces: 0,
+          worktree: null,
+          updated_at: '2026-01-01T00:00:00.000Z',
+          notes: '',
+          lane: 'standard',
+          lane_assigned_by: 'migration-default',
+          lane_demoted_at: null,
+          lane_demotion_reason: null,
+        },
+      },
+      last_action: 'init',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    fs.writeFileSync(
+      path.join(sprintDir, 'state.json'),
+      JSON.stringify(stateV2, null, 2) + '\n',
+      'utf8',
+    );
+    // Copy REPORT.md from sprint-v1-legacy so the pipeline can reach Step 2.8
+    const legacyReport = path.join(FIXTURES_DIR, 'sprint-v1-legacy', 'REPORT.md');
+    if (fs.existsSync(legacyReport)) {
+      fs.copyFileSync(legacyReport, path.join(sprintDir, 'REPORT.md'));
+    }
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithForcedUnmergedV2(sprintDirPath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_FORCE_MERGE_STATUS: 'unmerged',
+        },
+      },
+    );
+  }
+
+  it('exits 1 when sprint branch is unmerged under v2', () => {
+    const result = runWithForcedUnmergedV2(sprintDir);
+    expect(result.status).toBe(1);
+  });
+
+  it('stderr contains "Step 2.8 failed: sprint/S-19 not merged to main"', () => {
+    const result = runWithForcedUnmergedV2(sprintDir);
+    expect(result.stderr).toMatch(/Step 2\.8 failed: sprint\/S-19 not merged to main/);
+  });
+
+  it('stderr contains "Resolve: merge sprint/S-19" hint', () => {
+    const result = runWithForcedUnmergedV2(sprintDir);
+    expect(result.stderr).toMatch(/Resolve: merge sprint\/S-19/);
+  });
+
+  it('state.json sprint_status stays Active (not flipped to Completed)', () => {
+    runWithForcedUnmergedV2(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Active');
+  });
+});
+
+describe('Scenario 20: Step 2.8 advisory under v1 — warn + continue (CLEARGATE_FORCE_MERGE_STATUS=unmerged seam)', () => {
+  // Under v1 execution_mode, Step 2.8 emits a warning to stderr but does NOT exit 1.
+  // The pipeline continues and sprint_status flips to Completed.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Use SPRINT-19 (numeric portion) so the sprintNumMatch fires and Step 2.8 runs.
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-close-sprint-s20-'));
+    sprintDir = path.join(base, 'SPRINT-19');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    tmpBase = base;
+    const stateV2SchemaV1Mode = {
+      schema_version: 2,
+      sprint_id: 'SPRINT-19',
+      execution_mode: 'v1',
+      sprint_status: 'Active',
+      stories: {
+        'STORY-019-01': {
+          state: 'Done',
+          qa_bounces: 0,
+          arch_bounces: 0,
+          worktree: null,
+          updated_at: '2026-01-01T00:00:00.000Z',
+          notes: '',
+          lane: 'standard',
+          lane_assigned_by: 'migration-default',
+          lane_demoted_at: null,
+          lane_demotion_reason: null,
+        },
+      },
+      last_action: 'init',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    fs.writeFileSync(
+      path.join(sprintDir, 'state.json'),
+      JSON.stringify(stateV2SchemaV1Mode, null, 2) + '\n',
+      'utf8',
+    );
+    // Copy REPORT.md from sprint-v1-legacy so the pipeline can complete
+    const legacyReport = path.join(FIXTURES_DIR, 'sprint-v1-legacy', 'REPORT.md');
+    if (fs.existsSync(legacyReport)) {
+      fs.copyFileSync(legacyReport, path.join(sprintDir, 'REPORT.md'));
+    }
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithForcedUnmergedV1(sprintDirPath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_FORCE_MERGE_STATUS: 'unmerged',
+        },
+      },
+    );
+  }
+
+  it('exit code is 0 despite unmerged sprint branch (advisory in v1)', () => {
+    const result = runWithForcedUnmergedV1(sprintDir);
+    expect(result.status).toBe(0);
+  });
+
+  it('stderr contains "Step 2.8 warning: sprint/S-19 not merged to main (advisory in v1)"', () => {
+    const result = runWithForcedUnmergedV1(sprintDir);
+    expect(result.stderr).toMatch(/Step 2\.8 warning: sprint\/S-19 not merged to main \(advisory in v1\)/);
+  });
+
+  it('pipeline proceeds past Step 2.8 (Step 3 message also appears)', () => {
+    const result = runWithForcedUnmergedV1(sprintDir);
+    expect(result.stdout).toMatch(/Step 3/);
+  });
+
+  it('state.json sprint_status is flipped to Completed (pipeline continues)', () => {
+    runWithForcedUnmergedV1(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+});
