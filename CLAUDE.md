@@ -56,16 +56,6 @@ knowledge/              ← gitignored private reference docs (design-guide, arc
 - **After a surprise:** append one line. Format `YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars`. Grep first to avoid dupes. Newest on top.
 - Tag vocabulary and exact rules: `.claude/skills/flashcard/SKILL.md`.
 
-## Agent orchestration
-
-When running a sprint, spawn via the `Agent` tool with `subagent_type`:
-- **architect** (opus) — produces `plans/W<N>.md`, no production code
-- **developer** (sonnet) — one story end-to-end, one commit, includes `STORY=NNN-NN` verbatim in first response line
-- **qa** (sonnet) — independent verification, re-runs tests, approves or kicks back; never commits
-- **reporter** (opus) — runs once at sprint end, produces `REPORT.md`
-
-Full role contracts in `.claude/agents/*.md`. Communication model: agents don't talk to each other; they read/write artifact files and return structured text to the orchestrator.
-
 ## Test + commit conventions
 
 - **Real infra, no mocks** for database tests — run against docker-compose Postgres 18 + Redis 8 (flashcard-worthy: mocked tests have bitten us before).
@@ -108,6 +98,10 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
+**Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / Reporter). The skill is the canonical four-agent-loop spec; the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
+
+**Skill auto-load directive.** When the SessionStart banner emits `Load skill: <name>`, invoke the Skill tool to load it before continuing. Claude Code's description-match auto-load is advisory; this rule is the contract.
+
 **Codebase is source of truth.** Wiki, memory, and `context_source` are derived caches. On conflict between cache and code, the code wins; the cache rebuilds. Before stating that a capability exists or doesn't exist, grep the code.
 
 **Duplicate check before drafting.** Before drafting an Initiative or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate. If the request names an integration, feature, or capability, also grep the source tree for existing implementations and cite findings in `## Existing Surfaces`.
@@ -118,11 +112,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Brief is the universal pre-push handshake.** Every work-item template's `<instructions>` block tells you to render a Brief in chat after Writing the document — Summary / Open Questions / Edge Cases / Risks / Ambiguity. Halt for human review. When ambiguity reaches 🟢, push via `cleargate_push_item` automatically — the same approval covers Gate 1 and the push.
 
-**Architect runs twice per sprint.** (1) Sprint Design Review writes §2 of the sprint plan before human confirm. (2) Per-milestone plan writes `sprint-runs/<id>/plans/M<N>.md` before Developer agents start that milestone.
-
 **Boundary gates (CR-017).** `cleargate sprint init` runs the decomposition gate; `close_sprint.mjs` runs the lifecycle reconciler. Both block in v2.
-
-**Sprint Execution Gate.** Before transitioning Ready → Active, run `cleargate sprint preflight <id>`. The five checks (previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean, per-item readiness gates pass) must all pass. Halt and ask the human for resolution on any failure.
 
 **Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously. Pre-close enforces Steps 2.7 (no leftover worktrees) + 2.8 (sprint branch merged to main) under v2; failure halts close. Post-close prints a 6-item handoff list (Step 8) summarizing commits, merge state, wiki ingest, flashcards, artifacts, and next-sprint preflight.
 
@@ -134,15 +124,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Initiative Intake.** Stakeholder input arrives via two paths: (1) MCP pull — call `cleargate_pull_initiative` with the remote ID; the tool writes `pending-sync/INITIATIVE-NNN_*.md` automatically; read the result and present a Brief. (2) Manual paste — human pastes the text; triage it, write `pending-sync/INITIATIVE-NNN_*.md` using `templates/initiative.md`, present a Brief. In both cases, after Gate 1 the file moves to `archive/` stamped with `triaged_at:` and `spawned_items:`.
 
-**Four-agent loop (roles in `.claude/agents/`):**
-- `architect.md` — one plan per milestone; no production code.
-- `developer.md` — one Story end-to-end; one commit per Story; runs typecheck + tests before commit.
-- `qa.md` — independent verification gate; re-runs checks; never commits, never edits.
-- `reporter.md` — one sprint retrospective at sprint end; synthesizes token ledger + git log + flashcards into `REPORT.md`.
-
 **State-aware surface.** At session start, `cleargate doctor --session-start` (invoked by the SessionStart hook) emits one banner line before any other output: `ClearGate state: pre-member — local planning enabled, sync requires join.` OR `ClearGate state: member (project: <project_id>) — full surface enabled.` In **pre-member** state (no valid join token on disk), only local-planning commands are reachable: `init`, `join`, `whoami`, `wiki *`, `gate *`, `stamp`, `doctor`, `scaffold-lint`, `sprint *`, `story *`, `state *`, `upgrade`, `uninstall`. Commands `push`, `pull`, `sync`, `sync-log`, `conflicts`, and `admin *` (except `admin login`) require membership and exit 2 with a redirect: `Run: cleargate join <invite-url>`. If the SessionStart banner says `pre-member`, do not suggest push/pull/sync to the user — instead ask for an invite URL and direct them to `cleargate join`.
-
-**Orchestrator Dispatch Convention.** The PreToolUse:Task hook (`.claude/hooks/pre-tool-use-task.sh`) auto-writes a dispatch marker on every `Task()` spawn by parsing the orchestrator's prompt for the first work-item marker (`STORY=NNN-NN`, `BUG-NNN`, `EPIC-NNN`, `CR-NNN`, `PROPOSAL-NNN`, `HOTFIX-NNN`) and the `subagent_type`. The SubagentStop hook (`.claude/hooks/token-ledger.sh`) reads the newest `.dispatch-*.json` in the active sprint dir, attributes the row, and renames the file to `.processed-*`. **Manual fallback:** if the spawn prompt does not contain a parseable work-item marker, call `bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>` immediately before the `Task()` call. Example: `bash .cleargate/scripts/write_dispatch.sh CR-026 architect`.
 
 **Conversational style.** Keep replies terse. Details live in the work-item file and `REPORT.md`, not in chat. State results and next steps; skip narration of your own thought process. After Writing or Editing any file under `.cleargate/delivery/**`, briefly note the ingest result if the PostToolUse hook surfaced one — one short sentence (`✅ ingested as <bucket>/<id>.md` / `⚠️ gate failed: <criterion>` / `🔴 ingest error — see .cleargate/hook-log/gate-check.log`). Do not narrate when nothing fired (skip-excluded paths). This is conversational confirmation, not retry logic.
 
