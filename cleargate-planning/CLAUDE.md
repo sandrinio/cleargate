@@ -31,7 +31,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Sprint Execution Gate.** Before transitioning Ready → Active, run `cleargate sprint preflight <id>`. The four checks (previous sprint Completed, no leftover worktrees, `sprint/S-NN` ref free, `main` clean) must all pass. Halt and ask the human for resolution on any failure.
 
-**Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously.
+**Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously. Pre-close enforces Steps 2.7 (no leftover worktrees) + 2.8 (sprint branch merged to main) under v2; failure halts close. Post-close prints a 6-item handoff list (Step 8) summarizing commits, merge state, wiki ingest, flashcards, artifacts, and next-sprint preflight.
 
 **Drafting work items:**
 - Use the templates in `.cleargate/templates/` (`epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
