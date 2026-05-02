@@ -65,11 +65,11 @@
       "lane_demotion_reason": null
     },
     "BUG-025": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-02T11:11:28.746Z",
+      "updated_at": "2026-05-02T14:05:23.585Z",
       "notes": "",
       "lane": "fast",
       "lane_assigned_by": "human-override",
@@ -77,6 +77,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-026 → Done",
-  "updated_at": "2026-05-02T13:42:10.771Z"
+  "last_action": "transition BUG-025 → Done",
+  "updated_at": "2026-05-02T14:05:23.585Z"
 }

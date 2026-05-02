@@ -66,6 +66,16 @@ flashcards_flagged:
 
 `flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 
+## Inner-loop test runner
+
+When implementing a Story in the **`cleargate-cli/` engine** (this repo's flagship package), write new tests using **`node:test` + `node:assert/strict`** and run them iteratively via `node --test --import tsx <file>`. This is the universal Node 22+ pattern — works without vitest/jest setup, peaks at ~80MB RAM vs vitest's ~400MB per fork (CR-029 RAM math). Use the project's full-suite test command (`npm test`) only at commit-time to confirm green across the existing harness.
+
+**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Mirror the `gitEmail` injectable pattern at `cleargate-cli/test/lib/identity.test.ts:5`. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`.
+
+**Existing tests:** the bulk of `cleargate-cli/test/**/*.test.ts` is currently vitest-style; CR-029 codemod migrates them in the SPRINT-20→SPRINT-21 gap. **Do not codemod existing tests during a Story** — only your new test files use the node:test pattern. If a Story modifies an existing vitest test, leave it vitest-style for now (the codemod handles batch migration).
+
+**Other packages (`mcp/`, `admin/`):** keep their existing vitest setup — they have integration / Svelte concerns that require vitest tooling. The node:test guidance above applies to engine-only.
+
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
 - **Never mock the database.** Integration tests against real Postgres + Redis (SPRINT-01 flashcard).

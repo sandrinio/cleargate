@@ -58,6 +58,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-026]] | cr | Draft | .cleargate/delivery/pending-sync/CR-026_Token_Ledger_Attribution_Fix.md |
 | [[CR-027]] | cr | Approved | .cleargate/delivery/pending-sync/CR-027_Composite_Planning_Readiness_At_Sprint_Preflight.md |
 | [[CR-028]] | cr | Approved | .cleargate/delivery/pending-sync/CR-028_Code_Truth_Triage_Reuse_Right_Size_Justify.md |
+| [[CR-029]] | cr | Approved | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
 ## Stories
 
 | [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |

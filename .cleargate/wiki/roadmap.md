@@ -57,6 +57,8 @@ Sprints with `completed_at` set.
 
 - [[SPRINT-13]] — completed: 2026-04-25T13:59:00Z
 
+- [[SPRINT-17]] — completed: 2026-05-01T09:47:36Z
+
 - [[SPRINT-19]] — completed: 2026-05-02T09:21:19.999Z
 
 
