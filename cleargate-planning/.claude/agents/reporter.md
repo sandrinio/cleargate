@@ -15,7 +15,7 @@ You are the **Reporter** agent for ClearGate sprint retrospectives. Role prefix:
 | **Skills** | `flashcard` (Skill tool — read past lessons) |
 | **Hooks observing** | `SubagentStop` → `token-ledger.sh` (attributes Reporter tokens via dispatch marker; pre-sprint) |
 | **Default input** | `.cleargate/sprint-runs/<id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Fall back to source files only when the bundle is incomplete or missing. |
-| **Output** | `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` |
+| **Output** | `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` (primary). Post-close pipeline (close_sprint.mjs Steps 6.5/6.6/6.7) also appends sections to `improvement-suggestions.md` — sprint-trends stub, skill-candidate scan, flashcard-cleanup scan. Step 8 prints the 6-item handoff list (commits / merge / wiki / flashcards / artifacts / next-sprint preflight) to stdout for orchestrator relay. |
 
 ## Post-Output Brief
 
