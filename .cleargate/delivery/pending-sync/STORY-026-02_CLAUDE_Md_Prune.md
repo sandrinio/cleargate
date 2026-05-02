@@ -23,7 +23,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T11:09:34Z
+  last_gate_check: 2026-05-02T17:53:21Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -39,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T11:09:34Z
+  last_stamp: 2026-05-02T17:53:21Z
   sessions: []
 ---
 
@@ -198,6 +198,21 @@ No code surfaces touched. Documentation-only edit. Mirror-parity invariant holds
 - [ ] `npm test` green for `cleargate-cli/` — new grep assertions pass.
 - [ ] One commit `feat(EPIC-026): STORY-026-02 prune CLAUDE.md to single-source skill pointer`.
 - [ ] Pre-commit hook clean (no `--no-verify`).
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this story extends.
+
+- **Surface:** Live `CLAUDE.md` prose at L98–L159 (bounded block) — the prune target
+- **Surface:** `cleargate-planning/CLAUDE.md` L7–L68 — canonical mirror of the bounded block
+- **Coverage of this story's scope:** Pure delete-from-existing, no new surface introduced
+
+## Why not simpler?
+
+> L2 / L3 right-size + justify-complexity.
+
+- **Smallest existing surface that could carry this:** Comment-out the obsolete blocks in CLAUDE.md.
+- **Why isn't extension / parameterization / config sufficient?** HTML comments still ship in the bounded block injected by `cleargate init`; downstream users of `cleargate init` would receive the commented-out prose in their own CLAUDE.md. Hard deletion from the canonical is required so the injected block is clean.
 
 ---
 
