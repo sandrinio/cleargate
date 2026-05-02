@@ -64,7 +64,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[STORY-026-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-02_CLAUDE_Md_Prune.md |
 ## Sprints
 
-| [[SPRINT-20]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
+| [[SPRINT-20]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
+## Epics
+
+| [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |
