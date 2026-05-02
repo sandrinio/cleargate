@@ -498,3 +498,45 @@ the failure verbatim to the human and halts. Resolution is per-item:
 
 This gate is **enforcing under `execution_mode: v2`** and **advisory under v1**.
 
+
+
+## 14. Sprint Close Gate (Gate 4) — Pre-close + Post-close additions (source: CR-022)
+
+`close_sprint.mjs` runs an 8-step close pipeline. Steps 2.7, 2.8, 6.5, 6.6, 6.7, and 8 were added in SPRINT-19 by CR-022 to harden the close pipeline against the issues observed in SPRINT-18 (worktrees left open, sprint branch unmerged, no post-close handoff visibility).
+
+### §14.1 Step 2.7 — Worktree-Closed Pre-close Check
+
+Before any close action, the script verifies no leftover story worktrees remain. Runs `git worktree list --porcelain` and matches paths under `.worktrees/`.
+
+- **Enforcement (v2):** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
+- **Advisory (v1):** prints `Step 2.7 warning: leftover worktree at <path> (advisory in v1)` to stderr but continues.
+- **Test seams:** `CLEARGATE_SKIP_WORKTREE_CHECK=1` (full bypass), `CLEARGATE_FORCE_WORKTREE_PATHS` (test injection).
+
+### §14.2 Step 2.8 — Sprint-Merged-to-Main Verify
+
+Verifies the sprint branch (`sprint/S-NN`) tip is an ancestor of `main`. Runs `git merge-base --is-ancestor <sprint-tip> <main-tip>`.
+
+- **Enforcement (v2):** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
+- **Advisory (v1):** prints `Step 2.8 warning: sprint branch unmerged (advisory in v1)` to stderr but continues.
+- **Test seams:** `CLEARGATE_SKIP_MERGE_CHECK=1`, `CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged`, `CLEARGATE_REPO_ROOT` (test override).
+
+### §14.3 Steps 6.5 / 6.6 / 6.7 — Post-close additions
+
+Three non-fatal post-close steps fold into `improvement-suggestions.md`:
+- **Step 6.5:** invokes `sprint_trends.mjs` (stub — full implementation deferred to CR-027).
+- **Step 6.6:** scans for skill-candidate patterns via `suggest_improvements.mjs --skill-candidates`.
+- **Step 6.7:** scans for stale flashcards via `suggest_improvements.mjs --flashcard-cleanup`.
+
+Each step has its own skip seam (`CLEARGATE_SKIP_SPRINT_TRENDS=1`, `CLEARGATE_SKIP_SKILL_CANDIDATES=1`, `CLEARGATE_SKIP_FLASHCARD_CLEANUP=1`). Failures are non-fatal — printed as `Step 6.x warning:` and the pipeline continues.
+
+### §14.4 Step 8 — Verbose post-close handoff list
+
+Prints a 6-item handoff to stdout summarizing: (1) commits in sprint, (2) merge state, (3) wiki ingest status, (4) flashcard count, (5) artifacts written, (6) next-sprint preflight reminder. The next-sprint ID is computed by parsing the numeric portion of the closing sprint and incrementing it (e.g., SPRINT-19 → SPRINT-20).
+
+This step replaces the prior 3-line "pipeline complete" summary with explicit action-oriented output for the conversational orchestrator to relay to the human.
+
+### §14.5 `--allow-wiki-lint-debt` waiver flag
+
+`cleargate sprint archive --allow-wiki-lint-debt` waives wiki-lint findings during archive. Reserved for cases where pre-existing wiki-lint debt blocks otherwise-clean archives (e.g., 34 broken-backlink findings carried since SPRINT-16). Without the flag, lint findings cause `archive` to roll back. The flag emits the verbatim Gherkin message `wiki-lint debt waived via --allow-wiki-lint-debt flag` and continues.
+
+Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_reporter_context.mjs`) to absorb heavy-strategy sprint reports. Override via `VITEST_MAX_FORKS`-style `MAX_BUNDLE_BYTES` future env.
