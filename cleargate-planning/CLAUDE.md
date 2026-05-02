@@ -17,7 +17,9 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
-**Duplicate check before drafting.** Before drafting an Initiative or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate.
+**Codebase is source of truth.** Wiki, memory, and `context_source` are derived caches. On conflict between cache and code, the code wins; the cache rebuilds. Before stating that a capability exists or doesn't exist, grep the code.
+
+**Duplicate check before drafting.** Before drafting an Initiative or work item, grep `.cleargate/delivery/archive/` + `.cleargate/FLASHCARD.md` for similar past work. If you find overlap, surface it as a one-liner (*"This is very close to STORY-003-05 shipped in SPRINT-01 — are you extending it or redoing it?"*) instead of drafting a duplicate. If the request names an integration, feature, or capability, also grep the source tree for existing implementations and cite findings in `## Existing Surfaces`.
 
 **Halt at gates.** You halt at Gate 1 (Initiative approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` (hard reject) and explicit human confirmation. Readiness gates (`cached_gate_result.pass`) are advisory by default — the push proceeds and the item body receives an `[advisory: gate_failed — <criteria>]` prefix; opt into hard-reject via `STRICT_PUSH_GATES=true` on the MCP server.
 
