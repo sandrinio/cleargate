@@ -22,15 +22,22 @@ const CANON_ENF = path.join(
 const CLI_BIN = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
 
 describe('STORY-025-06 Scenario 1: CLAUDE.md Sprint Execution Gate bullet updated', () => {
-  it('CLAUDE.md (live) contains the new "Sprint Execution Gate." bullet wording', () => {
+  // STORY-026-02 prune: "Sprint Execution Gate." paragraph moved to sprint-execution skill.
+  // CLAUDE.md now carries only the skill-pointer bullet; the detailed preflight description
+  // lives in .claude/skills/sprint-execution/SKILL.md.
+  it('CLAUDE.md (live) does NOT contain "Sprint Execution Gate." paragraph (moved to skill)', () => {
     const content = fs.readFileSync(LIVE_CLAUDE, 'utf8');
-    expect(content).toContain('**Sprint Execution Gate.**');
-    expect(content).toContain('cleargate sprint preflight <id>');
+    expect(content).not.toContain('**Sprint Execution Gate.**');
   });
 
   it('CLAUDE.md (live) does NOT contain the old "(CR-021)" parenthetical', () => {
     const content = fs.readFileSync(LIVE_CLAUDE, 'utf8');
     expect(content).not.toMatch(/Sprint Execution Gate \(CR-021\)/);
+  });
+
+  it('CLAUDE.md (live) contains the sprint-execution skill pointer (R2)', () => {
+    const content = fs.readFileSync(LIVE_CLAUDE, 'utf8');
+    expect(content).toContain('.claude/skills/sprint-execution/SKILL.md');
   });
 });
 
@@ -62,11 +69,13 @@ describe('STORY-025-06 Scenario 2: cleargate-enforcement.md has §13 Sprint Exec
 });
 
 describe('STORY-025-06 Scenario 3: Mirror parity for CLAUDE.md (new bullet only)', () => {
-  it('Sprint Execution Gate bullet text is byte-identical between live and canonical', () => {
+  // STORY-026-02 prune: Sprint Execution Gate paragraph removed from both files.
+  // Parity now verified on the sprint-execution skill pointer (R2) which must match in both.
+  it('Sprint execution skill pointer is identical in live and canonical CLAUDE.md', () => {
     const live = fs.readFileSync(LIVE_CLAUDE, 'utf8');
     const canon = fs.readFileSync(CANON_CLAUDE, 'utf8');
-    const liveMatch = live.match(/\*\*Sprint Execution Gate\.\*\*[^\n]+/)?.[0];
-    const canonMatch = canon.match(/\*\*Sprint Execution Gate\.\*\*[^\n]+/)?.[0];
+    const liveMatch = live.match(/\*\*Sprint execution\.\*\*[^\n]+/)?.[0];
+    const canonMatch = canon.match(/\*\*Sprint execution\.\*\*[^\n]+/)?.[0];
     expect(liveMatch).toBeDefined();
     expect(canonMatch).toBeDefined();
     expect(liveMatch).toBe(canonMatch);
