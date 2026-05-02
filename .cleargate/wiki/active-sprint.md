@@ -28,7 +28,7 @@
 
 - [[SPRINT-18]] — status: Approved
 
-- [[SPRINT-20]] — status: Active
+- [[SPRINT-20]] — status: Completed
 
 
 

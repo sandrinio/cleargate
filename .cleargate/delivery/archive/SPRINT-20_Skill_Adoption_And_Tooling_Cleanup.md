@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: "block"
 remote_id: null
 source_tool: "local"
-status: "Active"
+status: "Completed"
 execution_mode: "v2"
 start_date: "2026-05-16"
 end_date: "2026-05-29"
