@@ -32,8 +32,6 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-18]] — status: Approved
 
-- [[SPRINT-19]] — status: Approved
-
 - [[SPRINT-20]] — status: Draft
 
 
@@ -58,6 +56,8 @@ Sprints with `completed_at` set.
 - [[SPRINT-09]] — completed: 2026-04-21T08:30:00Z
 
 - [[SPRINT-13]] — completed: 2026-04-25T13:59:00Z
+
+- [[SPRINT-19]] — completed: 2026-05-02T09:21:19.999Z
 
 
 

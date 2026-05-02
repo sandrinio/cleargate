@@ -13,17 +13,16 @@
 - [[EPIC-023]] (epic) — Approved
   - [[STORY-023-02]] (story) — Approved
   - [[STORY-023-03]] (story) — Approved
+- [[EPIC-026]] (epic) — Ready
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-19]] (sprint) — Approved
+- [[SPRINT-20]] (sprint) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
-- [[CR-022]] (cr) — Approved
-- [[CR-025]] (cr) — Approved
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -37,14 +36,14 @@
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
 - [[BUG-022]] (bug) — Verified
-- [[BUG-024]] (bug) — Approved
+- [[BUG-025]] (bug) — Triaged
 
 ## Archive
 
-- Epics: 15 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
-- Sprints: 13 Completed · [expand](archive/sprints.md)
+- Epics: 15 Completed · 2 Abandoned · 1 Done · [expand](archive/epics.md)
+- Sprints: 14 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 16 Completed · 4 Done · [expand](archive/crs.md)
+- CRs: 16 Completed · 7 Done · [expand](archive/crs.md)
 - Bugs: 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 49 Done · 31 Abandoned · [expand](archive/stories.md)
 
@@ -54,14 +53,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Bugs
-
-| [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
-| [[BUG-024]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-024_Token_Ledger_Attribution_Spike.md |
-| [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
-## Epics
-
-| [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |
-## Sprints
-
-| [[SPRINT-20]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
