@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * close_sprint.mjs — Seven-step sprint close pipeline
+ * close_sprint.mjs — Eight-step sprint close pipeline
  *
  * Usage: node close_sprint.mjs <sprint-id> [--assume-ack]
  *        node close_sprint.mjs <sprint-id> --report-body-stdin   (STORY-014-10)
@@ -14,6 +14,7 @@
  *   5. On Reporter success + user ack (or --assume-ack flag), flip sprint_status -> "Completed"
  *   6. Invoke suggest_improvements.mjs unconditionally
  *   7. Auto-push per-artifact status updates to MCP via cleargate sync work-items (non-fatal)
+ *   8. Verbose post-close handoff list (6-item next-steps block to stdout)
  *
  * Report filename: SPRINT-<#>_REPORT.md for new sprints (SPRINT-18+).
  *   Backwards-compat: if SPRINT-<#>_REPORT.md is absent but REPORT.md exists (legacy
@@ -663,10 +664,40 @@ function main() {
     process.stderr.write('Run `cleargate sync work-items` manually to retry.\n');
   }
 
-  process.stdout.write(`\nSprint ${sprintId} close pipeline complete.\n`);
-  process.stdout.write(`  state.json: sprint_status = Completed\n`);
-  process.stdout.write(`  report: ${reportFile}\n`);
-  process.stdout.write(`  improvement-suggestions.md: ${path.join(sprintDir, 'improvement-suggestions.md')}\n`);
+  // ── Step 8: Verbose post-close handoff list ───────────────────────────────
+  // Prints 6 explicit next-step items to stdout (CR-022 §3 M4).
+  {
+    const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
+    const nextSprintNum = sprintNumMatch
+      ? String(parseInt(sprintNumMatch[1], 10) + 1).padStart(sprintNumMatch[1].length, '0')
+      : null;
+    const nextSprintId = nextSprintNum ? `SPRINT-${nextSprintNum}` : '<next-sprint-id>';
+    const reportBasename = path.basename(reportFile);
+    const suggestionsPath = path.join(sprintDir, 'improvement-suggestions.md');
+
+    process.stdout.write(`\n${sprintId} closed. Next steps:\n`);
+    process.stdout.write(`  1. Review ${reportBasename}\n`);
+    process.stdout.write(
+      `  2. Review improvement-suggestions.md (sections: Suggestions / Skill Candidates / FLASHCARD Cleanup)\n`,
+    );
+    process.stdout.write(
+      `  3. Approve or reject Skill Candidates → run /improve or cleargate skill create <name>\n`,
+    );
+    process.stdout.write(
+      `  4. Approve or reject FLASHCARD cleanup entries → run /improve or cleargate flashcard prune\n`,
+    );
+    process.stdout.write(
+      `  5. Push approved status changes to MCP if Step 7 warned (\`cleargate sync work-items\`)\n`,
+    );
+    process.stdout.write(
+      `  6. Initialize next sprint: \`cleargate sprint init ${nextSprintId} --stories <ids>\`\n`,
+    );
+
+    // Surface artifact paths for convenience
+    process.stdout.write(`\nArtifacts:\n`);
+    process.stdout.write(`  report:               ${reportFile}\n`);
+    process.stdout.write(`  improvement-suggestions: ${suggestionsPath}\n`);
+  }
 }
 
 main();
