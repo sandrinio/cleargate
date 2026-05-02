@@ -3,6 +3,31 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.10.0] — 2026-05-02
+
+### Added
+- **Sprint-execution skill** (EPIC-026) — `.claude/skills/sprint-execution/SKILL.md` is now the canonical orchestration playbook (auto-loaded on sprint-active sessions); SessionStart hook + `cleargate sprint preflight|init` emit `→ Load skill: sprint-execution` directive (STORY-026-01).
+- **Composite preflight gate** (CR-027) — `cleargate sprint preflight` now runs five checks (was four); new check #5 verifies per-item `cached_gate_result.pass=true` for every in-scope work item; new `discovery-checked` + `risk-table-populated` readiness criteria.
+- **Code-truth triage stack** (CR-028) — protocol unnumbered "Code-Truth Principle" preamble; new `## Existing Surfaces` + `## Why not simpler?` sections in epic/story/CR templates; new `reuse-audit-recorded` + `simplest-form-justified` predicates.
+- **PreToolUse:Task hook** (CR-026) — `.claude/hooks/pre-tool-use-task.sh` auto-writes dispatch markers by parsing tool_input.prompt for work-item IDs; banner-immune; uniquified filename avoids parallel-spawn collision.
+- **Inner-loop test runner guidance** (CR-029 Phase E partial) — `.claude/agents/developer.md` instructs Dev agents to write new test files in `node:test` + `node:assert/strict` for ~80MB RAM vs ~400MB vitest fork.
+- `.cleargate/scripts/dedupe_frontmatter.mjs` — corpus dedupe pass for any duplicate frontmatter keys (BUG-025 follow-on).
+
+### Changed
+- **Token-ledger attribution** (CR-026) — `.claude/hooks/token-ledger.sh` now uses newest-file dispatch lookup (not session-id-keyed) + skips `^[0-9]+ items? blocked:` SessionStart-banner prefixes via `BANNER_SKIP_RE`; resolves three BUG-024 attribution defects.
+- **CLAUDE.md (live + canonical)** (STORY-026-02) — pruned ~26 lines of orchestration prose now lives in the sprint-execution skill; preserved halt rules, Gate 1 / Gate 4 contracts, Sprint-mode v1/v2, Boundary-gates pointers; added always-on "Skill auto-load directive" rule.
+- **`assert_story_files.mjs`** (CR-027) — exports `extractWorkItemIds` + `findWorkItemFile`; adds `--emit-json` flag for CLI shell-out.
+
+### Fixed
+- **`backfill_hierarchy.mjs::spliceKeys()`** (BUG-025) — was inserting NEW line for existing-null keys, producing duplicate frontmatter lines on each PostToolUse stamp; fix is two-phase: Phase 1 in-place replace, Phase 2 insert-absent-only.
+- 4 corpus files de-duplicated of orphaned `parent_cleargate_id:` lines (BUG-024, SPRINT-17, CR-023, EPIC-024).
+
+### Caveats (live wiring deferred)
+- `.claude/settings.json` (live) is gitignored and not yet wired to the new `pre-tool-use-task.sh`; only the canonical mirror (`cleargate-planning/.claude/settings.json`) is updated. Effect: takes hold on next `cleargate init` or manual settings edit.
+- Templates use numbered headings (`## 3.5 Existing Surfaces`) which don't match bare-substring predicates (`## Existing Surfaces`); SPRINT-20 anchors are backfilled with bare headings, but fresh template drafts will fail the new gates until follow-up CR ships.
+
+---
+
 ## [0.9.0] — 2026-04-30
 
 ### Added
