@@ -43,9 +43,26 @@ TYPECHECK: pass | fail
 TESTS: X passed, Y failed
 FILES_CHANGED: <list>
 NOTES: <one paragraph max — deviations from plan, flashcards recorded>
+r_coverage:
+  - { r_id: "R1", covered: true, deferred: false, clarified: false }
+  - { r_id: "R2", covered: false, deferred: true, clarified: false }
+plan_deviations:
+  - { what: "<short label>", why: "<one-sentence reason>", orchestrator_confirmed: true }
+adjacent_files:
+  - "<absolute or repo-relative path the dev believes may regress>"
 flashcards_flagged:
   - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
+
+**Casing contract (parser-bound):** STATUS / COMMIT / TYPECHECK / TESTS / FILES_CHANGED / NOTES are uppercase keys; r_coverage / plan_deviations / adjacent_files / flashcards_flagged are lowercase YAML-shaped lists. The QA Context Pack regex (`prep_qa_context.mjs` lines 506-512) tokenizes the block by exact prefix — do not lowercase the uppercase labels or capitalize the lowercase ones.
+
+**Three optional structured-handoff fields** (introduced by CR-024 S2; the QA Context Pack ingests them as `dev_handoff` per `prep_qa_context.mjs` lines 64-77):
+
+- `r_coverage` — one entry per requirement R1..RN drawn from the story's Gherkin and `## 3. Implementation Guide`. Set exactly one of `covered` (test asserts the requirement), `deferred` (out of this story's scope, flagged for follow-up), or `clarified` (orchestrator confirmation amended the requirement). Default `[]` when the story has zero numbered Rs (rare; flag in NOTES if so).
+- `plan_deviations` — one entry per deviation from the Architect's milestone plan blueprint. Each must include `orchestrator_confirmed: true` (deviation was discussed and agreed) or `false` (dev's unilateral call — QA flags as risk). Default `[]`.
+- `adjacent_files` — repo-relative paths the dev's gut-check thinks may regress from this change but were not directly edited. Default `[]`. The `prep_qa_context.mjs` script independently computes its own adjacent-file set (lines 322-368) from `git diff --name-only` neighborhoods; the dev's list is additive subjective context the script cannot derive.
+
+**Backwards-compat:** Three optional structured-handoff fields. Omitting them yields a `legacy`-format pack (per `prep_qa_context.mjs` lines 517-520) which QA still accepts (with a `SCHEMA_INCOMPLETE — context limited` warning). Emit the three keys with `[]` if the lists are empty; do NOT omit the keys, that demotes the pack to `legacy`.
 
 `flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 
