@@ -125,13 +125,19 @@ function sniffHierarchy(fm, body) {
 }
 
 /**
- * Splice new frontmatter key-value pairs into raw content after the last existing key
- * in the frontmatter block. Uses raw regex splice to avoid round-trip via YAML serializer
- * (per FLASHCARD 2026-04-24 #frontmatter #write-back: do NOT round-trip via parse+serialize).
+ * Upsert frontmatter key-value pairs into raw content.
  *
- * Inserts after the anchor line:
+ * Idempotency invariant (BUG-025 fix): if the key already exists in the frontmatter
+ * block (even as `null`), REPLACE that line in place. Only INSERT new lines for keys
+ * that are completely absent from the frontmatter block. This prevents duplicate keys
+ * when the file already has `parent_cleargate_id: null` stamped by a prior pass.
+ *
+ * For new keys (truly absent), inserts after the anchor line:
  *   1. parent_epic_ref or parent_ref line (if present)
  *   2. Otherwise: the last key line before the closing ---
+ *
+ * Per FLASHCARD 2026-04-24 #frontmatter #write-back: do NOT round-trip via
+ * parse+serialize — operate on raw lines.
  *
  * Returns the modified content string.
  */
@@ -145,41 +151,62 @@ function spliceKeys(raw, parentVal, sprintVal) {
   const fmBlock = raw.slice(0, fmClose);
   const rest = raw.slice(fmClose); // from \n--- onwards
 
-  // Build lines to insert
-  const toInsert = [];
-  if (parentVal !== null) {
-    toInsert.push(`parent_cleargate_id: "${parentVal}"`);
-  }
-  if (sprintVal !== null) {
-    toInsert.push(`sprint_cleargate_id: "${sprintVal}"`);
-  }
-  if (toInsert.length === 0) return raw;
+  // Nothing to write → no-op
+  if (parentVal === null && sprintVal === null) return raw;
 
-  // Find anchor: prefer parent_epic_ref or parent_ref line, else insert before closing ---
   const lines = fmBlock.split('\n');
-  let anchorIdx = -1;
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i];
-    if (/^parent_epic_ref:/.test(line) || /^parent_ref:/.test(line)) {
-      anchorIdx = i;
-      break;
+
+  // ── Phase 1: in-place updates for keys that already exist in the block ────────
+  // Replace existing `key: ...` lines with the new value so we never produce duplicates.
+  let updatedParent = false;
+  let updatedSprint = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (parentVal !== null && /^parent_cleargate_id:/.test(lines[i])) {
+      lines[i] = `parent_cleargate_id: "${parentVal}"`;
+      updatedParent = true;
+    }
+    if (sprintVal !== null && /^sprint_cleargate_id:/.test(lines[i])) {
+      lines[i] = `sprint_cleargate_id: "${sprintVal}"`;
+      updatedSprint = true;
     }
   }
 
-  // If no anchor found, insert after the last non-empty line in frontmatter
-  if (anchorIdx === -1) {
-    for (let i = lines.length - 1; i >= 1; i--) {
-      if (lines[i] && lines[i].trim()) {
+  // ── Phase 2: insert new lines for keys that were completely absent ─────────────
+  const toInsert = [];
+  if (parentVal !== null && !updatedParent) {
+    toInsert.push(`parent_cleargate_id: "${parentVal}"`);
+  }
+  if (sprintVal !== null && !updatedSprint) {
+    toInsert.push(`sprint_cleargate_id: "${sprintVal}"`);
+  }
+
+  if (toInsert.length > 0) {
+    // Find anchor: prefer parent_epic_ref or parent_ref line, else last non-empty key line
+    let anchorIdx = -1;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      if (/^parent_epic_ref:/.test(line) || /^parent_ref:/.test(line)) {
         anchorIdx = i;
         break;
       }
     }
+
+    // If no anchor found, insert after the last non-empty line in frontmatter
+    if (anchorIdx === -1) {
+      for (let i = lines.length - 1; i >= 1; i--) {
+        if (lines[i] && lines[i].trim()) {
+          anchorIdx = i;
+          break;
+        }
+      }
+    }
+
+    if (anchorIdx === -1) anchorIdx = lines.length - 1;
+
+    lines.splice(anchorIdx + 1, 0, ...toInsert);
   }
 
-  if (anchorIdx === -1) anchorIdx = lines.length - 1;
-
-  // Splice in the new lines after anchorIdx
-  lines.splice(anchorIdx + 1, 0, ...toInsert);
   return lines.join('\n') + rest;
 }
 

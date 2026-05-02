@@ -56,6 +56,11 @@
 
 set -u
 
+# CR-026: SessionStart blocked-items banner poisons transcript-grep (BUG-024 §3.1 Defect 2).
+# Skip-pattern: any line starting with "<N> items? blocked: " is the SessionStart banner.
+# Applied in the legacy work-item ID resolution block below via sed filtering.
+BANNER_SKIP_RE='^[0-9]+ items? blocked: '
+
 REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"
 LOG_DIR="${REPO_ROOT}/.cleargate/hook-log"
 mkdir -p "${LOG_DIR}"
@@ -93,20 +98,28 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
   LEDGER="${SPRINT_DIR}/token-ledger.jsonl"
 
-  # --- dispatch-marker attribution (CR-016, highest priority) ---
-  # Before each Task() spawn the orchestrator calls write_dispatch.sh which writes
-  #   .cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json
+  # --- dispatch-marker attribution (CR-016 + CR-026, highest priority) ---
+  # The PreToolUse:Task hook (pre-tool-use-task.sh, CR-026) auto-writes:
+  #   .cleargate/sprint-runs/<sprint>/.dispatch-<ts>-<pid>-<rand>.json
   # with { work_item_id, agent_type, spawned_at, session_id, writer }.
   # Reading this file (if present) gives accurate attribution; falls back to the
   # per-task pending-task sentinel (second priority) and transcript-scan (third).
+  #
+  # CR-026 Defect 1 fix — path-B (newest-file lookup):
+  # The old lookup keyed on the subagent's session_id from the SubagentStop payload,
+  # which is the *subagent's* session ID, never the orchestrator's. This caused 100%
+  # lookup failure since SPRINT-15 (BUG-024 §3.1 Defect 1). We now use newest-file
+  # lookup (ls -t) — atomic with the existing mv→.processed-$$ rename pattern.
+  # See CR-026 M3 plan §"Open Question Q1 resolution — path-A vs path-B".
   #
   # Atomicity: rename to .processed-$$ before reading, then delete post-row-write.
   # This prevents stale dispatch files from leaking attribution to a later subagent.
   SENTINEL_AGENT_TYPE=""
   SENTINEL_WORK_ITEM_ID=""
 
-  DISPATCH_FILE="${SPRINT_DIR}/.dispatch-${SESSION_ID}.json"
-  if [[ -f "${DISPATCH_FILE}" ]]; then
+  # CR-026: newest-file lookup (path-B) — replaces session-id-keyed lookup.
+  DISPATCH_FILE="$(ls -t "${SPRINT_DIR}"/.dispatch-*.json 2>/dev/null | head -1)"
+  if [[ -n "${DISPATCH_FILE}" && -f "${DISPATCH_FILE}" ]]; then
     DISPATCH_PROCESSED="${DISPATCH_FILE%.json}.processed-$$"
     if mv "${DISPATCH_FILE}" "${DISPATCH_PROCESSED}" 2>/dev/null; then
       DISPATCH_JSON="$(cat "${DISPATCH_PROCESSED}" 2>/dev/null)"
@@ -222,17 +235,33 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
 
   if [[ -z "${WORK_ITEM_ID}" ]]; then
     # Legacy: detect work_item_id (PRIMARY: first user message; FALLBACK: anywhere-grep)
-    WORK_ITEM_RAW="$(jq -rs '
-      [.[] | select(.type == "user")] | .[0].message.content
+    #
+    # CR-026: banner-skip applied before jq scan (BUG-024 §3.1 Defect 2).
+    # The SessionStart hook emits a banner line of the form:
+    #   "N items blocked: BUG-004: ..."
+    # This line poisons transcript-grep by matching the work-item regex first.
+    # We skip it via select(. | test(BANNER_SKIP_RE) | not) in the jq pipeline.
+    # BANNER_SKIP_RE is defined near the top of this script.
+    WORK_ITEM_RAW="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
+      [.[] | select(.type == "user")]
+      | [.[] | select(
+          (.message.content | if type == "array"
+            then map(.text? // "") | join(" ")
+            else (. // "") end
+          ) | test($banner_re) | not
+        )]
+      | .[0].message.content
       | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
       | tostring
-      | scan("(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
+      | scan("(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
     ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
 
     if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
       WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
     else
-      WORK_ITEM_ID="$(grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?' "${TRANSCRIPT_PATH}" 2>/dev/null \
+      # CR-026: fallback grep also applies banner-skip via sed filter.
+      WORK_ITEM_ID="$(sed -E "/${BANNER_SKIP_RE}/d" "${TRANSCRIPT_PATH}" 2>/dev/null \
+        | grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?[0-9]+(-[0-9]+)?' \
         | head -1 \
         | sed 's/=/-/g')"
       if [[ -n "${WORK_ITEM_ID}" ]]; then

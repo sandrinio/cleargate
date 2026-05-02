@@ -70,6 +70,12 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "section(4) has ≥1 listed-item"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
+    - id: simplest-form-justified
+      check: "body contains '## Why not simpler?'"
 ```
 
 ```yaml
@@ -87,6 +93,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body does not contain marker 'TBD'"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
 ```
 
 ```yaml
@@ -104,6 +112,12 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "section(4) has ≥1 listed-item"
     - id: gherkin-present
       check: "body contains 'Scenario:'"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
+    - id: simplest-form-justified
+      check: "body contains '## Why not simpler?'"
 ```
 
 ```yaml
@@ -117,6 +131,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body does not contain marker 'TBD'"
     - id: sandbox-paths-declared
       check: "section(2) has ≥1 listed-item"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
 ```
 
 ```yaml
@@ -130,4 +148,17 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).severity != null"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
+```
+
+```yaml
+- work_item_type: sprint
+  transition: ready-for-execution
+  severity: enforcing
+  criteria:
+    - id: risk-table-populated
+      check: "body contains '| Mitigation'"
+    - id: discovery-checked
+      check: "frontmatter(.).context_source != null"
 ```

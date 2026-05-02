@@ -58,13 +58,17 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-026]] | cr | Draft | .cleargate/delivery/pending-sync/CR-026_Token_Ledger_Attribution_Fix.md |
 | [[CR-027]] | cr | Approved | .cleargate/delivery/pending-sync/CR-027_Composite_Planning_Readiness_At_Sprint_Preflight.md |
 | [[CR-028]] | cr | Approved | .cleargate/delivery/pending-sync/CR-028_Code_Truth_Triage_Reuse_Right_Size_Justify.md |
+| [[CR-029]] | cr | Approved | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
 ## Stories
 
 | [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |
 | [[STORY-026-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-02_CLAUDE_Md_Prune.md |
 ## Sprints
 
-| [[SPRINT-20]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
+| [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
+## Epics
+
+| [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |

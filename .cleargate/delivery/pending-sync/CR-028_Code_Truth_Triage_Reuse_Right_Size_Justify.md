@@ -41,7 +41,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T09:58:20Z
+  last_gate_check: 2026-05-02T17:54:12Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -50,15 +50,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-028
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-02T09:58:20Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-4-7
+  last_stamp: 2026-05-02T17:54:12Z
+  sessions:
+    - session: 7cc0804d-be00-4162-94c8-254046c19c1b
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-02T14:26:59Z
 ---
 
 # CR-028: Code-Truth Triage — Reuse, Right-Size, Justify Complexity
@@ -214,6 +220,16 @@ Concretely:
 - Move `.cleargate/delivery/pending-sync/CR-028_*.md` to `.cleargate/delivery/archive/`.
 - Append flashcard line.
 - Wiki re-ingest (PostToolUse hook handles automatically).
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `.cleargate/knowledge/readiness-gates.md` — predicate vocabulary (shape #2 used as-is, no engine edits needed)
+- **Surface:** `cleargate-cli/src/lib/readiness-predicates.ts` — predicate parser (no edits needed; both new criteria use existing shape #2)
+- **Surface:** `.cleargate/templates/` — template hierarchy extended with new section templates
+- **Surface:** `CLAUDE.md` "Triage first" + "Duplicate check" anchors — extended with new "Codebase is source of truth" bullet
+- **Coverage:** ≥95% — this CR is pure protocol + template + new gate-criteria additions; zero new infrastructure
 
 ---
 

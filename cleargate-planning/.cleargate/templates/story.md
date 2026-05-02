@@ -16,6 +16,10 @@ L3: Complex — Cross-cutting, spike may be needed, ~1-2 days
 L4: Uncertain — Requires probing/spiking, >2 days
 
 Granularity Rubric (run this check BEFORE emitting a story during epic-decomposition):
+A candidate story is **too small** — file a CR or submit the PR directly — if ANY signal trips:
+  • Could this be a config change, a parameter addition, or a one-line edit? If yes, this is not a Story.
+  • The change touches one already-existing function/class and the diff fits in <30 LOC.
+  • The work amounts to renaming, formatting, or moving without behavior change.
 A candidate story is too big — emit two stories instead, with consecutive IDs (e.g. STORY-007-03 and STORY-007-04, never 03a/03b) — if ANY signal trips:
   • §1.2 Detailed Requirements joins unrelated user goals with "and also" / "additionally".
   • §2.1 Gherkin would need >5 scenarios covering unrelated behaviors.
@@ -119,6 +123,20 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 - **Risk:** {what could go wrong}
 - **Mitigation:** {agent's proposed mitigation}
 
+### 1.6 Existing Surfaces
+
+> L1 reuse audit. List source-tree implementations the request could extend. Cite file:line.
+
+- **Surface:** `path/to/file.ext:NN` — {what it does}
+- **Coverage of this requirement:** {≥80% / partial / none — and why}
+
+### 1.7 Why not simpler?
+
+> L2 / L3 right-size + justify-complexity. Answer both.
+
+- **Smallest existing surface that could carry this:** {citation or "none — net-new abstraction required"}
+- **Why isn't extension / parameterization / config sufficient?** {one paragraph}
+
 ## 2. The Truth (Executable Tests)
 
 ### 2.1 Acceptance Criteria (Gherkin)
@@ -185,3 +203,6 @@ Requirements to pass to Green (Ready for Execution):
 - [ ] Gherkin scenarios completely cover all detailed requirements in §1.2.
 - [ ] Implementation Guide (§3) maps to specific, verified file paths from the approved proposal.
 - [ ] No "TBDs" exist anywhere in the specification or technical logic.
+- [ ] §1.6 Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
+- [ ] §1.7 Why not simpler? has both sub-bullets answered (no "TBD" / no "{}").
+

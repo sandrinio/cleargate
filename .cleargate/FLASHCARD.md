@@ -3,6 +3,25 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-02 · #claude-md #mirror #prune · CLEARGATE-block awk-diff is the reliable mirror-parity gate — pipe both blocks to files and diff; empty = pass. Add to QA recipe template.
+2026-05-02 · #test-harness #vitest #worktree · Tests that grep CLAUDE.md must be updated in the same commit as the CLAUDE.md prune; old assertions become instantly-failing post-merge.
+2026-05-02 · #claude-md #prune #numeric-target · STORY-026-02 R7 ≥60-line target became unreachable after Wave 1+2 collapsed the prune surface (live 161, canonical 70 pre-prune). Mid-sprint metric on a stale pre-prune SHA estimate must be flagged + waived in Architect plan, not silently widened.
+2026-05-02 · #qa #templates #readiness · CR-028: template numbered headings (## 3.5, ### 1.6) don't match predicates (body contains '## Existing Surfaces'). File in CR-029.
+2026-05-02 · #templates #mirror · CR-028 SPRINT-20 anchor backfill = 6 anchors get sections (EPIC-026 + STORY-026-01 + STORY-026-02 + CR-026 + CR-027 + CR-028 self); BUG-025 exempt. Generalize: when adding a new readiness criterion, audit pending-sync anchors in the same commit.
+2026-05-02 · #protocol #section-numbering · CR-028 inserted unnumbered "Code-Truth Principle" preamble BEFORE existing §0 to avoid renumbering 16 numbered headings (161 ref sites). Path (a) renumber would cascade-break; path (b) preamble preserves stability.
+2026-05-02 · #protocol #templates #readiness #code-truth · CR-028: code-truth principle stack — wiki/memory/context_source are caches; code is canonical. Drafts cite ## Existing Surfaces + answer ## Why not simpler? (Story+Epic both; CR Existing-Surfaces only; Bug exempt).
+2026-05-02 · #qa #gherkin #coverage · CR-027 §4.7: Scenario 14 tests null-gate-result, not risk-table-populated criterion ID in stderr — partial gap; follow up in SPRINT-21 test.
+2026-05-02 · #preflight #gate3 #readiness · CR-027: sprint preflight gained check #5 (per-item cached_gate_result.pass=true + freshness; v2 hard-block, v1 warn). Pre-existing drafts with cached_gate_result.pass:null fail under v2 — backfill via cleargate gate check or downgrade to v1 for one cycle.
+2026-05-02 · #frontmatter #cached-gate · readCachedGate is async; sprint preflight is sync — CR-027 inlined a 25-LOC sync mirror. Future async refactor: handler → async cascades into 8 vitest scenarios.
+2026-05-02 · #scripts #shell-out · assert_story_files.mjs gained --emit-json flag (CR-027 path-a). Wraps the existing extractWorkItemIds export. sprint.ts shells out via execFn; tests inject canned JSON via execFn seam.
+2026-05-02 · #qa #sdr · SDR may name wrong suspect if grep-based; dev bisection can override — verify by checking whether src/ files were actually modified.
+2026-05-02 · #frontmatter #idempotent #backfill · backfill_hierarchy.mjs spliceKeys inserted NEW line for existing-null keys; fix: Phase 1 in-place replace, Phase 2 insert-absent-only.
+2026-05-02 · #qa #test-coverage #integration · M-plan-spec'd integration test files are REQUIRED, not optional — Dev must deliver them; per-hook unit tests don't cover cross-hook end-to-end flow.
+2026-05-02 · #snapshot #hooks · token-ledger.sh has a copy-on-fix snapshot lock in test/snapshots/ — update token-ledger.cr-NNN.sh + supersede byte-equality assertion every time the hook changes.
+2026-05-02 · #hooks #ledger #banner-skip · token-ledger.sh transcript-grep fallback skips ^[0-9]+ items? blocked: prefix via BANNER_SKIP_RE — SessionStart banner stops poisoning work_item_id attribution.
+2026-05-02 · #hooks #attribution #pre-tool-use-task · PreToolUse:Task hook auto-writes dispatch marker by grepping tool_input.prompt for first work-item ID; banner-immune (no transcript); uniquified filename avoids parallel-spawn collision.
+2026-05-02 · #hooks #ledger #dispatch · token-ledger.sh uses newest-file lookup (ls -t .dispatch-*.json | head -1), not session-id-keyed — orchestrator CLAUDE_SESSION_ID never matches subagent's SubagentStop payload session_id.
+2026-05-02 · #snapshot #init-test · session-start.sh snapshot locks (cr-008/cr-009) must be updated when canonical hook content changes — init test byte-compares rendered output against lock files.
 2026-05-02 · #worktree #git #commit · Dev agent's `git commit` landed on `main` instead of `story/<id>` branch — verify post-dispatch with `git log story/<id>` not just commit-success-claim.
 2026-05-02 · #vitest #ram #parallel-agents · vitest maxForks cap is PER-PROCESS — N parallel agents × maxForks = total forks (e.g. cap=2 + 3-agent wave = 6 forks ≈ 2.4GB). Lower VITEST_MAX_FORKS=1 or serialize agents on tight-RAM laptops.
 2026-05-02 · #vitest #ram #pool · Cap forks pool via vitest.config.ts `poolOptions.forks.maxForks=2` — CLI flag `--pool-options.forks.maxForks=N` collides with tinypool minThreads validation when pool=forks.

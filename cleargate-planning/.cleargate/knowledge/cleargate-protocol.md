@@ -4,6 +4,19 @@ You are operating in a ClearGate-enabled repository. Read this file in full befo
 
 ---
 
+## Code-Truth Principle
+
+ClearGate's epistemic stack: source code is canonical; wiki, memory, and `context_source` are derived caches. Every triage and draft answers four layers, in order:
+
+- **L0 — Code is source of truth.** On any conflict between cache and code, the code wins; the cache rebuilds. Verify capability claims by grep before stating them.
+- **L1 — Reuse before rebuild.** Before drafting a work item that names an integration, feature, or capability, grep the source tree for existing implementations. Cite findings in `## Existing Surfaces`. If an existing surface covers ≥80% of the requirement, the work item is an extension (CR), not a new build (Story).
+- **L2 — Right-size at triage.** Could this be a config change? a parameter addition? a one-line edit? If yes, it's not a Story — it's a PR or a tiny CR. Smallest viable form first.
+- **L3 — Justify complexity.** Every Epic and Story includes `## Why not simpler?` answering: what's the smallest existing surface; why isn't extension/parameterization/config sufficient.
+
+This is the same epistemic discipline the Knowledge Wiki applies to documents (raw → wiki → schema; source → cache → derived view), extended from planning artifacts to source code.
+
+---
+
 ## 0. The Five Phases
 
 ClearGate operates in five named phases. Every work item moves through them in order; every gate fires at a phase boundary.
@@ -103,7 +116,7 @@ Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed +
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
-Before sprint execution begins, the environment is checked. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021.
+Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. Under `execution_mode: v2` a failing per-item gate hard-blocks; under `v1` it warns. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
 
 ### Gate 4 — Close-Ack (per sprint, Close phase)
 
