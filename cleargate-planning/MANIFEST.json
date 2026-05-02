@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.9.0",
-  "generated_at": "2026-05-02T13:09:02.704Z",
+  "generated_at": "2026-05-02T17:30:16.178Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "4855571ede8b5a94d1a16b3ca38c6359ba2460ac2a8062649d2887ea20c55b8a",
+      "sha256": "55790014320187e500f6b904756bbc8bda4806274805e883d62492bf75a34f12",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -137,7 +137,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "31cd09beba5dbc3c3e9d5d407ad0c7f1e02882b0c551eb314aea2b5b30ac8d32",
+      "sha256": "f403bb55f4cdce4b82ce3fdd59b03dd55d8f3f64bdc0e1d1c2abf9b2121efa3d",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -158,14 +158,14 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "a55440504bb519d7a330566ff4bf53bb938dc8ccbc095e6a2ad25614163ddc13",
+      "sha256": "3817080b916467281350f5cb9b9aac14e1f9d96a3184af38033433494c84cb4f",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
-      "sha256": "d7a79a50e3cb5fd42735b017d3d88dff0fa443444951e717013e423770bad87b",
+      "sha256": "d0fc6643dea4bfadcdf084635c7240171233d8408f786548ba9365e89c5d361c",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/scripts/assert_story_files.mjs",
-      "sha256": "fd12810bd5e76f2a11f0a59f06d8ecf9696a626ac652f4276777c3031e06f367",
+      "sha256": "74db9e12008492e40c77cc9bffac4c689621ac5eededf9b342a87e45f918f003",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -194,6 +194,13 @@
     {
       "path": ".cleargate/scripts/constants.mjs",
       "sha256": "6f3fd11046bfd3d7f6b90b9ca70e02612a5db05ca21f2f2db3dce4473e720ce4",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/dedupe_frontmatter.mjs",
+      "sha256": "6bf2816399cad2ab6f8f770de5eb920c3547b6fad9295c81f08aa6a4f894ef21",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
