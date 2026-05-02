@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.9.0",
-  "generated_at": "2026-05-02T13:09:02.704Z",
+  "generated_at": "2026-05-02T15:21:55.577Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "4855571ede8b5a94d1a16b3ca38c6359ba2460ac2a8062649d2887ea20c55b8a",
+      "sha256": "55790014320187e500f6b904756bbc8bda4806274805e883d62492bf75a34f12",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -194,6 +194,13 @@
     {
       "path": ".cleargate/scripts/constants.mjs",
       "sha256": "6f3fd11046bfd3d7f6b90b9ca70e02612a5db05ca21f2f2db3dce4473e720ce4",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/dedupe_frontmatter.mjs",
+      "sha256": "6bf2816399cad2ab6f8f770de5eb920c3547b6fad9295c81f08aa6a4f894ef21",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
