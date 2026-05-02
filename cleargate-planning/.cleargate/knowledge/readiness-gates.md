@@ -72,6 +72,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body does not contain 'Unresolved'"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
+    - id: simplest-form-justified
+      check: "body contains '## Why not simpler?'"
 ```
 
 ```yaml
@@ -110,6 +114,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body contains 'Scenario:'"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
+    - id: simplest-form-justified
+      check: "body contains '## Why not simpler?'"
 ```
 
 ```yaml
@@ -125,6 +133,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "section(2) has ≥1 listed-item"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
+    - id: reuse-audit-recorded
+      check: "body contains '## Existing Surfaces'"
 ```
 
 ```yaml

@@ -85,6 +85,13 @@ last_synced_body_sha: null # sha256 of body at last sync
 - [ ] Invalidate/Update Epic: [Link]
 - [ ] Database schema impacts? {Yes/No — describe}
 
+## 2.5 Existing Surfaces
+
+> L1 reuse audit. List source-tree implementations this CR extends or modifies. Cite file:line.
+
+- **Surface:** `path/to/file.ext:NN` — {what it does today}
+- **Why this CR extends rather than rebuilds:** {one paragraph — required when the change names a capability that already exists somewhere in the tree}
+
 ## 3. Execution Sandbox
 *(Restrict the agent's scope to prevent unrelated refactoring.)*
 
@@ -107,3 +114,4 @@ Requirements to pass to Green (Ready for Execution):
 - [ ] Execution Sandbox contains exact file paths.
 - [ ] Verification command is provided.
 - [ ] `approved: true` is set in the YAML frontmatter.
+- [ ] §2.5 Existing Surfaces cites at least one source-tree path the CR extends.
