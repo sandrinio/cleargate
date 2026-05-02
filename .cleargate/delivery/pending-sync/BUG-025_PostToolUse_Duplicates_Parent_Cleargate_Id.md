@@ -24,7 +24,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T09:16:25Z
+  last_gate_check: 2026-05-02T11:00:54Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -40,7 +40,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T09:16:25Z
+  last_stamp: 2026-05-02T11:00:53Z
   sessions: []
 ---
 
@@ -96,14 +96,27 @@ Manual dedupe via `python3` re.match — keep first occurrence, drop subsequent.
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
+**SDR-corrected primary suspect (2026-05-02):** The bash hook `.claude/hooks/stamp-and-gate.sh` is a 32-line wrapper that shells to `cleargate stamp-tokens`, `cleargate gate check`, `cleargate wiki ingest` (verified by Read). The bash itself does NOT write `parent_cleargate_id`. The producer-side defect lives in the TypeScript command chain those subcommands invoke. Audit the TS handlers FIRST before touching the bash wrapper.
+
 **Investigate / Modify:**
-- `.claude/hooks/stamp-and-gate.sh` (live) + `cleargate-planning/.claude/hooks/stamp-and-gate.sh` (canonical mirror) — find the frontmatter-write logic; make it idempotent. The likely defect is an unconditional `printf 'parent_cleargate_id: null\n' >> "$file"` (or similar) without first checking whether the key exists.
-- `.cleargate/scripts/stamp_*.{mjs,sh}` — if any helper script writes the field directly, audit there too.
-- One-time corpus dedupe script: `.cleargate/scripts/dedupe_frontmatter.mjs` (NEW) — scans `.cleargate/delivery/**/*.md`, finds duplicate top-level YAML keys, keeps the first non-null value or the first occurrence, rewrites the file. Idempotent (re-run is no-op).
+- **`cleargate-cli/src/commands/stamp-tokens.ts`** (live in `dist/cli.js` after build) + its `buildNewFrontmatter` helper — the frontmatter rebuild path. Trace whether the existing-keys-preservation loop (around line 325 — `if (k !== 'draft_tokens' && k !== 'stamp_error')`) accidentally appends `parent_cleargate_id` from a different code path or fails to dedupe when the input already has duplicates from a prior edit.
+- **`cleargate-cli/src/commands/gate.ts` + `gate-check.ts` + `gate-run.ts`** — these are also invoked by the same hook chain. Audit any frontmatter-rewrite path (`stampFrontmatter`, `buildNewFrontmatter`, or equivalent serializer). One of these is appending `parent_cleargate_id: null` on each invocation.
+- **`cleargate-cli/src/lib/stamp-frontmatter.ts`** + the YAML serializer it uses — the writer is the prime suspect for the unconditional append.
+- **`.cleargate/scripts/backfill_hierarchy.mjs`** (verified writer of `parent_cleargate_id` per `grep -rln`) — one-shot batch script per its header comment, but verify it isn't being re-invoked from anywhere in the hook chain or by `cleargate gate run`.
+- **`.claude/hooks/stamp-and-gate.sh` (live + canonical mirror)** — secondary suspect. Audit ONLY after the TS chain is cleared. The wrapper makes the hook idempotency a TS-handler concern, not a bash-hook concern.
+- **One-time corpus dedupe script:** `.cleargate/scripts/dedupe_frontmatter.mjs` (NEW) — scans `.cleargate/delivery/**/*.md`, finds duplicate top-level YAML keys, keeps the first non-null value or the first occurrence, rewrites the file. Idempotent (re-run is no-op). Required regardless of where the producer-side fix lands — corpus is already polluted.
 
 **Do NOT modify:**
 - The `parseFrontmatter` consumer logic in `cleargate-cli/src/lib/frontmatter-yaml.ts` — strict YAML parsing is correct; the bug is the producer side.
-- The PostToolUse hook's gate-check or ingest paths — only the stamp logic.
+- The PostToolUse hook's gate-check or ingest paths — only the stamp/serializer logic that writes the duplicate key.
+- Wiki-page schema writers (`cleargate-cli/src/wiki/page-schema.ts`, `commands/wiki-ingest.ts`) — those write derivative wiki pages under `.cleargate/wiki/`, not raw work items under `.cleargate/delivery/`. Out of scope.
+
+**Investigation order (M4 plan must follow):**
+1. Repro per §2 — capture a `git diff` of one delivery file before/after a single Edit through Claude Code.
+2. Bisect: run each of `cleargate stamp-tokens <file>`, `cleargate gate check <file>`, `cleargate wiki ingest <file>` individually against a clean fixture. The one that adds `parent_cleargate_id: null` on a clean file is the producer.
+3. Fix in the TS handler identified by step 2; mirror to canonical if applicable.
+4. Run dedupe corpus script.
+5. Verify single-file regression test asserts hook idempotency across 3 sequential Edits.
 
 ## 5. Verification Protocol (The Failing Test)
 
