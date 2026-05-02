@@ -4,6 +4,9 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 2026-05-02 · #qa #gherkin #coverage · CR-027 §4.7: Scenario 14 tests null-gate-result, not risk-table-populated criterion ID in stderr — partial gap; follow up in SPRINT-21 test.
+2026-05-02 · #preflight #gate3 #readiness · CR-027: sprint preflight gained check #5 (per-item cached_gate_result.pass=true + freshness; v2 hard-block, v1 warn). Pre-existing drafts with cached_gate_result.pass:null fail under v2 — backfill via cleargate gate check or downgrade to v1 for one cycle.
+2026-05-02 · #frontmatter #cached-gate · readCachedGate is async; sprint preflight is sync — CR-027 inlined a 25-LOC sync mirror. Future async refactor: handler → async cascades into 8 vitest scenarios.
+2026-05-02 · #scripts #shell-out · assert_story_files.mjs gained --emit-json flag (CR-027 path-a). Wraps the existing extractWorkItemIds export. sprint.ts shells out via execFn; tests inject canned JSON via execFn seam.
 2026-05-02 · #qa #sdr · SDR may name wrong suspect if grep-based; dev bisection can override — verify by checking whether src/ files were actually modified.
 2026-05-02 · #frontmatter #idempotent #backfill · backfill_hierarchy.mjs spliceKeys inserted NEW line for existing-null keys; fix: Phase 1 in-place replace, Phase 2 insert-absent-only.
 2026-05-02 · #qa #test-coverage #integration · M-plan-spec'd integration test files are REQUIRED, not optional — Dev must deliver them; per-hook unit tests don't cover cross-hook end-to-end flow.

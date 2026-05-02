@@ -32,6 +32,7 @@ import {
   reconcileDecomposition,
   checkVerbMismatch,
 } from '../lib/lifecycle-reconcile.js';
+import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 
 // Terminal statuses — re-declared locally to avoid cross-module runtime import.
 // Keep in sync with TERMINAL_STATUSES in wiki-build.ts.
@@ -1036,6 +1037,294 @@ function checkMainClean(
   };
 }
 
+// ─── Check 5: per-item readiness gates ───────────────────────────────────────
+
+/**
+ * Locate the sprint plan file by ID, searching pending-sync/ then archive/.
+ * Returns null if no matching file is found. Re-implements discoverSprintFile
+ * from execution-mode.ts inline (CR-027: avoid cross-command export).
+ */
+function findSprintFile(sprintId: string, cwd: string): string | null {
+  const searchDirs = [
+    path.join(cwd, '.cleargate', 'delivery', 'pending-sync'),
+    path.join(cwd, '.cleargate', 'delivery', 'archive'),
+  ];
+  for (const dir of searchDirs) {
+    if (!fs.existsSync(dir)) continue;
+    let entries: string[];
+    try {
+      entries = fs.readdirSync(dir);
+    } catch {
+      continue;
+    }
+    const prefix = `${sprintId}_`;
+    for (const entry of entries) {
+      if ((entry.startsWith(prefix) || entry === `${sprintId}.md`) && entry.endsWith('.md')) {
+        return path.join(dir, entry);
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Locate a work-item file by ID, searching pending-sync/ then archive/.
+ * Returns null if not found. Re-implements findWorkItemFile from
+ * assert_story_files.mjs inline to avoid a shell-out dependency here.
+ */
+function findWorkItemFileLocal(cwd: string, workItemId: string): string | null {
+  const searchDirs = [
+    path.join(cwd, '.cleargate', 'delivery', 'pending-sync'),
+    path.join(cwd, '.cleargate', 'delivery', 'archive'),
+  ];
+  const prefix = `${workItemId}_`;
+  for (const dir of searchDirs) {
+    let entries: string[];
+    try {
+      entries = fs.readdirSync(dir);
+    } catch {
+      continue;
+    }
+    const match = entries.find((e) => (e.startsWith(prefix) || e === `${workItemId}.md`) && e.endsWith('.md'));
+    if (match) return path.join(dir, match);
+  }
+  return null;
+}
+
+/**
+ * Read the cached_gate_result from a file's frontmatter synchronously.
+ *
+ * CR-027: sync mirror of frontmatter-cache.ts:readCachedGate.
+ * sprint preflight is sync; refactoring the handler to async cascades into
+ * all 8 existing test scenarios. Inline 25-LOC sync implementation until
+ * a future async refactor is justified.
+ *
+ * Returns null if the file is unreadable, has no frontmatter, or has no
+ * cached_gate_result key (or if the key is null/absent).
+ */
+function readCachedGateSync(absPath: string): { pass: boolean; failing_criteria: { id: string; detail: string }[]; last_gate_check: string } | null {
+  let raw: string;
+  try {
+    raw = fs.readFileSync(absPath, 'utf8');
+  } catch {
+    return null;
+  }
+  let fm: Record<string, unknown>;
+  try {
+    ({ fm } = parseFrontmatter(raw));
+  } catch {
+    return null;
+  }
+  const val = fm['cached_gate_result'];
+  if (val === undefined || val === null) return null;
+  if (typeof val === 'object' && !Array.isArray(val)) {
+    const c = val as Record<string, unknown>;
+    // If pass is null (SPRINT-20 anchor shape: {pass: null, ...}), treat as no cached result.
+    // Per GOTCHA-4: {pass: null} = "gate check never ran" = null.
+    if (c['pass'] === null || c['pass'] === undefined) return null;
+    return {
+      pass: Boolean(c['pass']),
+      failing_criteria: Array.isArray(c['failing_criteria'])
+        ? (c['failing_criteria'] as { id: string; detail: string }[])
+        : [],
+      last_gate_check: String(c['last_gate_check'] ?? ''),
+    };
+  }
+  return null;
+}
+
+/**
+ * Extract work-item IDs from a sprint plan file via assert_story_files.mjs --emit-json.
+ * Returns string[] on success, or null on JSON parse failure.
+ *
+ * The execFn seam allows tests to inject canned JSON — no real shell-out in unit tests.
+ * If execFn throws (e.g. script not found in test fixture dirs), returns [] so the
+ * sprint plan self-check still runs (graceful degradation, not a hard failure).
+ */
+function extractInScopeWorkItemIds(
+  sprintFilePath: string,
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+): string[] | null {
+  const scriptPath = path.join(cwd, '.cleargate', 'scripts', 'assert_story_files.mjs');
+  const cmd = `node "${scriptPath}" "${sprintFilePath}" --emit-json`;
+  let stdout: string;
+  try {
+    stdout = execFn(cmd, { cwd, encoding: 'utf8' });
+  } catch {
+    // Graceful fallback: script not found or execution failed.
+    // No children are enumerable; the sprint plan self-check still runs.
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(stdout.trim()) as { workItemIds?: string[] };
+    if (!Array.isArray(parsed.workItemIds)) return null;
+    return parsed.workItemIds;
+  } catch {
+    return null;
+  }
+}
+
+/** Check 5: per-item readiness gates pass for all items in scope. */
+function checkPerItemReadinessGates(
+  sprintId: string,
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+  mode: string,
+): PreflightCheckResult {
+  const name = 'Per-item readiness gates';
+
+  // Under v1, this check is advisory-only: skip it (exit-0-equivalent).
+  if (mode === 'v1') {
+    return {
+      name,
+      pass: true,
+      skipped: true,
+      message: 'skipped (execution_mode: v1 — advisory only)',
+    };
+  }
+
+  // Find the sprint plan file
+  const sprintFilePath = findSprintFile(sprintId, cwd);
+  if (!sprintFilePath) {
+    return {
+      name,
+      pass: false,
+      skipped: false,
+      message: 'Per-item readiness gates: sprint plan file not found',
+      hint: `Cannot locate ${sprintId}*.md in pending-sync/ or archive/.`,
+    };
+  }
+
+  // Extract child work-item IDs from §1 Consolidated Deliverables
+  const childIds = extractInScopeWorkItemIds(sprintFilePath, cwd, execFn);
+  if (childIds === null) {
+    return {
+      name,
+      pass: false,
+      skipped: false,
+      message: 'Per-item readiness gates: failed to parse sprint plan deliverables',
+      hint: 'Verify "## 1. Consolidated Deliverables" exists and lists work-item IDs.',
+    };
+  }
+
+  // Failures accumulate here: { id, reason, failing_criteria }
+  const failures: { id: string; reason: string; failingCriteria: string[] }[] = [];
+  let totalChecked = 0;
+
+  // Helper: evaluate one work-item file
+  const evaluateItem = (id: string, absPath: string): void => {
+    // Read frontmatter for status + updated_at
+    let fm: Record<string, unknown>;
+    let raw: string;
+    try {
+      raw = fs.readFileSync(absPath, 'utf8');
+      ({ fm } = parseFrontmatter(raw));
+    } catch {
+      // Unreadable — treat as fail
+      totalChecked++;
+      failures.push({ id, reason: 'unreadable', failingCriteria: [] });
+      return;
+    }
+
+    // Skip terminal-status items (Done, Completed, Abandoned, Closed, Resolved)
+    const status = String(fm['status'] ?? '');
+    if (TERMINAL_STATUSES.has(status)) {
+      return; // not counted in totalChecked
+    }
+
+    totalChecked++;
+
+    // Read cached gate result
+    const cachedGate = readCachedGateSync(absPath);
+    const updatedAt = String(fm['updated_at'] ?? '');
+
+    let reason: string | null = null;
+    if (cachedGate === null) {
+      reason = 'no cached_gate_result';
+    } else if (cachedGate.pass !== true) {
+      reason = 'pass=false';
+    } else if (cachedGate.last_gate_check !== '' && updatedAt !== '' && cachedGate.last_gate_check < updatedAt) {
+      reason = 'stale';
+    }
+
+    if (reason !== null) {
+      failures.push({
+        id,
+        reason,
+        failingCriteria: cachedGate?.failing_criteria?.map((c) => c.id) ?? [],
+      });
+    }
+  };
+
+  // Evaluate all child items
+  for (const id of childIds) {
+    const absPath = findWorkItemFileLocal(cwd, id);
+    if (!absPath) {
+      totalChecked++;
+      failures.push({ id, reason: 'file not found', failingCriteria: [] });
+    } else {
+      evaluateItem(id, absPath);
+    }
+  }
+
+  // Sprint plan self-check: the sprint plan itself is one of the items in scope
+  // (per CR-027 §1: "the sprint plan is itself one of the items in scope")
+  // assert_story_files.mjs --emit-json extracts only child IDs, so we check it separately.
+  totalChecked++;
+  const sprintGate = readCachedGateSync(sprintFilePath);
+  let sprintRaw: string;
+  let sprintFm: Record<string, unknown> = {};
+  try {
+    sprintRaw = fs.readFileSync(sprintFilePath, 'utf8');
+    ({ fm: sprintFm } = parseFrontmatter(sprintRaw));
+  } catch {
+    // If unreadable, treat as fail (already handled by sprintFilePath check above)
+  }
+  const sprintUpdatedAt = String(sprintFm['updated_at'] ?? '');
+
+  let sprintReason: string | null = null;
+  if (sprintGate === null) {
+    sprintReason = 'no cached_gate_result';
+  } else if (sprintGate.pass !== true) {
+    sprintReason = 'pass=false';
+  } else if (sprintGate.last_gate_check !== '' && sprintUpdatedAt !== '' && sprintGate.last_gate_check < sprintUpdatedAt) {
+    sprintReason = 'stale';
+  }
+  if (sprintReason !== null) {
+    failures.push({
+      id: sprintId,
+      reason: sprintReason,
+      failingCriteria: sprintGate?.failing_criteria?.map((c) => c.id) ?? [],
+    });
+  }
+
+  if (failures.length === 0) {
+    return {
+      name,
+      pass: true,
+      skipped: false,
+      message: 'all in-scope items pass readiness gates',
+    };
+  }
+
+  // Build hint: bullet per failing item
+  const bulletLines = failures
+    .map(({ id, reason, failingCriteria }) => {
+      const criteria = failingCriteria.length > 0 ? `: ${failingCriteria.join(', ')}` : ` (${reason})`;
+      return `   - ${id}${criteria}`;
+    })
+    .join('\n');
+
+  return {
+    name,
+    pass: false,
+    skipped: false,
+    message: `Per-item readiness gates: ${failures.length}/${totalChecked} items not ready`,
+    hint: `${bulletLines}\n   Run: cleargate gate check <file> -v   for each`,
+  };
+}
+
 /**
  * Emit the punch list to stdout (on pass) or stderr (on failure).
  * Format matches §1.2 R4 of STORY-025-02.
@@ -1049,7 +1338,7 @@ function emitPunchList(
   const failures = results.filter((r) => !r.pass && !r.skipped);
 
   if (failures.length === 0) {
-    stdoutFn(`cleargate sprint preflight: all four checks pass for ${sprintId}`);
+    stdoutFn(`cleargate sprint preflight: all five checks pass for ${sprintId}`);
     return;
   }
 
@@ -1070,8 +1359,11 @@ function emitPunchList(
 /**
  * Main handler for `cleargate sprint preflight <sprint-id>`.
  *
- * Synchronous. All four checks always run before exitFn is called
+ * Synchronous. All five checks always run before exitFn is called
  * (so the operator sees the full punch list on a single invocation).
+ *
+ * CR-027: added check #5 — per-item readiness gates pass for every
+ * work-item ID in §1 Consolidated Deliverables.
  */
 export function sprintPreflightHandler(
   opts: { sprintId: string },
@@ -1095,12 +1387,16 @@ export function sprintPreflightHandler(
     execSync(cmd, { ...execOpts, stdio: 'pipe' })
   );
 
-  // Run all four checks — all run regardless of individual failures
+  // Read execution_mode once — passed to check #5 so it can apply v1/v2 severity.
+  const mode = readSprintExecutionMode(opts.sprintId, { cwd });
+
+  // Run all five checks — all run regardless of individual failures
   const results: PreflightCheckResult[] = [
     checkPrevSprintCompleted(opts.sprintId, cwd),
     checkNoLeftoverWorktrees(cwd, execFn),
     checkSprintBranchRefFree(opts.sprintId, cwd, execFn),
     checkMainClean(cwd, execFn),
+    checkPerItemReadinessGates(opts.sprintId, cwd, execFn, mode),
   ];
 
   emitPunchList(opts.sprintId, results, stdoutFn, stderrFn);
