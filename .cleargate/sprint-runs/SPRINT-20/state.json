@@ -29,11 +29,11 @@
       "lane_demotion_reason": null
     },
     "CR-026": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 1,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-02T13:34:24.797Z",
+      "updated_at": "2026-05-02T13:42:10.771Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -77,6 +77,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "qa-bounce CR-026: qa_bounces=1",
-  "updated_at": "2026-05-02T13:34:24.797Z"
+  "last_action": "transition CR-026 → Done",
+  "updated_at": "2026-05-02T13:42:10.771Z"
 }
