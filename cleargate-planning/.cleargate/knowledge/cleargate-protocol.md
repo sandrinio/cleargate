@@ -67,7 +67,7 @@ Example: *"Is this adding functionality that doesn't exist yet (Story) or changi
 
 Every drafted work item — Epic, Story, CR, Bug, Hotfix — gets a Brief presented to the human in chat after the document is written. The Brief is mechanically extracted from the document's own sections per the template's `<instructions>` block (Summary / Open Questions / Edge Cases / Risks / Ambiguity). Conversation resolves open questions; ambiguity flips 🔴 → 🟢 → **Gate 1 passes**.
 
-**No Proposal step is required.** The Proposal template is retained only for **Initiative-class scope** — multi-Epic work where a persistent file-based Brief is genuinely useful before decomposition begins. For everything else (single Epic / Story / CR / Bug / Hotfix), the agent triages the request directly into the appropriate template and presents the Brief.
+**Initiative-class scope** uses the `initiative.md` template — multi-Epic work where a persistent file-based Brief is genuinely useful before decomposition begins. For everything else (single Epic / Story / CR / Bug / Hotfix), the agent triages the request directly into the appropriate template and presents the Brief. The legacy Proposal step has been retired (CR-025 SPRINT-19); see §14.5 for the stakeholder-authored intake flow that retains the `cleargate:proposal` external label as backwards-compat.
 
 ---
 
@@ -156,7 +156,7 @@ These rules prevent hallucinated or out-of-scope changes.
 - **Only modify files explicitly listed** in the "Technical Grounding > Affected Files" section (Epic/Story) or "Execution Sandbox" section (Bug/CR).
 - **Do not refactor, optimize, or clean up** code that is not in scope. If you notice an issue outside scope, note it and ask the human whether to create a separate Story or CR.
 - **Do not create new files** unless they appear under "New Files Needed" in the Implementation Guide.
-- **Do not assume file paths.** All affected file paths must originate from an approved Proposal. If a path is missing or unverified, add it to §6 AI Interrogation Loop — do not guess.
+- **Do not assume file paths.** All affected file paths must originate from an approved Initiative. If a path is missing or unverified, add it to §6 AI Interrogation Loop — do not guess.
 
 ---
 
@@ -167,9 +167,9 @@ When the user wants to ingest context from the PM tool before any execution:
 1. Call `cleargate_pull_initiative` with the remote ID provided by the user.
 2. The tool writes the result to `.cleargate/plans/` using the appropriate local format.
 3. Read the pulled file to understand scope, constraints, and sprint context.
-4. Use this as the input context when beginning a Proposal draft.
+4. Use this as the input context when beginning an Initiative draft.
 
-You do not push during the Planning Phase. Planning Phase ends when the user confirms they want to begin drafting a Proposal.
+You do not push during the Planning Phase. Planning Phase ends when the user confirms they want to begin drafting an Initiative.
 
 ---
 
@@ -186,8 +186,8 @@ Is this a PUSH request? ──YES──→ check approved: true → cleargate_pu
       ↓
 Classify: Epic / Story / CR / Bug
       ↓
-Does an approved: true Proposal exist for this work?
-      ├── NO  → Draft Proposal → HALT at Gate 1
+Does an approved: true Initiative exist for this work?
+      ├── NO  → Draft Initiative → HALT at Gate 1
       └── YES → Draft work item (Epic/Story/CR/Bug) → HALT at Gate 2
                       ↓
              Human resolves §6 + sets 🟢
@@ -236,7 +236,7 @@ Invoked automatically at triage (read-only). Searches the wiki index and existin
 
 **lint**
 
-Enforcement run. Checks for drift between wiki pages and their raw source files. Exits non-zero on any violation; a non-zero exit halts Gate 1 (Proposal approval) and Gate 3 (Push). Run with `--suggest` to receive candidate cross-ref patches without blocking (exits 0).
+Enforcement run. Checks for drift between wiki pages and their raw source files. Exits non-zero on any violation; a non-zero exit halts Gate 1 (Initiative approval) and Gate 3 (Push). Run with `--suggest` to receive candidate cross-ref patches without blocking (exits 0).
 
 ---
 
@@ -330,7 +330,7 @@ Drift detection is commit-SHA comparison — not content hashing — eliminating
 
 `cleargate wiki lint` exits non-zero and blocks execution at:
 
-- **Gate 1 (Proposal approval):** lint must pass before the agent may proceed past the Proposal halt.
+- **Gate 1 (Initiative approval):** lint must pass before the agent may proceed past the Initiative halt.
 - **Gate 3 (Push):** lint must pass before `cleargate_push_item` is called.
 
 Lint checks performed:
