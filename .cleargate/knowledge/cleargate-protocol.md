@@ -103,7 +103,7 @@ Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed +
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
-Before sprint execution begins, the environment is checked. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021.
+Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. Under `execution_mode: v2` a failing per-item gate hard-blocks; under `v1` it warns. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
 
 ### Gate 4 — Close-Ack (per sprint, Close phase)
 

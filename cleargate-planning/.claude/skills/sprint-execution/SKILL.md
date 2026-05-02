@@ -113,12 +113,13 @@ Run this sequence exactly once, when the human says "start sprint NN" or equival
 cleargate sprint preflight <sprint-id>
 ```
 
-Four checks, all must pass:
+Five checks, all must pass:
 
 1. Previous sprint `sprint_status: "Completed"` in `state.json`.
 2. No leftover worktrees — `git worktree list` must not contain `.worktrees/STORY-*`.
 3. Sprint branch ref free — `git show-ref refs/heads/sprint/S-NN` returns nothing.
 4. `main` clean — `git status --porcelain` empty.
+5. Per-item readiness gates pass — every work-item ID in §1 Consolidated Deliverables has fresh `cached_gate_result.pass: true` (or terminal status). Under `execution_mode: v2` a failing item hard-blocks; under `v1` it warns. Failure punch-list names each item + its failing criteria.
 
 On failure, surface the punch list verbatim and halt. Per-item resolution:
 
@@ -126,6 +127,7 @@ On failure, surface the punch list verbatim and halt. Per-item resolution:
 - Leftover worktree → `git worktree remove` if abandoned, otherwise merge.
 - Branch ref exists → investigate; force-deletion only with explicit human approval.
 - Dirty main → human commits/stashes/discards. **Never `git reset --hard` or stash without explicit human approval.**
+- Per-item gate fail → run `cleargate gate check <file> -v` for the named item; fix the failing criterion (e.g., populate `context_source`, resolve TBDs); re-run preflight.
 
 ### A.2 Cut sprint branch
 
