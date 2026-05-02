@@ -1,8 +1,8 @@
 ---
 cr_id: CR-029
 parent_ref: cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md"
+sprint_cleargate_id: "SPRINT-20"
 carry_over: false
 status: Approved
 ambiguity: 🟢 Low
