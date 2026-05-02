@@ -34,7 +34,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T11:01:48Z
+  last_gate_check: 2026-05-02T17:53:54Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -43,15 +43,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-027
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-02T11:01:48Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-4-7
+  last_stamp: 2026-05-02T17:53:54Z
+  sessions:
+    - session: 7cc0804d-be00-4162-94c8-254046c19c1b
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-02T14:19:01Z
 ---
 
 # CR-027: Composite Planning Readiness — Per-Item Gate Check at Sprint Preflight + Discovery & Risk Criteria
@@ -196,6 +202,16 @@ The new `sprint.ready-for-execution` gate also runs at preflight as part of the 
 - Move `.cleargate/delivery/pending-sync/CR-027_*.md` to `.cleargate/delivery/archive/`.
 - Append flashcard line.
 - Wiki re-ingest (PostToolUse hook handles automatically).
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `sprintPreflightHandler` in `cleargate-cli/src/commands/sprint.ts:1075` — the preflight function this CR extends with check #5
+- **Surface:** `readSprintExecutionMode` in `cleargate-cli/src/commands/execution-mode.ts:118` — reused to gate v2-only behavior
+- **Surface:** `readCachedGate` in `cleargate-cli/src/lib/frontmatter-cache.ts:27` — reused to read per-item gate results
+- **Surface:** `extractWorkItemIds` in `.cleargate/scripts/assert_story_files.mjs:74` — reused to enumerate sprint work items
+- **Coverage:** ≥80% — this CR extends the preflight handler with a new check; reuses 4 existing helpers; no new infrastructure
 
 ---
 

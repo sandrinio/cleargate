@@ -1,7 +1,6 @@
 ---
 epic_id: EPIC-024
 parent_cleargate_id: null
-sprint_cleargate_id: null
 carry_over: false
 status: Done
 approved: true

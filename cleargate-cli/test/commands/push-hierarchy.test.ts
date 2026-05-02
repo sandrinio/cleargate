@@ -476,6 +476,49 @@ describe('Hierarchy keys — backfill script', () => {
     expect(afterContent).toBe(originalContent);
   });
 
+  // BUG-025 Regression: backfill N=3 invocations on a file with parent_cleargate_id: null
+  // must not produce duplicate parent_cleargate_id lines.
+  it('BUG-025: Backfill idempotency — N=3 invocations on file with parent_cleargate_id: null produces exactly one key', () => {
+    const scriptPath = path.resolve(
+      __testDirname,
+      '../../../.cleargate/scripts/backfill_hierarchy.mjs',
+    );
+
+    // Write fixture: has parent_ref (sniffable) + parent_cleargate_id: null (pre-existing null)
+    const fixturePath = path.join(tmpDir, 'BUG-025_regression_fixture.md');
+    const originalContent = [
+      '---',
+      'bug_id: BUG-025',
+      'parent_ref: "SPRINT-19 close pipeline diagnosis 2026-05-02"',
+      'parent_cleargate_id: null',
+      'sprint_cleargate_id: "SPRINT-20"',
+      'status: Triaged',
+      '---',
+      '',
+      '# BUG-025: regression fixture',
+      '',
+    ].join('\n');
+    fs.writeFileSync(fixturePath, originalContent, 'utf8');
+
+    // Run backfill 3 times
+    for (let i = 0; i < 3; i++) {
+      spawnSync('node', [scriptPath, tmpDir], { encoding: 'utf8', timeout: 15000 });
+    }
+
+    const afterContent = fs.readFileSync(fixturePath, 'utf8');
+
+    // Assert exactly ONE parent_cleargate_id: line
+    const matches = afterContent.match(/^parent_cleargate_id:/gm);
+    expect(matches).not.toBeNull();
+    expect(matches!.length).toBe(1);
+
+    // Assert the value was populated (not null) — sniffed from parent_ref
+    expect(afterContent).toContain('parent_cleargate_id: "SPRINT-19 close pipeline diagnosis 2026-05-02"');
+
+    // YAML must parse cleanly: parseFrontmatter must not throw
+    expect(() => parseFrontmatter(afterContent)).not.toThrow();
+  });
+
   // E2E: push + ingest — payload carries hierarchy, wiki page captures it
   it('E2E: push payload carries hierarchy keys that wiki-ingest then propagates', async () => {
     const tmpPush = makeTmpDir();

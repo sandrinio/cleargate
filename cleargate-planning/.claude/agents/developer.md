@@ -66,6 +66,16 @@ flashcards_flagged:
 
 `flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). The orchestrator reads this field after the story merges and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 
+## Inner-loop test runner
+
+For inner-loop iteration during a Story, prefer **`node:test` + `node:assert/strict`** when writing **new** test files for any TypeScript package targeting Node 22+. Run them via `node --test --import tsx <file>`. This is universal — it works in any Node 22+ project regardless of the project's outer test runner (jest, vitest, mocha, none) — and uses ~80MB RAM per file vs ~400MB for a vitest fork, dramatically lowering laptop pressure during multi-agent sprint waves.
+
+**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks (e.g., `vi.mock(...)`, `jest.mock(...)`). Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`.
+
+**Existing tests stay on the project's existing runner.** Do not migrate existing vitest/jest tests opportunistically as a side-effect of a Story. If your Story modifies an existing test, keep it on the original runner. Batch migrations belong in their own dedicated CR.
+
+**Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing — that ensures the new node:test files coexist with the existing harness. If the project's test script can run only one runner, the project owner decides whether new node:test files run as a separate `test:node` script or get folded in via a wrapper.
+
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
 - **Never mock the database.** Integration tests against real Postgres + Redis (SPRINT-01 flashcard).

@@ -465,7 +465,7 @@ describe('sandbox: evaluator restrictions', () => {
 // ─── readiness-gates.md smoke test ───────────────────────────────────────────
 
 describe('smoke test: readiness-gates.md parses correctly', () => {
-  it('js-yaml parse of readiness-gates.md returns 6 blocks', async () => {
+  it('js-yaml parse of readiness-gates.md returns 7 blocks (6 original + sprint gate added by CR-027)', async () => {
     const yaml = await import('js-yaml');
     const gatesPath = path.join(
       '/Users/ssuladze/Documents/Dev/ClearGate',
@@ -479,7 +479,8 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
     while ((match = blockRe.exec(raw)) !== null) {
       yamlBlocks.push(match[1]!);
     }
-    expect(yamlBlocks).toHaveLength(6);
+    // CR-027 added sprint.ready-for-execution gate (7th block); CR-028 adds no new gate blocks
+    expect(yamlBlocks).toHaveLength(7);
     // Each block is a YAML array with a single element
     const parsed = yamlBlocks.map((b) => {
       const arr = yaml.load(b) as unknown[];
@@ -763,5 +764,116 @@ describe('BUG-008 sub-fix #3 — blast-radius-populated section index', () => {
     const doc = makeDoc({}, body);
     const result = evaluate('section(2) has ≥1 listed-item', doc);
     expect(result.pass).toBe(true);
+  });
+});
+
+// ─── CR-028 code-truth triage criteria ───────────────────────────────────────
+
+describe('CR-028 code-truth triage criteria', () => {
+  // Scenario 1 — Epic with both new sections present → both new criteria pass.
+  it('Epic with ## Existing Surfaces AND ## Why not simpler? → reuse-audit-recorded + simplest-form-justified pass', () => {
+    const body = `## 1. Problem & Value
+
+Why we are doing this.
+
+## Existing Surfaces
+
+- **Surface:** \`cleargate-cli/src/lib/readiness-predicates.ts:1\` — predicate evaluator
+- **Coverage of this epic's scope:** ≥80% extension — this epic extends the evaluator
+
+## Why not simpler?
+
+- **Smallest existing surface that could carry this:** \`readiness-predicates.ts\`
+- **Why isn't extension / parameterization / config sufficient?** New predicate shapes are needed.
+
+## 2. Scope Boundaries
+
+- [ ] Some capability
+`;
+    const doc = makeDoc({ epic_id: 'EPIC-TEST', context_source: 'PROPOSAL-001.md' }, body);
+
+    const resultReuse = evaluate("body contains '## Existing Surfaces'", doc);
+    expect(resultReuse.pass).toBe(true);
+
+    const resultSimpler = evaluate("body contains '## Why not simpler?'", doc);
+    expect(resultSimpler.pass).toBe(true);
+  });
+
+  // Scenario 2 — Epic missing ## Existing Surfaces → reuse-audit-recorded fails.
+  it('Epic missing ## Existing Surfaces → reuse-audit-recorded fails with non-empty detail', () => {
+    const body = `## 1. Problem & Value
+
+Some content.
+
+## Why not simpler?
+
+- **Smallest existing surface:** none
+- **Why not sufficient?** Net-new abstraction required.
+`;
+    const doc = makeDoc({ epic_id: 'EPIC-TEST', context_source: 'PROPOSAL-001.md' }, body);
+
+    const result = evaluate("body contains '## Existing Surfaces'", doc);
+    expect(result.pass).toBe(false);
+    expect(result.detail.length).toBeGreaterThan(0);
+  });
+
+  // Scenario 3 — Story missing ## Why not simpler? → simplest-form-justified fails.
+  it('Story missing ## Why not simpler? → simplest-form-justified fails', () => {
+    const body = `## 1. The Spec
+
+Some spec content.
+
+## Existing Surfaces
+
+- **Surface:** \`cleargate-cli/src/commands/gate.ts:1\` — gate check handler
+- **Coverage:** partial
+
+## 2. The Truth
+
+Gherkin here.
+`;
+    const doc = makeDoc({ story_id: 'STORY-TEST', parent_epic_ref: 'EPIC-001' }, body);
+
+    const result = evaluate("body contains '## Why not simpler?'", doc);
+    expect(result.pass).toBe(false);
+  });
+
+  // Scenario 4 — CR with ## Existing Surfaces present → reuse-audit-recorded passes;
+  // simplest-form-justified is NOT in cr.ready-to-apply criteria.
+  it('CR with ## Existing Surfaces present → reuse-audit-recorded passes; simplest-form-justified absent from cr.ready-to-apply', () => {
+    const body = `## 1. The Context Override
+
+Old: no reuse check.
+New: reuse check required.
+
+## 2. Blast Radius
+
+- STORY-003: invalidated
+
+## Existing Surfaces
+
+- **Surface:** \`cleargate-cli/src/lib/readiness-predicates.ts:1\` — predicate evaluator
+- **Why this CR extends:** extends existing surface, does not rebuild.
+
+## 3. Execution Sandbox
+
+Modify: \`readiness-gates.md\`
+`;
+    const doc = makeDoc({ cr_id: 'CR-TEST', context_source: 'PROPOSAL-001.md' }, body);
+
+    const resultReuse = evaluate("body contains '## Existing Surfaces'", doc);
+    expect(resultReuse.pass).toBe(true);
+
+    // Negative assertion: cr.ready-to-apply must NOT include simplest-form-justified.
+    const gatesPath = path.join(
+      '/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/CR-028',
+      '.cleargate/knowledge/readiness-gates.md'
+    );
+    const gatesContent = fs.readFileSync(gatesPath, 'utf8');
+    // Extract the cr.ready-to-apply block
+    const crBlockMatch = gatesContent.match(/work_item_type: cr[\s\S]*?transition: ready-to-apply[\s\S]*?```/);
+    expect(crBlockMatch).not.toBeNull();
+    const crBlock = crBlockMatch![0];
+    expect(crBlock).not.toContain('simplest-form-justified');
   });
 });

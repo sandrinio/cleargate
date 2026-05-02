@@ -17,6 +17,12 @@ fi
 
 "${CG[@]}" doctor --session-start 2>/dev/null || true
 
+# --- Sprint-active skill auto-load directive (STORY-026-01) ---
+ACTIVE_FILE="${REPO_ROOT}/.cleargate/sprint-runs/.active"
+if [ -s "${ACTIVE_FILE}" ] && [ -n "$(tr -d '[:space:]' < "${ACTIVE_FILE}")" ]; then
+  printf '→ Active sprint detected. Load skill: sprint-execution\n'
+fi
+
 # ── §14.9 SessionStart sync nudge (STORY-010-08) ─────────────────────────────
 # Daily-throttled: probe remote for updates at most once per 24h.
 # Never auto-pulls or auto-pushes. Exits 0 regardless of outcome.

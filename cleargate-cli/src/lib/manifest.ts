@@ -20,6 +20,7 @@ export type Tier =
   | 'template'
   | 'agent'
   | 'hook'
+  | 'script'
   | 'skill'
   | 'cli-config'
   | 'user-artifact'

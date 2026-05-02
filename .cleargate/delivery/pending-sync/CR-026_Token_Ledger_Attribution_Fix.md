@@ -1,7 +1,7 @@
 ---
 cr_id: CR-026
 parent_ref: BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution Spike
-parent_cleargate_id: null
+parent_cleargate_id: BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution Spike
 sprint_cleargate_id: SPRINT-20
 carry_over: false
 status: Draft
@@ -20,7 +20,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T09:28:25Z
+  last_gate_check: 2026-05-02T17:53:35Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -36,7 +36,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T09:28:25Z
+  last_stamp: 2026-05-02T17:53:35Z
   sessions: []
 ---
 
@@ -135,6 +135,15 @@ cd cleargate-cli && npm test -- pre-tool-use-task.test
 3. Inspect `.cleargate/sprint-runs/SPRINT-20/.dispatch-*.json` immediately after spawn — confirm one new file exists with `work_item_id="STORY-026-01"`, `agent_type="developer"`.
 4. After agent completes, inspect `.cleargate/sprint-runs/SPRINT-20/token-ledger.jsonl` — confirm a row with `work_item_id="STORY-026-01"`, `agent_type="developer"`.
 5. Inspect `.cleargate/hook-log/token-ledger.log` — confirm a `dispatch-marker:` success line corresponding to the spawn.
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `.claude/hooks/token-ledger.sh` — existing SubagentStop hook that writes ledger rows
+- **Surface:** `.cleargate/scripts/write_dispatch.sh` — existing manual dispatch-marker writer
+- **Surface:** `.claude/settings.json` — hook wiring for SubagentStop
+- **Coverage:** ≥80% — this CR extends the existing hook + dispatch surface, no new infrastructure introduced
 
 ---
 

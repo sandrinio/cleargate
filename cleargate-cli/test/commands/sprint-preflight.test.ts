@@ -104,7 +104,13 @@ function commitFixtureFiles(
   execSync(`git commit -m "${message}"`, { cwd: dir, stdio: 'pipe' });
 }
 
-/** Build the standard fixture files for a given sprint target (e.g. SPRINT-18 checks SPRINT-17). */
+/** Build the standard fixture files for a given sprint target (e.g. SPRINT-18 checks SPRINT-17).
+ *
+ * CR-027: sprint plan now includes `cached_gate_result.pass: true` so check #5
+ * (per-item readiness gates) does not block the existing test scenarios.
+ * The sprint plan has no §1 Consolidated Deliverables, so only the sprint plan
+ * itself is evaluated by check #5, and it passes.
+ */
 function buildCleanFixture(
   dir: string,
   targetSprintId: string,
@@ -127,9 +133,23 @@ function buildCleanFixture(
     });
   }
 
+  // CR-027: include cached_gate_result.pass: true so check #5 passes for existing scenarios.
   files.push({
     relPath: `.cleargate/delivery/pending-sync/${targetSprintId}_Test_Sprint.md`,
-    content: `---\nsprint_id: "${targetSprintId}"\nexecution_mode: "v2"\n---\n\n# ${targetSprintId}\n`,
+    content: [
+      '---',
+      `sprint_id: "${targetSprintId}"`,
+      'execution_mode: "v2"',
+      'updated_at: "2026-01-01T00:00:00Z"',
+      'cached_gate_result:',
+      '  pass: true',
+      '  failing_criteria: []',
+      '  last_gate_check: "2026-06-01T00:00:00Z"',
+      '---',
+      '',
+      `# ${targetSprintId}`,
+      '',
+    ].join('\n'),
   });
 
   commitFixtureFiles(dir, files, 'fixture: clean state');
@@ -159,10 +179,10 @@ afterEach(() => {
   fs.rmSync(fixtureDir, { recursive: true, force: true });
 });
 
-// ─── Scenario 1: All four checks pass in clean state ─────────────────────────
+// ─── Scenario 1: All five checks pass in clean state ─────────────────────────
 
-describe('Scenario: all four checks pass in clean state', () => {
-  it('exit code is 0 and stdout contains "all four checks pass"', () => {
+describe('Scenario: all five checks pass in clean state', () => {
+  it('exit code is 0 and stdout contains "all five checks pass"', () => {
     // SPRINT-18 → prev SPRINT-17 with Completed status
     buildCleanFixture(fixtureDir, 'SPRINT-18', 'Completed');
 
@@ -170,7 +190,7 @@ describe('Scenario: all four checks pass in clean state', () => {
     const code = runPreflight('SPRINT-18', fixtureDir, cap);
 
     expect(code).toBe(0);
-    expect(cap.getOut()).toContain('all four checks pass');
+    expect(cap.getOut()).toContain('all five checks pass');
   });
 });
 
@@ -274,8 +294,8 @@ describe('Scenario: multiple checks fail simultaneously', () => {
     // Both pass (✓) and fail (✗) entries appear — all four ran
     expect(errOut).toContain('✓');
     expect(errOut).toContain('✗');
-    // exactly 2 out of 4 checks failed
-    expect(errOut).toContain('2/4 checks failed');
+    // exactly 2 out of 5 checks failed
+    expect(errOut).toContain('2/5 checks failed');
   });
 });
 
@@ -316,7 +336,7 @@ describe('Scenario: usage error on missing / malformed sprint-id arg', () => {
 // ─── Scenario 8: Skip prev-sprint check for SPRINT-01 ────────────────────────
 
 describe('Scenario: skip prev-sprint check for SPRINT-01', () => {
-  it('exit code is 0 in clean state (check 1 skipped, other three pass)', () => {
+  it('exit code is 0 in clean state (check 1 skipped, other four pass)', () => {
     // No SPRINT-00 state.json — check 1 skips
     buildCleanFixture(fixtureDir, 'SPRINT-01');  // helper skips prev state.json for num <= 1
 
@@ -324,7 +344,7 @@ describe('Scenario: skip prev-sprint check for SPRINT-01', () => {
     const code = runPreflight('SPRINT-01', fixtureDir, cap);
 
     expect(code).toBe(0);
-    expect(cap.getOut()).toContain('all four checks pass');
+    expect(cap.getOut()).toContain('all five checks pass');
   });
 
   it('when dirty, check 1 shows as skipped in the punch list', () => {
@@ -338,5 +358,310 @@ describe('Scenario: skip prev-sprint check for SPRINT-01', () => {
     expect(code).toBe(1);
     expect(cap.getErr()).toContain('skipped (no preceding sprint)');
     expect(cap.getErr()).toContain('main is dirty');
+  });
+});
+
+// ─── STORY-026-01: skill load directive on preflight ─────────────────────────
+
+describe('Scenario (STORY-026-01): preflight success emits skill load directive', () => {
+  it('stdout last line is "→ Load skill: sprint-execution" when all five checks pass', () => {
+    buildCleanFixture(fixtureDir, 'SPRINT-18', 'Completed');
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-18', fixtureDir, cap);
+
+    expect(code).toBe(0);
+    const lines = cap.getOut().split('\n').filter((l) => l.trim() !== '');
+    expect(lines[lines.length - 1]).toBe('→ Load skill: sprint-execution');
+  });
+});
+
+describe('Scenario (STORY-026-01): preflight failure stays quiet on skill directive', () => {
+  it('stdout does NOT contain "Load skill: sprint-execution" when a check fails', () => {
+    // prev sprint Active → check 1 fails → partial failure → no skill directive
+    buildCleanFixture(fixtureDir, 'SPRINT-19', 'Active');
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-19', fixtureDir, cap);
+
+    expect(code).toBe(1);
+    expect(cap.getOut()).not.toContain('Load skill: sprint-execution');
+  });
+});
+
+// ─── CR-027: Composite preflight gate (check #5) scenarios ───────────────────
+
+/**
+ * Build readiness fixture files for CR-027 scenarios.
+ *
+ * Writes:
+ *   - Sprint plan file with cached_gate_result + execution_mode
+ *   - Child work-item files with specified cached_gate_result + status
+ *
+ * Returns an execFn that intercepts `--emit-json` shell-outs and delegates
+ * git commands to real execSync.
+ *
+ * @param dir         - The fixture directory (a real git repo).
+ * @param sprintId    - Sprint ID (e.g. 'SPRINT-99').
+ * @param executionMode - 'v1' or 'v2'.
+ * @param sprintGate  - { pass, failingCriteria, lastGateCheck } for the sprint plan itself.
+ * @param items       - Child work items to create.
+ * @returns execFn interceptor that injects canned JSON for --emit-json calls.
+ */
+function seedReadinessFixture(
+  dir: string,
+  sprintId: string,
+  executionMode: 'v1' | 'v2',
+  sprintGate: { pass: boolean | null; failingCriteria: string[]; lastGateCheck: string | null },
+  items: Array<{
+    id: string;
+    status?: string;
+    pass: boolean | null;
+    failingCriteria?: string[];
+    lastGateCheck?: string | null;
+    updatedAt?: string;
+  }>,
+): (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string {
+  const prevNum = parseInt(/^SPRINT-(\d+)$/.exec(sprintId)?.[1] ?? '0', 10) - 1;
+  const prevId = prevNum > 0 ? `SPRINT-${String(prevNum).padStart(2, '0')}` : null;
+
+  const files: Array<{ relPath: string; content: string }> = [
+    { relPath: 'README.md', content: '# fixture\n' },
+  ];
+
+  if (prevId) {
+    files.push({
+      relPath: `.cleargate/sprint-runs/${prevId}/state.json`,
+      content: JSON.stringify({ sprint_id: prevId, sprint_status: 'Completed' }, null, 2),
+    });
+  }
+
+  // Build sprint plan frontmatter
+  const sprintGateYaml =
+    sprintGate.pass === null
+      ? ['cached_gate_result:', '  pass: null', '  failing_criteria: []', '  last_gate_check: null'].join('\n')
+      : [
+          'cached_gate_result:',
+          `  pass: ${sprintGate.pass}`,
+          `  failing_criteria: [${sprintGate.failingCriteria.map((c) => `{id: "${c}", detail: ""}`).join(', ')}]`,
+          `  last_gate_check: "${sprintGate.lastGateCheck ?? ''}"`,
+        ].join('\n');
+
+  // Build §1 Consolidated Deliverables table from item IDs
+  const deliverables =
+    items.length > 0
+      ? `\n## 1. Consolidated Deliverables\n\n${items.map((i) => `- ${i.id}`).join('\n')}\n`
+      : '';
+
+  files.push({
+    relPath: `.cleargate/delivery/pending-sync/${sprintId}_Test_Sprint.md`,
+    content: [
+      '---',
+      `sprint_id: "${sprintId}"`,
+      `execution_mode: "${executionMode}"`,
+      'updated_at: "2026-01-01T00:00:00Z"',
+      sprintGateYaml,
+      '---',
+      '',
+      `# ${sprintId}`,
+      deliverables,
+    ].join('\n'),
+  });
+
+  // Write child work-item files
+  for (const item of items) {
+    const gateYaml =
+      item.pass === null
+        ? ['cached_gate_result:', '  pass: null', '  failing_criteria: []', '  last_gate_check: null'].join('\n')
+        : [
+            'cached_gate_result:',
+            `  pass: ${item.pass}`,
+            `  failing_criteria: [${(item.failingCriteria ?? []).map((c) => `{id: "${c}", detail: ""}`).join(', ')}]`,
+            `  last_gate_check: "${item.lastGateCheck ?? ''}"`,
+          ].join('\n');
+
+    files.push({
+      relPath: `.cleargate/delivery/pending-sync/${item.id}_Test_Item.md`,
+      content: [
+        '---',
+        `status: "${item.status ?? 'Ready'}"`,
+        `updated_at: "${item.updatedAt ?? '2026-01-01T00:00:00Z'}"`,
+        gateYaml,
+        '---',
+        '',
+        `# ${item.id}`,
+        '',
+        '## 1. Summary',
+        '- test item',
+        '',
+      ].join('\n'),
+    });
+  }
+
+  commitFixtureFiles(dir, files, `fixture: CR-027 readiness ${sprintId}`);
+
+  // Return an execFn that intercepts --emit-json calls and passes git cmds through
+  const childIds = items.map((i) => i.id);
+  return (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => {
+    if (cmd.includes('--emit-json')) {
+      // Return canned JSON with child IDs
+      return JSON.stringify({ workItemIds: childIds });
+    }
+    // Delegate git and other commands to real execSync
+    return execSync(cmd, { ...opts, stdio: 'pipe' }) as unknown as string;
+  };
+}
+
+// ─── Scenario 9: v2 happy path — all items pass=true ─────────────────────────
+
+describe('Scenario 9 (CR-027): v2 happy path — all items pass=true', () => {
+  it('exit code is 0, "all five checks pass", no Per-item readiness gates failure', () => {
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v2',
+      { pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z' },
+      [
+        { id: 'EPIC-099', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+        { id: 'STORY-099-01', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(0);
+    expect(cap.getOut()).toContain('all five checks pass');
+    expect(cap.getErr()).not.toContain('Per-item readiness gates:');
+    const lines = cap.getOut().split('\n').filter((l) => l.trim() !== '');
+    expect(lines[lines.length - 1]).toBe('→ Load skill: sprint-execution');
+  });
+});
+
+// ─── Scenario 10: v2 hard-block — one EPIC pass=false ────────────────────────
+
+describe('Scenario 10 (CR-027): v2 hard-block — one EPIC pass=false', () => {
+  it('exit code is 1, stderr names EPIC-099 and failing criterion no-tbds', () => {
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v2',
+      { pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z' },
+      [
+        { id: 'EPIC-099', pass: false, failingCriteria: ['no-tbds'], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+        { id: 'STORY-099-01', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(1);
+    expect(cap.getErr()).toContain('Per-item readiness gates:');
+    expect(cap.getErr()).toContain('EPIC-099');
+    expect(cap.getErr()).toContain('no-tbds');
+    expect(cap.getOut()).not.toContain('Load skill: sprint-execution');
+  });
+});
+
+// ─── Scenario 11: staleness — last_gate_check < updated_at ───────────────────
+
+describe('Scenario 11 (CR-027): staleness — last_gate_check older than updated_at', () => {
+  it('exit code is 1, stderr contains EPIC-099 and stale reason', () => {
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v2',
+      { pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z' },
+      [
+        // EPIC-099: pass=true but last_gate_check is OLDER than updated_at → stale
+        { id: 'EPIC-099', pass: true, failingCriteria: [], lastGateCheck: '2026-01-01T00:00:00Z', updatedAt: '2026-05-02T00:00:00Z' },
+        { id: 'STORY-099-01', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(1);
+    expect(cap.getErr()).toContain('EPIC-099');
+    expect(cap.getErr()).toContain('stale');
+  });
+});
+
+// ─── Scenario 12: v1 mode — warns, exit 0 ────────────────────────────────────
+
+describe('Scenario 12 (CR-027): v1 mode — check #5 skipped, exit 0', () => {
+  it('exit code is 0 even with one item pass=false under v1', () => {
+    // Same setup as scenario 10 but execution_mode: v1 → check #5 skipped entirely
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v1',
+      { pass: false, failingCriteria: ['no-tbds'], lastGateCheck: '2026-06-01T00:00:00Z' },
+      [
+        { id: 'EPIC-099', pass: false, failingCriteria: ['no-tbds'], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    // Under v1, check #5 is skipped → all 5 results are pass-or-skipped → exit 0
+    expect(code).toBe(0);
+    expect(cap.getErr()).toBe('');
+    expect(cap.getOut()).toContain('all five checks pass');
+    const lines = cap.getOut().split('\n').filter((l) => l.trim() !== '');
+    expect(lines[lines.length - 1]).toBe('→ Load skill: sprint-execution');
+  });
+});
+
+// ─── Scenario 13: Done items are skipped from failure list ───────────────────
+
+describe('Scenario 13 (CR-027): Done items skipped from failure list', () => {
+  it('exit code is 0 when only Done item has pass=false (terminal status skipped)', () => {
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v2',
+      { pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z' },
+      [
+        // STORY-099-02: status=Done AND pass=false → SKIP (terminal status)
+        { id: 'STORY-099-02', status: 'Done', pass: false, failingCriteria: ['no-tbds'], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+        { id: 'EPIC-099', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(0);
+    expect(cap.getErr()).not.toContain('STORY-099-02');
+    expect(cap.getOut()).toContain('all five checks pass');
+  });
+});
+
+// ─── Scenario 14: sprint plan itself fails — missing cached_gate_result ───────
+
+describe('Scenario 14 (CR-027): sprint plan itself fails when cached_gate_result is null', () => {
+  it('exit code is 1, stderr names SPRINT-99 as failing item with no cached_gate_result', () => {
+    // Sprint plan has cached_gate_result.pass: null — mirrors SPRINT-20 actual state
+    // All children pass — sprint plan itself is the only failure
+    const execFn = seedReadinessFixture(
+      fixtureDir,
+      'SPRINT-99',
+      'v2',
+      { pass: null, failingCriteria: [], lastGateCheck: null }, // null = no cached_gate_result
+      [
+        { id: 'EPIC-099', pass: true, failingCriteria: [], lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      ],
+    );
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(1);
+    expect(cap.getErr()).toContain('SPRINT-99');
+    expect(cap.getErr()).toContain('no cached_gate_result');
   });
 });

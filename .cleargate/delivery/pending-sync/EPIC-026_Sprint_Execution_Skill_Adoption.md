@@ -7,6 +7,7 @@ status: Ready
 ambiguity: 🟢 Low
 context_source: Direct user ask 2026-05-02 — adopt V-Bounce-style agent-team SKILL pattern; skill drafted at .claude/skills/sprint-execution/SKILL.md during the same conversation; gate-1 waiver per memory feedback_proposal_gate_waiver.md
 proposal_gate_waiver: true
+approved: true
 approved_by: sandrinio
 approved_at: 2026-05-02T07:00:00Z
 owner: sandrinio
@@ -19,7 +20,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T07:07:04Z
+  last_gate_check: 2026-05-02T17:52:46Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -35,7 +36,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T07:07:04Z
+  last_stamp: 2026-05-02T17:52:46Z
   sessions: []
 ---
 
@@ -226,6 +227,22 @@ All human answers received 2026-05-02; integrated into the spec above. Listed he
 3. **Add explicit "when banner says Load skill X, invoke Skill tool" instruction to post-prune CLAUDE.md?** — **YES.** Description-match auto-load is unreliable as the sole forced-load path; the explicit rule is the contract.
 4. **Target sprint?** — **SPRINT-20.** SPRINT-19 is mid-flight.
 5. **Build `cleargate sprint check-stalls` (Option 2 stall watcher) inside this Epic?** — **DEFER.** Ship Option 1 (skill wall-clock budget table) only. File Option 2 as a follow-up CR after one sprint of observation if budgets prove insufficient.
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this epic extends.
+
+- **Surface:** `.claude/skills/sprint-execution/SKILL.md` (live) — the V-Bounce-style sprint-execution skill drafted during the same conversation
+- **Surface:** `CLAUDE.md` "Architect runs twice" + "Sprint Execution Gate" paragraphs — the prune surface for STORY-026-02
+- **Surface:** `cleargate-cli/src/commands/sprint.ts` — `cleargate sprint init/preflight/close` handlers
+- **Coverage of this epic's scope:** ≥80% — this epic extends + prunes existing surfaces, does not introduce a new orchestration layer
+
+## Why not simpler?
+
+> L2 / L3 right-size + justify-complexity.
+
+- **Smallest existing surface that could carry this epic:** The SessionStart hook + a CLAUDE.md docs-only edit.
+- **Why isn't extension / parameterization / config sufficient?** CLAUDE.md prose is unbounded; the skill-load directive needs a deterministic banner emit on sprint-active sessions, requiring a CLI sprint-context-emit handler in addition to the docs. A docs-only edit does not load the skill reliably.
 
 ---
 
