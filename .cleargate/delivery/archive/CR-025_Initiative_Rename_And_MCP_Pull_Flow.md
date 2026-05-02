@@ -2,7 +2,6 @@
 cr_id: CR-025
 parent_ref: cleargate-protocol.md §2-§4 (Proposal mandate, retired by CR-020); CR-020 (Brief-driven SDLC, SPRINT-17); SDLC brainstorm charter §2.1 + §2.5
 parent_cleargate_id: "cleargate-protocol.md §2-§4 (Proposal mandate, retired by CR-020); CR-020 (Brief-driven SDLC, SPRINT-17); SDLC brainstorm charter §2.1 + §2.5"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
 status: Done

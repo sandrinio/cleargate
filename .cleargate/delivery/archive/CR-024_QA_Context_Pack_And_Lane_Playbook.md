@@ -2,7 +2,6 @@
 cr_id: CR-024
 parent_ref: CR-021 §3.2.4 / §3.2.5 (Reporter context-bundle pattern, SPRINT-18); SPRINT-18 QA cycle observations 2026-05-01
 parent_cleargate_id: "CR-021 §3.2.4 / §3.2.5 (Reporter context-bundle pattern, SPRINT-18); SPRINT-18 QA cycle observations 2026-05-01"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
 status: Done

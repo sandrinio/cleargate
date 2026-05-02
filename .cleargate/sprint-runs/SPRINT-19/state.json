@@ -2,14 +2,14 @@
   "schema_version": 2,
   "sprint_id": "SPRINT-19",
   "execution_mode": "v2",
-  "sprint_status": "Active",
+  "sprint_status": "Completed",
   "stories": {
     "BUG-024": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-01T18:52:40.287Z",
+      "updated_at": "2026-05-02T09:10:14.719Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -17,11 +17,11 @@
       "lane_demotion_reason": null
     },
     "CR-022": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-01T18:52:40.287Z",
+      "updated_at": "2026-05-02T09:10:14.776Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -29,11 +29,11 @@
       "lane_demotion_reason": null
     },
     "CR-024": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-01T18:52:40.287Z",
+      "updated_at": "2026-05-02T09:10:14.833Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -41,11 +41,11 @@
       "lane_demotion_reason": null
     },
     "CR-025": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-01T18:52:40.287Z",
+      "updated_at": "2026-05-02T09:10:14.888Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -53,6 +53,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "Sprint SPRINT-19 initialised",
-  "updated_at": "2026-05-01T18:52:40.287Z"
+  "last_action": "close_sprint: sprint SPRINT-19 completed",
+  "updated_at": "2026-05-02T09:19:35.410Z"
 }
