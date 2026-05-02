@@ -95,6 +95,8 @@ After drafting any work item, the agent presents a Brief in chat:
 
 Conversation resolves the open questions. When all are resolved → ambiguity flips 🟢 → Gate 1 passes. **The same approval implicitly grants the MCP push** — agent calls `cleargate_push_item` immediately. No separate "now confirm the push" step.
 
+**Initiative intake (post-CR-025).** Stakeholder-shaped input (multi-Epic scope, persistent Brief useful) lands in `pending-sync/INITIATIVE-NNN_*.md` via two paths: (1) MCP pull — `cleargate_pull_initiative` with the remote ID writes the file automatically; (2) Manual paste — agent triages the input and writes the file using `templates/initiative.md`. Either path then runs the standard Brief loop above. After Gate 1 passes, the Initiative file moves to `archive/` stamped with `triaged_at: <ISO-8601>` and `spawned_items: ["EPIC-NNN", "EPIC-MMM", ...]` listing the work items it decomposed into.
+
 ### Gate 2 — Sprint Ready (per sprint, Prepare phase internal)
 
 Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written under `execution_mode: v2`. Without all three, the sprint cannot transition.

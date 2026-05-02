@@ -130,6 +130,8 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 - After `cleargate_push_item` returns a Remote ID, update the frontmatter AND move the file to `.cleargate/delivery/archive/` — these two happen atomically, never one without the other.
 - **Story granularity.** When decomposing an epic into stories, run the Granularity Rubric at the top of `story.md`. If a candidate story trips any signal (unrelated goals joined, >5 Gherkin scenarios, subsystems span, L4 complexity), emit two stories with consecutive IDs instead. Splits and merges are free at decomposition time — no remote IDs exist yet.
 
+**Initiative Intake.** Stakeholder input arrives via two paths: (1) MCP pull — call `cleargate_pull_initiative` with the remote ID; the tool writes `pending-sync/INITIATIVE-NNN_*.md` automatically; read the result and present a Brief. (2) Manual paste — human pastes the text; triage it, write `pending-sync/INITIATIVE-NNN_*.md` using `templates/initiative.md`, present a Brief. In both cases, after Gate 1 the file moves to `archive/` stamped with `triaged_at:` and `spawned_items:`.
+
 **Four-agent loop (roles in `.claude/agents/`):**
 - `architect.md` — one plan per milestone; no production code.
 - `developer.md` — one Story end-to-end; one commit per Story; runs typecheck + tests before commit.
