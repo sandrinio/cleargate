@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.9.0",
-  "generated_at": "2026-05-02T09:21:16.684Z",
+  "generated_at": "2026-05-02T12:30:06.364Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -95,7 +95,7 @@
     },
     {
       "path": ".claude/hooks/session-start.sh",
-      "sha256": "77c206eeaa5d460f9e751244f25ff09089578ad4d044487cbcff8b3e1d78582f",
+      "sha256": "b266a5567cc84c02d041e570569962c003daaa69b6aee244173e740dedbf4ee2",
       "tier": "hook",
       "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
@@ -124,6 +124,13 @@
     {
       "path": ".claude/skills/flashcard/SKILL.md",
       "sha256": "4c0fe5bb74697e1eb1f37203ff44b8e6a800f024a2f8c3fc8542aa206cd2c777",
+      "tier": "skill",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".claude/skills/sprint-execution/SKILL.md",
+      "sha256": "31cd09beba5dbc3c3e9d5d407ad0c7f1e02882b0c551eb314aea2b5b30ac8d32",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
