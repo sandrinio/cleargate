@@ -5,7 +5,7 @@ parent_cleargate_id: "CR-021 §3.2.4 / §3.2.5 (Reporter context-bundle pattern,
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: "SPRINT-18 mid-execution observation 2026-05-01: QA pass-1 for STORY-025-04 only caught the silent R4 scope-drop because the orchestrator manually surfaced the missing context in the QA prompt; in a normal flow it would have green-lit the drop. Current QA cycle is 'tests pass + structural conformance' which catches structural defects but misses semantic ones. Conversation 2026-05-01 mapped the gaps (semantic correctness past Gherkin, adversarial probe, DoD §2.2 audit, spec-vs-impl drift, cross-story integration, regression boundary, lane-aware depth) and the recommended fix (script-built objective context pack + dev-emitted subjective handoff + lane-aware QA playbook). User 2026-05-01: 'agree with recommandation. please create CR and put it in the next sprint'."
 proposal_gate_waiver:

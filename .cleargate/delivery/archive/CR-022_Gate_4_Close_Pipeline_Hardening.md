@@ -1,10 +1,11 @@
 ---
 cr_id: CR-022
 parent_ref: SDLC brainstorm charter §1.8 (Gate 4 expanded close pipeline) + §2.4 (Sprint 3 of 3); CR-021 (SPRINT-18 Prepare/Close/Observe mechanics, shipped); SPRINT-18 REPORT.md §6 Tooling (lessons folded in)
+parent_cleargate_id: "SDLC brainstorm charter §1.8 (Gate 4 expanded close pipeline) + §2.4 (Sprint 3 of 3); CR-021 (SPRINT-18 Prepare/Close/Observe mechanics, shipped); SPRINT-18 REPORT.md §6 Tooling (lessons folded in)"
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 context_source: "Charter §2.4 Sprint 3 of 3 — Gate 4 close pipeline hardening. Charter explicitly deferred CR-022 drafting until SPRINT-18 closed so it could absorb actual lessons from CR-021's first run (charter §2.4 line 272). SPRINT-18 closed 2026-05-01 with 7 anchors shipped; REPORT.md §6 surfaced concrete lessons folded into §3 below: (i) suggest_improvements.mjs missed the SPRINT-<#>_REPORT.md naming sweep, (ii) 138KB Reporter bundle exceeded 80KB cap on heavy-strategy sprints, (iii) cleargate sprint archive's wiki-lint hard-block has no data-debt waiver path. Plus the charter §1.8 pre-close + post-close additions: Step 2.7 worktree-closed check, Step 2.8 sprint-merged-to-main verify, Step 6.5 sprint_trends.mjs (V-Bounce port), Step 6.6 skill-candidate detection, Step 6.7 FLASHCARD cleanup pass, Step 8 verbose post-close handoff list."
 proposal_gate_waiver:
