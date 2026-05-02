@@ -28,8 +28,6 @@
 
 - [[SPRINT-18]] — status: Approved
 
-- [[SPRINT-19]] — status: Approved
-
 - [[SPRINT-20]] — status: Draft
 
 

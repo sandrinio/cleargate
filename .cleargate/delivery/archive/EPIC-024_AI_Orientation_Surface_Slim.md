@@ -41,6 +41,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-05-01T06:04:44Z
   sessions: []
+sprint_cleargate_id: "SPRINT-15"
 ---
 
 # EPIC-024: AI Orientation Surface Slim
