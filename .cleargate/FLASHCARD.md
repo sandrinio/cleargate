@@ -3,6 +3,9 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-02 · #protocol #templates #readiness #code-truth · CR-028: code-truth principle stack — wiki/memory/context_source are caches; code is canonical. Drafts cite ## Existing Surfaces + answer ## Why not simpler? (Story+Epic both; CR Existing-Surfaces only; Bug exempt).
+2026-05-02 · #protocol #section-numbering · CR-028 inserted unnumbered "Code-Truth Principle" preamble BEFORE existing §0 to avoid renumbering 16 numbered headings (161 ref sites). Path (a) renumber would cascade-break; path (b) preamble preserves stability.
+2026-05-02 · #templates #mirror · CR-028 SPRINT-20 anchor backfill = 6 anchors get sections (EPIC-026 + STORY-026-01 + STORY-026-02 + CR-026 + CR-027 + CR-028 self); BUG-025 exempt. Generalize: when adding a new readiness criterion, audit pending-sync anchors in the same commit.
 2026-05-02 · #qa #gherkin #coverage · CR-027 §4.7: Scenario 14 tests null-gate-result, not risk-table-populated criterion ID in stderr — partial gap; follow up in SPRINT-21 test.
 2026-05-02 · #preflight #gate3 #readiness · CR-027: sprint preflight gained check #5 (per-item cached_gate_result.pass=true + freshness; v2 hard-block, v1 warn). Pre-existing drafts with cached_gate_result.pass:null fail under v2 — backfill via cleargate gate check or downgrade to v1 for one cycle.
 2026-05-02 · #frontmatter #cached-gate · readCachedGate is async; sprint preflight is sync — CR-027 inlined a 25-LOC sync mirror. Future async refactor: handler → async cascades into 8 vitest scenarios.

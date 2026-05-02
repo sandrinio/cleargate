@@ -16,11 +16,13 @@ POST-WRITE BRIEF
 After Writing this document, render a Brief in chat with the following sections,
 mechanically extracted from the document's own structure:
 
-  - Summary        ← §1 Problem & Value
-  - Open Questions ← §6 AI Interrogation Loop
-  - Edge Cases     ← §2 OUT-OF-SCOPE list + §5 error scenarios
-  - Risks          ← §3 The Reality Check
-  - Ambiguity      ← bottom-of-doc ambiguity gate block
+  - Summary          ← §1 Problem & Value
+  - Open Questions   ← §6 AI Interrogation Loop
+  - Edge Cases       ← §2 OUT-OF-SCOPE list + §5 error scenarios
+  - Risks            ← §3 The Reality Check
+  - Existing Surfaces ← §3.5 Existing Surfaces
+  - Why not simpler? ← §3.6 Why not simpler?
+  - Ambiguity        ← bottom-of-doc ambiguity gate block
 
 Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
 Do NOT ask separately for push confirmation — Brief approval covers it.
@@ -107,6 +109,20 @@ last_synced_body_sha: null # sha256 of body at last sync
 | Performance | {e.g., Must complete in < 200ms} |
 | Security | {e.g., No PII in logs} |
 
+## 3.5 Existing Surfaces
+
+> L1 reuse audit. List source-tree implementations the epic could extend. Cite file:line.
+
+- **Surface:** `path/to/file.ext:NN` — {what it does}
+- **Coverage of this epic's scope:** {≥80% extension / partial / none — and why}
+
+## 3.6 Why not simpler?
+
+> L2 / L3 right-size + justify-complexity. Answer both.
+
+- **Smallest existing surface that could carry this epic:** {citation or "none — net-new abstraction required"}
+- **Why isn't extension / parameterization / config sufficient?** {one paragraph}
+
 ## 4. Technical Grounding (The "Shadow Spec")
 *(AI Planning Engine: Populate this strictly from the approved proposal.md)*
 
@@ -143,3 +159,5 @@ Requirements to pass to Green (Ready for Coding Agent):
 - [ ] §4 Technical Grounding contains 100% real, verified file paths.
 - [ ] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).
 - [ ] 0 "TBDs" exist in the document.
+- [ ] §3.5 Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
+- [ ] §3.6 Why not simpler? has both sub-bullets answered.

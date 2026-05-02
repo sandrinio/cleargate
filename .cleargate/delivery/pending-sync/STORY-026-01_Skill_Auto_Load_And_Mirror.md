@@ -23,7 +23,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-02T11:09:33Z
+  last_gate_check: 2026-05-02T17:53:04Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -39,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T11:09:33Z
+  last_stamp: 2026-05-02T17:53:04Z
   sessions: []
 ---
 
@@ -208,6 +208,22 @@ No public API changes. Hook stdout contract is consumed by the Claude Code harne
 - [ ] Smoke verification step §2.2(1) executed and pasted into the dev report.
 - [ ] One commit `feat(EPIC-026): STORY-026-01 skill auto-load + canonical mirror`.
 - [ ] Pre-commit hook clean (no `--no-verify`).
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this story extends.
+
+- **Surface:** `.claude/hooks/session-start.sh` — SessionStart hook that fires on session open
+- **Surface:** `cleargate-cli/src/commands/sprint.ts` — `sprint init/preflight` handlers
+- **Surface:** `cleargate-planning/.claude/skills/` — scaffold canonical-mirror discipline; new skill added here
+- **Coverage of this story's scope:** ≥80% — this story EXTENDS those surfaces by adding the new skill file and the CLI directive emit
+
+## Why not simpler?
+
+> L2 / L3 right-size + justify-complexity.
+
+- **Smallest existing surface that could carry this:** A one-line CLAUDE.md addition pointing to the skill file.
+- **Why isn't extension / parameterization / config sufficient?** A docs-only addition does not load the skill — Claude Code reads `.claude/skills/` only when the SessionStart banner directs it to. Both the canonical mirror AND the directive emit are required; neither alone is sufficient.
 
 ---
 
