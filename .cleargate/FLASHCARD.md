@@ -3,6 +3,8 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-02 · #claude-md #mirror #prune · CLEARGATE-block awk-diff is the reliable mirror-parity gate — pipe both blocks to files and diff; empty = pass. Add to QA recipe template.
+2026-05-02 · #test-harness #vitest #worktree · Tests that grep CLAUDE.md must be updated in the same commit as the CLAUDE.md prune; old assertions become instantly-failing post-merge.
 2026-05-02 · #claude-md #prune #numeric-target · STORY-026-02 R7 ≥60-line target became unreachable after Wave 1+2 collapsed the prune surface (live 161, canonical 70 pre-prune). Mid-sprint metric on a stale pre-prune SHA estimate must be flagged + waived in Architect plan, not silently widened.
 2026-05-02 · #qa #templates #readiness · CR-028: template numbered headings (## 3.5, ### 1.6) don't match predicates (body contains '## Existing Surfaces'). File in CR-029.
 2026-05-02 · #templates #mirror · CR-028 SPRINT-20 anchor backfill = 6 anchors get sections (EPIC-026 + STORY-026-01 + STORY-026-02 + CR-026 + CR-027 + CR-028 self); BUG-025 exempt. Generalize: when adding a new readiness criterion, audit pending-sync anchors in the same commit.
