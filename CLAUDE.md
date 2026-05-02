@@ -43,6 +43,18 @@ admin/                  ← admin tooling stub
 knowledge/              ← gitignored private reference docs (design-guide, architecture notes)
 ```
 
+## Dogfood split — canonical vs live
+
+This repo develops the scaffold and runs on it simultaneously, so `.claude/` exists in two places that you must keep in sync manually:
+
+- **Canonical (tracked):** `cleargate-planning/.claude/**` — source of truth. Edits land here.
+- **NPM payload (tracked, auto-mirrored):** `cleargate-cli/templates/cleargate-planning/.claude/**` — kept byte-identical to canonical by `npm run prebuild` (`copy-planning-payload.mjs`). Don't hand-edit; `prebuild` overwrites.
+- **Live (gitignored):** `/.claude/**` — what Claude Code actually executes in *this* repo. Excluded by `.gitignore:13`. Per-machine.
+
+Edits to canonical do **not** auto-propagate to live. After changing canonical hooks/agents/skills/settings, re-sync the live instance: run `cleargate init` from the repo root (rewrites `/.claude/` from the npm payload) or hand-port the specific block. Skipping this is how BUG-024 shipped its own fix while still running with the buggy hook — the CR-026 PreToolUse:Task hook landed in canonical but the live `/.claude/settings.json` was never rewired, so the dispatch markers continued to mis-attribute for the rest of SPRINT-20.
+
+Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any other surface that has a `cleargate-planning/` mirror — canonical edit + manual re-sync, every time.
+
 ## How work gets done
 
 1. **Plan** lives in `.cleargate/delivery/{pending-sync,archive}/`. A sprint file names its stories + milestones + DoD + risk table.
@@ -84,6 +96,7 @@ Node 24 LTS · TypeScript ^5.8 · Fastify ^5.8 · Drizzle 0.45.2 · Zod ^4.3 · 
 - Sprint execution runs through the four-agent loop — do not implement stories yourself in the main conversation when a sprint is active.
 - Keep conversational output terse. Details live in the sprint file and REPORT.md, not in chat.
 - Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.
+- After edits to `cleargate-planning/.claude/**` (hooks, agents, skills, settings), remind the user to re-sync the live `/.claude/` instance via `cleargate init` or hand-port — see *Dogfood split* above. Canonical edits do not auto-propagate.
 
 <!-- CLEARGATE:START -->
 ## 🔄 ClearGate Planning Framework
