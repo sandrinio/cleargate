@@ -42,6 +42,13 @@
  *                                          Step 2.7 instead of running git worktree list.
  *                                          Used to exercise the v2 block / v1 advisory paths
  *                                          without a real .worktrees/STORY-* directory.
+ *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 entirely (test environments where git
+ *                                      refs are absent or merge state is irrelevant).
+ *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject merge status for Step 2.8 without
+ *                                                  running git merge-base. Used to exercise
+ *                                                  the v2 block / v1 advisory paths.
+ *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT for Step 2.8 git commands
+ *                                      (used in tests that need a controlled git repo).
  */
 
 import fs from 'node:fs';
@@ -76,7 +83,9 @@ function migrateV1ToV2(state) {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const REPO_ROOT = process.env.CLEARGATE_REPO_ROOT
+  ? path.resolve(process.env.CLEARGATE_REPO_ROOT)
+  : path.resolve(__dirname, '..', '..');
 const SCRIPTS_DIR = __dirname;
 
 function usage() {
@@ -394,6 +403,87 @@ function main() {
         process.stderr.write(
           `Step 2.7 warning: leftover worktree at ${leftoverWorktrees[0]} (advisory in v1).\n`
         );
+      }
+    }
+  }
+
+  // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
+  // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
+  // On miss: list unmerged commits + exit 1 (v2 enforcing); warn + continue (v1 advisory).
+  // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
+  // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
+  //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
+  {
+    if (process.env.CLEARGATE_SKIP_MERGE_CHECK === '1') {
+      process.stdout.write('Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam).\n');
+    } else {
+      const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
+      if (!sprintNumMatch) {
+        process.stdout.write(`Step 2.8 skipped: sprint-id "${sprintId}" has no numeric portion.\n`);
+      } else {
+        const sprintBranch = `refs/heads/sprint/S-${sprintNumMatch[1]}`;
+        const mainBranch = 'refs/heads/main';
+        process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainBranch}...\n`);
+
+        const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
+
+        const forcedStatus = process.env.CLEARGATE_FORCE_MERGE_STATUS;
+        let isMerged = false;
+        let mergeCheckAvailable = true;
+
+        if (forcedStatus === 'merged') {
+          isMerged = true;
+        } else if (forcedStatus === 'unmerged') {
+          isMerged = false;
+        } else {
+          try {
+            execSync(
+              `git merge-base --is-ancestor ${sprintBranch} ${mainBranch}`,
+              { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
+            );
+            isMerged = true;
+          } catch (mergeErr) {
+            const exitStatus = /** @type {any} */ (mergeErr).status;
+            if (exitStatus === 1) {
+              isMerged = false;
+            } else {
+              // exit 128: refs missing or other git failure — fail-open with warning
+              mergeCheckAvailable = false;
+              process.stderr.write(
+                `Step 2.8 warning: git merge-base check unavailable (${/** @type {Error} */ (mergeErr).message}). ` +
+                `Skipping merge verification.\n`
+              );
+            }
+          }
+        }
+
+        if (!mergeCheckAvailable) {
+          // fail-open: refs missing or git unavailable — continue to Step 3
+        } else if (isMerged) {
+          process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainBranch}.\n`);
+        } else if (isEnforcingV2) {
+          // v2 enforcing — block close
+          let unmergedLog = '';
+          if (!forcedStatus) {
+            try {
+              unmergedLog = execSync(
+                `git log ${mainBranch}..${sprintBranch} --oneline`,
+                { encoding: 'utf8', cwd: REPO_ROOT, env: process.env }
+              );
+            } catch { /* unmerged-log fetch failed — proceed without */ }
+          }
+          process.stderr.write(
+            `Step 2.8 failed: sprint/S-${sprintNumMatch[1]} not merged to main.\n` +
+            (unmergedLog ? `  Unmerged commits:\n${unmergedLog}` : '') +
+            `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
+          );
+          process.exit(1);
+        } else {
+          // v1 advisory — warn + continue
+          process.stderr.write(
+            `Step 2.8 warning: sprint/S-${sprintNumMatch[1]} not merged to main (advisory in v1).\n`
+          );
+        }
       }
     }
   }
