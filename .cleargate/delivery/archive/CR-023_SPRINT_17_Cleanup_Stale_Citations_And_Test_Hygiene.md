@@ -2,7 +2,6 @@
 cr_id: CR-023
 parent_ref: SPRINT-17 cleanup follow-ups; cleargate-protocol.md (citations) + .cleargate/templates/ + cleargate-cli/test/scripts/test_close_sprint_v21.test.ts + cleargate-cli/test/scripts/protocol-section-24.test.ts + vitest worker hygiene
 parent_cleargate_id: "SPRINT-17 cleanup follow-ups; cleargate-protocol.md (citations) + .cleargate/templates/ + cleargate-cli/test/scripts/test_close_sprint_v21.test.ts + cleargate-cli/test/scripts/protocol-section-24.test.ts + vitest worker hygiene"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-18
 carry_over: false
 status: Done

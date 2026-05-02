@@ -2,7 +2,6 @@
 bug_id: BUG-024
 parent_ref: SPRINT-18 REPORT.md §6 Tooling (token-ledger Red carry-forward); SPRINT-17 REPORT.md §5 Tooling (same row)
 parent_cleargate_id: "SPRINT-18 REPORT.md §6 Tooling (token-ledger Red carry-forward); SPRINT-17 REPORT.md §5 Tooling (same row)"
-parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-19
 carry_over: false
 status: Approved

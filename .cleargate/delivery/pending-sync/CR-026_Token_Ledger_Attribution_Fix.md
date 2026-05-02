@@ -1,7 +1,7 @@
 ---
 cr_id: CR-026
 parent_ref: BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution Spike
-parent_cleargate_id: null
+parent_cleargate_id: "BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution Spike"
 sprint_cleargate_id: SPRINT-20
 carry_over: false
 status: Draft

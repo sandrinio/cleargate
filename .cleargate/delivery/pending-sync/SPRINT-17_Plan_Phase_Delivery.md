@@ -1,7 +1,6 @@
 ---
 sprint_id: "SPRINT-17"
 parent_cleargate_id: null
-sprint_cleargate_id: null
 carry_over: false
 lifecycle_init_mode: "block"
 remote_id: null
