@@ -49,6 +49,15 @@
  *                                                  the v2 block / v1 advisory paths.
  *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT for Step 2.8 git commands
  *                                      (used in tests that need a controlled git repo).
+ *   CLEARGATE_SKIP_SPRINT_TRENDS=1   — skip Step 6.5 entirely (test environments).
+ *   CLEARGATE_SKIP_SKILL_CANDIDATES=1 — skip Step 6.6 entirely (test environments).
+ *   CLEARGATE_SKIP_FLASHCARD_CLEANUP=1 — skip Step 6.7 entirely (test environments).
+ *   CLEARGATE_SPRINT_RUNS_DIR=<path> — override .cleargate/sprint-runs/ root for
+ *                                      sibling-sprint counting in sprint_trends.mjs.
+ *   CLEARGATE_FLASHCARD_PATH=<path>  — override .cleargate/FLASHCARD.md path for
+ *                                      --flashcard-cleanup scan in suggest_improvements.mjs.
+ *   CLEARGATE_FLASHCARD_LOOKBACK=<N> — override 3-sprint default lookback for
+ *                                      --flashcard-cleanup scan.
  */
 
 import fs from 'node:fs';
@@ -589,6 +598,46 @@ function main() {
     // suggest_improvements failure is non-fatal — log but do not abort
     process.stderr.write(`Warning: suggest_improvements.mjs failed: ${/** @type {Error} */ (err).message}\n`);
     process.stderr.write('Sprint is still marked Completed; improvement suggestions may be incomplete.\n');
+  }
+
+  // ── Step 6.5: Run sprint_trends.mjs (stub — full impl deferred to CR-027) ──
+  if (process.env.CLEARGATE_SKIP_SPRINT_TRENDS !== '1') {
+    process.stdout.write('Step 6.5: running sprint_trends.mjs (stub)...\n');
+    try {
+      invokeScript('sprint_trends.mjs', [sprintId], {
+        CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SPRINT_DIR: sprintDir,
+      });
+    } catch (err) {
+      // Non-fatal — sprint stays Completed; trends are advisory only.
+      process.stderr.write(`Step 6.5 warning: sprint_trends.mjs failed: ${/** @type {Error} */ (err).message}\n`);
+    }
+  }
+
+  // ── Step 6.6: Skill-candidate detection (folds into suggest_improvements.mjs) ──
+  if (process.env.CLEARGATE_SKIP_SKILL_CANDIDATES !== '1') {
+    process.stdout.write('Step 6.6: scanning for skill candidates...\n');
+    try {
+      invokeScript('suggest_improvements.mjs', [sprintId, '--skill-candidates'], {
+        CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SPRINT_DIR: sprintDir,
+      });
+    } catch (err) {
+      process.stderr.write(`Step 6.6 warning: skill-candidate scan failed: ${/** @type {Error} */ (err).message}\n`);
+    }
+  }
+
+  // ── Step 6.7: FLASHCARD cleanup pass (folds into suggest_improvements.mjs) ──
+  if (process.env.CLEARGATE_SKIP_FLASHCARD_CLEANUP !== '1') {
+    process.stdout.write('Step 6.7: scanning FLASHCARD.md for cleanup candidates...\n');
+    try {
+      invokeScript('suggest_improvements.mjs', [sprintId, '--flashcard-cleanup'], {
+        CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SPRINT_DIR: sprintDir,
+      });
+    } catch (err) {
+      process.stderr.write(`Step 6.7 warning: FLASHCARD cleanup scan failed: ${/** @type {Error} */ (err).message}\n`);
+    }
   }
 
   // ── Step 7: Auto-push per-artifact status updates to MCP ─────────────────

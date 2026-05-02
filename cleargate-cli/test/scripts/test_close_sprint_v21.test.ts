@@ -1205,3 +1205,461 @@ describe('Scenario 20: Step 2.8 advisory under v1 — warn + continue (CLEARGATE
     expect(state.sprint_status).toBe('Completed');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 21: Step 6.5 sprint_trends stub writes Trends section
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 21: Step 6.5 sprint_trends stub writes Trends section', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('improvement-suggestions.md contains "## Trends" section after pipeline runs', () => {
+    const sprintRunsDir = path.dirname(sprintDir);
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SPRINT_RUNS_DIR: sprintRunsDir,
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    const suggestionsFile = path.join(sprintDir, 'improvement-suggestions.md');
+    expect(fs.existsSync(suggestionsFile)).toBe(true);
+    const content = fs.readFileSync(suggestionsFile, 'utf8');
+    expect(content).toMatch(/## Trends/);
+    expect(content).toMatch(/full analysis deferred to CR-027/);
+  });
+
+  it('stdout contains "Step 6.5:" message', () => {
+    const sprintRunsDir = path.dirname(sprintDir);
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SPRINT_RUNS_DIR: sprintRunsDir,
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.stdout).toMatch(/Step 6\.5/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 22: Step 6.5 sprint_trends warns + continues if stub fails
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 22: Step 6.5 sprint_trends warns + continues if stub fails', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+  let fakeScriptsDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+    // Create a fake scripts dir WITHOUT sprint_trends.mjs to simulate script-not-found
+    fakeScriptsDir = path.join(tmpBase, 'scripts');
+    fs.mkdirSync(fakeScriptsDir, { recursive: true });
+    // Copy all scripts except sprint_trends.mjs
+    const srcDir = path.join(REPO_ROOT, '.cleargate', 'scripts');
+    for (const f of fs.readdirSync(srcDir)) {
+      if (f === 'sprint_trends.mjs') continue;
+      const src = path.join(srcDir, f);
+      const dst = path.join(fakeScriptsDir, f);
+      if (fs.statSync(src).isFile()) fs.copyFileSync(src, dst);
+    }
+    // Copy lib subdirectory
+    const libSrc = path.join(srcDir, 'lib');
+    const libDst = path.join(fakeScriptsDir, 'lib');
+    if (fs.existsSync(libSrc)) {
+      fs.mkdirSync(libDst, { recursive: true });
+      for (const f of fs.readdirSync(libSrc)) {
+        fs.copyFileSync(path.join(libSrc, f), path.join(libDst, f));
+      }
+    }
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('exit code is still 0 when sprint_trends.mjs is missing (non-fatal)', () => {
+    // Use the fake scripts dir that lacks sprint_trends.mjs by invoking
+    // close_sprint.mjs from the fake scripts dir
+    const fakeCloseSprint = path.join(fakeScriptsDir, 'close_sprint.mjs');
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', fakeCloseSprint, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+  });
+
+  it('stderr contains "Step 6.5 warning" when sprint_trends.mjs is missing', () => {
+    const fakeCloseSprint = path.join(fakeScriptsDir, 'close_sprint.mjs');
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', fakeCloseSprint, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+        },
+      },
+    );
+    expect(result.stderr).toMatch(/Step 6\.5 warning/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 23: Step 6.6 skill candidates section emitted (placeholder when empty)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 23: Step 6.6 skill candidates section emitted (placeholder when empty)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithSkipAll(extraEnv: Record<string, string> = {}) {
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+          // Use an empty temp flashcard so no candidates are detected
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'empty-flashcard.md'),
+          ...extraEnv,
+        },
+      },
+    );
+  }
+
+  beforeEach(() => {
+    // Create empty flashcard file
+    fs.writeFileSync(path.join(tmpBase, 'empty-flashcard.md'), '# ClearGate Flashcards\n\n', 'utf8');
+  });
+
+  it('improvement-suggestions.md contains "## Skill Creation Candidates" section', () => {
+    const result = runWithSkipAll();
+    expect(result.status).toBe(0);
+    const suggestionsFile = path.join(sprintDir, 'improvement-suggestions.md');
+    expect(fs.existsSync(suggestionsFile)).toBe(true);
+    const content = fs.readFileSync(suggestionsFile, 'utf8');
+    expect(content).toMatch(/## Skill Creation Candidates/);
+  });
+
+  it('section contains placeholder "_No candidates detected this sprint._" when no ledger or matching flashcards', () => {
+    const result = runWithSkipAll();
+    expect(result.status).toBe(0);
+    const content = fs.readFileSync(path.join(sprintDir, 'improvement-suggestions.md'), 'utf8');
+    expect(content).toMatch(/_No candidates detected this sprint\./);
+  });
+
+  it('stdout contains "Step 6.6:" message', () => {
+    const result = runWithSkipAll();
+    expect(result.stdout).toMatch(/Step 6\.6/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 24: Step 6.6 surfaces CAND-<sprint>-S<n> when ledger has ≥3× repeated tuple
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 24: Step 6.6 surfaces CAND entry when ledger has ≥3× repeated tuple', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+
+    // Inject a synthetic token-ledger.jsonl with a repeated (work_item_id, agent_type) tuple
+    const ledgerLines = [
+      JSON.stringify({ work_item_id: 'STORY-TEST-01', agent_type: 'developer', tokens: 100 }),
+      JSON.stringify({ work_item_id: 'STORY-TEST-01', agent_type: 'developer', tokens: 200 }),
+      JSON.stringify({ work_item_id: 'STORY-TEST-01', agent_type: 'developer', tokens: 150 }),
+    ];
+    fs.writeFileSync(path.join(sprintDir, 'token-ledger.jsonl'), ledgerLines.join('\n') + '\n', 'utf8');
+    // Empty flashcard to avoid flashcard-pattern candidates
+    fs.writeFileSync(path.join(tmpBase, 'empty-flashcard.md'), '# ClearGate Flashcards\n\n', 'utf8');
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('improvement-suggestions.md contains CAND-SPRINT-TEST-S entry', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'empty-flashcard.md'),
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    const content = fs.readFileSync(path.join(sprintDir, 'improvement-suggestions.md'), 'utf8');
+    expect(content).toMatch(/CAND-SPRINT-TEST-S\d+/);
+    expect(content).toMatch(/STORY-TEST-01/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 25: Step 6.7 FLASHCARD cleanup section emitted (placeholder when empty)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 25: Step 6.7 FLASHCARD cleanup section emitted (placeholder when empty)', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+    // Use a temp sprint runs dir with no sibling sprints → lookback yields 0 dirs → no stale candidates
+    fs.writeFileSync(path.join(tmpBase, 'empty-flashcard.md'), '# ClearGate Flashcards\n\n', 'utf8');
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('improvement-suggestions.md contains "## FLASHCARD Cleanup Candidates" section', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'empty-flashcard.md'),
+          CLEARGATE_SPRINT_RUNS_DIR: tmpBase,
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    const suggestionsFile = path.join(sprintDir, 'improvement-suggestions.md');
+    expect(fs.existsSync(suggestionsFile)).toBe(true);
+    const content = fs.readFileSync(suggestionsFile, 'utf8');
+    expect(content).toMatch(/## FLASHCARD Cleanup Candidates/);
+  });
+
+  it('section contains placeholder "_No candidates detected this sprint._" when FLASHCARD.md is empty', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'empty-flashcard.md'),
+          CLEARGATE_SPRINT_RUNS_DIR: tmpBase,
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    const content = fs.readFileSync(path.join(sprintDir, 'improvement-suggestions.md'), 'utf8');
+    expect(content).toMatch(/_No candidates detected this sprint\./);
+  });
+
+  it('stdout contains "Step 6.7:" message', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-TEST', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'empty-flashcard.md'),
+          CLEARGATE_SPRINT_RUNS_DIR: tmpBase,
+        },
+      },
+    );
+    expect(result.stdout).toMatch(/Step 6\.7/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scenario 26: Step 6.7 surfaces stale candidate when keyword has zero grep hits
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 26: Step 6.7 surfaces stale candidate when keyword has zero grep hits across last 3 sprint dirs', () => {
+  let tmpBase: string;
+  let sprintDir: string;
+  let sprintRunsDir: string;
+
+  beforeEach(() => {
+    // Create a sprint runs dir with SPRINT-19 as current sprint
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-close-sprint-s26-'));
+    tmpBase = base;
+    sprintRunsDir = path.join(base, 'sprint-runs');
+    fs.mkdirSync(sprintRunsDir, { recursive: true });
+    sprintDir = path.join(sprintRunsDir, 'SPRINT-19');
+    fs.mkdirSync(sprintDir, { recursive: true });
+
+    // Copy sprint-v1-legacy fixture state + report
+    const fixturePath = path.join(FIXTURES_DIR, 'sprint-v1-legacy');
+    fs.copyFileSync(path.join(fixturePath, 'state.json'), path.join(sprintDir, 'state.json'));
+    // Replace sprint_id in state to SPRINT-19
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    state.sprint_id = 'SPRINT-19';
+    fs.writeFileSync(path.join(sprintDir, 'state.json'), JSON.stringify(state, null, 2) + '\n', 'utf8');
+    fs.copyFileSync(path.join(fixturePath, 'REPORT.md'), path.join(sprintDir, 'REPORT.md'));
+
+    // Create 3 sibling sprint dirs (SPRINT-18, SPRINT-17, SPRINT-16) with empty content
+    // (keyword 'uniqueobscurelesson' won't appear in any of them)
+    for (const sid of ['SPRINT-18', 'SPRINT-17', 'SPRINT-16']) {
+      const sibDir = path.join(sprintRunsDir, sid);
+      fs.mkdirSync(sibDir, { recursive: true });
+      fs.writeFileSync(path.join(sibDir, 'state.json'), JSON.stringify({ sprint_status: 'Completed' }, null, 2), 'utf8');
+    }
+
+    // Create a synthetic FLASHCARD.md with an entry whose keyword won't appear in sibling dirs
+    const fcContent = [
+      '# ClearGate Flashcards',
+      '',
+      '2026-01-01 · #test #stale · uniqueobscurelesson: this entry should be flagged as stale',
+      '',
+    ].join('\n');
+    fs.writeFileSync(path.join(base, 'test-flashcard.md'), fcContent, 'utf8');
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  it('improvement-suggestions.md contains CAND-SPRINT-19-F entry for stale flashcard', () => {
+    const result = spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, 'SPRINT-19', '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDir,
+          CLEARGATE_STATE_FILE: path.join(sprintDir, 'state.json'),
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_SPRINT_TRENDS: '1',
+          CLEARGATE_SKIP_SKILL_CANDIDATES: '1',
+          CLEARGATE_FLASHCARD_PATH: path.join(tmpBase, 'test-flashcard.md'),
+          CLEARGATE_SPRINT_RUNS_DIR: sprintRunsDir,
+          CLEARGATE_FLASHCARD_LOOKBACK: '3',
+        },
+      },
+    );
+    expect(result.status).toBe(0);
+    const suggestionsFile = path.join(sprintDir, 'improvement-suggestions.md');
+    expect(fs.existsSync(suggestionsFile)).toBe(true);
+    const content = fs.readFileSync(suggestionsFile, 'utf8');
+    expect(content).toMatch(/CAND-SPRINT-19-F\d+/);
+    expect(content).toMatch(/stale/);
+  });
+});
