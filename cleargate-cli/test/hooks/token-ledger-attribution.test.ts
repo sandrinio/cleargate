@@ -443,4 +443,92 @@ describe('token-ledger.sh: dispatch-marker attribution (CR-016)', () => {
     // Should still produce a row (fallback)
     expect(row).not.toBeNull();
   });
+
+  /**
+   * CR-026-A: Dispatch file present (newest-file lookup), session ID in payload
+   * mismatches dispatch filename → still attributes correctly.
+   *
+   * This asserts the path-B fix (BUG-024 §3.1 Defect 1 / CR-026 M3 plan).
+   * The old code keyed DISPATCH_FILE on the subagent's session_id from the
+   * SubagentStop payload. The fix uses ls -t (newest-file lookup) instead,
+   * so a session_id mismatch no longer causes 100% lookup failure.
+   *
+   * Given a dispatch file written with a DIFFERENT filename (not session-id-keyed)
+   * And the SubagentStop payload session_id does NOT match the dispatch filename
+   * When the SubagentStop hook fires
+   * Then the row still attributes correctly from the dispatch file (newest-file wins)
+   */
+  it('CR-026-A: dispatch with non-session-id filename → newest-file lookup attributes correctly', () => {
+    const sessionId = 'session-cr026-path-b';
+
+    const transcript = makeTranscript([
+      makeUserTurn('STORY=001-01\n\nArchitect agent — read this plan.'),
+      makeAssistantTurn(200, 100),
+    ]);
+
+    // Write dispatch file with a uniquified name (as pre-tool-use-task.sh would):
+    // The filename does NOT contain the session_id → old code would miss it.
+    const dispatchFilename = `.dispatch-9999999999-12345-9999.json`;
+    const dispatchPath = path.join(env.sprintDir, dispatchFilename);
+    const dispatchPayload = JSON.stringify({
+      work_item_id: 'CR-026',
+      agent_type: 'developer',
+      spawned_at: '2026-05-02T12:00:00Z',
+      session_id: 'orchestrator-session-abc',
+      writer: 'pre-tool-use-task.sh@cleargate-0.10.0',
+    });
+    fs.writeFileSync(dispatchPath, dispatchPayload, 'utf-8');
+
+    // SubagentStop fires with a DIFFERENT session_id than what's in the filename
+    // Old code: DISPATCH_FILE = sprint_dir/.dispatch-session-cr026-path-b.json → miss
+    // New code: ls -t *.dispatch-*.json | head -1 → hits the uniquified file
+    const { getLastRow } = runHook(env, transcript, sessionId);
+    const row = getLastRow();
+
+    expect(row).not.toBeNull();
+    expect(row!['work_item_id']).toBe('CR-026');
+    expect(row!['agent_type']).toBe('developer');
+  });
+
+  /**
+   * CR-026-B: Transcript with banner line + valid work-item ID → ledger row
+   * attributes to the work-item, NOT the banner.
+   *
+   * This asserts the banner-skip fix (BUG-024 §3.1 Defect 2 / CR-026 M3 plan).
+   * The old code matched the first user message as-is. If it started with the
+   * SessionStart banner ("1 items blocked: BUG-004: ..."), the work-item ID
+   * was extracted from that banner instead of the actual dispatch prompt.
+   *
+   * Given a transcript whose first user message IS the SessionStart banner
+   * And the second user message contains the valid dispatch work-item ID
+   * And no dispatch file exists (legacy fallback path)
+   * When the SubagentStop hook fires
+   * Then the ledger row attributes to the actual work-item, NOT the banner's BUG-004
+   */
+  it('CR-026-B: SessionStart-poisoned transcript → banner skipped, real work-item attributed', () => {
+    const sessionId = 'session-cr026-banner-skip';
+
+    // Build a transcript that mimics the poisoned state:
+    // First user message = SessionStart banner (would match BUG-004 without fix)
+    // Second user message = actual orchestrator dispatch prompt with STORY-026-01
+    const BANNER_LINE = '1 items blocked: BUG-004: Token-ledger mis-attribution since SPRINT-15';
+    const transcript = makeTranscript([
+      makeUserTurn(BANNER_LINE),          // SessionStart banner — old code picks BUG-004 from here
+      makeUserTurn('STORY=026-01\n\nYou are the developer agent. Implement CR-026.'),
+      makeAssistantTurn(150, 75),
+    ]);
+
+    // No dispatch file: forces legacy transcript-grep fallback to run
+    const dispatchPath = path.join(env.sprintDir, `.dispatch-${sessionId}.json`);
+    expect(fs.existsSync(dispatchPath)).toBe(false);
+
+    const { getLastRow } = runHook(env, transcript, sessionId);
+    const row = getLastRow();
+
+    expect(row).not.toBeNull();
+    // Must NOT pick up BUG-004 from the banner
+    expect(row!['work_item_id']).not.toBe('BUG-004');
+    // Must pick up STORY-026-01 from the second user message
+    expect(row!['work_item_id']).toBe('STORY-026-01');
+  });
 });

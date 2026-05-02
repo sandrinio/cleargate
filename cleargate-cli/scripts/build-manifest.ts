@@ -139,6 +139,16 @@ export const TIER_RULES: readonly TierRule[] = Object.freeze([
     exclude: false,
   },
 
+  // Scripts (CR-026: write_dispatch.sh + canonical mirrors for cleargate scripts)
+  {
+    pattern: '.cleargate/scripts/**',
+    tier: 'script',
+    overwrite_policy: 'always',
+    preserve_on_uninstall: false,
+    nullSha: false,
+    exclude: false,
+  },
+
   // CLI config
   {
     pattern: '.claude/settings.json',
