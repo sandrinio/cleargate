@@ -31,6 +31,17 @@
  * Reuse: TERMINAL_STATES, VALID_STATES from constants.mjs
  *        validateState from validate_state.mjs
  *        atomicWrite pattern from update_state.mjs
+ *
+ * Test seams (CR-022 M1):
+ *   CLEARGATE_SKIP_LIFECYCLE_CHECK=1  — skip Step 2.6 lifecycle reconciliation entirely
+ *                                       (test environments where the CLI binary is present
+ *                                       but real git history would produce drift false-positives).
+ *   CLEARGATE_SKIP_WORKTREE_CHECK=1   — skip Step 2.7 entirely (test environments that cannot
+ *                                       run git worktree list from a real git root).
+ *   CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 — comma-separated fake worktree paths injected into
+ *                                          Step 2.7 instead of running git worktree list.
+ *                                          Used to exercise the v2 block / v1 advisory paths
+ *                                          without a real .worktrees/STORY-* directory.
  */
 
 import fs from 'node:fs';
@@ -262,55 +273,129 @@ function main() {
   // non-terminal in pending-sync (excluding carry_over: true).
   // Invokes `cleargate sprint reconcile-lifecycle <sprint-id>` CLI wrapper.
   // Fail-open if CLI binary is unavailable (non-blocking for test environments).
+  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 skips this step entirely (non-fatal).
   process.stdout.write('Step 2.6: running lifecycle reconciliation...\n');
-  try {
-    // Resolve CLI binary: prefer local dist/
-    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK === '1') {
+    process.stdout.write('Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
+  } else {
+    try {
+      // Resolve CLI binary: prefer local dist/
+      const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
 
-    if (fs.existsSync(cliBin)) {
-      // Read sprint start_date from frontmatter for the --since arg
-      let sinceArg = '';
-      try {
-        const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
-        if (fs.existsSync(pendingDir)) {
-          const entries = fs.readdirSync(pendingDir);
-          const sprintFile = entries.find(
-            (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
-          );
-          if (sprintFile) {
-            const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
-            const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
-            if (startDateMatch && startDateMatch[1]) {
-              sinceArg = `--since ${startDateMatch[1].trim()}`;
+      if (fs.existsSync(cliBin)) {
+        // Read sprint start_date from frontmatter for the --since arg
+        let sinceArg = '';
+        try {
+          const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
+          if (fs.existsSync(pendingDir)) {
+            const entries = fs.readdirSync(pendingDir);
+            const sprintFile = entries.find(
+              (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
+            );
+            if (sprintFile) {
+              const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
+              const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
+              if (startDateMatch && startDateMatch[1]) {
+                sinceArg = `--since ${startDateMatch[1].trim()}`;
+              }
             }
           }
+        } catch { /* ignore */ }
+
+        const reconcileArgs = [
+          'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
+        ];
+        if (sinceArg) reconcileArgs.push(sinceArg);
+        const reconcileCmd = reconcileArgs.join(' ');
+
+        try {
+          execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
+          process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
+        } catch (_reconcileErr) {
+          // Exit code 1 from reconcile-lifecycle means drift found
+          process.stderr.write(
+            'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
+            '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
+            '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
+          );
+          process.exit(1);
         }
-      } catch { /* ignore */ }
+      } else {
+        process.stdout.write('Step 2.6 skipped: CLI binary not found at cleargate-cli/dist/cli.js (non-fatal).\n');
+      }
+    } catch (step26Err) {
+      // Unexpected error — fail-open (log but do not block)
+      process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
+    }
+  }
 
-      const reconcileArgs = [
-        'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
-      ];
-      if (sinceArg) reconcileArgs.push(sinceArg);
-      const reconcileCmd = reconcileArgs.join(' ');
+  // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
+  // Block close if any .worktrees/STORY-* path is present.
+  // v2 enforcing (exit 1); v1 advisory (warn + continue).
+  // Skip if git worktree list is unavailable (non-fatal — tests run against tmpdirs).
+  // Test seams: CLEARGATE_SKIP_WORKTREE_CHECK=1 bypasses entirely;
+  //             CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 injects fake paths (no git call).
+  process.stdout.write('Step 2.7: checking for leftover worktrees...\n');
+  {
+    if (process.env.CLEARGATE_SKIP_WORKTREE_CHECK === '1') {
+      process.stdout.write('Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam).\n');
+    } else {
+      let leftoverWorktrees = [];
+      let worktreeListAvailable = true;
 
-      try {
-        execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
-        process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
-      } catch (_reconcileErr) {
-        // Exit code 1 from reconcile-lifecycle means drift found
+      if (process.env.CLEARGATE_FORCE_WORKTREE_PATHS) {
+        // Test seam: inject fake worktree paths without running git
+        leftoverWorktrees = process.env.CLEARGATE_FORCE_WORKTREE_PATHS
+          .split(',')
+          .map((p) => p.trim())
+          .filter(Boolean);
+      } else {
+        try {
+          const output = execSync('git worktree list --porcelain', {
+            cwd: REPO_ROOT,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+          });
+          for (const line of output.split('\n')) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('worktree ')) continue;
+            const wtPath = trimmed.slice('worktree '.length);
+            if (/[/\\]\.worktrees[/\\]STORY-/.test(wtPath)) {
+              const m = /(\.(worktrees)[/\\]STORY-.+)$/.exec(wtPath);
+              leftoverWorktrees.push(m ? m[1] : wtPath);
+            }
+          }
+        } catch {
+          worktreeListAvailable = false;
+        }
+      }
+
+      // Step 2.7 enforcing mode: v2 execution_mode (not just schema_version, since
+      // migration bumps schema_version to 2 for all sprints before isV2 is evaluated).
+      // Using execution_mode preserves v1 advisory behaviour for sprints initialised
+      // with execution_mode: "v1" even after their schema is migrated.
+      const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
+
+      if (!worktreeListAvailable) {
+        process.stdout.write('Step 2.7 skipped: git worktree list unavailable (non-fatal).\n');
+      } else if (leftoverWorktrees.length === 0) {
+        process.stdout.write('Step 2.7 passed: no leftover worktrees.\n');
+      } else if (isEnforcingV2) {
+        // v2 enforcing — block close
         process.stderr.write(
-          'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
-          '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
-          '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
+          `close_sprint: Step 2.7 failed: leftover worktree at ${leftoverWorktrees[0]}\n` +
+          `  ${leftoverWorktrees.length === 1 ? '' : `(plus ${leftoverWorktrees.length - 1} more)\n  `}` +
+          `Run \`git worktree remove ${leftoverWorktrees[0]}\` if abandoned, or merge the work in progress.\n` +
+          `  All worktrees must be closed before sprint close.\n`
         );
         process.exit(1);
+      } else {
+        // v1 advisory — warn + continue
+        process.stderr.write(
+          `Step 2.7 warning: leftover worktree at ${leftoverWorktrees[0]} (advisory in v1).\n`
+        );
       }
-    } else {
-      process.stdout.write('Step 2.6 skipped: CLI binary not found at cleargate-cli/dist/cli.js (non-fatal).\n');
     }
-  } catch (step26Err) {
-    // Unexpected error — fail-open (log but do not block)
-    process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
   }
 
   // ── Step 3: Invoke prefill_report.mjs ─────────────────────────────────────

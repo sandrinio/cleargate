@@ -104,6 +104,16 @@ function makeTempSprintDir(fixtureName: string, sprintDirName: string): string {
  * Run close_sprint.mjs with --assume-ack against a sprint dir.
  * CLEARGATE_SPRINT_DIR points to the sprint dir directly.
  * CLEARGATE_STATE_FILE points to state.json in the sprint dir.
+ *
+ * CLEARGATE_SKIP_WORKTREE_CHECK=1 is set by default so that Scenarios 1-14
+ * are not affected by any real .worktrees/STORY-* paths that may exist in the
+ * developer's git repo during a live sprint. Scenarios 15-17 test Step 2.7
+ * directly via their own spawnSync calls without this bypass.
+ *
+ * CLEARGATE_SKIP_LIFECYCLE_CHECK=1 is also set by default so that Scenarios 1-14
+ * are not affected by real lifecycle drift in the developer's git history (the
+ * reconcile-lifecycle CLI reads from REPO_ROOT, not from the temp sprint dir).
+ * Scenarios 15-17 also set this to ensure Step 2.7 is the first gate that fires.
  */
 function runCloseSprint(sprintDir: string, extraArgs: string[] = []): {
   status: number | null;
@@ -123,6 +133,8 @@ function runCloseSprint(sprintDir: string, extraArgs: string[] = []): {
         ...process.env,
         CLEARGATE_SPRINT_DIR: sprintDir,
         CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+        CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
       },
     },
   );
@@ -421,6 +433,8 @@ describe('Scenario 7: SPRINT-18+ sprints write SPRINT-<#>_REPORT.md (not REPORT.
           ...process.env,
           CLEARGATE_SPRINT_DIR: sprintDir,
           CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
         },
       },
     );
@@ -443,6 +457,8 @@ describe('Scenario 7: SPRINT-18+ sprints write SPRINT-<#>_REPORT.md (not REPORT.
           ...process.env,
           CLEARGATE_SPRINT_DIR: sprintDir,
           CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
         },
       },
     );
@@ -669,6 +685,8 @@ describe('Scenario 13: Step 5 wait-for-ack prompt shows SPRINT-<#>_REPORT.md fil
           ...process.env,
           CLEARGATE_SPRINT_DIR: sprintDir,
           CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
         },
       },
     );
@@ -713,11 +731,229 @@ describe('Scenario 14: Sprint ID with no numeric portion (SPRINT-TEST) uses plai
           ...process.env,
           CLEARGATE_SPRINT_DIR: sprintDir,
           CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
         },
       },
     );
     expect(result.status).toBe(0);
     expect(fs.existsSync(path.join(sprintDir, 'REPORT.md'))).toBe(true);
     expect(fs.existsSync(path.join(sprintDir, 'SPRINT-TEST_REPORT.md'))).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CR-022 M1: Step 2.7 worktree-closed pre-close check
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Scenario 15: Step 2.7 skipped when CLEARGATE_SKIP_WORKTREE_CHECK=1 (test seam)', () => {
+  // The CLEARGATE_SKIP_WORKTREE_CHECK=1 env var is the primary test seam for bypassing
+  // Step 2.7. This is used in environments where running git worktree list is undesirable
+  // or unreliable. Validates the skip message + pipeline progression.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    sprintDir = makeTempSprintDir('sprint-v1-legacy', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithSkipWorktreeCheck(sprintDirPath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+        },
+      },
+    );
+  }
+
+  it('stdout contains "Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam)"', () => {
+    const result = runWithSkipWorktreeCheck(sprintDir);
+    expect(result.stdout).toMatch(/Step 2\.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set \(test seam\)/);
+  });
+
+  it('exit code is 0 when Step 2.7 skips via test seam', () => {
+    const result = runWithSkipWorktreeCheck(sprintDir);
+    expect(result.status).toBe(0);
+  });
+
+  it('pipeline proceeds past Step 2.7 (Step 3 message also appears)', () => {
+    const result = runWithSkipWorktreeCheck(sprintDir);
+    expect(result.stdout).toMatch(/Step 3/);
+  });
+
+  it('state.json sprint_status is flipped to Completed', () => {
+    runWithSkipWorktreeCheck(sprintDir);
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
+  });
+});
+
+describe('Scenario 16: Step 2.7 blocks under v2 when leftover worktree present (CLEARGATE_FORCE_WORKTREE_PATHS env seam)', () => {
+  // Uses CLEARGATE_FORCE_WORKTREE_PATHS to inject a fake .worktrees/STORY-NNN-NN path
+  // without needing a real git repo or a real .worktrees/ directory.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Use sprint-v2-no-fast (schema_version: 2, no fast-lane stories) so isV2=true
+    // and the v2 enforcement path fires.
+    sprintDir = makeTempSprintDir('sprint-v2-no-fast', 'SPRINT-TEST');
+    tmpBase = path.dirname(sprintDir);
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithFakeWorktree(sprintDirPath: string, fakePath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_FORCE_WORKTREE_PATHS: fakePath,
+        },
+      },
+    );
+  }
+
+  it('exits 1 when a STORY-prefixed leftover worktree is injected under v2', () => {
+    const result = runWithFakeWorktree(sprintDir, '.worktrees/STORY-019-01');
+    expect(result.status).toBe(1);
+  });
+
+  it('stderr contains "Step 2.7 failed: leftover worktree at .worktrees/STORY-019-01"', () => {
+    const result = runWithFakeWorktree(sprintDir, '.worktrees/STORY-019-01');
+    expect(result.stderr).toMatch(/Step 2\.7 failed: leftover worktree at \.worktrees\/STORY-019-01/);
+  });
+
+  it('stderr contains git worktree remove hint', () => {
+    const result = runWithFakeWorktree(sprintDir, '.worktrees/STORY-019-01');
+    expect(result.stderr).toMatch(/git worktree remove/);
+  });
+
+  it('state.json sprint_status stays Active (not flipped to Completed)', () => {
+    runWithFakeWorktree(sprintDir, '.worktrees/STORY-019-01');
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Active');
+  });
+});
+
+describe('Scenario 17: Step 2.7 advisory under v1 — warn + continue (CLEARGATE_FORCE_WORKTREE_PATHS env seam)', () => {
+  // The v1 advisory path fires when isEnforcingV2 = false (i.e. execution_mode !== "v2").
+  // We create a v2-schema sprint (passes validateState) but with execution_mode: "v1"
+  // so that Step 2.7 treats it as advisory rather than enforcing.
+  // This exercises: warn + continue, exit 0 even with a leftover worktree.
+  let tmpBase: string;
+  let sprintDir: string;
+
+  beforeEach(() => {
+    // Create a sprint with schema_version: 2 (passes validateState) but execution_mode: "v1"
+    // so isEnforcingV2 = isV2 && state.execution_mode === 'v2' = true && false = false.
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-close-sprint-s17-'));
+    sprintDir = path.join(base, 'SPRINT-TEST');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    tmpBase = base;
+    const stateV2SchemaV1Mode = {
+      schema_version: 2,
+      sprint_id: 'SPRINT-TEST',
+      execution_mode: 'v1',
+      sprint_status: 'Active',
+      stories: {
+        'STORY-TEST-01': {
+          state: 'Done',
+          qa_bounces: 0,
+          arch_bounces: 0,
+          worktree: null,
+          updated_at: '2026-01-01T00:00:00.000Z',
+          notes: '',
+          lane: 'standard',
+          lane_assigned_by: 'migration-default',
+          lane_demoted_at: null,
+          lane_demotion_reason: null,
+        },
+      },
+      last_action: 'init',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    fs.writeFileSync(
+      path.join(sprintDir, 'state.json'),
+      JSON.stringify(stateV2SchemaV1Mode, null, 2) + '\n',
+      'utf8',
+    );
+    // Copy REPORT.md from sprint-v1-legacy fixture so the pipeline can complete
+    const legacyReport = path.join(FIXTURES_DIR, 'sprint-v1-legacy', 'REPORT.md');
+    if (fs.existsSync(legacyReport)) {
+      fs.copyFileSync(legacyReport, path.join(sprintDir, 'REPORT.md'));
+    }
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  function runWithFakeWorktreeV1(sprintDirPath: string, fakePath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          CLEARGATE_FORCE_WORKTREE_PATHS: fakePath,
+        },
+      },
+    );
+  }
+
+  it('exit code is 0 despite leftover worktree (advisory in v1)', () => {
+    const result = runWithFakeWorktreeV1(sprintDir, '.worktrees/STORY-019-02');
+    expect(result.status).toBe(0);
+  });
+
+  it('stderr contains "Step 2.7 warning: leftover worktree at .worktrees/STORY-019-02 (advisory in v1)"', () => {
+    const result = runWithFakeWorktreeV1(sprintDir, '.worktrees/STORY-019-02');
+    expect(result.stderr).toMatch(/Step 2\.7 warning: leftover worktree at \.worktrees\/STORY-019-02 \(advisory in v1\)/);
+  });
+
+  it('pipeline proceeds past Step 2.7 (Step 3 message also appears)', () => {
+    const result = runWithFakeWorktreeV1(sprintDir, '.worktrees/STORY-019-02');
+    expect(result.stdout).toMatch(/Step 3/);
+  });
+
+  it('state.json sprint_status is flipped to Completed (pipeline continues)', () => {
+    runWithFakeWorktreeV1(sprintDir, '.worktrees/STORY-019-02');
+    const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
+    expect(state.sprint_status).toBe('Completed');
   });
 });
