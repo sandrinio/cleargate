@@ -68,13 +68,13 @@ flashcards_flagged:
 
 ## Inner-loop test runner
 
-When implementing a Story in the **`cleargate-cli/` engine** (this repo's flagship package), write new tests using **`node:test` + `node:assert/strict`** and run them iteratively via `node --test --import tsx <file>`. This is the universal Node 22+ pattern — works without vitest/jest setup, peaks at ~80MB RAM vs vitest's ~400MB per fork (CR-029 RAM math). Use the project's full-suite test command (`npm test`) only at commit-time to confirm green across the existing harness.
+For inner-loop iteration during a Story, prefer **`node:test` + `node:assert/strict`** when writing **new** test files for any TypeScript package targeting Node 22+. Run them via `node --test --import tsx <file>`. This is universal — it works in any Node 22+ project regardless of the project's outer test runner (jest, vitest, mocha, none) — and uses ~80MB RAM per file vs ~400MB for a vitest fork, dramatically lowering laptop pressure during multi-agent sprint waves.
 
-**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Mirror the `gitEmail` injectable pattern at `cleargate-cli/test/lib/identity.test.ts:5`. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`.
+**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks (e.g., `vi.mock(...)`, `jest.mock(...)`). Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`.
 
-**Existing tests:** the bulk of `cleargate-cli/test/**/*.test.ts` is currently vitest-style; CR-029 codemod migrates them in the SPRINT-20→SPRINT-21 gap. **Do not codemod existing tests during a Story** — only your new test files use the node:test pattern. If a Story modifies an existing vitest test, leave it vitest-style for now (the codemod handles batch migration).
+**Existing tests stay on the project's existing runner.** Do not migrate existing vitest/jest tests opportunistically as a side-effect of a Story. If your Story modifies an existing test, keep it on the original runner. Batch migrations belong in their own dedicated CR.
 
-**Other packages (`mcp/`, `admin/`):** keep their existing vitest setup — they have integration / Svelte concerns that require vitest tooling. The node:test guidance above applies to engine-only.
+**Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing — that ensures the new node:test files coexist with the existing harness. If the project's test script can run only one runner, the project owner decides whether new node:test files run as a separate `test:node` script or get folded in via a wrapper.
 
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
