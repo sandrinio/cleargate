@@ -153,6 +153,8 @@ Feature: {Epic Name}
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 **Current Status: 🔴 High Ambiguity**
 
+*Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
+
 Requirements to pass to Green (Ready for Coding Agent):
 - [ ] Proposal document has `approved: true`.
 - [ ] The `<agent_context>` block is complete and validated.

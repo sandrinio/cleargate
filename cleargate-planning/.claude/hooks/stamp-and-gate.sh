@@ -24,8 +24,19 @@ TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Ordered chain — stamp MUST precede gate (gate may read draft_tokens)
 "${CG[@]}" stamp-tokens "$FILE" >>"$LOG" 2>&1
 SR1=$?
-"${CG[@]}" gate check "$FILE" >>"$LOG" 2>&1
+# CR-032: capture gate check stdout to tmpfile so we can re-emit ⚠️ lines to
+# hook stdout (→ Claude Code system-reminder). gate.ts emits ❌ lines to
+# stdout (gate.ts:259), not stderr; the tmpfile captures them separately.
+GATE_OUT=$(mktemp)
+"${CG[@]}" gate check "$FILE" >"$GATE_OUT" 2>>"$LOG"
 SR2=$?
+cat "$GATE_OUT" >>"$LOG"
+if [ "$SR2" -ne 0 ]; then
+  WORK_ITEM_ID=$(grep -m1 -oE '(EPIC|STORY|CR|BUG|HOTFIX|PROPOSAL|INITIATIVE|SPRINT)-[0-9]+(-[0-9]+)?' "$FILE" | head -1)
+  : "${WORK_ITEM_ID:=<work-item>}"
+  grep '^❌' "$GATE_OUT" 2>/dev/null | sed -E "s/^❌ /⚠️ gate failed: ${WORK_ITEM_ID} — /"
+fi
+rm -f "$GATE_OUT"
 "${CG[@]}" wiki ingest "$FILE" >>"$LOG" 2>&1
 SR3=$?
 echo "[$TS] stamp=$SR1 gate=$SR2 ingest=$SR3 file=$FILE" >>"$LOG"
