@@ -465,6 +465,126 @@ describe('sandbox: evaluator restrictions', () => {
   });
 });
 
+// ─── CR-033 existing-surfaces-verified — L0 code-truth tightening ─────────────
+
+describe('CR-033 existing-surfaces-verified — L0 code-truth tightening', () => {
+  // Scenario 1: Section absent → not-applicable (pass with skip detail).
+  it('Section absent → not-applicable (pass with skip detail)', () => {
+    const body = `## 1. Problem & Value
+
+Why we are doing this.
+
+## Why not simpler?
+
+- Because it is needed.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/not-applicable/);
+  });
+
+  // Scenario 2: Section present, cites package.json (real top-level file) → pass.
+  it('Section present, cites package.json (real top-level file) → pass', () => {
+    const body = `## Existing Surfaces
+
+- package.json — project manifest
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/exist/);
+  });
+
+  // Scenario 3: Section present, cites real file with :symbol suffix → pass; symbol stripped.
+  it('Section present, cites cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm → pass; symbol stripped', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm\` — work item type detection
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 4: Section present, cites missing file → fail; detail names path.
+  it('Section present, cites cleargate-cli/src/lib/does-not-exist.ts → fail; detail names path', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/src/lib/does-not-exist.ts\` — this file does not exist
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('cleargate-cli/src/lib/does-not-exist.ts');
+  });
+
+  // Scenario 5: Section present, mix of real + missing → fail; detail names only missing.
+  it('Section present, mix of real + missing paths → fail; detail names only missing', () => {
+    const body = `## Existing Surfaces
+
+- \`package.json\` — project manifest (real)
+- \`cleargate-cli/src/lib/does-not-exist.ts\` — this does not exist (missing)
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('cleargate-cli/src/lib/does-not-exist.ts');
+    expect(result.detail).not.toContain('package.json');
+  });
+
+  // Scenario 6: Section present, no path matches, contains "no overlap found" sentinel → pass.
+  it('Section present, no path matches, contains "no overlap found" sentinel → pass', () => {
+    const body = `## Existing Surfaces
+
+No overlap found — grepped: jira, integration, sync.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/sentinel/);
+  });
+
+  // Scenario 7: Section present, no path matches, no sentinel → fail with sentinel-missing detail.
+  it('Section present, no path matches, no sentinel → fail with sentinel-missing detail', () => {
+    const body = `## Existing Surfaces
+
+I looked around but nothing came to mind.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('no path citations');
+    expect(result.detail).toContain('sentinel');
+  });
+
+  // Scenario 8: Section present, cites a path with extension that traverses outside root → sandbox-rejected → fail.
+  // Note: `../../etc/passwd` has no extension so the permissive regex doesn't match it.
+  // Use a path that has an extension and traverses outside root to test sandbox rejection.
+  it('Section present, cites path traversing outside root → sandbox-rejected, treated as missing → fail', () => {
+    const body = `## Existing Surfaces
+
+- \`../../etc/shadow.conf\` — system file (path traversal attempt)
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    // The sandbox-rejected path is treated as missing
+    expect(result.detail).toMatch(/cited paths do not exist/);
+  });
+
+  // Scenario 9: Section present, cites cleargate-cli/package.json (real subdir file) → pass.
+  it('Section present, cites cleargate-cli/package.json (real subdir file) → pass', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/package.json\` — CLI package manifest
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+  });
+});
+
 // ─── readiness-gates.md smoke test ───────────────────────────────────────────
 
 describe('smoke test: readiness-gates.md parses correctly', () => {
