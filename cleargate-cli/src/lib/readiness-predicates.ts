@@ -16,7 +16,8 @@ export type ParsedPredicate =
   | { kind: 'section'; index: number; count: { op: '>=' | '==' | '>'; n: number }; itemType: 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item' | 'declared-item' }
   | { kind: 'file-exists'; path: string }
   | { kind: 'link-target-exists'; id: string }
-  | { kind: 'status-of'; id: string; value: string };
+  | { kind: 'status-of'; id: string; value: string }
+  | { kind: 'existing-surfaces-verified' };
 
 export interface ParsedDoc {
   fm: Record<string, unknown>;
@@ -112,6 +113,11 @@ export function parsePredicate(src: string): ParsedPredicate {
     return { kind: 'status-of', id, value };
   }
 
+  // 7. existing-surfaces-verified — closed-set shape, no parameters
+  if (s === 'existing-surfaces-verified') {
+    return { kind: 'existing-surfaces-verified' };
+  }
+
   throw new Error(`unsupported predicate shape: ${src}`);
 }
 
@@ -155,6 +161,8 @@ export function evaluate(
       return evalLinkTargetExists(parsed, opts);
     case 'status-of':
       return evalStatusOf(parsed, opts, projectRoot);
+    case 'existing-surfaces-verified':
+      return evalExistingSurfacesVerified(doc, projectRoot);
   }
 }
 
@@ -673,5 +681,105 @@ function evalStatusOf(
     detail: pass
       ? `status-of([[${parsed.id}]]) == ${parsed.value}`
       : `status-of([[${parsed.id}]]) is '${status}', expected '${parsed.value}'`,
+  };
+}
+
+// ─── Existing-surfaces-verified evaluator ─────────────────────────────────────
+
+/**
+ * CR-033: Verify that every path cited in the `## Existing Surfaces` section
+ * of the document body actually exists on disk relative to the project root.
+ *
+ * Algorithm per CR-033 §1:
+ *  1. Locate `## Existing Surfaces` section. Absent → not-applicable (pass).
+ *  2. Extract path-shaped substrings via permissive regex; strip `:symbol` suffix.
+ *  3. Sandbox-check + fs.existsSync each unique path.
+ *  4. Zero paths found: look for "no overlap found" / sentinel phrases → pass or fail.
+ *  5. Any missing path → fail with detail naming each missing path.
+ *
+ * Note: The permissive regex intentionally matches prose-shaped strings like `e.g`.
+ * The existence check filters them — `e.g` will not exist on disk and the criterion
+ * will fail with that string in the detail. This is the accepted CR-033 §0.5 Q1
+ * trade-off: permissive matching + existence filter, not strict format enforcement.
+ *
+ * Section locator reuses the `body.split(/^(?=## )/m)` pattern from evalSection
+ * (FLASHCARD 2026-04-19 #gates #predicate #section — off-by-one if body starts with ##).
+ */
+function evalExistingSurfacesVerified(
+  doc: ParsedDoc,
+  projectRoot: string
+): { pass: boolean; detail: string } {
+  const body = doc.body;
+
+  // Step 1: Locate ## Existing Surfaces section.
+  // Split on ## headings using lookahead (same pattern as evalSection at L464).
+  const rawParts = body.split(/^(?=## )/m);
+  let sectionContent: string | undefined;
+  for (const part of rawParts) {
+    // Per CR-033 and M3 plan gotcha: match literal `## Existing Surfaces` (not numbered heading).
+    if (part.startsWith('## Existing Surfaces')) {
+      sectionContent = part;
+      break;
+    }
+  }
+
+  if (!sectionContent) {
+    // Section absent → not-applicable; reuse-audit-recorded already handles the absence.
+    return {
+      pass: true,
+      detail: `not-applicable: ## Existing Surfaces section absent — reuse-audit-recorded already failing`,
+    };
+  }
+
+  // Step 2: Extract path-shaped substrings via permissive regex (CR-033 §0.5 Q1 resolved).
+  // Matches: src/foo.ts, src/foo.ts:fetchIssues, package.json, cleargate-cli/src/lib/foo.ts
+  const PATH_RE = /[a-zA-Z0-9_./-]+\.[a-zA-Z]{1,5}(?::[a-zA-Z_][a-zA-Z0-9_]*)?/g;
+  const rawMatches = sectionContent.match(PATH_RE) ?? [];
+
+  // Strip :symbol suffix and deduplicate
+  const paths = [...new Set(rawMatches.map((m) => m.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)$/, '')))];
+
+  // Step 4: Zero paths found — look for sentinel phrases.
+  if (paths.length === 0) {
+    const SENTINEL_RE =
+      /no overlap found|no existing surface|no prior implementation|audit returned empty/i;
+    if (SENTINEL_RE.test(sectionContent)) {
+      return {
+        pass: true,
+        detail: `## Existing Surfaces contains no path citations; sentinel phrase present — audit explicitly empty`,
+      };
+    }
+    return {
+      pass: false,
+      detail: `'## Existing Surfaces' has no path citations and no "no overlap found" sentinel`,
+    };
+  }
+
+  // Step 3: For each unique path, sandbox-check + existence-check.
+  const missing: string[] = [];
+  for (const p of paths) {
+    const resolved = path.resolve(projectRoot, p);
+    // Sandbox check: must be inside projectRoot (same pattern as evalFileExists at ~L580).
+    if (!resolved.startsWith(projectRoot + path.sep) && resolved !== projectRoot) {
+      // Sandbox-rejected paths are treated as missing per CR-033 §1 step 4.
+      missing.push(p);
+      continue;
+    }
+    if (!fs.existsSync(resolved)) {
+      missing.push(p);
+    }
+  }
+
+  // Step 5: Report result.
+  if (missing.length > 0) {
+    return {
+      pass: false,
+      detail: `cited paths do not exist on disk: ${missing.join(', ')}`,
+    };
+  }
+
+  return {
+    pass: true,
+    detail: `all ${paths.length} cited path${paths.length === 1 ? '' : 's'} exist on disk`,
   };
 }
