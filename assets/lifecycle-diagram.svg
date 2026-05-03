@@ -1,0 +1,247 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 780" width="100%" role="img" aria-labelledby="lc-title lc-desc">
+  <title id="lc-title">The ClearGate Lifecycle</title>
+  <desc id="lc-desc">Four-phase pipeline: Triage, Planning, Execution, Quality and Delivery. The Ambiguity Gate sits between Planning and Execution and requires PO + Sponsor sign-off. Execution runs three parallel Developer/QA worktrees. Delivery synthesizes a sprint Reporter, appends FLASHCARD lessons, and pushes via MCP to Jira, Linear, or GitHub Projects. A dashed feedback loop carries lessons from FLASHCARD back into the compiled Wiki.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A2533"/>
+      <stop offset="1" stop-color="#0E1822"/>
+    </linearGradient>
+    <linearGradient id="orangeFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A3D"/>
+      <stop offset="1" stop-color="#F2691C"/>
+    </linearGradient>
+    <linearGradient id="panelFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1F2D3D" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#0E1822" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="greenFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FE39B"/>
+      <stop offset="1" stop-color="#34C97A"/>
+    </linearGradient>
+    <linearGradient id="redFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF6B6B"/>
+      <stop offset="1" stop-color="#E15050"/>
+    </linearGradient>
+
+    <radialGradient id="gateGlow" cx="0.5" cy="0.5" r="0.7">
+      <stop offset="0" stop-color="#E15050" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#E15050" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orangeHalo" cx="0.5" cy="0.5" r="0.7">
+      <stop offset="0" stop-color="#F2691C" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#F2691C" stop-opacity="0"/>
+    </radialGradient>
+
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3A4756" stroke-width="0.5" opacity="0.18"/>
+    </pattern>
+
+    <marker id="arr" viewBox="0 0 10 10" markerWidth="9" markerHeight="9" refX="9" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#F2691C"/>
+    </marker>
+    <marker id="arrG" viewBox="0 0 10 10" markerWidth="9" markerHeight="9" refX="9" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#34C97A"/>
+    </marker>
+    <marker id="arrSlate" viewBox="0 0 10 10" markerWidth="7" markerHeight="7" refX="9" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa3b2"/>
+    </marker>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <style>
+    .title    { font: 700 32px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #F2F2F2; }
+    .subtitle { font: 400 16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #9aa3b2; }
+    .chip     { font: 600 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #FF8A3D; letter-spacing: 1.5px; }
+    .nTitle   { font: 600 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #F2F2F2; }
+    .nMeta    { font: 400 11px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #9aa3b2; }
+    .nOrange  { font: 600 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #fff; }
+    .nGate    { font: 700 13px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #fff; letter-spacing: 0.6px; }
+    .gateMeta { font: 400 11px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #FFD2D2; }
+    .edgeOK   { font: 600 11px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #34C97A; letter-spacing: 0.5px; }
+    .feedback { font: 500 13px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; fill: #FF8A3D; font-style: italic; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1600" height="780" fill="url(#bg)"/>
+  <rect width="1600" height="780" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="800" y="50" text-anchor="middle" class="title">The ClearGate Lifecycle</text>
+  <text x="800" y="80" text-anchor="middle" class="subtitle">From stakeholder intent to your PM tool of record — gated, parallelized, audited.</text>
+
+  <!-- Phase header chips -->
+  <g>
+    <rect x="138" y="115" width="144" height="32" rx="16" fill="none" stroke="#F2691C" stroke-width="1.5"/>
+    <text x="210" y="136" text-anchor="middle" class="chip">1 · TRIAGE</text>
+  </g>
+  <g>
+    <rect x="478" y="115" width="144" height="32" rx="16" fill="none" stroke="#F2691C" stroke-width="1.5"/>
+    <text x="550" y="136" text-anchor="middle" class="chip">2 · PLANNING</text>
+  </g>
+  <g>
+    <rect x="938" y="115" width="144" height="32" rx="16" fill="none" stroke="#F2691C" stroke-width="1.5"/>
+    <text x="1010" y="136" text-anchor="middle" class="chip">3 · EXECUTION</text>
+  </g>
+  <g>
+    <rect x="1278" y="115" width="184" height="32" rx="16" fill="none" stroke="#F2691C" stroke-width="1.5"/>
+    <text x="1370" y="136" text-anchor="middle" class="chip">4 · QUALITY &amp; DELIVERY</text>
+  </g>
+
+  <!-- Phase panels -->
+  <rect x="60"   y="170" width="300" height="400" rx="14" fill="url(#panelFill)" stroke="#3A4756" stroke-width="1"/>
+  <rect x="400"  y="170" width="300" height="400" rx="14" fill="url(#panelFill)" stroke="#3A4756" stroke-width="1"/>
+  <rect x="860"  y="170" width="300" height="400" rx="14" fill="url(#panelFill)" stroke="#3A4756" stroke-width="1"/>
+  <rect x="1200" y="170" width="340" height="400" rx="14" fill="url(#panelFill)" stroke="#3A4756" stroke-width="1"/>
+
+  <!-- ========== PHASE 1: TRIAGE ========== -->
+  <!-- Initiative pill -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="200" width="220" height="52" rx="26" fill="#3A4756" stroke="#5A6878" stroke-width="1"/>
+    <text x="210" y="226" text-anchor="middle" class="nTitle">💬 Initiative</text>
+    <text x="210" y="244" text-anchor="middle" class="nMeta">PO · Sponsor · pulled from PM tool</text>
+  </g>
+  <line x1="210" y1="254" x2="210" y2="288" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#arrSlate)"/>
+
+  <!-- Wiki cylinder -->
+  <g filter="url(#shadow)">
+    <ellipse cx="210" cy="298" rx="100" ry="14" fill="#0E1822" stroke="#F2691C" stroke-width="2"/>
+    <path d="M 110 298 L 110 360 A 100 14 0 0 0 310 360 L 310 298" fill="#0E1822" stroke="#F2691C" stroke-width="2"/>
+    <ellipse cx="210" cy="298" rx="100" ry="14" fill="none" stroke="#F2691C" stroke-width="2"/>
+    <text x="210" y="328" text-anchor="middle" class="nTitle" fill="#FF8A3D">📚 Compiled Wiki</text>
+    <text x="210" y="349" text-anchor="middle" class="nMeta">~3k tokens · read at session start</text>
+  </g>
+  <line x1="210" y1="380" x2="210" y2="418" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#arrSlate)"/>
+
+  <!-- Triage classifier card -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="420" width="220" height="92" rx="10" fill="#1F2D3D" stroke="#3A4756" stroke-width="1.5"/>
+    <text x="210" y="448" text-anchor="middle" class="nTitle">🔎 Classify</text>
+    <line x1="130" y1="458" x2="290" y2="458" stroke="#3A4756" stroke-width="1"/>
+    <text x="210" y="478" text-anchor="middle" class="nMeta">Epic · Story · CR · Bug · Proposal</text>
+    <text x="210" y="498" text-anchor="middle" class="nMeta">Halts at Gate 1 if ambiguous</text>
+  </g>
+
+  <!-- arrow Phase 1 → Phase 2 -->
+  <path d="M 360 370 L 400 370" stroke="#F2691C" stroke-width="2.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ========== PHASE 2: PLANNING ========== -->
+  <!-- Architect agent (orange filled) -->
+  <g filter="url(#shadow)">
+    <rect x="440" y="220" width="220" height="78" rx="12" fill="url(#orangeFill)" stroke="#FF8A3D" stroke-width="1.5"/>
+    <text x="550" y="252" text-anchor="middle" class="nOrange">🏛️ Architect agent</text>
+    <text x="550" y="276" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.85">once per milestone</text>
+  </g>
+  <line x1="550" y1="302" x2="550" y2="346" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#arrSlate)"/>
+
+  <!-- Phase Plan card -->
+  <g filter="url(#shadow)">
+    <rect x="430" y="350" width="240" height="160" rx="10" fill="#152130" stroke="#F2691C" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="550" y="378" text-anchor="middle" class="nTitle" fill="#FF8A3D">📋 Phase Plan</text>
+    <line x1="460" y1="390" x2="640" y2="390" stroke="#3A4756" stroke-width="1"/>
+    <text x="550" y="412" text-anchor="middle" class="nMeta">file-surface analysis</text>
+    <text x="550" y="432" text-anchor="middle" class="nMeta">collision graph</text>
+    <text x="550" y="452" text-anchor="middle" class="nMeta">merge ordering</text>
+    <text x="550" y="472" text-anchor="middle" class="nMeta">parallel-safe vs sequential</text>
+    <text x="550" y="496" text-anchor="middle" class="nMeta" fill="#FF8A3D">→ halts at Ambiguity Gate</text>
+  </g>
+
+  <!-- arrow Phase 2 → GATE -->
+  <path d="M 700 370 L 720 370" stroke="#F2691C" stroke-width="2.5" fill="none"/>
+
+  <!-- ========== AMBIGUITY GATE ========== -->
+  <circle cx="780" cy="370" r="100" fill="url(#gateGlow)"/>
+  <g filter="url(#shadow)">
+    <path d="M 840 370 L 810 300 L 750 300 L 720 370 L 750 440 L 810 440 Z"
+          fill="url(#redFill)" stroke="#FF8A8A" stroke-width="2"/>
+    <text x="780" y="350" text-anchor="middle" class="nGate">🔒 AMBIGUITY</text>
+    <text x="780" y="370" text-anchor="middle" class="nGate">GATE</text>
+    <text x="780" y="395" text-anchor="middle" class="gateMeta">PO + Sponsor</text>
+    <text x="780" y="412" text-anchor="middle" class="gateMeta">sign-off required</text>
+  </g>
+
+  <!-- arrow GATE → Phase 3 with "approved" label -->
+  <path d="M 840 370 L 860 370" stroke="#34C97A" stroke-width="2.5" fill="none" marker-end="url(#arrG)"/>
+  <text x="850" y="358" text-anchor="middle" class="edgeOK">approved</text>
+
+  <!-- ========== PHASE 3: EXECUTION ========== -->
+  <!-- Worktree A -->
+  <g filter="url(#shadow)">
+    <rect x="900" y="210" width="220" height="80" rx="12" fill="url(#orangeFill)" stroke="#FF8A3D" stroke-width="1.5"/>
+    <text x="1010" y="240" text-anchor="middle" class="nOrange">⚙️ Worktree A</text>
+    <text x="1010" y="263" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.85">Developer ↔ QA</text>
+    <text x="1010" y="280" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.7">isolated git branch</text>
+  </g>
+  <!-- Worktree B -->
+  <g filter="url(#shadow)">
+    <rect x="900" y="330" width="220" height="80" rx="12" fill="url(#orangeFill)" stroke="#FF8A3D" stroke-width="1.5"/>
+    <text x="1010" y="360" text-anchor="middle" class="nOrange">⚙️ Worktree B</text>
+    <text x="1010" y="383" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.85">Developer ↔ QA</text>
+    <text x="1010" y="400" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.7">isolated git branch</text>
+  </g>
+  <!-- Worktree C -->
+  <g filter="url(#shadow)">
+    <rect x="900" y="450" width="220" height="80" rx="12" fill="url(#orangeFill)" stroke="#FF8A3D" stroke-width="1.5"/>
+    <text x="1010" y="480" text-anchor="middle" class="nOrange">⚙️ Worktree C</text>
+    <text x="1010" y="503" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.85">Developer ↔ QA</text>
+    <text x="1010" y="520" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.7">isolated git branch</text>
+  </g>
+
+  <!-- 3 converging arrows from worktrees → Reporter -->
+  <path d="M 1120 250 C 1170 250, 1200 225, 1240 225"
+        stroke="#F2691C" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+  <path d="M 1120 370 C 1180 370, 1200 225, 1240 225"
+        stroke="#F2691C" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+  <path d="M 1120 490 C 1190 490, 1210 225, 1240 225"
+        stroke="#F2691C" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ========== PHASE 4: QUALITY & DELIVERY ========== -->
+  <!-- Reporter -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="195" width="260" height="64" rx="12" fill="url(#orangeFill)" stroke="#FF8A3D" stroke-width="1.5"/>
+    <text x="1370" y="222" text-anchor="middle" class="nOrange">📊 Reporter agent</text>
+    <text x="1370" y="244" text-anchor="middle" class="nMeta" fill="#fff" opacity="0.85">once per sprint · ledger + git log + DoD</text>
+  </g>
+  <line x1="1370" y1="262" x2="1370" y2="284" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#arrSlate)"/>
+
+  <!-- REPORT.md -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="288" width="260" height="40" rx="8" fill="#152130" stroke="#3A4756" stroke-width="1.5"/>
+    <text x="1370" y="313" text-anchor="middle" class="nTitle">📄 REPORT.md</text>
+  </g>
+  <line x1="1370" y1="330" x2="1370" y2="350" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#arrSlate)"/>
+
+  <!-- FLASHCARD cylinder -->
+  <g filter="url(#shadow)">
+    <ellipse cx="1370" cy="358" rx="120" ry="10" fill="#0E1822" stroke="#F2691C" stroke-width="2"/>
+    <path d="M 1250 358 L 1250 398 A 120 10 0 0 0 1490 398 L 1490 358" fill="#0E1822" stroke="#F2691C" stroke-width="2"/>
+    <ellipse cx="1370" cy="358" rx="120" ry="10" fill="none" stroke="#F2691C" stroke-width="2"/>
+    <text x="1370" y="384" text-anchor="middle" class="nTitle" fill="#FF8A3D">💡 FLASHCARD.md · append-only</text>
+  </g>
+  <line x1="1370" y1="412" x2="1370" y2="432" stroke="#34C97A" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+  <!-- MCP -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="436" width="260" height="50" rx="10" fill="url(#greenFill)" stroke="#4FE39B" stroke-width="1.5"/>
+    <text x="1370" y="467" text-anchor="middle" class="nOrange" fill="#0E1822">🔌 MCP Adapter</text>
+  </g>
+  <line x1="1370" y1="488" x2="1370" y2="510" stroke="#34C97A" stroke-width="1.5" marker-end="url(#arrG)"/>
+
+  <!-- PM tools -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="514" width="260" height="44" rx="22" fill="#3A4756" stroke="#5A6878" stroke-width="1"/>
+    <text x="1370" y="541" text-anchor="middle" class="nTitle">📋 Jira · Linear · GitHub Projects</text>
+  </g>
+
+  <!-- ========== FEEDBACK LOOP ========== -->
+  <path d="M 1250 398
+           C 1250 700, 1100 720, 800 720
+           C 500 720, 250 720, 210 410"
+        stroke="#F2691C" stroke-width="2" stroke-dasharray="6 5" fill="none" opacity="0.75" marker-end="url(#arr)"/>
+  <rect x="430" y="720" width="740" height="22" rx="4" fill="#0E1822" opacity="0.85"/>
+  <text x="800" y="736" text-anchor="middle" class="feedback">💡 lessons compound — every agent reads FLASHCARD before non-trivial work</text>
+
+</svg>
