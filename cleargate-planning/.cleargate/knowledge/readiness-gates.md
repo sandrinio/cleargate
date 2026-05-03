@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **6 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **7 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key whose value is a relative path to another document (e.g. `context_source`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(context_source).approved == true` reads the file named by the evaluated document's `context_source` key and asserts its `approved` field equals `true`.
@@ -31,6 +31,9 @@ Reads `.cleargate/wiki/index.md` and asserts that the wiki index contains a refe
 
 **6. `status-of(<[[ID]]>) == <value>`**
 Resolves the given ID via the wiki index, reads that page's compiled frontmatter `status:` field, and compares it to `<value>`. Status values in the live corpus are textual strings (`Draft`, `Ready`, `Active`, `Done`) — not emoji. Example: `status-of([[EPIC-008]]) == Active` passes when EPIC-008's wiki page has `status: Active`. Note: this predicate returns `unknown` (evaluates to fail) when the wiki index is stale and the item is not yet compiled. Run `cleargate wiki build` before relying on `status-of` predicates.
+
+**7. `existing-surfaces-verified`**
+Closed-set predicate (no parameters). Locates the `## Existing Surfaces` section in the document body, extracts path-shaped substrings via regex, asserts each cited path exists on disk relative to the project root. Passes when section is absent (defers to `reuse-audit-recorded`) OR all cited paths exist OR section contains a "no overlap found" / "no existing surface" / "no prior implementation" / "audit returned empty" sentinel. Sandbox-rejected paths (escaping project root) are treated as missing. Example: `existing-surfaces-verified` against an Epic body whose `## Existing Surfaces` cites `cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm` passes when that path exists.
 
 ---
 
@@ -80,6 +83,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
       check: "body contains '## Existing Surfaces'"
+    - id: existing-surfaces-verified
+      check: "existing-surfaces-verified"
     - id: simplest-form-justified
       check: "body contains '## Why not simpler?'"
 ```
@@ -122,6 +127,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
       check: "body contains '## Existing Surfaces'"
+    - id: existing-surfaces-verified
+      check: "existing-surfaces-verified"
     - id: simplest-form-justified
       check: "body contains '## Why not simpler?'"
 ```
@@ -141,6 +148,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
       check: "body contains '## Existing Surfaces'"
+    - id: existing-surfaces-verified
+      check: "existing-surfaces-verified"
 ```
 
 ```yaml
