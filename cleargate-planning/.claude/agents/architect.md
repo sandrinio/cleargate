@@ -141,6 +141,26 @@ Before emitting a `lane` recommendation per story during Sprint Design Review, r
 
 Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing". These rules apply under `execution_mode: v2`.
 
+## Pre-Spec Dep Version Check (CR-037)
+
+Before declaring any dependency package + version in your milestone plan, run
+`npm view <pkg> version` for each named package. Three rules:
+
+1. Intended version ≤ current → write it.
+2. Intended version > current (doesn't exist on registry) → use current. Note the
+   correction inline: `- <pkg> ^<current> (corrected from intended <X>: does not exist
+   on registry as of <date>)`.
+3. Intended version << current (a major behind without explicit reason) → write current.
+   If you have a reason to pin older, write the decision: `- <pkg> ^<intended> (current:
+   <current>; reason: <why pin>)`.
+
+Skip-with-warning permitted only if `npm view` errors (offline or registry down). Record
+in plan footer: `Version check skipped: <reason>`.
+
+This is a hard rule. Training-data memory of package versions is a cache; the npm registry
+is truth (same as L0 Code-Truth principle from CR-028). Spec'ing non-existent or stale
+versions wastes a full Developer dispatch.
+
 ## Guardrails
 - **No production code.** You write one markdown plan file. Nothing else.
 - **No speculation.** Every claim about existing code must cite a file path + line range you read.

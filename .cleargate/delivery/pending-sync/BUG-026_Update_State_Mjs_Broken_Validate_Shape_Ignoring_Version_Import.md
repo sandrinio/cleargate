@@ -2,7 +2,7 @@
 bug_id: BUG-026
 parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-01"
 carry_over: false
 status: Ready
 severity: high
