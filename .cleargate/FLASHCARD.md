@@ -3,6 +3,8 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-03 · #preflight #gate-cache #cr-038 · Step 0 output format must be unconditional: always emit `, N errors` even when N=0 — spec scenario text overrides sketch conditional.
+2026-05-03 · #snapshot #hooks #test-harness · stamp-and-gate snapshot locks (cr-008 + cr-009) must be updated when the hook body changes or the init snapshot test fails.
 2026-05-03 · #bug #git-log · BUG filed against npm-published version may already be fixed in dev repo — `git log -G <symbol>` before implementing avoids duplicate fix commits.
 2026-05-03 · #qa #spec #acceptance-metric · CR-034: spec §4.2 ≤2 listed-item count contradicted §3 6-criteria migration. Always cross-check aggregate acceptance metrics against explicit item lists.
 2026-05-03 · #readiness-gates #cr · sandbox-paths-declared was duplicate section(2) with blast-radius-populated; correct target is section(3) per CR template (Execution Sandbox = §3).

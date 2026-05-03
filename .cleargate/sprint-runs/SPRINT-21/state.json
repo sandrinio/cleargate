@@ -29,11 +29,11 @@
       "lane_demotion_reason": null
     },
     "CR-032": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-03T19:05:01.922Z",
+      "updated_at": "2026-05-03T21:05:41.912Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -101,11 +101,11 @@
       "lane_demotion_reason": null
     },
     "CR-038": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-03T19:05:01.922Z",
+      "updated_at": "2026-05-03T21:05:41.988Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -137,6 +137,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-037 → Done",
-  "updated_at": "2026-05-03T19:58:37.188Z"
+  "last_action": "transition CR-038 → Done",
+  "updated_at": "2026-05-03T21:05:41.988Z"
 }
