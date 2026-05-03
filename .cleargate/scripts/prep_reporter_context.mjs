@@ -287,6 +287,53 @@ function buildTokenLedgerDigest(sprintId, sprintDir) {
       }
     }
 
+    // ── CR-035: Session-totals delta bake-in ──────────────────────────────────
+    // Pre-compute the two-line split numbers for the Reporter's §3 token block.
+    // Shape of .session-totals.json: Record<sessionUuid, { input, output, cache_creation,
+    // cache_read, last_ts, last_turn_index }> — keyed by UUID, NOT flat.
+    // Sum Object.values to get the cumulative sprint total.
+    const sessionTotalsPath = path.join(sprintDir, '.session-totals.json');
+    let sprintTotalTokens = null;
+    let sessionTotalsSource = 'session-totals';
+    if (fs.existsSync(sessionTotalsPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(sessionTotalsPath, 'utf8'));
+        sprintTotalTokens = Object.values(raw).reduce((acc, entry) => {
+          return acc +
+            (entry.input ?? 0) +
+            (entry.output ?? 0) +
+            (entry.cache_creation ?? 0) +
+            (entry.cache_read ?? 0);
+        }, 0);
+      } catch {
+        sprintTotalTokens = null;
+        sessionTotalsSource = 'session-totals (parse-error — null)';
+      }
+    } else {
+      sessionTotalsSource = 'legacy-fallback (no .session-totals.json)';
+    }
+
+    // Sprint work = total ledger delta minus reporter rows.
+    // Reuse by_agent map: sprint_work = total - reporter_sum.
+    let sprintWorkTokens = null;
+    if (total !== 0 && typeof total === 'object') {
+      const reporterEntry = digest.by_agent && digest.by_agent['reporter'];
+      const reporterSum = reporterEntry ? reporterEntry.sum : 0;
+      sprintWorkTokens = (typeof total.sum === 'number' ? total.sum : 0) - reporterSum;
+    } else if (total === 0) {
+      sprintWorkTokens = 0;
+    }
+
+    lines.push('**CR-035 two-line split (pre-computed for Reporter §3):**');
+    lines.push(`sprint_work_tokens: ${sprintWorkTokens !== null ? sprintWorkTokens.toLocaleString() : 'null'}`);
+    lines.push(`sprint_total_tokens: ${sprintTotalTokens !== null ? sprintTotalTokens.toLocaleString() : 'null (see ' + sessionTotalsSource + ')'}`);
+    lines.push(`reporter_pass_tokens: null`);
+    if (sessionTotalsSource !== 'session-totals') {
+      lines.push(`**Note:** ${sessionTotalsSource}`);
+    }
+    lines.push('');
+    // ── end CR-035 ────────────────────────────────────────────────────────────
+
     return lines.join('\n') + '\n';
   } catch (err) {
     return `## Token Ledger Digest\n\nFailed to run count_tokens.mjs: ${err.message}\n`;
