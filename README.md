@@ -110,6 +110,35 @@ Requires Node ≥ 24 LTS.
 
 ---
 
+## What `init` lays down
+
+```text
+your-repo/
+├── CLAUDE.md                       ← bounded ClearGate block injected (idempotent)
+├── .claude/                        ← Claude Code session config
+│   ├── agents/                     ← the four-agent loop:
+│   │                                  architect · developer · qa · reporter
+│   │                                  (+ wiki-ingest / wiki-query / wiki-lint)
+│   ├── skills/                     ← sprint-execution · flashcard
+│   ├── hooks/                      ← session-start, token-ledger,
+│   │                                  pre-commit & pre-edit gates
+│   └── settings.json               ← hook wiring (PostToolUse, SubagentStop, …)
+└── .cleargate/                     ← planning artifacts + protocol (checked into git)
+    ├── FLASHCARD.md                ← append-only lesson log (every agent reads it)
+    ├── config.example.yml          ← gate command template (copy to config.yml)
+    ├── knowledge/                  ← protocol, enforcement rules, readiness gates,
+    │                                  sprint-closeout checklist
+    ├── templates/                  ← blueprints: epic · story · CR · Bug ·
+    │                                  initiative · Sprint Plan
+    └── delivery/
+        ├── pending-sync/           ← drafts + in-flight work items
+        └── archive/                ← items pushed to PM tool of record / completed
+```
+
+**`.claude/`** is what Claude Code reads at session start — agent role definitions, skills, and hooks that fire on tool use. **`.cleargate/`** is where your planning artifacts live — work items as markdown files, edited by both humans and agents, versioned alongside your code. The compiled `.cleargate/wiki/` (the ~3k-token awareness layer) is generated on demand by `cleargate wiki build` and grows as your project does.
+
+---
+
 ## Getting started in 10 minutes
 
 After `cleargate init` completes, ask Claude Code to begin. The session will read the ClearGate block in `CLAUDE.md` automatically. Walk through these steps:
@@ -140,16 +169,6 @@ gates:
 If a gate key is absent, `cleargate gate <name>` prints a friendly "not configured" message and exits 0 (non-blocking). Pass `--strict` to flip that to exit 1.
 
 ClearGate is not a build tool, test runner, or CI system. The Developer agent calls *your project's* toolchain — `cleargate gate test`, `cleargate gate typecheck`, etc. — via the commands you configure in `.cleargate/config.yml`. Your toolchain stays yours; ClearGate orchestrates when and why agents invoke it.
-
----
-
-## The new paradigm of team orchestration
-
-- **The Product Owner** — gets disciplined backlog execution.
-- **The Orchestrator** — codes at the speed of AI.
-- **The Sponsor** — achieves total, real-time visibility.
-
-**Ship faster. Ship disciplined. Ship with ClearGate.**
 
 ---
 
