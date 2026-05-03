@@ -1,16 +1,73 @@
-# ClearGate — Planning scaffold your AI coding agents follow.
+![ClearGate — Architecting the Future of AI-Driven Team Orchestration](./assets/github-banner.svg)
+
+# ClearGate
+
+**Bridging the gap between vibe coding and disciplined engineering.**
+
+ClearGate is an open-source planning scaffold that turns AI coding agents into a disciplined engineering team. It installs a four-agent loop (Architect → Developer → QA → Reporter), a template-driven work-item protocol (proposals → epics → stories → sprints), and a compiled awareness wiki — so your AI agents stop drifting between disconnected tasks and start shipping coherent software.
+
+> ClearGate is not an AI code generator. **It is an AI Engineering Manager.**
 
 **Node ≥ 24 LTS required.**
 
-ClearGate gives AI coding agents (Claude Code and similar) a structured planning protocol so they ship coherent software instead of drifting between disconnected tasks. It installs a four-agent loop (Architect plans, Developer codes, QA verifies, Reporter retrospects), a template-driven work-item protocol (proposals → epics → stories → sprints), and a compiled awareness wiki that gives every agent session immediate situational context without re-grepping raw files.
+---
 
-ClearGate is not a build tool, test runner, or CI system. The Developer agent calls *your project's* toolchain — `cleargate gate test`, `cleargate gate typecheck`, etc. — via commands you configure in `.cleargate/config.yml`. Your toolchain stays yours; ClearGate orchestrates when and why agents invoke it.
+## The problem
+
+Standard AI coding tools live entirely inside the developer's terminal. The business is locked out, sessions start blind, and agents re-grep raw files, hallucinate duplicate work, and overwrite cross-cutting decisions without warning.
+
+|            | Standard AI                              | ClearGate                                                       |
+| ---------- | ---------------------------------------- | --------------------------------------------------------------- |
+| Context    | Session blindness, blind grep            | Compiled wiki (~3k-token `index.md` read at session start)      |
+| Planning   | Flat task lists                          | Phase plans + shared-surface merge ordering                     |
+| Execution  | Single terminal thread                   | Concurrent git worktrees + four-agent loop                      |
+| Visibility | Dev-only (zero stakeholder visibility)   | MCP push to Jira / Linear / GitHub Projects                     |
+| Memory     | Forgets between sessions                 | Append-only `FLASHCARD.md` lessons + sprint reports             |
 
 ---
 
-## Why it exists
+## How it works
 
-AI coding agents are good at tactical execution but poor at self-coordinating across sessions. Without structure, a vibe-coder and their agent loop end up with orphaned changes, duplicate work items drafted from memory, and no reliable retrospective. ClearGate enforces a protocol: every change starts as a classified work item, every sprint runs through a gated four-agent loop, and every session starts with a compiled wiki that surfaces what already shipped — so the agent never re-discovers what the last session forgot.
+![The ClearGate Lifecycle — four-phase pipeline with Ambiguity Gate, parallel worktrees, and MCP push to PM tool of record](./assets/lifecycle-diagram.svg)
+
+> Stakeholder input enters through Triage. The Architect drafts a phase plan, which **halts at the Ambiguity Gate** until human sign-off. Once approved, parallel Developer/QA pairs execute in isolated git worktrees. The Reporter synthesizes the sprint, lessons compound into the Wiki, and the MCP adapter pushes everything natively into your PM tool.
+
+---
+
+## What ClearGate does
+
+### 1. Compiled awareness — the Karpathy-style wiki
+
+Raw work-item state (epics, stories, sprints, bugs, CRs, proposals, flashcard lessons) is continuously compiled into a lightweight `.cleargate/wiki/index.md`. The orchestrator reads this ~3,000-token summary at the **start of every session** — instant grasp of project topology, active sprint goals, and architectural constraints, *before a single file is grepped*.
+
+### 2. Triage → Planning → Execution → Quality & Delivery
+
+Every change starts as a classified work item. Drafted Epics and Phase Plans **halt at the Ambiguity Gate** until an Orchestrator + PO + Sponsor sign-off unlocks them. The AI cannot skip levels or "go rogue" past Draft. The result: absolute business control over AI compute and repository changes.
+
+### 3. The Four-Agent Loop
+
+Sub-agents never converse. They communicate via structured, file-based artifacts routed by the orchestrator.
+
+- **Architect** — once per milestone, writes a phase plan with file-surface analysis and merge ordering.
+- **Developer** — once per story, in an isolated git worktree, implements code + unit tests and runs typecheck.
+- **QA** — independently re-verifies against the story's Gherkin acceptance and DoD.
+- **Reporter** — once per sprint, synthesizes the token ledger, flashcards, git log, and DoD into `REPORT.md`.
+
+### 4. Shared-surface merge ordering
+
+Before any code is written, the Architect lists the files each story will touch and computes the collision graph. Colliding stories enter a strict sequential queue; non-overlapping stories run concurrently in isolated git worktrees. No merge-conflict thrash, no file-lock contention, clean per-story commits.
+
+### 5. Quality assurance & hotfix tracking
+
+Final human sign-off is required before a sprint can close. Bugs found post-QA are **never** silently patched — they are filed as hotfixes with originating signal and files touched, giving full traceability. A strict lifecycle reconciler (`close_sprint.mjs`) blocks sprint close on any drift between shipped commits and ticket state.
+
+### 6. Total visibility for the business — the MCP adapter
+
+ClearGate runs an MCP server that exposes `cleargate_push_item`, `cleargate_pull_initiative`, and friends. Approved epics, stories, and sprint reports are pushed natively into the customer's tool of record — no middleman DB, no proprietary dashboard. Native adapters for **Jira, Linear, and GitHub Projects**. The Sponsor and PO audit AI-generated contracts, dependencies, and token ledgers in real time, in their own tool.
+
+### 7. The self-improving engine
+
+Every sprint feeds three input metrics into the next: first-pass success rate, Architect/QA bounce count, and the Bug-Fix Tax (% of sprint capacity spent on bugs). The Hotfix Audit asks *"could this hotfix have been a sprint story? why was it missed at planning?"* — and the lessons land in append-only `.cleargate/FLASHCARD.md`, tagged (`#schema`, `#auth`, `#worktree`, …) and read by every agent at the start of non-trivial work. The framework structurally forces the AI to learn from its mistakes — and from the human engineer's feedback.
 
 ---
 
@@ -70,6 +127,18 @@ gates:
 ```
 
 If a gate key is absent, `cleargate gate <name>` prints a friendly "not configured" message and exits 0 (non-blocking). Pass `--strict` to flip that to exit 1.
+
+ClearGate is not a build tool, test runner, or CI system. The Developer agent calls *your project's* toolchain — `cleargate gate test`, `cleargate gate typecheck`, etc. — via the commands you configure in `.cleargate/config.yml`. Your toolchain stays yours; ClearGate orchestrates when and why agents invoke it.
+
+---
+
+## The new paradigm of team orchestration
+
+- **The Product Owner** — gets disciplined backlog execution.
+- **The Orchestrator** — codes at the speed of AI.
+- **The Sponsor** — achieves total, real-time visibility.
+
+**Ship faster. Ship disciplined. Ship with ClearGate.**
 
 ---
 
