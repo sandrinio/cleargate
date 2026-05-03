@@ -13,12 +13,11 @@ ClearGate is an open-source planning scaffold that turns AI coding agents into a
 ## Quick install
 
 ```bash
-npm i -D cleargate
 npx cleargate init
 npx cleargate doctor
 ```
 
-Requires Node ≥ 24 LTS. `init` writes a bounded ClearGate block into `CLAUDE.md`, installs the four-agent definitions, and scaffolds `.cleargate/`. Full walkthrough in [Install](#install) and [Getting started in 10 minutes](#getting-started-in-10-minutes) below.
+Requires Node ≥ 24 LTS. `init` writes a bounded ClearGate block into `CLAUDE.md`, installs the four-agent definitions, and scaffolds `.cleargate/`. To pin the version per-project, add it as a dev dependency: `npm i -D cleargate`. Full walkthrough in [Install](#install) and [Getting started in 10 minutes](#getting-started-in-10-minutes) below.
 
 ---
 
@@ -85,27 +84,29 @@ Every sprint feeds three input metrics into the next: first-pass success rate, A
 
 Requires Node ≥ 24 LTS.
 
-1. Add ClearGate to your project:
-
-   ```bash
-   npm i -D cleargate
-   ```
-
-2. Bootstrap the scaffold in your repo:
+1. Bootstrap the scaffold in your repo:
 
    ```bash
    npx cleargate init
    ```
 
-   This writes a bounded `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block into your `CLAUDE.md` (creating the file if it does not exist), installs agent role definitions under `.claude/agents/`, wires the token-ledger hook in `.claude/settings.json`, and creates `.cleargate/` with protocol rules, work-item templates, draft/archive folders, and a flashcard lesson log. Re-running `init` is idempotent — it updates the bounded block in place and preserves your customizations.
+   `npx` fetches and runs the published package on demand — no prior install needed. The command writes a bounded `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block into your `CLAUDE.md` (creating the file if it does not exist), installs agent role definitions under `.claude/agents/`, wires the token-ledger hook in `.claude/settings.json`, and creates `.cleargate/` with protocol rules, work-item templates, draft/archive folders, and a flashcard lesson log. Re-running `init` is idempotent — it updates the bounded block in place and preserves your customizations.
 
-3. Verify the scaffold is healthy:
+2. Verify the scaffold is healthy:
 
    ```bash
    npx cleargate doctor
    ```
 
    `doctor` checks for scaffold drift, missing hooks, blocked items, and configuration validity. Fix any issues it reports before starting your first sprint.
+
+3. *(Optional)* Pin the version per-project so every contributor gets the same one:
+
+   ```bash
+   npm i -D cleargate
+   ```
+
+   Records `cleargate` under `devDependencies` in your `package.json`. Skip this step if you're happy letting `npx` always grab the latest published version.
 
 ---
 
