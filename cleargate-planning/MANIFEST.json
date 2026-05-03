@@ -1,10 +1,10 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-02T19:21:41.996Z",
+  "generated_at": "2026-05-03T19:18:26.972Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "5aa58a549f74ecc73be1630428ef1903faae5c3779b7b5371307c5cb63621026",
+      "sha256": "a1203005821ec737d040af7b21cad6d9a59cfc7e9e0ac302f02cd036b343510f",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -165,7 +165,7 @@
     },
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
-      "sha256": "6125b57bfdcdd5d4fabe886770d9b062d76df9a232f4997dbedf3322aefdf1b5",
+      "sha256": "efbf73916bb591a62c06b340c77142795306b4093e0a869bb8d947ea386c7600",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

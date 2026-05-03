@@ -15,7 +15,13 @@ Reads a frontmatter field from a document. `<ref>` is either `.` (the document b
 Performs a case-sensitive substring search on the document body (everything after the frontmatter block). The negated form `body does not contain` passes when the string is absent. Example: `body does not contain 'TBD'` fails if the literal string `TBD` appears anywhere in the body.
 
 **3. `section(<N>) has <count> <item-type>`**
-Splits the document body on `## ` heading boundaries (1-indexed) and counts items of a given type within section N. `<count>` is an expression like `≥1`, `≥3`, or `0` (exact zero). `<item-type>` is one of `checked-checkbox` (lines matching `- [x]`), `unchecked-checkbox` (lines matching `- [ ]`), or `listed-item` (lines matching `- ` regardless of checkbox state). Example: `section(2) has ≥1 checked-checkbox` asserts that the second `##` section contains at least one checked markdown checkbox.
+Splits the document body on `## ` heading boundaries (1-indexed) and counts items of a given type within section N. `<count>` is an expression like `≥1`, `≥3`, or `0` (exact zero). `<item-type>` is one of:
+- `checked-checkbox` — lines matching `- [x]`
+- `unchecked-checkbox` — lines matching `- [ ]`
+- `listed-item` — lines matching `- ` regardless of checkbox state (bullet-precise; use when checkbox/task-list semantics are required, e.g. DoD)
+- `declared-item` — any line that declares a structured item: bullet lines (`- ...`), table data rows (`| ... |` lines following a `|---|`-style separator within the section), or definition-list terms (lines matching `**Item:**`, `Item:`, `*Item*:` etc.). Use `declared-item` when the gate cares only that the author declared at least N entries in section N, regardless of presentation format (table vs bullet vs def-list).
+
+Example: `section(2) has ≥1 checked-checkbox` asserts that the second `##` section contains at least one checked markdown checkbox. Example: `section(3) has ≥1 declared-item` passes when §3 contains at least one bullet, table data row, or definition-list term.
 
 **4. `file-exists(<path>)`**
 Asserts that a file exists on disk at the given path, resolved relative to the project root. Example: `file-exists(.cleargate/knowledge/cleargate-protocol.md)` passes when that file is present in the working tree.
@@ -65,9 +71,9 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: scope-in-populated
-      check: "section(2) has ≥1 listed-item"
+      check: "section(3) has ≥1 declared-item"
     - id: affected-files-declared
-      check: "section(4) has ≥1 listed-item"
+      check: "section(5) has ≥1 declared-item"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
     - id: discovery-checked
@@ -107,7 +113,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: implementation-files-declared
-      check: "section(3) has ≥1 listed-item"
+      check: "section(3) has ≥1 declared-item"
     - id: dod-declared
       check: "section(4) has ≥1 listed-item"
     - id: gherkin-present
@@ -126,11 +132,11 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: blast-radius-populated
-      check: "section(2) has ≥1 listed-item"
+      check: "section(2) has ≥1 declared-item"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: sandbox-paths-declared
-      check: "section(2) has ≥1 listed-item"
+      check: "section(3) has ≥1 declared-item"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
@@ -143,7 +149,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: repro-steps-deterministic
-      check: "section(2) has ≥3 listed-item"
+      check: "section(2) has ≥3 declared-item"
     - id: severity-set
       check: "frontmatter(.).severity != null"
     - id: no-tbds

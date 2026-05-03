@@ -13,7 +13,7 @@ export type ParsedPredicate =
   | { kind: 'frontmatter'; ref: string; field: string; op: '==' | '!=' | '>=' | '<='; value: string | number | boolean }
   | { kind: 'body-contains'; needle: string; negated: boolean }
   | { kind: 'marker-absence'; marker: 'TBD' | 'TODO' | 'FIXME' }
-  | { kind: 'section'; index: number; count: { op: '>=' | '==' | '>'; n: number }; itemType: 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item' }
+  | { kind: 'section'; index: number; count: { op: '>=' | '==' | '>'; n: number }; itemType: 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item' | 'declared-item' }
   | { kind: 'file-exists'; path: string }
   | { kind: 'link-target-exists'; id: string }
   | { kind: 'status-of'; id: string; value: string };
@@ -77,13 +77,13 @@ export function parsePredicate(src: string): ParsedPredicate {
 
   // 3. section(<N>) has <count> <item-type>
   const sectionMatch = s.match(
-    /^section\((\d+)\) has (≥|>=|==|>)(\d+) (checked-checkbox|unchecked-checkbox|listed-item)$/
+    /^section\((\d+)\) has (≥|>=|==|>)(\d+) (checked-checkbox|unchecked-checkbox|listed-item|declared-item)$/
   );
   if (sectionMatch) {
     const index = parseInt(sectionMatch[1]!, 10);
     const opChar = sectionMatch[2]!;
     const n = parseInt(sectionMatch[3]!, 10);
-    const itemType = sectionMatch[4] as 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item';
+    const itemType = sectionMatch[4] as 'checked-checkbox' | 'unchecked-checkbox' | 'listed-item' | 'declared-item';
     let countOp: '>=' | '==' | '>';
     if (opChar === '≥' || opChar === '>=') countOp = '>=';
     else if (opChar === '>') countOp = '>';
@@ -270,16 +270,25 @@ function compareValues(
   }
 }
 
-/** Resolve a path reference relative to the document or project root. */
+/** Resolve a path reference relative to the document or project root.
+ *  CR-031: also walks .cleargate/delivery/pending-sync/ and .cleargate/delivery/archive/
+ *  so that bare filenames resolve even after triage moves the target to archive.
+ *  Resolution order (stops at first match):
+ *   1. Relative to the citer document's directory
+ *   2. Relative to the project root
+ *   3. .cleargate/delivery/pending-sync/<ref>
+ *   4. .cleargate/delivery/archive/<ref>
+ */
 function resolveLinkedPath(
   ref: string,
   docAbsPath: string,
   projectRoot: string
 ): string | null {
-  // Try relative to doc first, then relative to projectRoot
   const candidates = [
-    path.resolve(path.dirname(docAbsPath), ref),
-    path.resolve(projectRoot, ref),
+    path.resolve(path.dirname(docAbsPath), ref),                                       // 1. relative to citer
+    path.resolve(projectRoot, ref),                                                    // 2. project root
+    path.resolve(projectRoot, '.cleargate', 'delivery', 'pending-sync', ref),         // 3. live
+    path.resolve(projectRoot, '.cleargate', 'delivery', 'archive', ref),              // 4. archived
   ];
   for (const candidate of candidates) {
     // Sandbox check
@@ -482,6 +491,9 @@ function evalSection(
     case 'listed-item':
       actualCount = (sectionContent.match(/^\s*- /gm) || []).length;
       break;
+    case 'declared-item':
+      actualCount = countDeclaredItems(sectionContent);
+      break;
   }
 
   const pass = applyCountOp(actualCount, parsed.count.op, parsed.count.n);
@@ -499,6 +511,61 @@ function applyCountOp(actual: number, op: '>=' | '==' | '>', n: number): boolean
     case '==': return actual === n;
     case '>': return actual > n;
   }
+}
+
+/**
+ * Count declared items in a section content string.
+ * CR-034: A declared item is any of:
+ *   - A bullet line: lines matching `^\s*- ` (regardless of checkbox state)
+ *   - A table data row: `| ... |` lines that follow a `|---|`-style separator
+ *   - A definition-list term: lines matching `^[*_]?[A-Z][^|*\n]*[*_]?:`
+ *     (covers `**Item:**`, `Item:`, `*Item*:` etc.)
+ * Counts bullets + table data rows + definition-list terms within the section.
+ */
+function countDeclaredItems(sectionContent: string): number {
+  const lines = sectionContent.split('\n');
+  let count = 0;
+  let inTable = false; // true after we've seen a separator row
+
+  for (const line of lines) {
+    // Bullet lines (includes `- [x]` and `- [ ]`)
+    if (/^\s*- /.test(line)) {
+      count++;
+      inTable = false;
+      continue;
+    }
+
+    // Table rows: `| ... |` pattern
+    if (/^\|.+\|/.test(line)) {
+      // Check if this is a separator row: |---|, |:---:|, etc.
+      if (/^\|[\s\-:]+\|[\s\-:|]*$/.test(line.replace(/\s/g, ''))) {
+        // This is a separator row — marks start of data rows
+        inTable = true;
+        continue;
+      }
+      // Data row (only if we've seen a separator)
+      if (inTable) {
+        count++;
+      }
+      // Header row (before separator) — not counted
+      continue;
+    }
+
+    // If we hit a non-table line after being in a table, exit table mode
+    if (inTable && !/^\|/.test(line)) {
+      inTable = false;
+    }
+
+    // Definition-list terms: `**Item:**`, `Item:`, `*Item*:`, `Item — value`
+    // Match lines that start with an optional bold/italic marker, then uppercase letter,
+    // then no pipes or asterisks, then end with colon
+    if (/^(\*{1,2}|_{1,2})?[A-Z][^|*\n]*(\*{1,2}|_{1,2})?:/.test(line.trim())) {
+      count++;
+      continue;
+    }
+  }
+
+  return count;
 }
 
 // ─── File-exists evaluator ────────────────────────────────────────────────────
