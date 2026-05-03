@@ -30,6 +30,8 @@
 
 - [[SPRINT-20]] — status: Completed
 
+- [[SPRINT-21]] — status: Ready
+
 
 
 ## Recently Completed Sprints

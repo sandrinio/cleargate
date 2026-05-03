@@ -59,6 +59,16 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-027]] | cr | Approved | .cleargate/delivery/pending-sync/CR-027_Composite_Planning_Readiness_At_Sprint_Preflight.md |
 | [[CR-028]] | cr | Approved | .cleargate/delivery/pending-sync/CR-028_Code_Truth_Triage_Reuse_Right_Size_Justify.md |
 | [[CR-029]] | cr | Approved | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
+| [[CR-030]] | cr | Draft | .cleargate/delivery/pending-sync/CR-030_Initiative_First_Class_Citizenship.md |
+| [[CR-031]] | cr | Draft | .cleargate/delivery/pending-sync/CR-031_Predicate_Resolves_Linked_Files_Across_PendingSync_And_Archive.md |
+| [[CR-032]] | cr | Draft | .cleargate/delivery/pending-sync/CR-032_Surface_Gate_Failures_And_Stop_Self_Cert.md |
+| [[CR-033]] | cr | Draft | .cleargate/delivery/pending-sync/CR-033_Reuse_Audit_Verifies_Cited_Surfaces_Exist.md |
+| [[CR-034]] | cr | Draft | .cleargate/delivery/pending-sync/CR-034_Listed_Item_Predicate_Accepts_Table_Rows.md |
+| [[CR-035]] | cr | Draft | .cleargate/delivery/pending-sync/CR-035_Reporter_Token_Total_Includes_Own_SubagentStop.md |
+| [[CR-036]] | cr | Draft | .cleargate/delivery/pending-sync/CR-036_Reporter_Token_Diet_Bundle_Enforcement_And_Fresh_Session.md |
+| [[CR-037]] | cr | Draft | .cleargate/delivery/pending-sync/CR-037_Architect_Validates_Dep_Versions_Against_Npm_Registry.md |
+| [[CR-038]] | cr | Draft | .cleargate/delivery/pending-sync/CR-038_Stale_Gate_Cache_Refresh_At_Sprint_Preflight.md |
+| [[CR-039]] | cr | Draft | .cleargate/delivery/pending-sync/CR-039_Spike_Per_Story_Session_Reset_For_Dev_QA_Loop.md |
 ## Stories
 
 | [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |
@@ -66,9 +76,11 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Sprints
 
 | [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
+| [[SPRINT-21]] | sprint | Ready | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
+| [[BUG-026]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-026_Update_State_Mjs_Broken_Validate_Shape_Ignoring_Version_Import.md |
 ## Epics
 
 | [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |
