@@ -21,6 +21,30 @@ Requires Node ≥ 24 LTS. `init` writes a bounded ClearGate block into `CLAUDE.m
 
 ---
 
+## Give it to your agent
+
+Already running an AI coding agent? Paste this prompt into Claude Code (or Cursor / Aider / any agent with shell + file-read access on this repo) and let it install and verify ClearGate for you:
+
+```text
+Install ClearGate (npm package: cleargate) in this project.
+
+1. Run `npx cleargate init` from the repo root. Report what files it
+   created or modified.
+2. Run `npx cleargate doctor`. Surface any warnings or errors verbatim.
+3. Read the bounded `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->`
+   block now in CLAUDE.md. In 3 lines, summarize how this changes how
+   we'll plan and execute work from now on.
+4. List `.claude/agents/` and `.cleargate/templates/` — one line per
+   item — so I can see what's available.
+
+Do not write any production code yet. This is install + verification
+only. If any step errors, stop and report the exact error.
+```
+
+If `init` lands cleanly, your next message can be: *"File a ClearGate proposal for [your feature]."* The agent will classify the request, draft a work item under `.cleargate/delivery/pending-sync/`, and halt at Gate 1 for your approval — no rogue code generation.
+
+---
+
 ## The problem
 
 Standard AI coding tools live entirely inside the developer's terminal. The business is locked out, sessions start blind, and agents re-grep raw files, hallucinate duplicate work, and overwrite cross-cutting decisions without warning.
