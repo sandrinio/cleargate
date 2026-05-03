@@ -8,7 +8,17 @@ ClearGate is an open-source planning scaffold that turns AI coding agents into a
 
 > ClearGate is not an AI code generator. **It is an AI Engineering Manager.**
 
-**Node ≥ 24 LTS required.**
+---
+
+## Quick install
+
+```bash
+npm i -D cleargate
+npx cleargate init
+npx cleargate doctor
+```
+
+Requires Node ≥ 24 LTS. `init` writes a bounded ClearGate block into `CLAUDE.md`, installs the four-agent definitions, and scaffolds `.cleargate/`. Full walkthrough in [Install](#install) and [Getting started in 10 minutes](#getting-started-in-10-minutes) below.
 
 ---
 
