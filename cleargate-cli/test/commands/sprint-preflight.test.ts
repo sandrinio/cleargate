@@ -500,12 +500,20 @@ function seedReadinessFixture(
 
   commitFixtureFiles(dir, files, `fixture: CR-027 readiness ${sprintId}`);
 
-  // Return an execFn that intercepts --emit-json calls and passes git cmds through
+  // Return an execFn that intercepts --emit-json and gate-check calls;
+  // passes git commands through to real execSync.
+  // CR-038: also intercept `cleargate gate check` so tests don't spawn the
+  // real binary (M2 plan: "Tests should NOT spawn real cleargate gate check").
   const childIds = items.map((i) => i.id);
   return (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => {
     if (cmd.includes('--emit-json')) {
       // Return canned JSON with child IDs
       return JSON.stringify({ workItemIds: childIds });
+    }
+    if (cmd.includes('gate check')) {
+      // Simulate successful no-op gate check (Step 0 writes to frontmatter in
+      // real usage; here we just confirm the call was made without side-effects).
+      return '';
     }
     // Delegate git and other commands to real execSync
     return execSync(cmd, { ...opts, stdio: 'pipe' }) as unknown as string;
@@ -663,5 +671,279 @@ describe('Scenario 14 (CR-027): sprint plan itself fails when cached_gate_result
     expect(code).toBe(1);
     expect(cap.getErr()).toContain('SPRINT-99');
     expect(cap.getErr()).toContain('no cached_gate_result');
+  });
+});
+
+// ─── CR-038 Step 0: stale gate cache refresh scenarios ────────────────────────
+
+/**
+ * Build a fixture for CR-038 Step 0 scenarios with a custom execFn that
+ * tracks how many times `cleargate gate check` was called per item ID.
+ *
+ * Returns { execFn, gateCheckCalls } where gateCheckCalls is mutated as the
+ * handler runs.
+ *
+ * @param dir           - Fixture git repo directory.
+ * @param sprintId      - Sprint ID.
+ * @param items         - Child work items. Items with inArchive=true land in
+ *                        archive/ instead of pending-sync/.
+ * @param gateCheckBehavior - Per-item gate check behaviour: 'success' (return ''),
+ *                             'error' (throw), or undefined (default 'success').
+ */
+function seedStep0Fixture(
+  dir: string,
+  sprintId: string,
+  items: Array<{
+    id: string;
+    status?: string;
+    inArchive?: boolean;
+    pass?: boolean | null;
+    lastGateCheck?: string | null;
+    updatedAt?: string;
+    gateCheckBehavior?: 'success' | 'error';
+  }>,
+): { execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string; gateCheckCalls: Record<string, number> } {
+  const prevNum = parseInt(/^SPRINT-(\d+)$/.exec(sprintId)?.[1] ?? '0', 10) - 1;
+  const prevId = prevNum > 0 ? `SPRINT-${String(prevNum).padStart(2, '0')}` : null;
+
+  const files: Array<{ relPath: string; content: string }> = [
+    { relPath: 'README.md', content: '# fixture\n' },
+  ];
+
+  if (prevId) {
+    files.push({
+      relPath: `.cleargate/sprint-runs/${prevId}/state.json`,
+      content: JSON.stringify({ sprint_id: prevId, sprint_status: 'Completed' }, null, 2),
+    });
+  }
+
+  // Build §1 Consolidated Deliverables listing
+  const deliverables =
+    items.length > 0
+      ? `\n## 1. Consolidated Deliverables\n\n${items.map((i) => `- ${i.id}`).join('\n')}\n`
+      : '';
+
+  files.push({
+    relPath: `.cleargate/delivery/pending-sync/${sprintId}_Test_Sprint.md`,
+    content: [
+      '---',
+      `sprint_id: "${sprintId}"`,
+      'execution_mode: "v2"',
+      'updated_at: "2026-01-01T00:00:00Z"',
+      'cached_gate_result:',
+      '  pass: true',
+      '  failing_criteria: []',
+      '  last_gate_check: "2026-06-01T00:00:00Z"',
+      '---',
+      '',
+      `# ${sprintId}`,
+      deliverables,
+    ].join('\n'),
+  });
+
+  // Write item files
+  for (const item of items) {
+    const bucket = item.inArchive ? 'archive' : 'pending-sync';
+    const gateBlock =
+      item.pass === null || item.pass === undefined
+        ? 'cached_gate_result:\n  pass: null\n  failing_criteria: []\n  last_gate_check: null'
+        : [
+            'cached_gate_result:',
+            `  pass: ${item.pass}`,
+            '  failing_criteria: []',
+            `  last_gate_check: "${item.lastGateCheck ?? '2026-06-01T00:00:00Z'}"`,
+          ].join('\n');
+
+    files.push({
+      relPath: `.cleargate/delivery/${bucket}/${item.id}_Test_Item.md`,
+      content: [
+        '---',
+        `status: "${item.status ?? 'Ready'}"`,
+        `updated_at: "${item.updatedAt ?? '2026-01-01T00:00:00Z'}"`,
+        gateBlock,
+        '---',
+        '',
+        `# ${item.id}`,
+        '',
+        '## 1. Summary',
+        '- test item',
+        '',
+      ].join('\n'),
+    });
+  }
+
+  commitFixtureFiles(dir, files, `fixture: CR-038 step0 ${sprintId}`);
+
+  const gateCheckCalls: Record<string, number> = {};
+  const childIds = items.map((i) => i.id);
+  const itemsByPath = new Map<string, (typeof items)[number]>();
+  for (const item of items) {
+    const bucket = item.inArchive ? 'archive' : 'pending-sync';
+    const absPath = path.join(dir, '.cleargate', 'delivery', bucket, `${item.id}_Test_Item.md`);
+    itemsByPath.set(absPath, item);
+  }
+
+  const execFn = (cmd: string, opts: { cwd: string; encoding: 'utf8' }): string => {
+    if (cmd.includes('--emit-json')) {
+      return JSON.stringify({ workItemIds: childIds });
+    }
+    if (cmd.includes('gate check')) {
+      // Extract the file path from the command: cleargate gate check "<path>"
+      const m = /gate check "([^"]+)"/.exec(cmd);
+      if (m) {
+        const itemPath = m[1]!;
+        // Find which item this is by path
+        const matchingId = [...itemsByPath.entries()].find(([p]) => p === itemPath)?.[1]?.id ?? itemPath;
+        gateCheckCalls[matchingId] = (gateCheckCalls[matchingId] ?? 0) + 1;
+        const behavior = itemsByPath.get(itemPath)?.gateCheckBehavior ?? 'success';
+        if (behavior === 'error') {
+          throw new Error(`mock gate check error for ${matchingId}`);
+        }
+      }
+      return '';
+    }
+    return execSync(cmd, { ...opts, stdio: 'pipe' }) as unknown as string;
+  };
+
+  return { execFn, gateCheckCalls };
+}
+
+// ─── Scenario 15 (CR-038): all-fresh caches — Step 0 reports 0 errors ────────
+
+describe('Scenario 15 (CR-038): Step 0 — all items refreshed, 0 errors', () => {
+  it('stdout contains "Step 0: refreshed N items, 0 errors." and exit code 0', () => {
+    const { execFn, gateCheckCalls } = seedStep0Fixture(fixtureDir, 'SPRINT-99', [
+      { id: 'CR-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      { id: 'EPIC-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      { id: 'STORY-099-01', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    ]);
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    expect(code).toBe(0);
+    expect(cap.getOut()).toContain('Step 0: refreshed 3 items, 0 errors.');
+    // gate check was called once per non-terminal item
+    expect(gateCheckCalls['CR-099']).toBe(1);
+    expect(gateCheckCalls['EPIC-099']).toBe(1);
+    expect(gateCheckCalls['STORY-099-01']).toBe(1);
+  });
+});
+
+// ─── Scenario 16 (CR-038): stale items — Step 0 invokes gate check for each ──
+
+describe('Scenario 16 (CR-038): Step 0 — stale items get gate check invoked', () => {
+  it('Step 0 reports 2 refreshed items and execFn receives 2 gate-check calls', () => {
+    // 2 items whose last_gate_check < updated_at (stale); still refreshed regardless
+    const { execFn, gateCheckCalls } = seedStep0Fixture(fixtureDir, 'SPRINT-99', [
+      {
+        id: 'CR-099',
+        pass: true,
+        lastGateCheck: '2026-01-01T00:00:00Z',  // older than updated_at
+        updatedAt: '2026-05-01T00:00:00Z',       // more recent → stale
+      },
+      {
+        id: 'STORY-099-01',
+        pass: true,
+        lastGateCheck: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-05-01T00:00:00Z',
+      },
+    ]);
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    // Step 0 ran gate check for both stale items
+    expect(gateCheckCalls['CR-099']).toBe(1);
+    expect(gateCheckCalls['STORY-099-01']).toBe(1);
+    expect(cap.getOut()).toContain('Step 0: refreshed 2 items, 0 errors.');
+    // Note: Check 5 (CR-027) will still see stale (mock doesn't actually update frontmatter)
+    // but Step 0 itself passed (no errors). Exit code is 1 due to Check 5 stale detection.
+    // This is correct — Step 0 refreshes, Step 5 re-reads the (now-fresh-in-prod) cache.
+    expect(code).toBe(1);  // Check 5 still sees stale because mock doesn't write frontmatter
+  });
+});
+
+// ─── Scenario 17 (CR-038): per-item gate error — Step 0 continues ─────────────
+
+describe('Scenario 17 (CR-038): Step 0 — per-item gate check error, other items still refreshed', () => {
+  it('Step 0 reports N-1 refreshed + 1 error; preflight continues (exit driven by Check 5)', () => {
+    const { execFn, gateCheckCalls } = seedStep0Fixture(fixtureDir, 'SPRINT-99', [
+      { id: 'CR-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', gateCheckBehavior: 'error' },
+      { id: 'EPIC-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+      { id: 'STORY-099-01', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    ]);
+
+    const cap = makeCapture();
+    // Does not throw — Step 0 swallows individual errors
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    const out = cap.getOut();
+    expect(out).toContain('Step 0: refreshed 2 items, 1 errors.');
+    // Error bullet line for the failing item
+    expect(out).toContain('CR-099');
+    // Other items still processed
+    expect(gateCheckCalls['EPIC-099']).toBe(1);
+    expect(gateCheckCalls['STORY-099-01']).toBe(1);
+    // Step 0 itself does NOT call exitFn(1); preflight continues to Check 5
+    // Check 5 passes (EPIC-099 + STORY-099-01 have pass=true + non-stale cache)
+    expect(code).toBe(0);
+  });
+});
+
+// ─── Scenario 18 (CR-038): archive-terminal item — Step 0 skips it ───────────
+
+describe('Scenario 18 (CR-038): Step 0 — archive/terminal item skipped (no gate check)', () => {
+  it('Step 0 skips Done item in archive; gate check not called for it', () => {
+    const { execFn, gateCheckCalls } = seedStep0Fixture(fixtureDir, 'SPRINT-99', [
+      // This item is Done + in archive — Step 0 must skip it
+      {
+        id: 'STORY-099-02',
+        status: 'Done',
+        inArchive: true,
+        pass: true,
+        lastGateCheck: '2026-06-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+      // This item is active — Step 0 should refresh it
+      { id: 'EPIC-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    ]);
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    // STORY-099-02 was skipped (no gate check call)
+    expect(gateCheckCalls['STORY-099-02']).toBeUndefined();
+    // EPIC-099 was refreshed
+    expect(gateCheckCalls['EPIC-099']).toBe(1);
+    // Step 0 reports 1 refreshed (EPIC-099), STORY-099-02 skipped
+    expect(cap.getOut()).toContain('Step 0: refreshed 1 items, 0 errors.');
+    expect(code).toBe(0);
+  });
+});
+
+// ─── Scenario 19 (CR-038): all errors — Step 0 does not fail preflight ────────
+
+describe('Scenario 19 (CR-038): Step 0 — all items error, Step 0 never calls exitFn(1)', () => {
+  it('exit code is 0 when all gate checks error (Step 5 still runs and passes)', () => {
+    // All items error on gate check — Step 0 collects errors but never blocks
+    const { execFn } = seedStep0Fixture(fixtureDir, 'SPRINT-99', [
+      { id: 'CR-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', gateCheckBehavior: 'error' },
+      { id: 'EPIC-099', pass: true, lastGateCheck: '2026-06-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', gateCheckBehavior: 'error' },
+    ]);
+
+    const cap = makeCapture();
+    const code = runPreflight('SPRINT-99', fixtureDir, cap, { execFn });
+
+    const out = cap.getOut();
+    expect(out).toContain('Step 0: refreshed 0 items, 2 errors.');
+    // Error bullet lines present in stdout
+    expect(out).toContain('CR-099');
+    expect(out).toContain('EPIC-099');
+    // Step 0 itself does NOT block — exit code driven by Check 5
+    // Check 5 still reads the pre-existing pass=true cache from fixture → passes
+    expect(code).toBe(0);
+    // The skill load directive is still emitted
+    expect(cap.getOut()).toContain('→ Load skill: sprint-execution');
   });
 });

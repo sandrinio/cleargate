@@ -1325,6 +1325,87 @@ function checkPerItemReadinessGates(
   };
 }
 
+// ─── Step 0: refresh per-item gate caches (CR-038) ───────────────────────────
+
+/** Result of the Step 0 gate-cache refresh. */
+interface RefreshResult {
+  /** Work-item IDs whose gate check was successfully invoked. */
+  refreshed: string[];
+  /** Work-item IDs skipped because they carry a terminal status. */
+  skipped: string[];
+  /** Per-item errors: gate check threw or execFn rejected. */
+  errors: { id: string; message: string }[];
+}
+
+/**
+ * CR-038: refresh cached_gate_result for every in-scope work item before
+ * Check 5 (CR-027) reads the cache. This eliminates the stale-cache-blocks-
+ * preflight false-positive class.
+ *
+ * Algorithm:
+ *   1. Locate sprint plan via findSprintFile.
+ *   2. Extract child IDs via extractInScopeWorkItemIds (reuses the CR-027 seam).
+ *   3. For each ID: skip if status ∈ TERMINAL_STATUSES; otherwise run
+ *      `cleargate gate check "<path>"` via execFn (suppress stdout, capture error).
+ *   4. Return { refreshed, skipped, errors }.
+ *
+ * Step 0 NEVER fails preflight on its own; errors are surfaced for visibility.
+ * The actual block decision lives with Check 5 (CR-027) reading the now-fresh cache.
+ */
+function refreshScopedGateCaches(
+  sprintId: string,
+  cwd: string,
+  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
+): RefreshResult {
+  const result: RefreshResult = { refreshed: [], skipped: [], errors: [] };
+
+  // Step 1: locate sprint plan
+  const sprintFilePath = findSprintFile(sprintId, cwd);
+  if (!sprintFilePath) {
+    // No sprint file found — nothing to refresh; Step 5 will surface the error
+    return result;
+  }
+
+  // Step 2: extract child IDs (+ sprint plan itself is handled by Step 5 self-check)
+  const childIds = extractInScopeWorkItemIds(sprintFilePath, cwd, execFn);
+  if (!childIds || childIds.length === 0) {
+    return result;
+  }
+
+  // Step 3: for each child ID, resolve file and run gate check
+  for (const id of childIds) {
+    const absPath = findWorkItemFileLocal(cwd, id);
+    if (!absPath) {
+      // File not found — not an error for Step 0 (Step 5 will report it)
+      continue;
+    }
+
+    // Skip terminal-status items (Done, Completed, Abandoned, etc.)
+    let status = '';
+    try {
+      const raw = fs.readFileSync(absPath, 'utf8');
+      const { fm } = parseFrontmatter(raw);
+      status = String(fm['status'] ?? '');
+    } catch {
+      // Unreadable — skip gracefully
+    }
+    if (TERMINAL_STATUSES.has(status)) {
+      result.skipped.push(id);
+      continue;
+    }
+
+    // Run gate check via execFn; suppress stdout, capture errors
+    try {
+      execFn(`cleargate gate check "${absPath}"`, { cwd, encoding: 'utf8' });
+      result.refreshed.push(id);
+    } catch (err) {
+      result.errors.push({ id, message: String(err) });
+    }
+  }
+
+  return result;
+}
+
 /**
  * Emit the punch list to stdout (on pass) or stderr (on failure).
  * Format matches §1.2 R4 of STORY-025-02.
@@ -1364,6 +1445,8 @@ function emitPunchList(
  *
  * CR-027: added check #5 — per-item readiness gates pass for every
  * work-item ID in §1 Consolidated Deliverables.
+ * CR-038: added Step 0 — refresh per-item cached_gate_result before Check 5
+ * reads the cache, eliminating stale-cache false-positive blocks.
  */
 export function sprintPreflightHandler(
   opts: { sprintId: string },
@@ -1389,6 +1472,14 @@ export function sprintPreflightHandler(
 
   // Read execution_mode once — passed to check #5 so it can apply v1/v2 severity.
   const mode = readSprintExecutionMode(opts.sprintId, { cwd });
+
+  // Step 0 (CR-038): refresh per-item gate cache for all in-scope items.
+  // Never fails preflight on its own; errors reported, decision lives with Check 5.
+  const refresh = refreshScopedGateCaches(opts.sprintId, cwd, execFn);
+  stdoutFn(`Step 0: refreshed ${refresh.refreshed.length} items, ${refresh.errors.length} errors.\n`);
+  for (const e of refresh.errors) {
+    stdoutFn(`  - ${e.id}: ${e.message}\n`);
+  }
 
   // Run all five checks — all run regardless of individual failures
   const results: PreflightCheckResult[] = [
