@@ -2,7 +2,7 @@
 cr_id: CR-037
 parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-21"
 carry_over: false
 status: Ready
 approved: true
