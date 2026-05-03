@@ -4,8 +4,10 @@ parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -45,7 +47,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -71,23 +73,23 @@ draft_tokens:
 
 - **Question:** Citation format — strict (require `path:symbol` or `path:line` syntax) or permissive (extract any path-shaped substring from the section)?
   - **Recommended:** **permissive**. Extract candidates with the regex `[a-zA-Z0-9_./-]+\.[a-zA-Z]{1,5}(:[a-zA-Z_][a-zA-Z0-9_]*)?` (matches `src/foo.ts`, `src/foo.ts:fetchIssues`, `cleargate-cli/src/lib/work-item-type.ts`, `package.json`, etc.). Strict format would force agents to learn yet another micro-syntax; permissive matches what humans naturally write. False negatives (a path-like string that isn't actually a path) are caught by the existence check itself — `fs.existsSync` returns false, criterion fails, agent corrects.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Section parsing — only `## Existing Surfaces`, or also accept `### Existing Surfaces` and other heading levels?
   - **Recommended:** `## Existing Surfaces` only (matching CR-028's predicate exactly). Heading-level drift is a separate template-discipline issue.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Empty section handling — fail with "section present but cites zero surfaces" or pass on the basis that "no overlap found" is a valid audit result?
   - **Recommended:** **fail** if the section contains zero path-shaped substrings AND zero "no overlap found" / "no existing surface" sentinel phrases. The agent must either cite paths or explicitly assert the audit returned empty. Splitting "section heading-only" from "audit-with-result" is the whole point.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Glob support — handle `src/integrations/jira-*.ts` patterns?
   - **Recommended:** v1 = literal paths only. Glob support deferred. Agents writing patterns instead of literal paths is a smell ("I think there's stuff in here but didn't actually look").
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** New predicate shape (#7) or extend existing `body contains` semantics?
   - **Recommended:** new closed-set predicate shape: `existing-surfaces-verified`. Predicate engine gains one new shape. Keeps the `body contains '## Existing Surfaces'` check separate (presence) from the new check (correctness). CR-028's existing predicate stays as-is; this CR adds a sibling.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** off-sprint OR SPRINT-21 candidate. Lower urgency than CR-030/031/032 (which fix the test's blocking failures). This is the principle-tightening that follows once the basics work.

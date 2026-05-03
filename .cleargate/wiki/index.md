@@ -76,7 +76,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Sprints
 
 | [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
-| [[SPRINT-21]] | sprint | Ready | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
+| [[SPRINT-21]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
