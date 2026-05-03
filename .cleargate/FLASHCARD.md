@@ -3,6 +3,11 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-03 · #bug #git-log · BUG filed against npm-published version may already be fixed in dev repo — `git log -G <symbol>` before implementing avoids duplicate fix commits.
+2026-05-03 · #qa #spec #acceptance-metric · CR-034: spec §4.2 ≤2 listed-item count contradicted §3 6-criteria migration. Always cross-check aggregate acceptance metrics against explicit item lists.
+2026-05-03 · #readiness-gates #cr · sandbox-paths-declared was duplicate section(2) with blast-radius-populated; correct target is section(3) per CR template (Execution Sandbox = §3).
+2026-05-03 · #predicates #declared-item #tables · declared-item counts table data rows only after a |---| separator; header row alone yields 0 — correct behavior per template semantics.
+2026-05-03 · #test-harness #worktree #vitest · Smoke tests with hardcoded repo root path fail in worktrees — use import.meta.url-relative SMOKE_REPO_ROOT constant instead.
 2026-05-03 · #protocol #gate #bypass · SPRINT-21 cached_gate_result.pass hand-set true (engine can't type-detect SPRINT files); CR-030 in this sprint fixes — bypass rescinds post-CR-030.
 2026-05-02 · #claude-md #mirror #prune · CLEARGATE-block awk-diff is the reliable mirror-parity gate — pipe both blocks to files and diff; empty = pass. Add to QA recipe template.
 2026-05-02 · #test-harness #vitest #worktree · Tests that grep CLAUDE.md must be updated in the same commit as the CLAUDE.md prune; old assertions become instantly-failing post-merge.
