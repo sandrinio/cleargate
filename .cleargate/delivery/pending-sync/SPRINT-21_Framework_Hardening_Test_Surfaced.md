@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: "block"
 remote_id: null
 source_tool: "local"
-status: "Ready"
+status: "Active"
 execution_mode: "v2"
 start_date: "2026-05-30"
 end_date: "2026-06-12"
@@ -44,7 +44,7 @@ proposals: []
 approved: true
 approved_at: "2026-05-03T18:08:44Z"
 approved_by: "sandrinio"
-activated_at: null
+activated_at: "2026-05-03T20:05:00Z"
 human_override: false
 draft_tokens:
   input: null
@@ -95,69 +95,117 @@ cached_gate_result:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [`BUG-026`](BUG-026_Update_State_Mjs_Broken_Validate_Shape_Ignoring_Version_Import.md) | Bug | `update_state.mjs` broken — `validateShapeIgnoringVersion` import | fast | XS | y (W1 batch) | low | W1 |
 | [`CR-031`](CR-031_Predicate_Resolves_Linked_Files_Across_PendingSync_And_Archive.md) | CR | `resolveLinkedPath` walks pending-sync + archive | fast | XS | y (W1 batch) | low | W1 |
-| [`CR-035`](CR-035_Reporter_Token_Total_Includes_Own_SubagentStop.md) | CR | Reporter §3 token total — session-totals + two-line split | fast | XS | y (W1 batch) | low | W1 |
+| [`CR-034`](CR-034_Listed_Item_Predicate_Accepts_Table_Rows.md) | CR | `listed-item` predicate accepts table rows (`declared-item`) | standard | S | y (W1 batch) | low | W1 |
 | [`CR-037`](CR-037_Architect_Validates_Dep_Versions_Against_Npm_Registry.md) | CR | Architect pre-spec dep version check via `npm view` | fast | XS | y (W1 batch) | low | W1 |
 | [`CR-032`](CR-032_Surface_Gate_Failures_And_Stop_Self_Cert.md) | CR | Surface gate failures + literal-criterion rule at Ambiguity Gate | standard | S | y (W2) | low | W2 |
-| [`CR-034`](CR-034_Listed_Item_Predicate_Accepts_Table_Rows.md) | CR | `listed-item` predicate accepts table rows (`declared-item`) | standard | S | y (W2) | low | W2 |
-| [`CR-036`](CR-036_Reporter_Token_Diet_Bundle_Enforcement_And_Fresh_Session.md) | CR | Reporter token diet — bundle mandatory + fresh session_id + budget warn | standard | M | y (W3) | med | W3 |
-| [`CR-038`](CR-038_Stale_Gate_Cache_Refresh_At_Sprint_Preflight.md) | CR | Stale `cached_gate_result` refresh as preflight Step 0 | standard | S | y (W3) | low | W3 |
+| [`CR-038`](CR-038_Stale_Gate_Cache_Refresh_At_Sprint_Preflight.md) | CR | Stale `cached_gate_result` refresh as preflight Step 0 | standard | S | y (W2) | low | W2 |
 | [`CR-030`](CR-030_Initiative_First_Class_Citizenship.md) | CR | Initiative + Sprint first-class citizenship (bucket+type+stamp+id+predicate) | standard | M | y (W3) | med | W3 |
 | [`CR-033`](CR-033_Reuse_Audit_Verifies_Cited_Surfaces_Exist.md) | CR | `existing-surfaces-verified` predicate (CR-028 follow-up) | standard | M | y (W3) | low | W3 |
-| [`CR-039`](CR-039_Spike_Per_Story_Session_Reset_For_Dev_QA_Loop.md) | CR (spike) | Per-story session reset investigation memo | standard | spike (≤1 dev-day) | n (W4 solo) | low | W4 |
+| [`CR-035`](CR-035_Reporter_Token_Total_Includes_Own_SubagentStop.md) | CR | Reporter §3 token total — session-totals + two-line split | fast | XS | y (W3) | low | W3 |
+| [`CR-036`](CR-036_Reporter_Token_Diet_Bundle_Enforcement_And_Fresh_Session.md) | CR | Reporter token diet — bundle mandatory + fresh session_id + budget warn | standard | M | n (W4 solo) | med | W4 |
+| [`CR-039`](CR-039_Spike_Per_Story_Session_Reset_For_Dev_QA_Loop.md) | CR (spike) | Per-story session reset investigation memo | standard | spike (≤1 dev-day) | n (W5 solo) | low | W5 |
 
-**Estimated totals:** 11 items, 4 waves. Complexity: 4×XS + 3×S + 3×M + 1 spike. Lane mix: 4 fast / 7 standard. Parallelism: W1 = 4 in a batch (one developer, 4 trivial edits); W2 = 2 parallel; W3 = 4 parallel; W4 = 1 solo.
+**Estimated totals:** 11 items, 5 waves. Complexity: 4×XS + 3×S + 3×M + 1 spike. Lane mix: 4 fast / 7 standard. Parallelism: W1 = 4 in a batch (one developer, 4 ground edits); W2 = 2 parallel; W3 = 3 parallel; W4 = 1 solo; W5 = 1 solo.
 
-**Dispatch unit estimate:** ~7-9 Developer dispatches + matching QA dispatches (W1 batch counts as 1 dispatch by convention if a single Developer carries the 4 trivial edits; otherwise 4). Architect: 1 bundled M-plan covering all 4 waves (per SPRINT-19 lesson: bundled plans beat per-story dispatches).
+**Dispatch unit estimate:** ~6–8 Developer dispatches + matching QA dispatches (W1 batch counts as 1 dispatch with one Developer carrying 4 ground edits; W2/W3 parallel = 2/3 dispatches; W4/W5 solo = 1/1). Architect: 1 sprint-wide SDR + per-milestone M2/M3/M4 plans (skip M1 since W1 is fast-lane batch + standard-lane CR-034 is small enough that the SDR's preliminary stencil suffices).
 
 ## 2. Execution Strategy
 
-*(Populated by Architect Sprint Design Review — DEFERRED. SDR runs after the 11 anchor files reach 🟢 in pending-sync, and updates this section in-place before Gate 2.)*
+*Reordered 2026-05-03 by orchestrator + human for max compounding — each wave's output is consumed by the next. Architect SDR remains DEFERRED to post-W1 and may further refine line-range stencils, but the 5-wave structure below is locked.*
 
-### 2.1 Phase Plan (preliminary)
+### 2.1 Phase Plan (compounding-order)
 
-**Wave 1 — Quick wins (parallel batch):**
-- **One Developer dispatch carries all 4 XS edits:** BUG-026 (restore export) + CR-031 (6-line predicate fallback) + CR-035 (Reporter prompt edit) + CR-037 (Architect prompt edit). Single commit `feat(SPRINT-21-W1): four trivial fixes (BUG-026 + CR-031 + CR-035 + CR-037)`.
-- Rationale: each item ≤30-line touch; bundling avoids the ceremonial overhead of 4 separate dispatches.
-- Acceptance: each item's verification protocol passes individually; mirror diffs empty.
+**Wave 1 — Ground (4 items, batch dispatch):**
+> *The soil. Each removes a class of silent failure that affects every later wave.*
 
-**Wave 2 — Visibility bedrock (2 parallel dispatches):**
-- **CR-032** (Developer dispatch 2): surface gate failures + literal-criterion rule. 2 hooks + 2 CLAUDE.md + 7 templates + 1 test.
-- **CR-034** (Developer dispatch 3): `declared-item` predicate + 6 criteria migrations. Predicate engine + readiness-gates + 8 unit tests.
-- Rationale: both touch predicate/visibility infrastructure; ship together so W3+ benefit from refreshed signal surface AND table-friendly predicates.
-- Coupling: CR-032's chat-injection pattern is reused by CR-036 + CR-038 in W3.
+| Item | What it produces | Who consumes |
+|---|---|---|
+| **BUG-026** | `update_state.mjs` actually works (restore `validateShapeIgnoringVersion` import) | orchestrator state machine, every later dispatch |
+| **CR-031** | predicate `resolveLinkedPath` walks pending-sync ∪ archive | every gate check after a lifecycle move |
+| **CR-034** | `declared-item` predicate (table rows count) + 6 criteria migrations | W3's CR-030 + CR-033 (predicate engine extension); the 11 anchor drafts (so they pass their own gates) |
+| **CR-037** | Architect dep validation via `npm view` (prompt edit) | every M-plan dispatch in W2/W3/W4 |
 
-**Wave 3 — Cost + preflight + Initiative + L0 (4 parallel dispatches):**
-- **CR-036 + CR-035 (paired)** (Developer dispatch 4): Reporter diet — bundle mandatory + fresh session_id + budget warn. Note: CR-035 already shipped in W1; CR-036 builds on its prompt edit.
-- **CR-038** (Developer dispatch 5): preflight Step 0 cache refresh. Pairs with CR-027 (already shipped in SPRINT-20).
-- **CR-030** (Developer dispatch 6): Initiative+Sprint first-class. 4 CLI files + template + readiness-gates + 3 tests.
-- **CR-033** (Developer dispatch 7): `existing-surfaces-verified` predicate. New predicate engine code + 9 tests.
-- Rationale: all touch different file surfaces (Reporter/preflight/work-item-type/predicates respectively); zero shared-file conflicts; all benefit from W2's bedrock.
+→ Single bundled Developer commit: `feat(SPRINT-21-W1): four ground fixes (BUG-026 + CR-031 + CR-034 + CR-037)`. One QA pass over the bundle. Acceptance: each item's verification protocol passes individually; mirror diffs empty.
 
-**Wave 4 — Spike (1 solo dispatch):**
-- **CR-039** (Developer dispatch 8): per-story session reset investigation. Runs LAST so measurement reflects post-CR-036 baseline.
+**Wave 2 — Visibility (2 parallel dispatches):**
+> *The eyes. After this wave, the sprint sees itself — every W3+W4+W5 dispatch runs with full signal.*
 
-### 2.2 Merge Ordering (preliminary)
+| Item | What it produces | Who consumes |
+|---|---|---|
+| **CR-032** | chat-injection of gate failures + literal-criterion rule (PostToolUse stdout) | every W3+W4+W5 dispatch — no more silent fails |
+| **CR-038** | preflight Step 0 cache refresh (paired with CR-027 which shipped in SPRINT-20) | future SPRINT-* preflights stop false-positive blocking on stale caches |
+
+→ Two parallel Developer dispatches. **Critical inflection point** — orchestrator manually scans hook log post-W1 dispatches and surfaces gate-fails to human until CR-032 lands.
+
+**Wave 3 — Type system + Reporter prep (3 parallel dispatches):**
+> *The bones. Now safe to extend, because CR-034 made predicates match templates and CR-032 surfaces failures.*
+
+| Item | What it produces | Who consumes |
+|---|---|---|
+| **CR-030** | Initiative + Sprint first-class (bucket+type+stamp+id+predicate) — uses CR-034 baseline | future Initiative→Epic flow; SPRINT-21's own type checks |
+| **CR-033** | `existing-surfaces-verified` predicate (new shape #7) — uses CR-034 engine extension | future reuse audits |
+| **CR-035** | Reporter reads `.session-totals.json` + two-line split | W4's CR-036 builds on this prompt edit |
+
+→ Three parallel Developer dispatches.
+
+**Wave 4 — Cost diet (1 solo dispatch):**
+> *The discipline. Lands in time for SPRINT-21's own Reporter close to reap savings.*
+
+| Item | What it produces | Who consumes |
+|---|---|---|
+| **CR-036** | Reporter diet — bundle mandatory + fresh session_id + budget warn (200k soft / 500k hard advisory) | SPRINT-21's own Gate-4 Reporter dispatch (~99% cost cut) |
+
+Builds on CR-035 (W3 prompt edit base), uses CR-032 (W2 chat injection) for budget warnings. Step 3.5 fatal under v2 — verification step folds in `prep_reporter_context.mjs` diagnostic.
+
+**Wave 5 — Spike (1 solo dispatch):**
+> *The mirror. Measures against post-diet baseline.*
+
+| Item | What it produces | Who consumes |
+|---|---|---|
+| **CR-039** | per-story session-reset memo + minimal prototype (Dev+QA only, 1 dev-day cap) | SPRINT-22+ planning; informs follow-up CR if findings are go/no-go |
+
+Runs LAST so the prototype measures cost-savings against the post-CR-036 Reporter, not the pre-diet one.
+
+**Compounding chain — left-to-right:**
+
+```
+W1 ground → W2 dispatches use working state.json, correct predicates, dep-checked M-plan
+   ↓
+W2 visibility → W3 dispatches see gate-fails in chat, have refreshed caches
+   ↓
+W3 type system + Reporter prep → W4 dispatch uses CR-035 base + CR-032 injection
+   ↓
+W4 cost diet → SPRINT-21's own Reporter close reaps the savings
+   ↓
+W5 spike → measures post-diet cost as the real baseline for SPRINT-22
+```
+
+### 2.2 Merge Ordering (compounding-order)
 
 Files touched by more than one item:
 
 | Shared File | Items | Merge Order | Rationale |
 | --- | --- | --- | --- |
-| `cleargate-cli/src/lib/readiness-predicates.ts` | CR-031 (W1), CR-033 (W3), CR-034 (W2) | W1 → W2 → W3 | Three concurrent edits; merge in wave order. CR-031 is XS (~6 lines); CR-034 adds new item-type; CR-033 adds new shape #7. Zero overlap if merged sequentially. |
+| `cleargate-cli/src/lib/readiness-predicates.ts` | CR-031 (W1), CR-034 (W1), CR-033 (W3) | W1 → W3 | Two W1 edits land in same bundled commit (CR-031 ~6 lines path resolution; CR-034 adds new `declared-item` item-type). CR-033 in W3 adds new closed-set shape #7. Zero overlap if merged sequentially. |
 | `cleargate-cli/src/lib/work-item-type.ts` | CR-030 (W3) | n/a | Single-wave solo. |
-| `.cleargate/knowledge/readiness-gates.md` | CR-030 (W3), CR-033 (W3), CR-034 (W2) | W2 → W3 (parallel within W3) | CR-034 migrates 6 criteria first; CR-030 adds Initiative gate + renames `proposal-approved`; CR-033 adds `existing-surfaces-verified` to 3 gates. Architect SDR confirms exact diff conflict resolution. |
-| `.cleargate/scripts/close_sprint.mjs` | CR-036 (W3) | n/a | Single. |
-| `.claude/agents/reporter.md` | CR-035 (W1), CR-036 (W3) | W1 → W3 | CR-035 lands prompt edit first; CR-036 builds on it. |
+| `.cleargate/knowledge/readiness-gates.md` | CR-034 (W1), CR-030 (W3), CR-033 (W3) | W1 → W3 (parallel within W3) | CR-034 migrates 6 criteria from `listed-item` → `declared-item` in W1 bundled commit; CR-030 adds Initiative gate + renames `proposal-approved` → `parent-approved`; CR-033 adds `existing-surfaces-verified` to 3 gates. Architect M3 plan pins exact diff conflict resolution between CR-030 + CR-033 within W3. |
+| `.cleargate/scripts/close_sprint.mjs` | CR-036 (W4) | n/a | Single. |
+| `.claude/agents/reporter.md` | CR-035 (W3), CR-036 (W4) | W3 → W4 | CR-035 lands prompt edit first; CR-036 builds on it. |
 | `.claude/agents/architect.md` | CR-037 (W1) | n/a | Single. |
 | `.claude/hooks/stamp-and-gate.sh` | CR-032 (W2) | n/a | Single. |
-| `.claude/hooks/token-ledger.sh` | CR-036 (W3) | n/a | Single. |
+| `.claude/hooks/token-ledger.sh` | CR-036 (W4) | n/a | Single. |
 | `CLAUDE.md` (live + canonical) | CR-032 (W2) | n/a | Single. |
-| Templates (epic.md, story.md, CR.md, Bug.md, proposal.md, initiative.md, Sprint Plan Template.md) | CR-032 (W2) | n/a | Single (all 7 footers). |
+| Templates (epic.md, story.md, CR.md, Bug.md, proposal.md, initiative.md, Sprint Plan Template.md) | CR-032 (W2), initiative.md also CR-030 (W3) | W2 → W3 | CR-032 adds Ambiguity Gate footer to all 7 templates in W2. CR-030's initiative.md edits in W3 land on top of CR-032's footer. |
 
-### 2.3 Shared-Surface Warnings (preliminary)
+### 2.3 Shared-Surface Warnings (compounding-order)
 
-- **`cleargate-cli/src/lib/readiness-predicates.ts` is the hot file** — three CRs touch it across two waves. Architect SDR must specify exact line ranges per CR + post-merge prebuild verification. Mitigation: CR-034 lands FIRST (item-type extension), then CR-031 in same W1 commit (path resolution), then CR-033 in W3 (new shape). Each diff is additive.
-- **`.cleargate/knowledge/readiness-gates.md` parallel edits in W3** — CR-030 + CR-033 both touch criterion lists. Mitigation: assign as sequential within W3 dispatch order, OR coordinate via per-CR-section line stencils in M-plan.
-- **CR-034 MUST land before W3 starts** — without it, every Story drafted in SPRINT-21's own work fails its own gate (`implementation-files-declared`). Recursive sprint-meta-pain.
+- **`cleargate-cli/src/lib/readiness-predicates.ts` is the hot file** — three CRs touch it across two waves. Mitigation: CR-031 (path resolution, ~6 lines) and CR-034 (new `declared-item` item-type) land in the SAME W1 bundled commit, applied sequentially within the file. CR-033 (new closed-set shape #7) lands in W3 and is additive. Architect M3 plan specifies exact line ranges for CR-033 to avoid touching CR-031/CR-034 regions.
+- **`.cleargate/knowledge/readiness-gates.md` parallel edits in W3** — CR-030 + CR-033 both touch criterion lists. Mitigation: dispatch order within W3 — CR-030 first (renames `proposal-approved` → `parent-approved`, adds Initiative gate), CR-033 second (adds `existing-surfaces-verified` to 3 gates). Architect M3 plan pins exact line ranges. CR-034's W1 migration of 6 criteria lands BEFORE W3, so W3 edits sit on top of the migrated baseline.
+- **CR-034 promoted to W1 (was W2 in original plan)** — eliminates the recursion risk. CR-034 lands FIRST, so every later anchor draft AND every W2/W3/W4/W5 dispatch benefits from the predicate-template alignment. Resolves the original "MUST land before any other CR's draft is created" warning.
+- **CR-038 promoted to W2 (was W3)** — pairs with CR-032 as visibility bedrock. After W2, both signal infrastructure (chat injection) AND preflight reliability (cache refresh) are live for all W3+ dispatches.
+- **CR-035 demoted to W3 (was W1)** — pairs with its consumer (CR-036 in W4) for compounding clarity. CR-035's two-line split + `.session-totals.json` read provides the prompt-edit base that CR-036 builds on.
+- **CR-036 isolated to W4 (was W3)** — its outputs are consumed by SPRINT-21's own Gate-4 Reporter dispatch. Landing it solo in W4 maximizes the savings window before close.
+- **CR-039 stays last (W5)** — measures cost-savings against the post-CR-036 baseline, not the pre-diet one.
 
 ### 2.4 Lane Audit (preliminary)
 
@@ -216,7 +264,7 @@ _(Populated by orchestrator + Reporter during sprint execution. Empty at draft t
 
 ## Execution Guidelines (Local Annotation — Not Pushed)
 
-- **Starting Point:** W1 spawns one Developer dispatch carrying 4 trivial edits as a batch (BUG-026 + CR-031 + CR-035 + CR-037). Single commit. W2 spawns 2 parallel Developer dispatches (CR-032, CR-034). W3 spawns 4 parallel Developer dispatches (CR-036, CR-038, CR-030, CR-033). W4 spawns 1 Developer dispatch for the CR-039 spike memo.
+- **Starting Point:** W1 spawns one Developer dispatch carrying 4 ground edits as a batch (BUG-026 + CR-031 + CR-034 + CR-037). Single commit. W2 spawns 2 parallel Developer dispatches (CR-032, CR-038). W3 spawns 3 parallel Developer dispatches (CR-030, CR-033, CR-035). W4 spawns 1 solo Developer dispatch (CR-036). W5 spawns 1 solo Developer dispatch for the CR-039 spike memo.
 - **Relevant Context:** Each anchor file's `<agent_context>` block (where present) is the authoritative scope spec. Test-session evidence is captured per-CR in `context_source` frontmatter — read it for the live-evidence framing.
 - **Constraints:**
   - No CLAUDE.md changes outside CLEARGATE-tag-block region (live).

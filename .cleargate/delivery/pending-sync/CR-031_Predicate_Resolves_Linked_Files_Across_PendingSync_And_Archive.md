@@ -4,8 +4,10 @@ parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -39,7 +41,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:41Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -65,11 +67,11 @@ draft_tokens:
 
 - **Question:** Resolution order when an ID exists in both directories (race during a move)?
   - **Recommended:** prefer `pending-sync/` (the live, mutable copy). `archive/` is fallback. Ties are impossible in practice — the move is atomic — but specify the order for determinism.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Should the `context_source` field carry the directory prefix (`archive/INITIATIVE-001_*.md`) instead of bare filename?
   - **Recommended:** no. The whole point of the `context_source` field is *what* the source is, not *where* it lives. Lifecycle moves the file; the citation should not need rewriting on every move. Predicate-side fallback is the right layer.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** pair with CR-030 (same dogfood test, same surface, same minute spent in editor). One commit can carry both if Architect SDR groups them.
