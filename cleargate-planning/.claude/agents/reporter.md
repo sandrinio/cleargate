@@ -14,7 +14,7 @@ You are the **Reporter** agent for ClearGate sprint retrospectives. Role prefix:
 | **Scripts** | `prep_reporter_context.mjs` (read curated bundle), `count_tokens.mjs` (token totals + anomalies), git log per sprint commit, FLASHCARD date-window slicer |
 | **Skills** | `flashcard` (Skill tool — read past lessons) |
 | **Hooks observing** | `SubagentStop` → `token-ledger.sh` (attributes Reporter tokens via dispatch marker; pre-sprint) |
-| **Default input** | `.cleargate/sprint-runs/<id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Fall back to source files only when the bundle is incomplete or missing. |
+| **Default input** | `.cleargate/sprint-runs/<id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Bundle is the only input; do NOT Read, Grep, or Bash-shell-out to source story bodies, plan files, raw git log, hook logs, or FLASHCARD.md. If a slice is missing, surface it as a Brief footnote ("§N could not be filled — bundle slice missing for <X>"). Escape hatch: env CLEARGATE_REPORTER_BROADFETCH=1 (logged + auto-flashcarded; reserved for diagnostics). |
 | **Output** | `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` (primary). Post-close pipeline (close_sprint.mjs Steps 6.5/6.6/6.7) also appends sections to `improvement-suggestions.md` — sprint-trends stub, skill-candidate scan, flashcard-cleanup scan. Step 8 prints the 6-item handoff list (commits / merge / wiki / flashcards / artifacts / next-sprint preflight) to stdout for orchestrator relay. |
 
 ## Post-Output Brief
@@ -31,7 +31,7 @@ This Brief replaces today's "re-run with --assume-ack" prompt as the Gate 4 trig
 Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use the Sprint Report v2 template at `.cleargate/templates/sprint_report.md` as the exact structural guide. The report must contain all six sections (§§1-6) with no empty or missing section headers.
 
 ## Inputs
-- **Default input bundle:** `.cleargate/sprint-runs/<sprint-id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Read this first. Fall back to the source files below only when the bundle is incomplete or missing.
+- **Default input bundle:** `.cleargate/sprint-runs/<sprint-id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Read this first and only. The source files listed below are documented for completeness only — they are the inputs prep_reporter_context.mjs slices into the bundle. Do NOT read them yourself unless CLEARGATE_REPORTER_BROADFETCH=1 is set.
 - Sprint ID (e.g. `S-09`)
 - Path to the sprint file (e.g. `.cleargate/delivery/archive/SPRINT-09_Execution_Phase_v2.md`)
 - Path to the token ledger (e.g. `.cleargate/sprint-runs/S-09/token-ledger.jsonl`)
@@ -91,6 +91,23 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use
 ## v2-adoption note
 This reporter spec was adopted in SPRINT-09 (STORY-013-07) as the Sprint Report v2 rollout.
 Per sprint DoD line 119 dogfood check: this note confirms the v2 template is active.
+
+## Token Budget Discipline (CR-036)
+
+The Reporter dispatch is budgeted at **200,000 tokens (soft warn)** and **500,000 tokens (hard advisory + auto-flashcard)**. The token-ledger SubagentStop hook emits the warning to stdout when `delta.input + delta.output + delta.cache_creation + delta.cache_read` for the Reporter row crosses the threshold; the orchestrator surfaces the line into chat per CR-032.
+
+If you encounter the soft warn at 200k while writing the report:
+1. Stop reading source files (you should not be reading them anyway — see Inputs).
+2. Check that `.reporter-context.md` was loaded from `.cleargate/sprint-runs/<id>/`.
+3. If the bundle is missing slices, surface a Brief footnote and proceed; do NOT recover by source-file reads.
+
+Hard advisory at 500k auto-records a flashcard `Reporter dispatch exceeded 500k tokens — investigate prompt or bundle`. The dispatch is NOT killed; the warning is informational. The Architect or human triages on next sprint.
+
+## Fresh Session Dispatch (CR-036)
+
+The orchestrator MUST dispatch the Reporter in a fresh session — do not inherit dev+qa cumulative context. Per the orchestration playbook (`.claude/skills/sprint-execution/SKILL.md` §E.2), session reset is achieved via `Agent` tool dispatch with no prior turn context (the `Task` tool already creates a new conversation per dispatch — verify the dispatch payload contains no `--resume` or session continuation flag). If the Agent tool's session-reset semantics are unclear in this runtime, the orchestrator falls back to a fresh `claude` shell child via `bash .cleargate/scripts/write_dispatch.sh <sprint-id> reporter` (which already spawns cleanly).
+
+The Reporter starts cold each time. The bundle + template are the only context.
 
 ## Fallback: Write-blocked Environment (STORY-014-10)
 

@@ -118,6 +118,48 @@ run_hook_and_get_work_item() {
   fi
 }
 
+# Run the hook with a pre-built transcript carrying specific usage numbers.
+# Writes a sentinel with agent_type to set AGENT_TYPE via dispatch lookup.
+# Args: $1=tmpdir, $2=agent_type, $3=input_tokens, $4=output_tokens, $5=cache_creation, $6=cache_read
+# Returns: hook stdout (budget warning lines)
+run_hook_with_usage() {
+  local tmpdir="$1"
+  local agent_type="$2"
+  local in_tokens="$3"
+  local out_tokens="$4"
+  local cc_tokens="$5"
+  local cr_tokens="$6"
+  local extra_path="${7:-}"
+
+  local sprint_id="SPRINT-TEST-$$"
+  local sprint_runs_dir="${tmpdir}/.cleargate/sprint-runs"
+  local sprint_dir="${sprint_runs_dir}/${sprint_id}"
+  mkdir -p "${sprint_dir}"
+  printf '%s' "${sprint_id}" > "${sprint_runs_dir}/.active"
+  mkdir -p "${tmpdir}/.cleargate/hook-log"
+
+  # Write a sentinel so AGENT_TYPE is picked up without transcript-grep
+  local sentinel_file="${sprint_dir}/.pending-task-1.json"
+  printf '{"agent_type":"%s","work_item_id":"%s","turn_index":0,"started_at":"2026-01-01T00:00:00Z"}' \
+    "${agent_type}" "${sprint_id}" > "${sentinel_file}"
+
+  # Write a minimal transcript with the requested usage numbers
+  local transcript_file="${tmpdir}/transcript-usage.jsonl"
+  printf '{"type":"user","message":{"content":"CR-036 %s"}}\n' "${agent_type}" > "${transcript_file}"
+  printf '{"type":"assistant","message":{"content":"ok","model":"claude-opus-4-5","usage":{"input_tokens":%s,"output_tokens":%s,"cache_creation_input_tokens":%s,"cache_read_input_tokens":%s}}}\n' \
+    "${in_tokens}" "${out_tokens}" "${cc_tokens}" "${cr_tokens}" >> "${transcript_file}"
+
+  local payload
+  payload="$(printf '{"session_id":"cr036-test-session","transcript_path":"%s","hook_event_name":"SubagentStop"}' \
+    "${transcript_file}")"
+
+  if [[ -n "${extra_path}" ]]; then
+    PATH="${extra_path}:${PATH}" CLAUDE_PROJECT_DIR="${tmpdir}" bash "${HOOK}" <<< "${payload}" 2>/dev/null
+  else
+    CLAUDE_PROJECT_DIR="${tmpdir}" bash "${HOOK}" <<< "${payload}" 2>/dev/null
+  fi
+}
+
 assert_work_item() {
   local name="$1"
   local expected="$2"
@@ -128,6 +170,36 @@ assert_work_item() {
     PASS=$((PASS + 1))
   else
     printf '  ✗ %s (expected "%s", got "%s")\n' "${name}" "${expected}" "${actual}"
+    FAIL=$((FAIL + 1))
+    ERRORS+=("${name}")
+  fi
+}
+
+assert_contains() {
+  local name="$1"
+  local needle="$2"
+  local haystack="$3"
+
+  if printf '%s' "${haystack}" | grep -qF "${needle}"; then
+    printf '  ✓ %s\n' "${name}"
+    PASS=$((PASS + 1))
+  else
+    printf '  ✗ %s (expected to contain "%s", got: "%s")\n' "${name}" "${needle}" "${haystack}"
+    FAIL=$((FAIL + 1))
+    ERRORS+=("${name}")
+  fi
+}
+
+assert_not_contains() {
+  local name="$1"
+  local needle="$2"
+  local haystack="$3"
+
+  if ! printf '%s' "${haystack}" | grep -qF "${needle}"; then
+    printf '  ✓ %s\n' "${name}"
+    PASS=$((PASS + 1))
+  else
+    printf '  ✗ %s (expected NOT to contain "%s", but it did)\n' "${name}" "${needle}"
     FAIL=$((FAIL + 1))
     ERRORS+=("${name}")
   fi
@@ -342,6 +414,78 @@ assert_work_item "BUG-010 Case 18: multiple dispatch markers → first (STORY-01
   run_hook_from_fixture "${tmpdir}" "${FIXTURES_DIR}/transcript-bug-010-case8-multi-dispatch.jsonl" "SPRINT-14"
   rm -rf "${tmpdir}"
 )"
+
+# ─── CR-036 Budget Warning Tests ──────────────────────────────────────────────
+# Tests for the reporter token-budget warning block added by CR-036.
+# Usage numbers: input=50000, output=50000, cc=0, cr=<varies>
+# DELTA_IN + DELTA_OUT + DELTA_CC + DELTA_CR = total
+
+printf '\n'
+printf 'CR-036 reporter token-budget warning tests\n'
+printf '=============================================\n'
+
+# ── CR-036 Case 19: reporter row, total < 200k → no budget line ──────────────
+# total = 50000 + 50000 + 0 + 80000 = 180000 (< 200k)
+_cr036_tmpdir19=$(mktemp -d)
+_cr036_out19=$(run_hook_with_usage "${_cr036_tmpdir19}" "reporter" 50000 50000 0 80000)
+rm -rf "${_cr036_tmpdir19}"
+assert_not_contains \
+  "CR-036 Case 19: reporter row total=180k → no budget warning" \
+  "Reporter token budget exceeded" \
+  "${_cr036_out19}"
+
+# ── CR-036 Case 20: reporter row, 200k < total < 500k → soft-warn line ───────
+# total = 50000 + 50000 + 0 + 200000 = 300000 (> 200k, < 500k)
+_cr036_tmpdir20=$(mktemp -d)
+_cr036_out20=$(run_hook_with_usage "${_cr036_tmpdir20}" "reporter" 50000 50000 0 200000)
+rm -rf "${_cr036_tmpdir20}"
+assert_contains \
+  "CR-036 Case 20: reporter row total=300k → soft warn line" \
+  "(soft warn)" \
+  "${_cr036_out20}"
+assert_not_contains \
+  "CR-036 Case 20: reporter row total=300k → not HARD advisory" \
+  "(HARD advisory)" \
+  "${_cr036_out20}"
+
+# ── CR-036 Case 21: reporter row, total > 500k → hard-advisory + flashcard ───
+# total = 50000 + 50000 + 0 + 500000 = 600000 (> 500k)
+# Use stub-cleargate-cli on PATH so flashcard invocation is recorded
+_cr036_tmpdir21=$(mktemp -d)
+_cr036_stub_log="${_cr036_tmpdir21}/stub-invocations.log"
+export CLEARGATE_STUB_LOG="${_cr036_stub_log}"
+_cr036_out21=$(run_hook_with_usage "${_cr036_tmpdir21}" "reporter" 50000 50000 0 500000 \
+  "${FIXTURES_DIR}/stub-cleargate-cli")
+unset CLEARGATE_STUB_LOG
+assert_contains \
+  "CR-036 Case 21: reporter row total=600k → HARD advisory line" \
+  "(HARD advisory)" \
+  "${_cr036_out21}"
+# Verify stub was called (flashcard invocation)
+_cr036_stub_called=0
+if [[ -f "${_cr036_stub_log}" ]] && grep -q "flashcard" "${_cr036_stub_log}"; then
+  _cr036_stub_called=1
+fi
+if [[ "${_cr036_stub_called}" -eq 1 ]]; then
+  printf '  ✓ CR-036 Case 21: cleargate flashcard stub was invoked on HARD advisory\n'
+  PASS=$((PASS + 1))
+else
+  printf '  ✗ CR-036 Case 21: cleargate flashcard stub NOT invoked (stub_log=%s, exists=%s)\n' \
+    "${_cr036_stub_log}" "$(test -f "${_cr036_stub_log}" && echo yes || echo no)"
+  FAIL=$((FAIL + 1))
+  ERRORS+=("CR-036 Case 21: flashcard stub not invoked")
+fi
+rm -rf "${_cr036_tmpdir21}"
+
+# ── CR-036 Case 22: non-reporter row over budget → no warning ────────────────
+# same 600k usage but agent_type=developer → no budget warning
+_cr036_tmpdir22=$(mktemp -d)
+_cr036_out22=$(run_hook_with_usage "${_cr036_tmpdir22}" "developer" 50000 50000 0 500000)
+rm -rf "${_cr036_tmpdir22}"
+assert_not_contains \
+  "CR-036 Case 22: developer row total=600k → no Reporter budget warning" \
+  "Reporter token budget" \
+  "${_cr036_out22}"
 
 # ─── Summary ──────────────────────────────────────────────────────────────────
 

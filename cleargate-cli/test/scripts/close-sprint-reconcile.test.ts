@@ -150,6 +150,7 @@ function runCloseSprint(sprintDir: string, extraArgs: string[] = []): {
         ...process.env,
         CLEARGATE_SPRINT_DIR: sprintDir,
         CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SKIP_BUNDLE_CHECK: '1',
       },
     },
   );

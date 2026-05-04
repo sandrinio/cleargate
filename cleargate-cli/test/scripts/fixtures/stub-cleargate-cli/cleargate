@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Stub cleargate CLI for test scenarios.
+# Records invocations to $CLEARGATE_STUB_LOG (if set) for assertion.
+if [[ -n "${CLEARGATE_STUB_LOG:-}" ]]; then
+  printf '%s\n' "$*" >> "${CLEARGATE_STUB_LOG}"
+fi
+exit 0

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "sprint_id": "SPRINT-TEST",
-  "execution_mode": "v2",
+  "execution_mode": "v1",
   "sprint_status": "Active",
   "stories": {
     "STORY-TEST-01": {
