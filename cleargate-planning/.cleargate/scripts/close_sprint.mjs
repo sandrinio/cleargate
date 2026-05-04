@@ -156,7 +156,7 @@ function invokeScript(scriptName, scriptArgs, env) {
   });
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
 
   if (args.length < 1) usage();
@@ -781,4 +781,4 @@ function main() {
   }
 }
 
-main();
+await main();
