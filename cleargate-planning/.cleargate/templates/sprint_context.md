@@ -8,6 +8,10 @@ last_updated: "YYYY-MM-DDTHH:MM:SSZ"
 
 Per-sprint audit artefact. Populated at sprint init (M1 planning) and re-touched after each story merges. Referenced from every Developer/QA/Architect task brief so all agents start from the same baseline.
 
+## Sprint Goal
+
+_(populated by orchestrator from sprint plan §0 at kickoff)_
+
 ## Locked Versions
 
 Frozen dependency versions for this sprint. Orchestrator populates from `package.json` snapshots at sprint init; Developers must not upgrade these mid-sprint without an explicit CR.
@@ -40,3 +44,7 @@ Exported helpers and modules from already-merged stories in this sprint. The Arc
 | Story | Module / Export | Path |
 |-------|----------------|------|
 | (populated as stories merge) | | |
+
+## Mid-Sprint Amendments
+
+_(populated by Architect on CR:scope-change or CR:approach-change; never rewrite, only append. Format: '<ISO-ts> · <ID> · <one-line note>')_
