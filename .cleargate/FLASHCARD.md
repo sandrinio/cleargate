@@ -3,6 +3,12 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-04 · #qa #worktree #mirror · test_close_pipeline reporter.md mirror check fails in worktrees — live `.claude/agents/` is gitignored at `/.claude/`; suppress or skip this check in worktree context.
+2026-05-04 · #close-pipeline #step-3.5 · close_sprint.mjs Step 3.5 is v2-fatal post-CR-036 — bundle ≥2KB or close exits 1; v1 advisory preserved. Use CLEARGATE_SKIP_BUNDLE_CHECK=1 in tests.
+2026-05-04 · #reporter #budget · Reporter token budget: 200k soft warn / 500k hard advisory + auto-flashcard. token-ledger.sh hook emits via stdout (CR-032 chat-injection).
+2026-05-04 · #reporter #fresh-session · Reporter dispatched in fresh session via write_dispatch.sh shell child — Agent tool path requires no --resume flag. Verified post-CR-036.
+2026-05-04 · #mirror #parity · Architect plan said close_sprint.mjs is live-only; canonical mirror EXISTS at cleargate-planning/.cleargate/scripts/close_sprint.mjs — both updated for parity.
+2026-05-04 · #test-harness #fixtures · sprint-v1-legacy fixture had execution_mode:v2 + schema_version:1 — inconsistent; fixed to v1. v1-era sprints should have execution_mode:v1.
 2026-05-04 · #qa #test-count · Dev's "pre-existing failure count" can be FILE count not TEST count — QA must distinguish; spot-check by running one to confirm the actual scope.
 2026-05-04 · #qa #gates #regression · AND-semantics in an enforcing gate means any new required criterion breaks ALL existing items of that type — test FULL gate runs against real parent files on disk, not isolated predicates.
 2026-05-04 · #gate #or-group · gate.ts or_group?: optional field on GateCriterion — criteria sharing same or_group value pass-as-group when ≥1 member passes; backward-compat: criteria without or_group still required-AND.
