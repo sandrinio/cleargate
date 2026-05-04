@@ -132,7 +132,72 @@ function atomicWrite(filePath, content) {
 }
 
 /**
+ * Read all ledger entries from a token-ledger.jsonl file.
+ * @param {string} ledgerPath
+ * @returns {{ work_item_id: string, agent_type: string, session_id?: string, sprint_id?: string }[]}
+ */
+function readLedgerEntries(ledgerPath) {
+  if (!fs.existsSync(ledgerPath)) return [];
+  const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(l => l.trim());
+  const entries = [];
+  for (const line of lines) {
+    try {
+      const entry = JSON.parse(line);
+      if (entry.work_item_id && entry.agent_type) {
+        entries.push({
+          work_item_id: entry.work_item_id,
+          agent_type: entry.agent_type,
+          session_id: entry.session_id ?? '',
+          sprint_id: entry.sprint_id ?? '',
+        });
+      }
+    } catch { /* skip malformed lines */ }
+  }
+  return entries;
+}
+
+/**
+ * Check if a (work_item_id|agent_type) bucket is a session-attribution artifact.
+ *
+ * Session-shared filter (CR-056): When multiple Architect (or other agent) dispatches run
+ * within the same session, the token ledger attributes them all to the same bucket keyed
+ * by the first-merged work_item_id. The canonical example is "CR-045 × architect" in
+ * SPRINT-23/SPRINT-24 — all 17 entries share the SAME session_id 48aa90c9-..., making
+ * them one session mis-attributed as 17 distinct repeats.
+ *
+ * Rule: session-attribution artifact if ALL entries with a known session_id share the
+ * SAME session_id (i.e., exactly 1 distinct session across all entries). When multiple
+ * distinct sessions are present, there is genuine independent repetition.
+ *
+ * Known false-positive class: "CR-045 × architect" — 17 entries, 1 session UUID.
+ *
+ * @param {{ session_id?: string }[]} entries all entries for this bucket (across sprints)
+ * @returns {boolean} true if bucket should be filtered as session-shared artifact
+ */
+function isSessionShared(entries) {
+  if (entries.length < 3) return false;
+  const distinctSessions = new Set(
+    entries.map(e => e.session_id ?? '').filter(s => s !== '')
+  );
+  // If exactly 1 distinct session accounts for all entries, this is a session-attribution artifact
+  return distinctSessions.size === 1;
+}
+
+/**
  * Scan token-ledger.jsonl and FLASHCARD.md for skill creation candidates.
+ *
+ * Heuristic (CR-056 tightened):
+ *   1. Session-shared filter: if ≥2 of ≥3 entries for a bucket share the same
+ *      session_id → skip (token-attribution artifact, not a real recurring pattern).
+ *      Known false-positive class: "CR-045 × architect" from SPRINT-23/SPRINT-24 —
+ *      all 17 entries share session_id 48aa90c9-... (session-shared).
+ *   2. Cross-sprint aggregation: collect entries from the current sprint's ledger PLUS
+ *      prior sprints' ledgers (via CLEARGATE_SPRINT_RUNS_DIR). Count ≥3× total across
+ *      ≥2 distinct sprints.
+ *   3. Cross-sprint dedup: if the candidate's hash already appears in any prior sprint's
+ *      improvement-suggestions.md → surface as seen_in: [...] instead of re-flagging.
+ *   4. Threshold raised to "≥3× across ≥2 distinct sprints AND not session-shared".
+ *
  * Appends or replaces the "## Skill Creation Candidates" section in improvement-suggestions.md.
  * @param {string} sprintId
  * @param {string} sprintDir
@@ -144,24 +209,72 @@ function scanSkillCandidates(sprintId, sprintDir, suggestionsFile) {
     : path.join(REPO_ROOT, '.cleargate', 'FLASHCARD.md');
   const ledgerPath = path.join(sprintDir, 'token-ledger.jsonl');
 
-  // Count repeated (work_item_id, agent_type) tuples from token-ledger.jsonl
-  /** @type {Map<string, number>} */
-  const tupleCounts = new Map();
-  if (fs.existsSync(ledgerPath)) {
-    const lines = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter(l => l.trim());
-    for (const line of lines) {
-      try {
-        const entry = JSON.parse(line);
-        if (entry.work_item_id && entry.agent_type) {
-          const key = `${entry.work_item_id}|${entry.agent_type}`;
-          tupleCounts.set(key, (tupleCounts.get(key) ?? 0) + 1);
-        }
-      } catch { /* skip malformed lines */ }
+  // Resolve sprint-runs root (used for cross-sprint lookback)
+  const sprintRunsDir = process.env.CLEARGATE_SPRINT_RUNS_DIR
+    ? path.resolve(process.env.CLEARGATE_SPRINT_RUNS_DIR)
+    : path.dirname(sprintDir);
+
+  // ── Step 1: collect all ledger entries across current + prior sprints ─────────
+  // Collect from current sprint
+  const currentEntries = readLedgerEntries(ledgerPath);
+
+  // Collect from prior sprints (all sprint dirs except current)
+  const allPriorEntries = [];
+  const priorSuggestionsContents = [];
+  if (fs.existsSync(sprintRunsDir)) {
+    let priorDirs;
+    try {
+      priorDirs = fs.readdirSync(sprintRunsDir)
+        .filter(name => name !== sprintId && !name.startsWith('.'))
+        .map(name => path.join(sprintRunsDir, name))
+        .filter(p => {
+          try { return fs.statSync(p).isDirectory(); } catch { return false; }
+        });
+    } catch { priorDirs = []; }
+
+    for (const priorDir of priorDirs) {
+      const priorLedger = path.join(priorDir, 'token-ledger.jsonl');
+      const entries = readLedgerEntries(priorLedger);
+      allPriorEntries.push(...entries);
+
+      // Collect prior improvement-suggestions.md for cross-sprint dedup
+      const priorSuggFile = path.join(priorDir, 'improvement-suggestions.md');
+      if (fs.existsSync(priorSuggFile)) {
+        try {
+          priorSuggestionsContents.push(fs.readFileSync(priorSuggFile, 'utf8'));
+        } catch { /* skip unreadable */ }
+      }
     }
   }
 
-  // Find tuples repeated ≥3×
-  const repeatedTuples = [...tupleCounts.entries()].filter(([, count]) => count >= 3);
+  // ── Step 2: build cross-sprint bucket map ────────────────────────────────────
+  // Map: key (work_item_id|agent_type) → { entries: [...], sprintIds: Set<string> }
+  /** @type {Map<string, { entries: { session_id?: string, sprint_id?: string }[], sprintIds: Set<string> }>} */
+  const buckets = new Map();
+
+  for (const e of currentEntries) {
+    const key = `${e.work_item_id}|${e.agent_type}`;
+    if (!buckets.has(key)) buckets.set(key, { entries: [], sprintIds: new Set() });
+    const b = buckets.get(key);
+    b.entries.push(e);
+    b.sprintIds.add(sprintId);
+  }
+  for (const e of allPriorEntries) {
+    const key = `${e.work_item_id}|${e.agent_type}`;
+    if (!buckets.has(key)) buckets.set(key, { entries: [], sprintIds: new Set() });
+    const b = buckets.get(key);
+    b.entries.push(e);
+    if (e.sprint_id) b.sprintIds.add(e.sprint_id);
+  }
+
+  // ── Step 3: apply heuristic filters ──────────────────────────────────────────
+  // Threshold: ≥3× total AND ≥2 distinct sprints AND NOT session-shared
+  const repeatedTuples = [...buckets.entries()].filter(([, b]) => {
+    if (b.entries.length < 3) return false;
+    if (b.sprintIds.size < 2) return false;
+    if (isSessionShared(b.entries)) return false;
+    return true;
+  });
 
   // Grep FLASHCARD.md for "also do" patterns
   const alsoDoMatches = [];
@@ -175,21 +288,35 @@ function scanSkillCandidates(sprintId, sprintDir, suggestionsFile) {
     }
   }
 
-  // Read existing suggestions file content
+  // Read existing suggestions file content (current sprint)
   let existingContent = fs.existsSync(suggestionsFile)
     ? fs.readFileSync(suggestionsFile, 'utf8')
     : `# Improvement Suggestions — ${sprintId}\n\nGenerated by \`suggest_improvements.mjs\`. Append-only; IDs are stable.\nVocabulary: Templates | Handoffs | Skills | Process | Tooling\n\n---\n\n`;
 
+  /**
+   * Check if a hash already appears in current sprint's suggestions OR any prior sprint's.
+   * @param {string} hash
+   * @returns {boolean}
+   */
+  function hashAlreadySeen(hash) {
+    const marker = `<!-- hash:${hash} -->`;
+    if (existingContent.includes(marker)) return true;
+    for (const priorContent of priorSuggestionsContents) {
+      if (priorContent.includes(marker)) return true;
+    }
+    return false;
+  }
+
   // Build the candidates
   const candidates = [];
   let candN = 1;
-  for (const [key] of repeatedTuples) {
+  for (const [key, bucket] of repeatedTuples) {
     const [workItemId, agentType] = key.split('|');
     const candId = `CAND-${sprintId}-S${String(candN).padStart(2, '0')}`;
     const hashKey = `skill|${key}`;
     const hash = stableHash(hashKey);
-    if (!existingContent.includes(`<!-- hash:${hash} -->`)) {
-      candidates.push({ candId, hash, workItemId, agentType, source: 'ledger' });
+    if (!hashAlreadySeen(hash)) {
+      candidates.push({ candId, hash, workItemId, agentType, source: 'ledger', sprintIds: bucket.sprintIds });
       candN++;
     }
   }
@@ -197,8 +324,8 @@ function scanSkillCandidates(sprintId, sprintDir, suggestionsFile) {
     const candId = `CAND-${sprintId}-S${String(candN).padStart(2, '0')}`;
     const hashKey = `skill|flashcard|${line.slice(0, 60)}`;
     const hash = stableHash(hashKey);
-    if (!existingContent.includes(`<!-- hash:${hash} -->`)) {
-      candidates.push({ candId, hash, workItemId: null, agentType: null, source: 'flashcard', line });
+    if (!hashAlreadySeen(hash)) {
+      candidates.push({ candId, hash, workItemId: null, agentType: null, source: 'flashcard', line, sprintIds: new Set() });
       candN++;
     }
   }
@@ -220,7 +347,8 @@ function scanSkillCandidates(sprintId, sprintDir, suggestionsFile) {
       sectionLines.push(`<!-- hash:${c.hash} -->`);
       sectionLines.push('');
       if (c.source === 'ledger') {
-        sectionLines.push(`**Pattern detected:** ${c.workItemId} × ${c.agentType} repeated ≥3× in token-ledger`);
+        const sprintList = c.sprintIds ? [...c.sprintIds].sort().join(', ') : sprintId;
+        sectionLines.push(`**Pattern detected:** ${c.workItemId} × ${c.agentType} repeated ≥3× across ≥2 distinct sprints (${sprintList})`);
       } else {
         sectionLines.push(`**Pattern detected:** "also do" pattern in FLASHCARD.md`);
         sectionLines.push(`**Source line:** \`${c.line}\``);
