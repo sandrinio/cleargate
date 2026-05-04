@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Draft
+status: Ready
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -78,12 +78,12 @@ crs:
   - CR-058
 bugs: []
 proposals: []
-approved: false
+approved: true
 human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T18:58:44Z
+  last_gate_check: 2026-05-04T19:02:20Z
 stamp_error: no ledger rows for work_item_id SPRINT-25
 draft_tokens:
   input: null
@@ -91,7 +91,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:43:16Z
+  last_stamp: 2026-05-04T19:02:20Z
   sessions: []
 ---
 
