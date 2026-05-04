@@ -11,7 +11,7 @@ execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
 created_at: 2026-05-04T10:00:00Z
-updated_at: 2026-05-04T10:00:00Z
+updated_at: 2026-05-04T09:00:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -54,7 +54,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T09:57:11Z
+  last_gate_check: 2026-05-04T09:58:56Z
 stamp_error: no ledger rows for work_item_id SPRINT-23
 draft_tokens:
   input: null
