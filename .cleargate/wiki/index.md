@@ -14,15 +14,22 @@
   - [[STORY-023-02]] (story) — Approved
   - [[STORY-023-03]] (story) — Approved
 - [[EPIC-026]] (epic) — Ready
+  - [[STORY-026-01]] (story) — Draft
+  - [[STORY-026-02]] (story) — Draft
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-20]] (sprint) — Draft
+- [[SPRINT-23]] (sprint) — Active
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
+- [[CR-026]] (cr) — Draft
+- [[CR-027]] (cr) — Approved
+- [[CR-028]] (cr) — Approved
+- [[CR-029]] (cr) — Approved
+- [[CR-048]] (cr) — Ready
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -36,14 +43,16 @@
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
 - [[BUG-022]] (bug) — Verified
+- [[BUG-024]] (bug) — Approved
 - [[BUG-025]] (bug) — Triaged
+- [[BUG-026]] (bug) — Ready
 
 ## Archive
 
-- Epics: 15 Completed · 2 Abandoned · 1 Done · [expand](archive/epics.md)
-- Sprints: 14 Completed · [expand](archive/sprints.md)
+- Epics: 15 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
+- Sprints: 18 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 16 Completed · 7 Done · [expand](archive/crs.md)
+- CRs: 24 Done · 16 Completed · [expand](archive/crs.md)
 - Bugs: 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 49 Done · 31 Abandoned · [expand](archive/stories.md)
 
@@ -53,44 +62,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-026]] | cr | Draft | .cleargate/delivery/pending-sync/CR-026_Token_Ledger_Attribution_Fix.md |
-| [[CR-027]] | cr | Approved | .cleargate/delivery/pending-sync/CR-027_Composite_Planning_Readiness_At_Sprint_Preflight.md |
-| [[CR-028]] | cr | Approved | .cleargate/delivery/pending-sync/CR-028_Code_Truth_Triage_Reuse_Right_Size_Justify.md |
-| [[CR-029]] | cr | Approved | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
-| [[CR-030]] | cr | Draft | .cleargate/delivery/pending-sync/CR-030_Initiative_First_Class_Citizenship.md |
-| [[CR-031]] | cr | Draft | .cleargate/delivery/pending-sync/CR-031_Predicate_Resolves_Linked_Files_Across_PendingSync_And_Archive.md |
-| [[CR-032]] | cr | Draft | .cleargate/delivery/pending-sync/CR-032_Surface_Gate_Failures_And_Stop_Self_Cert.md |
-| [[CR-033]] | cr | Draft | .cleargate/delivery/pending-sync/CR-033_Reuse_Audit_Verifies_Cited_Surfaces_Exist.md |
-| [[CR-034]] | cr | Draft | .cleargate/delivery/pending-sync/CR-034_Listed_Item_Predicate_Accepts_Table_Rows.md |
-| [[CR-035]] | cr | Draft | .cleargate/delivery/pending-sync/CR-035_Reporter_Token_Total_Includes_Own_SubagentStop.md |
-| [[CR-036]] | cr | Draft | .cleargate/delivery/pending-sync/CR-036_Reporter_Token_Diet_Bundle_Enforcement_And_Fresh_Session.md |
-| [[CR-037]] | cr | Draft | .cleargate/delivery/pending-sync/CR-037_Architect_Validates_Dep_Versions_Against_Npm_Registry.md |
-| [[CR-038]] | cr | Draft | .cleargate/delivery/pending-sync/CR-038_Stale_Gate_Cache_Refresh_At_Sprint_Preflight.md |
-| [[CR-039]] | cr | Draft | .cleargate/delivery/pending-sync/CR-039_Spike_Per_Story_Session_Reset_For_Dev_QA_Loop.md |
-| [[CR-040]] | cr | Draft | .cleargate/delivery/pending-sync/CR-040_Vitest_To_Node_Test_Migration.md |
-| [[CR-042]] | cr | Ready | .cleargate/delivery/pending-sync/CR-042_Reporter_Fresh_Session_Doc_Fix.md |
-| [[CR-043]] | cr | Ready | .cleargate/delivery/pending-sync/CR-043_Red_Green_TDD_Discipline.md |
-| [[CR-044]] | cr | Ready | .cleargate/delivery/pending-sync/CR-044_DevOps_Role_Agent.md |
-| [[CR-045]] | cr | Done | .cleargate/delivery/pending-sync/CR-045_Sprint_Context_File.md |
-| [[CR-046]] | cr | Done | .cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md |
-| [[CR-047]] | cr | Done | .cleargate/delivery/pending-sync/CR-047_Mid_Sprint_Triage_And_Test_Pattern_Validation.md |
-| [[CR-048]] | cr | Ready | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |
-## Stories
-
-| [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |
-| [[STORY-026-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-02_CLAUDE_Md_Prune.md |
-## Sprints
-
-| [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
-| [[SPRINT-21]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
-| [[SPRINT-22]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-22_SDLC_Hardening.md |
-| [[SPRINT-23]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-23_SDLC_Hardening_Tooling.md |
-## Bugs
-
-| [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
-| [[BUG-026]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-026_Update_State_Mjs_Broken_Validate_Shape_Ignoring_Version_Import.md |
-## Epics
-
-| [[EPIC-026]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-026_Sprint_Execution_Skill_Adoption.md |

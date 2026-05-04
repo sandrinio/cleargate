@@ -33,22 +33,6 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[BUG-026]] — status: Ready
 
-- [[CR-031]] — status: Ready
-
-- [[CR-032]] — status: Ready
-
-- [[CR-033]] — status: Ready
-
-- [[CR-034]] — status: Ready
-
-- [[CR-035]] — status: Ready
-
-- [[CR-037]] — status: Ready
-
-- [[CR-038]] — status: Ready
-
-- [[CR-039]] — status: Ready
-
 - [[CR-048]] — status: Ready
 
 - [[EPIC-006]] — status: Ready
