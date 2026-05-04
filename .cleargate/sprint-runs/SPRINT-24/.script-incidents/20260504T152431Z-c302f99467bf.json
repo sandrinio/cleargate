@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-04T15:24:30Z",
+  "command": "node",
+  "args": ["/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/validate_state.mjs","SPRINT-24"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Multiple state.json files found; specify --state-file:\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-10/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-11/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-12/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-14/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-15/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-16/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-17/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-18/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-19/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-20/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-21/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-22/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-23/state.json\n/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-24/state.json",
+  "agent_type": null,
+  "work_item_id": null
+}

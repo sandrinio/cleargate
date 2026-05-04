@@ -1500,3 +1500,8 @@
   action: "update"
   target: "CR-051"
   path: ".cleargate/delivery/pending-sync/CR-051_DevOps_Subagent_Registration.md"
+- timestamp: "2026-05-04T15:45:50.946Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-050"
+  path: ".cleargate/delivery/pending-sync/CR-050_Run_Script_Path_B_Caller_Migration.md"
