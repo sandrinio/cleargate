@@ -33,7 +33,14 @@
  *   Fix 2 (Defect 2): Add BANNER_SKIP_RE constant + banner-skip in the
  *     legacy transcript-grep fallback — prevents SessionStart blocked-items
  *     banner from poisoning work_item_id attribution.
- *   Snapshot: token-ledger.cr-026.sh (current authoritative baseline)
+ *   Snapshot: token-ledger.cr-026.sh (historical; superseded by CR-036)
+ *
+ * CR-036 (2026-05-04): Reporter token budget warnings.
+ *   Fix: After row write, when agent_type == "reporter", compute
+ *     total = DELTA_IN + DELTA_OUT + DELTA_CC + DELTA_CR and emit:
+ *     - total > 200k: stdout "⚠️ Reporter token budget exceeded: <total> > 200000 (soft warn)"
+ *     - total > 500k: same + best-effort cleargate flashcard record via CLI
+ *   Snapshot: token-ledger.cr-036.sh (current authoritative baseline)
  *
  * Pattern: copy-on-fix — snapshot was taken immediately after each fix.
  * To update the active snapshot intentionally: cp <live-hook> <snapshot-path>
@@ -97,7 +104,19 @@ describe('hook snapshot regression locks', () => {
     expect(fs.existsSync(snapshotPath), `CR-018 snapshot not found: ${snapshotPath}`).toBe(true);
   });
 
-  it('token-ledger.sh matches CR-026 snapshot byte-for-byte', () => {
+  it('CR-026 snapshot file exists (historical baseline — superseded by CR-036)', () => {
+    // CR-026 snapshot is retained for audit/forensic purposes.
+    // After CR-036, the live hook is intentionally different from the CR-026 snapshot.
+    // We assert the snapshot file exists but do NOT assert live == cr-026.
+    const snapshotPath = path.join(
+      __dirname,
+      'hooks',
+      'token-ledger.cr-026.sh'
+    );
+    expect(fs.existsSync(snapshotPath), `CR-026 snapshot not found: ${snapshotPath}`).toBe(true);
+  });
+
+  it('token-ledger.sh matches CR-036 snapshot byte-for-byte', () => {
     const livePath = path.join(
       REPO_ROOT,
       'cleargate-planning',
@@ -108,11 +127,11 @@ describe('hook snapshot regression locks', () => {
     const snapshotPath = path.join(
       __dirname,
       'hooks',
-      'token-ledger.cr-026.sh'
+      'token-ledger.cr-036.sh'
     );
 
     expect(fs.existsSync(livePath), `live hook not found: ${livePath}`).toBe(true);
-    expect(fs.existsSync(snapshotPath), `CR-026 snapshot not found: ${snapshotPath}`).toBe(true);
+    expect(fs.existsSync(snapshotPath), `CR-036 snapshot not found: ${snapshotPath}`).toBe(true);
 
     const live = fs.readFileSync(livePath);
     const snapshot = fs.readFileSync(snapshotPath);
