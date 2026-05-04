@@ -41,11 +41,9 @@ context_source: |
   This is also a meta-improvement: future caller tests will look at
   these 4 as the canonical pattern; getting them right now compounds.
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: .node.test.ts, cleargate-cli/test/scripts/run-script-wrapper-backcompat.node.test.ts"
-  last_gate_check: 2026-05-04T18:37:26Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T18:58:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -61,7 +59,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:37:26Z
+  last_stamp: 2026-05-04T18:55:54Z
   sessions: []
 ---
 
@@ -114,9 +112,12 @@ draft_tokens:
 ## Existing Surfaces
 
 - **Surface:** `cleargate-cli/test/helpers/wrap-script.ts` (CR-052) — async wrapScript helper.
-- **Surface:** `cleargate-cli/test/commands/{sprint,state,gate,story}.node.test.ts` (CR-050) — 4 caller integration tests using spawnFn-arg-capture.
-- **Surface:** `cleargate-cli/test/scripts/run-script-wrapper-backcompat.node.test.ts` (CR-052 refactored) — proof-of-consumer reference pattern.
-- **Why this CR extends rather than rebuilds:** wrapScript exists; 4 tests exist. CR-055 swaps one pattern for another. Pure refactor.
+- **Surface:** `cleargate-cli/test/commands/sprint.node.test.ts` (CR-050) — caller integration test using spawnFn-arg-capture.
+- **Surface:** `cleargate-cli/test/commands/state.node.test.ts` (CR-050) — caller integration test using spawnFn-arg-capture.
+- **Surface:** `cleargate-cli/test/commands/gate.node.test.ts` (CR-050) — caller integration test using spawnFn-arg-capture.
+- **Surface:** `cleargate-cli/test/commands/story.node.test.ts` (CR-050) — caller integration test using spawnFn-arg-capture.
+- **Surface:** `cleargate-cli/test/scripts/run-script-wrapper.red.node.test.ts` (CR-052 refactored) — proof-of-consumer reference pattern.
+- **Why this CR extends rather than rebuilds:** `cleargate-cli/test/helpers/wrap-script.ts` exists; 4 caller tests exist. CR-055 swaps one pattern for another. Pure refactor.
 
 ## 3. Execution Sandbox
 

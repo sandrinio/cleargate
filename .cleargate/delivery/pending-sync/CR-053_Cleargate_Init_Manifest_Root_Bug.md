@@ -34,11 +34,9 @@ context_source: |
   payload-root OR inside `cleargate-planning/`? Either way the fix is
   small (~10 LOC: skip-list addition OR path-rewrite).
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: /.gitig, /MANIFEST.json, copy-payload.ts"
-  last_gate_check: 2026-05-04T18:35:39Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T18:58:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -54,7 +52,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:35:39Z
+  last_stamp: 2026-05-04T18:55:15Z
   sessions: []
 ---
 
@@ -105,9 +103,9 @@ draft_tokens:
 
 - **Surface:** `cleargate-cli/src/init/copy-payload.ts` L49 `SKIP_FILES = new Set<string>(['CLAUDE.md'])` — entry point for the fix.
 - **Surface:** `cleargate-cli/src/init/copy-payload.ts` L65-78 `FIRST_INSTALL_ONLY` — different mechanism (no-overwrite for user-owned files); not the right place for MANIFEST.json fix.
-- **Surface:** `/.gitignore` L48 (current) — `/MANIFEST.json` stopgap line to remove.
-- **Surface:** `cleargate-cli/scripts/copy-planning-payload.mjs` — prebuild script that creates the payload; verify it doesn't put MANIFEST.json at payload root.
-- **Why this CR extends rather than rebuilds:** copy-payload.ts has well-tested logic; CR-053 adds 1 entry to an existing skip-list. Minimal blast radius.
+- **Surface:** `.gitignore` L48 (current) — root-level `MANIFEST.json` stopgap line to remove.
+- **Surface:** `cleargate-cli/scripts/copy-planning-payload.mjs` — prebuild script that creates the payload; verify it doesn't put `cleargate-planning/MANIFEST.json` at payload root.
+- **Why this CR extends rather than rebuilds:** `cleargate-cli/src/init/copy-payload.ts` has well-tested logic; CR-053 adds 1 entry to an existing skip-list. Minimal blast radius.
 
 ## 3. Execution Sandbox
 

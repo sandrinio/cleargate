@@ -46,13 +46,9 @@ context_source: |
   - Lifecycle SVG redraw (post-sprint, user-driven via image generator)
   - INTERNALS.md update (verify exists; if substantively stale, file as separate CR-059)
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: no-tbds
-      detail: 1 marker occurrence of 'TBD' at line 26
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: /README.md, /cleargate-cli/README.md, /assets/github-banner.svg, /assets/lifecycle-diagram.svg, /docs/INTERNALS.md, cleargate-planning/.claud"
-  last_gate_check: 2026-05-04T18:41:27Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T18:58:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -68,7 +64,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:41:27Z
+  last_stamp: 2026-05-04T18:58:26Z
   sessions: []
 ---
 
@@ -97,7 +93,7 @@ draft_tokens:
   - **Human decision:** _populated during Brief review_
 
 - **Question:** SDLC scratch roadmap doc — update OR archive?
-  - **Recommended:** UPDATE in place. `.cleargate/scratch/SDLC_hardening_continued.md` should mark SPRINT-22/23/24 as complete and SPRINT-25 as the wrap-up. Add a brief retro section: "SDLC Hardening arc closes here; framework now ergonomic; future sprints address product direction (TBD)."
+  - **Recommended:** UPDATE in place. `.cleargate/scratch/SDLC_hardening_continued.md` should mark SPRINT-22/23/24 as complete and SPRINT-25 as the wrap-up. Add a brief retro section: "SDLC Hardening arc closes here; framework now ergonomic; future sprints return to product direction (set at SPRINT-26 kickoff)."
   - **Human decision:** _populated during Brief review_
 
 ## 1. The Context Override (Old vs. New)
@@ -138,12 +134,17 @@ draft_tokens:
 
 ## Existing Surfaces
 
-- **Surface:** `/README.md` (202 lines) — root README; entry point for new users.
-- **Surface:** `/cleargate-cli/README.md` (53 lines) — npm package README.
-- **Surface:** `/assets/github-banner.svg` + `/assets/lifecycle-diagram.svg` — referenced art (don't redraw; verify presence).
-- **Surface:** `/docs/INTERNALS.md` — referenced from §Want to know more (line 201). Verify exists; flag for separate CR if substantively stale.
+- **Surface:** `README.md` (202 lines) — root README; entry point for new users.
+- **Surface:** `cleargate-cli/README.md` (53 lines) — npm package README.
+- **Surface:** `assets/github-banner.svg` — referenced art (don't redraw; verify presence).
+- **Surface:** `assets/lifecycle-diagram.svg` — referenced art (don't redraw; verify presence).
+- **Surface:** `docs/INTERNALS.md` — referenced from §Want to know more (line 201). Verify exists; flag for separate CR if substantively stale.
 - **Surface:** `.cleargate/scratch/SDLC_hardening_continued.md` — local strategy scratchpad.
-- **Surface:** `cleargate-planning/.claude/agents/{architect,developer,devops,qa,reporter}.md` — actual agent role specs (read-only reference for accurate prose).
+- **Surface:** `cleargate-planning/.claude/agents/architect.md` — Architect role spec (read-only reference for accurate prose).
+- **Surface:** `cleargate-planning/.claude/agents/developer.md` — Developer role spec (read-only reference).
+- **Surface:** `cleargate-planning/.claude/agents/devops.md` — DevOps role spec (read-only reference).
+- **Surface:** `cleargate-planning/.claude/agents/qa.md` — QA role spec (read-only reference).
+- **Surface:** `cleargate-planning/.claude/agents/reporter.md` — Reporter role spec (read-only reference).
 - **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` — actual loop spec (read-only reference).
 - **Why this CR extends rather than rebuilds:** all docs exist; CR-058 updates content sections. No new files except the diagram prompt + sprint retro.
 
