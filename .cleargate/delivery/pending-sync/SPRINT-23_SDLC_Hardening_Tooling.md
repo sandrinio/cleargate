@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Ready
+status: Active
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -56,16 +56,22 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T10:58:54Z
-stamp_error: no ledger rows for work_item_id SPRINT-23
+  last_gate_check: 2026-05-04T11:01:58Z
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-04T10:58:54Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T11:01:57Z
+  sessions:
+    - session: 48aa90c9-f20f-4899-ba85-1079373f3d8e
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T10:59:22Z
 ---
 
 # SPRINT-23: SDLC Hardening — Cross-Cutting Tooling
