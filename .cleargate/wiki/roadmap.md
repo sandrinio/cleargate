@@ -11,8 +11,6 @@ Sprints currently active (`activated_at` set, `completed_at` not set).
 
 - [[SPRINT-15]] — activated: 2026-04-30T00:00:00Z
 
-- [[SPRINT-22]] — activated: 2026-05-04T09:00:00Z
-
 
 
 ## Planned Sprints
@@ -35,6 +33,8 @@ Sprints not yet started (`activated_at` not set).
 - [[SPRINT-18]] — status: Approved
 
 - [[SPRINT-20]] — status: Completed
+
+- [[SPRINT-23]] — status: Draft
 
 
 
@@ -64,6 +64,8 @@ Sprints with `completed_at` set.
 - [[SPRINT-19]] — completed: 2026-05-02T09:21:19.999Z
 
 - [[SPRINT-21]] — completed: 2026-05-04T07:32:36Z
+
+- [[SPRINT-22]] — completed: 2026-05-04T09:40:00Z
 
 
 
