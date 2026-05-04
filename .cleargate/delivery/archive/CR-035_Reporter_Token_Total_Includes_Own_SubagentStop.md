@@ -2,14 +2,14 @@
 cr_id: CR-035
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: "SPRINT-21"
+sprint_cleargate_id: SPRINT-21
 carry_over: false
-status: Ready
+status: Done
 approved: true
 approved_at: 2026-05-03T20:00:00Z
 approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
-updated_at: 2026-05-03T00:00:00Z
+updated_at: 2026-05-04T12:00:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 server_pushed_at_version: null
@@ -44,9 +44,11 @@ context_source: |
   instead of last-row session_total, OR explicitly label the exclusion in
   the report ("excluding Reporter analysis pass: <X>; Reporter cost: <Y>").
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-03T19:04:50Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: .claude/agents/reporter.md, /.session-totals.json, .session-totals.json"
+  last_gate_check: 2026-05-04T11:22:06Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -62,7 +64,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-03T17:46:19Z
+  last_stamp: 2026-05-04T11:22:06Z
   sessions: []
 ---
 

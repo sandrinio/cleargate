@@ -357,6 +357,171 @@ export function reconcileLifecycle(opts: ReconcileLifecycleOpts): ReconcileLifec
   return { drift, clean: cleanIds.size };
 }
 
+// ─── reconcileCrossSprintOrphans ──────────────────────────────────────────────
+
+/**
+ * Orphan drift item: a file in pending-sync/ with a non-terminal status
+ * that has been marked Done (or another terminal state) in a closed sprint's
+ * state.json — indicating it was completed but never archived.
+ */
+export interface OrphanDriftItem {
+  id: string;
+  type: 'CR' | 'STORY' | 'BUG' | 'EPIC' | 'HOTFIX';
+  pending_sync_status: string;
+  state_json_state: string;
+  state_json_sprint: string;
+  file_path: string;
+}
+
+export interface ReconcileOrphansOpts {
+  /** Path to .cleargate/delivery */
+  deliveryRoot: string;
+  /** Path to .cleargate/sprint-runs */
+  sprintRunsRoot: string;
+}
+
+export interface ReconcileOrphansResult {
+  drift: OrphanDriftItem[];
+  clean: number;
+}
+
+/**
+ * Detect cross-sprint orphan drift: items in pending-sync/ with status: Ready
+ * (or any non-terminal status) that are recorded as Done in a closed sprint's
+ * state.json. These were completed but never archived at sprint close.
+ *
+ * Active-sprint exclusion: reads .active sentinel to identify the current
+ * sprint and skips that sprint's state.json (in-flight items are not orphans).
+ *
+ * Scope: only scans pending-sync/*.md files matching the work-item-ID pattern.
+ * Does NOT scan .script-incidents/ or any subdirectory.
+ */
+export function reconcileCrossSprintOrphans(opts: ReconcileOrphansOpts): ReconcileOrphansResult {
+  const { deliveryRoot, sprintRunsRoot } = opts;
+
+  // Terminal states from state.json (story-level states, not artifact statuses)
+  const TERMINAL_STATE_JSON = new Set(['Done', 'Escalated', 'Parking Lot']);
+
+  // Read the active sprint sentinel (to exclude it from orphan detection)
+  let activeSprintId: string | null = null;
+  try {
+    activeSprintId = fs.readFileSync(path.join(sprintRunsRoot, '.active'), 'utf8').trim();
+  } catch {
+    // No .active file — no active sprint; scan all sprints
+  }
+
+  // Collect all pending-sync *.md files (no subdirectory traversal)
+  const pendingDir = path.join(deliveryRoot, 'pending-sync');
+  let pendingFiles: string[];
+  try {
+    pendingFiles = fs.readdirSync(pendingDir).filter(
+      (f) => f.endsWith('.md') && !f.startsWith('.'),
+    );
+  } catch {
+    pendingFiles = [];
+  }
+
+  // Build a map: id → { status, filePath } for each pending-sync item
+  interface PendingItem {
+    status: string;
+    filePath: string;
+    type: OrphanDriftItem['type'];
+  }
+  const pendingMap = new Map<string, PendingItem>();
+
+  for (const fileName of pendingFiles) {
+    const absPath = path.join(pendingDir, fileName);
+    const { status } = readArtifactStatus(absPath);
+    if (status === null) continue;
+    // Skip already-terminal items in pending-sync (shouldn't be there but be safe)
+    if (ARTIFACT_TERMINAL_STATUSES.has(status)) continue;
+
+    // Extract ID from filename: filenames use <ID>_<slug>.md or <ID>.md format.
+    // ID_PATTERN uses \b word-boundaries which don't fire between a digit and '_'
+    // (since '_' is a word char), so we extract the prefix before the first '_' or '.'.
+    const fileNameNoExt = fileName.endsWith('.md') ? fileName.slice(0, -3) : fileName;
+    const prefixPart = fileNameNoExt.split('_')[0] ?? fileNameNoExt;
+    const rawId = prefixPart;
+    const id = normalizeId(rawId);
+    const type = idType(id);
+    if (!type || type === 'PROPOSAL') continue;
+
+    pendingMap.set(id, {
+      status,
+      filePath: path.join('pending-sync', fileName),
+      type: type as OrphanDriftItem['type'],
+    });
+  }
+
+  if (pendingMap.size === 0) {
+    return { drift: [], clean: 0 };
+  }
+
+  // Walk sprint-runs directories for state.json files
+  let sprintDirs: string[];
+  try {
+    sprintDirs = fs.readdirSync(sprintRunsRoot).filter((entry) => {
+      // Skip the .active sentinel file and any hidden files
+      if (entry.startsWith('.')) return false;
+      // Skip non-directories (e.g. files in root)
+      try {
+        return fs.statSync(path.join(sprintRunsRoot, entry)).isDirectory();
+      } catch {
+        return false;
+      }
+    });
+  } catch {
+    sprintDirs = [];
+  }
+
+  const drift: OrphanDriftItem[] = [];
+  // Track which IDs we've flagged to avoid duplicates (first sprint that shows Done wins)
+  const flagged = new Set<string>();
+  let clean = 0;
+
+  for (const sprintDir of sprintDirs) {
+    // Skip the active sprint
+    if (activeSprintId && sprintDir === activeSprintId) continue;
+
+    const stateFile = path.join(sprintRunsRoot, sprintDir, 'state.json');
+    let stateJson: Record<string, unknown>;
+    try {
+      const raw = fs.readFileSync(stateFile, 'utf8');
+      stateJson = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      continue;
+    }
+
+    const stories = stateJson['stories'] as Record<string, { state: string }> | undefined;
+    if (!stories || typeof stories !== 'object') continue;
+
+    for (const [id, storyEntry] of Object.entries(stories)) {
+      // Skip if already flagged from an earlier sprint
+      if (flagged.has(id)) continue;
+
+      const pending = pendingMap.get(id);
+      if (!pending) continue; // not in pending-sync
+
+      const stateInJson = storyEntry?.state ?? '';
+      if (TERMINAL_STATE_JSON.has(stateInJson)) {
+        // This item is Done in a closed sprint but still in pending-sync — orphan drift
+        flagged.add(id);
+        drift.push({
+          id,
+          type: pending.type,
+          pending_sync_status: pending.status,
+          state_json_state: stateInJson,
+          state_json_sprint: sprintDir,
+          file_path: pending.filePath,
+        });
+        clean++;
+      }
+    }
+  }
+
+  return { drift, clean };
+}
+
 // ─── reconcileDecomposition ───────────────────────────────────────────────────
 
 /**

@@ -5,11 +5,10 @@ parent: ""
 children: []
 status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md"
-last_ingest: "2026-05-04T07:33:11.562Z"
-last_ingest_commit: "00864d77bed79954f33e78875349d059dba32466"
+raw_path: ".cleargate/delivery/archive/SPRINT-21_Framework_Hardening_Test_Surfaced.md"
+last_ingest: "2026-05-04T12:49:39.041Z"
+last_ingest_commit: "fe5494939db909438e2087b1c13b7248982313e0"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-21"
 ---
 
 # SPRINT-21: SPRINT-21
