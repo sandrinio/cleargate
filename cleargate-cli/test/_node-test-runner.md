@@ -101,3 +101,43 @@ npx tsx --test test/path/to/new-file.node.test.ts
 ```
 
 That's it. Do **NOT** run `npm test` (still routes to vitest, full 129-file suite, slow). Only the new file under inspection.
+
+## Red/Green naming convention (CR-043, SPRINT-22)
+
+The Red/Green TDD workflow (SKILL.md §C.3–§C.5) introduces a second file-naming dimension.
+
+### Naming matrix
+
+| Author | Phase | Naming | Runner picks up? | Immutable? |
+|---|---|---|---|---|
+| QA-Red | Red | `*.red.node.test.ts` | `npm test` (`test/**`) | Yes — pre-commit hook blocks Dev edits |
+| Developer | Green / edge cases | `*.node.test.ts` | `npm test` (`test/**`) | No |
+| QA-Red (vitest legacy, pre-SPRINT-22) | Red | `*.red.test.ts` | `npm run test:vitest` only | Yes — same hook |
+
+**Key rule:** the Red infix (`red`) comes BEFORE the `node` infix. Correct: `calculator.red.node.test.ts`. Incorrect: `calculator.node.red.test.ts` or `calculator.red.ts`.
+
+### Dev-immutability rule
+
+Files matching `*.red.test.ts` or `*.red.node.test.ts` are **immutable for Developer dispatches** (see `developer.md` §Forbidden Surfaces). The pre-commit hook (`pre-commit-surface-gate.sh`) rejects staged modifications to these files on a story branch after a `qa-red(STORY-NNN-NN):` commit exists.
+
+If a Red test's assertion is wrong (spec mismatch), the Developer returns `BLOCKED: spec mismatch` — the orchestrator routes back to QA-Red to correct the test.
+
+### Bypass
+
+```bash
+SKIP_RED_GATE=1 git commit -m "..."
+```
+
+Only with explicit human approval. Log bypass in sprint §4 Execution Log.
+
+### Sample fixture
+
+A self-contained pedagogy example lives at `cleargate-cli/examples/red-green-example/` (OUTSIDE the `test/**` glob — NOT auto-run by `npm test`). Run manually:
+
+```bash
+# Red phase — should FAIL (no implementation yet)
+npx tsx --test cleargate-cli/examples/red-green-example/calculator.red.node.test.ts
+
+# Green phase — should PASS (implementation present)
+npx tsx --test cleargate-cli/examples/red-green-example/calculator.node.test.ts
+```

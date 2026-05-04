@@ -1,8 +1,8 @@
 ---
 name: sprint-execution
 description: |
-  Use to orchestrate the four-agent sprint loop end-to-end — Architect → Developer →
-  QA → Reporter — across one ClearGate sprint. Activates from sprint kickoff
+  Use to orchestrate the five-dispatch sprint loop end-to-end — Architect → QA-Red →
+  Developer → QA-Verify → Reporter — across one ClearGate sprint. Activates from sprint kickoff
   (preflight + cut sprint branch + state init) through per-story execution
   (worktree → dev → QA → flashcard gate → merge) into walkthrough and Gate-4 close.
   Triggers: SessionStart banner mentioning an active sprint; explicit user phrases
@@ -40,7 +40,7 @@ Five touchpoints where the goal is the tiebreaker:
 
 1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint.
 2. **Architect dispatch (§B).** Pass the sprint goal in the dispatch prompt. The milestone plan should reference how each story advances the goal, not only what files it changes.
-3. **Mid-sprint CR triage (§C.9).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
+3. **Mid-sprint CR triage (§C.10).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
 4. **Escalation (§8).** When `qa_bounces ≥ 3`, `arch_bounces ≥ 3`, or 3 circuit-breaker hits flip a story to `Escalated`, frame the human-decision question through the goal lens: "Drop this story → goal still met? Re-approach → goal still met by sprint end?"
 5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief.
 
@@ -183,7 +183,7 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 
 ## 5. Phase C — Per-Story Execution Loop
 
-Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → Developer → QA → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
+Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → **QA-Red** → Developer → QA-Verify → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
 
 > **Naming note.** State-machine values (`Bouncing`, `Ready to Bounce`), `state.json` counter fields (`qa_bounces`, `arch_bounces`), and script names (`validate_bounce_readiness.mjs`) retain the legacy "bounce" term because they are code-bound. The narrative in this skill uses "execution loop", "story cycle", and "rework" to describe the same mechanics.
 
@@ -212,7 +212,32 @@ git worktree list
 
 **Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a subdirectory of the outer worktree. (`cleargate-enforcement.md` §1.3.)
 
-### C.3 Spawn Developer
+### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
+
+```bash
+bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
+```
+
+Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
+
+> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
+
+QA-Red returns:
+
+```
+QA-RED: WRITTEN | BLOCKED
+RED_TESTS: <list of *.red.node.test.ts files written>
+BASELINE_FAIL: <count of failing scenarios>
+flashcards_flagged: [ ... ]
+```
+
+On `QA-RED: BLOCKED`: surface Spec-Gap to human; do not proceed to §C.4 until resolved.
+
+On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch with subject `qa-red(STORY-NNN-NN): write failing tests`, then proceeds to §C.4 Spawn Developer.
+
+**Fast lane skip:** if `state.json.stories[<id>].lane === "fast"`, skip this entire step and proceed directly to §C.4 Spawn Developer.
+
+### C.4 Spawn Developer
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
@@ -238,13 +263,15 @@ FILES_CHANGED: <list>
 flashcards_flagged: [ ... ]
 ```
 
-If `STATUS=blocked`: route per §C.7 (Blockers Triage).
+If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 
-### C.4 Spawn QA
+### C.5 Spawn QA-Verify
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
+
+Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
 
 QA inputs: story file path, worktree path, Developer commit SHA. QA returns:
 
@@ -256,11 +283,11 @@ REGRESSIONS: <list>
 flashcards_flagged: [ ... ]
 ```
 
-**On `QA: FAIL`:** increment `qa_bounces` via `update_state.mjs STORY-NNN-NN --qa-bounce`. If counter ≥ 3 → flip story to `Escalated`, surface to human, halt. Else → re-spawn Developer with QA's bug report as input. Return to §C.3.
+**On `QA: FAIL`:** increment `qa_bounces` via `update_state.mjs STORY-NNN-NN --qa-bounce`. If counter ≥ 3 → flip story to `Escalated`, surface to human, halt. Else → re-spawn Developer with QA's bug report as input. Return to §C.4.
 
 **On `QA: PASS`:** update state to `QA Passed`, proceed.
 
-### C.5 Architect Pass (v2, `lane: standard` only)
+### C.6 Architect Pass (v2, `lane: standard` only)
 
 `lane: fast` skips this step entirely.
 
@@ -272,7 +299,7 @@ If pre-gate scan reveals new dependencies / structural issues → return to Deve
 
 If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
 
-### C.6 Story Merge
+### C.7 Story Merge
 
 ```bash
 git checkout sprint/S-NN
@@ -289,7 +316,7 @@ Verify all required reports exist before merge:
 
 Missing report → return to spawn that agent. **Do not merge with missing reports.**
 
-### C.7 Blockers Triage (Developer circuit breaker)
+### C.8 Blockers Triage (Developer circuit breaker)
 
 When Developer returns `BLOCKED: circuit breaker triggered`, read `.cleargate/sprint-runs/<id>/reports/STORY-NNN-NN-dev-blockers.md`. The report has three sections:
 
@@ -301,7 +328,7 @@ When Developer returns `BLOCKED: circuit breaker triggered`, read `.cleargate/sp
 
 3 consecutive circuit-breaker hits on the same story → `update_state.mjs STORY-NNN-NN Escalated`, halt.
 
-### C.8 Flashcard Gate (v2 mandatory; v1 dogfood)
+### C.9 Flashcard Gate (v2 mandatory; v1 dogfood)
 
 After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
 
@@ -321,7 +348,7 @@ touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}
 
 Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` spawn until every card has a `.processed-<hash>` marker. Bypass only with `SKIP_FLASHCARD_GATE=1` — log the bypass in sprint §4.
 
-### C.9 Mid-cycle User Input — CR Triage
+### C.10 Mid-cycle User Input — CR Triage
 
 If the user injects new input mid-story, classify before routing:
 
@@ -334,7 +361,7 @@ If the user injects new input mid-story, classify before routing:
 
 Log every CR in sprint §4 Execution Log with date + ID.
 
-> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.9.)"* Quarantine remains default for goal-incidental scope.
+> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.10.)"* Quarantine remains default for goal-incidental scope.
 
 ---
 
