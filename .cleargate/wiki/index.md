@@ -16,6 +16,7 @@
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
+- [[SPRINT-24]] (sprint) — Active
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
@@ -40,7 +41,7 @@
 - Epics: 15 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
 - Sprints: 19 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 28 Done · 16 Completed · [expand](archive/crs.md)
+- CRs: 32 Done · 16 Completed · [expand](archive/crs.md)
 - Bugs: 3 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
 
@@ -50,12 +51,6 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-049]] | cr | Done | .cleargate/delivery/pending-sync/CR-049_Canonical_Live_Drift_Audit.md |
-| [[CR-050]] | cr | Done | .cleargate/delivery/pending-sync/CR-050_Run_Script_Path_B_Caller_Migration.md |
-| [[CR-051]] | cr | Done | .cleargate/delivery/pending-sync/CR-051_DevOps_Subagent_Registration.md |
-| [[CR-052]] | cr | Done | .cleargate/delivery/pending-sync/CR-052_E2E_Wrapper_Test_Helper.md |
 ## Sprints
 
-| [[SPRINT-24]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
+| [[SPRINT-24]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
