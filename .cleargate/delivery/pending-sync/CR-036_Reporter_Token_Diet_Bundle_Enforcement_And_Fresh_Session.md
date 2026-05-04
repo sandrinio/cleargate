@@ -2,10 +2,12 @@
 cr_id: CR-036
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-01"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -53,7 +55,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -79,23 +81,23 @@ draft_tokens:
 
 - **Question:** Step 3.5 fatality — block close on bundle generation failure (v2), or stay non-fatal and add a hard `WARN: BUNDLE MISSING` to stdout?
   - **Recommended:** **fatal under v2**, warn-only under v1. v2 sprints already enforce mirror-parity, decomposition, etc.; bundle generation is on the same tier. v1 keeps its escape hatch for legacy flows. Failure mode is a clear stderr block listing what the prep script needed and didn't find — agent can fix and re-run close.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Source-file fallback in Reporter prompt — remove entirely, or keep as opt-in via explicit dispatch flag?
   - **Recommended:** **remove the fallback path from reporter.md when bundle is present**. Today's "fall back when incomplete or missing" is too permissive — the agent gets to decide what "incomplete" means and reads everything to be safe. New rule: bundle present → bundle is the only input (plus the template). Bundle absent → close pipeline failed and the Reporter shouldn't be dispatched at all. Only escape hatch is `CLEARGATE_REPORTER_BROADFETCH=1` env (logged + flashcarded if used).
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Fresh session_id — Reporter spawned with explicit session reset, or accept the inheritance and rely on prompt scope to ignore it?
   - **Recommended:** **fresh session_id**. Inheritance carried 10.5M cache_read into the Reporter dispatch in the test — that cost is structural, not addressable via prompt. Implementation: orchestrator sprint-execution skill protocol gains a "Reporter dispatched in new session" instruction; if Claude Code's `Agent` tool doesn't natively support session reset, the agent is invoked via a fresh `claude --resume false` shell child. Worth confirming what the SDK supports.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Token budget assertion — soft warn or hard fail when Reporter exceeds threshold?
   - **Recommended:** **soft warn** at 200k tokens, **hard advisory** at 500k. The token-ledger SubagentStop hook already runs; add a check that emits `⚠️ Reporter token budget exceeded: <actual> > <threshold>` to stdout (per CR-032 surfacing pattern). Hard fail risks false positives during legitimately large sprints; soft warn surfaces drift early.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** `prep_reporter_context.mjs` failure mode investigation — file as a separate diagnostic CR, or fold into this one?
   - **Recommended:** **fold the diagnostic into this CR's verification step**. Run the prep script standalone against the test folder's SPRINT-01; capture the failure cause; fix as part of CR-036 acceptance #1 (script must succeed against a known-good sprint). If the failure is environmental (missing dependency, path issue), surface as flashcard. If structural, fix in this CR.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** ~~**SPRINT-20** if not yet activated~~. **Stale rec — SPRINT-20 shipped in commit `618fadc`.** Defaults to SPRINT-21.

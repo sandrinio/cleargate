@@ -2,10 +2,12 @@
 cr_id: CR-035
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-21"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -44,7 +46,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -70,7 +72,7 @@ draft_tokens:
 
 - **Question:** Source — sum all ledger rows' deltas, OR read `.session-totals.json` directly, OR sum from last SubagentStop's `session_total` (current behavior, off-by-one)?
   - **Recommended:** **read `.session-totals.json`**. It's already maintained by the token-ledger hook as the cumulative source of truth, updated atomically on every SubagentStop. Single source, no arithmetic, no off-by-one possible. Falls back to last-row `session_total` only if the file doesn't exist (legacy sprints).
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Reporting shape — single total OR two-line split (sprint work + Reporter analysis)?
   - **Recommended:** **two-line split**. Sprint cost transparency matters. Format:
@@ -80,7 +82,7 @@ draft_tokens:
     Token cost (sprint total):                  23,845,652
     ```
     Makes Reporter cost visible — it IS a Reporter dispatch concern (CR-036) and burying it under one total hides the signal.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** SPRINT-21 — pair with CR-036 (Reporter diet). Both touch Reporter prompt + dispatch path. One commit covers both.

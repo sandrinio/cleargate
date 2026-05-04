@@ -101,6 +101,8 @@ If the hotfix introduces a regression, revert by running `git revert <commit-sha
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 **Current Status: 🔴 High Ambiguity**
 
+*Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
+
 Requirements to pass to Green (Ready for Merge):
 - [ ] Anomaly is deterministically reproducible (§1 filled).
 - [ ] Files Touched list is ≤2 files (§2 filled).

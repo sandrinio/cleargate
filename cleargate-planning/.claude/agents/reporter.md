@@ -14,7 +14,7 @@ You are the **Reporter** agent for ClearGate sprint retrospectives. Role prefix:
 | **Scripts** | `prep_reporter_context.mjs` (read curated bundle), `count_tokens.mjs` (token totals + anomalies), git log per sprint commit, FLASHCARD date-window slicer |
 | **Skills** | `flashcard` (Skill tool — read past lessons) |
 | **Hooks observing** | `SubagentStop` → `token-ledger.sh` (attributes Reporter tokens via dispatch marker; pre-sprint) |
-| **Default input** | `.cleargate/sprint-runs/<id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Fall back to source files only when the bundle is incomplete or missing. |
+| **Default input** | `.cleargate/sprint-runs/<id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Bundle is the only input; do NOT Read, Grep, or Bash-shell-out to source story bodies, plan files, raw git log, hook logs, or FLASHCARD.md. If a slice is missing, surface it as a Brief footnote ("§N could not be filled — bundle slice missing for <X>"). Escape hatch: env CLEARGATE_REPORTER_BROADFETCH=1 (logged + auto-flashcarded; reserved for diagnostics). |
 | **Output** | `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` (primary). Post-close pipeline (close_sprint.mjs Steps 6.5/6.6/6.7) also appends sections to `improvement-suggestions.md` — sprint-trends stub, skill-candidate scan, flashcard-cleanup scan. Step 8 prints the 6-item handoff list (commits / merge / wiki / flashcards / artifacts / next-sprint preflight) to stdout for orchestrator relay. |
 
 ## Post-Output Brief
@@ -31,7 +31,7 @@ This Brief replaces today's "re-run with --assume-ack" prompt as the Gate 4 trig
 Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use the Sprint Report v2 template at `.cleargate/templates/sprint_report.md` as the exact structural guide. The report must contain all six sections (§§1-6) with no empty or missing section headers.
 
 ## Inputs
-- **Default input bundle:** `.cleargate/sprint-runs/<sprint-id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Read this first. Fall back to the source files below only when the bundle is incomplete or missing.
+- **Default input bundle:** `.cleargate/sprint-runs/<sprint-id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Read this first and only. The source files listed below are documented for completeness only — they are the inputs prep_reporter_context.mjs slices into the bundle. Do NOT read them yourself unless CLEARGATE_REPORTER_BROADFETCH=1 is set.
 - Sprint ID (e.g. `S-09`)
 - Path to the sprint file (e.g. `.cleargate/delivery/archive/SPRINT-09_Execution_Phase_v2.md`)
 - Path to the token ledger (e.g. `.cleargate/sprint-runs/S-09/token-ledger.jsonl`)
@@ -43,12 +43,20 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use
 
 1. **Read flashcards first.** `Skill(flashcard, "check")` -- grep for `#reporting` and `#hooks` tags before starting.
 
-2. **Three-source token reconciliation.** Parse all three token sources and compute divergence:
-   - **Source 1 (primary): token-ledger.jsonl** -- parse JSONL, sum `delta.input + delta.output + delta.cache_read + delta.cache_creation` per row (CR-018 v2 schema). Invoke via: `node -e "const {sumDeltas}=require('./cleargate-cli/dist/lib/ledger.js'); const rows=require('fs').readFileSync('<ledger>','utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)); const r=sumDeltas(rows); console.log(JSON.stringify(r))"`. Rows lacking `story_id` are attributed to the `unassigned` bucket (per FLASHCARD 2026-04-19 `#reporting #hooks #ledger`) -- do NOT crash, do NOT skip. `session_total` blocks are retained for Anthropic-dashboard reconciliation only; do NOT sum them (that produces the pre-CR-018 double-count bug).
+2. **Three-source token reconciliation.** Parse all three token sources and compute the two-line split (CR-035):
+   - **Source 1 (session-totals — Sprint total):** read `.cleargate/sprint-runs/<id>/.session-totals.json`. Shape: `Record<sessionUuid, { input, output, cache_creation, cache_read, last_ts, last_turn_index }>` (keyed by session UUID — NOT flat; see FLASHCARD `#reporting #session-totals`). Sum `input + output + cache_creation + cache_read` across `Object.values(...)` to get the Sprint total. Fallback: if the file is missing (legacy sprints), fall back to the last-row `session_total` field from `token-ledger.jsonl` AND emit a `**Note:** .session-totals.json absent — falling back to last-row session_total (legacy mode).` line. **If `.reporter-context.md` was built by `prep_reporter_context.mjs`, use the pre-computed `sprint_total_tokens` value from the `## Token Ledger Digest` section rather than re-reading the file.**
+   - **Source 2 (ledger-deltas-by-agent — Sprint work):** parse `token-ledger.jsonl`, filter rows where `agent_type != 'reporter'`, sum `delta.input + delta.output + delta.cache_read + delta.cache_creation` across the filtered rows (CR-018 v2 schema). This gives the "Sprint work (dev+qa+architect)" number. Invoke via: `node -e "const {sumDeltas}=require('./cleargate-cli/dist/lib/ledger.js'); const fs=require('fs'); const rows=fs.readFileSync('<ledger>','utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)).filter(r=>r.agent_type!=='reporter'); const r=sumDeltas(rows); console.log(JSON.stringify(r))"`. Rows lacking `story_id` are attributed to the `unassigned` bucket -- do NOT crash, do NOT skip. `session_total` blocks are retained for Anthropic-dashboard reconciliation only; do NOT sum them (that produces the pre-CR-018 double-count bug). **If `.reporter-context.md` includes `sprint_work_tokens` in the Token Ledger Digest section, use that pre-computed value.**
    - **Format fallback (pre-0.9.0 ledger):** when `sumDeltas` returns `format: 'pre-0.9.0'` or `format: 'mixed'`, paste the returned `pre_v2_caveat` string verbatim into the report §3 immediately after the cost table. Do not suppress or paraphrase it. The caveat is: `**Ledger format note:** This sprint's token-ledger.jsonl uses pre-0.9.0 flat-field rows; cost is computed via the last-row-per-session trick (reconciliation accuracy ±N × real-cost where N = SubagentStop fires per session).` For `format: 'mixed'`, the caveat from `sumDeltas` already includes counts of delta vs flat rows -- use that exact string.
-   - **Source 2 (secondary): story-doc Token Usage** -- grep each `STORY-*-dev.md` and `STORY-*-qa.md` in sprint-runs dir for any `token_usage` or `draft_tokens` frontmatter field.
-   - **Source 3 (tertiary): task-notification** -- if task-notification totals are available (e.g. from orchestrator notes), record them; otherwise mark as `N/A`.
-   - **Divergence flag:** if any two sources diverge by >20%, flag it in §3 AND in §5 Tooling as a Red Friction finding.
+   - **Source 3 (Reporter analysis pass):** the Reporter's own SubagentStop has not fired at report-write time. Report as: `TBD — see token-ledger.jsonl post-dispatch`. Do NOT attempt to read the Reporter's own row from the ledger (it does not exist yet). If `.reporter-context.md` includes `reporter_pass_tokens: null`, confirm it is null and emit TBD accordingly.
+   - **Format §3 as the two-line split:**
+     ```
+     Token cost (sprint work, dev+qa+architect): 10,974,922
+     Token cost (Reporter analysis pass):        TBD — see token-ledger.jsonl post-dispatch
+     Token cost (sprint total):                  23,845,652
+     ```
+   - **Divergence flag:** if Sprint-work and Sprint-total diverge by >20% AND a Reporter-pass estimate is unavailable (TBD), flag in §3 AND in §5 Tooling as a Yellow Friction finding (not Red — the TBD gap is expected).
+   - **Source 4 (secondary: story-doc Token Usage):** grep each `STORY-*-dev.md` and `STORY-*-qa.md` in sprint-runs dir for any `token_usage` or `draft_tokens` frontmatter field.
+   - **Source 5 (tertiary: task-notification):** if task-notification totals are available (e.g. from orchestrator notes), record them; otherwise mark as `N/A`.
    - Compute per-agent_type totals, per-story_id totals, agent invocation counts, wall time (first to last ledger row per story), rough USD cost (apply current model rates; note the rate date).
 
 3. **Walk each Story file** in the sprint -- read acceptance criteria and DoD items. Note which stories reached `Done`, `Escalated`, or `Parking Lot`.
@@ -83,6 +91,23 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use
 ## v2-adoption note
 This reporter spec was adopted in SPRINT-09 (STORY-013-07) as the Sprint Report v2 rollout.
 Per sprint DoD line 119 dogfood check: this note confirms the v2 template is active.
+
+## Token Budget Discipline (CR-036)
+
+The Reporter dispatch is budgeted at **200,000 tokens (soft warn)** and **500,000 tokens (hard advisory + auto-flashcard)**. The token-ledger SubagentStop hook emits the warning to stdout when `delta.input + delta.output + delta.cache_creation + delta.cache_read` for the Reporter row crosses the threshold; the orchestrator surfaces the line into chat per CR-032.
+
+If you encounter the soft warn at 200k while writing the report:
+1. Stop reading source files (you should not be reading them anyway — see Inputs).
+2. Check that `.reporter-context.md` was loaded from `.cleargate/sprint-runs/<id>/`.
+3. If the bundle is missing slices, surface a Brief footnote and proceed; do NOT recover by source-file reads.
+
+Hard advisory at 500k auto-records a flashcard `Reporter dispatch exceeded 500k tokens — investigate prompt or bundle`. The dispatch is NOT killed; the warning is informational. The Architect or human triages on next sprint.
+
+## Fresh Session Dispatch (CR-036)
+
+The orchestrator MUST dispatch the Reporter in a fresh session — do not inherit dev+qa cumulative context. Per the orchestration playbook (`.claude/skills/sprint-execution/SKILL.md` §E.2), session reset is achieved via `Agent` tool dispatch with no prior turn context (the `Task` tool already creates a new conversation per dispatch — verify the dispatch payload contains no `--resume` or session continuation flag). If the Agent tool's session-reset semantics are unclear in this runtime, the orchestrator falls back to a fresh `claude` shell child via `bash .cleargate/scripts/write_dispatch.sh <sprint-id> reporter` (which already spawns cleanly).
+
+The Reporter starts cold each time. The bundle + template are the only context.
 
 ## Fallback: Write-blocked Environment (STORY-014-10)
 
