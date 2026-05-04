@@ -7,7 +7,7 @@ carry_over: false
 status: Draft
 approved: false
 created_at: 2026-05-04T10:00:00Z
-updated_at: 2026-05-04T10:00:00Z
+updated_at: 2026-05-04T09:00:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -27,11 +27,9 @@ context_source: |
   diagnosed by reading bash output in chat. With run_script.sh, the failure
   + repro would be structured into the dispatch's report automatically.
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: init_sprint.mjs, close_sprint.mjs, update_state.mjs"
-  last_gate_check: 2026-05-04T09:52:40Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T09:58:56Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -47,7 +45,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T09:52:40Z
+  last_stamp: 2026-05-04T09:58:55Z
   sessions: []
 ---
 
@@ -100,7 +98,9 @@ draft_tokens:
 
 ## Existing Surfaces
 
-- **Surface:** `.cleargate/scripts/` — directory containing all sprint orchestration scripts (init_sprint.mjs, close_sprint.mjs, update_state.mjs, etc.). The wrapper sits alongside.
+- **Surface:** `.cleargate/scripts/init_sprint.mjs` — sprint orchestration script (sample callee for the wrapper).
+- **Surface:** `.cleargate/scripts/close_sprint.mjs` — close-pipeline script (sample callee).
+- **Surface:** `.cleargate/scripts/update_state.mjs` — state-mutation script (sample callee).
 - **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` §C — dispatch contracts. Wrapper rule lands here.
 - **Surface:** `cleargate-planning/.claude/agents/reporter.md` — Reporter aggregates incidents.
 - **Why this CR extends rather than rebuilds:** existing scripts stay; wrapper is additive infrastructure. Not a from-scratch CI/test framework.
