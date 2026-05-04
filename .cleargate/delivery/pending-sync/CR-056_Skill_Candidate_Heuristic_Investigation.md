@@ -47,11 +47,9 @@ context_source: |
   Recommend (a). Real skill candidates would need stronger evidence
   (manual review, multi-CR pattern across non-shared sessions).
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: cleargate-cli/src/lib/improvement-suggestions.ts, /improvement-suggestions.md, /token-ledger.jsonl, suggest_improvements.mjs"
-  last_gate_check: 2026-05-04T18:38:30Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T18:58:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -67,7 +65,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:38:30Z
+  last_stamp: 2026-05-04T18:56:29Z
   sessions: []
 ---
 
@@ -120,11 +118,12 @@ draft_tokens:
 
 ## Existing Surfaces
 
-- **Surface:** `.cleargate/scripts/suggest_improvements.mjs` — close-pipeline Step 6.6 entry point.
-- **Surface:** `cleargate-cli/src/lib/improvement-suggestions.ts` (or wherever the logic lives — Dev verifies path during investigation).
-- **Surface:** `.cleargate/sprint-runs/SPRINT-{23,24}/improvement-suggestions.md` — historical false-positive evidence.
-- **Surface:** `.cleargate/sprint-runs/SPRINT-{23,24}/token-ledger.jsonl` — token-attribution data.
-- **Why this CR extends rather than rebuilds:** suggest_improvements.mjs is a working tool; CR-056 tightens one heuristic. No rebuild.
+- **Surface:** `.cleargate/scripts/suggest_improvements.mjs` — close-pipeline Step 6.6 entry point. Dev's investigation also confirms whether logic lives entirely in this file or also in a `cleargate-cli/src/lib/` companion module.
+- **Surface:** `.cleargate/sprint-runs/SPRINT-23/improvement-suggestions.md` — historical false-positive evidence (sprint 1 of 2).
+- **Surface:** `.cleargate/sprint-runs/SPRINT-24/improvement-suggestions.md` — historical false-positive evidence (sprint 2 of 2).
+- **Surface:** `.cleargate/sprint-runs/SPRINT-23/token-ledger.jsonl` — token-attribution data (sprint 1 of 2).
+- **Surface:** `.cleargate/sprint-runs/SPRINT-24/token-ledger.jsonl` — token-attribution data (sprint 2 of 2).
+- **Why this CR extends rather than rebuilds:** `.cleargate/scripts/suggest_improvements.mjs` is a working tool; CR-056 tightens one heuristic. No rebuild.
 
 ## 3. Execution Sandbox
 

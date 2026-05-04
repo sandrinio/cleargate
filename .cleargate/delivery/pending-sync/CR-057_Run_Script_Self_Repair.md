@@ -46,11 +46,9 @@ context_source: |
   Investigation determines which (if any) actually appear in the
   incident corpus.
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: .cleargate/sprint-runs/SPRINT-23/.scrip, .cleargate/sprint-runs/SPRINT-24/.scrip"
-  last_gate_check: 2026-05-04T18:39:53Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T18:58:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -66,7 +64,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T18:39:53Z
+  last_stamp: 2026-05-04T18:57:24Z
   sessions: []
 ---
 
@@ -124,10 +122,10 @@ draft_tokens:
 ## Existing Surfaces
 
 - **Surface:** `.cleargate/scripts/run_script.sh` — current wrapper, no self-repair.
-- **Surface:** `.cleargate/sprint-runs/SPRINT-23/.script-incidents/` + `.cleargate/sprint-runs/SPRINT-24/.script-incidents/` — incident corpus.
+- **Surface:** `.cleargate/sprint-runs/SPRINT-24/.script-incidents/20260504T152431Z-c302f99467bf.json` — representative incident from SPRINT-24 corpus (Dev `ls` the directory to enumerate the full set; SPRINT-23 produced no incident files).
 - **Surface:** `cleargate-cli/src/lib/script-incident.ts` — ScriptIncident interface.
 - **Surface:** `cleargate-cli/test/helpers/wrap-script.ts` (CR-052) — helper for any new self-repair tests.
-- **Why this CR extends rather than rebuilds:** wrapper exists; incident schema exists. CR-057 either adds bounded self-repair logic OR documents-and-defers. No infrastructure rebuild.
+- **Why this CR extends rather than rebuilds:** `.cleargate/scripts/run_script.sh` exists; incident schema exists. CR-057 either adds bounded self-repair logic OR documents-and-defers. No infrastructure rebuild.
 
 ## 3. Execution Sandbox
 

@@ -83,7 +83,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T18:43:17Z
+  last_gate_check: 2026-05-04T18:58:44Z
 stamp_error: no ledger rows for work_item_id SPRINT-25
 draft_tokens:
   input: null
