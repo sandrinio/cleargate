@@ -25,6 +25,7 @@ import {
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
+import { resolveCleargateScript } from '../lib/script-paths.js';
 import { wikiBuildHandler } from './wiki-build.js';
 import { wikiLintHandler } from './wiki-lint.js';
 import {
@@ -230,11 +231,15 @@ export function sprintInitHandler(
     }
   }
 
-  // v2: shell out via run_script.sh
+  // v2: shell out via run_script.sh (CR-050: explicit node + absolute path)
   const runScript = resolveRunScript(cli ?? {});
-  const args = ['init_sprint.mjs', opts.sprintId, '--stories', opts.stories];
+  const scriptPath = resolveCleargateScript({ cwd }, 'init_sprint.mjs');
 
-  const result = spawnFn('bash', [runScript, ...args], { stdio: 'inherit' });
+  const result = spawnFn(
+    'bash',
+    [runScript, 'node', scriptPath, opts.sprintId, '--stories', opts.stories],
+    { stdio: 'inherit' },
+  );
 
   if (result.error) {
     stderrFn(`[cleargate sprint init] error: ${result.error.message}`);
@@ -272,16 +277,18 @@ export function sprintCloseHandler(
     return printInertAndExit(stdoutFn, exitFn);
   }
 
-  // v2: shell out via run_script.sh
+  // v2: shell out via run_script.sh (CR-050: explicit node + absolute path)
   const runScript = resolveRunScript(cli ?? {});
-  const args = ['close_sprint.mjs', opts.sprintId];
+  const closeCwd = cli?.cwd ?? process.cwd();
+  const closeScriptPath = resolveCleargateScript({ cwd: closeCwd }, 'close_sprint.mjs');
+  const closeArgs = [runScript, 'node', closeScriptPath, opts.sprintId];
   // FLASHCARD #cli #commander #optional-key: omit the key when undefined; only
   // append --assume-ack when the flag was explicitly set (opts.assumeAck === true).
   if (opts.assumeAck === true) {
-    args.push('--assume-ack');
+    closeArgs.push('--assume-ack');
   }
 
-  const result = spawnFn('bash', [runScript, ...args], { stdio: 'inherit' });
+  const result = spawnFn('bash', closeArgs, { stdio: 'inherit' });
 
   if (result.error) {
     stderrFn(`[cleargate sprint close] error: ${result.error.message}`);

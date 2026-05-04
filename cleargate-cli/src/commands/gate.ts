@@ -21,6 +21,7 @@ import {
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
+import { resolveCleargateScript } from '../lib/script-paths.js';
 import yaml from 'js-yaml';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 import { evaluate } from '../lib/readiness-predicates.js';
@@ -415,9 +416,11 @@ export function gateQaHandler(
   }
 
   const runScript = resolveRunScriptForGate(cli ?? {});
+  const qaCwd = cli?.cwd ?? process.cwd();
+  const gateRunnerPath = resolveCleargateScript({ cwd: qaCwd }, 'pre_gate_runner.sh');
   const result = spawnFn(
     'bash',
-    [runScript, 'pre_gate_runner.sh', 'qa', opts.worktree, opts.branch],
+    [runScript, 'bash', gateRunnerPath, 'qa', opts.worktree, opts.branch],
     { stdio: 'inherit' },
   );
 
@@ -457,9 +460,11 @@ export function gateArchHandler(
   }
 
   const runScript = resolveRunScriptForGate(cli ?? {});
+  const archCwd = cli?.cwd ?? process.cwd();
+  const archGateRunnerPath = resolveCleargateScript({ cwd: archCwd }, 'pre_gate_runner.sh');
   const result = spawnFn(
     'bash',
-    [runScript, 'pre_gate_runner.sh', 'arch', opts.worktree, opts.branch],
+    [runScript, 'bash', archGateRunnerPath, 'arch', opts.worktree, opts.branch],
     { stdio: 'inherit' },
   );
 

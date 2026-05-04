@@ -35,6 +35,7 @@ import {
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
+import { resolveCleargateScript } from '../lib/script-paths.js';
 
 // ─── Public CLI option types ───────────────────────────────────────────────────
 
@@ -146,11 +147,12 @@ export function storyStartHandler(
     return exitFn(step1.status ?? 1);
   }
 
-  // Step 2: run_script.sh update_state.mjs <ID> Bouncing
+  // Step 2: run_script.sh node update_state.mjs <ID> Bouncing (CR-050: explicit node + abs path)
   const runScript = resolveRunScript(cli ?? { cwd });
+  const updateStateScript = resolveCleargateScript({ cwd }, 'update_state.mjs');
   const step2 = spawnFn(
     'bash',
-    [runScript, 'update_state.mjs', opts.storyId, 'Bouncing'],
+    [runScript, 'node', updateStateScript, opts.storyId, 'Bouncing'],
     { stdio: 'pipe', cwd, encoding: 'utf8' },
   );
   if (step2.error) {
@@ -326,11 +328,12 @@ export function storyCompleteHandler(
     return exitFn(step5.status ?? 1);
   }
 
-  // Step 6: run_script.sh update_state.mjs <ID> Done
+  // Step 6: run_script.sh node update_state.mjs <ID> Done (CR-050: explicit node + abs path)
   const runScript = resolveRunScript(cli ?? { cwd });
+  const updateStateDoneScript = resolveCleargateScript({ cwd }, 'update_state.mjs');
   const step6 = spawnFn(
     'bash',
-    [runScript, 'update_state.mjs', opts.storyId, 'Done'],
+    [runScript, 'node', updateStateDoneScript, opts.storyId, 'Done'],
     { stdio: 'pipe', cwd, encoding: 'utf8' },
   );
   if (step6.error) {
