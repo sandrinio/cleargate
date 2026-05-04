@@ -4,7 +4,7 @@ parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
 sprint_cleargate_id: SPRINT-22
 carry_over: false
-status: Ready
+status: Done
 approved: true
 approved_at: 2026-05-04T08:30:00Z
 approved_by: sandrinio

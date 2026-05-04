@@ -6,11 +6,12 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 execution_mode: v2
 start_date: 2026-05-04
 end_date: 2026-05-15
 activated_at: 2026-05-04T09:00:00Z
+completed_at: 2026-05-04T09:40:00Z
 created_at: 2026-05-04T08:00:00Z
 updated_at: 2026-05-04T09:00:00Z
 created_at_version: cleargate@0.10.0
