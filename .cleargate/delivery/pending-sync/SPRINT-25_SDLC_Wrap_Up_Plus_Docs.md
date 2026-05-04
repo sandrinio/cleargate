@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Ready
+status: Active
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -83,16 +83,22 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T19:10:22Z
-stamp_error: no ledger rows for work_item_id SPRINT-25
+  last_gate_check: 2026-05-04T19:20:11Z
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-04T19:10:22Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T19:20:11Z
+  sessions:
+    - session: 75415998-9bf1-4ea7-8be1-e4e2ea480df6
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T19:10:47Z
 ---
 
 # SPRINT-25: SDLC Hardening Wrap-Up + Docs Aligned
