@@ -31,8 +31,6 @@ Stories with medium or high ambiguity that need design decisions before work can
 Items with `status: Ready` that have not been pushed to the remote PM tool (`remote_id` is empty).
 
 
-- [[CR-049]] — status: Ready
-
 - [[CR-050]] — status: Ready
 
 - [[CR-051]] — status: Ready
