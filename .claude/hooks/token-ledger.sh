@@ -401,6 +401,26 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     "${SENTINEL_TURN_INDEX}" \
     >> "${HOOK_LOG}"
 
+  # --- CR-036: Reporter token-budget warning (chat-injection per CR-032 pattern) ---
+  if [[ "${AGENT_TYPE}" == "reporter" ]]; then
+    REPORTER_TOTAL=$(( DELTA_IN + DELTA_OUT + DELTA_CC + DELTA_CR ))
+    REPORTER_BUDGET_SOFT=200000
+    REPORTER_BUDGET_HARD=500000
+    if [[ "${REPORTER_TOTAL}" -gt "${REPORTER_BUDGET_HARD}" ]]; then
+      printf '\n⚠️ Reporter token budget exceeded: %s > %s (HARD advisory)\n' \
+        "${REPORTER_TOTAL}" "${REPORTER_BUDGET_HARD}"
+      # Auto-flashcard via cleargate CLI (best-effort; never block)
+      if command -v cleargate >/dev/null 2>&1; then
+        cleargate flashcard record \
+          "Reporter dispatch exceeded 500k tokens — investigate prompt or bundle" \
+          >/dev/null 2>&1 || true
+      fi
+    elif [[ "${REPORTER_TOTAL}" -gt "${REPORTER_BUDGET_SOFT}" ]]; then
+      printf '\n⚠️ Reporter token budget exceeded: %s > %s (soft warn)\n' \
+        "${REPORTER_TOTAL}" "${REPORTER_BUDGET_SOFT}"
+    fi
+  fi
+
   # --- delete processed sentinel ---
   if [[ -n "${PROCESSED_FILE}" && -f "${PROCESSED_FILE}" ]]; then
     rm -f "${PROCESSED_FILE}"

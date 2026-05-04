@@ -59,6 +59,9 @@
  *                                      --flashcard-cleanup scan in suggest_improvements.mjs.
  *   CLEARGATE_FLASHCARD_LOOKBACK=<N> — override 3-sprint default lookback for
  *                                      --flashcard-cleanup scan.
+ *   CLEARGATE_SKIP_BUNDLE_CHECK=1    — skip Step 3.5 bundle generation + size check entirely
+ *                                      (CR-036 test seam; analogous to CLEARGATE_SKIP_MERGE_CHECK).
+ *                                      Never use in production — Step 3.5 is v2-fatal in production.
  */
 
 import fs from 'node:fs';
@@ -511,17 +514,40 @@ function main() {
   }
 
   // ── Step 3.5: Build curated Reporter context bundle ───────────────────────
-  process.stdout.write('Step 3.5: building Reporter context bundle...\n');
-  try {
-    invokeScript('prep_reporter_context.mjs', [sprintId], {
-      CLEARGATE_STATE_FILE: stateFile,
-      CLEARGATE_SPRINT_DIR: sprintDir,
-    });
-    process.stdout.write(`Step 3.5 passed: ${sprintDir}/.reporter-context.md ready.\n`);
-  } catch (err) {
-    // Non-fatal — Reporter falls back to source files
-    process.stderr.write(`Step 3.5 warning: prep_reporter_context.mjs failed: ${/** @type {Error} */ (err).message}\n`);
-    process.stderr.write('Reporter will fall back to broad-fetch context loading.\n');
+  const bundlePath = path.join(sprintDir, '.reporter-context.md');
+  const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
+  const MIN_BUNDLE_BYTES = 2048;
+  if (process.env.CLEARGATE_SKIP_BUNDLE_CHECK === '1') {
+    process.stdout.write('Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).\n');
+  } else {
+    process.stdout.write('Step 3.5: building Reporter context bundle...\n');
+    try {
+      invokeScript('prep_reporter_context.mjs', [sprintId], {
+        CLEARGATE_STATE_FILE: stateFile,
+        CLEARGATE_SPRINT_DIR: sprintDir,
+      });
+      if (!fs.existsSync(bundlePath)) {
+        throw new Error(`bundle not written at ${bundlePath}`);
+      }
+      const bundleSize = fs.statSync(bundlePath).size;
+      if (bundleSize < MIN_BUNDLE_BYTES) {
+        throw new Error(`bundle too small (${bundleSize}B < ${MIN_BUNDLE_BYTES}B): ${bundlePath}`);
+      }
+      process.stdout.write(`Step 3.5 passed: ${bundlePath} ready (${Math.round(bundleSize / 1024)}KB).\n`);
+    } catch (err) {
+      const msg = /** @type {Error} */ (err).message;
+      if (isEnforcingV2) {
+        process.stderr.write(
+          `close_sprint: Step 3.5 FAILED (v2 hard-block): ${msg}\n` +
+          `  Cannot dispatch Reporter without bundle. Fix prep_reporter_context.mjs or run with execution_mode: v1.\n` +
+          `  Diagnostic: node .cleargate/scripts/prep_reporter_context.mjs ${sprintId}\n`
+        );
+        process.exit(1);
+      } else {
+        process.stderr.write(`Step 3.5 warning (v1 advisory): ${msg}\n`);
+        process.stderr.write('Reporter will fall back to broad-fetch context loading.\n');
+      }
+    }
   }
 
   // ── Step 4: Orchestrator spawns Reporter separately ───────────────────────

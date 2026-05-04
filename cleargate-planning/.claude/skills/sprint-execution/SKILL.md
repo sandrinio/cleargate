@@ -377,6 +377,10 @@ If the report stub does not exist, dispatch the Reporter:
 bash .cleargate/scripts/write_dispatch.sh SPRINT-NN reporter
 ```
 
+> **Fresh session.** The Reporter MUST dispatch in a fresh session — do not inherit dev+qa cumulative context. `write_dispatch.sh` already spawns a clean shell child; the `Agent` tool path requires no session-continuation flag. If the runtime offers a session-reset knob (e.g. `--resume false` or equivalent), use it. The Reporter starts cold and reads only `.reporter-context.md` + `sprint_report.md`.
+
+> **Token budget.** Soft warn at 200k tokens, hard advisory at 500k (per CR-036). The token-ledger SubagentStop hook emits the warning to stdout; orchestrator surfaces the line into chat. Hard advisory auto-records a flashcard. The dispatch is NOT killed — the warning is informational; review the bundle slices on next sprint.
+
 Reporter writes `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` and returns the Brief:
 
 > **Goal:** `<verbatim sprint goal>` — **Verdict: met | partial | missed.**
