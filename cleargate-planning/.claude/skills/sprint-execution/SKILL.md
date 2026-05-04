@@ -303,20 +303,67 @@ If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment
 
 ### C.7 Story Merge
 
-```bash
-git checkout sprint/S-NN
-git merge story/STORY-NNN-NN --no-ff -m "merge(story/STORY-NNN-NN): STORY-NNN-NN <title>"
-git worktree remove .worktrees/STORY-NNN-NN
-git branch -d story/STORY-NNN-NN
-```
+**DevOps-owned.** The orchestrator does NOT run `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, or `npm run prebuild` directly. All mechanical merge work is delegated to the DevOps agent.
 
-Verify all required reports exist before merge:
+**Required reports — verify before dispatch:**
 
-- `STORY-NNN-NN-dev.md` (always required, regardless of lane)
-- `STORY-NNN-NN-qa.md` (required unless lane=fast skipped QA)
-- `STORY-NNN-NN-arch.md` (required for v2 standard-lane only)
+| Report | Required when |
+|---|---|
+| `STORY-NNN-NN-dev.md` | Always (all lanes) |
+| `STORY-NNN-NN-qa.md` | Always, unless lane=fast explicitly skipped QA-Verify |
+| `STORY-NNN-NN-arch.md` | v2 standard-lane only |
+| `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
 
-Missing report → return to spawn that agent. **Do not merge with missing reports.**
+Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**
+
+**Orchestrator dispatch sequence:**
+
+1. Mark the dispatch:
+   ```bash
+   bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN devops
+   ```
+
+2. Spawn the DevOps agent with the following context (§3.1 Context Pack):
+   ```
+   SPRINT-{NN} — DevOps dispatch for {STORY-ID}.
+
+   INPUTS:
+   - Story ID: {STORY-ID}
+   - Sprint ID: SPRINT-{NN}
+   - Worktree path: .worktrees/{STORY-ID}/
+   - Story branch: story/{STORY-ID}
+   - Sprint branch: sprint/S-{NN}
+   - Dev commit SHA: {abc1234}
+   - QA commit SHA (if present): {def5678}
+   - Architect commit SHA (if present): {ghi9012}
+   - Files-changed manifest: {list from git show --stat <dev-sha>}
+   - Canonical scaffold touched? {yes|no}
+   - Lane: {standard | fast}
+   - Required reports present:
+       - {STORY-ID}-dev.md    ✓
+       - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
+       - {STORY-ID}-arch.md   ✓ (v2 standard lane only)
+
+   ACTIONS (in order):
+   1. Verify all required reports exist; halt if any missing.
+   2. Checkout sprint branch.
+   3. git merge story/{STORY-ID} --no-ff -m "merge(story/{STORY-ID}): {commit subject}"
+   4. If canonical scaffold touched: cd cleargate-cli && npm run prebuild
+   5. Mirror parity audit: for each file in files-changed where canonical mirror exists,
+      diff live ↔ canonical. Report drift in §Mirror Parity (DO NOT auto-fix).
+   6. Post-merge test verification: run only test files touched by this commit.
+   7. git worktree remove .worktrees/{STORY-ID}
+   8. git branch -d story/{STORY-ID}
+   9. CLEARGATE_STATE_FILE=... node .cleargate/scripts/update_state.mjs {STORY-ID} Done
+   ```
+
+3. **Halt** and wait for DevOps to return `STATUS=done` or `STATUS=blocked`.
+
+**On `STATUS=done`:** DevOps has written `.cleargate/sprint-runs/SPRINT-{NN}/reports/{STORY-ID}-devops.md`. If it notes live re-sync needed (mirror parity drift), address via `cleargate init` or hand-port at Gate-4 doc-refresh (see §C.9 Flashcard Gate for the next step, then proceed to the next story / wave).
+
+**On `STATUS=blocked`:** DevOps has written `{STORY-ID}-devops-blockers.md`. Surface the blockers report to the human. DevOps does NOT auto-resolve conflicts — orchestrator escalates and waits for human resolution before re-dispatching DevOps.
+
+**Forbidden orchestrator patterns (v2):** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
 
 ### C.8 Blockers Triage (Developer circuit breaker)
 

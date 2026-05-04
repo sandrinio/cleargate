@@ -73,3 +73,36 @@ PASS. SKILL.md diff contains ONLY §1 table additions (3 hunks in §1). No chang
 ## Regressions
 
 None detected. New test files are additive. No modifications to existing logic paths beyond the two targeted changes (L227 token-ledger.sh, write_dispatch.sh validator block).
+
+## Phase B
+
+**Commit:** `4e4ade1` on `story/CR-044`
+**Scope:** SKILL.md §C.7 Story Merge body rewrite — orchestrator-owned → DevOps-owned dispatch block.
+
+### CHECK_1 — §C.7 body restructured
+
+PASS. The diff replaces the four-line `git checkout / git merge / git worktree remove / git branch -d` bash block with "DevOps-owned." prose. The new body describes the orchestrator dispatching the DevOps agent via `write_dispatch.sh` and provides the §3.1 Context Pack inline (INPUTS, ACTIONS, HALT, STATUS handlers). Old orchestrator-runs-git-merge prose is entirely removed.
+
+### CHECK_2 — Required reports table includes devops.md
+
+PASS. A four-row markdown table replaces the old bullet list. The fourth row is:
+
+```
+| `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
+```
+
+devops.md is listed alongside dev/qa/arch with an explicit note that it is the output of this step, not a prerequisite.
+
+### CHECK_3 — Forbidden orchestrator patterns documented
+
+PASS. The §C.7 body concludes with an explicit "Forbidden orchestrator patterns (v2):" footer naming all five operations: `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild`. Matches CR-044 §4 Acceptance #2 verbatim.
+
+### CHECK_4 — Mirror parity
+
+PASS. `diff cleargate-planning/.claude/skills/sprint-execution/SKILL.md cleargate-cli/templates/cleargate-planning/.claude/skills/sprint-execution/SKILL.md` produced empty output — files are byte-identical.
+
+## Phase B Verdict
+
+All four checks pass. Ship it.
+
+**STATUS: PASS-PHASE-B**
