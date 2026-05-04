@@ -41,4 +41,8 @@ jobs:
         run: npm run build --workspace=cleargate-cli
 
       - name: Run foreign-repo integration test
-        run: npm test --workspace=cleargate-cli -- test/integration/foreign-repo.test.ts
+        # foreign-repo.test.ts uses vitest (describe/it/expect from 'vitest');
+        # the default `npm test` runs node:test via tsx, which trips
+        # "Vitest failed to access its internal state" on this file. Use
+        # vitest directly for this integration suite.
+        run: cd cleargate-cli && npx vitest run test/integration/foreign-repo.test.ts
