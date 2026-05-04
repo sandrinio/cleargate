@@ -6,8 +6,8 @@ children: []
 status: "Ready"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md"
-last_ingest: "2026-05-04T13:58:59.443Z"
-last_ingest_commit: "1d4ec6f8a7a6863731f9cc86c1ea11296866f218"
+last_ingest: "2026-05-04T14:06:43.898Z"
+last_ingest_commit: "913d8f30455e36f319f03e6241117292cb2b7d1b"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-24"
 ---
