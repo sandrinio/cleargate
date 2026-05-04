@@ -4,7 +4,7 @@ parent_ref: BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution S
 parent_cleargate_id: BUG-024 §3.4 (Recommended fix scope) — Token-Ledger Attribution Spike
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Draft
+status: Done
 ambiguity: 🟢 Low
 approved: true
 proposal_gate_waiver:

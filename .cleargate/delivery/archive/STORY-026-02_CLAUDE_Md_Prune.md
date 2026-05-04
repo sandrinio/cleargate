@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-026
 parent_cleargate_id: EPIC-026
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Draft
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-026 §2 IN-SCOPE M2.1 — collapse the duplicated four-agent-loop block in CLAUDE.md (live + canonical) down to a single bullet pointer once the sprint-execution skill is the canonical playbook. EPIC-026 §6 Q3 confirmed an explicit "when banner says Load skill X, invoke Skill tool" rule remains in CLAUDE.md as the always-on contract. Wave 2 dispatch — runs AFTER STORY-026-01 + CR-026 + BUG-025 land to avoid mirror-surface contention.
 actor: Conversational orchestrator agent (always-on context surface consumer)

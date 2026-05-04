@@ -4,7 +4,7 @@ parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
 sprint_cleargate_id: "SPRINT-01"
 carry_over: false
-status: Ready
+status: Done
 severity: high
 approved: true
 approved_at: 2026-05-03T20:00:00Z
