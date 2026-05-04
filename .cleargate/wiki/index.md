@@ -54,3 +54,12 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Sprints
 
 | [[SPRINT-24]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
+| [[SPRINT-25]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md |
+## CRs
+
+| [[CR-053]] | cr | Draft | .cleargate/delivery/pending-sync/CR-053_Cleargate_Init_Manifest_Root_Bug.md |
+| [[CR-054]] | cr | Draft | .cleargate/delivery/pending-sync/CR-054_Run_Script_UTF8_Truncation.md |
+| [[CR-055]] | cr | Draft | .cleargate/delivery/pending-sync/CR-055_WrapScript_Caller_Test_Adoption.md |
+| [[CR-056]] | cr | Draft | .cleargate/delivery/pending-sync/CR-056_Skill_Candidate_Heuristic_Investigation.md |
+| [[CR-057]] | cr | Draft | .cleargate/delivery/pending-sync/CR-057_Run_Script_Self_Repair.md |
+| [[CR-058]] | cr | Draft | .cleargate/delivery/pending-sync/CR-058_README_Refresh_Plus_Diagram_Prompt.md |
