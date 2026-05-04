@@ -6,12 +6,12 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Draft
+status: Ready
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
 created_at: 2026-05-04T10:00:00Z
-updated_at: 2026-05-04T09:00:00Z
+updated_at: 2026-05-04T10:30:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -49,12 +49,14 @@ crs:
   - CR-048
 bugs: []
 proposals: []
-approved: false
+approved: true
+approved_at: 2026-05-04T10:30:00Z
+approved_by: human
 human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T09:58:56Z
+  last_gate_check: 2026-05-04T10:22:06Z
 stamp_error: no ledger rows for work_item_id SPRINT-23
 draft_tokens:
   input: null
@@ -62,7 +64,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T09:57:11Z
+  last_stamp: 2026-05-04T10:22:06Z
   sessions: []
 ---
 

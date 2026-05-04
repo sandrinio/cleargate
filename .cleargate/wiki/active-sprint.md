@@ -30,7 +30,7 @@
 
 - [[SPRINT-20]] — status: Completed
 
-- [[SPRINT-23]] — status: Draft
+- [[SPRINT-23]] — status: Ready
 
 
 

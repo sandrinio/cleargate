@@ -73,10 +73,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-042]] | cr | Ready | .cleargate/delivery/pending-sync/CR-042_Reporter_Fresh_Session_Doc_Fix.md |
 | [[CR-043]] | cr | Ready | .cleargate/delivery/pending-sync/CR-043_Red_Green_TDD_Discipline.md |
 | [[CR-044]] | cr | Ready | .cleargate/delivery/pending-sync/CR-044_DevOps_Role_Agent.md |
-| [[CR-045]] | cr | Draft | .cleargate/delivery/pending-sync/CR-045_Sprint_Context_File.md |
-| [[CR-046]] | cr | Draft | .cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md |
-| [[CR-047]] | cr | Draft | .cleargate/delivery/pending-sync/CR-047_Mid_Sprint_Triage_And_Test_Pattern_Validation.md |
-| [[CR-048]] | cr | Draft | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |
+| [[CR-045]] | cr | Ready | .cleargate/delivery/pending-sync/CR-045_Sprint_Context_File.md |
+| [[CR-046]] | cr | Ready | .cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md |
+| [[CR-047]] | cr | Ready | .cleargate/delivery/pending-sync/CR-047_Mid_Sprint_Triage_And_Test_Pattern_Validation.md |
+| [[CR-048]] | cr | Ready | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |
 ## Stories
 
 | [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |
@@ -86,7 +86,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
 | [[SPRINT-21]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
 | [[SPRINT-22]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-22_SDLC_Hardening.md |
-| [[SPRINT-23]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-23_SDLC_Hardening_Tooling.md |
+| [[SPRINT-23]] | sprint | Ready | .cleargate/delivery/pending-sync/SPRINT-23_SDLC_Hardening_Tooling.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |
