@@ -34,6 +34,8 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-20]] — status: Completed
 
+- [[SPRINT-22]] — status: Ready
+
 
 
 ## Shipped Sprints
