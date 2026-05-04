@@ -1,13 +1,12 @@
 /**
- * story.node.test.ts — CR-050 node:test caller migration tests.
+ * story.node.test.ts — CR-050 + CR-055 node:test caller integration tests.
  *
  * Verifies that story start (step 2) + story complete (step 6) pass the NEW
  * canonical interface to run_script.sh after CR-050 migration:
  *   - arg[1] is 'node' (explicit interpreter for .mjs scripts)
  *   - arg[2] is an absolute path ending in update_state.mjs
  *
- * HYBRID PATTERN: spawnFn capture for run_script.sh call; mocked git calls return
- * success. story start requires a real state.json seed to pass step 3 (fs read).
+ * CR-055: Adds wrapScript-based scenario invoking the real wrapper end-to-end.
  *
  * No vitest. Uses node:test + node:assert/strict per FLASHCARD #node-test.
  */
@@ -21,11 +20,15 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { storyStartHandler, storyCompleteHandler } from '../../src/commands/story.js';
+import { wrapScript } from '../helpers/wrap-script.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const FIXTURE_V2 = path.resolve(__dirname, '../../src/commands/fixtures/SPRINT-99-v2.md');
+
+// Live run_script.sh wrapper for CR-055 wrapScript-based integration tests.
+const LIVE_WRAPPER = path.resolve(__dirname, '..', '..', '..', '.cleargate', 'scripts', 'run_script.sh');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -199,5 +202,33 @@ describe('CR-050 story complete step 6 — canonical call form (args[1]=node, ar
     );
     assert.strictEqual(args[3], 'STORY-99-01', 'Expected story ID as args[3]');
     assert.strictEqual(args[4], 'Done', 'Expected Done as args[4] for step 6');
+  });
+});
+
+// ─── CR-055 wrapScript — real wrapper integration ─────────────────────────────
+
+describe('CR-055 story — wrapScript end-to-end: real wrapper integration', () => {
+  it('wrapper exits 0 when invoked with node -e process.exit(0) (story explicit-node interface)', async () => {
+    const result = await wrapScript({
+      wrapper: LIVE_WRAPPER,
+      args: ['node', '-e', 'process.exit(0)'],
+      env: {
+        AGENT_TYPE: 'developer',
+        WORK_ITEM_ID: 'CR-055',
+      },
+    });
+
+    assert.strictEqual(
+      result.exitCode,
+      0,
+      `Expected exit 0 from 'node -e process.exit(0)' via real wrapper but got ${result.exitCode}. ` +
+        `This tests the explicit-node interface form used by story start/complete callers. ` +
+        `stderr: ${result.stderr}`
+    );
+    assert.strictEqual(
+      result.incidentJson,
+      undefined,
+      'Expected no incident JSON on success but got one'
+    );
   });
 });

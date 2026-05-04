@@ -1,18 +1,13 @@
 /**
- * sprint.node.test.ts — CR-050 node:test caller migration tests.
+ * sprint.node.test.ts — CR-050 + CR-055 node:test caller integration tests.
  *
  * Verifies that sprint init + sprint close pass the NEW canonical interface
  * to run_script.sh after CR-050 migration:
  *   - arg[1] is 'node' (explicit interpreter)
  *   - arg[2] is an absolute path ending in the script name
  *
- * These are the post-migration "green" tests. The vitest tests in sprint.test.ts
- * still exist and test other behaviors; this file focuses exclusively on
- * the CR-050 call-site migration assertions.
- *
- * HYBRID PATTERN: spawnFn capture (no real git/no real scripts invoked).
- * The capture-mock verifies arg structure; the shim-removal.red.node.test.ts
- * verifies real wrapper behavior end-to-end.
+ * CR-055: Adds wrapScript-based scenarios that invoke the real wrapper end-to-end,
+ * exercising the interface-level path that spawnFn-arg-capture cannot cover.
  *
  * No vitest. Uses node:test + node:assert/strict per FLASHCARD #node-test.
  */
@@ -24,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { sprintInitHandler, sprintCloseHandler } from '../../src/commands/sprint.js';
+import { wrapScript } from '../helpers/wrap-script.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +29,10 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 // Fixture paths — reuse SPRINT-99 fixtures from src/commands/fixtures/
 const FIXTURE_V2 = path.resolve(__dirname, '../../src/commands/fixtures/SPRINT-99-v2.md');
+
+// Live run_script.sh wrapper for CR-055 wrapScript-based integration tests.
+// Resolves from cleargate-cli/test/commands/ → up 3 → repo root → .cleargate/scripts/
+const LIVE_WRAPPER = path.resolve(__dirname, '..', '..', '..', '.cleargate', 'scripts', 'run_script.sh');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -188,6 +188,38 @@ describe('CR-050 sprint close — canonical call form (args[1]=node, args[2]=abs
       args[2],
       '/some/project/.cleargate/scripts/close_sprint.mjs',
       `Expected absolute canonical path but got '${args[2]}'`
+    );
+  });
+});
+
+// ─── CR-055 wrapScript — real wrapper integration ─────────────────────────────
+//
+// Invokes run_script.sh end-to-end via wrapScript to verify the wrapper accepts
+// the explicit-node interface form (arg[1]=node) that sprint callers use.
+// Catches interface-level regressions that spawnFn-arg-capture cannot detect.
+
+describe('CR-055 sprint — wrapScript end-to-end: real wrapper integration', () => {
+  it('wrapper exits 0 when invoked with node -e process.exit(0) (sprint explicit-node interface)', async () => {
+    const result = await wrapScript({
+      wrapper: LIVE_WRAPPER,
+      args: ['node', '-e', 'process.exit(0)'],
+      env: {
+        AGENT_TYPE: 'developer',
+        WORK_ITEM_ID: 'CR-055',
+      },
+    });
+
+    assert.strictEqual(
+      result.exitCode,
+      0,
+      `Expected exit 0 from 'node -e process.exit(0)' via real wrapper but got ${result.exitCode}. ` +
+        `This tests the explicit-node interface form used by sprint init/close callers. ` +
+        `stderr: ${result.stderr}`
+    );
+    assert.strictEqual(
+      result.incidentJson,
+      undefined,
+      'Expected no incident JSON on success but got one (wrapper wrote error JSON unexpectedly)'
     );
   });
 });

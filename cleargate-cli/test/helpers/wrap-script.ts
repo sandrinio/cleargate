@@ -16,6 +16,33 @@
  *   // result.exitCode, result.stdout, result.stderr, result.incidentJson
  *
  * See CR-052 §4 for full acceptance criteria.
+ *
+ * ## Canonical caller-test pattern
+ *
+ * Use this pattern in any test file that needs to verify a command's wrapper invocation
+ * end-to-end (catches interface-level bugs that spawnFn-arg-capture cannot detect):
+ *
+ * ```typescript
+ * import { wrapScript } from '../helpers/wrap-script.js';
+ *
+ * const LIVE_WRAPPER = path.resolve(__dirname, '..', '..', '..', '.cleargate', 'scripts', 'run_script.sh');
+ *
+ * it('wrapper exits 0 with explicit-node interface', async () => {
+ *   const result = await wrapScript({
+ *     wrapper: LIVE_WRAPPER,
+ *     args: ['node', '-e', 'process.exit(0)'],
+ *     env: { AGENT_TYPE: 'developer', WORK_ITEM_ID: 'CR-NNN' },
+ *   });
+ *   assert.strictEqual(result.exitCode, 0);
+ *   assert.strictEqual(result.incidentJson, undefined); // no error JSON on success
+ * });
+ * ```
+ *
+ * For callers that invoke bash scripts (e.g., gate qa/arch with pre_gate_runner.sh),
+ * use `args: ['bash', '-c', 'exit 0']` instead of the node form.
+ *
+ * Use `fixtures` to seed tmpdir files (e.g., `.cleargate/sprint-runs/.active`) before exec.
+ * Use `result.incidentJson` to assert on failure-path incident fields (ts, exit_code, stderr).
  */
 
 import * as fs from 'node:fs';
