@@ -437,6 +437,9 @@ describe('evaluate — status-of predicate', () => {
 
 // ─── Sandbox tests ────────────────────────────────────────────────────────────
 
+// Resolve to the worktree-local repo root (cleargate-cli/test/lib → up 3 levels)
+const SMOKE_REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
+
 describe('sandbox: evaluator restrictions', () => {
   it('rejects FS reads outside projectRoot (path traversal)', () => {
     const dir = makeTmpDir();
@@ -453,12 +456,132 @@ describe('sandbox: evaluator restrictions', () => {
     // Verify that readiness-predicates.ts source does not use child_process or execSync
     const { readFileSync } = await import('node:fs');
     const src = readFileSync(
-      path.join('/Users/ssuladze/Documents/Dev/ClearGate', 'cleargate-cli/src/lib/readiness-predicates.ts'),
+      path.join(SMOKE_REPO_ROOT, 'cleargate-cli/src/lib/readiness-predicates.ts'),
       'utf8'
     );
     expect(src).not.toContain('child_process');
     expect(src).not.toContain('execSync');
     expect(src).not.toContain('spawnSync');
+  });
+});
+
+// ─── CR-033 existing-surfaces-verified — L0 code-truth tightening ─────────────
+
+describe('CR-033 existing-surfaces-verified — L0 code-truth tightening', () => {
+  // Scenario 1: Section absent → not-applicable (pass with skip detail).
+  it('Section absent → not-applicable (pass with skip detail)', () => {
+    const body = `## 1. Problem & Value
+
+Why we are doing this.
+
+## Why not simpler?
+
+- Because it is needed.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/not-applicable/);
+  });
+
+  // Scenario 2: Section present, cites package.json (real top-level file) → pass.
+  it('Section present, cites package.json (real top-level file) → pass', () => {
+    const body = `## Existing Surfaces
+
+- package.json — project manifest
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/exist/);
+  });
+
+  // Scenario 3: Section present, cites real file with :symbol suffix → pass; symbol stripped.
+  it('Section present, cites cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm → pass; symbol stripped', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm\` — work item type detection
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 4: Section present, cites missing file → fail; detail names path.
+  it('Section present, cites cleargate-cli/src/lib/does-not-exist.ts → fail; detail names path', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/src/lib/does-not-exist.ts\` — this file does not exist
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('cleargate-cli/src/lib/does-not-exist.ts');
+  });
+
+  // Scenario 5: Section present, mix of real + missing → fail; detail names only missing.
+  it('Section present, mix of real + missing paths → fail; detail names only missing', () => {
+    const body = `## Existing Surfaces
+
+- \`package.json\` — project manifest (real)
+- \`cleargate-cli/src/lib/does-not-exist.ts\` — this does not exist (missing)
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('cleargate-cli/src/lib/does-not-exist.ts');
+    expect(result.detail).not.toContain('package.json');
+  });
+
+  // Scenario 6: Section present, no path matches, contains "no overlap found" sentinel → pass.
+  it('Section present, no path matches, contains "no overlap found" sentinel → pass', () => {
+    const body = `## Existing Surfaces
+
+No overlap found — grepped: jira, integration, sync.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/sentinel/);
+  });
+
+  // Scenario 7: Section present, no path matches, no sentinel → fail with sentinel-missing detail.
+  it('Section present, no path matches, no sentinel → fail with sentinel-missing detail', () => {
+    const body = `## Existing Surfaces
+
+I looked around but nothing came to mind.
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    expect(result.detail).toContain('no path citations');
+    expect(result.detail).toContain('sentinel');
+  });
+
+  // Scenario 8: Section present, cites a path with extension that traverses outside root → sandbox-rejected → fail.
+  // Note: `../../etc/passwd` has no extension so the permissive regex doesn't match it.
+  // Use a path that has an extension and traverses outside root to test sandbox rejection.
+  it('Section present, cites path traversing outside root → sandbox-rejected, treated as missing → fail', () => {
+    const body = `## Existing Surfaces
+
+- \`../../etc/shadow.conf\` — system file (path traversal attempt)
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(false);
+    // The sandbox-rejected path is treated as missing
+    expect(result.detail).toMatch(/cited paths do not exist/);
+  });
+
+  // Scenario 9: Section present, cites cleargate-cli/package.json (real subdir file) → pass.
+  it('Section present, cites cleargate-cli/package.json (real subdir file) → pass', () => {
+    const body = `## Existing Surfaces
+
+- \`cleargate-cli/package.json\` — CLI package manifest
+`;
+    const doc = makeDoc({}, body, SMOKE_REPO_ROOT + '/test.md');
+    const result = evaluate('existing-surfaces-verified', doc, { projectRoot: SMOKE_REPO_ROOT });
+    expect(result.pass).toBe(true);
   });
 });
 
@@ -468,7 +591,7 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
   it('js-yaml parse of readiness-gates.md returns 7 blocks (6 original + sprint gate added by CR-027)', async () => {
     const yaml = await import('js-yaml');
     const gatesPath = path.join(
-      '/Users/ssuladze/Documents/Dev/ClearGate',
+      SMOKE_REPO_ROOT,
       '.cleargate/knowledge/readiness-gates.md'
     );
     const raw = fs.readFileSync(gatesPath, 'utf8');
@@ -479,8 +602,8 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
     while ((match = blockRe.exec(raw)) !== null) {
       yamlBlocks.push(match[1]!);
     }
-    // CR-027 added sprint.ready-for-execution gate (7th block); CR-028 adds no new gate blocks
-    expect(yamlBlocks).toHaveLength(7);
+    // CR-027 added sprint.ready-for-execution gate (7th block); CR-030 adds initiative gate (8th block)
+    expect(yamlBlocks).toHaveLength(8);
     // Each block is a YAML array with a single element
     const parsed = yamlBlocks.map((b) => {
       const arr = yaml.load(b) as unknown[];
@@ -497,7 +620,7 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
   it('every criterion.check parses via parsePredicate without throwing', async () => {
     const yaml = await import('js-yaml');
     const gatesPath = path.join(
-      '/Users/ssuladze/Documents/Dev/ClearGate',
+      SMOKE_REPO_ROOT,
       '.cleargate/knowledge/readiness-gates.md'
     );
     const raw = fs.readFileSync(gatesPath, 'utf8');
@@ -517,7 +640,7 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
   });
 
   it('smoke: evaluate ≥1 real pending-sync item against proposal gate', () => {
-    const projectRoot = '/Users/ssuladze/Documents/Dev/ClearGate';
+    const projectRoot = SMOKE_REPO_ROOT;
     const pendingSyncDir = path.join(projectRoot, '.cleargate', 'delivery', 'pending-sync');
     const files = fs.readdirSync(pendingSyncDir).filter((f) => f.endsWith('.md'));
     // Just need one file to exercise the evaluator
@@ -552,7 +675,7 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
     const doc: ParsedDoc = { fm, body, absPath: sampleFile };
 
     // Evaluate the "no-tbds" predicate which works on any item
-    const result = evaluate("body does not contain 'TBD'", doc, { projectRoot });
+    const result = evaluate("body does not contain 'TBD'", doc, { projectRoot: SMOKE_REPO_ROOT });
     // Result may be pass or fail — just assert it runs without error
     expect(typeof result.pass).toBe('boolean');
     expect(typeof result.detail).toBe('string');
@@ -561,9 +684,9 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
 
 // ─── BUG-008 regression tests ─────────────────────────────────────────────────
 
-// Sub-fix #1: proposal-approved prose-vs-path heuristic
+// Sub-fix #1: parent-approved-proposal prose-vs-path heuristic
 
-describe('BUG-008 sub-fix #1 — proposal-approved prose-vs-path heuristic', () => {
+describe('BUG-008 sub-fix #1 — parent-approved-proposal prose-vs-path heuristic', () => {
   it('R-08: context_source is prose with approved_by + approved_at → pass', () => {
     const dir = makeTmpDir();
     const docPath = path.join(dir, 'EPIC-021.md');
@@ -866,7 +989,7 @@ Modify: \`readiness-gates.md\`
 
     // Negative assertion: cr.ready-to-apply must NOT include simplest-form-justified.
     const gatesPath = path.join(
-      '/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/CR-028',
+      SMOKE_REPO_ROOT,
       '.cleargate/knowledge/readiness-gates.md'
     );
     const gatesContent = fs.readFileSync(gatesPath, 'utf8');
@@ -875,5 +998,348 @@ Modify: \`readiness-gates.md\`
     expect(crBlockMatch).not.toBeNull();
     const crBlock = crBlockMatch![0];
     expect(crBlock).not.toContain('simplest-form-justified');
+  });
+});
+
+// ─── CR-031: resolveLinkedPath walks pending-sync + archive ──────────────────
+
+describe('CR-031: resolveLinkedPath — searches pending-sync and archive', () => {
+  // Scenario 1: citer in pending-sync, target in pending-sync (existing baseline)
+  it('Scenario 1: citer in pending-sync, target in pending-sync resolves via candidate 1 (sibling)', () => {
+    const dir = makeTmpDir();
+    const pendingSync = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingSync, { recursive: true });
+    const targetFile = path.join(pendingSync, 'INITIATIVE-001.md');
+    fs.writeFileSync(targetFile, '---\napproved: true\n---\n\nBody.', 'utf8');
+
+    const citerPath = path.join(pendingSync, 'EPIC-001.md');
+    const doc = makeDoc({ context_source: 'INITIATIVE-001.md' }, 'body', citerPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 2: citer in pending-sync, target in archive (the CR-031 bug)
+  it('Scenario 2: citer in pending-sync, target in archive resolves via candidate 4', () => {
+    const dir = makeTmpDir();
+    const pendingSync = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    const archive = path.join(dir, '.cleargate', 'delivery', 'archive');
+    fs.mkdirSync(pendingSync, { recursive: true });
+    fs.mkdirSync(archive, { recursive: true });
+    // Target moved to archive (triage complete)
+    const targetFile = path.join(archive, 'INITIATIVE-001.md');
+    fs.writeFileSync(targetFile, '---\napproved: true\n---\n\nBody.', 'utf8');
+
+    const citerPath = path.join(pendingSync, 'EPIC-001.md');
+    const doc = makeDoc({ context_source: 'INITIATIVE-001.md' }, 'body', citerPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+    expect(result.detail).not.toMatch(/linked file not found/i);
+  });
+
+  // Scenario 3: citer in archive, target in archive (frozen pair)
+  it('Scenario 3: citer in archive, target in archive (frozen pair) resolves via candidate 1', () => {
+    const dir = makeTmpDir();
+    const archive = path.join(dir, '.cleargate', 'delivery', 'archive');
+    fs.mkdirSync(archive, { recursive: true });
+    const targetFile = path.join(archive, 'PROPOSAL-001.md');
+    fs.writeFileSync(targetFile, '---\napproved: true\n---\n\nBody.', 'utf8');
+
+    const citerPath = path.join(archive, 'EPIC-001.md');
+    const doc = makeDoc({ context_source: 'PROPOSAL-001.md' }, 'body', citerPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 4: citer in archive, target in pending-sync (rare: shipped item citing active bug)
+  it('Scenario 4: citer in archive, target in pending-sync resolves via candidate 3', () => {
+    const dir = makeTmpDir();
+    const pendingSync = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    const archive = path.join(dir, '.cleargate', 'delivery', 'archive');
+    fs.mkdirSync(pendingSync, { recursive: true });
+    fs.mkdirSync(archive, { recursive: true });
+    // Target is still active in pending-sync
+    const targetFile = path.join(pendingSync, 'BUG-001.md');
+    fs.writeFileSync(targetFile, '---\napproved: true\n---\n\nBody.', 'utf8');
+
+    const citerPath = path.join(archive, 'STORY-001-01.md');
+    const doc = makeDoc({ context_source: 'BUG-001.md' }, 'body', citerPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 5: sandbox preserved — path traversal via ref still rejected
+  it('Scenario 5: sandbox preserved — "../../../etc/passwd" traversal rejected', () => {
+    const dir = makeTmpDir();
+    const pendingSync = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
+    fs.mkdirSync(pendingSync, { recursive: true });
+
+    const citerPath = path.join(pendingSync, 'EPIC-X.md');
+    // Traversal ref that would escape sandbox
+    const doc = makeDoc({ context_source: '../../../etc/passwd' }, 'body', citerPath);
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(false);
+    // Must not find the file (sandbox violation or not found)
+    expect(result.detail).toMatch(/linked file not found|sandbox|prose.*waiver/i);
+  });
+});
+
+// ─── CR-034: declared-item predicate accepts tables + def-lists ──────────────
+
+describe('CR-034: declared-item item-type', () => {
+  // parsePredicate accepts declared-item shape
+  it('parsePredicate accepts declared-item item-type', () => {
+    const p = parsePredicate('section(3) has ≥1 declared-item');
+    expect(p.kind).toBe('section');
+    if (p.kind === 'section') {
+      expect(p.itemType).toBe('declared-item');
+    }
+  });
+
+  // Scenario 1: section with 3 bullets passes declared-item
+  it('Scenario 1: section with 3 bullets → declared-item count=3, passes ≥1', () => {
+    const body = `## Section 1
+
+- item one
+- item two
+- item three
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥1 declared-item', doc);
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 2: section with a 4-row table passes declared-item count=4
+  it('Scenario 2: section with 4-row table → declared-item count=4, passes ≥1', () => {
+    const body = `## Section 1
+
+| Item | Value |
+|---|---|
+| Primary File | \`package.json\` |
+| Related Files | \`vite.config.ts\` |
+| New Files Needed | Yes |
+| Notes | None |
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥1 declared-item', doc);
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 3: section with 2 bullets + 3 table rows → count=5
+  it('Scenario 3: section with 2 bullets + 3 table rows → declared-item count=5, passes ≥5', () => {
+    const body = `## Section 1
+
+- bullet one
+- bullet two
+
+| Col A | Col B |
+|---|---|
+| row 1a | row 1b |
+| row 2a | row 2b |
+| row 3a | row 3b |
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥5 declared-item', doc);
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 4: section with definition-list entries passes
+  it('Scenario 4: section with definition-list terms → passes ≥3 declared-item', () => {
+    const body = `## Section 1
+
+**Primary File:** \`package.json\`
+**Related Files:** \`vite.config.ts\`, \`tsconfig.json\`
+**New Files Needed:** Yes — all of the above
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥3 declared-item', doc);
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 5: empty section → fails
+  it('Scenario 5: empty section → fails ≥1 declared-item', () => {
+    const body = `## Section 1
+
+(no content here)
+
+## Section 2
+
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥1 declared-item', doc);
+    expect(result.pass).toBe(false);
+  });
+
+  // Scenario 6: section with only table header + separator (no data rows) → fails
+  it('Scenario 6: table header + separator only (no data rows) → fails ≥1 declared-item', () => {
+    const body = `## Section 1
+
+| Item | Value |
+|---|---|
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥1 declared-item', doc);
+    expect(result.pass).toBe(false);
+  });
+
+  // Scenario 7: mixed 1 bullet + 1 def-list + 2 table rows → count=4
+  it('Scenario 7: 1 bullet + 1 def-list + 2 table rows → passes ≥4 declared-item', () => {
+    const body = `## Section 1
+
+- bullet entry
+
+**Type:** foo
+
+| Col A | Col B |
+|---|---|
+| row 1a | row 1b |
+| row 2a | row 2b |
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(1) has ≥4 declared-item', doc);
+    expect(result.pass).toBe(true);
+  });
+
+  // Scenario 8: dod-declared regression — listed-item still works for checkbox bullets
+  it('Scenario 8: dod-declared regression — listed-item with - [x] and - [ ] lines still passes', () => {
+    const body = `## Section 1
+
+Intro.
+
+## Section 2
+
+- [x] Acceptance criterion one met
+- [x] Acceptance criterion two met
+- [ ] Optional criterion
+`;
+    const doc = makeDoc({}, body);
+    const result = evaluate('section(2) has ≥1 listed-item', doc);
+    expect(result.pass).toBe(true);
+    expect(result.detail).toMatch(/3 listed-item/);
+  });
+});
+
+// ─── BUG-026: update_state.mjs import regression ────────────────────────────
+
+describe('BUG-026: validate_state.mjs exports validateShapeIgnoringVersion', () => {
+  it('validateShapeIgnoringVersion is exported and callable — rejects invalid shape', async () => {
+    const scriptPath = path.join(SMOKE_REPO_ROOT, '.cleargate', 'scripts', 'validate_state.mjs');
+    // Dynamic import of the .mjs module — must not throw an ImportError
+    // The module guard in validate_state.mjs uses process.argv check so main() won't run on import
+    const mod = await import(scriptPath);
+    expect(typeof mod.validateShapeIgnoringVersion).toBe('function');
+    // Call with an invalid shape — should return valid: false, not throw
+    const result = mod.validateShapeIgnoringVersion({ not_an_object: true });
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('validateShapeIgnoringVersion is exported and callable — accepts minimal valid shape', async () => {
+    const scriptPath = path.join(SMOKE_REPO_ROOT, '.cleargate', 'scripts', 'validate_state.mjs');
+    const mod = await import(scriptPath);
+    const validState = {
+      sprint_id: 'SPRINT-TEST',
+      execution_mode: 'v2',
+      sprint_status: 'Active',
+      stories: {
+        'STORY-TEST-01': {
+          state: 'Ready to Bounce',
+          qa_bounces: 0,
+          arch_bounces: 0,
+          updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      },
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    const result = mod.validateShapeIgnoringVersion(validState);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+});
+
+// ─── CR-030: parent-approved per-type field map ───────────────────────────────
+
+describe('CR-030 parent-approved per-type field map', () => {
+  it('R-030-1: Epic with context_source → Proposal (approved: true) → frontmatter(context_source).approved == true passes', () => {
+    const dir = makeTmpDir();
+    const proposalPath = path.join(dir, 'PROPOSAL-001.md');
+    fs.writeFileSync(proposalPath, [
+      '---',
+      'proposal_id: "PROPOSAL-001"',
+      'approved: true',
+      'status: "Draft"',
+      '---',
+      '# Proposal 001',
+    ].join('\n'), 'utf8');
+
+    const doc = makeDoc(
+      { context_source: 'PROPOSAL-001.md' },
+      'body text',
+      path.join(dir, 'EPIC-001.md'),
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  it('R-030-2: Epic with context_source → Initiative (status: Triaged) → frontmatter(context_source).status == Triaged passes', () => {
+    const dir = makeTmpDir();
+    const initiativePath = path.join(dir, 'INITIATIVE-001_test.md');
+    fs.writeFileSync(initiativePath, [
+      '---',
+      'initiative_id: "INITIATIVE-001"',
+      'status: "Triaged"',
+      '---',
+      '# Initiative 001',
+    ].join('\n'), 'utf8');
+
+    const doc = makeDoc(
+      { context_source: 'INITIATIVE-001_test.md' },
+      'body text',
+      path.join(dir, 'EPIC-002.md'),
+    );
+    const result = evaluate("frontmatter(context_source).status == 'Triaged'", doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  it('R-030-3: Initiative fixture passes advisory gate when §1 has ≥1 listed-item AND §5 has ≥1 listed-item AND no TBDs', () => {
+    const dir = makeTmpDir();
+    // Initiative body with §1 and §5 populated, no TBDs
+    const initiativeBody = [
+      '## User Flow',
+      '',
+      '- User logs in and sees dashboard',
+      '- User navigates to settings',
+      '',
+      '## Background',
+      '',
+      'Some background.',
+      '',
+      '## Constraints',
+      '',
+      'None.',
+      '',
+      '## Out of Scope',
+      '',
+      'Mobile app.',
+      '',
+      '## Success Criteria',
+      '',
+      '- 99% uptime SLA met',
+      '- User NPS > 50',
+    ].join('\n');
+
+    const doc = makeDoc(
+      { initiative_id: 'INITIATIVE-001' },
+      initiativeBody,
+      path.join(dir, 'INITIATIVE-001_test.md'),
+    );
+
+    // Check each advisory criterion independently
+    const noTbds = evaluate("body does not contain marker 'TBD'", doc, { projectRoot: dir });
+    const userFlow = evaluate('section(1) has ≥1 listed-item', doc, { projectRoot: dir });
+    const successCriteria = evaluate('section(5) has ≥1 listed-item', doc, { projectRoot: dir });
+
+    expect(noTbds.pass).toBe(true);
+    expect(userFlow.pass).toBe(true);
+    expect(successCriteria.pass).toBe(true);
   });
 });

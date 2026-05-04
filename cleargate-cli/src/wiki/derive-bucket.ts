@@ -7,12 +7,13 @@ export interface BucketInfo {
 }
 
 const PREFIX_MAP: Array<{ prefix: string; type: WikiPageType; bucket: string }> = [
-  { prefix: 'EPIC-',     type: 'epic',     bucket: 'epics' },
-  { prefix: 'STORY-',    type: 'story',    bucket: 'stories' },
-  { prefix: 'SPRINT-',   type: 'sprint',   bucket: 'sprints' },
-  { prefix: 'PROPOSAL-', type: 'proposal', bucket: 'proposals' },
-  { prefix: 'CR-',       type: 'cr',       bucket: 'crs' },
-  { prefix: 'BUG-',      type: 'bug',      bucket: 'bugs' },
+  { prefix: 'EPIC-',        type: 'epic',       bucket: 'epics' },
+  { prefix: 'STORY-',       type: 'story',      bucket: 'stories' },
+  { prefix: 'SPRINT-',      type: 'sprint',     bucket: 'sprints' },
+  { prefix: 'PROPOSAL-',    type: 'proposal',   bucket: 'proposals' },
+  { prefix: 'CR-',          type: 'cr',         bucket: 'crs' },
+  { prefix: 'BUG-',         type: 'bug',        bucket: 'bugs' },
+  { prefix: 'INITIATIVE-',  type: 'initiative', bucket: 'initiatives' },
 ];
 
 /**

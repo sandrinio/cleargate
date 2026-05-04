@@ -135,6 +135,7 @@ function runCloseSprint(sprintDir: string, extraArgs: string[] = []): {
         CLEARGATE_STATE_FILE: stateFile,
         CLEARGATE_SKIP_WORKTREE_CHECK: '1',
         CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+        CLEARGATE_SKIP_BUNDLE_CHECK: '1',
       },
     },
   );
@@ -543,6 +544,11 @@ describe('Scenario 9: Step 3.5 invokes prep_reporter_context.mjs and prints step
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Scenario 10: Step 3.5 warns and continues if prep_reporter_context.mjs fails', () => {
+  // CR-036: Step 3.5 is v2-fatal for execution_mode:v2 sprints.
+  // Use a v1-mode sprint (execution_mode:v1) to exercise the advisory/non-fatal path.
+  // The sprint-v1-legacy fixture has execution_mode:v1 (schema_version:1 → migrated to v2
+  // but execution_mode stays v1), so Step 3.5 failure produces a warning, not a hard-block.
+  // CLEARGATE_SKIP_BUNDLE_CHECK is intentionally NOT set here so Step 3.5 actually runs.
   let tmpBase: string;
   let sprintDir: string;
 
@@ -557,18 +563,39 @@ describe('Scenario 10: Step 3.5 warns and continues if prep_reporter_context.mjs
     fs.rmSync(tmpBase, { recursive: true, force: true });
   });
 
+  function runWithBundleCheck(sprintDirPath: string) {
+    const sprintId = path.basename(sprintDirPath);
+    const stateFile = path.join(sprintDirPath, 'state.json');
+    return spawnSync(
+      '/usr/bin/env',
+      ['node', CLOSE_SPRINT_SCRIPT, sprintId, '--assume-ack'],
+      {
+        encoding: 'utf8',
+        timeout: 30_000,
+        env: {
+          ...process.env,
+          CLEARGATE_SPRINT_DIR: sprintDirPath,
+          CLEARGATE_STATE_FILE: stateFile,
+          CLEARGATE_SKIP_WORKTREE_CHECK: '1',
+          CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
+          // CLEARGATE_SKIP_BUNDLE_CHECK intentionally absent — Step 3.5 must run
+        },
+      },
+    );
+  }
+
   it('stderr contains "Step 3.5 warning" when prep_reporter_context.mjs fails', () => {
-    const result = runCloseSprint(sprintDir);
+    const result = runWithBundleCheck(sprintDir);
     expect(result.stderr).toMatch(/Step 3\.5 warning/);
   });
 
   it('pipeline exits 0 despite Step 3.5 failure (non-fatal)', () => {
-    const result = runCloseSprint(sprintDir);
+    const result = runWithBundleCheck(sprintDir);
     expect(result.status).toBe(0);
   });
 
   it('sprint_status is flipped to Completed even when Step 3.5 fails', () => {
-    runCloseSprint(sprintDir);
+    runWithBundleCheck(sprintDir);
     const state = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8'));
     expect(state.sprint_status).toBe('Completed');
   });
@@ -993,6 +1020,7 @@ describe('Scenario 18: Step 2.8 skipped via CLEARGATE_SKIP_MERGE_CHECK=1 (test s
           CLEARGATE_SKIP_WORKTREE_CHECK: '1',
           CLEARGATE_SKIP_LIFECYCLE_CHECK: '1',
           CLEARGATE_SKIP_MERGE_CHECK: '1',
+          CLEARGATE_SKIP_BUNDLE_CHECK: '1',
         },
       },
     );

@@ -2,10 +2,12 @@
 cr_id: CR-034
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-20"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -47,7 +49,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -77,15 +79,15 @@ draft_tokens:
     - Predicate is the layer that doesn't care about format — it cares about "did the author declare anything in §N?" Tables, bullets, and definition lists all answer "yes."
     - Single fix (one predicate change) covers all 9+ criteria using the shape; rewriting templates is N changes that drift over time.
   - **Counter-recommendation:** template layer is *simpler* — one rewrite per template, no engine change, lowest risk. Worth considering if §0.5 Q3 is "no" (don't broaden item-type semantics).
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** If predicate fix — extend existing `listed-item` (silently broader) or add new item-type `declared-item` (explicit)?
   - **Recommended:** **new item-type `declared-item`**. Definition: "any line that declares a structured item — either a `-` bullet, a `| ... |` table data row (after a `|---|` separator), or a definition-list term." Explicit name; existing `listed-item` stays bullet-precise for criteria that genuinely need bullets (e.g., DoD checkboxes). Gates that don't care about format switch from `listed-item` → `declared-item`.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Which gate criteria switch from `listed-item` → `declared-item`?
   - **Recommended:** all 9+ where the corresponding template section uses tables. Concretely: `implementation-files-declared`, `affected-files-declared`, `scope-in-populated`, `blast-radius-populated`, `sandbox-paths-declared`, `repro-steps-deterministic`. Keep `dod-declared` on `listed-item` (DoD is a checkbox list — bullet shape is the right enforcement).
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** ~~**SPRINT-20** if not yet activated~~. **Stale rec — SPRINT-20 shipped in commit `618fadc`.** Defaults to SPRINT-21.

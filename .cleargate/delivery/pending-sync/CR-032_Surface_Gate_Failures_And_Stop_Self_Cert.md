@@ -2,10 +2,12 @@
 cr_id: CR-032
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-20"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -53,7 +55,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -79,15 +81,15 @@ draft_tokens:
 
 - **Question:** Where does the gate-fail signal get injected — PostToolUse hook stdout (which Claude Code surfaces as a system-reminder), a separate channel, or both?
   - **Recommended:** PostToolUse hook stdout. Claude Code's hook spec already injects stdout into the conversation as a system-reminder block (see existing `[advisory: gate_failed]` + `phase4:` pattern in `.cleargate/hook-log/gate-check.log`). Add one structured stdout line per gate failure. No new transport surface needed.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Failure A (silent) — should the hook block the next tool call until the agent acknowledges, or just inject the warning and let the agent decide?
   - **Recommended:** inject only. Blocking creates conversation deadlocks (the agent might be mid-iteration and need to keep editing). Acknowledgment is enforced socially by the system-reminder being visible — if the agent skips it, the user sees the gate-fail too, and corrects. Hard-block is reserved for `pre-edit-gate.sh` (planning-first enforcement).
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Failure B (self-cert) — enforce literal-criterion-mode in the gate checklist itself, or add a CLAUDE.md rule against substitution?
   - **Recommended:** both. CLAUDE.md gets one new paragraph forbidding substitution at the Ambiguity Gate. Templates' Ambiguity Gate footer adds: *"Each criterion must be evaluated against its literal text. Do not substitute softer interpretations. If a criterion is not met but you believe the intent is satisfied, say so explicitly and ask the human."* The textual change is necessary; mechanical enforcement (a `cleargate ambiguity check <file>` command that asserts each box's evidence) is a follow-up CR.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** ~~SPRINT-20 if not yet activated~~. **Stale rec — SPRINT-20 shipped in commit `618fadc`.** Defaults to SPRINT-21.

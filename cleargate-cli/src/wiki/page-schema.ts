@@ -4,7 +4,7 @@
  * parent_cleargate_id, and sprint_cleargate_id are optional.
  */
 
-export type WikiPageType = 'epic' | 'story' | 'sprint' | 'proposal' | 'cr' | 'bug' | 'topic';
+export type WikiPageType = 'epic' | 'story' | 'sprint' | 'proposal' | 'cr' | 'bug' | 'topic' | 'initiative';
 export type RepoTag = 'cli' | 'mcp' | 'planning';
 
 /** The nine required + three optional frontmatter fields every wiki page must satisfy. */

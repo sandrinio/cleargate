@@ -3,6 +3,32 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-04 · #cost-framing #pricing · cache_read at $0.30/MTok vs cache_creation at $3.75/MTok (Sonnet 4.6) — saving cache_read tokens by forcing re-ramp can NET NEGATIVE in dollars. Always compute both directions before recommending fresh-session/cache-bust optimizations.
+2026-05-04 · #spike #recommendation · CR-039 spike: session_id is shared across orchestrator+subagents (no SDK override). Token-count savings (~16M/sprint) is real but dollar-net is ~-$1.58/sprint at current pricing. PARTIAL/NO-GO; CR-041+CR-042 deferred to SPRINT-22.
+2026-05-04 · #docs #agent-defs · reporter.md L108 claim "Task tool creates new conversation per dispatch" is INACCURATE per ledger evidence (1 session_id per sprint). CR-042 fixes this in SPRINT-22.
+2026-05-04 · #session-reset #agent-tool · Claude Code Agent/Task tool shares orchestrator session_id — no per-dispatch session isolation; SubagentStop won't fire for `claude -p` subprocess dispatches.
+2026-05-04 · #qa #worktree #mirror · test_close_pipeline reporter.md mirror check fails in worktrees — live `.claude/agents/` is gitignored at `/.claude/`; suppress or skip this check in worktree context.
+2026-05-04 · #close-pipeline #step-3.5 · close_sprint.mjs Step 3.5 is v2-fatal post-CR-036 — bundle ≥2KB or close exits 1; v1 advisory preserved. Use CLEARGATE_SKIP_BUNDLE_CHECK=1 in tests.
+2026-05-04 · #reporter #budget · Reporter token budget: 200k soft warn / 500k hard advisory + auto-flashcard. token-ledger.sh hook emits via stdout (CR-032 chat-injection).
+2026-05-04 · #reporter #fresh-session · Reporter dispatched in fresh session via write_dispatch.sh shell child — Agent tool path requires no --resume flag. Verified post-CR-036.
+2026-05-04 · #mirror #parity · Architect plan said close_sprint.mjs is live-only; canonical mirror EXISTS at cleargate-planning/.cleargate/scripts/close_sprint.mjs — both updated for parity.
+2026-05-04 · #test-harness #fixtures · sprint-v1-legacy fixture had execution_mode:v2 + schema_version:1 — inconsistent; fixed to v1. v1-era sprints should have execution_mode:v1.
+2026-05-04 · #qa #test-count · Dev's "pre-existing failure count" can be FILE count not TEST count — QA must distinguish; spot-check by running one to confirm the actual scope.
+2026-05-04 · #qa #gates #regression · AND-semantics in an enforcing gate means any new required criterion breaks ALL existing items of that type — test FULL gate runs against real parent files on disk, not isolated predicates.
+2026-05-04 · #gate #or-group · gate.ts or_group?: optional field on GateCriterion — criteria sharing same or_group value pass-as-group when ≥1 member passes; backward-compat: criteria without or_group still required-AND.
+2026-05-04 · #stamp-tokens #fm-key-map · stamp-tokens.ts L194 idKeys array + work-item-type.ts L14 FM_KEY_MAP are DUAL sources of truth for work-item key mapping — must update both when adding work-item types.
+2026-05-04 · #predicates #existing-surfaces · existing-surfaces-verified permissive regex requires file extension — extension-less paths (`etc/passwd`) are silently dropped via sentinel-missing branch, not sandbox-rejection. Test with `.conf`/`.md`/etc.
+2026-05-04 · #predicates #existing-surfaces · existing-surfaces-verified pass/fail: section absent → pass (not-applicable); zero paths + no sentinel → fail; zero paths + sentinel → pass; missing paths → fail with list.
+2026-05-04 · #reporting #session-totals · .session-totals.json is UUID-keyed map not flat — sum Object.values; spec quoted flat shape but live shape is `Record<sessionUuid, {input, output, ...}>`.
+2026-05-04 · #mirror #parity · cleargate-planning/.cleargate/scripts/ does NOT mirror prep_reporter_context.mjs — live-only by design; do NOT create the canonical mirror.
+2026-05-04 · #mirror #dogfood-split · Live `.claude/agents/` is gitignored — canonical edits to agent prompts require `cleargate init` re-sync post-merge; QA cannot verify live parity via tracked-file diff.
+2026-05-03 · #preflight #gate-cache #cr-038 · Step 0 output format must be unconditional: always emit `, N errors` even when N=0 — spec scenario text overrides sketch conditional.
+2026-05-03 · #snapshot #hooks #test-harness · stamp-and-gate snapshot locks (cr-008 + cr-009) must be updated when the hook body changes or the init snapshot test fails.
+2026-05-03 · #bug #git-log · BUG filed against npm-published version may already be fixed in dev repo — `git log -G <symbol>` before implementing avoids duplicate fix commits.
+2026-05-03 · #qa #spec #acceptance-metric · CR-034: spec §4.2 ≤2 listed-item count contradicted §3 6-criteria migration. Always cross-check aggregate acceptance metrics against explicit item lists.
+2026-05-03 · #readiness-gates #cr · sandbox-paths-declared was duplicate section(2) with blast-radius-populated; correct target is section(3) per CR template (Execution Sandbox = §3).
+2026-05-03 · #predicates #declared-item #tables · declared-item counts table data rows only after a |---| separator; header row alone yields 0 — correct behavior per template semantics.
+2026-05-03 · #test-harness #worktree #vitest · Smoke tests with hardcoded repo root path fail in worktrees — use import.meta.url-relative SMOKE_REPO_ROOT constant instead.
 2026-05-03 · #protocol #gate #bypass · SPRINT-21 cached_gate_result.pass hand-set true (engine can't type-detect SPRINT files); CR-030 in this sprint fixes — bypass rescinds post-CR-030.
 2026-05-02 · #claude-md #mirror #prune · CLEARGATE-block awk-diff is the reliable mirror-parity gate — pipe both blocks to files and diff; empty = pass. Add to QA recipe template.
 2026-05-02 · #test-harness #vitest #worktree · Tests that grep CLAUDE.md must be updated in the same commit as the CLAUDE.md prune; old assertions become instantly-failing post-merge.

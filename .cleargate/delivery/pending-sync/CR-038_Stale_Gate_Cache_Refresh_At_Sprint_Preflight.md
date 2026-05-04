@@ -2,10 +2,12 @@
 cr_id: CR-038
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-21"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -42,7 +44,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:43Z
+  last_gate_check: 2026-05-03T19:04:51Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -68,11 +70,11 @@ draft_tokens:
 
 - **Question:** Refresh scope — every item in `pending-sync/` (broad), or only items in the sprint's Consolidated Deliverables (narrow)?
   - **Recommended:** **narrow** (sprint scope only). Broad refresh would re-evaluate items unrelated to the sprint, slowing preflight without benefit. CR-027's composite check already iterates the sprint's `## 1. Consolidated Deliverables` table — Step 0 reuses that same iteration to refresh, then Step 5 (CR-027) reads the refreshed cache.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Refresh failure handling — if `cleargate gate check` errors on one item, abort preflight or continue?
   - **Recommended:** **continue + report**. A single item's gate check error (e.g., parse failure, missing context_source target) shouldn't block the entire preflight. Step 0 collects all errors, surfaces them in stdout, and lets Step 5's composite check then decide pass/fail per item.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** SPRINT-21 (Tier 1). Pair with CR-027 if it hasn't shipped — Step 0 is meaningless without Step 5 reading the refreshed cache.

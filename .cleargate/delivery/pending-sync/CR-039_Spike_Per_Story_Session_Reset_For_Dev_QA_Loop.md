@@ -2,10 +2,12 @@
 cr_id: CR-039
 parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-21"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -54,7 +56,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:43Z
+  last_gate_check: 2026-05-03T19:04:51Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -84,15 +86,15 @@ draft_tokens:
 
 - **Question:** Spike output format — written memo vs prototype branch vs both?
   - **Recommended:** **memo + minimal prototype**. Memo answers the four unknowns; prototype validates the cost-savings claim against a single fresh sprint. Both fit in one developer-day.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Spike scope — Dev+QA only, or also Architect?
   - **Recommended:** **Dev+QA only** for v1. Architect runs once per sprint (bundled M1 plan, per the sprint-execution skill default); minimal cumulative cost. Dev+QA loops per-story; that's where the cumulative cache compounds.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Spike duration cap?
   - **Recommended:** **1 developer-day max**. If unknowns 1-2 can't be answered in a day, the SDK likely doesn't expose what we need cleanly — record findings and close as "no-go for v1."
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** SPRINT-21 if capacity allows (low-risk spike, high-leverage finding). Otherwise SPRINT-22 candidate.

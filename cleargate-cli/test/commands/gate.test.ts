@@ -622,11 +622,14 @@ describe('transition-inference', () => {
 
 // ─── BUG-008 smoke: readiness-gates.md after fix parses cleanly ───────────────
 
-describe('BUG-008 smoke: readiness-gates.md after fix parses cleanly', () => {
-  const REAL_GATES_PATH = '/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/knowledge/readiness-gates.md';
-  const PROJECT_ROOT = '/Users/ssuladze/Documents/Dev/ClearGate';
+// Worktree-safe repo root: resolve relative to this test file (test/commands/ → 3 levels up = repo root)
+const GATE_TEST_REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
 
-  it('readiness-gates.md parses all 6 gate blocks with no errors', async () => {
+describe('BUG-008 smoke: readiness-gates.md after fix parses cleanly', () => {
+  const REAL_GATES_PATH = path.join(GATE_TEST_REPO_ROOT, '.cleargate/knowledge/readiness-gates.md');
+  const PROJECT_ROOT = GATE_TEST_REPO_ROOT;
+
+  it('readiness-gates.md parses all gate blocks with no errors (CR-027 adds sprint=7th, CR-030 adds initiative=8th)', async () => {
     const yaml = await import('js-yaml');
     const raw = fs.readFileSync(REAL_GATES_PATH, 'utf8');
     const fenceRe = /```yaml\n([\s\S]*?)```/g;
@@ -635,7 +638,8 @@ describe('BUG-008 smoke: readiness-gates.md after fix parses cleanly', () => {
     while ((match = fenceRe.exec(raw)) !== null) {
       blocks.push(yaml.load(match[1]!));
     }
-    expect(blocks).toHaveLength(6);
+    // 6 original + sprint (CR-027, already in file before CR-030) + initiative (CR-030)
+    expect(blocks).toHaveLength(8);
   });
 
   it('all criterion check strings in readiness-gates.md parse via parsePredicate without throwing', async () => {
@@ -652,7 +656,7 @@ describe('BUG-008 smoke: readiness-gates.md after fix parses cleanly', () => {
     }
   });
 
-  it('EPIC-021-style fixture: prose context_source with approved_by + approved_at passes proposal-approved', async () => {
+  it('EPIC-021-style fixture: prose context_source with approved_by + approved_at passes parent-approved', async () => {
     // Simulates the real EPIC-021 scenario: context_source is long prose with em-dash,
     // and the epic has approved_by + approved_at waiver fields.
     const EPIC_LIKE_FIXTURE = `---
@@ -714,14 +718,13 @@ Then an Error is shown
         },
       );
     } catch {
-      // Other criteria may fail — only proposal-approved matters for this smoke test
+      // Other criteria may fail — only parent-approved matters for this smoke test
     }
 
     const combined = out.join('\n');
-    // proposal-approved should emit a [pass] line, NOT a ❌ line
-    // The gate output format is: "✅ proposal-approved: ..." for pass
-    //                        or "❌ proposal-approved: ..." for fail
-    expect(combined).not.toMatch(/❌ proposal-approved/);
+    // parent-approved OR-group should pass, NOT emit a ❌ line for the group
+    // The gate output format: "❌ parent-approved: ..." when the OR-group fails
+    expect(combined).not.toMatch(/❌ parent-approved/);
   });
 
   it('CR-010-style fixture: prose "TBD resolution" in body passes no-tbds marker predicate', async () => {
@@ -847,5 +850,184 @@ approved: false
     const combined = out.join('\n');
     // blast-radius-populated should pass (not appear as ❌)
     expect(combined).not.toMatch(/❌ blast-radius-populated/);
+  });
+});
+
+// ─── CR-030 γ: OR-group evaluator regression tests ───────────────────────────
+
+/**
+ * Gates doc with OR-group criteria for the parent-approved concern.
+ * This mirrors the real readiness-gates.md epic.ready-for-decomposition gate
+ * (stripped down to just the or_group criteria + one independent criterion).
+ */
+const OR_GROUP_GATES_DOC = `
+\`\`\`yaml
+- work_item_type: epic
+  transition: ready-for-decomposition
+  severity: enforcing
+  criteria:
+    - id: parent-approved-proposal
+      check: "frontmatter(context_source).approved == true"
+      or_group: parent-approved
+    - id: parent-approved-initiative
+      check: "frontmatter(context_source).status == 'Triaged'"
+      or_group: parent-approved
+    - id: no-tbds
+      check: "body does not contain 'TBD'"
+\`\`\`
+`;
+
+describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+  it('Epic with Proposal parent (approved: true, no status) → gate passes for parent-approved concern', async () => {
+    const dir = makeTmpDir();
+
+    // Create a Proposal file with approved: true
+    const proposalPath = path.join(dir, 'PROPOSAL-001_test.md');
+    fs.writeFileSync(proposalPath, [
+      '---',
+      'proposal_id: "PROPOSAL-001"',
+      'approved: true',
+      'status: Draft',
+      '---',
+      '',
+      '# Proposal 001',
+    ].join('\n'), 'utf8');
+
+    const epicContent = [
+      '---',
+      'epic_id: "EPIC-001"',
+      `context_source: "PROPOSAL-001_test.md"`,
+      '---',
+      '',
+      '# Epic 001',
+      '',
+      'No TBDs here.',
+    ].join('\n');
+
+    const absPath = path.join(dir, 'EPIC-001.md');
+    fs.writeFileSync(absPath, epicContent, 'utf8');
+    const gatesDocPath = path.join(dir, 'readiness-gates.md');
+    fs.writeFileSync(gatesDocPath, OR_GROUP_GATES_DOC, 'utf8');
+
+    const out: string[] = [];
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-for-decomposition' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch (e) {
+      // Should not fail on parent-approved concern
+    }
+    const combined = out.join('\n');
+    // The OR-group must NOT appear as a ❌ failure
+    expect(combined).not.toMatch(/❌ parent-approved/);
+  });
+
+  it('Epic with Initiative parent (status: Triaged, no approved) → gate passes for parent-approved concern', async () => {
+    const dir = makeTmpDir();
+
+    // Create an Initiative file with status: Triaged (no approved field)
+    const initiativePath = path.join(dir, 'INITIATIVE-001_test.md');
+    fs.writeFileSync(initiativePath, [
+      '---',
+      'initiative_id: "INITIATIVE-001"',
+      'status: "Triaged"',
+      '---',
+      '',
+      '# Initiative 001',
+    ].join('\n'), 'utf8');
+
+    const epicContent = [
+      '---',
+      'epic_id: "EPIC-002"',
+      `context_source: "INITIATIVE-001_test.md"`,
+      '---',
+      '',
+      '# Epic 002',
+      '',
+      'No TBDs here.',
+    ].join('\n');
+
+    const absPath = path.join(dir, 'EPIC-002.md');
+    fs.writeFileSync(absPath, epicContent, 'utf8');
+    const gatesDocPath = path.join(dir, 'readiness-gates.md');
+    fs.writeFileSync(gatesDocPath, OR_GROUP_GATES_DOC, 'utf8');
+
+    const out: string[] = [];
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-for-decomposition' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch (e) {
+      // Should not fail on parent-approved concern
+    }
+    const combined = out.join('\n');
+    // The OR-group must NOT appear as a ❌ failure
+    expect(combined).not.toMatch(/❌ parent-approved/);
+  });
+
+  it('Epic with no valid parent (file missing) → gate fails with OR-group-failed error', async () => {
+    const dir = makeTmpDir();
+
+    const epicContent = [
+      '---',
+      'epic_id: "EPIC-003"',
+      `context_source: "NONEXISTENT_parent.md"`,
+      '---',
+      '',
+      '# Epic 003',
+      '',
+      'No TBDs here.',
+    ].join('\n');
+
+    const absPath = path.join(dir, 'EPIC-003.md');
+    fs.writeFileSync(absPath, epicContent, 'utf8');
+    const gatesDocPath = path.join(dir, 'readiness-gates.md');
+    fs.writeFileSync(gatesDocPath, OR_GROUP_GATES_DOC, 'utf8');
+
+    const out: string[] = [];
+    const exitCodes: number[] = [];
+    try {
+      await gateCheckHandler(
+        absPath,
+        { transition: 'ready-for-decomposition' },
+        {
+          cwd: dir,
+          now: FIXED_NOW_FN,
+          gatesDocPath,
+          stdout: (s) => out.push(s),
+          stderr: (s) => out.push(s),
+          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+        },
+      );
+    } catch {
+      // Expected to fail
+    }
+
+    // Must have failed
+    expect(exitCodes).toContain(1);
+
+    const combined = out.join('\n');
+    // Must emit the OR-group failure message
+    expect(combined).toMatch(/❌ parent-approved/);
+    // The detail should describe the OR-group failure
+    expect(combined).toMatch(/OR-group failed/);
   });
 });

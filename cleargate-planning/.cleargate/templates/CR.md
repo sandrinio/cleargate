@@ -108,6 +108,8 @@ last_synced_body_sha: null # sha256 of body at last sync
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 **Current Status: 🔴 High Ambiguity**
 
+*Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
+
 Requirements to pass to Green (Ready for Execution):
 - [ ] "Obsolete Logic" to be evicted is explicitly declared.
 - [ ] All impacted downstream Epics/Stories are identified and reverted to 🔴 High Ambiguity.

@@ -2,10 +2,12 @@
 cr_id: CR-037
 parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-21"
 carry_over: false
-status: Draft
-approved: false
+status: Ready
+approved: true
+approved_at: 2026-05-03T20:00:00Z
+approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
 updated_at: 2026-05-03T00:00:00Z
 created_at_version: cleargate@0.10.0
@@ -45,7 +47,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T17:47:42Z
+  last_gate_check: 2026-05-03T19:04:51Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -71,18 +73,18 @@ draft_tokens:
 
 - **Question:** Validation scope — every dep named in any plan section, or only deps in the "scaffold" / "stack" portions?
   - **Recommended:** **every dep**. The cost (one `npm view <pkg> version`) is sub-second; the value (catching one drift saves a full Developer turn = millions of tokens) dominates. False-positive cost is near-zero — checking a real package returns its real version, no harm.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Behavior on drift — auto-pin to current, OR flag as explicit Architect decision in the plan?
   - **Recommended:** **flag as explicit decision**. Auto-pinning hides the drift; explicit flag forces the Architect to either justify the older pin (e.g., "v6 is the latest stable; v7-beta out 2025-12 with breaking API") or update to current. Format in plan §3:
     ```
     - vite ^6.0.0 (current per npm registry: 6.0.7 — pinning to ^6 minor range)
     ```
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Network access in Architect agent — already present, or new capability surface?
   - **Recommended:** **already present**. Architect has Bash tool access (per `.claude/agents/architect.md` tools field). `npm view <pkg> version` is a single shell command. No new capability needed; just a prompt instruction.
-  - **Human decision:** _populated during Brief review_
+  - **Human decision:** ✅ accepted as Recommended (batch 2026-05-03 — orchestrator + sandrinio compounding-order sweep)
 
 - **Question:** Sprint inclusion?
   - **Recommended:** SPRINT-21. Pair-of-opportunity with CR-036 (Reporter diet) — both are agent-prompt-only edits, low risk, ship together.

@@ -49,7 +49,9 @@
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:node": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
+    "test:node:file": "tsx --test --test-reporter=spec"
   },
   "dependencies": {
     "@napi-rs/keyring": "^1.2.0",
