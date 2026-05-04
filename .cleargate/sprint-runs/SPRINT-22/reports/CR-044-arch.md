@@ -178,3 +178,129 @@ CHECK_5_SNAPSHOT_SUPERSEDE: pass
 CHECK_6_C7_DEFERRAL: concur
 flashcards_flagged: []
 ```
+
+---
+
+## Phase B
+
+role: architect
+
+**PHASE B post-flight** — review of commit `4e4ade1` on `story/CR-044`. Doc-only edit: SKILL.md §C.7 Story Merge body rewrite (legacy orchestrator-runs-git-merge prose → DevOps dispatch contract).
+
+### Scope of Phase B review
+
+Strictly the §C.7 body rewrite that was deferred from Phase A. Verified against the 4 prompt checks: design soundness, forbidden-pattern callout, cross-refs intact, no scope creep.
+
+**Commit `4e4ade1` files-changed:**
+- `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` (+58 / −12)
+- `cleargate-planning/MANIFEST.json` (sha256 + timestamp refresh — auto from `npm run prebuild`)
+
+Total: 2 files, 61 insertions / 14 deletions. No code changes, no test changes.
+
+### Check 1 — §C.7 design soundness
+
+PASS. The new §C.7 body (SKILL.md L304-366 in the worktree post-rebase) covers all five required design elements:
+
+| Element | Evidence |
+|---|---|
+| (a) Orchestrator dispatch sequence (write_dispatch.sh + Agent dispatch) | L323-326: Step 1 invokes `bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN devops`. L328-353: Step 2 spawns DevOps agent with explicit context block (the §3.1 Context Pack). ✓ |
+| (b) DevOps owns ALL mechanical actions | L342-352 `ACTIONS (in order)` lists 9 steps: verify reports, checkout sprint, `git merge --no-ff`, conditional `npm run prebuild`, mirror parity diff, post-merge test verification, `git worktree remove`, `git branch -d`, `update_state.mjs ... Done`. Complete ownership of the merge pipeline. ✓ |
+| (c) STATUS=blocked handling | L362-364: explicit "On `STATUS=blocked`" block — DevOps writes `{STORY-ID}-devops-blockers.md`, orchestrator surfaces to human, "DevOps does NOT auto-resolve conflicts — orchestrator escalates and waits for human resolution before re-dispatching DevOps." ✓ |
+| (d) Cross-refs to §C.8 Blockers Triage updated post-renumbering | The §C.7 body cross-refs `§C.9 Flashcard Gate` (L362) — verified §C.9 still exists at SKILL.md L380. The header `### C.7 Story Merge` was preserved (no header renumber occurred in this commit — only body rewrite within the existing §C.7 envelope). All §C.* cross-references in SKILL.md (§C.4 L240, §C.8 L268+L413, §C.9 L362, §C.10 L43+L413) resolve to existing headers. ✓ |
+| (e) Context Pack inline | L329-353: full INPUTS/ACTIONS block reproduced inline (story ID, sprint ID, worktree path, branches, dev/QA/Architect commit SHAs, files-changed manifest, canonical-scaffold flag, lane, required-reports checklist, then 9 ACTIONS). Matches anchor §3.1 verbatim. Explicit inline rather than a `(see §3.1)` reference — best for orchestrator session-context. ✓ |
+
+Additional design positives:
+- Required-reports table at L312-318 cleanly distinguishes `devops.md` ("Written BY DevOps during this step (not a prerequisite)") from `dev.md`/`qa.md`/`arch.md` (true prerequisites). Prevents the orchestrator from treating its absence as a halt condition.
+- L320: "Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**" — preserves the pre-dispatch verification gate from the legacy §C.7.
+- L362: "If it notes live re-sync needed (mirror parity drift), address via `cleargate init` or hand-port at Gate-4 doc-refresh" — correctly defers mirror-parity remediation to sprint-close (per `cleargate-planning/MANIFEST.json` audit pattern).
+
+### Check 2 — Forbidden-pattern callout
+
+PASS. The orchestrator-narrowing acceptance signal is present at L366:
+
+```
+**Forbidden orchestrator patterns (v2):** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
+```
+
+All 5 forbidden commands explicitly named — matches the prompt's required list verbatim:
+- `git merge` ✓
+- `git worktree remove` ✓
+- `git branch -d` ✓
+- `update_state.mjs` ✓
+- `npm run prebuild` ✓
+
+The phrasing scopes enforcement to v2 standard-lane (consistent with §C.6 Architect Pass header `(v2, lane: standard only)`). The escape hatch ("classify as edge case and document in sprint §4 Execution Log") is appropriate — handles legitimate orchestrator overrides (e.g., recovery operations after a DevOps agent failure) without nullifying the rule.
+
+Also reinforced at L308 (header preamble): "**DevOps-owned.** The orchestrator does NOT run `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, or `npm run prebuild` directly. All mechanical merge work is delegated to the DevOps agent." — same 5 commands cited, two-place coherence.
+
+### Check 3 — Cross-refs intact
+
+PASS. Post-rewrite §C structure verified by grep `^### C\.` against the worktree SKILL.md:
+
+```
+192:### C.1 Pre-execution check
+203:### C.2 Create worktree
+217:### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
+242:### C.4 Spawn Developer
+270:### C.5 Spawn QA-Verify
+292:### C.6 Architect Pass (v2, `lane: standard` only)
+304:### C.7 Story Merge
+368:### C.8 Blockers Triage (Developer circuit breaker)
+380:### C.9 Flashcard Gate (v2 mandatory; v1 dogfood)
+400:### C.10 Mid-cycle User Input — CR Triage
+```
+
+All 10 §C subsections present — no header renumbering occurred (the rewrite was a pure body replacement within the existing §C.7 envelope, exactly as the M1 plan + Phase A deferral note specified).
+
+Inbound cross-refs to §C.7 from elsewhere in SKILL.md: grep `§C\.7` returns 0 hits outside §C.7 itself — no other section references §C.7 by number. The §C.7 body's outbound references all resolve:
+- `§C.9 Flashcard Gate` (L362) → exists at L380 ✓
+- Implicit reference to `§3.1 Context Pack` at L322 → §3.1 of the CR-044 anchor work item, not SKILL.md (correct context — this is the agent prompt §3.1, not a SKILL.md section). The phrasing "(§3.1 Context Pack)" matches CR-044 anchor convention. ✓
+
+Other §C.* cross-refs in SKILL.md (unchanged by Phase B):
+- L43 → §C.10 ✓
+- L236, L238, L240 → §C.4 ✓
+- L268 → §C.8 ✓
+- L288 → §C.4 ✓
+- L413 → §C.8, §C.10 ✓
+
+No broken refs introduced. No stale renumber pointers.
+
+### Check 4 — No scope creep
+
+PASS. `git -C .worktrees/CR-044 show 4e4ade1 --stat` confirms:
+
+```
+cleargate-planning/.claude/skills/sprint-execution/SKILL.md       | 71 ++++++++++++++++++----
+cleargate-planning/MANIFEST.json                                  |  4 +-
+2 files changed, 61 insertions(+), 14 deletions(-)
+```
+
+- SKILL.md: doc edit, §C.7 body only.
+- MANIFEST.json: 4-line auto-generated diff — `generated_at` timestamp refresh (L3) + SKILL.md sha256 update (L147). Standard `npm run prebuild` output. No manual hand-edit.
+
+Two files. Neither contains code. Neither contains test changes. No package.json changes. No scaffold-canonical → npm-payload mirror drift (MANIFEST.json was regenerated via `npm run prebuild`, which is the canonical sync path per `CLAUDE.md` §"Dogfood split").
+
+The user-prompt expectation "SKILL.md + MANIFEST.json + dev report only" — the dev report (`CR-044-dev.md`) lives in the main tree at `.cleargate/sprint-runs/SPRINT-22/reports/`, not in the story-branch commit. This is the canonical pattern (sprint reports never travel with story commits — they are a separate orchestration artifact). The 2-file commit is the correct, minimal scope.
+
+### Regressions / risks / push-back
+
+None. The §C.7 rewrite executes the M1 plan §"CR-044 implementation sketch" step 2 verbatim, with the post-CR-043-merge line-range correctly recomputed (rebase commit `1b67efc` integrated CR-043 cleanly; the §C.7 header landed at L304 post-rebase, ~10 lines below its pre-rebase position, exactly matching the Phase A deferral plan's prediction).
+
+Minor observations (informational only):
+- The "Forbidden orchestrator patterns" footer (L366) is an additive constraint not strictly required by §3.1 Context Pack but clearly aligned with the CR-044 acceptance signal "orchestrator-narrowing." This is a pure improvement over the M1 sketch — recommend keeping.
+- Sprint mid-flight inconsistency flagged in Phase A ("§1 names DevOps but §C.6/§C.7 still describes orchestrator-runs-git-merge") is now RESOLVED. SKILL.md is internally consistent: §1 Agent Roster, §1 dispatch-marker valid-types, §1 Wall-clock budgets, and §C.7 Story Merge all reference the DevOps dispatch path.
+
+### Final verdict (Phase B)
+
+**ARCH: PASS**
+
+All 4 phase-B checks pass. CR-044 is now complete (Phase A + Phase B both PASS). Ready for DevOps merge to sprint/S-22. No flashcards flagged — the design follows the M1 blueprint exactly; no surprises surfaced during the rewrite or rebase.
+
+```
+ARCH: PASS
+CHECK_1_C7_DESIGN: pass
+CHECK_2_FORBIDDEN_CALLOUT: pass
+CHECK_3_CROSS_REFS: pass
+CHECK_4_NO_SCOPE_CREEP: pass
+flashcards_flagged: []
+```

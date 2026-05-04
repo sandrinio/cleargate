@@ -100,3 +100,39 @@ npm run typecheck → 0 errors
 - **No qa-red agent_type.** CR-043 uses `agent_type=qa` (option A-hybrid). CR-044 adds only `devops`.
 - **Live `.claude/` re-sync:** NOT done by Dev. Orchestrator handles at sprint-close Gate-4 doc-refresh checklist via `cleargate init`.
 - **SKILL.md §C.7 body:** Deferred to post-CR-043-merge rebase. Orchestrator must resume this worktree after CR-043 lands on sprint/S-22.
+
+## Phase B
+
+**Date:** 2026-05-03
+
+### Change
+
+`cleargate-planning/.claude/skills/sprint-execution/SKILL.md` §C.7 Story Merge — replaced legacy orchestrator-runs-git-merge prose (4-line bash block + 3-bullet report checklist) with DevOps dispatch block (~50 lines).
+
+**New §C.7 structure:**
+- Opening "DevOps-owned" declaration listing the 5 forbidden orchestrator commands.
+- Required-reports table (4 rows: dev, qa, arch, devops — with lane conditions).
+- "Do not dispatch DevOps with missing reports" guard.
+- 3-step orchestrator dispatch sequence: write_dispatch.sh → spawn DevOps with §3.1 Context Pack inline → halt.
+- STATUS=done handler (with mirror parity drift note referencing `cleargate init`).
+- STATUS=blocked handler (surface blockers, no auto-resolve).
+- Forbidden-patterns footer for v2 enforcement.
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | MODIFIED — §C.7 rewritten as DevOps dispatch block |
+| `cleargate-planning/MANIFEST.json` | AUTO-GENERATED — via `npm run prebuild` |
+| `cleargate-cli/templates/cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | AUTO-GENERATED — via `npm run prebuild` |
+
+### Verification
+
+- Mirror parity (`diff canonical ↔ npm payload`): empty. PASS.
+- `npm run typecheck`: 0 errors. PASS.
+- `npm test`: 11 passed, 2 failed (pre-existing env failures — tsx not at worktree root, introduced by CR-043 merge; confirmed by stash test showing same failures without phase B edit). Phase B introduces no new tests (doc-only edit; dispatch specified "NO VITEST").
+- Cross-ref check: §C.7 now references §C.9 Flashcard Gate (correct — next step after merge). No stale §C.6/§C.7 in-prose references to fix (they appear only in section headings, not as cross-refs in prose).
+
+### Notes
+
+- Pre-existing 2-test failure in `red-green-example.node.test.ts` is a worktree-root `node_modules` gap from the CR-043 rebase. Not caused by this phase B edit. Phase A shipped with 7/7 passing (those 2 tests did not exist then). The failures are bounded to the fixture environment check, not the validator or integration logic.
