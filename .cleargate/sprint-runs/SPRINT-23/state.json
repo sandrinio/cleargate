@@ -5,11 +5,11 @@
   "sprint_status": "Active",
   "stories": {
     "CR-045": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-04T10:49:25.991Z",
+      "updated_at": "2026-05-04T12:44:02.253Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -19,9 +19,9 @@
     "CR-046": {
       "state": "Ready to Bounce",
       "qa_bounces": 0,
-      "arch_bounces": 0,
+      "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-05-04T10:49:25.991Z",
+      "updated_at": "2026-05-04T12:44:02.179Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -33,7 +33,7 @@
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-04T10:49:25.991Z",
+      "updated_at": "2026-05-04T12:43:49.095Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -45,7 +45,7 @@
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-04T10:49:25.991Z",
+      "updated_at": "2026-05-04T12:43:49.095Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -53,6 +53,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "Sprint SPRINT-23 initialised",
-  "updated_at": "2026-05-04T10:49:25.991Z"
+  "last_action": "transition CR-045 → Done",
+  "updated_at": "2026-05-04T12:44:02.253Z"
 }
