@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Ready
+status: Active
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -86,7 +86,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T13:58:59Z
+  last_gate_check: 2026-05-04T14:09:09Z
 stamp_error: no ledger rows for work_item_id SPRINT-24
 draft_tokens:
   input: null
@@ -94,7 +94,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T13:58:59Z
+  last_stamp: 2026-05-04T14:09:09Z
   sessions: []
 ---
 
@@ -132,50 +132,75 @@ draft_tokens:
 
 ## 2. Execution Strategy
 
-### 2.1 Phase Plan (preliminary — Architect SDR finalizes)
+### 2.1 Phase Plan (FINALIZED — Architect SDR 2026-05-04)
 
 **Wave 1 — CR-049 alone (foundational):**
-- CR-049 reconciles canonical = live for 4 scripts + adds parity test. Lands first so subsequent CRs develop against a clean baseline.
+- CR-049 reconciles canonical = live for 4 named scripts (write_dispatch.sh, validate_state.mjs, test/test_flashcard_gate.sh, test/test_test_ratchet.sh) and adds `cleargate-cli/test/scaffold/canonical-live-parity.node.test.ts` (6 scenarios). Lands first so subsequent CRs develop against a clean canonical=live baseline.
+- **Goal-clause delivery:** "Reconcile canonical-vs-live drift for 4 known-divergent scripts + add parity CI guard."
 
-**Wave 2 — CR-052 → CR-050 sequential, CR-051 parallel:**
-- CR-052 ships `test/helpers/wrap-script.ts` first (CR-050 consumes it).
-- CR-050 follows; migrates 6 callers + deletes shim + uses helper.
-- CR-051 runs parallel with CR-052/050; investigation + fix on a separate file surface (devops.md + SKILL.md).
+**Wave 2 — CR-052 → CR-050 strictly sequential; CR-051 parallel:**
+- **CR-052 first** (W2-A): ships `cleargate-cli/test/helpers/wrap-script.ts` + `cleargate-cli/test/helpers/wrap-script.node.test.ts` (4 meta-scenarios) + refactors `run-script-wrapper-backcompat.node.test.ts` as proof-of-consumer. Lands before CR-050 because CR-050's 3 caller-test refactors import the helper.
+  - **Goal-clause delivery:** "Promote the wrapper-e2e test pattern into a shared helper."
+- **CR-050 second** (W2-B): migrates 8 production callers (see §2.3 — story.ts adds 2 sites beyond the named 6) + deletes shim block (~15 LOC) + deletes companion test + refactors 3 caller test files using CR-052 helper. Hard ordering: starts only after CR-052 merges to sprint branch.
+  - **Goal-clause delivery:** "Retire the run_script.sh back-compat shim by migrating production CLI callers to the canonical arbitrary-cmd interface."
+- **CR-051 parallel** (W2-C): investigation (≤30 min) on `devops.md` frontmatter + Claude Code agent-registry behaviour, then either frontmatter fix or docs-only patch. Touches `.claude/agents/devops.md` + `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` (§1, §A.1, §C.7) + new test. Disjoint file surface from CR-050/052 → safe to run concurrently with W2-B.
+  - **Goal-clause delivery:** "Investigate + fix DevOps subagent registration so future sprints don't need orchestrator-fallback."
 
-→ **TPV operational on all 4 standard-lane CRs.** First sprint where TPV runs in the loop. Per CR-047 self-validation paradox closed; orchestrator must explicitly invoke `--arch-bounce` on Mode:TPV BLOCKED-WIRING-GAP.
+**TPV operational on all 4 CRs.** First sprint where TPV runs in the loop. Per FLASHCARD 2026-05-04 `#tpv #self-validation`, orchestrator must explicitly invoke `node update_state.mjs <id> --arch-bounce` on Mode:TPV BLOCKED-WIRING-GAP — no auto-increment from Mode:TPV return.
 
-### 2.2 Merge Ordering (preliminary — Architect SDR pins line ranges)
+**Goal-advancement check:** every CR maps to one explicit goal clause; no scope outside the goal. Passive metric (TPV catch rate ≥1) is tracked across CR-049, CR-050, CR-052 per §0 metrics.
 
-| Shared File | Items | Merge Order | Rationale |
+### 2.2 Merge Ordering (FINALIZED — Architect SDR 2026-05-04)
+
+| Shared File | Items | Pinned Lines / Block | Merge Order | Rationale |
+| --- | --- | --- | --- | --- |
+| `cleargate-planning/.cleargate/scripts/{write_dispatch.sh, validate_state.mjs, test/test_flashcard_gate.sh, test/test_test_ratchet.sh}` | CR-049 only | full-file replace from live | n/a (W1) | Single-CR (CR-049 reconciles live → canonical, byte-identical post-merge). |
+| `cleargate-cli/test/scaffold/canonical-live-parity.node.test.ts` | CR-049 only | NEW file, ≥6 scenarios | n/a (W1) | Single-CR; new file. |
+| `cleargate-cli/test/helpers/wrap-script.ts` | CR-052 (NEW) → CR-050 (imports) | NEW ~80 LOC + import-only in CR-050 | sequential — CR-052 lands first | CR-050's caller-test migration imports the helper. CR-050 starts only after CR-052 sprint-branch merge. |
+| `cleargate-cli/test/helpers/wrap-script.node.test.ts` | CR-052 only | NEW file, 4 meta-scenarios | n/a (W2-A) | Single-CR; new file. |
+| `cleargate-cli/test/scripts/run-script-wrapper-backcompat.node.test.ts` | CR-052 (refactor) → CR-050 (delete) | full file | sequential | CR-052 refactors as proof-of-consumer; CR-050 then deletes it (companion to shim removal). |
+| `cleargate-cli/src/commands/sprint.ts` | CR-050 only | L233-251 (init), L275-292 (close), and `args` arrays at L235, L277 | n/a (W2-B) | Single-CR; 2 invocations migrate from `[runScript, '<name>.mjs', ...]` to `[runScript, 'node', '<path>.mjs', ...]`. |
+| `cleargate-cli/src/commands/state.ts` | CR-050 only | L83-103 (update), L126-148 (validate); spawnFn at L85, L128 | n/a (W2-B) | Single-CR; 2 invocations. |
+| `cleargate-cli/src/commands/gate.ts` | CR-050 only | L395-435 (qa), L437-476 (arch); spawnFn at L418, L460 | n/a (W2-B) | Single-CR; 2 invocations. Both pass `pre_gate_runner.sh` → migrate to `bash` + path. |
+| **`cleargate-cli/src/commands/story.ts`** (NEW IN SCOPE) | CR-050 only | L149-165 (step2 Bouncing), L329-345 (step6 Done); spawnFn at L151, L331 | n/a (W2-B) | **7th + 8th callers — see §2.3 warning. Both pass `'update_state.mjs'` as arg-2 (shim form). Must migrate to `node` + path or shim deletion will return 127.** |
+| `cleargate-planning/.cleargate/scripts/run_script.sh` + `.cleargate/scripts/run_script.sh` | CR-050 only | shim block (~15 LOC, commit 763e7f7) | n/a (W2-B) | Single-CR; live ↔ canonical edited together (currently byte-identical, 224 LOC each). |
+| `cleargate-planning/.claude/agents/devops.md` + `.claude/agents/devops.md` | CR-051 only | frontmatter (`name:`, `model:`, `tools:`) if delta vs qa.md/developer.md | n/a (W2-C) | Single-CR; possibly no edit if root cause = session-cache. |
+| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | CR-051 only | §1 Agent Roster (L56) +3 lines, §A.1 preflight (L112) +1 check, §C.7 Story Merge (L349) +escape-hatch subsection ≤10 lines | n/a (W2-C) | Single-CR. Three disjoint sections; no collision risk with any other SPRINT-24 CR. |
+| `cleargate-cli/test/scaffold/devops-agent-registration.node.test.ts` | CR-051 only | NEW file, 3 scenarios | n/a (W2-C) | Single-CR; new file. |
+
+**Cross-CR merge order:** CR-049 → CR-052 → CR-050; CR-051 may merge any time after CR-049 (independent surface). Recommended: CR-051 merges between CR-052 and CR-050 to free DevOps subagent for CR-050's DevOps step if CR-051 ships a frontmatter fix.
+
+### 2.3 Shared-Surface Warnings (FINALIZED — Architect SDR 2026-05-04)
+
+- **CR-052 → CR-050 sequencing is load-bearing.** If CR-050 lands before CR-052, CR-050 must inline tmpdir-spawnSync logic into 4 test files (3 caller tests + the existing backcompat test). Architect M-plan for CR-050 must enforce the import. **Mitigation:** CR-050 dispatch is gated on CR-052 sprint-branch merge.
+- **CR-050 scope is 8 callers, not 6 (NEW finding).** SDR grep found 2 additional shim-form invocations in `cleargate-cli/src/commands/story.ts` L151 + L331 — both pass `bash run_script.sh update_state.mjs <id> <state>`. CR-050 §0.5 Q5 already authorizes inline migration of the 7th caller; this finding extends to the 8th. **Mitigation:** Architect M-plan for CR-050 must explicitly include `story.ts` as a 4th file in the migration list and update §3 Execution Sandbox accordingly. Test surface grows by `cleargate-cli/test/scripts/test_update_state.test.ts` if it exercises story.ts spawn paths.
+- **CR-050's shim deletion is irreversible mid-sprint.** Once the back-compat block is removed, any pre-existing caller that hasn't been migrated returns 127 (executable not found on PATH). **Mitigation:** Pre-deletion grep in Architect M-plan: `grep -rn "run_script.sh" cleargate-cli/src/commands/ --include="*.ts" | grep "spawnFn\|\\.mjs\|\\.sh"`. Must return zero matches against the OLD shim form before the shim block is deleted.
+- **CR-049 audit may surface drift beyond the 4 known scripts.** Scope-cut rule: CR-049 fixes the 4 known + audit-only report for everything else. If audit shows widespread drift (15+ files), surface for SPRINT-25 fix CR. **Mitigation:** scope-cut decision belongs to orchestrator on M-plan return, not Developer.
+- **CR-051's investigation may scope-cut the CR.** If root cause = session-cache (not a frontmatter bug), the CR ships SKILL.md docs only — no devops.md change. **Mitigation:** M-plan budgets for both branches; orchestrator selects branch on investigation-report return. The new test (`devops-agent-registration.node.test.ts`) ships either way.
+- **CR-051 SKILL.md edit is multi-section but disjoint.** §1 (L56), §A.1 (L112), §C.7 (L349) are non-adjacent; no append-vs-insert collision. No other SPRINT-24 CR touches SKILL.md.
+- **Run_script.sh canonical = live currently (224 LOC each).** No pre-existing drift. CR-050 edits both files in lockstep — no merge ordering between the two.
+
+### 2.4 Lane Audit (FINALIZED — Architect SDR 2026-05-04, applied rubric §9 cleargate-enforcement.md)
+
+| Item | Lane | Failing Check(s) | Rationale (≤80 chars) |
 | --- | --- | --- | --- |
-| `cleargate-planning/.cleargate/scripts/run_script.sh` | CR-050 only | n/a | Single-CR (CR-050 deletes shim block). |
-| `cleargate-planning/.cleargate/scripts/*` (4 known-divergent) | CR-049 only | n/a | Single-CR (CR-049 reconciles live → canonical). |
-| `cleargate-planning/.claude/agents/devops.md` | CR-051 only | n/a | Single-CR (CR-051 fixes frontmatter if needed). |
-| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | CR-051 only | n/a | Single-CR (CR-051 §1 Agent Roster + §C.7 escape hatch + §A.1 preflight). |
-| `cleargate-cli/test/helpers/wrap-script.ts` | CR-052 only (NEW) + CR-050 imports | sequential | CR-052 lands first; CR-050 imports the helper. |
-| `cleargate-cli/src/commands/{sprint,state,gate}.ts` | CR-050 only | n/a | Single-CR (CR-050 migrates 6 invocations). |
+| CR-049 | standard | #1 (>2 files: 4 scripts + new test = 5) | 4 canonical scripts replaced + new parity test; not fast |
+| CR-050 | standard | #1 (>2 files: 4 src + 4 test + 2 wrapper = 10), #4 (multi-scenario) | 8 callers + shim delete + 4 test refactors; not fast |
+| CR-051 | standard | #1 (>2 files: devops.md + SKILL.md + new test ≥3) | Investigation + multi-file edit; not fast |
+| CR-052 | standard | #1 (>2 files: helper + meta-test + consumer refactor = 3) | New helper + 4 meta-tests + 1 consumer refactor; not fast |
 
-### 2.3 Shared-Surface Warnings (preliminary)
+All 4 CRs fail the size cap (rubric check #1) and are correctly classified `standard`. None touches forbidden surfaces (rubric check #2); none adds dependencies (#3); all have `expected_bounce_exposure: low/med` per §1 table; all stay within EPIC-013 declared scope.
 
-- **CR-052 → CR-050 sequencing is load-bearing.** If CR-050 lands before CR-052, CR-050 has to inline tmpdir-spawnSync logic into 3 test files (duplication). Architect M1 plan must enforce the ordering.
-- **CR-049 audit may surface drift beyond the 4 known scripts.** Scope-cut rule: CR-049 fixes the 4 known + audit-only report for everything else. If audit shows widespread drift (15+ files), surface for SPRINT-25 fix CR.
-- **CR-050's shim deletion is irreversible mid-sprint.** Once the back-compat block is removed, any pre-existing caller that hasn't been migrated will return 127 (executable not found on PATH). Search ENTIRE worktree for `run_script.sh.*\.(mjs|sh)` regex before shipping CR-050.
-- **CR-051's investigation may scope-cut the CR.** If root cause = session-cache (not a frontmatter bug), the CR ships SKILL.md docs only — no devops.md change. M1 plan budgets for both outcomes.
+### 2.5 ADR-Conflict Flags (FINALIZED — Architect SDR 2026-05-04)
 
-### 2.4 Lane Audit (preliminary)
-
-| Item | Lane | Rationale (≤80 chars) |
-| --- | --- | --- |
-| CR-049 | standard | Multi-file edit (4 scripts + new test) + audit report; not fast |
-| CR-050 | standard | 6 caller migrations + shim deletion + 3 test refactors + 2 docs |
-| CR-051 | standard | Investigation + multi-file edit (devops.md + SKILL.md + new test) |
-| CR-052 | standard | New helper + meta-tests + 1 consumer refactor |
-
-### 2.5 ADR-Conflict Flags (preliminary — Architect SDR finalizes)
-
-- **None blocking.** SPRINT-24 lives within established invariants. The test-helper pattern (CR-052) is additive; the canonical-drift fix (CR-049) reconciles toward the documented mirror invariant.
-- **Soft flag 1 — TPV operational dogfood paradox:** SPRINT-23 shipped TPV but didn't run it. SPRINT-24 is the first sprint where TPV runs. If TPV mis-fires (e.g., flags valid Red tests as wiring-gap), surface to human; do not let dogfood paradox stall the merge. Track in §5 metrics.
-- **Soft flag 2 — orchestrator-fallback DevOps may persist.** If CR-051 root cause is session-cache and SPRINT-24 is the sprint that discovers it, the FIRST few CRs of SPRINT-24 may still need orchestrator-fallback. Document explicitly per CR-051 §0.5 Q4.
+- **None blocking.** SPRINT-24 lives within established invariants. The test-helper pattern (CR-052) is additive; the canonical-drift fix (CR-049) reconciles toward the documented mirror invariant; the shim removal (CR-050) consolidates toward CR-046's canonical interface; CR-051 documents existing reality.
+- **Confirmed alignment with locked decisions:**
+  - **Dogfood mirror invariant (CLAUDE.md "Dogfood split — canonical vs live"):** CR-049 + CR-050 + CR-051 all edit live ↔ canonical pairs in lockstep. CR-049's parity test enforces this in CI going forward.
+  - **Two-runner test policy (FLASHCARD 2026-05-04 `#node-test #vitest`):** all new tests in SPRINT-24 use `*.node.test.ts` naming + `tsx --test` runner. Confirmed in CR-049 (`canonical-live-parity.node.test.ts`), CR-051 (`devops-agent-registration.node.test.ts`), CR-052 (`wrap-script.node.test.ts`).
+  - **run_script.sh wrapper canonical interface (CR-046):** CR-050 finalizes the migration CR-046 deferred. No conflict.
+- **Soft flag 1 — TPV operational dogfood paradox:** SPRINT-23 shipped TPV but didn't run it. SPRINT-24 is the first sprint where TPV runs. If TPV mis-fires (e.g., flags valid Red tests as wiring-gap), surface to human; do not let dogfood paradox stall the merge. Track in §5 metrics. Ref FLASHCARD 2026-05-04 `#tpv #self-validation`.
+- **Soft flag 2 — orchestrator-fallback DevOps may persist.** If CR-051 root cause is session-cache and SPRINT-24 is the sprint that discovers it, the FIRST few CRs of SPRINT-24 may still need orchestrator-fallback. Document explicitly per CR-051 §0.5 Q4. Ref FLASHCARD 2026-05-04 `#devops #agent-registry`.
+- **Soft flag 3 — story.ts callers expand CR-050 scope (NEW).** Not an ADR conflict but a downstream dispatch consequence: CR-050 M-plan must list story.ts as a 4th src file. Surface to orchestrator before CR-050 dispatch.
 
 ## 3. Risks & Dependencies
 

@@ -32,7 +32,7 @@
 
 - [[SPRINT-23]] — status: Completed
 
-- [[SPRINT-24]] — status: Ready
+- [[SPRINT-24]] — status: Active
 
 
 

@@ -4,12 +4,12 @@ parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
 sprint_cleargate_id: SPRINT-24
 carry_over: false
-status: Ready
+status: Done
 approved: true
 approved_at: 2026-05-04T13:00:00Z
 approved_by: human
 created_at: 2026-05-04T18:00:00Z
-updated_at: 2026-05-04T13:00:00Z
+updated_at: 2026-05-04T15:30:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -38,9 +38,11 @@ context_source: |
   Plus 2 prose lines in cleargate-planning/.claude/agents/architect.md
   (already updated to NEW form in commit 763e7f7).
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-04T14:01:46Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: cleargate-cli/test/scripts/run-script-wrapper-backcompat.node.test.ts"
+  last_gate_check: 2026-05-04T15:45:50Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -56,7 +58,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T13:58:51Z
+  last_stamp: 2026-05-04T15:45:50Z
   sessions: []
 ---
 

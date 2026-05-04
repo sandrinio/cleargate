@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-04T15:24:38Z",
+  "command": "totally_nonexistent_9999.mjs",
+  "args": [],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 127,
+  "stdout": "",
+  "stderr": "/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/run_script.sh: line 111: totally_nonexistent_9999.mjs: command not found",
+  "agent_type": null,
+  "work_item_id": null
+}
