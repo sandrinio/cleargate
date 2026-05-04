@@ -1495,3 +1495,8 @@
   action: "update"
   target: "CR-052"
   path: ".cleargate/delivery/pending-sync/CR-052_E2E_Wrapper_Test_Helper.md"
+- timestamp: "2026-05-04T15:22:30.290Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-051"
+  path: ".cleargate/delivery/pending-sync/CR-051_DevOps_Subagent_Registration.md"
