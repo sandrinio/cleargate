@@ -30,7 +30,7 @@
 
 - [[SPRINT-20]] — status: Completed
 
-- [[SPRINT-23]] — status: Active
+- [[SPRINT-23]] — status: Completed
 
 
 

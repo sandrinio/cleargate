@@ -7,11 +7,11 @@
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
 | Epics | 26 | 0 | 19 |
-| Stories | 154 | 0 | 149 |
-| Sprints | 23 | 1 | 18 |
+| Stories | 154 | 0 | 153 |
+| Sprints | 23 | 0 | 19 |
 | Proposals | 14 | 0 | 14 |
-| CRs | 45 | 0 | 40 |
-| Bugs | 18 | 0 | 14 |
+| CRs | 45 | 0 | 44 |
+| Bugs | 18 | 0 | 17 |
 
 ## Active Epics
 
@@ -50,6 +50,12 @@ _No active epics._
 - [[BUG-021]] (bugs) — Abandoned
 
 - [[BUG-022]] (bugs) — Verified
+
+- [[BUG-024]] (bugs) — Done
+
+- [[BUG-025]] (bugs) — Done
+
+- [[BUG-026]] (bugs) — Done
 
 - [[CR-001]] (crs) — Completed
 
@@ -99,6 +105,12 @@ _No active epics._
 
 - [[CR-025]] (crs) — Done
 
+- [[CR-026]] (crs) — Done
+
+- [[CR-027]] (crs) — Done
+
+- [[CR-028]] (crs) — Done
+
 - [[CR-030]] (crs) — Done
 
 - [[CR-031]] (crs) — Done
@@ -130,6 +142,8 @@ _No active epics._
 - [[CR-046]] (crs) — Done
 
 - [[CR-047]] (crs) — Done
+
+- [[CR-048]] (crs) — Done
 
 - [[EPIC-000]] (epics) — Completed
 
@@ -232,6 +246,8 @@ _No active epics._
 - [[SPRINT-21]] (sprints) — Completed
 
 - [[SPRINT-22]] (sprints) — Completed
+
+- [[SPRINT-23]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 
@@ -507,6 +523,10 @@ _No active epics._
 
 - [[STORY-023-01]] (stories) — Done
 
+- [[STORY-023-02]] (stories) — Done
+
+- [[STORY-023-03]] (stories) — Done
+
 - [[STORY-023-04]] (stories) — Done
 
 - [[STORY-024-01]] (stories) — Done
@@ -528,6 +548,10 @@ _No active epics._
 - [[STORY-025-05]] (stories) — Done
 
 - [[STORY-025-06]] (stories) — Done
+
+- [[STORY-026-01]] (stories) — Done
+
+- [[STORY-026-02]] (stories) — Done
 
 - [[STORY-099-01]] (stories) — Completed
 
