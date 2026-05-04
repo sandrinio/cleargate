@@ -11,25 +11,16 @@
 - [[EPIC-016]] (epic) — Draft
 - [[EPIC-021]] (epic) — Ready
 - [[EPIC-023]] (epic) — Approved
-  - [[STORY-023-02]] (story) — Approved
-  - [[STORY-023-03]] (story) — Approved
 - [[EPIC-026]] (epic) — Ready
-  - [[STORY-026-01]] (story) — Draft
-  - [[STORY-026-02]] (story) — Draft
 - [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-23]] (sprint) — Active
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
-- [[CR-026]] (cr) — Draft
-- [[CR-027]] (cr) — Approved
-- [[CR-028]] (cr) — Approved
 - [[CR-029]] (cr) — Approved
-- [[CR-048]] (cr) — Ready
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -43,18 +34,15 @@
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
 - [[BUG-022]] (bug) — Verified
-- [[BUG-024]] (bug) — Approved
-- [[BUG-025]] (bug) — Triaged
-- [[BUG-026]] (bug) — Ready
 
 ## Archive
 
 - Epics: 15 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
-- Sprints: 18 Completed · [expand](archive/sprints.md)
+- Sprints: 19 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 24 Done · 16 Completed · [expand](archive/crs.md)
-- Bugs: 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
-- Stories: 69 Completed · 49 Done · 31 Abandoned · [expand](archive/stories.md)
+- CRs: 28 Done · 16 Completed · [expand](archive/crs.md)
+- Bugs: 3 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
+- Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
 
 ## Contradictions
 
@@ -62,6 +50,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-048]] | cr | Done | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |

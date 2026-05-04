@@ -31,8 +31,6 @@ Stories with medium or high ambiguity that need design decisions before work can
 Items with `status: Ready` that have not been pushed to the remote PM tool (`remote_id` is empty).
 
 
-- [[BUG-026]] — status: Ready
-
 - [[EPIC-006]] — status: Ready
 
 - [[EPIC-012]] — status: Ready
