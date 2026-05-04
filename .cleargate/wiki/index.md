@@ -74,7 +74,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-043]] | cr | Ready | .cleargate/delivery/pending-sync/CR-043_Red_Green_TDD_Discipline.md |
 | [[CR-044]] | cr | Ready | .cleargate/delivery/pending-sync/CR-044_DevOps_Role_Agent.md |
 | [[CR-045]] | cr | Done | .cleargate/delivery/pending-sync/CR-045_Sprint_Context_File.md |
-| [[CR-046]] | cr | Ready | .cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md |
+| [[CR-046]] | cr | Done | .cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md |
 | [[CR-047]] | cr | Ready | .cleargate/delivery/pending-sync/CR-047_Mid_Sprint_Triage_And_Test_Pattern_Validation.md |
 | [[CR-048]] | cr | Ready | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |
 ## Stories

@@ -49,8 +49,6 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[CR-039]] — status: Ready
 
-- [[CR-046]] — status: Ready
-
 - [[CR-047]] — status: Ready
 
 - [[CR-048]] — status: Ready
