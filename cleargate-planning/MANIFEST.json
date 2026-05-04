@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T05:47:50.283Z",
+  "generated_at": "2026-05-04T09:01:49.462Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -53,7 +53,7 @@
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "0dd5c26cd1cf59536802ee6ae311562631f75d5a329a09fecb8c016934d79f79",
+      "sha256": "b54829d9e83aa8668caefe5d8309edd54486270b375cc46774a1afd3b9864995",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
