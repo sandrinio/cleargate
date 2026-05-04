@@ -5,11 +5,11 @@
   "sprint_status": "Active",
   "stories": {
     "CR-030": {
-      "state": "Ready to Bounce",
-      "qa_bounces": 0,
+      "state": "Done",
+      "qa_bounces": 1,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-03T19:05:01.922Z",
+      "updated_at": "2026-05-04T04:26:22.918Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -41,11 +41,11 @@
       "lane_demotion_reason": null
     },
     "CR-033": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-03T19:05:01.922Z",
+      "updated_at": "2026-05-04T04:26:22.973Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -65,11 +65,11 @@
       "lane_demotion_reason": null
     },
     "CR-035": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-03T19:05:01.922Z",
+      "updated_at": "2026-05-04T04:26:23.028Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -137,6 +137,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-038 → Done",
-  "updated_at": "2026-05-03T21:05:41.988Z"
+  "last_action": "transition CR-035 → Done",
+  "updated_at": "2026-05-04T04:26:23.028Z"
 }

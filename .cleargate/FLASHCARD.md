@@ -3,6 +3,15 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-04 · #qa #test-count · Dev's "pre-existing failure count" can be FILE count not TEST count — QA must distinguish; spot-check by running one to confirm the actual scope.
+2026-05-04 · #qa #gates #regression · AND-semantics in an enforcing gate means any new required criterion breaks ALL existing items of that type — test FULL gate runs against real parent files on disk, not isolated predicates.
+2026-05-04 · #gate #or-group · gate.ts or_group?: optional field on GateCriterion — criteria sharing same or_group value pass-as-group when ≥1 member passes; backward-compat: criteria without or_group still required-AND.
+2026-05-04 · #stamp-tokens #fm-key-map · stamp-tokens.ts L194 idKeys array + work-item-type.ts L14 FM_KEY_MAP are DUAL sources of truth for work-item key mapping — must update both when adding work-item types.
+2026-05-04 · #predicates #existing-surfaces · existing-surfaces-verified permissive regex requires file extension — extension-less paths (`etc/passwd`) are silently dropped via sentinel-missing branch, not sandbox-rejection. Test with `.conf`/`.md`/etc.
+2026-05-04 · #predicates #existing-surfaces · existing-surfaces-verified pass/fail: section absent → pass (not-applicable); zero paths + no sentinel → fail; zero paths + sentinel → pass; missing paths → fail with list.
+2026-05-04 · #reporting #session-totals · .session-totals.json is UUID-keyed map not flat — sum Object.values; spec quoted flat shape but live shape is `Record<sessionUuid, {input, output, ...}>`.
+2026-05-04 · #mirror #parity · cleargate-planning/.cleargate/scripts/ does NOT mirror prep_reporter_context.mjs — live-only by design; do NOT create the canonical mirror.
+2026-05-04 · #mirror #dogfood-split · Live `.claude/agents/` is gitignored — canonical edits to agent prompts require `cleargate init` re-sync post-merge; QA cannot verify live parity via tracked-file diff.
 2026-05-03 · #preflight #gate-cache #cr-038 · Step 0 output format must be unconditional: always emit `, N errors` even when N=0 — spec scenario text overrides sketch conditional.
 2026-05-03 · #snapshot #hooks #test-harness · stamp-and-gate snapshot locks (cr-008 + cr-009) must be updated when the hook body changes or the init snapshot test fails.
 2026-05-03 · #bug #git-log · BUG filed against npm-published version may already be fixed in dev repo — `git log -G <symbol>` before implementing avoids duplicate fix commits.
