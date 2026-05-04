@@ -34,7 +34,7 @@
 
 - [[SPRINT-24]] — status: Completed
 
-- [[SPRINT-25]] — status: Draft
+- [[SPRINT-25]] — status: Ready
 
 
 
