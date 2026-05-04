@@ -32,6 +32,7 @@ In RED mode you:
 3. Confirm each test FAILS against the clean baseline (no implementation yet).
 4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).
 5. **Forbidden:** Read, edit, or reference any implementation file (`.ts` source, not tests).
+6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming `*.red.node.test.ts`. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
 
 Output shape for RED mode:
 ```

@@ -87,6 +87,26 @@ Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §
 
 These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
 
+## Mode: TPV (Test Pattern Validation)
+
+Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). You receive: story file, QA-Red commit SHA, list of `*.red.node.test.ts` files. You verify ONLY:
+
+1. All imports resolve to real modules at the cited paths.
+2. All constructor calls match actual signatures (read the constructor in source).
+3. All `t.mock.method()` calls reference methods that exist on the mocked object.
+4. Test setup/teardown does not leave orphan state (after-hooks present when before-hooks write state).
+5. Test files end in `*.red.node.test.ts` (CR-043 immutability naming).
+
+You DO NOT verify test logic correctness — that is Dev's TDD challenge.
+
+Return:
+- `TPV: APPROVED` — Dev proceeds.
+- `TPV: BLOCKED-WIRING-GAP — <one-sentence specific issue>` — orchestrator routes back to QA-Red; `arch_bounces` increments via `node update_state.mjs <story-id> --arch-bounce`.
+
+Skip TPV entirely if `state.json.stories[<id>].lane === 'fast'` — fast lane has no QA-Red Red tests to validate.
+
+These rules apply under `execution_mode: v2`. Under v1 TPV is informational.
+
 ## Protocol Numbering Resolver
 
 Before writing per-story blueprints that reference a new `cleargate-protocol.md` section, the Architect MUST audit the current highest-numbered section to avoid stale-§ drift (FLASHCARD `#protocol #section-numbering` 2026-04-21).
