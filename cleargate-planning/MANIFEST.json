@@ -1,10 +1,10 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T12:46:05.064Z",
+  "generated_at": "2026-05-04T12:48:27.626Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "f3a56baa92c807f79880b51b192475aa3df2a151088958710ed46708e0bb6364",
+      "sha256": "a2d11d6a7f21bce22730ba9076af9ddde44b258082e33aa99fcd57c14ad75f55",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -53,7 +53,7 @@
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "a40431ad8ef436850fb5ec3f0670ac5a6e887fc9caa2a580e97cad6ab8565d4f",
+      "sha256": "c6fab6b64acc717a6bb5618531e6568010b3aeb10a98e33ba10b8dde45f5becb",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -144,7 +144,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "ce992d1d5dd9cd459718156affc0129c8b9116bc8240311a6b0d348314c64f62",
+      "sha256": "dd99cb97811f8861c63636698a9d88fe0b55a3d71500eab83fa65d8a45f3e6bc",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -166,6 +166,13 @@
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
       "sha256": "50e999717b9c9e1c11638f3f2433f413d177ed8ddf3cffdbb20b50c8807b1fc5",
+      "tier": "protocol",
+      "overwrite_policy": "merge-3way",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/knowledge/mid-sprint-triage-rubric.md",
+      "sha256": "170f762b427074a84c183a91fb65d1d6408650b7746de3bbc460d21194bda30a",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
