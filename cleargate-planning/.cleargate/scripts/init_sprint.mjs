@@ -2,7 +2,12 @@
 /**
  * init_sprint.mjs — Initialize a sprint state.json
  *
- * Usage: node init_sprint.mjs <sprint-id> --stories ID1,ID2,... [--force]
+ * Usage: node init_sprint.mjs <sprint-id> --stories ID1,ID2,... [--force] [--preserve-bounces]
+ *
+ * --preserve-bounces requires --force; reads existing state.json and carries
+ * forward qa_bounces / arch_bounces / state / lane / worktree per matching
+ * story-id. Items not in the new --stories list are dropped. Useful when
+ * mid-sprint dogfood / rerun must not lose kickback history.
  *
  * Creates .cleargate/sprint-runs/<sprint-id>/state.json with initial state
  * "Ready to Bounce" for each story. Refuses if state.json already exists
@@ -117,6 +122,7 @@ function main() {
   }
 
   const force = args.includes('--force');
+  const preserveBounces = args.includes('--preserve-bounces');
 
   const sprintDir = path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
   const stateFile = path.join(sprintDir, 'state.json');
@@ -126,6 +132,20 @@ function main() {
       `state.json already exists at ${stateFile}; pass --force to overwrite\n`
     );
     process.exit(1);
+  }
+
+  // --- CR-049-followup: Preserve bounce counters when --force re-inits an in-flight sprint ---
+  // Default --force overwrites everything (initial design). With --preserve-bounces,
+  // qa_bounces / arch_bounces / state are read from the existing state.json and merged
+  // back per-story. Only Ready-to-Bounce default fields get reset.
+  let preserved = {};
+  if (force && preserveBounces && fs.existsSync(stateFile)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+      preserved = existing.stories || {};
+    } catch (err) {
+      process.stderr.write(`WARN: --preserve-bounces could not read existing state.json: ${err.message}\n`);
+    }
   }
 
   // --- Read execution_mode from sprint frontmatter ---
@@ -159,17 +179,18 @@ function main() {
   const now = new Date().toISOString();
   const stories = {};
   for (const id of storyIds) {
+    const carry = preserved[id] || {};
     stories[id] = {
-      state: 'Ready to Bounce',
-      qa_bounces: 0,
-      arch_bounces: 0,
-      worktree: null,
+      state: carry.state ?? 'Ready to Bounce',
+      qa_bounces: carry.qa_bounces ?? 0,
+      arch_bounces: carry.arch_bounces ?? 0,
+      worktree: carry.worktree ?? null,
       updated_at: now,
-      notes: '',
-      lane: 'standard',
-      lane_assigned_by: 'migration-default',
-      lane_demoted_at: null,
-      lane_demotion_reason: null,
+      notes: carry.notes ?? '',
+      lane: carry.lane ?? 'standard',
+      lane_assigned_by: carry.lane_assigned_by ?? 'migration-default',
+      lane_demoted_at: carry.lane_demoted_at ?? null,
+      lane_demotion_reason: carry.lane_demotion_reason ?? null,
     };
   }
 
