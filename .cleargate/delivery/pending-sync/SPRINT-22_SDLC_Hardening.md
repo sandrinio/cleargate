@@ -6,12 +6,13 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Ready
+status: Active
 execution_mode: v2
 start_date: 2026-05-04
 end_date: 2026-05-15
+activated_at: 2026-05-04T09:00:00Z
 created_at: 2026-05-04T08:00:00Z
-updated_at: 2026-05-04T08:30:00Z
+updated_at: 2026-05-04T09:00:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -47,16 +48,22 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T08:47:35Z
-stamp_error: no ledger rows for work_item_id SPRINT-22
+  last_gate_check: 2026-05-04T08:59:49Z
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-04T08:47:35Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T08:59:48Z
+  sessions:
+    - session: fd518f2c-da3e-471e-a13d-35fcfb59d0b6
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T08:59:14Z
 ---
 
 # SPRINT-22: SDLC Hardening — Test discipline + Role refinement
@@ -104,20 +111,31 @@ draft_tokens:
 
 ### 2.2 Merge Ordering
 
-| Shared File | Items | Merge Order | Rationale |
-| --- | --- | --- | --- |
-| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | CR-043, CR-044 | CR-043 → CR-044 | CR-043 inserts §C.3 QA-Red dispatch step (between current §C.2 worktree creation and §C.3 spawn Developer). CR-044 inserts §C.6+ DevOps dispatch step. Disjoint regions; Architect M1 plan pins exact line ranges. CR-043 lands first to keep numbering stable. |
-| `cleargate-planning/.claude/agents/qa.md` | CR-043 | n/a | Single-CR edit (mode-dispatch support added). |
-| `cleargate-planning/.claude/agents/reporter.md` | CR-042 | n/a | Single-CR edit (L108 fix + audit other agents). |
-| `cleargate-planning/.claude/agents/devops.md` | CR-044 | n/a | New file. |
-| `.claude/hooks/pre-commit-surface-gate.sh` | CR-043 | n/a | Single-CR extension (`*.red.test.ts` immutability check). |
-| `.claude/hooks/token-ledger.sh` | CR-044 | n/a | Single-CR change (agent_type=devops). |
+Pre-lock confirmed by Architect SDR 2026-05-04 against `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` HEAD (478 lines).
+
+| Shared File | Items | Merge Order | Insert Region (HEAD lines) | Rationale |
+| --- | --- | --- | --- | --- |
+| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` (canonical) | CR-043, CR-044 | CR-043 → CR-044 | CR-043: insert NEW `### C.3 Spawn QA-Red` block at L214 (currently blank, between §C.2 ending L213 and §C.3 Spawn Developer header L215). Renumber existing §C.3..§C.9 → §C.4..§C.10 (headers at L215, L243, L263, L275, L292, L304, L324). Update in-prose §C.x cross-refs at L184, L241, L259. CR-044 (post-rebase): edit the renumbered §C.7 Story Merge body (was §C.6 at HEAD L275-290) — replace orchestrator-runs-git-merge prose with DevOps dispatch block. Append a `devops` row to §1 Agent Roster table (HEAD L58-63) and §1 Wall-clock budgets table (HEAD L70-74). | Two disjoint regions. CR-043 lands first to keep §C numbering stable; CR-044 Dev MUST `git merge sprint/S-22` (with CR-043 already merged) before editing SKILL.md and recompute offsets — CR-043's insert + renumber shifts §C.7 down by ~16 lines. M1 plan §"Cross-story risks" #1 owns the rebase instruction. |
+| `cleargate-planning/.claude/agents/qa.md` | CR-043 | n/a | New `## Mode Dispatch — Red vs Verify` section inserted after L29 (end of "Pack-First Ingest" block), before `## Lane-Aware Playbook` at L31. | Single-CR edit (mode-dispatch support added). |
+| `cleargate-planning/.claude/agents/developer.md` | CR-043 | n/a | New `## Forbidden Surfaces` section inserted after L99 (end of "Worktree Contract"), before `## Lane-Aware Execution` at L101. | Single-CR extension (`*.red.test.ts` immutability rule prose). |
+| `cleargate-planning/.claude/agents/reporter.md` | CR-042 | n/a | L108 sentence body replacement only (subsection heading at L106 stays). | Single-CR edit. |
+| `cleargate-planning/.claude/agents/devops.md` | CR-044 | n/a | NEW file (~120 LOC; sonnet frontmatter; tools `Read, Edit, Bash, Grep, Glob` — no Write). | New file, no merge conflict. |
+| `cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh` | CR-043 | n/a | Extend the existing 11-line stub (HEAD L1-11) with a Red-immutability pre-check BEFORE the delegating `exec` at L10. ~25 LOC addition. **Option A** in M1 plan; do NOT edit `.cleargate/scripts/file_surface_diff.sh`. | Single-CR extension. |
+| `cleargate-planning/.claude/hooks/token-ledger.sh` (canonical mirror) | CR-044 | n/a | Add `devops` to the legacy fallback role iteration at L227. The PRIMARY path (dispatch-marker JSON, L121-141) already accepts arbitrary `agent_type` strings — L227 edit only fixes the no-sentinel fallback. | Single-CR change. |
+| `cleargate-planning/.cleargate/scripts/write_dispatch.sh` (canonical mirror) | CR-044 | n/a | Insert ~8-LOC `case` validator block after L50 (`AGENT_TYPE="${2}"`); reject unknown agent_types with new exit code 3 (existing exits are 0/1/2). | Single-CR addition. Live `/.cleargate/scripts/write_dispatch.sh` re-syncs at sprint close. |
+| `cleargate-cli/test/_node-test-runner.md` | CR-043 | n/a | Append `## Red/Green naming convention` section after the `## QA verification recipe` ending L103. Documents `*.red.node.test.ts` combined naming. | Single-CR doc append. |
+| `cleargate-cli/examples/red-green-example/` | CR-043 | n/a | NEW directory + 4 files (calculator.red.node.test.ts / calculator.node.test.ts / calculator.ts / README.md). Lives OUTSIDE `test/**/*.node.test.ts` glob so `npm test` does not auto-run. | New directory, no conflict. |
 
 ### 2.3 Shared-Surface Warnings
 
-- **CR-043 + CR-044 both modify SKILL.md §C** in disjoint subsections. Architect M1 plan must specify exact line ranges per §2.2. CR-043 lands first.
-- **CR-044 introduces a NEW agent role** (DevOps). Existing orchestrator references in SKILL.md (§C.6 Story Merge), CLAUDE.md, and execution-skill prose all need re-read to remove "orchestrator runs git merge" language. Architect SDR audits.
-- **CR-042 may surface duplicate inaccuracies** in `architect.md`, `developer.md`, `qa.md` per its §0.5 Q2 audit. Whether the same fix lands across multiple agent prompts in CR-042 or stays scoped to reporter.md is locked at draft (audit in same commit).
+- **CR-043 inserts §C.3 QA-Red between L213 and L215; CR-044 edits §C.7 Story Merge (was §C.6 at L275-290).** The two regions are disjoint at HEAD, but CR-043's renumber shifts every header at L215 and below by +1 letter (§C.3→C.4, §C.4→C.5, …, §C.9→C.10). CR-044 Dev MUST rebase on `sprint/S-22` (post-CR-043 merge) before editing SKILL.md, otherwise the §C.6→§C.7 boundary will conflict. M1 plan §"Cross-story risks" #1 owns the rebase instruction.
+- **CR-043's renumber ripples through 3 in-prose cross-references** (HEAD L184 narrative loop, L241 "route per §C.7", L259 "Return to §C.3"). All three must be updated in CR-043's commit. Architect M1 plan §"CR-043 Implementation sketch" step 1 enumerates each.
+- **CR-044 introduces a NEW `devops` agent role.** Architect SDR audit grep: `grep -nE "git merge|git worktree remove|update_state.mjs|npm run prebuild" cleargate-planning/.claude/agents/*.md` returns 0 hits in `architect.md|qa.md|reporter.md` at HEAD. The "orchestrator runs git merge" language only lives in SKILL.md §C.6 (HEAD) — already in CR-044's Modify list. No additional cross-reference rewrites required in non-developer agent files.
+- **CR-042 audit grep clean at HEAD.** `grep -n "fresh session\|new conversation\|per dispatch" cleargate-planning/.claude/agents/*.md` returns hits ONLY in `reporter.md` L108 (the inaccurate claim itself). `architect.md|developer.md|qa.md` contain 0 instances of the inaccurate phrasing. CR-042's audit-other-agents step (per §0.5 Q2) will document this and stay scoped to reporter.md only.
+- **Pre-commit-surface-gate.sh is an 11-line stub** at `cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh:1-11`. CR-043's Red-immutability check goes INSIDE the stub before the `exec`, NOT in the underlying `.cleargate/scripts/file_surface_diff.sh`. file_surface_diff.sh enforces the §3.1 file-surface contract — mixing concerns increases blast radius. M1 plan §"CR-043 Implementation sketch" step 4 codifies this as Option A.
+- **`*.node.test.ts` naming for ALL new tests.** SPRINT-22 frontmatter constraint: `npm test` routes to node:test only. Combined Red+node naming is `*.red.node.test.ts` (Red infix BEFORE node infix). CR-043 sample fixture + Red-gate hook test + Red-green example test all use this convention. Zero new vitest files in this milestone.
+- **token-ledger.sh primary path already accepts `devops`.** L227 edit only matters when the dispatch marker is missing (no-sentinel fallback). Test scenarios in M1 plan validate both paths.
+- **Sample-fixture location override.** CR-043 §4 acceptance text + Test Commands cite `test/fixtures/red-green-example/`, but SPRINT-22 frontmatter mandates `cleargate-cli/examples/`. Architect M1 ruling: sprint frontmatter wins; use `cleargate-cli/examples/red-green-example/`. Dev report acknowledges the CR-043 acceptance text drift; closeout footnote may amend CR-043 §4 prose post-merge.
 
 ### 2.4 Lane Audit (preliminary)
 
@@ -127,22 +145,24 @@ draft_tokens:
 | CR-043 | standard | qa.md mode-dispatch + SKILL §C insert + pre-commit hook + sample fixture |
 | CR-044 | standard | New agent + SKILL §C insert + context-pack contract + validator updates |
 
-### 2.5 ADR-Conflict Flags (preliminary)
+### 2.5 ADR-Conflict Flags
 
 - **None blocking.** SPRINT-22's design lives within established invariants (mirror-parity, file-surface contract, real-infra-no-mocks, archive-immutability §11.4).
-- **Soft flag (informational):** CR-044 introduces a new agent role. Token-ledger attribution for DevOps dispatches needs `agent_type=devops` added to the valid set in `.claude/hooks/token-ledger.sh` and any consumers (`suggest_improvements.mjs` uses it). CR-044 includes this in scope.
-- **Soft flag (informational):** CR-043 introduces `*.red.test.ts` naming convention and pre-commit hook enforcement. Bypass via `SKIP_RED_GATE=1` is documented but discouraged.
+- **Soft flag (informational):** CR-044 adds a new `devops` agent_type. Token-ledger primary path (dispatch-marker JSON) accepts arbitrary strings — already compatible. The L227 legacy fallback list is the only edit. `suggest_improvements.mjs` reads `agent_type` as an Object key with no allowlist (verified at L147-156); no edit required there. Both clarifications captured in M1 plan CR-044 file surface.
+- **Soft flag (informational):** CR-043 introduces `*.red.test.ts` (vitest legacy) and `*.red.node.test.ts` (node:test, new) naming convention. Pre-commit hook enforcement; bypass via `SKIP_RED_GATE=1` is documented but discouraged. The combined node+red naming order (Red BEFORE node) is locked in M1 plan and will be documented in `cleargate-cli/test/_node-test-runner.md` per CR-043 acceptance #7.
+- **Soft flag (informational):** CR-043 acceptance text + Test Commands reference `cleargate-cli/test/fixtures/red-green-example/` but SPRINT-22 frontmatter requires `cleargate-cli/examples/red-green-example/` (out of `test/**` glob). Sprint frontmatter wins per Constitutional precedence. M1 plan codifies. Closeout footnote may amend CR-043 §4 prose to remove the divergence.
+- **Soft flag (informational):** CR-043 reuses `agent_type=qa` for both Red and Verify modes (option A-hybrid per §0.5 Q8). Token-ledger aggregation will combine QA-Red + QA-Verify under a single `qa` bucket in the Reporter per-agent_type digest. Acceptable for SPRINT-22; a future split (e.g. `qa-red`) is a SPRINT-23+ candidate (CR-047 territory).
 
 ## 3. Risks & Dependencies
 
 | Risk | Mitigation |
 | --- | --- |
-| CR-043 + CR-044 both restructure SKILL.md mid-sprint | Architect M1 plan locks line ranges before W1 dispatch. CR-043 lands first into `sprint/S-22` per §2.2; CR-044 rebases. |
+| CR-043 + CR-044 both restructure SKILL.md mid-sprint | Architect M1 plan locks line ranges before W1 dispatch (see §2.2 table). CR-043 lands first into `sprint/S-22` per §2.2; CR-044 Dev rebases on top before editing. |
 | New DevOps role gets unused/duplicated | CR-044 acceptance includes orchestrator-narrowing audit — at least 1 SPRINT-23 standard-lane story runs end-to-end with DevOps dispatch and zero manual git/state calls from main session. |
 | TDD discipline becomes overhead theater | CR-043 acceptance: in SPRINT-23, ≥1 actual standard-lane story uses QA-Red dispatch and the failing test catches a defect Dev would have shipped. Track this number. If 0, downgrade to fast-lane only. |
-| Test-tampering — Dev weakens QA-Red tests | Pre-commit hook enforcement per CR-043 §0.5 Q9 (extends `.claude/hooks/pre-commit-surface-gate.sh`). `SKIP_RED_GATE=1` bypass logged like other bypasses. |
+| Test-tampering — Dev weakens QA-Red tests | Pre-commit hook enforcement per CR-043 §0.5 Q9 (extends `cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh` Option A). `SKIP_RED_GATE=1` bypass logged like other bypasses. |
 | Mid-sprint user feedback restructures plan | SPRINT-21 set precedent (vitest→node:test landed mid-sprint via tight-scope; CR-040 dropped from SPRINT-22 mid-Brief). Same playbook applies — classify Bug/Clarification/Scope/Approach per V-Bounce rubric (formalized in CR-047 SPRINT-23). For now, conversational. |
-| Live `.claude/` re-sync forgotten post-CR-043 + CR-044 | Add to `.doc-refresh-checklist.md` as a Gate-4 step: "After CR-043 + CR-044 merge, re-sync live via `cleargate init` or hand-port qa.md + devops.md + SKILL.md + pre-commit-surface-gate.sh." |
+| Live `.claude/` re-sync forgotten post-CR-043 + CR-044 | Add to `.doc-refresh-checklist.md` as a Gate-4 step: "After CR-043 + CR-044 merge, re-sync live via `cleargate init` or hand-port qa.md + devops.md + developer.md + SKILL.md + pre-commit-surface-gate.sh + token-ledger.sh + write_dispatch.sh." |
 | 3-item sprint width is at the lower edge of typical 5-9 lane | Acceptable — CR-043 + CR-044 are M-complexity each; CR-042 is XS tag-along. Total ~3-4 dev-days; right-sized for the structural-change risk profile. |
 
 ## 4. Execution Log
@@ -171,7 +191,7 @@ _(Populated by orchestrator + Reporter during sprint execution. Empty at draft t
   - No CLAUDE.md changes outside CLEARGATE-tag-block region (live).
   - Mirror parity per-edit, not state-parity (FLASHCARD `2026-04-19 #wiki #protocol #mirror`).
   - **NO VITEST in SPRINT-22.** `npm test` is canonically routed to node:test (`tsx --test 'test/**/*.node.test.ts'`) per sprint-prep package.json edit 2026-05-04. Vitest is opt-in only via `npm run test:vitest`. Dev/QA dispatches MUST use `npm test` (or `npx tsx --test <path>` for single file). Invoking vitest is explicitly out of scope; if a Dev/QA finds they "need" to run vitest, surface as a `Spec-Gap` blocker.
-  - **All NEW tests in CR-043 + CR-044 work use `*.node.test.ts` naming** (per `cleargate-cli/test/_node-test-runner.md`).
+  - **All NEW tests in CR-043 + CR-044 work use `*.node.test.ts` naming** (per `cleargate-cli/test/_node-test-runner.md`). Combined Red+node naming is `*.red.node.test.ts` (Red infix BEFORE node infix).
   - **Sample fixtures go in `cleargate-cli/examples/` not `cleargate-cli/test/fixtures/`** — keeps them out of the `test/**` glob so `npm test` doesn't auto-run intentionally-failing Red examples.
   - DoD test counts ENFORCED, not advisory (SPRINT-19 lesson).
   - Live `.claude/` re-sync at sprint close per Gate-4 doc-refresh checklist.
@@ -186,7 +206,7 @@ Requirements to pass to Green (Gate 2 — Sprint Ready):
 - [x] Sprint Goal articulated (§0 Stakeholder Brief).
 - [x] Wave structure preview present (§2.1 with 1 wave + parallelism notes).
 - [x] All anchor files drafted in `pending-sync/` and approved (`status: Ready, approved: true`).
-- [ ] **Architect SDR** populates §§2.1-2.5 with line-range stencils (DEFERRED to first dispatch; preliminary content present).
+- [x] **Architect SDR** populated §§2.2-2.3 + §2.5 with concrete line ranges (refined 2026-05-04 against SKILL.md HEAD; CR-043 insert at L214, CR-044 edit on renumbered §C.7; M1 plan written at `.cleargate/sprint-runs/SPRINT-22/plans/M1.md`). §2.1 + §2.4 unchanged (locked by Brief approval).
 - [x] Risks enumerated with mitigations (§3 — 7 items).
 - [x] All anchors at 🟢: Brief approved 2026-05-04.
 - [ ] Sprint Execution Gate (Gate 3) preflight will run before Ready → Active transition (next step).
