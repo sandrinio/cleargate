@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Ready
+status: Active
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -83,16 +83,22 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T19:02:20Z
-stamp_error: no ledger rows for work_item_id SPRINT-25
+  last_gate_check: 2026-05-04T19:20:11Z
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-04T19:02:20Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T19:20:11Z
+  sessions:
+    - session: 75415998-9bf1-4ea7-8be1-e4e2ea480df6
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T19:10:47Z
 ---
 
 # SPRINT-25: SDLC Hardening Wrap-Up + Docs Aligned
@@ -130,68 +136,93 @@ draft_tokens:
 
 **Dispatch unit estimate:** 6 × full 7-step loop = ~42 dispatches. SPRINT-24 was 28; SPRINT-25 step-up explained by 6 vs 4 CRs. Acceptable; standard lanes parallelize well.
 
-## 2. Execution Strategy (preliminary — Architect SDR finalizes)
+## 2. Execution Strategy (Architect SDR finalized — 2026-05-04)
 
 ### 2.1 Phase Plan
 
-**Wave 1 — Five parallel dispatches:**
-- CR-053 (init MANIFEST fix) — independent (cleargate-cli/src/init/)
-- CR-054 (UTF-8 truncation) — independent (.cleargate/scripts/ + script-incident.ts)
-- CR-055 (wrapScript adoption) — independent (test/commands/ refactor)
-- CR-056 (skill-heuristic) — independent (suggest_improvements.mjs)
-- CR-058 (README refresh) — independent (docs only)
+**Wave 1 — Five parallel dispatches (no shared mutable file):**
+- **CR-053** (init MANIFEST fix) — touches `cleargate-cli/src/init/copy-payload.ts` + new test + `/.gitignore`. Independent of other W1 CRs.
+- **CR-054** (UTF-8 truncation) — touches `.cleargate/scripts/run_script.sh` + canonical mirror + `cleargate-cli/src/lib/script-incident.ts` (JSDoc only) + new test. The bash file is shared with CR-057 but CR-057 is in W2; W1 has no contention.
+- **CR-055** (wrapScript adoption) — refactor of 4 `cleargate-cli/test/commands/*.node.test.ts` files + JSDoc on `wrap-script.ts`. No overlap with other W1 surfaces.
+- **CR-056** (skill-heuristic) — touches `.cleargate/scripts/suggest_improvements.mjs` + new test + investigation report. Independent.
+- **CR-058** (README refresh) — touches `/README.md`, `/cleargate-cli/README.md`, `.cleargate/scratch/SDLC_hardening_continued.md`, new lifecycle-diagram-prompt.md. No code overlap; soft prose-coupling to CR-053 (see §2.3).
 
-**Wave 2 — CR-057 alone:**
-- CR-057 (self-repair) — depends on CR-054 byte-truncation landing first (self-repair logic may inspect stderr signatures; needs byte-correct input).
+**W1 dispatch posture:** all 5 CRs may be dispatched concurrently. The DevOps merge order within W1 is not constrained by file collision (no two W1 CRs touch the same file) — order DevOps merges by completion timestamp. Exception: CR-053 SHOULD merge before CR-058's final QA-Verify (see §2.3 prose-coupling warning); orchestrator gates CR-058's merge on CR-053 having merged.
 
-### 2.2 Merge Ordering (preliminary)
+**Wave 2 — CR-057 alone (sequential after CR-054):**
+- **CR-057** (self-repair) — depends on CR-054's `head -c $MAX_BYTES` byte-correct truncation already landed in `run_script.sh`. Rationale: in CODE-MODE, CR-057 ships `_run_script_self_repair.sh` (or `.mjs`) sibling that run_script.sh calls on non-zero exit. The sibling reads the captured stderr (truncated by `_truncate_stream`) for pattern-match dispatch. If CR-057 lands first, the sibling's pattern-match logic may be tuned against char-truncated stderr signatures; later CR-054 byte-fix would invalidate the patterns. Sequential merge eliminates the rework.
+- **Investigation outcome may pivot to DOCS-MODE.** Per CR-057 §4 acceptance, if the corpus shows no pattern with ≥2 occurrences (and SPRINT-23 contributed 0 incidents — verified via `ls .cleargate/sprint-runs/SPRINT-23/.script-incidents/` returning empty; SPRINT-24 has 3 files), CR-057 ships only `.cleargate/knowledge/script-incident-corpus-analysis.md` and updates CR-046 §0.5 Q3 status. No `run_script.sh` change in DOCS-MODE → the W2 wave-split is a no-op overhead in DOCS-MODE. Acceptable; preserve sequential ordering for safety.
 
-| Shared File | Items | Merge Order | Rationale |
+### 2.2 Merge Ordering
+
+| Shared File | Items | Order | Rationale |
 | --- | --- | --- | --- |
-| `.cleargate/scripts/run_script.sh` (+ canonical) | CR-054, CR-057 | CR-054 → CR-057 | CR-057's self-repair sibling sources/calls run_script.sh; needs byte-correct truncation already in place. |
-| `cleargate-cli/src/lib/script-incident.ts` | CR-054 (JSDoc), CR-057 (interface +retry_attempt) | CR-054 → CR-057 | Sequential within W2. |
-| `cleargate-cli/test/commands/{sprint,state,gate,story}.node.test.ts` | CR-055 only | n/a | Single-CR refactor. |
-| `cleargate-cli/src/init/copy-payload.ts` | CR-053 only | n/a | Single-CR edit. |
-| `.cleargate/scripts/suggest_improvements.mjs` | CR-056 only | n/a | Single-CR edit. |
-| `/README.md` + `/cleargate-cli/README.md` | CR-058 only | n/a | Single-CR edit. |
-| `/.gitignore` | CR-053 only (line removal) | n/a | Single-CR edit. |
-| `.cleargate/scratch/SDLC_hardening_continued.md` | CR-058 only | n/a | Single-CR edit. |
+| `.cleargate/scripts/run_script.sh` | CR-054, CR-057 (CODE-MODE only) | CR-054 → CR-057 | CR-057 sibling-call hook lands at non-zero exit path; needs byte-correct `_truncate_stream` already in place so pattern-matching reads correct stderr. DOCS-MODE skips this file → no contention. |
+| `cleargate-planning/.cleargate/scripts/run_script.sh` (canonical mirror) | CR-054, CR-057 (CODE-MODE only) | CR-054 → CR-057 | Mirror parity invariant (FLASHCARD 2026-04-19 #wiki #protocol #mirror). Both edits must lockstep with their live-side counterpart in the same commit; sequential merge preserves the invariant. |
+| `cleargate-cli/src/lib/script-incident.ts` | CR-054 (JSDoc on MAX_STREAM_BYTES, L16-18), CR-057 (CODE-MODE only — adds optional `retry_attempt: number` field) | CR-054 → CR-057 | JSDoc edit and interface extension are physically distinct lines, but sequential ordering still safer: CR-057's interface change is a schema-evolution event (FLASHCARD 2026-05-04 #cr-046 #wrapper #breaking-change applies — pair schema change with one production-path test, which CR-057 §2 already provides). |
+| `cleargate-cli/test/commands/{sprint,state,gate,story}.node.test.ts` | CR-055 only | n/a | Single-CR refactor; 4 files all owned by CR-055. |
+| `cleargate-cli/src/init/copy-payload.ts` | CR-053 only | n/a | Single-CR addition to `SKIP_FILES` (L49). |
+| `.cleargate/scripts/suggest_improvements.mjs` | CR-056 only | n/a | Single-CR heuristic refactor. |
+| `/README.md`, `/cleargate-cli/README.md` | CR-058 only | n/a | Single-CR docs refresh. |
+| `/.gitignore` | CR-053 only (line removal of `/MANIFEST.json`) | n/a | Single-CR edit; no prebuild interaction. |
+| `.cleargate/scratch/SDLC_hardening_continued.md` | CR-058 only | n/a | Single-CR scratch update. |
+| `cleargate-planning/MANIFEST.json` (prebuild artifact) | CR-053, CR-054, CR-055 (any CR touching tracked files under `cleargate-planning/` or root scaffold) | regenerated post-each-merge by `npm run build` | FLASHCARD 2026-05-01 #manifest #prebuild — MANIFEST.json SHAs change after every protocol/template edit; regenerate in the SAME commit as the edit or doctor flags drift on next session. DevOps's post-merge mechanic re-runs prebuild; orchestrator must verify MANIFEST.json is staged in the merge commit. |
 
-### 2.3 Shared-Surface Warnings (preliminary)
+### 2.3 Shared-Surface Warnings
 
-- **CR-054 + CR-057 shared run_script.sh.** Sequential merge order via wave split. CR-057 M1 plan re-reads run_script.sh post-CR-054 merge to pin line ranges for the self-repair sibling integration point.
-- **CR-056 false-positive may surface real pattern.** §3 Out of scope says "no skill ships in CR-056". If investigation reveals a real recurring pattern, surface to human via §4 Execution Log; queue for SPRINT-26.
-- **CR-057 may scope-cut to docs-only.** Branch decision happens during investigation phase. Both branches have acceptance criteria in CR-057 §4.
-- **CR-058 + cleargate init runtime check.** CR-053 ships first OR CR-058 doc'd outcome assumes CR-053 ships. If CR-058 documents Gate-4 doc-refresh as "cleargate init no longer writes root MANIFEST.json", that statement is true only AFTER CR-053 lands. Resolve via merge order: CR-053 lands before CR-058 final commit OR CR-058 footnotes "post-CR-053 behavior".
+- **CR-054 + CR-057 share `run_script.sh` (live + canonical).** Sequential merge order via wave split. CR-057's M1 plan must re-read `run_script.sh` post-CR-054 merge to pin line ranges for the self-repair sibling integration point — the line numbers will have shifted by ~2 lines (pattern: replace `${content:0:$MAX_BYTES}` with `head -c $MAX_BYTES "$file"`). Mirror parity invariant holds at every CR boundary, not just sprint close — CR-054 Dev pairs canonical + live in one commit; same for CR-057.
 
-### 2.4 Lane Audit (preliminary)
+- **CR-054 + CR-057 share `script-incident.ts`.** CR-054 edits JSDoc only (L16-18, MAX_STREAM_BYTES semantics clarification). CR-057 CODE-MODE adds an optional `retry_attempt: number` interface field. Lines are physically separate but sequential merge eliminates merge-conflict risk and respects the FLASHCARD 2026-05-04 #cr-046 #wrapper #breaking-change rule on schema evolution (pair with production-path test — CR-057 §2 ships `run-script-self-repair.red.node.test.ts` covering the new field).
+
+- **CR-053 prose-coupling to CR-058.** CR-058's `## What's New` section and `Getting started` rewrite reference `cleargate init` as "no longer writes root MANIFEST.json post-CR-053". This statement is true only AFTER CR-053 merges. Resolve via DevOps merge order: CR-053 must merge before CR-058's QA-Verify runs. Orchestrator gate: hold CR-058's QA-Verify dispatch until CR-053 state is `Merged`. Alternative escape hatch: CR-058 footnotes the claim as "post-CR-053 (this sprint)" — equally valid.
+
+- **CR-056 false-positive may surface real pattern.** CR-056 §3 Out of scope says "no skill ships in CR-056". If investigation reveals a real recurring pattern (not the diagnosed token-attribution artifact), surface to human via CR's §4 Execution Log; queue for SPRINT-26. Do NOT design or ship a skill in this CR — the investigation budget is ≤30min, the design budget for a real skill is much larger.
+
+- **CR-057 may scope-cut to DOCS-MODE.** Branch decision happens during the ≤30min investigation phase. Both branches have explicit acceptance criteria in CR-057 §4. Pre-evidence: SPRINT-23 has 0 incident files (`.cleargate/sprint-runs/SPRINT-23/.script-incidents/` is empty); SPRINT-24 has 3. Total corpus = 3 incidents. The threshold for CODE-MODE is "≥2 occurrences per pattern across ≥1 commands". A corpus of 3 incidents that all share the same exit_code + stderr signature would clear the bar; otherwise DOCS-MODE. Orchestrator should expect DOCS-MODE as the high-probability outcome; size the W2 dispatch accordingly.
+
+- **MANIFEST.json regen on every canonical edit.** FLASHCARD 2026-05-01 #manifest #prebuild flags the trap: edits under `cleargate-planning/` or scaffold-tracked files invalidate `cleargate-planning/MANIFEST.json` SHAs. DevOps merge step must re-run `npm run build` (regenerates MANIFEST.json) and stage the regenerated file in the same commit as the source edit. CR-054's canonical-mirror edit triggers this. CR-053, CR-055, CR-056, CR-058 do not edit canonical-tracked files (CR-053 edits cleargate-cli/src; CR-055 edits cleargate-cli/test; CR-056 edits `.cleargate/scripts/`; CR-058 edits root README + scratch doc). Only CR-054 + CR-057-CODE-MODE require MANIFEST regen.
+
+### 2.4 Lane Audit
+
+Re-ran the 7-check Lane Classification rubric per CR. All 6 confirmed `standard`; no demotions to `fast`. Default migration assignment held.
 
 | Item | Lane | Rationale (≤80 chars) |
 | --- | --- | --- |
-| CR-053 | standard | Multi-file (src + test + .gitignore); doesn't fit fast-lane size cap. |
-| CR-054 | standard | Multi-file (bash + ts + new test) + interface concern. |
-| CR-055 | standard | 4-file refactor + JSDoc; not fast (touches multiple subsystems). |
-| CR-056 | standard | Investigation + multi-file + new test. |
-| CR-057 | standard | Investigation + potential code addition + 2-mode acceptance. |
-| CR-058 | standard | Multi-section README rewrite + new prompt file + scratch doc edit. |
+| CR-053 | standard | 3 files (src + test + .gitignore); fails ≤2-file fast-lane size cap. |
+| CR-054 | standard | 4 files (bash live + canonical + ts JSDoc + new test); fails size cap. |
+| CR-055 | standard | 5 files (4 caller tests + JSDoc); fails size cap. |
+| CR-056 | standard | Investigation + multi-file + new test; expected_bounce_exposure=med. |
+| CR-057 | standard | 2-mode CR with branching outcomes; expected_bounce_exposure=med. |
+| CR-058 | standard | ~150 LOC across 4 files + new prompt; fails size cap; multi-section rewrite. |
 
-### 2.5 ADR-Conflict Flags (preliminary — Architect SDR finalizes)
+### 2.5 ADR-Conflict Flags
 
-- **None blocking.** All 6 CRs live within established invariants (mirror parity, file-surface contract, real-infra-no-mocks, archive-immutability).
-- **Soft flag 1 — TPV operational dogfood (continued).** Second sprint where TPV runs. SPRINT-25 = 6 standard-lane CRs × Mode: TPV. Track catch rate; combine with SPRINT-24's 0/4 for the §5 metrics decision threshold.
-- **Soft flag 2 — DevOps registration unresolved.** CR-051 documented escape-hatch; SPRINT-25 still uses orchestrator-fallback per the documented pattern. Live SKILL.md re-sync cures live drift but registration remains session-cache-bound.
-- **Soft flag 3 — CR-058 prose-only edits don't lend themselves to TPV.** The TPV gate (Architect Mode: TPV) checks test wiring soundness. CR-058's tests are limited to "grep verification" (e.g., no `four-agent loop` left). TPV will pass-through but signal value is low for prose-only CRs. Note for the Reporter §6.
+- **None blocking.** All 6 CRs live within established invariants (mirror parity, file-surface contract, real-infra-no-mocks, archive-immutability, MANIFEST.json prebuild regen).
+
+- **Soft flag 1 — TPV operational dogfood (continued).** Second sprint where TPV runs. SPRINT-25 = 6 standard-lane CRs × Mode: TPV. Track catch rate; combine with SPRINT-24's 0/4 for the §0 metrics decision threshold at SPRINT-26 kickoff (per CR-047 §0.5 Q4).
+
+- **Soft flag 2 — DevOps registration unresolved.** CR-051 documented escape-hatch; SPRINT-25 still uses orchestrator-fallback per the documented pattern. Live SKILL.md re-sync at Gate-4 cures live drift but registration remains session-cache-bound. No CR in SPRINT-25 unblocks this; tracking-only.
+
+- **Soft flag 3 — CR-058 prose-only edits don't lend themselves to TPV.** The TPV gate (Architect Mode: TPV) checks test wiring soundness. CR-058's tests are limited to "grep verification" (e.g., no `four-agent loop` matches left) plus the standard typecheck/test pre-commit. TPV will pass-through (no test-pattern wiring to validate). Note for the Reporter §6 metrics: count CR-058 in the denominator with caveat, not as a TPV signal contributor.
+
+- **Soft flag 4 — schema evolution on `script-incident.ts` in CR-057 CODE-MODE.** Per FLASHCARD 2026-05-04 #cr-046 #wrapper #breaking-change, wrapper-interface schema changes orphan callers when only spawnMock-style tests exist. CR-057 §2 already ships a production-path test (`run-script-self-repair.red.node.test.ts`) covering the new `retry_attempt` field. Compliance verified at plan-time. Architect post-flight on CR-057 must re-confirm.
+
+- **Soft flag 5 — MANIFEST.json prebuild regen contract.** Per FLASHCARD 2026-05-01 #manifest #prebuild, edits to canonical-tracked files invalidate `cleargate-planning/MANIFEST.json`. CR-054 (canonical mirror edit) and CR-057 CODE-MODE (canonical mirror + new sibling) trigger this. DevOps merge step for those two CRs MUST stage the regenerated MANIFEST.json in the same commit. Orchestrator gates DevOps dispatch on `npm run build` running clean. The other 4 CRs (CR-053/055/056/058) do not touch `cleargate-planning/` and do not require regen.
+
+- **Soft flag 6 — `.cleargate/scripts/` is FIRST_INSTALL_ONLY in copy-payload.** Per `cleargate-cli/src/init/copy-payload.ts:65-69`, `.cleargate/scripts/*` is exempt from re-init overwrites. CR-054's edit to live `.cleargate/scripts/run_script.sh` is the dogfood-instance edit; the SPRINT-25 close `cleargate init` re-sync will NOT overwrite it (FIRST_INSTALL_ONLY). Canonical mirror edit propagates to user-repos via fresh `cleargate init`. No conflict; documenting for completeness.
 
 ## 3. Risks & Dependencies
 
 | Risk | Likelihood | Mitigation |
 | --- | --- | --- |
-| CR-057 finds no recurring patterns | Medium | DOCS-MODE acceptance shipped per CR-057 §4 |
+| CR-057 finds no recurring patterns | High | DOCS-MODE acceptance shipped per CR-057 §4; orchestrator pre-sized for DOCS-MODE outcome (corpus = 3 incidents) |
 | CR-056 surfaces real pattern (not false-positive) | Low | §3 Out of scope says no skill ships; queue for SPRINT-26 |
 | CR-058 scope creep across all README sections | Medium | Strict acceptance grep + spot-check by QA-Verify; stay in named sections |
 | TPV mis-fires on prose-only CR-058 | Low | TPV scope = test wiring; CR-058 has minimal test surface; expect pass-through |
 | CR-053 SKIP_FILES vs FIRST_INSTALL_ONLY confusion | Low | CR-053 §0.5 Q5 default explicitly separates the two mechanisms |
 | Merge conflict CR-054 + CR-057 on run_script.sh | Low | Sequential wave split; CR-057 re-reads post-CR-054 merge |
+| MANIFEST.json prebuild drift on canonical-mirror commits | Medium | DevOps merge step runs `npm run build` and stages regen file in same commit (CR-054 + CR-057-CODE-MODE only) |
+| CR-058 prose claim about CR-053 lands before CR-053 merges | Low | Orchestrator gates CR-058 QA-Verify on CR-053 = Merged; alternative footnote escape hatch documented |
 
 ## 4. Execution Log
 
