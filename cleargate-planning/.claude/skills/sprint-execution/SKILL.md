@@ -147,6 +147,8 @@ node .cleargate/scripts/init_sprint.mjs SPRINT-NN
 
 This writes `.cleargate/sprint-runs/SPRINT-NN/state.json` and flips `.cleargate/sprint-runs/.active` to `SPRINT-NN`. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
 
+`init_sprint.mjs` also writes `<sprintDir>/sprint-context.md` from `.cleargate/templates/sprint_context.md`, populated with `sprint_id` + goal (extracted from sprint plan §0 `- **Sprint Goal:** …` bullet, or placeholder if absent) + active CR list. Every Dev/QA/Architect/DevOps dispatch reads this file as preflight (see §B + §C contracts + agent prompts `## Preflight`).
+
 ### A.4 Architect Sprint Design Review (v2 only)
 
 Mandatory under `execution_mode: v2`; optional but encouraged under `v1`. Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
@@ -178,6 +180,8 @@ bash .cleargate/scripts/write_dispatch.sh M<N> architect
 Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and instruction to write `.cleargate/sprint-runs/<sprint-id>/plans/M<N>.md`.
 
 **Skip per-milestone Architect for `lane: fast` stories** — they dispatch to Developer without a plan, per the lane contract (see `.claude/agents/architect.md` Lane Classification).
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action (Sprint Goal + Cross-Cutting Rules + Active CRs sections constrain every decision).
 
 > 🎯 **Goal check.** Pass the sprint goal verbatim in the Architect's dispatch prompt. The plan should explicitly tie each story to the goal under "Per-story blueprint" — e.g. *"STORY-NNN-NN advances goal by <one sentence>"*. Plans that don't reference the goal go back to the Architect with a re-dispatch.
 
@@ -222,6 +226,8 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
+
 > `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
 
 QA-Red returns:
@@ -246,6 +252,8 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
 
 Then spawn with `subagent_type=developer`. Inputs the prompt must include verbatim:
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 - `STORY=NNN-NN` (Developer must echo this on its first response line).
 - Path to story file.
@@ -275,6 +283,8 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 
 Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
 
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
+
 QA inputs: story file path, worktree path, Developer commit SHA. QA returns:
 
 ```
@@ -292,6 +302,8 @@ flashcards_flagged: [ ... ]
 ### C.6 Architect Pass (v2, `lane: standard` only)
 
 `lane: fast` skips this step entirely.
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 ```bash
 bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
@@ -452,6 +464,8 @@ If the report stub does not exist, dispatch the Reporter:
 ```bash
 bash .cleargate/scripts/write_dispatch.sh SPRINT-NN reporter
 ```
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 > **Fresh session.** The Reporter MUST dispatch in a fresh session — do not inherit dev+qa cumulative context. `write_dispatch.sh` already spawns a clean shell child; the `Agent` tool path requires no session-continuation flag. If the runtime offers a session-reset knob (e.g. `--resume false` or equivalent), use it. The Reporter starts cold and reads only `.reporter-context.md` + `sprint_report.md`.
 
