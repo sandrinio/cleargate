@@ -2,7 +2,7 @@
   "schema_version": 2,
   "sprint_id": "SPRINT-24",
   "execution_mode": "v2",
-  "sprint_status": "Active",
+  "sprint_status": "Completed",
   "stories": {
     "CR-049": {
       "state": "Done",
@@ -53,6 +53,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-050 → Done",
-  "updated_at": "2026-05-04T15:45:35.248Z"
+  "last_action": "close_sprint: sprint SPRINT-24 completed",
+  "updated_at": "2026-05-04T17:33:00.804Z"
 }

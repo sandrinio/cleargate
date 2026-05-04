@@ -8,9 +8,9 @@
 |------|-------|--------|---------|
 | Epics | 26 | 0 | 19 |
 | Stories | 154 | 0 | 153 |
-| Sprints | 24 | 1 | 19 |
+| Sprints | 24 | 0 | 19 |
 | Proposals | 14 | 0 | 14 |
-| CRs | 49 | 0 | 47 |
+| CRs | 49 | 0 | 48 |
 | Bugs | 18 | 0 | 17 |
 
 ## Active Epics
@@ -146,6 +146,8 @@ _No active epics._
 - [[CR-048]] (crs) — Done
 
 - [[CR-049]] (crs) — Done
+
+- [[CR-050]] (crs) — Done
 
 - [[CR-051]] (crs) — Done
 

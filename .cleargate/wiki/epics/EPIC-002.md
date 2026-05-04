@@ -15,7 +15,7 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-002_Knowledge_Wiki_Layer.md"
-last_ingest: "2026-05-04T13:04:30.339Z"
+last_ingest: "2026-05-04T17:33:10.984Z"
 last_ingest_commit: "161cc1023dd5d8a469151ca2cb3ef7ce561081f7"
 repo: "planning"
 ---

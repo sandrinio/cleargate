@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -86,7 +86,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T14:09:09Z
+  last_gate_check: 2026-05-04T17:33:55Z
 stamp_error: no ledger rows for work_item_id SPRINT-24
 draft_tokens:
   input: null
@@ -94,7 +94,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T14:09:09Z
+  last_stamp: 2026-05-04T17:33:55Z
   sessions: []
 ---
 

@@ -457,7 +457,5 @@
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     }
-  ],
-  "installed_at": "2026-05-04T17:33:35.397Z",
-  "pin_version": "0.10.0"
+  ]
 }
