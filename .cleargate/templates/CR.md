@@ -12,6 +12,7 @@ POST-WRITE BRIEF
 After Writing this document, render a Brief in chat with the following sections,
 mechanically extracted from the document's own structure:
 
+  - Prior work    ← cleargate-wiki-query result (cite [[IDs]] or write "none found")
   - Summary        ← §1 The Context Override
   - Open Questions ← §0.5 Open Questions
   - Edge Cases     ← §2 Blast Radius & Invalidation
