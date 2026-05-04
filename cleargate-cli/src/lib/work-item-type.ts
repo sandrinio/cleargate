@@ -5,7 +5,7 @@
  * Maps frontmatter ID keys and filename patterns to canonical work-item types.
  */
 
-export type WorkItemType = 'story' | 'epic' | 'proposal' | 'cr' | 'bug';
+export type WorkItemType = 'story' | 'epic' | 'proposal' | 'cr' | 'bug' | 'initiative' | 'sprint';
 
 /**
  * Frontmatter key → work-item type mapping.
@@ -17,6 +17,8 @@ const FM_KEY_MAP: Array<{ key: string; type: WorkItemType }> = [
   { key: 'proposal_id', type: 'proposal' },
   { key: 'cr_id', type: 'cr' },
   { key: 'bug_id', type: 'bug' },
+  { key: 'initiative_id', type: 'initiative' },
+  { key: 'sprint_id', type: 'sprint' },
 ];
 
 /**
@@ -28,6 +30,8 @@ const PREFIX_MAP: Array<{ prefix: string; type: WorkItemType }> = [
   { prefix: 'PROPOSAL-', type: 'proposal' },
   { prefix: 'CR-', type: 'cr' },
   { prefix: 'BUG-', type: 'bug' },
+  { prefix: 'INITIATIVE-', type: 'initiative' },
+  { prefix: 'SPRINT-', type: 'sprint' },
 ];
 
 /**
@@ -72,4 +76,6 @@ export const WORK_ITEM_TRANSITIONS: Record<WorkItemType, string[]> = {
   story: ['ready-for-execution'],
   cr: ['ready-to-apply'],
   bug: ['ready-for-fix'],
+  initiative: ['ready-for-decomposition'],
+  sprint: ['ready-for-execution'],
 };

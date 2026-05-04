@@ -191,7 +191,7 @@ export async function stampTokensHandler(
  */
 function extractWorkItemId(fm: Record<string, unknown>, absPath: string): string | null {
   // Try frontmatter ID keys in order
-  const idKeys = ['story_id', 'epic_id', 'proposal_id', 'cr_id', 'bug_id'];
+  const idKeys = ['story_id', 'epic_id', 'proposal_id', 'cr_id', 'bug_id', 'initiative_id', 'sprint_id'];
   for (const key of idKeys) {
     const val = fm[key];
     if (typeof val === 'string' && val.trim() !== '') {
@@ -201,7 +201,7 @@ function extractWorkItemId(fm: Record<string, unknown>, absPath: string): string
 
   // Fallback: extract from filename
   const basename = path.basename(absPath);
-  const match = basename.match(/^(STORY|EPIC|PROPOSAL|CR|BUG)-\d+(-\d+)?/i);
+  const match = basename.match(/^(STORY|EPIC|PROPOSAL|CR|BUG|INITIATIVE|SPRINT)-\d+(-\d+)?/i);
   if (match) {
     return match[0].toUpperCase();
   }
@@ -210,7 +210,7 @@ function extractWorkItemId(fm: Record<string, unknown>, absPath: string): string
   const typeFromPath = detectWorkItemType(absPath);
   if (typeFromPath) {
     // Try to find the ID segment in the basename
-    const idMatch = basename.match(/((?:STORY|EPIC|PROPOSAL|CR|BUG)-\d+(?:-\d+)?)/i);
+    const idMatch = basename.match(/((?:STORY|EPIC|PROPOSAL|CR|BUG|INITIATIVE|SPRINT)-\d+(?:-\d+)?)/i);
     if (idMatch) {
       return idMatch[1].toUpperCase();
     }

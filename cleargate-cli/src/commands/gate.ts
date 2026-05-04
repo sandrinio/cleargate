@@ -53,6 +53,10 @@ export interface GateCliOptions {
 interface GateCriterion {
   id: string;
   check: string;
+  /** Optional OR-group name. Criteria sharing the same or_group value are treated as a
+   *  logical OR: the gate passes for that concern if ANY member of the group passes.
+   *  Criteria without or_group are treated as required (AND). */
+  or_group?: string;
 }
 
 interface GateBlock {
@@ -216,8 +220,7 @@ export async function gateCheckHandler(
   const evalOpts = { projectRoot, ...(wikiIndexPath ? { wikiIndexPath } : {}) };
 
   // Evaluate each criterion
-  const failingCriteria: { id: string; detail: string }[] = [];
-  const allResults: Array<{ id: string; pass: boolean; detail: string }> = [];
+  const allResults: Array<{ id: string; pass: boolean; detail: string; or_group?: string }> = [];
 
   for (const criterion of gate.criteria) {
     let result: { pass: boolean; detail: string };
@@ -226,9 +229,43 @@ export async function gateCheckHandler(
     } catch (err) {
       result = { pass: false, detail: `predicate error: ${String(err)}` };
     }
-    allResults.push({ id: criterion.id, ...result });
-    if (!result.pass) {
-      failingCriteria.push({ id: criterion.id, detail: result.detail });
+    allResults.push({ id: criterion.id, ...result, or_group: criterion.or_group });
+  }
+
+  // Apply OR-group semantics: criteria sharing an or_group pass if ANY member passes.
+  // Criteria without or_group are required individually (AND semantics).
+  const failingCriteria: { id: string; detail: string }[] = [];
+
+  // Collect grouped results: group_name → array of results
+  const orGroups = new Map<string, Array<{ id: string; pass: boolean; detail: string }>>();
+  for (const r of allResults) {
+    if (r.or_group) {
+      const existing = orGroups.get(r.or_group) ?? [];
+      existing.push(r);
+      orGroups.set(r.or_group, existing);
+    }
+  }
+
+  for (const r of allResults) {
+    if (r.or_group) {
+      // OR-group: only emit a failure if ALL members of the group fail.
+      // We emit one failure per group (not per criterion), keyed on the group name.
+      // We only check once — when we encounter the FIRST member of the group.
+      const groupMembers = orGroups.get(r.or_group)!;
+      const isFirstMember = groupMembers[0]!.id === r.id;
+      if (isFirstMember) {
+        const anyPasses = groupMembers.some((m) => m.pass);
+        if (!anyPasses) {
+          // All members failed — emit group-level failure
+          const details = groupMembers.map((m) => `${m.id}: ${m.detail}`).join('; ');
+          failingCriteria.push({ id: r.or_group, detail: `OR-group failed — all alternatives failed: ${details}` });
+        }
+      }
+    } else {
+      // Standard AND: must pass individually
+      if (!r.pass) {
+        failingCriteria.push({ id: r.id, detail: r.detail });
+      }
     }
   }
 
@@ -251,16 +288,17 @@ export async function gateCheckHandler(
   if (overallPass) {
     stdoutFn(`\u2705 ${detectedType}.${transition} passed (${gate.criteria.length} criteria)`);
   } else {
-    for (const r of allResults) {
-      if (!r.pass) {
-        if (isAdvisory) {
-          stdoutFn(`\u26A0 ${r.id}: ${r.detail} (advisory)`);
-        } else {
-          stdoutFn(`\u274C ${r.id}: ${r.detail}`);
-        }
+    // Emit failures from failingCriteria (which already has OR-group semantics applied)
+    for (const fc of failingCriteria) {
+      if (isAdvisory) {
+        stdoutFn(`\u26A0 ${fc.id}: ${fc.detail} (advisory)`);
+      } else {
+        stdoutFn(`\u274C ${fc.id}: ${fc.detail}`);
       }
-      if (opts.verbose) {
-        // In verbose mode, emit full detail per criterion
+    }
+    if (opts.verbose) {
+      // In verbose mode, emit full per-criterion detail
+      for (const r of allResults) {
         stdoutFn(`  [${r.pass ? 'pass' : 'fail'}] ${r.id}: ${r.detail}`);
       }
     }
