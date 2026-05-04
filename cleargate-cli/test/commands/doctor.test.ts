@@ -673,7 +673,7 @@ function makeExitTmpDir(): string {
   return d;
 }
 
-/** Write a minimal .cleargate/ scaffold (does NOT include cleargate-planning/MANIFEST.json). */
+/** Write a minimal .cleargate/ scaffold (does NOT include .cleargate/.install-manifest.json). */
 function writeCleargateDirOnly(dir: string): void {
   const deliveryDir = path.join(dir, '.cleargate', 'delivery', 'pending-sync');
   fs.mkdirSync(deliveryDir, { recursive: true });
@@ -718,12 +718,12 @@ cached_gate_result: ${gateResult}
   fs.writeFileSync(path.join(pendingDir, 'STORY-BLOCKED.md'), content, 'utf-8');
 }
 
-/** Write a valid cleargate-planning/MANIFEST.json. */
+/** Write a valid .cleargate/.install-manifest.json (the install snapshot CR-053 path). */
 function writeManifest(dir: string): void {
-  const manifestDir = path.join(dir, 'cleargate-planning');
+  const manifestDir = path.join(dir, '.cleargate');
   fs.mkdirSync(manifestDir, { recursive: true });
   fs.writeFileSync(
-    path.join(manifestDir, 'MANIFEST.json'),
+    path.join(manifestDir, '.install-manifest.json'),
     JSON.stringify({ cleargate_version: '0.5.0', generated_at: '2026-04-26T00:00:00Z', files: [] }, null, 2),
     'utf-8'
   );
@@ -806,7 +806,7 @@ describe('STORY-014-01 Scenario 3: Missing .cleargate exits 2', () => {
 // Scenario 4: Missing manifest exits 2
 
 describe('STORY-014-01 Scenario 4: Missing manifest exits 2', () => {
-  it('exits 2 when cleargate-planning/MANIFEST.json is absent', async () => {
+  it('exits 2 when .cleargate/.install-manifest.json is absent', async () => {
     const dir = makeExitTmpDir();
     writeCleargateDirOnly(dir);
     // Do NOT write manifest
@@ -821,7 +821,7 @@ describe('STORY-014-01 Scenario 4: Missing manifest exits 2', () => {
     expect(codes).toHaveLength(1);
     expect(codes[0]).toBe(2);
     const output = out.join('\n');
-    expect(output).toContain('MANIFEST.json');
+    expect(output).toContain('.install-manifest.json');
   });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "cleargate",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "private": false,
   "type": "module",
   "description": "Planning framework for Claude Code agents — sprint/epic/story protocol, five-role agent team (architect/developer/qa/devops/reporter), Karpathy-style awareness wiki.",

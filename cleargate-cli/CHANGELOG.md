@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.11.1] — 2026-05-05
+
+Hotfix.
+
+### Fixed
+- **`cleargate doctor` no longer reports false-positive `cleargate misconfigured: cleargate-planning/MANIFEST.json not found`** — `cleargate-cli/src/commands/doctor.ts` `runHookHealth()` was checking `cleargate-planning/MANIFEST.json`, a path that `copy-payload.ts` (CR-053, v0.11.0) explicitly never creates in target repos. Doctor now checks `.cleargate/.install-manifest.json` (the actual install snapshot written by `init`). Every healthy v0.11.0 install previously printed the warning + exited 2 from `doctor`.
+
 ## [0.11.0] — 2026-05-04
 
 SDLC Hardening Wrap-Up + Docs Aligned (SPRINT-25). Six CRs shipped (CR-053..CR-058); the SDLC Hardening arc closes here.

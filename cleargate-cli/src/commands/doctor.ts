@@ -162,10 +162,14 @@ function runHookHealth(
     return;
   }
 
-  // STORY-014-01: config-error — missing cleargate-planning/MANIFEST.json
-  const manifestPath = path.join(cwd, 'cleargate-planning', 'MANIFEST.json');
+  // STORY-014-01: config-error — missing install snapshot.
+  // CR-053 moved the install snapshot to .cleargate/.install-manifest.json;
+  // the previous check at cleargate-planning/MANIFEST.json was a path that
+  // copy-payload.ts intentionally never creates (false-positive on every
+  // healthy install).
+  const manifestPath = path.join(cwd, '.cleargate', '.install-manifest.json');
   if (!fs.existsSync(manifestPath)) {
-    stdout(`cleargate misconfigured: cleargate-planning/MANIFEST.json not found. Run: cleargate init`);
+    stdout(`cleargate misconfigured: .cleargate/.install-manifest.json not found. Run: cleargate init`);
     if (outcome) outcome.configError = true;
     // Do not return — continue with remaining checks
   }
