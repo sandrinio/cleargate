@@ -514,6 +514,8 @@ export function reconcileCrossSprintOrphans(opts: ReconcileOrphansOpts): Reconci
           state_json_sprint: sprintDir,
           file_path: pending.filePath,
         });
+      } else {
+        // Item is in pending-sync AND in state.json but NOT terminal — correctly in-flight
         clean++;
       }
     }
