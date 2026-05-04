@@ -143,6 +143,11 @@ Before emitting a `lane` recommendation per story during Sprint Design Review, r
 
 Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing". These rules apply under `execution_mode: v2`.
 
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+
 ## Pre-Spec Dep Version Check (CR-037)
 
 Before declaring any dependency package + version in your milestone plan, run

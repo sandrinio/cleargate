@@ -1,123 +1,200 @@
 #!/usr/bin/env bash
-# run_script.sh — Wrapper that captures stdout/stderr separately and prints a
-# structured diagnostic block on non-zero exit.
-# Usage: run_script.sh <script-name> [args...]
-# Supported extensions: .mjs (runs via node), .sh (runs via bash)
+# run_script.sh — Arbitrary-command wrapper that captures stdout/stderr independently
+# and writes a structured JSON incident file on non-zero exit.
+#
+# Interface: bash run_script.sh <command> [args...]
+#   <command>  — any executable on PATH (e.g. node, bash, sh, true, false)
+#   [args...]  — forwarded to the command unchanged
+#
+# On success (exit 0): stdout+stderr are passed through; no incident file written.
+# On failure (exit ≠ 0): stdout+stderr are passed through AND a JSON incident is
+#   written to .cleargate/sprint-runs/<active-sprint>/.script-incidents/<ts>-<hash>.json
+#
+# Self-exemption: if RUN_SCRIPT_ACTIVE=1 is already set, the wrapper is already
+# running — do not nest. Execute the command directly to avoid infinite recursion.
+# This guard implements the self-exempt contract documented in SKILL.md §C.x.
+#
+# Env vars read:
+#   ORCHESTRATOR_PROJECT_DIR  — project root override (falls back to CLAUDE_PROJECT_DIR,
+#                               then to git rev-parse --show-toplevel, then script dir ancestor)
+#   AGENT_TYPE                — populates incident JSON agent_type field (null if empty)
+#   WORK_ITEM_ID              — populates incident JSON work_item_id field (null if empty)
+#   RUN_SCRIPT_ACTIVE         — self-exemption guard (set to 1 by this wrapper)
+
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ---------------------------------------------------------------------------
+# Self-exemption guard — do not wrap recursively
+# ---------------------------------------------------------------------------
+if [[ "${RUN_SCRIPT_ACTIVE:-}" == "1" ]]; then
+  # Already inside a wrapper invocation; pass through directly, no JSON capture
+  exec "$@"
+fi
 
 # ---------------------------------------------------------------------------
 # Usage guard
 # ---------------------------------------------------------------------------
 if [[ $# -lt 1 ]]; then
-  echo "Usage: run_script.sh <script-name> [args...]" >&2
+  echo "Usage: bash run_script.sh <command> [args...]" >&2
   exit 2
 fi
 
-SCRIPT_NAME="$1"
-shift
-SCRIPT_ARGS=()
-if [[ $# -gt 0 ]]; then
-  SCRIPT_ARGS=("$@")
-fi
+# ---------------------------------------------------------------------------
+# Resolve project root for incident file path
+# ---------------------------------------------------------------------------
+_resolve_project_root() {
+  # Priority: ORCHESTRATOR_PROJECT_DIR → CLAUDE_PROJECT_DIR → git toplevel → script dir ancestor
+  if [[ -n "${ORCHESTRATOR_PROJECT_DIR:-}" ]]; then
+    echo "$ORCHESTRATOR_PROJECT_DIR"
+    return
+  fi
+  if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "$CLAUDE_PROJECT_DIR"
+    return
+  fi
+  if _root=$(git rev-parse --show-toplevel 2>/dev/null); then
+    echo "$_root"
+    return
+  fi
+  # Fallback: assume run_script.sh lives in <repo>/.cleargate/scripts/
+  echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../.. && pwd)"
+}
 
-# ---------------------------------------------------------------------------
-# Resolve path — script may be an absolute path or relative to SCRIPT_DIR
-# ---------------------------------------------------------------------------
-if [[ "$SCRIPT_NAME" == /* ]]; then
-  SCRIPT_PATH="$SCRIPT_NAME"
+PROJECT_ROOT="$(_resolve_project_root)"
+SPRINT_RUNS_DIR="${PROJECT_ROOT}/.cleargate/sprint-runs"
+ACTIVE_FILE="${SPRINT_RUNS_DIR}/.active"
+
+# Determine sprint incident dir
+if [[ -f "$ACTIVE_FILE" ]]; then
+  SPRINT_ID="$(cat "$ACTIVE_FILE" | tr -d '[:space:]')"
+  INCIDENTS_DIR="${SPRINT_RUNS_DIR}/${SPRINT_ID}/.script-incidents"
 else
-  SCRIPT_PATH="${SCRIPT_DIR}/${SCRIPT_NAME}"
-fi
-
-# ---------------------------------------------------------------------------
-# Extension routing
-# ---------------------------------------------------------------------------
-EXT="${SCRIPT_NAME##*.}"
-case "$EXT" in
-  mjs)  RUNNER="node" ;;
-  sh)   RUNNER="bash" ;;
-  *)
-    echo "unsupported extension: .${EXT}" >&2
-    exit 2
-    ;;
-esac
-
-# ---------------------------------------------------------------------------
-# Check script exists
-# ---------------------------------------------------------------------------
-if [[ ! -f "$SCRIPT_PATH" ]]; then
-  echo "run_script.sh: script not found: ${SCRIPT_PATH}" >&2
-  exit 2
+  # No active sprint sentinel → write to _off-sprint bucket
+  INCIDENTS_DIR="${SPRINT_RUNS_DIR}/_off-sprint/.script-incidents"
 fi
 
 # ---------------------------------------------------------------------------
 # Capture stdout + stderr to temp files
 # ---------------------------------------------------------------------------
-STDOUT_FILE="$(mktemp)"
-STDERR_FILE="$(mktemp)"
-trap 'rm -f "$STDOUT_FILE" "$STDERR_FILE"' EXIT
+STDOUT_TMP="$(mktemp)"
+STDERR_TMP="$(mktemp)"
+trap 'rm -f "$STDOUT_TMP" "$STDERR_TMP"' EXIT
+
+# Mark self as active before running the wrapped command
+export RUN_SCRIPT_ACTIVE=1
 
 EXIT_CODE=0
-if [[ ${#SCRIPT_ARGS[@]} -gt 0 ]]; then
-  "$RUNNER" "$SCRIPT_PATH" "${SCRIPT_ARGS[@]}" > "$STDOUT_FILE" 2> "$STDERR_FILE" || EXIT_CODE=$?
-else
-  "$RUNNER" "$SCRIPT_PATH" > "$STDOUT_FILE" 2> "$STDERR_FILE" || EXIT_CODE=$?
-fi
+"$@" >"$STDOUT_TMP" 2>"$STDERR_TMP" || EXIT_CODE=$?
 
 # ---------------------------------------------------------------------------
-# On success: pass through and exit 0
+# Always pass through stdout + stderr to the caller
+# ---------------------------------------------------------------------------
+cat "$STDOUT_TMP"
+cat "$STDERR_TMP" >&2
+
+# ---------------------------------------------------------------------------
+# On success: nothing more to do
 # ---------------------------------------------------------------------------
 if [[ $EXIT_CODE -eq 0 ]]; then
-  cat "$STDOUT_FILE"
-  cat "$STDERR_FILE" >&2
   exit 0
 fi
 
 # ---------------------------------------------------------------------------
-# On failure: pass stdout through, then print structured diagnostic to stderr
+# On failure: write structured JSON incident file
 # ---------------------------------------------------------------------------
-cat "$STDOUT_FILE"
+MAX_BYTES=4096
+TRUNCATION_SUFFIX="... [truncated]"
 
-# Root-cause heuristic (6-branch)
-STDERR_CONTENT="$(cat "$STDERR_FILE")"
-ROOT_CAUSE="unknown error"
-SUGGESTED_FIX="check the script output above for details"
+_truncate_stream() {
+  local file="$1"
+  local content
+  content="$(cat "$file")"
+  local byte_len=${#content}
+  if [[ $byte_len -le $MAX_BYTES ]]; then
+    # Use printf to emit the raw content — avoids echo interpretation issues
+    printf '%s' "$content"
+  else
+    printf '%s' "${content:0:$MAX_BYTES}${TRUNCATION_SUFFIX}"
+  fi
+}
 
-if echo "$STDERR_CONTENT" | grep -q "state\.json not found"; then
-  ROOT_CAUSE="state.json not found — sprint may not be initialized"
-  SUGGESTED_FIX="run: node .cleargate/scripts/init_sprint.mjs <sprint-id> --stories <ids>"
-elif echo "$STDERR_CONTENT" | grep -qi "ENOENT"; then
-  ROOT_CAUSE="missing file (ENOENT)"
-  SUGGESTED_FIX="verify all required files exist at the expected paths"
-elif echo "$STDERR_CONTENT" | grep -qi "EACCES"; then
-  ROOT_CAUSE="permission denied (EACCES)"
-  SUGGESTED_FIX="chmod 755 the target file or directory"
-elif echo "$STDERR_CONTENT" | grep -qi "SyntaxError"; then
-  ROOT_CAUSE="JavaScript syntax error"
-  SUGGESTED_FIX="fix the syntax error in the script; run: node --check <file>"
-elif echo "$STDERR_CONTENT" | grep -qi "Cannot find module"; then
-  ROOT_CAUSE="missing module (import resolution failure)"
-  SUGGESTED_FIX="run npm install in the relevant package directory"
-elif echo "$STDERR_CONTENT" | grep -qi "command not found"; then
-  ROOT_CAUSE="required command not found on PATH"
-  SUGGESTED_FIX="install the missing tool or add it to PATH"
+STDOUT_CAPTURED="$(_truncate_stream "$STDOUT_TMP")"
+STDERR_CAPTURED="$(_truncate_stream "$STDERR_TMP")"
+
+# Build filename: <ts>-<hash>.json
+TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+TS_FILE="$(date -u +%Y%m%dT%H%M%SZ)"
+# Hash the full command string (first arg + all args)
+HASH="$(printf '%s' "$*" | shasum -a 1 | cut -c1-12)"
+INCIDENT_FILE="${INCIDENTS_DIR}/${TS_FILE}-${HASH}.json"
+
+# Ensure incident directory exists
+mkdir -p "$INCIDENTS_DIR"
+
+# Collect context
+COMMAND="$1"
+shift
+ARGS_JSON="["
+FIRST=1
+for ARG in "$@"; do
+  if [[ $FIRST -eq 1 ]]; then
+    FIRST=0
+  else
+    ARGS_JSON="${ARGS_JSON},"
+  fi
+  # JSON-escape the arg: replace \ with \\, " with \", newlines with \n
+  ARG_ESCAPED="${ARG//\\/\\\\}"
+  ARG_ESCAPED="${ARG_ESCAPED//\"/\\\"}"
+  ARG_ESCAPED="${ARG_ESCAPED//$'\n'/\\n}"
+  ARGS_JSON="${ARGS_JSON}\"${ARG_ESCAPED}\""
+done
+ARGS_JSON="${ARGS_JSON}]"
+
+CWD="$(pwd)"
+
+# Encode agent_type + work_item_id (null if empty)
+AGENT_TYPE_VAL="${AGENT_TYPE:-}"
+WORK_ITEM_ID_VAL="${WORK_ITEM_ID:-}"
+
+if [[ -z "$AGENT_TYPE_VAL" ]]; then
+  AGENT_TYPE_JSON="null"
+else
+  AGENT_TYPE_JSON="\"${AGENT_TYPE_VAL}\""
 fi
 
+if [[ -z "$WORK_ITEM_ID_VAL" ]]; then
+  WORK_ITEM_ID_JSON="null"
+else
+  WORK_ITEM_ID_JSON="\"${WORK_ITEM_ID_VAL}\""
+fi
+
+# JSON-encode captured streams (escape backslash, double-quote, and newlines)
+_json_str() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  printf '%s' "$s"
+}
+
+STDOUT_JSON="$(_json_str "$STDOUT_CAPTURED")"
+STDERR_JSON="$(_json_str "$STDERR_CAPTURED")"
+COMMAND_JSON="$(_json_str "$COMMAND")"
+CWD_JSON="$(_json_str "$CWD")"
+
+cat > "$INCIDENT_FILE" <<JSON
 {
-  echo ""
-  echo "## Script Incident"
-  echo "Script:     ${SCRIPT_NAME}"
-  echo "Runner:     ${RUNNER}"
-  echo "Exit code:  ${EXIT_CODE}"
-  echo ""
-  echo "### First 10 lines of stderr:"
-  echo "$STDERR_CONTENT" | head -10
-  echo ""
-  echo "Root cause: ${ROOT_CAUSE}"
-  echo "Suggested fix: ${SUGGESTED_FIX}"
-  echo "## End Incident"
-} >&2
+  "ts": "${TS}",
+  "command": "${COMMAND_JSON}",
+  "args": ${ARGS_JSON},
+  "cwd": "${CWD_JSON}",
+  "exit_code": ${EXIT_CODE},
+  "stdout": "${STDOUT_JSON}",
+  "stderr": "${STDERR_JSON}",
+  "agent_type": ${AGENT_TYPE_JSON},
+  "work_item_id": ${WORK_ITEM_ID_JSON}
+}
+JSON
 
 exit $EXIT_CODE

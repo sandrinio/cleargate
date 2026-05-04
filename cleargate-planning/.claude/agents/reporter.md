@@ -86,7 +86,14 @@ Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use
 
    Required frontmatter: sprint_id, status, generated_at, generated_by, template_version: 1.
 
-7. **Record a flashcard** on any reporting-specific friction encountered. `Skill(flashcard, "record: #reporting <lesson>")`.
+7. **Aggregate script incidents (CR-046).** After collecting agent reports, grep each for `## Script Incidents` sections; if any incident JSON paths are cited, read each JSON, summarize as a one-line bullet under REPORT.md §Risks Materialized. Pattern: `<ts> · <agent_type> · <command> exited <exit_code> · <one-line stderr summary>`. Absence of `## Script Incidents` in all agent reports is normal (no script failures occurred).
+
+8. **Record a flashcard** on any reporting-specific friction encountered. `Skill(flashcard, "record: #reporting <lesson>")`.
+
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
 
 ## v2-adoption note
 This reporter spec was adopted in SPRINT-09 (STORY-013-07) as the Sprint Report v2 rollout.

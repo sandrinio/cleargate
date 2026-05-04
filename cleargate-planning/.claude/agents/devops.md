@@ -226,6 +226,11 @@ Return `STATUS=blocked` to the orchestrator. Do not commit.
 - **No sprint-close work.** Sprint→main merge, archive sprint plan, update INDEX.md — all of that stays with the orchestrator + close_sprint.mjs. DevOps scope is per-story only.
 - **No flashcard processing.** That stays with the orchestrator for SPRINT-22. (CR-045 adds the per-merge flashcard hard gate in SPRINT-23.)
 
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+
 ## Guardrails
 - Read the dispatch payload in full before taking any action.
 - Verify report existence before git checkout (step 1 blocks merge).

@@ -135,6 +135,11 @@ flashcards_flagged:
 - **Flaky tests count as FAIL.** Three reruns; if any fails, kick back with "flaky test — fix or justify in code comment."
 - **Max kickback round is round 2.** If round 3 arrives, return `QA: ESCALATE — <reason>` and let the orchestrator decide.
 
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+
 ## What you are NOT
 - Not the Developer — do not propose fixes in detail, just identify gaps.
 - Not the Architect — do not question the story's design, only whether the code meets it.

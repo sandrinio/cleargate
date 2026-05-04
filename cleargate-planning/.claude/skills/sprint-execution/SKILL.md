@@ -220,6 +220,8 @@ git worktree list
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 
 > `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
@@ -244,6 +246,8 @@ On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch wit
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
+
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
 
 Then spawn with `subagent_type=developer`. Inputs the prompt must include verbatim:
 
@@ -273,6 +277,8 @@ If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+
 Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
 
 QA inputs: story file path, worktree path, Developer commit SHA. QA returns:
@@ -292,6 +298,8 @@ flashcards_flagged: [ ... ]
 ### C.6 Architect Pass (v2, `lane: standard` only)
 
 `lane: fast` skips this step entirely.
+
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
 
 ```bash
 bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
@@ -411,6 +419,25 @@ If the user injects new input mid-story, classify before routing:
 Log every CR in sprint §4 Execution Log with date + ID.
 
 > 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.10.)"* Quarantine remains default for goal-incidental scope.
+
+### C.11 Script Invocation Contract (CR-046)
+
+All bash/node script invocations dispatched FROM agents (Developer / QA / Architect / DevOps) MUST use the wrapper:
+
+```bash
+bash .cleargate/scripts/run_script.sh <command> [args...]
+```
+
+**What the wrapper does (on failure):**
+- Captures stdout + stderr independently (≤4KB each; truncated with `... [truncated]` if exceeded).
+- Writes a structured JSON incident to `.cleargate/sprint-runs/<sprint-id>/.script-incidents/<ts>-<hash>.json`.
+- Propagates the original exit code to the caller.
+
+**Self-exemption clause:** The wrapper itself (`run_script.sh`) is exempt from wrapping — it sets `RUN_SCRIPT_ACTIVE=1` before executing the wrapped command so recursive calls pass through directly. Orchestrator-direct invocations of `run_script.sh` are the canonical entry point; they are exempt by this contract.
+
+**Agent reporting obligation:** If a wrapped script fails (incident JSON written), the dispatching agent MUST include the incident JSON path in its report's `## Script Incidents` section.
+
+**Pre-sprint invocations (before `.active` sentinel exists):** Wrapper writes to `.cleargate/sprint-runs/_off-sprint/.script-incidents/` when no active sprint is detected. This is expected during preflight steps.
 
 ---
 
