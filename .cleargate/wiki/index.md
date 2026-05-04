@@ -62,3 +62,6 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## CRs
+
+| [[CR-048]] | cr | Done | .cleargate/delivery/pending-sync/CR-048_Sprint_21_Orphan_Drift_Cleanup.md |
