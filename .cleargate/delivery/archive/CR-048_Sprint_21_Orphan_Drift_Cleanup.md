@@ -4,12 +4,12 @@ parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
 sprint_cleargate_id: SPRINT-23
 carry_over: false
-status: Ready
+status: Done
 approved: true
 approved_at: 2026-05-04T10:30:00Z
 approved_by: human
 created_at: 2026-05-04T10:00:00Z
-updated_at: 2026-05-04T10:30:00Z
+updated_at: 2026-05-04T13:45:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 context_source: |
@@ -37,7 +37,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T12:34:47Z
+  last_gate_check: 2026-05-04T12:50:46Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -46,15 +46,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-048
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-04T10:22:03Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T12:50:45Z
+  sessions:
+    - session: 48aa90c9-f20f-4899-ba85-1079373f3d8e
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T11:14:52Z
 ---
 
 # CR-048: SPRINT-21 Orphan Drift Cleanup + Reconciler Hardening
