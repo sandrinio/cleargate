@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T09:24:57.769Z",
+  "generated_at": "2026-05-04T09:27:01.216Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -144,7 +144,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "13224fb56ea6345fda2aa63222b2b9beff42f1bcdc6fdc31a20982d1acac73e9",
+      "sha256": "70ca0a37c102cefb3c17639eed8a9a0484dd9e0f5e605bcd49358f24e5dd42f2",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
