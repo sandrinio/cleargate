@@ -1,12 +1,14 @@
 /**
- * gate.node.test.ts — CR-050 node:test caller migration tests.
+ * gate.node.test.ts — CR-050 + CR-055 node:test caller integration tests.
  *
  * Verifies that gate qa + gate arch pass the NEW canonical interface
  * to run_script.sh after CR-050 migration:
  *   - arg[1] is 'bash' (explicit interpreter for .sh scripts)
  *   - arg[2] is an absolute path ending in pre_gate_runner.sh
  *
- * HYBRID PATTERN: spawnFn capture — verifies arg structure without running real scripts.
+ * CR-055: Adds wrapScript-based scenario invoking the real wrapper end-to-end
+ * with the explicit-bash interface form that gate callers use.
+ *
  * No vitest. Uses node:test + node:assert/strict per FLASHCARD #node-test.
  */
 
@@ -17,12 +19,16 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { gateQaHandler, gateArchHandler } from '../../src/commands/gate.js';
+import { wrapScript } from '../helpers/wrap-script.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Fixture paths
 const FIXTURE_V2 = path.resolve(__dirname, '../../src/commands/fixtures/SPRINT-99-v2.md');
+
+// Live run_script.sh wrapper for CR-055 wrapScript-based integration tests.
+const LIVE_WRAPPER = path.resolve(__dirname, '..', '..', '..', '.cleargate', 'scripts', 'run_script.sh');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -135,5 +141,33 @@ describe('CR-050 gate arch — canonical call form (args[1]=bash, args[2]=abs-pa
       `Expected absolute canonical path for pre_gate_runner.sh`
     );
     assert.strictEqual(args[3], 'arch', 'Expected mode as args[3]');
+  });
+});
+
+// ─── CR-055 wrapScript — real wrapper integration ─────────────────────────────
+
+describe('CR-055 gate — wrapScript end-to-end: real wrapper integration', () => {
+  it('wrapper exits 0 when invoked with bash -c exit 0 (gate explicit-bash interface)', async () => {
+    const result = await wrapScript({
+      wrapper: LIVE_WRAPPER,
+      args: ['bash', '-c', 'exit 0'],
+      env: {
+        AGENT_TYPE: 'qa',
+        WORK_ITEM_ID: 'CR-055',
+      },
+    });
+
+    assert.strictEqual(
+      result.exitCode,
+      0,
+      `Expected exit 0 from 'bash -c exit 0' via real wrapper but got ${result.exitCode}. ` +
+        `This tests the explicit-bash interface form used by gate qa/arch callers. ` +
+        `stderr: ${result.stderr}`
+    );
+    assert.strictEqual(
+      result.incidentJson,
+      undefined,
+      'Expected no incident JSON on success but got one'
+    );
   });
 });
