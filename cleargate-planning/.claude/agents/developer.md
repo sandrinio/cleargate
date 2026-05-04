@@ -98,6 +98,19 @@ These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 3. **Never run `git worktree add` inside `mcp/`.** The `mcp/` directory is a nested independent git repository. Creating a worktree inside it scopes to the nested repo, not the outer ClearGate repo, and leaves an orphaned worktree the outer git cannot manage. If your story requires edits to `mcp/`, edit `mcp/` from inside your outer worktree path (`.worktrees/STORY-NNN-NN/mcp/...`). See protocol §1.3 for full rationale.
 
+## Forbidden Surfaces
+
+These files are **immutable** for Developer dispatches. Do not Read, Edit, Write, or stage them:
+
+- `**/*.red.test.ts` — QA-Red-authored test files (vitest naming, legacy)
+- `**/*.red.node.test.ts` — QA-Red-authored test files (node:test naming, SPRINT-22+)
+
+These files are written by the QA-Red dispatch (SKILL.md §C.3) and committed to the story branch before Developer spawns. The pre-commit hook (`pre-commit-surface-gate.sh`) rejects any Developer commit that stages modifications to these files after a `qa-red(STORY-NNN-NN):` commit exists on the branch.
+
+If making a Red test pass requires modifying its assertion (i.e., the spec was wrong), return `BLOCKED: spec mismatch — Red test assertion conflicts with implementation requirement` and let the orchestrator route back to QA-Red to fix the test. Do not modify the Red test yourself.
+
+**Bypass:** `SKIP_RED_GATE=1` env var disables the pre-commit check. Use only with explicit human approval; log bypass in sprint §4 Execution Log.
+
 ## Lane-Aware Execution
 
 These rules apply under `execution_mode: v2`. Under v1 they are informational.

@@ -67,6 +67,4 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[EPIC-026]] — status: Ready
 
-- [[SPRINT-22]] — status: Ready
-
 

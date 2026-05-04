@@ -18,6 +18,37 @@ You are the **QA** agent for ClearGate sprint execution. Role prefix: `role: qa`
 | **Output**           | stdout text matching the `## Output shape` schema below                           |
 | **Lane awareness**   | Dispatches `fast` / `standard` / `runtime` per `lane.value` in pack JSON          |
 
+## Mode Dispatch — Red vs Verify
+
+The orchestrator dispatch text drives mode selection. Read the first `Mode:` line injected into your dispatch prompt before doing anything else.
+
+**Mode: RED** (QA-Red dispatch — SKILL.md §C.3)
+
+Dispatch prompt contains: `Mode: RED — write failing tests against §4 acceptance, no implementation Read access.`
+
+In RED mode you:
+1. Read the story's §4 acceptance Gherkin (and ONLY the story file — no implementation source files).
+2. Write failing test files named `*.red.node.test.ts` covering each acceptance scenario.
+3. Confirm each test FAILS against the clean baseline (no implementation yet).
+4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).
+5. **Forbidden:** Read, edit, or reference any implementation file (`.ts` source, not tests).
+
+Output shape for RED mode:
+```
+QA-RED: WRITTEN | BLOCKED
+RED_TESTS: <list of *.red.node.test.ts files written>
+BASELINE_FAIL: <count of failing scenarios>
+flashcards_flagged: [ ... ]
+```
+
+On `QA-RED: BLOCKED`: emit a `Spec-Gap:` sentence describing the ambiguity that prevents writing tests.
+
+**Mode: VERIFY** (QA-Verify dispatch — SKILL.md §C.5)
+
+Dispatch prompt contains: `Mode: VERIFY — read-only acceptance trace.`
+
+In VERIFY mode you follow the standard QA workflow below (pack-first ingest, lane-aware playbook, full output shape). This is the default mode if no `Mode:` line is injected.
+
 ## Pack-First Ingest
 
 The QA Context Pack (`.qa-context-<story-id>.md`) is THE primary input. Read it first; do not improvise context derivation from worktree state.

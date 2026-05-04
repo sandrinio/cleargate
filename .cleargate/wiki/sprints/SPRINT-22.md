@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-22"
 parent: ""
 children: []
-status: "Ready"
+status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-22_SDLC_Hardening.md"
-last_ingest: "2026-05-04T08:47:36.002Z"
-last_ingest_commit: "9a35a342e1db5abe44150ea45e9f7b8006e6a5ca"
+last_ingest: "2026-05-04T08:59:49.744Z"
+last_ingest_commit: "35ee35fb8b00a14acd2a07013f5cd23d6b177d44"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-22"
 ---

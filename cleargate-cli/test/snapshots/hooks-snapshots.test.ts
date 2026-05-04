@@ -40,7 +40,12 @@
  *     total = DELTA_IN + DELTA_OUT + DELTA_CC + DELTA_CR and emit:
  *     - total > 200k: stdout "⚠️ Reporter token budget exceeded: <total> > 200000 (soft warn)"
  *     - total > 500k: same + best-effort cleargate flashcard record via CLI
- *   Snapshot: token-ledger.cr-036.sh (current authoritative baseline)
+ *   Snapshot: token-ledger.cr-036.sh (historical; superseded by CR-044)
+ *
+ * CR-044 (2026-05-04): DevOps role agent — add 'devops' to legacy fallback role list.
+ *   Fix: L227 role iteration loop gains 'devops' so transcript-grep path correctly
+ *     attributes DevOps agent tokens when no dispatch marker is present.
+ *   Snapshot: token-ledger.cr-044.sh (current authoritative baseline)
  *
  * Pattern: copy-on-fix — snapshot was taken immediately after each fix.
  * To update the active snapshot intentionally: cp <live-hook> <snapshot-path>
@@ -116,7 +121,19 @@ describe('hook snapshot regression locks', () => {
     expect(fs.existsSync(snapshotPath), `CR-026 snapshot not found: ${snapshotPath}`).toBe(true);
   });
 
-  it('token-ledger.sh matches CR-036 snapshot byte-for-byte', () => {
+  it('CR-036 snapshot file exists (historical baseline — superseded by CR-044)', () => {
+    // CR-036 snapshot is retained for audit/forensic purposes.
+    // After CR-044, the live hook is intentionally different from the CR-036 snapshot
+    // (devops added to role list at L227).
+    const snapshotPath = path.join(
+      __dirname,
+      'hooks',
+      'token-ledger.cr-036.sh'
+    );
+    expect(fs.existsSync(snapshotPath), `CR-036 snapshot not found: ${snapshotPath}`).toBe(true);
+  });
+
+  it('token-ledger.sh matches CR-044 snapshot byte-for-byte', () => {
     const livePath = path.join(
       REPO_ROOT,
       'cleargate-planning',
@@ -127,11 +144,11 @@ describe('hook snapshot regression locks', () => {
     const snapshotPath = path.join(
       __dirname,
       'hooks',
-      'token-ledger.cr-036.sh'
+      'token-ledger.cr-044.sh'
     );
 
     expect(fs.existsSync(livePath), `live hook not found: ${livePath}`).toBe(true);
-    expect(fs.existsSync(snapshotPath), `CR-036 snapshot not found: ${snapshotPath}`).toBe(true);
+    expect(fs.existsSync(snapshotPath), `CR-044 snapshot not found: ${snapshotPath}`).toBe(true);
 
     const live = fs.readFileSync(livePath);
     const snapshot = fs.readFileSync(snapshotPath);
