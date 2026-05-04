@@ -17,6 +17,7 @@ import {
   printInertAndExit,
   type ExecutionModeOptions,
 } from './execution-mode.js';
+import { resolveCleargateScript } from '../lib/script-paths.js';
 
 // ─── Public CLI option types ───────────────────────────────────────────────────
 
@@ -80,11 +81,13 @@ export function stateUpdateHandler(
     return printInertAndExit(stdoutFn, exitFn);
   }
 
-  // v2: shell out via run_script.sh
+  // v2: shell out via run_script.sh (CR-050: explicit node + absolute path)
   const runScript = resolveRunScript(cli ?? {});
+  const updateCwd = cli?.cwd ?? process.cwd();
+  const updateScriptPath = resolveCleargateScript({ cwd: updateCwd }, 'update_state.mjs');
   const result = spawnFn(
     'bash',
-    [runScript, 'update_state.mjs', opts.storyId, opts.newState],
+    [runScript, 'node', updateScriptPath, opts.storyId, opts.newState],
     { stdio: 'inherit' },
   );
 
@@ -123,11 +126,13 @@ export function stateValidateHandler(
     return printInertAndExit(stdoutFn, exitFn);
   }
 
-  // v2: shell out via run_script.sh
+  // v2: shell out via run_script.sh (CR-050: explicit node + absolute path)
   const runScript = resolveRunScript(cli ?? {});
+  const validateCwd = cli?.cwd ?? process.cwd();
+  const validateScriptPath = resolveCleargateScript({ cwd: validateCwd }, 'validate_state.mjs');
   const result = spawnFn(
     'bash',
-    [runScript, 'validate_state.mjs', opts.sprintId],
+    [runScript, 'node', validateScriptPath, opts.sprintId],
     { stdio: 'inherit' },
   );
 
