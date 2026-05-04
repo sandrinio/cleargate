@@ -12,13 +12,28 @@
  */
 
 /**
- * Maximum number of bytes captured from stdout or stderr.
- * Content exceeding this limit is truncated with the TRUNCATION_SUFFIX appended.
+ * Maximum number of **bytes** captured from stdout or stderr.
+ *
+ * run_script.sh uses `head -c $MAX_STREAM_BYTES` (POSIX byte-count), NOT a
+ * bash `${var:0:N}` char-index slice. For ASCII input these are equivalent;
+ * for UTF-8 multi-byte input (e.g. cyrillic, CJK, emoji) byte-count is correct
+ * and char-index is not — 4096 cyrillic chars × 2 bytes/char = 8192 bytes, which
+ * would exceed the intended 4096-byte cap.
+ *
+ * Trade-off: `head -c` truncation may split a multi-byte character at the byte
+ * boundary. The resulting partial UTF-8 sequence is valid for downstream
+ * JSON.stringify — Node.js escapes incomplete sequences, producing valid JSON
+ * that round-trips through JSON.parse without error. The stream content is
+ * diagnostic-only; cosmetic partial-char at the truncation boundary is acceptable.
+ *
+ * Total field byte-length when truncated: MAX_STREAM_BYTES + Buffer.byteLength(TRUNCATION_SUFFIX)
+ * ≈ 4096 + 15 = 4111 bytes (all ASCII suffix chars).
  */
 export const MAX_STREAM_BYTES = 4096;
 
 /**
  * Suffix appended to truncated stream content to signal the truncation.
+ * Contains only ASCII characters; Buffer.byteLength(TRUNCATION_SUFFIX) === TRUNCATION_SUFFIX.length.
  */
 export const TRUNCATION_SUFFIX = '... [truncated]';
 

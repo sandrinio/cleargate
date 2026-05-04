@@ -111,15 +111,19 @@ MAX_BYTES=4096
 TRUNCATION_SUFFIX="... [truncated]"
 
 _truncate_stream() {
+  # Byte-correct truncation: use head -c for POSIX byte-count (not bash ${var:0:N}
+  # which is char-index — wrong for UTF-8 multi-byte input).
+  # Trade-off: output may end with a partial multi-byte char boundary; downstream
+  # Node.js JSON.stringify escapes the partial sequence, producing valid JSON.
   local file="$1"
-  local content
-  content="$(cat "$file")"
-  local byte_len=${#content}
-  if [[ $byte_len -le $MAX_BYTES ]]; then
-    # Use printf to emit the raw content — avoids echo interpretation issues
-    printf '%s' "$content"
+  local file_bytes
+  file_bytes="$(wc -c < "$file")"
+  if [[ $file_bytes -le $MAX_BYTES ]]; then
+    # File fits within budget — emit as-is (no suffix)
+    head -c "$MAX_BYTES" "$file"
   else
-    printf '%s' "${content:0:$MAX_BYTES}${TRUNCATION_SUFFIX}"
+    # Truncation occurred — emit first MAX_BYTES bytes then TRUNCATION_SUFFIX
+    printf '%s' "$(head -c "$MAX_BYTES" "$file")${TRUNCATION_SUFFIX}"
   fi
 }
 
