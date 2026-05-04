@@ -34,7 +34,7 @@
 
 - [[SPRINT-24]] — status: Completed
 
-- [[SPRINT-25]] — status: Active
+- [[SPRINT-25]] — status: Completed
 
 
 

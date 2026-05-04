@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 execution_mode: v2
 start_date: 2026-05-05
 end_date: 2026-05-16
@@ -83,7 +83,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T19:20:11Z
+  last_gate_check: 2026-05-04T21:41:49Z
 draft_tokens:
   input: 0
   output: 0
