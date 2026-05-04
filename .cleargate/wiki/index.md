@@ -55,7 +55,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-049]] | cr | Done | .cleargate/delivery/pending-sync/CR-049_Canonical_Live_Drift_Audit.md |
 | [[CR-050]] | cr | Ready | .cleargate/delivery/pending-sync/CR-050_Run_Script_Path_B_Caller_Migration.md |
 | [[CR-051]] | cr | Ready | .cleargate/delivery/pending-sync/CR-051_DevOps_Subagent_Registration.md |
-| [[CR-052]] | cr | Ready | .cleargate/delivery/pending-sync/CR-052_E2E_Wrapper_Test_Helper.md |
+| [[CR-052]] | cr | Done | .cleargate/delivery/pending-sync/CR-052_E2E_Wrapper_Test_Helper.md |
 ## Sprints
 
 | [[SPRINT-24]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
