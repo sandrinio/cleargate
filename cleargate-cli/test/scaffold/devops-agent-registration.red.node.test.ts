@@ -39,18 +39,26 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 // ---------------------------------------------------------------------------
-// Worktree detection: live .claude/ is gitignored; checks against live paths
-// must be skipped in worktrees (per FLASHCARD 2026-05-04 #qa #worktree #mirror).
-// In a worktree, REPO_ROOT/.git is a FILE (pointer), not a directory.
-// In a primary checkout, REPO_ROOT/.git is a directory.
-// This mirrors the pattern in canonical-live-parity.red.node.test.ts.
+// Live-path skip: live `.claude/` is gitignored and may be absent in three
+// situations — (a) running from a git worktree (REPO_ROOT/.git is a FILE
+// pointer, not a directory), (b) downstream consumer / CI clone where
+// `cleargate init` has not been run, (c) any primary checkout where the user
+// has not run `cleargate init` yet. In all three cases the live-path
+// assertions are unverifiable and should skip. The canonical-path assertions
+// remain unconditional regression sentinels.
+// Mirrors the pattern in canonical-live-parity.red.node.test.ts L244-258.
 // ---------------------------------------------------------------------------
 function isWorktree(): boolean {
+  // (a) Worktree: .git is a file pointer
   try {
-    return fs.statSync(path.join(REPO_ROOT, '.git')).isFile();
+    if (fs.statSync(path.join(REPO_ROOT, '.git')).isFile()) return true;
   } catch {
-    return false;
+    // .git missing entirely → also skip
+    return true;
   }
+  // (b)/(c) Live agents dir absent (CI clone or pre-init dev machine)
+  if (!fs.existsSync(path.join(REPO_ROOT, '.claude', 'agents'))) return true;
+  return false;
 }
 
 // ---------------------------------------------------------------------------

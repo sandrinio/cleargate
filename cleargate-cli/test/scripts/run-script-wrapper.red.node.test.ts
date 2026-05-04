@@ -123,9 +123,22 @@ function readIncidentFiles(repo: TmpRepo): ScriptIncident[] {
   if (!fs.existsSync(repo.incidentsDir)) {
     return [];
   }
-  const files = fs.readdirSync(repo.incidentsDir).filter((f) => f.endsWith('.json'));
-  return files.map((f) => {
-    const raw = fs.readFileSync(path.join(repo.incidentsDir, f), 'utf8');
+  // Sort by mtime ascending so callers using `incidents[length-1]` get the most
+  // recently written file deterministically across platforms. (Linux ext4
+  // returns readdirSync entries in directory-hash order, not insertion order
+  // — Mac HFS+/APFS happens to return insertion order, masking this on local
+  // dev machines but breaking on Linux CI.)
+  const files = fs
+    .readdirSync(repo.incidentsDir)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => {
+      const full = path.join(repo.incidentsDir, f);
+      return { full, mtime: fs.statSync(full).mtimeMs };
+    })
+    .sort((a, b) => a.mtime - b.mtime)
+    .map((entry) => entry.full);
+  return files.map((full) => {
+    const raw = fs.readFileSync(full, 'utf8');
     return JSON.parse(raw) as ScriptIncident;
   });
 }
