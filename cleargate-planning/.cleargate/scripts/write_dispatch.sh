@@ -17,7 +17,7 @@
 #
 # Args:
 #   $1  work_item_id  — e.g. STORY-020-02, CR-016, BUG-021
-#   $2  agent_type    — one of: developer|architect|qa|reporter|cleargate-wiki-contradict
+#   $2  agent_type    — one of: developer|architect|qa|reporter|devops|cleargate-wiki-contradict
 #
 # Env (optional):
 #   CLAUDE_SESSION_ID         — session UUID of the orchestrator session
@@ -48,6 +48,17 @@ fi
 
 WORK_ITEM_ID="${1}"
 AGENT_TYPE="${2}"
+
+# ─── Validate agent_type ────────────────────────────────────────────────────
+case "${AGENT_TYPE}" in
+  developer|architect|qa|reporter|devops|cleargate-wiki-contradict)
+    ;;
+  *)
+    printf '[%s] error: invalid agent_type: %s\n' "$(date -u +%FT%TZ)" "${AGENT_TYPE}" >> "${LOG}"
+    printf 'error: invalid agent_type: %s (expected developer|architect|qa|reporter|devops|cleargate-wiki-contradict)\n' "${AGENT_TYPE}" >&2
+    exit 3
+    ;;
+esac
 
 # ─── Resolve active sprint ──────────────────────────────────────────────────
 ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"

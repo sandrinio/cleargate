@@ -19,22 +19,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
 /**
- * Validate a parsed state object.
+ * Validate a parsed state object, ignoring schema_version check.
+ * Used PRE-MIGRATION so that v1 files pass shape validation before being upgraded.
  * @param {object} state - Parsed state.json content
  * @returns {{ valid: boolean, errors: string[] }}
  */
-export function validateState(state) {
+export function validateShapeIgnoringVersion(state) {
   const errors = [];
 
   if (typeof state !== 'object' || state === null) {
     errors.push('state is not an object');
     return { valid: false, errors };
-  }
-
-  if (state.schema_version !== SCHEMA_VERSION) {
-    errors.push(
-      `schema_version mismatch: expected ${SCHEMA_VERSION}, got ${state.schema_version}`
-    );
   }
 
   if (!state.sprint_id) {
@@ -93,6 +88,35 @@ export function validateState(state) {
 
   if (!state.updated_at) {
     errors.push('missing required top-level field: updated_at');
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Validate a parsed state object (strict — includes schema_version check).
+ * Call this AFTER migration to assert the file is fully v2-compliant.
+ * @param {object} state - Parsed state.json content
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+export function validateState(state) {
+  const errors = [];
+
+  if (typeof state !== 'object' || state === null) {
+    errors.push('state is not an object');
+    return { valid: false, errors };
+  }
+
+  if (state.schema_version !== SCHEMA_VERSION) {
+    errors.push(
+      `schema_version mismatch: expected ${SCHEMA_VERSION}, got ${state.schema_version}`
+    );
+  }
+
+  // Delegate shape validation (everything except version check)
+  const shapeResult = validateShapeIgnoringVersion(state);
+  for (const e of shapeResult.errors) {
+    errors.push(e);
   }
 
   return { valid: errors.length === 0, errors };

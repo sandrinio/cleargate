@@ -62,7 +62,7 @@ const SKIP_FILES = new Set<string>(['CLAUDE.md']);
  *   fixes during re-init. SPRINT-24 work to bring canonical = live and
  *   revisit this exemption.
  */
-const FIRST_INSTALL_ONLY: Array<RegExp | string> = [
+export const FIRST_INSTALL_ONLY: Array<RegExp | string> = [
   '.gitignore',
   '.cleargate/FLASHCARD.md',
   /^\.cleargate\/scripts\//,
