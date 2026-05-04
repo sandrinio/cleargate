@@ -40,7 +40,7 @@ Five touchpoints where the goal is the tiebreaker:
 
 1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint.
 2. **Architect dispatch (§B).** Pass the sprint goal in the dispatch prompt. The milestone plan should reference how each story advances the goal, not only what files it changes.
-3. **Mid-sprint CR triage (§C.10).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
+3. **Mid-sprint CR triage (§C.10 rubric → §C.11 routing).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
 4. **Escalation (§8).** When `qa_bounces ≥ 3`, `arch_bounces ≥ 3`, or 3 circuit-breaker hits flip a story to `Escalated`, frame the human-decision question through the goal lens: "Drop this story → goal still met? Re-approach → goal still met by sprint end?"
 5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief.
 
@@ -147,6 +147,8 @@ node .cleargate/scripts/init_sprint.mjs SPRINT-NN
 
 This writes `.cleargate/sprint-runs/SPRINT-NN/state.json` and flips `.cleargate/sprint-runs/.active` to `SPRINT-NN`. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
 
+`init_sprint.mjs` also writes `<sprintDir>/sprint-context.md` from `.cleargate/templates/sprint_context.md`, populated with `sprint_id` + goal (extracted from sprint plan §0 `- **Sprint Goal:** …` bullet, or placeholder if absent) + active CR list. Every Dev/QA/Architect/DevOps dispatch reads this file as preflight (see §B + §C contracts + agent prompts `## Preflight`).
+
 ### A.4 Architect Sprint Design Review (v2 only)
 
 Mandatory under `execution_mode: v2`; optional but encouraged under `v1`. Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
@@ -179,13 +181,15 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 
 **Skip per-milestone Architect for `lane: fast` stories** — they dispatch to Developer without a plan, per the lane contract (see `.claude/agents/architect.md` Lane Classification).
 
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action (Sprint Goal + Cross-Cutting Rules + Active CRs sections constrain every decision).
+
 > 🎯 **Goal check.** Pass the sprint goal verbatim in the Architect's dispatch prompt. The plan should explicitly tie each story to the goal under "Per-story blueprint" — e.g. *"STORY-NNN-NN advances goal by <one sentence>"*. Plans that don't reference the goal go back to the Architect with a re-dispatch.
 
 ---
 
 ## 5. Phase C — Per-Story Execution Loop
 
-Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → **QA-Red** → Developer → QA-Verify → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
+Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → **QA-Red** → **TPV (Test Pattern Validation, Architect-only)** → Developer → QA-Verify → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
 
 > **Naming note.** State-machine values (`Bouncing`, `Ready to Bounce`), `state.json` counter fields (`qa_bounces`, `arch_bounces`), and script names (`validate_bounce_readiness.mjs`) retain the legacy "bounce" term because they are code-bound. The narrative in this skill uses "execution loop", "story cycle", and "rework" to describe the same mechanics.
 
@@ -220,7 +224,11 @@ git worktree list
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 > `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
 
@@ -235,9 +243,34 @@ flashcards_flagged: [ ... ]
 
 On `QA-RED: BLOCKED`: surface Spec-Gap to human; do not proceed to §C.4 until resolved.
 
-On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch with subject `qa-red(STORY-NNN-NN): write failing tests`, then proceeds to §C.4 Spawn Developer.
+On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch with subject `qa-red(STORY-NNN-NN): write failing tests`, then proceeds to §C.3.5 TPV Gate.
 
-**Fast lane skip:** if `state.json.stories[<id>].lane === "fast"`, skip this entire step and proceed directly to §C.4 Spawn Developer.
+**Fast lane skip:** if `state.json.stories[<id>].lane === "fast"`, skip this entire step AND §C.3.5 and proceed directly to §C.4 Spawn Developer.
+
+### C.3.5 TPV Gate (Architect-only — standard lane, v2 only)
+
+**Skip if:** `state.json.stories[<id>].lane === 'fast'` OR `execution_mode: v1`.
+
+After QA-Red commits Red tests, spawn the Architect in `Mode: TPV` to perform wiring-only validation before Dev dispatch. TPV does NOT evaluate test logic correctness — it verifies wiring so Dev does not waste a full dispatch on a mis-wired test harness.
+
+```bash
+bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN architect
+```
+
+Dispatch prompt MUST inject:
+
+> `Mode: TPV — Test Pattern Validation only. You receive: story file, QA-Red commit SHA, list of *.red.node.test.ts files. Verify ONLY: (1) imports resolve to real paths, (2) constructor signatures match, (3) mocked methods exist on the mocked object, (4) after-hooks present when before-hooks write state, (5) file naming *.red.node.test.ts. Do NOT evaluate test logic. Return: TPV: APPROVED (Dev proceeds) or TPV: BLOCKED-WIRING-GAP — <one-sentence specific issue> (orchestrator routes back to QA-Red).`
+
+Architect returns one of:
+
+- `TPV: APPROVED` — proceed to §C.4 Spawn Developer.
+- `TPV: BLOCKED-WIRING-GAP — <issue>` — orchestrator increments `arch_bounces` via:
+  ```bash
+  node .cleargate/scripts/update_state.mjs STORY-NNN-NN --arch-bounce
+  ```
+  Then routes back to §C.3 QA-Red with the gap description in the re-dispatch prompt. If `arch_bounces ≥ 3` → flip story to `Escalated`, halt.
+
+TPV is a WIRING gate, not a correctness gate. A test that imports the right module but asserts incorrectly still gets `TPV: APPROVED` — Dev's TDD cycle handles assertion correctness.
 
 ### C.4 Spawn Developer
 
@@ -245,7 +278,11 @@ On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch wit
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
 
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+
 Then spawn with `subagent_type=developer`. Inputs the prompt must include verbatim:
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 - `STORY=NNN-NN` (Developer must echo this on its first response line).
 - Path to story file.
@@ -273,7 +310,11 @@ If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+
 Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 QA inputs: story file path, worktree path, Developer commit SHA. QA returns:
 
@@ -292,6 +333,10 @@ flashcards_flagged: [ ... ]
 ### C.6 Architect Pass (v2, `lane: standard` only)
 
 `lane: fast` skips this step entirely.
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
+
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
 
 ```bash
 bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
@@ -397,7 +442,24 @@ touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}
 
 Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` spawn until every card has a `.processed-<hash>` marker. Bypass only with `SKIP_FLASHCARD_GATE=1` — log the bypass in sprint §4.
 
-### C.10 Mid-cycle User Input — CR Triage
+### C.10 Mid-Sprint Triage
+
+When the user injects new input mid-sprint (between story kickoff and merge), classify it before routing. Use the keyword-heuristic classifier (`classify()` from `cleargate-cli/src/lib/triage-classifier.ts`) as a first-pass advisory, then confirm. See authoritative rubric: `.cleargate/knowledge/mid-sprint-triage-rubric.md`.
+
+| Class | Trigger | Counter | Human Approval | First-pass action |
+|---|---|---|---|---|
+| `bug` | Defect vs spec | `qa_bounces++` | No | Re-open story; Dev fix; QA re-verify |
+| `clarification` | Ambiguity question | None | No (yes if spec gap) | Update §1.2 in place; re-run impacted test |
+| `scope` | Net-new requirement | None | YES for mid-sprint add | Quarantine to next sprint (default); escalate if goal-critical |
+| `approach` | Different impl, same spec | None | No (yes if cross-story impact) | Reset Dev context; re-spawn with updated approach |
+
+**Confidence signal:** `classify()` returns `confidence: 'low'` when no keyword matched. LOW confidence classifications MUST be confirmed with the human before routing.
+
+**Scope-only note:** This rubric covers USER input only. QA-FAIL bounces continue to use `qa_bounces` (existing §C.5 path). TPV-gap bounces use `arch_bounces` (§C.3.5 path).
+
+For the operational routing table with per-type routing rules, see §C.11 (Mid-cycle User Input — CR Triage).
+
+### C.11 Mid-cycle User Input — CR Triage
 
 If the user injects new input mid-story, classify before routing:
 
@@ -410,7 +472,26 @@ If the user injects new input mid-story, classify before routing:
 
 Log every CR in sprint §4 Execution Log with date + ID.
 
-> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.10.)"* Quarantine remains default for goal-incidental scope.
+> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.11.)"* Quarantine remains default for goal-incidental scope.
+
+### C.11 Script Invocation Contract (CR-046)
+
+All bash/node script invocations dispatched FROM agents (Developer / QA / Architect / DevOps) MUST use the wrapper:
+
+```bash
+bash .cleargate/scripts/run_script.sh <command> [args...]
+```
+
+**What the wrapper does (on failure):**
+- Captures stdout + stderr independently (≤4KB each; truncated with `... [truncated]` if exceeded).
+- Writes a structured JSON incident to `.cleargate/sprint-runs/<sprint-id>/.script-incidents/<ts>-<hash>.json`.
+- Propagates the original exit code to the caller.
+
+**Self-exemption clause:** The wrapper itself (`run_script.sh`) is exempt from wrapping — it sets `RUN_SCRIPT_ACTIVE=1` before executing the wrapped command so recursive calls pass through directly. Orchestrator-direct invocations of `run_script.sh` are the canonical entry point; they are exempt by this contract.
+
+**Agent reporting obligation:** If a wrapped script fails (incident JSON written), the dispatching agent MUST include the incident JSON path in its report's `## Script Incidents` section.
+
+**Pre-sprint invocations (before `.active` sentinel exists):** Wrapper writes to `.cleargate/sprint-runs/_off-sprint/.script-incidents/` when no active sprint is detected. This is expected during preflight steps.
 
 ---
 
@@ -452,6 +533,8 @@ If the report stub does not exist, dispatch the Reporter:
 ```bash
 bash .cleargate/scripts/write_dispatch.sh SPRINT-NN reporter
 ```
+
+- Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
 > **Fresh session.** The Reporter MUST dispatch in a fresh session — do not inherit dev+qa cumulative context. `write_dispatch.sh` already spawns a clean shell child; the `Agent` tool path requires no session-continuation flag. If the runtime offers a session-reset knob (e.g. `--resume false` or equivalent), use it. The Reporter starts cold and reads only `.reporter-context.md` + `sprint_report.md`.
 
