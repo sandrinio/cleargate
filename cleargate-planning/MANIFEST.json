@@ -1,10 +1,10 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T05:47:50.283Z",
+  "generated_at": "2026-05-04T09:27:01.216Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "a1203005821ec737d040af7b21cad6d9a59cfc7e9e0ac302f02cd036b343510f",
+      "sha256": "514610f7adb810af693336abee68197463207b35d54e80070f559a9828e1f728",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -39,21 +39,28 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "55790014320187e500f6b904756bbc8bda4806274805e883d62492bf75a34f12",
+      "sha256": "ae8320a324230d315033dba56427d81d9353d11bea4d51d3d8dd675221e03955",
+      "tier": "agent",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".claude/agents/devops.md",
+      "sha256": "af413aad1c3e8f3c16151a794380fa3b853c8f2768ea6997a7d7a99095b85cc0",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "b6ac9d814e1bbd1fb9a062ce7775e34da1d1e5e6fc35140b977f30b2632654fa",
+      "sha256": "677377d383d741bda01fd21202a2cf836e4a7aa7787fbbd868df87d9715ed5da",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "0dd5c26cd1cf59536802ee6ae311562631f75d5a329a09fecb8c016934d79f79",
+      "sha256": "b54829d9e83aa8668caefe5d8309edd54486270b375cc46774a1afd3b9864995",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -67,7 +74,7 @@
     },
     {
       "path": ".claude/hooks/pre-commit-surface-gate.sh",
-      "sha256": "a58f3b3c3dbb615a14bf6e2355f5122e80a5cb1e8ef9442648324f3124723ee3",
+      "sha256": "6741422cd8ca75b45e26bd0e9cb54126ad9e933f763c9094ceba6b84794b761a",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -116,7 +123,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "bd2685fd51231f94951f6d987fa2253dbeff13544b2b6215f7a5e21e01a00a94",
+      "sha256": "6678f814520c379b3ab055f3a1b98c92f631fd415ae24752d45aa8bee058c29c",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -137,7 +144,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "c9a1e06af45e1231265147d67836e5e9a68d246df90e61be9451f9f8972e5fbb",
+      "sha256": "70ca0a37c102cefb3c17639eed8a9a0484dd9e0f5e605bcd49358f24e5dd42f2",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

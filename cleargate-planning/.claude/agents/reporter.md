@@ -105,7 +105,7 @@ Hard advisory at 500k auto-records a flashcard `Reporter dispatch exceeded 500k 
 
 ## Fresh Session Dispatch (CR-036)
 
-The orchestrator MUST dispatch the Reporter in a fresh session — do not inherit dev+qa cumulative context. Per the orchestration playbook (`.claude/skills/sprint-execution/SKILL.md` §E.2), session reset is achieved via `Agent` tool dispatch with no prior turn context (the `Task` tool already creates a new conversation per dispatch — verify the dispatch payload contains no `--resume` or session continuation flag). If the Agent tool's session-reset semantics are unclear in this runtime, the orchestrator falls back to a fresh `claude` shell child via `bash .cleargate/scripts/write_dispatch.sh <sprint-id> reporter` (which already spawns cleanly).
+The orchestrator MUST dispatch the Reporter in a fresh context — do not inherit dev+qa cumulative conversation turns. Reporter dispatch runs in the orchestrator's session_id; the SubagentStop hook attributes tokens to the work_item via the dispatch marker (`.dispatch-<session-id>.json`). The orchestrator falls back to a fresh `claude` shell child via `bash .cleargate/scripts/write_dispatch.sh <sprint-id> reporter` (which already spawns cleanly).
 
 The Reporter starts cold each time. The bundle + template are the only context.
 

@@ -1,8 +1,8 @@
 ---
 name: sprint-execution
 description: |
-  Use to orchestrate the four-agent sprint loop end-to-end — Architect → Developer →
-  QA → Reporter — across one ClearGate sprint. Activates from sprint kickoff
+  Use to orchestrate the five-dispatch sprint loop end-to-end — Architect → QA-Red →
+  Developer → QA-Verify → Reporter — across one ClearGate sprint. Activates from sprint kickoff
   (preflight + cut sprint branch + state init) through per-story execution
   (worktree → dev → QA → flashcard gate → merge) into walkthrough and Gate-4 close.
   Triggers: SessionStart banner mentioning an active sprint; explicit user phrases
@@ -40,7 +40,7 @@ Five touchpoints where the goal is the tiebreaker:
 
 1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint.
 2. **Architect dispatch (§B).** Pass the sprint goal in the dispatch prompt. The milestone plan should reference how each story advances the goal, not only what files it changes.
-3. **Mid-sprint CR triage (§C.9).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
+3. **Mid-sprint CR triage (§C.10).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
 4. **Escalation (§8).** When `qa_bounces ≥ 3`, `arch_bounces ≥ 3`, or 3 circuit-breaker hits flip a story to `Escalated`, frame the human-decision question through the goal lens: "Drop this story → goal still met? Re-approach → goal still met by sprint end?"
 5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief.
 
@@ -60,6 +60,7 @@ It is pure framing: surface deviations from the goal as first-class events, not 
 | `architect` | opus | (a) Sprint Design Review pre-confirm, (b) per-milestone plan | `sprint-runs/<id>/plans/M<N>.md` (per milestone); markdown block §2 (design review) |
 | `developer` | sonnet | One per story, inside its worktree | One commit `feat(<epic>): STORY-NNN-NN <desc>` + `STORY-NNN-NN-dev.md` report |
 | `qa` | sonnet | After Developer reports `STATUS=done` | `STORY-NNN-NN-qa.md` report (no code edits) |
+| `devops` | sonnet | Per-story, after QA-Verify + Architect post-flight | One merge commit (no-ff) + `STORY-NNN-NN-devops.md` report |
 | `reporter` | sonnet | Once at sprint close, after all stories merged + walkthrough done | `sprint-runs/<id>/SPRINT-<#>_REPORT.md` |
 
 ### Wall-clock budgets
@@ -71,6 +72,7 @@ Each agent dispatch has a target duration. Note the start time before each `Agen
 | `architect` (per milestone) | ≤ 10 min | Plan-only output; long runs usually mean too many stories in the milestone |
 | `developer` (per story) | ≤ 30 min | Includes typecheck + tests in the worktree; long runs near the circuit-breaker threshold |
 | `qa` (per story) | ≤ 15 min | Read + re-run gates; should not edit code |
+| `devops` (per story) | ≤ 5 min | Mechanical work only — merge, teardown, state; long runs indicate git/npm issue |
 | `reporter` (per sprint) | ≤ 20 min | Single file write; long runs mean ledger reconciliation issues |
 
 If a Task call has been pending for **>2× the budget** with no visible progress, surface it to the human and offer to interrupt. There is no automatic stall detection — the parent session blocks on `Agent` calls and cannot poll mid-run. The human's interrupt is the only reliable kill path until ambient watcher infra exists.
@@ -84,7 +86,7 @@ bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
 ```
 
 - `<work_item_id>`: e.g. `STORY-020-02`, `CR-016`, `BUG-021`. For the Reporter at sprint close use the sprint ID (e.g. `SPRINT-19`).
-- `<agent_type>`: exact string — `developer | architect | qa | reporter | cleargate-wiki-contradict`.
+- `<agent_type>`: exact string — `developer | architect | qa | reporter | devops | cleargate-wiki-contradict`.
 
 If you forget the marker, ledger attribution falls back to transcript-grep heuristics (unreliable). The hook deletes the file after consumption — write fresh per dispatch.
 
@@ -183,7 +185,7 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 
 ## 5. Phase C — Per-Story Execution Loop
 
-Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → Developer → QA → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
+Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → **QA-Red** → Developer → QA-Verify → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
 
 > **Naming note.** State-machine values (`Bouncing`, `Ready to Bounce`), `state.json` counter fields (`qa_bounces`, `arch_bounces`), and script names (`validate_bounce_readiness.mjs`) retain the legacy "bounce" term because they are code-bound. The narrative in this skill uses "execution loop", "story cycle", and "rework" to describe the same mechanics.
 
@@ -212,7 +214,32 @@ git worktree list
 
 **Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a subdirectory of the outer worktree. (`cleargate-enforcement.md` §1.3.)
 
-### C.3 Spawn Developer
+### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
+
+```bash
+bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
+```
+
+Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
+
+> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
+
+QA-Red returns:
+
+```
+QA-RED: WRITTEN | BLOCKED
+RED_TESTS: <list of *.red.node.test.ts files written>
+BASELINE_FAIL: <count of failing scenarios>
+flashcards_flagged: [ ... ]
+```
+
+On `QA-RED: BLOCKED`: surface Spec-Gap to human; do not proceed to §C.4 until resolved.
+
+On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch with subject `qa-red(STORY-NNN-NN): write failing tests`, then proceeds to §C.4 Spawn Developer.
+
+**Fast lane skip:** if `state.json.stories[<id>].lane === "fast"`, skip this entire step and proceed directly to §C.4 Spawn Developer.
+
+### C.4 Spawn Developer
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
@@ -238,13 +265,15 @@ FILES_CHANGED: <list>
 flashcards_flagged: [ ... ]
 ```
 
-If `STATUS=blocked`: route per §C.7 (Blockers Triage).
+If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 
-### C.4 Spawn QA
+### C.5 Spawn QA-Verify
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
+
+Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
 
 QA inputs: story file path, worktree path, Developer commit SHA. QA returns:
 
@@ -256,11 +285,11 @@ REGRESSIONS: <list>
 flashcards_flagged: [ ... ]
 ```
 
-**On `QA: FAIL`:** increment `qa_bounces` via `update_state.mjs STORY-NNN-NN --qa-bounce`. If counter ≥ 3 → flip story to `Escalated`, surface to human, halt. Else → re-spawn Developer with QA's bug report as input. Return to §C.3.
+**On `QA: FAIL`:** increment `qa_bounces` via `update_state.mjs STORY-NNN-NN --qa-bounce`. If counter ≥ 3 → flip story to `Escalated`, surface to human, halt. Else → re-spawn Developer with QA's bug report as input. Return to §C.4.
 
 **On `QA: PASS`:** update state to `QA Passed`, proceed.
 
-### C.5 Architect Pass (v2, `lane: standard` only)
+### C.6 Architect Pass (v2, `lane: standard` only)
 
 `lane: fast` skips this step entirely.
 
@@ -272,24 +301,71 @@ If pre-gate scan reveals new dependencies / structural issues → return to Deve
 
 If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
 
-### C.6 Story Merge
+### C.7 Story Merge
 
-```bash
-git checkout sprint/S-NN
-git merge story/STORY-NNN-NN --no-ff -m "merge(story/STORY-NNN-NN): STORY-NNN-NN <title>"
-git worktree remove .worktrees/STORY-NNN-NN
-git branch -d story/STORY-NNN-NN
-```
+**DevOps-owned.** The orchestrator does NOT run `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, or `npm run prebuild` directly. All mechanical merge work is delegated to the DevOps agent.
 
-Verify all required reports exist before merge:
+**Required reports — verify before dispatch:**
 
-- `STORY-NNN-NN-dev.md` (always required, regardless of lane)
-- `STORY-NNN-NN-qa.md` (required unless lane=fast skipped QA)
-- `STORY-NNN-NN-arch.md` (required for v2 standard-lane only)
+| Report | Required when |
+|---|---|
+| `STORY-NNN-NN-dev.md` | Always (all lanes) |
+| `STORY-NNN-NN-qa.md` | Always, unless lane=fast explicitly skipped QA-Verify |
+| `STORY-NNN-NN-arch.md` | v2 standard-lane only |
+| `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
 
-Missing report → return to spawn that agent. **Do not merge with missing reports.**
+Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**
 
-### C.7 Blockers Triage (Developer circuit breaker)
+**Orchestrator dispatch sequence:**
+
+1. Mark the dispatch:
+   ```bash
+   bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN devops
+   ```
+
+2. Spawn the DevOps agent with the following context (§3.1 Context Pack):
+   ```
+   SPRINT-{NN} — DevOps dispatch for {STORY-ID}.
+
+   INPUTS:
+   - Story ID: {STORY-ID}
+   - Sprint ID: SPRINT-{NN}
+   - Worktree path: .worktrees/{STORY-ID}/
+   - Story branch: story/{STORY-ID}
+   - Sprint branch: sprint/S-{NN}
+   - Dev commit SHA: {abc1234}
+   - QA commit SHA (if present): {def5678}
+   - Architect commit SHA (if present): {ghi9012}
+   - Files-changed manifest: {list from git show --stat <dev-sha>}
+   - Canonical scaffold touched? {yes|no}
+   - Lane: {standard | fast}
+   - Required reports present:
+       - {STORY-ID}-dev.md    ✓
+       - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
+       - {STORY-ID}-arch.md   ✓ (v2 standard lane only)
+
+   ACTIONS (in order):
+   1. Verify all required reports exist; halt if any missing.
+   2. Checkout sprint branch.
+   3. git merge story/{STORY-ID} --no-ff -m "merge(story/{STORY-ID}): {commit subject}"
+   4. If canonical scaffold touched: cd cleargate-cli && npm run prebuild
+   5. Mirror parity audit: for each file in files-changed where canonical mirror exists,
+      diff live ↔ canonical. Report drift in §Mirror Parity (DO NOT auto-fix).
+   6. Post-merge test verification: run only test files touched by this commit.
+   7. git worktree remove .worktrees/{STORY-ID}
+   8. git branch -d story/{STORY-ID}
+   9. CLEARGATE_STATE_FILE=... node .cleargate/scripts/update_state.mjs {STORY-ID} Done
+   ```
+
+3. **Halt** and wait for DevOps to return `STATUS=done` or `STATUS=blocked`.
+
+**On `STATUS=done`:** DevOps has written `.cleargate/sprint-runs/SPRINT-{NN}/reports/{STORY-ID}-devops.md`. If it notes live re-sync needed (mirror parity drift), address via `cleargate init` or hand-port at Gate-4 doc-refresh (see §C.9 Flashcard Gate for the next step, then proceed to the next story / wave).
+
+**On `STATUS=blocked`:** DevOps has written `{STORY-ID}-devops-blockers.md`. Surface the blockers report to the human. DevOps does NOT auto-resolve conflicts — orchestrator escalates and waits for human resolution before re-dispatching DevOps.
+
+**Forbidden orchestrator patterns (v2):** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
+
+### C.8 Blockers Triage (Developer circuit breaker)
 
 When Developer returns `BLOCKED: circuit breaker triggered`, read `.cleargate/sprint-runs/<id>/reports/STORY-NNN-NN-dev-blockers.md`. The report has three sections:
 
@@ -301,7 +377,7 @@ When Developer returns `BLOCKED: circuit breaker triggered`, read `.cleargate/sp
 
 3 consecutive circuit-breaker hits on the same story → `update_state.mjs STORY-NNN-NN Escalated`, halt.
 
-### C.8 Flashcard Gate (v2 mandatory; v1 dogfood)
+### C.9 Flashcard Gate (v2 mandatory; v1 dogfood)
 
 After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
 
@@ -321,7 +397,7 @@ touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}
 
 Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` spawn until every card has a `.processed-<hash>` marker. Bypass only with `SKIP_FLASHCARD_GATE=1` — log the bypass in sprint §4.
 
-### C.9 Mid-cycle User Input — CR Triage
+### C.10 Mid-cycle User Input — CR Triage
 
 If the user injects new input mid-story, classify before routing:
 
@@ -334,7 +410,7 @@ If the user injects new input mid-story, classify before routing:
 
 Log every CR in sprint §4 Execution Log with date + ID.
 
-> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.9.)"* Quarantine remains default for goal-incidental scope.
+> 🎯 **Goal check on `CR:scope-change`.** Default routing is quarantine-into-next-sprint. **Override the default if the new requirement is critical to the active sprint goal** — escalate to the human with: *"This scope-change is goal-critical: the sprint goal is `<verbatim>` and without this change, the goal will not be met. Add to current sprint? (Adding mid-sprint requires explicit ack per §C.10.)"* Quarantine remains default for goal-incidental scope.
 
 ---
 

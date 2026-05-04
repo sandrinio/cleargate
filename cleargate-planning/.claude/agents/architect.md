@@ -61,6 +61,8 @@ When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` 
 
 **Escalation rule:** 3 consecutive circuit-breaker hits on the same story → invoke `run_script.sh update_state.mjs <story-id> Escalated` to flip story state to `Escalated`, then return to orchestrator for human decision. Do not attempt a 4th re-launch.
 
+**State ownership note (CR-044):** The `Done` state transition is owned by the DevOps agent (`.claude/agents/devops.md`) after merge. Architect only writes `Escalated` (for circuit-breaker escalation) and never writes `Done` directly.
+
 These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 ## Sprint Design Review
