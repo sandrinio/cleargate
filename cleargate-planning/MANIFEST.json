@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T12:50:12.027Z",
+  "generated_at": "2026-05-04T12:57:29.126Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -200,7 +200,7 @@
     },
     {
       "path": ".cleargate/scripts/close_sprint.mjs",
-      "sha256": "6ba8222f45db5076686d4f0ab1e5f9d5f4c4f3d4bfadfcb75afaf38ff9452db9",
+      "sha256": "a8e202fe1b1d3346b5e94e272a5b22311e848735faae68e7e38a5c56afaf4575",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

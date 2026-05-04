@@ -16,7 +16,7 @@ function copyDirSync(src: string, dst: string): void {
 }
 
 export default defineConfig({
-  entry: ['src/cli.ts', 'src/auth/factory.ts', 'src/auth/token-store.ts', 'src/auth/require-token.ts', 'src/admin-api/index.ts', 'src/lib/ledger.ts'],
+  entry: ['src/cli.ts', 'src/auth/factory.ts', 'src/auth/token-store.ts', 'src/auth/require-token.ts', 'src/admin-api/index.ts', 'src/lib/ledger.ts', 'src/lib/lifecycle-reconcile.ts'],
   format: ['esm', 'cjs'],
   banner: {
     js: '#!/usr/bin/env node',
