@@ -47,9 +47,3 @@ Thumbs.db
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/
-
-# Root MANIFEST.json — cleargate init creates this at the root (intended
-# canonical path is cleargate-planning/MANIFEST.json which IS tracked).
-# Per-machine artifact at root; SPRINT-25 candidate: fix init to not
-# write the duplicate at user-repo root.
-/MANIFEST.json
