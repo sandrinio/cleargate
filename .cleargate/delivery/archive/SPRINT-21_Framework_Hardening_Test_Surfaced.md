@@ -1,19 +1,20 @@
 ---
-sprint_id: "SPRINT-21"
+sprint_id: SPRINT-21
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-21"
+sprint_cleargate_id: SPRINT-21
 carry_over: false
-lifecycle_init_mode: "block"
+lifecycle_init_mode: block
 remote_id: null
-source_tool: "local"
-status: "Active"
-execution_mode: "v2"
-start_date: "2026-05-30"
-end_date: "2026-06-12"
-created_at: "2026-05-03T00:00:00Z"
-updated_at: "2026-05-03T00:00:00Z"
-created_at_version: "cleargate@0.10.0"
-updated_at_version: "cleargate@0.10.0"
+source_tool: local
+status: Completed
+execution_mode: v2
+start_date: 2026-05-30
+end_date: 2026-06-12
+completed_at: 2026-05-04T07:32:36Z
+created_at: 2026-05-03T00:00:00Z
+updated_at: 2026-05-04T07:32:36Z
+created_at_version: cleargate@0.10.0
+updated_at_version: cleargate@0.10.0
 context_source: |
   Sourced from end-to-end install test 2026-05-03 in
   /Users/ssuladze/Documents/Dev/markdown_file_renderer (cleargate@0.10.0).
@@ -38,33 +39,44 @@ context_source: |
   flow + L0 tightening, then session-reset spike.
 epics: []
 stories: []
-crs: ["CR-030", "CR-031", "CR-032", "CR-033", "CR-034", "CR-035", "CR-036", "CR-037", "CR-038", "CR-039"]
-bugs: ["BUG-026"]
+crs:
+  - CR-030
+  - CR-031
+  - CR-032
+  - CR-033
+  - CR-034
+  - CR-035
+  - CR-036
+  - CR-037
+  - CR-038
+  - CR-039
+bugs:
+  - BUG-026
 proposals: []
 approved: true
-approved_at: "2026-05-03T18:08:44Z"
-approved_by: "sandrinio"
-activated_at: "2026-05-03T20:05:00Z"
+approved_at: 2026-05-03T18:08:44Z
+approved_by: sandrinio
+activated_at: 2026-05-03T20:05:00Z
 human_override: false
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T00:00:00Z
-  bypass_note: |
-    One-time hand-set bypass 2026-05-03. The gate engine cannot classify
-    work-item type "SPRINT" (work-item-type.ts union missing SPRINT entry) —
-    this is exactly what CR-030 (W3 of this sprint) fixes. Sprint plan content
-    has been reviewed manually: all 11 anchor items pass their predicates;
-    Consolidated Deliverables and Wave structure are populated; Risks + DoD
-    enumerated. Bypass is rescinded once CR-030 lands and the engine can
-    type-detect Sprint files natively.
+  last_gate_check: 2026-05-04T07:33:11Z
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-04T07:33:11Z
+  sessions:
+    - session: fd518f2c-da3e-471e-a13d-35fcfb59d0b6
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-04T07:29:20Z
 ---
 
 # SPRINT-21: Framework Hardening — Test-Surfaced Findings (Visibility + Cost + Initiative)

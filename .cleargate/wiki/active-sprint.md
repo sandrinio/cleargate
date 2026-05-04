@@ -9,8 +9,6 @@
 
 - [[SPRINT-15]] — status: Completed
 
-- [[SPRINT-21]] — status: Active
-
 
 
 ## Planned Sprints
