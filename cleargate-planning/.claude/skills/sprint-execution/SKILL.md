@@ -60,6 +60,7 @@ It is pure framing: surface deviations from the goal as first-class events, not 
 | `architect` | opus | (a) Sprint Design Review pre-confirm, (b) per-milestone plan | `sprint-runs/<id>/plans/M<N>.md` (per milestone); markdown block §2 (design review) |
 | `developer` | sonnet | One per story, inside its worktree | One commit `feat(<epic>): STORY-NNN-NN <desc>` + `STORY-NNN-NN-dev.md` report |
 | `qa` | sonnet | After Developer reports `STATUS=done` | `STORY-NNN-NN-qa.md` report (no code edits) |
+| `devops` | sonnet | Per-story, after QA-Verify + Architect post-flight | One merge commit (no-ff) + `STORY-NNN-NN-devops.md` report |
 | `reporter` | sonnet | Once at sprint close, after all stories merged + walkthrough done | `sprint-runs/<id>/SPRINT-<#>_REPORT.md` |
 
 ### Wall-clock budgets
@@ -71,6 +72,7 @@ Each agent dispatch has a target duration. Note the start time before each `Agen
 | `architect` (per milestone) | ≤ 10 min | Plan-only output; long runs usually mean too many stories in the milestone |
 | `developer` (per story) | ≤ 30 min | Includes typecheck + tests in the worktree; long runs near the circuit-breaker threshold |
 | `qa` (per story) | ≤ 15 min | Read + re-run gates; should not edit code |
+| `devops` (per story) | ≤ 5 min | Mechanical work only — merge, teardown, state; long runs indicate git/npm issue |
 | `reporter` (per sprint) | ≤ 20 min | Single file write; long runs mean ledger reconciliation issues |
 
 If a Task call has been pending for **>2× the budget** with no visible progress, surface it to the human and offer to interrupt. There is no automatic stall detection — the parent session blocks on `Agent` calls and cannot poll mid-run. The human's interrupt is the only reliable kill path until ambient watcher infra exists.
@@ -84,7 +86,7 @@ bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
 ```
 
 - `<work_item_id>`: e.g. `STORY-020-02`, `CR-016`, `BUG-021`. For the Reporter at sprint close use the sprint ID (e.g. `SPRINT-19`).
-- `<agent_type>`: exact string — `developer | architect | qa | reporter | cleargate-wiki-contradict`.
+- `<agent_type>`: exact string — `developer | architect | qa | reporter | devops | cleargate-wiki-contradict`.
 
 If you forget the marker, ledger attribution falls back to transcript-grep heuristics (unreliable). The hook deletes the file after consumption — write fresh per dispatch.
 
