@@ -32,6 +32,8 @@
 
 - [[SPRINT-23]] — status: Completed
 
+- [[SPRINT-24]] — status: Ready
+
 
 
 ## Recently Completed Sprints
