@@ -156,7 +156,7 @@ function invokeScript(scriptName, scriptArgs, env) {
   });
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
 
   if (args.length < 1) usage();
@@ -349,6 +349,61 @@ function main() {
       // Unexpected error — fail-open (log but do not block)
       process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
     }
+  }
+
+  // ── Step 2.6b: Cross-Sprint Orphan Drift Check (CR-048) ─────────────────────
+  // Detect items in pending-sync/ with non-terminal status whose state.json entry
+  // in any closed sprint shows Done — i.e., completed but never archived.
+  // v2: drift > 0 blocks close. v1: warn-only.
+  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 also skips this step.
+  process.stdout.write('Step 2.6b: checking for cross-sprint orphan drift...\n');
+  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
+    try {
+      const cliBin26b = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+      if (fs.existsSync(cliBin26b)) {
+        // Dynamic import the compiled reconciler function
+        const reconcilerMod = await import(
+          path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+        ).catch(() => null);
+
+        if (reconcilerMod && typeof reconcilerMod.reconcileCrossSprintOrphans === 'function') {
+          const deliveryRoot = path.join(REPO_ROOT, '.cleargate', 'delivery');
+          const sprintRunsRoot = path.join(REPO_ROOT, '.cleargate', 'sprint-runs');
+          const orphanResult = reconcilerMod.reconcileCrossSprintOrphans({ deliveryRoot, sprintRunsRoot });
+
+          if (orphanResult.drift.length > 0) {
+            process.stderr.write(
+              `Step 2.6b: ${orphanResult.drift.length} cross-sprint orphan(s) detected:\n`
+            );
+            for (const item of orphanResult.drift) {
+              process.stderr.write(
+                `  ${item.id} — status: ${item.pending_sync_status} in pending-sync, ` +
+                `state: ${item.state_json_state} in ${item.state_json_sprint}\n`
+              );
+            }
+            if (isV2) {
+              process.stderr.write(
+                'close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close under v2.\n' +
+                '  Archive the listed items and re-run close_sprint.mjs.\n'
+              );
+              process.exit(1);
+            } else {
+              process.stdout.write('Step 2.6b warning (v1): orphan drift detected above — remediate before next sprint.\n');
+            }
+          } else {
+            process.stdout.write('Step 2.6b passed: no cross-sprint orphan drift.\n');
+          }
+        } else {
+          process.stdout.write('Step 2.6b skipped: reconcileCrossSprintOrphans not available in built CLI.\n');
+        }
+      } else {
+        process.stdout.write('Step 2.6b skipped: CLI binary not found (non-fatal).\n');
+      }
+    } catch (step26bErr) {
+      process.stderr.write(`Step 2.6b warning: orphan check unavailable: ${step26bErr.message}\n`);
+    }
+  } else {
+    process.stdout.write('Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
   }
 
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
@@ -726,4 +781,4 @@ function main() {
   }
 }
 
-main();
+await main();
