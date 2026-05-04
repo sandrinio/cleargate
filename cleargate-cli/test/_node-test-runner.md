@@ -1,6 +1,6 @@
 # Node test runner — `*.node.test.ts` convention
 
-**Active 2026-05-04 — SPRINT-21 W4 onward.** New tests must use this convention. Existing `*.test.ts` files (vitest) stay until CR-040 migration in SPRINT-22.
+**Active 2026-05-04. SPRINT-22 sprint-prep:** `npm test` now defaults to node:test (`tsx --test 'test/**/*.node.test.ts'`). The legacy vitest suite is opt-in via `npm run test:vitest`. New tests use node:test exclusively. The 129 existing `*.test.ts` (vitest) files stay in place but are NOT exercised by default — by user direction (no bulk migration; permanent two-runner state).
 
 ## Why
 
@@ -8,10 +8,10 @@ Vitest's fork-pool overhead + boot cost compounds badly inside agent dispatches.
 
 ## Naming
 
-- Vitest (legacy, 129 files + 4 SPRINT-21-merged): `*.test.ts`
-- node:test (new, SPRINT-21 W4+): `*.node.test.ts`
+- Vitest (legacy, 133 files): `*.test.ts` — opt-in only via `npm run test:vitest`
+- node:test (new, default): `*.node.test.ts` — picked up by `npm test`
 
-The suffix split lets both runners coexist until CR-040 migrates the legacy surface in one sweep.
+The suffix split is **permanent** per user direction (2026-05-04). New tests are always `*.node.test.ts`. Sample fixtures or example files that should NOT be auto-run use `.example.ts` extension instead (no `.test.` infix).
 
 ## Imports
 
@@ -23,16 +23,21 @@ import assert from 'node:assert/strict';
 ## Running
 
 ```bash
-# All node:test files
-npm run test:node
+# Default: all node:test files (FAST — does not invoke vitest)
+npm test
 
-# Single file (most common — use this from QA dispatches)
+# Single file (most common — use from QA dispatches)
 npx tsx --test test/lib/example.node.test.ts
 # or
-npm run test:node:file -- test/lib/example.node.test.ts
+npm run test:file -- test/lib/example.node.test.ts
+
+# Legacy vitest suite (opt-in only — slow, full 133-file run)
+npm run test:vitest
 ```
 
 `tsx --test` runs the file directly with TypeScript transpile on the fly. No `pretest: npm run build` step required for node:test files.
+
+**SPRINT-22 onward rule:** `npm test` is the canonical pre-commit and QA-Verify command. Do NOT invoke vitest unless explicitly debugging a legacy vitest test.
 
 ## Assertion translation (vitest → node:assert/strict)
 

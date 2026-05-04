@@ -47,9 +47,10 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "pretest": "npm run build",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
+    "test:file": "tsx --test --test-reporter=spec",
+    "test:vitest": "npm run build && vitest run",
+    "test:vitest:watch": "vitest",
     "test:node": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
     "test:node:file": "tsx --test --test-reporter=spec"
   },

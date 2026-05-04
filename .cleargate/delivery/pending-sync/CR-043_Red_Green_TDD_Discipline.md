@@ -33,7 +33,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T08:33:55Z
+  last_gate_check: 2026-05-04T08:46:45Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -49,7 +49,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T08:33:55Z
+  last_stamp: 2026-05-04T08:46:44Z
   sessions: []
 ---
 
@@ -102,7 +102,7 @@ draft_tokens:
 - [ ] **State machine** — `state.json` per-story state set adds optional intermediate states: `Red Written`, `Green In Progress` (between current `Ready to Bounce` and `QA Passed`). Or: keep the state machine flat; track Red/Green via report file presence. **Recommended:** keep state machine flat (CR-040 simpler).
 - [ ] **Token-ledger** — `agent_type=qa-red` added to valid set in `.claude/hooks/token-ledger.sh` and consumers (suggest_improvements.mjs).
 - [ ] **`cleargate-cli/test/_node-test-runner.md`** — add section explaining `*.red.test.ts` naming + Dev-immutability rule.
-- [ ] **Sample fixture** — `cleargate-cli/test/fixtures/red-green-example/` — directory with one `*.red.test.ts` + one `*.test.ts` showing the pattern. Architects reference this in M-plans.
+- [ ] **Sample fixture** — `cleargate-cli/examples/red-green-example/` — directory with one `*.red.test.ts` + one `*.test.ts` showing the pattern. Located OUTSIDE `test/` so the `npm test` glob (`test/**/*.node.test.ts`) does NOT auto-run it; Architects reference this in M-plans for pedagogical purposes.
 
 ## Existing Surfaces
 
@@ -122,10 +122,10 @@ draft_tokens:
 - `cleargate-cli/test/_node-test-runner.md` — add `*.red.test.ts` naming convention + Dev-immutability rule
 
 **Add:**
-- `cleargate-cli/test/fixtures/red-green-example/calculator.red.test.ts` (sample Red test)
-- `cleargate-cli/test/fixtures/red-green-example/calculator.test.ts` (sample Green test)
-- `cleargate-cli/test/fixtures/red-green-example/calculator.ts` (sample impl)
-- `cleargate-cli/test/fixtures/red-green-example/README.md` (explanation referenced by Architect M-plans for Red/Green pattern guidance)
+- `cleargate-cli/examples/red-green-example/calculator.red.test.ts` (sample Red test — outside `test/` glob so npm test doesn't auto-run)
+- `cleargate-cli/examples/red-green-example/calculator.test.ts` (sample Green test — same reason)
+- `cleargate-cli/examples/red-green-example/calculator.ts` (sample impl)
+- `cleargate-cli/examples/red-green-example/README.md` (explanation referenced by Architect M-plans for Red/Green pattern guidance)
 
 **Auto-regenerated:**
 - `cleargate-cli/templates/cleargate-planning/.claude/{agents,skills,hooks}/...` (via `npm run prebuild`)
@@ -146,7 +146,7 @@ draft_tokens:
 2. `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` §C documents the new 5-step loop (Architect → QA-Red dispatch → Dev → QA-Verify dispatch → Architect post-flight) with explicit fast-lane skip rule for QA-Red. Two distinct dispatch-prompt templates (RED, VERIFY) shown verbatim in §C.3 + §C.4 respectively.
 3. `cleargate-planning/.claude/agents/developer.md` includes a "Forbidden Surfaces" section listing `**/*.red.test.ts` as immutable for Developer dispatches.
 4. `.claude/hooks/pre-commit-surface-gate.sh` rejects a test commit on a story branch that includes a diff in `*.red.test.ts` after the QA-Red commit. Manual smoke: create fixture branch, commit `*.red.test.ts`, attempt Dev commit modifying that file, expect pre-commit rejection. `SKIP_RED_GATE=1` bypass works + logs.
-5. Sample fixture at `cleargate-cli/test/fixtures/red-green-example/` runs end-to-end: `calculator.red.test.ts` fails when `calculator.ts` is empty; both Red + Green tests pass after impl. Architect M-plans reference this fixture as canonical Red/Green pattern.
+5. Sample fixture at `cleargate-cli/examples/red-green-example/` runs end-to-end via explicit `npx tsx --test cleargate-cli/examples/red-green-example/`: `calculator.red.test.ts` fails when `calculator.ts` is empty; both Red + Green tests pass after impl. NOT auto-run by `npm test` (out-of-glob). Architect M-plans reference this fixture as canonical Red/Green pattern.
 6. Mirror parity: `diff cleargate-planning/.claude/agents/qa.md cleargate-cli/templates/cleargate-planning/.claude/agents/qa.md` empty post-prebuild.
 7. `cleargate-cli/test/_node-test-runner.md` documents `*.red.test.ts` naming + Dev-immutability rule.
 8. **Process acceptance (validated retrospectively at SPRINT-23 close):** ≥1 standard-lane story in SPRINT-23 ran the full Architect → QA-Red → Dev → QA-Verify → Architect post-flight loop with all required reports present. If 0, downgrade to fast-lane only.

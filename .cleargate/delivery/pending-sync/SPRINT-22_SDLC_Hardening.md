@@ -47,7 +47,7 @@ human_override: false
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-04T08:36:50Z
+  last_gate_check: 2026-05-04T08:47:35Z
 stamp_error: no ledger rows for work_item_id SPRINT-22
 draft_tokens:
   input: null
@@ -55,7 +55,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T08:36:50Z
+  last_stamp: 2026-05-04T08:47:35Z
   sessions: []
 ---
 
@@ -170,7 +170,9 @@ _(Populated by orchestrator + Reporter during sprint execution. Empty at draft t
 - **Constraints:**
   - No CLAUDE.md changes outside CLEARGATE-tag-block region (live).
   - Mirror parity per-edit, not state-parity (FLASHCARD `2026-04-19 #wiki #protocol #mirror`).
+  - **NO VITEST in SPRINT-22.** `npm test` is canonically routed to node:test (`tsx --test 'test/**/*.node.test.ts'`) per sprint-prep package.json edit 2026-05-04. Vitest is opt-in only via `npm run test:vitest`. Dev/QA dispatches MUST use `npm test` (or `npx tsx --test <path>` for single file). Invoking vitest is explicitly out of scope; if a Dev/QA finds they "need" to run vitest, surface as a `Spec-Gap` blocker.
   - **All NEW tests in CR-043 + CR-044 work use `*.node.test.ts` naming** (per `cleargate-cli/test/_node-test-runner.md`).
+  - **Sample fixtures go in `cleargate-cli/examples/` not `cleargate-cli/test/fixtures/`** — keeps them out of the `test/**` glob so `npm test` doesn't auto-run intentionally-failing Red examples.
   - DoD test counts ENFORCED, not advisory (SPRINT-19 lesson).
   - Live `.claude/` re-sync at sprint close per Gate-4 doc-refresh checklist.
 
