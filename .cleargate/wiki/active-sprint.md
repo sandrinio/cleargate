@@ -34,6 +34,8 @@
 
 - [[SPRINT-24]] — status: Completed
 
+- [[SPRINT-25]] — status: Draft
+
 
 
 ## Recently Completed Sprints
