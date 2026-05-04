@@ -4,6 +4,8 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-04 · #heuristic #session-shared · isSessionShared: distinct-session-count==1 (NOT "≥2 of ≥3 share same session") — looser rule false-flags real 2+1 split-sprint patterns.
+2026-05-04 · #red-test #scripts #env · Red scenarios for .mjs scripts: invoke via spawnSync(node, [scriptPath]), NOT wrapScript (wrapScript is run_script.sh-only); use CLEARGATE_SPRINT_DIR + CLEARGATE_SPRINT_RUNS_DIR env overrides for fixture isolation.
 2026-05-04 · #pre-gate #scanner #dogfood · pre_gate_runner.sh exits 1 with empty record output (header only); suspect pre_gate_common.sh:53 redirect path bug — surfaced during CR-053 post-flight; investigate at SPRINT-26 kickoff.
 2026-05-04 · #cr-049 #mirror #parity · CR-049 named 4 divergent canonical scripts but only 3 actually drift (write_dispatch.sh, validate_state.mjs, test_flashcard_gate.sh); test_test_ratchet.sh diff returns empty. Architects: verify drift count via diff before authoring sync M-plan.
 2026-05-04 · #devops #agent-registry · devops subagent type may not register in long Claude Code sessions even when .claude/agents/devops.md exists; orchestrator-fallback inline DevOps execution preserves merge pipeline.
