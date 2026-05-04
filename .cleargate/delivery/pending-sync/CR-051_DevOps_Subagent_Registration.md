@@ -39,11 +39,9 @@ context_source: |
   to devops.md; or the agent registry has a glob that requires specific
   path/frontmatter shape.
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: devops.md, SKILL.md"
-  last_gate_check: 2026-05-04T13:58:53Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-04T14:01:00Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -59,7 +57,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-04T13:58:53Z
+  last_stamp: 2026-05-04T14:00:56Z
   sessions: []
 ---
 
@@ -80,7 +78,7 @@ draft_tokens:
   - **Human decision:** _populated during Brief review_
 
 - **Question:** Should orchestrator-fallback inline DevOps stay as documented escape hatch?
-  - **Recommended:** YES. Document explicitly in SKILL.md §C.7 as "DevOps escape hatch — if subagent_type=devops unavailable, orchestrator executes the same checklist inline. Devops report still generated; mark `operator: orchestrator-fallback`."
+  - **Recommended:** YES. Document explicitly in `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` §C.7 as "DevOps escape hatch — if subagent_type=devops unavailable, orchestrator executes the same checklist inline. Devops report still generated; mark `operator: orchestrator-fallback`."
   - **Human decision:** _populated during Brief review_
 
 - **Question:** If the bug is in the agent .md frontmatter shape, what's the fix?
@@ -95,7 +93,7 @@ draft_tokens:
 
 **New Logic (The New Truth):**
 - DevOps subagent registration follows whatever Claude Code agent-registry rule we discover via investigation.
-- Sprint-execution SKILL.md documents the rule + the orchestrator-fallback inline path as a documented backup.
+- Sprint-execution skill documents the rule + the orchestrator-fallback inline path as a documented backup.
 - Pre-sprint-kickoff orchestrator preflight verifies devops subagent_type is reachable; halt if not.
 
 ## 2. Blast Radius & Invalidation
@@ -113,10 +111,11 @@ draft_tokens:
 
 ## Existing Surfaces
 
-- **Surface:** `.claude/agents/devops.md` + `cleargate-planning/.claude/agents/devops.md`.
-- **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` §1 + §C.7.
-- **Surface:** Claude Code Agent tool subagent_type registration mechanism (external, runtime).
-- **Why this CR extends rather than rebuilds:** devops.md exists; SKILL.md exists; CR-051 adds documentation + verification + escape-hatch formalization. No new infrastructure.
+- **Surface:** `cleargate-planning/.claude/agents/devops.md` — canonical DevOps agent prompt (CR-044).
+- **Surface:** `.claude/agents/devops.md` — live mirror of canonical DevOps agent prompt.
+- **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` — §1 Agent Roster (registration constraint note) and §C.7 (escape-hatch documentation) and §A.1 preflight (subagent verification).
+- **Surface:** Claude Code Agent tool subagent_type registration mechanism — external runtime behavior; no in-repo source path.
+- **Why this CR extends rather than rebuilds:** the DevOps agent prompt and the sprint-execution skill exist; CR-051 adds documentation + verification + escape-hatch formalization. No new infrastructure.
 
 ## 3. Execution Sandbox
 
