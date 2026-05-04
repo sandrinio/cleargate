@@ -49,6 +49,35 @@ const HOOK_FILES_WITH_PIN = new Set([
 const SKIP_FILES = new Set<string>(['CLAUDE.md']);
 
 /**
+ * Files that are FIRST-INSTALL-ONLY: seeded on a fresh project, NEVER
+ * overwritten on re-init even with --force. These accumulate per-project
+ * state that the user owns; canonical edits to them in the npm payload
+ * must not clobber a downstream project's lived-in copy.
+ *
+ * - .gitignore: per-project policy; users add custom patterns.
+ * - .cleargate/FLASHCARD.md: append-only project lesson log.
+ * - .cleargate/scripts/*: scripts may receive bug-fix patches mid-sprint
+ *   that haven't yet propagated back to canonical (the dogfood-split
+ *   bug). Treating them as first-install-only avoids reverting live
+ *   fixes during re-init. SPRINT-24 work to bring canonical = live and
+ *   revisit this exemption.
+ */
+const FIRST_INSTALL_ONLY: Array<RegExp | string> = [
+  '.gitignore',
+  '.cleargate/FLASHCARD.md',
+  /^\.cleargate\/scripts\//,
+];
+
+function isFirstInstallOnly(relPath: string): boolean {
+  for (const pattern of FIRST_INSTALL_ONLY) {
+    if (typeof pattern === 'string' ? pattern === relPath : pattern.test(relPath)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Recursively enumerate files under `dir`.
  * Returns paths relative to `dir`.
  */
@@ -134,7 +163,17 @@ export function copyPayload(
         report.actions.push({ action: 'skipped', relPath });
         continue;
       }
-      // Different + force — overwrite
+      if (isFirstInstallOnly(relPath)) {
+        // First-install-only: never overwrite even with --force. User owns this file
+        // and its evolution; canonical scaffold seeds it once.
+        if (needsExec && process.platform !== 'win32') {
+          fs.chmodSync(dstPath, 0o755);
+        }
+        report.skipped++;
+        report.actions.push({ action: 'skipped', relPath });
+        continue;
+      }
+      // Different + force + not first-install-only — overwrite
       fs.writeFileSync(dstPath, srcBuffer);
       if (needsExec && process.platform !== 'win32') {
         fs.chmodSync(dstPath, 0o755);
