@@ -17,11 +17,11 @@
       "lane_demotion_reason": null
     },
     "CR-054": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-04T19:04:48.956Z",
+      "updated_at": "2026-05-04T20:07:15.516Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -77,6 +77,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-053 → Done",
-  "updated_at": "2026-05-04T19:49:42.390Z"
+  "last_action": "transition CR-054 → Done",
+  "updated_at": "2026-05-04T20:07:15.516Z"
 }
