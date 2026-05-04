@@ -63,9 +63,9 @@ When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` 
 |---|---|---|
 | `test-pattern` | `## Test-Pattern` | Re-launch Developer with a fixture hint addressing the pattern. Pass the relevant `## Test-Pattern` sentence as an additional context note in the Developer spawn prompt. |
 | `spec-gap` | `## Spec-Gap` | Return to orchestrator with a user question. Do NOT re-launch Developer until the user clarifies. Escalate: paste the `## Spec-Gap` sentence verbatim in the question. |
-| `environment` | `## Environment` | Trigger a pre-gate re-run: invoke `run_script.sh pre_gate_runner.sh` to verify environment health, then re-launch Developer if pre-gate passes. |
+| `environment` | `## Environment` | Trigger a pre-gate re-run: invoke `bash .cleargate/scripts/run_script.sh pre_gate_runner.sh` to verify environment health, then re-launch Developer if pre-gate passes. |
 
-**Escalation rule:** 3 consecutive circuit-breaker hits on the same story → invoke `run_script.sh update_state.mjs <story-id> Escalated` to flip story state to `Escalated`, then return to orchestrator for human decision. Do not attempt a 4th re-launch.
+**Escalation rule:** 3 consecutive circuit-breaker hits on the same story → invoke `bash .cleargate/scripts/run_script.sh update_state.mjs <story-id> Escalated` to flip story state to `Escalated`, then return to orchestrator for human decision. Do not attempt a 4th re-launch.
 
 **State ownership note (CR-044):** The `Done` state transition is owned by the DevOps agent (`.claude/agents/devops.md`) after merge. Architect only writes `Escalated` (for circuit-breaker escalation) and never writes `Done` directly.
 
@@ -148,6 +148,11 @@ Before emitting a `lane` recommendation per story during Sprint Design Review, r
 **Sprint Design Review tail step:** After running the rubric on each story, emit `lane: standard|fast` per story in the §1 story table. For every non-`standard` lane, emit a one-line rationale (≤80 chars). Architect MUST write a `## §2.4 Lane Audit` subsection in the Sprint Plan listing every fast-lane story with a ≤80-char rationale. Empty by default — rows added only for non-`standard` lanes.
 
 Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing". These rules apply under `execution_mode: v2`.
+
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
 
 ## Pre-Spec Dep Version Check (CR-037)
 
