@@ -70,11 +70,22 @@ export interface UpgradeCliOptions {
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
-/** Write file atomically: write to .tmp, then rename. Never leaves partial writes. */
+/**
+ * Write file atomically: write to .tmp, then rename. Never leaves partial writes.
+ *
+ * BUG-018 (recurrence in upgrade): `fs.writeFile` defaults to mode 0o644.
+ * Hook scripts (`.sh`) need the executable bit or Claude Code spawn fails with
+ * "Permission denied". `cleargate init` already preserves +x via copy-payload.ts;
+ * upgrade was rewriting the same files at 0o644 and silently breaking every
+ * hook in the target repo. Restore +x for any `.sh` target.
+ */
 async function writeAtomic(filePath: string, content: string): Promise<void> {
   const tmpPath = filePath + '.tmp.' + Date.now();
   await fsp.writeFile(tmpPath, content, 'utf-8');
   await fsp.rename(tmpPath, filePath);
+  if (filePath.endsWith('.sh')) {
+    await fsp.chmod(filePath, 0o755);
+  }
 }
 
 /**

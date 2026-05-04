@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.11.3] — 2026-05-05
+
+Hotfix.
+
+### Fixed
+- **`cleargate upgrade` no longer strips the executable bit from `.sh` hook scripts** — `cleargate-cli/src/commands/upgrade.ts` `writeAtomic()` now `chmod 0o755` after writing any `.sh` target. `fs.writeFile` defaults to 0o644; init solved this in `copy-payload.ts` (BUG-018) but upgrade's write path bypassed that fix. Result: every Claude Code hook in target repos failed with `Permission denied` after upgrade until manually re-chmod'd. Observed today on `markdown_file_renderer` after the SPRINT-02 PostToolUse:Edit hook fired.
+
 ## [0.11.2] — 2026-05-05
 
 Hotfix.
