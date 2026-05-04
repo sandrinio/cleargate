@@ -69,6 +69,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-037]] | cr | Draft | .cleargate/delivery/pending-sync/CR-037_Architect_Validates_Dep_Versions_Against_Npm_Registry.md |
 | [[CR-038]] | cr | Draft | .cleargate/delivery/pending-sync/CR-038_Stale_Gate_Cache_Refresh_At_Sprint_Preflight.md |
 | [[CR-039]] | cr | Draft | .cleargate/delivery/pending-sync/CR-039_Spike_Per_Story_Session_Reset_For_Dev_QA_Loop.md |
+| [[CR-040]] | cr | Draft | .cleargate/delivery/pending-sync/CR-040_Vitest_To_Node_Test_Migration.md |
+| [[CR-042]] | cr | Ready | .cleargate/delivery/pending-sync/CR-042_Reporter_Fresh_Session_Doc_Fix.md |
+| [[CR-043]] | cr | Ready | .cleargate/delivery/pending-sync/CR-043_Red_Green_TDD_Discipline.md |
+| [[CR-044]] | cr | Ready | .cleargate/delivery/pending-sync/CR-044_DevOps_Role_Agent.md |
 ## Stories
 
 | [[STORY-026-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-026-01_Skill_Auto_Load_And_Mirror.md |
@@ -77,6 +81,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-20]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md |
 | [[SPRINT-21]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-21_Framework_Hardening_Test_Surfaced.md |
+| [[SPRINT-22]] | sprint | Ready | .cleargate/delivery/pending-sync/SPRINT-22_SDLC_Hardening.md |
 ## Bugs
 
 | [[BUG-025]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-025_PostToolUse_Duplicates_Parent_Cleargate_Id.md |

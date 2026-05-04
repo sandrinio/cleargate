@@ -8,9 +8,9 @@
 |------|-------|--------|---------|
 | Epics | 26 | 0 | 19 |
 | Stories | 154 | 0 | 149 |
-| Sprints | 21 | 0 | 16 |
+| Sprints | 22 | 0 | 17 |
 | Proposals | 14 | 0 | 14 |
-| CRs | 38 | 0 | 24 |
+| CRs | 41 | 0 | 24 |
 | Bugs | 18 | 0 | 14 |
 
 ## Active Epics
@@ -196,6 +196,8 @@ _No active epics._
 - [[SPRINT-19]] (sprints) — Completed
 
 - [[SPRINT-20]] (sprints) — Completed
+
+- [[SPRINT-21]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 

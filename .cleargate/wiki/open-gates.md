@@ -53,6 +53,12 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[CR-039]] — status: Ready
 
+- [[CR-042]] — status: Ready
+
+- [[CR-043]] — status: Ready
+
+- [[CR-044]] — status: Ready
+
 - [[EPIC-006]] — status: Ready
 
 - [[EPIC-012]] — status: Ready
@@ -60,5 +66,7 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 - [[EPIC-021]] — status: Ready
 
 - [[EPIC-026]] — status: Ready
+
+- [[SPRINT-22]] — status: Ready
 
 
