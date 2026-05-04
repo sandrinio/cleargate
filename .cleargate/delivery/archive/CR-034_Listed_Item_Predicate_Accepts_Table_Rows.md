@@ -2,14 +2,14 @@
 cr_id: CR-034
 parent_ref: EPIC-008
 parent_cleargate_id: EPIC-008
-sprint_cleargate_id: "SPRINT-20"
+sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Ready
+status: Done
 approved: true
 approved_at: 2026-05-03T20:00:00Z
 approved_by: sandrinio
 created_at: 2026-05-03T00:00:00Z
-updated_at: 2026-05-03T00:00:00Z
+updated_at: 2026-05-04T12:00:00Z
 created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 server_pushed_at_version: null
@@ -49,7 +49,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-03T19:04:50Z
+  last_gate_check: 2026-05-04T11:22:05Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -65,7 +65,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-03T17:46:11Z
+  last_stamp: 2026-05-04T11:22:05Z
   sessions: []
 ---
 
