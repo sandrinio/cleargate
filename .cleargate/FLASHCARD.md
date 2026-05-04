@@ -3,6 +3,10 @@
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+2026-05-04 · #cost-framing #pricing · cache_read at $0.30/MTok vs cache_creation at $3.75/MTok (Sonnet 4.6) — saving cache_read tokens by forcing re-ramp can NET NEGATIVE in dollars. Always compute both directions before recommending fresh-session/cache-bust optimizations.
+2026-05-04 · #spike #recommendation · CR-039 spike: session_id is shared across orchestrator+subagents (no SDK override). Token-count savings (~16M/sprint) is real but dollar-net is ~-$1.58/sprint at current pricing. PARTIAL/NO-GO; CR-041+CR-042 deferred to SPRINT-22.
+2026-05-04 · #docs #agent-defs · reporter.md L108 claim "Task tool creates new conversation per dispatch" is INACCURATE per ledger evidence (1 session_id per sprint). CR-042 fixes this in SPRINT-22.
+2026-05-04 · #session-reset #agent-tool · Claude Code Agent/Task tool shares orchestrator session_id — no per-dispatch session isolation; SubagentStop won't fire for `claude -p` subprocess dispatches.
 2026-05-04 · #qa #worktree #mirror · test_close_pipeline reporter.md mirror check fails in worktrees — live `.claude/agents/` is gitignored at `/.claude/`; suppress or skip this check in worktree context.
 2026-05-04 · #close-pipeline #step-3.5 · close_sprint.mjs Step 3.5 is v2-fatal post-CR-036 — bundle ≥2KB or close exits 1; v1 advisory preserved. Use CLEARGATE_SKIP_BUNDLE_CHECK=1 in tests.
 2026-05-04 · #reporter #budget · Reporter token budget: 200k soft warn / 500k hard advisory + auto-flashcard. token-ledger.sh hook emits via stdout (CR-032 chat-injection).
