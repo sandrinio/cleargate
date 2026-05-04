@@ -3,6 +3,26 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.11.0] — 2026-05-04
+
+SDLC Hardening Wrap-Up + Docs Aligned (SPRINT-25). Six CRs shipped (CR-053..CR-058); the SDLC Hardening arc closes here.
+
+### Added
+- **`run_script.sh` byte-correct UTF-8 truncation** (CR-054) — `_truncate_stream()` now uses `head -c $MAX_BYTES` with a separate `wc -c` source-file check gating the suffix append; `${var:0:N}` was char-index, not byte-count, and silently mis-truncated multi-byte input (cyrillic, CJK).
+- **wrapScript helper adoption in 4 caller tests** (CR-055) — `cleargate-cli/test/commands/{sprint,state,gate,story}.node.test.ts` now consume the `wrapScript` helper end-to-end (one new `await wrapScript(...)` scenario per file). JSDoc canonical-pattern block added at top of `cleargate-cli/test/helpers/wrap-script.ts`. Suite runtime: 52s → 57s (1.09×).
+- **Skill-candidate heuristic — session-shared filter + cross-sprint dedup + threshold raise** (CR-056) — `.cleargate/scripts/suggest_improvements.mjs` (live + canonical) tightens `scanSkillCandidates`: (1) `isSessionShared()` filters buckets where all entries share one session UUID (token-attribution artifact); (2) cross-sprint hash dedup scans prior `improvement-suggestions.md`; (3) threshold raised to "≥3× across ≥2 distinct sprints AND not session-shared". Eliminates the every-sprint "CR-045 × architect" false-positive.
+- **`script-incident-corpus-analysis.md` knowledge doc** (CR-057) — `.cleargate/knowledge/script-incident-corpus-analysis.md` formally closes CR-046 §0.5 Q3 deferred self-repair question. DOCS-MODE shipped (no `run_script.sh` self-repair logic) — corpus = 3 incidents, no recurring failure pattern. Revisit-trigger documented.
+- **Five-role agent team** in README (CR-058) — root `README.md` rebranded "Four-Agent Loop" → "Five-Role Agent Loop"; describes Architect (4 modes: SDR/M1/TPV/post-flight), Developer, QA (Red + Verify modes), DevOps (mechanical merge + state), Reporter (sprint close); 4 explicit gates documented (Gate 1 Initiative, Gate 2 Ambiguity, Gate 3 preflight, Gate 4 close); §What's New section recaps SPRINT-22..SPRINT-24 (CR-042..CR-052); MCP adapter claim softened to "in development" (only LinearAdapter currently shipped). New `.cleargate/sprint-runs/SPRINT-25/lifecycle-diagram-prompt.md` (164 lines, structured headings) ready for external image-generator.
+- **`cleargate-cli/README.md` Commands section** (CR-058) — documents `sprint preflight/init/close`, `gate check`, `doctor`, `state update/validate`, `story start/done/bouncing`.
+
+### Fixed
+- **`cleargate init` no longer writes `MANIFEST.json` to user-repo root** (CR-053) — `cleargate-cli/src/init/copy-payload.ts` `SKIP_FILES` adds `'MANIFEST.json'`; the npm-payload-root MANIFEST.json (parity manifest for the meta-repo's payload-copy verification) was being copied into every user repo as a side-effect of `copyPayload` walking the payload root. Removes the SPRINT-24 `.gitignore` `/MANIFEST.json` stopgap (commit `5fd8b22`).
+
+### Changed
+- Package description rebranded "four-agent loop" → "five-role agent team".
+
+---
+
 ## [0.10.0] — 2026-05-02
 
 ### Added
