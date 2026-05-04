@@ -2000,3 +2000,8 @@
   action: "update"
   target: "CR-045"
   path: ".cleargate/delivery/pending-sync/CR-045_Sprint_Context_File.md"
+- timestamp: "2026-05-04T12:47:33.050Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-046"
+  path: ".cleargate/delivery/pending-sync/CR-046_Run_Script_Wrapper.md"
