@@ -58,4 +58,4 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-052]] | cr | Ready | .cleargate/delivery/pending-sync/CR-052_E2E_Wrapper_Test_Helper.md |
 ## Sprints
 
-| [[SPRINT-24]] | sprint | Ready | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
+| [[SPRINT-24]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
