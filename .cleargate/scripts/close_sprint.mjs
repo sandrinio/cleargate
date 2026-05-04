@@ -34,9 +34,10 @@
  *        atomicWrite pattern from update_state.mjs
  *
  * Test seams (CR-022 M1):
- *   CLEARGATE_SKIP_LIFECYCLE_CHECK=1  — skip Step 2.6 lifecycle reconciliation entirely
- *                                       (test environments where the CLI binary is present
- *                                       but real git history would produce drift false-positives).
+ *   CLEARGATE_SKIP_LIFECYCLE_CHECK=1  — skip Step 2.6 lifecycle reconciliation AND Step 2.6b
+ *                                       cross-sprint orphan drift check entirely (test
+ *                                       environments where the CLI binary is present but
+ *                                       real git history would produce drift false-positives).
  *   CLEARGATE_SKIP_WORKTREE_CHECK=1   — skip Step 2.7 entirely (test environments that cannot
  *                                       run git worktree list from a real git root).
  *   CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 — comma-separated fake worktree paths injected into
