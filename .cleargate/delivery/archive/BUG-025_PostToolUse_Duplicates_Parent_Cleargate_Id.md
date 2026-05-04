@@ -4,7 +4,7 @@ parent_ref: SPRINT-19 close pipeline diagnosis 2026-05-02; CR-022 M4/M5/M6/M11 l
 parent_cleargate_id: "SPRINT-19 close pipeline diagnosis 2026-05-02; CR-022 M4/M5/M6/M11 lifecycle drift"
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Triaged
+status: Done
 ambiguity: 🟢 Low
 severity: P2-Medium
 reporter: sandrinio (orchestrator-observed during SPRINT-19 close)

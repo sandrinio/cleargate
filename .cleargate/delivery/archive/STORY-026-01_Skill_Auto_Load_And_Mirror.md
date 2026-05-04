@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-026
 parent_cleargate_id: EPIC-026
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Draft
+status: Done
 ambiguity: 🟢 Low
 context_source: EPIC-026 §2 IN-SCOPE bullets M1.1 + M1.2 + M1.3 — auto-load infrastructure (SessionStart hook + sprint CLI directives + canonical skill mirror + scaffold rebuild). Sprint plan §2.1 designates this group as a single-developer dispatch since the three surfaces are tightly coupled (the testable outcome — "skill auto-loads on sprint-active sessions" — requires all three).
 actor: Orchestrator agent (entering a sprint-active Claude Code session)

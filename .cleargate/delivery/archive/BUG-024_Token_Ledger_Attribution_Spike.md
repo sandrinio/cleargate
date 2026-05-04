@@ -4,7 +4,7 @@ parent_ref: SPRINT-18 REPORT.md §6 Tooling (token-ledger Red carry-forward); SP
 parent_cleargate_id: "SPRINT-18 REPORT.md §6 Tooling (token-ledger Red carry-forward); SPRINT-17 REPORT.md §5 Tooling (same row)"
 sprint_cleargate_id: SPRINT-19
 carry_over: false
-status: Approved
+status: Done
 ambiguity: 🟢 Low
 severity: P2-Medium
 reporter: sandrinio
