@@ -44,3 +44,17 @@ bootstrap cleargate-planning/.cleargate/scripts/test_ratchet.mjs
 
 # ── sprint_context.md — "hono" matches inside English word "honour" (false positive) ──
 hono cleargate-planning/.cleargate/templates/sprint_context.md
+
+# ── cleargate-wiki-contradict.md — Postgres+Redis inside contradiction-detection example prose ──
+postgres cleargate-planning/.claude/agents/cleargate-wiki-contradict.md
+redis cleargate-planning/.claude/agents/cleargate-wiki-contradict.md
+
+# ── cleargate-enforcement.md — "bootstrap" inside CI/bypass-context English usage ──
+bootstrap cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md
+
+# ── mid-sprint-triage-rubric.md — Postgres+Redis inside approach-change boundary-case example ──
+postgres cleargate-planning/.cleargate/knowledge/mid-sprint-triage-rubric.md
+redis cleargate-planning/.cleargate/knowledge/mid-sprint-triage-rubric.md
+
+# ── prep_qa_context.mjs — "fastify" inside MCP-dogfood tag mapping for THIS repo's mcp/ tree ──
+fastify cleargate-planning/.cleargate/scripts/prep_qa_context.mjs
