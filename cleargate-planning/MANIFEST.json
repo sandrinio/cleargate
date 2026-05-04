@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.10.0",
-  "generated_at": "2026-05-04T05:47:50.283Z",
+  "generated_at": "2026-05-04T09:09:55.816Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -39,14 +39,14 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "55790014320187e500f6b904756bbc8bda4806274805e883d62492bf75a34f12",
+      "sha256": "ae8320a324230d315033dba56427d81d9353d11bea4d51d3d8dd675221e03955",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "b6ac9d814e1bbd1fb9a062ce7775e34da1d1e5e6fc35140b977f30b2632654fa",
+      "sha256": "677377d383d741bda01fd21202a2cf836e4a7aa7787fbbd868df87d9715ed5da",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -67,7 +67,7 @@
     },
     {
       "path": ".claude/hooks/pre-commit-surface-gate.sh",
-      "sha256": "a58f3b3c3dbb615a14bf6e2355f5122e80a5cb1e8ef9442648324f3124723ee3",
+      "sha256": "6741422cd8ca75b45e26bd0e9cb54126ad9e933f763c9094ceba6b84794b761a",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -137,7 +137,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "c9a1e06af45e1231265147d67836e5e9a68d246df90e61be9451f9f8972e5fbb",
+      "sha256": "14837086f24159689756f589d859cc6502d5c126003bb0087d19519a6420b12f",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
