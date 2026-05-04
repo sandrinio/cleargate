@@ -2,9 +2,16 @@
 # run_script.sh — Arbitrary-command wrapper that captures stdout/stderr independently
 # and writes a structured JSON incident file on non-zero exit.
 #
-# Interface: bash run_script.sh <command> [args...]
+# Interface (NEW): bash run_script.sh <command> [args...]
 #   <command>  — any executable on PATH (e.g. node, bash, sh, true, false)
 #   [args...]  — forwarded to the command unchanged
+#
+# Interface (BACK-COMPAT): bash run_script.sh <script-name>.mjs [args...]
+#                          bash run_script.sh <script-name>.sh  [args...]
+#   If arg1 matches *.mjs and the file exists in SCRIPT_DIR → routes through node.
+#   If arg1 matches *.sh  and the file exists in SCRIPT_DIR → routes through bash.
+#   This preserves all production call-sites that pass script names without an explicit
+#   interpreter (e.g. cleargate sprint init passes assert_story_files.mjs).
 #
 # On success (exit 0): stdout+stderr are passed through; no incident file written.
 # On failure (exit ≠ 0): stdout+stderr are passed through AND a JSON incident is
@@ -38,6 +45,23 @@ if [[ $# -lt 1 ]]; then
   echo "Usage: bash run_script.sh <command> [args...]" >&2
   exit 2
 fi
+
+# ---------------------------------------------------------------------------
+# Back-compat extension routing (CR-046)
+# If arg1 is a bare script name (*.mjs or *.sh) that exists in SCRIPT_DIR,
+# prepend the appropriate interpreter so production call-sites keep working.
+# Otherwise, treat arg1 as an arbitrary executable on PATH (new interface).
+# ---------------------------------------------------------------------------
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_ARG1="${1}"
+if [[ "${_ARG1}" == *.mjs && -f "${SCRIPT_DIR}/${_ARG1}" ]]; then
+  # Route through node; remaining args unchanged
+  set -- node "${SCRIPT_DIR}/${_ARG1}" "${@:2}"
+elif [[ "${_ARG1}" == *.sh && -f "${SCRIPT_DIR}/${_ARG1}" ]]; then
+  # Route through bash; remaining args unchanged
+  set -- bash "${SCRIPT_DIR}/${_ARG1}" "${@:2}"
+fi
+# Otherwise: arg1 is already an explicit command — no rewrite needed.
 
 # ---------------------------------------------------------------------------
 # Resolve project root for incident file path
