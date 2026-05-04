@@ -26,7 +26,7 @@ DO NOT output these instructions in the rendered file.
 </instructions>
 
 ---
-initiative_id: "INIT-{NNN}"
+initiative_id: "INITIATIVE-{NNN}"
 remote_id: null
 source_tool: "linear | jira | github | manual-paste"
 status: "{PM native status — e.g. Discovery, In Triage, Triaged}"

@@ -146,7 +146,7 @@ status: Draft
 ---
 # EPIC-099: Test Epic
 FIXTURE
-_gate_out1="❌ proposal-approved: linked file not found: INITIATIVE-001_test.md
+_gate_out1="❌ parent-approved: OR-group failed — all alternatives failed: parent-approved-proposal: linked file not found: INITIATIVE-001_test.md; parent-approved-initiative: linked file not found: INITIATIVE-001_test.md
 ❌ affected-files-declared: section 4 has 0 listed-item (≥1 required)"
 _stdout1=$(run_hook "${_tmpdir1}" "${_fixture1}" 1 "${_gate_out1}")
 rm -rf "${_tmpdir1}"
@@ -205,7 +205,7 @@ status: Draft
 ---
 # CR-099: Test CR
 FIXTURE
-_gate_out4="❌ proposal-approved: linked file not found"
+_gate_out4="❌ parent-approved: OR-group failed"
 _stdout4=$(run_hook "${_tmpdir4}" "${_fixture4}" 1 "${_gate_out4}")
 rm -rf "${_tmpdir4}"
 

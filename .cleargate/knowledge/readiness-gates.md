@@ -69,8 +69,12 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   transition: ready-for-decomposition
   severity: enforcing
   criteria:
-    - id: proposal-approved
+    - id: parent-approved-proposal
       check: "frontmatter(context_source).approved == true"
+      or_group: parent-approved
+    - id: parent-approved-initiative
+      check: "frontmatter(context_source).status == 'Triaged'"
+      or_group: parent-approved
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: scope-in-populated
@@ -176,4 +180,17 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body contains '| Mitigation'"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
+```
+
+```yaml
+- work_item_type: initiative
+  transition: ready-for-decomposition
+  severity: advisory
+  criteria:
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+    - id: user-flow-populated
+      check: "section(1) has ≥1 listed-item"
+    - id: success-criteria-populated
+      check: "section(5) has ≥1 listed-item"
 ```

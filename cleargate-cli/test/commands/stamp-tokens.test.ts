@@ -429,3 +429,101 @@ describe('Unit: Model comma-join sorted alphabetically', () => {
     expect(sessB?.model).toBe('opus');
   });
 });
+
+// ─── CR-030: Initiative and Sprint stamp scenarios ────────────────────────────
+
+describe('CR-030: Initiative stamp — work_item_id captured as INITIATIVE-NNN', () => {
+  it('stamps Initiative fixture with initiative_id in frontmatter → work_item_id captured as INITIATIVE-001', async () => {
+    // Pre-CR-030: stderr would emit "cannot determine work_item_id"
+    // Post-CR-030: stamp succeeds and work_item_id = INITIATIVE-001
+    const content = `---
+initiative_id: "INITIATIVE-001"
+status: "Triaged"
+---
+
+# INITIATIVE-001: Test Initiative
+`;
+    const filePath = writeWorkItemFile(tmpDir, 'INITIATIVE-001_test.md', content);
+
+    writeJsonl(sprintRunsRoot, 'SPRINT-05', [
+      makeRow({ work_item_id: 'INITIATIVE-001', input: 200, output: 100, session_id: 'sess-init' }),
+    ]);
+
+    const stdout = collectStdout();
+    let exitCode = -1;
+    const cliOpts: StampTokensCliOptions = {
+      cwd: tmpDir,
+      now: () => new Date('2026-04-19T15:00:00Z'),
+      sprintRunsRoot,
+      stdout: stdout.fn,
+      exit: (code: number) => {
+        exitCode = code;
+        throw new Error(`exit(${code})`);
+      },
+    };
+
+    try {
+      await stampTokensHandler(filePath, {}, cliOpts);
+    } catch (e) {
+      if (!(e instanceof Error) || !e.message.startsWith('exit(')) throw e;
+    }
+
+    expect(exitCode).toBe(0);
+
+    const written = fs.readFileSync(filePath, 'utf-8');
+    const { fm } = parseFrontmatter(written);
+    const tokens = fm['draft_tokens'] as { input: number; sessions: unknown[] };
+    // work_item_id was recognized → tokens were stamped
+    expect(tokens.input).toBeGreaterThan(0);
+    // stamp_error must NOT mention "cannot determine work_item_id"
+    const stampError = fm['stamp_error'] as string | undefined;
+    expect(stampError ?? '').not.toMatch(/cannot determine work_item_id/);
+  });
+});
+
+describe('CR-030: Sprint stamp — work_item_id captured as SPRINT-NN', () => {
+  it('stamps Sprint fixture with sprint_id in frontmatter → work_item_id captured as SPRINT-21 (regression)', async () => {
+    // Pre-CR-030: stderr would emit "cannot determine work_item_id" for sprint files
+    // Post-CR-030: stamp succeeds and work_item_id = SPRINT-21
+    const content = `---
+sprint_id: "SPRINT-21"
+status: "Active"
+---
+
+# SPRINT-21: Test Sprint
+`;
+    const filePath = writeWorkItemFile(tmpDir, 'SPRINT-21_test.md', content);
+
+    writeJsonl(sprintRunsRoot, 'SPRINT-05', [
+      makeRow({ work_item_id: 'SPRINT-21', input: 150, output: 75, session_id: 'sess-sprint' }),
+    ]);
+
+    const stdout = collectStdout();
+    let exitCode = -1;
+    const cliOpts: StampTokensCliOptions = {
+      cwd: tmpDir,
+      now: () => new Date('2026-04-19T15:00:00Z'),
+      sprintRunsRoot,
+      stdout: stdout.fn,
+      exit: (code: number) => {
+        exitCode = code;
+        throw new Error(`exit(${code})`);
+      },
+    };
+
+    try {
+      await stampTokensHandler(filePath, {}, cliOpts);
+    } catch (e) {
+      if (!(e instanceof Error) || !e.message.startsWith('exit(')) throw e;
+    }
+
+    expect(exitCode).toBe(0);
+
+    const written = fs.readFileSync(filePath, 'utf-8');
+    const { fm } = parseFrontmatter(written);
+    const tokens = fm['draft_tokens'] as { input: number; sessions: unknown[] };
+    expect(tokens.input).toBeGreaterThan(0);
+    const stampError = fm['stamp_error'] as string | undefined;
+    expect(stampError ?? '').not.toMatch(/cannot determine work_item_id/);
+  });
+});

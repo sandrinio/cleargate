@@ -602,8 +602,8 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
     while ((match = blockRe.exec(raw)) !== null) {
       yamlBlocks.push(match[1]!);
     }
-    // CR-027 added sprint.ready-for-execution gate (7th block); CR-028 adds no new gate blocks
-    expect(yamlBlocks).toHaveLength(7);
+    // CR-027 added sprint.ready-for-execution gate (7th block); CR-030 adds initiative gate (8th block)
+    expect(yamlBlocks).toHaveLength(8);
     // Each block is a YAML array with a single element
     const parsed = yamlBlocks.map((b) => {
       const arr = yaml.load(b) as unknown[];
@@ -684,9 +684,9 @@ describe('smoke test: readiness-gates.md parses correctly', () => {
 
 // ─── BUG-008 regression tests ─────────────────────────────────────────────────
 
-// Sub-fix #1: proposal-approved prose-vs-path heuristic
+// Sub-fix #1: parent-approved-proposal prose-vs-path heuristic
 
-describe('BUG-008 sub-fix #1 — proposal-approved prose-vs-path heuristic', () => {
+describe('BUG-008 sub-fix #1 — parent-approved-proposal prose-vs-path heuristic', () => {
   it('R-08: context_source is prose with approved_by + approved_at → pass', () => {
     const dir = makeTmpDir();
     const docPath = path.join(dir, 'EPIC-021.md');
@@ -1253,5 +1253,93 @@ describe('BUG-026: validate_state.mjs exports validateShapeIgnoringVersion', () 
     const result = mod.validateShapeIgnoringVersion(validState);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
+  });
+});
+
+// ─── CR-030: parent-approved per-type field map ───────────────────────────────
+
+describe('CR-030 parent-approved per-type field map', () => {
+  it('R-030-1: Epic with context_source → Proposal (approved: true) → frontmatter(context_source).approved == true passes', () => {
+    const dir = makeTmpDir();
+    const proposalPath = path.join(dir, 'PROPOSAL-001.md');
+    fs.writeFileSync(proposalPath, [
+      '---',
+      'proposal_id: "PROPOSAL-001"',
+      'approved: true',
+      'status: "Draft"',
+      '---',
+      '# Proposal 001',
+    ].join('\n'), 'utf8');
+
+    const doc = makeDoc(
+      { context_source: 'PROPOSAL-001.md' },
+      'body text',
+      path.join(dir, 'EPIC-001.md'),
+    );
+    const result = evaluate('frontmatter(context_source).approved == true', doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  it('R-030-2: Epic with context_source → Initiative (status: Triaged) → frontmatter(context_source).status == Triaged passes', () => {
+    const dir = makeTmpDir();
+    const initiativePath = path.join(dir, 'INITIATIVE-001_test.md');
+    fs.writeFileSync(initiativePath, [
+      '---',
+      'initiative_id: "INITIATIVE-001"',
+      'status: "Triaged"',
+      '---',
+      '# Initiative 001',
+    ].join('\n'), 'utf8');
+
+    const doc = makeDoc(
+      { context_source: 'INITIATIVE-001_test.md' },
+      'body text',
+      path.join(dir, 'EPIC-002.md'),
+    );
+    const result = evaluate("frontmatter(context_source).status == 'Triaged'", doc, { projectRoot: dir });
+    expect(result.pass).toBe(true);
+  });
+
+  it('R-030-3: Initiative fixture passes advisory gate when §1 has ≥1 listed-item AND §5 has ≥1 listed-item AND no TBDs', () => {
+    const dir = makeTmpDir();
+    // Initiative body with §1 and §5 populated, no TBDs
+    const initiativeBody = [
+      '## User Flow',
+      '',
+      '- User logs in and sees dashboard',
+      '- User navigates to settings',
+      '',
+      '## Background',
+      '',
+      'Some background.',
+      '',
+      '## Constraints',
+      '',
+      'None.',
+      '',
+      '## Out of Scope',
+      '',
+      'Mobile app.',
+      '',
+      '## Success Criteria',
+      '',
+      '- 99% uptime SLA met',
+      '- User NPS > 50',
+    ].join('\n');
+
+    const doc = makeDoc(
+      { initiative_id: 'INITIATIVE-001' },
+      initiativeBody,
+      path.join(dir, 'INITIATIVE-001_test.md'),
+    );
+
+    // Check each advisory criterion independently
+    const noTbds = evaluate("body does not contain marker 'TBD'", doc, { projectRoot: dir });
+    const userFlow = evaluate('section(1) has ≥1 listed-item', doc, { projectRoot: dir });
+    const successCriteria = evaluate('section(5) has ≥1 listed-item', doc, { projectRoot: dir });
+
+    expect(noTbds.pass).toBe(true);
+    expect(userFlow.pass).toBe(true);
+    expect(successCriteria.pass).toBe(true);
   });
 });
