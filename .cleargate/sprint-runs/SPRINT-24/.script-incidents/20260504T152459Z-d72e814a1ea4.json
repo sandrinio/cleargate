@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-04T15:24:59Z",
+  "command": "validate_state.mjs",
+  "args": ["SPRINT-24"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 127,
+  "stdout": "",
+  "stderr": "/tmp/run_script_noshim.sh: line 95: validate_state.mjs: command not found",
+  "agent_type": null,
+  "work_item_id": null
+}
