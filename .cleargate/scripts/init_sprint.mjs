@@ -189,6 +189,61 @@ function main() {
   fs.writeFileSync(tmpFile, JSON.stringify(state, null, 2) + '\n', 'utf8');
   fs.renameSync(tmpFile, stateFile);
 
+  // --- CR-045: Write sprint-context.md from template ---
+  // Reads .cleargate/templates/sprint_context.md, substitutes frontmatter fields,
+  // optionally splices the sprint goal from the sprint plan §0, and writes atomically.
+  // Skip if file already exists and --force was not passed (idempotency-safe re-init).
+  const ctxTemplate = path.join(REPO_ROOT, '.cleargate', 'templates', 'sprint_context.md');
+  const ctxOut = path.join(sprintDir, 'sprint-context.md');
+
+  if (!fs.existsSync(ctxOut) || force) {
+    let ctxContent;
+    try {
+      ctxContent = fs.readFileSync(ctxTemplate, 'utf8');
+    } catch {
+      // Template absent — log warning and continue (non-fatal)
+      process.stderr.write(
+        `WARN: sprint-context.md template not found at ${ctxTemplate}; skipping sprint-context.md write.\n`
+      );
+      ctxContent = null;
+    }
+
+    if (ctxContent !== null) {
+      // Substitute frontmatter placeholders
+      ctxContent = ctxContent.replace(/sprint_id:\s*["']?S-NN["']?/, `sprint_id: "${sprintId}"`);
+      ctxContent = ctxContent.replace(/created_at:\s*["']?YYYY-MM-DDTHH:MM:SSZ["']?/, `created_at: "${now}"`);
+      ctxContent = ctxContent.replace(/last_updated:\s*["']?YYYY-MM-DDTHH:MM:SSZ["']?/, `last_updated: "${now}"`);
+
+      // Optionally extract sprint goal from sprint plan §0.
+      // Regex matches `- **Sprint Goal:** <text>` within first 200 lines (after H1).
+      // Falls back to placeholder if absent — non-fatal.
+      if (sprintFilePath) {
+        try {
+          const planContent = fs.readFileSync(sprintFilePath, 'utf8');
+          const planLines = planContent.split('\n').slice(0, 200);
+          const goalLine = planLines.find((l) => /^- \*\*Sprint Goal:\*\* (.+)$/.test(l.trim()));
+          if (goalLine) {
+            const goalMatch = goalLine.trim().match(/^- \*\*Sprint Goal:\*\* (.+)$/);
+            if (goalMatch) {
+              const goalText = goalMatch[1].trim();
+              ctxContent = ctxContent.replace(
+                '_(populated by orchestrator from sprint plan §0 at kickoff)_',
+                goalText
+              );
+            }
+          }
+        } catch {
+          // Goal extraction failed — leave placeholder; non-fatal
+        }
+      }
+
+      // Write atomically via tmpFile + renameSync (mirrors state.json pattern)
+      const ctxTmp = `${ctxOut}.tmp.${process.pid}`;
+      fs.writeFileSync(ctxTmp, ctxContent, 'utf8');
+      fs.renameSync(ctxTmp, ctxOut);
+    }
+  }
+
   process.stdout.write(`Initialized state.json for sprint ${sprintId} with ${storyIds.length} stories\n`);
 }
 
