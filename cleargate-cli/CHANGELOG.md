@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.11.2] — 2026-05-05
+
+Hotfix.
+
+### Fixed
+- **`cleargate upgrade` and `cleargate init` now warn when session-loaded configs change** — `cleargate-cli/src/commands/upgrade.ts` tracks modifications to `.claude/settings.json` and `.mcp.json` during the run and prints a `⚠ Restart Claude Code in this repo` block at the end if either changed. `init.ts` adds the same "restart Claude Code if already open" suffix to its `Updated .claude/settings.json` log line (parallels the existing `.mcp.json` message). Without this, hook wiring + MCP-server changes silently fail to load until the user happens to restart their session — observed today when SPRINT-02 drafts in `markdown_file_renderer` did not trigger `stamp-and-gate.sh` after upgrade because the running session held a pre-upgrade settings snapshot.
+
 ## [0.11.1] — 2026-05-05
 
 Hotfix.

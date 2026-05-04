@@ -326,7 +326,7 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   const mergedSettings = mergeSettings(existingSettings, HOOK_ADDITION);
   fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
   writeAtomic(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n');
-  stdout(`[cleargate init] Updated .claude/settings.json: merged PostToolUse hook\n`);
+  stdout(`[cleargate init] Updated .claude/settings.json: merged PostToolUse hook — restart Claude Code if already open.\n`);
 
   // Step 5: Inject bounded block into CLAUDE.md
   const claudeMdPath = path.join(cwd, 'CLAUDE.md');

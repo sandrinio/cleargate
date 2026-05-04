@@ -454,6 +454,12 @@ export async function upgradeHandler(
 
   const driftMap: DriftMap = {};
 
+  // Files whose contents are loaded once per Claude Code session — if upgrade
+  // mutates either, the running session will not pick up the change without a
+  // restart. Track modifications and surface a warning at the end.
+  const SESSION_LOAD_PATHS = new Set(['.claude/settings.json', '.mcp.json']);
+  const sessionRestartFiles: string[] = [];
+
   for (const item of workItems) {
     const { entry, currentSha, installSha, action } = item;
 
@@ -495,6 +501,10 @@ export async function upgradeHandler(
       current_sha: postSha,
       package_sha: entry.sha256,
     };
+
+    if (SESSION_LOAD_PATHS.has(entry.path) && postSha !== currentSha) {
+      sessionRestartFiles.push(entry.path);
+    }
   }
 
   // ─── 6. Refresh .drift-state.json ────────────────────────────────────────────
@@ -502,4 +512,12 @@ export async function upgradeHandler(
   await writeDriftState(cwd, driftMap, { lastRefreshed: now.toISOString() });
 
   stdout('[upgrade] complete.');
+
+  if (sessionRestartFiles.length > 0) {
+    stdout('');
+    stdout(`⚠ Restart Claude Code in this repo to load the new ${sessionRestartFiles.length === 1 ? 'config' : 'configs'}:`);
+    for (const f of sessionRestartFiles) {
+      stdout(`    ${f} (loaded once at session start)`);
+    }
+  }
 }
