@@ -80,6 +80,11 @@ For inner-loop iteration during a Story, prefer **`node:test` + `node:assert/str
 
 **Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing — that ensures the new node:test files coexist with the existing harness. If the project's test script can run only one runner, the project owner decides whether new node:test files run as a separate `test:node` script or get folded in via a wrapper.
 
+## Script Invocation
+
+Any bash/node script you invoke MUST go through the wrapper:
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
 - **Never mock the database.** Integration tests against real Postgres + Redis (SPRINT-01 flashcard).
