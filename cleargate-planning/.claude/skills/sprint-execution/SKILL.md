@@ -63,6 +63,8 @@ It is pure framing: surface deviations from the goal as first-class events, not 
 | `devops` | sonnet | Per-story, after QA-Verify + Architect post-flight | One merge commit (no-ff) + `STORY-NNN-NN-devops.md` report |
 | `reporter` | sonnet | Once at sprint close, after all stories merged + walkthrough done | `sprint-runs/<id>/SPRINT-<#>_REPORT.md` |
 
+**Registration constraint:** The Claude Code agent registry caches at session start. If an agent `.md` file under `.claude/agents/` was added or modified after the current session began, `Agent(subagent_type=<name>)` will return "Agent type '<name>' not found" even though the file exists. Fix: restart the Claude Code session. Verify `devops` reachable at sprint preflight (§A.1 check 6). If unavailable mid-sprint, use the §C.7 DevOps Escape Hatch.
+
 ### Wall-clock budgets
 
 Each agent dispatch has a target duration. Note the start time before each `Agent` spawn; after the call returns, compare elapsed against the budget. Ran-long stories get flagged in sprint §4 Execution Log even on success.
@@ -115,13 +117,14 @@ Run this sequence exactly once, when the human says "start sprint NN" or equival
 cleargate sprint preflight <sprint-id>
 ```
 
-Five checks, all must pass:
+Six checks, all must pass:
 
 1. Previous sprint `sprint_status: "Completed"` in `state.json`.
 2. No leftover worktrees — `git worktree list` must not contain `.worktrees/STORY-*`.
 3. Sprint branch ref free — `git show-ref refs/heads/sprint/S-NN` returns nothing.
 4. `main` clean — `git status --porcelain` empty.
 5. Per-item readiness gates pass — every work-item ID in §1 Consolidated Deliverables has fresh `cached_gate_result.pass: true` (or terminal status). Under `execution_mode: v2` a failing item hard-blocks; under `v1` it warns. Failure punch-list names each item + its failing criteria.
+6. **Verify `devops` subagent reachable** — attempt `Agent(subagent_type=devops, prompt: "echo preflight-check")` immediately after session start. If it returns "Agent type 'devops' not found", halt and ask the human to restart the Claude Code session; do NOT proceed under assumption the escape hatch will cover every merge. This check is manual (not enforced by `cleargate sprint preflight`); document result in sprint §4 Execution Log.
 
 On failure, surface the punch list verbatim and halt. Per-item resolution:
 
@@ -130,6 +133,7 @@ On failure, surface the punch list verbatim and halt. Per-item resolution:
 - Branch ref exists → investigate; force-deletion only with explicit human approval.
 - Dirty main → human commits/stashes/discards. **Never `git reset --hard` or stash without explicit human approval.**
 - Per-item gate fail → run `cleargate gate check <file> -v` for the named item; fix the failing criterion (e.g., populate `context_source`, resolve TBDs); re-run preflight.
+- Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.
 
 ### A.2 Cut sprint branch
 
@@ -409,6 +413,10 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
 **On `STATUS=blocked`:** DevOps has written `{STORY-ID}-devops-blockers.md`. Surface the blockers report to the human. DevOps does NOT auto-resolve conflicts — orchestrator escalates and waits for human resolution before re-dispatching DevOps.
 
 **Forbidden orchestrator patterns (v2):** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
+
+#### DevOps Escape Hatch — subagent_type=devops unavailable
+
+If spawning `Agent(subagent_type=devops)` returns "Agent type 'devops' not found" (registry miss — see §1 registration constraint note), the orchestrator executes the §C.7 ACTIONS steps 2-9 verbatim inline (in the orchestrator's own bash session). All rules still apply: no `git merge` short-circuit, no conflict auto-resolution. Write the same `STORY-NNN-NN-devops.md` report with an additional frontmatter field `operator: orchestrator-fallback` and note the session restart requirement. This path is exceptional — if it triggers, queue a session restart at the next natural break and verify `devops` appears in the next session's available agent list before continuing the sprint.
 
 ### C.8 Blockers Triage (Developer circuit breaker)
 
