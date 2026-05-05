@@ -2,13 +2,13 @@
 story_id: STORY-006-08
 parent_epic_ref: EPIC-006
 parent_cleargate_id: "EPIC-006"
-sprint_cleargate_id: "SPRINT-04"
+sprint_cleargate_id: "SPRINT-06"
 status: Done
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006 §6 Q2 (Chart.js override), STORY-004-06
 design_guide_ref: ../../knowledge/design-guide.md
-sprint_id: SPRINT-04
+sprint_id: SPRINT-06
 created_at: 2026-04-17T00:00:00Z
 updated_at: 2026-04-18T18:00:00Z
 created_at_version: strategy-phase-pre-init

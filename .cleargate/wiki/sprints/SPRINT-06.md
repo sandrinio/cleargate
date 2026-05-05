@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-06"
 parent: ""
 children: []
-status: "Planned"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-06_Admin_UI.md"
-last_ingest: "2026-05-04T17:33:10.984Z"
-last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
+raw_path: ".cleargate/delivery/archive/SPRINT-06_Admin_UI.md"
+last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 

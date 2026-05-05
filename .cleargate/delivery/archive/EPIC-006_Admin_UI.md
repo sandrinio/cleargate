@@ -1,14 +1,17 @@
 ---
 epic_id: EPIC-006
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: PROPOSAL-003_MCP_Adapter.md
 owner: Vibe Coder (ssuladze@exadel.com)
-target_date: TBD
+target_date: 2026-04-20
+completed_in_sprint: SPRINT-06
+completed_at: 2026-04-20T11:26:00Z
+completion_notes: All 10 EPIC-006 stories shipped in SPRINT-06 (2026-04-20). STORY-004-08 (auth/exchange) + STORY-005-06 (CLI device-flow login) closed inline; STORY-004-09 (Items Admin API) added mid-sprint as a 006-06 prereq. Admin/ scaffold, OAuth, all 10 routes, Dockerfile + Coolify runbook all merged. Status retroactively reconciled 2026-05-06.
 created_at: 2026-04-17T00:00:00Z
-updated_at: 2026-04-17T00:00:00Z
+updated_at: 2026-05-06T00:00:00Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: post-SPRINT-26
 resolved_at: 2026-04-17T00:00:00Z
 resolved_by: Vibe Coder (ssuladze@exadel.com)
 approved: true
@@ -26,6 +29,15 @@ children:
   - "[[STORY-006-08]]"
   - "[[STORY-006-09]]"
   - "[[STORY-006-10]]"
+stamp_error: no ledger rows for work_item_id EPIC-006
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-05-05T20:37:50Z
+  sessions: []
 ---
 
 # EPIC-006: Admin UI (SvelteKit)
