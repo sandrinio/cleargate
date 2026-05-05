@@ -42,6 +42,9 @@
  *     STORY-B's file is newer on disk (written last).
  *
  * IMMUTABILITY: this file is sealed post-Red per CR-043 protocol. Devs must NOT modify it.
+ * QA-RED AMEND (round 2, 2026-05-05): CR-043 overridden for structural-error fix in Scenario 2 Test 1.
+ *   Scenario 2 Test 1 now invokes pending-task-sentinel.sh directly (Option A) instead of
+ *   fs.writeFileSync, so the hook collision is observable. Other scenarios unchanged.
  */
 
 import { describe, it, before, after } from 'node:test';
@@ -64,6 +67,13 @@ const TOKEN_LEDGER_HOOK = path.join(
   '.claude',
   'hooks',
   'token-ledger.sh',
+);
+const SENTINEL_SCRIPT = path.join(
+  REPO_ROOT,
+  'cleargate-planning',
+  '.claude',
+  'hooks',
+  'pending-task-sentinel.sh',
 );
 
 // ---------------------------------------------------------------------------
@@ -389,58 +399,98 @@ describe('BUG-029 Scenario 2: pending-task-sentinel TURN_INDEX collision', () =>
   });
 
   it('two sentinel writes at the same TURN_INDEX produce two distinct files (not one overwrite)', () => {
-    const TURN_INDEX = 0; // Both parallel Task() calls see the same turn_index
-
-    // Simulate what pending-task-sentinel.sh does for each parallel Agent call:
-    // OLD naming (pre-fix): .pending-task-${TURN_INDEX}.json
-    // NEW naming (post-fix): must include a uniquifier, e.g. .pending-task-${TURN_INDEX}-<pid>-<rand>.json
+    // QA-RED AMEND (2026-05-05): invoke pending-task-sentinel.sh directly (Option A)
+    // instead of fs.writeFileSync. This lets the hook collision be observable: pre-fix
+    // the hook writes .pending-task-0.json for BOTH calls (overwrite → 1 file); post-fix
+    // the hook appends a uniquifier (e.g. PID+RANDOM) so both coexist (2 files).
     //
-    // We assert the post-fix state: after two writes that target the same turn_index,
-    // two distinct .pending-task-*.json files must exist in sprintDir.
+    // Both calls share the same transcript (0 assistant turns → TURN_INDEX=0).
+    // SKIP_FLASHCARD_GATE=1 bypasses the flashcard gate (no STORY-*-dev.md in fixture).
     //
-    // To write both "simultaneously" without a uniquifier race, we directly probe
-    // the naming scheme: write both old-style files and count survivors.
-    const oldNameA = path.join(env.sprintDir, `.pending-task-${TURN_INDEX}.json`);
-    const oldNameB = path.join(env.sprintDir, `.pending-task-${TURN_INDEX}.json`); // identical — collision
+    // POST-FIX assertion: 2 distinct .pending-task-*.json files.
+    // PRE-FIX behavior: 1 file (second hook invocation overwrites first).
+    // This test FAILS on the clean baseline.
 
-    const sentinelA = JSON.stringify({
-      agent_type: 'developer',
-      work_item_id: 'STORY-A',
-      turn_index: TURN_INDEX,
-      started_at: '2026-05-05T00:42:33Z',
+    // Create a minimal transcript with 0 assistant turns so TURN_INDEX=0 for both calls.
+    const transcriptPath = path.join(env.tmpDir, 'transcript-sentinel-s2t1.jsonl');
+    fs.writeFileSync(
+      transcriptPath,
+      JSON.stringify({ type: 'user', message: { content: 'trigger' } }) + '\n',
+      'utf-8',
+    );
+
+    const childEnv = {
+      ...process.env,
+      ORCHESTRATOR_PROJECT_DIR: env.tmpDir,
+      SKIP_FLASHCARD_GATE: '1',
+      // Clear NODE_TEST_CONTEXT so nested bash children don't see test context.
+      NODE_TEST_CONTEXT: undefined as unknown as string,
+    };
+    // Remove NODE_TEST_CONTEXT entirely from the env object.
+    delete childEnv['NODE_TEST_CONTEXT'];
+
+    // Build hook input payloads for STORY-A and STORY-B.
+    const payloadA = JSON.stringify({
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Task',
+      session_id: 'session-s2-a',
+      transcript_path: transcriptPath,
+      tool_input: {
+        subagent_type: 'developer',
+        prompt: 'STORY=STORY-A\nImplement feature A.',
+        description: 'Developer for STORY-A',
+      },
     });
-    const sentinelB = JSON.stringify({
-      agent_type: 'developer',
-      work_item_id: 'STORY-B',
-      turn_index: TURN_INDEX,
-      started_at: '2026-05-05T00:42:33Z',
+    const payloadB = JSON.stringify({
+      hook_event_name: 'PreToolUse',
+      tool_name: 'Task',
+      session_id: 'session-s2-b',
+      transcript_path: transcriptPath,
+      tool_input: {
+        subagent_type: 'developer',
+        prompt: 'STORY=STORY-B\nImplement feature B.',
+        description: 'Developer for STORY-B',
+      },
     });
 
-    // Write A then B — this is exactly what the hook does in the parallel-dispatch scenario.
-    // Both use the same filename keyed by TURN_INDEX.
-    fs.writeFileSync(oldNameA, sentinelA, 'utf-8');
-    fs.writeFileSync(oldNameB, sentinelB, 'utf-8'); // overwrites A
+    // First hook fire — STORY-A Task dispatch
+    const rA = spawnSync('bash', [SENTINEL_SCRIPT], {
+      input: payloadA,
+      encoding: 'utf8',
+      timeout: 10_000,
+      env: childEnv,
+    });
+    assert.strictEqual(
+      rA.status,
+      0,
+      `pending-task-sentinel.sh (STORY-A) exited ${rA.status}. stderr: ${rA.stderr}`,
+    );
+
+    // Second hook fire — STORY-B Task dispatch (same TURN_INDEX=0, same transcript)
+    const rB = spawnSync('bash', [SENTINEL_SCRIPT], {
+      input: payloadB,
+      encoding: 'utf8',
+      timeout: 10_000,
+      env: childEnv,
+    });
+    assert.strictEqual(
+      rB.status,
+      0,
+      `pending-task-sentinel.sh (STORY-B) exited ${rB.status}. stderr: ${rB.stderr}`,
+    );
 
     const sentinelFiles = fs
       .readdirSync(env.sprintDir)
       .filter((f) => f.startsWith('.pending-task-') && f.endsWith('.json'));
 
-    // POST-FIX assertion: two writes must produce two distinct files.
-    // A fix MUST change the filename scheme (e.g. ".pending-task-0-PID-RAND.json")
-    // so both can coexist.
-    //
-    // PRE-FIX behavior: oldNameA === oldNameB → only 1 file survives (STORY-B).
-    //
-    // This assertion documents the collision: we expect 2 files but the current
-    // scheme can only produce 1. FAILS on clean baseline.
     assert.strictEqual(
       sentinelFiles.length,
       2,
-      `Expected 2 distinct sentinel files for two parallel Agent dispatches at TURN_INDEX=${TURN_INDEX}, ` +
+      `Expected 2 distinct sentinel files for two parallel Task() dispatches at TURN_INDEX=0, ` +
         `but found ${sentinelFiles.length}. ` +
         `This is the BUG-029 pending-task collision: pending-task-sentinel.sh:186 uses ` +
         `'.pending-task-\${TURN_INDEX}.json', so two parallel Task() calls in the same ` +
-        `assistant message share the same filename; the second write silently overwrites the first. ` +
+        `assistant message share the same filename; the second mv silently overwrites the first. ` +
         `Fix: add uniquifier suffix (e.g. \${TURN_INDEX}-\$\$-\${RANDOM}) to the sentinel filename.`,
     );
   });
