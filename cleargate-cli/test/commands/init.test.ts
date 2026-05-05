@@ -872,6 +872,138 @@ describe('cleargate init', () => {
     }
   }, 20000);
 
+  // ─── CR-059 Scenario 5: Idempotent re-init suppresses restart warning ────────
+  //
+  // Given: existingSettings already has the exact PostToolUse + PreToolUse block
+  //        that HOOK_ADDITION would add (nothing schema-meaningful changes).
+  // When:  init runs.
+  // Then:  stdout contains "unchanged (hooks block already current)"
+  //        AND does NOT contain "restart Claude Code".
+
+  it('CR-059 scenario 5: idempotent re-init suppresses restart warning', async () => {
+    // Build a settings.json that already contains exactly what HOOK_ADDITION would merge.
+    const existingSettings = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [
+              {
+                type: 'command',
+                command: '${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-edit-gate.sh',
+              },
+            ],
+          },
+        ],
+        PostToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [
+              {
+                type: 'command',
+                command: '${CLAUDE_PROJECT_DIR}/.claude/hooks/stamp-and-gate.sh',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const clauDeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(clauDeDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(clauDeDir, 'settings.json'),
+      JSON.stringify(existingSettings, null, 2) + '\n',
+      'utf8',
+    );
+
+    const cap = makeCapture();
+    await initHandler({ cwd: tmpDir, payloadDir: META_ROOT_PLANNING, stdout: cap.stdout, stderr: cap.stderr });
+
+    const outJoined = cap.out.join('');
+
+    // Must report "unchanged" (no schema-meaningful change)
+    expect(outJoined).toContain('[cleargate init] .claude/settings.json unchanged (hooks block already current)');
+
+    // The settings.json line must NOT include the restart suffix —
+    // other steps (.mcp.json) may still mention restart on first creation,
+    // so we assert on the specific settings.json log line.
+    const settingsLine = cap.out.find((line) => line.includes('settings.json'));
+    expect(settingsLine).toBeDefined();
+    expect(settingsLine).not.toContain('restart Claude Code');
+  });
+
+  // ─── CR-059 Scenario 6: Real hooks change still warns ─────────────────────
+  //
+  // Given: existingSettings has a stale/different PostToolUse command.
+  // When:  init runs.
+  // Then:  stdout contains "Updated .claude/settings.json"
+  //        AND contains "restart Claude Code if already open".
+
+  it('CR-059 scenario 6: real hooks change emits restart warning', async () => {
+    // Settings with a stale stamp-and-gate command — different from what HOOK_ADDITION adds.
+    const existingSettings = {
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: 'Edit|Write',
+            hooks: [
+              {
+                type: 'command',
+                command: '${CLAUDE_PROJECT_DIR}/.claude/hooks/OLD-gate.sh',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const clauDeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(clauDeDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(clauDeDir, 'settings.json'),
+      JSON.stringify(existingSettings, null, 2) + '\n',
+      'utf8',
+    );
+
+    const cap = makeCapture();
+    await initHandler({ cwd: tmpDir, payloadDir: META_ROOT_PLANNING, stdout: cap.stdout, stderr: cap.stderr });
+
+    const outJoined = cap.out.join('');
+
+    // Must say "Updated" (hooks block really changed)
+    expect(outJoined).toContain('Updated .claude/settings.json');
+
+    // Must advise a restart
+    expect(outJoined).toContain('restart Claude Code if already open');
+  });
+
+  // ─── CR-059 Scenario 7: Parse-failure conservative fallback ──────────────
+  //
+  // Given: existingSettings is malformed JSON (can't be parsed).
+  // When:  init runs.
+  // Then:  stdout contains "restart Claude Code if already open"
+  //        (conservative — when in doubt, warn).
+
+  it('CR-059 scenario 7: malformed settings.json triggers conservative restart warning', async () => {
+    const clauDeDir = path.join(tmpDir, '.claude');
+    fs.mkdirSync(clauDeDir, { recursive: true });
+    // Write intentionally broken JSON
+    fs.writeFileSync(
+      path.join(clauDeDir, 'settings.json'),
+      '{ this is not valid JSON }',
+      'utf8',
+    );
+
+    const cap = makeCapture();
+    await initHandler({ cwd: tmpDir, payloadDir: META_ROOT_PLANNING, stdout: cap.stdout, stderr: cap.stderr });
+
+    const outJoined = cap.out.join('');
+
+    // Conservative path: parse failure → treat existingSettings as null → new content differs from '{}' → warn
+    expect(outJoined).toContain('restart Claude Code if already open');
+  });
+
   // ─── BUG-023: init stamps pin_version into install snapshot ─────────────────
 
   it('BUG-023: init writes pin_version into install snapshot', async () => {
