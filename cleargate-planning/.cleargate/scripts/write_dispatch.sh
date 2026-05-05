@@ -107,7 +107,13 @@ if [[ -f "${PKG_JSON}" ]]; then
 fi
 
 # ─── Write dispatch file atomically ─────────────────────────────────────────
-DISPATCH_TARGET="${SPRINT_DIR}/.dispatch-${SESSION_ID}.json"
+# BUG-029 fix: uniquify the dispatch filename so that two parallel Task()
+# spawns from the same orchestrator session (same SESSION_ID) do NOT collide
+# on the same target path. Pattern matches pre-tool-use-task.sh:115.
+# Old: .dispatch-${SESSION_ID}.json  ← second parallel write silently overwrites first.
+# New: .dispatch-${TS}-${PID}-${RAND}.json  ← each spawn gets a distinct file.
+TS_EPOCH="$(date -u +%s)"
+DISPATCH_TARGET="${SPRINT_DIR}/.dispatch-${TS_EPOCH}-$$-${RANDOM}.json"
 SPAWNED_AT="$(date -u +%FT%TZ)"
 
 DISPATCH_JSON="$(jq -cn \
