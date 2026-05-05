@@ -14,7 +14,7 @@
 
 **Engineering scope: yes.** All 10 EPIC-006 stories + STORY-004-08 (auth/exchange) + STORY-005-06 (CLI login) + STORY-004-09 (Items Admin API, discovered mid-sprint as a 006-06 prereq) landed with tests green in `admin/`, `mcp/`, `cleargate-cli/`. Admin UI runs locally via Playwright E2E covering OAuth happy path, token-modal gate, audit filter roundtrip, stats chart render. Dockerfile builds end-to-end (fix commits `6a6cc3f` + `62dee3d` resolved two real build failures caught by direct Orbstack verification before the ops handoff).
 
-**Ops scope: partial.** Runbook `admin/coolify/DEPLOYMENT.md` was written, step-through rehearsed, and the Dockerfile verified to build clean — but the production deploy of `admin.cleargate.<domain>` + MCP redeploy with `@fastify/cors` env wiring is an ops-hands task queued for next sprint. No blocker — the image builds; the sub-domain + TLS cert + env var push is ~30 min of ops work.
+**Ops scope: complete.** Runbook `admin/coolify/DEPLOYMENT.md` written, step-through rehearsed, and Dockerfile verified to build clean. Production deploy executed post-sprint: `admin.cleargate.soula.ge` is live with TLS, MCP redeployed with `CLEARGATE_ADMIN_ORIGIN` and `@fastify/cors` env wiring, and a root admin can log in via GitHub OAuth and drive the full surface end-to-end. (Originally noted as "partial — queued for next sprint" in the 2026-04-20 report; reconciled 2026-05-06 to reflect the live deployment.)
 
 ### Headline deliverables
 
@@ -177,7 +177,7 @@ Approximate spend on SPRINT-06 activity alone (excluding EPIC-010 carryover row)
 
 Targeted for SPRINT-08 (SPRINT-07 already shipped per execution-order swap):
 
-- **Ops deployment execution.** Push admin container + MCP redeploy to Coolify. `admin.cleargate.<domain>` TLS + env vars + first-admin bootstrap (currently undocumented psql insert — needs a runbook or a `cleargate-admin bootstrap-root` CLI command).
+- ~~**Ops deployment execution.**~~ ✅ Done post-sprint — `admin.cleargate.soula.ge` is live; MCP redeploy + `@fastify/cors` env wired. First-admin bootstrap shipped as `cleargate-admin bootstrap-root` (STORY-011-03, EPIC-011).
 - **`GET /admin-api/v1/items/:cleargate_id` single-item endpoint.** Replace 006-06's list-and-filter-by-200 workaround.
 - **Items test-harness isolation.** `mcp/src/admin-api/__tests__/items.test.ts` uses a hardcoded admin UUID that collides with concurrent suite runs (parallel-FK failures flagged during STORY-004-09). Fix: per-test UUIDs or serialise.
 - **`stories: []` sprint frontmatter.** Active-sprint criteria body-regex needs tightening (noticed during wiki rebuild pre-SPRINT-07).
