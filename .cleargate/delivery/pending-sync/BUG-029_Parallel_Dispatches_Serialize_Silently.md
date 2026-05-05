@@ -29,7 +29,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-05T08:52:13Z
+  last_gate_check: 2026-05-05T09:07:37Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -45,7 +45,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-05T08:51:06Z
+  last_stamp: 2026-05-05T09:07:37Z
   sessions: []
 ---
 
@@ -114,12 +114,26 @@ Note three findings: (a) two dispatches at `00:42:33Z`, (b) only STORY-002-03 pr
 
 ---
 
+## 6. Spike Findings
+
+**Root cause:** `.cleargate/scripts/write_dispatch.sh:110` — `DISPATCH_TARGET="${SPRINT_DIR}/.dispatch-${SESSION_ID}.json"`. Single filename per orchestrator session. Two parallel Task() spawns from the same session both call `write_dispatch.sh` with the same `SESSION_ID`, both compute the identical target path, and the atomic `mv` at line 130 makes the second write silently overwrite the first. Compounded by `cleargate-planning/.claude/hooks/pending-task-sentinel.sh:186` which keys `.pending-task-${TURN_INDEX}.json` by transcript turn-count — two Agent calls in a single assistant message share one turn_index, so the pending-task sentinel collides identically. The bug spans both manual+auto sentinel layers.
+
+**Mechanism:** Orchestrator issues two Task() calls in one message. Both fire `write_dispatch.sh STORY-002-03 ...` then `write_dispatch.sh STORY-002-04 ...` in rapid succession (00:42:33Z log shows both). Second invocation overwrites the dispatch file in place; first attribution is lost. When the first SubagentStop fires, `token-ledger.sh:121` reads the newest `.dispatch-*.json` (now STORY-002-04's content) and consumes/deletes it. When the second SubagentStop fires, no marker remains → falls back to transcript-grep → mis-attributes or drops. The re-dispatch at 01:00:24Z works because it's serial — one marker, one consumer.
+
+**Why other suspects are NOT the cause:** SKILL.md is silent on parallel-call mechanics but the evidence (two `wrote dispatch:` lines at 00:42:33Z) proves the orchestrator IS issuing concurrent Task calls — the skill doc isn't blocking parallelism, the dispatch-marker layer is. `pre-tool-use-task.sh:115` correctly uniquifies its filename via `${RANDOM}+${pid}+epoch`, so the auto-hook path would NOT collide; but `write_dispatch.sh` (the path SKILL.md §1 instructs the orchestrator to use explicitly) was not updated to match. `token-ledger.sh` newest-wins lookup is downstream — given a single overwritten marker, it has no way to recover the lost attribution.
+
+**Recommended fix scope (lane = standard):** Three files, ~25 LOC net. (1) `.cleargate/scripts/write_dispatch.sh:110` — replace `DISPATCH_TARGET=".dispatch-${SESSION_ID}.json"` with the same uniquification pattern from `pre-tool-use-task.sh:115` (`.dispatch-$(date -u +%s)-$$-${RANDOM}.json`); ~3 LOC. (2) `cleargate-planning/.claude/hooks/pending-task-sentinel.sh:186` — replace `${TURN_INDEX}` keying with `${TURN_INDEX}-$$-${RANDOM}` and update token-ledger.sh's pending-task lookup if needed; ~5 LOC. (3) `token-ledger.sh:121` newest-file lookup is wrong for parallelism — must match `(work_item_id, agent_type)` from the SubagentStop's transcript head, NOT timestamp. This is the load-bearing change: rewrite §C "dispatch-marker attribution" block to grep the subagent's first-user-message for the work_item_id and pick the matching `.dispatch-*.json` file by content; ~15 LOC. After the live `/.claude/hooks/` re-sync, mirror via `cleargate-cli && npm run prebuild`.
+
+**Conditional ADR flag:** **No.** SKILL.md and the parallel-dispatch protocol need NO change — the orchestrator's behavior (single message, multiple Agent calls) is already correct per CLAUDE.md's parallel-tool-call directive. The fix is entirely a marker-mechanic correction; no protocol rewrite needed.
+
+---
+
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity** — repro is observable; root cause needs source-level investigation to determine whether the bug is in the orchestrator skill, the sentinel hook, or the SubagentStop handler.
+**Current Status: 🟢 Low Ambiguity** — root cause confirmed at file:line; recommended fix scope ≤30 LOC across 3 files.
 
 Requirements to pass to Green (Ready for Fix):
 - [x] Reproduction steps are 100% deterministic.
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached.
 - [ ] Verification command (failing test) is provided. — *test sketched, not yet written*
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter.
