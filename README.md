@@ -65,8 +65,6 @@ Standard AI coding tools live entirely inside the developer's terminal. The busi
 
 > Stakeholder input enters through Triage. The Architect drafts a phase plan, which **halts at the Ambiguity Gate** until human sign-off. Once approved, parallel Developer/QA pairs execute in isolated git worktrees. DevOps handles mechanical merge and state transitions. The Reporter synthesizes the sprint, lessons compound into the Wiki, and the MCP adapter pushes everything natively into your PM tool.
 
-> _Diagram refresh in flight — see SPRINT-25 lifecycle-diagram-prompt.md_
-
 ---
 
 ## What ClearGate does
@@ -112,7 +110,7 @@ Final human sign-off is required before a sprint can close. Bugs found post-QA a
 
 ### 6. Total visibility for the business — the MCP adapter
 
-ClearGate runs an MCP server that exposes `cleargate_push_item`, `cleargate_pull_initiative`, and friends. Approved epics, stories, and sprint reports are pushed natively into the customer's tool of record — no middleman DB, no proprietary dashboard. MCP server with adapter framework; native **Jira** and **GitHub Projects** adapters in development; **Linear** is shipped. See [docs/INTERNALS.md](./docs/INTERNALS.md) for adapter status. The Sponsor and PO audit AI-generated contracts, dependencies, and token ledgers in real time, in their own tool.
+ClearGate runs an MCP server that exposes `cleargate_push_item`, `cleargate_pull_initiative`, and friends. Approved epics, stories, and sprint reports are pushed natively into the customer's tool of record — no middleman DB, no proprietary dashboard. MCP server ships with a provider-agnostic adapter framework (`PmAdapter` interface); the **Linear** adapter is implemented and deployed today. **Jira** and **GitHub Projects** are on the roadmap — the framework supports them, but adapter implementations have not yet been written. See [docs/INTERNALS.md](./docs/INTERNALS.md) for current adapter status. The Sponsor and PO audit AI-generated contracts, dependencies, and token ledgers in real time, in their own tool.
 
 ### 7. The self-improving engine
 
@@ -120,9 +118,9 @@ Every sprint feeds three input metrics into the next: first-pass success rate, A
 
 ---
 
-## What's New (SPRINT-22 through SPRINT-24)
+## What's New (SPRINT-22 through SPRINT-26)
 
-The SDLC Hardening arc (SPRINT-22 → SPRINT-23 → SPRINT-24) added eight major capabilities to the framework. Post-CR-053, `cleargate init` no longer writes a root `MANIFEST.json` to the user's repo.
+The SDLC Hardening arc spans SPRINT-22 → SPRINT-23 → SPRINT-24 (eight major framework capabilities), then wraps up in SPRINT-25 with carry-over fixes + docs alignment, and rolls into SPRINT-26 (currently active) addressing issues surfaced by live dogfood use.
 
 **SPRINT-22 — TDD discipline + role refinement**
 - **CR-042** Reporter prompt accuracy fix — fresh-session dispatch contract documented in `reporter.md`.
@@ -140,6 +138,23 @@ The SDLC Hardening arc (SPRINT-22 → SPRINT-23 → SPRINT-24) added eight major
 - **CR-050** `run_script.sh` shim retirement — 8 callers migrated to the structured wrapper.
 - **CR-051** DevOps subagent registration findings + escape hatch — `devops` registration edge case documented; escape hatch in SKILL.md §C.7.
 - **CR-052** `wrapScript` shared test helper — canonical caller-test pattern for `run_script.sh`-invoking tests.
+
+**SPRINT-25 — SDLC Hardening Wrap-Up + Docs Aligned**
+- **CR-053** `cleargate init` MANIFEST.json root-path bug fix — `init` no longer writes a stray `MANIFEST.json` to the user-repo root.
+- **CR-054** `run_script.sh` UTF-8 byte-correct truncation — incident-log truncation no longer splits multi-byte characters.
+- **CR-055** `wrapScript` helper adoption in caller tests — completes the CR-052 migration across remaining caller-tests.
+- **CR-056** Skill candidate heuristic — investigation + fix for skill auto-load mis-suggestions.
+- **CR-057** `run_script.sh` self-repair — incident-corpus-driven hardening; the wrapper learns from its own incident log.
+- **CR-058** README refresh + lifecycle-diagram prompt — this README, plus the diagram-regen prompt at `.cleargate/sprint-runs/SPRINT-25/lifecycle-diagram-prompt.md`.
+
+**SPRINT-26 — Dogfood Hardening (active)**
+
+Triggered by a 2026-05-04 → 2026-05-05 dogfood test where ClearGate scaffolded and shipped a real downstream product sprint. Three CLI bugs were hot-patched in flight (v0.11.1 / v0.11.2 / v0.11.3); five additional items were filed as standard work for this sprint:
+- **BUG-027** token-ledger fallback grep regression (~25% of ledger rows mis-attributed).
+- **BUG-028** `upgrade --dry-run` vs real-run state mismatch in the merge prompt.
+- **BUG-029** parallel-eligible dispatches silently serialize.
+- **CR-059** smarter session-load restart warning.
+- **CR-060** doc clarity — `cleargate-planning/` is not shipped to target repos.
 
 See sprint files for the complete commit history.
 
