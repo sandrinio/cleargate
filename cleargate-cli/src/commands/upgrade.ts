@@ -49,6 +49,7 @@ import {
   openInEditor as defaultOpenInEditor,
   containsConflictMarkers,
 } from '../lib/editor.js';
+import { extractSessionLoadDelta } from '../lib/session-load-delta.js';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -446,7 +447,27 @@ export async function upgradeHandler(
     let count = 0;
     for (const item of workItems) {
       const state = classify(item.entry.sha256, item.installSha, item.currentSha, item.entry.tier);
-      stdout(`[dry-run] ${item.entry.path}  action=${item.action}  state=${state}`);
+
+      // BUG-028 Direction Y: compute projected post-state so users can see what
+      // the live run would leave behind.  After a successful "take-theirs" the
+      // file on disk equals the upstream payload, so its sha == entry.sha256.
+      // Classifying with postSha = entry.sha256 (install = entry.sha256 as well)
+      // always yields `clean` — which is exactly what the drift map would record.
+      // We emit both states as `state=<pre> → <post>` so the human can see at a
+      // glance which files will be mutated (pre != post).
+      const projectedPostSha = item.entry.sha256;
+      const projectedPostState = classify(
+        item.entry.sha256,
+        item.entry.sha256,
+        projectedPostSha,
+        item.entry.tier
+      );
+      const stateLabel =
+        state !== projectedPostState
+          ? `state=${state} → ${projectedPostState}`
+          : `state=${state}`;
+
+      stdout(`[dry-run] ${item.entry.path}  action=${item.action}  ${stateLabel}`);
       count++;
     }
     stdout(`[dry-run] ${count} files planned. No changes made.`);
@@ -473,6 +494,19 @@ export async function upgradeHandler(
 
   for (const item of workItems) {
     const { entry, currentSha, installSha, action } = item;
+
+    // CR-059: For session-load-relevant files, capture pre-mutation content so
+    // we can compare schema-meaningful portions rather than raw bytes.
+    let preMutationContent: string | null = null;
+    if (SESSION_LOAD_PATHS.has(entry.path)) {
+      const targetPath = path.join(cwd, entry.path);
+      try {
+        preMutationContent = await fsp.readFile(targetPath, 'utf-8');
+      } catch {
+        // File absent — treat as empty string (conservative: any write may need restart)
+        preMutationContent = '';
+      }
+    }
 
     switch (action) {
       case 'skip': {
@@ -513,8 +547,23 @@ export async function upgradeHandler(
       package_sha: entry.sha256,
     };
 
-    if (SESSION_LOAD_PATHS.has(entry.path) && postSha !== currentSha) {
-      sessionRestartFiles.push(entry.path);
+    // CR-059: Replace byte-level postSha !== currentSha check with schema-aware
+    // extractSessionLoadDelta. Only warn when hooks block (.claude/settings.json)
+    // or mcpServers.cleargate (.mcp.json) actually changed. Cosmetic-only rewrites
+    // (key order, whitespace) are suppressed. Conservative: if content unreadable
+    // or parse fails, extractSessionLoadDelta returns true (warn).
+    if (SESSION_LOAD_PATHS.has(entry.path) && preMutationContent !== null) {
+      const targetPath = path.join(cwd, entry.path);
+      let postMutationContent: string;
+      try {
+        postMutationContent = await fsp.readFile(targetPath, 'utf-8');
+      } catch {
+        // Cannot read post-mutation file — conservative: warn
+        postMutationContent = '';
+      }
+      if (extractSessionLoadDelta(entry.path, preMutationContent, postMutationContent)) {
+        sessionRestartFiles.push(entry.path);
+      }
     }
   }
 

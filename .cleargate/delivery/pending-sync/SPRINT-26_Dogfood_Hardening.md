@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: local
-status: Draft
+status: Active
 execution_mode: v2
 start_date: 2026-05-06
 end_date: 2026-05-17
@@ -52,7 +52,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-05T08:36:52Z
+  last_gate_check: 2026-05-05T08:53:44Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

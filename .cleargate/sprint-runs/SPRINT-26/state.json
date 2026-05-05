@@ -1,0 +1,70 @@
+{
+  "schema_version": 2,
+  "sprint_id": "SPRINT-26",
+  "execution_mode": "v2",
+  "sprint_status": "Active",
+  "stories": {
+    "BUG-027": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-05T15:38:17.658Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-028": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-05T16:06:38.574Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-029": {
+      "state": "Done",
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-05T17:34:10.503Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "CR-059": {
+      "state": "Done",
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-05T16:35:39.779Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "CR-060": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-05T09:10:18.012Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "transition BUG-029 → Done",
+  "updated_at": "2026-05-05T17:34:10.503Z"
+}

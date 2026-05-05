@@ -45,7 +45,24 @@
  * CR-044 (2026-05-04): DevOps role agent — add 'devops' to legacy fallback role list.
  *   Fix: L227 role iteration loop gains 'devops' so transcript-grep path correctly
  *     attributes DevOps agent tokens when no dispatch marker is present.
- *   Snapshot: token-ledger.cr-044.sh (current authoritative baseline)
+ *   Snapshot: token-ledger.cr-044.sh (historical; superseded by BUG-027)
+ *
+ * BUG-027 (2026-05-05): Token-ledger fallback grep mis-tags work_item to first lexical EPIC-NNN.
+ *   Fix: Before transcript grep, read most-recent prior ledger row's work_item_id (Step 1)
+ *     and most-recent dispatch-marker log line (Step 2). Transcript grep is now last resort.
+ *     Eliminates 12 EPIC-001 misattributions observed in SPRINT-02 dogfood.
+ *   Snapshot: token-ledger.bug-027.sh (historical; superseded by BUG-029)
+ *
+ * BUG-029 (2026-05-05): Parallel dispatch markers collide — newest-file lookup mis-attributes.
+ *   Fix 1 (write_dispatch.sh): Replace `.dispatch-${SESSION_ID}.json` with
+ *     `.dispatch-${TS}-${PID}-${RANDOM}.json` so parallel Task() spawns each
+ *     get a distinct dispatch file.
+ *   Fix 2 (pending-task-sentinel.sh): Replace `.pending-task-${TURN_INDEX}.json`
+ *     with `.pending-task-${TURN_INDEX}-$$-${RANDOM}.json` for same reason.
+ *   Fix 3 (token-ledger.sh): Replace `ls -t .dispatch-*.json | head -1` with
+ *     content-based (work_item_id) tuple-match against the SubagentStop transcript.
+ *     Newest-file fallback is retained when no tuple match is found (logged warn).
+ *   Snapshot: token-ledger.bug-029.sh (current authoritative baseline)
  *
  * Pattern: copy-on-fix — snapshot was taken immediately after each fix.
  * To update the active snapshot intentionally: cp <live-hook> <snapshot-path>
@@ -133,7 +150,33 @@ describe('hook snapshot regression locks', () => {
     expect(fs.existsSync(snapshotPath), `CR-036 snapshot not found: ${snapshotPath}`).toBe(true);
   });
 
-  it('token-ledger.sh matches CR-044 snapshot byte-for-byte', () => {
+  it('CR-044 snapshot file exists (historical baseline — superseded by BUG-027)', () => {
+    // CR-044 snapshot is retained for audit/forensic purposes.
+    // After BUG-027, the live hook is intentionally different from the CR-044 snapshot
+    // (ledger-row + dispatch-marker-log lookup added before transcript grep).
+    // We assert the snapshot file exists but do NOT assert live == cr-044.
+    const snapshotPath = path.join(
+      __dirname,
+      'hooks',
+      'token-ledger.cr-044.sh'
+    );
+    expect(fs.existsSync(snapshotPath), `CR-044 snapshot not found: ${snapshotPath}`).toBe(true);
+  });
+
+  it('BUG-027 snapshot file exists (historical baseline — superseded by BUG-029)', () => {
+    // BUG-027 snapshot is retained for audit/forensic purposes.
+    // After BUG-029, the live hook is intentionally different from the BUG-027 snapshot
+    // (newest-file lookup replaced with tuple-match on work_item_id from transcript).
+    // We assert the snapshot file exists but do NOT assert live == bug-027.
+    const snapshotPath = path.join(
+      __dirname,
+      'hooks',
+      'token-ledger.bug-027.sh'
+    );
+    expect(fs.existsSync(snapshotPath), `BUG-027 snapshot not found: ${snapshotPath}`).toBe(true);
+  });
+
+  it('token-ledger.sh matches BUG-029 snapshot byte-for-byte', () => {
     const livePath = path.join(
       REPO_ROOT,
       'cleargate-planning',
@@ -144,11 +187,11 @@ describe('hook snapshot regression locks', () => {
     const snapshotPath = path.join(
       __dirname,
       'hooks',
-      'token-ledger.cr-044.sh'
+      'token-ledger.bug-029.sh'
     );
 
     expect(fs.existsSync(livePath), `live hook not found: ${livePath}`).toBe(true);
-    expect(fs.existsSync(snapshotPath), `CR-044 snapshot not found: ${snapshotPath}`).toBe(true);
+    expect(fs.existsSync(snapshotPath), `BUG-029 snapshot not found: ${snapshotPath}`).toBe(true);
 
     const live = fs.readFileSync(livePath);
     const snapshot = fs.readFileSync(snapshotPath);

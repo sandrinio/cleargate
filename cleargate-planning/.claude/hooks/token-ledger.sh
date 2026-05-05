@@ -98,27 +98,91 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
   LEDGER="${SPRINT_DIR}/token-ledger.jsonl"
 
-  # --- dispatch-marker attribution (CR-016 + CR-026, highest priority) ---
+  # --- dispatch-marker attribution (CR-016 + CR-026 + BUG-029, highest priority) ---
   # The PreToolUse:Task hook (pre-tool-use-task.sh, CR-026) auto-writes:
   #   .cleargate/sprint-runs/<sprint>/.dispatch-<ts>-<pid>-<rand>.json
   # with { work_item_id, agent_type, spawned_at, session_id, writer }.
   # Reading this file (if present) gives accurate attribution; falls back to the
   # per-task pending-task sentinel (second priority) and transcript-scan (third).
   #
-  # CR-026 Defect 1 fix — path-B (newest-file lookup):
-  # The old lookup keyed on the subagent's session_id from the SubagentStop payload,
-  # which is the *subagent's* session ID, never the orchestrator's. This caused 100%
-  # lookup failure since SPRINT-15 (BUG-024 §3.1 Defect 1). We now use newest-file
-  # lookup (ls -t) — atomic with the existing mv→.processed-$$ rename pattern.
-  # See CR-026 M3 plan §"Open Question Q1 resolution — path-A vs path-B".
+  # BUG-029 fix — tuple-match replaces newest-file lookup:
+  # When two parallel Task() spawns write two distinct .dispatch-*.json files,
+  # the old `ls -t | head -1` (newest-file) lookup grabs whichever was written
+  # last — mis-attributing the ledger row to the wrong story. The fix: extract
+  # the work_item_id from the SubagentStop transcript (first user message) and
+  # match it against the work_item_id field inside each .dispatch-*.json.
+  # Fallback: if no tuple match, fall back to newest-file lookup with a warning.
   #
   # Atomicity: rename to .processed-$$ before reading, then delete post-row-write.
   # This prevents stale dispatch files from leaking attribution to a later subagent.
   SENTINEL_AGENT_TYPE=""
   SENTINEL_WORK_ITEM_ID=""
+  DISPATCH_PROCESSED=""
 
-  # CR-026: newest-file lookup (path-B) — replaces session-id-keyed lookup.
-  DISPATCH_FILE="$(ls -t "${SPRINT_DIR}"/.dispatch-*.json 2>/dev/null | head -1)"
+  # BUG-029: extract work_item_id from the SubagentStop transcript (first user message).
+  # This is the orchestrator's dispatch prompt — by convention it starts with the
+  # work_item_id (e.g. "STORY=NNN-NN" or "STORY-NNN-NN") or contains it prominently.
+  # We use non-capturing groups (no capture groups → scan returns full match string)
+  # and a broad alphanumeric suffix to also match letter-suffix IDs like STORY-A, STORY-B
+  # used in tests and fast-lane items (not just digit-keyed like the legacy path).
+  TRANSCRIPT_WORK_ITEM=""
+  if [[ -f "${TRANSCRIPT_PATH}" ]]; then
+    # Primary: first user message, scan for work-item reference (TYPE[-=]ID).
+    # scan("(?:...)+") with no capture groups returns the full match string.
+    TRANSCRIPT_WORK_ITEM="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
+      [.[] | select(.type == "user")]
+      | [.[] | select(
+          (.message.content | if type == "array"
+            then map(.text? // "") | join(" ")
+            else (. // "") end
+          ) | test($banner_re) | not
+        )]
+      | .[0].message.content
+      | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
+      | tostring
+      | [scan("(?:STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=][A-Za-z0-9]+(?:-[A-Za-z0-9]+)?")]
+      | .[0] // ""
+    ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1 | sed 's/=/-/g')"
+    # Normalize: replace = with - (STORY=NNN-NN → STORY-NNN-NN)
+    TRANSCRIPT_WORK_ITEM="$(printf '%s' "${TRANSCRIPT_WORK_ITEM}" | sed 's/=/-/g')"
+    [[ "${TRANSCRIPT_WORK_ITEM}" == "" || "${TRANSCRIPT_WORK_ITEM}" == "null" ]] && TRANSCRIPT_WORK_ITEM=""
+  fi
+
+  # BUG-029: tuple-match — iterate dispatch files, find one whose work_item_id
+  # matches TRANSCRIPT_WORK_ITEM. If exactly one matches, consume it; otherwise
+  # fall back to newest-file (legacy CR-026 path) with a warning logged.
+  DISPATCH_FILE=""
+  if [[ -n "${TRANSCRIPT_WORK_ITEM}" ]]; then
+    # Search all dispatch files for a content match on work_item_id.
+    MATCHED_FILE=""
+    MATCH_COUNT=0
+    for CANDIDATE in "${SPRINT_DIR}"/.dispatch-*.json; do
+      [[ -f "${CANDIDATE}" ]] || continue
+      CANDIDATE_WORK_ITEM="$(jq -r '.work_item_id // empty' "${CANDIDATE}" 2>/dev/null)"
+      if [[ "${CANDIDATE_WORK_ITEM}" == "${TRANSCRIPT_WORK_ITEM}" ]]; then
+        MATCHED_FILE="${CANDIDATE}"
+        MATCH_COUNT=$(( MATCH_COUNT + 1 ))
+      fi
+    done
+    if [[ "${MATCH_COUNT}" -eq 1 ]]; then
+      DISPATCH_FILE="${MATCHED_FILE}"
+      printf '[%s] dispatch-marker tuple-match: transcript_work_item=%s → %s\n' \
+        "$(date -u +%FT%TZ)" "${TRANSCRIPT_WORK_ITEM}" "${DISPATCH_FILE}" >> "${HOOK_LOG}"
+    elif [[ "${MATCH_COUNT}" -gt 1 ]]; then
+      printf '[%s] warn: %d dispatch files matched work_item=%s — falling back to newest-file\n' \
+        "$(date -u +%FT%TZ)" "${MATCH_COUNT}" "${TRANSCRIPT_WORK_ITEM}" >> "${HOOK_LOG}"
+    fi
+  fi
+
+  # Fallback: newest-file lookup (CR-026 path-B) when tuple-match found nothing.
+  if [[ -z "${DISPATCH_FILE}" ]]; then
+    if [[ -n "${TRANSCRIPT_WORK_ITEM}" ]]; then
+      printf '[%s] warn: no tuple-match for work_item=%s — falling back to newest-file lookup\n' \
+        "$(date -u +%FT%TZ)" "${TRANSCRIPT_WORK_ITEM}" >> "${HOOK_LOG}"
+    fi
+    DISPATCH_FILE="$(ls -t "${SPRINT_DIR}"/.dispatch-*.json 2>/dev/null | head -1)"
+  fi
+
   if [[ -n "${DISPATCH_FILE}" && -f "${DISPATCH_FILE}" ]]; then
     DISPATCH_PROCESSED="${DISPATCH_FILE%.json}.processed-$$"
     if mv "${DISPATCH_FILE}" "${DISPATCH_PROCESSED}" 2>/dev/null; then
@@ -234,49 +298,102 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
 
   if [[ -z "${WORK_ITEM_ID}" ]]; then
-    # Legacy: detect work_item_id (PRIMARY: first user message; FALLBACK: anywhere-grep)
+    # BUG-027: Before falling to transcript grep, attempt sentinel-aware lookups.
     #
-    # CR-026: banner-skip applied before jq scan (BUG-024 §3.1 Defect 2).
-    # The SessionStart hook emits a banner line of the form:
-    #   "N items blocked: BUG-004: ..."
-    # This line poisons transcript-grep by matching the work-item regex first.
-    # We skip it via select(. | test(BANNER_SKIP_RE) | not) in the jq pipeline.
-    # BANNER_SKIP_RE is defined near the top of this script.
-    WORK_ITEM_RAW="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
-      [.[] | select(.type == "user")]
-      | [.[] | select(
-          (.message.content | if type == "array"
-            then map(.text? // "") | join(" ")
-            else (. // "") end
-          ) | test($banner_re) | not
-        )]
-      | .[0].message.content
-      | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
-      | tostring
-      | scan("(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
-    ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
+    # Resolution order (cheapest/most-accurate first):
+    #   Step 1 — Prior ledger row (Option A, M1 open decision):
+    #     Read the most-recent row from ${LEDGER} (the file this hook appends to).
+    #     Orchestrator-architect coordination calls happen AFTER a subagent dispatch that
+    #     correctly tagged the active epic; reusing the last row's work_item_id is both
+    #     cheap and accurate. This step is the primary fix for the 12 EPIC-001
+    #     misattributions observed during the SPRINT-02 dogfood (BUG-027 context_source).
+    #   Step 2 — Most-recent dispatch-marker log line:
+    #     The hook emits "dispatch-marker: session=... work_item=... agent=..." to HOOK_LOG
+    #     on every successful dispatch-file consumption. Reading the last such line gives
+    #     accurate attribution for the same class of coordination calls.
+    #   Step 3 (legacy) — First user message transcript scan (CR-026 banner-skip).
+    #   Step 4 (last resort) — Anywhere-grep in transcript (CR-026 banner-skip).
+    #
+    # Steps 3+4 are kept as final fallbacks; the transcript grep is now the last resort,
+    # not the primary path, which eliminates the EPIC-001 lexical-first misattribution.
 
-    if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
-      WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
-    else
-      # CR-026: fallback grep also applies banner-skip via sed filter.
-      WORK_ITEM_ID="$(sed -E "/${BANNER_SKIP_RE}/d" "${TRANSCRIPT_PATH}" 2>/dev/null \
-        | grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?[0-9]+(-[0-9]+)?' \
-        | head -1 \
-        | sed 's/=/-/g')"
-      if [[ -n "${WORK_ITEM_ID}" ]]; then
-        printf '[%s] work_item_id fallback grep: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+    # Step 1: Read most-recent prior ledger row's work_item_id.
+    PRIOR_LEDGER_WORK_ITEM=""
+    if [[ -f "${LEDGER}" ]]; then
+      PRIOR_LEDGER_WORK_ITEM="$(tail -1 "${LEDGER}" 2>/dev/null \
+        | jq -r '.work_item_id // empty' 2>/dev/null)"
+      # Only accept non-empty, non-"none", non-"unknown" values.
+      if [[ -n "${PRIOR_LEDGER_WORK_ITEM}" && \
+            "${PRIOR_LEDGER_WORK_ITEM}" != "none" && \
+            "${PRIOR_LEDGER_WORK_ITEM}" != "unknown" && \
+            "${PRIOR_LEDGER_WORK_ITEM}" != "null" ]]; then
+        WORK_ITEM_ID="${PRIOR_LEDGER_WORK_ITEM}"
+        printf '[%s] work_item_id from prior ledger row: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
       fi
     fi
-    [[ -z "${WORK_ITEM_ID}" ]] && WORK_ITEM_ID=""
 
-    # Legacy fallback: if no work_item_id found at all, fall back to old grep for story_id only
-    if [[ -z "${WORK_ITEM_ID}" ]]; then
-      STORY_ID_LEGACY="$(grep -oE 'STORY[-=]?[0-9]{3}-[0-9]{2}' "${TRANSCRIPT_PATH}" 2>/dev/null \
+    # Step 2: Read most-recent dispatch-marker log line (if Step 1 did not resolve).
+    if [[ -z "${WORK_ITEM_ID}" && -f "${HOOK_LOG}" ]]; then
+      DISPATCH_MARKER_WORK_ITEM="$(grep -E '^\[.+\] dispatch-marker: ' "${HOOK_LOG}" 2>/dev/null \
+        | tail -1 \
+        | grep -oE 'work_item=[^ ]+' \
         | head -1 \
-        | sed -E 's/STORY[-=]?([0-9]{3}-[0-9]{2})/STORY-\1/')"
-      [[ -z "${STORY_ID_LEGACY}" ]] && STORY_ID_LEGACY="none"
-      WORK_ITEM_ID="${STORY_ID_LEGACY}"
+        | sed 's/work_item=//')"
+      if [[ -n "${DISPATCH_MARKER_WORK_ITEM}" && \
+            "${DISPATCH_MARKER_WORK_ITEM}" != "none" && \
+            "${DISPATCH_MARKER_WORK_ITEM}" != "unknown" ]]; then
+        WORK_ITEM_ID="${DISPATCH_MARKER_WORK_ITEM}"
+        printf '[%s] work_item_id from dispatch-marker log: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+      fi
+    fi
+
+    # Step 3: Legacy transcript scan — first user message (CR-026 banner-skip applied).
+    # Only runs when Steps 1+2 did not resolve.
+    if [[ -z "${WORK_ITEM_ID}" ]]; then
+      # CR-026: banner-skip applied before jq scan (BUG-024 §3.1 Defect 2).
+      # The SessionStart hook emits a banner line of the form:
+      #   "N items blocked: BUG-004: ..."
+      # This line poisons transcript-grep by matching the work-item regex first.
+      # We skip it via select(. | test(BANNER_SKIP_RE) | not) in the jq pipeline.
+      # BANNER_SKIP_RE is defined near the top of this script.
+      WORK_ITEM_RAW="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
+        [.[] | select(.type == "user")]
+        | [.[] | select(
+            (.message.content | if type == "array"
+              then map(.text? // "") | join(" ")
+              else (. // "") end
+            ) | test($banner_re) | not
+          )]
+        | .[0].message.content
+        | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
+        | tostring
+        | scan("(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
+      ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
+
+      if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
+        WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
+      else
+        # Step 4 (last resort): CR-026: fallback grep also applies banner-skip via sed filter.
+        # This is the path that was misattributing EPIC-001 (BUG-027). Now reached only when
+        # Steps 1+2+3 all fail to resolve a work_item_id.
+        WORK_ITEM_ID="$(sed -E "/${BANNER_SKIP_RE}/d" "${TRANSCRIPT_PATH}" 2>/dev/null \
+          | grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?[0-9]+(-[0-9]+)?' \
+          | head -1 \
+          | sed 's/=/-/g')"
+        if [[ -n "${WORK_ITEM_ID}" ]]; then
+          printf '[%s] work_item_id fallback grep: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+        fi
+      fi
+      [[ -z "${WORK_ITEM_ID}" ]] && WORK_ITEM_ID=""
+
+      # Legacy fallback: if no work_item_id found at all, fall back to old grep for story_id only
+      if [[ -z "${WORK_ITEM_ID}" ]]; then
+        STORY_ID_LEGACY="$(grep -oE 'STORY[-=]?[0-9]{3}-[0-9]{2}' "${TRANSCRIPT_PATH}" 2>/dev/null \
+          | head -1 \
+          | sed -E 's/STORY[-=]?([0-9]{3}-[0-9]{2})/STORY-\1/')"
+        [[ -z "${STORY_ID_LEGACY}" ]] && STORY_ID_LEGACY="none"
+        WORK_ITEM_ID="${STORY_ID_LEGACY}"
+      fi
     fi
   fi
 
