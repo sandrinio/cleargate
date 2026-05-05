@@ -446,7 +446,27 @@ export async function upgradeHandler(
     let count = 0;
     for (const item of workItems) {
       const state = classify(item.entry.sha256, item.installSha, item.currentSha, item.entry.tier);
-      stdout(`[dry-run] ${item.entry.path}  action=${item.action}  state=${state}`);
+
+      // BUG-028 Direction Y: compute projected post-state so users can see what
+      // the live run would leave behind.  After a successful "take-theirs" the
+      // file on disk equals the upstream payload, so its sha == entry.sha256.
+      // Classifying with postSha = entry.sha256 (install = entry.sha256 as well)
+      // always yields `clean` — which is exactly what the drift map would record.
+      // We emit both states as `state=<pre> → <post>` so the human can see at a
+      // glance which files will be mutated (pre != post).
+      const projectedPostSha = item.entry.sha256;
+      const projectedPostState = classify(
+        item.entry.sha256,
+        item.entry.sha256,
+        projectedPostSha,
+        item.entry.tier
+      );
+      const stateLabel =
+        state !== projectedPostState
+          ? `state=${state} → ${projectedPostState}`
+          : `state=${state}`;
+
+      stdout(`[dry-run] ${item.entry.path}  action=${item.action}  ${stateLabel}`);
       count++;
     }
     stdout(`[dry-run] ${count} files planned. No changes made.`);
