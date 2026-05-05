@@ -18,9 +18,32 @@ export type MergeChoice = 'k' | 't' | 'e';
 /**
  * Render an inline unified diff of `ours` vs `theirs` for the given `filePath`.
  * Uses the `diff` npm package's `createPatch`.
+ *
+ * BUG-028: when `createPatch` produces no hunk lines (e.g. whitespace/EOL-only
+ * divergences that the line-diff algorithm cannot surface), append a fallback
+ * annotation so the user has a signal before choosing k/t/e.
  */
 export function renderInlineDiff(ours: string, theirs: string, filePath: string): string {
-  return createPatch(filePath, ours, theirs, 'installed', 'upstream');
+  const patch = createPatch(filePath, ours, theirs, 'installed', 'upstream');
+
+  // Detect empty-body patch: no lines starting with + or - (excluding +++ / --- headers).
+  const hasHunkLines = patch
+    .split('\n')
+    .filter((l) => l.startsWith('+') || l.startsWith('-'))
+    .filter((l) => !l.startsWith('+++') && !l.startsWith('---'))
+    .length > 0;
+
+  if (!hasHunkLines) {
+    const ourBytes = Buffer.byteLength(ours, 'utf-8');
+    const theirBytes = Buffer.byteLength(theirs, 'utf-8');
+    const byteNote =
+      ourBytes !== theirBytes
+        ? `${Math.abs(theirBytes - ourBytes)} bytes changed`
+        : 'same byte count';
+    return patch + `(whitespace/EOL-only differences — ${byteNote})\n`;
+  }
+
+  return patch;
 }
 
 // ─── Prompt ───────────────────────────────────────────────────────────────────
