@@ -23,6 +23,7 @@ import { loadPackageManifest, type ManifestFile } from '../lib/manifest.js';
 import { promptYesNo as defaultPromptYesNo, promptEmail as defaultPromptEmail } from '../lib/prompts.js';
 import { resolveIdentity, readParticipant, writeParticipant, type ResolveIdentityOpts } from '../lib/identity.js';
 import { resolveScaffoldRoot, ScaffoldSourceError } from '../lib/scaffold-source.js';
+import { extractSessionLoadDelta } from '../lib/session-load-delta.js';
 
 /**
  * The PostToolUse hook config to merge — updated in STORY-008-06 to use
@@ -324,9 +325,19 @@ export async function initHandler(opts: InitOptions = {}): Promise<void> {
   }
 
   const mergedSettings = mergeSettings(existingSettings, HOOK_ADDITION);
+  const mergedSettingsContent = JSON.stringify(mergedSettings, null, 2) + '\n';
+  const existingSettingsContent = existingSettings !== null
+    ? JSON.stringify(existingSettings, null, 2) + '\n'
+    : '{}';
   fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-  writeAtomic(settingsPath, JSON.stringify(mergedSettings, null, 2) + '\n');
-  stdout(`[cleargate init] Updated .claude/settings.json: merged PostToolUse hook — restart Claude Code if already open.\n`);
+  writeAtomic(settingsPath, mergedSettingsContent);
+  // CR-059: Only emit restart warning if the hooks block actually changed.
+  // Cosmetic-only rewrites (key order, whitespace) are suppressed.
+  if (extractSessionLoadDelta('.claude/settings.json', existingSettingsContent, mergedSettingsContent)) {
+    stdout(`[cleargate init] Updated .claude/settings.json: merged PostToolUse hook — restart Claude Code if already open.\n`);
+  } else {
+    stdout(`[cleargate init] .claude/settings.json unchanged (hooks block already current)\n`);
+  }
 
   // Step 5: Inject bounded block into CLAUDE.md
   const claudeMdPath = path.join(cwd, 'CLAUDE.md');
