@@ -6,10 +6,9 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-26_Dogfood_Hardening.md"
-last_ingest: "2026-05-05T08:53:44.773Z"
-last_ingest_commit: "16ecfc9b36e7d6703a63e14da6f218653152753b"
+last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest_commit: "a15adb7390ff46487e4d2a9279cb1516c15b3061"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-26"
 ---
 
 # SPRINT-26: SPRINT-26

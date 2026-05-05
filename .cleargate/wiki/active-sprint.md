@@ -14,8 +14,6 @@
 ## Planned Sprints
 
 
-- [[SPRINT-06]] — status: Planned
-
 - [[SPRINT-07]] — status: Planned
 
 - [[SPRINT-10]] — status: Completed

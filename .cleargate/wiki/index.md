@@ -4,7 +4,6 @@
 
 ## Active
 
-- [[EPIC-006]] (epic) — Ready
 - [[EPIC-010]] (epic) — Draft
   - [[STORY-010-02]] (story) — Draft
 - [[EPIC-012]] (epic) — Ready
@@ -12,16 +11,17 @@
 - [[EPIC-021]] (epic) — Ready
 - [[EPIC-023]] (epic) — Approved
 - [[EPIC-026]] (epic) — Ready
-- [[SPRINT-06]] (sprint) — Planned
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-24]] (sprint) — Active
+- [[SPRINT-26]] (sprint) — Active
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
 - [[CR-029]] (cr) — Approved
+- [[CR-059]] (cr) — Draft
+- [[CR-060]] (cr) — Draft
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -35,13 +35,16 @@
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
 - [[BUG-022]] (bug) — Verified
+- [[BUG-027]] (bug) — Draft
+- [[BUG-028]] (bug) — Draft
+- [[BUG-029]] (bug) — Draft
 
 ## Archive
 
-- Epics: 15 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
-- Sprints: 19 Completed · [expand](archive/sprints.md)
+- Epics: 16 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
+- Sprints: 22 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 32 Done · 16 Completed · [expand](archive/crs.md)
+- CRs: 38 Done · 16 Completed · [expand](archive/crs.md)
 - Bugs: 3 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
 
@@ -51,23 +54,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Sprints
-
-| [[SPRINT-24]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
-| [[SPRINT-25]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md |
-| [[SPRINT-26]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-26_Dogfood_Hardening.md |
-## CRs
-
-| [[CR-053]] | cr | Draft | .cleargate/delivery/pending-sync/CR-053_Cleargate_Init_Manifest_Root_Bug.md |
-| [[CR-054]] | cr | Draft | .cleargate/delivery/pending-sync/CR-054_Run_Script_UTF8_Truncation.md |
-| [[CR-055]] | cr | Draft | .cleargate/delivery/pending-sync/CR-055_WrapScript_Caller_Test_Adoption.md |
-| [[CR-056]] | cr | Draft | .cleargate/delivery/pending-sync/CR-056_Skill_Candidate_Heuristic_Investigation.md |
-| [[CR-057]] | cr | Draft | .cleargate/delivery/pending-sync/CR-057_Run_Script_Self_Repair.md |
-| [[CR-058]] | cr | Draft | .cleargate/delivery/pending-sync/CR-058_README_Refresh_Plus_Diagram_Prompt.md |
-| [[CR-059]] | cr | Draft | .cleargate/delivery/pending-sync/CR-059_Smarter_Session_Load_Restart_Warning.md |
-| [[CR-060]] | cr | Draft | .cleargate/delivery/pending-sync/CR-060_Doc_Clarity_Cleargate_Planning_Not_Shipped_To_Targets.md |
-## Bugs
-
-| [[BUG-027]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-027_Token_Ledger_Fallback_Grep_EPIC_001_Regression.md |
-| [[BUG-028]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-028_Upgrade_Merge_Prompt_State_Mismatch.md |
-| [[BUG-029]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-029_Parallel_Dispatches_Serialize_Silently.md |

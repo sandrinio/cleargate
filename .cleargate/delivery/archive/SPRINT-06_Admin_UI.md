@@ -1,22 +1,39 @@
 ---
-sprint_id: "SPRINT-06"
+sprint_id: SPRINT-06
 remote_id: null
-source_tool: "local"
-status: "Planned"
-start_date: null
-end_date: null
-activated_at: null
-completed_at: null
+source_tool: local
+status: Completed
+start_date: 2026-04-20
+end_date: 2026-04-20
+activated_at: 2026-04-20T01:23:00Z
+completed_at: 2026-04-20T11:26:00Z
 synced_at: null
-created_at: "2026-04-18T18:00:00Z"
-updated_at: "2026-04-19T00:00:00Z"
-created_at_version: "strategy-phase-pre-init"
-updated_at_version: "post-SPRINT-04"
-deferred_from: ["SPRINT-04", "SPRINT-05"]
-deferred_reason: "First deferred SPRINT-04→SPRINT-05 for EPIC-002 Knowledge Wiki. Deferred SPRINT-05→SPRINT-06 on 2026-04-19 to ship the process-refinement trifecta (EPIC-001 + EPIC-008 + EPIC-009) first — auto-stamped frontmatter, cost visibility, and machine-checked readiness gates pay off immediately for the larger Admin UI sprint."
+created_at: 2026-04-18T18:00:00Z
+updated_at: 2026-05-06T00:00:00Z
+created_at_version: strategy-phase-pre-init
+updated_at_version: post-SPRINT-26
+deferred_from:
+  - SPRINT-04
+  - SPRINT-05
+deferred_reason: First deferred SPRINT-04→SPRINT-05 for EPIC-002 Knowledge Wiki. Deferred SPRINT-05→SPRINT-06 on 2026-04-19 to ship the process-refinement trifecta (EPIC-001 + EPIC-008 + EPIC-009) first — auto-stamped frontmatter, cost visibility, and machine-checked readiness gates pay off immediately for the larger Admin UI sprint.
+completion_notes: "Shipped 2026-04-20 in a single ~10h day. 13 stories merged: 10 EPIC-006 (006-01..006-10) + STORY-004-08 (auth/exchange) + STORY-005-06 (CLI device-flow login) + STORY-004-09 (Items Admin API, added inline as 006-06 prereq). Engineering scope complete; ops deploy of admin.cleargate.<domain> queued for follow-up sprint. See sprint-runs/SPRINT-06/REPORT.md. Status retroactively reconciled 2026-05-06."
 approved: true
-sprint_cleargate_id: "SPRINT-06"
-
+sprint_cleargate_id: SPRINT-06
+draft_tokens:
+  input: 1439
+  output: 708556
+  cache_creation: 9224093
+  cache_read: 231885132
+  model: claude-opus-4-7
+  last_stamp: 2026-05-05T20:38:08Z
+  sessions:
+    - session: 961b8bdb-8371-45c1-8e64-a42cd02616c8
+      model: claude-opus-4-7
+      input: 1439
+      output: 708556
+      cache_read: 231885132
+      cache_creation: 9224093
+      ts: 2026-04-20T11:28:29Z
 ---
 
 # SPRINT-06: Admin UI (SvelteKit + DaisyUI + GitHub OAuth)

@@ -13,11 +13,11 @@ children:
   - "[[STORY-006-08]]"
   - "[[STORY-006-09]]"
   - "[[STORY-006-10]]"
-status: "Ready"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-006_Admin_UI.md"
-last_ingest: "2026-05-04T17:33:10.984Z"
-last_ingest_commit: "161cc1023dd5d8a469151ca2cb3ef7ce561081f7"
+raw_path: ".cleargate/delivery/archive/EPIC-006_Admin_UI.md"
+last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 

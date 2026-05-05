@@ -2,12 +2,12 @@
 story_id: STORY-005-06
 parent_epic_ref: EPIC-005
 parent_cleargate_id: "EPIC-005"
-sprint_cleargate_id: "SPRINT-04"
+sprint_cleargate_id: "SPRINT-06"
 status: Completed
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-005 §6.2, SPRINT-03 deferral
-sprint_id: SPRINT-04
+sprint_id: SPRINT-06
 created_at: 2026-04-18T18:00:00Z
 updated_at: 2026-04-18T18:00:00Z
 created_at_version: strategy-phase-pre-init
