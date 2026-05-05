@@ -55,6 +55,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-24]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
 | [[SPRINT-25]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md |
+| [[SPRINT-26]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-26_Dogfood_Hardening.md |
 ## CRs
 
 | [[CR-053]] | cr | Draft | .cleargate/delivery/pending-sync/CR-053_Cleargate_Init_Manifest_Root_Bug.md |
@@ -63,3 +64,10 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-056]] | cr | Draft | .cleargate/delivery/pending-sync/CR-056_Skill_Candidate_Heuristic_Investigation.md |
 | [[CR-057]] | cr | Draft | .cleargate/delivery/pending-sync/CR-057_Run_Script_Self_Repair.md |
 | [[CR-058]] | cr | Draft | .cleargate/delivery/pending-sync/CR-058_README_Refresh_Plus_Diagram_Prompt.md |
+| [[CR-059]] | cr | Draft | .cleargate/delivery/pending-sync/CR-059_Smarter_Session_Load_Restart_Warning.md |
+| [[CR-060]] | cr | Draft | .cleargate/delivery/pending-sync/CR-060_Doc_Clarity_Cleargate_Planning_Not_Shipped_To_Targets.md |
+## Bugs
+
+| [[BUG-027]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-027_Token_Ledger_Fallback_Grep_EPIC_001_Regression.md |
+| [[BUG-028]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-028_Upgrade_Merge_Prompt_State_Mismatch.md |
+| [[BUG-029]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-029_Parallel_Dispatches_Serialize_Silently.md |
