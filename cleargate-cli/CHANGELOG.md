@@ -3,6 +3,21 @@
 All notable changes to this project are documented in this file.
 Format: [Common Changelog](https://common-changelog.org/) — most-recent version first.
 
+## [0.11.4] — 2026-05-05
+
+SPRINT-26 Dogfood Hardening — Issues Surfaced by Live Use. Five items shipped (3 bugs + 2 CRs); the SDLC Hardening arc closed in SPRINT-25, this is the first sprint addressing dogfood-surfaced framework gaps from real-use testing on `markdown_file_renderer`.
+
+### Fixed
+- **Token-ledger `work_item` fallback grep no longer misattributes to first lexical EPIC-NNN** (BUG-027) — `cleargate-planning/.claude/hooks/token-ledger.sh` resolver chain now tries (1) prior ledger row's `work_item_id` then (2) most-recent `dispatch-marker:` log line BEFORE falling back to transcript grep. Regression of [[BUG-024]] (closed in SPRINT-19); 12 misattribution instances observed during the SPRINT-02 dogfood test on `markdown_file_renderer` (~25% of session output tokens tagged to wrong epic). New authoritative snapshot `cleargate-cli/test/snapshots/hooks/token-ledger.bug-027.sh` supersedes cr-044's byte-equality assertion (cr-044 demoted to existence-only).
+- **`cleargate upgrade --dry-run` and live run now report identical `state=` for every file** (BUG-028) — `cleargate-cli/src/commands/upgrade.ts` dry-run path now computes a hypothetical `postSha` by reading the upstream payload and emits a two-state line `state=<pre> → <post>` for upstream-changed files. `cleargate-cli/src/lib/merge-ui.ts` `renderInlineDiff()` appends a `(whitespace/EOL-only differences — N bytes changed)` annotation when `createPatch()` produces an empty body, so the user always sees a signal in the merge prompt. Discovered when the same `.claude/hooks/session-start.sh` file reported `state=clean` in dry-run and `state=upstream-changed` in the immediately-following real run.
+- **Parallel-eligible Task dispatches no longer silently serialize** (BUG-029) — `cleargate-planning/.claude/hooks/write_dispatch.sh` and `cleargate-planning/.claude/hooks/pending-task-sentinel.sh` now uniquify marker filenames with `${ts}-${PID}-${RANDOM}` suffixes (was: single `.dispatch-${SESSION_ID}.json` and `.pending-task-${TURN_INDEX}.json` per orchestrator session, which collided when two Agent calls fired in one turn). `cleargate-planning/.claude/hooks/token-ledger.sh` SubagentStop handler now matches completion to dispatch by `(work_item_id, agent_type)` tuple from the transcript instead of the prior `ls -t | head -1` newest-file lookup. Discovered during the SPRINT-02 dogfood test where two parallel-eligible stories dispatched at the same timestamp but only one produced a ledger row; the second was silently dropped and re-dispatched 18 minutes later. New authoritative snapshot `cleargate-cli/test/snapshots/hooks/token-ledger.bug-029.sh`; `bug-027.sh` rolls forward to the new canonical state and is demoted to existence-only.
+
+### Added
+- **Smarter session-load restart warning — suppresses no-op rewrites** (CR-059) — new helper `cleargate-cli/src/lib/session-load-delta.ts` exporting `extractSessionLoadDelta(filePath, oldContent, newContent)` returns `true` only when schema-meaningful keys actually changed: `hooks.{PreToolUse,PostToolUse,SessionStart,SubagentStop}.*` for `.claude/settings.json`, `mcpServers.cleargate` for `.mcp.json`. Both `upgrade.ts` and `init.ts` now consult the helper before emitting the v0.11.2 "Restart Claude Code" warning, so cosmetic re-formats (key order, whitespace, trailing newline) don't trigger warning fatigue. Conservative on parse failure: when in doubt, warn.
+
+### Changed
+- **`CLAUDE.md` "Dogfood split" section clarified** (CR-060) — explicit one-paragraph note that target repos do **not** receive a `cleargate-planning/` directory; only the *contents* of `.claude/` and `.cleargate/` are copied. Top-level `CLAUDE.md` is bounded-block-injected; top-level `MANIFEST.json` is skipped per `cleargate-cli/src/init/copy-payload.ts:54` SKIP_FILES; install snapshot lands at `.cleargate/.install-manifest.json`. Pure doc, no behavior change.
+
 ## [0.11.3] — 2026-05-05
 
 Hotfix.
