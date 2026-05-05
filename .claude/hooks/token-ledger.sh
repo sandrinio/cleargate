@@ -98,27 +98,91 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
   LEDGER="${SPRINT_DIR}/token-ledger.jsonl"
 
-  # --- dispatch-marker attribution (CR-016 + CR-026, highest priority) ---
+  # --- dispatch-marker attribution (CR-016 + CR-026 + BUG-029, highest priority) ---
   # The PreToolUse:Task hook (pre-tool-use-task.sh, CR-026) auto-writes:
   #   .cleargate/sprint-runs/<sprint>/.dispatch-<ts>-<pid>-<rand>.json
   # with { work_item_id, agent_type, spawned_at, session_id, writer }.
   # Reading this file (if present) gives accurate attribution; falls back to the
   # per-task pending-task sentinel (second priority) and transcript-scan (third).
   #
-  # CR-026 Defect 1 fix — path-B (newest-file lookup):
-  # The old lookup keyed on the subagent's session_id from the SubagentStop payload,
-  # which is the *subagent's* session ID, never the orchestrator's. This caused 100%
-  # lookup failure since SPRINT-15 (BUG-024 §3.1 Defect 1). We now use newest-file
-  # lookup (ls -t) — atomic with the existing mv→.processed-$$ rename pattern.
-  # See CR-026 M3 plan §"Open Question Q1 resolution — path-A vs path-B".
+  # BUG-029 fix — tuple-match replaces newest-file lookup:
+  # When two parallel Task() spawns write two distinct .dispatch-*.json files,
+  # the old `ls -t | head -1` (newest-file) lookup grabs whichever was written
+  # last — mis-attributing the ledger row to the wrong story. The fix: extract
+  # the work_item_id from the SubagentStop transcript (first user message) and
+  # match it against the work_item_id field inside each .dispatch-*.json.
+  # Fallback: if no tuple match, fall back to newest-file lookup with a warning.
   #
   # Atomicity: rename to .processed-$$ before reading, then delete post-row-write.
   # This prevents stale dispatch files from leaking attribution to a later subagent.
   SENTINEL_AGENT_TYPE=""
   SENTINEL_WORK_ITEM_ID=""
+  DISPATCH_PROCESSED=""
 
-  # CR-026: newest-file lookup (path-B) — replaces session-id-keyed lookup.
-  DISPATCH_FILE="$(ls -t "${SPRINT_DIR}"/.dispatch-*.json 2>/dev/null | head -1)"
+  # BUG-029: extract work_item_id from the SubagentStop transcript (first user message).
+  # This is the orchestrator's dispatch prompt — by convention it starts with the
+  # work_item_id (e.g. "STORY=NNN-NN" or "STORY-NNN-NN") or contains it prominently.
+  # We use non-capturing groups (no capture groups → scan returns full match string)
+  # and a broad alphanumeric suffix to also match letter-suffix IDs like STORY-A, STORY-B
+  # used in tests and fast-lane items (not just digit-keyed like the legacy path).
+  TRANSCRIPT_WORK_ITEM=""
+  if [[ -f "${TRANSCRIPT_PATH}" ]]; then
+    # Primary: first user message, scan for work-item reference (TYPE[-=]ID).
+    # scan("(?:...)+") with no capture groups returns the full match string.
+    TRANSCRIPT_WORK_ITEM="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
+      [.[] | select(.type == "user")]
+      | [.[] | select(
+          (.message.content | if type == "array"
+            then map(.text? // "") | join(" ")
+            else (. // "") end
+          ) | test($banner_re) | not
+        )]
+      | .[0].message.content
+      | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
+      | tostring
+      | [scan("(?:STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=][A-Za-z0-9]+(?:-[A-Za-z0-9]+)?")]
+      | .[0] // ""
+    ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1 | sed 's/=/-/g')"
+    # Normalize: replace = with - (STORY=NNN-NN → STORY-NNN-NN)
+    TRANSCRIPT_WORK_ITEM="$(printf '%s' "${TRANSCRIPT_WORK_ITEM}" | sed 's/=/-/g')"
+    [[ "${TRANSCRIPT_WORK_ITEM}" == "" || "${TRANSCRIPT_WORK_ITEM}" == "null" ]] && TRANSCRIPT_WORK_ITEM=""
+  fi
+
+  # BUG-029: tuple-match — iterate dispatch files, find one whose work_item_id
+  # matches TRANSCRIPT_WORK_ITEM. If exactly one matches, consume it; otherwise
+  # fall back to newest-file (legacy CR-026 path) with a warning logged.
+  DISPATCH_FILE=""
+  if [[ -n "${TRANSCRIPT_WORK_ITEM}" ]]; then
+    # Search all dispatch files for a content match on work_item_id.
+    MATCHED_FILE=""
+    MATCH_COUNT=0
+    for CANDIDATE in "${SPRINT_DIR}"/.dispatch-*.json; do
+      [[ -f "${CANDIDATE}" ]] || continue
+      CANDIDATE_WORK_ITEM="$(jq -r '.work_item_id // empty' "${CANDIDATE}" 2>/dev/null)"
+      if [[ "${CANDIDATE_WORK_ITEM}" == "${TRANSCRIPT_WORK_ITEM}" ]]; then
+        MATCHED_FILE="${CANDIDATE}"
+        MATCH_COUNT=$(( MATCH_COUNT + 1 ))
+      fi
+    done
+    if [[ "${MATCH_COUNT}" -eq 1 ]]; then
+      DISPATCH_FILE="${MATCHED_FILE}"
+      printf '[%s] dispatch-marker tuple-match: transcript_work_item=%s → %s\n' \
+        "$(date -u +%FT%TZ)" "${TRANSCRIPT_WORK_ITEM}" "${DISPATCH_FILE}" >> "${HOOK_LOG}"
+    elif [[ "${MATCH_COUNT}" -gt 1 ]]; then
+      printf '[%s] warn: %d dispatch files matched work_item=%s — falling back to newest-file\n' \
+        "$(date -u +%FT%TZ)" "${MATCH_COUNT}" "${TRANSCRIPT_WORK_ITEM}" >> "${HOOK_LOG}"
+    fi
+  fi
+
+  # Fallback: newest-file lookup (CR-026 path-B) when tuple-match found nothing.
+  if [[ -z "${DISPATCH_FILE}" ]]; then
+    if [[ -n "${TRANSCRIPT_WORK_ITEM}" ]]; then
+      printf '[%s] warn: no tuple-match for work_item=%s — falling back to newest-file lookup\n' \
+        "$(date -u +%FT%TZ)" "${TRANSCRIPT_WORK_ITEM}" >> "${HOOK_LOG}"
+    fi
+    DISPATCH_FILE="$(ls -t "${SPRINT_DIR}"/.dispatch-*.json 2>/dev/null | head -1)"
+  fi
+
   if [[ -n "${DISPATCH_FILE}" && -f "${DISPATCH_FILE}" ]]; then
     DISPATCH_PROCESSED="${DISPATCH_FILE%.json}.processed-$$"
     if mv "${DISPATCH_FILE}" "${DISPATCH_PROCESSED}" 2>/dev/null; then
