@@ -183,7 +183,12 @@ fi
   fi
 
   STARTED_AT="$(date -u +%FT%TZ)"
-  SENTINEL_FILE="${SPRINT_DIR}/.pending-task-${TURN_INDEX}.json"
+  # BUG-029 fix: uniquify the sentinel filename so that two parallel Task() calls
+  # in the same assistant message (same TURN_INDEX) do NOT collide on the same
+  # target path. Pattern: ${TURN_INDEX}-${PID}-${RANDOM} mirrors write_dispatch.sh.
+  # Old: .pending-task-${TURN_INDEX}.json  ← second call overwrites first.
+  # New: .pending-task-${TURN_INDEX}-$$-${RANDOM}.json  ← each call gets its own file.
+  SENTINEL_FILE="${SPRINT_DIR}/.pending-task-${TURN_INDEX}-$$-${RANDOM}.json"
 
   # Write the sentinel atomically (tmp + mv).
   TMP="${SENTINEL_FILE}.tmp.$$"

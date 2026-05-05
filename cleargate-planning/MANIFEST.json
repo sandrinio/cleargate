@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.11.3",
-  "generated_at": "2026-05-05T16:33:46.758Z",
+  "generated_at": "2026-05-05T17:10:18.958Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -67,7 +67,7 @@
     },
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
-      "sha256": "8204286b19287c490cc09014b0c87e2b2686e6bd120393b7165895d215d6b49a",
+      "sha256": "a3c2dc71a803c37527afd059b81e2adad2104d4887ae125846a2416f2f719b71",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -123,7 +123,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "4af378426dedce8836f470db8f653277607c26049e73fffafbc2bf46158772d3",
+      "sha256": "37a5bc311ca36f016ed72f1ded92d70d2b0acdd8993d634667b05d3407de0f22",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -389,7 +389,7 @@
     },
     {
       "path": ".cleargate/scripts/write_dispatch.sh",
-      "sha256": "abdcaf09b09251f3ab42cb7ec8bdedc5806fd0eb337578f55043bffb158d8128",
+      "sha256": "2d4ebbd8a6f0e833c86b534c3106377018d54f6e24b3ff1a171b18d807103748",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
