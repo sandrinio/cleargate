@@ -55,7 +55,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-24]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-24_Loop_Tightening.md |
 | [[SPRINT-25]] | sprint | Completed | .cleargate/delivery/archive/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md |
-| [[SPRINT-26]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-26_Dogfood_Hardening.md |
+| [[SPRINT-26]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-26_Dogfood_Hardening.md |
 ## CRs
 
 | [[CR-053]] | cr | Draft | .cleargate/delivery/pending-sync/CR-053_Cleargate_Init_Manifest_Root_Bug.md |
