@@ -5,7 +5,9 @@ parent_cleargate_id: EPIC-016
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
-approved: false
+approved: true
+approved_at: 2026-05-05T08:40:00Z
+approved_by: sandrinio
 created_at: 2026-05-05T08:00:00Z
 updated_at: 2026-05-05T08:00:00Z
 created_at_version: cleargate@0.11.3
@@ -29,7 +31,7 @@ context_source: |
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-05T08:07:44Z
+  last_gate_check: 2026-05-05T08:51:26Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -45,7 +47,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-05T08:05:22Z
+  last_stamp: 2026-05-05T08:51:13Z
   sessions: []
 ---
 
