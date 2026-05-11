@@ -12,7 +12,26 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Readable } from 'node:stream';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { joinHandler, type JoinOptions } from '../../src/commands/join.js';
+
+// Per-test tmp dir for the config file — keeps joinHandler's saveConfig() out
+// of the user's real ~/.cleargate/ directory. Set in beforeEach, cleaned in
+// afterEach. Tests inherit it via makeOpts().configPath default.
+let TEST_CONFIG_PATH: string;
+beforeEach(() => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cleargate-join-test-'));
+  TEST_CONFIG_PATH = path.join(dir, 'config.json');
+});
+afterEach(() => {
+  try {
+    fs.rmSync(path.dirname(TEST_CONFIG_PATH), { recursive: true, force: true });
+  } catch {
+    // best-effort cleanup
+  }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -155,6 +174,9 @@ function makeOpts(partial: Partial<JoinOptions> = {}): JoinOptions & {
     isTTY: false,
     // Fast device-flow polling in tests
     intervalOverrideMs: 0,
+    // Route saveConfig + loadConfig at a tmp file so tests don't touch the
+    // real ~/.cleargate/config.json. Overridable per test via `partial`.
+    configPath: TEST_CONFIG_PATH,
     ...partial,
     capturedStdout,
     capturedStderr,

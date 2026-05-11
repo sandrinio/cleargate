@@ -12,17 +12,83 @@
  * Lives here (not in mcp-client.ts) because the refresh flow needs TokenStore + mcpUrl and
  * mcp-client.ts is kept thin (just: host, bearer, JSON-RPC).
  */
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { createTokenStore } from './factory.js';
 import type { TokenStore } from './token-store.js';
 
-// ── Single-flight in-memory cache ─────────────────────────────────────────────
-// Process-local; naturally cleared when the Node CLI exits.
-// Key: `${profile}::${mcpUrl}` — R1 mitigation: two profiles in same process never collide.
-// Env-token path (CLEARGATE_MCP_TOKEN) bypasses this cache entirely.
+// ── In-memory + on-disk single-flight cache ──────────────────────────────────
+// In-memory: process-local; naturally cleared when the Node CLI exits.
+// On-disk:   ~/.cleargate/access-token.json (mode 0600), survives across CLI
+//            invocations. Critical because each `cleargate` call is a fresh
+//            process — without a disk cache every call hits keychain to load
+//            the refresh token, then rotates it via /auth/refresh, which
+//            re-saves to keychain and resets the macOS ACL → re-prompt loop.
+// Key: `${profile}::${mcpUrl}` — two profiles in same process never collide.
+// Env-token path (CLEARGATE_MCP_TOKEN) bypasses both caches entirely.
 
 const CACHE = new Map<string, { accessToken: string; expiresAtMs: number }>();
 
-/** Test seam: clear the acquire cache between tests. */
+interface DiskCacheEntry {
+  accessToken: string;
+  expiresAtMs: number;
+}
+interface DiskCacheFile {
+  version: 1;
+  entries: Record<string, DiskCacheEntry>;
+}
+
+function defaultDiskCachePath(env: NodeJS.ProcessEnv = process.env): string | null {
+  // Test override: setting CLEARGATE_DISK_CACHE_PATH=off disables the disk
+  // cache entirely; setting it to a path uses that file instead of the home dir.
+  const override = env['CLEARGATE_DISK_CACHE_PATH'];
+  if (override === 'off') return null;
+  if (typeof override === 'string' && override.length > 0) return override;
+  const home = os.homedir();
+  if (!home) return null;
+  return path.join(home, '.cleargate', 'access-token.json');
+}
+
+function readDiskCache(filePath: string): DiskCacheFile {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const parsed = JSON.parse(raw) as unknown;
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      (parsed as { version?: unknown }).version === 1 &&
+      typeof (parsed as { entries?: unknown }).entries === 'object' &&
+      (parsed as { entries?: unknown }).entries !== null
+    ) {
+      return parsed as DiskCacheFile;
+    }
+  } catch {
+    // ENOENT, parse error, schema mismatch — treat as empty
+  }
+  return { version: 1, entries: {} };
+}
+
+function writeDiskCache(filePath: string, data: DiskCacheFile): void {
+  const dir = path.dirname(filePath);
+  try {
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    try {
+      fs.chmodSync(dir, 0o700);
+    } catch {
+      // existing dir with custom mode — leave alone
+    }
+    const tmpPath = path.join(dir, '.access-token.json.tmp');
+    fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+    fs.chmodSync(tmpPath, 0o600);
+    fs.renameSync(tmpPath, filePath);
+    fs.chmodSync(filePath, 0o600);
+  } catch {
+    // Disk-cache failures are non-fatal — the next call just refreshes again.
+  }
+}
+
+/** Test seam: clear the in-memory acquire cache between tests. */
 export function __resetAcquireCache(): void {
   CACHE.clear();
 }
@@ -53,6 +119,8 @@ export interface AcquireOptions {
   env?: NodeJS.ProcessEnv;
   /** Test seam: overrides Date.now() for expiry calculations. */
   now?: () => number;
+  /** Test seam: overrides ~/.cleargate/access-token.json path. */
+  diskCachePath?: string | null;
 }
 
 export class AcquireError extends Error {
@@ -88,12 +156,31 @@ export async function acquireAccessToken(opts: AcquireOptions): Promise<string> 
     return envToken;
   }
 
-  // 2. Single-flight cache check (skip when forceRefresh is set).
+  // 2a. In-memory cache check (skip when forceRefresh is set).
   const cacheKey = `${opts.profile}::${opts.mcpUrl}`;
   if (!opts.forceRefresh) {
     const cached = CACHE.get(cacheKey);
     if (cached && nowFn() < cached.expiresAtMs) {
       return cached.accessToken;
+    }
+  }
+
+  // 2b. On-disk cache check — survives across CLI invocations and avoids
+  //     the keychain re-prompt loop that comes from per-call refresh-token
+  //     rotation. Disabled by passing diskCachePath: null (tests) or
+  //     CLEARGATE_DISK_CACHE_PATH=off in the real process env.
+  //     Note: consults process.env (not opts.env) because tests deliberately
+  //     pass empty `env: {}` to suppress CLEARGATE_MCP_TOKEN, but still want
+  //     the disk-cache override picked up from the test runner's env.
+  const diskCachePath =
+    opts.diskCachePath === undefined ? defaultDiskCachePath() : opts.diskCachePath;
+  if (!opts.forceRefresh && diskCachePath) {
+    const file = readDiskCache(diskCachePath);
+    const entry = file.entries[cacheKey];
+    if (entry && nowFn() < entry.expiresAtMs) {
+      // Promote into in-memory cache for the rest of this process's lifetime.
+      CACHE.set(cacheKey, entry);
+      return entry.accessToken;
     }
   }
 
@@ -159,12 +246,20 @@ export async function acquireAccessToken(opts: AcquireOptions): Promise<string> 
 
   const accessToken = body.access_token;
 
-  // 4. Cache the new access token (expire 60s before the JWT exp claim).
+  // 4. Cache the new access token (expire 60s before the JWT exp claim) in
+  //    BOTH the in-memory map and on disk. The disk cache is what stops the
+  //    keychain re-prompt loop on subsequent CLI invocations.
   const payload = decodeJwtPayload(accessToken);
   const exp = payload?.exp;
   if (typeof exp === 'number' && Number.isFinite(exp)) {
     const expiresAtMs = (exp - 60) * 1000;
-    CACHE.set(cacheKey, { accessToken, expiresAtMs });
+    const entry: DiskCacheEntry = { accessToken, expiresAtMs };
+    CACHE.set(cacheKey, entry);
+    if (diskCachePath) {
+      const file = readDiskCache(diskCachePath);
+      file.entries[cacheKey] = entry;
+      writeDiskCache(diskCachePath, file);
+    }
   }
   // If exp is missing or non-numeric, do NOT cache — next call will re-refresh.
 

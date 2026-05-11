@@ -128,3 +128,67 @@ export function requireMcpUrl(cfg: Config): string {
   }
   return cfg.mcpUrl;
 }
+
+export interface SaveConfigOptions {
+  configPath?: string;
+}
+
+/**
+ * Persist a partial update into ~/.cleargate/config.json.
+ *
+ * Reads the existing raw JSON (if present), shallow-merges `updates` on top, and
+ * writes atomically with mode 0600. Unknown keys already in the file (e.g.
+ * project_id, written by other surfaces) are preserved — strict Zod validation
+ * is intentionally skipped here because admin-url.ts and other readers store
+ * fields outside the strict schema.
+ */
+export function saveConfig(
+  updates: Partial<{ mcpUrl: string; profile: string; logLevel: string }>,
+  opts: SaveConfigOptions = {},
+): void {
+  const home = os.homedir();
+  if (!home) {
+    throw new Error('Cannot determine home directory.');
+  }
+  const configPath =
+    opts.configPath ?? path.join(home, '.cleargate', 'config.json');
+  const dir = path.dirname(configPath);
+
+  let existing: Record<string, unknown> = {};
+  try {
+    const raw = fs.readFileSync(configPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      existing = parsed as Record<string, unknown>;
+    }
+  } catch (err) {
+    if (
+      !(
+        err instanceof Error &&
+        'code' in err &&
+        (err as NodeJS.ErrnoException).code === 'ENOENT'
+      )
+    ) {
+      // Treat parse errors as recoverable — overwrite rather than fail join.
+    }
+  }
+
+  const merged: Record<string, unknown> = { ...existing };
+  for (const [k, v] of Object.entries(updates)) {
+    if (v !== undefined) merged[k] = v;
+  }
+
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  try {
+    fs.chmodSync(dir, 0o700);
+  } catch {
+    // existing dir with custom mode — leave alone
+  }
+
+  const tmpPath = path.join(dir, '.config.json.tmp');
+  const json = JSON.stringify(merged, null, 2) + '\n';
+  fs.writeFileSync(tmpPath, json, { mode: 0o600 });
+  fs.chmodSync(tmpPath, 0o600);
+  fs.renameSync(tmpPath, configPath);
+  fs.chmodSync(configPath, 0o600);
+}

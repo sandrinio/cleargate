@@ -14,7 +14,7 @@
  * CR-006 EPIC-019.
  */
 import * as os from 'node:os';
-import { loadConfig } from '../config.js';
+import { loadConfig, saveConfig } from '../config.js';
 import { createTokenStore } from '../auth/factory.js';
 import {
   pickProvider,
@@ -63,6 +63,8 @@ export interface JoinOptions {
   sleepFn?: (ms: number) => Promise<void>;
   /** Test seam: override device-flow poll interval in ms (0 = instant in tests) */
   intervalOverrideMs?: number;
+  /** Test seam: override ~/.cleargate/config.json path for both load + save. */
+  configPath?: string;
 }
 
 export async function joinHandler(opts: JoinOptions): Promise<void> {
@@ -83,6 +85,7 @@ export async function joinHandler(opts: JoinOptions): Promise<void> {
       token = opts.inviteUrl;
       const cfg = loadConfig({
         flags: { profile: opts.profile, mcpUrl: opts.mcpUrlFlag },
+        ...(opts.configPath !== undefined ? { configPath: opts.configPath } : {}),
       });
       if (!cfg.mcpUrl) {
         stderr(
@@ -459,9 +462,16 @@ export async function joinHandler(opts: JoinOptions): Promise<void> {
     const store = await (opts.createStore ?? createTokenStore)();
     await store.save(opts.profile, refreshToken);
 
+    // Persist mcpUrl so subsequent commands don't need --mcp-url / env var.
+    saveConfig(
+      { mcpUrl: baseUrl },
+      opts.configPath !== undefined ? { configPath: opts.configPath } : {},
+    );
+
     // ── Success output ─────────────────────────────────────────────────────
     stdout(`joined project '${projectName}' as '${hostname()}'\n`);
     stdout(`refresh token saved to ${store.backend}.\n`);
+    stdout(`mcp_url ${baseUrl} saved to ~/.cleargate/config.json.\n`);
   } catch (err) {
     stderr(
       `cleargate: internal error: ${err instanceof Error ? err.message : String(err)}\n`,

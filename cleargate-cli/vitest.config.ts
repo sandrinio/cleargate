@@ -29,5 +29,11 @@ export default defineConfig({
       '**/dist/**',
       '**/_archive/**',
     ],
+    // Disable on-disk access-token cache globally for tests — prevents
+    // acquireAccessToken() from writing to the developer's real
+    // ~/.cleargate/access-token.json during CI/test runs.
+    env: {
+      CLEARGATE_DISK_CACHE_PATH: 'off',
+    },
   },
 });

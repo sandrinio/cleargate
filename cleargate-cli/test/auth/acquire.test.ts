@@ -90,6 +90,9 @@ function makeNetworkErrorFetch(): typeof globalThis.fetch {
 
 beforeEach(() => {
   __resetAcquireCache();
+  // Disable on-disk access-token cache for tests — exercise the in-memory
+  // cache + fetch-spy semantics without touching the real ~/.cleargate dir.
+  process.env['CLEARGATE_DISK_CACHE_PATH'] = 'off';
 });
 
 describe('acquireAccessToken', () => {
