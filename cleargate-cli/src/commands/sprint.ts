@@ -1387,6 +1387,16 @@ function refreshScopedGateCaches(
       continue;
     }
 
+    // Skip items physically located in archive/ — planning is done; gate
+    // re-checks are meaningless and only thrash `last_gate_check` stamps,
+    // which dirty main and fail Check 4. The on-disk location is a stronger
+    // "done with planning" signal than the status field (frontmatter status
+    // sometimes lags behind the move to archive/).
+    if (absPath.includes(`${path.sep}archive${path.sep}`)) {
+      result.skipped.push(id);
+      continue;
+    }
+
     // Skip terminal-status items (Done, Completed, Abandoned, etc.)
     let status = '';
     try {
