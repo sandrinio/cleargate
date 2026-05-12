@@ -75,9 +75,20 @@ export async function writeCachedGate(
     throw new Error(`writeCachedGate: failed to parse frontmatter in ${absPath}`);
   }
 
-  // Idempotency check: compare existing cached_gate_result
+  // Idempotency check: compare STRUCTURAL content (pass + failing_criteria)
+  // only. Excluding `last_gate_check` is deliberate — the timestamp is freshly
+  // stamped on every invocation (line 60), so including it in the comparison
+  // means the check never triggers, dirtying the file on every gate-check call
+  // even when the structural result is unchanged. That stamp-thrash then trips
+  // `sprint preflight` Check 4 (main-clean) in a perpetual loop on any sprint
+  // kickoff where a non-archived in-scope item has gate failures cached.
   const existing = coerceCachedGate(fm['cached_gate_result']);
-  if (existing && JSON.stringify(existing) === JSON.stringify(newResult)) {
+  if (
+    existing &&
+    existing.pass === newResult.pass &&
+    JSON.stringify(existing.failing_criteria) ===
+      JSON.stringify(newResult.failing_criteria)
+  ) {
     return;
   }
 
