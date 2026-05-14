@@ -2,9 +2,9 @@
 cr_id: CR-060
 parent_ref: EPIC-013
 parent_cleargate_id: EPIC-013
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-26
 carry_over: false
-status: Draft
+status: Done
 approved: true
 approved_at: 2026-05-05T08:40:00Z
 approved_by: sandrinio
@@ -37,15 +37,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-060
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-05T08:51:20Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-4-7
+  last_stamp: 2026-05-14T20:23:36Z
+  sessions:
+    - session: 5133efc1-8f4d-4d20-b17f-77a951223254
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-05T09:09:11Z
 ---
 
 # CR-060: Clarify in CLAUDE.md that cleargate-planning/ is meta-repo-only, not shipped to target repos

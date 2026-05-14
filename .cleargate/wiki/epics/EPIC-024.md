@@ -6,7 +6,7 @@ children: []
 status: "Done"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-024_AI_Orientation_Surface_Slim.md"
-last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest: "2026-05-14T20:24:44.603Z"
 last_ingest_commit: "87be520b8e8be42f207124d5f66dec8adbe269ab"
 repo: "planning"
 ---

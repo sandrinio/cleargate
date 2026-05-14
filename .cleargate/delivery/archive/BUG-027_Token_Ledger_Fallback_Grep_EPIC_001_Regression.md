@@ -1,10 +1,10 @@
 ---
 bug_id: BUG-027
 parent_ref: BUG-024 (Done) — token-ledger attribution spike, SubagentStop hook misroutes
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: BUG-024 (Done) — token-ledger attribution spike, SubagentStop hook misroutes
+sprint_cleargate_id: SPRINT-26
 carry_over: false
-status: Draft
+status: Done
 severity: P2-Medium
 reporter: sandrinio
 approved: true
@@ -40,15 +40,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id BUG-027
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-05T08:50:55Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-4-7
+  last_stamp: 2026-05-14T20:23:28Z
+  sessions:
+    - session: 5133efc1-8f4d-4d20-b17f-77a951223254
+      model: <synthetic>,claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-05T15:11:36Z
 ---
 
 # BUG-027: Token-ledger fallback grep mis-tags work_item to first lexical EPIC-NNN
