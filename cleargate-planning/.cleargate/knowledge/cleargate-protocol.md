@@ -642,3 +642,141 @@ wiki:
 ```
 
 Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.
+
+---
+
+## Type & Payload Contract
+
+Every item pushed to the MCP server (`cleargate_push_item`) must conform to the following contract. Adapter authors implementing new PM-tool integrations MUST satisfy all requirements below before the server accepts the payload.
+
+### Open-type validator
+
+`type` is validated as an open vocabulary (new types do not require a server upgrade):
+
+```
+z.string().min(1).max(64).regex(/^[a-z][a-z0-9_-]*$/)
+```
+
+Applied after lowercase-normalize. Types that fail this regex are rejected at the MCP transport layer with an L1 `TYPE_INVALID` error.
+
+### KNOWN_TYPES — advisory registry (8 entries)
+
+These 8 types have first-class gate and reporting support. Any type outside this list passes validation but triggers an L2 `TYPE_UNKNOWN` warning in the server log.
+
+| Type | Description |
+|---|---|
+| `initiative` | High-level strategic investment |
+| `epic` | Feature-level work breakdown |
+| `story` | Executable unit of work (one sprint, one commit) |
+| `bug` | Defect report + fix |
+| `cr` | Change request — scope amendment or approach change |
+| `proposal` | Stakeholder-authored item awaiting triage |
+| `sprint` | Sprint plan artifact |
+| `sprint_report` | Sprint closeout report |
+
+### RESERVED_PAYLOAD_KEYS (5 entries)
+
+The following keys are set exclusively by the MCP server or the CLI sync engine. Callers MUST NOT include them in `payload`; the server strips or rejects them on receipt.
+
+| Key | Owner | Reason |
+|---|---|---|
+| `cleargate_id` | CLI stamp engine | Must match the frontmatter `cleargate_id` — server validates; caller cannot override |
+| `pushed_by` | Server | Set from JWT `sub` → member lookup; client-supplied value is ignored |
+| `pushed_at` | Server | Set to server UTC timestamp; client-supplied value is ignored |
+| `last_synced_body_sha` | Sync engine | Conflict-detection cursor; tampering causes spurious diffs |
+| `_version` | Server | Internal optimistic-lock counter; client tampering causes 409 |
+
+### Minimum payload contract
+
+Every push MUST include:
+
+| Key | Level | Note |
+|---|---|---|
+| `cleargate_id` | **Required (L1 error if absent)** | `TYPE-NNN` or 5-digit numeric (see formats below) |
+| `type` | **Required (L1 error if absent)** | Open vocabulary, validated by regex above |
+| `title` | Recommended (L2 warning if absent) | Human-readable item title |
+| `status` | Recommended (L2 warning if absent) | From §21 status vocabulary |
+
+### `payload.origin` convention
+
+`payload.origin` identifies the surface that produced the push. Gates fire or are bypassed based on this value:
+
+| Value pattern | Gate behavior |
+|---|---|
+| `cleargate-cli` | All readiness gates run (standard path) |
+| `adapter:<vendor>` | Gates bypass — adapter is assumed to have already validated externally. Example: `adapter:linear`, `adapter:jira` |
+| `system:<service>` | Gates bypass — system-generated push (e.g. `system:reporter`, `system:wiki-ingest`) |
+| absent / null | Treated as `cleargate-cli`; gates run |
+
+### `cleargate_id` formats (2 valid forms)
+
+| Format | Pattern | Example | Used for |
+|---|---|---|---|
+| Type-prefixed | `TYPE-NNN` (TYPE = uppercase letters, NNN = 1–5 digits) | `STORY-027-05`, `EPIC-003` | All standard work items |
+| 5-digit numeric | Exactly 5 decimal digits | `00042` | Legacy PM-tool remote IDs; internal migration use only |
+
+### L1 errorCode taxonomy (7 codes)
+
+L1 errors cause the MCP tool call to return a structured error payload with shape `{ code, message, hint }` and HTTP 422 (or equivalent MCP error).
+
+| Code | Condition | Hint |
+|---|---|---|
+| `TYPE_INVALID` | `type` fails regex validation | Normalize to lowercase-kebab; max 64 chars |
+| `ID_INVALID` | `cleargate_id` does not match either valid format | Use `TYPE-NNN` or 5-digit numeric |
+| `ID_MISSING` | `cleargate_id` absent from payload | Required field — stamp it before push |
+| `TYPE_MISSING` | `type` absent from payload | Required field |
+| `RESERVED_KEY` | Payload contains a `RESERVED_PAYLOAD_KEYS` member | Remove the key; server owns it |
+| `APPROVED_GATE` | `payload.approved !== true` and `skipApprovedGate` not set | Set `approved: true` after human sign-off |
+| `PROJECT_NOT_FOUND` | JWT `project_id` claim has no matching project row | Re-join with a valid invite URL |
+
+### L2 warningCode taxonomy (3 codes)
+
+L2 warnings are non-blocking. The push succeeds, but the server appends `[advisory: <code>]` to the item body and logs the warning.
+
+| Code | Condition | Field |
+|---|---|---|
+| `TITLE_MISSING` | `title` absent or empty | `title` |
+| `STATUS_MISSING` | `status` absent or not in §21 vocabulary | `status` |
+| `TYPE_UNKNOWN` | `type` is not in `KNOWN_TYPES` advisory registry | `type` |
+
+---
+
+## Codebase / PM-Tool Boundary
+
+**Rule:** `cleargate-cli/src/**` and `.claude/**` MUST NOT import any PM-tool SDK. PM-tool adapters live exclusively in `mcp/src/adapters/`. Credentials and connection config live in admin DB rows, configured via the admin console UI.
+
+### Rationale
+
+ClearGate must remain PM-tool-agnostic at the CLI and agent-definition layer so that:
+1. The CLI can be installed in any repo regardless of which PM tool the team uses.
+2. Agent prompts (`.claude/**`) do not hard-code vendor assumptions.
+3. A new PM-tool adapter can be added by dropping a file in `mcp/src/adapters/` without touching `cleargate-cli/` or `.claude/`.
+
+### Forbidden import patterns
+
+Any `import` or `require` statement in `cleargate-cli/src/**/*.ts` or `.claude/**/*.{ts,sh,md}` that references the following patterns fails CI:
+
+| Pattern | PM tool |
+|---|---|
+| `@linear/sdk` | Linear |
+| `linear-sdk` | Linear (alt package) |
+| `jira-client` | Jira |
+| `node-jira-client` | Jira (alt package) |
+| `jira.js` | Jira (alt package) |
+| `azure-devops` | Azure DevOps |
+| `@atlassian/` | Atlassian family |
+
+### Allowed surface for PM-tool code
+
+`mcp/src/adapters/` is the only surface where PM-tool SDK imports are permitted. Each adapter file is responsible for importing its SDK, mapping ClearGate payload shapes to PM-tool API calls, and surfacing errors as structured MCP errors.
+
+### CI enforcement
+
+`scripts/ci-no-pm-sdk.mjs` scans the two forbidden surfaces and exits non-zero on any match. Run via:
+
+```
+node scripts/ci-no-pm-sdk.mjs
+npm run check:no-pm-sdk
+```
+
+Comments (lines starting with `//`, `#`, `/*`, or `*`) are excluded from the scan. The script prints `✓ no forbidden PM-SDK imports` on a clean tree.
