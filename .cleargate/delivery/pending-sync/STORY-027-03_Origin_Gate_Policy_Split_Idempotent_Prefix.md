@@ -4,8 +4,11 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-14T20:00:00Z
 context_source: |
   EPIC-027 §2 Scope (origin-based gate policy split + idempotent advisory prefix +
   pull 404 clarification) + §5 Scenarios 8-11 + §6 Q4 Answer (payload.origin
@@ -44,7 +47,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:22:35Z
+  last_stamp: 2026-05-14T21:26:40Z
   sessions: []
 ---
 
