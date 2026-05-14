@@ -98,15 +98,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id SPRINT-27
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-14T21:25:01Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-14T21:35:04Z
+  sessions:
+    - session: 91fdf8e4-b3db-40ae-9172-2b207315dbde
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-14T21:33:27Z
 ---
 
 # SPRINT-27: MCP Type-Agnostic Sync + Sprint Artifact Push + Admin-Console Connection UX
@@ -150,11 +156,103 @@ Ship EPIC-027 Phase 1 (open-type validator, gate-policy split, error taxonomy, c
 - Full SPRINT-01..24 backfill push to MCP — separate CR if CR-064 smoke passes and the user wants the full history visible in the admin UI
 - BUG-027 / BUG-028 / BUG-029 / CR-059 / CR-060 — SPRINT-26 items, closed via SPRINT-26 path
 
-## 2. Execution Strategy (Architect SDR — to populate at sprint init)
+## 2. Execution Strategy (Sprint Design Review — Binding)
 
-> The §2 subsections below are a planning **proposal** from the conversational agent. The Architect will rewrite §2 during the Sprint Design Review at sprint init and that version is the binding plan; this version is advisory until then.
+> Architect SDR output 2026-05-14T21:30Z, replacing the prior conversational-agent §2 proposal. v2 binding rules below. **Three plan amendments + three open decisions surfaced — see §"Open Decisions for Orchestrator" at end of §2.5 below.**
 
-### 2.1 Phase Plan (Proposal)
+### 2.1 Phase Plan
+
+Three waves. v2 mode; Wave 2 strict-serial on `push-item.ts` + `payload-contract.ts`. Cross-coupling claims grepped against codebase before this section was written (see §2.3 for evidence cites; FLASHCARD `2026-05-14 #architect #sdr #anti-speculation` applies).
+
+**Wave 1 — Parallel-safe quintet** (single orchestrator dispatch turn):
+
+- **CR-065** — `cleargate-cli/src/commands/mcp-serve.ts` (insert env-var branch before `new AuthFetcher` at line 71) + new file `cleargate-cli/src/auth/service-token-fetcher.ts` + tests. **Goal advancement:** Unblocks the stdio tab of CR-061 by giving Claude Desktop / Claude Code a `CLEARGATE_SERVICE_TOKEN` consumer path that bypasses keychain auth.
+- **BUG-030** — `mcp/src/db/schema.ts:96-98` (drop `notNull()`, add `onDelete: 'set null'`) + new migration + try/catch around `members.ts:250` (23503 → 409). **Goal advancement:** Removes the P1-High 500 blocker on the members surface that gates `cleargate join` recovery flows.
+- **CR-062** — `mcp/src/admin-api/members.ts` (new `POST /:mid/resend-invite` route, mailer call inside existing `POST /:projectId/members` create-invite path at line 218-225) + new files `invite-email.ts` + `invite-email-template.ts` + admin UI icon refactor. **Goal advancement:** Closes the members-list UX gap; admins can recover from missed invites without shell access.
+- **CR-063** — `cleargate-cli/src/commands/wiki-ingest.ts` (path validator + EXCLUDED_SUFFIXES carve-out + buildPageBody two-source idempotency) + `wiki/scan.ts` + `wiki/derive-bucket.ts` + `wiki/page-schema.ts` + new backfill script + new Step 7.5 in `close_sprint.mjs`. **Goal advancement:** First half of the EPIC-027 proof loop — sprint reports become a second wiki source class.
+- **STORY-027-05** — `CLAUDE.md` bounded-block paragraph + `cleargate-planning/CLAUDE.md` mirror + two new H2 sections in `cleargate-protocol.md` + new `scripts/ci-no-pm-sdk.mjs` + `mcp/src/db/schema.ts:92` comment + `package.json` script. **Goal advancement:** Locks the codebase/PM-tool SDK boundary as a CI-enforced invariant. Fast lane (see §2.4).
+
+**Wave 2 — MCP core, strict-serial chain on `mcp/src/tools/push-item.ts` and the new `mcp/src/lib/payload-contract.ts`** (one Developer dispatch at a time, each rebased on the prior):
+
+- **STORY-027-01** → **STORY-027-02** → **STORY-027-03** → **STORY-027-04**.
+- No parallelization. -01 creates the module; -02 extends it; -03 refactors the gate-policy block at push-item.ts:109/121 wrapping each in `originRequiresGates(payload.origin)`; -04 wraps the whole result in the `warnings: []` array.
+- **Goal advancement (chain):** -01 opens the type validator (precondition for CR-064 smoke). -02 hardens the payload contract with guiding errors. -03 unlocks adapter-driven pushes by replacing `skipApprovedGate` with `payload.origin`. -04 makes EPIC-027's "headline metric" (zero MCP code change to add a type) observable via warnings telemetry.
+
+**Wave 3 — Post-EPIC-027 follow-on pair** (parallel-safe; both depend on Wave 2 complete):
+
+- **CR-061** — `admin/src/lib/components/TokenIssuedModal.svelte` 3-tab refactor + tests. Depends on CR-065 (W1) for the stdio tab snippet to reference the correct env var name. Authored in parallel with CR-064 once Wave 2 -01 is green.
+- **CR-064** — `cleargate-cli/src/commands/push.ts:404-412` typeMap + path validator extension + new `close_sprint.mjs` step inserted **before** CR-063's wiki-ingest step + new smoke-test script. **Hard precondition:** STORY-027-01..-04 fully merged AND -01's `KNOWN_TYPES` includes `'sprint'` + `'sprint_report'` so smoke pushes emit `warnings: []`. **Goal advancement:** Closes the EPIC-027 proof loop — pushes ClearGate's own sprint plans + reports to MCP with zero MCP code change.
+
+### 2.2 Merge Ordering — Shared-File Surface
+
+Boundaries locked by **symbol**, not line number (Wave 2 chain shifts line numbers between merges).
+
+| Shared File | Stories | Order | Rationale |
+|---|---|---|---|
+| `mcp/src/lib/payload-contract.ts` (NEW) | STORY-027-01, -02, -03, -04 | strict: -01 creates → -02/-03/-04 extend | -01 owns module creation: `KNOWN_TYPES` (must include `'sprint'`, `'sprint_report'`), `TYPE_REGEX`, `normalizeType`, forward-declared `ValidationError`. -02 adds `RESERVED_PAYLOAD_KEYS`, `MAX_PAYLOAD_BYTES_DEFAULT`, full `ValidationError` class. -03 adds `ORIGIN_CLEARGATE_CLI`, `originRequiresGates()`. -04 adds `CLEARGATE_ID_TYPE_REGEX`, `CLEARGATE_ID_NUMERIC_REGEX`, `isKnownIdFormat`, `Warning` type. No story may extend without rebasing on prior. |
+| `mcp/src/tools/push-item.ts` | STORY-027-01, -02, -03, -04 | strict: -01 → -02 → -03 → -04 | -01 swaps the `ITEM_TYPES` z.enum at the `pushItemInput` Zod object (currently line 7-14, 18). -02 inserts four reject paths ABOVE the existing approved-gate symbol `if (!ctx.skipApprovedGate)` (currently line 109). -03 wraps that same symbol block + the `cached_gate_result` block (line 121-122) in `originRequiresGates(payload.origin)`, replaces the bare `!ctx.skipApprovedGate` predicate, and rewrites the advisory-prefix injection site. -04 extends `PushItemResult` (line 47) with `warnings: Warning[]` and builds the array after L1 checks pass. Cannot parallelize — each rewrites symbols the next reads. |
+| `mcp/src/mcp/register-tools.ts` | STORY-027-01 (import update) | (single — folded into -01) | Line 5 currently `import { ITEM_TYPES, pushItem, ... }`. -01's M-plan must drop the `ITEM_TYPES` import (replaced by validator) and confirm the `pushItem(...)` call at line 106 sets `payload.origin = "cleargate-cli"` as the default when CLI omits it (or relies on -03's missing-origin-defaults-to-cleargate-cli rule). **This file is missing from STORY-027-01 §3.1's file table — surface as plan amendment.** |
+| `mcp/src/tools/sync-status.ts` | STORY-027-03 | (single — folded into -03) | Line 40 currently `{ ...ctx, skipApprovedGate: true }`. -03 must migrate to setting `payload.origin = "system:sync-status"` on the args object. **Test files** (`pull-item.test.ts`, `list-items.test.ts`, `sync-status.test.ts`, `push-item.test.ts`) carry 8+ `skipApprovedGate: true` hits — -03's R4 keeps the alias one minor, so tests pass unchanged. M-plan must NOT migrate test files (regression risk on deprecation-alias path). |
+| `mcp/src/admin-api/members.ts` | BUG-030, CR-062 | **strict: BUG-030 → CR-062** | BUG-030 wraps `db.delete(members)` at the DELETE handler symbol (currently line 250) with try/catch + 23503 mapping. CR-062 registers a new `POST /:mid/resend-invite` route (different function entirely) AND inserts a mailer call into the existing `POST /:projectId/members` create-invite handler immediately AFTER the `invite_url` return prep at line 221-225. Different regions; sequential to avoid rebase. |
+| `mcp/src/db/schema.ts` | BUG-030, STORY-027-05 | BUG-030 first (line 96-98 FK clause) → STORY-027-05 (line 92 comment) | Adjacent regions. BUG-030 changes the FK behavior; STORY-027-05 updates the type-column vocabulary comment. Order BUG-030 first since it ships with a migration. |
+| `mcp/src/db/schema.ts` (audit_log columns) | STORY-027-04 | (conditional — see Open Decisions) | If -04 needs `warningCode` + `origin` columns and they're absent today, -04 adds a migration. Independent of BUG-030's edit (different table). |
+| `admin/src/lib/components/TokenIssuedModal.svelte` | CR-061 | (single) | UI isolated. Reads `PUBLIC_MCP_URL` via `$env/dynamic/public` (verified pattern). Snippet text for stdio tab hardcodes `CLEARGATE_SERVICE_TOKEN`. |
+| `admin/src/routes/projects/[id]/members/+page.svelte` | CR-062 | (single) | **CR-062 references `admin/src/lib/components/MembersList.svelte` — file does not exist** (`admin/src/lib/components/` has AddAdminModal, InviteModal, Modal, TokenIssueForm, TokenIssuedModal only). Members row rendering lives in the page-level Svelte file. CR-062 Developer must either extract MembersList.svelte as a new component OR inline-edit the page. **Surface as plan amendment for CR-062.** |
+| `cleargate-cli/src/commands/mcp-serve.ts` | CR-065 | (single) | Env-var branch inserted BEFORE `new AuthFetcher(...)` at line 71. Header construction at line 178 unchanged. |
+| `cleargate-cli/src/commands/push.ts` | CR-064 | (single) | typeMap extension at line 404-412 (confirmed). Path validator at line 350-351 extended with second permitted root. |
+| `CLAUDE.md` + `cleargate-planning/CLAUDE.md` | STORY-027-05 | mirror pair, identical edits | Bounded-block parity (FLASHCARD `2026-04-19 #wiki #protocol #mirror` + `2026-05-01 #mirror #parity`). |
+| `.cleargate/scripts/close_sprint.mjs` + `cleargate-planning/.cleargate/scripts/close_sprint.mjs` | CR-063, CR-064 | **strict: CR-063 → CR-064** | Mirror parity verified GREEN. CR-063 inserts new "Step 7.5: wiki ingest sprint report" AFTER Step 7. CR-064 inserts new "Step 7.4: MCP push sprint plan + report" IMMEDIATELY BEFORE CR-063's Step 7.5. Anchor for CR-064: the literal line `// CR-063: wiki ingest sprint report` that CR-063 emits. Mirror parity must hold after both edits. |
+| `cleargate-cli/templates/cleargate-planning/.cleargate/scripts/close_sprint.mjs` | (both) | regenerated via `npm run prebuild` | Do NOT hand-edit. FLASHCARD `2026-05-01 #scaffold #mirror #prebuild`. |
+
+### 2.3 Shared-Surface Warnings
+
+- **`push-item.ts` four-story rebase chain (Wave 2)** — Bug in -01 forces re-test of -02..-04. Mitigation: -01's M-plan locks `KNOWN_TYPES` literal verbatim including `'sprint_report'` (underscore, not hyphen — CR-064 §0.5 Q1) and seeds the `normalizeType` regex test bar. QA-Red on -01 writes Red tests for the open-type + normalize + invalid-format scenarios BEFORE -01 implementation. **High-care merge** even though story bounce-exposure is rated low.
+- **`register-tools.ts` ITEM_TYPES import (gap)** — Line 5 imports `ITEM_TYPES` from push-item.ts. -01's swap removes this export. STORY-027-01 §3.1 does NOT list `register-tools.ts`. **Architect M-plan for -01 MUST include this file.** Without the amendment, -01 ships with a broken import and typecheck fails.
+- **`members.ts` BUG-030 ↔ CR-062 region collision** — No symbol overlap; sequential ordering avoids cherry-pick risk.
+- **`MembersList.svelte` does not exist (gap)** — CR-062 §3 names this file four times with "(verify name)". Grep confirms absent. **Architect must surface this to orchestrator** — decision required before CR-062 dispatch.
+- **`skipApprovedGate` audit incomplete (gap)** — Verified: only TWO production callers — `sync-status.ts:40` (named in -03) AND **`mcp/src/mcp/register-tools.ts:106`** (NOT named in -03's §3). **Surface as plan amendment for STORY-027-03.**
+- **CR-061 stdio tab ↔ CR-065 env-var-name coupling** — CR-065 §0.5 Q1 locks `CLEARGATE_SERVICE_TOKEN` final. CR-061 unit test must assert the rendered JSON contains the exact env var literal (string match, not constant import).
+- **CR-064 ↔ STORY-027-01 `KNOWN_TYPES` coupling** — If -01 ships with `'sprint-report'` (hyphen) instead of `'sprint_report'` (underscore), CR-064's smoke emits `unknown_type` warnings. **M-plan for -01 cites underscore verbatim.**
+- **`close_sprint.mjs` CR-063 → CR-064 ordering on a moving target** — Symbolic anchoring, not line-number. Mirror parity (live↔canonical) MUST hold per FLASHCARD `2026-05-04 #mirror #parity`.
+- **CR-065 auth-adjacency** — Wave 1's only auth-touching item. Built-in mitigation: env-unset path byte-identical to pre-CR. **High-care merge** despite low intrinsic risk.
+- **CLAUDE.md mirror invariant per-edit (STORY-027-05)** — Live↔canonical CLAUDE.md is pre-divergent by 4 canonical-only bullets pre-EPIC-024. -05's edit must apply IDENTICALLY but MUST NOT reconcile the 4-bullet divergence. QA runs CLEARGATE-block awk-diff per FLASHCARD `2026-05-02 #claude-md #mirror #prune`.
+- **`scripts/ci-no-pm-sdk.mjs` glob runtime risk** — STORY-027-05 §3.2 example uses `import { globSync } from 'node:fs'` — this API does NOT exist in Node 24. **Surface as plan amendment for STORY-027-05.**
+
+### 2.4 Lane Audit
+
+Default `standard`. Rows added only for non-standard lanes.
+
+| Item | Lane | Rationale (≤80 chars) |
+|---|---|---|
+| STORY-027-05 | **fast** | Doc edits + ≤30 LOC CI grep script; no runtime change; passes 7-check rubric. |
+
+All other items (STORY-027-01..-04, CR-061, CR-062, CR-063, CR-064, CR-065, BUG-030) are `standard`.
+
+**STORY-027-05 fast-lane verification:** 9 Gherkin scenarios literally fails 7-check #4 ("exactly one Scenario:"), but 5 are doc-state grep-assertions, not runtime test scenarios. **Architect overrides to fast lane** citing the doc-state-vs-runtime distinction and `expected_bounce_exposure: low`. Fast lane approved with §2.3 globSync-API amendment applied before Dev dispatch.
+
+### 2.5 ADR-Conflict Flags
+
+- **STORY-027-03 — Conditional flag (must amend protocol).** Origin-based gate policy is a contract change. STORY-027-05 MUST land in W1 BEFORE STORY-027-03 finishes W2 so the protocol section exists when -03 cites it. Sequencing: STORY-027-05 (W1) ✓ → STORY-027-03 (W2 #3) → no conflict.
+- **STORY-027-05 — Locks an architectural rule.** "CLI never imports a PM-tool SDK" becomes CI-enforced. **No conflict with prior ADRs.**
+- **CR-064 — Proves EPIC-027 headline metric.** Zero MCP code change to sync `"sprint"` + `"sprint_report"`. **No conflict.**
+- **CR-063 ↔ CR-064 close_sprint.mjs ordering — Resolved.** CR-064 §0.5 Q4 locks the order. §2.2 binds the symbolic anchor. **No conflict.**
+- **CR-065 ↔ CR-061 stdio tab — Coordinated.** CR-065 ships W1; CR-061 ships W3 referencing locked env var name. **No conflict.**
+- **EPIC-027 vs. EPIC-010** — Extension, not redo. FLASHCARDs `2026-04-30 #mcp #cli #wire-format` + `2026-04-30 #mcp #frontmatter #serialization` reviewed; no conflict.
+- **BUG-030 vs. `audit_log` cascade comment at schema.ts:168** — Out of scope per BUG-030 §3 Evidence. **No conflict; flagged for future triage.**
+- **CR-062 vs. mailer consumer pattern** — Mailer wired only at `magic-link-provider.ts:88`; admin-api/members.ts does NOT call it today. CR-062 adds a second consumer using the shared `Mailer` interface. **No conflict.**
+- **STORY-027-04 audit_log schema migration vs. BUG-030 schema.ts edit** — Different tables. **No conflict.**
+- **CR-065 vs. STORY-006-05 token-issuance contract** — Service-token verification path exists. Reuse, not change. **No conflict.**
+- **STORY-027-01 vs. `register-tools.ts:5` ITEM_TYPES import** — Plan amendment (not ADR conflict). Add `register-tools.ts` to -01 §3.1 Related Files.
+
+### Open Decisions for Orchestrator
+
+Three items require human/orchestrator response before Wave 1 dispatch:
+
+1. **CR-062 component name.** Resolve whether the Developer extracts a new `admin/src/lib/components/MembersList.svelte` OR inlines the icon refactor in `admin/src/routes/projects/[id]/members/+page.svelte`. The CR §3 references the component four times with "(verify name)"; the file does not exist. Architect recommends: extract new component (CR-062 §2 already plans tests at `MembersList.test.ts`).
+2. **STORY-027-04 audit_log schema state.** Before -04 dispatch, grep `mcp/src/db/schema.ts` for existing `audit_log` table definition and confirm whether `warningCode` + `origin` columns exist. -04's M-plan branches: columns exist → no migration; columns absent → migration required.
+3. **STORY-027-05 globSync API choice.** Lock the actual import (`fs.promises.glob` from Node 22+, or `fast-glob` from existing deps, or fall back to a `readdir` recursion) before the Developer dispatch. The §3.2 example code uses an API that does not exist in Node 24 stable.
+
+### 2.1 Phase Plan (Proposal — superseded)
 
 Three waves; v2 mode.
 
