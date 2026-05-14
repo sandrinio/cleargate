@@ -2,24 +2,21 @@
 cr_id: CR-061
 parent_ref: STORY-006-05
 parent_cleargate_id: STORY-006-05
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-27
 carry_over: false
 area: admin-console
 status: Approved
 approved: true
+context_source: "Direct human ask 2026-05-06 after STORY-006-05 dogfood: token-issued modal currently shows the raw token only. Users (incl. Claude Desktop / Claude Code via stdio) lack a copy-paste connection snippet. Approved 2026-05-14 with 4 §0.5 Qs resolved at Gate-1 ack. Depends on CR-065 (CLEARGATE_SERVICE_TOKEN env auth) shipping first so the stdio tab content references the correct env var name."
 created_at: 2026-05-06T00:00:00Z
 updated_at: 2026-05-14T00:00:00Z
 created_at_version: post-SPRINT-26
 updated_at_version: cleargate@0.11.5
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: discovery-checked
-      detail: expected context_source != "null", got undefined
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-  last_gate_check: 2026-05-05T21:09:34Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:23:24Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-05-14T19:57:38.110Z
 last_pulled_by: null
@@ -132,6 +129,15 @@ cd admin && npm run dev
 - All three test layers green.
 - Storage-leak invariant from STORY-006-05 remains green.
 - Manual: copy the JSON snippet → paste into a Cursor/Cline-style MCP config → `tools/list` returns the 10 cleargate tools without a 401.
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `admin/src/lib/mcp-client.ts` — existing MCP-client wiring on the admin side; the 3-tab snippet's curl-tab and stdio-tab values are derived from the same `mcpUrl` resolution this file performs.
+- **Surface:** `cleargate-cli/src/commands/mcp-serve.ts` — current MCP-serve entry; the stdio tab cites the CLEARGATE_SERVICE_TOKEN env path added by CR-065.
+
+The token-issued modal itself (`admin/src/lib/components/TokenIssuedModal` — Svelte file extension intentionally not cited by full path because the readiness-gate regex caps file extensions at 5 chars; see SPRINT-27 plan §Execution Guidelines) is the primary edit target.
 
 ---
 

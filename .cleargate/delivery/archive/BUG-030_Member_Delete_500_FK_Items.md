@@ -2,24 +2,23 @@
 bug_id: BUG-030
 parent_ref: STORY-004-03
 parent_cleargate_id: STORY-004-03
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-27
 carry_over: false
 area: admin-console
 status: Triaged
 severity: P1-High
 reporter: sandro.suladze@gmail.com
 approved: true
+context_source: "Observed 2026-05-06 in admin console: DELETE /admin-api/v1/members/:mid returns 500 when the target member has authored items (FK violation on items.updated_by_member_id NOT NULL). Two-part fix: (a) ON DELETE SET NULL migration on items.updated_by_member_id; (b) 23503 → 409 error mapping defense-in-depth. P1-High because the members surface 500s on a routine admin action."
 created_at: 2026-05-06T00:00:00Z
 updated_at: 2026-05-06T00:00:00Z
 created_at_version: post-SPRINT-26
 updated_at_version: post-SPRINT-26
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: discovery-checked
-      detail: expected context_source != "null", got undefined
-  last_gate_check: 2026-05-05T22:14:36Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:22:00Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-05-14T19:57:41.084Z
 last_pulled_by: null

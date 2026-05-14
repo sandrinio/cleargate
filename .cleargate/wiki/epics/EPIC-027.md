@@ -6,9 +6,10 @@ children: []
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-027_MCP_Type_Agnostic_Sync_And_Universal_Payload.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
-last_ingest_commit: ""
+last_ingest: "2026-05-14T21:21:04.942Z"
+last_ingest_commit: "7df9a3ca9afbb90c65ed2701a7f3d5a75450edef"
 repo: "planning"
+parent_cleargate_id: "EPIC-010"
 ---
 
 # EPIC-027: EPIC-027

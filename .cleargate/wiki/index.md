@@ -63,3 +63,18 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[STORY-027-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-03_Origin_Gate_Policy_Split_Idempotent_Prefix.md |
 | [[STORY-027-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-04_Error_Taxonomy_And_Warnings.md |
 | [[STORY-027-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-05_Docs_And_CI_No_PM_SDK_Rule.md |
+## Epics
+
+| [[EPIC-027]] | epic | Approved | .cleargate/delivery/archive/EPIC-027_MCP_Type_Agnostic_Sync_And_Universal_Payload.md |
+## CRs
+
+| [[CR-061]] | cr | Approved | .cleargate/delivery/archive/CR-061_Token_Modal_Connection_Instructions.md |
+| [[CR-062]] | cr | Approved | .cleargate/delivery/archive/CR-062_Resend_Invite_From_Members_List.md |
+| [[CR-064]] | cr | Approved | .cleargate/delivery/archive/CR-064_Sync_Sprint_Plans_And_Reports_To_MCP.md |
+| [[CR-065]] | cr | Approved | .cleargate/delivery/archive/CR-065_MCP_Serve_Service_Token_Auth.md |
+## Bugs
+
+| [[BUG-030]] | bug | Triaged | .cleargate/delivery/archive/BUG-030_Member_Delete_500_FK_Items.md |
+## Sprints
+
+| [[SPRINT-27]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |

@@ -105,7 +105,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T19:55:29Z
+  last_stamp: 2026-05-14T21:22:29Z
   sessions: []
 ---
 
@@ -142,8 +142,8 @@ Ship EPIC-027 Phase 1 (open-type validator, gate-policy split, error taxonomy, c
 **Cross-thread dependency note:** CR-064 verification depends on STORY-027-01 including `'sprint'` and `'sprint_report'` in its `KNOWN_TYPES` advisory registry. CR-061's stdio tab depends on CR-065 shipping `CLEARGATE_SERVICE_TOKEN` auth path. Both dependencies are surfaced in §2.2 merge ordering.
 
 **Items deferred** (acknowledged backlog, not in scope):
-- [[STORY-027-06]] (planned) — `cleargate lint` command + frontmatter-schema parser — L3, SPRINT-28
-- [[STORY-027-07]] (planned) — `@cleargate/types` shared npm package — SPRINT-28
+- STORY-027-06 (planned, SPRINT-28) — `cleargate lint` command + frontmatter-schema parser — L3
+- STORY-027-07 (planned, SPRINT-28) — `@cleargate/types` shared npm package
 - Full SPRINT-01..24 backfill push to MCP — separate CR if CR-064 smoke passes and the user wants the full history visible in the admin UI
 - [[BUG-027]] / [[BUG-028]] / [[BUG-029]] / [[CR-059]] / [[CR-060]] — SPRINT-26 items, closed via SPRINT-26 path
 

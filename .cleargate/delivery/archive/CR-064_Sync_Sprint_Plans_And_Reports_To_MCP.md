@@ -13,11 +13,9 @@ created_at_version: cleargate@0.11.5
 updated_at_version: cleargate@0.11.5
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-  last_gate_check: 2026-05-14T05:52:30Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:22:11Z
 context_source: |
   Direct human ask 2026-05-14 during SPRINT-27 planning: "what about ingesting
   and syncing sprint reports and sprint plans too with mcp?"
@@ -195,6 +193,14 @@ node scripts/close_sprint.mjs --sprint-id SPRINT-26 --dry-run
 - Pull round-trip succeeds for all 4 items.
 - Gate-4 dry run shows the two ordered steps.
 - No warnings or errors in MCP audit_log.
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `cleargate-cli/src/commands/push.ts` — existing push command with typeMap; extended to recognize sprint-runs/SPRINT-NN/REPORT*.md paths and derive type "sprint_report".
+- **Surface:** `.cleargate/scripts/close_sprint.mjs` — existing Gate-4 pipeline; extended with MCP push step (before CR-063's wiki-ingest step).
+- **Surface:** `mcp/src/tools/push-item.ts` — EPIC-027 STORY-027-01 opens the type validator; this CR proves the end-to-end by pushing sprint + sprint_report types.
 
 ---
 
