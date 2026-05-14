@@ -70,6 +70,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[CR-061]] | cr | Approved | .cleargate/delivery/archive/CR-061_Token_Modal_Connection_Instructions.md |
 | [[CR-062]] | cr | Approved | .cleargate/delivery/archive/CR-062_Resend_Invite_From_Members_List.md |
+| [[CR-063]] | cr | Approved | .cleargate/delivery/archive/CR-063_Ingest_Sprint_Reports_Into_Wiki.md |
 | [[CR-064]] | cr | Approved | .cleargate/delivery/archive/CR-064_Sync_Sprint_Plans_And_Reports_To_MCP.md |
 | [[CR-065]] | cr | Approved | .cleargate/delivery/archive/CR-065_MCP_Serve_Service_Token_Auth.md |
 ## Bugs
