@@ -12,7 +12,7 @@ children:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-016_Upgrade_UX.md"
-last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest: "2026-05-14T20:24:44.603Z"
 last_ingest_commit: "cc47c7269f73e4881c167d0a043046ac3de5d9d6"
 repo: "planning"
 ---

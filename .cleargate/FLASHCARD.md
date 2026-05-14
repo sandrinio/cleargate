@@ -4,6 +4,7 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-14 · #architect #sdr #anti-speculation · Story §Existing Surfaces bullets are advisory — SDR must grep codebase to verify cross-story coupling claims (069-09 mishap).
 2026-05-04 · #qa #scratch #gitignore · scratch/ is gitignored — Dev cannot update from worktree path; QA must verify on main-repo disk, not worktree path.
 2026-05-04 · #qa #report #worktree-vs-main · QA agent sometimes writes report to worktree-relative `.cleargate/sprint-runs/<id>/reports/` path; orchestrator must copy to main-repo path before merge for audit trail (DevOps fallback).
 2026-05-04 · #heuristic #session-shared · isSessionShared: distinct-session-count==1 (NOT "≥2 of ≥3 share same session") — looser rule false-flags real 2+1 split-sprint patterns.

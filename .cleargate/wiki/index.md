@@ -11,17 +11,21 @@
 - [[EPIC-021]] (epic) — Ready
 - [[EPIC-023]] (epic) — Approved
 - [[EPIC-026]] (epic) — Ready
+- [[EPIC-027]] (epic) — Approved
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-26]] (sprint) — Active
+- [[SPRINT-27]] (sprint) — Approved
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
 - [[CR-029]] (cr) — Approved
-- [[CR-059]] (cr) — Draft
-- [[CR-060]] (cr) — Draft
+- [[CR-061]] (cr) — Approved
+- [[CR-062]] (cr) — Approved
+- [[CR-063]] (cr) — Approved
+- [[CR-064]] (cr) — Approved
+- [[CR-065]] (cr) — Approved
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -35,17 +39,15 @@
 - [[BUG-019]] (bug) — Verified
 - [[BUG-020]] (bug) — Verified
 - [[BUG-022]] (bug) — Verified
-- [[BUG-027]] (bug) — Draft
-- [[BUG-028]] (bug) — Draft
-- [[BUG-029]] (bug) — Draft
+- [[BUG-030]] (bug) — Triaged
 
 ## Archive
 
 - Epics: 16 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
-- Sprints: 22 Completed · [expand](archive/sprints.md)
+- Sprints: 23 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 38 Done · 16 Completed · [expand](archive/crs.md)
-- Bugs: 3 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
+- CRs: 40 Done · 16 Completed · [expand](archive/crs.md)
+- Bugs: 6 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
 
 ## Contradictions

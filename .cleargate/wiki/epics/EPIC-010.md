@@ -14,7 +14,7 @@ children:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-010_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest: "2026-05-14T20:24:44.603Z"
 last_ingest_commit: "161cc1023dd5d8a469151ca2cb3ef7ce561081f7"
 repo: "planning"
 ---

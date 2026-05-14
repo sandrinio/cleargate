@@ -38,7 +38,9 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-25]] — status: Completed
 
-- [[SPRINT-26]] — status: Active
+- [[SPRINT-26]] — status: Completed
+
+- [[SPRINT-27]] — status: Approved
 
 
 
@@ -133,5 +135,7 @@ _No active epics._
 - [[EPIC-022]] — status: Completed
 
 - [[EPIC-023]] — status: Approved
+
+- [[EPIC-027]] — status: Approved
 
 

@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 execution_mode: v2
 start_date: 2026-05-06
 end_date: 2026-05-17
@@ -66,8 +66,8 @@ draft_tokens:
   output: 0
   cache_creation: 0
   cache_read: 0
-  model: <synthetic>,claude-opus-4-7
-  last_stamp: 2026-05-05T08:36:46Z
+  model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+  last_stamp: 2026-05-14T20:23:51Z
   sessions:
     - session: 5133efc1-8f4d-4d20-b17f-77a951223254
       model: <synthetic>,claude-opus-4-7
@@ -76,6 +76,41 @@ draft_tokens:
       cache_read: 0
       cache_creation: 0
       ts: 2026-05-05T08:35:15Z
+    - session: c03ca6e9-5d91-4fc7-a2cf-1cc3b2ff7500
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-05T19:24:16Z
+    - session: b0026553-22c4-4b86-bb09-a5948a9ca061
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-06T10:43:52Z
+    - session: f411c840-f2a2-41d3-84bc-5457211b15f6
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-07T10:43:40Z
+    - session: b0756f7a-ad63-48be-9f0f-bd56e586060b
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-07T20:43:11Z
+    - session: d11e6ce1-9d5a-4f15-b376-e943e00750ed
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-12T06:45:39Z
 ---
 
 # SPRINT-26: Dogfood Hardening — Issues Surfaced by Live Use

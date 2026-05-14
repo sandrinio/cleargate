@@ -6,7 +6,7 @@ children: []
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md"
-last_ingest: "2026-05-05T20:38:17.258Z"
+last_ingest: "2026-05-14T20:24:44.603Z"
 last_ingest_commit: "b16f0f6720a132a92e6f88b35e1a45694f1ed5ed"
 repo: "planning"
 ---

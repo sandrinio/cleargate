@@ -6,12 +6,12 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 26 | 0 | 20 |
+| Epics | 27 | 0 | 21 |
 | Stories | 154 | 0 | 153 |
-| Sprints | 26 | 1 | 22 |
+| Sprints | 27 | 0 | 23 |
 | Proposals | 14 | 0 | 14 |
-| CRs | 57 | 0 | 54 |
-| Bugs | 21 | 0 | 17 |
+| CRs | 62 | 0 | 61 |
+| Bugs | 22 | 0 | 21 |
 
 ## Active Epics
 
@@ -56,6 +56,14 @@ _No active epics._
 - [[BUG-025]] (bugs) — Done
 
 - [[BUG-026]] (bugs) — Done
+
+- [[BUG-027]] (bugs) — Done
+
+- [[BUG-028]] (bugs) — Done
+
+- [[BUG-029]] (bugs) — Done
+
+- [[BUG-030]] (bugs) — Triaged
 
 - [[CR-001]] (crs) — Completed
 
@@ -165,6 +173,20 @@ _No active epics._
 
 - [[CR-058]] (crs) — Done
 
+- [[CR-059]] (crs) — Done
+
+- [[CR-060]] (crs) — Done
+
+- [[CR-061]] (crs) — Approved
+
+- [[CR-062]] (crs) — Approved
+
+- [[CR-063]] (crs) — Approved
+
+- [[CR-064]] (crs) — Approved
+
+- [[CR-065]] (crs) — Approved
+
 - [[EPIC-000]] (epics) — Completed
 
 - [[EPIC-001]] (epics) — Abandoned
@@ -204,6 +226,8 @@ _No active epics._
 - [[EPIC-024]] (epics) — Done
 
 - [[EPIC-025]] (epics) — Done
+
+- [[EPIC-027]] (epics) — Approved
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 
@@ -276,6 +300,8 @@ _No active epics._
 - [[SPRINT-24]] (sprints) — Completed
 
 - [[SPRINT-25]] (sprints) — Completed
+
+- [[SPRINT-26]] (sprints) — Completed
 
 - [[STORY-000-01]] (stories) — Completed
 
