@@ -6,9 +6,10 @@ children: []
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
-last_ingest_commit: ""
+last_ingest: "2026-05-14T21:22:30.232Z"
+last_ingest_commit: "7df9a3ca9afbb90c65ed2701a7f3d5a75450edef"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-27"
 ---
 
 # SPRINT-27: SPRINT-27

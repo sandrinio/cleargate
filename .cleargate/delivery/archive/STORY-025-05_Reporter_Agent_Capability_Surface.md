@@ -1,7 +1,7 @@
 ---
 story_id: STORY-025-05
 parent_epic_ref: EPIC-025
-parent_cleargate_id: "EPIC-025"
+parent_cleargate_id: EPIC-025
 sprint_cleargate_id: SPRINT-18
 carry_over: false
 status: Done
@@ -18,9 +18,13 @@ created_at_version: cleargate@0.10.0
 updated_at_version: cleargate@0.10.0
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-01T11:16:30Z
+  pass: false
+  failing_criteria:
+    - id: reuse-audit-recorded
+      detail: "'## Existing Surfaces' not found in body"
+    - id: simplest-form-justified
+      detail: "'## Why not simpler?' not found in body"
+  last_gate_check: 2026-05-14T20:55:39Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

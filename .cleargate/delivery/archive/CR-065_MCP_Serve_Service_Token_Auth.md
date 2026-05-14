@@ -13,11 +13,9 @@ created_at_version: cleargate@0.11.5
 updated_at_version: cleargate@0.11.5
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-  last_gate_check: 2026-05-14T19:47:56Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:23:33Z
 context_source: |
   Spawned 2026-05-14 from CR-061 Q1 resolution: the user wants Claude Desktop
   + other stdio MCP clients (Cline, Claude Code in target repos) to be able
@@ -191,6 +189,14 @@ CLEARGATE_SERVICE_TOKEN= cleargate mcp serve
 - Manual round-trip succeeds from Claude Desktop using the modal-issued snippet.
 - Bad-token failure path prints actionable error and exits non-zero.
 - Pre-CR keychain-mode path is byte-identical in behavior (regression-protected by existing keychain tests + the new "env unset" case).
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `cleargate-cli/src/commands/mcp-serve.ts` — existing MCP-serve entry; extended with CLEARGATE_SERVICE_TOKEN env branch added before the keychain refresh path.
+- **Surface:** `cleargate-cli/src/auth/factory.ts` — existing token-acquisition factory; the new service-token fetcher slots in alongside the keychain and identity-flow fetchers.
+- **Surface:** `cleargate-cli/src/auth/keychain-store.ts` — existing keychain path; the env-unset code path stays byte-identical to current behavior.
 
 ---
 

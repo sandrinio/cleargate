@@ -19,13 +19,9 @@ created_at_version: v0.11.5
 updated_at_version: v0.11.5
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-    - id: simplest-form-justified
-      detail: "'## Why not simpler?' not found in body"
-  last_gate_check: 2026-05-14T19:52:12Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:21:04Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-05-14T19:57:22.945Z
 last_pulled_by: null
@@ -293,6 +289,22 @@ Feature: MCP type-agnostic sync and universal payload contract
 
 - **AI Question 8 (added 2026-05-12):** Should `cleargate_id` have a format regex, or stay fully freeform within length bounds?
   - **Human Answer (2026-05-14):** Accept **two** valid forms without warning: (a) the TYPE-NNN convention `^[A-Z][A-Z0-9_]*-\d+(-\d+)*$` (e.g. `EPIC-027`, `STORY-027-01`); (b) plain 5-digit numeric `^\d{5}$` (e.g. `00027`, `12345`, useful for adapter-pulled items with numeric IDs from Linear/Jira). Anything else triggers L2 `unknown_id_format` advisory warning. Length bounds (1-128) stay enforced.
+
+## Existing Surfaces
+
+> L1 reuse audit — gate-anchor version of §3.5 above. Source-tree implementations this Epic extends.
+
+- **Surface:** `mcp/src/tools/push-item.ts` — current closed-enum type validator, approved gate, cached-gate check, advisory prefix injection (full breakdown in §3.5).
+- **Surface:** `mcp/src/tools/pull-item.ts` — generic 404 path replaced with structured response.
+- **Surface:** `mcp/src/tools/sync-status.ts` — current skipApprovedGate caller; migrated to origin-based policy.
+- **Surface:** `mcp/src/db/schema.ts` — items table already type-agnostic; vocabulary comment updated.
+
+## Why not simpler?
+
+> Gate-anchor version of §3.6 above. L2 right-size + justify-complexity.
+
+- **Smallest existing surface that could carry this:** `mcp/src/tools/push-item.ts` could absorb the open-type + reserved-keys + size-cap changes inline (≈40 LOC). The policy wrapper extraction and `cleargate lint` command are net-new, but small.
+- **Why isn't extension / parameterization / config sufficient?** Three concerns are not parameterizable: (a) the architectural rule that the CLI must never import a PM-tool SDK can't be enforced by a config flag (CI grep required); (b) the origin-based gate policy is a structural change to who-calls-what, not a flag; (c) the L3 lint layer is a new code path needing template-schema discovery. Together they warrant one coherent Epic over three disjoint CRs.
 
 ---
 

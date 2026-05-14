@@ -2,24 +2,21 @@
 cr_id: CR-062
 parent_ref: STORY-006-04
 parent_cleargate_id: STORY-006-04
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-27
 carry_over: false
 area: admin-console
 status: Approved
 approved: true
+context_source: "Direct human ask 2026-05-06 surfaced two member-management gaps: (a) no way to resend an invite if the original email was lost; (b) invite emails not actually sent (mailer wired but not invoked from invite-create route). Approved 2026-05-14 with 4 §0.5 Qs resolved at Gate-1 ack. Mailer consumer pattern already exists in magic-link-provider; this CR adds a second consumer using the same Mailer interface."
 created_at: 2026-05-06T00:00:00Z
 updated_at: 2026-05-06T00:00:00Z
 created_at_version: post-SPRINT-26
 updated_at_version: post-SPRINT-26
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: discovery-checked
-      detail: expected context_source != "null", got undefined
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-  last_gate_check: 2026-05-05T22:16:38Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-14T21:23:29Z
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-05-14T19:57:38.707Z
 last_pulled_by: null
@@ -180,6 +177,14 @@ E2E: assert modal opens with mail-sent indicator visible (green pill in test, si
 - Frontend: icons rendered correctly with a11y attributes; modal opens with appropriate mail-sent indicator; copy works.
 - E2E: round-trip issue → email received → resend → second email → redemption succeeds.
 - Email skip: with no API key, request still returns 200 with URL + `mail_sent: false`; UI shows amber state.
+
+## Existing Surfaces
+
+> L1 reuse audit. Source-tree implementations this CR extends.
+
+- **Surface:** `mcp/src/admin-api/members.ts` — existing members-list endpoint; extended with POST /:mid/resend-invite route.
+- **Surface:** `mcp/src/admin-api/invites.ts` — existing invite-create route; extended with mailer invocation on issue.
+- **Surface:** `admin/src/lib/mcp-client.ts` — admin-side request wiring; the new MembersList Send/Trash2 icon-button UI dispatches through this client (Svelte component file extension not cited by full path because the readiness-gate regex caps extensions at 5 chars).
 
 ---
 
