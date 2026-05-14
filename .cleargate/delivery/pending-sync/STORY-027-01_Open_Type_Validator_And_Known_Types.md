@@ -47,7 +47,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:26:36Z
+  last_stamp: 2026-05-14T21:41:53Z
   sessions: []
 ---
 
@@ -168,7 +168,7 @@ Feature: Open type validator + normalize + KNOWN_TYPES registry
 | Item | Value |
 |---|---|
 | Primary File | `mcp/src/tools/push-item.ts` |
-| Related Files | `mcp/src/lib/payload-contract.ts` |
+| Related Files | `mcp/src/lib/payload-contract.ts`, `mcp/src/mcp/register-tools.ts` (SDR amendment: line 5 imports ITEM_TYPES — drop with the validator swap) |
 | Test Files | `mcp/src/tools/push-item.node.test.ts`, `mcp/src/lib/payload-contract.node.test.ts` |
 | New Files Needed | Yes — `mcp/src/lib/payload-contract.ts`, `mcp/src/lib/payload-contract.node.test.ts` |
 

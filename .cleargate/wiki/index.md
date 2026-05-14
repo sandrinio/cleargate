@@ -78,4 +78,4 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[BUG-030]] | bug | Triaged | .cleargate/delivery/archive/BUG-030_Member_Delete_500_FK_Items.md |
 ## Sprints
 
-| [[SPRINT-27]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |
+| [[SPRINT-27]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |

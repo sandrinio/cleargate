@@ -110,7 +110,7 @@ push_version: 1
 - **Surface:** `mcp/src/config.ts:56` — `CLEARGATE_RESEND_API_KEY` already declared optional. No new env vars.
 - **Surface:** `admin/src/routes/projects/[id]/members/+page.svelte` — members page hosts the list; row template gets the icon buttons.
 - **Surface:** `admin/src/lib/components/MembersList.svelte` (verify name; same area) — row component owns the icon-button rendering and click dispatch.
-- **Surface:** `admin/src/lib/components/InviteIssuedModal.svelte` (verify name) — if it already exists, reuse for both create + resend; if invite issuance currently uses a one-off inline modal, extract a shared `InviteUrlModal`.
+- **Surface:** `admin/src/lib/components/InviteIssuedModal.svelte` (NEW — extract from page-level routes file per SDR open-decision) — if it already exists, reuse for both create + resend; if invite issuance currently uses a one-off inline modal, extract a shared `InviteUrlModal`.
 - **Surface:** `admin/package.json` — `lucide-svelte` already a dependency (per EPIC-006 stack); no new deps.
 - **Why this CR extends rather than rebuilds:** Data model unchanged. Mailer wired. Icon library shipping. Modal pattern established by token-issued. CR is composition.
 
@@ -130,7 +130,7 @@ push_version: 1
 **Modify (UI):**
 - `admin/src/lib/api/members.ts` (or `mcp-client.ts`) — add `resendInvite(memberId)` method; update `createMember` return type to include `mail_sent`.
 - `admin/src/routes/projects/[id]/members/+page.svelte` — render Send + Trash2 icon buttons (lucide-svelte) for each row; `pending` rows get both, `active` rows get only Trash2; aria-labels + native title tooltips.
-- `admin/src/lib/components/MembersList.svelte` (verify name) — if list rendering is component-level, the icon buttons live here.
+- `admin/src/lib/components/MembersList.svelte` (NEW — extract from page-level routes file per SDR open-decision) — if list rendering is component-level, the icon buttons live here.
 - `admin/src/lib/components/InviteUrlModal.svelte` (NEW or reuse) — single modal for create + resend; props: `inviteUrl`, `expiresAt`, `mailSent`, `recipientEmail`. Shows green "Email sent to <email>" pill if `mailSent === true`, amber "Email could not be sent — copy the URL manually" if `false`. Copy + close buttons.
 - `admin/src/lib/components/MembersList.test.ts` (NEW or extend) — icon-presence + aria-label + click-dispatch unit tests.
 - `admin/tests/e2e/members.spec.ts` — extend.
