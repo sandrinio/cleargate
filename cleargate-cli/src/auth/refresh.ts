@@ -10,6 +10,15 @@
  * BUG-019 — used by `cleargate mcp serve` (and any future surfaces).
  */
 
+/**
+ * Common token-fetcher interface. Both AuthFetcher (keychain-refresh mode) and
+ * ServiceTokenFetcher (service-token mode) implement this. mcp-serve.ts holds a
+ * `TokenFetcher` reference, not an `AuthFetcher` specifically.
+ */
+export interface TokenFetcher {
+  getAccessToken(): Promise<string>;
+}
+
 export interface RefreshExchangeResponse {
   token_type: 'Bearer';
   access_token: string;
@@ -78,7 +87,7 @@ export interface AuthFetcherOptions extends RefreshDeps {
   skewSeconds?: number;
 }
 
-export class AuthFetcher {
+export class AuthFetcher implements TokenFetcher {
   private accessToken: string | null = null;
   private accessExpiresAt = 0;
   private inflight: Promise<string> | null = null;
