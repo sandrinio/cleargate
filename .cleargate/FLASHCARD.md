@@ -4,6 +4,7 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-15 · #deploy #release · admin console deploys from `cleargate-admin` remote (separate GitHub mirror), NOT `origin`. After any admin/** change, `git push cleargate-admin main:main` is required to trigger Coolify rebuild — skipping leaves prod stale. CLAUDE.md "Deploy targets" table is authoritative.
 2026-05-15 · #path-validator · path-validator must run BEFORE readFile/parseFrontmatter to guarantee exit 2 (not 1) for non-allowlisted paths; parseFrontmatter exits 1 for non-markdown.
 2026-05-15 · #svelte #vitest · vi.mock('$env/dynamic/public') needs a vitest.config alias + stub file — without it vite import-analysis errors before mock intercepts. Pattern: $app/navigation alias precedent.
 2026-05-15 · #mirror #parity #three-way · sprint-critical scripts need three-way parity check: live + canonical + npm-payload; verify all three pairs diff empty post-prebuild.

@@ -32,7 +32,7 @@ cleargate-planning/     ← canonical scaffold source (what `cleargate init` ins
 
 cleargate-cli/          ← @cleargate/cli npm package source (publishes `cleargate`)
 mcp/                    ← MCP server — nested separate git repo (sandrinio/cleargate-mcp)
-admin/                  ← admin tooling stub
+admin/                  ← SvelteKit admin console — tracked in OUTER repo, mirrored to sandrinio/cleargate-admin remote for Coolify deploy
 
 .claude/                ← LIVE dogfood instance (gitignored) — Claude Code reads here
   agents/               ← four-agent role definitions
@@ -78,6 +78,20 @@ Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any o
 - **Never `--no-verify`.** If a hook fails, fix the cause.
 - **Never `git reset --hard`, force push, or rewrite history** without explicit per-action approval.
 
+## Deploy targets
+
+Three repos, three deploy paths. Push the right remote(s) for each release:
+
+| Surface | Source path | Source repo (push to) | Deploy mechanism |
+|---|---|---|---|
+| `cleargate` CLI | `cleargate-cli/` | `origin` (`sandrinio/cleargate`) | `npm publish` from `cleargate-cli/` after version bump; release commit subject `release(cleargate): vX.Y.Z — <summary>` |
+| MCP server | `mcp/` (nested git repo) | `origin` on inner mcp/.git (`sandrinio/cleargate-mcp`) | Coolify watches `main`; deployed at `https://cleargate-mcp.soula.ge/` |
+| Admin console | `admin/` (tracked in outer repo) | **two remotes:** `origin` (`sandrinio/cleargate`) AND `cleargate-admin` (`sandrinio/cleargate-admin`) | Coolify watches `cleargate-admin/main`; admin/ source lives in the outer monorepo but the **deploy mirror is a separate repo** — push to BOTH after any `admin/**` change |
+
+**Admin release recipe** — `git push origin main` (canonical) **AND** `git push cleargate-admin main:main` (Coolify deploy mirror). Skipping the second push leaves the deployed admin console stale; the source-of-truth diverges silently from prod. Add to release checklist for any sprint with `admin/**` files changed.
+
+**Quick check before assuming release-complete:** `git remote -v` lists which remotes are configured locally. If `cleargate-admin` is among them and the sprint touched `admin/**`, push it.
+
 ## Active state (as of 2026-04-18)
 
 - **Shipped:** SPRINT-01 (MCP v0.1, 12 stories), SPRINT-02 (Admin API, 6 stories), [SPRINT-03](.cleargate/delivery/archive/SPRINT-03_CLI_Packages.md) (CLI packages + admin CLI + `cleargate join` + invite-storage retrofit, 11 stories). Deployed via Coolify at `https://cleargate-mcp.soula.ge/`.
@@ -86,6 +100,7 @@ Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any o
 - **Architectural decisions locked:**
   - **Invite storage (2026-04-18):** Postgres source of truth, Redis cache-only. Reason: durability + auditability + admin-UI queryability.
   - **Wiki drift detection (2026-04-19):** git SHA (not content hash) — drops EPIC-001 dependency; accepts spurious-recompile tradeoff.
+  - **Admin deploy mirror (2026-05-15):** `cleargate-admin` remote on the outer repo IS the Coolify-watched deploy source for the admin console. Outer `cleargate` repo is canonical (the admin/ source-of-truth lives there); `cleargate-admin` is a fast-forward mirror pushed after every admin/** change. See "Deploy targets" table.
 
 ## Stack versions (canonical — see INDEX.md for full table)
 
