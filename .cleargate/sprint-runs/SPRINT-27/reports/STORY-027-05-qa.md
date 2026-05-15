@@ -1,11 +1,15 @@
 ---
-work_item: STORY-027-05
-sprint: SPRINT-27
-agent: qa
-mode: verify
-verdict: PASS
-acceptance_coverage: 9 of 9
-deviation_verdict: ACCEPT — fs.globSync vs fast-glob
+work_item: "STORY-027-05"
+sprint: "SPRINT-27"
+agent: "qa"
+mode: "verify"
+verdict: "PASS"
+acceptance_coverage: "9 of 9"
+deviation_verdict: "ACCEPT — fs.globSync vs fast-glob"
+story_id: "STORY-027-05"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-05 — QA-Verify Report

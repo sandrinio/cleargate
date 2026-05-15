@@ -1,13 +1,17 @@
 ---
-work_item: STORY-027-02
-sprint: SPRINT-27
-agent: qa
-status: pass
-inner_mcp_commit: 51c432c
-typecheck: pass
-tests_027_02: 29 passed, 0 failed
-tests_027_01_regression: 36 passed, 0 failed
-vitest_full: 331 passed, 1 skipped (pre-existing)
+work_item: "STORY-027-02"
+sprint: "SPRINT-27"
+agent: "qa"
+status: "pass"
+inner_mcp_commit: "51c432c"
+typecheck: "pass"
+tests_027_02: "29 passed, 0 failed"
+tests_027_01_regression: "36 passed, 0 failed"
+vitest_full: "331 passed, 1 skipped (pre-existing)"
+story_id: "STORY-027-02"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-02 SPRINT-27 — QA Report

@@ -1,15 +1,19 @@
 ---
-work_item: STORY-027-04
-sprint: SPRINT-27
-agent: developer
-lane: standard
-status: done
-inner_mcp_commit: a69536a
-red_commit: fe786ae
-migration_file: mcp/src/db/migrations/0009_sad_mindworm.sql
-typecheck: pass
-tests_027_04: 57 passed, 0 failed
-tests_regression: 331 passed, 1 skipped (pre-existing)
+work_item: "STORY-027-04"
+sprint: "SPRINT-27"
+agent: "developer"
+lane: "standard"
+status: "done"
+inner_mcp_commit: "a69536a"
+red_commit: "fe786ae"
+migration_file: "mcp/src/db/migrations/0009_sad_mindworm.sql"
+typecheck: "pass"
+tests_027_04: "57 passed, 0 failed"
+tests_regression: "331 passed, 1 skipped (pre-existing)"
+story_id: "STORY-027-04"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-04 — Developer Report

@@ -1,12 +1,16 @@
 ---
-work_item: STORY-027-01
-sprint: SPRINT-27
-agent: qa
-role: qa
-status: pass
-commit_verified: caa8cf8
-red_commit: 3452581
-qa_completed_at: 2026-05-15T00:00:00Z
+work_item: "STORY-027-01"
+sprint: "SPRINT-27"
+agent: "qa"
+role: "qa"
+status: "pass"
+commit_verified: "caa8cf8"
+red_commit: "3452581"
+qa_completed_at: "2026-05-15T00:00:00Z"
+story_id: "STORY-027-01"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-01 QA Report

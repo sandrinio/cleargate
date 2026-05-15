@@ -1,13 +1,17 @@
 ---
-work_item: STORY-027-05
-sprint: SPRINT-27
-agent: developer
-lane: fast
-status: done
-commit: 8e053c5
-inner_mcp_commit: ecb2a63
-typecheck: pass
-tests: 141 passed, 19 failed (19 pre-existing Red failures in *.red.node.test.ts; 14 new tests all green)
+work_item: "STORY-027-05"
+sprint: "SPRINT-27"
+agent: "developer"
+lane: "fast"
+status: "done"
+commit: "8e053c5"
+inner_mcp_commit: "ecb2a63"
+typecheck: "pass"
+tests: "141 passed, 19 failed (19 pre-existing Red failures in *.red.node.test.ts; 14 new tests all green)"
+story_id: "STORY-027-05"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-05 — Developer Report
