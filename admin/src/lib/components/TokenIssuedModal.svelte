@@ -30,6 +30,7 @@
    */
   import { onDestroy } from 'svelte';
   import { beforeNavigate } from '$app/navigation';
+  import { env as publicEnv } from '$env/dynamic/public';
   import { copyToClipboard } from '$lib/utils/clipboard.js';
   import { toastStore } from '$lib/stores/toast.svelte.js';
 
@@ -47,8 +48,35 @@
   // Internal mutable copy; zeroed on close so the prop reference is also cleared
   let _plaintext = $state('');
 
+  // Tab state for connection snippet section
+  let activeTab = $state<'json' | 'curl' | 'stdio'>('json');
+
   // Shake animation state for checkbox when close is attempted without ticking
   let shakeCheckbox = $state(false);
+
+  // Derived snippet builders — reference _plaintext reactively; zeroed automatically when _plaintext resets
+  const mcpUrl = $derived(publicEnv.PUBLIC_MCP_URL ?? 'http://localhost:3000');
+  const jsonSnippet = $derived(
+    JSON.stringify({ url: `${mcpUrl}/mcp`, headers: { Authorization: `Bearer ${_plaintext}` } }, null, 2)
+  );
+  const curlSnippet = $derived(
+    `curl -X POST ${mcpUrl}/mcp -H "Authorization: Bearer ${_plaintext}" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`
+  );
+  const stdioSnippet = $derived(
+    JSON.stringify(
+      {
+        mcpServers: {
+          cleargate: {
+            command: 'cleargate',
+            args: ['mcp', 'serve'],
+            env: { CLEARGATE_SERVICE_TOKEN: _plaintext },
+          },
+        },
+      },
+      null,
+      2
+    )
+  );
 
   // beforeunload handler — prevents accidental navigation while plaintext is exposed
   function beforeUnloadHandler(e: BeforeUnloadEvent) {
@@ -160,6 +188,16 @@
       copying = false;
     }
   }
+
+  async function handleSnippetCopy(snippet: string) {
+    const ok = await copyToClipboard(snippet);
+    if (ok) {
+      // Toast MUST NOT contain the token value — Design Guide §6.10
+      toastStore.success('Copied to clipboard');
+    } else {
+      toastStore.error('Copy failed. Please select and copy manually.');
+    }
+  }
 </script>
 
 <!-- Global keydown capture to block Esc -->
@@ -238,6 +276,90 @@
           </button>
         </div>
       </div>
+
+      <!-- Connection snippet tabs — CR-061 -->
+      <section class="connect-snippets mb-4">
+        <!-- Tab strip -->
+        <div role="tablist" class="flex gap-1 mb-2">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'json'}
+            class="px-3 py-1.5 text-xs rounded-lg font-medium transition-colors"
+            class:bg-primary={activeTab === 'json'}
+            class:text-primary-content={activeTab === 'json'}
+            class:bg-base-200={activeTab !== 'json'}
+            class:text-base-content={activeTab !== 'json'}
+            onclick={() => (activeTab = 'json')}
+          >
+            HTTP JSON config
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'curl'}
+            class="px-3 py-1.5 text-xs rounded-lg font-medium transition-colors"
+            class:bg-primary={activeTab === 'curl'}
+            class:text-primary-content={activeTab === 'curl'}
+            class:bg-base-200={activeTab !== 'curl'}
+            class:text-base-content={activeTab !== 'curl'}
+            onclick={() => (activeTab = 'curl')}
+          >
+            curl test
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'stdio'}
+            class="px-3 py-1.5 text-xs rounded-lg font-medium transition-colors"
+            class:bg-primary={activeTab === 'stdio'}
+            class:text-primary-content={activeTab === 'stdio'}
+            class:bg-base-200={activeTab !== 'stdio'}
+            class:text-base-content={activeTab !== 'stdio'}
+            onclick={() => (activeTab = 'stdio')}
+          >
+            Claude Desktop (stdio)
+          </button>
+        </div>
+
+        <!-- Tab panel -->
+        <div role="tabpanel" class="relative">
+          <pre class="bg-base-200 rounded-xl p-4 font-mono text-xs whitespace-pre-wrap break-all">{activeTab === 'json' ? jsonSnippet : activeTab === 'curl' ? curlSnippet : stdioSnippet}</pre>
+          <button
+            type="button"
+            class="absolute top-2 right-2 btn btn-xs btn-ghost bg-base-100"
+            aria-label="Copy snippet"
+            onclick={() =>
+              handleSnippetCopy(
+                activeTab === 'json' ? jsonSnippet : activeTab === 'curl' ? curlSnippet : stdioSnippet
+              )}
+          >
+            <!-- Clipboard icon (inline SVG) -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Footer routing reminder -->
+        <p class="text-xs text-[#6B7280] mt-2">
+          Pulled items land where the agent's instructions say. Run
+          <code class="font-mono">npx cleargate init</code> in the target repo for
+          <code class="font-mono">.cleargate/delivery/pending-sync/</code> auto-routing.
+        </p>
+      </section>
 
       <!-- Checkbox gate — required to enable Close -->
       <div class="mb-6">
