@@ -229,6 +229,12 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
   // source, MCP is a queryable mirror.
   payloadForPush['body'] = body;
 
+  // STORY-027-03 R8: stamp origin idempotently (respect any pre-existing user value).
+  // This ensures the MCP server's audit_log.origin column is always populated for CLI pushes.
+  if (payloadForPush['origin'] === undefined) {
+    payloadForPush['origin'] = 'cleargate-cli';
+  }
+
   // MCP call
   const mcp = await resolveMcp();
 
