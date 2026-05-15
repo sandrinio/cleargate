@@ -9,6 +9,8 @@
 
 - [[SPRINT-15]] — status: Completed
 
+- [[SPRINT-27]] — status: Active
+
 
 
 ## Planned Sprints
@@ -35,8 +37,6 @@
 - [[SPRINT-25]] — status: Completed
 
 - [[SPRINT-26]] — status: Completed
-
-- [[SPRINT-27]] — status: Approved
 
 
 

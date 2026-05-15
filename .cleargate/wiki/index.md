@@ -58,11 +58,11 @@ See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Stories
 
-| [[STORY-027-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-01_Open_Type_Validator_And_Known_Types.md |
-| [[STORY-027-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-02_Reserved_Keys_And_Type_Change_Forbid.md |
-| [[STORY-027-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-03_Origin_Gate_Policy_Split_Idempotent_Prefix.md |
-| [[STORY-027-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-04_Error_Taxonomy_And_Warnings.md |
-| [[STORY-027-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-027-05_Docs_And_CI_No_PM_SDK_Rule.md |
+| [[STORY-027-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-01_Open_Type_Validator_And_Known_Types.md |
+| [[STORY-027-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-02_Reserved_Keys_And_Type_Change_Forbid.md |
+| [[STORY-027-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-03_Origin_Gate_Policy_Split_Idempotent_Prefix.md |
+| [[STORY-027-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-04_Error_Taxonomy_And_Warnings.md |
+| [[STORY-027-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-05_Docs_And_CI_No_PM_SDK_Rule.md |
 ## Epics
 
 | [[EPIC-027]] | epic | Approved | .cleargate/delivery/archive/EPIC-027_MCP_Type_Agnostic_Sync_And_Universal_Payload.md |
@@ -78,4 +78,4 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[BUG-030]] | bug | Triaged | .cleargate/delivery/archive/BUG-030_Member_Delete_500_FK_Items.md |
 ## Sprints
 
-| [[SPRINT-27]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |
+| [[SPRINT-27]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |

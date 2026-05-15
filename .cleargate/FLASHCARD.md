@@ -4,6 +4,20 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-15 · #path-validator · path-validator must run BEFORE readFile/parseFrontmatter to guarantee exit 2 (not 1) for non-allowlisted paths; parseFrontmatter exits 1 for non-markdown.
+2026-05-15 · #svelte #vitest · vi.mock('$env/dynamic/public') needs a vitest.config alias + stub file — without it vite import-analysis errors before mock intercepts. Pattern: $app/navigation alias precedent.
+2026-05-15 · #mirror #parity #three-way · sprint-critical scripts need three-way parity check: live + canonical + npm-payload; verify all three pairs diff empty post-prebuild.
+2026-05-15 · #audit-log #transaction · per-warning audit_log rows written OUTSIDE the DB transaction in pushItem (best-effort) — decouples item persistence from telemetry; runTool success-row still fires via MCP transport.
+2026-05-15 · #audit-log #test-isolation · pushItem-direct-call tests that assert zero audit rows fail when new logic emits warnings — provide complete payload (title + status + known type + valid id) to suppress.
+2026-05-15 · #migration #drizzle #sequence · drizzle-kit reuses the next available sequence slot regardless of gaps (0008 absent → generates 0009_new_name.sql alongside existing 0009_old_name.sql); journal tracks by hash not filename.
+2026-05-15 · #advisory #idempotency · advisory strip-and-replace must handle TWO positions: body start (no H1) AND immediately after H1 — single-position regex misses H1 bodies.
+2026-05-15 · #worktree #procedural · direct commits to sprint branch bypass story worktree — small additive changes may ACCEPT but flag: enforce worktree branch for all story commits.
+2026-05-15 · #mcp #scope-bleed-guard · before deleting an exported symbol, grep ALL importers (e.g. ITEM_TYPES export chain: push-item.ts, list-items.ts, register-tools.ts, cleargate-sync-work-items.ts) — undocumented dependents cause typecheck breaks.
+2026-05-15 · #mirror #parity #prebuild · cleargate-cli/templates/cleargate-planning/ is gitignored; verify scaffold mirror parity via diff after npm run prebuild, do NOT git add it.
+2026-05-15 · #migration #drizzle #snapshot · drizzle-kit-generated migrations include a full schema snapshot (.json); hand-rolling breaks the hash chain — always use drizzle-kit generate for drizzle-managed schemas.
+2026-05-15 · #test-harness #postgres #red-test · Postgres disallows TEMP tables from FK-referencing permanent tables (err 42P16); use a permanent scratch table with DROP TABLE IF EXISTS in beforeEach for defense-in-depth FK tests.
+2026-05-15 · #scaffold #prebuild #knowledge-mirror · cleargate-planning/.cleargate/knowledge/ is mirrored by prebuild; canonical-live-parity Red test diffs live vs canonical — update both files or parity test fails.
+2026-05-15 · #schema #migration #postgres · Postgres 18 stores NOT NULL as named constraints (e.g. items_col_not_null); ALTER COLUMN DROP NOT NULL alone does not drop them — also DROP CONSTRAINT IF EXISTS the named constraint.
 2026-05-14 · #architect #sdr #anti-speculation · Story §Existing Surfaces bullets are advisory — SDR must grep codebase to verify cross-story coupling claims (069-09 mishap).
 2026-05-04 · #qa #scratch #gitignore · scratch/ is gitignored — Dev cannot update from worktree path; QA must verify on main-repo disk, not worktree path.
 2026-05-04 · #qa #report #worktree-vs-main · QA agent sometimes writes report to worktree-relative `.cleargate/sprint-runs/<id>/reports/` path; orchestrator must copy to main-repo path before merge for audit trail (DevOps fallback).

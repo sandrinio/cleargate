@@ -1,0 +1,3 @@
+- 2026-05-14T22:52:14Z · #rejected · STORY-027-05 fast-glob decision is story-specific, not generalizable
+- 2026-05-14T22:52:14Z · #rejected · CR-063 last_report_ingest_commit is implementation detail, not pattern
+- 2026-05-14T22:52:14Z · #rejected · CR-063 Scenario 9 false-pass noise — test-specific

@@ -4,8 +4,11 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-14T20:00:00Z
 context_source: |
   EPIC-027 §2 Scope (Document RESERVED_PAYLOAD_KEYS + open-type + minimum-contract
   in cleargate-protocol.md + CLAUDE.md; CI no-PM-SDK grep rule script) + §5
@@ -45,7 +48,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:22:39Z
+  last_stamp: 2026-05-14T21:41:45Z
   sessions: []
 ---
 
@@ -187,9 +190,9 @@ Feature: Docs + CI no-PM-SDK rule
    ```js
    #!/usr/bin/env node
    import { readFileSync } from 'node:fs';
-   import { globSync } from 'node:fs'; // or fast-glob if globSync absent in target Node version
+   import fg from 'fast-glob'; // SDR-locked: fast-glob (existing dep in cleargate-cli/) — see SPRINT-27 §2 Open Decision 3
    const PATTERNS = ['@linear/sdk', 'jira-client', 'azure-devops', '@atlassian/', 'linear-sdk', 'node-jira-client', 'jira.js'];
-   const FILES = globSync(['cleargate-cli/src/**/*.ts', '.claude/**/*.{ts,sh,md}']);
+   const FILES = fg.sync(['cleargate-cli/src/**/*.ts', '.claude/**/*.{ts,sh,md}']);
    let hits = 0;
    for (const file of FILES) {
      const content = readFileSync(file, 'utf8');
@@ -209,7 +212,7 @@ Feature: Docs + CI no-PM-SDK rule
    if (hits === 0) { console.log('✓ no forbidden PM-SDK imports'); process.exit(0); }
    process.exit(1);
    ```
-   (Architect M-plan refines exact regex; Developer may simplify if globSync API choice changes.)
+   (Glob API locked to fast-glob per SDR; fast-glob is already a transitive dep via cleargate-cli's tooling — verify with `npm ls fast-glob` at first dispatch.)
 
 2. **`cleargate-protocol.md` edits:** Append two H2 sections at the end of the file (or insert alphabetically; verify existing structure during dev). Content per R1 + R2.
 

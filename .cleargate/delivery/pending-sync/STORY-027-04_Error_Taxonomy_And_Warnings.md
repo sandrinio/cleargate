@@ -4,8 +4,11 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-14T20:00:00Z
 context_source: |
   EPIC-027 §2 Scope (L2 warnings array + audit_log integration) + §5 Scenarios
   2 (unknown_type warning), 8 (missing_recommended_fields), implicit
@@ -45,7 +48,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:22:37Z
+  last_stamp: 2026-05-14T21:41:49Z
   sessions: []
 ---
 
@@ -177,8 +180,8 @@ Feature: L2 warnings array + cleargate_id format check + audit_log telemetry
 | Primary File | `mcp/src/tools/push-item.ts` |
 | Related Files | `mcp/src/lib/payload-contract.ts`, `mcp/src/lib/audit-log.ts` (verify path), `mcp/src/db/schema.ts` |
 | Test Files | `mcp/src/tools/push-item.node.test.ts`, `mcp/src/lib/payload-contract.node.test.ts`, `mcp/src/lib/audit-log.node.test.ts` |
-| Migration File | `mcp/migrations/<next>_add_warningcode_and_origin_to_audit_log.sql` (if columns absent) |
-| New Files Needed | Possibly one migration file; otherwise extension of existing modules |
+| Migration File | `mcp/migrations/<next>_add_warningcode_and_origin_to_audit_log.sql` — **REQUIRED** per SDR grep of schema.ts:134-152: errorCode exists, warningCode + origin ABSENT. |
+| New Files Needed | Yes — one migration file (warningCode + origin columns) + extension of existing modules |
 
 ### 3.2 Technical Logic
 
