@@ -746,6 +746,65 @@ async function main() {
     process.stderr.write('Run `cleargate sync work-items` manually to retry.\n');
   }
 
+  // ── Step 7.4: MCP push of sprint plan + report ───────────────────────────────
+  // CR-064: mcp push sprint plan + report
+  // Runs after Step 7 (work-item sync) and BEFORE Step 7.5 (CR-063 wiki ingest).
+  // Per SDR-locked ordering: MCP push first, wiki ingest second (CR-064 §0.5 Q4 accepted).
+  // Non-fatal on failure: sprint stays Completed. MCP push can be retried manually.
+  process.stdout.write('Step 7.4: pushing sprint plan + report to MCP...\n');
+  try {
+    const cliBin74 = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+    if (fs.existsSync(cliBin74)) {
+      // Resolve sprint plan path: prefer archive/, fall back to pending-sync/
+      const deliveryBase = path.join(REPO_ROOT, '.cleargate', 'delivery');
+      const archiveDir = path.join(deliveryBase, 'archive');
+      const pendingDir = path.join(deliveryBase, 'pending-sync');
+      let planPath = null;
+      for (const dir of [archiveDir, pendingDir]) {
+        if (!fs.existsSync(dir)) continue;
+        const match = fs.readdirSync(dir).find(
+          (f) => f.startsWith(sprintId + '_') && f.endsWith('.md'),
+        );
+        if (match) { planPath = path.join(dir, match); break; }
+      }
+      if (planPath && fs.existsSync(planPath)) {
+        try {
+          execSync(`node ${JSON.stringify(cliBin74)} push ${JSON.stringify(planPath)}`, {
+            stdio: 'inherit',
+            env: process.env,
+            timeout: 60000,
+          });
+          process.stdout.write('Step 7.4a passed: sprint plan pushed to MCP.\n');
+        } catch (err74a) {
+          process.stderr.write(`Step 7.4a warning: sprint plan push failed: ${/** @type {Error} */ (err74a).message}\n`);
+        }
+      } else {
+        process.stdout.write('Step 7.4a skipped: sprint plan file not found.\n');
+      }
+      // Resolve sprint report path: reuses reportFile resolved via legacy-fallback in Step 4
+      if (reportFile && fs.existsSync(reportFile)) {
+        try {
+          execSync(`node ${JSON.stringify(cliBin74)} push ${JSON.stringify(reportFile)}`, {
+            stdio: 'inherit',
+            env: process.env,
+            timeout: 60000,
+          });
+          process.stdout.write('Step 7.4b passed: sprint report pushed to MCP.\n');
+        } catch (err74b) {
+          process.stderr.write(`Step 7.4b warning: sprint report push failed: ${/** @type {Error} */ (err74b).message}\n`);
+        }
+      } else {
+        process.stdout.write('Step 7.4b skipped: sprint report file not found (legacy sprint or report not yet written).\n');
+      }
+    } else {
+      process.stdout.write('Step 7.4 skipped: CLI binary not found (non-fatal).\n');
+    }
+  } catch (err) {
+    // Non-fatal — sprint stays Completed; MCP push can be retried manually
+    process.stderr.write(`Step 7.4 warning: MCP push failed: ${/** @type {Error} */ (err).message}\n`);
+    process.stderr.write('Run `cleargate push <plan-or-report-path>` manually to retry.\n');
+  }
+
   // ── Step 7.5: wiki ingest sprint report ──────────────────────────────────
   // CR-063: wiki ingest sprint report
   // Runs after Step 7 (MCP sync). Non-fatal: sprint stays Completed on failure.
