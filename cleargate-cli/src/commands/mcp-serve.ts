@@ -7,13 +7,19 @@
  * Bearer <access_token>`, then writes the response (single JSON OR SSE-framed
  * data events) back to stdout, one JSON-RPC message per line.
  *
- * Auth model:
- *   - boot: load refresh_token from keychain → POST /auth/refresh → cache
- *     access_token + persist rotated refresh_token.
- *   - per-request: lazy refresh ~60s before access expiry; on 401 invalidate
- *     and retry once.
- *   - if refresh itself fails (no token / revoked): print actionable hint to
- *     stderr and exit non-zero so Claude Code surfaces "auth failed".
+ * Auth model (CR-065):
+ *   service-token mode (CLEARGATE_SERVICE_TOKEN set + non-empty):
+ *     - token passed verbatim as Bearer on every /mcp POST.
+ *     - no keychain access, no refresh logic.
+ *     - on 401 from /mcp: print actionable error and exit non-zero.
+ *
+ *   keychain-refresh mode (CLEARGATE_SERVICE_TOKEN unset or empty):
+ *     - boot: load refresh_token from keychain → POST /auth/refresh → cache
+ *       access_token + persist rotated refresh_token.
+ *     - per-request: lazy refresh ~60s before access expiry; on 401 invalidate
+ *       and retry once.
+ *     - if refresh itself fails (no token / revoked): print actionable hint to
+ *       stderr and exit non-zero so Claude Code surfaces "auth failed".
  *
  * Notification messages (id-less JSON-RPC) get no stdout response per spec.
  *
@@ -25,6 +31,8 @@ import { Readable } from 'node:stream';
 import { loadConfig } from '../config.js';
 import { createTokenStore } from '../auth/factory.js';
 import { AuthFetcher, RefreshError } from '../auth/refresh.js';
+import type { TokenFetcher } from '../auth/refresh.js';
+import { ServiceTokenFetcher } from '../auth/service-token-fetcher.js';
 
 export interface McpServeOptions {
   profile: string;
@@ -52,6 +60,14 @@ export interface McpServeOptions {
 
 const DEFAULT_BASE_URL = 'https://cleargate-mcp.soula.ge';
 
+/** Sentinel error type used to signal a service-token 401 up through proxyOne. */
+class ServiceToken401Error extends Error {
+  constructor() {
+    super('service-token-401');
+    this.name = 'ServiceToken401Error';
+  }
+}
+
 export async function mcpServeHandler(opts: McpServeOptions): Promise<void> {
   const fetchFn = opts.fetch ?? globalThis.fetch;
   const stdout = opts.stdout ?? ((s) => process.stdout.write(s));
@@ -63,34 +79,51 @@ export async function mcpServeHandler(opts: McpServeOptions): Promise<void> {
   });
   const baseUrl = cfg.mcpUrl ?? DEFAULT_BASE_URL;
 
-  const store = await (opts.createStore ?? createTokenStore)({
-    ...(opts.keychainService !== undefined ? { keychainService: opts.keychainService } : {}),
-    ...(opts.forceBackend !== undefined ? { forceBackend: opts.forceBackend } : {}),
-  });
+  // CR-065: service-token branch — checked BEFORE touching the keychain.
+  const serviceToken = process.env['CLEARGATE_SERVICE_TOKEN'] ?? '';
+  let fetcher: TokenFetcher;
+  let isServiceTokenMode: boolean;
 
-  const fetcher = new AuthFetcher({
-    baseUrl,
-    loadRefresh: () => store.load(opts.profile),
-    saveRefresh: (t) => store.save(opts.profile, t),
-    ...(opts.fetch !== undefined ? { fetch: opts.fetch } : {}),
-    ...(opts.now !== undefined ? { now: opts.now } : {}),
-  });
+  if (serviceToken.length > 0) {
+    // Service-token mode: bypass keychain entirely.
+    isServiceTokenMode = true;
+    fetcher = new ServiceTokenFetcher(serviceToken);
+    stderr('cleargate mcp serve: auth mode = service-token\n');
+  } else {
+    // Keychain-refresh mode: existing path, byte-identical to pre-CR.
+    isServiceTokenMode = false;
+    const store = await (opts.createStore ?? createTokenStore)({
+      ...(opts.keychainService !== undefined ? { keychainService: opts.keychainService } : {}),
+      ...(opts.forceBackend !== undefined ? { forceBackend: opts.forceBackend } : {}),
+    });
 
-  // Boot-time refresh so failures surface early (Claude Code shows auth-failed).
-  try {
-    await fetcher.getAccessToken();
-  } catch (err) {
-    if (err instanceof RefreshError) {
-      stderr(
-        `cleargate mcp serve: refresh failed (${err.status} ${err.code}). ` +
-          `Run \`cleargate join <invite-url>\` to re-authenticate.\n`,
-      );
-    } else {
-      stderr(
-        `cleargate mcp serve: ${err instanceof Error ? err.message : String(err)}\n`,
-      );
+    const authFetcher = new AuthFetcher({
+      baseUrl,
+      loadRefresh: () => store.load(opts.profile),
+      saveRefresh: (t) => store.save(opts.profile, t),
+      ...(opts.fetch !== undefined ? { fetch: opts.fetch } : {}),
+      ...(opts.now !== undefined ? { now: opts.now } : {}),
+    });
+
+    fetcher = authFetcher;
+    stderr('cleargate mcp serve: auth mode = keychain-refresh\n');
+
+    // Boot-time refresh so failures surface early (Claude Code shows auth-failed).
+    try {
+      await authFetcher.getAccessToken();
+    } catch (err) {
+      if (err instanceof RefreshError) {
+        stderr(
+          `cleargate mcp serve: refresh failed (${err.status} ${err.code}). ` +
+            `Run \`cleargate join <invite-url>\` to re-authenticate.\n`,
+        );
+      } else {
+        stderr(
+          `cleargate mcp serve: ${err instanceof Error ? err.message : String(err)}\n`,
+        );
+      }
+      return exit(1);
     }
-    return exit(1);
   }
 
   const inputStream = (opts.stdin as Readable | undefined) ?? process.stdin;
@@ -103,8 +136,24 @@ export async function mcpServeHandler(opts: McpServeOptions): Promise<void> {
   for await (const line of rl) {
     if (!line.trim()) continue;
     try {
-      await proxyOne(line, baseUrl, fetcher, fetchFn, stdout, stderr);
+      await proxyOne(
+        line,
+        baseUrl,
+        fetcher,
+        isServiceTokenMode,
+        fetchFn,
+        stdout,
+        stderr,
+      );
     } catch (err) {
+      if (err instanceof ServiceToken401Error) {
+        // Fail fast in service-token mode: print actionable error and exit.
+        stderr(
+          `cleargate mcp serve: CLEARGATE_SERVICE_TOKEN rejected by /mcp (401). ` +
+            `Issue a new token in the admin console: Tokens → Issue → copy snippet.\n`,
+        );
+        return exit(1);
+      }
       // Emit an internal-error JSON-RPC response if we have an id; otherwise
       // log and continue.
       const errMsg = err instanceof Error ? err.message : String(err);
@@ -126,7 +175,8 @@ export async function mcpServeHandler(opts: McpServeOptions): Promise<void> {
 async function proxyOne(
   line: string,
   baseUrl: string,
-  fetcher: AuthFetcher,
+  fetcher: TokenFetcher,
+  isServiceTokenMode: boolean,
   fetchFn: typeof globalThis.fetch,
   stdout: (s: string) => void,
   stderr: (s: string) => void,
@@ -144,7 +194,12 @@ async function proxyOne(
   let res = await postFrame(baseUrl, line, access, fetchFn);
 
   if (res.status === 401) {
-    fetcher.invalidate();
+    if (isServiceTokenMode) {
+      // Fail fast in service-token mode — throw sentinel; no retry, no fallback.
+      throw new ServiceToken401Error();
+    }
+    // Keychain mode: invalidate + retry once (existing behavior).
+    (fetcher as AuthFetcher).invalidate();
     access = await fetcher.getAccessToken();
     res = await postFrame(baseUrl, line, access, fetchFn);
   }

@@ -4,8 +4,11 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-14T20:00:00Z
 context_source: |
   EPIC-027 §2 Scope (RESERVED_PAYLOAD_KEYS, type-change-forbid, payload size cap,
   approved_not_boolean) + §5 Scenarios 4-7 + §6 Q3 Answer (hard reject with
@@ -46,7 +49,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:22:33Z
+  last_stamp: 2026-05-14T21:26:38Z
   sessions: []
 ---
 

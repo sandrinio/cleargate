@@ -4,8 +4,11 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Draft
+status: Approved
 ambiguity: 🟢 Low
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-14T20:00:00Z
 context_source: |
   EPIC-027 §2 Scope (origin-based gate policy split + idempotent advisory prefix +
   pull 404 clarification) + §5 Scenarios 8-11 + §6 Q4 Answer (payload.origin
@@ -44,7 +47,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-14T21:22:35Z
+  last_stamp: 2026-05-14T21:42:00Z
   sessions: []
 ---
 
@@ -66,7 +69,10 @@ As a server-side adapter pulling issues from Jira/Linear/Azure, I want my pushes
   - missing / `undefined` — treated as `"cleargate-cli"` for backward-compat (the existing six caller types are all CLI-originated today)
 - R3: Export `ORIGIN_CLEARGATE_CLI = "cleargate-cli"` + `originRequiresGates(origin): boolean` helper from `payload-contract.ts`. The helper is the single decision point — both gate checks call it.
 - R4: Backward-compat: `PushItemContext.skipApprovedGate` boolean kept as deprecated alias. If `skipApprovedGate === true` is set, treat as `origin = "system:legacy-skip"` (gates bypass). Emit a `console.warn` (server-side log only, not in response) on first observation per process: "skipApprovedGate is deprecated; set payload.origin = 'system:<service>' instead". Remove in SPRINT-28+.
-- R5: Migrate the one known caller (`mcp/src/tools/sync-status.ts`) from `skipApprovedGate: true` to setting `payload.origin = "system:sync-status"`. Audit: `grep -rn "skipApprovedGate" mcp/src/` must return zero hits in calling-code AFTER this story; the field itself remains in the type definition with `/** @deprecated use payload.origin */`.
+- R5: Migrate the **two** production callers per SDR grep audit:
+  - `mcp/src/tools/sync-status.ts:40` — currently sets `skipApprovedGate: true`; migrate to `payload.origin = "system:sync-status"`.
+  - `mcp/src/mcp/register-tools.ts:106` — MCP-tool wrapper for `cleargate_push_item`; does NOT currently set skipApprovedGate, so under R2's missing-origin-defaults-to-cleargate-cli rule it inherits gate firing (correct CLI behavior). Verify this and add an explicit `payload.origin ??= "cleargate-cli"` stamp at the wrapper if redundancy is preferred for telemetry.
+  Audit: `grep -rn "skipApprovedGate: true" mcp/src/` must return zero hits in calling-code (excluding tests + type definition) AFTER this story; the field itself remains in `PushItemContext` with `/** @deprecated use payload.origin */`. Test files (`pull-item.test.ts`, `list-items.test.ts`, `sync-status.test.ts`, `push-item.test.ts`) carry 8+ `skipApprovedGate: true` hits — keep unchanged (regression-protect the deprecation-alias path).
 - R6: Idempotent body advisory prefix: the existing logic at `mcp/src/tools/push-item.ts:160-175` re-prepends `[advisory: gate_failed — <criteria>]` on every re-push, stacking lines on the second-and-later push. Add a regex check: if the body already starts with `[advisory: gate_failed —`, REPLACE that line in place (keeping the rest of the body intact). Detection regex: `/^\[advisory: gate_failed — [^\]]+\]\n/`.
 - R7: Structured pull 404: `mcp/src/tools/pull-item.ts` currently returns a generic 404 when no row matches the requested `cleargate_id`. Change to `{code: "item_not_found", message: "no item with cleargate_id '<id>'", hint: "push it first, or check the cleargate_id"}`.
 - R8: `payload.origin` is OPTIONAL in the request schema; defaults to `"cleargate-cli"` when missing. CLI side: `cleargate-cli/src/commands/push.ts` stamps `payload.origin = "cleargate-cli"` automatically on every push (small CLI edit included in this story's surface).

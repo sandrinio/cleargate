@@ -1,5 +1,8 @@
 {
   "name": "cleargate-monorepo",
   "private": true,
-  "workspaces": ["cleargate-cli", "admin"]
+  "workspaces": ["cleargate-cli", "admin"],
+  "scripts": {
+    "check:no-pm-sdk": "node scripts/ci-no-pm-sdk.mjs"
+  }
 }

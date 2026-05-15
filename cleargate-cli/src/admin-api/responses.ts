@@ -39,6 +39,8 @@ export const InviteCreatedSchema = z
     invite_url: z.string(),
     invite_token: z.string(),
     invite_expires_in: z.number().int(),
+    /** Whether the invite email was sent successfully (CR-062) */
+    mail_sent: z.boolean(),
   })
   .strict();
 

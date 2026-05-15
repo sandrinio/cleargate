@@ -25,6 +25,10 @@ export interface WikiPage {
   parent_cleargate_id?: string;
   /** Optional — canonical cleargate-id of the owning sprint (§11.7). */
   sprint_cleargate_id?: string;
+  /** Optional — repo-relative path to the raw sprint report file (CR-063). */
+  report_raw_path?: string;
+  /** Optional — git SHA of raw sprint report at last ingest (CR-063). */
+  last_report_ingest_commit?: string;
 }
 
 /** Serialise a WikiPage frontmatter + body into a markdown string. */
@@ -56,6 +60,12 @@ export function serializePage(page: WikiPage, body: string): string {
   }
   if (page.sprint_cleargate_id !== undefined) {
     lines.push(`sprint_cleargate_id: "${page.sprint_cleargate_id}"`);
+  }
+  if (page.report_raw_path !== undefined) {
+    lines.push(`report_raw_path: "${page.report_raw_path}"`);
+  }
+  if (page.last_report_ingest_commit !== undefined) {
+    lines.push(`last_report_ingest_commit: "${page.last_report_ingest_commit}"`);
   }
   lines.push('---');
 
@@ -91,8 +101,15 @@ export function parsePage(raw: string): WikiPage {
   const sprint_cleargate_id = fm['sprint_cleargate_id'] !== undefined
     ? String(fm['sprint_cleargate_id'])
     : undefined;
+  // Optional sprint-report fields (CR-063)
+  const report_raw_path = fm['report_raw_path'] !== undefined
+    ? String(fm['report_raw_path'])
+    : undefined;
+  const last_report_ingest_commit = fm['last_report_ingest_commit'] !== undefined
+    ? String(fm['last_report_ingest_commit'])
+    : undefined;
 
-  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo, last_contradict_sha, parent_cleargate_id, sprint_cleargate_id };
+  return { type, id, parent, children, status, remote_id, raw_path, last_ingest, last_ingest_commit, repo, last_contradict_sha, parent_cleargate_id, sprint_cleargate_id, report_raw_path, last_report_ingest_commit };
 }
 
 function parseFmRaw(raw: string): { fm: Record<string, unknown>; body: string } {

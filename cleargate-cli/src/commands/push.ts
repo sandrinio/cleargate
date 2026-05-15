@@ -175,6 +175,23 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
     ? filePath
     : path.resolve(projectRoot, filePath);
 
+  // CR-064: path validator — allow sprint-runs paths ONLY for allowlisted report basenames.
+  // Runs BEFORE file read + frontmatter parse so non-allowlisted paths always exit 2,
+  // not 1 (which is reserved for frontmatter/approval errors).
+  // Ordering rule per M3 §CR-064 risk note: allowlist carve-out runs BEFORE exclusion check.
+  if (SPRINT_RUNS_PATH_REGEX.test(resolvedPath)) {
+    if (!SPRINT_REPORT_PATH_REGEX.test(resolvedPath)) {
+      stderr(
+        `Error: path not in allowlist. Only sprint report files are accepted from sprint-runs/.\n` +
+        `  Allowed: .cleargate/sprint-runs/SPRINT-NN/REPORT.md\n` +
+        `           .cleargate/sprint-runs/SPRINT-NN/SPRINT-NN_REPORT.md\n` +
+        `  Got:     "${resolvedPath}"\n`,
+      );
+      exit(2);
+      return;
+    }
+  }
+
   let rawContent: string;
   try {
     rawContent = await fsPromises.readFile(resolvedPath, 'utf8');
@@ -207,7 +224,7 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
   }
 
   const itemId = getItemId(fm);
-  const type = getItemType(fm);
+  const type = getItemTypeWithPathOverride(resolvedPath, fm);
   if (!type) {
     stderr(`Error: cannot determine item type from frontmatter in "${resolvedPath}".\n`);
     exit(1);
@@ -228,6 +245,12 @@ async function handlePush(filePath: string, ctx: PushCtx): Promise<void> {
   // payload.body under the item's jsonb column — repo remains the canonical
   // source, MCP is a queryable mirror.
   payloadForPush['body'] = body;
+
+  // STORY-027-03 R8: stamp origin idempotently (respect any pre-existing user value).
+  // This ensures the MCP server's audit_log.origin column is always populated for CLI pushes.
+  if (payloadForPush['origin'] === undefined) {
+    payloadForPush['origin'] = 'cleargate-cli';
+  }
 
   // MCP call
   const mcp = await resolveMcp();
@@ -393,18 +416,26 @@ async function writeAtomic(filePath: string, content: string): Promise<void> {
 }
 
 function getItemId(fm: Record<string, unknown>): string {
-  for (const key of ['story_id', 'epic_id', 'proposal_id', 'cr_id', 'bug_id']) {
+  for (const key of ['story_id', 'epic_id', 'proposal_id', 'sprint_id', 'cr_id', 'bug_id']) {
     const val = fm[key];
     if (typeof val === 'string' && val) return val;
   }
   return 'unknown';
 }
 
+// CR-064: regex detecting any path under .cleargate/sprint-runs/ (for path-validator gate).
+const SPRINT_RUNS_PATH_REGEX = /\.cleargate[\\/]sprint-runs[\\/]/;
+
+// CR-064: regex for sprint-report paths — matches REPORT.md or SPRINT-NN_REPORT.md
+// under .cleargate/sprint-runs/SPRINT-NN/. Capital letters only; sub-dirs rejected.
+const SPRINT_REPORT_PATH_REGEX = /\.cleargate[\\/]sprint-runs[\\/]SPRINT-\d{2,}[\\/](REPORT|SPRINT-\d{2,}_REPORT)\.md$/;
+
 function getItemType(fm: Record<string, unknown>): string | null {
   const typeMap: Record<string, string> = {
     story_id: 'story',
     epic_id: 'epic',
     proposal_id: 'proposal',
+    sprint_id: 'sprint',
     cr_id: 'cr',
     bug_id: 'bug',
   };
@@ -412,4 +443,19 @@ function getItemType(fm: Record<string, unknown>): string | null {
     if (typeof fm[key] === 'string' && fm[key]) return type;
   }
   return null;
+}
+
+/**
+ * CR-064: path-aware type override.
+ * If the file path matches the sprint-report allowlist regex, returns 'sprint_report'
+ * regardless of frontmatter content. Otherwise delegates to getItemType(fm).
+ *
+ * Priority: path-override BEFORE frontmatter typeMap (per CR §0.5 Q2).
+ */
+export function getItemTypeWithPathOverride(
+  localPath: string,
+  fm: Record<string, unknown>,
+): string | null {
+  if (SPRINT_REPORT_PATH_REGEX.test(localPath)) return 'sprint_report';
+  return getItemType(fm);
 }

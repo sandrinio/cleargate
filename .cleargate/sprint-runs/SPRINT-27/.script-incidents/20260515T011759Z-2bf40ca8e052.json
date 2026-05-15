@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-15T01:17:59Z",
+  "command": "npx",
+  "args": ["vitest","run","admin/tests/unit/MembersList.test.ts"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "\n RUN  v2.1.9 /Users/ssuladze/Documents/Dev/ClearGate\n\n ❯ .worktrees/CR-062/admin/tests/unit/MembersList.test.ts (0 test)\n ❯ admin/tests/unit/MembersList.test.ts (0 test)\n\n Test Files  2 failed (2)\n      Tests  no tests\n   Start at  05:17:57\n   Duration  1.02s (transform 589ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 93ms)",
+  "stderr": "⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  admin/tests/unit/MembersList.test.ts [ admin/tests/unit/MembersList.test.ts ]\n FAIL  .worktrees/CR-062/admin/tests/unit/MembersList.test.ts [ .worktrees/CR-062/admin/tests/unit/MembersList.test.ts ]\nError: Failed to parse source for import analysis because the content contains invalid JS syntax. If you are using JSX, make sure to name the file with the .jsx or .tsx extension.\n  Plugin: vite:import-analysis\n  File: /Users/ssuladze/Documents/Dev/ClearGate/admin/src/lib/components/MembersList.svelte:55:10\n  53 |      return 'pending';\n  54 |    }\n  55 |  </script>\n     |           ^\n  56 |  \n  57 |  <!-- Desktop table layout -->\n ❯ TransformPluginContext._formatError node_modules/vitest/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41\n ❯ TransformPluginContext.error node_modules/vitest/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16\n ❯ TransformPluginContext.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64259:14\n ❯ PluginContainer.transform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18\n ❯ loadAndTransform node_modules/vitest/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯",
+  "agent_type": null,
+  "work_item_id": null
+}

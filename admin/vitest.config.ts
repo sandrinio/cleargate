@@ -11,6 +11,8 @@ export default defineConfig({
       // SvelteKit $app/* stubs for unit tests (vitest does not run the SvelteKit plugin)
       '$app/navigation': path.resolve(__dirname, './src/lib/__mocks__/app-navigation.ts'),
       '$app/stores': path.resolve(__dirname, './src/lib/__mocks__/app-stores.ts'),
+      // SvelteKit $env/* stubs — vi.mock() overrides these in individual tests
+      '$env/dynamic/public': path.resolve(__dirname, './src/lib/__mocks__/env-dynamic-public.ts'),
     },
     conditions: ['browser'],
   },

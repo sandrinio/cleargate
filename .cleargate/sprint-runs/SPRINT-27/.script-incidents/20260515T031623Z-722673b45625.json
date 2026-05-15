@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-15T03:16:23Z",
+  "command": "npx",
+  "args": ["tsx","--env-file=mcp/.env","--test","mcp/test/payload-contract-id-format.red.node.test.ts"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "/Users/ssuladze/Documents/Dev/ClearGate/mcp/test/payload-contract-id-format.red.node.test.ts:39\n  CLEARGATE_ID_NUMERIC_REGEX,\n  ^\nSyntaxError: The requested module '../src/lib/payload-contract.js' does not provide an export named 'CLEARGATE_ID_NUMERIC_REGEX'\n    at #asyncInstantiate (node:internal/modules/esm/module_job:326:21)\n    at async ModuleJob.run (node:internal/modules/esm/module_job:429:5)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:639:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v25.9.0\n✖ mcp/test/payload-contract-id-format.red.node.test.ts (302.750458ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 310.522208\n\n✖ failing tests:\n\ntest at mcp/test/payload-contract-id-format.red.node.test.ts:1:1\n✖ mcp/test/payload-contract-id-format.red.node.test.ts (302.750458ms)\n  'test failed'",
+  "stderr": "",
+  "agent_type": null,
+  "work_item_id": null
+}

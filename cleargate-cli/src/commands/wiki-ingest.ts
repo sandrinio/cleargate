@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
-import { deriveBucket } from '../wiki/derive-bucket.js';
+import { deriveBucket, isSprintReportPath, deriveBucketFromReportPath } from '../wiki/derive-bucket.js';
 import { deriveRepo } from '../wiki/derive-repo.js';
 import { getGitSha, type GitRunner } from '../wiki/git-sha.js';
 import { serializePage, parsePage, type WikiPage } from '../wiki/page-schema.js';
@@ -99,34 +99,41 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   // Compute relative path from cwd (repo root)
   const relRawPath = path.relative(cwd, absRawPath).replace(/\\/g, '/');
 
-  // Step 1: Validate path resolves under <cwd>/.cleargate/delivery/
-  const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
-  const deliveryRootNorm = deliveryRoot.replace(/\\/g, '/');
-  const absDeliveryRoot = deliveryRoot;
+  // Step 1: Validate path.
+  // CR-063: Sprint-report allowlist carve-out MUST run BEFORE delivery-root check
+  // and BEFORE EXCLUDED_SUFFIXES check. Order matters: sprint-runs/ is in EXCLUDED_SUFFIXES.
+  const isSprintReport = isSprintReportPath(relRawPath);
 
-  // Check: absRawPath must be under absDeliveryRoot
-  const relToDelivery = path.relative(absDeliveryRoot, absRawPath);
-  if (relToDelivery.startsWith('..') || path.isAbsolute(relToDelivery)) {
-    stderr(`wiki ingest: ${rawPath} not under .cleargate/delivery/\n`);
-    exit(2);
-    return;
-  }
+  if (!isSprintReport) {
+    // Standard path: must be under .cleargate/delivery/
+    const deliveryRoot = path.join(cwd, '.cleargate', 'delivery');
+    const absDeliveryRoot = deliveryRoot;
 
-  void deliveryRootNorm; // suppress lint warning
+    const relToDelivery = path.relative(absDeliveryRoot, absRawPath);
+    if (relToDelivery.startsWith('..') || path.isAbsolute(relToDelivery)) {
+      stderr(`wiki ingest: ${rawPath} not under .cleargate/delivery/\n`);
+      exit(2);
+      return;
+    }
 
-  // Step 2: Exclusion check (defense-in-depth)
-  const isExcluded = EXCLUDED_SUFFIXES.some((excl) => relRawPath.startsWith(excl));
-  if (isExcluded) {
-    stdout(`wiki ingest: ${rawPath} excluded (skip)\n`);
-    exit(0);
-    return;
+    // Step 2: Exclusion check (defense-in-depth, only for non-sprint-report paths)
+    const isExcluded = EXCLUDED_SUFFIXES.some((excl) => relRawPath.startsWith(excl));
+    if (isExcluded) {
+      stdout(`wiki ingest: ${rawPath} excluded (skip)\n`);
+      exit(0);
+      return;
+    }
   }
 
   // Step 3: Derive bucket + id + type + repo
   const filename = path.basename(absRawPath);
   let bucketInfo: ReturnType<typeof deriveBucket>;
   try {
-    bucketInfo = deriveBucket(filename);
+    if (isSprintReport) {
+      bucketInfo = deriveBucketFromReportPath(relRawPath);
+    } else {
+      bucketInfo = deriveBucket(filename);
+    }
   } catch (e) {
     stderr(`wiki ingest: cannot determine bucket for ${rawPath}: ${(e as Error).message}\n`);
     exit(1);
@@ -174,21 +181,35 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   const currentSha = getGitSha(absRawPath, gitRunner) ?? '';
   const pageExists = fs.existsSync(pagePath);
 
-  if (pageExists && currentSha !== '') {
-    let isNoOp = false;
+  // Read existing wiki page once (used for idempotency + carrying forward fields)
+  let existingPage: WikiPage | undefined;
+  if (pageExists) {
     try {
       const existingPageContent = fs.readFileSync(pagePath, 'utf8');
-      const existingPage = parsePage(existingPageContent);
+      existingPage = parsePage(existingPageContent);
+    } catch {
+      // If parse fails, proceed with ingest
+    }
+  }
 
-      if (existingPage.last_ingest_commit === currentSha) {
-        // Check if raw file content matches what git shows for that SHA
-        const contentUnchanged = checkContentUnchanged(absRawPath, currentSha, relRawPath, gitRunner);
-        if (contentUnchanged) {
+  if (existingPage !== undefined && currentSha !== '') {
+    let isNoOp = false;
+    try {
+      if (isSprintReport) {
+        // Sprint-report idempotency: compare against last_report_ingest_commit.
+        // SHA match alone is sufficient (same as git-SHA drift-detection contract per FLASHCARD 2026-04-19).
+        if (existingPage.last_report_ingest_commit === currentSha) {
           isNoOp = true;
+        }
+      } else {
+        // Plan idempotency: compare against last_ingest_commit
+        if (existingPage.last_ingest_commit === currentSha) {
+          const contentUnchanged = checkContentUnchanged(absRawPath, currentSha, relRawPath, gitRunner);
+          if (contentUnchanged) isNoOp = true;
         }
       }
     } catch {
-      // If we can't parse the existing page, proceed with ingest
+      // If we can't check, proceed with ingest
     }
 
     if (isNoOp) {
@@ -201,43 +222,71 @@ export async function wikiIngestHandler(opts: WikiIngestOptions): Promise<void> 
   // Determine action
   const action = pageExists ? 'update' : 'create';
 
-  // Preserve last_contradict_sha from the existing wiki page (Phase 4 stamps it there;
-  // we must carry it forward when re-writing the page so idempotency survives re-ingest).
-  let existingLastContradictSha: string | undefined;
-  if (pageExists) {
-    try {
-      const existingPageContent = fs.readFileSync(pagePath, 'utf8');
-      const existingPage = parsePage(existingPageContent);
-      existingLastContradictSha = existingPage.last_contradict_sha;
-    } catch {
-      // If parse fails, leave undefined
-    }
-  }
+  // Step 5: Build new WikiPage and write it.
+  // CR-063: two-source composition — plan and report can each update a sprint page independently.
+  // When ingesting a report, preserve the plan stub (above the report block).
+  // When ingesting a plan, preserve any existing report block (below the plan stub).
+  const timestamp = now();
 
-  // Step 5: Build new WikiPage and write it
+  // Carry forward fields from existing wiki page
+  const existingLastContradictSha = existingPage?.last_contradict_sha;
+  const existingReportRawPath = existingPage?.report_raw_path;
+  const existingLastReportIngestCommit = existingPage?.last_report_ingest_commit;
+
+  // For a sprint-report ingest: update report-specific frontmatter fields;
+  //   use existing plan-side fields (raw_path, last_ingest_commit) from the existing page.
+  // For a plan ingest: update plan-side fields; preserve report-specific fields from existing page.
   const parent = buildParentRef(fm);
   const children = buildChildrenRefs(fm);
-  const timestamp = now();
 
   const wikiPage: WikiPage = {
     type,
     id,
-    parent,
-    children,
-    status: String(fm['status'] ?? ''),
-    remote_id: String(fm['remote_id'] ?? ''),
-    raw_path: relRawPath,
+    parent: isSprintReport ? (existingPage?.parent ?? '') : parent,
+    children: isSprintReport ? (existingPage?.children ?? []) : children,
+    status: isSprintReport ? (existingPage?.status ?? String(fm['status'] ?? '')) : String(fm['status'] ?? ''),
+    remote_id: isSprintReport ? (existingPage?.remote_id ?? String(fm['remote_id'] ?? '')) : String(fm['remote_id'] ?? ''),
+    // raw_path tracks the plan file path; for report-only ingest preserve existing or use relRawPath as fallback
+    raw_path: isSprintReport ? (existingPage?.raw_path ?? relRawPath) : relRawPath,
     last_ingest: timestamp,
-    last_ingest_commit: currentSha,
+    // last_ingest_commit tracks the plan source; preserve when re-ingesting report
+    last_ingest_commit: isSprintReport ? (existingPage?.last_ingest_commit ?? '') : currentSha,
     repo,
     // Carry forward last_contradict_sha so Phase 4 idempotency survives re-ingest
     ...(existingLastContradictSha !== undefined ? { last_contradict_sha: existingLastContradictSha } : {}),
-    // Hierarchy keys (§11.7): read from raw fm — stamped at raw-side, not wiki-side
-    ...(typeof fm['parent_cleargate_id'] === 'string' ? { parent_cleargate_id: fm['parent_cleargate_id'] } : {}),
-    ...(typeof fm['sprint_cleargate_id'] === 'string' ? { sprint_cleargate_id: fm['sprint_cleargate_id'] } : {}),
+    // Hierarchy keys (§11.7): read from raw fm for plan ingest; preserve for report ingest
+    ...(isSprintReport
+      ? (existingPage?.parent_cleargate_id !== undefined ? { parent_cleargate_id: existingPage.parent_cleargate_id } : {})
+      : (typeof fm['parent_cleargate_id'] === 'string' ? { parent_cleargate_id: fm['parent_cleargate_id'] } : {})),
+    ...(isSprintReport
+      ? (existingPage?.sprint_cleargate_id !== undefined ? { sprint_cleargate_id: existingPage.sprint_cleargate_id } : {})
+      : (typeof fm['sprint_cleargate_id'] === 'string' ? { sprint_cleargate_id: fm['sprint_cleargate_id'] } : {})),
+    // CR-063 sprint-report fields
+    report_raw_path: isSprintReport ? relRawPath : (existingReportRawPath ?? undefined),
+    last_report_ingest_commit: isSprintReport ? currentSha : (existingLastReportIngestCommit ?? undefined),
   };
 
-  const pageBody = buildPageBody({ id, fm, body });
+  // Read existing page body to carry forward the relevant block
+  let existingPageBody = '';
+  if (existingPage !== undefined && pageExists) {
+    try {
+      const existingPageContent = fs.readFileSync(pagePath, 'utf8');
+      // The wiki page format is: ---\nfm-lines\n---\n\nbody
+      // Split on lines that are exactly '---'
+      const lines = existingPageContent.split('\n');
+      let closingDash = -1;
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i] === '---') { closingDash = i; break; }
+      }
+      if (closingDash !== -1) {
+        existingPageBody = lines.slice(closingDash + 1).join('\n').replace(/^\n/, '');
+      }
+    } catch {
+      // Leave empty if we can't read
+    }
+  }
+
+  const pageBody = buildPageBody({ id, fm, body, isSprintReport, existingPageBody });
   const pageContent = serializePage(wikiPage, pageBody);
 
   fs.mkdirSync(pageDir, { recursive: true });
@@ -342,7 +391,52 @@ function buildChildrenRefs(fm: Record<string, unknown>): string[] {
   });
 }
 
-function buildPageBody(item: { id: string; fm: Record<string, unknown>; body: string }): string {
+/** Extract the sprint-report block (<!-- BEGIN sprint-report -->...<!-- END sprint-report -->) from a page body. */
+function extractReportBlock(pageBody: string): string | undefined {
+  const beginMarker = '<!-- BEGIN sprint-report -->';
+  const endMarker = '<!-- END sprint-report -->';
+  const beginIdx = pageBody.indexOf(beginMarker);
+  const endIdx = pageBody.indexOf(endMarker);
+  if (beginIdx === -1 || endIdx === -1 || endIdx <= beginIdx) return undefined;
+  return pageBody.slice(beginIdx, endIdx + endMarker.length);
+}
+
+/** Extract the plan stub portion of a page body (everything BEFORE the sprint-report block, or the whole body). */
+function extractPlanStub(pageBody: string): string {
+  const beginMarker = '<!-- BEGIN sprint-report -->';
+  const beginIdx = pageBody.indexOf(beginMarker);
+  if (beginIdx === -1) return pageBody;
+  return pageBody.slice(0, beginIdx);
+}
+
+function buildPageBody(item: {
+  id: string;
+  fm: Record<string, unknown>;
+  body: string;
+  isSprintReport: boolean;
+  existingPageBody: string;
+}): string {
+  const { isSprintReport, existingPageBody } = item;
+
+  if (isSprintReport) {
+    // Report ingest: rewrite only the sprint-report block; preserve the plan stub above it.
+    const planStub = existingPageBody ? extractPlanStub(existingPageBody) : buildPlanStub(item);
+    const reportBlock = buildReportBlock(item.body);
+    return planStub + reportBlock;
+  } else {
+    // Plan ingest: rewrite the plan stub; preserve any existing sprint-report block.
+    const planStub = buildPlanStub(item);
+    const existingReportBlock = existingPageBody ? extractReportBlock(existingPageBody) : undefined;
+    if (existingReportBlock !== undefined) {
+      // Preserve the report block verbatim after the plan stub
+      const stub = planStub.trimEnd() + '\n\n';
+      return stub + existingReportBlock + '\n';
+    }
+    return planStub;
+  }
+}
+
+function buildPlanStub(item: { id: string; fm: Record<string, unknown>; body: string }): string {
   const title = String(item.fm['title'] ?? item.id);
   const summary = String(
     item.fm['description'] ?? item.body.split('\n')[0] ?? 'No summary available.',
@@ -365,6 +459,17 @@ function buildPageBody(item: { id: string; fm: Record<string, unknown>; body: st
     '',
     '## Open questions',
     'None.',
+    '',
+  ].join('\n');
+}
+
+function buildReportBlock(reportBody: string): string {
+  return [
+    '<!-- BEGIN sprint-report -->',
+    '## Sprint Report',
+    '',
+    reportBody.trim(),
+    '<!-- END sprint-report -->',
     '',
   ].join('\n');
 }
