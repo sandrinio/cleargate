@@ -1,10 +1,14 @@
 ---
-work_item: STORY-027-04
-sprint: SPRINT-27
-agent: qa
-mode: VERIFY
-pack_status: absent (fallback to source files)
-inner_mcp_commit: a69536a
+work_item: "STORY-027-04"
+sprint: "SPRINT-27"
+agent: "qa"
+mode: "VERIFY"
+pack_status: "absent (fallback to source files)"
+inner_mcp_commit: "a69536a"
+story_id: "STORY-027-04"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-04 — QA Verify Report

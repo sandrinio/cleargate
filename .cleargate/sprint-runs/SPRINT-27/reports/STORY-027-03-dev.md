@@ -1,14 +1,18 @@
 ---
-work_item: STORY-027-03
-sprint: SPRINT-27
-agent: developer
-lane: standard
-status: done
-inner_mcp_commit: 80e1a08
-red_commit: 34e8890
-typecheck: pass
-tests_027_03: 28 passed, 0 failed
-tests_regression: 65 passed, 0 failed (5 Red files -01/-02 + 331 vitest baseline)
+work_item: "STORY-027-03"
+sprint: "SPRINT-27"
+agent: "developer"
+lane: "standard"
+status: "done"
+inner_mcp_commit: "80e1a08"
+red_commit: "34e8890"
+typecheck: "pass"
+tests_027_03: "28 passed, 0 failed"
+tests_regression: "65 passed, 0 failed (5 Red files -01/-02 + 331 vitest baseline)"
+story_id: "STORY-027-03"
+sprint_id: "SPRINT-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-027-03 — Developer Report
