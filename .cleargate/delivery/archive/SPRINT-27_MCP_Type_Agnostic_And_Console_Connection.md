@@ -6,9 +6,10 @@ carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 approved: true
 activated_at: 2026-05-14T21:35:00Z
+completed_at: 2026-05-15T05:04:05Z
 execution_mode: v2
 start_date: 2026-05-19
 end_date: 2026-06-01
