@@ -1,0 +1,20 @@
+role: architect
+
+# CR-063 Architect Post-Flight — SPRINT-27
+
+`CR-063` `SPRINT-27` Wave 1 — standard lane — Dev `0d01b32` / Red `6ab8027`.
+
+```
+ARCH-PASS: APPROVED
+NOTES: All nine verification items pass cleanly. (1) Path validator at wiki-ingest.ts:105 calls isSprintReportPath(relRawPath) which (derive-bucket.ts:29-36) matches the regex `\.cleargate/sprint-runs/(SPRINT-\d{2,})/([^/]+)$` and accepts only filenames matching SPRINT_REPORT_FILENAMES=['REPORT.md'] or SPRINT_REPORT_CANONICAL_RE=/^SPRINT-\d{2,}_REPORT\.md$/ — everything else under sprint-runs (state.json, token-ledger.jsonl, plans/, reports/) is rejected because they fail the filename allowlist and then hit the EXCLUDED_SUFFIXES `.cleargate/sprint-runs/` skip-with-exit-0 branch. (2) Allowlist-before-exclusion ordering verified in source: line 105 computes isSprintReport, lines 107-126 wrap BOTH the delivery-root check AND the EXCLUDED_SUFFIXES check in `if (!isSprintReport)` — the carve-out runs first, structurally and unambiguously, matching SDR §2.3. (3) buildPageBody (lines 412-437) implements two-source rendering via extractPlanStub/extractReportBlock helpers; markers are `<!-- BEGIN sprint-report -->` / `<!-- END sprint-report -->` (buildReportBlock lines 466-475). Sprint-report ingest preserves the plan stub above; plan ingest preserves any existing report block below. (4) Idempotency via SHA confirmed: page-schema.ts lines 64-69 emit both `report_raw_path` and `last_report_ingest_commit` optional frontmatter fields; wiki-ingest.ts lines 198-203 compare currentSha against last_report_ingest_commit (report path) or last_ingest_commit + content (plan path), with separate no-op branches. (5) Step 7.5 anchor `// CR-063: wiki ingest sprint report` appears exactly once at .cleargate/scripts/close_sprint.mjs:750 (grep -c returns 1 in both mirrors). (6) Mirror parity: `diff .cleargate/scripts/close_sprint.mjs cleargate-planning/.cleargate/scripts/close_sprint.mjs` produces empty output (PARITY-OK). (7) Scaffold mirror under cleargate-cli/templates/ is correctly NOT in commit 0d01b32 file list — that path is gitignored and auto-mirrored by `npm run prebuild` per the canonical→npm-payload→live triad documented in CLAUDE.md "Dogfood split". (8) Backfill script exists at cleargate-cli/scripts/backfill-sprint-reports.mjs with `#!/usr/bin/env node` shebang on line 1, 136 LOC, range SPRINT-03..SPRINT-26, idempotent (relies on SHA-gated ingest no-op). (9) Step 7.5 insertion position verified: starts at line 749 ("── Step 7.5 ──"), immediately AFTER Step 7 ends at line 747 ("Run `cleargate sync work-items` manually to retry."), and BEFORE Step 8 at line 779 ("── Step 8: Verbose post-close handoff list ──"). The forward-looking comment at line 752 ("CR-064 (Wave 3) inserts its MCP-push step at Step 7.4, immediately before this anchor") preserves the symbolic anchor contract for Wave 3 — CR-064 will splice Step 7.4 above the anchor without touching Step 7.5 internals.
+STRUCTURAL_DEBT: none
+DEVIATION_VERDICT: ACCEPT
+```
+
+## Deviation context
+
+QA report flags one ACCEPTED deviation. Reviewing the Dev report (`reports/CR-063-dev.md`) and the source: Dev's implementation of `last_report_ingest_commit` idempotency uses SHA-only comparison rather than SHA+content-diff (which is the rule the plan applied to plan-side idempotency). This matches the FLASHCARD 2026-04-19 "Wiki drift detection: git SHA (not content hash)" decision — SHA-match is the canonical idempotency contract; the plan-side content-diff is a defense-in-depth quirk inherited from earlier wiki-ingest paths. Applying content-diff to report paths would be over-engineering. ACCEPTED.
+
+## Wave 3 handoff note for CR-064
+
+The anchor `// CR-063: wiki ingest sprint report` on close_sprint.mjs:750 is the splice point for CR-064. Wave 3 Architect should specify: insert `// ── Step 7.4: <CR-064 step name> ──` block BEFORE line 749 (the `// ── Step 7.5: wiki ingest sprint report ──` header), keeping line 750 anchor intact. Mirror parity must be re-verified after CR-064 lands. The comment on line 752 of the as-shipped file documents this contract explicitly for the next implementer.
