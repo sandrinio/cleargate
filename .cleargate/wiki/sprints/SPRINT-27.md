@@ -3,13 +3,12 @@ type: sprint
 id: "SPRINT-27"
 parent: ""
 children: []
-status: "Active"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
-last_ingest: "2026-05-14T21:42:17.472Z"
-last_ingest_commit: "57a6c68702a922779f4e2140dcec07b18e2547cb"
+raw_path: ".cleargate/delivery/archive/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
+last_ingest: "2026-05-16T21:01:30.305Z"
+last_ingest_commit: "6b51f2e2ee0a3388833aed569d6ed7feccec11eb"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-27"
 ---
 
 # SPRINT-27: SPRINT-27

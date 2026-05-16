@@ -13,9 +13,11 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-01T19:44:21Z
+  pass: false
+  failing_criteria:
+    - id: discovery-checked
+      detail: expected context_source != "null", got undefined
+  last_gate_check: 2026-05-16T23:32:35Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

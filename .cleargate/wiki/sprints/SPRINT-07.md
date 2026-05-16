@@ -6,7 +6,7 @@ children: []
 status: "Planned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-07_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
+last_ingest: "2026-05-16T21:01:30.305Z"
 last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
 repo: "planning"
 ---

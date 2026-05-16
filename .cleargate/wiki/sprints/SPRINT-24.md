@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-24_Loop_Tightening.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
+last_ingest: "2026-05-16T21:01:30.305Z"
 last_ingest_commit: "53d9728571ce1a8f54827bbc9c2341609643aa2e"
 repo: "planning"
 ---

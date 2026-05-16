@@ -9,7 +9,7 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-020_Wiki_Contradiction_Detection.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
+last_ingest: "2026-05-16T21:01:30.305Z"
 last_ingest_commit: "d0836d2090936805038cbd9b3a2426c266ddef2e"
 repo: "planning"
 ---

@@ -4,7 +4,16 @@ parent_ref: cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**
 parent_cleargate_id: cleargate-cli/ engine — test infrastructure (cleargate-cli/test/**, cleargate-cli/vitest.config.ts, cleargate-cli/package.json) + cleargate-planning/.claude/agents/developer.md
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Approved
+status: Abandoned
+abandoned_at: 2026-05-17T00:00:00Z
+abandoned_by: sandrinio
+abandoned_reason: |
+  Superseded by EPIC-028 (full vitest elimination, SPRINT-28). User direction
+  2026-05-17 reversed the prior "two-runner permanent state" decision (memory
+  feedback_npm_test_routes_node_test.md updated). CR-029's scope was engine-only
+  swap (cleargate-cli/ test/ dir); EPIC-028 covers all ~129 vitest files across
+  mcp/, cleargate-cli/, admin/, scripts/ + vitest dep removal from package.json.
+  CR-029 body retained for historical context; do not execute as-is.
 ambiguity: 🟢 Low
 context_source: "Multi-turn user conversation 2026-05-02 (this session). User cited laptop RAM pressure from vitest fork pool during sprint execution (3 parallel agents × maxForks=2 = 6 forks ≈ 2.4 GB; FLASHCARDs 2026-05-01 #vitest #leak #posttest, 2026-05-02 #vitest #ram #parallel-agents). Walked four options: (A) tighten vitest config, (B) split unit/integration tags, (C) drop vitest from engine, (D) per-iteration runner swap. Settled on C scoped to the cleargate-cli engine only (not mcp/, not admin/). User direct approval pattern: 'agreed' (option C) → 'good. create it' (CR drafting). Engine has 130 test files but only 1 real vi.mock site, 0 vi.useFakeTimers, 0 vi.stubGlobal in cleargate-cli/test/ — DI-first test style already dominates, which collapses the highest-risk part of the migration."
 proposal_gate_waiver:
@@ -18,13 +27,12 @@ created_at: 2026-05-02T00:00:00Z
 updated_at: 2026-05-02T13:30:00Z
 created_at_version: cleargate@0.9.0
 updated_at_version: cleargate@0.9.0
-server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-02T14:08:21Z
-pushed_by: null
-pushed_at: null
+  pass: false
+  failing_criteria:
+    - id: reuse-audit-recorded
+      detail: "'## Existing Surfaces' not found in body"
+  last_gate_check: 2026-05-16T20:54:15Z
 last_pulled_by: null
 last_pulled_at: null
 last_remote_update: null
@@ -38,8 +46,11 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T14:08:21Z
+  last_stamp: 2026-05-16T23:31:55Z
   sessions: []
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-16T23:32:11.196Z
+push_version: 1
 ---
 
 # CR-029: Engine Test Runner — Vitest → node:test

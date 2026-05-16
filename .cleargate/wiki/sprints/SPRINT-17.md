@@ -5,9 +5,9 @@ parent: ""
 children: []
 status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-17_Plan_Phase_Delivery.md"
-last_ingest: "2026-05-14T20:24:44.603Z"
-last_ingest_commit: "87be520b8e8be42f207124d5f66dec8adbe269ab"
+raw_path: ".cleargate/delivery/archive/SPRINT-17_Plan_Phase_Delivery.md"
+last_ingest: "2026-05-16T21:01:30.305Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 

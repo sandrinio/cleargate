@@ -1,7 +1,7 @@
 ---
 story_id: STORY-010-02
 parent_epic_ref: EPIC-010
-parent_cleargate_id: "EPIC-010"
+parent_cleargate_id: EPIC-010
 status: Draft
 ambiguity: 🟢 Low
 complexity_label: L3
@@ -12,9 +12,13 @@ updated_at: 2026-04-19T19:30:00Z
 created_at_version: post-SPRINT-05
 updated_at_version: post-SPRINT-05
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-04-19T21:39:28Z
+  pass: false
+  failing_criteria:
+    - id: reuse-audit-recorded
+      detail: "'## Existing Surfaces' not found in body"
+    - id: simplest-form-justified
+      detail: "'## Why not simpler?' not found in body"
+  last_gate_check: 2026-05-16T23:32:35Z
 stamp_error: no ledger rows for work_item_id STORY-010-02
 draft_tokens:
   input: null
