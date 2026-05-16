@@ -11,13 +11,16 @@ created_at: 2026-04-25T00:00:00Z
 updated_at: 2026-04-25T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
-server_pushed_at_version: null
+context_source: |
+  Surfaced 2026-04-25 by QA on STORY-018-05 (scaffold wiki-lint agent ingest).
+  Wiki-lint agent YAML frontmatter contains a backtick character that breaks
+  the YAML parser when the lint agent is invoked via subagent dispatch.
+  Re-triaged 2026-05-17 during SPRINT-28 prep — pulled in as fast-lane fix
+  since it's been blocking wiki-lint reliability for ~3 sprints.
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: discovery-checked
-      detail: expected context_source != "null", got undefined
-  last_gate_check: 2026-05-16T23:32:35Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-16T23:34:35Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -32,7 +35,7 @@ draft_tokens:
   cache_creation: 6303363
   cache_read: 70122563
   model: <synthetic>,claude-opus-4-7, claude-opus-4-7
-  last_stamp: 2026-05-01T19:44:17Z
+  last_stamp: 2026-05-16T23:34:34Z
   sessions:
     - session: b01e84b6-4e1a-42fc-95df-09aba928f166
       model: <synthetic>,claude-opus-4-7, claude-opus-4-7
@@ -84,7 +87,7 @@ draft_tokens:
       cache_creation: 0
       ts: 2026-05-01T11:40:26Z
     - session: 9ec729a0-a1c1-45a6-8414-d2cc1318768e
-      model: claude-opus-4-7
+      model: <synthetic>,claude-opus-4-7, claude-opus-4-7
       input: 0
       output: 0
       cache_read: 0
