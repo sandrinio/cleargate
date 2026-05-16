@@ -12,20 +12,23 @@
 - [[EPIC-023]] (epic) — Approved
 - [[EPIC-026]] (epic) — Ready
 - [[EPIC-027]] (epic) — Approved
+  - STORY-027-xx (5 stories) — 5 Approved
+- [[EPIC-028]] (epic) — Approved
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-27]] (sprint) — Approved
+- [[SPRINT-28]] (sprint) — Approved
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
-- [[CR-029]] (cr) — Approved
 - [[CR-061]] (cr) — Approved
 - [[CR-062]] (cr) — Approved
 - [[CR-063]] (cr) — Approved
 - [[CR-064]] (cr) — Approved
 - [[CR-065]] (cr) — Approved
+- [[CR-066]] (cr) — Approved
+- [[CR-067]] (cr) — Approved
 - [[BUG-002]] (bug) — Verified
 - [[BUG-003]] (bug) — Verified
 - [[BUG-004]] (bug) — Draft
@@ -44,9 +47,9 @@
 ## Archive
 
 - Epics: 16 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
-- Sprints: 23 Completed · [expand](archive/sprints.md)
+- Sprints: 24 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 40 Done · 16 Completed · [expand](archive/crs.md)
+- CRs: 40 Done · 16 Completed · 1 Abandoned · [expand](archive/crs.md)
 - Bugs: 6 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
 - Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
 
@@ -56,26 +59,14 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Stories
-
-| [[STORY-027-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-01_Open_Type_Validator_And_Known_Types.md |
-| [[STORY-027-02]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-02_Reserved_Keys_And_Type_Change_Forbid.md |
-| [[STORY-027-03]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-03_Origin_Gate_Policy_Split_Idempotent_Prefix.md |
-| [[STORY-027-04]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-04_Error_Taxonomy_And_Warnings.md |
-| [[STORY-027-05]] | story | Approved | .cleargate/delivery/pending-sync/STORY-027-05_Docs_And_CI_No_PM_SDK_Rule.md |
-## Epics
-
-| [[EPIC-027]] | epic | Approved | .cleargate/delivery/archive/EPIC-027_MCP_Type_Agnostic_Sync_And_Universal_Payload.md |
 ## CRs
 
-| [[CR-061]] | cr | Approved | .cleargate/delivery/archive/CR-061_Token_Modal_Connection_Instructions.md |
-| [[CR-062]] | cr | Approved | .cleargate/delivery/archive/CR-062_Resend_Invite_From_Members_List.md |
-| [[CR-063]] | cr | Approved | .cleargate/delivery/archive/CR-063_Ingest_Sprint_Reports_Into_Wiki.md |
-| [[CR-064]] | cr | Approved | .cleargate/delivery/archive/CR-064_Sync_Sprint_Plans_And_Reports_To_MCP.md |
-| [[CR-065]] | cr | Approved | .cleargate/delivery/archive/CR-065_MCP_Serve_Service_Token_Auth.md |
-## Bugs
+| [[CR-029]] | cr | Abandoned | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
+| [[CR-066]] | cr | Approved | .cleargate/delivery/pending-sync/CR-066_Sprint_Close_Reconciles_Parent_Statuses.md |
+| [[CR-067]] | cr | Approved | .cleargate/delivery/pending-sync/CR-067_Unify_Status_Vocabulary_To_Completed.md |
+## Epics
 
-| [[BUG-030]] | bug | Triaged | .cleargate/delivery/archive/BUG-030_Member_Delete_500_FK_Items.md |
+| [[EPIC-028]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-028_Vitest_Elimination.md |
 ## Sprints
 
-| [[SPRINT-27]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md |
+| [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-28_Reconcile_Finish_Harvest.md |
