@@ -37,7 +37,7 @@ updated_at_version: cleargate@0.12.0
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-16T23:31:16Z
+  last_gate_check: 2026-05-16T23:34:29Z
 last_pulled_by: null
 last_pulled_at: null
 last_remote_update: null
@@ -238,6 +238,20 @@ Feature: Vitest Elimination
     When I run `npm test` in each of mcp/, cleargate-cli/, admin/
     Then each exits 0
     And the elapsed time is reported in REPORT.md §5 Process
+
+  Scenario: Error path — vitest references reappear after Epic ships
+    Given EPIC-028 has shipped and vitest is fully removed
+    When a developer accidentally adds a new test file with `import ... from 'vitest'`
+    Then the CI pre-commit hook (or `npm run lint`) fails with a clear Error message naming the file
+    And the message reads "Error: vitest reference detected at <path> — repo is node:test only (EPIC-028)"
+    And the commit is blocked
+
+  Scenario: Error path — codemod encounters an un-convertible file
+    Given the codemod processes a vitest file containing `vi.mock('./dep', factory)` with complex factory closure
+    When the codemod runs in auto-convert mode
+    Then the codemod skips the file with an Error entry in the manual-fix report
+    And the report entry includes the file path, line number, and the offending API
+    And the codemod exit code is non-zero so the conversion batch story halts at preflight
 ```
 
 ## 6. AI Interrogation Loop

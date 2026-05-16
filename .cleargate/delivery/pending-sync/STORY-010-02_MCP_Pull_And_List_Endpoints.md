@@ -12,13 +12,13 @@ updated_at: 2026-04-19T19:30:00Z
 created_at_version: post-SPRINT-05
 updated_at_version: post-SPRINT-05
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-    - id: simplest-form-justified
-      detail: "'## Why not simpler?' not found in body"
-  last_gate_check: 2026-05-16T23:32:35Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-16T23:35:07Z
+approved: true
+pushed_by: sandrinio@github.local
+pushed_at: 2026-04-20T19:45:58.158Z
+push_version: 2
 stamp_error: no ledger rows for work_item_id STORY-010-02
 draft_tokens:
   input: null
@@ -26,12 +26,8 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-04-19T20:05:06Z
+  last_stamp: 2026-05-16T23:35:06Z
   sessions: []
-approved: true
-pushed_by: sandrinio@github.local
-pushed_at: 2026-04-20T19:45:58.158Z
-push_version: 2
 ---
 
 # STORY-010-02: Four New MCP Endpoints + Generic `PmAdapter` Interface
@@ -173,6 +169,22 @@ Feature: MCP pull + list + comments + detect endpoints
 - [ ] All 4 tools appear in MCP server's `list_tools` output.
 - [ ] Linear sandbox smoke: pull a known issue + its comments end-to-end.
 - [ ] PmAdapter interface exported from `mcp/src/adapters/index.ts` for downstream consumers.
+
+## Existing Surfaces
+
+> L1 reuse audit added 2026-05-17 during SPRINT-28 prep gate-clean pass.
+
+- **Surface:** `mcp/src/mcp/register-tools.ts` — existing MCP tool registration site; the 4 new endpoints (`cleargate_pull_item`, `cleargate_list_remote_updates`, `cleargate_pull_comments`, `cleargate_detect_new_items`) register here alongside the current `push_item` / `sync_status` / `pull_initiative` registrations.
+- **Surface:** `mcp/src/auth/service-token.ts` — bearer auth already wired for HTTP MCP requests; reused as-is for the 4 new endpoints.
+- **Surface:** `mcp/src/db/client.ts` — Postgres connection; the new endpoints read the existing `items` table for pull operations.
+- **Surface:** `cleargate-cli/src/lib/frontmatter-yaml.ts` — atomic frontmatter write pattern; pull-item handler reuses on the CLI side when stamping `last_pulled_*` attribution.
+- **Coverage of this story's scope:** ~60% — endpoints are net-new but ride on existing auth + DB + registration infrastructure. The PmAdapter interface is the only genuinely new abstraction (and was always planned per EPIC-010 §0 Q3).
+
+## Why not simpler?
+
+- **Smallest existing surface that could carry this story:** add the 4 endpoints as one large `sync.ts` tool dispatching by `action` string. Estimated effort: ~30% less.
+- **Why isn't extension sufficient?** EPIC-010 §0 architecture rules require each endpoint to be a discrete tool so the CLI sync driver (STORY-010-04, already shipped) can call them by name with type-checked args. A single dispatch-by-string surface defeats the type-checking and forces CLI runtime branching on the wire. The 4-endpoint split is the minimum that preserves the type contract.
+- **PmAdapter interface justification:** EPIC-010 §0 Q3 resolved this 2026-04-19 — generic interface from day one (vs Linear-specific). Adding Jira / GitHub Projects later becomes a drop-in. The cost is one interface file + one concrete `linear-adapter.ts`; the avoided cost is per-tool branching when the second PM tool lands.
 
 ## Ambiguity Gate
 🟢.

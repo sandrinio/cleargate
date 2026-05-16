@@ -66,7 +66,14 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-067]] | cr | Approved | .cleargate/delivery/pending-sync/CR-067_Unify_Status_Vocabulary_To_Completed.md |
 ## Epics
 
-| [[EPIC-028]] | epic | Approved | .cleargate/delivery/pending-sync/EPIC-028_Vitest_Elimination.md |
+| [[EPIC-028]] | epic | Approved | .cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md |
 ## Sprints
 
 | [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-28_Reconcile_Finish_Harvest.md |
+## Bugs
+
+| [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
+## Stories
+
+| [[STORY-010-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-010-02_MCP_Pull_And_List_Endpoints.md |
+| [[STORY-028-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-028-01_Reconciliation_Harvest_Pass.md |
