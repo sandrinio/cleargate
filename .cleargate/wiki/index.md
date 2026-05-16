@@ -63,13 +63,13 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[CR-029]] | cr | Abandoned | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
 | [[CR-066]] | cr | Approved | .cleargate/delivery/pending-sync/CR-066_Sprint_Close_Reconciles_Parent_Statuses.md |
-| [[CR-067]] | cr | Approved | .cleargate/delivery/pending-sync/CR-067_Unify_Status_Vocabulary_To_Completed.md |
+| [[CR-067]] | cr | Approved | .cleargate/delivery/archive/CR-067_Unify_Status_Vocabulary_To_Completed.md |
 ## Epics
 
 | [[EPIC-028]] | epic | Approved | .cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md |
 ## Sprints
 
-| [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/pending-sync/SPRINT-28_Reconcile_Finish_Harvest.md |
+| [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md |
 ## Bugs
 
 | [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
