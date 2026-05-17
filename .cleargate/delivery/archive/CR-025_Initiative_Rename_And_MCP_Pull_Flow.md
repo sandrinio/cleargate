@@ -4,7 +4,7 @@ parent_ref: cleargate-protocol.md §2-§4 (Proposal mandate, retired by CR-020);
 parent_cleargate_id: "cleargate-protocol.md §2-§4 (Proposal mandate, retired by CR-020); CR-020 (Brief-driven SDLC, SPRINT-17); SDLC brainstorm charter §2.1 + §2.5"
 sprint_cleargate_id: SPRINT-19
 carry_over: false
-status: Done
+status: Completed
 ambiguity: 🟢 Low
 context_source: "SDLC brainstorm charter §2.1 left 'Proposal' rename as an open question; §2.5 confirmed phase + gate names. User 2026-05-01 closed the question: 'i agree to rename proposal to initiative. it should have its own template. the vibe coder should write all work items (artifacts) in the codebase with AI agent. Initiative can be written outside the codebase. It should capture what BA/PM is requesting. User flow, diagrams, e2e (verbally) and etc.' Plus 'Initiative will probably come from MCP pull.' Splits the SDLC into a pre-Plan stakeholder layer (Initiative, BA/PM territory, no AI authoring) and the in-codebase AI-driven layer (Epic / Story / CR / Bug / Hotfix). PROPOSAL-008 + PROPOSAL-009 are archived as part of this CR (no special handling)."
 proposal_gate_waiver:
