@@ -99,6 +99,8 @@ _No active epics._
 
 - [[EPIC-026]] — status: Ready
 
+- [[EPIC-029]] — status: Draft
+
 
 
 ## Shipped Epics

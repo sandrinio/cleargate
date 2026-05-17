@@ -5,14 +5,14 @@
   "sprint_status": "Active",
   "stories": {
     "STORY-010-02": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T20:27:49.424Z",
       "notes": "",
-      "lane": "standard",
-      "lane_assigned_by": "migration-default",
+      "lane": "fast",
+      "lane_assigned_by": "human-override",
       "lane_demoted_at": null,
       "lane_demotion_reason": null
     },
@@ -29,11 +29,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-01": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T20:49:57.518Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -53,11 +53,11 @@
       "lane_demotion_reason": null
     },
     "STORY-067-01": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T20:52:35.777Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -89,11 +89,11 @@
       "lane_demotion_reason": null
     },
     "STORY-028-04": {
-      "state": "Ready to Bounce",
-      "qa_bounces": 0,
+      "state": "Done",
+      "qa_bounces": 1,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T21:04:56.525Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -149,11 +149,11 @@
       "lane_demotion_reason": null
     },
     "BUG-004": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T20:38:52.080Z",
       "notes": "",
       "lane": "fast",
       "lane_assigned_by": "human-override",
@@ -161,6 +161,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "lane-set STORY-028-08: lane=fast (human-override)",
-  "updated_at": "2026-05-17T18:50:52.534Z"
+  "last_action": "transition STORY-028-04 → Done",
+  "updated_at": "2026-05-17T21:04:56.525Z"
 }
