@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-17T16:31:59Z",
+  "command": "node",
+  "args": ["/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/init_sprint.mjs","SPRINT-28","--stories","STORY-010-02,STORY-028-01,BUG-004"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "UNAPPROVED (1): BUG-004\nERROR: v2 sprint init blocked — 0 items missing, 1 unapproved, 0 stub-empty. Fix the above, then re-run init.",
+  "agent_type": null,
+  "work_item_id": null
+}
