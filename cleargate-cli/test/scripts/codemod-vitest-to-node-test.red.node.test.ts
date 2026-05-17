@@ -638,3 +638,141 @@ describe('STORY-028-04 Scenario 9 — exit code 1 on any-manual directory', () =
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Scenario 4b — .spec.ts files convert and rename to .node.test.ts
+// Gherkin §2.1 Scenario 4: ".spec.ts files convert and rename to .node.test.ts"
+// ---------------------------------------------------------------------------
+
+describe('STORY-028-04 Scenario 4b — .spec.ts rename to .node.test.ts', () => {
+  let tmpDir: string;
+
+  before(() => {
+    // Stage input.spec.ts (not input.vitest.test.ts) into a fresh tmpdir.
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-codemod-spec-rename-'));
+    const srcSpec = path.join(FIXTURES_ROOT, 'scenario-04b-spec-rename', 'input.spec.ts');
+    fs.copyFileSync(srcSpec, path.join(tmpDir, 'input.spec.ts'));
+  });
+
+  after(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('codemod exits 0 (spec file is auto-convertible)', () => {
+    assertScriptExists();
+    const result = runCodemod(tmpDir);
+    assert.strictEqual(
+      result.status,
+      0,
+      `Scenario 4b FAIL: expected exit 0 for .spec.ts fixture, got ${result.status}.\n` +
+      `stderr: ${result.stderr}`,
+    );
+  });
+
+  it('input.spec.ts is renamed to input.node.test.ts (no .spec.ts remains)', () => {
+    assertScriptExists();
+    runCodemod(tmpDir);
+    const specStillExists = fs.existsSync(path.join(tmpDir, 'input.spec.ts'));
+    const nodeTestExists = fs.existsSync(path.join(tmpDir, 'input.node.test.ts'));
+    assert.ok(
+      !specStillExists,
+      'Scenario 4b FAIL: input.spec.ts still present after codemod — spec not renamed.',
+    );
+    assert.ok(
+      nodeTestExists,
+      'Scenario 4b FAIL: input.node.test.ts not created — rename did not occur.',
+    );
+  });
+
+  it('output matches expected.node.test.ts (spec rename output correct)', () => {
+    assertScriptExists();
+    runCodemod(tmpDir);
+    const outputFile = path.join(tmpDir, 'input.node.test.ts');
+    const expectedFile = path.join(FIXTURES_ROOT, 'scenario-04b-spec-rename', 'expected.node.test.ts');
+
+    const actual = readOrNull(outputFile);
+    const expected = fs.readFileSync(expectedFile, 'utf8');
+
+    assert.ok(actual !== null, `Scenario 4b FAIL: output file not found at ${outputFile}.`);
+
+    const normalize = (s: string) =>
+      s
+        .split('\n')
+        .map((l) => l.trimEnd())
+        .join('\n')
+        .trimEnd();
+
+    assert.strictEqual(
+      normalize(actual!),
+      normalize(expected),
+      'Scenario 4b FAIL: codemod output for .spec.ts does not match expected fixture.',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Scenario 6b — Target collision: both input.test.ts AND input.node.test.ts exist
+// Gherkin §2.1 Scenario 6: "Target collision"
+// ---------------------------------------------------------------------------
+
+describe('STORY-028-04 Scenario 6b — target collision (both .test.ts + .node.test.ts exist)', () => {
+  let tmpDir: string;
+  let reportPath: string;
+  let originalTestContent: string;
+
+  before(() => {
+    // Stage BOTH input.test.ts AND input.node.test.ts into the tmpdir.
+    // input.node.test.ts is the "pre-existing" target that causes collision.
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-codemod-collision-'));
+    reportPath = path.join(tmpDir, '.codemod-manual-fix-report.md');
+
+    const srcTest = path.join(FIXTURES_ROOT, 'scenario-06b-collision', 'input.test.ts');
+    const srcExisting = path.join(FIXTURES_ROOT, 'scenario-06b-collision', 'input.node.test.ts');
+
+    fs.copyFileSync(srcTest, path.join(tmpDir, 'input.test.ts'));
+    fs.copyFileSync(srcExisting, path.join(tmpDir, 'input.node.test.ts'));
+
+    originalTestContent = fs.readFileSync(srcTest, 'utf8');
+  });
+
+  after(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('codemod exits 1 (target collision triggers manual-fix path)', () => {
+    assertScriptExists();
+    const result = runCodemod(tmpDir, ['--report', reportPath]);
+    assert.strictEqual(
+      result.status,
+      1,
+      `Scenario 6b FAIL: expected exit 1 for collision fixture, got ${result.status}.\n` +
+      `stderr: ${result.stderr}`,
+    );
+  });
+
+  it('input.test.ts content is unchanged (codemod left it alone)', () => {
+    assertScriptExists();
+    runCodemod(tmpDir, ['--report', reportPath]);
+    const actualContent = readOrNull(path.join(tmpDir, 'input.test.ts'));
+    assert.ok(
+      actualContent !== null,
+      'Scenario 6b FAIL: input.test.ts is missing after codemod run.',
+    );
+    assert.strictEqual(
+      actualContent,
+      originalTestContent,
+      'Scenario 6b FAIL: input.test.ts content was modified despite collision.',
+    );
+  });
+
+  it('manual-fix report contains "target file already exists"', () => {
+    assertScriptExists();
+    runCodemod(tmpDir, ['--report', reportPath]);
+    const reportContent = readOrNull(reportPath) ?? '';
+    assert.ok(
+      reportContent.includes('target file already exists'),
+      `Scenario 6b FAIL: manual-fix report does not contain "target file already exists".\n` +
+      `Report:\n${reportContent}`,
+    );
+  });
+});
