@@ -353,8 +353,9 @@ sprint
   .description('CR-017: check lifecycle status of artifacts referenced in this sprint\'s commits (exits 1 on drift)')
   .option('--since <iso-date>', 'start of git log range (default: sprint start_date or 90 days ago)')
   .option('--until <iso-date>', 'end of git log range (default: now)')
-  .action((sprintId: string, opts: { since?: string; until?: string }) => {
-    reconcileLifecycleCliHandler({ sprintId, since: opts.since, until: opts.until });
+  .option('--parents', 'audit parent (Epic/Sprint) rollup statuses; read-only (CR-066)')
+  .action((sprintId: string, opts: { since?: string; until?: string; parents?: boolean }) => {
+    reconcileLifecycleCliHandler({ sprintId, since: opts.since, until: opts.until, parents: opts.parents });
   });
 
 sprint

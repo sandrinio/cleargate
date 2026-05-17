@@ -407,6 +407,79 @@ async function main() {
     process.stdout.write('Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
   }
 
+  // ── Step 2.6c: Parent (Epic/Sprint) Rollup (CR-066) ──────────────────────
+  // Runs unconditionally (not gated by CLEARGATE_SKIP_LIFECYCLE_CHECK).
+  // For each active parent in delivery/pending-sync/, checks children coverage:
+  //   auto-flip      → rewrite status: Completed atomically, log one line.
+  //   halt-partial   → collect into haltList; exit 1 after processing all.
+  //   halt-zero-children → collect into haltList; exit 1 after processing all.
+  //   no-op / skip-deferred → silent.
+  // Defensive guard: if walkActiveParents is not a function (stale dist/), skip with warning.
+
+  /**
+   * Atomic in-place status rewrite (raw-bytes regex-replace).
+   * Follows FLASHCARD 2026-04-24 #frontmatter #write-back pattern.
+   * @param {string} filePath
+   * @param {string} newStatus
+   */
+  function setFrontmatterStatusAtomic(filePath, newStatus) {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (!fm) throw new Error(`No frontmatter in ${filePath}`);
+    const newFm = fm[1].replace(/^status:.*$/m, `status: ${newStatus}`);
+    const newRaw = raw.replace(fm[1], newFm);
+    const tmp = filePath + '.tmp.' + process.pid;
+    fs.writeFileSync(tmp, newRaw, 'utf8');
+    fs.renameSync(tmp, filePath);
+  }
+
+  process.stdout.write('Step 2.6c: rolling up parent statuses...\n');
+  try {
+    // Use __dirname-relative path so the import finds the ACTUAL built dist,
+    // not a fixture tmpdir override (CLEARGATE_REPO_ROOT may point elsewhere in tests).
+    const scriptRepoRoot26c = path.resolve(SCRIPTS_DIR, '..', '..');
+    const reconcilerMod26c = await import(
+      path.join(scriptRepoRoot26c, 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+    ).catch(() => null);
+
+    if (!reconcilerMod26c || typeof reconcilerMod26c.walkActiveParents !== 'function') {
+      process.stdout.write('Step 2.6c skipped: walkActiveParents not in built CLI — rebuild cleargate-cli/.\n');
+    } else {
+      // Delivery paths come from REPO_ROOT (may be fixture tmpdir in tests)
+      const deliveryRoot26c = path.join(REPO_ROOT, '.cleargate', 'delivery');
+      const archiveRoot26c = path.join(deliveryRoot26c, 'archive');
+      const results26c = await reconcilerMod26c.walkActiveParents({
+        deliveryRoot: deliveryRoot26c,
+        archiveRoot: archiveRoot26c,
+      });
+      const flips26c = results26c.filter((r) => r.verdict === 'auto-flip');
+      const halts26c = results26c.filter(
+        (r) => r.verdict === 'halt-partial' || r.verdict === 'halt-zero-children',
+      );
+
+      for (const f of flips26c) {
+        setFrontmatterStatusAtomic(f.parent_path, 'Completed');
+        process.stdout.write(
+          `Step 2.6c: ${f.parent_id} status ${f.current_status} → Completed` +
+          ` (${f.terminal_children.length}/${f.terminal_children.length} children Completed:` +
+          ` ${f.terminal_children.join(', ')})\n`,
+        );
+      }
+
+      if (halts26c.length > 0) {
+        process.stderr.write(`Step 2.6c HALT: ${halts26c.length} parent(s) require manual ack:\n`);
+        for (const h of halts26c) {
+          process.stderr.write(`  - [${h.verdict}] ${h.halt_reason}\n`);
+        }
+        process.exit(1);
+      }
+
+      process.stdout.write(`Step 2.6c passed: ${flips26c.length} parent(s) auto-flipped; no halts.\n`);
+    }
+  } catch (e26c) {
+    process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
+  }
+
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
   // Block close if any .worktrees/STORY-* path is present.
   // v2 enforcing (exit 1); v1 advisory (warn + continue).
