@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-024"
 parent: ""
 children: []
-status: "Done"
+status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-024_AI_Orientation_Surface_Slim.md"
-last_ingest: "2026-05-16T21:01:30.305Z"
-last_ingest_commit: "87be520b8e8be42f207124d5f66dec8adbe269ab"
+last_ingest: "2026-05-17T23:17:07.149Z"
+last_ingest_commit: "75567a633f98fbec90a00c738c45aac00a75400b"
 repo: "planning"
 ---
 

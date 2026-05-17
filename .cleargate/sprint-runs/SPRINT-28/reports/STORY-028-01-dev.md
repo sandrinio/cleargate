@@ -137,3 +137,24 @@ Pre-existing failures (not introduced by this story):
 4. **Move auto-flipped epics to archive** — The lifecycle-drift step (Step 2.6a/b) will surface that these 4 epics are now Completed but still in pending-sync. DevOps/orchestrator should `git mv` them to `.cleargate/delivery/archive/` at sprint close.
 
 5. **Lifecycle drift backlog (20 items)** — The reconciler detected 20 artifacts with commit-vs-file location/status drift. These should be resolved systematically in SPRINT-29 (likely one dedicated housekeeping story).
+
+---
+
+## 10. Idempotency Verification (DoD §4.2 Item 4)
+
+**Re-audit command (qa-bounce fix):**
+```
+node cleargate-cli/dist/cli.js sprint reconcile-lifecycle SPRINT-28 --parents
+```
+
+**Full re-audit output captured to:** `.cleargate/.harvest-reaudit.log`
+
+**Result:** No new auto-flip candidates produced. The re-audit returned the same parent-rollup halt-list as the original audit:
+- EPIC-012: halt-zero-children (0 children) — unchanged
+- EPIC-021: halt-zero-children (0 children) — unchanged
+- SPRINT-07: halt-zero-children — unchanged (archival sprint placeholder)
+- SPRINT-16: halt-zero-children — unchanged (archival sprint placeholder)
+
+The 4 epics manually flipped in commit `5854ea46` (EPIC-010, EPIC-016, EPIC-023, EPIC-026) are now `Completed`; the reconciler no longer proposes them as candidates (they do not appear in the `--parents` output as flip candidates). This confirms idempotency: re-running the parent rollup audit after the apply produces zero additional diffs.
+
+**Wiki rebuild (qa-bounce fix):** Ran `node cleargate-cli/dist/cli.js wiki build` after the prior commit. Result: 326 pages written. The Active section of `.cleargate/wiki/index.md` no longer lists EPIC-010, EPIC-016, EPIC-023, or EPIC-026. The Archive section now shows 22 Completed epics (was 18 before this story's auto-flips). DoD §4.2 item 5 fully satisfied.
