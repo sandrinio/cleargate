@@ -79,6 +79,16 @@ export async function pushHandler(fileOrId: string, opts: PushOptions = {}): Pro
   const exit = opts.exit ?? ((c: number): never => process.exit(c));
   const nowFn = opts.now ?? (() => new Date().toISOString());
 
+  // ── CR-067 migration lock guard ───────────────────────────────────────────────
+  // If a status-vocabulary migration is in progress, refuse any push that could
+  // race the atomic frontmatter rewrite. Exit code 75 = EX_TEMPFAIL (retry later).
+  const migrationLockPath = path.join(projectRoot, '.cleargate', '.migration-lock');
+  if (fs.existsSync(migrationLockPath)) {
+    stderr(`Error: CR-067 migration in progress (.migration-lock held); retry in 30s\n`);
+    exit(75);
+    return;
+  }
+
   // Identity
   const identity = resolveIdentity(projectRoot);
   const sprintRoot = resolveActiveSprintDir(projectRoot);
