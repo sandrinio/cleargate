@@ -69,11 +69,21 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[EPIC-028]] | epic | Approved | .cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md |
 ## Sprints
 
-| [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md |
+| [[SPRINT-28]] | sprint | Active | .cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md |
 ## Bugs
 
-| [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
+| [[BUG-004]] | bug | Approved | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
 ## Stories
 
 | [[STORY-010-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-010-02_MCP_Pull_And_List_Endpoints.md |
 | [[STORY-028-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-028-01_Reconciliation_Harvest_Pass.md |
+| [[STORY-028-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-028-04_Vitest_Codemod_Tool.md |
+| [[STORY-028-05]] | story | Draft | .cleargate/delivery/pending-sync/STORY-028-05_Mcp_Vitest_Conversion.md |
+| [[STORY-028-06]] | story | Draft | .cleargate/delivery/pending-sync/STORY-028-06_Cli_Vitest_Conversion.md |
+| [[STORY-028-07]] | story | Draft | .cleargate/delivery/pending-sync/STORY-028-07_Admin_Vitest_Conversion.md |
+| [[STORY-028-08]] | story | Draft | .cleargate/delivery/pending-sync/STORY-028-08_Docs_And_Flashcard_Cleanup.md |
+| [[STORY-066-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-066-01_Parent_Rollup_Lib.md |
+| [[STORY-066-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-066-02_Sprint_Close_And_CLI_Wiring.md |
+| [[STORY-067-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-067-01_Migration_Script_And_Tests.md |
+| [[STORY-067-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-067-02_Archive_Migration_And_Templates.md |
+| [[STORY-067-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-067-03_Tighten_Terminal_And_Adapter_Map.md |

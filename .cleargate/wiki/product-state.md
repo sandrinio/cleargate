@@ -7,8 +7,8 @@
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
 | Epics | 28 | 0 | 22 |
-| Stories | 160 | 0 | 153 |
-| Sprints | 28 | 0 | 26 |
+| Stories | 170 | 0 | 153 |
+| Sprints | 28 | 1 | 26 |
 | Proposals | 14 | 0 | 14 |
 | CRs | 64 | 0 | 64 |
 | Bugs | 22 | 0 | 21 |
@@ -315,7 +315,7 @@ _No active epics._
 
 - [[SPRINT-27]] (sprints) — Completed
 
-- [[SPRINT-28]] (sprints) — Approved
+- [[SPRINT-28]] (sprints) — Active
 
 - [[STORY-000-01]] (stories) — Completed
 

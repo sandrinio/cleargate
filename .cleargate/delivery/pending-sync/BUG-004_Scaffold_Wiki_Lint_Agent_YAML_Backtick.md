@@ -3,14 +3,16 @@ bug_id: BUG-004
 parent_ref: EPIC-018
 parent_cleargate_id: EPIC-018
 sprint_cleargate_id: SPRINT-12
-status: Draft
+status: Approved
 severity: P2-Medium
 reporter: sandro (via QA STORY-018-05)
-approved: false
+approved: true
+approved_by: sandrinio
+approved_at: 2026-05-17T00:00:00Z
 created_at: 2026-04-25T00:00:00Z
-updated_at: 2026-04-25T00:00:00Z
+updated_at: 2026-05-17T16:32:27Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: c59ed54-dirty
 context_source: |
   Surfaced 2026-04-25 by QA on STORY-018-05 (scaffold wiki-lint agent ingest).
   Wiki-lint agent YAML frontmatter contains a backtick character that breaks
@@ -93,6 +95,7 @@ draft_tokens:
       cache_read: 0
       cache_creation: 0
       ts: 2026-05-01T19:03:45Z
+server_pushed_at_version: null
 ---
 
 # BUG-004: Scaffold `cleargate-wiki-lint.md` Frontmatter YAML Backtick Breaks Strict Parser
