@@ -124,25 +124,30 @@ function assertScaffoldShape(tmp: string): void {
 }
 
 /**
- * Assert all .md files under .cleargate/ are frontmatter-parseable (or body-only).
+ * Assert all .md files under .cleargate/ and .claude/agents/ are frontmatter-parseable
+ * (or body-only).
  *
- * Scope: .cleargate/ only. Files under .claude/agents/ use Claude Code's agent
- * YAML format — those may contain complex description values with special chars
- * (backticks, colons) that are intentional and not ClearGate work-item frontmatter.
- * The load-bearing check is that ClearGate's own templates/knowledge/FLASHCARD files
- * parse correctly; agent definition files are excluded from this assertion.
+ * Scope: .cleargate/ + .claude/agents/. Agent definition files use Claude Code's agent
+ * YAML format which may contain backticks and other special chars in description values.
+ * BUG-004: cleargate-wiki-lint.md had an unquoted backtick that broke js-yaml CORE_SCHEMA;
+ * including .claude/agents/ in this assertion prevents regression.
  */
 function assertMdFilesParseClean(tmp: string): void {
-  const cleargateDir = path.join(tmp, '.cleargate');
-  const mdFiles = collectMdFiles(cleargateDir);
-  for (const filePath of mdFiles) {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    // Only files that start with --- have frontmatter to parse
-    if (raw.startsWith('---')) {
-      expect(
-        () => parseFrontmatter(raw),
-        `parseFrontmatter should not throw for ${path.relative(tmp, filePath)}`,
-      ).not.toThrow();
+  const dirs = [
+    path.join(tmp, '.cleargate'),
+    path.join(tmp, '.claude', 'agents'),
+  ];
+  for (const dir of dirs) {
+    const mdFiles = collectMdFiles(dir);
+    for (const filePath of mdFiles) {
+      const raw = fs.readFileSync(filePath, 'utf8');
+      // Only files that start with --- have frontmatter to parse
+      if (raw.startsWith('---')) {
+        expect(
+          () => parseFrontmatter(raw),
+          `parseFrontmatter should not throw for ${path.relative(tmp, filePath)}`,
+        ).not.toThrow();
+      }
     }
   }
 }
