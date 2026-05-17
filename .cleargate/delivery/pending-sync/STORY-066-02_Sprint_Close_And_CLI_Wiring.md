@@ -31,11 +31,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:39:03Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:18:49Z
 stamp_error: no ledger rows for work_item_id STORY-066-02
 draft_tokens:
   input: null
@@ -43,7 +41,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:39:03Z
+  last_stamp: 2026-05-17T19:18:49Z
   sessions: []
 ---
 
@@ -242,7 +240,11 @@ CLI: `cleargate sprint reconcile-lifecycle <sprint-id> [--parents]` — new flag
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `.cleargate/scripts/close_sprint.mjs` — existing Step 2.6 + 2.6b structure (lines 294-407); new step inserts after line 407.
+- **Surface:** `cleargate-planning/.cleargate/scripts/close_sprint.mjs` — canonical mirror; same line range.
+- **Surface:** `cleargate-cli/src/commands/sprint.ts` — existing `reconcileLifecycleHandler` CLI option parsing; add `--parents` to the option spec.
+- **Surface:** `cleargate-cli/src/lib/frontmatter-yaml.ts` — atomic-line-edit helpers; check whether a `setFrontmatterField(file, key, value)` helper exists. If yes, reuse; if no, inline the regex-replace.
+- **Coverage of this story's scope:** ~70% — extends existing script + CLI handler; new code is the Step 2.6c block (~40 LOC) + `--parents` option wiring (~15 LOC).
 
 ## Why not simpler?
 

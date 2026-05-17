@@ -29,11 +29,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:37:50Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:17:46Z
 stamp_error: no ledger rows for work_item_id STORY-066-01
 draft_tokens:
   input: null
@@ -41,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:37:49Z
+  last_stamp: 2026-05-17T19:17:46Z
   sessions: []
 ---
 
@@ -214,7 +212,10 @@ N/A — library only.
 
 ## Existing Surfaces
 
-> See §1.6 above.
+- **Surface:** `cleargate-cli/src/lib/lifecycle-reconcile.ts:27` — `ARTIFACT_TERMINAL_STATUSES` Set; new lib imports this constant.
+- **Surface:** `cleargate-cli/src/lib/frontmatter-yaml.ts` — parse/serialize frontmatter; new lib reuses `parseFrontmatter()`.
+- **Surface:** `cleargate-cli/src/lib/lifecycle-reconcile.ts:436` — existing pattern for "skip already-terminal items"; new lib follows the same predicate.
+- **Coverage of this story's scope:** ~30% — new lib is a sibling traversal (parents → children), distinct from existing reconciler (closed-sprint state → pending-sync leaves). Reuses two helpers; logic itself is net-new.
 
 ## Why not simpler?
 

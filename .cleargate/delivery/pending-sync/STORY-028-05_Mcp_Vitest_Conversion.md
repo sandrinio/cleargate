@@ -27,11 +27,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:44:00Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:21:16Z
 stamp_error: no ledger rows for work_item_id STORY-028-05
 draft_tokens:
   input: null
@@ -39,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:44:00Z
+  last_stamp: 2026-05-17T19:21:15Z
   sessions: []
 ---
 
@@ -210,7 +208,12 @@ N/A.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `mcp/test/` (50 vitest files per EPIC-028 §4) — codemod target directory.
+- **Surface:** `mcp/vitest.config.ts` — root config to delete.
+- **Surface:** `mcp/package.json` — `vitest: ^2.1.0` devDep (verified 2026-05-17).
+- **Surface:** `cleargate-cli/scripts/backfill-sprint-reports.mjs` — sibling script reference; the codemod runner from STORY-028-04 lands in this directory.
+- **Surface:** `mcp/docker-compose.yml` — real-infra test execution per FLASHCARD `#mocked-tests`.
+- **Coverage of this story's scope:** ~50% — codemod handles auto path; manual fixes are net-new test-code edits.
 
 ## Why not simpler?
 

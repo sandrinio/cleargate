@@ -34,11 +34,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:41:50Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:21:13Z
 stamp_error: no ledger rows for work_item_id STORY-067-03
 draft_tokens:
   input: null
@@ -46,7 +44,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:41:50Z
+  last_stamp: 2026-05-17T19:21:13Z
   sessions: []
 ---
 
@@ -208,7 +206,10 @@ N/A — internal constant change.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `cleargate-cli/src/lib/lifecycle-reconcile.ts` — exact lines to edit: 27-30 (constant), 47, 51, 309, 329 (expected[] literals).
+- **Surface:** `mcp/src/adapters/README.md` — created in STORY-010-02; this story appends a Status Vocabulary Mapping section.
+- **Surface:** `cleargate-cli/test/lib/lifecycle-reconcile.test.ts` — existing tests on the constant; update assertion values (EPIC-028 renames to node:test naming before this story dispatches).
+- **Coverage of this story's scope:** ~99% — pure tighten + doc-section; no new module.
 
 ## Why not simpler?
 
