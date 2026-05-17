@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-010
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: PROPOSAL-007_Multi_Participant_MCP_Sync.md
 owner: Vibe Coder (sandro.suladze@gmail.com)
@@ -26,15 +26,6 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-04-19T20:06:31Z
-stamp_error: no ledger rows for work_item_id EPIC-010
-draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-04-19T20:04:11Z
-  sessions: []
 approved: true
 pushed_by: sandrinio@github.local
 pushed_at: 2026-04-20T19:45:19.944Z
@@ -48,6 +39,21 @@ children:
   - "[[STORY-010-06]]"
   - "[[STORY-010-07]]"
   - "[[STORY-010-08]]"
+draft_tokens:
+  input: 18777
+  output: 8657079
+  cache_creation: 82723283
+  cache_read: 4312410066
+  model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+  last_stamp: 2026-05-17T23:03:32Z
+  sessions:
+    - session: 961b8bdb-8371-45c1-8e64-a42cd02616c8
+      model: <synthetic>,claude-opus-4-7, claude-opus-4-7
+      input: 18777
+      output: 8657079
+      cache_read: 4312410066
+      cache_creation: 82723283
+      ts: 2026-04-20T01:23:33Z
 ---
 
 # EPIC-010: Multi-Participant MCP Sync (v1)

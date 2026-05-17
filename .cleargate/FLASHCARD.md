@@ -4,6 +4,8 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-18 · #parent-rollup #reconciler · parent-rollup.ts extractId() checks story_id only; Epic files use epic_id — add epic_id/sprint_id key checks before filename-stem fallback.
+
 2026-05-18 · #node-test #migration · node:test on DB-integration suites needs `--test-concurrency=1` (matches vitest singleFork:true); default parallel breaks FK constraints.
 2026-05-18 · #node-test #hono · @hono/node-server calls `socket.destroySoon()` ~500ms after Fastify `inject()` fake-socket request — node:test treats it as hard fail (vitest tolerated); patch via onRequest hook no-op or uncaughtException handler.
 2026-05-18 · #node-test #mock · `mock.module()` mock-class instances must use the same property names as the real class (`AdminApiError.kind` not `.errorType`) — node:test's stricter equality exposes vitest-passing mock-shape bugs.
