@@ -24,11 +24,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:40:05Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:18:52Z
 stamp_error: no ledger rows for work_item_id STORY-067-01
 draft_tokens:
   input: null
@@ -36,7 +34,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:40:05Z
+  last_stamp: 2026-05-17T19:18:52Z
   sessions: []
 ---
 
@@ -203,7 +201,11 @@ CLI only. No exported library.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `cleargate-cli/src/commands/push.ts` — `writeAtomic` pattern; script copies the same `tmpfile + renameSync` idiom.
+- **Surface:** `cleargate-cli/src/lib/frontmatter-yaml.ts` — parse/serialize helpers; script intentionally bypasses these to preserve raw bytes (per FLASHCARD).
+- **Surface:** `cleargate-cli/scripts/backfill-sprint-reports.mjs` — sibling `.mjs` script providing boilerplate shape.
+- **Surface:** `cleargate-cli/scripts/copy-planning-payload.mjs` — sibling prebuild script providing boilerplate shape.
+- **Coverage of this story's scope:** ~40% — new script + new test, but reuses existing atomic-write idiom and scripts-directory conventions.
 
 ## Why not simpler?
 

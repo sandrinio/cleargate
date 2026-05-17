@@ -29,11 +29,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:45:44Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:20:29Z
 stamp_error: no ledger rows for work_item_id STORY-028-07
 draft_tokens:
   input: null
@@ -41,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:45:44Z
+  last_stamp: 2026-05-17T19:20:29Z
   sessions: []
 ---
 
@@ -215,7 +213,11 @@ N/A.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `admin/src/` + `admin/test/` (34 vitest files per EPIC-028 §4) — codemod target directories.
+- **Surface:** `admin/vitest.config.ts` — config to delete (likely contains $env alias per FLASHCARD).
+- **Surface:** `admin/package.json` — vitest devDep to remove; `@testing-library/svelte ^5.2.7` to KEEP.
+- **Surface:** `.cleargate/FLASHCARD.md` — 2026-05-15 `#svelte #vitest` $env mock pattern reference + 2026-04-19 `#vitest #vi-mock #sveltekit-endpoint` SvelteKit endpoint test pattern.
+- **Coverage of this story's scope:** ~40% — codemod handles plain assertions; svelte-specific manual fixes are net-new test patterns.
 
 ## Why not simpler?
 

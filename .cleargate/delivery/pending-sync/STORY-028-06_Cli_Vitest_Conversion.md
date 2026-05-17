@@ -26,11 +26,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:44:36Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:19:13Z
 stamp_error: no ledger rows for work_item_id STORY-028-06
 draft_tokens:
   input: null
@@ -38,7 +36,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:44:36Z
+  last_stamp: 2026-05-17T19:19:13Z
   sessions: []
 ---
 
@@ -173,7 +171,11 @@ N/A.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `cleargate-cli/test/` — 138 `*.{test,spec}.ts` files per EPIC-028 §4 (codemod target).
+- **Surface:** `cleargate-cli/vitest.config.ts` — config to delete.
+- **Surface:** `cleargate-cli/package.json` — vitest devDep to remove.
+- **Surface:** `cleargate-cli/examples/` — Red examples directory; OUT of scope (per FLASHCARD `#fixtures #sprint-22`).
+- **Coverage of this story's scope:** ~70% — codemod handles vast majority of cleargate-cli/test/ given DI-style dominance.
 
 ## Why not simpler?
 

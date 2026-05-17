@@ -30,11 +30,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:46:40Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:19:22Z
 stamp_error: no ledger rows for work_item_id STORY-028-08
 draft_tokens:
   input: null
@@ -42,7 +40,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:46:40Z
+  last_stamp: 2026-05-17T19:19:22Z
   sessions: []
 ---
 
@@ -203,7 +201,13 @@ CLI: `npm run check:no-vitest` (per package) — exit 0 = clean, exit 1 = vitest
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `CLAUDE.md` — repo-root live copy.
+- **Surface:** `cleargate-planning/CLAUDE.md` — canonical mirror.
+- **Surface:** `cleargate-planning/.claude/agents/developer.md` — canonical agent prompt.
+- **Surface:** `.cleargate/FLASHCARD.md` — append-only log.
+- **Surface:** `.claude/hooks/pre-commit-surface-gate.sh` — live stub; see FLASHCARD 2026-05-04 `#pre-commit #stub-extension` for the in-stub-before-exec pattern.
+- **Surface:** `mcp/package.json` + `cleargate-cli/package.json` + `admin/package.json` — three workspace package.json files for `check:no-vitest` script wiring.
+- **Coverage of this story's scope:** ~90% — pure doc + guard wiring; no new abstraction.
 
 ## Why not simpler?
 

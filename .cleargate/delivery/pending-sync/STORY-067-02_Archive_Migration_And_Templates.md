@@ -28,11 +28,9 @@ updated_at: 2026-05-17T16:40:00Z
 created_at_version: cleargate@0.12.0
 updated_at_version: cleargate@0.12.0
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: existing-surfaces-verified
-      detail: "'## Existing Surfaces' has no path citations and no \"no overlap found\" sentinel"
-  last_gate_check: 2026-05-17T18:40:52Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-05-17T19:21:10Z
 stamp_error: no ledger rows for work_item_id STORY-067-02
 draft_tokens:
   input: null
@@ -40,7 +38,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-17T18:40:52Z
+  last_stamp: 2026-05-17T19:21:10Z
   sessions: []
 ---
 
@@ -199,7 +197,16 @@ N/A.
 
 ## Existing Surfaces
 
-> See §1.6.
+- **Surface:** `cleargate-cli/scripts/copy-planning-payload.mjs` — runs in prebuild; rebuilds `cleargate-cli/templates/cleargate-planning/` from `cleargate-planning/`.
+- **Surface:** `cleargate-cli/scripts/backfill-sprint-reports.mjs` — sibling script convention reference; the migration runner from STORY-067-01 lands alongside this one.
+- **Surface:** `.cleargate/templates/story.md` + `cleargate-planning/.cleargate/templates/story.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/Bug.md` + `cleargate-planning/.cleargate/templates/Bug.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/CR.md` + `cleargate-planning/.cleargate/templates/CR.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/epic.md` + `cleargate-planning/.cleargate/templates/epic.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/initiative.md` + `cleargate-planning/.cleargate/templates/initiative.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/sprint_report.md` + `cleargate-planning/.cleargate/templates/sprint_report.md` — paired files to edit.
+- **Surface:** `.cleargate/templates/hotfix.md` + `cleargate-planning/.cleargate/templates/hotfix.md` — paired files to edit.
+- **Coverage of this story's scope:** ~95% — pure invocation + find/replace; no new code.
 
 ## Why not simpler?
 
