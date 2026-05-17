@@ -67,6 +67,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Epics
 
 | [[EPIC-028]] | epic | Approved | .cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md |
+| [[EPIC-029]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
 ## Sprints
 
 | [[SPRINT-28]] | sprint | Active | .cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md |

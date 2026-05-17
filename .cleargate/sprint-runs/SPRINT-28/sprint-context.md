@@ -44,7 +44,13 @@ Exported helpers and modules from already-merged stories in this sprint. The Arc
 | Story | Module / Export | Path |
 |-------|----------------|------|
 | (populated as stories merge) | | |
+| STORY-066-01 | rollUpParentStatus, walkActiveParents, RollupResult | cleargate-cli/src/lib/parent-rollup.ts (re-exported via lifecycle-reconcile.ts) |
+| STORY-067-01 | migrate-status-to-completed.mjs (CLI: --dry-run/--apply), push.ts .migration-lock guard | cleargate-cli/scripts/migrate-status-to-completed.mjs + cleargate-cli/src/commands/push.ts |
+| STORY-028-04 | codemod-vitest-to-node-test.mjs (CLI: --apply --root <dir> [--report <path>]) | cleargate-cli/scripts/codemod-vitest-to-node-test.mjs |
 
 ## Mid-Sprint Amendments
 
 _(populated by Architect on CR:scope-change or CR:approach-change; never rewrite, only append. Format: '<ISO-ts> · <ID> · <one-line note>')_
+
+2026-05-18T00:00:00.000Z · STORY-067-01-arch · Architect post-flight raised 4 advisory risks for STORY-067-02 dispatch: (1) walk is non-recursive — subdirectories of pending-sync/archive are not traversed; (2) single-status-line break — only first frontmatter status: line is rewritten, multi-line values silently ignored; (3) dry-run output should be piped to audit log before --apply runs in CI; (4) exit-handler removal — process.on('exit') lock cleanup removed from final build; review before STORY-067-02 wires CI step.
+2026-05-18T21:04:56.000Z · STORY-028-04-arch · Architect post-flight (PASS) raised 3 advisory items for STORY-028-05/-06/-07 dispatch: (1) pre-flight grep for `.each(` — test.each/describe.each are not converted by the codemod and must be detected before bulk apply; (2) pre-flight grep for `expect.assertions|expect.hasAssertions|expect.extend` — these are not mapped and require manual-fix handling; (3) test-glob bleed deferral to STORY-028-08 — `test/fixtures/**` matches cleargate-cli/package.json test script glob; recommended fix: exclude `test/fixtures/**` from the test script before running the codemod at scale.
