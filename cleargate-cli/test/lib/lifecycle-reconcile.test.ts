@@ -165,7 +165,7 @@ describe('Scenario 2: Drift at close blocks', () => {
 
     const result = reconcileLifecycle(makeOpts({ deliveryRoot: root, gitRunner }));
     expect(result.drift[0]?.file_path).toMatch(/pending-sync\/CR-005/);
-    expect(result.drift[0]?.expected_status).toBe('Done');
+    expect(result.drift[0]?.expected_status).toBe('Completed');
   });
 });
 
@@ -175,8 +175,8 @@ describe('Scenario 3: Multi-ID commit fully validated', () => {
   it('BUG-001 + CR-001 in one commit: one stale → exits naming only the stale one', () => {
     const { root, pendingDir, archiveDir } = makeDeliveryRoot();
 
-    // BUG-001 is Verified in archive — clean
-    writeArtifact(archiveDir, 'BUG-001', 'Verified');
+    // BUG-001 is Completed in archive — clean
+    writeArtifact(archiveDir, 'BUG-001', 'Completed');
     // CR-001 is Draft in pending-sync — drift
     writeArtifact(pendingDir, 'CR-001', 'Draft');
 
@@ -404,18 +404,20 @@ describe('parseCommitMessage', () => {
 // ─── VERB_STATUS_MAP integrity ────────────────────────────────────────────────
 
 describe('VERB_STATUS_MAP', () => {
-  it('feat maps to STORY/EPIC/CR with expected Done|Completed', () => {
+  it('feat maps to STORY/EPIC/CR with expected Completed only (post-CR-067)', () => {
     expect(VERB_STATUS_MAP['feat']).toBeDefined();
     expect(VERB_STATUS_MAP['feat']!.types).toContain('STORY');
     expect(VERB_STATUS_MAP['feat']!.types).toContain('CR');
     expect(VERB_STATUS_MAP['feat']!.types).toContain('EPIC');
-    expect(VERB_STATUS_MAP['feat']!.expected).toContain('Done');
     expect(VERB_STATUS_MAP['feat']!.expected).toContain('Completed');
+    expect(VERB_STATUS_MAP['feat']!.expected).not.toContain('Done');
+    expect(VERB_STATUS_MAP['feat']!.expected).not.toContain('Verified');
   });
 
-  it('fix maps to BUG/HOTFIX with expected Verified', () => {
+  it('fix maps to BUG/HOTFIX with expected Completed only (post-CR-067)', () => {
     expect(VERB_STATUS_MAP['fix']).toBeDefined();
     expect(VERB_STATUS_MAP['fix']!.types).toContain('BUG');
-    expect(VERB_STATUS_MAP['fix']!.expected).toContain('Verified');
+    expect(VERB_STATUS_MAP['fix']!.expected).toContain('Completed');
+    expect(VERB_STATUS_MAP['fix']!.expected).not.toContain('Verified');
   });
 });
