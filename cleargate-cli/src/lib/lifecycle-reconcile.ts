@@ -713,3 +713,7 @@ export function checkVerbMismatch(verb: string, type: string): string | null {
   }
   return null;
 }
+
+// ─── Parent rollup re-exports (STORY-066-01) ──────────────────────────────────
+
+export { rollUpParentStatus, walkActiveParents, type RollupResult } from './parent-rollup.js';
