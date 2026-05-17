@@ -41,11 +41,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-02": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T21:47:46.583Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -65,11 +65,11 @@
       "lane_demotion_reason": null
     },
     "STORY-067-02": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T21:35:37.534Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -101,11 +101,11 @@
       "lane_demotion_reason": null
     },
     "STORY-028-05": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-17T18:50:41.615Z",
+      "updated_at": "2026-05-17T22:55:12.933Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -161,6 +161,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-028-04 → Done",
-  "updated_at": "2026-05-17T21:04:56.525Z"
+  "last_action": "transition STORY-028-05 → Done",
+  "updated_at": "2026-05-17T22:55:12.933Z"
 }
