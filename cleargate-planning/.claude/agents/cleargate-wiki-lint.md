@@ -1,6 +1,6 @@
 ---
 name: cleargate-wiki-lint
-description: Use BEFORE Gate 1 (Proposal approval) and Gate 3 (Push) to enforce wiki-vs-raw consistency. Default mode (enforcement) exits non-zero on any drift, naming the offending page; halts gate transitions. `--suggest` mode (advisory) exits 0 and prints candidate cross-refs the ingest pass missed (Karpathy discovery). Performance: O(n), one pass per page plus one index cross-check; no all-pairs comparison.
+description: "Use BEFORE Gate 1 (Proposal approval) and Gate 3 (Push) to enforce wiki-vs-raw consistency. Default mode (enforcement) exits non-zero on any drift, naming the offending page; halts gate transitions. `--suggest` mode (advisory) exits 0 and prints candidate cross-refs the ingest pass missed (Karpathy discovery). Performance: O(n), one pass per page plus one index cross-check; no all-pairs comparison."
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

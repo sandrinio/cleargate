@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.12.0",
-  "generated_at": "2026-05-15T05:10:35.575Z",
+  "generated_at": "2026-05-17T20:29:28.492Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -25,7 +25,7 @@
     },
     {
       "path": ".claude/agents/cleargate-wiki-lint.md",
-      "sha256": "42067fd728e64ac1ff1ace5822b8f8c3ddf1ba70fd0fbddf0e8cb19d5d699e77",
+      "sha256": "2a9212d81df9a68e167ec7a18093a73c6da0208f13685c6887d5bd832b56fb3d",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
