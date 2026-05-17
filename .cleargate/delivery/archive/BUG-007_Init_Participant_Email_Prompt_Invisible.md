@@ -2,7 +2,7 @@
 bug_id: BUG-007
 parent_ref: STORY-010-01
 parent_cleargate_id: STORY-010-01
-status: Verified
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 approved: true

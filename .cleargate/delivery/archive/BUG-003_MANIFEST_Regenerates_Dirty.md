@@ -3,7 +3,7 @@ bug_id: BUG-003
 parent_ref: EPIC-009
 parent_cleargate_id: "EPIC-009"
 sprint_cleargate_id: "SPRINT-11"
-status: Verified
+status: Completed
 severity: P3-Low
 reporter: sandro
 approved: true

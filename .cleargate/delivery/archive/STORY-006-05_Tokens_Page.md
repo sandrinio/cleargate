@@ -3,7 +3,7 @@ story_id: STORY-006-05
 parent_epic_ref: EPIC-006
 parent_cleargate_id: "EPIC-006"
 sprint_cleargate_id: "SPRINT-06"
-status: Done
+status: Completed
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-003_MCP_Adapter.md, EPIC-006 §5 (Token display), STORY-004-04

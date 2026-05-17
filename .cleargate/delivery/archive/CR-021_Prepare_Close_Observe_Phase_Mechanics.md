@@ -4,7 +4,7 @@ parent_ref: EPIC-025 (decomposition wrapper); cleargate-protocol.md (Prepare/Clo
 parent_cleargate_id: "EPIC-025 (decomposition wrapper); cleargate-protocol.md (Prepare/Close/Observe-phase semantics) + close_sprint.mjs + reporter.md + Sprint Plan + Sprint Report templates"
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Done
+status: Completed
 ambiguity: 🟢 Low
 context_source: ".cleargate/scratch/SDLC_brainstorm.md (de-facto charter — Option A per 2026-05-01 conversation). Sibling to CR-020 (Plan-phase). This CR covers Prepare/Close/Observe-phase mechanics. Scope captured in brainstorm §2.3, §2.3a, §2.3b, §2.4, §6 working notes (CR-split: option 2 — CR-021 in SPRINT-18 after CR-020 lands in SPRINT-17). Verbatim user approval: 'go for option a'. Gate 1 (Brief) waived — sharp intent + inline references in source conversation."
 proposal_gate_waiver:

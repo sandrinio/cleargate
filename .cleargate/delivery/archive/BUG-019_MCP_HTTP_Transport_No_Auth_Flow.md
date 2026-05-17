@@ -3,7 +3,7 @@ bug_id: BUG-019
 parent_ref: EPIC-019
 parent_cleargate_id: "EPIC-019"
 sprint_cleargate_id: "off-sprint"
-status: Verified
+status: Completed
 severity: P0-Critical
 reporter: sandrinio
 sprint: off-sprint

@@ -4,7 +4,7 @@ parent_ref: EPIC-016 — Upgrade UX
 parent_cleargate_id: EPIC-016 — Upgrade UX
 sprint_cleargate_id: SPRINT-26
 carry_over: false
-status: Done
+status: Completed
 severity: P3-Low
 reporter: sandrinio
 approved: true

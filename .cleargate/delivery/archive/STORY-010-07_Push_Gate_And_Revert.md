@@ -2,7 +2,7 @@
 story_id: STORY-010-07
 parent_epic_ref: EPIC-010
 parent_cleargate_id: "EPIC-010"
-status: Done
+status: Completed
 ambiguity: 🟢 Low
 complexity_label: L2
 context_source: PROPOSAL-007_Multi_Participant_MCP_Sync.md

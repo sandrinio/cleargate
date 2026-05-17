@@ -1,6 +1,6 @@
 ---
 hotfix_id: "HOTFIX-001"
-status: "Verified"
+status: Completed
 severity: "P2"
 originating_signal: "user-report"
 created_at: "2026-04-30T08:00:40.505Z"

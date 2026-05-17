@@ -4,7 +4,7 @@ parent_ref: STORY-013-07 | STORY-014-08 | CR-017
 parent_cleargate_id: STORY-013-07
 sprint_cleargate_id: SPRINT-16
 carry_over: false
-status: Done
+status: Completed
 approved: true
 approved_at: 2026-04-30T13:15:00Z
 approved_by: sandrinio
