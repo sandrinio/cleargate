@@ -1825,3 +1825,8 @@
   action: "update"
   target: "STORY-028-05"
   path: ".cleargate/delivery/pending-sync/STORY-028-05_Mcp_Vitest_Conversion.md"
+- timestamp: "2026-05-17T19:23:12.503Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "BUG-004"
+  path: ".cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md"
