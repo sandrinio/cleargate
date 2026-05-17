@@ -32,6 +32,7 @@ import {
   reconcileLifecycle,
   reconcileDecomposition,
   checkVerbMismatch,
+  walkActiveParents,
 } from '../lib/lifecycle-reconcile.js';
 import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 
@@ -312,7 +313,7 @@ export function sprintCloseHandler(
  * Falls back to last 90 days if frontmatter cannot be read.
  */
 export function reconcileLifecycleCliHandler(
-  opts: { sprintId: string; since?: string; until?: string },
+  opts: { sprintId: string; since?: string; until?: string; parents?: boolean },
   cli?: SprintCliOptions,
 ): void {
   const stdoutFn = cli?.stdout ?? ((s: string) => process.stdout.write(s + '\n'));
@@ -362,24 +363,60 @@ export function reconcileLifecycleCliHandler(
 
     if (result.drift.length === 0) {
       stdoutFn(`lifecycle: clean (${result.clean} artifacts reconciled)`);
-      return exitFn(0);
+    } else {
+      stderrFn(`lifecycle: DRIFT detected (${result.drift.length} unreconciled artifacts):`);
+      for (const item of result.drift) {
+        stderrFn(
+          `  DRIFT: ${item.id} status=${item.actual_status ?? 'missing'} in ${item.in_archive ? 'archive' : 'pending-sync'}, expected ${item.expected_status}` +
+          ` (commit ${item.commit_shas[0] ?? 'unknown'})`,
+        );
+        stderrFn(
+          `    Remediation: git mv .cleargate/delivery/pending-sync/${item.file_path?.replace('pending-sync/', '') ?? item.id + '_*.md'} .cleargate/delivery/archive/ && update status: ${item.expected_status}`,
+        );
+      }
+      if (!opts.parents) {
+        return exitFn(1);
+      }
     }
-
-    stderrFn(`lifecycle: DRIFT detected (${result.drift.length} unreconciled artifacts):`);
-    for (const item of result.drift) {
-      stderrFn(
-        `  DRIFT: ${item.id} status=${item.actual_status ?? 'missing'} in ${item.in_archive ? 'archive' : 'pending-sync'}, expected ${item.expected_status}` +
-        ` (commit ${item.commit_shas[0] ?? 'unknown'})`,
-      );
-      stderrFn(
-        `    Remediation: git mv .cleargate/delivery/pending-sync/${item.file_path?.replace('pending-sync/', '') ?? item.id + '_*.md'} .cleargate/delivery/archive/ && update status: ${item.expected_status}`,
-      );
-    }
-    return exitFn(1);
   } catch (err) {
     stderrFn(`lifecycle reconciliation error: ${err instanceof Error ? err.message : String(err)}`);
-    return exitFn(1);
+    if (!opts.parents) {
+      return exitFn(1);
+    }
   }
+
+  // ── --parents: read-only parent (Epic/Sprint) rollup audit (CR-066) ─────────
+  // When --parents is set, walk active parents and print a verdict table.
+  // Always exits 0: audit is informational; halts do not propagate exit code.
+  if (opts.parents) {
+    const archiveRoot = path.join(deliveryRoot, 'archive');
+    walkActiveParents({ deliveryRoot, archiveRoot })
+      .then((results) => {
+        stdoutFn('Parent rollup audit (--parents):');
+        for (const r of results) {
+          if (r.verdict === 'auto-flip') {
+            stdoutFn(
+              `  ${r.parent_id}  ✓ proposed: Completed` +
+              ` (${r.terminal_children.length}/${r.terminal_children.length} children Completed)`,
+            );
+          } else if (r.verdict === 'halt-partial' || r.verdict === 'halt-zero-children') {
+            stdoutFn(`  ${r.parent_id}  ✗ ${r.verdict}: ${r.halt_reason ?? 'no details'}`);
+          } else if (r.verdict === 'no-op') {
+            // Already terminal — skip silently
+          } else {
+            stdoutFn(`  ${r.parent_id}  ~ ${r.verdict}`);
+          }
+        }
+        exitFn(0);
+      })
+      .catch((err) => {
+        stderrFn(`--parents audit error: ${err instanceof Error ? err.message : String(err)}`);
+        exitFn(0);
+      });
+    return;
+  }
+
+  return exitFn(0);
 }
 
 // ─── sprintArchiveHandler ─────────────────────────────────────────────────────
