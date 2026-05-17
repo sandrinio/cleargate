@@ -3,7 +3,7 @@ bug_id: BUG-010
 parent_ref: BUG-009
 parent_cleargate_id: "BUG-009"
 sprint_cleargate_id: "SPRINT-14"
-status: Verified
+status: Completed
 severity: P1-High
 reporter: orchestrator
 sprint: SPRINT-14

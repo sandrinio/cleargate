@@ -4,7 +4,7 @@ parent_ref: BUG-021
 parent_cleargate_id: BUG-021
 sprint_cleargate_id: SPRINT-15
 superseded_by: CR-018
-status: Verified
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 sprint: SPRINT-15
