@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-025
 parent_cleargate_id: EPIC-025
 sprint_cleargate_id: SPRINT-18
 carry_over: false
-status: Done
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-025 + CR-021 §3.2.6 (reporter.md capability surface spec). M5 of CR-021's milestone plan — depends on M2 (preflight CLI) only for the Brief's Gate-4-trigger language; depends on M4 only for the new SPRINT-<#>_REPORT.md output path reference.
 actor: Reporter agent (self-orienting)

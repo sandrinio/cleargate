@@ -3,7 +3,7 @@ bug_id: BUG-005
 parent_ref: EPIC-013
 parent_cleargate_id: "EPIC-013"
 sprint_cleargate_id: "SPRINT-13"
-status: Verified
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 approved: true

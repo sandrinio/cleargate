@@ -29,7 +29,7 @@ DO NOT output these instructions in the rendered file.
 initiative_id: "INITIATIVE-{NNN}"
 remote_id: null
 source_tool: "linear | jira | github | manual-paste"
-status: "{PM native status — e.g. Discovery, In Triage, Triaged}"
+status: "{PM native status — e.g. Discovery, In Triage, Triaged, Completed}"
 synced_at: null
 triaged_at: null
 spawned_items: []

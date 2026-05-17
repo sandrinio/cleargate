@@ -2,7 +2,7 @@
 story_id: STORY-016-05
 parent_epic_ref: EPIC-016
 parent_cleargate_id: "EPIC-016"
-status: Done
+status: Completed
 approved: true
 approved_at: 2026-04-30T00:00:00Z
 approved_by: sandrinio

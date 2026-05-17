@@ -4,7 +4,7 @@ parent_ref: EPIC-013 — Execution Phase v2
 parent_cleargate_id: EPIC-013 — Execution Phase v2
 sprint_cleargate_id: SPRINT-26
 carry_over: false
-status: Done
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 approved: true
