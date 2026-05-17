@@ -19,21 +19,32 @@ import { parseFrontmatter } from '../wiki/parse-frontmatter.js';
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
 /**
- * Terminal statuses for artifact lifecycle.
+ * Terminal statuses for artifact lifecycle (post-CR-067).
  * Source: .cleargate/scripts/constants.mjs:45 TERMINAL_STATES.
- * NOTE: These are the *artifact* terminal statuses (Done, Completed, Verified, etc.),
- * not state.json story states (Done, Escalated, Parking Lot).
+ * NOTE: These are the *artifact* terminal statuses, not state.json story states.
+ *
+ * CR-067 keep/remove decisions:
+ *   Completed  — KEEP (sole canonical terminal post-CR-067 vocab unification)
+ *   Abandoned  — KEEP (explicit non-completion terminal; needed for cleargate_id audit)
+ *   Closed     — KEEP (issue-specific terminal; not subject to CR-067 vocab scope)
+ *   Resolved   — KEEP (bug-specific terminal; not subject to CR-067 vocab scope)
+ *   Done       — REMOVE (CR-067 unified vocab; all Done artifacts migrated to Completed)
+ *   Verified   — REMOVE (CR-067 unified vocab; all Verified artifacts migrated to Completed)
+ *   Escalated  — REMOVE (state.json story-state vocab, not artifact status; lives in TERMINAL_STATE_JSON)
+ *   Parking Lot — REMOVE (state.json story-state vocab, not artifact status; lives in TERMINAL_STATE_JSON)
  */
 export const ARTIFACT_TERMINAL_STATUSES = new Set([
-  'Done',
   'Completed',
-  'Verified',
   'Abandoned',
   'Closed',
   'Resolved',
-  'Escalated',
-  'Parking Lot',
 ]);
+
+/**
+ * Canonical single expected status for all artifact gate-checks (post-CR-067).
+ * All per-verb expected[] arrays reference this constant.
+ */
+const ARTIFACT_GATE_EXPECTED = ['Completed'] as const;
 
 /**
  * Verb-to-expected-status map (v1).
@@ -44,11 +55,11 @@ export const ARTIFACT_TERMINAL_STATUSES = new Set([
 export const VERB_STATUS_MAP: Readonly<Record<string, { types: string[]; expected: string[] }>> = {
   feat: {
     types: ['STORY', 'EPIC', 'CR'],
-    expected: ['Done', 'Completed'],
+    expected: [...ARTIFACT_GATE_EXPECTED],
   },
   fix: {
     types: ['BUG', 'HOTFIX'],
-    expected: ['Verified', 'Done', 'Completed'],
+    expected: [...ARTIFACT_GATE_EXPECTED],
   },
 };
 
@@ -306,8 +317,8 @@ export function reconcileLifecycle(opts: ReconcileLifecycleOpts): ReconcileLifec
         let expectedStatuses: string[];
         if (verb === 'feat' && type === 'BUG') {
           // verb mismatch — soft warning, does not block; still check status
-          // Use 'Verified' as expected for BUG even with feat verb
-          expectedStatuses = ['Verified', 'Done', 'Completed'];
+          // Use Completed as expected for BUG even with feat verb (post-CR-067)
+          expectedStatuses = [...ARTIFACT_GATE_EXPECTED];
         } else if (!verbConfig.types.includes(type)) {
           // Type not covered by this verb's map — skip
           continue;
@@ -326,7 +337,7 @@ export function reconcileLifecycle(opts: ReconcileLifecycleOpts): ReconcileLifec
           idToItem.delete(id);
         } else if (!idToItem.has(id)) {
           // New drift item
-          const expectedStr = expectedStatuses[0] ?? 'Done';
+          const expectedStr = expectedStatuses[0] ?? 'Completed';
           idToItem.set(id, {
             id,
             type: type as DriftItem['type'],
