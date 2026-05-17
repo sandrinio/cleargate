@@ -89,17 +89,9 @@ _No active epics._
 ## Planned Epics
 
 
-- [[EPIC-010]] — status: Draft
-
 - [[EPIC-012]] — status: Ready
 
-- [[EPIC-016]] — status: Draft
-
 - [[EPIC-021]] — status: Ready
-
-- [[EPIC-026]] — status: Ready
-
-- [[EPIC-029]] — status: Draft
 
 
 
@@ -122,6 +114,8 @@ _No active epics._
 
 - [[EPIC-009]] — status: Completed
 
+- [[EPIC-010]] — status: Completed
+
 - [[EPIC-011]] — status: Completed
 
 - [[EPIC-013]] — status: Completed
@@ -129,6 +123,8 @@ _No active epics._
 - [[EPIC-014]] — status: Completed
 
 - [[EPIC-015]] — status: Completed
+
+- [[EPIC-016]] — status: Completed
 
 - [[EPIC-018]] — status: Completed
 
@@ -138,7 +134,13 @@ _No active epics._
 
 - [[EPIC-022]] — status: Completed
 
-- [[EPIC-023]] — status: Approved
+- [[EPIC-023]] — status: Completed
+
+- [[EPIC-024]] — status: Completed
+
+- [[EPIC-025]] — status: Completed
+
+- [[EPIC-026]] — status: Completed
 
 - [[EPIC-027]] — status: Approved
 

@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md"
-last_ingest: "2026-05-16T21:01:30.305Z"
+last_ingest: "2026-05-17T23:17:07.149Z"
 last_ingest_commit: "3fb1f34fb57c98d3d27b59712cc5e74c87f524ea"
 repo: "planning"
 ---
