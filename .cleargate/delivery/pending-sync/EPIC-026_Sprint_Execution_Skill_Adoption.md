@@ -3,7 +3,7 @@ epic_id: EPIC-026
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-20
 carry_over: false
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: Direct user ask 2026-05-02 — adopt V-Bounce-style agent-team SKILL pattern; skill drafted at .claude/skills/sprint-execution/SKILL.md during the same conversation; gate-1 waiver per memory feedback_proposal_gate_waiver.md
 proposal_gate_waiver: true
@@ -18,9 +18,11 @@ created_at_version: 174a479
 updated_at_version: 174a479
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-02T17:52:46Z
+  pass: false
+  failing_criteria:
+    - id: gherkin-error-path
+      detail: "'Error' not found in body"
+  last_gate_check: 2026-05-17T23:03:58Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -36,7 +38,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-02T17:52:46Z
+  last_stamp: 2026-05-17T23:03:58Z
   sessions: []
 ---
 
