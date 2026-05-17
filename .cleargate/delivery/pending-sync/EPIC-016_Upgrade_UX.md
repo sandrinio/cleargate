@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-016
-status: Draft
+status: Completed
 approved: true
 approved_at: 2026-04-30T00:00:00Z
 approved_by: sandrinio
@@ -14,9 +14,11 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-04-30T16:29:46Z
+  pass: false
+  failing_criteria:
+    - id: gherkin-error-path
+      detail: "'Error' not found in body"
+  last_gate_check: 2026-05-17T23:03:42Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -25,15 +27,6 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id EPIC-016
-draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-04-24T08:21:25Z
-  sessions: []
 children:
   - "[[STORY-016-01]]"
   - "[[STORY-016-02]]"
@@ -41,6 +34,15 @@ children:
   - "[[STORY-016-04]]"
   - "[[STORY-016-05]]"
   - "[[STORY-016-06]]"
+stamp_error: no ledger rows for work_item_id EPIC-016
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-05-17T23:03:41Z
+  sessions: []
 ---
 
 # EPIC-016: Upgrade UX — Release Notifier, CHANGELOG, Meta-Repo Dogfood
