@@ -1,14 +1,16 @@
 ---
-story_id: STORY-066-01
-role: developer
-sprint_id: SPRINT-28
-dispatched_at: 2026-05-17T20:24:48Z
-returned_at: 2026-05-17T20:41:20Z
-duration_ms: 991905
-status: done
-commit: be1ecf655b62a82ca34d98822c6d0f6b3b12f8d1
-typecheck: pass
-tests: 6 passed, 0 failed (parent-rollup Red suite); full suite 216 passed, 4 failed (pre-existing flaky BUG-029 × 2 + stable CR-043 Red/Green example × 2 — all unrelated to this story)
+story_id: "STORY-066-01"
+role: "developer"
+sprint_id: "SPRINT-28"
+dispatched_at: "2026-05-17T20:24:48Z"
+returned_at: "2026-05-17T20:41:20Z"
+duration_ms: "991905"
+status: "done"
+commit: "be1ecf655b62a82ca34d98822c6d0f6b3b12f8d1"
+typecheck: "pass"
+tests: "6 passed, 0 failed (parent-rollup Red suite); full suite 216 passed, 4 failed (pre-existing flaky BUG-029 × 2 + stable CR-043 Red/Green example × 2 — all unrelated to this story)"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # Developer Report — STORY-066-01

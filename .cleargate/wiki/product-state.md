@@ -6,12 +6,12 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 29 | 0 | 22 |
-| Stories | 170 | 0 | 154 |
+| Epics | 28 | 0 | 24 |
+| Stories | 170 | 0 | 170 |
 | Sprints | 29 | 1 | 26 |
-| Proposals | 14 | 0 | 14 |
+| Proposals | 15 | 0 | 14 |
 | CRs | 64 | 0 | 64 |
-| Bugs | 22 | 0 | 21 |
+| Bugs | 22 | 0 | 22 |
 
 ## Active Epics
 
@@ -26,6 +26,8 @@ _No active epics._
 - [[BUG-002]] (bugs) — Completed
 
 - [[BUG-003]] (bugs) — Completed
+
+- [[BUG-004]] (bugs) — Completed
 
 - [[BUG-005]] (bugs) — Completed
 
@@ -179,19 +181,19 @@ _No active epics._
 
 - [[CR-060]] (crs) — Completed
 
-- [[CR-061]] (crs) — Approved
+- [[CR-061]] (crs) — Completed
 
-- [[CR-062]] (crs) — Approved
+- [[CR-062]] (crs) — Completed
 
-- [[CR-063]] (crs) — Approved
+- [[CR-063]] (crs) — Completed
 
-- [[CR-064]] (crs) — Approved
+- [[CR-064]] (crs) — Completed
 
-- [[CR-065]] (crs) — Approved
+- [[CR-065]] (crs) — Completed
 
-- [[CR-066]] (crs) — Approved
+- [[CR-066]] (crs) — Completed
 
-- [[CR-067]] (crs) — Approved
+- [[CR-067]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 
@@ -213,6 +215,8 @@ _No active epics._
 
 - [[EPIC-009]] (epics) — Completed
 
+- [[EPIC-010]] (epics) — Completed
+
 - [[EPIC-011]] (epics) — Completed
 
 - [[EPIC-013]] (epics) — Completed
@@ -233,9 +237,11 @@ _No active epics._
 
 - [[EPIC-025]] (epics) — Completed
 
-- [[EPIC-027]] (epics) — Approved
+- [[EPIC-026]] (epics) — Completed
 
-- [[EPIC-028]] (epics) — Approved
+- [[EPIC-027]] (epics) — Completed
+
+- [[EPIC-028]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 
@@ -622,6 +628,38 @@ _No active epics._
 - [[STORY-026-01]] (stories) — Completed
 
 - [[STORY-026-02]] (stories) — Completed
+
+- [[STORY-027-01]] (stories) — Completed
+
+- [[STORY-027-02]] (stories) — Completed
+
+- [[STORY-027-03]] (stories) — Completed
+
+- [[STORY-027-04]] (stories) — Completed
+
+- [[STORY-027-05]] (stories) — Completed
+
+- [[STORY-028-01]] (stories) — Completed
+
+- [[STORY-028-04]] (stories) — Completed
+
+- [[STORY-028-05]] (stories) — Completed
+
+- [[STORY-028-06]] (stories) — Completed
+
+- [[STORY-028-07]] (stories) — Completed
+
+- [[STORY-028-08]] (stories) — Completed
+
+- [[STORY-066-01]] (stories) — Completed
+
+- [[STORY-066-02]] (stories) — Completed
+
+- [[STORY-067-01]] (stories) — Completed
+
+- [[STORY-067-02]] (stories) — Completed
+
+- [[STORY-067-03]] (stories) — Completed
 
 - [[STORY-099-01]] (stories) — Completed
 

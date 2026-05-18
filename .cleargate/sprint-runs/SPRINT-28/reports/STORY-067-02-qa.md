@@ -1,10 +1,12 @@
 ---
-story_id: STORY-067-02
-report_type: qa-verify
-author: qa-agent
-date: 2026-05-18
-sprint_id: SPRINT-28
-commit_sha: 75567a63
+story_id: "STORY-067-02"
+report_type: "qa-verify"
+author: "qa-agent"
+date: "2026-05-18"
+sprint_id: "SPRINT-28"
+commit_sha: "75567a63"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report — STORY-067-02

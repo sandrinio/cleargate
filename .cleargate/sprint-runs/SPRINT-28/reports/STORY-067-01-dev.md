@@ -1,14 +1,16 @@
 ---
-story_id: STORY-067-01
-role: developer
-sprint_id: SPRINT-28
-dispatched_at: 2026-05-17T20:26:51Z
-returned_at: 2026-05-17T20:43:39Z
-duration_ms: 1007891
-status: done
-commit: 795b7c43
-typecheck: pass
-tests: 234 passed, 1 failed (pre-existing BUG-029 Red test — parallel-dispatch.red.node.test.ts — unrelated)
+story_id: "STORY-067-01"
+role: "developer"
+sprint_id: "SPRINT-28"
+dispatched_at: "2026-05-17T20:26:51Z"
+returned_at: "2026-05-17T20:43:39Z"
+duration_ms: "1007891"
+status: "done"
+commit: "795b7c43"
+typecheck: "pass"
+tests: "234 passed, 1 failed (pre-existing BUG-029 Red test — parallel-dispatch.red.node.test.ts — unrelated)"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # Developer Report — STORY-067-01

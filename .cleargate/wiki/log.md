@@ -1650,3 +1650,8 @@
   action: "create"
   target: "SPRINT-29"
   path: ".cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md"
+- timestamp: "2026-05-18T17:10:44.847Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-28"
+  path: ".cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md"

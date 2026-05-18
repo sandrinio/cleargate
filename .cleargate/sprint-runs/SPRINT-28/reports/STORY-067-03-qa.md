@@ -1,11 +1,14 @@
 ---
-story_id: STORY-067-03
-qa_agent: claude-sonnet-4-6
-verdict: PASS
-timestamp: 2026-05-18T00:00:00Z
-lane: fast
-pack_present: false
-pack_warn: WARN — QA context pack absent; proceeded via worktree direct inspection. Confidence: standard.
+story_id: "STORY-067-03"
+qa_agent: "claude-sonnet-4-6"
+verdict: "PASS"
+timestamp: "2026-05-18T00:00:00Z"
+lane: "fast"
+pack_present: "false"
+pack_warn: "WARN — QA context pack absent; proceeded via worktree direct inspection. Confidence: standard."
+sprint_id: "SPRINT-28"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA Report — STORY-067-03

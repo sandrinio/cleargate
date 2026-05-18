@@ -1,11 +1,13 @@
 ---
-story_id: STORY-066-02
-role: developer
-sprint_id: SPRINT-28
-status: done
-commit: 7fba2e5b
-typecheck: pass
-tests: 15 passed (9 close-sprint + 6 CLI); full suite 306 passed / 2 failed (pre-existing STORY-028-04 codemod fixture-glob failures, no new regressions)
+story_id: "STORY-066-02"
+role: "developer"
+sprint_id: "SPRINT-28"
+status: "done"
+commit: "7fba2e5b"
+typecheck: "pass"
+tests: "15 passed (9 close-sprint + 6 CLI); full suite 306 passed / 2 failed (pre-existing STORY-028-04 codemod fixture-glob failures, no new regressions)"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # Developer Report — STORY-066-02

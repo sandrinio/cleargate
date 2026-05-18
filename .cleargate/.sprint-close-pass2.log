@@ -1,0 +1,51 @@
+Step 1-2 passed: all 13 stories are terminal.
+Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.
+Step 2.6: running lifecycle reconciliation...
+lifecycle: DRIFT detected (22 unreconciled artifacts):
+  DRIFT: EPIC-028 status=missing in archive, expected Completed (commit aa94b9f28a410cd22bf18ea07f8017abdc5f0c39)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/EPIC-028_Vitest_Elimination.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-028-08 status=missing in archive, expected Completed (commit aa94b9f28a410cd22bf18ea07f8017abdc5f0c39)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-028-08_Docs_And_Flashcard_Cleanup.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-028-07 status=missing in archive, expected Completed (commit ca83092019ee1d3e605cd0f19d12bd3f46a3c14a)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-028-07_Admin_Vitest_Conversion.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-028-06 status=missing in archive, expected Completed (commit 8cd03a4a60071d05e1440eaf5002b2cb944bdb23)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-028-06_Cli_Vitest_Conversion.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-067 status=missing in archive, expected Completed (commit 1a3234d0820f050b7049f76c8ac04b88e7a6cc4e)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-067_Unify_Status_Vocabulary_To_Completed.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-067-03 status=missing in archive, expected Completed (commit 1a3234d0820f050b7049f76c8ac04b88e7a6cc4e)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-067-03_Tighten_Terminal_And_Adapter_Map.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-028-05 status=missing in archive, expected Completed (commit 0ba97261234dcee7c4678a73d55338ca92408174)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-028-05_Mcp_Vitest_Conversion.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-066 status=missing in archive, expected Completed (commit 19f164080a0cd971e116ca775f86519d84d0bc07)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-066_Sprint_Close_Reconciles_Parent_Statuses.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-066-02 status=missing in archive, expected Completed (commit 19f164080a0cd971e116ca775f86519d84d0bc07)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-066-02_Sprint_Close_And_CLI_Wiring.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-067-02 status=missing in archive, expected Completed (commit 75567a633f98fbec90a00c738c45aac00a75400b)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-067-02_Archive_Migration_And_Templates.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-028-04 status=missing in archive, expected Completed (commit 452d27177c5135ff3f64fe6f175f2ed92a93055b)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-028-04_Vitest_Codemod_Tool.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-067-01 status=missing in archive, expected Completed (commit 795b7c430ed22feb74b4975b85a83a51b1531d83)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-067-01_Migration_Script_And_Tests.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-066-01 status=missing in archive, expected Completed (commit be1ecf655b62a82ca34d98822c6d0f6b3b12f8d1)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-066-01_Parent_Rollup_Lib.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: BUG-004 status=missing in archive, expected Completed (commit ee820eb08c0bbbede3d366dd35a1b4929d6a926d)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: EPIC-027 status=missing in archive, expected Completed (commit 247b3809e1c33b6b0834423b083ae82ba51c135b)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/EPIC-027_MCP_Type_Agnostic_Sync_And_Universal_Payload.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-064 status=missing in archive, expected Completed (commit 247b3809e1c33b6b0834423b083ae82ba51c135b)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-064_Sync_Sprint_Plans_And_Reports_To_MCP.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-061 status=missing in archive, expected Completed (commit 2d47137f5ff20862dca9db56bda06fea2641b223)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-061_Token_Modal_Connection_Instructions.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-027-03 status=missing in archive, expected Completed (commit e50869a36358ee6345f2354e9b074f9f39f65c00)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-027-03_Origin_Gate_Policy_Split_Idempotent_Prefix.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-062 status=missing in archive, expected Completed (commit 1f5cb1f48d40d19c5febc9fc3c6fe8cdf332004f)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-062_Resend_Invite_From_Members_List.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-063 status=missing in archive, expected Completed (commit 0d01b32854c41f46c389d80166858baccc6637df)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-063_Ingest_Sprint_Reports_Into_Wiki.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: CR-065 status=missing in archive, expected Completed (commit 974a947c13c836ba71797972017d9d5e3b52cb56)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/CR-065_MCP_Serve_Service_Token_Auth.md .cleargate/delivery/archive/ && update status: Completed
+  DRIFT: STORY-027-05 status=missing in archive, expected Completed (commit 8e053c5a9e629a12956516dbd6a365dd36ef6c84)
+    Remediation: git mv .cleargate/delivery/pending-sync/archive/STORY-027-05_Docs_And_CI_No_PM_SDK_Rule.md .cleargate/delivery/archive/ && update status: Completed
+close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.
+  Remediate the listed artifacts and re-run close_sprint.mjs.
+  To carry over an artifact: set carry_over: true in its frontmatter.
