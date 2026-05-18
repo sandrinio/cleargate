@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.12.0",
-  "generated_at": "2026-05-17T23:04:32.815Z",
+  "generated_at": "2026-05-18T08:07:54.764Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
@@ -39,7 +39,7 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "36f75fe9f8dc8412eb22706dfd021f5db5694c81d73e0c938e701a83c0149126",
+      "sha256": "db7963778d68654f2dc96658d60433fa79305a10eec937807f2f0ed0cd05ce89",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -74,7 +74,7 @@
     },
     {
       "path": ".claude/hooks/pre-commit-surface-gate.sh",
-      "sha256": "6741422cd8ca75b45e26bd0e9cb54126ad9e933f763c9094ceba6b84794b761a",
+      "sha256": "8dd817fbe75ee53753e2fe1fc2ccd2b6efdb2b3c0b6ad3191bebd9640afdd6f8",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
