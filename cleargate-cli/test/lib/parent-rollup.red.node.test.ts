@@ -19,7 +19,7 @@
  * *.red.node.test.ts naming is immutable after QA-Red approval.
  */
 
-import { describe, it, before, after } from 'node:test';
+import { describe, it, test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -152,6 +152,58 @@ describe('rollUpParentStatus — Scenario 5: already-terminal parent', () => {
     assert.strictEqual(result.verdict, 'no-op');
     assert.strictEqual(result.proposed_status, null);
   });
+});
+
+// ─── HOTFIX-066: extractId() handles all 4 ID-key conventions ────────────────
+// Additive test added by HOTFIX-066 (Developer) — not part of QA-Red scope.
+// Exercises the `epic_id`, `sprint_id`, `bug_id`, and `cr_id` frontmatter keys
+// via the public rollUpParentStatus() surface (extractId() is private).
+// Each sub-test writes a minimal parent file and asserts that parent_id in the
+// returned RollupResult equals the frontmatter ID value — proving extractId()
+// resolved the correct key instead of falling back to the filename stem.
+
+test("extractId() handles all 4 ID-key conventions", async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'extractid-conv-'));
+  const pendingDir = path.join(tmpDir, 'pending-sync');
+  const archiveDir = path.join(tmpDir, 'archive');
+  fs.mkdirSync(pendingDir, { recursive: true });
+  fs.mkdirSync(archiveDir, { recursive: true });
+
+  try {
+    const cases: Array<{ key: string; value: string; filename: string }> = [
+      { key: 'epic_id',       value: 'EPIC-042',        filename: 'EPIC-042_Some_Epic.md' },
+      { key: 'sprint_id',     value: 'SPRINT-99',       filename: 'SPRINT-99_Some_Sprint.md' },
+      { key: 'bug_id',        value: 'BUG-007',         filename: 'BUG-007_Some_Bug.md' },
+      { key: 'cr_id',         value: 'CR-100',          filename: 'CR-100_Some_CR.md' },
+    ];
+
+    for (const { key, value, filename } of cases) {
+      const filePath = path.join(pendingDir, filename);
+      fs.writeFileSync(
+        filePath,
+        ['---', `${key}: "${value}"`, 'status: Completed', '---', ''].join('\n')
+      );
+
+      const result = await rollUpParentStatus(filePath, {
+        deliveryRoot: tmpDir,
+        archiveRoot: archiveDir,
+      });
+
+      assert.strictEqual(
+        result.parent_id,
+        value,
+        `extractId() with key "${key}": expected parent_id="${value}" but got "${result.parent_id}"`
+      );
+      // Already-terminal (Completed) → verdict should be no-op
+      assert.strictEqual(
+        result.verdict,
+        'no-op',
+        `Already-terminal parent (${value}) should yield no-op but got "${result.verdict}"`
+      );
+    }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
 });
 
 // ─── Scenario 6: Sub-epic cycle detection (§1.5 risk #1) ─────────────────────
