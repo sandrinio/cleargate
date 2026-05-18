@@ -5,7 +5,7 @@ parent_cleargate_id: CR-061
 sprint_cleargate_id: null
 carry_over: false
 area: cli,auth
-status: Approved
+status: Completed
 approved: true
 created_at: 2026-05-14T00:00:00Z
 updated_at: 2026-05-14T00:00:00Z

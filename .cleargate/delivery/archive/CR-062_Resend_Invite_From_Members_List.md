@@ -5,7 +5,7 @@ parent_cleargate_id: STORY-006-04
 sprint_cleargate_id: SPRINT-27
 carry_over: false
 area: admin-console
-status: Approved
+status: Completed
 approved: true
 context_source: "Direct human ask 2026-05-06 surfaced two member-management gaps: (a) no way to resend an invite if the original email was lost; (b) invite emails not actually sent (mailer wired but not invoked from invite-create route). Approved 2026-05-14 with 4 §0.5 Qs resolved at Gate-1 ack. Mailer consumer pattern already exists in magic-link-provider; this CR adds a second consumer using the same Mailer interface."
 created_at: 2026-05-06T00:00:00Z

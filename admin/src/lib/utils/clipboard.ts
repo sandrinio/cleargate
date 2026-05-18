@@ -13,11 +13,20 @@
  */
 
 /**
+ * Test-time override for copyToClipboard. Set to a mock function in tests.
+ * STORY-028-07: supports per-test override via __clipboardOverride__.
+ */
+export const __clipboardOverride__: { fn?: (text: string) => Promise<boolean> } = {};
+
+/**
  * Copy text to the clipboard.
  * Uses navigator.clipboard if available; falls back to textarea execCommand.
  * Returns true on success, false on failure.
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
+  if (__clipboardOverride__.fn) {
+    return __clipboardOverride__.fn(text);
+  }
   // Primary path: Clipboard API (requires HTTPS or localhost)
   if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
     try {

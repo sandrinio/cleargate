@@ -4,20 +4,16 @@
 
 ## Active
 
-- [[EPIC-010]] (epic) — Draft
-  - [[STORY-010-02]] (story) — Draft
 - [[EPIC-012]] (epic) — Ready
-- [[EPIC-016]] (epic) — Draft
 - [[EPIC-021]] (epic) — Ready
-- [[EPIC-023]] (epic) — Approved
-- [[EPIC-026]] (epic) — Ready
 - [[EPIC-027]] (epic) — Approved
   - STORY-027-xx (5 stories) — 5 Approved
 - [[EPIC-028]] (epic) — Approved
+  - STORY-028-xx (5 stories) — 5 Draft
 - [[SPRINT-07]] (sprint) — Planned
 - [[SPRINT-16]] (sprint) — Approved
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-28]] (sprint) — Approved
+- [[SPRINT-28]] (sprint) — Active
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
@@ -29,29 +25,23 @@
 - [[CR-065]] (cr) — Approved
 - [[CR-066]] (cr) — Approved
 - [[CR-067]] (cr) — Approved
-- [[BUG-002]] (bug) — Verified
-- [[BUG-003]] (bug) — Verified
-- [[BUG-004]] (bug) — Draft
-- [[BUG-005]] (bug) — Verified
-- [[BUG-007]] (bug) — Verified
-- [[BUG-008]] (bug) — Verified
-- [[BUG-009]] (bug) — Verified
-- [[BUG-010]] (bug) — Verified
-- [[BUG-017]] (bug) — Verified
-- [[BUG-018]] (bug) — Verified
-- [[BUG-019]] (bug) — Verified
-- [[BUG-020]] (bug) — Verified
-- [[BUG-022]] (bug) — Verified
+- [[BUG-004]] (bug) — Approved
 - [[BUG-030]] (bug) — Triaged
+- [[STORY-028-01]] (story) — Approved
+- [[STORY-066-01]] (story) — Draft
+- [[STORY-066-02]] (story) — Draft
+- [[STORY-067-01]] (story) — Draft
+- [[STORY-067-02]] (story) — Draft
+- [[STORY-067-03]] (story) — Draft
 
 ## Archive
 
-- Epics: 16 Completed · 2 Abandoned · 2 Done · [expand](archive/epics.md)
+- Epics: 22 Completed · 2 Abandoned · [expand](archive/epics.md)
 - Sprints: 24 Completed · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 40 Done · 16 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 6 Done · 1 Abandoned · 1 Completed · [expand](archive/bugs.md)
-- Stories: 69 Completed · 53 Done · 31 Abandoned · [expand](archive/stories.md)
+- CRs: 56 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 19 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- Stories: 123 Completed · 31 Abandoned · [expand](archive/stories.md)
 
 ## Contradictions
 
@@ -59,21 +49,9 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-029]] | cr | Abandoned | .cleargate/delivery/pending-sync/CR-029_Engine_Vitest_To_NodeTest.md |
-| [[CR-066]] | cr | Approved | .cleargate/delivery/pending-sync/CR-066_Sprint_Close_Reconciles_Parent_Statuses.md |
-| [[CR-067]] | cr | Approved | .cleargate/delivery/archive/CR-067_Unify_Status_Vocabulary_To_Completed.md |
 ## Epics
 
-| [[EPIC-028]] | epic | Approved | .cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md |
+| [[EPIC-029]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
 ## Sprints
 
-| [[SPRINT-28]] | sprint | Approved | .cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md |
-## Bugs
-
-| [[BUG-004]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-004_Scaffold_Wiki_Lint_Agent_YAML_Backtick.md |
-## Stories
-
-| [[STORY-010-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-010-02_MCP_Pull_And_List_Endpoints.md |
-| [[STORY-028-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-028-01_Reconciliation_Harvest_Pass.md |
+| [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |

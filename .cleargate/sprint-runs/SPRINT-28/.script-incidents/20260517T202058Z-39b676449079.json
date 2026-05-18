@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-17T20:20:58Z",
+  "command": "tsx",
+  "args": ["--test",".worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 127,
+  "stdout": "",
+  "stderr": ".cleargate/scripts/run_script.sh: line 92: tsx: command not found",
+  "agent_type": null,
+  "work_item_id": null
+}

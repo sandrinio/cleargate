@@ -1,12 +1,29 @@
 /**
- * $app/navigation stub for vitest unit tests.
- * SvelteKit's $app/navigation is not available in jsdom; this stub
- * provides no-op implementations so components that import it can be tested.
+ * $app/navigation stub for unit tests.
  *
- * Note: tests that need to assert beforeNavigate behaviour should mock this
- * module via vi.mock('$app/navigation', ...) in their test file.
+ * STORY-028-07: Updated to support per-test overrides via __overrides__.
+ * Tests can set __overrides__.goto = mock.fn() before rendering a component.
+ *
+ * Usage in test:
+ *   import { __overrides__ } from '../../src/lib/__mocks__/app-navigation.ts';
+ *   beforeEach(() => { __overrides__.goto = mock.fn(); });
+ *   afterEach(() => { __overrides__.goto = undefined; });
+ *   // assert on __overrides__.goto.mock.calls
  */
-export function beforeNavigate(_fn: (navigation: { cancel: () => void }) => void): void {
+
+type NavCallback = (nav: { cancel: () => void }) => void;
+
+export const __overrides__: {
+  goto?: (...args: unknown[]) => unknown;
+  beforeNavigate?: (...args: unknown[]) => unknown;
+  goto_mock_fn?: unknown;
+} = {};
+
+export function beforeNavigate(fn: NavCallback): void {
+  if (__overrides__.beforeNavigate) {
+    __overrides__.beforeNavigate(fn);
+    return;
+  }
   // no-op in unit test environment
 }
 
@@ -14,7 +31,11 @@ export function afterNavigate(_fn: () => void): void {
   // no-op in unit test environment
 }
 
-export async function goto(_url: string, _opts?: unknown): Promise<void> {
+export async function goto(url: string, opts?: unknown): Promise<void> {
+  if (__overrides__.goto) {
+    await (__overrides__.goto as (url: string, opts?: unknown) => unknown)(url, opts);
+    return;
+  }
   // no-op in unit test environment
 }
 

@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: cli,sprint-close,reconciler
-status: Approved
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-05-17T00:00:00Z

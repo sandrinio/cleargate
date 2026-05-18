@@ -1,7 +1,8 @@
 ---
 sprint_id: "SPRINT-16"
+carry_over: true
 source_tool: "local"
-status: "Approved"
+status: Abandoned
 start_date: "2026-05-13"
 end_date: "2026-05-26"
 created_at: "2026-04-29T00:00:00Z"

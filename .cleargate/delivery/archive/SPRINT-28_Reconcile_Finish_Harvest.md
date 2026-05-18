@@ -6,11 +6,11 @@ carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: local
-status: Approved
+status: Active
 approved: true
 approved_by: sandrinio
 approved_at: 2026-05-17T00:00:00Z
-activated_at: null
+activated_at: 2026-05-17T16:45:00Z
 completed_at: null
 execution_mode: v2
 start_date: 2026-05-19
@@ -143,72 +143,125 @@ Ship three foundations (CR-066 parent reconciliation, CR-067 vocab unification, 
 - **CR-029**: abandoned 2026-05-17 (superseded by EPIC-028).
 - **Full SPRINT-01..24 backfill push to MCP**: separate CR.
 
-## 2. Execution Strategy (to be locked at Architect SDR)
+## 2. Execution Strategy (LOCKED at Architect SDR — 2026-05-17)
 
-> Conversational-agent proposal — Architect SDR replaces this section with binding waves at sprint init. v2 mode.
+> SDR Phase A.4 binding output. SPRINT-28 in-scope IDs (10 new stories drafted + 3 existing): STORY-066-01, STORY-066-02, STORY-067-01, STORY-067-02, STORY-067-03, STORY-028-04, STORY-028-05, STORY-028-06, STORY-028-07, STORY-028-08, STORY-010-02, STORY-028-01, BUG-004. v2 execution mode.
 
-### 2.1 Phase Plan (proposed)
+### 2.1 Phase Plan
 
-Three waves. v2 mode; Wave 1 + Wave 2 run partially parallel (disjoint surfaces).
+Three waves. Wave 1 runs three foundation tracks in parallel; Wave 2 applies the foundations sequentially within each track but parallel-safe across tracks; Wave 3 dogfoods + tightens + closes the sprint.
 
-**Wave 1 — Foundation libs** (parallel-safe; 3 tracks):
-- **Track A:** CR-066 — `rollUpParentStatus()` lib + tests + sub-epic recursion + zero-children skip.
-- **Track B:** CR-067 — migration script `migrate-status-to-completed.mjs` + tests; template + gate-check updates queued (not applied until Wave 2's archive migration runs).
-- **Track C:** EPIC-028 — codemod tool `codemod-vitest-to-node-test.mjs` + golden-fixture tests.
+**Wave 1 — Foundation libs (parallel-safe across all four tracks):**
 
-**Wave 2 — Apply foundations** (parallel-safe within track; sequential within each track):
-- **Track A:** CR-066 — close_sprint.mjs Step 2.6c insert; `cleargate sprint reconcile-lifecycle --parents` flag. Depends on Wave 1A complete.
-- **Track B:** CR-067 — Phase B archive migration (~113 items rewritten in one commit). Depends on Wave 1B + a tightening lock against concurrent push during the migration window.
-- **Track C:** EPIC-028 — three per-package conversion stories run in series (mcp/ first, cleargate-cli/ second, admin/ third). Each story includes config-delete + package.json cleanup.
+- **Track A (CR-066 lib):** `STORY-066-01` — `parent-rollup.ts` library + 5 fixture-shape tests. `parallel_eligible: y`. `lane: standard`. Predecessor for STORY-066-02 only.
+- **Track B (CR-067 script):** `STORY-067-01` — `migrate-status-to-completed.mjs` + 6 fixture tests + push.ts lock-check edit. `parallel_eligible: y`. `lane: standard`. Predecessor for STORY-067-02 only.
+- **Track C (EPIC-028 codemod):** `STORY-028-04` — vitest→node:test codemod tool + 6 golden-fixture tests. `parallel_eligible: y`. `lane: standard`. Predecessor for STORY-028-05/-06/-07.
+- **Track D (EPIC-010 closeout):** `STORY-010-02` — four new MCP endpoints + generic `PmAdapter` interface. `parallel_eligible: y`. `lane: standard`. Independent of all foundations (disjoint surface = `mcp/src/endpoints/` + `mcp/src/adapters/`).
+- **Fast lane (any wave):** `BUG-004` — single-line backtick fix in `cleargate-wiki-lint.md` + widen `assertMdFilesParseClean` scope. `lane: fast`. Can run in Wave 1 or any later wave.
 
-**Wave 3 — Dogfood + tighten + finish** (parallel-safe across all tracks):
-- **STORY-028-01** — runs CR-066's harvest against the 6 stale Epics (depends on Wave 2A).
-- **CR-067 Phase C** — tighten `TERMINAL_STATUSES = ['Completed']` (depends on Wave 2A AND Wave 2B; one-line edit guarded by CR-067 final story).
-- **STORY-010-02** — independent; can run any wave (mcp/ endpoints surface). Architect may schedule in Wave 1 if Developer capacity permits.
-- **BUG-004** — fast lane; any wave.
-- **EPIC-028 docs story** — last; after all 3 per-package batches land.
+**Wave 2 — Apply foundations (sequential within each track; parallel-safe across tracks):**
+
+- **Track A → STORY-066-02** — close_sprint.mjs Step 2.6c insert + `--parents` CLI flag. Mirror parity in both close_sprint.mjs copies. Predecessor: STORY-066-01 merged + `npm run build` in cleargate-cli/ regenerates `dist/`.
+- **Track B → STORY-067-02** — Phase B archive migration application + 8 templates updated (live + canonical) + prebuild verifies npm payload. Predecessor: STORY-067-01 merged. **Lock discipline:** orchestrator MUST NOT dispatch any `cleargate push` agent during this story's execution window (per Cross-Cutting Rule 4).
+- **Track C → STORY-028-05, STORY-028-06, STORY-028-07 (serial within track, but track is parallel with A/B):**
+  - STORY-028-05 (mcp/, 50 files) → STORY-028-06 (cleargate-cli/, 138 files) → STORY-028-07 (admin/, 34 files, preflight-gated for svelte compat).
+  - Order is intentional: mcp/ flushes mock patterns first (smallest); cli/ second (largest, mostly DI); admin/ last (highest-risk preflight).
+
+**Wave 3 — Dogfood + tighten + finish:**
+
+- **STORY-028-01** (CR-066 dogfood harvest, `lane: fast`, `parallel_eligible: n`) — Predecessor: STORY-066-02 merged. Runs CR-066's `--parents` audit against the six stale Epics; commits auto-flips; captures halt-list. **Must complete BEFORE SPRINT-28's own close** (Cross-Cutting Rule 6) or Step 2.6c will halt close on EPIC-010 / EPIC-021 / EPIC-023.
+- **STORY-067-03** (`lane: fast`, `parallel_eligible: n`) — Tighten `ARTIFACT_TERMINAL_STATUSES` to `{Completed}` + adapter README. Predecessors: STORY-067-02 merged (archive clean) AND STORY-066-02 merged (reconciler still passes against tightened set). Runs AFTER STORY-066-01's parent-rollup tests have proven the lib works with the tolerant set; tightening here closes the migration window.
+- **STORY-028-08** (`lane: fast`) — Docs + agent prompts + FLASHCARD + no-vitest pre-commit guard. Predecessor: STORY-028-05/-06/-07 all merged. Last story of EPIC-028.
+
+**Parallelization matrix (Wave-internal):**
+
+| Wave | Concurrent stories (safe to dispatch in same window) |
+|------|------------------------------------------------------|
+| 1 | STORY-066-01 ∥ STORY-067-01 ∥ STORY-028-04 ∥ STORY-010-02 ∥ BUG-004 |
+| 2 | STORY-066-02 ∥ STORY-067-02 ∥ (STORY-028-05 → -06 → -07 serial within track) |
+| 3 | STORY-028-01 → STORY-067-03 → STORY-028-08 (strict serial; each predecessor blocks the next) |
 
 ### 2.2 Merge Ordering — Shared-File Surface
 
+Every file touched by more than one in-scope story. Order column reflects the wave/story landing sequence.
+
 | Shared File | Stories | Order | Rationale |
 |---|---|---|---|
-| `cleargate-cli/src/lib/lifecycle-reconcile.ts` | CR-066 (re-export `rollUpParentStatus` + TERMINAL_STATUSES read-tolerance) + CR-067 (tighten TERMINAL_STATUSES to `['Completed']`) | **CR-066 first → CR-067 tighten last** | CR-066's reconciler must tolerate `{Done, Verified, Completed}` during the CR-067 migration window. CR-067's Phase C is the only story that touches the TERMINAL_STATUSES literal. |
-| `cleargate-cli/src/lib/parent-rollup.ts` (NEW) | CR-066 | (single) | New file. |
-| `cleargate-cli/scripts/migrate-status-to-completed.mjs` (NEW) | CR-067 | (single) | New file. |
-| `cleargate-cli/scripts/codemod-vitest-to-node-test.mjs` (NEW) | EPIC-028 | (single) | New file. |
-| `.cleargate/scripts/close_sprint.mjs` + mirror | CR-066 (Step 2.6c insert) | (single, both mirrors) | Mirror-parity per FLASHCARD `#scaffold #mirror`. |
-| `cleargate-cli/src/commands/sprint.ts` | CR-066 (`--parents` flag on `reconcileLifecycleHandler`) | (single, additive) | One handler, additive flag. |
-| `.cleargate/templates/*.md` (8 artifact templates) + mirrors | CR-067 | (single batch, all mirrors) | Status enum guidance update; all 8 templates in one commit. |
-| `cleargate-cli/src/lib/gate/*.ts` | CR-067 | (single batch) | Terminal-state checks consolidate to `Completed`. |
-| `cleargate-cli/test/**/*.test.ts` + `*.spec.ts` | EPIC-028 cleargate-cli/ story | (single) | 138-file batch; one commit. |
-| `mcp/test/**/*.test.ts` | EPIC-028 mcp/ story | (single) | 50-file batch; one commit. |
-| `admin/src/**/*.test.ts` + `admin/test/**/*.test.ts` | EPIC-028 admin/ story | (single) | 34-file batch; one commit. |
-| `mcp/package.json` + `cleargate-cli/package.json` + `admin/package.json` | EPIC-028 (vitest dep removal per-package) | (folded into each per-package story) | Same commit as the file conversions for that package. |
-| `mcp/vitest.config.ts` + `cleargate-cli/vitest.config.ts` + `admin/vitest.config.ts` | EPIC-028 (DELETE per-package) | (folded into each per-package story) | Same commit. |
-| `CLAUDE.md` + `cleargate-planning/CLAUDE.md` | EPIC-028 docs story | (single, both mirrors) | Remove "two-runner" language; add "node:test only" rule. |
-| `cleargate-planning/.claude/agents/developer.md` | EPIC-028 docs story | (single, canonical only — prebuild regenerates derived) | Test-runner section update. |
+| `cleargate-cli/src/lib/lifecycle-reconcile.ts` | STORY-066-01 (re-export `rollUpParentStatus`+`walkActiveParents`) → STORY-067-03 (tighten ARTIFACT_TERMINAL_STATUSES + expected[] literals at lines 47/51/309/329) | -01 first, -067-03 last | -01 is additive (re-export); -067-03 mutates the constant. Sequencing keeps the tolerant set live during the migration window. |
+| `cleargate-cli/src/commands/sprint.ts` | STORY-066-02 (`--parents` flag on reconcileLifecycleHandler) | (single) | Additive option; no other in-scope story touches this handler. |
+| `cleargate-cli/src/commands/push.ts` | STORY-067-01 (`.migration-lock` check before frontmatter writes) | (single) | Top-of-handler guard; no other in-scope story modifies push. |
+| `.cleargate/scripts/close_sprint.mjs` + `cleargate-planning/.cleargate/scripts/close_sprint.mjs` (mirror pair) | STORY-066-02 (Step 2.6c insert) | (single, both files in same commit) | Mirror-parity per FLASHCARD `#mirror #parity` (2026-05-04). `diff` must return empty post-commit. |
+| `.cleargate/templates/{story,Bug,CR,epic,initiative,Sprint Plan Template,sprint_report,hotfix}.md` + `cleargate-planning/.cleargate/templates/*` (8 + 8 = 16 files) | STORY-067-02 | (single batch — all 16 in one commit) | Status-enum guidance update + npm payload regenerated via prebuild. |
+| `mcp/src/adapters/README.md` | STORY-010-02 (creates file) → STORY-067-03 (appends Status Vocabulary Mapping section) | -010-02 first, -067-03 appends | -010-02 owns the file shape; -067-03 adds the mapping table. Per STORY-067-03 §1.5: if -010-02 has not yet shipped at -067-03 dispatch, -067-03 creates the file from scratch with the mapping section. |
+| `mcp/package.json` | STORY-028-05 (remove vitest devDep + scripts) + STORY-010-02 (potentially add `js-yaml` per FLASHCARD `#mcp #deps`) + STORY-028-08 (add `check:no-vitest` script) | -010-02 first → -028-05 second → -028-08 last | -010-02 in Wave 1 (additive); -028-05 in Wave 2 (subtractive); -028-08 in Wave 3 (additive script only). |
+| `cleargate-cli/package.json` | STORY-028-04 (add ts-morph devDep, Wave 1) → STORY-028-06 (remove vitest devDep + scripts, Wave 2) → STORY-028-08 (add `check:no-vitest` script, Wave 3) | -028-04 → -028-06 → -028-08 | Each is a different edit region; no semantic collision. |
+| `admin/package.json` | STORY-028-07 (remove vitest devDep + scripts, KEEP @testing-library/svelte) + STORY-028-08 (add `check:no-vitest` script) | -028-07 → -028-08 | Sequential by wave. |
+| `mcp/vitest.config.ts`, `cleargate-cli/vitest.config.ts`, `admin/vitest.config.ts` | STORY-028-05 / -06 / -07 (DELETE each in its package's commit) | (per-package, in each Wave-2/-3 commit) | One DELETE per file, fold into the per-package conversion commit. |
+| `CLAUDE.md` + `cleargate-planning/CLAUDE.md` (mirror pair) | STORY-028-08 (single edit) | (single, both files in same commit) | Mirror-parity. No other in-scope story touches CLAUDE.md. |
+| `cleargate-planning/.claude/agents/developer.md` | STORY-028-08 (canonical only — live is gitignored per FLASHCARD `#mirror #dogfood-split`) | (single) | PR description carries `cleargate init` re-sync reminder. |
+| `.cleargate/FLASHCARD.md` | STORY-028-08 (one new line at top) | (single) | Append-only log; newest entry at top. |
+| `.claude/hooks/pre-commit-surface-gate.sh` | STORY-028-08 (insert no-vitest grep line BEFORE the `exec` line per FLASHCARD `#pre-commit #stub-extension`) | (single) | Single-line addition. |
+| `cleargate-cli/test/**/*.{test,spec}.ts` | STORY-028-06 (138-file conversion + rename to `*.node.test.ts`) | (single commit) | Atomic per-package. |
+| `mcp/test/**/*.test.ts` | STORY-028-05 (50-file conversion + rename) | (single commit) | Atomic per-package. |
+| `admin/src/**/*.test.ts` + `admin/test/**/*.test.ts` | STORY-028-07 (34-file conversion + rename, preflight-gated) | (single commit) | Atomic per-package. |
+| `.cleargate/delivery/{pending-sync,archive}/**/*.md` (frontmatter bulk rewrites, ~113 items) | STORY-067-02 (one dedicated commit) | (single bulk commit) | `.migration-lock` enforces serialization with concurrent push. |
+| `.cleargate/delivery/pending-sync/EPIC-*.md` (status flips at harvest) | STORY-028-01 (one or more frontmatter `status:` rewrites for auto-flipped epics) | (single commit, post-Wave-2A) | Mutated via STORY-066-02's reconciler write path; orchestrator runs the apply step. |
 
 ### 2.3 Shared-Surface Warnings
 
-- **CR-066 ↔ CR-067 on `TERMINAL_STATUSES`:** CR-066's lib initially reads the 3-element set for back-compat during the CR-067 migration. CR-067's Phase C is the only story that flips it to `['Completed']`. Wave 3 ordering enforces this — STORY-028-01 (harvest) runs against the tolerant set; Phase C tighten is the last commit of Wave 3.
-- **CR-067 archive migration ↔ concurrent `cleargate push`:** migration script acquires `.cleargate/.migration-lock`; push commands respect the lock. Critical that no orchestrator runs `cleargate push` while Phase B is executing.
-- **EPIC-028 admin/ batch ↔ @testing-library/svelte compat:** verify in admin/ story PREFLIGHT before mass-conversion. If incompat, escalate; do not start the 34-file batch.
-- **STORY-028-01 ↔ CR-066 default block-mode:** dogfood pass will hit partial-coverage halts on EPIC-010 / EPIC-021 / EPIC-023 (per §0 metrics). STORY-028-01 includes manual ack steps for these halts — does NOT silently bypass via env flag.
+One warning per shared-file pair where the risk is non-obvious.
+
+- **`lifecycle-reconcile.ts` — STORY-066-01 add-re-export vs STORY-067-03 mutate-constant.** STORY-066-01 must NOT touch lines 27-30 / 47 / 51 / 309 / 329 (the constants and expected[] literals). It only ADDs `export { rollUpParentStatus, walkActiveParents } from './parent-rollup.ts';` near the existing exports. STORY-067-03 owns the constant tightening; -01 leaving the constants alone preserves the tolerant set throughout Wave 1+2.
+- **`close_sprint.mjs` live+canonical mirror — STORY-066-02 only.** No other in-scope story edits close_sprint.mjs. Risk: if a future hotfix CR-NNN lands during SPRINT-28 mid-flight touching close_sprint.mjs, it must coordinate with STORY-066-02's Step 2.6c block insertion (line ~407 anchor). Architect monitors via mid-sprint amendment log.
+- **`mcp/src/adapters/README.md` — STORY-010-02 creates / STORY-067-03 appends.** If STORY-067-03 dispatches before STORY-010-02 ships (possible if STORY-010-02 hits an unforeseen L3 blocker), STORY-067-03 creates the README from scratch with the mapping section. Orchestrator confirms file existence at -067-03 dispatch and adjusts story prose accordingly.
+- **`mcp/package.json` triple-edit.** STORY-010-02 (Wave 1, additive: `js-yaml`?) → STORY-028-05 (Wave 2, subtractive: vitest) → STORY-028-08 (Wave 3, additive: `check:no-vitest`). Three edits to one file across three waves. Each edit must rebase cleanly on the prior; no semantic collision because they touch different keys, but any merge-conflict on the JSON keyspace requires manual resolution preserving all three intents.
+- **`cleargate-cli/package.json` triple-edit.** STORY-028-04 (add ts-morph) → STORY-028-06 (remove vitest) → STORY-028-08 (add check:no-vitest). Same shape as mcp/.
+- **EPIC-028 `vitest` → `*.node.test.ts` rename in `cleargate-cli/test/`.** STORY-066-01 (`parent-rollup.node.test.ts`) and STORY-067-01 (`migrate-status-to-completed.node.test.ts`) ship as node:test from birth in Wave 1. STORY-028-06 (Wave 2) walks `cleargate-cli/test/`; its codemod is idempotent and skips already-`*.node.test.ts` files. Risk: if STORY-066-01 or -067-01 accidentally writes a `*.test.ts` (not `*.node.test.ts`) file, STORY-028-06 renames it. **Mitigation: Developer for -066-01/-067-01 names test files with `.node.test.ts` from birth (already required by Cross-Cutting Rule 1).**
+- **`cleargate-cli/examples/` exclusion.** STORY-028-06's codemod must NOT walk `cleargate-cli/examples/` per FLASHCARD `#fixtures #sprint-22` (intentionally-failing Red examples). `--root cleargate-cli/test` excludes naturally; no flag needed.
+- **`.migration-lock` semantic ownership.** Created by STORY-067-01 (script) and STORY-067-02 (apply phase). Read by STORY-067-01 (push.ts edit). The lock file path is `.cleargate/.migration-lock`. Orchestrator-level rule: NO push agent dispatch while STORY-067-02 is executing. This is an out-of-band sequencing constraint, not a git-merge ordering one.
+- **STORY-028-01 ↔ CR-066 default block-mode.** STORY-028-01's dry-run will surface 3+ halts (EPIC-010 partial / EPIC-021 zero-children / EPIC-023 sub-epic placeholders). Manual ack inline; do NOT introduce an env-flag bypass (per CR-066 §1 Q3 resolution).
 
 ### 2.4 Lane Audit
 
-| Item | Lane | Rationale (≤80 chars) |
-|---|---|---|
-| STORY-028-01 | fast | One-shot dogfood; commit a status-flip diff + warn-list notes |
-| BUG-004 | fast | Single backtick fix; trivial |
-| EPIC-028 codemod story | standard | New tool + golden fixtures; not trivial |
-| EPIC-028 docs story | fast | CLAUDE.md + developer.md + FLASHCARD prose; doc-only |
+Per the seven-check Lane Classification rubric. Every in-scope story listed; non-`standard` rows include rationale ≤80 chars.
 
-All other items run `standard`. CR-067 Phase A (migration script) standard; Phase B (archive backfill) standard; Phase C (tighten TERMINAL_STATUSES) fast. EPIC-028 per-package batches all standard.
+| Story | Lane | Rationale (≤80 chars) |
+|---|---|---|
+| STORY-066-01 | standard | New lib + 5 fixture tests; >50 LOC; med bounce exposure |
+| STORY-066-02 | standard | Touches close_sprint.mjs mirror pair + CLI handler; med exposure |
+| STORY-067-01 | standard | New script + 6 fixture tests + push.ts edit; >50 LOC |
+| STORY-067-02 | standard | Bulk archive migration; 8+8 template edits; mirror parity gate |
+| STORY-067-03 | fast | 5-line edit on lifecycle-reconcile.ts + README append; ≤50 LOC, doc-heavy |
+| STORY-028-04 | standard | New ts-morph codemod + 6 golden fixtures + new devDep; med exposure |
+| STORY-028-05 | standard | 50-file conversion + config delete; high exposure |
+| STORY-028-06 | standard | 138-file conversion (largest); high exposure |
+| STORY-028-07 | standard | 34-file conversion + preflight-gated svelte compat; high exposure |
+| STORY-028-08 | fast | CLAUDE.md + developer.md + FLASHCARD prose + hook line; doc/config only |
+| STORY-010-02 | standard | 4 endpoints + new adapter interface; net-new code; med exposure |
+| STORY-028-01 | fast | One-shot dogfood; commit a status-flip diff + halt-list notes |
+| BUG-004 | fast | Single-line backtick frontmatter fix + 1-line test scope widen |
+
+Lane distribution: 9 standard + 4 fast = 31% fast (matches §2.4 target in original §1 metadata).
+
+Rubric notes for fast-lane assignments:
+- STORY-067-03: ≤50 LOC + no forbidden surface + no new dep + single concern + existing tests cover (lifecycle-reconcile tests) + low exposure + within EPIC-028/CR-067 scope.
+- STORY-028-08: doc-only + ≤50 LOC + no forbidden surface + no new dep + single concern (rename two-runner→single-runner + add guard) + low exposure.
+- STORY-028-01: doc/state-mutation only (no source code edits) + ≤50 LOC (one apply commit) + single concern + low exposure.
+- BUG-004: ≤50 LOC (1-line frontmatter + 1-line test scope) + single concern + low exposure + scaffold content (forbidden-surface-adjacent but not in the forbidden table).
 
 ### 2.5 ADR-Conflict Flags
 
-None at draft time. Re-check at Architect SDR.
+Scanned against CLAUDE.md "Architectural decisions locked" + flashcards #adr-conflict / #scope-bleed.
+
+- **None identified at SDR.** Rationale: SPRINT-28 work either (a) implements decisions that were freshly locked at parent-CR Gate-1 ack 2026-05-17 (CR-066 Q1-Q4, CR-067 Q1-Q3, EPIC-028 Q1-Q5 — all locked) or (b) extends in-scope subsystems without crossing locked boundaries.
+- **Locked decisions referenced (not violated):**
+  - Invite storage (2026-04-18 Postgres-authoritative): not touched.
+  - Wiki drift detection (2026-04-19 git-SHA): not touched.
+  - Admin deploy mirror (2026-05-15 `cleargate-admin` remote): not in scope (no admin/** runtime changes; STORY-028-07 admin test conversion touches admin/test/ only — no Coolify-deploy impact).
+  - EPIC-027 boundary (2026-05-17 no PM-tool SDK in cleargate-cli/.claude/): preserved by STORY-010-02 placing all Linear logic in `mcp/src/adapters/`.
+  - Status vocabulary 2026-05-17 (one Completed only): CR-067 implements; no conflict.
+  - Test runner 2026-05-17 reversal (no two-runner state, all node:test): EPIC-028 implements; no conflict.
+- **One soft adjacency to monitor:** STORY-028-07's possible JSDOM-direct fallback (if @testing-library/svelte breaks under node:test) could surface a new architectural choice — node:test + jsdom-global setup — that warrants a CR if it requires more than a 1-line `--import` flag. Architect monitors at -028-07 preflight; escalates to a follow-up CR rather than amending SPRINT-28 scope.
 
 ## Risks & Dependencies
 

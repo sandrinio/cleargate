@@ -1,8 +1,9 @@
 ---
 sprint_id: "SPRINT-07"
+carry_over: true
 remote_id: null
 source_tool: "local"
-status: "Planned"
+status: Abandoned
 start_date: null
 end_date: null
 activated_at: null

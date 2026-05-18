@@ -4,7 +4,7 @@ parent_ref: cleargate-protocol.md (Plan-phase semantics + gate model)
 parent_cleargate_id: "cleargate-protocol.md (Plan-phase semantics + gate model)"
 sprint_cleargate_id: SPRINT-17
 carry_over: false
-status: Done
+status: Completed
 approved: true
 approved_at: 2026-05-01T00:00:00Z
 approved_by: sandrinio

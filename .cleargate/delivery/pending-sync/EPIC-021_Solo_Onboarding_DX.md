@@ -1,6 +1,6 @@
 ---
 epic_id: EPIC-021
-status: Ready
+status: Completed
 ambiguity: 🟢 Low
 context_source: User direct request 2026-04-25 — proposal gate waived (sharp intent + inline references). Architectural pivot 2026-04-25 from solo-OAuth-patches to token-first onboarding after user pushback on GitHub binding. All 8 §6 AI Interrogation questions ratified by user 2026-04-25 with AI recommendations accepted verbatim. Token primitives confirmed already present in mcp/src/admin-api/{tokens,invites}.ts and mcp/src/auth/service-token.ts.
 owner: sandrinio

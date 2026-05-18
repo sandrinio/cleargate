@@ -1,6 +1,6 @@
 {
   "name": "cleargate",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "private": false,
   "type": "module",
   "description": "Planning framework for Claude Code agents — sprint/epic/story protocol, five-role agent team (architect/developer/qa/devops/reporter), Karpathy-style awareness wiki.",
@@ -47,12 +47,11 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
-    "test:file": "tsx --test --test-reporter=spec",
-    "test:vitest": "npm run build && vitest run",
-    "test:vitest:watch": "vitest",
-    "test:node": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
-    "test:node:file": "tsx --test --test-reporter=spec"
+    "test": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec 'test/**/*.node.test.ts' '!test/fixtures/**'",
+    "test:file": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec",
+    "test:node": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec 'test/**/*.node.test.ts' '!test/fixtures/**'",
+    "test:node:file": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec",
+    "check:no-vitest": "node -e \"const r=require('child_process').execSync('grep -rE \\\"\\\\b(vitest|vi\\\\.fn|vi\\\\.mock|vi\\\\.spyOn|vi\\\\.stubGlobal|vi\\\\.useFakeTimers|vi\\\\.useRealTimers|vi\\\\.advanceTimersByTime|vi\\\\.hoisted)\\\\b\\\" --include=\\\"*.ts\\\" --include=\\\"*.js\\\" --include=\\\"*.mjs\\\" --exclude-dir=test/fixtures . 2>/dev/null || true', {encoding:'utf8'}); if(r.trim()){console.error('vitest residue detected:\\\\n'+r); process.exit(1)} console.log('no vitest residue')\""
   },
   "dependencies": {
     "@napi-rs/keyring": "^1.2.0",
@@ -67,9 +66,9 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.11.10",
+    "ts-morph": "28.0.0",
     "tsup": "^8",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.0",
-    "vitest": "^2.1.0"
+    "typescript": "^5.8.0"
   }
 }

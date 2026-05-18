@@ -4,7 +4,7 @@ parent_ref: BUG-024 (Done) — token-ledger attribution spike, SubagentStop hook
 parent_cleargate_id: BUG-024 (Done) — token-ledger attribution spike, SubagentStop hook misroutes
 sprint_cleargate_id: SPRINT-26
 carry_over: false
-status: Done
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 approved: true

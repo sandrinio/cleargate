@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-17T20:22:01Z",
+  "command": "tsx",
+  "args": ["--test",".worktrees/STORY-028-04/cleargate-cli/test/scripts/codemod-vitest-to-node-test.red.node.test.ts"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 127,
+  "stdout": "",
+  "stderr": ".cleargate/scripts/run_script.sh: line 92: tsx: command not found",
+  "agent_type": null,
+  "work_item_id": null
+}

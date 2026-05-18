@@ -3,7 +3,7 @@ bug_id: BUG-020
 parent_ref: BUG-010
 parent_cleargate_id: "BUG-010"
 sprint_cleargate_id: "off-sprint"
-status: Verified
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 sprint: off-sprint

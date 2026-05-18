@@ -36,7 +36,7 @@ epic_id: "EPIC-{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
-status: "Draft"
+status: "Draft"  # lifecycle: Draft → Active → Completed
 ambiguity: "🔴 High"
 context_source: "PROPOSAL-{ID}.md"
 owner: "{PM/PO name}"
