@@ -46,7 +46,7 @@ template_version: 2
      Each CR:bug and UR:bug counts toward Bug-Fix Tax (§3). CR:scope-change increments arch_bounces. -->
 
 ### STORY-NNN-NN: <Title>
-- **Status:** Done | Escalated | Parking Lot | Carried Over
+- **Status:** Completed | Escalated | Parking Lot | Carried Over
 - **Complexity:** L<n>
 - **Commit:** `<sha>`
 - **Bounce count:** qa=N arch=N total=N

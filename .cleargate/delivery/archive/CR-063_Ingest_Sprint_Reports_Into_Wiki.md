@@ -4,7 +4,7 @@ parent_ref: EPIC-002
 parent_cleargate_id: EPIC-002
 sprint_cleargate_id: SPRINT-03
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 created_at: 2026-05-08T00:00:00Z
 updated_at: 2026-05-07T00:00:00Z

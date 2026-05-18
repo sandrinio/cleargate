@@ -32,7 +32,7 @@ hotfix_id: "{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
-status: "Draft"
+status: "Draft"  # lifecycle: Draft → In Fix → Completed
 severity: "P2"
 originating_signal: "user-report"
 created_at: "{ISO}"

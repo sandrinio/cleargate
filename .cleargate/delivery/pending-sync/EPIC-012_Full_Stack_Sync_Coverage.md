@@ -1,6 +1,7 @@
 ---
 epic_id: EPIC-012
-status: Ready
+carry_over: true
+status: Abandoned
 ambiguity: 🟢 Low
 context_source: ./PROPOSAL-007_Multi_Participant_MCP_Sync.md
 owner: Vibe Coder (sandro.suladze@gmail.com)

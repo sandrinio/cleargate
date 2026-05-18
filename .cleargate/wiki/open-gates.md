@@ -24,6 +24,8 @@ Stories with medium or high ambiguity that need design decisions before work can
 
 - [[STORY-003-10]] — ambiguity: 🟡 Medium
 
+- [[STORY-028-07]] — ambiguity: 🟡 Medium
+
 
 
 ## Gate 3 — Ready to Push (not yet synced)
@@ -35,6 +37,6 @@ Items with `status: Ready` that have not been pushed to the remote PM tool (`rem
 
 - [[EPIC-021]] — status: Ready
 
-- [[EPIC-026]] — status: Ready
+- [[EPIC-029]] — status: Ready
 
 

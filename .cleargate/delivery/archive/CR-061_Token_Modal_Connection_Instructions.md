@@ -5,7 +5,7 @@ parent_cleargate_id: STORY-006-05
 sprint_cleargate_id: SPRINT-27
 carry_over: false
 area: admin-console
-status: Approved
+status: Completed
 approved: true
 context_source: "Direct human ask 2026-05-06 after STORY-006-05 dogfood: token-issued modal currently shows the raw token only. Users (incl. Claude Desktop / Claude Code via stdio) lack a copy-paste connection snippet. Approved 2026-05-14 with 4 §0.5 Qs resolved at Gate-1 ack. Depends on CR-065 (CLEARGATE_SERVICE_TOKEN env auth) shipping first so the stdio tab content references the correct env var name."
 created_at: 2026-05-06T00:00:00Z

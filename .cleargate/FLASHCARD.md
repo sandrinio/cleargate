@@ -4,6 +4,28 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-18 · #node-test #testing · EPIC-028 complete — single test runner across mcp/, cleargate-cli/, admin/. __overrides__ pattern (mutable shared state in __mocks__/ + 2 prod seams) is the workaround for static-ESM-import un-interceptability.
+
+2026-05-18 · #parent-rollup #reconciler · parent-rollup.ts extractId() checks story_id only; Epic files use epic_id — add epic_id/sprint_id key checks before filename-stem fallback.
+
+2026-05-18 · #node-test #migration · node:test on DB-integration suites needs `--test-concurrency=1` (matches vitest singleFork:true); default parallel breaks FK constraints.
+2026-05-18 · #node-test #hono · @hono/node-server calls `socket.destroySoon()` ~500ms after Fastify `inject()` fake-socket request — node:test treats it as hard fail (vitest tolerated); patch via onRequest hook no-op or uncaughtException handler.
+2026-05-18 · #node-test #mock · `mock.module()` mock-class instances must use the same property names as the real class (`AdminApiError.kind` not `.errorType`) — node:test's stricter equality exposes vitest-passing mock-shape bugs.
+2026-05-18 · #mcp #nested-repo · `mcp/` is a gitignored nested git repo — QA tests must resolve its path via `git rev-parse --git-common-dir` + `path.dirname()` (worktree-relative breaks). DevOps must verify INNER commit SHA, not outer (outer carries only the dev report on EPIC-028 conversion stories).
+2026-05-18 · #close-pipeline #test-seam · close_sprint.mjs `import()` of reconciler module must be `__dirname`-relative (SCRIPTS_DIR), NOT REPO_ROOT-relative — CLEARGATE_REPO_ROOT test seam overrides REPO_ROOT to a tmpdir without dist; only the static script dir reliably finds the built bundle.
+2026-05-18 · #migration #prebuild #gitignore · `cleargate-cli/templates/cleargate-planning/` (npm payload) is gitignored — verify byte-equality via `diff -rq` after `npm run prebuild`, never `git add` it.
+2026-05-18 · #orchestration #merge-conflict · MANIFEST.json conflicts between concurrent story branches are deterministically resolvable: `git rebase sprint/S-NN` + `cd cleargate-cli && npm run prebuild` regenerates the SHA table — no manual merge needed.
+2026-05-18 · #orchestration #report-files · Dev/QA/Architect dispatch prompts MUST tell agents to write their report to .cleargate/sprint-runs/<id>/reports/<id>-{dev,qa,arch}.md before returning; text-only return blocks DevOps at Step 1.
+2026-05-18 · #orchestration #env-vars · run_script.sh does NOT inject env vars; prefix CLEARGATE_STATE_FILE=... BEFORE `bash run_script.sh ...` or invoke `node update_state.mjs` directly without the wrapper.
+2026-05-18 · #scaffold #yaml #agent-def · agent `description:` values with backticks must be double-quoted in YAML frontmatter — unquoted backtick triggers js-yaml CORE_SCHEMA YAMLException on subagent dispatch (BUG-004).
+2026-05-18 · #ts-morph #codemod · ts-morph v28 `replaceWithText()` re-indents multi-line text by the node's column offset; use raw `applyEdits()` on character ranges for multi-line replacements.
+2026-05-18 · #ts-morph #npm-install · ts-morph as new devDep needs `npm install` at workspace root before tests run; package-lock.json update alone leaves node_modules empty.
+2026-05-18 · #fixtures #test-glob · `*.node.test.ts` fixture files with vitest imports get picked up by `test/**/*.node.test.ts` glob and fail — exclude `test/fixtures/**` from runner glob or rename fixtures (.snap/.txt).
+2026-05-18 · #sub-epic #recursion · parent-rollup recursion needs `visited-Set` snapshot per sibling branch; shared mutable Set falsely flags sibling sub-epics as cycles.
+2026-05-18 · #qa-red #red-test · ERR_MODULE_NOT_FOUND collapses all `it()` blocks to 1 reported failure in `tsx --test`; count failing scenarios from test-inventory comment, not from runner output.
+2026-05-18 · #qa #red-test #vacuous-pass · Non-mutation assertions (bytes unchanged) pass vacuously when script absent — verify they flip fail→pass after impl lands.
+2026-05-18 · #qa #red-test #exit-code · Exit-code assertions on absent scripts can false-pass via MODULE_NOT_FOUND coincidence; add `assertScriptExists()` guard first in every test.
+2026-05-18 · #qa #codemod #fixture-gap · QA-Red on codemod stories must assert each §2.1 Gherkin scenario 1:1 — `.spec.ts` rename + target collision are easily overlooked without explicit fixture pairs.
 2026-05-15 · #deploy #release · admin console deploys from `cleargate-admin` remote (separate GitHub mirror), NOT `origin`. After any admin/** change, `git push cleargate-admin main:main` is required to trigger Coolify rebuild — skipping leaves prod stale. CLAUDE.md "Deploy targets" table is authoritative.
 2026-05-15 · #path-validator · path-validator must run BEFORE readFile/parseFrontmatter to guarantee exit 2 (not 1) for non-allowlisted paths; parseFrontmatter exits 1 for non-markdown.
 2026-05-15 · #svelte #vitest · vi.mock('$env/dynamic/public') needs a vitest.config alias + stub file — without it vite import-analysis errors before mock intercepts. Pattern: $app/navigation alias precedent.

@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-17T20:21:09Z",
+  "command": "npx",
+  "args": ["tsx","--test",".worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "\nnode:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\nError [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-01/cleargate-cli/src/lib/parent-rollup.js' imported from /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts\n    at finalizeResolution (node:internal/modules/esm/resolve:271:11)\n    at moduleResolve (node:internal/modules/esm/resolve:861:10)\n    at defaultResolve (node:internal/modules/esm/resolve:988:11)\n    at nextResolve (node:internal/modules/esm/hooks:769:28)\n    at resolveBase (file:///Users/ssuladze/Documents/Dev/ClearGate/node_modules/tsx/dist/esm/index.mjs?1779049268756:2:3744)\n    at async resolveDirectory (file:///Users/ssuladze/Documents/Dev/ClearGate/node_modules/tsx/dist/esm/index.mjs?1779049268756:2:4237)\n    at async resolve (file:///Users/ssuladze/Documents/Dev/ClearGate/node_modules/tsx/dist/esm/index.mjs?1779049268756:2:5355)\n    at async nextResolve (node:internal/modules/esm/hooks:769:22)\n    at async AsyncLoaderHooksOnLoaderHookWorker.resolve (node:internal/modules/esm/hooks:265:24)\n    at async handleMessage (node:internal/modules/esm/worker:251:18) {\n  code: 'ERR_MODULE_NOT_FOUND',\n  url: 'file:///Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-01/cleargate-cli/src/lib/parent-rollup.js'\n}\n\nNode.js v25.9.0\n✖ .worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts (255.475ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 262.776583\n\n✖ failing tests:\n\ntest at .worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts:1:1\n✖ .worktrees/STORY-066-01/cleargate-cli/test/lib/parent-rollup.red.node.test.ts (255.475ms)\n  'test failed'",
+  "stderr": "",
+  "agent_type": null,
+  "work_item_id": null
+}

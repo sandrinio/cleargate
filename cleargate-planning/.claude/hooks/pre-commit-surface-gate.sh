@@ -23,6 +23,8 @@ else
   echo "[red-gate] BYPASS: SKIP_RED_GATE=1 set — skipping Red-test immutability check. Log bypass in sprint §4." >&2
 fi
 
+if ! npm run check:no-vitest -s --prefix mcp 2>/dev/null || ! npm run check:no-vitest -s --prefix cleargate-cli 2>/dev/null || ! npm run check:no-vitest -s --prefix admin 2>/dev/null; then exit 1; fi
+
 SCRIPT="${REPO_ROOT}/.cleargate/scripts/file_surface_diff.sh"
 if [[ ! -f "${SCRIPT}" ]]; then
   echo "[surface-gate] WARNING: file_surface_diff.sh not found — skipping" >&2
