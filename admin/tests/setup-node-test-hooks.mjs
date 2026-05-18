@@ -48,7 +48,11 @@ const LOCAL_MOCK_OVERRIDES = {
   [path.join(LIB_DIR, 'mcp-client.js')]: path.join(MOCKS_DIR, 'mcp-client.ts'),
 };
 
-// Ensure app-environment stub exists
+// Ensure app-environment stub exists.
+// AUTO-CREATE NOTE (STORY-028-08 / Directive 4): this file is committed to the repo at
+// src/lib/__mocks__/app-environment.ts, but this guard creates it at import-time if absent
+// (e.g. fresh checkout where the file was never committed, or git clean -fx). The guard is
+// a safety net — the committed file is always the authoritative source.
 const appEnvStub = path.join(MOCKS_DIR, 'app-environment.ts');
 if (!fs.existsSync(appEnvStub)) {
   fs.writeFileSync(appEnvStub, 'export const browser = true;\nexport const building = false;\nexport const dev = true;\n');

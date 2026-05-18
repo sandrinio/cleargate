@@ -73,6 +73,8 @@ Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any o
 ## Test + commit conventions
 
 - **Real infra, no mocks** for database tests — run against docker-compose Postgres 18 + Redis 8 (flashcard-worthy: mocked tests have bitten us before).
+- **Single test runner:** node:test only (via tsx). Adding vitest back is forbidden — see EPIC-028 closure 2026-05-18. File naming: `*.node.test.ts`. Run via `tsx --test` or `node --test --import tsx/esm`.
+- **admin/ runner flag:** `node --conditions browser` is required for admin/ tests — it triggers jsdom-bootstrap via `setup-node-test.mjs` (loaded via `--import`). Without this flag, Svelte component tests fail on browser-only APIs.
 - **Pre-commit:** `npm run typecheck` clean + `npm test` green for the affected package. Non-negotiable.
 - **Commit format:** `feat(<epic>): STORY-NNN-NN <short desc>` — one commit per story.
 - **Never `--no-verify`.** If a hook fails, fix the cause.
