@@ -63,4 +63,38 @@ function createToastStore() {
   };
 }
 
-export const toastStore = createToastStore();
+const _realToastStore = createToastStore();
+
+/**
+ * Test-time override for individual toast methods.
+ * STORY-028-07: tests can replace individual methods to intercept calls.
+ * Example: __toastMethods__.success = mock.fn()
+ */
+export const __toastMethods__: {
+  success?: (message: string) => string;
+  error?: (message: string) => string;
+  info?: (message: string) => string;
+  warning?: (message: string) => string;
+} = {};
+
+export const toastStore = {
+  get toasts() { return _realToastStore.toasts; },
+  add: _realToastStore.add.bind(_realToastStore),
+  remove: _realToastStore.remove.bind(_realToastStore),
+  info(message: string) {
+    if (__toastMethods__.info) return __toastMethods__.info(message);
+    return _realToastStore.info(message);
+  },
+  success(message: string) {
+    if (__toastMethods__.success) return __toastMethods__.success(message);
+    return _realToastStore.success(message);
+  },
+  warning(message: string) {
+    if (__toastMethods__.warning) return __toastMethods__.warning(message);
+    return _realToastStore.warning(message);
+  },
+  error(message: string) {
+    if (__toastMethods__.error) return __toastMethods__.error(message);
+    return _realToastStore.error(message);
+  },
+};
