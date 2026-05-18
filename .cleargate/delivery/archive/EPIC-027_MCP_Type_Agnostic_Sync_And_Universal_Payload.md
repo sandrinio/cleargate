@@ -3,7 +3,7 @@ epic_id: EPIC-027
 parent_cleargate_id: EPIC-010
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 proposal_gate_waiver:
   approved_by: sandrinio

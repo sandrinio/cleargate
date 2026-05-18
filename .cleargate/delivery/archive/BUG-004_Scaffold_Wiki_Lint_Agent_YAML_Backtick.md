@@ -3,7 +3,7 @@ bug_id: BUG-004
 parent_ref: EPIC-018
 parent_cleargate_id: EPIC-018
 sprint_cleargate_id: SPRINT-12
-status: Approved
+status: Completed
 severity: P2-Medium
 reporter: sandro (via QA STORY-018-05)
 approved: true
