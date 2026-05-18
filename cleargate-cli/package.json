@@ -47,12 +47,10 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
-    "test:file": "tsx --test --test-reporter=spec",
-    "test:vitest": "npm run build && vitest run",
-    "test:vitest:watch": "vitest",
-    "test:node": "tsx --test --test-reporter=spec 'test/**/*.node.test.ts'",
-    "test:node:file": "tsx --test --test-reporter=spec"
+    "test": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec 'test/**/*.node.test.ts'",
+    "test:file": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec",
+    "test:node": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec 'test/**/*.node.test.ts'",
+    "test:node:file": "tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec"
   },
   "dependencies": {
     "@napi-rs/keyring": "^1.2.0",
@@ -70,7 +68,6 @@
     "ts-morph": "28.0.0",
     "tsup": "^8",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.0",
-    "vitest": "^2.1.0"
+    "typescript": "^5.8.0"
   }
 }
