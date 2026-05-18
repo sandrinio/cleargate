@@ -54,4 +54,5 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[EPIC-029]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
 ## Sprints
 
+| [[SPRINT-28]] | sprint | Active | .cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md |
 | [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |

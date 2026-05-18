@@ -1,12 +1,14 @@
 ---
-story_id: STORY-066-01
-role: qa
-mode: VERIFY
-sprint_id: SPRINT-28
-dev_commit: be1ecf655b62a82ca34d98822c6d0f6b3b12f8d1
-qa_red_commit: 86164c5
-verdict: PASS
-acceptance_coverage: 6 of 6 scenarios (5 Gherkin + 1 cycle-detection)
+story_id: "STORY-066-01"
+role: "qa"
+mode: "VERIFY"
+sprint_id: "SPRINT-28"
+dev_commit: "be1ecf655b62a82ca34d98822c6d0f6b3b12f8d1"
+qa_red_commit: "86164c5"
+verdict: "PASS"
+acceptance_coverage: "6 of 6 scenarios (5 Gherkin + 1 cycle-detection)"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report — STORY-066-01

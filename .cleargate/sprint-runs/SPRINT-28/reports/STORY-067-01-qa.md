@@ -1,11 +1,13 @@
 ---
-story_id: STORY-067-01
-role: qa
-mode: VERIFY
-sprint_id: SPRINT-28
-dev_commit: 795b7c43
-verdict: PASS
-acceptance_coverage: 6 of 6 Gherkin scenarios
+story_id: "STORY-067-01"
+role: "qa"
+mode: "VERIFY"
+sprint_id: "SPRINT-28"
+dev_commit: "795b7c43"
+verdict: "PASS"
+acceptance_coverage: "6 of 6 Gherkin scenarios"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report — STORY-067-01

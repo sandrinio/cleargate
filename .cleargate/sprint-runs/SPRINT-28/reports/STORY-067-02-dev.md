@@ -1,8 +1,10 @@
 ---
-story_id: STORY-067-02
-sprint_id: SPRINT-28
-generated_by: Developer agent
-generated_at: 2026-05-18T00:00:00Z
+story_id: "STORY-067-02"
+sprint_id: "SPRINT-28"
+generated_by: "Developer agent"
+generated_at: "2026-05-18T00:00:00Z"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-067-02 Developer Report

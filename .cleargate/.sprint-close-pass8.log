@@ -1,0 +1,68 @@
+Step 1-2 passed: all 13 stories are terminal.
+Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.
+Step 2.6: running lifecycle reconciliation...
+lifecycle: clean (205 artifacts reconciled)
+Step 2.6 passed: lifecycle reconciliation clean.
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b passed: no cross-sprint orphan drift.
+Step 2.6c: rolling up parent statuses...
+Step 2.6c passed: 0 parent(s) auto-flipped; no halts.
+Step 2.7: checking for leftover worktrees...
+Step 2.7 passed: no leftover worktrees.
+Step 2.8: verifying refs/heads/sprint/S-28 merged to refs/heads/main...
+Step 2.8 failed: sprint/S-28 not merged to main.
+  Unmerged commits:
+8a6cb649 release(cleargate): v0.13.0 — SPRINT-28 (CR-066 + CR-067 + EPIC-028 + HOTFIX-066)
+57e8e1da chore(SPRINT-28): final pre-close — sprint-run + hotfix smoke + M-028-07 plan
+7a1bf4d9 merge(hotfix/parent-rollup-extractid): CR-066 extractId() supports epic_id/sprint_id/bug_id/cr_id (STORY-028-01 dogfood finding)
+77ece291 hotfix(CR-066): parent-rollup.ts extractId() supports epic_id/sprint_id/bug_id/cr_id (STORY-028-01 dogfood finding)
+96789a36 merge(story/STORY-028-08): EPIC-028 closeout — docs + check:no-vitest guard + fixture-glob exclude
+aa94b9f2 feat(EPIC-028): STORY-028-08 sprint closeout — docs + check:no-vitest guard + fixture-glob exclude
+f6a27d8b merge(story/STORY-028-07): EPIC-028 admin/ vitest→node:test (34 files) + jsdom-bootstrap + setup-node-test.mjs
+ca830920 feat(epic-028): STORY-028-07 admin/ vitest→node:test (34 files)
+be69866a qa-red(STORY-028-07): write failing repo-state tests for admin/ vitest elimination
+3bee0a0f merge(story/STORY-028-06): EPIC-028 cleargate-cli/ vitest→node:test (138 files) + config + dep removal + rebase resolution
+8c791325 chore(STORY-028-06): add §11 rebase-conflict-resolution entry to dev report
+3444104a fix(STORY-028-06): mock-API completeness in 7 files + Red test self-reference+baseline (qa-bounce fix)
+8cd03a4a feat(EPIC-028): STORY-028-06 cleargate-cli/ vitest→node:test (138 files) + config + dep removal
+21ae0cde qa-red(STORY-028-06): write failing repo-state tests for cleargate-cli/ vitest elimination
+a81fdd92 merge(story/STORY-028-01): CR-066 dogfood harvest — 4 epics auto-flipped Completed + halt-list + extractId() bug surfaced for SPRINT-29
+759a491b merge(story/STORY-067-03): CR-067 Phase C — tighten ARTIFACT_TERMINAL_STATUSES to 4-element + adapter README
+db1cd824 fix(STORY-028-01): wiki rebuild + idempotency re-audit (qa-bounce fix)
+1a3234d0 feat(CR-067): STORY-067-03 tighten ARTIFACT_TERMINAL_STATUSES to {Completed, Resolved, Closed, Abandoned}
+f6867cd8 chore(STORY-028-01): dev report + harvest-audit.log + extractId() flashcard
+5854ea46 chore(STORY-028-01): CR-066 dogfood harvest — auto-flip 4 epics, halt-list 2 for review
+3455371f chore(SPRINT-28): post-Wave-2 flashcards + sprint-run churn
+b38f07de merge(story/STORY-028-05): EPIC-028 mcp/ vitest→node:test conversion (inner b14e23e)
+353ba346 chore(SPRINT-28): stage STORY-028-05 reports on sprint branch pre-merge
+0ba97261 feat(EPIC-028): STORY-028-05 mcp/ vitest → node:test (50 files, vitest dep removed)
+9b9d4077 merge(story/STORY-066-02): CR-066 Step 2.6c + --parents flag + mirror parity
+19f16408 feat(CR-066): STORY-066-02 close_sprint Step 2.6c + --parents flag + mirror parity
+5c4d6246 qa-red(STORY-066-02): write failing tests for Step 2.6c + --parents flag
+465651e9 merge(story/STORY-067-02): CR-067 Phase B — 114 archive flips + 7+7 template vocab edits
+75567a63 feat(CR-067): STORY-067-02 archive migration + 16 templates + npm payload refresh
+4117c8f7 qa-red(STORY-028-05): write failing repo-state tests for mcp/ vitest elimination
+6cbeffc6 qa-red(STORY-067-02): write failing repo-state + template parity tests
+dbb650b1 chore(SPRINT-28): post-Wave-1 sprint-run + wiki churn
+45e59155 chore(SPRINT-28): Wave 1 flashcards + rebuild dist for STORY-066-02 prereq
+261df591 merge(story/STORY-028-04): vitest→node:test codemod tool + ts-morph dep
+452d2717 feat(EPIC-028): STORY-028-04 add fixture+test for .spec.ts rename + target collision (qa-bounce fix)
+9f6ee10b merge(story/STORY-067-01): status migration script + push.ts lock guard
+33181da4 merge(story/STORY-066-01): parent-rollup library + tests
+27db506e feat(EPIC-028): STORY-028-04 vitest→node:test codemod tool + ts-morph dep
+795b7c43 feat(CR-067): STORY-067-01 status migration script + push.ts lock guard
+be1ecf65 feat(CR-066): STORY-066-01 parent-rollup library + re-export
+845576a2 chore(BUG-004): prebuild — refresh MANIFEST.json generated_at timestamp
+47d336e1 merge(bug/BUG-004): wiki-lint agent YAML backtick + assertMdFilesParseClean scope
+ee820eb0 fix(BUG-004): wiki-lint agent YAML frontmatter backtick + scope widen
+2eda1e1a merge(story/STORY-010-02): verify already-shipped MCP endpoints + adapter
+0bc54670 qa-red(STORY-028-04): write failing tests for codemod-vitest-to-node-test.mjs
+d60f435e qa-red(STORY-067-01): write failing tests for migrate-status-to-completed.mjs
+5c7545f2 feat(EPIC-010): STORY-010-02 verify already-shipped MCP endpoints + adapter; flip Completed
+86164c55 qa-red(STORY-066-01): write failing tests for parent-rollup library
+3642cf63 plan(SPRINT-28): wiki log entry for BUG-004 ingest
+3ed88535 plan(SPRINT-28): wiki ingest for BUG-004 timestamp bump
+6a731a4d plan(SPRINT-28): bump BUG-004 cached_gate_result.last_gate_check past updated_at
+8a694bca plan(SPRINT-28): gate-clean — lift §1.6 paths into ## Existing Surfaces on 10 stories
+708ae7cc plan(SPRINT-28): Phase A kickoff — SDR + state.json + 10 decomposed stories
+  Resolve: merge sprint/S-28 → main, then re-run close_sprint.mjs.

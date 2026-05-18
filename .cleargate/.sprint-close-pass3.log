@@ -1,0 +1,12 @@
+Step 1-2 passed: all 13 stories are terminal.
+Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.
+Step 2.6: running lifecycle reconciliation...
+lifecycle: clean (205 artifacts reconciled)
+Step 2.6 passed: lifecycle reconciliation clean.
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b: 3 cross-sprint orphan(s) detected:
+  STORY-027-01 — status: Approved in pending-sync, state: Done in SPRINT-27
+  STORY-027-02 — status: Approved in pending-sync, state: Done in SPRINT-27
+  STORY-027-04 — status: Approved in pending-sync, state: Done in SPRINT-27
+close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close under v2.
+  Archive the listed items and re-run close_sprint.mjs.

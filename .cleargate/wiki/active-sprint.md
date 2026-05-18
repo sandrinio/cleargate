@@ -16,7 +16,7 @@
 ## Planned Sprints
 
 
-- [[SPRINT-07]] — status: Planned
+- [[SPRINT-07]] — status: Abandoned
 
 - [[SPRINT-10]] — status: Completed
 
@@ -24,7 +24,7 @@
 
 - [[SPRINT-12]] — status: Completed
 
-- [[SPRINT-16]] — status: Approved
+- [[SPRINT-16]] — status: Abandoned
 
 - [[SPRINT-18]] — status: Approved
 
@@ -38,7 +38,7 @@
 
 - [[SPRINT-26]] — status: Completed
 
-- [[SPRINT-29]] — status: Draft
+- [[SPRINT-29]] — status: Abandoned
 
 
 
