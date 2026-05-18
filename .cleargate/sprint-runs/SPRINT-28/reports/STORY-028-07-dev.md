@@ -15,7 +15,11 @@ Node.js module loader hooks (`tests/setup-node-test-hooks.mjs`) handle:
 2. `.svelte.js` rune-mode files → `svelte/compiler compileModule()`
 3. `.svelte.ts` rune-mode TS files → esbuild TS strip → `svelte/compiler compileModule()`
 4. Virtual module fallbacks: `$app/navigation`, `$env/dynamic/public`, `$app/stores`, `chart.js/auto`, `ioredis`
+<<<<<<< Updated upstream
 5. Local override redirects: `mcp-client.ts` → `__mocks__/mcp-client.ts` (for component tests only; skipped when importer is a test file)
+=======
+5. Local override redirects: `mcp-client.ts` → `__mocks__/mcp-client.ts` (for component tests)
+>>>>>>> Stashed changes
 
 The `--conditions browser` flag is required to get Svelte client-side rendering (not SSR).
 
@@ -25,6 +29,7 @@ Key issues discovered and fixed:
 
 1. **`mock.module()` cannot intercept static ESM imports** — root architectural challenge. Solution: `__overrides__` mutable shared state pattern in stub files (app-navigation, env-dynamic-public, mcp-client, clipboard, toast, ioredis, chart-js-auto).
 
+<<<<<<< Updated upstream
 2. **`mock.calls[i]` is an object** — node:test returns `{ arguments: [...], error, result, stack }`, not a plain array. All expect shim `toHaveBeenCalledWith` implementations updated + direct `.mock.calls[i][0]` patterns corrected.
 
 3. **`mock.module()` format** — node v25 requires `{ exports: {...} }`, not factory functions.
@@ -52,3 +57,22 @@ Modified: `admin/package.json`, `admin/tsconfig.json`, `admin/src/lib/utils/clip
 Deleted: `admin/vitest.config.ts`, all 34 `admin/tests/unit/*.test.ts` vitest files.
 
 Added: 34 `admin/tests/unit/*.node.test.ts` converted files.
+=======
+2. **`mock.calls[i]` is an object** — node:test returns `{ arguments: [...], error, result, stack }`, not a plain array. All expect shim `toHaveBeenCalledWith` implementations updated + 5 direct `.mock.calls[i][0]` patterns corrected.
+
+3. **`mock.module()` format** — node v25 requires `{ exports: {...} }`, not factory functions.
+
+4. **`mock.timers.enable()` API** — requires `{ apis: [...] }` object, not plain array. `clearTimeout` is not a valid API name (only `setTimeout|setInterval|Date|setImmediate`).
+
+5. **SvelteKit virtual modules** — `$env/dynamic/public`, `$types`, `$app/*` needed stubs for both runtime (loader hooks) and compile-time (sveltekit-virtual.d.ts).
+
+6. **ioredis static import** — `health-checks.ts` uses `import { Redis } from 'ioredis'` statically. Added `ioredis` to VIRTUAL_FALLBACKS in loader hooks. Extended `__ioredisState__` with `methodOverrides` for per-test control of `connect()`/`ping()`/`disconnect()`.
+
+7. **mcp-client mock redirect** — `LOCAL_MOCK_OVERRIDES` hook intercepts mcp-client.ts for component tests but NOT for mcp-client.node.test.ts (which tests the real module). Importer detection via `context.parentURL` in the `resolve` hook.
+
+8. **tsconfig.json** — replaced `extends: ".svelte-kit/tsconfig.json"` with explicit compiler options + `allowImportingTsExtensions: true` + `noEmit: true` + virtual module declarations in `sveltekit-virtual.d.ts`.
+
+## Files Changed
+
+See git diff on `story/STORY-028-07` branch.
+>>>>>>> Stashed changes
