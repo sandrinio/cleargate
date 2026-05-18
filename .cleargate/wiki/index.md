@@ -49,3 +49,9 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## Epics
+
+| [[EPIC-029]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
+## Sprints
+
+| [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |

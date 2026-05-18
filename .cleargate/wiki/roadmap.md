@@ -42,6 +42,8 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-26]] — status: Completed
 
+- [[SPRINT-29]] — status: Draft
+
 
 
 ## Shipped Sprints
@@ -92,6 +94,8 @@ _No active epics._
 - [[EPIC-012]] — status: Ready
 
 - [[EPIC-021]] — status: Ready
+
+- [[EPIC-029]] — status: Ready
 
 
 
