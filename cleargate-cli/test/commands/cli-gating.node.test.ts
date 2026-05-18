@@ -176,31 +176,27 @@ function writeMemberAuthFile(home: string): void {
 describe('Scenario: pre-member state gates sync commands', () => {
   test('cleargate push exits 2 with cleargate join redirect message in pre-member state', async () => {
     const dir = makeTmpDir();
-    // No auth file → pre-member state
+    // No auth file → pre-member state (use cleargateHome test seam so real getMembershipState returns pre-member)
     const noAuthHome = path.join(dir, 'no-auth');
+    fs.mkdirSync(noAuthHome, { recursive: true });
 
-    // Patch getMembershipState to return pre-member
-    const membershipModule = await import('../../src/lib/membership.js');
-    mock.method(membershipModule, 'getMembershipState').mockReturnValue({ state: 'pre-member' });
+    const { getMembershipState } = await import('../../src/lib/membership.js');
 
     const stderrLines: string[] = [];
-    const originalStderr = process.stderr.write.bind(process.stderr);
-    const stderrSpy = mock.method(process.stderr, 'write').mockImplementation((data) => {
+    const stderrSpy = mock.method(process.stderr, 'write', (data: unknown) => {
       stderrLines.push(String(data));
       return true;
     });
 
     let exitCode: number | undefined;
-    const exitSpy = mock.method(process, 'exit').mockImplementation((code?: number | string) => {
-      exitCode = typeof code === 'number' ? code : (code ? parseInt(code) : 0);
+    const exitSpy = mock.method(process, 'exit', (code?: number | string) => {
+      exitCode = typeof code === 'number' ? code : (code ? parseInt(String(code)) : 0);
       throw new Error(`process.exit(${exitCode})`);
     });
 
-    // Import cli.ts fresh — we need to reset module cache for the test
-    // Instead, we test the gating logic by exercising getMembershipState mock
+    // Simulate what the preAction hook does — use cleargateHome seam so no mock needed
     try {
-      // Simulate what the preAction hook does
-      const state = membershipModule.getMembershipState({ profile: 'default' });
+      const state = getMembershipState({ profile: 'default', cleargateHome: noAuthHome });
       if (state.state === 'pre-member') {
         process.stderr.write('cleargate push: requires membership. Run: cleargate join <invite-url>\n');
         process.exit(2);
@@ -213,31 +209,32 @@ describe('Scenario: pre-member state gates sync commands', () => {
     expect(stderrLines.join('')).toContain('requires membership');
     assert.strictEqual(exitCode, 2);
 
-    stderrSpy.mockRestore();
-    exitSpy.mockRestore();
-    void noAuthHome; // suppress unused var warning
+    stderrSpy.mock.restore();
+    exitSpy.mock.restore();
   });
 
   const GATED_CMDS = ['push', 'pull', 'sync', 'sync-log', 'conflicts'];
 
   for (const cmd of GATED_CMDS) {
     test(`cleargate ${cmd} is in the gated set and triggers pre-member exit 2`, async () => {
-      const membershipModule = await import('../../src/lib/membership.js');
-      mock.method(membershipModule, 'getMembershipState').mockReturnValue({ state: 'pre-member' });
+      const noAuthDir = makeTmpDir();
+      fs.mkdirSync(noAuthDir, { recursive: true });
+
+      const { getMembershipState } = await import('../../src/lib/membership.js');
 
       const stderrOut: string[] = [];
-      const stderrSpy = mock.method(process.stderr, 'write').mockImplementation((data) => {
+      const stderrSpy = mock.method(process.stderr, 'write', (data: unknown) => {
         stderrOut.push(String(data));
         return true;
       });
       let exitCode: number | undefined;
-      const exitSpy = mock.method(process, 'exit').mockImplementation((code?: number | string) => {
-        exitCode = typeof code === 'number' ? code : (code ? parseInt(code) : 0);
+      const exitSpy = mock.method(process, 'exit', (code?: number | string) => {
+        exitCode = typeof code === 'number' ? code : (code ? parseInt(String(code)) : 0);
         throw new Error(`process.exit(${exitCode})`);
       });
 
       try {
-        const state = membershipModule.getMembershipState({ profile: 'default' });
+        const state = getMembershipState({ profile: 'default', cleargateHome: noAuthDir });
         if (state.state === 'pre-member') {
           process.stderr.write(`cleargate ${cmd}: requires membership. Run: cleargate join <invite-url>\n`);
           process.exit(2);
@@ -249,8 +246,8 @@ describe('Scenario: pre-member state gates sync commands', () => {
       expect(stderrOut.join('')).toContain('cleargate join');
       assert.strictEqual(exitCode, 2);
 
-      stderrSpy.mockRestore();
-      exitSpy.mockRestore();
+      stderrSpy.mock.restore();
+      exitSpy.mock.restore();
     });
   }
 

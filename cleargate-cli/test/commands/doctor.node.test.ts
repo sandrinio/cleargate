@@ -392,10 +392,6 @@ describe('Scenario: Daily throttle', () => {
     // Write a minimal package manifest (should NOT be read if throttle works)
     writePackageManifest(pkgRoot, makeManifest([]));
 
-    // Spy on computeCurrentSha to verify it's NOT called
-    const manifestModule = await import('../../src/lib/manifest.js');
-    const computeSpy = mock.method(manifestModule, 'computeCurrentSha');
-
     const cli = makeCliOpts({ cwd: projectRoot, packageRoot: pkgRoot, now: () => now });
 
     await doctorHandler(
@@ -403,8 +399,16 @@ describe('Scenario: Daily throttle', () => {
       cli
     );
 
-    // computeCurrentSha must NOT have been called (cache was reused)
-    assert.strictEqual(computeSpy.mock.calls.length, 0);
+    // Throttle behavioral assertion: doctorHandler must NOT rewrite drift state when cache is fresh.
+    // If computeCurrentSha were called (throttle bypassed), writeDriftState would be called with now.toISOString(),
+    // updating last_refreshed. Verify last_refreshed is still tenMinutesAgo (i.e., cache was reused).
+    const postState = await readDriftState(projectRoot);
+    assert.ok(postState !== null, 'drift state file must exist');
+    assert.strictEqual(
+      postState!.last_refreshed,
+      tenMinutesAgo.toISOString(),
+      'last_refreshed must NOT be updated — throttle must have reused the cache without recomputing SHAs'
+    );
   });
 });
 

@@ -318,7 +318,7 @@ describe('checkLatestVersion (STORY-016-01)', () => {
     writeCacheFile(home, '0.8.0', nowMs, 25 /* stale — would trigger refresh */);
 
     // Spy on process.stderr.write to verify nothing is written
-    const stderrSpy = mock.method(process.stderr, 'write').mockImplementation(() => true);
+    const stderrSpy = mock.method(process.stderr, 'write', () => true);
 
     let result: Awaited<ReturnType<typeof checkLatestVersion>> | undefined;
     let threw = false;
@@ -332,7 +332,7 @@ describe('checkLatestVersion (STORY-016-01)', () => {
     } catch {
       threw = true;
     } finally {
-      stderrSpy.mockRestore();
+      stderrSpy.mock.restore();
     }
 
     assert.strictEqual(threw, false);

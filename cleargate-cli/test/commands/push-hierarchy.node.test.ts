@@ -248,10 +248,10 @@ describe('Hierarchy keys — push command', () => {
 
     await pushHandler(filePath, seams.opts);
 
-    const lastCall = mcp.call.mock.calls[mcp.call.mock.calls.length - 1] as [string, Record<string, unknown>];
-    assert.strictEqual(lastCall[0], 'push_item');
-    assert.strictEqual((lastCall[1] as Record<string, Record<string, string>>).payload?.parent_cleargate_id, 'EPIC-022');
-    assert.strictEqual((lastCall[1] as Record<string, Record<string, string>>).payload?.sprint_cleargate_id, 'SPRINT-14');
+    const lastCall = mcp.call.mock.calls[mcp.call.mock.calls.length - 1]!;
+    assert.strictEqual(lastCall.arguments[0], 'push_item');
+    assert.strictEqual((lastCall.arguments[1] as Record<string, Record<string, string>>).payload?.parent_cleargate_id, 'EPIC-022');
+    assert.strictEqual((lastCall.arguments[1] as Record<string, Record<string, string>>).payload?.sprint_cleargate_id, 'SPRINT-14');
   });
 
   // Scenario: Push tolerates null keys
@@ -271,9 +271,9 @@ describe('Hierarchy keys — push command', () => {
     await pushHandler(filePath, seams.opts);
 
     // Verify call was made and payload includes the null fields (passed through fm shallow-clone)
-    const lastCallNull = mcp.call.mock.calls[mcp.call.mock.calls.length - 1] as [string, Record<string, unknown>];
-    assert.strictEqual(lastCallNull[0], 'push_item');
-    assert.strictEqual(lastCallNull[1].cleargate_id, 'CR-001');
+    const lastCallNull = mcp.call.mock.calls[mcp.call.mock.calls.length - 1]!;
+    assert.strictEqual(lastCallNull.arguments[0], 'push_item');
+    assert.strictEqual((lastCallNull.arguments[1] as Record<string, unknown>)['cleargate_id'], 'CR-001');
 
     // payload.parent_cleargate_id should be null (not undefined/omitted)
     const callArgs = (mcp.calls[0]!.args as Record<string, unknown>);

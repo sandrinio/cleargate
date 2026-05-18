@@ -203,7 +203,7 @@ describe('Config Loader', () => {
       env: {},
       configPath: path.join(os.tmpdir(), 'cleargate-nonexistent-12345.json'),
     });
-    assert.throws(() => requireMcpUrl(cfg), 'mcpUrl not configured. Run `cleargate join <invite-url>` first.');
+    assert.throws(() => requireMcpUrl(cfg), /mcpUrl not configured\. Run `cleargate join <invite-url>` first\./);
   });
 
   // Test 11: requireMcpUrl returns the string when mcpUrl is set

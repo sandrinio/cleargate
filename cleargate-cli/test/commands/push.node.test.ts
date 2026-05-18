@@ -276,10 +276,10 @@ describe('cleargate push — push gate + attribution + revert', () => {
     await pushHandler(filePath, seams.opts);
 
     // Verify MCP was called
-    const lastCallPush = mcp.call.mock.calls[mcp.call.mock.calls.length - 1] as [string, Record<string, unknown>];
-    assert.strictEqual(lastCallPush[0], 'push_item');
-    assert.strictEqual(lastCallPush[1].cleargate_id, 'STORY-042-01');
-    assert.strictEqual(lastCallPush[1].type, 'story');
+    const lastCallPush = mcp.call.mock.calls[mcp.call.mock.calls.length - 1]!;
+    assert.strictEqual(lastCallPush.arguments[0], 'push_item');
+    assert.strictEqual((lastCallPush.arguments[1] as Record<string, unknown>)['cleargate_id'], 'STORY-042-01');
+    assert.strictEqual((lastCallPush.arguments[1] as Record<string, unknown>)['type'], 'story');
 
     // Verify local frontmatter was updated with attribution
     const rawUpdated = fs.readFileSync(filePath, 'utf8');

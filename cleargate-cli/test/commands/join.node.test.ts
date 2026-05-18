@@ -329,8 +329,8 @@ describe('JC-01: cleargate join <url> --auth github happy path', () => {
     assert.deepStrictEqual(store.save.mock.calls[store.save.mock.calls.length - 1].arguments, ['default', FAKE_REFRESH_TOKEN]);
 
     // Proof uses access_token (OD-2 fix)
-    const completeCall = fetchFn.mock.calls.find((c) => (c[0] as string).includes('/complete'));
-    const completeBody = JSON.parse((completeCall?.[1] as RequestInit | undefined)?.body as string ?? '{}') as {
+    const completeCall = fetchFn.mock.calls.find((c) => (c.arguments[0] as string).includes('/complete'));
+    const completeBody = JSON.parse((completeCall?.arguments[1] as RequestInit | undefined)?.body as string ?? '{}') as {
       challenge_id: string;
       proof: Record<string, string>;
     };
@@ -390,8 +390,8 @@ describe('JC-02: cleargate join <url> --auth email happy path', () => {
     assert.deepStrictEqual(store.save.mock.calls[store.save.mock.calls.length - 1].arguments, ['default', FAKE_REFRESH_TOKEN]);
 
     // Proof uses code field for email
-    const completeCall = fetchFn.mock.calls.find((c) => (c[0] as string).includes('/complete'));
-    const completeBody = JSON.parse((completeCall?.[1] as RequestInit | undefined)?.body as string ?? '{}') as {
+    const completeCall = fetchFn.mock.calls.find((c) => (c.arguments[0] as string).includes('/complete'));
+    const completeBody = JSON.parse((completeCall?.arguments[1] as RequestInit | undefined)?.body as string ?? '{}') as {
       challenge_id: string;
       proof: Record<string, string>;
     };
@@ -532,7 +532,7 @@ describe('JC-05: wrong OTP code → 3 retries then exit 12', () => {
     expect(opts.capturedStderr.join('')).toContain('3 tries');
 
     // 3 /complete calls made (one per attempt)
-    const completeCalls = fetchFn.mock.calls.filter((c) => (c[0] as string).includes('/complete'));
+    const completeCalls = fetchFn.mock.calls.filter((c) => (c.arguments[0] as string).includes('/complete'));
     assert.strictEqual((completeCalls).length, 3);
   });
 
@@ -780,8 +780,8 @@ describe('R-2: happy path — bare UUID', () => {
     await run(opts);
 
     assert.strictEqual(opts.exitCode, undefined);
-    const challengeCall = fetchFn.mock.calls.find((c) => (c[0] as string).includes('/challenge'));
-    assert.strictEqual(challengeCall?.[0], `${MCP_BASE}/join/${VALID_UUID}/challenge`);
+    const challengeCall = fetchFn.mock.calls.find((c) => (c.arguments[0] as string).includes('/challenge'));
+    assert.strictEqual(challengeCall?.arguments[0], `${MCP_BASE}/join/${VALID_UUID}/challenge`);
   });
 });
 
@@ -860,11 +860,11 @@ describe('R-9: 429 on /challenge', () => {
     const opts = makeOpts({
       auth: 'github',
       fetch: mock.fn(() => Promise.resolve(
-        new Response(JSON.stringify({ error: 'too_many_requests' })), {
+        new Response(JSON.stringify({ error: 'too_many_requests' }), {
           status: 429,
           headers: { 'content-type': 'application/json', 'retry-after': '600' },
         }),
-      ),
+      )),
     });
     await run(opts);
     assert.strictEqual(opts.exitCode, 8);
@@ -983,7 +983,7 @@ describe('R-15: hostname appears in success message', () => {
 describe('R-16: unhandled exception from store.save exits 99', () => {
   test('R-16: exits 99 when store.save rejects', async () => {
     const store = makeFakeStore();
-    store.save.mockRejectedValue(new Error('keychain busted'));
+    store.save = mock.fn(async () => { throw new Error('keychain busted'); });
     const fetchFn = mock.fn((url: string) => {
       if (url.includes('/challenge')) return Promise.resolve(mockChallengeResponse('github'));
       if (url === GITHUB_TOKEN_URL) return Promise.resolve(mockGitHubSuccess());
@@ -1021,8 +1021,8 @@ describe('URL edge case: query params stripped from fetch URL', () => {
     });
     await run(opts);
 
-    const challengeCall = fetchFn.mock.calls.find((c) => (c[0] as string).includes('/challenge'));
-    assert.strictEqual(challengeCall?.[0], `${MCP_BASE}/join/${VALID_UUID}/challenge`);
+    const challengeCall = fetchFn.mock.calls.find((c) => (c.arguments[0] as string).includes('/challenge'));
+    assert.strictEqual(challengeCall?.arguments[0], `${MCP_BASE}/join/${VALID_UUID}/challenge`);
   });
 });
 

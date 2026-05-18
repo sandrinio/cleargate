@@ -219,14 +219,15 @@ describe("STORY-028-06 — no vitest imports remain in cleargate-cli/ (excl exam
       const testDir = path.join(CLI_ROOT, 'test');
       const scriptsDir = path.join(CLI_ROOT, 'scripts');
 
-      // Use bash to exclude examples/ and test/fixtures/
+      // Use bash to exclude examples/, test/fixtures/, and the Red test file itself
+      // (the Red test file contains `from 'vitest'` in 6 documentation strings — self-matches).
       const result = spawnSync(
         'bash',
         [
           '-c',
           `grep -r --include="*.ts" -l "from 'vitest'\\|from \\"vitest\\"" ` +
             `"${srcDir}" "${testDir}" "${scriptsDir}" 2>/dev/null ` +
-            `| grep -v "/examples/" | grep -v "/test/fixtures/" | wc -l`,
+            `| grep -v "/examples/" | grep -v "/test/fixtures/" | grep -v "\\.red\\.node\\.test\\.ts" | wc -l`,
         ],
         { encoding: 'utf-8', env },
       );
@@ -264,7 +265,7 @@ describe('STORY-028-06 — no vi.* mock patterns remain in cleargate-cli/ (excl 
           `grep -rE --include="*.ts" -l ` +
             `"\\bvi\\.(fn|mock|spyOn|stubGlobal|useFakeTimers|useRealTimers|advanceTimersByTime|hoisted)\\b" ` +
             `"${srcDir}" "${testDir}" "${scriptsDir}" 2>/dev/null ` +
-            `| grep -v "/examples/" | grep -v "/test/fixtures/" | wc -l`,
+            `| grep -v "/examples/" | grep -v "/test/fixtures/" | grep -v "\\.red\\.node\\.test\\.ts" | wc -l`,
         ],
         { encoding: 'utf-8', env },
       );
@@ -281,8 +282,10 @@ describe('STORY-028-06 — no vi.* mock patterns remain in cleargate-cli/ (excl 
   );
 });
 
-// ---- T5: *.node.test.ts file count ≥ 187 in cleargate-cli/test/ (excl fixtures) ----
-describe('STORY-028-06 — test file count preserved (≥ 187 *.node.test.ts excl fixtures)', () => {
+// ---- T5: *.node.test.ts file count ≥ 178 in cleargate-cli/test/ (excl fixtures) ----
+// Corrected from >= 187 per qa-bounce fix: actual pre-conversion baseline was 40, not 49.
+// 40 pre-existing + 138 converted = 178 minimum per story spec.
+describe('STORY-028-06 — test file count preserved (≥ 178 *.node.test.ts excl fixtures)', () => {
   /**
    * BASELINE (captured 2026-05-18 before conversion):
    *   Pre-existing *.node.test.ts in test/ (excl fixtures): 40
@@ -297,14 +300,14 @@ describe('STORY-028-06 — test file count preserved (≥ 187 *.node.test.ts exc
    *   (b) any extra .node.test.ts files added by other stories in the sprint.
    */
   it(
-    'count of *.node.test.ts files in cleargate-cli/test/ (excl fixtures) is >= 187 ' +
-      '(49 pre-existing + 138 converted)',
+    'count of *.node.test.ts files in cleargate-cli/test/ (excl fixtures) is >= 178 ' +
+      '(40 pre-existing + 138 converted; corrected from QA-Red baseline per qa-bounce fix)',
     () => {
       const nodeTestCount = countNodeTestFiles();
       assert.ok(
-        nodeTestCount >= 187,
+        nodeTestCount >= 178,
         `FAIL: only ${nodeTestCount} *.node.test.ts files found in cleargate-cli/test/ ` +
-          '(excluding fixtures) — expected >= 187. ' +
+          '(excluding fixtures) — expected >= 178. ' +
           'The 138 vitest .test.ts/.spec.ts files have not been converted to ' +
           '.node.test.ts yet.',
       );
