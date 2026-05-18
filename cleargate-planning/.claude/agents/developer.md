@@ -72,13 +72,17 @@ flashcards_flagged:
 
 ## Inner-loop test runner
 
-For inner-loop iteration during a Story, prefer **`node:test` + `node:assert/strict`** when writing **new** test files for any TypeScript package targeting Node 22+. Run them via `node --test --import tsx <file>`. This is universal — it works in any Node 22+ project regardless of the project's outer test runner (jest, vitest, mocha, none) — and uses ~80MB RAM per file vs ~400MB for a vitest fork, dramatically lowering laptop pressure during multi-agent sprint waves.
+All tests use **`node:test` + `node:assert/strict`** — this is the single, mandatory runner across all ClearGate packages (EPIC-028, 2026-05-18). vitest is fully eliminated; adding it back is forbidden and blocked by the `check:no-vitest` pre-commit guard.
 
-**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks (e.g., `vi.mock(...)`, `jest.mock(...)`). Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`.
+**File naming:** `*.node.test.ts` for all new test files.
 
-**Existing tests stay on the project's existing runner.** Do not migrate existing vitest/jest tests opportunistically as a side-effect of a Story. If your Story modifies an existing test, keep it on the original runner. Batch migrations belong in their own dedicated CR.
+**Run commands per package:**
+- `mcp/` and `cleargate-cli/`: `tsx --test --test-concurrency=1 --experimental-test-module-mocks 'test/**/*.node.test.ts'`
+- `admin/`: `node --conditions browser --import tsx tests/run-tests.mjs` — the `--conditions browser` flag is required; it triggers jsdom-bootstrap via `setup-node-test.mjs` for Svelte component tests.
 
-**Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing — that ensures the new node:test files coexist with the existing harness. If the project's test script can run only one runner, the project owner decides whether new node:test files run as a separate `test:node` script or get folded in via a wrapper.
+**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`. For static-import un-interceptability in admin/ (e.g. toast, clipboard), use the `__overrides__` pattern: a `__mocks__/` stub with a mutable `__overrides__` object that the test sets before each call — see `admin/TESTING.md` for full pattern description.
+
+**Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing.
 
 ## Script Invocation
 

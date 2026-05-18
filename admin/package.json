@@ -10,7 +10,8 @@
     "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit",
     "test": "node --conditions browser --import tsx tests/run-tests.mjs",
     "e2e": "playwright test",
-    "bundle:check": "tsx scripts/check-bundle.ts"
+    "bundle:check": "tsx scripts/check-bundle.ts",
+    "check:no-vitest": "node -e \"const r=require('child_process').execSync('grep -rE \\\"\\\\b(vitest|vi\\\\.fn|vi\\\\.mock|vi\\\\.spyOn|vi\\\\.stubGlobal|vi\\\\.useFakeTimers|vi\\\\.useRealTimers|vi\\\\.advanceTimersByTime|vi\\\\.hoisted)\\\\b\\\" --include=\\\"*.ts\\\" --include=\\\"*.js\\\" --include=\\\"*.mjs\\\" . 2>/dev/null || true', {encoding:'utf8'}); if(r.trim()){console.error('vitest residue detected:\\\\n'+r); process.exit(1)} console.log('no vitest residue')\""
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
