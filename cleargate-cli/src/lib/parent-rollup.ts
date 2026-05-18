@@ -51,14 +51,33 @@ function readFm(filePath: string): Record<string, unknown> | null {
 }
 
 /**
- * Extract the story_id from frontmatter, falling back to the filename stem.
+ * Extract the canonical ID from frontmatter, checking all known ID-key conventions
+ * in priority order before falling back to the filename stem.
+ *
+ * Key priority order mirrors template conventions:
+ *   story_id (story.md) → epic_id (epic.md) → sprint_id (Sprint Plan Template.md)
+ *   → bug_id (Bug.md) → cr_id (CR.md) → initiative_id (initiative.md)
+ *   → hotfix_id (hotfix.md)
+ *
+ * Filename stem fallback: takes the first underscore-delimited segment so that
+ * files named "EPIC-010_Multi_Participant_MCP_Sync.md" resolve to "EPIC-010".
  */
 function extractId(fm: Record<string, unknown>, filePath: string): string {
-  if (typeof fm['story_id'] === 'string' && fm['story_id'].trim() !== '') {
-    return fm['story_id'].trim();
+  for (const key of [
+    'story_id',
+    'epic_id',
+    'sprint_id',
+    'bug_id',
+    'cr_id',
+    'initiative_id',
+    'hotfix_id',
+  ]) {
+    const val = fm[key];
+    if (typeof val === 'string' && val.trim() !== '') return val.trim();
   }
-  // Fallback: use filename without extension
-  return path.basename(filePath, '.md');
+  // Fallback: parse from filename stem (first underscore-delimited segment)
+  const stem = path.basename(filePath, '.md');
+  return stem.split('_')[0] ?? stem;
 }
 
 /**
