@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-027
 parent_cleargate_id: EPIC-027
 sprint_cleargate_id: SPRINT-27
 carry_over: false
-status: Approved
+status: Completed
 ambiguity: 🟢 Low
 approved: true
 approved_by: sandrinio

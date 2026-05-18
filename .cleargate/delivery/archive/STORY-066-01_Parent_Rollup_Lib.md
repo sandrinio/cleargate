@@ -5,7 +5,7 @@ parent_cleargate_id: CR-066
 sprint_cleargate_id: SPRINT-28
 carry_over: false
 area: cli,reconciler,lib
-status: Draft
+status: Completed
 approved: false
 ambiguity: 🟢 Low
 complexity_label: L2

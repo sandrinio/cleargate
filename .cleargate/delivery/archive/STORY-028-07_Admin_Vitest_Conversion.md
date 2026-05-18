@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-028
 sprint_cleargate_id: SPRINT-28
 carry_over: false
 area: admin,tests,svelte,codemod
-status: Draft
+status: Completed
 approved: false
 ambiguity: 🟡 Medium
 complexity_label: L2

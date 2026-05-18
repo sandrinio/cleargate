@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-027
 sprint_cleargate_id: null
 carry_over: false
 area: cli,mcp,scripts
-status: Approved
+status: Completed
 approved: true
 created_at: 2026-05-14T00:00:00Z
 updated_at: 2026-05-14T00:00:00Z

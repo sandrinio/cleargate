@@ -5,7 +5,7 @@ parent_cleargate_id: CR-066
 sprint_cleargate_id: SPRINT-28
 carry_over: false
 area: cli,reconciler,hygiene
-status: Approved
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-05-17T00:00:00Z
