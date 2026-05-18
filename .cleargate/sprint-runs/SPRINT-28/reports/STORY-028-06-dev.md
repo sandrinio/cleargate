@@ -86,3 +86,21 @@ Converted 137 vitest `.test.ts` files in `cleargate-cli/test/` + 1 file in `clea
 3. **mock.fn() vs vitest**: In node:test, `mock.fn().mock.calls[i]` returns `{ arguments: [...], ... }` not a raw array. The shim's `toHaveBeenCalledWith` uses `.arguments` correctly. Direct destructuring patterns like `const [a, b] = fn.mock.calls[0]` in 6 files were fixed to `fn.mock.calls[0].arguments`.
 
 4. **Remaining test failures**: 132 individual test failures (excluding 2 fixture-glob bleed). Many are pre-existing vitest failures that weren't visible before (e.g., close-sprint tests that require build, snapshot-drift tests, etc.). Full triage would require comparing against the original vitest baseline.
+
+## §11 Rebase Conflict Resolution (2026-05-18)
+
+**Context:** STORY-028-06's branch (`story/STORY-028-06`) was rebased onto `sprint/S-28` which already contained STORY-067-03's commit (`1a3234d0`). STORY-067-03 updated `lifecycle-reconcile.test.ts` with CR-067 status-vocabulary changes (Done→Completed, Verified→Completed). STORY-028-06's conversion renamed that file to `lifecycle-reconcile.node.test.ts` and converted the API to node:test. Git detected 2 content collisions.
+
+**Resolution rule applied:** HEAD side (STORY-067-03, CR-067 vocab) took precedence for status strings; incoming side (STORY-028-06, node:test API) took precedence for assertion API form.
+
+**Conflict 1** (Scenario 2, `drift item includes the correct remediation-enabling fields`):
+- HEAD: `expect(result.drift[0]?.expected_status).toBe('Completed')` (vitest API, CR-067 vocab)
+- Incoming: `assert.strictEqual(result.drift[0]?.expected_status, 'Done')` (node:test API, pre-CR-067 vocab)
+- Resolution: `assert.strictEqual(result.drift[0]?.expected_status, 'Completed')` — node:test API + CR-067 vocab
+
+**Conflict 2** (VERB_STATUS_MAP describe block):
+- HEAD: `it('feat maps to ... Completed only (post-CR-067)', ...)` with `expect().toContain('Completed')` / `.not.toContain('Done')` / `.not.toContain('Verified')` (vitest `it()` API, CR-067 vocab)
+- Incoming: `test('feat maps to ... Done|Completed', ...)` with `assert.ok(String(...).includes('Done'))` (node:test API, pre-CR-067 vocab)
+- Resolution: `test('feat maps to ... Completed only (post-CR-067)', ...)` with node:test `assert.ok(String(...).includes('Completed'))` / `assert.ok(!String(...).includes('Done'))` / `assert.ok(!String(...).includes('Verified'))` — same pattern for `fix` verb block.
+
+**Verification:** 24/24 tests pass (`node --test --import tsx test/lib/lifecycle-reconcile.node.test.ts`). `npm run typecheck` clean. Rebase completed with `git rebase --continue` (no further conflicts on subsequent commit `3444104a`).
