@@ -4,6 +4,11 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-19 · #qa-red #spec-gap · Red file's inline regex/const copy goes stale when Dev applies spec-gap fix; delete `.red.` file at merge, do not patch in place — its tests duplicate the plain `.node.test.ts`.
+2026-05-19 · #readiness-gate #path-re · PATH_RE suffix `(?::[a-zA-Z0-9_]+)?` now supports numeric line anchors (`:42`); strip-suffix regex at the same call site must mirror the character class.
+2026-05-19 · #regex #test-fixture · When tightening a path-extraction regex, pre-existing test fixtures citing bare filenames (e.g. `package.json`) break — update to slash-required form (`./package.json`); behavioral change is intentional.
+2026-05-19 · #git #stash · `git stash` + failed `stash pop` + `stash drop` lost in-flight Dev edits; never stash for baseline comparison — use a throwaway branch or committed fixup instead.
+
 2026-05-18 · #node-test #testing · EPIC-028 complete — single test runner across mcp/, cleargate-cli/, admin/. __overrides__ pattern (mutable shared state in __mocks__/ + 2 prod seams) is the workaround for static-ESM-import un-interceptability.
 
 2026-05-18 · #parent-rollup #reconciler · parent-rollup.ts extractId() checks story_id only; Epic files use epic_id — add epic_id/sprint_id key checks before filename-stem fallback.
