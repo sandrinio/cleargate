@@ -56,3 +56,24 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-28]] | sprint | Active | .cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md |
 | [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |
+| [[SPRINT-30]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md |
+## Bugs
+
+| [[BUG-031]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-031_Cleargate_Init_Inherits_Global_Project_Id.md |
+| [[BUG-032]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-032_Sprint_Close_Backsync_Skips_Story_Frontmatter.md |
+## CRs
+
+| [[CR-068]] | cr | Approved | .cleargate/delivery/pending-sync/CR-068_Init_Silence_DEP0190_Shell_True_Warning.md |
+| [[CR-069]] | cr | Approved | .cleargate/delivery/pending-sync/CR-069_Init_Final_Banner_Surfaces_Mcp_Restart_Need.md |
+| [[CR-070]] | cr | Approved | .cleargate/delivery/pending-sync/CR-070_Collapse_Execution_Mode_To_Single_Behavior.md |
+| [[CR-071]] | cr | Approved | .cleargate/delivery/pending-sync/CR-071_Sprint_Execution_Autonomy_Contract.md |
+| [[CR-072]] | cr | Approved | .cleargate/delivery/pending-sync/CR-072_Cleargate_Init_Default_Gitignore_Expansion.md |
+| [[CR-073]] | cr | Approved | .cleargate/delivery/pending-sync/CR-073_Readiness_Gate_Path_Parser_Tightening.md |
+## Stories
+
+| [[STORY-068-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-068-01_Drop_Shell_True_From_Init_Spawns.md |
+| [[STORY-069-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-069-01_Init_Final_MCP_Restart_Banner.md |
+| [[STORY-070-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-070-01_Collapse_Execution_Mode_Single_Behavior.md |
+| [[STORY-071-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-071-01_Sprint_Execution_Autonomy_Contract.md |
+| [[STORY-072-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-072-01_Expand_Init_Gitignore_Default.md |
+| [[STORY-073-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-073-01_Tighten_Path_Parser_Regex.md |
