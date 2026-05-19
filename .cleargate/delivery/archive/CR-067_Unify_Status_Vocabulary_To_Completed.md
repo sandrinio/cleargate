@@ -1,7 +1,7 @@
 ---
 cr_id: CR-067
 parent_ref: status-vocabulary across templates, gate-checks, scripts, archived items
-parent_cleargate_id: null
+parent_cleargate_id: "status-vocabulary across templates, gate-checks, scripts, archived items"
 sprint_cleargate_id: SPRINT-28
 carry_over: false
 area: cli,scripts,templates,gate-checks,migration

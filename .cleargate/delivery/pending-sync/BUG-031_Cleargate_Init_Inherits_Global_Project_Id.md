@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-031
 parent_ref: EPIC-021
-parent_cleargate_id: null
+parent_cleargate_id: "EPIC-021"
 sprint_cleargate_id: null
 carry_over: false
 status: Triaged

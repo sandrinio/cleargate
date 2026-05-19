@@ -1,7 +1,7 @@
 ---
 sprint_id: SPRINT-29
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-29"
 carry_over: true
 lifecycle_init_mode: block
 area: delivery-structure,cli,migration,scaffold
