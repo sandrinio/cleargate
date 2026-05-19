@@ -38,15 +38,21 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-05-19T16:05:07Z
-stamp_error: no ledger rows for work_item_id STORY-073-01
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-19T16:05:07Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-7
+  last_stamp: 2026-05-19T16:56:32Z
+  sessions:
+    - session: 1ab577c1-dab2-482f-85ac-f5263801f3bc
+      model: claude-opus-4-7
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-19T16:55:15Z
 ---
 
 # STORY-073-01: Tighten readiness-gate path-extractor regex to require directory separator
@@ -67,9 +73,9 @@ As a CR/Story author writing the §Existing Surfaces section, I want the readine
    ```
    With:
    ```ts
-   const PATH_RE = /[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_./-]*\.[a-zA-Z]{1,5}(?::[a-zA-Z_][a-zA-Z0-9_]*)?/g;
+   const PATH_RE = /[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_./-]*\.[a-zA-Z]{1,5}(?::[a-zA-Z0-9_]+)?/g;
    ```
-   The new regex requires at least one `/` between the start of the token and the final `.ext`. Trailing `:symbol` capture is preserved.
+   The new regex requires at least one `/` between the start of the token and the final `.ext`. The trailing `:anchor` capture accepts both alphabetic symbol names (`:fetchIssues`) and numeric line numbers (`:42`) — required by §2.1 Scenario 6 (`foo.ts:42`).
 2. **Effects on existing behavior:**
    - `init.ts` (bare filename in prose) — no longer matches.
    - `state.execution_mode` (dotted code reference) — no longer matches.
