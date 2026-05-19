@@ -63,7 +63,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-19T14:36:01Z
+  last_stamp: 2026-05-19T19:21:25Z
   sessions: []
 ---
 
@@ -150,7 +150,7 @@ Identical project_id. Two unrelated repos (meta-repo vs pdf_processor) reporting
 
 **Investigate:**
 
-- `cleargate-cli/src/util/identity.ts` (or equivalent) — the participant/project resolution function used by `cleargate doctor --session-start`. Whichever lookup happens BEFORE consulting per-repo `.cleargate/.participant.json` is the leak source.
+- `cleargate-cli/src/lib/identity.ts` — the canonical participant/project resolution module. (Story spec originally said `util/identity.ts`; the canonical path is `lib/`. Patch applied 2026-05-19 per M1 plan §6 Open Decision 3.) Whichever lookup happens BEFORE consulting per-repo `.cleargate/.participant.json` is the leak source. Also audit `cleargate-cli/src/lib/membership.ts` — `getMembershipState()` reads `~/.cleargate/auth.json` and is the most likely leak surface per the M1 SDR investigation.
 - `cleargate-cli/src/commands/doctor.ts` — the `--session-start` code path that emits the `state: member (project: …)` line. Verify the resolver prioritizes per-repo over global, and that absence of a per-repo `project_id` returns pre-member (NOT falls through to global).
 - `cleargate-cli/src/commands/join.ts` — where is `project_id` written on a successful join? If it's written to a global file (e.g., `~/.cleargate/joined-projects.json`), that's the leak surface.
 - `cleargate-cli/src/commands/init.ts` — does init read or seed any global project file? It should not.
