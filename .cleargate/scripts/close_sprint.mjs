@@ -480,6 +480,61 @@ async function main() {
     process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
   }
 
+  // ── Step 2.6d: Same-Sprint Story Backsync (BUG-032) ─────────────────────────
+  // Flip all Done-state stories in the closing sprint from their current
+  // frontmatter status to `status: Completed, approved: true`, then move
+  // the file from pending-sync/ to archive/.
+  //
+  // Root cause: reconcileCrossSprintOrphans explicitly SKIPS the active sprint
+  // (reads .active sentinel). No prior step flipped same-sprint story frontmatter.
+  // This step fills that gap.
+  //
+  // Idempotence: stories already at a terminal status are silently skipped.
+  // Runs unconditionally (no CLEARGATE_SKIP_* seam) — the function is pure FS,
+  // no git calls, no CLI binary required. CLEARGATE_REPO_ROOT overrides delivery paths.
+  process.stdout.write('Step 2.6d: back-syncing same-sprint story frontmatter...\n');
+  try {
+    const reconcilerMod26d = await import(
+      path.join(SCRIPTS_DIR, '..', '..', 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+    ).catch(() => null);
+
+    if (!reconcilerMod26d || typeof reconcilerMod26d.reconcileCurrentSprintStories !== 'function') {
+      process.stdout.write(
+        'Step 2.6d skipped: reconcileCurrentSprintStories not in built CLI — rebuild cleargate-cli/.\n',
+      );
+    } else {
+      const deliveryRoot26d = path.join(REPO_ROOT, '.cleargate', 'delivery');
+      const sprintRunsRoot26d = path.join(REPO_ROOT, '.cleargate', 'sprint-runs');
+
+      const backsyncResult = reconcilerMod26d.reconcileCurrentSprintStories({
+        deliveryRoot: deliveryRoot26d,
+        sprintRunsRoot: sprintRunsRoot26d,
+        sprintId,
+        retroactive: false,
+      });
+
+      if (backsyncResult.flipped.length > 0) {
+        for (const item of backsyncResult.flipped) {
+          process.stdout.write(
+            `Step 2.6d: ${item.id} status ${item.old_status} → Completed` +
+            ` (state.json: Done) → archived at ${item.file_path}\n`,
+          );
+        }
+        process.stdout.write(
+          `Step 2.6d passed: ${backsyncResult.flipped.length} story/stories back-synced and archived.\n`,
+        );
+      } else {
+        process.stdout.write(
+          `Step 2.6d passed: no same-sprint story backsync needed` +
+          ` (${backsyncResult.skipped_already_terminal} already terminal, ` +
+          `${backsyncResult.skipped_not_done} pending non-Done).\n`,
+        );
+      }
+    }
+  } catch (e26d) {
+    process.stderr.write(`Step 2.6d warning: same-sprint backsync unavailable: ${e26d.message}\n`);
+  }
+
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
   // Block close if any .worktrees/STORY-* path is present.
   // v2 enforcing (exit 1); v1 advisory (warn + continue).
