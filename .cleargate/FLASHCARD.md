@@ -4,6 +4,10 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-19 · #devops #build #dist · DevOps merge-time scoped test fails on stale `cleargate-cli/dist/cli.js` (gitignored, locally-built). When src/ is touched, rebuild before Step 6: `cd cleargate-cli && npm run build`.
+2026-05-19 · #close-pipeline #test-seam · `reconcileCurrentSprintStories` (Step 2.6d) needs no SKIP seam — pure FS (no git, no network); `import().catch` handles stale-dist gracefully.
+2026-05-19 · #close-pipeline #id-lookup · `reconcileCrossSprintOrphans` prefix-split silently drops non-standard IDs (e.g. `STORY-TEST-01` → `idType()` returns null → entry dropped). Use `findArtifactFile()` for cross-format coverage when test fixtures use non-numeric segments.
+2026-05-19 · #test-harness #gitignore · `git check-ignore -v` exits 0 for negation `!` rules (false positive). Omit `-v` to get exit 1 for not-ignored files with `!` allowlists.
 2026-05-19 · #qa-red #spec-gap · Red file's inline regex/const copy goes stale when Dev applies spec-gap fix; delete `.red.` file at merge, do not patch in place — its tests duplicate the plain `.node.test.ts`.
 2026-05-19 · #readiness-gate #path-re · PATH_RE suffix `(?::[a-zA-Z0-9_]+)?` now supports numeric line anchors (`:42`); strip-suffix regex at the same call site must mirror the character class.
 2026-05-19 · #regex #test-fixture · When tightening a path-extraction regex, pre-existing test fixtures citing bare filenames (e.g. `package.json`) break — update to slash-required form (`./package.json`); behavioral change is intentional.
