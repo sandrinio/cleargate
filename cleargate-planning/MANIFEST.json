@@ -1,10 +1,10 @@
 {
   "cleargate_version": "0.13.0",
-  "generated_at": "2026-05-22T17:56:56.479Z",
+  "generated_at": "2026-05-22T19:03:52.798Z",
   "files": [
     {
       "path": ".claude/agents/architect.md",
-      "sha256": "823db34b934d080e648955326dcc3cd31899e90f62ecfa4a9344f5b473237084",
+      "sha256": "090888a44229612b1a7cb026eb113157c3ff8e899aa2693b43850a8f42e95c04",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -39,28 +39,28 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "db7963778d68654f2dc96658d60433fa79305a10eec937807f2f0ed0cd05ce89",
+      "sha256": "1a2ca593ed4dae8d7f3e44840fcd527330fe468dd696cb2a15993e7c330721d0",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/devops.md",
-      "sha256": "65e84275b7a6480be2144250cc00573e8c26840abed98768ce4c168d594c7f8e",
+      "sha256": "6402ec599b9a65ca46d5b5bfd363baf1c30c63690e0cd736c79fdd7d41350fe7",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "c6fab6b64acc717a6bb5618531e6568010b3aeb10a98e33ba10b8dde45f5becb",
+      "sha256": "f3aa3fdbe2231c15404bbf376c715f961d161a9ea01fa919e12b2b3b9bf3b003",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "36558f7f90e2e52192df88f243631735a880b7d371e6df17025933151a825c56",
+      "sha256": "2cc0f8f143c5387b75b641cea1ae05ffdae7966815bf8644745016c95c79c670",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -101,6 +101,13 @@
       "preserve_on_uninstall": false
     },
     {
+      "path": ".claude/hooks/pre-tool-use-autonomy.sh",
+      "sha256": "519774451c2cb3233baa1f7b20f166f956a1f3e77f568ad6f55194c539b927f6",
+      "tier": "hook",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
       "path": ".claude/hooks/pre-tool-use-task.sh",
       "sha256": "79fdd30e3f301cb89757aa2279a5fb8cc3a91493b62d5c801517853500368e7f",
       "tier": "hook",
@@ -130,7 +137,7 @@
     },
     {
       "path": ".claude/settings.json",
-      "sha256": "8c3c8fe2bd2a2c23e3faa56fad94352c66a11646d12a4ca79ff95d578e589ec0",
+      "sha256": "cd0bb53b69cb063d760d9709939acef694043a1f7bb74f8542f84c31fd9546c9",
       "tier": "cli-config",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -144,7 +151,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "877fabf8fcc682d9ba55421e6ba8c2a4ccf2b84a83d66e77dedc418b5aa47a3a",
+      "sha256": "107869b0c36fee69ac3836f5ecda9ec94edbd1dd89dc30f87b1ada760d0c14fc",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

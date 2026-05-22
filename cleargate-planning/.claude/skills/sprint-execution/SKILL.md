@@ -637,7 +637,7 @@ When in doubt, read the source-of-truth doc — this skill cites them, it does n
 
 ## 11. Conversational Discipline During Execution
 
-- **Sprint execution is autonomous.** Once started, run the loop end-to-end. Escalate only on blockers, gate failures, or destructive operations.
+- **Sprint execution is autonomous.** See `.cleargate/knowledge/cleargate-protocol.md` § Sprint Execution Autonomy for the canonical rule and blocker enumeration. In short: once started, run the loop end-to-end; halt only on the five defined true-blocker cases (destructive actions, secrets, user-intent decisions, technical impossibility, spec-internal contradictions).
 - **Terse output.** Status updates one sentence each. Details live in story reports and `SPRINT-<#>_REPORT.md`, not in chat.
 - **Halt at gates without negotiation.** Gate 3 (preflight), Gate 4 (close sign-off), `Escalated` state — these are not advisory. Surface, halt, wait.
 - **Never `--no-verify`, `--assume-ack` autonomously, force-push, or `git reset --hard`.** Every one of these requires explicit per-action human approval.
