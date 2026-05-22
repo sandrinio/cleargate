@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-22T18:01:34Z",
+  "command": "git",
+  "args": ["worktree","remove","/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-070-01"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 128,
+  "stdout": "",
+  "stderr": "fatal: '/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-070-01' contains modified or untracked files, use --force to delete it",
+  "agent_type": null,
+  "work_item_id": null
+}

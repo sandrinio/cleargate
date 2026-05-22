@@ -93,8 +93,8 @@ _No active epics._
 ## Planned Epics
 
 
+- [[EPIC-030]] — status: Draft
 
-_No planned epics._
 
 
 ## Shipped Epics

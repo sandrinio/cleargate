@@ -52,6 +52,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## Epics
 
 | [[EPIC-029]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
+| [[EPIC-030]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-030_AI_Driven_Sprint_Planning.md |
 ## Sprints
 
 | [[SPRINT-28]] | sprint | Active | .cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md |
@@ -77,3 +78,6 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[STORY-071-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-071-01_Sprint_Execution_Autonomy_Contract.md |
 | [[STORY-072-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-072-01_Expand_Init_Gitignore_Default.md |
 | [[STORY-073-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-073-01_Tighten_Path_Parser_Regex.md |
+## Proposals
+
+| [[PROPOSAL-074]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md |
