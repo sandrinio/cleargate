@@ -780,3 +780,46 @@ npm run check:no-pm-sdk
 ```
 
 Comments (lines starting with `//`, `#`, `/*`, or `*`) are excluded from the scan. The script prints `✓ no forbidden PM-SDK imports` on a clean tree.
+
+---
+
+## 22. Sprint Execution Autonomy
+
+Once a sprint's frontmatter / state.json carries `sprint_status: "Active"`, no agent
+— Orchestrator, Architect, Developer, QA, DevOps, or Reporter — MAY issue a user-facing
+prompt (`AskUserQuestion`, `ExitPlanMode`, interactive stdin read) EXCEPT under one of the
+five true-blocker cases below.
+
+**Rationale:** all ambiguity is supposed to clear at Gate 2 (pre-sprint). Mid-execution
+questions are evidence that Gate 2 was incomplete; the right answer is to surface those
+gaps to the next sprint's Gate-2 checklist, not to interrupt current execution.
+
+**Scope:** the contract activates at sprint Active. Architect's Sprint Design Review
+(SDR) — which runs after initial Gate 2 but before sprint goes Active — is EXEMPT.
+
+### True blockers (escalation REQUIRED)
+
+1. **Destructive action approval.** force-push, `git reset --hard`, dropping a DB table,
+   deleting an untracked file the user might own, killing a process. Ask before performing.
+2. **Secret / credential handling.** Anything that would require reading from .env files,
+   fetching a secret, or persisting credential material. Ask before reading or writing.
+3. **User-intent decision.** A question whose answer is genuinely "what does the user
+   want?" and cannot be inferred from sprint goal, story Gherkin, or prior decisions.
+4. **True technical impossibility.** Required infrastructure unavailable (e.g. test DB
+   unreachable, MCP down). Write blockers report AND surface to user.
+5. **Spec-internal contradiction.** Story Gherkin contradicts itself, or two stories
+   in the same wave specify incompatible behavior on a shared surface. Write blockers
+   report — Gate-1/Gate-2 escape that human must triage.
+
+### Not blockers — agent decides
+
+- Choice between two reasonable implementations that both meet the acceptance Gherkin.
+- Test-pattern selection within established repo precedent.
+- Minor wording / UX copy choices. Default to conservative; document in dev report.
+- Refactor-or-not within the touched surface. Default NO refactor.
+- Library version selection within the Architect's pre-validated table.
+- Error-message phrasing.
+- Log-line format.
+
+**When in doubt: write a blockers report (`STORY-NNN-NN-<agent>-blockers.md`) and
+return BLOCKED. Do not interpret silence as permission to proceed on ambiguous scope.**
