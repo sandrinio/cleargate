@@ -1,12 +1,11 @@
 /**
- * ClearGate Execution Phase v2 — Constants
+ * ClearGate Execution Phase — Constants
  *
- * state.json v2 Schema (LOCKED — any future field change must bump schema_version):
+ * state.json v3 Schema (STORY-070-01: execution_mode retired — single always-enforced behavior):
  *
  * {
- *   "schema_version": 2,          // integer, mandatory
+ *   "schema_version": 3,          // integer, mandatory
  *   "sprint_id": "S-NN",          // string
- *   "execution_mode": "v1"|"v2",  // string
  *   "sprint_status": "Active",    // string
  *   "stories": {
  *     "STORY-NNN-NN": {
@@ -16,7 +15,7 @@
  *       "worktree": null,            // string|null — path to worktree checkout
  *       "updated_at": "<ISO-8601>",  // string
  *       "notes": "",                 // string
- *       "lane": "standard",          // additive v2; default "standard"
+ *       "lane": "standard",          // default "standard"
  *       "lane_assigned_by": "architect" | "human-override" | "migration-default",
  *       "lane_demoted_at": "<ISO-8601>" | null,
  *       "lane_demotion_reason": string | null
@@ -25,9 +24,11 @@
  *   "last_action": "<string>",    // human-readable last operation
  *   "updated_at": "<ISO-8601>"    // string
  * }
+ *
+ * Break-glass env var: CLEARGATE_ADVISORY=1 downgrades gate failures to warnings.
  */
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const BOUNCE_CAP = 3;
 

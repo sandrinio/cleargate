@@ -25,6 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES, BOUNCE_CAP } from './constants.mjs';
 import { validateState, validateShapeIgnoringVersion } from './validate_state.mjs';
+import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -112,6 +113,12 @@ function main() {
   // Migrate v1 → v2 if needed; write atomically so subsequent reads see v2
   if (state.schema_version === 1) {
     state = migrateV1ToV2(state);
+    atomicWrite(stateFile, state);
+  }
+
+  // Migrate v2 → v3: strip execution_mode (STORY-070-01)
+  const { changed: v3Changed } = migrateStateToV3(state, stateFile);
+  if (v3Changed) {
     atomicWrite(stateFile, state);
   }
 
