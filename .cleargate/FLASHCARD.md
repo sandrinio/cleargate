@@ -4,6 +4,8 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-22 · #qa #regression #baseline-variance · full-suite failure count can vary ~15 across runs (env/test-isolation flakes); always stash-baseline before attributing a delta to the story under test, never trust raw count diff.
+
 2026-05-20 · #membership #per-repo #cr-011 · `getMembershipState` requires `{projectRoot}` param + per-repo `.cleargate/.join.json` to return `member`. Global `~/.cleargate/auth.json` alone is insufficient. `join.ts` MUST write the marker on success (otherwise doctor always shows pre-member).
 2026-05-20 · #worktree #build #node_modules · git worktrees share source but NOT `node_modules`. Symlink `ln -s <main-repo>/cleargate-cli/node_modules <worktree>/cleargate-cli/node_modules` before any `npm run build` step in a fresh worktree.
 2026-05-20 · #worktree #build #dist · dist/cli.js references co-located chunk-*.js files. When running tests via `process.execPath + DIST_CLI_PATH` from a worktree, the full dist/ (cli.js + all chunks) must be present, not just cli.js. Build inside the worktree (after node_modules symlink) or copy the entire dist/ tree.
