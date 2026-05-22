@@ -6,24 +6,25 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 
 | New § | Source § | Title |
 |---|---|---|
-| §1 | protocol §15 | Worktree Lifecycle (v2) |
-| §2 | protocol §16 | User Walkthrough on Sprint Branch (v2) |
-| §3 | protocol §17 | Mid-Sprint Change Request Triage (v2) |
-| §4 | protocol §18 | Immediate Flashcard Gate (v2) |
-| §5 | protocol §19 | Execution Mode Routing (v2) |
-| §6 | protocol §20 | File-Surface Contract (v2) |
-| §7 | protocol §22 | Advisory Readiness Gates on Push (v2) — CR-010 |
+| §1 | protocol §15 | Worktree Lifecycle |
+| §2 | protocol §16 | User Walkthrough on Sprint Branch |
+| §3 | protocol §17 | Mid-Sprint Change Request Triage |
+| §4 | protocol §18 | Immediate Flashcard Gate |
+| §5 | protocol §19 | Execution Mode Routing (retired — see §15 Operator Emergency Levers) |
+| §6 | protocol §20 | File-Surface Contract |
+| §7 | protocol §22 | Advisory Readiness Gates on Push — CR-010 |
 | §8 | protocol §23 | Doctor Exit-Code Semantics |
 | §9 | protocol §24 | Lane Routing |
 | §10 | protocol §25 | Lifecycle Reconciliation (CR-017) |
 | §11 | protocol §26 | Decomposition Gate (CR-017) |
 | §12 | protocol §27 | Gate 3.5 — Sprint Close Acknowledgement (CR-019) |
+| §15 | — | Operator Emergency Levers (STORY-070-01) |
 
 ---
 
-## 1. Worktree Lifecycle (v2) (source: protocol §15)
+## 1. Worktree Lifecycle (source: protocol §15)
 
-**v1/v2 gating:** Under `execution_mode: v1` the rules in this section are **informational** — they document the intended workflow but are not enforced by any script. Under `execution_mode: v2` they are **mandatory**: every story transition that would run a Developer agent MUST follow these procedures before any file edits begin.
+**Always enforced** (STORY-070-01: `execution_mode` retired — single always-enforced behavior). Every story transition that would run a Developer agent MUST follow these procedures before any file edits begin. Set `CLEARGATE_ADVISORY=1` for break-glass downgrade to warnings (see §15).
 
 ### §1.1 Branch hierarchy
 
@@ -93,18 +94,13 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 
 ### §1.5 Enforcement gates
 
-| `execution_mode` | These rules are |
-|---|---|
-| `v1` | Informational — document intended workflow; not script-enforced |
-| `v2` | Mandatory — `validate_bounce_readiness.mjs` checks worktree isolation before any Developer Agent edit |
-
-Under v2, attempting to run a Developer Agent on a story without a matching `.worktrees/STORY-NNN-NN/` path present causes `validate_bounce_readiness.mjs` to exit non-zero and the orchestrator to halt the story transition.
+**Always enforced.** Attempting to run a Developer Agent on a story without a matching `.worktrees/STORY-NNN-NN/` path present causes `validate_bounce_readiness.mjs` to exit non-zero and the orchestrator to halt the story transition. Set `CLEARGATE_ADVISORY=1` (§15) for break-glass downgrade.
 
 ---
 
-## 2. User Walkthrough on Sprint Branch (v2) (source: protocol §16)
+## 2. User Walkthrough on Sprint Branch (source: protocol §16)
 
-**v1/v2 gating:** Under `execution_mode: v1` this section is **informational**. Under `execution_mode: v2` it is **mandatory**: the sprint branch MUST NOT merge to `main` until the walkthrough is complete and all `UR:bug` items are resolved.
+**Always enforced** (STORY-070-01): the sprint branch MUST NOT merge to `main` until the walkthrough is complete and all `UR:bug` items are resolved.
 
 ### §2.1 Walkthrough trigger
 
@@ -136,9 +132,9 @@ The sprint branch MUST NOT merge to `main` while any `UR:bug` item is unresolved
 
 ---
 
-## 3. Mid-Sprint Change Request Triage (v2) (source: protocol §17)
+## 3. Mid-Sprint Change Request Triage (source: protocol §17)
 
-**v1/v2 gating:** Under `execution_mode: v1` this section is **informational**. Under `execution_mode: v2` it is **mandatory**: every user-injected change during a bounce MUST be classified before routing.
+**Always enforced** (STORY-070-01): every user-injected change during a bounce MUST be classified before routing.
 
 ### §3.1 Classification table
 
@@ -166,9 +162,9 @@ A `CR:scope-change` MUST NOT be folded into the current story's commit. Create a
 
 ---
 
-## 4. Immediate Flashcard Gate (v2) (source: protocol §18)
+## 4. Immediate Flashcard Gate (source: protocol §18)
 
-**v1/v2 gating:** Under `execution_mode: v1` this section is **informational** — the gate is advisory and the orchestrator may proceed without processing flagged cards (though it is strongly encouraged). Under `execution_mode: v2` it is **mandatory**: the orchestrator MUST NOT create the next story's worktree until all `flashcards_flagged` entries from the prior story's dev + QA reports are processed.
+**Always enforced** (STORY-070-01): the orchestrator MUST NOT create the next story's worktree until all `flashcards_flagged` entries from the prior story's dev + QA reports are processed.
 
 **V-Bounce reference:** `skills/agent-team/SKILL.md` §"Step 5.5: Immediate Flashcard Recording (Hard Gate)" at pinned SHA `2b8477ab65e39e594ee8b6d8cf13a210498eaded`.
 
@@ -203,13 +199,13 @@ YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars
 
 The orchestrator may reformat an entry that violates the format before appending, but must log the reformat in sprint §4 Execution Log.
 
-### §4.5 v1 dogfood note
+### §4.5 Historical note
 
-SPRINT-09 runs under `execution_mode: v1`. From STORY-013-06 merge onwards, the orchestrator applies the §4.2 processing loop manually as a dogfood check even though the rule is informational. This is recorded in the SPRINT-09 sprint plan (line 121).
+Before STORY-070-01, this gate was advisory under `execution_mode: v1` and mandatory under `execution_mode: v2`. The `execution_mode` field is now retired — this gate is always enforced.
 
-### §4.6 PreToolUse hook enforcement (v2)
+### §4.6 PreToolUse hook enforcement
 
-Under `execution_mode: v2`, the `pending-task-sentinel.sh` PreToolUse hook automatically enforces the flashcard gate before every Task (subagent) dispatch. This is implemented by STORY-014-03.
+The `pending-task-sentinel.sh` PreToolUse hook automatically enforces the flashcard gate before every Task (subagent) dispatch. This is implemented by STORY-014-03.
 
 **Hash-marker convention:**
 
@@ -237,8 +233,7 @@ The marker files are gitignored via the existing `.cleargate/sprint-runs/` gitig
 2. For each report file, it parses the `flashcards_flagged:` YAML list (inline `[]` and block `- "text"` forms both supported).
 3. For each card, it computes the 12-char SHA-1 hash and checks for the `.processed-<hash>` marker in `SPRINT_DIR`.
 4. If any card is unprocessed:
-   - **v2**: exits non-zero (blocks Task spawn) with stderr listing each unprocessed card and the `touch` command hint.
-   - **v1**: prints an advisory warning to stderr and exits 0 (does not block).
+   - exits non-zero (blocks Task spawn) with stderr listing each unprocessed card and the `touch` command hint.
 5. If `flashcards_flagged: []` or no report files exist, the gate passes immediately.
 
 **Bypass:**
@@ -247,49 +242,35 @@ Set `SKIP_FLASHCARD_GATE=1` in the environment to bypass the gate entirely (both
 
 ---
 
-## 5. Execution Mode Routing (v2) (source: protocol §19)
+## 5. Execution Mode Routing (retired — source: protocol §19)
 
-The `execution_mode` field in a Sprint Plan's frontmatter is the single switch that controls whether §§1–18 of this protocol are **enforcing** or **advisory** for that sprint.
+**STORY-070-01: `execution_mode` field is retired.** All gates are always enforced. This section is preserved for historical context only. See §15 (Operator Emergency Levers) for the break-glass escape hatch.
 
-### §5.1 Flag semantics
+### §5.1 Historical flag semantics (retired)
 
-| `execution_mode` value | Effect |
-|---|---|
-| `"v1"` | All §§1–18 rules are **advisory** — document intended workflow; no CLI or script enforcement. New CLI commands (`sprint init|close`, `story start|complete`, `gate qa|arch`, `state update|validate`) print an inert-mode message and exit 0. |
-| `"v2"` | All §§1–18 rules are **mandatory** — CLI wrappers route to `run_script.sh` scripts; worktree isolation, pre-gate scanning, bounce counters, flashcard gate, and sprint-close pipeline are all enforced. |
+The `execution_mode: "v1" | "v2"` field previously controlled whether protocol §§1–18 were enforcing or advisory for a sprint. As of STORY-070-01, this distinction is removed — the v2 (enforcing) behavior is unconditionally active. The field is stripped from state.json by the `_migrate-schema-v3.mjs` migrator on first read.
 
-### §5.2 Sprint-scoped flag
+### §5.2 Sprint-scoped flag (retired)
 
-The `execution_mode` flag is **sprint-scoped**, not global. A project may run SPRINT-10 on `v2` while SPRINT-11 planning files default to `v1` until the Architect completes a Sprint Design Review (§1.1). Setting the flag on one sprint has no effect on any other sprint file.
+Previously sprint-scoped. Now irrelevant — all sprints use the single always-enforced behavior.
 
-### §5.3 Orchestrator routing rule
+### §5.3 Orchestrator routing rule (retired)
 
-Before spawning any Developer, QA, or Reporter agent, the orchestrator MUST:
+Previously, before spawning any agent, the orchestrator read the `execution_mode` frontmatter field and routed accordingly. As of STORY-070-01, this field is retired. The orchestrator always applies §§1–18 as mandatory gates. Use `CLEARGATE_ADVISORY=1` (§15) for break-glass.
 
-1. Locate the active sprint file at `.cleargate/delivery/pending-sync/SPRINT-{ID}_*.md` (or the archived equivalent).
-2. Read the `execution_mode` frontmatter field. If absent, treat as `"v1"`.
-3. If `"v1"`: proceed with advisory-only loop. §§1–18 rules are informational.
-4. If `"v2"`: enforce §§1–18 before each agent spawn as mandatory gates.
+### §5.4 CLI inert-mode message (retired)
 
-### §5.4 CLI inert-mode message
+Previously, v2-only CLI commands would print `v1 mode active — command inert` when `execution_mode: "v1"` was set. This behavior is retired — all CLI commands are always active.
 
-When a v2-only CLI command is invoked and the active sprint's `execution_mode` is `"v1"`, the CLI MUST print exactly:
+### §5.5 Default value (retired)
 
-```
-v1 mode active — command inert. Set execution_mode: v2 in sprint frontmatter to enable.
-```
-
-and exit 0. No subprocess is spawned. This preserves backward compatibility for users who have not yet migrated to v2.
-
-### §5.5 Default value
-
-The default value is `"v1"`. All sprint plans generated from the Sprint Plan Template default to `execution_mode: "v1"` until explicitly flipped. The flag should only be set to `"v2"` after all M2 EPIC-013 stories have shipped and the Architect has completed a Sprint Design Review (§1.1).
+Previously defaulted to `"v1"`. The field no longer exists in new state.json files.
 
 ---
 
-## 6. File-Surface Contract (v2) (source: protocol §20)
+## 6. File-Surface Contract (source: protocol §20)
 
-Under `execution_mode: v2`, each story's §3.1 "Context & Files" table is the **authoritative file surface** for that story's commit. The pre-commit hook enforces this contract automatically.
+Each story's §3.1 "Context & Files" table is the **authoritative file surface** for that story's commit. The pre-commit hook enforces this contract automatically. **Always enforced** (STORY-070-01: `execution_mode` retired).
 
 ### §6.1 Rule
 
@@ -417,7 +398,7 @@ An artifact with `carry_over: true` in its frontmatter is silently skipped by th
 |---|---|---|
 | **Sprint close** | `close_sprint.mjs` Step 2.6 via `cleargate sprint reconcile-lifecycle <id>` | Block-by-default. Drift → exit 1 with punch list. |
 | **Sprint kickoff — lifecycle layer** | `cleargate sprint init` before `init_sprint.mjs` | **warn-only** when `lifecycle_init_mode: "warn"` in sprint frontmatter (default for SPRINT-15); **block** when `lifecycle_init_mode: "block"` (SPRINT-16+). `--allow-drift` flag skips the warn/block but records a waiver in `context_source:`. |
-| **v1 dormancy** | Both gates are dormant under `execution_mode: v1`. | n/a |
+| **Always active** | Both gates always run (STORY-070-01: single enforced behavior). | n/a |
 
 ### §10.5 v2 Escalation Path
 
@@ -449,7 +430,7 @@ If the Architect cannot deliver the decomposition before the activating sprint's
 
 ### §11.4 Invocation
 
-`cleargate sprint init` calls `reconcileDecomposition()` BEFORE shelling out to `init_sprint.mjs`. A non-empty `missing[]` result exits 1 with a punch list. The gate is dormant under `execution_mode: v1` (the entire `sprintInitHandler` is v1-inert).
+`cleargate sprint init` calls `reconcileDecomposition()` BEFORE shelling out to `init_sprint.mjs`. A non-empty `missing[]` result exits 1 with a punch list. Always enforced (STORY-070-01).
 
 ---
 
@@ -496,7 +477,7 @@ the failure verbatim to the human and halts. Resolution is per-item:
 - Branch ref exists → investigate; force-deletion only with explicit human approval
 - Dirty main → human commits / stashes / discards as appropriate
 
-This gate is **enforcing under `execution_mode: v2`** and **advisory under v1**.
+This gate is **always enforced** (STORY-070-01: single always-enforced behavior).
 
 
 
@@ -540,3 +521,22 @@ This step replaces the prior 3-line "pipeline complete" summary with explicit ac
 `cleargate sprint archive --allow-wiki-lint-debt` waives wiki-lint findings during archive. Reserved for cases where pre-existing wiki-lint debt blocks otherwise-clean archives (e.g., 34 broken-backlink findings carried since SPRINT-16). Without the flag, lint findings cause `archive` to roll back. The flag emits the verbatim Gherkin message `wiki-lint debt waived via --allow-wiki-lint-debt flag` and continues.
 
 Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_reporter_context.mjs`) to absorb heavy-strategy sprint reports. Override via `VITEST_MAX_FORKS`-style `MAX_BUNDLE_BYTES` future env.
+
+---
+
+## 15. Operator Emergency Levers (STORY-070-01)
+
+**Internal break-glass env vars for ClearGate operators.** These are undocumented in normal user-facing docs; they exist to allow the framework to progress when a gate blocks incorrectly. Do not use routinely — gate failures are signals of real problems.
+
+### `CLEARGATE_ADVISORY=1`
+
+When set to the exact string `'1'`, all gate failures in the CLI (`cleargate sprint preflight`, `cleargate sprint init`, etc.) are **downgraded from hard exits to stderr warnings** prefixed with `[advisory]`. The command exits 0.
+
+**Semantics:**
+- Only the exact string `'1'` is truthy. Values `'0'`, `'true'`, `'yes'`, `''`, or absent → gate failures remain fatal.
+- Implemented in `cleargate-cli/src/util/gate-mode.ts` via `isAdvisory()`.
+- Does NOT downgrade migrator errors or parse failures — those remain fatal regardless.
+
+**When to use:** CI environments bootstrapping a new ClearGate install, or during a sprint where a transient gate failure (e.g., stale state.json) would otherwise block a human-confirmed safe operation.
+
+**Log advisory use:** Record any use of `CLEARGATE_ADVISORY=1` in the sprint §4 Execution Log.

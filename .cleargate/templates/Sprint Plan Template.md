@@ -45,7 +45,6 @@ lifecycle_init_mode: "warn"  # "warn" | "block" — controls sprint-init lifecyc
 remote_id: "{PM_TOOL_SPRINT_ID}"
 source_tool: "linear | jira"
 status: "Draft | Active | Completed"
-execution_mode: "v1"   # Enum: "v1" | "v2". Default "v1". Under "v2", §§1–18 of cleargate-enforcement.md are enforcing (worktree isolation, pre-gate scanning, bounce counters, flashcard gate, sprint-close pipeline). Under "v1", those sections are advisory only and all new CLI commands (sprint init|close, story start|complete, gate qa|arch, state update|validate) print an inert-mode message. Set to "v2" only after all EPIC-013 M2 stories have shipped and the Architect has completed a Sprint Design Review (see §5 of the protocol).
 start_date: "{YYYY-MM-DD}"
 end_date: "{YYYY-MM-DD}"
 synced_at: "{ISO-8601 timestamp}"
@@ -87,7 +86,7 @@ cached_gate_result:
 | `{STORY-NNN-NN}` | {Title} | standard / fast | M{N} | y / n | low / med / high |
 
 ## 2. Execution Strategy
-*(Written by Architect during Sprint Design Review. Required before `execution_mode: v2` sprint start. Under v1, this section may be omitted or left as a stub.)*
+*(Written by Architect during Sprint Design Review. Required before sprint start.)*
 
 ### 2.1 Phase Plan
 {Parallel vs sequential story groups. List which stories run concurrently in each wave and which must be serialized.}

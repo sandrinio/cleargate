@@ -36,10 +36,6 @@ export function validateShapeIgnoringVersion(state) {
     errors.push('missing required field: sprint_id');
   }
 
-  if (!state.execution_mode) {
-    errors.push('missing required field: execution_mode');
-  }
-
   if (!state.sprint_status) {
     errors.push('missing required field: sprint_status');
   }

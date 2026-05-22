@@ -13,12 +13,9 @@
  * "Ready to Bounce" for each story. Refuses if state.json already exists
  * unless --force is passed.
  *
- * Under execution_mode: v2 (read from sprint frontmatter):
- *   - Asserts all story files exist in pending-sync/ before writing state.json.
- *   - On failure: prints missing list to stderr and exits 1 WITHOUT creating state.json.
- *
- * Under execution_mode: v1:
- *   - Runs the same assertion but only warns on failure (does not block).
+ * STORY-070-01: execution_mode is retired. All gates are always enforced.
+ * Break-glass: set CLEARGATE_ADVISORY=1 to downgrade gate failures to warnings.
+ * The story-file assertion always runs in blocking mode (v2-equivalent behavior).
  */
 
 import fs from 'node:fs';
@@ -39,26 +36,6 @@ function usage() {
     'Usage: node init_sprint.mjs <sprint-id> --stories ID1,ID2,... [--force]\n'
   );
   process.exit(2);
-}
-
-/**
- * Read execution_mode from a sprint file's YAML frontmatter.
- * Uses a single-field regex — does NOT hand-roll a full YAML parser.
- * Returns 'v2' | 'v1' (defaults to 'v1' if field absent or unreadable).
- */
-function readExecutionMode(sprintFilePath) {
-  let content;
-  try {
-    content = fs.readFileSync(sprintFilePath, 'utf8');
-  } catch {
-    return 'v1';
-  }
-  // Match frontmatter block
-  const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!fm) return 'v1';
-  const modeMatch = fm[1].match(/^execution_mode:\s*["']?(v[12])/m);
-  if (!modeMatch) return 'v1';
-  return modeMatch[1];
 }
 
 /**
@@ -148,30 +125,23 @@ function main() {
     }
   }
 
-  // --- Read execution_mode from sprint frontmatter ---
+  // --- Gate-2 story-file assertion (always enforced — STORY-070-01) ---
   const sprintFilePath = findSprintFile(REPO_ROOT, sprintId);
-  const executionMode = sprintFilePath ? readExecutionMode(sprintFilePath) : 'v1';
-
-  // --- Gate-2 story-file assertion ---
   if (sprintFilePath) {
-    const { exitCode, stderr, stdout } = runAssertStoryFiles(REPO_ROOT, sprintFilePath);
+    const { exitCode, stderr } = runAssertStoryFiles(REPO_ROOT, sprintFilePath);
     if (exitCode !== 0) {
-      if (executionMode === 'v2') {
-        // Hard block: do not create state.json
-        process.stderr.write(stderr);
-        // Count categories from structured stderr lines
-        const missingCount = (stderr.match(/^MISSING \((\d+)\):/m) ?? [])[1] ?? '0';
-        const unapprovedCount = (stderr.match(/^UNAPPROVED \((\d+)\):/m) ?? [])[1] ?? '0';
-        const emptyCount = (stderr.match(/^STUB-EMPTY \((\d+)\):/m) ?? [])[1] ?? '0';
-        process.stderr.write(
-          `ERROR: v2 sprint init blocked — ${missingCount} items missing, ${unapprovedCount} unapproved, ${emptyCount} stub-empty. Fix the above, then re-run init.\n`
-        );
-        process.exit(1);
+      // Always enforce (v2-equivalent behavior; CLEARGATE_ADVISORY=1 for break-glass)
+      process.stderr.write(stderr);
+      // Count categories from structured stderr lines
+      const missingCount = (stderr.match(/^MISSING \((\d+)\):/m) ?? [])[1] ?? '0';
+      const unapprovedCount = (stderr.match(/^UNAPPROVED \((\d+)\):/m) ?? [])[1] ?? '0';
+      const emptyCount = (stderr.match(/^STUB-EMPTY \((\d+)\):/m) ?? [])[1] ?? '0';
+      const msg = `ERROR: sprint init blocked — ${missingCount} items missing, ${unapprovedCount} unapproved, ${emptyCount} stub-empty. Fix the above, then re-run init.\n`;
+      if (process.env.CLEARGATE_ADVISORY === '1') {
+        process.stderr.write(`[advisory] ${msg}`);
       } else {
-        // v1: warn only
-        process.stderr.write(
-          `WARN: missing story files: ${stderr.trim().split('\n').pop() || 'see above'}\n`
-        );
+        process.stderr.write(msg);
+        process.exit(1);
       }
     }
   }
@@ -197,7 +167,6 @@ function main() {
   const state = {
     schema_version: SCHEMA_VERSION,
     sprint_id: sprintId,
-    execution_mode: executionMode,
     sprint_status: 'Active',
     stories,
     last_action: `Sprint ${sprintId} initialised`,
