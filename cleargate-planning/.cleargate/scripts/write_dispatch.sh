@@ -122,13 +122,15 @@ DISPATCH_JSON="$(jq -cn \
   --arg spawned_at "${SPAWNED_AT}" \
   --arg session_id "${SESSION_ID}" \
   --arg writer "write_dispatch.sh@cleargate-${CG_VERSION}" \
+  --arg run_id "${RUN_ID:-}" \
   '{
     work_item_id: $work_item_id,
     agent_type: $agent_type,
     spawned_at: $spawned_at,
     session_id: $session_id,
     writer: $writer
-  }')"
+  }
+  | if $run_id == "" then . else .run_id = $run_id end')"
 
 # Atomic write via mktemp + mv (rename is atomic on POSIX same-fs)
 TMP="$(mktemp "${SPRINT_DIR}/.dispatch-tmp-XXXXXX")"

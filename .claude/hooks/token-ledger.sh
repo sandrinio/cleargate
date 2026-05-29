@@ -118,6 +118,7 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   SENTINEL_AGENT_TYPE=""
   SENTINEL_WORK_ITEM_ID=""
   DISPATCH_PROCESSED=""
+  DISPATCH_RUN_ID=""
 
   # BUG-029: extract work_item_id from the SubagentStop transcript (first user message).
   # This is the orchestrator's dispatch prompt — by convention it starts with the
@@ -189,6 +190,7 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
       DISPATCH_JSON="$(cat "${DISPATCH_PROCESSED}" 2>/dev/null)"
       DISPATCH_AGENT="$(printf '%s' "${DISPATCH_JSON}" | jq -r '.agent_type // empty' 2>/dev/null)"
       DISPATCH_WORK_ITEM="$(printf '%s' "${DISPATCH_JSON}" | jq -r '.work_item_id // empty' 2>/dev/null)"
+      DISPATCH_RUN_ID="$(printf '%s' "${DISPATCH_JSON}" | jq -r '.run_id // empty' 2>/dev/null)"
       if [[ -n "${DISPATCH_AGENT}" && -n "${DISPATCH_WORK_ITEM}" ]]; then
         SENTINEL_AGENT_TYPE="${DISPATCH_AGENT}"
         SENTINEL_WORK_ITEM_ID="${DISPATCH_WORK_ITEM}"
@@ -472,16 +474,21 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     '{input: $in, output: $out, cache_creation: $cc, cache_read: $cr}')"
 
   # Atomically update .session-totals.json with new totals for this session_id
+  # STORY-033-02: also key by RUN_ID when dispatch marker carries one (parallel-wave attribution).
   TS="$(date -u +%FT%TZ)"
   NEW_SESSION_TOTALS="$(printf '%s' "${PRIOR_SESSION_JSON}" | jq -c \
     --arg sid "${SESSION_ID}" \
+    --arg run_id "${DISPATCH_RUN_ID:-}" \
     --argjson in "${CURRENT_IN}" \
     --argjson out "${CURRENT_OUT}" \
     --argjson cc "${CURRENT_CC}" \
     --argjson cr "${CURRENT_CR}" \
     --arg ts "${TS}" \
     --argjson ti "${SENTINEL_TURN_INDEX}" \
-    '.[$sid] = {input: $in, output: $out, cache_creation: $cc, cache_read: $cr, last_ts: $ts, last_turn_index: $ti}' \
+    '
+      .[$sid] = {input: $in, output: $out, cache_creation: $cc, cache_read: $cr, last_ts: $ts, last_turn_index: $ti}
+      | if $run_id == "" then . else .[$run_id] = {input: $in, output: $out, cache_creation: $cc, cache_read: $cr, last_ts: $ts, last_turn_index: $ti} end
+    ' \
     2>/dev/null)"
 
   if [[ -n "${NEW_SESSION_TOTALS}" ]]; then
@@ -493,7 +500,36 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     fi
   fi
 
+  # --- STORY-033-02: RUN_ID no-op guard (barrier-written row already exists) ---
+  # When the dispatch marker carries a run_id, check whether a ledger row for this
+  # work_item_id + run_id already exists (written by the barrier). If so, exit 0 without
+  # appending a second row — this neutralises late SubagentStop mis-attribution.
+  if [[ -n "${DISPATCH_RUN_ID}" && -f "${LEDGER}" ]]; then
+    if grep -q "\"run_id\":\"${DISPATCH_RUN_ID}\"" "${LEDGER}" 2>/dev/null; then
+      printf '[%s] barrier row already present — skip (work_item=%s run_id=%s)\n' \
+        "${TS}" "${WORK_ITEM_ID}" "${DISPATCH_RUN_ID}" >> "${HOOK_LOG}"
+      # Clean up sentinels/dispatch before exit
+      if [[ -n "${PROCESSED_FILE}" && -f "${PROCESSED_FILE}" ]]; then rm -f "${PROCESSED_FILE}"; fi
+      if [[ -n "${DISPATCH_PROCESSED:-}" && -f "${DISPATCH_PROCESSED}" ]]; then rm -f "${DISPATCH_PROCESSED}"; fi
+      exit 0
+    fi
+  fi
+
+  # --- STORY-033-02: ESCALATED guard — when RUN_ID is set but transcript has no tokens ---
+  # A segment whose verdict carries no tokens is recorded as ESCALATED; no row is written.
+  if [[ -n "${DISPATCH_RUN_ID}" ]]; then
+    if [[ "${CURRENT_IN}" -eq 0 && "${CURRENT_OUT}" -eq 0 ]]; then
+      printf '[%s] ESCALATED: run_id=%s work_item=%s — no tokens in transcript, skipping row\n' \
+        "${TS}" "${DISPATCH_RUN_ID}" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+      # Clean up sentinels/dispatch before exit
+      if [[ -n "${PROCESSED_FILE}" && -f "${PROCESSED_FILE}" ]]; then rm -f "${PROCESSED_FILE}"; fi
+      if [[ -n "${DISPATCH_PROCESSED:-}" && -f "${DISPATCH_PROCESSED}" ]]; then rm -f "${DISPATCH_PROCESSED}"; fi
+      exit 0
+    fi
+  fi
+
   # --- assemble ledger row (v2 schema: delta + session_total replace flat input/output/cache_*) ---
+  # STORY-033-02: include run_id field when dispatch marker carries one.
   ROW="$(jq -cn \
     --arg ts "${TS}" \
     --arg agent "${AGENT_TYPE}" \
@@ -508,7 +544,9 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     --argjson session_total "${SESSION_TOTAL_JSON}" \
     --arg model "${CURRENT_MODEL}" \
     --argjson turns "${CURRENT_TURNS}" \
-    '{ts: $ts, sprint_id: $sprint, story_id: $story, work_item_id: $work_item, agent_type: $agent, session_id: $session, transcript: $transcript, sentinel_started_at: $sentinel_started_at, delta_from_turn: $turn_index, delta: $delta, session_total: $session_total, model: $model, turns: $turns}')"
+    --arg run_id "${DISPATCH_RUN_ID:-}" \
+    '{ts: $ts, sprint_id: $sprint, story_id: $story, work_item_id: $work_item, agent_type: $agent, session_id: $session, transcript: $transcript, sentinel_started_at: $sentinel_started_at, delta_from_turn: $turn_index, delta: $delta, session_total: $session_total, model: $model, turns: $turns}
+    | if $run_id == "" then . else .run_id = $run_id end')"
 
   printf '%s\n' "${ROW}" >> "${LEDGER}"
   printf '[%s] wrote row: sprint=%s agent=%s work_item=%s story=%s delta=in:%s/out:%s session_total=in:%s/out:%s delta_from=%s\n' \
