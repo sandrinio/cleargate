@@ -13,6 +13,8 @@ Proposals with `approved: false` or `status: Draft` that have not yet been bless
 
 - [[PROPOSAL-009]] — status: Draft
 
+- [[PROPOSAL-074]] — status: Draft
+
 
 
 ## Gate 2 — Pending Story Ambiguity Clearance
@@ -25,6 +27,18 @@ Stories with medium or high ambiguity that need design decisions before work can
 - [[STORY-003-10]] — ambiguity: 🟡 Medium
 
 - [[STORY-028-07]] — ambiguity: 🟡 Medium
+
+- [[STORY-032-01]] — ambiguity: 🟡 Medium
+
+- [[STORY-032-02]] — ambiguity: 🟡 Medium
+
+- [[STORY-032-03]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-02]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-03]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-04]] — ambiguity: 🟡 Medium
 
 
 

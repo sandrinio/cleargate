@@ -127,6 +127,7 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 ### 1.6 Existing Surfaces
 
 > L1 reuse audit. List source-tree implementations the request could extend. Cite file:line.
+> Cite paths with at least one '/' separator; root files use './name.ext'. Bare filenames and dotted code references are ignored.
 
 - **Surface:** `path/to/file.ext:NN` — {what it does}
 - **Coverage of this requirement:** {≥80% / partial / none — and why}

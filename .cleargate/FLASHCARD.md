@@ -4,6 +4,26 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-29 · #orchestration #subagent #sdr · Agent-tool subagents return ONLY their final message; SendMessage continuation is unavailable in this harness. A Design-Review/plan dispatch ending in a summary LOSES the deliverable block — instruct "final message = the block verbatim, no preamble/summary". Cost a 26k-token re-run on the SPRINT-32 SDR.
+2026-05-29 · #wiki #code-map #stale-path · EPIC-032 §0 + STORY-032-01 cite cleargate-cli/src/wiki/synthesis/index.ts which does NOT exist — the index is built by buildIndex() inside commands/wiki-build.ts:173 via synthesis/render.ts renderTemplate. Cite wiki-build.ts not synthesis/index.ts. [SPRINT-32 SDR]
+2026-05-29 · #readiness-gate #template #decomposition · Gate criteria reuse-audit-recorded / simplest-form-justified do a LITERAL substring match for `## Existing Surfaces` / `## Why not simpler?`. The epic/story/CR templates' numbered headings (`### 1.6`, `## 3.5`) FAIL the gate — emit UNNUMBERED `##` headings; in stories place them AFTER `## 4. Quality Gates` so the `## `-counted section(3)=impl-files / section(4)=DoD don't shift. Bit EPIC-031/32/33 + STORY-033-01.
+
+2026-05-29 · #workflow #token-ledger #worktree · Claude Code Workflow tool: agent() fires SubagentStop with the ORCHESTRATOR transcript/session_id (even under isolation:'worktree') and NEVER fires PreToolUse:Task → dispatch-marker attribution is dead; write the per-segment ledger row from the returned verdict.tokens at the barrier, keyed by RUN_ID. isolation:'worktree' = tracked-files-only at .claude/worktrees/wf_* off the wrong base (strips gitignored /.claude/ live + /mcp/). resumeFromRunId caches completed agents (0 tokens on replay). [STORY-033-01 spike]
+
+2026-05-22 · #qa #regression #baseline-variance · full-suite failure count can vary ~15 across runs (env/test-isolation flakes); always stash-baseline before attributing a delta to the story under test, never trust raw count diff.
+
+2026-05-20 · #membership #per-repo #cr-011 · `getMembershipState` requires `{projectRoot}` param + per-repo `.cleargate/.join.json` to return `member`. Global `~/.cleargate/auth.json` alone is insufficient. `join.ts` MUST write the marker on success (otherwise doctor always shows pre-member).
+2026-05-20 · #worktree #build #node_modules · git worktrees share source but NOT `node_modules`. Symlink `ln -s <main-repo>/cleargate-cli/node_modules <worktree>/cleargate-cli/node_modules` before any `npm run build` step in a fresh worktree.
+2026-05-20 · #worktree #build #dist · dist/cli.js references co-located chunk-*.js files. When running tests via `process.execPath + DIST_CLI_PATH` from a worktree, the full dist/ (cli.js + all chunks) must be present, not just cli.js. Build inside the worktree (after node_modules symlink) or copy the entire dist/ tree.
+2026-05-19 · #devops #build #dist · DevOps merge-time scoped test fails on stale `cleargate-cli/dist/cli.js` (gitignored, locally-built). When src/ is touched, rebuild before Step 6: `cd cleargate-cli && npm run build`.
+2026-05-19 · #close-pipeline #test-seam · `reconcileCurrentSprintStories` (Step 2.6d) needs no SKIP seam — pure FS (no git, no network); `import().catch` handles stale-dist gracefully.
+2026-05-19 · #close-pipeline #id-lookup · `reconcileCrossSprintOrphans` prefix-split silently drops non-standard IDs (e.g. `STORY-TEST-01` → `idType()` returns null → entry dropped). Use `findArtifactFile()` for cross-format coverage when test fixtures use non-numeric segments.
+2026-05-19 · #test-harness #gitignore · `git check-ignore -v` exits 0 for negation `!` rules (false positive). Omit `-v` to get exit 1 for not-ignored files with `!` allowlists.
+2026-05-19 · #qa-red #spec-gap · Red file's inline regex/const copy goes stale when Dev applies spec-gap fix; delete `.red.` file at merge, do not patch in place — its tests duplicate the plain `.node.test.ts`.
+2026-05-19 · #readiness-gate #path-re · PATH_RE suffix `(?::[a-zA-Z0-9_]+)?` now supports numeric line anchors (`:42`); strip-suffix regex at the same call site must mirror the character class.
+2026-05-19 · #regex #test-fixture · When tightening a path-extraction regex, pre-existing test fixtures citing bare filenames (e.g. `package.json`) break — update to slash-required form (`./package.json`); behavioral change is intentional.
+2026-05-19 · #git #stash · `git stash` + failed `stash pop` + `stash drop` lost in-flight Dev edits; never stash for baseline comparison — use a throwaway branch or committed fixup instead.
+
 2026-05-18 · #node-test #testing · EPIC-028 complete — single test runner across mcp/, cleargate-cli/, admin/. __overrides__ pattern (mutable shared state in __mocks__/ + 2 prod seams) is the workaround for static-ESM-import un-interceptability.
 
 2026-05-18 · #parent-rollup #reconciler · parent-rollup.ts extractId() checks story_id only; Epic files use epic_id — add epic_id/sprint_id key checks before filename-stem fallback.

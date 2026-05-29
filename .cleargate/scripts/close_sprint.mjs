@@ -71,6 +71,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { TERMINAL_STATES } from './constants.mjs';
 import { validateState } from './validate_state.mjs';
+import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 import { reportFilename } from './lib/report-filename.mjs';
 
 /**
@@ -202,6 +203,12 @@ async function main() {
     atomicWrite(stateFile, state);
   }
 
+  // Migrate v2 → v3: strip execution_mode (STORY-070-01)
+  const { changed: v3Changed } = migrateStateToV3(state, stateFile);
+  if (v3Changed) {
+    atomicWrite(stateFile, state);
+  }
+
   const { valid, errors } = validateState(state);
   if (!valid) {
     process.stderr.write('Error: state.json validation failed:\n');
@@ -228,13 +235,13 @@ async function main() {
   process.stdout.write(`Step 1-2 passed: all ${Object.keys(state.stories || {}).length} stories are terminal.\n`);
 
   // ── Step 2.5: v2.1 validation — activation-gated ──────────────────────────
-  // Activation gate: schema_version >= 2 AND at least one story has lane: 'fast'
-  const isV2 = (state.schema_version || 1) >= 2;
-  const hasFastLane = isV2 && Object.values(state.stories || {}).some(
+  // Activation gate: at least one story has lane: 'fast'
+  // (schema_version is always >= 3 post-STORY-070-01 migrator)
+  const hasFastLane = Object.values(state.stories || {}).some(
     (s) => /** @type {any} */ (s).lane === 'fast'
   );
 
-  if (isV2 && hasFastLane) {
+  if (hasFastLane) {
     // Naming convention: sprint dir must match ^SPRINT-\d{2,3}$
     const sprintDirName = path.basename(sprintDir);
     if (!/^SPRINT-\d{2,3}$/.test(sprintDirName)) {
@@ -355,7 +362,7 @@ async function main() {
   // ── Step 2.6b: Cross-Sprint Orphan Drift Check (CR-048) ─────────────────────
   // Detect items in pending-sync/ with non-terminal status whose state.json entry
   // in any closed sprint shows Done — i.e., completed but never archived.
-  // v2: drift > 0 blocks close. v1: warn-only.
+  // Always enforced (STORY-070-01: execution_mode retired).
   // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 also skips this step.
   process.stdout.write('Step 2.6b: checking for cross-sprint orphan drift...\n');
   if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
@@ -382,15 +389,12 @@ async function main() {
                 `state: ${item.state_json_state} in ${item.state_json_sprint}\n`
               );
             }
-            if (isV2) {
-              process.stderr.write(
-                'close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close under v2.\n' +
-                '  Archive the listed items and re-run close_sprint.mjs.\n'
-              );
-              process.exit(1);
-            } else {
-              process.stdout.write('Step 2.6b warning (v1): orphan drift detected above — remediate before next sprint.\n');
-            }
+            // Always enforced (STORY-070-01: execution_mode retired)
+            process.stderr.write(
+              'close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close.\n' +
+              '  Archive the listed items and re-run close_sprint.mjs.\n'
+            );
+            process.exit(1);
           } else {
             process.stdout.write('Step 2.6b passed: no cross-sprint orphan drift.\n');
           }
@@ -433,6 +437,10 @@ async function main() {
     fs.renameSync(tmp, filePath);
   }
 
+  // ── Step 2.6c test seam ──────────────────────────────────────────────────────
+  if (process.env.CLEARGATE_SKIP_PARENT_ROLLUP === '1') {
+    process.stdout.write('Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).\n');
+  } else {
   process.stdout.write('Step 2.6c: rolling up parent statuses...\n');
   try {
     // Use __dirname-relative path so the import finds the ACTUAL built dist,
@@ -479,10 +487,66 @@ async function main() {
   } catch (e26c) {
     process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
   }
+  } // end CLEARGATE_SKIP_PARENT_ROLLUP else block
+
+  // ── Step 2.6d: Same-Sprint Story Backsync (BUG-032) ─────────────────────────
+  // Flip all Done-state stories in the closing sprint from their current
+  // frontmatter status to `status: Completed, approved: true`, then move
+  // the file from pending-sync/ to archive/.
+  //
+  // Root cause: reconcileCrossSprintOrphans explicitly SKIPS the active sprint
+  // (reads .active sentinel). No prior step flipped same-sprint story frontmatter.
+  // This step fills that gap.
+  //
+  // Idempotence: stories already at a terminal status are silently skipped.
+  // Runs unconditionally (no CLEARGATE_SKIP_* seam) — the function is pure FS,
+  // no git calls, no CLI binary required. CLEARGATE_REPO_ROOT overrides delivery paths.
+  process.stdout.write('Step 2.6d: back-syncing same-sprint story frontmatter...\n');
+  try {
+    const reconcilerMod26d = await import(
+      path.join(SCRIPTS_DIR, '..', '..', 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+    ).catch(() => null);
+
+    if (!reconcilerMod26d || typeof reconcilerMod26d.reconcileCurrentSprintStories !== 'function') {
+      process.stdout.write(
+        'Step 2.6d skipped: reconcileCurrentSprintStories not in built CLI — rebuild cleargate-cli/.\n',
+      );
+    } else {
+      const deliveryRoot26d = path.join(REPO_ROOT, '.cleargate', 'delivery');
+      const sprintRunsRoot26d = path.join(REPO_ROOT, '.cleargate', 'sprint-runs');
+
+      const backsyncResult = reconcilerMod26d.reconcileCurrentSprintStories({
+        deliveryRoot: deliveryRoot26d,
+        sprintRunsRoot: sprintRunsRoot26d,
+        sprintId,
+        retroactive: false,
+      });
+
+      if (backsyncResult.flipped.length > 0) {
+        for (const item of backsyncResult.flipped) {
+          process.stdout.write(
+            `Step 2.6d: ${item.id} status ${item.old_status} → Completed` +
+            ` (state.json: Done) → archived at ${item.file_path}\n`,
+          );
+        }
+        process.stdout.write(
+          `Step 2.6d passed: ${backsyncResult.flipped.length} story/stories back-synced and archived.\n`,
+        );
+      } else {
+        process.stdout.write(
+          `Step 2.6d passed: no same-sprint story backsync needed` +
+          ` (${backsyncResult.skipped_already_terminal} already terminal, ` +
+          `${backsyncResult.skipped_not_done} pending non-Done).\n`,
+        );
+      }
+    }
+  } catch (e26d) {
+    process.stderr.write(`Step 2.6d warning: same-sprint backsync unavailable: ${e26d.message}\n`);
+  }
 
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
   // Block close if any .worktrees/STORY-* path is present.
-  // v2 enforcing (exit 1); v1 advisory (warn + continue).
+  // Always enforced (STORY-070-01: execution_mode retired).
   // Skip if git worktree list is unavailable (non-fatal — tests run against tmpdirs).
   // Test seams: CLEARGATE_SKIP_WORKTREE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 injects fake paths (no git call).
@@ -521,18 +585,14 @@ async function main() {
         }
       }
 
-      // Step 2.7 enforcing mode: v2 execution_mode (not just schema_version, since
-      // migration bumps schema_version to 2 for all sprints before isV2 is evaluated).
-      // Using execution_mode preserves v1 advisory behaviour for sprints initialised
-      // with execution_mode: "v1" even after their schema is migrated.
-      const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
+      // Step 2.7 always enforced (STORY-070-01: execution_mode retired).
 
       if (!worktreeListAvailable) {
         process.stdout.write('Step 2.7 skipped: git worktree list unavailable (non-fatal).\n');
       } else if (leftoverWorktrees.length === 0) {
         process.stdout.write('Step 2.7 passed: no leftover worktrees.\n');
-      } else if (isEnforcingV2) {
-        // v2 enforcing — block close
+      } else {
+        // Always block close on leftover worktrees
         process.stderr.write(
           `close_sprint: Step 2.7 failed: leftover worktree at ${leftoverWorktrees[0]}\n` +
           `  ${leftoverWorktrees.length === 1 ? '' : `(plus ${leftoverWorktrees.length - 1} more)\n  `}` +
@@ -540,11 +600,6 @@ async function main() {
           `  All worktrees must be closed before sprint close.\n`
         );
         process.exit(1);
-      } else {
-        // v1 advisory — warn + continue
-        process.stderr.write(
-          `Step 2.7 warning: leftover worktree at ${leftoverWorktrees[0]} (advisory in v1).\n`
-        );
       }
     }
   }
@@ -567,8 +622,7 @@ async function main() {
         const mainBranch = 'refs/heads/main';
         process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainBranch}...\n`);
 
-        const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
-
+        // Step 2.8 always enforced (STORY-070-01: execution_mode retired).
         const forcedStatus = process.env.CLEARGATE_FORCE_MERGE_STATUS;
         let isMerged = false;
         let mergeCheckAvailable = true;
@@ -603,8 +657,8 @@ async function main() {
           // fail-open: refs missing or git unavailable — continue to Step 3
         } else if (isMerged) {
           process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainBranch}.\n`);
-        } else if (isEnforcingV2) {
-          // v2 enforcing — block close
+        } else {
+          // Always enforced (STORY-070-01: execution_mode retired)
           let unmergedLog = '';
           if (!forcedStatus) {
             try {
@@ -620,11 +674,6 @@ async function main() {
             `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
           );
           process.exit(1);
-        } else {
-          // v1 advisory — warn + continue
-          process.stderr.write(
-            `Step 2.8 warning: sprint/S-${sprintNumMatch[1]} not merged to main (advisory in v1).\n`
-          );
         }
       }
     }
@@ -644,7 +693,6 @@ async function main() {
 
   // ── Step 3.5: Build curated Reporter context bundle ───────────────────────
   const bundlePath = path.join(sprintDir, '.reporter-context.md');
-  const isEnforcingV2 = isV2 && state.execution_mode === 'v2';
   const MIN_BUNDLE_BYTES = 2048;
   if (process.env.CLEARGATE_SKIP_BUNDLE_CHECK === '1') {
     process.stdout.write('Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).\n');
@@ -664,18 +712,14 @@ async function main() {
       }
       process.stdout.write(`Step 3.5 passed: ${bundlePath} ready (${Math.round(bundleSize / 1024)}KB).\n`);
     } catch (err) {
+      // Always enforced (STORY-070-01: execution_mode retired)
       const msg = /** @type {Error} */ (err).message;
-      if (isEnforcingV2) {
-        process.stderr.write(
-          `close_sprint: Step 3.5 FAILED (v2 hard-block): ${msg}\n` +
-          `  Cannot dispatch Reporter without bundle. Fix prep_reporter_context.mjs or run with execution_mode: v1.\n` +
-          `  Diagnostic: node .cleargate/scripts/prep_reporter_context.mjs ${sprintId}\n`
-        );
-        process.exit(1);
-      } else {
-        process.stderr.write(`Step 3.5 warning (v1 advisory): ${msg}\n`);
-        process.stderr.write('Reporter will fall back to broad-fetch context loading.\n');
-      }
+      process.stderr.write(
+        `close_sprint: Step 3.5 FAILED: ${msg}\n` +
+        `  Cannot dispatch Reporter without bundle. Fix prep_reporter_context.mjs.\n` +
+        `  Diagnostic: node .cleargate/scripts/prep_reporter_context.mjs ${sprintId}\n`
+      );
+      process.exit(1);
     }
   }
 

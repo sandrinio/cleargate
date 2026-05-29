@@ -1,13 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://cleargate.dev/schemas/state.v2.json",
-  "title": "ClearGate Sprint State v2",
-  "description": "Schema for .cleargate/sprint-runs/<sprint-id>/state.json. schema_version=2 adds per-story lane fields (lane, lane_assigned_by, lane_demoted_at, lane_demotion_reason). Migrated from v1 on first read by update_state.mjs.",
+  "$id": "https://cleargate.dev/schemas/state.v3.json",
+  "title": "ClearGate Sprint State v3",
+  "description": "Schema for .cleargate/sprint-runs/<sprint-id>/state.json. schema_version=3 removes execution_mode (retired by STORY-070-01 — single always-enforced behavior). Migrated from v2 by _migrate-schema-v3.mjs on first read.",
   "type": "object",
   "required": [
     "schema_version",
     "sprint_id",
-    "execution_mode",
     "sprint_status",
     "stories",
     "last_action",
@@ -17,18 +16,13 @@
   "properties": {
     "schema_version": {
       "type": "integer",
-      "const": 2,
-      "description": "Schema version. Must be 2 for v2 state files. Bumped from v1 by migration in update_state.mjs."
+      "const": 3,
+      "description": "Schema version. Must be 3 for v3 state files. Bumped from v2 by _migrate-schema-v3.mjs."
     },
     "sprint_id": {
       "type": "string",
-      "description": "Sprint identifier, e.g. S-09",
-      "examples": ["S-09", "S-10"]
-    },
-    "execution_mode": {
-      "type": "string",
-      "enum": ["v1", "v2"],
-      "description": "Execution mode for the sprint. v1 = legacy sequential; v2 = worktree-parallel."
+      "description": "Sprint identifier, e.g. SPRINT-09",
+      "examples": ["SPRINT-09", "SPRINT-10"]
     },
     "sprint_status": {
       "type": "string",

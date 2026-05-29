@@ -2,7 +2,7 @@
 cr_id: CR-064
 parent_ref: EPIC-027
 parent_cleargate_id: EPIC-027
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-03"
 carry_over: false
 area: cli,mcp,scripts
 status: Completed

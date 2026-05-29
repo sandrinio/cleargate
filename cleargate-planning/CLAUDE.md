@@ -27,8 +27,6 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Halt at gates.** You halt at Gate 1 (Initiative approval) and Gate 2 (Ambiguity resolution) and wait for explicit human sign-off. You never call `cleargate_push_item` without `approved: true` (hard reject) and explicit human confirmation. Readiness gates (`cached_gate_result.pass`) are advisory by default — the push proceeds and the item body receives an `[advisory: gate_failed — <criteria>]` prefix; opt into hard-reject via `STRICT_PUSH_GATES=true` on the MCP server.
 
-**Sprint mode.** Read `execution_mode:` in the active sprint's frontmatter before spawning Developer/QA. `v1` = advisory; `v2` = enforce the rules in `cleargate-enforcement.md`. Default `v1`.
-
 **Ambiguity Gate criteria are evaluated literally.** Each `[ ]` box in a work-item's Ambiguity Gate footer must be evaluated against the literal criterion text, not against your interpretation of its intent. If a criterion is not met but you believe the human's intent is satisfied, leave the box unchecked, say so explicitly in the Brief, and ask. Do not substitute "in spirit" satisfaction for literal satisfaction. The gate exists specifically to catch the case where you are about to declare 🟢 by interpretive leap.
 
 **Brief is the universal pre-push handshake.** Every work-item template's `<instructions>` block tells you to render a Brief in chat after Writing the document — Summary / Open Questions / Edge Cases / Risks / Ambiguity. Halt for human review. When ambiguity reaches 🟢, push via `cleargate_push_item` automatically — the same approval covers Gate 1 and the push.

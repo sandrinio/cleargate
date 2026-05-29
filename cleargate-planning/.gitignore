@@ -1,3 +1,39 @@
+# ── Secrets ─────────────────────────────────────────────────────────────────
+# Local environment files (API keys, tokens, credentials)
+# The allowlist lines below MUST come AFTER .env* so the negation overrides.
+.env
+.env.*
+!.env.example
+!.env.template
+
+# ── OS junk ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+
+# ── Node.js ──────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
+
+# ── ClearGate per-participant ─────────────────────────────────────────────────
 # Per-participant identity file — personal email, not team-shared
 /.cleargate/.participant.json
 
@@ -10,5 +46,10 @@
 # Unresolved conflicts cache — runtime-generated, not team-shared
 /.cleargate/.conflicts.json
 
+# ── ClearGate worktrees ───────────────────────────────────────────────────────
 # Story worktrees — ephemeral per-story git worktrees (v2 execution)
 .worktrees/
+
+# ── ClearGate telemetry ───────────────────────────────────────────────────────
+# Hook execution logs — runtime-generated, per-machine, not team-shared
+/.cleargate/hook-log/

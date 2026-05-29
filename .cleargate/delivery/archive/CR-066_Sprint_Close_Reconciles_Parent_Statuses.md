@@ -1,8 +1,8 @@
 ---
 cr_id: CR-066
 parent_ref: close_sprint.mjs Step 2.6 (lifecycle reconciler)
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "close_sprint.mjs Step 2.6 (lifecycle reconciler)"
+sprint_cleargate_id: "SPRINT-16"
 carry_over: false
 area: cli,sprint-close,reconciler
 status: Completed
