@@ -44,8 +44,6 @@
 
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-32]] — status: Active
-
 
 
 ## Recently Completed Sprints

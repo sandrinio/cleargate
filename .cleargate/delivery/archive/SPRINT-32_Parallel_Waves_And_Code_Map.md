@@ -6,9 +6,10 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: null
-status: Active
+status: Completed
 start_date: 2026-05-29
 end_date: 2026-05-29
+completed_at: 2026-05-29
 synced_at: null
 epics:
   - EPIC-033

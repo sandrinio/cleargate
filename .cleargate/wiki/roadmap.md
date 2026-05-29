@@ -48,8 +48,6 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-32]] — status: Active
-
 
 
 ## Shipped Sprints
@@ -84,6 +82,8 @@ Sprints with `completed_at` set.
 - [[SPRINT-22]] — completed: 2026-05-04T09:40:00Z
 
 - [[SPRINT-27]] — completed: 2026-05-15T05:04:05Z
+
+- [[SPRINT-32]] — completed: 2026-05-29
 
 
 

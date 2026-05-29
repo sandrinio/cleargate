@@ -1,7 +1,7 @@
 {
   "schema_version": 3,
   "sprint_id": "SPRINT-32",
-  "sprint_status": "Active",
+  "sprint_status": "Completed",
   "stories": {
     "STORY-033-02": {
       "state": "Done",
@@ -76,6 +76,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-032-03 → Done",
-  "updated_at": "2026-05-29T15:42:04.901Z"
+  "last_action": "close_sprint: sprint SPRINT-32 completed",
+  "updated_at": "2026-05-29T18:07:15.315Z"
 }
