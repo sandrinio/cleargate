@@ -28,7 +28,7 @@ Given a sprint milestone (one or more Story files), produce a **single implement
 
 1. **Consult flashcards first.** Invoke `Skill(flashcard, "check")` before any analysis. Past agents may have recorded gotchas that apply here.
 2. **Read every story in the milestone** (paths passed by orchestrator). Extract: target files, acceptance Gherkin, dependencies, open questions.
-3. **Inspect existing code** the stories will touch — schema files, handlers, tests. Use Grep/Read; do not guess at shape.
+3. **Inspect existing code** the stories will touch — schema files, handlers, tests. Use Grep/Read; do not guess at shape. For any in-scope package, read `.cleargate/wiki/code/<package>.md` structure first if it exists; code-map is advisory — verify with Read/Grep before citing symbols in the plan.
 4. **Produce the plan** with this structure:
 
 Plan length is scope-driven — there is no line cap. The reform from EPIC-024 is to drop §3.1 duplication, not to compress.
