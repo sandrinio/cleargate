@@ -67,6 +67,7 @@ complexity_label: "L2"
 parallel_eligible: "y"
 expected_bounce_exposure: "low"
 lane: "standard"
+db_write_set: []  # advisory-v1 (EPIC-033 wave-planner axis 4): list table names this story writes to; default [] = no DB collision contribution; absent treated as [] by architect-synth predicate
 created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
