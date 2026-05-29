@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-032
 parent_cleargate_id: "EPIC-032"
 sprint_cleargate_id: SPRINT-32
 carry_over: false
-status: Draft
+status: Completed
 approved: true
 ambiguity: 🟡 Medium
 context_source: |
