@@ -1,11 +1,13 @@
 ---
-story: STORY-032-01
-role: developer
-sprint: SPRINT-32
-status: done
-commit: b7b7b547
-qa_bounces: 0
-arch_bounces: 0
+story: "STORY-032-01"
+role: "developer"
+sprint: "SPRINT-32"
+status: "done"
+commit: "b7b7b547"
+qa_bounces: "0"
+arch_bounces: "0"
+story_id: "STORY-032-01"
+sprint_id: "SPRINT-32"
 ---
 
 # STORY-032-01 Dev Report

@@ -1,10 +1,12 @@
 ---
-story: STORY-033-02
-role: qa
-sprint: SPRINT-32
-verdict: PASS
-qa_bounces: 0
-arch_bounces: 0
+story: "STORY-033-02"
+role: "qa"
+sprint: "SPRINT-32"
+verdict: "PASS"
+qa_bounces: "0"
+arch_bounces: "0"
+story_id: "STORY-033-02"
+sprint_id: "SPRINT-32"
 ---
 
 # STORY-033-02 — QA Report

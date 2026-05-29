@@ -1,9 +1,11 @@
 ---
-story_id: STORY-032-03
-role: developer
-sprint_id: SPRINT-32
-commit: a4fc3371
-generated_at: 2026-05-29T00:00:00Z
+story_id: "STORY-032-03"
+role: "developer"
+sprint_id: "SPRINT-32"
+commit: "a4fc3371"
+generated_at: "2026-05-29T00:00:00Z"
+qa_bounces: "1"
+arch_bounces: "0"
 ---
 
 STORY: STORY-032-03

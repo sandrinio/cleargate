@@ -1,10 +1,14 @@
 ---
-story: STORY-032-01
-role: qa
-sprint: SPRINT-32
-verdict: QA-RED WRITTEN
-mode: RED
-created_at: 2026-05-29
+story: "STORY-032-01"
+role: "qa"
+sprint: "SPRINT-32"
+verdict: "QA-RED WRITTEN"
+mode: "RED"
+created_at: "2026-05-29"
+story_id: "STORY-032-01"
+sprint_id: "SPRINT-32"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Red Report — STORY-032-01: TypeScript Skeleton Extractor + db_writes
