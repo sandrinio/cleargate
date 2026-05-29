@@ -44,7 +44,7 @@
 
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-32]] — status: Draft
+- [[SPRINT-32]] — status: Active
 
 
 

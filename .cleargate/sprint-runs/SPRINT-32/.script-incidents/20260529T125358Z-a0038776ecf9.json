@@ -1,0 +1,11 @@
+{
+  "ts": "2026-05-29T12:53:58Z",
+  "command": "cd cleargate-cli && tsx --test test/scripts/collision-surface-planning-workflow.red.node.test.ts",
+  "args": [],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": ".cleargate/scripts/run_script.sh: line 92: cd cleargate-cli && tsx --test test/scripts/collision-surface-planning-workflow.red.node.test.ts: No such file or directory",
+  "agent_type": null,
+  "work_item_id": null
+}

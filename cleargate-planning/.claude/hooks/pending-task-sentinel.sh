@@ -183,12 +183,19 @@ fi
   fi
 
   STARTED_AT="$(date -u +%FT%TZ)"
-  # BUG-029 fix: uniquify the sentinel filename so that two parallel Task() calls
-  # in the same assistant message (same TURN_INDEX) do NOT collide on the same
-  # target path. Pattern: ${TURN_INDEX}-${PID}-${RANDOM} mirrors write_dispatch.sh.
-  # Old: .pending-task-${TURN_INDEX}.json  ← second call overwrites first.
-  # New: .pending-task-${TURN_INDEX}-$$-${RANDOM}.json  ← each call gets its own file.
-  SENTINEL_FILE="${SPRINT_DIR}/.pending-task-${TURN_INDEX}-$$-${RANDOM}.json"
+  # STORY-033-02: key sentinel by RUN_ID when present (parallel-wave attribution).
+  # When RUN_ID is set, two concurrent Task dispatches sharing one session + one TURN_INDEX
+  # each get a distinct .pending-task-${RUN_ID}.json file and neither overwrites the other.
+  # When RUN_ID is absent (serial path), fall back to the BUG-029 uniquify form
+  # .pending-task-${TURN_INDEX}-$$-${RANDOM}.json so the serial baseline is preserved.
+  if [[ -n "${RUN_ID:-}" ]]; then
+    SENTINEL_FILE="${SPRINT_DIR}/.pending-task-${RUN_ID}.json"
+  else
+    # BUG-029 fix: uniquify when no RUN_ID (serial path).
+    # Old: .pending-task-${TURN_INDEX}.json  ← second call overwrites first.
+    # New: .pending-task-${TURN_INDEX}-$$-${RANDOM}.json  ← each call gets its own file.
+    SENTINEL_FILE="${SPRINT_DIR}/.pending-task-${TURN_INDEX}-$$-${RANDOM}.json"
+  fi
 
   # Write the sentinel atomically (tmp + mv).
   TMP="${SENTINEL_FILE}.tmp.$$"

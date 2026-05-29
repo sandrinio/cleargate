@@ -1,9 +1,10 @@
 ---
 epic_id: EPIC-033
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-31"
 carry_over: false
-status: Draft
+status: Completed
+approved: true
 ambiguity: 🟡 Medium
 context_source: |
   user-direct-epic-waiver — conversation 2026-05-29, "Dynamic Workflows" efficiency

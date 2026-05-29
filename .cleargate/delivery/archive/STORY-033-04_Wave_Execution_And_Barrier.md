@@ -1,10 +1,11 @@
 ---
 story_id: STORY-033-04
 parent_epic_ref: EPIC-033
-parent_cleargate_id: null
+parent_cleargate_id: "EPIC-033"
 sprint_cleargate_id: SPRINT-32
 carry_over: false
-status: Draft
+status: Completed
+approved: true
 ambiguity: 🟡 Medium
 context_source: |
   EPIC-033 decomposition at SPRINT-32 kickoff 2026-05-29; §6 answers (Q1 kill-switch

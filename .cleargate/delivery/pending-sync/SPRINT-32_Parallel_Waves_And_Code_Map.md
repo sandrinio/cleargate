@@ -6,9 +6,9 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: null
-status: Draft
-start_date: TBD
-end_date: TBD
+status: Active
+start_date: 2026-05-29
+end_date: 2026-05-29
 synced_at: null
 epics:
   - EPIC-033
@@ -50,8 +50,8 @@ draft_tokens:
   output: 0
   cache_creation: 0
   cache_read: 0
-  model: <synthetic>,claude-opus-4-8
-  last_stamp: 2026-05-29T08:45:55Z
+  model: <synthetic>,claude-opus-4-8, claude-opus-4-8
+  last_stamp: 2026-05-29T17:53:39Z
   sessions:
     - session: a5ac0087-64e0-48d2-8dc6-4e5d0e4115c9
       model: <synthetic>,claude-opus-4-8
@@ -60,6 +60,13 @@ draft_tokens:
       cache_read: 0
       cache_creation: 0
       ts: 2026-05-29T08:41:57Z
+    - session: 7fededeb-34d1-4a55-9c7a-63ed97361a54
+      model: claude-opus-4-8
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-29T15:49:02Z
 ---
 
 # SPRINT-32: Parallel Waves + Code Map
