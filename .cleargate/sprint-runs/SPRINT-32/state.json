@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "STORY-032-03": {
-      "state": "QA Passed",
+      "state": "Done",
       "qa_bounces": 1,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-05-29T15:38:07.800Z",
+      "updated_at": "2026-05-29T15:42:04.901Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -76,6 +76,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-032-03 → QA Passed",
-  "updated_at": "2026-05-29T15:38:07.800Z"
+  "last_action": "transition STORY-032-03 → Done",
+  "updated_at": "2026-05-29T15:42:04.901Z"
 }
