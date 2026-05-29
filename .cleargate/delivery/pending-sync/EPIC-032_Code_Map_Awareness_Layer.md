@@ -26,7 +26,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-05-29T08:48:08Z
+  last_gate_check: 2026-05-29T09:19:11Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-29T08:48:08Z
+  last_stamp: 2026-05-29T09:19:10Z
   sessions: []
 ---
 
@@ -208,7 +208,24 @@ Feature: Code-Map Awareness Layer
     When the Architect plans a change touching that file
     Then the Architect verifies via Read/Grep before citing foo in the plan
     And the code-map page is queued for rebuild on the next ingest pass
+
+  Scenario: Unparseable source file logs an Error and is skipped, not fatal
+    Given a TypeScript file under cleargate-cli/src that fails to parse (syntax error)
+    When wiki build extracts that package's skeleton
+    Then stdout logs `code-map: parse Error in <file> — symbols from this file omitted`
+    And the package page is still emitted from the files that parsed cleanly
+    And the build exit code is 0
 ```
+
+## 5.5 Story Breakdown (phased)
+
+| Story | Title | Lane | Depends on | Mode / Milestone |
+|---|---|---|---|---|
+| STORY-032-01 | TS skeleton extractor (exports/signatures/import-edges + `db_writes`) | standard | none | v2 / M1 |
+| STORY-032-02 | Code-map page schema + git-SHA drift detection + 2k token budget | standard | none | v2 / M2 |
+| STORY-032-03 | wiki-build integration + synthesis/index linking + Architect consumption | standard | STORY-032-01, STORY-032-02 | v2 / M2 |
+
+> STORY-032-01 and STORY-032-02 touch disjoint surfaces (extractor vs. page schema) and are a single file-disjoint wave; STORY-032-03 integrates both and sequences after. See SPRINT-32 §2 for the cross-epic merge order against EPIC-033.
 
 ## 6. AI Interrogation Loop (Human Input Required)
 
