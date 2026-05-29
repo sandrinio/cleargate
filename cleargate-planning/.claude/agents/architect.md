@@ -101,6 +101,8 @@ Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §
 
 **Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
 
+**Planning-workflow path (EPIC-033 / STORY-033-03):** Under `execution_mode: v2-parallel` (and `CLEARGATE_PARALLEL_WAVES` not `off`) with N > 2 stories, the §2.1–2.5 SDR production is delegated to the `architect-synth` agent (`.claude/agents/architect-synth.md`), which consumes digests from parallel `architect-reader` agents. The single-dispatch SDR above remains the authoritative definition that `architect-synth` references by pointer — and is the sole path for N ≤ 2 stories (tiny-sprint floor) or when the kill-switch is active.
+
 These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
 
 ## Mode: TPV (Test Pattern Validation)
