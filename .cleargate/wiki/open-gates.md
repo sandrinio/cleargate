@@ -28,6 +28,18 @@ Stories with medium or high ambiguity that need design decisions before work can
 
 - [[STORY-028-07]] — ambiguity: 🟡 Medium
 
+- [[STORY-032-01]] — ambiguity: 🟡 Medium
+
+- [[STORY-032-02]] — ambiguity: 🟡 Medium
+
+- [[STORY-032-03]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-02]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-03]] — ambiguity: 🟡 Medium
+
+- [[STORY-033-04]] — ambiguity: 🟡 Medium
+
 
 
 ## Gate 3 — Ready to Push (not yet synced)

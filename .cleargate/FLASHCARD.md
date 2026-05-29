@@ -4,6 +4,12 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-05-29 · #orchestration #subagent #sdr · Agent-tool subagents return ONLY their final message; SendMessage continuation is unavailable in this harness. A Design-Review/plan dispatch ending in a summary LOSES the deliverable block — instruct "final message = the block verbatim, no preamble/summary". Cost a 26k-token re-run on the SPRINT-32 SDR.
+2026-05-29 · #wiki #code-map #stale-path · EPIC-032 §0 + STORY-032-01 cite cleargate-cli/src/wiki/synthesis/index.ts which does NOT exist — the index is built by buildIndex() inside commands/wiki-build.ts:173 via synthesis/render.ts renderTemplate. Cite wiki-build.ts not synthesis/index.ts. [SPRINT-32 SDR]
+2026-05-29 · #readiness-gate #template #decomposition · Gate criteria reuse-audit-recorded / simplest-form-justified do a LITERAL substring match for `## Existing Surfaces` / `## Why not simpler?`. The epic/story/CR templates' numbered headings (`### 1.6`, `## 3.5`) FAIL the gate — emit UNNUMBERED `##` headings; in stories place them AFTER `## 4. Quality Gates` so the `## `-counted section(3)=impl-files / section(4)=DoD don't shift. Bit EPIC-031/32/33 + STORY-033-01.
+
+2026-05-29 · #workflow #token-ledger #worktree · Claude Code Workflow tool: agent() fires SubagentStop with the ORCHESTRATOR transcript/session_id (even under isolation:'worktree') and NEVER fires PreToolUse:Task → dispatch-marker attribution is dead; write the per-segment ledger row from the returned verdict.tokens at the barrier, keyed by RUN_ID. isolation:'worktree' = tracked-files-only at .claude/worktrees/wf_* off the wrong base (strips gitignored /.claude/ live + /mcp/). resumeFromRunId caches completed agents (0 tokens on replay). [STORY-033-01 spike]
+
 2026-05-22 · #qa #regression #baseline-variance · full-suite failure count can vary ~15 across runs (env/test-isolation flakes); always stash-baseline before attributing a delta to the story under test, never trust raw count diff.
 
 2026-05-20 · #membership #per-repo #cr-011 · `getMembershipState` requires `{projectRoot}` param + per-repo `.cleargate/.join.json` to return `member`. Global `~/.cleargate/auth.json` alone is insufficient. `join.ts` MUST write the marker on success (otherwise doctor always shows pre-member).
