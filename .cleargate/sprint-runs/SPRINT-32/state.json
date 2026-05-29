@@ -1,0 +1,81 @@
+{
+  "schema_version": 3,
+  "sprint_id": "SPRINT-32",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-033-02": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-032-01": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-033-03": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-032-02": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-033-04": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-032-03": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-05-29T09:22:55.322Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "Sprint SPRINT-32 initialised",
+  "updated_at": "2026-05-29T09:22:55.322Z"
+}

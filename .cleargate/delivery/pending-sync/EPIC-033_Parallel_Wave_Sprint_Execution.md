@@ -4,6 +4,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
+approved: true
 ambiguity: 🟡 Medium
 context_source: |
   user-direct-epic-waiver — conversation 2026-05-29, "Dynamic Workflows" efficiency

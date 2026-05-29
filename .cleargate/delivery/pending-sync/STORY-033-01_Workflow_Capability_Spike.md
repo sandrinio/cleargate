@@ -5,6 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 status: Completed
+approved: true
 ambiguity: 🟢 Low
 context_source: |
   EPIC-033 §2 — the BLOCKING capability spike. Gates STORY-033-02..04.

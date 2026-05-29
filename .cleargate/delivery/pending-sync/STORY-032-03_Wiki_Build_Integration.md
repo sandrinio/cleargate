@@ -5,6 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-32
 carry_over: false
 status: Draft
+approved: true
 ambiguity: 🟡 Medium
 context_source: |
   EPIC-032 decomposition at SPRINT-32 kickoff 2026-05-29; §6 answers (Q5 opt-in --code-map
