@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.13.0",
-  "generated_at": "2026-05-29T12:53:15.795Z",
+  "generated_at": "2026-05-29T13:55:20.903Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -165,7 +165,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "107869b0c36fee69ac3836f5ecda9ec94edbd1dd89dc30f87b1ada760d0c14fc",
+      "sha256": "1404cc736b49dc1559a2b5ea8083fdc0ab42f2f1ae870e632695b5901d6ea445",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -179,14 +179,14 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-enforcement.md",
-      "sha256": "5730e807fe25af79b309bef23488de23ec406828782dbaa48f143e7aab91b413",
+      "sha256": "5b56bed93f20ab39cc530ee32c895e4f741e20f2e7127607a71b326f65d66bb4",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "0380e74efa8aa782b77952fa68cc0171de035653e777d5c241d84c6e0414957b",
+      "sha256": "e5d4ee245483cedb3fdde25401b12885786456273a0e8d025746448ad3dab13e",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -278,6 +278,13 @@
     {
       "path": ".cleargate/scripts/init_sprint.mjs",
       "sha256": "1cdd9e8ebb8951a4142b83222d98b671c33ac9f72e238f58cb9bf1dbf29ce3cd",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/launch_wave.mjs",
+      "sha256": "8f2d641d80891d7c1d348c268a5366284dfcf7736ee9737b2ff2d8a4be1bd1b2",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
