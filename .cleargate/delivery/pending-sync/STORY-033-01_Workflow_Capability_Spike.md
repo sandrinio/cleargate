@@ -1,8 +1,8 @@
 ---
 story_id: STORY-033-01
 parent_epic_ref: EPIC-033
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "EPIC-033"
+sprint_cleargate_id: "SPRINT-30"
 carry_over: false
 status: Completed
 approved: true

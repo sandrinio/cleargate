@@ -1,7 +1,7 @@
 ---
 epic_id: EPIC-032
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-30"
 carry_over: false
 status: Draft
 approved: true
