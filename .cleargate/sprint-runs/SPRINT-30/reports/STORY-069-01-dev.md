@@ -1,9 +1,11 @@
 ---
-story_id: STORY-069-01
-sprint_id: SPRINT-30
-agent: developer
-commit: bedc3774
-timestamp: 2026-05-19T00:00:00Z
+story_id: "STORY-069-01"
+sprint_id: "SPRINT-30"
+agent: "developer"
+commit: "bedc3774"
+timestamp: "2026-05-19T00:00:00Z"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-069-01 Developer Report

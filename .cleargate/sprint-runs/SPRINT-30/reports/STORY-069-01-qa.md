@@ -1,12 +1,14 @@
 ---
-story_id: STORY-069-01
-sprint_id: SPRINT-30
-agent: qa
-mode: VERIFY
-qa_round: 1
-commit: bedc3774
-timestamp: 2026-05-19T00:00:00Z
-verdict: PASS
+story_id: "STORY-069-01"
+sprint_id: "SPRINT-30"
+agent: "qa"
+mode: "VERIFY"
+qa_round: "1"
+commit: "bedc3774"
+timestamp: "2026-05-19T00:00:00Z"
+verdict: "PASS"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report: STORY-069-01

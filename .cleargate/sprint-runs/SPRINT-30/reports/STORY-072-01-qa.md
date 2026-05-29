@@ -1,11 +1,13 @@
 ---
-story_id: STORY-072-01
-report_type: qa
-sprint_id: SPRINT-30
-created_at: 2026-05-19T00:00:00Z
-agent: qa
-commit: 9e379f75
-verdict: PASS
+story_id: "STORY-072-01"
+report_type: "qa"
+sprint_id: "SPRINT-30"
+created_at: "2026-05-19T00:00:00Z"
+agent: "qa"
+commit: "9e379f75"
+verdict: "PASS"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA Report — STORY-072-01

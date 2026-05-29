@@ -1,10 +1,12 @@
 ---
-story_id: STORY-068-01
-phase: qa-verify
-sprint_id: SPRINT-30
-commit: 3a151a89
-created_at: 2026-05-19
-agent: qa
+story_id: "STORY-068-01"
+phase: "qa-verify"
+sprint_id: "SPRINT-30"
+commit: "3a151a89"
+created_at: "2026-05-19"
+agent: "qa"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report: STORY-068-01

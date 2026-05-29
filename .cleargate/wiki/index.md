@@ -60,7 +60,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-28]] | sprint | Active | .cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md |
 | [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |
-| [[SPRINT-30]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md |
+| [[SPRINT-30]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md |
 | [[SPRINT-31]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md |
 | [[SPRINT-32]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-32_Parallel_Waves_And_Code_Map.md |
 ## Bugs

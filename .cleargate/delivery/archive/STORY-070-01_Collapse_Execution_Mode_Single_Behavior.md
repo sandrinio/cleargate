@@ -5,7 +5,7 @@ parent_cleargate_id: CR-070
 sprint_cleargate_id: SPRINT-30
 carry_over: false
 area: protocol/sprint-execution,schema,docs
-status: Approved
+status: "Completed"
 approved: true
 approved_at: 2026-05-19T00:00:00Z
 approved_by: sandrinio

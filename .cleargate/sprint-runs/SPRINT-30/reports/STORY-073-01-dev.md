@@ -1,9 +1,12 @@
 ---
-story_id: STORY-073-01
-commit: 7ace2538
-branch: story/STORY-073-01
-sprint: SPRINT-30
-authored_at: 2026-05-19
+story_id: "STORY-073-01"
+commit: "7ace2538"
+branch: "story/STORY-073-01"
+sprint: "SPRINT-30"
+authored_at: "2026-05-19"
+sprint_id: "SPRINT-30"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # Dev Report — STORY-073-01

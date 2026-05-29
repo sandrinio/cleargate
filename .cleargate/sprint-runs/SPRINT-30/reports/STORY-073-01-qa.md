@@ -1,10 +1,12 @@
 ---
-story_id: STORY-073-01
-report_type: qa-verify
-sprint_id: SPRINT-30
-created_at: 2026-05-19T00:00:00Z
-agent: qa
-dev_commit: 7ace2538
+story_id: "STORY-073-01"
+report_type: "qa-verify"
+sprint_id: "SPRINT-30"
+created_at: "2026-05-19T00:00:00Z"
+agent: "qa"
+dev_commit: "7ace2538"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA-Verify Report — STORY-073-01

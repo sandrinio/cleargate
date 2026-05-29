@@ -1,12 +1,12 @@
 ---
 sprint_id: SPRINT-30
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-30"
+sprint_cleargate_id: SPRINT-30
 carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: null
-status: Active
+status: Completed
 start_date: 2026-05-19
 end_date: 2026-06-02
 synced_at: null
@@ -49,15 +49,21 @@ context_source: |
   Scope will grow as pdf_processor SPRINT-02 surfaces more findings —
   this sprint plan is deliberately structured to absorb new items
   filed mid-sprint (see §3 Sprint-grow protocol).
-stamp_error: no ledger rows for work_item_id SPRINT-30
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-19T14:51:30Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-8
+  last_stamp: 2026-05-29T09:12:04Z
+  sessions:
+    - session: 7fededeb-34d1-4a55-9c7a-63ed97361a54
+      model: claude-opus-4-8
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-29T09:07:47Z
 ---
 
 # SPRINT-30: Solo Onboarding Dogfood Hardening

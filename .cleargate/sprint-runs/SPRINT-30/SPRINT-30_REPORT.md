@@ -1,31 +1,10 @@
 ---
-type: sprint
-id: "SPRINT-30"
-parent: ""
-children: []
-status: "Completed"
-remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md"
-last_ingest: "2026-05-29T09:12:04.913Z"
-last_ingest_commit: "a0eaaafb1a741bb13946faba9769397642e031d0"
-repo: "planning"
-sprint_cleargate_id: "SPRINT-30"
-report_raw_path: ".cleargate/sprint-runs/SPRINT-30/SPRINT-30_REPORT.md"
-last_report_ingest_commit: ""
+sprint_id: "SPRINT-30"
+status: "Shipped"
+generated_at: "2026-05-29T00:00:00.000Z"
+generated_by: "Reporter agent"
+template_version: 2
 ---
-
-# SPRINT-30: SPRINT-30
-
-# SPRINT-30: Solo Onboarding Dogfood Hardening
-
-## Blast radius
-Affects: None.
-
-## Open questions
-None.
-
-<!-- BEGIN sprint-report -->
-## Sprint Report
 
 <!-- role: reporter -->
 <!-- Sprint Report v2 Template — template_version: 2 -->
@@ -317,4 +296,3 @@ The two wrapper-misuse incidents share a root cause: the wrapper expects `<cmd> 
 | Date | Author | Change |
 |---|---|---|
 | 2026-05-29 | Reporter agent | Initial generation |
-<!-- END sprint-report -->

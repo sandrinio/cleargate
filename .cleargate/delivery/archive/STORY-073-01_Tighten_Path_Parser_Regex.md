@@ -5,7 +5,7 @@ parent_cleargate_id: CR-073
 sprint_cleargate_id: SPRINT-30
 carry_over: false
 area: cli/readiness-gates
-status: Approved
+status: "Completed"
 approved: true
 approved_at: 2026-05-19T00:00:00Z
 approved_by: sandrinio

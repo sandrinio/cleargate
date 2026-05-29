@@ -4,7 +4,7 @@ parent_ref: EPIC-021
 parent_cleargate_id: "EPIC-021"
 sprint_cleargate_id: SPRINT-30
 carry_over: false
-status: Triaged
+status: "Completed"
 severity: P1-High
 reporter: sandrinio
 approved: true
