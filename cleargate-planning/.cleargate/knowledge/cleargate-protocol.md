@@ -780,3 +780,83 @@ npm run check:no-pm-sdk
 ```
 
 Comments (lines starting with `//`, `#`, `/*`, or `*`) are excluded from the scan. The script prints `✓ no forbidden PM-SDK imports` on a clean tree.
+
+## 23. Parallel-Wave Execution Contract
+
+Once a sprint declares `execution_mode: v2-parallel`, the Orchestrator may execute each
+Architect-planned wave as one fire-and-forget `parallel()` Workflow of worktree-isolated
+per-story **segments** that return a schema-typed verdict, consolidated at a serial
+**barrier**. This section is the binding contract for that flow. It **inherits §22** — every
+true-blocker rule, the autonomy contract, and the five true-blocker kinds carry over
+unchanged; §23 only adds the parallel-execution-specific invariants.
+
+**Kill-switch (zero behavior change).** `execution_mode: v2-serial` (the default for v2
+sprints) OR `CLEARGATE_PARALLEL_WAVES=off` in the session env routes to the existing serial
+five-dispatch Phase C loop with **zero behavior change** — no `launch_wave.mjs` invocation
+occurs, and each story runs one at a time. The parallel-wave code never executes on the
+kill-switch path. `execution_mode: v2-parallel` with no override selects the wave loop.
+
+### 23.1 Segment verdict schema (discriminated union)
+
+Every segment returns exactly one verdict object. The discriminant is `verdict`:
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `verdict` | `'GREEN' \| 'ESCALATED' \| 'BLOCKED'` | always | the discriminant |
+| `storyId` | string | always | the story this segment executed (e.g. `STORY-033-04`) |
+| `runId` | string | always | the segment's stable, distinct `RUN_ID` |
+| `devSha` | string | always | Developer commit SHA |
+| `qaSha` | string | always | QA-Verify commit SHA |
+| `archSha` | string | optional | Architect-pass SHA (standard lane v2 only) |
+| `flashcards_flagged` | string[] | always (may be empty) | cards processed at the between-wave barrier |
+| `counters` | `{ qa_bounces, arch_bounces, breaker_hits }` | always | all three numeric |
+| `tokens` | `{ input, output, cache_creation, cache_read, model }` | always | per-segment cost the ledger consumes |
+| `blocker` | `{ type, message }` | **required iff `verdict != GREEN`** | `type` ∈ the five §22 true-blocker kinds |
+
+A `blocker.type` is one of the five §22 true-blocker kinds: `destructive`, `secret`,
+`user-intent`, `technical-impossibility`, `spec-contradiction`. The validator
+(`validateVerdicts`, exported from `.cleargate/scripts/launch_wave.mjs`) accepts a
+well-formed verdict array and **raises a validation Error naming the offending `storyId`**
+on any malformed verdict (missing required field, unknown `verdict` discriminant, or a
+non-GREEN verdict without a valid `blocker`). The named segment is marked `ESCALATED` and
+gets **no ledger row**; sibling GREEN verdicts consolidate normally.
+
+### 23.2 RUN_ID attribution invariant
+
+Per the STORY-033-01 spike, `agent()` fires `SubagentStop` with the **orchestrator**
+transcript/session_id even under worktree isolation, and `PreToolUse:Task` never fires under
+workflows — so per-agent transcript attribution is **dead**. The barrier therefore writes
+**one ledger row per segment from `verdict.tokens`, keyed by the segment's `RUN_ID`**
+(STORY-033-02 owns the write; this contract owns producing the `tokens` and the `RUN_ID`).
+Each segment mints a **stable, distinct** `RUN_ID` so sibling segments never collide on the
+RUN_ID-keyed `.session-totals.json` row, and so a `resumeFromRunId` replay re-keys the same
+segment. The RUN_ID attribution invariant: per-story cost is attributed solely via the
+verdict's `tokens` written at the barrier under the segment's `RUN_ID` — never via
+`SubagentStop`, never via a dispatch marker.
+
+### 23.3 Barrier consolidation + serial merge rule
+
+At the barrier the Orchestrator, in order: (1) runs `validateVerdicts` over the returned
+array; (2) processes the union of every segment's `flashcards_flagged[]` and writes the
+`.processed-<hash>` markers **between waves** (the relocated flashcard gate — set
+`SKIP_FLASHCARD_GATE=1` pre-launch, restore at the barrier); (3) **serially** merges each
+GREEN `story/STORY-X` to `sprint/S-NN` — **one worktree at a time, never two concurrently**
+(the shared sprint branch is a single-writer axis; per-worktree `.git` indexes mean the
+pre-commit surface gate never races, but the merge does); (4) restores the prior
+`SKIP_FLASHCARD_GATE` value. A mixed GREEN+ESCALATED wave merges the GREEN stories
+immediately (serial), then resumes only the ESCALATED segment via `resumeFromRunId` — GREEN
+segments short-circuit on resume (zero new ledger rows). Segments are **idempotent** so a
+resume or partial-failure re-run produces no duplicate side effects.
+
+### 23.4 In-segment true-blocker re-map (§22 inheritance)
+
+A segment runs inside a `parallel()` Workflow that **cannot halt for a human mid-run**, so
+the synchronous-Ask escalation form of §22 is **forbidden in-segment**. When a segment hits
+a §22 destructive or secret condition (or any of the five true-blocker kinds), it RETURNS
+`verdict: BLOCKED` with `blocker.type ∈ {destructive, secret, user-intent,
+technical-impossibility, spec-contradiction}` and a `blocker.message`, and writes a blockers
+report — it issues **no `AskUserQuestion`**. The Orchestrator halts the wave loop on the
+`BLOCKED`/`ESCALATED` verdict and surfaces it to the human, then resumes via
+`resumeFromRunId` after resolution. Fully autonomous up to that halt (§22 autonomy contract,
+§6 Q3): once Gate 2 is signed off, every wave auto-launches with no per-wave "go"; only a
+non-GREEN verdict interrupts.

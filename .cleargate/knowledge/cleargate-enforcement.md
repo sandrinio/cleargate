@@ -96,6 +96,15 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 
 **Always enforced.** Attempting to run a Developer Agent on a story without a matching `.worktrees/STORY-NNN-NN/` path present causes `validate_bounce_readiness.mjs` to exit non-zero and the orchestrator to halt the story transition. Set `CLEARGATE_ADVISORY=1` (§15) for break-glass downgrade.
 
+### §1.6 Parallel-wave worktree contract (source: protocol §23)
+
+Under `execution_mode: v2-parallel` a wave runs multiple per-story segments concurrently, each in its OWN ClearGate-managed `.worktrees/STORY-X` (created via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` — **not** the Workflow tool's `isolation:'worktree'`, which strips gitignored `/.claude/` + `/mcp/` and cuts off the wrong base; spike decision 2). Two file-surface axes:
+
+- **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (STORY-033-03's five-clause predicate), not a runtime lock.
+- **Shared sprint-branch axis (serial barrier merge).** `sprint/S-NN` is a single-writer axis. The barrier therefore merges each GREEN `story/STORY-X` to `sprint/S-NN` **serially — one worktree at a time, never two concurrently** (protocol §23.3). Concurrent `git worktree add` at wave launch is avoided by pre-creating all wave worktrees serially before any segment runs.
+
+The kill-switch (`execution_mode: v2-serial` OR `CLEARGATE_PARALLEL_WAVES=off`) reverts to the serial §1.2 worktree lifecycle with zero behavior change.
+
 ---
 
 ## 2. User Walkthrough on Sprint Branch (source: protocol §16)
