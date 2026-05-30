@@ -2,12 +2,12 @@
 bug_id: BUG-033
 parent_ref: STORY-033-03 (EPIC-033)
 parent_cleargate_id: STORY-033-03
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-32
 carry_over: false
-status: Draft
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
-approved: false
+approved: true
 area: sprint-execution,orchestration,workflows
 created_at: 2026-05-31T00:00:00Z
 updated_at: 2026-05-31T00:00:00Z
@@ -35,7 +35,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-30T21:05:36Z
+  last_stamp: 2026-05-30T21:28:49Z
   sessions: []
 ---
 
@@ -47,11 +47,11 @@ draft_tokens:
 
 - **Question:** Should a story with an empty/missing §3.1 table hard-serialize the whole wave, or just be excluded from parallelization (placed in its own serial lane)?
 - **Recommended:** Exclude-and-serialize the offending story (its own trailing serial lane), and emit a visible warning — same posture as the existing "unknown collision metadata → fail-safe-serialize" rule. Do NOT block the entire wave.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** RESOLVED 2026-05-31 — exclude-and-serialize (recommended). `architect-synth` fail-safe-serializes the empty-surface story into its own trailing serial wave with rationale `"unknown collision metadata — fail-safe-serialized"`; `collision_surface.sh` emits a `[collision_surface] WARN:` on stderr. The wave is NOT blocked.
 
 - **Question:** Beyond slash-free tokens, should the parser also treat known non-path config keys / package names (e.g. `cleargate-protocol`) as collision surfaces, or only enforce fail-safe on emptiness?
 - **Recommended:** Start with the emptiness/low-yield fail-safe (below); a semantic config-key collision axis is out of scope for v1 (EPIC-033 already deferred a "merge-adjacency" third axis).
-- **Human decision:** {populated during Brief review}
+- **Human decision:** RESOLVED 2026-05-31 — emptiness fail-safe only (recommended). The semantic config-key collision axis stays deferred. The path-shape guard WAS broadened to its already-documented contract (`"/" OR known extension`) — path *recognition*, not a semantic collision axis — which also reduces false-empties (bare filenames like `package.json` now parse).
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -110,8 +110,21 @@ Add a `*.node.test.ts` (or extend `test/scripts/collision-surface-planning-workf
 
 ---
 
+## 6. Resolution (off-sprint fix, 2026-05-31)
+
+Fixed directly off-sprint per the resolved §0.5 decisions (predicate hard-serialize + observable signal + truthful guard). The sealed STORY-033-03 Red file was left untouched and still passes; verification lives in a NEW test file.
+
+**Changed (all four mirrors kept byte-identical: live `.cleargate/scripts` + `.claude/agents`, canonical `cleargate-planning/**`, npm payload, dist):**
+- `collision_surface.sh` — (1) broadened the path-shape guard to `"/" OR known extension` (`looks_like_path()`), making the code match its own stale header comment; (2) on ZERO parseable paths, emits `[collision_surface] WARN: … fail-safe-serialize` on **stderr** while keeping stdout empty + `exit 0` (preserves sealed Bash Unit 3, whose contract is the empty case).
+- `architect-synth.md` — fail-safe-serialize rule extended: an empty `(file_surface ∪ file_creates)` is now a trigger (distinct from "missing fields"); added an **Empty-surface guard** so clause 2 is never read as `∅ ∩ ∅ = disjoint`. Rationale reuses the exact `"unknown collision metadata — fail-safe-serialized"` phrase.
+- `architect-reader.md` — clarified that empty `collision_surface.sh` output must be reported as `file_surface: []` (do not invent paths) — that empty is the fail-safe signal.
+
+**Verification:** `test/scripts/bug-033-collision-surface-failsafe.node.test.ts` — 6 scenarios (stderr WARN on slash-free-only + on missing §3.1; bare-filename now parses; label/prose rejected; slash-bearing regression; synth/reader prose assertions). Green alongside the 15 sealed STORY-033-03 tests.
+
+---
+
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Resolved — fixed off-sprint**
 
 *Evaluate each criterion against its literal text.*
 
@@ -120,5 +133,5 @@ Requirements to pass to Green (Ready for Fix):
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached. (Source excerpt — this is a logic gap, not a crash.)
 - [x] Verification command (failing test) is provided.
-- [ ] §0.5 Open Questions resolved at Brief review (fail-safe scope: serialize-story vs block-wave).
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] §0.5 Open Questions resolved (fail-safe scope: exclude-and-serialize; emptiness-only). See §0.5.
+- [x] `approved: true` is set in the YAML frontmatter.

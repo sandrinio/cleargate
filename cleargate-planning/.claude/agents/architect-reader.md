@@ -29,7 +29,7 @@ Given exactly ONE story file path, read it and return a compact structured diges
 Field sources:
 - `storyId` — frontmatter `story_id`
 - `parallel_eligible` — frontmatter `parallel_eligible` (default `"y"` if absent)
-- `file_surface` — ALL paths emitted by `.cleargate/scripts/collision_surface.sh <story-file>`. Do NOT filter. Include every emitted path.
+- `file_surface` — ALL paths emitted by `.cleargate/scripts/collision_surface.sh <story-file>`. Do NOT filter. Include every emitted path. If the script emits NOTHING on stdout (it prints a `[collision_surface] WARN:` line on stderr when it cannot parse any path — no §3.1 table, prose-only table, or only slash-free/extension-less tokens), report `file_surface: []` faithfully. Do NOT invent paths. An empty `file_surface` is the fail-safe signal architect-synth needs to serialize this story (BUG-033) — empty is "unproven", never "disjoint".
 - `file_creates` — paths from §3.1 rows/cells tagged as creations ("New Files Needed" row values, "Primary File (new)" cells). Union into `file_surface` for the disjointness predicate (architect-synth unions them; reader reports separately).
 - `db_write_set` — frontmatter `db_write_set` array (default `[]` if absent or empty)
 - `dep_predecessors` — frontmatter `dep_predecessors` array (default `[]` if absent)

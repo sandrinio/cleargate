@@ -2,12 +2,12 @@
 bug_id: BUG-034
 parent_ref: STORY-033-04 (EPIC-033)
 parent_cleargate_id: STORY-033-04
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-32
 carry_over: false
-status: Draft
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
-approved: false
+approved: true
 area: sprint-execution,orchestration,workflows
 created_at: 2026-05-31T00:00:00Z
 updated_at: 2026-05-31T00:00:00Z
@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-30T21:06:17Z
+  last_stamp: 2026-05-30T21:29:57Z
   sessions: []
 ---
 
@@ -49,11 +49,11 @@ draft_tokens:
 
 - **Question:** Should the env save/restore live inside `launch_wave.mjs` (wrap `parallel()`+barrier in `try/finally`) or stay an Orchestrator-prose obligation in SKILL.md §C.0.1 with a code-enforced guard added?
 - **Recommended:** Move it into `launch_wave.mjs` — set `SKIP_FLASHCARD_GATE` at the top of `launchWave()`, restore in a `finally` that runs regardless of validator/merge throws. Prose-only obligations are exactly what failed here. Keep the SKILL.md step as documentation.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** RESOLVED 2026-05-31 — in-code `try/finally` in `launchWave()` (recommended). `validateVerdicts()` now runs INSIDE the protected region so the `finally` fires before the validation Error propagates. SKILL.md §C.0.1 steps 1/6 + §C.9 reworded to point at the code-enforced guarantee (no longer a prose obligation).
 
 - **Question:** Should the restore snapshot the *prior* value (env var may have been legitimately set before launch) rather than hard-deleting it?
 - **Recommended:** Yes — capture `const prev = env.SKIP_FLASHCARD_GATE` and restore exactly that (delete if it was unset), so the gate returns to its true pre-wave state.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** RESOLVED 2026-05-31 — snapshot the prior value (recommended). Uses `hasOwnProperty` (not truthiness) so "unset" vs "empty string" vs "set" all restore exactly; deletes the key iff it was unset pre-wave.
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -106,8 +106,20 @@ Extend `test/scripts/wave-execution-barrier.red.node.test.ts`:
 
 ---
 
+## 6. Resolution (off-sprint fix, 2026-05-31)
+
+Fixed directly off-sprint per the resolved §0.5 decisions. The sealed STORY-033-04 barrier Red file was left untouched and still passes; verification lives in a NEW test file.
+
+**Changed (all four mirrors kept byte-identical: live `.cleargate/scripts`, canonical `cleargate-planning/**`, npm payload, dist):**
+- `launch_wave.mjs` — `launchWave()` now OWNS the gate save/set/restore. In the live-dispatch branch it snapshots the prior `SKIP_FLASHCARD_GATE` (`hasOwnProperty`-based), sets `=1` before `parallel()`, runs `validateVerdicts()` INSIDE a `try`, and restores the exact prior value (delete iff unset) in a `finally`. The planning-only branch (no seam) mutates no env. Added an injectable `env` param (defaults to `process.env`) for testability.
+- `SKILL.md` §C.0.1 step 1 (gate suppression now launcher-owned, Orchestrator must NOT hand-manage), step 6 (restore already happened in the `finally`), and the §C.9 between-wave paragraph — all reworded to the code-enforced guarantee.
+
+**Verification:** `test/scripts/bug-034-flashcard-gate-restore.node.test.ts` — 6 scenarios (restore-to-unset on barrier throw; restore exact prior value; restore empty-string prior; happy-path restore; gate observed `=1` mid-dispatch; planning-mode no-mutation). Green alongside the 23 sealed STORY-033-04 tests.
+
+---
+
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Resolved — fixed off-sprint**
 
 *Evaluate each criterion against its literal text.*
 
@@ -116,5 +128,5 @@ Requirements to pass to Green (Ready for Fix):
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached. (Source excerpt + grep — this is a missing-handler gap, not a crash.)
 - [x] Verification command (failing test) is provided.
-- [ ] §0.5 Open Questions resolved at Brief review (restore location: in-code finally vs prose; prior-value snapshot).
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] §0.5 Open Questions resolved (restore location: in-code finally; prior-value snapshot). See §0.5.
+- [x] `approved: true` is set in the YAML frontmatter.

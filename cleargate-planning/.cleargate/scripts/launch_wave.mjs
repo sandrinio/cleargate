@@ -258,11 +258,24 @@ export function validateVerdicts(verdicts) {
  * stable RUN_ID, runs the linear per-story pipeline inside its own ClearGate-managed
  * `.worktrees/STORY-X`, accumulates `tokens` from the outset, and RETURNS a verdict object —
  * it never blocks (a §22 true-blocker becomes a BLOCKED verdict with `blocker.type`, never an
- * `AskUserQuestion`). The Orchestrator validates the returned array at the barrier.
+ * `AskUserQuestion`).
+ *
+ * Flashcard write-gate (BUG-034 — code-enforced restore). Per the spike, per-thunk child env
+ * is not settable, so the WRITE-gate is suppressed by setting `SKIP_FLASHCARD_GATE=1` in the
+ * env inherited by every segment for the duration of the `parallel()` dispatch. This launcher
+ * OWNS that save/set/restore in a `try/finally`: the prior value is snapshotted, `=1` is set
+ * before dispatch, and the EXACT prior value is restored (deleted iff it was unset) in a
+ * `finally` that runs even when `parallel()` or `validateVerdicts()` throws. Previously this
+ * was an Orchestrator prose obligation (SKILL.md §C.0.1); a mid-barrier throw left the gate
+ * suppressed session-wide, leaking into the serial fallback EPIC-033 promises is untouched.
+ *
+ * `validateVerdicts()` (the designed throw site) runs INSIDE the protected region so the
+ * `finally` always restores the gate before the validation Error propagates to the caller.
  *
  * The `parallel`/`segmentRunner` seams are injected so this is testable without a live
  * Workflow runtime (SPRINT-32 runs serial — no real dispatch). When omitted, the function
- * documents the shape; the live launcher wires the Workflow `parallel()` primitive.
+ * documents the shape and performs NO env mutation; the live launcher wires the Workflow
+ * `parallel()` primitive.
  *
  * @param {object} args
  * @param {string} args.sprintId
@@ -270,9 +283,11 @@ export function validateVerdicts(verdicts) {
  * @param {{ wave: string, stories: string[], parallel: boolean }} args.wave  one wave from waves.json
  * @param {(thunks: Array<() => Promise<object>>) => Promise<object[]>} [args.parallel]  parallel() seam
  * @param {(story: string, runId: string) => Promise<object>} [args.segmentRunner]       per-segment seam
- * @returns {Promise<object[]>}  the array of segment verdicts (validated by the caller at the barrier)
+ * @param {NodeJS.ProcessEnv} [args.env]  env handle for the gate save/restore (defaults to process.env)
+ * @returns {Promise<object[]>}  the validated array of segment verdicts
+ * @throws {Error} from validateVerdicts when any verdict is malformed — gate is restored first.
  */
-export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner }) {
+export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner, env = process.env }) {
   const stories = (wave && Array.isArray(wave.stories) ? wave.stories : []).slice();
 
   // Pre-create each wave story's worktree SERIALLY (spike risk-mitigation: concurrent
@@ -286,6 +301,7 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
   if (typeof parallel !== 'function' || typeof segmentRunner !== 'function') {
     // No live runtime seam supplied (the SPRINT-32 serial-build case). Return the plan so a
     // caller can inspect the worktree commands + minted RUN_IDs without dispatching agents.
+    // NO env mutation here — nothing is dispatched, so the gate need not be suppressed.
     return segmentPlan.map((seg) => ({
       storyId: seg.story,
       runId: seg.runId,
@@ -294,10 +310,24 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
     }));
   }
 
-  const thunks = segmentPlan.map((seg) => () => segmentRunner(seg.story, seg.runId));
-  const verdicts = await parallel(thunks);
-  void worktreeCommands; // pre-created by the Orchestrator before the parallel() call
-  return verdicts;
+  // BUG-034: snapshot the PRIOR gate value, suppress it for the dispatch, restore it EXACTLY
+  // in a `finally` — even if parallel()/validateVerdicts() throws. `hasOwnProperty` (not a
+  // truthiness check) distinguishes "unset" from "set to empty string" so restore is exact.
+  const hadPriorGate = Object.prototype.hasOwnProperty.call(env, 'SKIP_FLASHCARD_GATE');
+  const priorGate = env.SKIP_FLASHCARD_GATE;
+  env.SKIP_FLASHCARD_GATE = '1';
+  try {
+    const thunks = segmentPlan.map((seg) => () => segmentRunner(seg.story, seg.runId));
+    const verdicts = await parallel(thunks);
+    // Designed throw site (names the offending storyId). Inside the try so the finally below
+    // restores the gate before the Error propagates to the Orchestrator.
+    validateVerdicts(verdicts);
+    void worktreeCommands; // pre-created by the Orchestrator before the parallel() call
+    return verdicts;
+  } finally {
+    if (hadPriorGate) env.SKIP_FLASHCARD_GATE = priorGate;
+    else delete env.SKIP_FLASHCARD_GATE;
+  }
 }
 
 // When run directly (`node launch_wave.mjs`) print a short usage note — there is no live

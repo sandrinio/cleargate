@@ -43,6 +43,8 @@ Two stories A and B may share a wave IFF ALL five clauses hold:
 
 Any failed clause → serialize A and B into different waves. Cite the failing clause in the wave rationale.
 
+**Empty-surface guard (BUG-033 — do NOT fail open).** Clause 2 is only meaningful when BOTH stories have a NON-empty surface. If either story's `(file_surface ∪ file_creates)` is empty — `collision_surface.sh` emitted nothing because the story has no §3.1 table, a prose-only table, or only slash-free / extension-less tokens (`architect-reader` reports `[]`) — you must NOT read `∅ ∩ ∅ = ∅` as "disjoint". An empty surface is **unproven**, not **proven-disjoint**. Fail-safe-serialize the empty-surface story (see below) BEFORE running any pairwise clause-2 check; never co-wave it.
+
 ## Tiny-sprint floor (N ≤ 2)
 
 When the milestone has N ≤ 2 stories: skip the fan-out computation entirely. Emit a SINGLE wave containing ALL stories with `parallel: false`. Rationale must mention "tiny-sprint floor" or "N≤2" or "sequential". **Always emit `waves.json`** even at the floor — downstream STORY-033-04 reads `parallel: false` rather than special-casing file absence.
@@ -51,11 +53,12 @@ When the milestone has N ≤ 2 stories: skip the fan-out computation entirely. E
 
 A story is fail-safe-serialized when ANY of:
 - Its digest is missing required fields (malformed frontmatter, no parseable §3.1 table)
+- **Its surface is empty — `(file_surface ∪ file_creates)` has no entries** (BUG-033). This is distinct from "missing fields": the field is present but `[]`. An empty surface is unproven, never proven-disjoint, so it cannot be co-waved.
 - Its `db_write_set` is non-empty (coarse DB collision axis — surface for serial treatment)
 - It was placed here by the Orchestrator with explicit `parallel_eligible: "n"`
 
 Fail-safe-serialized stories are placed in their own trailing serial wave, NEVER co-waved with another story. The rationale MUST contain exactly:
-- For missing/unparseable metadata: `"unknown collision metadata — fail-safe-serialized"`
+- For missing/unparseable metadata OR an empty surface: `"unknown collision metadata — fail-safe-serialized"`
 - For DB-touching: `"DB-touching story serialized: db_write_set non-empty (coarse DB collision axis)"`
 
 ## Wave packing algorithm
