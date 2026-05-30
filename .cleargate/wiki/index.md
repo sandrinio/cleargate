@@ -67,6 +67,8 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[BUG-031]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-031_Cleargate_Init_Inherits_Global_Project_Id.md |
 | [[BUG-032]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-032_Sprint_Close_Backsync_Skips_Story_Frontmatter.md |
+| [[BUG-033]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-033_Collision_Surface_Fail_Open.md |
+| [[BUG-034]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-034_Flashcard_Gate_Restore_Not_Exception_Safe.md |
 ## CRs
 
 | [[CR-068]] | cr | Approved | .cleargate/delivery/pending-sync/CR-068_Init_Silence_DEP0190_Shell_True_Warning.md |
