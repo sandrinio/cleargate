@@ -4,6 +4,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 lifecycle_init_mode: warn
+execution_mode: v2
 remote_id: ""
 source_tool: linear
 context_source: Decomposes EPIC-043 (Framework Hygiene & Efficiency Remediation, pushed v2) + Approved CR-070, from the 2026-06-01 source-level framework self-review. Owner directed 'take them all' (full EPIC-043 scope) on 2026-06-01.
@@ -31,7 +32,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-31T21:39:30Z
+  last_stamp: 2026-05-31T21:59:59Z
   sessions: []
 ---
 
