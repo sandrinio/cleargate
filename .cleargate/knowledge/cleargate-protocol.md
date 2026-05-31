@@ -68,7 +68,7 @@ You never push to the PM tool without approval. You never skip a level in the do
 - CR: "change", "replace", "update how X works", "remove", "refactor" (existing behavior)
 - Bug: "broken", "error", "crash", "not working", "wrong output", "fix"
 - Pull: "pull", "sync", "what's in Linear/Jira", "show me the sprint"
-- Push: "push to Linear", "create in Jira", "sync this item"
+- Push: "push", "cleargate push", "sync this item"
 
 ### Ambiguous Requests
 
