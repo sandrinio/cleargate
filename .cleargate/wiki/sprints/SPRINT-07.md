@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-07"
 parent: ""
 children: []
-status: "Planned"
+status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-07_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-05-17T23:17:07.149Z"
-last_ingest_commit: "a0d473c1e858a6f2f0d75fb78a3bf6319aa8f109"
+last_ingest: "2026-05-31T08:08:46.362Z"
+last_ingest_commit: "25cff29ab62a1703170ff7e608b557a0f518ed8e"
 repo: "planning"
 ---
 

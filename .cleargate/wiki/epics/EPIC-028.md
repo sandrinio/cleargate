@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-028"
 parent: ""
 children: []
-status: "Approved"
+status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md"
-last_ingest: "2026-05-17T23:17:07.149Z"
-last_ingest_commit: "79bc3eb7abd7719226fb04f5382c826d0ae880e4"
+last_ingest: "2026-05-31T08:08:46.362Z"
+last_ingest_commit: "25cff29ab62a1703170ff7e608b557a0f518ed8e"
 repo: "planning"
 ---
 

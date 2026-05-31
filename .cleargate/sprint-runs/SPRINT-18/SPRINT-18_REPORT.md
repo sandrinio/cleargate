@@ -1,9 +1,12 @@
 ---
-sprint_id: "SPRINT-18"
-status: "Draft"
-generated_at: "2026-05-01T20:30:00Z"
-generated_by: "Reporter agent"
+sprint_id: SPRINT-18
+status: Draft
+generated_at: 2026-05-01T20:30:00Z
+generated_by: Reporter agent
 template_version: 2
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:03:37.760Z
+push_version: 1
 ---
 
 <!-- Sprint Report v2 Template — first dogfood of new mechanics from CR-021 (SPRINT-18 self-host).

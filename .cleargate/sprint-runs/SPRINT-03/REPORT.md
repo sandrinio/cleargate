@@ -1,3 +1,9 @@
+---
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:05:33.825Z
+push_version: 1
+---
+
 # SPRINT-03 Report: CLI Packages (`cleargate-cli` scaffold + Admin CLI + `cleargate join`)
 
 **Status:** Shipped (engineering complete; ops close-out deferred — see DoD)

@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-033"
 parent: ""
 children: []
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-033_Parallel_Wave_Sprint_Execution.md"
-last_ingest: "2026-05-29T07:50:00.648Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-033_Parallel_Wave_Sprint_Execution.md"
+last_ingest: "2026-05-31T08:08:46.362Z"
+last_ingest_commit: "794be88a65a59ec22a715fcdaf8d7a242c41f43c"
 repo: "planning"
 ---
 

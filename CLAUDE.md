@@ -17,18 +17,25 @@ Scaffold AI agents into a three-phase sync loop — **Plan** (PM tool → local 
   delivery/
     INDEX.md            ← curated roadmap table (epic/sprint map)
     pending-sync/       ← drafts + in-flight items (sprints, epics, stories, initiatives)
-    archive/            ← items pushed to PM tool / completed
-  wiki/                 ← compiled awareness layer (ships in SPRINT-04 EPIC-002)
+    archive/            ← items pushed to ClearGate / completed
+  config.yml            ← per-repo config; wiki.ingest_buckets controls which buckets the wiki compiles
+  wiki/                 ← compiled awareness layer. Buckets: epics, sprints, proposals, crs, bugs, initiatives.
+                          STORIES ARE EXCLUDED by default (config.yml ingest_buckets omits `stories`) —
+                          too granular for the awareness layer. Stories still push to ClearGate via `cleargate push`.
   sprint-runs/<id>/
-    plans/M<N>.md       ← Architect output per milestone
-    token-ledger.jsonl  ← auto-populated by SubagentStop hook
-    REPORT.md           ← Reporter output at sprint end
+    plans/M<N>.md            ← Architect output per milestone
+    token-ledger.jsonl       ← auto-populated by SubagentStop hook
+    SPRINT-<#>_REPORT.md     ← Reporter output at sprint end (legacy: REPORT.md for SPRINT-01..17).
+                               Pushed to ClearGate via `cleargate push <file>` under id SPRINT-<#>-REPORT
+                               (type sprint_report) — distinct from the SPRINT-<#> work-item, so it never overwrites it.
   hook-log/             ← raw hook stdout/stderr
 
 cleargate-planning/     ← canonical scaffold source (what `cleargate init` installs)
   CLAUDE.md             ← the injection spec
   .claude/{agents,skills,hooks,settings.json}
   .cleargate/{FLASHCARD.md,knowledge,templates,delivery}/  (empty skeleton)
+  .cleargate/config.yml ← shipped active config; ingest_buckets excludes `stories` so end-user
+                          installs get story-free wikis by default (config.example.yml = full reference)
 
 cleargate-cli/          ← @cleargate/cli npm package source (publishes `cleargate`)
 mcp/                    ← MCP server — nested separate git repo (sandrinio/cleargate-mcp)

@@ -1,10 +1,13 @@
 ---
-sprint_id: "SPRINT-27"
-status: "Draft"
-generated_at: "2026-05-15T04:40:00Z"
-generated_by: "Reporter agent"
+sprint_id: SPRINT-27
+status: Draft
+generated_at: 2026-05-15T04:40:00Z
+generated_by: Reporter agent
 template_version: 2
-area: "epic-027"
+area: epic-027
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:03:44.433Z
+push_version: 1
 ---
 
 <!-- Sprint Report v2 Template — template_version: 2 -->

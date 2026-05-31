@@ -1,3 +1,9 @@
+---
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:05:39.030Z
+push_version: 1
+---
+
 # SPRINT-11 Report: Wiki Index Hygiene & Scale
 
 **Status:** ✅ Shipped (4 / 4 stories merged to `sprint/SPRINT-11`, HEAD `401a2b3`)

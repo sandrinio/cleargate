@@ -5,6 +5,17 @@ wiki:
   index_token_ceiling: 8000
   # CR-002: raised from default 50 to accommodate the full story corpus (136 stories).
   bucket_pagination_ceiling: 200
+  # 2026-05-31: stories are no longer compiled into the wiki — too granular/numerous
+  # for the awareness layer. Every other bucket is still ingested. Stories continue
+  # to sync to ClearGate via `cleargate push`; only the local wiki skips them.
+  # This allowlist omits `stories` (and is the same default the scaffold ships).
+  ingest_buckets:
+    - epics
+    - sprints
+    - proposals
+    - crs
+    - bugs
+    - initiatives
 
 gates:
   # Worker cap lives in cleargate-cli/vitest.config.ts (poolOptions.forks.maxForks=2).

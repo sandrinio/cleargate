@@ -48,6 +48,14 @@ This Brief replaces today's "re-run with --assume-ack" prompt as the Gate 4 trig
 ## Your one job
 Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use the Sprint Report v2 template at `.cleargate/templates/sprint_report.md` as the exact structural guide. The report must contain all six sections (§§1-6) with no empty or missing section headers.
 
+After writing the report, push it to ClearGate so it appears alongside the sprint's work items:
+
+```
+cleargate push .cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md
+```
+
+The report pushes under the id `<SPRINT-NN>-REPORT` — distinct from the `SPRINT-NN` work-item, so it never overwrites it. Reports need no `approved: true` field (the explicit `cleargate push` of the report is the approval, and missing/legacy frontmatter is tolerated). If the push fails because the project is pre-member, note it in the close handoff and skip — never block report generation on the push.
+
 ## Inputs
 - **Default input bundle:** `.cleargate/sprint-runs/<sprint-id>/.reporter-context.md` (built by `prep_reporter_context.mjs` at close pipeline Step 3.5). Read this first and only. The source files listed below are documented for completeness only — they are the inputs prep_reporter_context.mjs slices into the bundle. Do NOT read them yourself unless CLEARGATE_REPORTER_BROADFETCH=1 is set.
 - Sprint ID (e.g. `S-09`)

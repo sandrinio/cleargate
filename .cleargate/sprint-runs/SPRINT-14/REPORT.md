@@ -1,9 +1,12 @@
 ---
-sprint_id: "SPRINT-14"
-status: "Shipped"
-generated_at: "2026-04-27T00:00:00Z"
+sprint_id: SPRINT-14
+status: Shipped
+generated_at: 2026-04-27T00:00:00Z
 generated_by: "Orchestrator (hand-written per STORY-022-08 §C; Reporter spawn deferred to SPRINT-15 per Architect M5 §6 #5)"
 template_version: 2
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:03:34.756Z
+push_version: 1
 ---
 
 <!-- Sprint Report v2 — template_version: 2 -->

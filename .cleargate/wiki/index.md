@@ -4,44 +4,32 @@
 
 ## Active
 
-- [[EPIC-012]] (epic) — Ready
-- [[EPIC-021]] (epic) — Ready
-- [[EPIC-027]] (epic) — Approved
-  - STORY-027-xx (5 stories) — 5 Approved
-- [[EPIC-028]] (epic) — Approved
-  - STORY-028-xx (5 stories) — 5 Draft
-- [[SPRINT-07]] (sprint) — Planned
-- [[SPRINT-16]] (sprint) — Approved
+- [[EPIC-030]] (epic) — Draft
+- [[EPIC-031]] (epic) — Draft
 - [[SPRINT-18]] (sprint) — Approved
 - [[SPRINT-28]] (sprint) — Active
+- [[SPRINT-31]] (sprint) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
 - [[PROPOSAL-013]] (proposal) — Approved
-- [[CR-061]] (cr) — Approved
-- [[CR-062]] (cr) — Approved
-- [[CR-063]] (cr) — Approved
-- [[CR-064]] (cr) — Approved
-- [[CR-065]] (cr) — Approved
-- [[CR-066]] (cr) — Approved
-- [[CR-067]] (cr) — Approved
-- [[BUG-004]] (bug) — Approved
+- [[PROPOSAL-029]] (proposal) — Ready
+- [[PROPOSAL-074]] (proposal) — Draft
+- [[CR-068]] (cr) — Approved
+- [[CR-069]] (cr) — Approved
+- [[CR-070]] (cr) — Approved
+- [[CR-071]] (cr) — Approved
+- [[CR-072]] (cr) — Approved
+- [[CR-073]] (cr) — Approved
 - [[BUG-030]] (bug) — Triaged
-- [[STORY-028-01]] (story) — Approved
-- [[STORY-066-01]] (story) — Draft
-- [[STORY-066-02]] (story) — Draft
-- [[STORY-067-01]] (story) — Draft
-- [[STORY-067-02]] (story) — Draft
-- [[STORY-067-03]] (story) — Draft
 
 ## Archive
 
-- Epics: 22 Completed · 2 Abandoned · [expand](archive/epics.md)
-- Sprints: 24 Completed · [expand](archive/sprints.md)
+- Epics: 27 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Sprints: 26 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 56 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 19 Completed · 1 Abandoned · [expand](archive/bugs.md)
-- Stories: 123 Completed · 31 Abandoned · [expand](archive/stories.md)
+- CRs: 63 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 24 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 
@@ -49,51 +37,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Epics
-
-| [[EPIC-029]] | epic | Ready | .cleargate/delivery/pending-sync/EPIC-029_Delivery_Folder_Umbrella_Restructure.md |
-| [[EPIC-030]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-030_AI_Driven_Sprint_Planning.md |
-| [[EPIC-031]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-031_Test_Suite_Wall_Time_Reduction.md |
-| [[EPIC-032]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-032_Code_Map_Awareness_Layer.md |
-| [[EPIC-033]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-033_Parallel_Wave_Sprint_Execution.md |
-## Sprints
-
-| [[SPRINT-28]] | sprint | Active | .cleargate/sprint-runs/SPRINT-28/SPRINT-28_REPORT.md |
-| [[SPRINT-29]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md |
-| [[SPRINT-30]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md |
-| [[SPRINT-31]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md |
-| [[SPRINT-32]] | sprint | Completed | .cleargate/delivery/pending-sync/SPRINT-32_Parallel_Waves_And_Code_Map.md |
-## Bugs
-
-| [[BUG-031]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-031_Cleargate_Init_Inherits_Global_Project_Id.md |
-| [[BUG-032]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-032_Sprint_Close_Backsync_Skips_Story_Frontmatter.md |
-| [[BUG-033]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-033_Collision_Surface_Fail_Open.md |
-| [[BUG-034]] | bug | Draft | .cleargate/delivery/pending-sync/BUG-034_Flashcard_Gate_Restore_Not_Exception_Safe.md |
-## CRs
-
-| [[CR-068]] | cr | Approved | .cleargate/delivery/pending-sync/CR-068_Init_Silence_DEP0190_Shell_True_Warning.md |
-| [[CR-069]] | cr | Approved | .cleargate/delivery/pending-sync/CR-069_Init_Final_Banner_Surfaces_Mcp_Restart_Need.md |
-| [[CR-070]] | cr | Approved | .cleargate/delivery/pending-sync/CR-070_Collapse_Execution_Mode_To_Single_Behavior.md |
-| [[CR-071]] | cr | Approved | .cleargate/delivery/pending-sync/CR-071_Sprint_Execution_Autonomy_Contract.md |
-| [[CR-072]] | cr | Approved | .cleargate/delivery/pending-sync/CR-072_Cleargate_Init_Default_Gitignore_Expansion.md |
-| [[CR-073]] | cr | Approved | .cleargate/delivery/pending-sync/CR-073_Readiness_Gate_Path_Parser_Tightening.md |
-## Stories
-
-| [[STORY-031-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-031-01_Cli_Test_Runner_Split.md |
-| [[STORY-031-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-031-02_QA_Scoped_Tests_Default.md |
-| [[STORY-032-01]] | story | Draft | .cleargate/delivery/pending-sync/STORY-032-01_TS_Skeleton_Extractor.md |
-| [[STORY-032-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-032-02_Code_Map_Page_Schema.md |
-| [[STORY-032-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-032-03_Wiki_Build_Integration.md |
-| [[STORY-033-01]] | story | Completed | .cleargate/delivery/pending-sync/STORY-033-01_Workflow_Capability_Spike.md |
-| [[STORY-033-02]] | story | Draft | .cleargate/delivery/pending-sync/STORY-033-02_Parallel_Spawn_Ledger_Attribution.md |
-| [[STORY-033-03]] | story | Draft | .cleargate/delivery/pending-sync/STORY-033-03_Architect_Planning_Workflow.md |
-| [[STORY-033-04]] | story | Draft | .cleargate/delivery/pending-sync/STORY-033-04_Wave_Execution_And_Barrier.md |
-| [[STORY-068-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-068-01_Drop_Shell_True_From_Init_Spawns.md |
-| [[STORY-069-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-069-01_Init_Final_MCP_Restart_Banner.md |
-| [[STORY-070-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-070-01_Collapse_Execution_Mode_Single_Behavior.md |
-| [[STORY-071-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-071-01_Sprint_Execution_Autonomy_Contract.md |
-| [[STORY-072-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-072-01_Expand_Init_Gitignore_Default.md |
-| [[STORY-073-01]] | story | Approved | .cleargate/delivery/pending-sync/STORY-073-01_Tighten_Path_Parser_Regex.md |
-## Proposals
-
-| [[PROPOSAL-074]] | proposal | Draft | .cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md |

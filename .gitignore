@@ -27,6 +27,9 @@ Thumbs.db
 # Per-participant identity file — personal email, not team-shared
 /.cleargate/.participant.json
 
+# Per-machine join state (project_id + joined_at) — written by `cleargate join`, not team-shared
+/.cleargate/.join.json
+
 # Sync drift marker — per-machine runtime state, not team-shared
 # (anchored at any depth — also catches cleargate-cli/.cleargate/.sync-marker.json)
 **/.cleargate/.sync-marker.json

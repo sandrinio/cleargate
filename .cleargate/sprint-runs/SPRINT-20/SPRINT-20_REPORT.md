@@ -1,9 +1,12 @@
 ---
-sprint_id: "SPRINT-20"
-status: "Shipped"
-generated_at: "2026-05-02T23:20:00Z"
+sprint_id: SPRINT-20
+status: Shipped
+generated_at: 2026-05-02T23:20:00Z
 generated_by: "Reporter agent (role: reporter)"
 template_version: 2
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:03:39.208Z
+push_version: 1
 ---
 
 <!-- role: reporter -->

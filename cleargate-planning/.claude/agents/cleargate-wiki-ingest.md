@@ -34,10 +34,13 @@ Given one absolute path to a raw work-item file under `.cleargate/delivery/**`, 
    | `STORY-` | `story` | `stories` |
    | `SPRINT-` | `sprint` | `sprints` |
    | `PROPOSAL-` | `proposal` | `proposals` |
+   | `INITIATIVE-` | `initiative` | `initiatives` |
    | `CR-` | `cr` | `crs` |
    | `BUG-` | `bug` | `bugs` |
 
    The `id` is the stem of the filename (everything before the first `_` or `.md` suffix). Example: `STORY-042-01_name.md` → id `STORY-042-01`, bucket `stories`.
+
+   **Bucket allowlist (§21.2).** After deriving the bucket, read `.cleargate/config.yml`. If a `wiki.ingest_buckets` list is present and the derived bucket is NOT in it, exit 0 immediately and emit `SKIP: bucket '<bucket>' not in wiki.ingest_buckets`. Do not write a page, log entry, or index row. When the key is absent, all buckets are ingestable (default). This mirrors the `cleargate wiki ingest` CLI, which enforces the same allowlist — so the auto-ingest hook and a direct agent invocation behave identically.
 
 4. **Idempotency guard (§10.7).** Read the existing wiki page at `.cleargate/wiki/<bucket>/<id>.md` if it exists. Extract its `last_ingest_commit` frontmatter field. Run:
 

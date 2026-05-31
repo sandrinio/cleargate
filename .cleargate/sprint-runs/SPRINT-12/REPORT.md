@@ -1,3 +1,9 @@
+---
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:05:39.774Z
+push_version: 1
+---
+
 # SPRINT-12 Report: Framework Universality — Public Ship
 
 **Status:** Shipped (5 / 5 stories merged to `sprint/SPRINT-12`, HEAD `7d70128`)

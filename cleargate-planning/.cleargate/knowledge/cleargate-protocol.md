@@ -68,7 +68,7 @@ You never push to the PM tool without approval. You never skip a level in the do
 - CR: "change", "replace", "update how X works", "remove", "refactor" (existing behavior)
 - Bug: "broken", "error", "crash", "not working", "wrong output", "fix"
 - Pull: "pull", "sync", "what's in Linear/Jira", "show me the sprint"
-- Push: "push to Linear", "create in Jira", "sync this item"
+- Push: "push", "cleargate push", "sync this item"
 
 ### Ambiguous Requests
 
@@ -642,6 +642,22 @@ wiki:
 ```
 
 Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.
+
+### §21.2 Ingest Bucket Allowlist
+
+By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
+
+```yaml
+wiki:
+  ingest_buckets:
+    - epics
+    - sprints      # sprint reports
+    - crs
+    - bugs
+    - initiatives
+```
+
+When set, only the listed buckets get per-item wiki pages, index rows, and synthesis listings — `cleargate wiki build`, `cleargate wiki ingest`, and the PostToolUse ingest hook all skip every other bucket (exit 0, no-op). Omit the key entirely to ingest all buckets. This is how a repo keeps high-churn `stories` (and unused `proposals`) out of the wiki while still tracking them in the raw delivery tree and sprint reports.
 
 ---
 

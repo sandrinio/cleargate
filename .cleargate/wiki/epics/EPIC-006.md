@@ -16,7 +16,7 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-006_Admin_UI.md"
-last_ingest: "2026-05-17T23:17:07.149Z"
+last_ingest: "2026-05-31T08:08:46.362Z"
 last_ingest_commit: "936d9538e3c7bf21acb75197eb80a2760fbe5f94"
 repo: "planning"
 ---

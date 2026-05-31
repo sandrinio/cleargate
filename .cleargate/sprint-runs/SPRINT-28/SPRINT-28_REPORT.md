@@ -1,9 +1,12 @@
 ---
-sprint_id: "SPRINT-28"
-status: "Shipped"
-generated_at: "2026-05-18T17:00:00Z"
-generated_by: "Reporter agent"
+sprint_id: SPRINT-28
+status: Shipped
+generated_at: 2026-05-18T17:00:00Z
+generated_by: Reporter agent
 template_version: 2
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:03:45.207Z
+push_version: 1
 ---
 
 <!-- Sprint Report v2 — generated for SPRINT-28 Reconcile, Finish, Harvest -->

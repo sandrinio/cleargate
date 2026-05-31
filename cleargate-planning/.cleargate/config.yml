@@ -1,0 +1,18 @@
+# ClearGate per-repo configuration.
+# See config.example.yml for the full schema (gates, ceilings, all options).
+# This file is seeded by `cleargate init`. Edit freely — re-init will not
+# clobber your changes (skipped when it differs, unless you pass --force).
+
+wiki:
+  # Buckets the compiled wiki ingests pages for. `stories` is intentionally
+  # omitted: story pages are too granular/numerous for the awareness layer, so
+  # the wiki tracks epics/sprints/proposals/crs/bugs/initiatives instead.
+  # Stories still sync to ClearGate via `cleargate push` — only the local wiki
+  # skips them. Add `stories` here if you want per-story wiki pages back.
+  ingest_buckets:
+    - epics
+    - sprints
+    - proposals
+    - crs
+    - bugs
+    - initiatives

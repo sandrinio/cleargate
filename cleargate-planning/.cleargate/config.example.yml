@@ -3,6 +3,17 @@
 
 # wiki:
 #   index_token_ceiling: 8000   # chars budget for wiki/index.md (STORY-015-03)
+#   # Allowlist of bucket directories the wiki ingests/builds pages for.
+#   # Only these buckets get per-item pages, index rows, and synthesis listings;
+#   # every other bucket is skipped (build + ingest + synthesis). Omit the key
+#   # entirely to ingest ALL buckets (the default). Valid buckets:
+#   # epics | stories | sprints | proposals | initiatives | crs | bugs
+#   ingest_buckets:
+#     - epics
+#     - sprints      # sprint reports
+#     - crs
+#     - bugs
+#     - initiatives
 
 # gates:
 #   precommit: "<command run before every commit — typecheck + tests>"

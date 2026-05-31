@@ -1,3 +1,9 @@
+---
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:05:36.795Z
+push_version: 1
+---
+
 # SPRINT-07 — Multi-Participant MCP Sync v1 — Retrospective
 
 **Status:** Shipped · **Window:** 2026-04-19 → 2026-04-20 · **Stories:** 8/8 (EPIC-010-01…08)

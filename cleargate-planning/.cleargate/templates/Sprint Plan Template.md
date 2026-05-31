@@ -68,7 +68,7 @@ cached_gate_result:
 # SPRINT-{ID}: {Sprint Number / Name}
 
 ## 0. Stakeholder Brief
-*(Sponsor-readable summary. Pushed to PM tool. Pair with §3 Risks below.)*
+*(Sponsor-readable summary. Pushed via cleargate push. Pair with §3 Risks below.)*
 
 - **Sprint Goal:** {1 sentence}
 - **Business Outcome:** {what the user / sponsor gets}

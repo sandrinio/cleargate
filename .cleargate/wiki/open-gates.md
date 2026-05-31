@@ -22,24 +22,8 @@ Proposals with `approved: false` or `status: Draft` that have not yet been bless
 Stories with medium or high ambiguity that need design decisions before work can start.
 
 
-- [[STORY-002-05]] — ambiguity: 🟡 Medium
 
-- [[STORY-003-10]] — ambiguity: 🟡 Medium
-
-- [[STORY-028-07]] — ambiguity: 🟡 Medium
-
-- [[STORY-032-01]] — ambiguity: 🟡 Medium
-
-- [[STORY-032-02]] — ambiguity: 🟡 Medium
-
-- [[STORY-032-03]] — ambiguity: 🟡 Medium
-
-- [[STORY-033-02]] — ambiguity: 🟡 Medium
-
-- [[STORY-033-03]] — ambiguity: 🟡 Medium
-
-- [[STORY-033-04]] — ambiguity: 🟡 Medium
-
+_No items pending Gate 2 ambiguity clearance._
 
 
 ## Gate 3 — Ready to Push (not yet synced)

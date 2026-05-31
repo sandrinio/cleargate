@@ -1,3 +1,9 @@
+---
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-05-31T01:05:40.510Z
+push_version: 1
+---
+
 # SPRINT-13 Report: Identity-Bound Invite Auth (EPIC-019)
 
 **Status:** Shipped (4 CRs merged, all QA-approved; deploy-day live-smoke parked)

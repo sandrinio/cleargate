@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-16"
 parent: ""
 children: []
-status: "Approved"
+status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md"
-last_ingest: "2026-05-17T23:17:07.149Z"
-last_ingest_commit: "b16f0f6720a132a92e6f88b35e1a45694f1ed5ed"
+last_ingest: "2026-05-31T08:08:46.362Z"
+last_ingest_commit: "25cff29ab62a1703170ff7e608b557a0f518ed8e"
 repo: "planning"
 ---
 
