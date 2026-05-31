@@ -44,8 +44,15 @@ Thumbs.db
 # Story worktrees — ephemeral per-story git worktrees (v2 execution)
 .worktrees/
 
-# MCP server — nested separate git repo (sandrinio/cleargate-mcp), not a submodule
+# Deploy products — each its own nested git repo, never tracked by this
+# planning repo. Split out of the monorepo 2026-05-31; re-cloned side-by-side
+# so cleargate-cli's prebuild still finds ../cleargate-planning.
+#   mcp/           → sandrinio/cleargate-mcp   (Coolify)
+#   cleargate-cli/ → sandrinio/cleargate-cli   (npm publish)
+#   admin/         → sandrinio/cleargate-admin (Coolify)
 /mcp/
+/cleargate-cli/
+/admin/
 
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:

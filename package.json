@@ -1,7 +1,7 @@
 {
-  "name": "cleargate-monorepo",
+  "name": "cleargate-planning",
   "private": true,
-  "workspaces": ["cleargate-cli", "admin"],
+  "description": "ClearGate planning scaffold (meta-repo). Deploy products — cleargate-cli, admin, mcp — live in their own repos; see CLAUDE.md.",
   "scripts": {
     "check:no-pm-sdk": "node scripts/ci-no-pm-sdk.mjs"
   }
