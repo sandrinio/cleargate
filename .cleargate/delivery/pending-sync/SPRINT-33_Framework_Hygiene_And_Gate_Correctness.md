@@ -8,7 +8,7 @@ execution_mode: v2
 remote_id: ""
 source_tool: linear
 context_source: Decomposes EPIC-043 (Framework Hygiene & Efficiency Remediation, pushed v2) + Approved CR-070, from the 2026-06-01 source-level framework self-review. Owner directed 'take them all' (full EPIC-043 scope) on 2026-06-01.
-status: Draft
+status: Active
 start_date: 2026-06-02
 end_date: 2026-06-13
 synced_at: ""
@@ -25,15 +25,21 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-05-31T21:39:30Z
-stamp_error: no ledger rows for work_item_id SPRINT-33
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-05-31T21:59:59Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-8
+  last_stamp: 2026-05-31T22:09:18Z
+  sessions:
+    - session: 4420c861-8a6f-40a6-93ac-1829eb771e0b
+      model: claude-opus-4-8
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-05-31T22:07:27Z
 ---
 
 # SPRINT-33: Framework Hygiene & Gate Correctness
@@ -65,38 +71,70 @@ Repair the gates that don't gate, reconcile templates↔predicates, cut the sess
 | `STORY-043-09` | CLI surface hygiene (hide plumbing + stub label + orphan delete) | standard | M3 | y | low |
 | `STORY-043-10` | Sprint consolidation `/simplify` pass | standard | M4 | n | med |
 
-## 2. Execution Strategy
-*(Pre-populated by the orchestrator; the Architect VALIDATES/AMENDS this in the Sprint Design Review before sprint start.)*
+## 2. Execution Strategy (SDR-validated)
+
+> SDR note: every cited surface in §§2.1–2.5 was Read/grep-verified against the working tree on 2026-06-01. The single material amendment is CR-070's status (already merged — see §2.2 + VERDICT). VERDICT: APPROVE-WITH-AMENDMENTS.
 
 ### 2.1 Phase Plan
-- **M1 — Gate correctness (sequential where coupled):** `CR-070` → `STORY-043-01` (sentinel depends on execution_mode being gone). In parallel with that chain: `STORY-043-02` (predicate anchoring) and `STORY-043-04` (hotfix type) ‖. Then `STORY-043-03` (template de-number) **after** `STORY-043-02` (so heading-text anchoring lands first and de-numbering becomes cosmetic). `STORY-043-05` (close hardening) independent within M1.
-- **M2 — Docs:** `STORY-043-06` (standalone).
-- **M3 — Efficiency:** `STORY-043-07` ‖ `STORY-043-09` (disjoint files). `STORY-043-08` (conditional Architect) edits `SKILL.md` — serialize vs M4.
-- **M4 — Quality:** `STORY-043-10` (consolidation) **last** — edits `SKILL.md` + `qa.md`, both touched earlier; merges after 043-06 and 043-08.
+
+**M1 — Gate correctness.**
+- `CR-070` — **already merged in-tree** as STORY-070-01 (commit `b87f6ac0`, EPIC-029 banner). `state.schema.json` is v3, `gate-mode.ts` (`isAdvisory()`) is tracked, `cleargate-enforcement.md` §15 Operator Emergency Levers exists, `init_sprint.mjs`/`close_sprint.mjs` are unconditional, `check:no-execution-mode-vocabulary` is wired in `package.json`. **The only CR-070 deliverable still missing is `cleargate-cli/test/util/gate-mode.test.ts` (named in CR-070 §3 line 164, never created).** Action: run CR-070 as a thin closure story that (a) adds the missing `gate-mode.test.ts`, (b) confirms the in-tree state via its Test 1/2/5 grep gates, then archive the CR. It carries no risk for `STORY-043-01` because the dependency ("execution_mode is gone") is **already satisfied**.
+- `STORY-043-01` (sentinel fail-closed) — sequence after CR-070 closure for ledger cleanliness, but its blocking precondition already holds: `init_sprint.mjs` no longer writes `execution_mode`. The live `pending-task-sentinel.sh` (lines 54-58, 135-136) is the one consumer that still reads the now-absent field — exactly the inert read this story removes. Sequential within M1. Parallel-safe against -02/-03/-04 (disjoint files).
+- `STORY-043-02` (predicate heading-text anchoring) ‖ — independent file (`readiness-predicates.ts`). Confirmed anchors: `evalBodyContains` L345, `evalExistingSurfacesVerified` L708, `startsWith('## Existing Surfaces')` L720.
+- `STORY-043-04` (hotfix type) ‖ — independent files (`work-item-type.ts` has zero `hotfix` today; `readiness-gates.md` has zero hotfix block today — both verified). Parallel-safe.
+- `STORY-043-03` (template de-number) — **after `STORY-043-02`**. With -02's heading-text anchoring landed, -03's de-numbering becomes cosmetic-but-still-correct; both fix the same root bug from opposite sides and do not conflict. Sequential after -02.
+- `STORY-043-05` (close hardening + reporter v2 + flashcard curation) — independent within M1 (`close_sprint.mjs`, `reporter.md`, flashcard `SKILL.md`). Verified genuinely undone: `reporter.md` still says "six sections / template_version: 1"; flashcard-archive prose absent. **Does NOT touch `execution_mode` lines** — its `close_sprint.mjs` hunks (dist-assertion before Step 2.6, `--assume-ack` cascade de-dup at L168/L763) are disjoint from CR-070's already-merged `execution_mode` migrator (L206) and "always-enforced" comments. Runs anytime in M1.
+
+**M2 — Docs.** `STORY-043-06` (README + init banner + qa.md prose) — standalone. Touches `qa.md` (shared with -10, disjoint hunk — see §2.2).
+
+**M3 — Efficiency.** `STORY-043-07` (incremental wiki recompile) ‖ `STORY-043-09` (CLI surface hygiene). Disjoint files: -07 in `wiki-ingest.ts`; -09 in `cli.ts` + `triage-classifier.ts` (delete) + `write_dispatch.sh`. `STORY-043-08` (conditional Architect re-entries) edits `SKILL.md` — serialize vs -09/-10. **-09 also edits `write_dispatch.sh` and the SKILL prose that calls it (SKILL lines 87/181/260/293/314/346/406/578)** — flag below (§2.2/§2.3).
+
+**M4 — Quality.** `STORY-043-10` (Consolidation D.5) **last** — edits `SKILL.md` + `qa.md`, both touched earlier. Merges after -06 (qa.md) and -08/-09 (SKILL.md).
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
 
 | Shared File | Stories Touching It | Merge Order | Rationale |
 |---|---|---|---|
-| `.claude/skills/sprint-execution/SKILL.md` | STORY-043-08, STORY-043-10 | 043-08 → 043-10 | 08 edits §C.3.5/§C.6 (per-story dispatch); 10 adds Phase D.5 (close-stage); 10 rebases on 08 |
-| `.claude/agents/qa.md` | STORY-043-06, STORY-043-10 | 043-06 → 043-10 | 06 reconciles re-run prose; 10 adds the consolidation full-suite re-run; 10 lands after |
-| `cleargate-cli/src/lib/readiness-predicates.ts` ↔ templates | STORY-043-02, STORY-043-03 | 043-02 → 043-03 | predicate heading-text anchoring lands first; template de-numbering then cosmetic |
-| `state.json` / execution_mode surfaces | CR-070, STORY-043-01 | CR-070 → 043-01 | sentinel fail-closed depends on execution_mode being retired |
+| `.claude/skills/sprint-execution/SKILL.md` | 043-08, 043-09, 043-10 | 043-08 → 043-09 → 043-10 | 08 edits §C.3.5 (~286) / §C.6 (~369-383) dispatch gating; **09 edits the `write_dispatch.sh`-call prose at SKILL lines 87/181/260/293/314/346/406/578 — a region the prepopulated table MISSED**; 10 inserts Phase D.5 between §6 (L542) and §7 (L559). All three regions textually disjoint but one file — serialize, rebase each on the prior. |
+| `.claude/agents/qa.md` | 043-06, 043-10 | 043-06 → 043-10 | 06 softens Workflow re-run prose (steps 3 & 5, ~L115/L122); 10 appends a Consolidation-mode note to the Mode Dispatch block (~L33-63). Disjoint hunks; 10 rebases on 06. |
+| `cleargate-cli/src/lib/readiness-predicates.ts` ↔ `.cleargate/templates/{epic,story,CR,Bug}.md` | 043-02, 043-03 | 043-02 → 043-03 | Different files (predicate source vs templates) — **logical dependency, not a true file collision**. -02 anchors on heading text first; -03's de-numbering then cosmetic. Both correct independently; ordering is for clean acceptance. |
+| `.cleargate/scripts/close_sprint.mjs` | CR-070 (merged), 043-05 | n/a (CR-070 done) | CR-070's `execution_mode` migrator (L206) + always-enforced comments are **already in main**. 043-05's dist-assertion + `--assume-ack` de-dup hunks are disjoint. No live collision. |
+| `state.json` / execution_mode surfaces | CR-070 (merged), 043-01 | n/a | **Dependency already satisfied in-tree.** 043-01 only removes the consumer read in `pending-task-sentinel.sh`; touches no `state.schema.json`/script line CR-070 owns. |
+| `.claude/agents/architect.md` | 043-08 only | — | No collision (sole editor). |
+| `cleargate-cli/src/commands/init.ts` | 043-06 only | — | No collision. |
+
+**Corrections vs prepopulated §2.2:** (1) **`SKILL.md` is touched by THREE stories, not two** — 043-09 was omitted; corrected chain 08 → 09 → 10. (2) The `readiness-predicates.ts ↔ templates` row is a logical dependency across *different* files, not a shared-file collision — relabeled. (3) CR-070's `close_sprint.mjs` / `state.json` rows are moot (already merged).
 
 ### 2.3 Shared-Surface Warnings
-- `STORY-043-05` touches `close_sprint.mjs` + `reporter.md` + flashcard skill in one story by design (all close-stage) — keep it atomic to avoid a 3-way split collision.
-- Every scaffold story (`-01,-03,-05,-06,-08,-10`) edits `.claude/**` or `.cleargate/templates/**` and MUST mirror canonical (`cleargate-planning/`) + payload (`cleargate-cli/templates/`) + live (`/.claude`) — DevOps runs `npm run prebuild` and a mirror-parity diff post-merge.
+- **`SKILL.md` three-way serial (08 → 09 → 10).** Disjoint text regions, same canonical file. DevOps serializes merges, rebases each later story on the prior, and runs the three-way mirror (canonical → payload via `npm run prebuild` → live via `cleargate init`) ONCE after the LAST of the three lands — not per-story — to avoid intermediate live-drift on the running framework.
+- **`qa.md` two-way (06 → 10).** Same atomicity: -10 rebases on -06; mirror-parity `diff -q` canonical ↔ payload post-merge.
+- **Scaffold-mirror obligation (canonical → payload → live), per story:** `043-01` (sentinel hook ×3), `043-03` (CR.md/Bug.md), `043-04` (`readiness-gates.md`), `043-05` (`reporter.md` + flashcard `SKILL.md`), `043-06` (`qa.md`), `043-08` (`SKILL.md` + `architect.md`), `043-10` (`SKILL.md` + `qa.md`). DevOps runs `npm run prebuild` + mirror-parity `diff` on EVERY one of these merges (BUG-024 class).
+- **`043-05` atomicity.** Keep `close_sprint.mjs` + `reporter.md` + flashcard `SKILL.md` in one story by design (all close-stage); do not split.
+- **Live-loop safety (framework runs on itself this sprint).** `043-01` (sentinel), `043-05` (close hardening), `043-08` (conditional Architect dispatch) all edit the LIVE orchestration path. Developer edits canonical + payload only; the **live `/.claude` re-sync (`cleargate init`) is DEFERRED to Gate-4 doc-refresh** — re-syncing mid-sprint would alter THIS sprint's own execution loop before merge to main.
 
 ### 2.4 Lane Audit
-*(All stories standard lane — none qualify for fast lane: each spans multiple files and/or carries non-trivial bounce exposure. Architect confirms at SDR.)*
+All 11 work items are `standard` lane (confirmed against the 7-check rubric). No fast-lane candidates: each touches a forbidden surface (gates, `readiness-predicates.ts`, `work-item-type.ts`, config-adjacent `cli.ts`), spans >2 files, carries med/high bounce exposure, or modifies the live orchestration loop.
 
 | Story | Lane | Rationale (≤80 chars) |
 |---|---|---|
-| — | — | no fast-lane stories; gate/loop changes warrant full adversarial loop |
+| CR-070 (closure) | standard | gate-semantics surface; closure verifies schema-v3 + advisory hatch in-tree |
+| 043-01 | standard | flashcard-gate enforcement change; live-loop hook + 3-way mirror |
+| 043-02 | standard | readiness-predicate evaluator change; gate-correctness core |
+| 043-03 | standard | template+gate reconciliation across 6 files; high bounce exposure |
+| 043-04 | standard | WorkItemType union + gate block; type-system + canonical mirror |
+| 043-05 | standard | close-cascade fail-closed + reporter v2; live-loop, high exposure |
+| 043-06 | standard | README+init banner+qa.md; >2 files, agent-prompt mirror |
+| 043-07 | standard | wiki-ingest narrowing with byte-parity floor; med exposure |
+| 043-08 | standard | live dispatch-count change to sprint loop; high exposure, safeguard |
+| 043-09 | standard | CLI surface + orphan delete + dispatch-marker; 3 files |
+| 043-10 | standard | new sprint-loop phase across SKILL.md+qa.md+mirrors; high exposure |
 
 ### 2.5 ADR-Conflict Flags
-- `STORY-043-08` (conditional Architect re-entries) is the only loop-behavior change; it must preserve the safeguard that ANY pre-gate flag still dispatches the live Architect. Architect to confirm no conflict with the adversarial-split ADR at SDR.
-- `STORY-043-01`/`CR-070` must not weaken gate enforcement — `CLEARGATE_ADVISORY=1` remains the sole downgrade.
+- **Adversarial-core invariant (043-08).** Five-agent split + worktree-per-story isolation are locked. 043-08 narrows *when* the Architect re-enters but the non-removable safeguard ("ANY pre-gate flag — demotion, `arch_bounce`, surface drift, new-deps, structural, OR exit-2 scan-failure — still dispatches the live Architect") preserves the check on every risky path. No conflict, PROVIDED the safeguard prose lands verbatim in both `SKILL.md` and `architect.md`; QA-Verify greps for it.
+- **Gate-semantics invariant (CR-070 / 043-01).** `CLEARGATE_ADVISORY=1` (`gate-mode.ts:isAdvisory()`) is the SOLE downgrade lever. 043-01 must not introduce a second downgrade; bypass precedence fixed: `SKIP_FLASHCARD_GATE=1` > `_off-sprint` > `CLEARGATE_ADVISORY=1` > block.
+- **Correctness-floor invariant (043-07, 043-10).** Both gate an optimization/transformation behind a full-fidelity floor: 043-07's `cleargate wiki build` byte-parity test; 043-10's QA-Verify full-suite red→revert. Un-optimized path stays canonical.
+- **Worktree-isolation invariant (043-10).** D.5 runs `/simplify` on `git diff main...sprint/S-NN` as ONE consolidation commit on the *sprint* branch after story worktrees are torn down (§C.7) — never re-enters a story worktree; `*.red.node.test.ts` immutability preserved.
+- **No DB/MCP/auth-flow surface touched by any story** — all 11 live under `.claude/**`, `.cleargate/**`, or `cleargate-cli/src/{lib,commands,util,cli.ts}`.
 
 ## Risks & Dependencies
 

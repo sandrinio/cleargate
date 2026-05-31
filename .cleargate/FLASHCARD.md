@@ -1,8 +1,11 @@
 # ClearGate Flashcards
 
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
+2026-06-01 · #sprint-planning #dogfood #execution_mode · CR-070 (pending-sync, Approved) was ALREADY merged as STORY-070-01 under commit b87f6ac0 (EPIC-029 banner) in a prior dogfood pass: gate-mode.ts tracked, state.schema.json v3, enforcement.md reconciled, init_sprint.mjs no longer writes execution_mode, check:no-execution-mode-vocabulary npm script present. The pending-sync CR-070 file is a STALE artifact describing done work. SPRINT-33 M1 'CR-070→043-01' dependency is already satisfied in-tree; only the gate-mode.test.ts (CR-070 §3.164, never created) + the sentinel hook (043-01's job) remain. [SPRINT-33 SDR]
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
+
+2026-06-01 · #execution_mode #dogfood #scaffold #wave · execution_mode collapse (STORY-070-01) retired only the ENFORCEMENT axis (v1/v2 → always-on + CLEARGATE_ADVISORY=1). The TOPOLOGY axis survives: shouldRunParallel() (launch_wave.mjs:137-140) still reads sprint-frontmatter execution_mode for v2-serial/v2-parallel; schema v3 dropped it from state.json but NOT frontmatter; SKILL.md still branches on it. One token, two meanings, two stores — split topology into wave_mode (or env-only). → CR-074. [SPRINT-33 SDR]
 
 2026-05-31 · #qa-red #sealed-test #fail-safe · Off-sprint bug fix where a SEALED Red test asserts the now-buggy contract (e.g. collision_surface empty=disjoint, Bash Unit 3): fix the consumer/predicate + emit an out-of-band signal (stderr), keep the script's stdout/exit contract green — don't edit the sealed file; verify in a NEW test. [BUG-033]
 2026-05-29 · #release #npm-version #workspace · `npm version` in a workspace member triggers a root reinstall that NORMALIZES node_modules to the lockfile — pruning drifted/extraneous packages a fragile build silently depended on. It can break a build that worked moments before. Bump the version by editing package.json directly, or rebuild+re-test the bin after any `npm version`. [SPRINT-32 publish]

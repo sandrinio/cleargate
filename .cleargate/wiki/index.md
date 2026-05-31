@@ -43,4 +43,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[EPIC-044]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md |
 ## Sprints
 
-| [[SPRINT-33]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md |
+| [[SPRINT-33]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md |
+## CRs
+
+| [[CR-074]] | cr | Draft | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
