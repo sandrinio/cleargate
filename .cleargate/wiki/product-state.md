@@ -6,8 +6,8 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 32 | 0 | 26 |
-| Sprints | 32 | 1 | 28 |
+| Epics | 34 | 0 | 26 |
+| Sprints | 33 | 1 | 28 |
 | Proposals | 16 | 0 | 14 |
 | CRs | 70 | 0 | 64 |
 | Bugs | 26 | 0 | 24 |

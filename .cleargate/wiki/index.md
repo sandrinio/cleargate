@@ -37,3 +37,10 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## Epics
+
+| [[EPIC-043]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-043_Framework_Hygiene_And_Efficiency_Remediation.md |
+| [[EPIC-044]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md |
+## Sprints
+
+| [[SPRINT-33]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md |
