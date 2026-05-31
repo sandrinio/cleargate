@@ -37,12 +37,14 @@ cleargate-planning/     ← canonical scaffold source (what `cleargate init` ins
   .cleargate/config.yml ← shipped active config; ingest_buckets excludes `stories` so end-user
                           installs get story-free wikis by default (config.example.yml = full reference)
 
-cleargate-cli/          ← @cleargate/cli npm package source (publishes `cleargate`)
-mcp/                    ← MCP server — nested separate git repo (sandrinio/cleargate-mcp)
-admin/                  ← SvelteKit admin console — tracked in OUTER repo, mirrored to sandrinio/cleargate-admin remote for Coolify deploy
+cleargate-cli/          ← `cleargate` npm package source — OWN git repo (sandrinio/cleargate-cli), gitignored here
+mcp/                    ← MCP server — OWN git repo (sandrinio/cleargate-mcp), gitignored here
+admin/                  ← SvelteKit admin console — deploys to sandrinio/cleargate-admin, gitignored here
+                          (all three split out of the monorepo 2026-05-31, re-cloned side-by-side for local
+                           build/dogfood; admin/ is not yet its own git repo — clean split pending)
 
 .claude/                ← LIVE dogfood instance (gitignored) — Claude Code reads here
-  agents/               ← four-agent role definitions
+  agents/               ← five agent roles (architect, developer, qa, devops, reporter) + wiki subagents
   skills/flashcard/
   hooks/token-ledger.sh
   settings.json
@@ -67,7 +69,7 @@ Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any o
 ## How work gets done
 
 1. **Plan** lives in `.cleargate/delivery/{pending-sync,archive}/`. A sprint file names its stories + milestones + DoD + risk table.
-2. **Execute** via the four-agent loop (`.claude/agents/`). I (the conversational agent) orchestrate; I do not write production code directly when a sprint is running.
+2. **Execute** via the five-agent loop (`.claude/agents/` — Architect → QA-Red → Developer → QA-Verify → Reporter, with DevOps for merge/teardown). I (the conversational agent) orchestrate; I do not write production code directly when a sprint is running.
 3. **Artifacts** land in `.cleargate/sprint-runs/<id>/`. Never edit the ledger by hand; the hook owns it.
 4. **Learning** accumulates in `.cleargate/FLASHCARD.md`. Every agent (and me) reads it at the start of non-trivial work.
 
@@ -89,17 +91,15 @@ Same rule applies to `.cleargate/templates/`, `.cleargate/knowledge/`, and any o
 
 ## Deploy targets
 
-Three repos, three deploy paths. Push the right remote(s) for each release:
+After the 2026-05-31 planning-only split, each product is its **own** git repo (gitignored here, re-cloned side-by-side). The outer `sandrinio/cleargate` repo tracks **none** of their source. Release each from its own checkout:
 
 | Surface | Source path | Source repo (push to) | Deploy mechanism |
 |---|---|---|---|
-| `cleargate` CLI | `cleargate-cli/` | `origin` (`sandrinio/cleargate`) | `npm publish` from `cleargate-cli/` after version bump; release commit subject `release(cleargate): vX.Y.Z — <summary>` |
-| MCP server | `mcp/` (nested git repo) | `origin` on inner mcp/.git (`sandrinio/cleargate-mcp`) | Coolify watches `main`; deployed at `https://cleargate-mcp.soula.ge/` |
-| Admin console | `admin/` (tracked in outer repo) | **two remotes:** `origin` (`sandrinio/cleargate`) AND `cleargate-admin` (`sandrinio/cleargate-admin`) | Coolify watches `cleargate-admin/main`; admin/ source lives in the outer monorepo but the **deploy mirror is a separate repo** — push to BOTH after any `admin/**` change |
+| `cleargate` CLI | `cleargate-cli/` (own repo, gitignored here) | `origin` on `cleargate-cli/.git` (`sandrinio/cleargate-cli`) | `npm publish` from `cleargate-cli/` after version bump; release commit subject `release(cleargate): vX.Y.Z — <summary>` |
+| MCP server | `mcp/` (own repo, gitignored here) | `origin` on `mcp/.git` (`sandrinio/cleargate-mcp`) | Coolify watches `main`; deployed at `https://cleargate-mcp.soula.ge/` |
+| Admin console | `admin/` (gitignored here; **not yet its own git repo** — split pending) | `sandrinio/cleargate-admin` | Coolify watches `cleargate-admin/main` and builds the `admin/` **subdir** of a full-monorepo mirror (legacy push-to-both artifact). Deployed at `https://admin.cleargate.soula.ge/`. |
 
-**Admin release recipe** — `git push origin main` (canonical) **AND** `git push cleargate-admin main:main` (Coolify deploy mirror). Skipping the second push leaves the deployed admin console stale; the source-of-truth diverges silently from prod. Add to release checklist for any sprint with `admin/**` files changed.
-
-**Quick check before assuming release-complete:** `git remote -v` lists which remotes are configured locally. If `cleargate-admin` is among them and the sprint touched `admin/**`, push it.
+**Admin deploy is mid-migration.** `cleargate-admin` is currently a *stale full-monorepo mirror* (not an admin-root repo). The old "push outer `main` to both `origin` and `cleargate-admin`" recipe is **retired** — `admin/` is no longer tracked in the outer repo, so there is nothing to mirror. Making `cleargate-admin` an admin-root repo (and flipping Coolify's base dir from `admin/` to `/`) is an open decision. Until then the deployed console can drift from the local `admin/` checkout, and the vestigial `cleargate-admin` remote on the outer repo can be dropped.
 
 ## Active state (as of 2026-04-18)
 
@@ -107,9 +107,11 @@ Three repos, three deploy paths. Push the right remote(s) for each release:
 - **Active:** [SPRINT-04 Knowledge Wiki](.cleargate/delivery/pending-sync/SPRINT-04_Knowledge_Wiki.md) — 9 EPIC-002 stories. Karpathy-style wiki + wiki-ingest/query/lint subagents + PostToolUse hook + `cleargate wiki {build,ingest,query,lint}` CLI. Adapted for our 3-repo case (git-SHA drift, `repo:` tag).
 - **Planned next:** [SPRINT-05 Admin UI](.cleargate/delivery/pending-sync/SPRINT-05_Admin_UI.md) — deferred one sprint from SPRINT-04 to ship the wiki first.
 - **Architectural decisions locked:**
-  - **Invite storage (2026-04-18):** Postgres source of truth, Redis cache-only. Reason: durability + auditability + admin-UI queryability.
+  - **Invite storage (2026-04-18):** Postgres source of truth, Redis cache-only. Reason: durability + auditability + admin-UI queryability. (This is the *MCP server's* Postgres — see "Admin owns no database" below.)
   - **Wiki drift detection (2026-04-19):** git SHA (not content hash) — drops EPIC-001 dependency; accepts spurious-recompile tradeoff.
-  - **Admin deploy mirror (2026-05-15):** `cleargate-admin` remote on the outer repo IS the Coolify-watched deploy source for the admin console. Outer `cleargate` repo is canonical (the admin/ source-of-truth lives there); `cleargate-admin` is a fast-forward mirror pushed after every admin/** change. See "Deploy targets" table.
+  - **Admin owns no database (verified 2026-05-31):** the admin console (`admin/`) is a thin SvelteKit frontend over the MCP server's `/admin-api/v1` REST API. It opens no Postgres connection (no `drizzle`/`pg` in `admin/package.json`); its only persistence is Redis (GitHub-OAuth sessions). All project/member/token/work-item data lives in the **MCP server's single Postgres DB** and is reached over HTTP. "Shared DB between admin and mcp" is wrong — there is one DB, owned by mcp.
+  - **Push terminates in Postgres (verified 2026-05-31):** `cleargate push` and `cleargate_sync_work_items` upsert into the MCP server's versioned `items` store and **stop there**. The PM-tool adapter (`mcp/src/adapters/`) is **pull-only** (`pullItem`/`listUpdates`/`pullComments`/`detectNewItems` — there is no `pushItem`); nothing is written out to Linear/Jira today. The vision line's "MCP adapter pushes native" is the roadmap target, not current behavior.
+  - **Admin deploy mirror (superseded 2026-05-31):** the old model — `cleargate-admin` as a fast-forward mirror of the outer repo's `main`, pushed after every `admin/**` change — is **retired** by the planning-only split (`admin/` is no longer tracked in the outer repo). `cleargate-admin` is now a stale full-monorepo mirror that Coolify still builds the `admin/` subdir of; a clean admin-root repo + Coolify base-dir flip is pending. See "Deploy targets".
 
 ## Stack versions (canonical — see INDEX.md for full table)
 
@@ -119,7 +121,7 @@ Node 24 LTS · TypeScript ^5.8 · Fastify ^5.8 · Drizzle 0.45.2 · Zod ^4.3 · 
 
 - Before recommending a file/function/flag that memory claims exists: verify with Read/Grep. Memory may be stale.
 - Before destructive ops (force push, reset --hard, dropping tables, deleting branches, killing untracked work): ask.
-- Sprint execution runs through the four-agent loop — do not implement stories yourself in the main conversation when a sprint is active.
+- Sprint execution runs through the five-agent loop (Architect/Developer/QA/DevOps/Reporter) — do not implement stories yourself in the main conversation when a sprint is active.
 - Keep conversational output terse. Details live in the sprint file and REPORT.md, not in chat.
 - Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.
 - After edits to `cleargate-planning/.claude/**` (hooks, agents, skills, settings), remind the user to re-sync the live `/.claude/` instance via `cleargate init` or hand-port — see *Dogfood split* above. Canonical edits do not auto-propagate.
@@ -127,7 +129,7 @@ Node 24 LTS · TypeScript ^5.8 · Fastify ^5.8 · Drizzle 0.45.2 · Zod ^4.3 · 
 <!-- CLEARGATE:START -->
 ## 🔄 ClearGate Planning Framework
 
-This repository uses **ClearGate** — a standalone planning framework for AI coding agents. ClearGate scaffolds *how work is planned* (initiatives → epics → stories → sprints) and defines a four-agent loop for execution. ClearGate does not run builds, tests, or deployments; execution tooling remains the target repo's own.
+This repository uses **ClearGate** — a standalone planning framework for AI coding agents. ClearGate scaffolds *how work is planned* (initiatives → epics → stories → sprints) and defines a five-agent loop for execution (Architect, Developer, QA, DevOps, Reporter). ClearGate does not run builds, tests, or deployments; execution tooling remains the target repo's own.
 
 **Session-start orientation (read in this order):**
 1. `.cleargate/wiki/index.md` — compiled awareness layer (~3k tokens). Lists active sprint, in-flight items, recent shipments, open gates, planned work, and topic synthesis pages. **Read this first** to know what exists before grepping raw files. If absent, run `cleargate wiki build`.
@@ -137,7 +139,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
-**Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / Reporter). The skill is the canonical four-agent-loop spec; the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
+**Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / DevOps / Reporter). The skill is the canonical sprint-loop spec (Architect → QA-Red → Developer → QA-Verify → Reporter, with DevOps for merge/teardown); the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
 
 **Skill auto-load directive.** When the SessionStart banner emits `Load skill: <name>`, invoke the Skill tool to load it before continuing. Claude Code's description-match auto-load is advisory; this rule is the contract.
 
@@ -173,11 +175,11 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Cross-project orchestration.** When running an orchestrator from one project's repo against another project's sprint tree, export `ORCHESTRATOR_PROJECT_DIR=/absolute/path/to/target/repo` in the shell before launching the session. Overrides `CLAUDE_PROJECT_DIR`; sentinel + ledger writes route into the target's `.cleargate/sprint-runs/` tree. If the target has no `.cleargate/sprint-runs/.active` sentinel, writes land in the target's `_off-sprint` bucket — not the orchestrator's own repo.
 
-**Codebase / PM-Tool Boundary (EPIC-027).** `cleargate-cli/src/**` and `.claude/**` MUST NOT import any PM-tool SDK (`@linear/sdk`, `jira-client`, `azure-devops`, `@atlassian/`, `linear-sdk`, `node-jira-client`, `jira.js`). PM-tool adapters live exclusively in `mcp/src/adapters/`; credentials live in admin DB rows. The type-and-payload contract (open-type validator, KNOWN_TYPES, RESERVED_PAYLOAD_KEYS, `payload.origin`, `cleargate_id` formats, L1 errorCode + L2 warningCode taxonomies) is fully documented in `.cleargate/knowledge/cleargate-protocol.md` §Type & Payload Contract and §Codebase/PM-Tool Boundary. CI enforcement: `npm run check:no-pm-sdk` (exits non-zero on any forbidden import). Target repos that ran `cleargate init` before SPRINT-27 should re-run `cleargate init` to pick up this boundary rule in their local bounded block.
+**Codebase / PM-Tool Boundary (EPIC-027).** `cleargate-cli/src/**` and `.claude/**` MUST NOT import any PM-tool SDK (`@linear/sdk`, `jira-client`, `azure-devops`, `@atlassian/`, `linear-sdk`, `node-jira-client`, `jira.js`). PM-tool adapters live exclusively in `mcp/src/adapters/`; PM-tool credentials are held **server-side on the MCP server** (today a single `LINEAR_API_KEY` env var — per-project credential rows are roadmap, not shipped). The adapter surface is **pull-only** today (`pullItem`/`listUpdates`/`pullComments`/`detectNewItems`); `cleargate push` lands work items in the MCP Postgres store and does **not** write out to the PM tool. The type-and-payload contract (open-type validator, KNOWN_TYPES, RESERVED_PAYLOAD_KEYS, `payload.origin`, `cleargate_id` formats, L1 errorCode + L2 warningCode taxonomies) is fully documented in `.cleargate/knowledge/cleargate-protocol.md` §Type & Payload Contract and §Codebase/PM-Tool Boundary. CI enforcement: `npm run check:no-pm-sdk` (exits non-zero on any forbidden import). Target repos that ran `cleargate init` before SPRINT-27 should re-run `cleargate init` to pick up this boundary rule in their local bounded block.
 
 **Project overrides.** Content OUTSIDE this `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block takes precedence where it conflicts with ClearGate defaults.
 
-**Scope reminder.** ClearGate is a *planning* framework. It scaffolds how work gets planned and how the four-agent loop runs. It does not replace your project's build system, CI, test runner, or deployment tooling.
+**Scope reminder.** ClearGate is a *planning* framework. It scaffolds how work gets planned and how the five-agent loop runs. It does not replace your project's build system, CI, test runner, or deployment tooling.
 
 **Guardrails for the conversational agent:**
 - Sprint close requires explicit human ack. Run close_sprint.mjs without flags first; surface the "re-run with --assume-ack" prompt verbatim and halt. Never pass --assume-ack yourself — that flag is reserved for automated tests.
