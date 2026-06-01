@@ -1,9 +1,13 @@
 ---
-story: STORY-043-01
-agent: developer
-status: done
-commit: 4821ee52
-note: Persisted by orchestrator from the Developer's inline return (dev did not write the file itself).
+story: "STORY-043-01"
+agent: "developer"
+status: "done"
+commit: "4821ee52"
+note: "Persisted by orchestrator from the Developer's inline return (dev did not write the file itself)."
+story_id: "STORY-043-01"
+sprint_id: "SPRINT-33"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-043-01 — Developer Report

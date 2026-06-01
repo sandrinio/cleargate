@@ -1,29 +1,13 @@
 ---
-type: sprint
-id: "SPRINT-33"
-parent: ""
-children: []
-status: "Active"
-remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md"
-last_ingest: "2026-06-01T15:35:02.303Z"
-last_ingest_commit: "f62f21dcea377e5882b582c640908a6740ec913a"
-repo: "planning"
-report_raw_path: ".cleargate/sprint-runs/SPRINT-33/SPRINT-33_REPORT.md"
-last_report_ingest_commit: ""
+sprint_id: SPRINT-33
+status: Shipped
+generated_at: 2026-06-01T18:05:00Z
+generated_by: Reporter agent
+template_version: 2
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-06-01T15:35:01.883Z
+push_version: 2
 ---
-
-# SPRINT-33: SPRINT-33
-
-# SPRINT-33: Framework Hygiene & Gate Correctness
-
-## Blast radius
-Affects: None.
-
-## Open questions
-None.
-<!-- BEGIN sprint-report -->
-## Sprint Report
 
 <!-- Sprint Report v2 Template — template_version: 2 -->
 <!-- role: reporter -->
@@ -340,4 +324,3 @@ Order-sensitive; apply at Gate-4 doc-refresh (per Execution Log):
 3. `npm run build` in `cleargate-cli/` to rebuild `dist/cli.js` (043-02/-04/-07/-09 runtime surfaces); verify dist mtime ≥ source mtime.
 4. Confirm gate-parity: an Epic authored from the numbered template passes `cleargate gate check` with no hand-fix → retire FLASHCARD 41; smoke a complete + empty-§3 HOTFIX file (5/5 pass + targeted fail).
 5. `write_dispatch.sh` (043-09) is TRACKED — already live on merge; no init needed for it.
-<!-- END sprint-report -->

@@ -8,7 +8,7 @@ execution_mode: v2
 remote_id: ""
 source_tool: linear
 context_source: Decomposes EPIC-043 (Framework Hygiene & Efficiency Remediation, pushed v2) + Approved CR-070, from the 2026-06-01 source-level framework self-review. Owner directed 'take them all' (full EPIC-043 scope) on 2026-06-01.
-status: Active
+status: Completed
 start_date: 2026-06-02
 end_date: 2026-06-13
 synced_at: ""

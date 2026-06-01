@@ -1,8 +1,10 @@
 ---
-story_id: STORY-043-07
-sprint_id: SPRINT-33
-author: developer
-created_at: 2026-06-01T14:30:00Z
+story_id: "STORY-043-07"
+sprint_id: "SPRINT-33"
+author: "developer"
+created_at: "2026-06-01T14:30:00Z"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-043-07 Developer Report: Incremental Wiki Synthesis Recompile

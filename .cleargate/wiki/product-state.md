@@ -9,7 +9,7 @@
 | Epics | 34 | 0 | 26 |
 | Sprints | 33 | 2 | 28 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 71 | 0 | 64 |
+| CRs | 71 | 0 | 65 |
 | Bugs | 26 | 0 | 24 |
 
 ## Active Epics
@@ -197,6 +197,8 @@ _No active epics._
 - [[CR-066]] (crs) — Completed
 
 - [[CR-067]] (crs) — Completed
+
+- [[CR-070]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 

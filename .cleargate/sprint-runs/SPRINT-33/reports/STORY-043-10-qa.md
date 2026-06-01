@@ -1,9 +1,11 @@
 ---
-story_id: STORY-043-10
-sprint_id: SPRINT-33
-qa_verdict: PASS
-qa_mode: VERIFY
-date: 2026-06-01
+story_id: "STORY-043-10"
+sprint_id: "SPRINT-33"
+qa_verdict: "PASS"
+qa_mode: "VERIFY"
+date: "2026-06-01"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA Report — STORY-043-10

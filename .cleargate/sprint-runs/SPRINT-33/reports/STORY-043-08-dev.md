@@ -1,9 +1,11 @@
 ---
-story_id: STORY-043-08
-sprint_id: SPRINT-33
-agent: developer
-status: done
+story_id: "STORY-043-08"
+sprint_id: "SPRINT-33"
+agent: "developer"
+status: "done"
 timestamp: "2026-06-01"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-043-08 Developer Report — Conditional Architect Re-Entries

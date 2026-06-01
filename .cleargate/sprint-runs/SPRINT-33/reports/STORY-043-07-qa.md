@@ -1,8 +1,10 @@
 ---
-story_id: STORY-043-07
-sprint_id: SPRINT-33
-author: qa
-created_at: 2026-06-01T15:00:00Z
+story_id: "STORY-043-07"
+sprint_id: "SPRINT-33"
+author: "qa"
+created_at: "2026-06-01T15:00:00Z"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-043-07 QA Report: Incremental Wiki Synthesis Recompile

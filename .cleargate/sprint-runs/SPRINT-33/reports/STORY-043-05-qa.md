@@ -1,8 +1,11 @@
 ---
-story_id: STORY-043-05
-qa_agent: qa
-verdict: PASS
-generated_at: 2026-06-01T00:00:00Z
+story_id: "STORY-043-05"
+qa_agent: "qa"
+verdict: "PASS"
+generated_at: "2026-06-01T00:00:00Z"
+sprint_id: "SPRINT-33"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # QA Report — STORY-043-05

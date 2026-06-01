@@ -1,12 +1,15 @@
 ---
-story_id: STORY-043-09
-sprint: SPRINT-33
-role: developer
-status: done
-commit: accb65a
-repo: cleargate-cli
-branch: story/STORY-043-09
-written_at: 2026-06-01
+story_id: "STORY-043-09"
+sprint: "SPRINT-33"
+role: "developer"
+status: "done"
+commit: "accb65a"
+repo: "cleargate-cli"
+branch: "story/STORY-043-09"
+written_at: "2026-06-01"
+sprint_id: "SPRINT-33"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-043-09 Dev Report — CLI Surface Hygiene
