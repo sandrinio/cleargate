@@ -6,6 +6,13 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-06-01 · #gates #predicate #section · evalSection is POSITIONAL (1-indexed, ignores numeric heading prefixes). A leading `## 0.5 Open Questions` shifts every `section(N)` by one — verify gate-block indices against the template's H2 ORDER, not its printed numbers. (hotfix gate needed section(2/3/4), not 1/2/3.) [SPRINT-33 043-04]
+2026-06-01 · #gates #review · Post-flight a NEW gate block by running `evaluate()` end-to-end on a FILLED template (require pass) AND an empty-target-section file (require that criterion to FAIL) — vocabulary-parse + YAML-shape checks miss section-TARGETING bugs. [SPRINT-33 043-04]
+2026-06-01 · #gates #test #regression · readiness-gates.md block count is hardcoded in TWO test files (gate-unit.node.test.ts + readiness-predicates.node.test.ts), both reading the LIVE repo-root file; a SEPARATE transitions-count guard (==N types) lives in work-item-type.node.test.ts. Adding a gate block bumps the TWO block guards; adding a type bumps the transitions guard. grep ALL test/ for the count, not the first hit. [SPRINT-33 043-04]
+2026-06-01 · #test-design #regression-guard · For a count assertion that goes stale on expansion, prefer `==N` (exact) over `>=N-1` (floor) — a floor guard silently allows over-registration. [SPRINT-33 043-04]
+
+
+2026-06-01 · #gates #test · readiness-gates.md has TWO independent count guards: WORK_ITEM_TRANSITIONS keys (==8 types, work-item-type.node.test.ts) AND the yaml-block count (gate-unit.node.test.ts:748, ==N blocks); adding any new gate block bumps the SECOND not the first — both must be updated. [SPRINT-33 043-04]
 2026-06-01 · #gate #test-harness · `gate check` non-verbose prints ONLY the `✅ <type>.<transition> passed` summary + `❌` failing-predicate lines (per-criterion detail is `-v` only, gate.ts:288/298). Grepping for a PASSING predicate name never matches — assert pass via ABSENCE of `❌ <predicate-id>`, or use `-v`. [SPRINT-33 043-03]
 2026-06-01 · #test-harness #awk · awk range `/^## N./,/^## [0-9]/` self-terminates on its own start line (start matches end pattern) → captures nothing. Use flag-based awk `/start/{f=1;next} f&&/^## /{exit} f`. [SPRINT-33 043-03]
 2026-06-01 · #gate #template · evalSection (readiness-predicates.ts) splits body on `^## ` only — H3 (`### `) headings create NO section index. Demote a leading `## Open Questions` to `### ` to fix a positional `section(N)` off-by-one without moving content. [SPRINT-33 043-03]
