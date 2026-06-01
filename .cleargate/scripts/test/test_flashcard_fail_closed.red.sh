@@ -2,18 +2,33 @@
 # ============================================================
 # test_flashcard_fail_closed.red.sh — QA-RED for STORY-043-01
 # ============================================================
-# IMMUTABLE: This file was authored by the QA-Red agent and
-# encodes the acceptance contract for STORY-043-01. It MUST NOT
-# be edited by the Developer or any subsequent agent. After
-# QA-Red phase, this file is sealed. The Developer delivers the
+# IMMUTABLE (post-correction): This file was authored by the QA-Red agent
+# and encodes the acceptance contract for STORY-043-01. It MUST NOT
+# be edited by the Developer or any subsequent agent. After this
+# correction (sanctioned by the M1 amendment directive, orchestrator
+# 2026-06-01), the file is re-sealed. The Developer delivers the
 # implementation against which this red test goes green; the
 # Developer's own deliverable is the rewrite of the CANONICAL
 # test harness (test_flashcard_enforcement.sh), not this file.
 #
+# AMENDMENT NOTE (2026-06-01, per M1 plan §STORY-043-01
+# "Test-target resolution directive", mechanism (a)):
+#   This correction re-targets the hook-under-test from the LIVE
+#   gitignored .claude/hooks/pending-task-sentinel.sh (reached via
+#   the old _find_git_root walk-past-worktree logic) to the in-worktree
+#   CANONICAL copy at cleargate-planning/.claude/hooks/pending-task-sentinel.sh.
+#   The _find_git_root function and LIVE_HOOK variable are removed.
+#   Hook-under-test is resolved SCRIPT-RELATIVE via REPO_ROOT (already
+#   SCRIPT_DIR/../../.., stable in both main checkout and worktree).
+#   Optional env override: PENDING_TASK_SENTINEL_HOOK (for CI on main
+#   checkout where canonical and live may legitimately differ).
+#   Immutability resumes after this single sanctioned correction.
+#
 # Purpose: Encode the 4 Gherkin acceptance scenarios for
 # "flashcard sentinel fail-closed" (STORY-043-01, SPRINT-33 M1).
-# Drives the LIVE .claude/hooks/pending-task-sentinel.sh via
-# ORCHESTRATOR_PROJECT_DIR env injection (FLASHCARD #224 pattern:
+# Drives the in-worktree CANONICAL hook
+#   cleargate-planning/.claude/hooks/pending-task-sentinel.sh
+# via ORCHESTRATOR_PROJECT_DIR env injection (FLASHCARD #224 pattern:
 # prefer env injection over sed-surgery for hook tests).
 #
 # Scenarios:
@@ -50,26 +65,20 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-# GIT_ROOT: walk up to find the directory containing a .git DIR
-# (worktrees have .git FILE, not dir).
-_find_git_root() {
-  local dir="$1"
-  while [[ "${dir}" != "/" ]]; do
-    if [[ -d "${dir}/.git" ]]; then
-      printf '%s' "${dir}"
-      return
-    fi
-    dir="$(dirname "${dir}")"
-  done
-  printf '%s' "${REPO_ROOT}"
-}
-GIT_ROOT="$(_find_git_root "${REPO_ROOT}")"
+# Hook-under-test: in-worktree CANONICAL copy (mechanism (a) per M1 amendment).
+# SCRIPT_DIR is .cleargate/scripts/test/ inside the worktree checkout root (REPO_ROOT).
+# Walk: SCRIPT_DIR → ../../.. = REPO_ROOT.
+# Target: cleargate-planning/.claude/hooks/pending-task-sentinel.sh within that checkout.
+# NOT .claude/hooks/... (that is the LIVE gitignored hook, out of bounds mid-sprint).
+# Optional env override for CI on main checkout: PENDING_TASK_SENTINEL_HOOK.
+if [[ -n "${PENDING_TASK_SENTINEL_HOOK:-}" ]]; then
+  CANONICAL_HOOK="${PENDING_TASK_SENTINEL_HOOK}"
+else
+  CANONICAL_HOOK="${REPO_ROOT}/cleargate-planning/.claude/hooks/pending-task-sentinel.sh"
+fi
 
-# The LIVE hook — what Claude Code actually executes in this repo.
-LIVE_HOOK="${GIT_ROOT}/.claude/hooks/pending-task-sentinel.sh"
-
-if [[ ! -f "${LIVE_HOOK}" ]]; then
-  printf 'ERROR: live hook not found at %s\n' "${LIVE_HOOK}" >&2
+if [[ ! -f "${CANONICAL_HOOK}" ]]; then
+  printf 'ERROR: canonical hook not found at %s\n' "${CANONICAL_HOOK}" >&2
   exit 2
 fi
 
@@ -181,10 +190,8 @@ EOF
 }
 
 # ----------------------------------------------------------------
-# invoke_hook: drive the live hook, capture stderr.
+# invoke_hook: drive the CANONICAL hook, capture stderr.
 # $1 = tmpdir  →  used as ORCHESTRATOR_PROJECT_DIR.
-# Optional extra env vars are passed as $2 (space-separated KEY=VAL
-# pairs; eval-expanded before the invocation).
 # Sets global LAST_STDERR and LAST_RC.
 # ----------------------------------------------------------------
 LAST_STDERR=""
@@ -198,7 +205,7 @@ invoke_hook() {
   stderr_file="$(mktemp)"
 
   printf '%s' "${input_json}" \
-    | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" bash "${LIVE_HOOK}" 2>"${stderr_file}"
+    | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" bash "${CANONICAL_HOOK}" 2>"${stderr_file}"
   LAST_RC=$?
   LAST_STDERR="$(cat "${stderr_file}")"
   rm -f "${stderr_file}"
@@ -213,7 +220,7 @@ invoke_hook_advisory() {
   stderr_file="$(mktemp)"
 
   printf '%s' "${input_json}" \
-    | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" CLEARGATE_ADVISORY=1 bash "${LIVE_HOOK}" 2>"${stderr_file}"
+    | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" CLEARGATE_ADVISORY=1 bash "${CANONICAL_HOOK}" 2>"${stderr_file}"
   LAST_RC=$?
   LAST_STDERR="$(cat "${stderr_file}")"
   rm -f "${stderr_file}"
