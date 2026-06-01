@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.14.0",
-  "generated_at": "2026-05-31T08:10:44.064Z",
+  "generated_at": "2026-06-01T05:08:40.533Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -81,7 +81,7 @@
     },
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
-      "sha256": "cbee2c2228b9738124385eb58b75694cd96a6a07e357614d9547cf325ea0470d",
+      "sha256": "d62404e290dbb04602a75858f03555a9d141839e3ec02512781beb444e6202ac",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
