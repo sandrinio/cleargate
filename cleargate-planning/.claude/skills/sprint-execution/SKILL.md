@@ -578,6 +578,45 @@ Log every event in sprint §4. **Sprint branch MUST NOT merge to main while any 
 
 ---
 
+## 6.5 Phase D.5 — Consolidation
+
+**When:** Runs ONCE per sprint, after all stories have merged into `sprint/S-NN` (walkthrough done, all `UR:bug` items resolved) and **before** Gate-4 close (Phase E). Worktrees are already torn down by §C.7 at this point — this is a sprint-branch operation, not a story-branch operation.
+
+**Rationale:** Each story is built by a Developer sealed in its own worktree, blind to the others. Cross-story duplication, divergent patterns, and missed reuse are structurally invisible during execution. Phase D.5 is the only place one reviewer sees the whole sprint diff — it is the dedup/reuse/altitude pass that per-story isolation cannot provide.
+
+### D.5.1 Run /simplify on the full sprint diff
+
+Invoke the `code-simplifier` agent (`/simplify`) against the full sprint diff:
+
+```bash
+git diff main...sprint/S-NN
+```
+
+The agent applies reuse, deduplication, and altitude fixes and produces ONE consolidation commit on the sprint branch `sprint/S-NN`. This is not a story branch commit — the worktrees are gone.
+
+**Red-test immutability constraint:** The consolidation MUST NOT touch any `*.red.node.test.ts` file (frozen post-Red per §C.3 — same immutability rule as Developer). Before accepting the consolidation commit, the Orchestrator MUST verify the commit's file list contains no `*.red.node.test.ts` path:
+
+```bash
+git show --name-only <consolidation-sha> | grep '\.red\.node\.test\.ts'
+# Must return empty — any match is a violation; revert immediately.
+```
+
+If `*.red.node.test.ts` files appear in the consolidation commit's file list, revert the commit unconditionally and log the violation in sprint §4 Execution Log.
+
+### D.5.2 QA-Verify re-runs the full suite (safety net)
+
+After the consolidation commit lands on `sprint/S-NN`, dispatch QA in Consolidation mode (see `qa.md` § Consolidation-mode dispatch) — a sprint-diff full-suite re-run, read-only, sole question: does the full suite stay green after the /simplify commit?
+
+**Green → keep:** Full suite is green — keep the consolidation commit on `sprint/S-NN` and proceed to Phase E (Gate 4 close).
+
+**Red → revert:** Full suite is red — run `git revert <consolidation-sha>` on `sprint/S-NN`. Log the revert in sprint §4 Execution Log. Close the sprint on the un-simplified still-green diff. The un-simplified diff is the correctness floor — a failed simplification never blocks the sprint.
+
+### D.5.3 Optional advisory sprint-diff code review
+
+After D.5.1–D.5.2 (whether or not consolidation succeeded), the Orchestrator MAY run an advisory `/code-review` on `git diff main...sprint/S-NN`. This is advisory only — it is NOT a gate. Findings go into sprint §4 Execution Log; they do not block Phase E.
+
+---
+
 ## 7. Phase E — Gate 4 Close (Reporter + Human Sign-off)
 
 This is a **Gate-3-class action**. Authorising sprint execution does NOT authorise close. Close requires its own dedicated human approval.

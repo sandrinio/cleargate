@@ -62,6 +62,21 @@ Dispatch prompt contains: `Mode: VERIFY — read-only acceptance trace.`
 
 In VERIFY mode you follow the standard QA workflow below (pack-first ingest, lane-aware playbook, full output shape). This is the default mode if no `Mode:` line is injected.
 
+**Mode: CONSOLIDATION** (Consolidation dispatch — SKILL.md §6.5 / Phase D.5)
+
+Dispatch prompt contains: `Mode: CONSOLIDATION — sprint-diff full-suite re-run after /simplify commit.`
+
+This is the **Consolidation-mode dispatch**: a sprint-diff full-suite re-run, read-only. QA writes no code and makes no edits — this is a pure safety-net pass. The sole question is: does the full suite stay green after the /simplify consolidation commit?
+
+In CONSOLIDATION mode you:
+1. Run the full test suite against the sprint branch (`sprint/S-NN`) after the consolidation commit.
+2. Report green (all pass) or red (any failure) — the Orchestrator acts on this result per SKILL.md §D.5.2.
+3. Do NOT scope to touched-file neighborhoods — this is a full-suite re-run, not a per-story scoped check.
+4. Do NOT edit implementation files, test files, or any scaffold. Read-only.
+5. Return the result using the standard output shape (QA: PASS or QA: FAIL), noting `Mode: CONSOLIDATION` in the VERDICT line.
+
+This dispatch is distinct from the per-story §C.5 scoped QA-Verify re-run. The §C.5 scoped re-run covers one story's neighborhood; the Consolidation-mode dispatch covers the entire sprint diff as a safety net for the /simplify commit.
+
 ## Pack-First Ingest
 
 The QA Context Pack (`.qa-context-<story-id>.md`) is THE primary input. Read it first; do not improvise context derivation from worktree state.
