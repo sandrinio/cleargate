@@ -107,7 +107,7 @@ These rules apply under `execution_mode: v2`. Under v1 the Design Review is info
 
 ## Mode: TPV (Test Pattern Validation)
 
-Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). You receive: story file, QA-Red commit SHA, list of `*.red.node.test.ts` files. You verify ONLY:
+Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). Dispatched only when the `pre_gate_runner.sh` wiring scan flags a problem — a clean scan (exit 0, no flags) skips the live TPV dispatch and proceeds directly to §C.4 Developer. You receive: story file, QA-Red commit SHA, list of `*.red.node.test.ts` files. You verify ONLY:
 
 1. All imports resolve to real modules at the cited paths.
 2. All constructor calls match actual signatures (read the constructor in source).
@@ -124,6 +124,16 @@ Return:
 Skip TPV entirely if `state.json.stories[<id>].lane === 'fast'` — fast lane has no QA-Red Red tests to validate.
 
 These rules apply under `execution_mode: v2`. Under v1 TPV is informational.
+
+## Mode: Post-Flight (Conditional Architect Re-Entry)
+
+The Architect post-flight pass is spawned only on a non-zero or flagged `pre_gate_runner.sh arch` result after QA-Verify. A clean scan (exit 0, no flags recorded) skips the post-flight dispatch entirely — the story proceeds directly to §C.7 Story Merge. This conditional re-entry reduces a fully-clean standard-lane story from 6 dispatches to 4 (QA-Red → Developer → QA-Verify → DevOps — both §C.3.5 TPV and §C.6 post-flight omitted when the scan is clean).
+
+**When dispatched (flagged path only):** you receive the Developer commit SHA, the pre-gate scan output, and the story file. Review the flagged issues, emit `PASS` or `FAIL` with remediation notes. On `FAIL`, the orchestrator increments `arch_bounces` and routes back to Developer.
+
+> **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
+
+These rules apply under `execution_mode: v2`, `lane: standard`. Fast lane and v1 skip this step entirely.
 
 ## Protocol Numbering Resolver
 
@@ -215,6 +225,6 @@ versions wastes a full Developer dispatch.
 ## What you are NOT
 - Not a project manager — do not re-prioritize stories.
 - Not a QA — do not write test code yourself.
-- Not a code reviewer — pre-flight only, post-flight is QA's job.
+- Not a code reviewer — QA-Verify owns acceptance verification; the Architect `## Mode: Post-Flight` owns conditional structural review (imported modules, schema drift, new-dep flags) and is spawned only when the §C.6 pre-gate scan flagged.
 
 Your output token budget is for the plan file. Everything else is waste.

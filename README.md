@@ -41,7 +41,7 @@ Do not write any production code yet. This is install + verification
 only. If any step errors, stop and report the exact error.
 ```
 
-If `init` lands cleanly, your next message can be: *"File a ClearGate proposal for [your feature]."* The agent will classify the request, draft a work item under `.cleargate/delivery/pending-sync/`, and halt at Gate 1 for your approval — no rogue code generation.
+If `init` lands cleanly, your next message can be: *"File a ClearGate story for [your feature]."* The agent will classify the request, draft a work item under `.cleargate/delivery/pending-sync/`, and halt at Gate 1 for your approval — no rogue code generation.
 
 ---
 
@@ -222,15 +222,28 @@ your-repo/
 
 ---
 
+## Quickstart
+
+New to ClearGate? Four steps to your first shipped work item:
+
+1. **Install.** Run `npx cleargate init` in your repo root, then `npx cleargate doctor` to verify the scaffold.
+2. **File a Story.** Ask Claude Code: *"I want to add [feature]."* The agent classifies the request, drafts an Epic/Story under `.cleargate/delivery/pending-sync/`, and halts at **Gate 1** for your review.
+3. **Approve it (Gate 1).** Read the draft. Set `approved: true` in the frontmatter and tell Claude Code to proceed. Gate 1 closes.
+4. **Push it.** Run `cleargate push` (or ask Claude Code to push). The work item lands in your PM tool and in the MCP Postgres store.
+
+That's all you need to get started. Sprints, the five-agent execution loop, and Gates 2-4 are the next step — they govern *how* the work gets implemented once you have a populated backlog. See [Getting started in 10 minutes](#getting-started-in-10-minutes) below for the full loop, or [docs/INTERNALS.md](./docs/INTERNALS.md) for the complete architecture.
+
+---
+
 ## Getting started in 10 minutes
 
 After `cleargate init` completes, ask Claude Code to begin. The session will read the ClearGate block in `CLAUDE.md` automatically. Walk through these steps:
 
-1. **File a proposal.** Ask Claude Code: *"I want to add [feature]. File a ClearGate proposal."* Claude will classify the request, draft a Proposal file in `.cleargate/delivery/pending-sync/`, and halt at **Gate 1** for your review.
+1. **File the work.** Ask Claude Code: *"I want to add [feature]."* Claude will classify the request as an Epic/Story, draft the work item under `.cleargate/delivery/pending-sync/`, and halt at **Gate 1** for your review. There is no separate Proposal step — the agent goes straight to scoped Epic or Story.
 
 2. **Approve it.** Read the draft. Set `approved: true` in the frontmatter and tell Claude Code to proceed. Gate 1 closes.
 
-3. **Decompose into an Epic and Stories.** Claude Code will decompose the Proposal into an Epic (scope + goals) and then into Stories (individual implementable units). Each Story gets a Gherkin acceptance scenario and an ambiguity gate. If anything is unclear, the agent halts and asks — it cannot skip levels. When all open questions are resolved, **Gate 2** (Ambiguity) closes.
+3. **Decompose into Stories.** Claude Code will decompose the Epic or request into Stories (individual implementable units). Each Story gets a Gherkin acceptance scenario and an ambiguity gate. If anything is unclear, the agent halts and asks — it cannot skip levels. When all open questions are resolved, **Gate 2** (Ambiguity) closes.
 
 4. **Schedule a Sprint.** Group the Stories into a Sprint file. Run `cleargate sprint preflight` (**Gate 3**) to verify the sprint is ready for execution — no orphaned work items, no unresolved ambiguities, no drift in the scaffold.
 
@@ -245,7 +258,7 @@ After `cleargate init` completes, ask Claude Code to begin. The session will rea
    - **Architect (post-flight)** confirms no architectural drift.
    - **DevOps** merges, tears down the worktree, and flips the Story state to `Done`.
 
-7. **Close the sprint.** After all Stories are `Done`, the Reporter writes the retrospective. Run `close_sprint.mjs --assume-ack` (**Gate 4**) to flip the sprint to `Completed`, archive artifacts, and print the 6-item handoff summary.
+7. **Close the sprint.** After all Stories are `Done`, the Reporter writes the retrospective. Run `close_sprint.mjs` with **no flags** (**Gate 4**). The script surfaces a confirmation prompt verbatim — confirm it to flip the sprint to `Completed`, archive artifacts, and print the 6-item handoff summary. The agent must not bypass the human confirmation step.
 
 For gates configuration (what command `cleargate gate test` runs in your project), create `.cleargate/config.yml` at your repo root. `cleargate init` installs a documented example template at `.cleargate/config.example.yml` alongside — copy it and edit, or start from the skeleton below:
 

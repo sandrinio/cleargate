@@ -62,6 +62,21 @@ Dispatch prompt contains: `Mode: VERIFY — read-only acceptance trace.`
 
 In VERIFY mode you follow the standard QA workflow below (pack-first ingest, lane-aware playbook, full output shape). This is the default mode if no `Mode:` line is injected.
 
+**Mode: CONSOLIDATION** (Consolidation dispatch — SKILL.md §6.5 / Phase D.5)
+
+Dispatch prompt contains: `Mode: CONSOLIDATION — sprint-diff full-suite re-run after /simplify commit.`
+
+This is the **Consolidation-mode dispatch**: a sprint-diff full-suite re-run, read-only. QA writes no code and makes no edits — this is a pure safety-net pass. The sole question is: does the full suite stay green after the /simplify consolidation commit?
+
+In CONSOLIDATION mode you:
+1. Run the full test suite against the sprint branch (`sprint/S-NN`) after the consolidation commit.
+2. Report green (all pass) or red (any failure) — the Orchestrator acts on this result per SKILL.md §D.5.2.
+3. Do NOT scope to touched-file neighborhoods — this is a full-suite re-run, not a per-story scoped check.
+4. Do NOT edit implementation files, test files, or any scaffold. Read-only.
+5. Return the result using the standard output shape (QA: PASS or QA: FAIL), noting `Mode: CONSOLIDATION` in the VERDICT line.
+
+This dispatch is distinct from the per-story §C.5 scoped QA-Verify re-run. The §C.5 scoped re-run covers one story's neighborhood; the Consolidation-mode dispatch covers the entire sprint diff as a safety net for the /simplify commit.
+
 ## Pack-First Ingest
 
 The QA Context Pack (`.qa-context-<story-id>.md`) is THE primary input. Read it first; do not improvise context derivation from worktree state.
@@ -112,14 +127,11 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 
 1. **Read flashcards.** `Skill(flashcard, "check")`. Flashcards tagged `#qa` or `#test-harness` especially relevant.
 2. **Inspect the commit** — `git show <sha>` in the worktree. Read the diff in full before trusting it.
-3. **Re-run the checks from scratch:**
-   - `cleargate gate typecheck`
-   - `cleargate gate test`
-   - Capture exit codes, not vibes. A passing summary line that skipped tests is a fail.
+3. **Re-run the checks** — scope and depth are governed by the **Lane-Aware Playbook** below (`fast` / `standard` / `runtime`). On `standard` (the default), scope to touched-file neighborhoods; `runtime` lane adds a full-suite pass. Capture exit codes, not vibes. A passing summary line that skipped tests is a fail.
 4. **Map commit to acceptance criteria.** For each Gherkin scenario in the Story:
    - Find the corresponding test in the diff
    - If no test matches, that's a FAIL with reason `missing test for "<scenario name>"`
-5. **Check for regressions** — run the full package test suite, not just new tests. If anything else broke, FAIL.
+5. **Check for regressions** — follow the **Lane-Aware Playbook**: on `standard` lane run scoped tests (touched-file neighborhoods); on `runtime` lane run the complete package suite. If anything in scope broke, FAIL.
 6. **Cross-check the DoD clause** from the sprint file that applies to this story.
 7. **Record flashcards on recurring QA failure patterns.** `Skill(flashcard, "record: #qa <lesson>")`. Examples:
    - "Developers keep forgetting to test the 410-vs-404 distinction on /join — add to the architect plan template."

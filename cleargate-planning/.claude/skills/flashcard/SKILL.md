@@ -63,6 +63,16 @@ Examples:
    - `[R] → superseded-by <short-ref>` → resolved or replaced by a later card / shipped fix. `<short-ref>` is a date+tag (e.g. `2026-04-19/#hooks-sentinel`) or a STORY/CR ID.
    Markers are additive — the original lesson text is preserved. The reporter agent flags candidates at sprint end; a human approves the batch before markers are applied (see `.claude/agents/reporter.md` → "Flashcard audit").
 8. **Check-mode filter.** `check` reads active cards only (no marker). Include `[S]` / `[R]` cards only when: (a) their tags directly match the current task area, or (b) the invocation is `check-all` (explicit history read). This keeps `check` signal-dense without losing the historical record.
+9. **Curation is review-driven, not age-based.** A still-relevant card stays active regardless of age — nothing is auto-evicted or deleted based on time alone. Cards become archival candidates only when a human review determines they are superseded by a shipped fix, resolved by a CR/story, or are exact duplicates of another active card.
+
+## Cold Archive
+
+Flashcards that have been approved for archival are moved (copied then marked) to `.cleargate/FLASHCARD-archive.md`. This file serves as a greppable cold archive: removed from the active scan in `check` mode but still searchable for historical context. Archival is a two-step process — always human-approved at Gate 4 (sprint close):
+
+1. **Reporter surfaces archival candidates** in §4 Observe of the sprint report. A candidate is a card with reason: superseded (a newer card or shipped fix covers the same lesson), resolved (the underlying bug/quirk no longer exists), or duplicate (identical lesson already in another active card).
+2. **Human approves the batch at Gate 4.** The orchestrator then moves the card body to `.cleargate/FLASHCARD-archive.md` and applies the `[S]` or `[R]` marker in the live `FLASHCARD.md` in place of the full lesson body.
+
+**FLASHCARD-archive.md format:** mirrors the live file's one-liner format but includes an `archived_at:` header per entry for traceability. Grep it the same way as the live file. Never delete entries from the archive.
 
 ## Invocation contract
 

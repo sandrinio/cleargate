@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# test_flashcard_enforcement.sh — STORY-014-03
+# test_flashcard_enforcement.sh — STORY-014-03 (reworked STORY-043-01)
 # Verifies 4 Gherkin scenarios for the flashcard gate in pending-task-sentinel.sh.
 #
-# Scenarios:
-#   1. v2 Task spawn blocked when unprocessed flagged card exists; stderr names card + touch-command hint.
-#   2. v2 Task spawn proceeds after .processed-<hash> marker touched.
-#   3. v1 advisory: warning to stderr, exit 0.
+# Scenarios (fail-closed semantics after STORY-043-01):
+#   1. Block by default: unprocessed flagged card + no CLEARGATE_ADVISORY → exit 1 + BLOCKED.
+#   2. Processed marker: .processed-<hash> present → exit 0, sentinel written.
+#   3. Advisory: CLEARGATE_ADVISORY=1 + unprocessed card → exit 0 + WARNING.
 #   4. Empty flashcards_flagged: [] is a no-op.
 #
 # Usage: bash .cleargate/scripts/test/test_flashcard_enforcement.sh
@@ -18,23 +18,21 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-# GIT_ROOT: the real repo root where .git/ is a directory (not a .git file as in worktrees).
-# .claude/ is gitignored and lives only at GIT_ROOT.
-_find_git_root() {
-  local dir="$1"
-  while [[ "${dir}" != "/" ]]; do
-    if [[ -d "${dir}/.git" ]]; then
-      printf '%s' "${dir}"
-      return
-    fi
-    dir="$(dirname "${dir}")"
-  done
-  printf '%s' "${REPO_ROOT}"
-}
-GIT_ROOT="$(_find_git_root "${REPO_ROOT}")"
+# Hook-under-test: in-worktree CANONICAL copy (mechanism (a) per M1 §STORY-043-01).
+# SCRIPT_DIR is .cleargate/scripts/test/ inside the checkout root (REPO_ROOT).
+# Target: cleargate-planning/.claude/hooks/pending-task-sentinel.sh within that checkout.
+# NOT .claude/hooks/... (that is the LIVE gitignored hook, out of bounds mid-sprint).
+# Optional env override for CI on main checkout: PENDING_TASK_SENTINEL_HOOK.
+if [[ -n "${PENDING_TASK_SENTINEL_HOOK:-}" ]]; then
+  CANONICAL_HOOK="${PENDING_TASK_SENTINEL_HOOK}"
+else
+  CANONICAL_HOOK="${REPO_ROOT}/cleargate-planning/.claude/hooks/pending-task-sentinel.sh"
+fi
 
-# Live hook — contains REPO_ROOT hardcoded; patched per test via sed.
-LIVE_HOOK="${GIT_ROOT}/.claude/hooks/pending-task-sentinel.sh"
+if [[ ! -f "${CANONICAL_HOOK}" ]]; then
+  printf 'ERROR: canonical hook not found at %s\n' "${CANONICAL_HOOK}" >&2
+  exit 2
+fi
 
 PASS=0
 FAIL=0
@@ -72,13 +70,17 @@ mk_tmpdir() {
   mktemp -d "/tmp/cg-fc-test.XXXXXX"
 }
 
+# mk_sprint: create a synthetic sprint fixture WITHOUT execution_mode (post-CR-070 world).
+# Arguments: tmpdir sprint_id
+# Returns (stdout): the sprint_dir path.
 mk_sprint() {
-  local tmpdir="$1" sprint_id="$2" exec_mode="$3"
+  local tmpdir="$1" sprint_id="$2"
   local sprint_dir="${tmpdir}/.cleargate/sprint-runs/${sprint_id}"
   mkdir -p "${sprint_dir}"
   printf '%s' "${sprint_id}" > "${tmpdir}/.cleargate/sprint-runs/.active"
-  printf '{"schema_version":1,"sprint_id":"%s","execution_mode":"%s","sprint_status":"Active","stories":{},"last_action":"test","updated_at":"2026-04-22T00:00:00Z"}\n' \
-    "${sprint_id}" "${exec_mode}" > "${sprint_dir}/state.json"
+  # Write clean post-CR-070 state.json WITHOUT execution_mode field.
+  printf '{"schema_version":3,"sprint_id":"%s","sprint_status":"Active","stories":{},"last_action":"test","updated_at":"2026-06-01T00:00:00Z"}\n' \
+    "${sprint_id}" > "${sprint_dir}/state.json"
   mkdir -p "${tmpdir}/.cleargate/hook-log"
   printf '%s' "${sprint_dir}"
 }
@@ -114,14 +116,6 @@ flashcards_flagged: []
 EOF
 }
 
-# Prepare hook invocation: no sed patching needed.
-# We use ORCHESTRATOR_PROJECT_DIR env override (added in STORY-014-05) to
-# redirect REPO_ROOT to the tmpdir.  This exercises the production override
-# path and is immune to future changes in the variable assignment form.
-patch_hook() {
-  : # no-op — hook is invoked directly via env override in invoke_hook
-}
-
 # Invoke hook, capture stderr separately, return exit code via return value.
 # $1 = tmpdir (used as ORCHESTRATOR_PROJECT_DIR so the hook reads from it)
 LAST_STDERR=""
@@ -130,7 +124,20 @@ invoke_hook() {
   local input_json='{"tool_name":"Task","tool_input":{"subagent_type":"developer","prompt":"STORY=099-02 test"},"transcript_path":"","session_id":"test","cwd":"/tmp"}'
   local stderr_file
   stderr_file="$(mktemp)"
-  printf '%s' "${input_json}" | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" bash "${LIVE_HOOK}" 2>"${stderr_file}"
+  printf '%s' "${input_json}" | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" bash "${CANONICAL_HOOK}" 2>"${stderr_file}"
+  local rc=$?
+  LAST_STDERR="$(cat "${stderr_file}")"
+  rm -f "${stderr_file}"
+  return "${rc}"
+}
+
+# Like invoke_hook but exports CLEARGATE_ADVISORY=1 (Scenario 3).
+invoke_hook_advisory() {
+  local tmpdir="$1"
+  local input_json='{"tool_name":"Task","tool_input":{"subagent_type":"developer","prompt":"STORY=099-02 test"},"transcript_path":"","session_id":"test","cwd":"/tmp"}'
+  local stderr_file
+  stderr_file="$(mktemp)"
+  printf '%s' "${input_json}" | ORCHESTRATOR_PROJECT_DIR="${tmpdir}" CLEARGATE_ADVISORY=1 bash "${CANONICAL_HOOK}" 2>"${stderr_file}"
   local rc=$?
   LAST_STDERR="$(cat "${stderr_file}")"
   rm -f "${stderr_file}"
@@ -138,13 +145,12 @@ invoke_hook() {
 }
 
 # ================================================================
-# Scenario 1: v2 Task spawn blocked when unprocessed flagged card exists
+# Scenario 1: Block by default — unprocessed flagged card, no CLEARGATE_ADVISORY → exit 1
 # ================================================================
-printf '\n=== Scenario 1: v2 blocked on unprocessed card ===\n'
+printf '\n=== Scenario 1: block by default (no execution_mode, no advisory) ===\n'
 T1="$(mk_tmpdir)"
-SPRINT_DIR1="$(mk_sprint "${T1}" "SPRINT-TEST" "v2")"
+SPRINT_DIR1="$(mk_sprint "${T1}" "SPRINT-TEST")"
 mk_dev_report_md "${SPRINT_DIR1}" "099-01"
-patch_hook "${T1}"
 
 LAST_STDERR=""
 invoke_hook "${T1}"
@@ -158,14 +164,13 @@ assert_contains "S1: stderr says FLASHCARD GATE BLOCKED" "FLASHCARD GATE BLOCKED
 rm -rf "${T1}"
 
 # ================================================================
-# Scenario 2: v2 Task spawn proceeds after .processed-<hash> marker touched
+# Scenario 2: Processed marker — .processed-<hash> present → exit 0 + sentinel written
 # ================================================================
-printf '\n=== Scenario 2: v2 proceeds after marker touched ===\n'
+printf '\n=== Scenario 2: processed marker lets Task proceed ===\n'
 T2="$(mk_tmpdir)"
-SPRINT_DIR2="$(mk_sprint "${T2}" "SPRINT-TEST" "v2")"
+SPRINT_DIR2="$(mk_sprint "${T2}" "SPRINT-TEST")"
 mk_dev_report_md "${SPRINT_DIR2}" "099-01"
 touch "${SPRINT_DIR2}/.processed-${KNOWN_HASH}"
-patch_hook "${T2}"
 
 LAST_STDERR=""
 invoke_hook "${T2}"
@@ -178,16 +183,15 @@ assert_eq "S2: sentinel file was written" "1" "${SENTINEL_COUNT}"
 rm -rf "${T2}"
 
 # ================================================================
-# Scenario 3: v1 advisory — warning to stderr, exit 0
+# Scenario 3: Advisory — CLEARGATE_ADVISORY=1 + unprocessed card → exit 0 + WARNING
 # ================================================================
-printf '\n=== Scenario 3: v1 advisory (warning, exit 0) ===\n'
+printf '\n=== Scenario 3: CLEARGATE_ADVISORY=1 downgrades block to warning ===\n'
 T3="$(mk_tmpdir)"
-SPRINT_DIR3="$(mk_sprint "${T3}" "SPRINT-TEST" "v1")"
+SPRINT_DIR3="$(mk_sprint "${T3}" "SPRINT-TEST")"
 mk_dev_report_md "${SPRINT_DIR3}" "099-01"
-patch_hook "${T3}"
 
 LAST_STDERR=""
-invoke_hook "${T3}"
+invoke_hook_advisory "${T3}"
 RC3=$?
 
 assert_eq "S3: exit code is 0 (advisory, not blocked)" "0" "${RC3}"
@@ -201,9 +205,8 @@ rm -rf "${T3}"
 # ================================================================
 printf '\n=== Scenario 4: empty flashcards_flagged is no-op ===\n'
 T4="$(mk_tmpdir)"
-SPRINT_DIR4="$(mk_sprint "${T4}" "SPRINT-TEST" "v2")"
+SPRINT_DIR4="$(mk_sprint "${T4}" "SPRINT-TEST")"
 mk_dev_report_empty "${SPRINT_DIR4}" "099-01"
-patch_hook "${T4}"
 
 LAST_STDERR=""
 invoke_hook "${T4}"

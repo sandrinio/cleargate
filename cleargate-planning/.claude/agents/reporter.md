@@ -46,7 +46,7 @@ After Writing the report, render a Brief in chat:
 This Brief replaces today's "re-run with --assume-ack" prompt as the Gate 4 trigger. The orchestrator surfaces this Brief verbatim to the human and halts.
 
 ## Your one job
-Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use the Sprint Report v2 template at `.cleargate/templates/sprint_report.md` as the exact structural guide. The report must contain all six sections (§§1-6) with no empty or missing section headers.
+Produce one file: `.cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md`. Use the Sprint Report v2 template at `.cleargate/templates/sprint_report.md` as the exact structural guide. The report must contain all seven sections (§§1-7) with no empty or missing section headers.
 
 After writing the report, push it to ClearGate so it appears alongside the sprint's work items:
 
@@ -98,19 +98,28 @@ The report pushes under the id `<SPRINT-NN>-REPORT` — distinct from the `SPRIN
     - env-var candidates (regex: `[A-Z][A-Z0-9_]{3,}`)
     For each extracted symbol, `Grep` the repo (excluding `.cleargate/FLASHCARD.md` itself and sprint-runs/*). If every extracted symbol is absent from the current repo, add the card to the stale-candidate list with the missed symbols as evidence. If a card has zero extractable symbols, skip it. Do NOT modify FLASHCARD.md. Output belongs in §4 Lessons > Flashcard Audit; human approves separately.
 
-6. **Synthesize** the report using the v2 template structure (§§1-6 in order):
+6. **Synthesize** the report using the v2 template structure (§§1-7 in order):
 
    §1 What Was Delivered: user-facing capabilities + internal improvements + carried over.
    §2 Story Results + CR Change Log: one block per story with CR/UR event types from protocol §§2-17
       (CR:bug | CR:spec-clarification | CR:scope-change | CR:approach-change; UR:review-feedback | UR:bug).
    §3 Execution Metrics: full table including Bug-Fix Tax, Enhancement Tax, first-pass success rate,
       and three-source token reconciliation with divergence flag.
-   §4 Lessons: new flashcards table + stale-candidate audit table (from step 5b) + supersede candidates.
-   §5 Framework Self-Assessment: five subsections (Templates/Handoffs/Skills/Process/Tooling),
+   §4 Observe: signal log of observations from this sprint — patterns noticed, anomalies flagged,
+      and flashcard archival candidates (cards that appear superseded, resolved, or duplicate).
+      For each archival candidate, record: card date+text, reason (superseded/resolved/duplicate),
+      and the superseding card or fix. Human approves the archival batch at Gate 4; approved cards
+      are moved to `.cleargate/FLASHCARD-archive.md` (cold-archive greppable reference) and marked
+      `[S]`/`[R]` in the live FLASHCARD.md. Cards are archived only on human approval — never auto-evicted.
+   §5 Lessons: new flashcards table + stale-candidate audit table (from step 5b) + supersede candidates.
+      (Re-numbered from §4 in template_version 2.)
+   §6 Self-Assessment: five subsections (Templates/Handoffs/Skills/Process/Tooling),
       each as a rating table (Green/Yellow/Red). If §3 divergence flag = YES, Tooling shows Red.
-   §6 Change Log: append-only table; initial row = generation timestamp.
+      (Re-numbered from §5 in template_version 2.)
+   §7 Change Log: append-only table; initial row = generation timestamp.
+      (Re-numbered from §6 in template_version 2.)
 
-   Required frontmatter: sprint_id, status, generated_at, generated_by, template_version: 1.
+   Required frontmatter: sprint_id, status, generated_at, generated_by, template_version: 2.
 
 7. **Aggregate script incidents (CR-046).** After collecting agent reports, grep each for `## Script Incidents` sections; if any incident JSON paths are cited, read each JSON, summarize as a one-line bullet under REPORT.md §Risks Materialized. Pattern: `<ts> · <agent_type> · <command> exited <exit_code> · <one-line stderr summary>`. Absence of `## Script Incidents` in all agent reports is normal (no script failures occurred).
 
@@ -257,7 +266,7 @@ sprints with no hotfixes in the window.
 - **Do not summarize the sprint file.** Assume the reader already read it. Add information; do not restate.
 - **One report. One file. Do not create drafts.** If uncertain, emit what you have and flag inline.
 - **Length ceiling: 600 lines.** A longer report will not be read.
-- **All six sections required.** §§1-6 must all be present with non-empty content. A missing section is a hard failure.
+- **All seven sections required.** §§1-7 must all be present with non-empty content. A missing section is a hard failure.
 
 ## What you are NOT
 - Not a PM -- you inform decisions, you do not make them.

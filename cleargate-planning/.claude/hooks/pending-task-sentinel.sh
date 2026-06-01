@@ -20,9 +20,9 @@
 # Output: writes .cleargate/sprint-runs/<sprint-id>/.pending-task-<turn_index>.json
 #         with { agent_type, work_item_id, turn_index, started_at }
 #
-# Robustness: under v1 never blocks the tool call (exit 0 always). Under v2,
-# exits non-zero to block Task spawn when unprocessed flashcards exist.
-# Set SKIP_FLASHCARD_GATE=1 to bypass the flashcard gate in both modes.
+# Robustness: exits non-zero to block Task spawn when unprocessed flashcards exist.
+# Set SKIP_FLASHCARD_GATE=1 to bypass the flashcard gate entirely.
+# Set CLEARGATE_ADVISORY=1 to downgrade the block to a warning (exit 0).
 
 set -u
 
@@ -51,13 +51,6 @@ mkdir -p "${SPRINT_DIR}"
 TOOL_NAME_EARLY="$(printf '%s' "${INPUT}" | jq -r '.tool_name // empty')"
 
 if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPRINT_ID}" != "_off-sprint" ]]; then
-  # Read execution_mode from state.json
-  EXEC_MODE="v1"
-  if [[ -f "${SPRINT_DIR}/state.json" ]]; then
-    EXEC_MODE="$(jq -r '.execution_mode // "v1"' "${SPRINT_DIR}/state.json" 2>/dev/null)"
-    [[ -z "${EXEC_MODE}" || "${EXEC_MODE}" == "null" ]] && EXEC_MODE="v1"
-  fi
-
   # Collect flagged cards from all STORY-*-dev.md and STORY-*-qa.md in SPRINT_DIR (flat layout).
   UNPROCESSED_CARDS=()
   UNPROCESSED_HASHES=()
@@ -131,10 +124,20 @@ if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "$
   done
 
   if [[ "${#UNPROCESSED_CARDS[@]}" -gt 0 ]]; then
-    printf '[%s] flashcard-gate: %d unprocessed card(s) found (mode=%s)\n' \
-      "$(date -u +%FT%TZ)" "${#UNPROCESSED_CARDS[@]}" "${EXEC_MODE}" >> "${HOOK_LOG}"
-    if [[ "${EXEC_MODE}" == "v2" ]]; then
-      # Block Task spawn — exit 1 with diagnostic on stderr (real stderr, not log)
+    printf '[%s] flashcard-gate: %d unprocessed card(s) found\n' \
+      "$(date -u +%FT%TZ)" "${#UNPROCESSED_CARDS[@]}" >> "${HOOK_LOG}"
+    if [[ "${CLEARGATE_ADVISORY:-0}" == "1" ]]; then
+      # Advisory mode: warning only, continue to sentinel write
+      printf 'FLASHCARD GATE WARNING: %d unprocessed flashcard(s).\n' \
+        "${#UNPROCESSED_CARDS[@]}" >&2
+      for i in "${!UNPROCESSED_CARDS[@]}"; do
+        CARD="${UNPROCESSED_CARDS[$i]}"
+        HASH="${UNPROCESSED_HASHES[$i]}"
+        printf '  card: %s\n' "${CARD}" >&2
+        printf '  mark processed: touch %s/.processed-%s\n' "${SPRINT_DIR}" "${HASH}" >&2
+      done
+    else
+      # Default: block Task spawn — exit 1 with diagnostic on stderr (real stderr, not log)
       printf 'FLASHCARD GATE BLOCKED: %d unprocessed flashcard(s) must be processed before spawning next Task.\n' \
         "${#UNPROCESSED_CARDS[@]}" >&2
       for i in "${!UNPROCESSED_CARDS[@]}"; do
@@ -144,16 +147,6 @@ if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "$
         printf '  mark processed: touch %s/.processed-%s\n' "${SPRINT_DIR}" "${HASH}" >&2
       done
       exit 1
-    else
-      # v1: advisory warning only, continue to sentinel write
-      printf 'FLASHCARD GATE WARNING (v1 advisory): %d unprocessed flashcard(s).\n' \
-        "${#UNPROCESSED_CARDS[@]}" >&2
-      for i in "${!UNPROCESSED_CARDS[@]}"; do
-        CARD="${UNPROCESSED_CARDS[$i]}"
-        HASH="${UNPROCESSED_HASHES[$i]}"
-        printf '  card: %s\n' "${CARD}" >&2
-        printf '  mark processed: touch %s/.processed-%s\n' "${SPRINT_DIR}" "${HASH}" >&2
-      done
     fi
   fi
 fi

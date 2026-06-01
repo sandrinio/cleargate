@@ -79,9 +79,9 @@ Each agent dispatch has a target duration. Note the start time before each `Agen
 
 If a Task call has been pending for **>2× the budget** with no visible progress, surface it to the human and offer to interrupt. There is no automatic stall detection — the parent session blocks on `Agent` calls and cannot poll mid-run. The human's interrupt is the only reliable kill path until ambient watcher infra exists.
 
-### Dispatch marker — write before every spawn
+### Dispatch marker — written automatically before every spawn (fallback only)
 
-The token-ledger hook attributes tokens by reading `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`. You write that file immediately before each `Agent` call:
+The token-ledger hook attributes tokens by reading `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`. The **primary path** is the PreToolUse:Task hook (`pre-tool-use-task.sh`), which auto-writes the marker on every `Agent` call without manual orchestrator intervention. The manual script below is a **fallback** for spawns the auto-hook cannot attribute (e.g. a generic Architect dispatch whose Task() prompt lacks a parseable work-item marker):
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
@@ -90,7 +90,7 @@ bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
 - `<work_item_id>`: e.g. `STORY-020-02`, `CR-016`, `BUG-021`. For the Reporter at sprint close use the sprint ID (e.g. `SPRINT-19`).
 - `<agent_type>`: exact string — `developer | architect | qa | reporter | devops | cleargate-wiki-contradict`.
 
-If you forget the marker, ledger attribution falls back to transcript-grep heuristics (unreliable). The hook deletes the file after consumption — write fresh per dispatch.
+The script is idempotent: if a same-session auto-marker (written by `pre-tool-use-task.sh`) already exists for the current session, it exits 0 without writing a duplicate. Omitting the manual call when the auto-hook fires is correct; calling it when unsure is safe (the guard prevents duplication). The hook deletes the marker after consumption — write fresh per dispatch if needed.
 
 ---
 
@@ -178,6 +178,7 @@ After human confirms, update sprint frontmatter `status: Active` (via `cleargate
 Before any Developer dispatches in a milestone, spawn the Architect once for the whole milestone:
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh M<N> architect
 ```
 
@@ -257,6 +258,7 @@ git worktree list
 ### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
@@ -287,9 +289,21 @@ On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch wit
 
 **Skip if:** `state.json.stories[<id>].lane === 'fast'` OR `execution_mode: v1`.
 
-After QA-Red commits Red tests, spawn the Architect in `Mode: TPV` to perform wiring-only validation before Dev dispatch. TPV does NOT evaluate test logic correctness — it verifies wiring so Dev does not waste a full dispatch on a mis-wired test harness.
+After QA-Red commits Red tests, run the wiring/pre-gate scan first:
 
 ```bash
+bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
+```
+
+**Conditional TPV dispatch (scan-flag gated — a clean standard-lane story proceeds to §C.4 with NO Architect TPV dispatch):**
+
+- **If the scan returns exit 0 with no flags:** skip the live Architect `Mode: TPV` dispatch and proceed directly to §C.4 Spawn Developer. No Architect agent is spawned for TPV on the clean path.
+- **If the scan returns a flag (exit 1) or scan-could-not-run (exit 2):** spawn the Architect in `Mode: TPV` to perform wiring-only validation before Dev dispatch. TPV does NOT evaluate test logic correctness — it verifies wiring so Dev does not waste a full dispatch on a mis-wired test harness.
+
+> **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
+
+```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN architect
 ```
 
@@ -311,6 +325,7 @@ TPV is a WIRING gate, not a correctness gate. A test that imports the right modu
 ### C.4 Spawn Developer
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
 
@@ -343,6 +358,7 @@ If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 ### C.5 Spawn QA-Verify
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
@@ -380,7 +396,12 @@ bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/
 
 If pre-gate scan reveals new dependencies / structural issues → return to Developer (do NOT spawn Architect for mechanical failures). 3+ pre-gate failures → escalate.
 
-If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
+**Conditional post-flight dispatch (scan-flag gated — a clean standard-lane story dispatches ≤4 agents, not 6; ≤5 when one re-entry fires; 6 when both flag):**
+
+- **If the scan returns exit 0 with no flags (clean scan):** skip the live Architect post-flight dispatch and proceed directly to §C.7 Story Merge. No Architect agent is spawned on the clean path. This drops a fully-clean standard-lane story from 6 dispatches to 4 (QA-Red → Developer → QA-Verify → DevOps — both §C.3.5 TPV and §C.6 post-flight skipped on a fully-clean scan).
+- **If the scan returns a flag (exit 1) or scan-could-not-run (exit 2):** spawn the live Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
+
+> **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
 
 ### C.7 Story Merge
 
@@ -394,7 +415,7 @@ If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment
 |---|---|
 | `STORY-NNN-NN-dev.md` | Always (all lanes) |
 | `STORY-NNN-NN-qa.md` | Always, unless lane=fast explicitly skipped QA-Verify |
-| `STORY-NNN-NN-arch.md` | v2 standard-lane only |
+| `STORY-NNN-NN-arch.md` | v2 standard-lane only, AND only when the §C.6 pre-gate scan flagged (Architect post-flight was dispatched); absent on a clean-scan story |
 | `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
 
 Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**
@@ -403,6 +424,7 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
 
 1. Mark the dispatch:
    ```bash
+   # Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
    bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN devops
    ```
 
@@ -425,10 +447,10 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
    - Required reports present:
        - {STORY-ID}-dev.md    ✓
        - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
-       - {STORY-ID}-arch.md   ✓ (v2 standard lane only)
+       - {STORY-ID}-arch.md   ✓ (v2 standard lane only, AND only when pre-gate scan flagged — absent if Architect was not dispatched)
 
    ACTIONS (in order):
-   1. Verify all required reports exist; halt if any missing.
+   1. Verify all required reports exist; halt if any missing. Exception: arch.md is required ONLY when the §C.6 pre-gate scan flagged (Architect was dispatched); a clean-scan story legitimately has no arch.md and must NOT halt.
    2. Checkout sprint branch.
    3. git merge story/{STORY-ID} --no-ff -m "merge(story/{STORY-ID}): {commit subject}"
    4. If canonical scaffold touched: cd cleargate-cli && npm run prebuild
@@ -488,7 +510,7 @@ Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` 
 
 ### C.10 Mid-Sprint Triage
 
-When the user injects new input mid-sprint (between story kickoff and merge), classify it before routing. Use the keyword-heuristic classifier (`classify()` from `cleargate-cli/src/lib/triage-classifier.ts`) as a first-pass advisory, then confirm. See authoritative rubric: `.cleargate/knowledge/mid-sprint-triage-rubric.md`.
+When the user injects new input mid-sprint (between story kickoff and merge), classify it before routing. Apply the keyword-heuristic rubric from `.cleargate/knowledge/mid-sprint-triage-rubric.md` as a first-pass advisory, then confirm with the user. The four classes are: `bug`, `clarification`, `scope`, `approach` — match the user's language against the keyword banks in the rubric doc.
 
 | Class | Trigger | Counter | Human Approval | First-pass action |
 |---|---|---|---|---|
@@ -497,7 +519,7 @@ When the user injects new input mid-sprint (between story kickoff and merge), cl
 | `scope` | Net-new requirement | None | YES for mid-sprint add | Quarantine to next sprint (default); escalate if goal-critical |
 | `approach` | Different impl, same spec | None | No (yes if cross-story impact) | Reset Dev context; re-spawn with updated approach |
 
-**Confidence signal:** `classify()` returns `confidence: 'low'` when no keyword matched. LOW confidence classifications MUST be confirmed with the human before routing.
+**Confidence signal:** When no keyword in the rubric matches the user's input, treat the classification as low-confidence. LOW confidence classifications MUST be confirmed with the human before routing.
 
 **Scope-only note:** This rubric covers USER input only. QA-FAIL bounces continue to use `qa_bounces` (existing §C.5 path). TPV-gap bounces use `arch_bounces` (§C.3.5 path).
 
@@ -556,6 +578,45 @@ Log every event in sprint §4. **Sprint branch MUST NOT merge to main while any 
 
 ---
 
+## 6.5 Phase D.5 — Consolidation
+
+**When:** Runs ONCE per sprint, after all stories have merged into `sprint/S-NN` (walkthrough done, all `UR:bug` items resolved) and **before** Gate-4 close (Phase E). Worktrees are already torn down by §C.7 at this point — this is a sprint-branch operation, not a story-branch operation.
+
+**Rationale:** Each story is built by a Developer sealed in its own worktree, blind to the others. Cross-story duplication, divergent patterns, and missed reuse are structurally invisible during execution. Phase D.5 is the only place one reviewer sees the whole sprint diff — it is the dedup/reuse/altitude pass that per-story isolation cannot provide.
+
+### D.5.1 Run /simplify on the full sprint diff
+
+Invoke the `code-simplifier` agent (`/simplify`) against the full sprint diff:
+
+```bash
+git diff main...sprint/S-NN
+```
+
+The agent applies reuse, deduplication, and altitude fixes and produces ONE consolidation commit on the sprint branch `sprint/S-NN`. This is not a story branch commit — the worktrees are gone.
+
+**Red-test immutability constraint:** The consolidation MUST NOT touch any `*.red.node.test.ts` file (frozen post-Red per §C.3 — same immutability rule as Developer). Before accepting the consolidation commit, the Orchestrator MUST verify the commit's file list contains no `*.red.node.test.ts` path:
+
+```bash
+git show --name-only <consolidation-sha> | grep '\.red\.node\.test\.ts'
+# Must return empty — any match is a violation; revert immediately.
+```
+
+If `*.red.node.test.ts` files appear in the consolidation commit's file list, revert the commit unconditionally and log the violation in sprint §4 Execution Log.
+
+### D.5.2 QA-Verify re-runs the full suite (safety net)
+
+After the consolidation commit lands on `sprint/S-NN`, dispatch QA in Consolidation mode (see `qa.md` § Consolidation-mode dispatch) — a sprint-diff full-suite re-run, read-only, sole question: does the full suite stay green after the /simplify commit?
+
+**Green → keep:** Full suite is green — keep the consolidation commit on `sprint/S-NN` and proceed to Phase E (Gate 4 close).
+
+**Red → revert:** Full suite is red — run `git revert <consolidation-sha>` on `sprint/S-NN`. Log the revert in sprint §4 Execution Log. Close the sprint on the un-simplified still-green diff. The un-simplified diff is the correctness floor — a failed simplification never blocks the sprint.
+
+### D.5.3 Optional advisory sprint-diff code review
+
+After D.5.1–D.5.2 (whether or not consolidation succeeded), the Orchestrator MAY run an advisory `/code-review` on `git diff main...sprint/S-NN`. This is advisory only — it is NOT a gate. Findings go into sprint §4 Execution Log; they do not block Phase E.
+
+---
+
 ## 7. Phase E — Gate 4 Close (Reporter + Human Sign-off)
 
 This is a **Gate-3-class action**. Authorising sprint execution does NOT authorise close. Close requires its own dedicated human approval.
@@ -575,6 +636,7 @@ No flags. Script validates Steps 1–2.6 (lifecycle reconciler runs at Step 2.6;
 If the report stub does not exist, dispatch the Reporter:
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh SPRINT-NN reporter
 ```
 

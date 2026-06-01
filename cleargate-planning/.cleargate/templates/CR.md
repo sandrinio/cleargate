@@ -33,6 +33,7 @@ sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for o
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft | In Review | Approved | Completed"
 approved: false
+context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
@@ -86,7 +87,7 @@ last_synced_body_sha: null # sha256 of body at last sync
 - [ ] Invalidate/Update Epic: [Link]
 - [ ] Database schema impacts? {Yes/No — describe}
 
-## 2.5 Existing Surfaces
+## Existing Surfaces
 
 > L1 reuse audit. List source-tree implementations this CR extends or modifies. Cite file:line.
 > Cite paths with at least one '/' separator; root files use './name.ext'. Bare filenames and dotted code references are ignored.
@@ -107,6 +108,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 ---
 
+## Context Source
+
+> Discovery audit. Populated from the approved Epic, verified codebase grounding, and recorded direct approval.
+
+**context_source:** {approved Epic / verified codebase grounding + recorded direct approval}
+
+---
+
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 **Current Status: 🔴 High Ambiguity**
 
@@ -118,4 +127,4 @@ Requirements to pass to Green (Ready for Execution):
 - [ ] Execution Sandbox contains exact file paths.
 - [ ] Verification command is provided.
 - [ ] `approved: true` is set in the YAML frontmatter.
-- [ ] §2.5 Existing Surfaces cites at least one source-tree path the CR extends.
+- [ ] Existing Surfaces cites at least one source-tree path the CR extends.
