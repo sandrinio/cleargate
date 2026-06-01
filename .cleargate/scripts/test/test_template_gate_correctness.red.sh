@@ -7,6 +7,20 @@
 # be edited by the Developer or any subsequent agent. The Developer
 # delivers the implementation against which this red test goes green.
 #
+# CORRECTION NOTE (2026-06-01): Re-authored by QA-Red under sanctioned
+# correction dispatch (orchestrator directive). The original sealed file
+# contained 8 assertion-mechanics bugs that made tests un-passable even
+# against a correct implementation (NOT spec issues):
+#   - Bug 1 (7 assertions: T1-A, T1-B, T2-C, T2-D, T3-C, T3-D, T4-C):
+#     gate_check ran non-verbose; grep pattern 'predicate.*pass' can never
+#     match non-verbose output which only emits the summary line on pass.
+#     Fix: assert absence of '❌ <predicate-name>' failure line instead
+#     (predicate passes ⟺ no ❌ line for it in non-verbose output).
+#   - Bug 2 (T4-A): awk range /^## 2\. Reproduction Protocol/,/^## [0-9]/
+#     self-terminates on its own start line (## 2. matches ^## [0-9]).
+#     Fix: use flag-based extraction that skips the start line itself.
+# Spec contract is identical; only assertion mechanics are corrected.
+#
 # Purpose:
 #   Encode the 6 Gherkin acceptance scenarios for
 #   "Template / Gate Correctness — De-number Headings, Add
@@ -52,6 +66,14 @@
 #
 # Expected at RED baseline: T1, T2, T3, T4, T6 FAIL; T5 PASSES.
 # Expected after implementation: all 6 PASS.
+#
+# Pass-detection strategy (non-verbose gate output):
+#   `node cli.js gate check <file>` emits only:
+#     - "✅ <type>.<transition> passed (N criteria)"  — on overall pass
+#     - "❌ <predicate-id>: <detail>"                 — per failing predicate
+#   Per-criterion lines are verbose-only (-v flag).
+#   Therefore: a predicate passes ⟺ its "❌ <predicate-id>" line is ABSENT.
+#   All gate assertions below use this absence-of-failure-line strategy.
 #
 # Path resolution:
 #   SCRIPT_DIR = this file's directory (.cleargate/scripts/test/ inside worktree)
@@ -135,6 +157,22 @@ assert_contains() {
   else
     printf 'FAIL: %s — needle not found in output\n  needle: %s\n' "${label}" "${needle}"
     FAIL=$(( FAIL + 1 ))
+  fi
+}
+
+# assert_predicate_passes: assert that a predicate does NOT appear as a
+# failure line in gate output. In non-verbose mode, a passing predicate
+# produces no output; a failing one emits "❌ <predicate-id>: <detail>".
+# Absence of the "❌ <predicate-id>" line means the predicate passed.
+assert_predicate_passes() {
+  local label="$1" predicate_id="$2" gate_output="$3"
+  if printf '%s' "${gate_output}" | grep -qF "❌ ${predicate_id}"; then
+    printf 'FAIL: %s — predicate "%s" shows as failing in gate output\n' "${label}" "${predicate_id}"
+    printf '%s\n' "${gate_output}" | grep -F "❌ ${predicate_id}" | head -3 | sed 's/^/        /'
+    FAIL=$(( FAIL + 1 ))
+  else
+    printf 'PASS: %s — predicate "%s" has no ❌ failure line (passes)\n' "${label}" "${predicate_id}"
+    PASS=$(( PASS + 1 ))
   fi
 }
 
@@ -253,25 +291,12 @@ T1_EPIC="$(mk_epic_scratch "${T1_TMP}")"
 gate_check "${T1_EPIC}"
 T1_OUTPUT="${GC_OUTPUT}"
 
-if printf '%s' "${T1_OUTPUT}" | grep -qiE 'reuse-audit-recorded.*pass|✓.*reuse-audit-recorded|reuse-audit-recorded.*✓'; then
-  printf 'PASS: T1-A: reuse-audit-recorded PASSES on epic scratch\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T1-A: reuse-audit-recorded does NOT pass on epic scratch (red baseline — expected)\n'
-  printf '      gate output lines containing "reuse":\n'
-  printf '%s\n' "${T1_OUTPUT}" | grep -i 'reuse' | head -5 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+# Assertion: predicate passes ⟺ its "❌ <predicate-id>" line is ABSENT.
+assert_predicate_passes "T1-A: reuse-audit-recorded PASSES on epic scratch" \
+  "reuse-audit-recorded" "${T1_OUTPUT}"
 
-if printf '%s' "${T1_OUTPUT}" | grep -qiE 'simplest-form-justified.*pass|✓.*simplest-form-justified|simplest-form-justified.*✓'; then
-  printf 'PASS: T1-B: simplest-form-justified PASSES on epic scratch\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T1-B: simplest-form-justified does NOT pass on epic scratch (red baseline — expected)\n'
-  printf '      gate output lines containing "simplest":\n'
-  printf '%s\n' "${T1_OUTPUT}" | grep -i 'simplest' | head -5 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T1-B: simplest-form-justified PASSES on epic scratch" \
+  "simplest-form-justified" "${T1_OUTPUT}"
 
 rm -rf "${T1_TMP}"
 
@@ -313,26 +338,15 @@ else
 fi
 
 # Sub-check C+D: gate check — implementation-files-declared and dod-declared
+# Assertion: absence of "❌ <predicate-id>" line means the predicate passed.
 gate_check "${T2_STORY}"
 T2_OUTPUT="${GC_OUTPUT}"
 
-if printf '%s' "${T2_OUTPUT}" | grep -qiE 'implementation-files-declared.*pass|✓.*implementation-files-declared|implementation-files-declared.*✓'; then
-  printf 'PASS: T2-C: implementation-files-declared PASSES (section 3 unshifted)\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T2-C: implementation-files-declared does NOT pass — section 3 may have shifted\n'
-  printf '%s\n' "${T2_OUTPUT}" | grep -i 'implementation' | head -3 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T2-C: implementation-files-declared PASSES (section 3 unshifted)" \
+  "implementation-files-declared" "${T2_OUTPUT}"
 
-if printf '%s' "${T2_OUTPUT}" | grep -qiE 'dod-declared.*pass|✓.*dod-declared|dod-declared.*✓'; then
-  printf 'PASS: T2-D: dod-declared PASSES (section 4 unshifted)\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T2-D: dod-declared does NOT pass — section 4 may have shifted\n'
-  printf '%s\n' "${T2_OUTPUT}" | grep -i 'dod' | head -3 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T2-D: dod-declared PASSES (section 4 unshifted)" \
+  "dod-declared" "${T2_OUTPUT}"
 
 rm -rf "${T2_TMP}"
 
@@ -369,28 +383,17 @@ else
 fi
 
 # T3-C: gate check CR → discovery-checked passes
+# Assertion: absence of "❌ discovery-checked" line means the predicate passed.
 gate_check "${T3_CR}"
 T3_CR_OUTPUT="${GC_OUTPUT}"
-if printf '%s' "${T3_CR_OUTPUT}" | grep -qiE 'discovery-checked.*pass|✓.*discovery-checked|discovery-checked.*✓'; then
-  printf 'PASS: T3-C: CR gate check — discovery-checked PASSES\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T3-C: CR gate check — discovery-checked does NOT pass (red baseline)\n'
-  printf '%s\n' "${T3_CR_OUTPUT}" | grep -i 'discovery' | head -3 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T3-C: CR gate check — discovery-checked PASSES" \
+  "discovery-checked" "${T3_CR_OUTPUT}"
 
 # T3-D: gate check Bug → discovery-checked passes
 gate_check "${T3_BUG}"
 T3_BUG_OUTPUT="${GC_OUTPUT}"
-if printf '%s' "${T3_BUG_OUTPUT}" | grep -qiE 'discovery-checked.*pass|✓.*discovery-checked|discovery-checked.*✓'; then
-  printf 'PASS: T3-D: Bug gate check — discovery-checked PASSES\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T3-D: Bug gate check — discovery-checked does NOT pass (red baseline)\n'
-  printf '%s\n' "${T3_BUG_OUTPUT}" | grep -i 'discovery' | head -3 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T3-D: Bug gate check — discovery-checked PASSES" \
+  "discovery-checked" "${T3_BUG_OUTPUT}"
 
 rm -rf "${T3_TMP}"
 
@@ -405,9 +408,11 @@ T4_TMP="$(mk_tmpdir)"
 T4_BUG="$(mk_bug_scratch "${T4_TMP}")"
 
 # T4-A: §2 Reproduction uses "- " bullets (not "1. " ordinals)
-# Count "- " bullets in §2 body (between ## 2. and next ## heading)
-REPRO_BULLETS="$(awk '/^## 2\. Reproduction Protocol/,/^## [0-9]/' "${T4_BUG}" | grep -c '^- ' || true)"
-REPRO_ORDINALS="$(awk '/^## 2\. Reproduction Protocol/,/^## [0-9]/' "${T4_BUG}" | grep -cE '^[0-9]+\. ' || true)"
+# Extract body between "## <anything> Reproduction" header and the next ## heading.
+# Use flag-based awk to skip the start line (avoids self-termination where the start
+# header matches the end pattern used in a range expression).
+REPRO_BULLETS="$(awk '/^## .*Reproduction/{f=1;next} f&&/^## /{exit} f' "${T4_BUG}" | grep -c '^- ' || true)"
+REPRO_ORDINALS="$(awk '/^## .*Reproduction/{f=1;next} f&&/^## /{exit} f' "${T4_BUG}" | grep -cE '^[0-9]+\. ' || true)"
 
 if [[ "${REPRO_BULLETS}" -gt 0 ]]; then
   printf 'PASS: T4-A: §2 Reproduction has %d bullet items ("- " prefix)\n' "${REPRO_BULLETS}"
@@ -447,16 +452,11 @@ else
 fi
 
 # T4-C: repro-steps-deterministic predicate passes via gate check
+# Assertion: absence of "❌ repro-steps-deterministic" line means the predicate passed.
 gate_check "${T4_BUG}"
 T4_OUTPUT="${GC_OUTPUT}"
-if printf '%s' "${T4_OUTPUT}" | grep -qiE 'repro-steps-deterministic.*pass|✓.*repro-steps-deterministic|repro-steps-deterministic.*✓'; then
-  printf 'PASS: T4-C: repro-steps-deterministic PASSES on Bug scratch\n'
-  PASS=$(( PASS + 1 ))
-else
-  printf 'FAIL: T4-C: repro-steps-deterministic does NOT pass (red baseline)\n'
-  printf '%s\n' "${T4_OUTPUT}" | grep -i 'repro' | head -3 | sed 's/^/        /'
-  FAIL=$(( FAIL + 1 ))
-fi
+assert_predicate_passes "T4-C: repro-steps-deterministic PASSES on Bug scratch" \
+  "repro-steps-deterministic" "${T4_OUTPUT}"
 
 rm -rf "${T4_TMP}"
 
