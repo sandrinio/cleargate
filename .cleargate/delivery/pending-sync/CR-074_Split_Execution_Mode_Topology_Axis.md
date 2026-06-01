@@ -1,8 +1,8 @@
 ---
 cr_id: CR-074
 parent_ref: EPIC-044
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "EPIC-044"
+sprint_cleargate_id: "SPRINT-33"
 carry_over: false
 status: Draft
 approved: false

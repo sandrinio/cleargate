@@ -6,6 +6,8 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-06-01 · #qa-red #test-design #heading · When writing a RED test for heading-anchoring: `### X` contains `## X` as a substring, so it PASSES the old literal-indexOf predicate by accident — a `###` releveled case is NOT a valid baseline-fail. Use a NUMERIC prefix (`## 3.6 X`) to guarantee the baseline fails. [SPRINT-33 043-02]
+
 2026-06-01 · #qa-red #worktree #hook-test · _find_git_root walks past the worktree .git FILE to the main-repo .git DIR — so `${GIT_ROOT}/.claude/hooks/...` always targets the LIVE hook, the wrong target for an in-worktree hook self-test. Resolve the hook SCRIPT-relative to the in-worktree canonical sibling (cleargate-planning/.claude/hooks/) instead. [SPRINT-33 043-01]
 
 2026-06-01 · #execution_mode #dogfood #scaffold #wave · execution_mode collapse (STORY-070-01) retired only the ENFORCEMENT axis (v1/v2 → always-on + CLEARGATE_ADVISORY=1). The TOPOLOGY axis survives: shouldRunParallel() (launch_wave.mjs:137-140) still reads sprint-frontmatter execution_mode for v2-serial/v2-parallel; schema v3 dropped it from state.json but NOT frontmatter; SKILL.md still branches on it. One token, two meanings, two stores — split topology into wave_mode (or env-only). → CR-074. [SPRINT-33 SDR]
