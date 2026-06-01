@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-043
 sprint_cleargate_id: SPRINT-33
 carry_over: false
 area: templates,gates
-status: Draft
+status: Completed
 approved: true
 ambiguity: 🟢 Low
 context_source: EPIC-043 WS6 + WS8(b)(c); source-level template/gate review 2026-06-01; verified codebase grounding (readiness-predicates.ts:720, BUG-033/BUG-034) + recorded direct approval

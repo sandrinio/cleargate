@@ -11,7 +11,7 @@ context_source: |
   the per-edit path incremental (partition-targeted + stamp-only skip) while keeping
   `cleargate wiki build` byte-identical as the correctness floor.
 area: cli,wiki,perf
-status: Draft
+status: Completed
 approved: true
 ambiguity: 🟢 Low
 complexity_label: L3

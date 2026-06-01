@@ -11,7 +11,7 @@ context_source: |
   Grounded by reading cleargate-cli/src/lib/work-item-type.ts, the hotfix.md template,
   and the readiness-gates.md cr/bug blocks; the <=2-file-cap predicate gap was verified
   against readiness-predicates.ts (section ops are >=/>/== only, no <=).
-status: Draft
+status: Completed
 approved: true
 ambiguity: 🟢 Low
 complexity_label: L2

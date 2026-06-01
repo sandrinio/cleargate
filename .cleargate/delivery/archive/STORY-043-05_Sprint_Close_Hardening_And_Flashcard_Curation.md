@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-043
 sprint_cleargate_id: SPRINT-33
 carry_over: false
 area: scripts,close,reporter,flashcard
-status: Draft
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-06-01T00:00:00Z
