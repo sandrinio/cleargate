@@ -1,3 +1,5 @@
+2026-06-01 · #close-pipeline #dist #live-loop · close_sprint WS8(e) dist fail-closed assertion (L301) fires ONLY when cleargate-cli/dist/cli.js ABSENT and CLEARGATE_SKIP_LIFECYCLE_CHECK!=1; clean no-op when dist present (healthy close never aborted); placed before Step 2.6 so the cascade can't half-run. [SPRINT-33 043-05]
+2026-06-01 · #close-pipeline #section-numbering · close_sprint.mjs Step 2.5 'Check required §5 sections' comment + '§5 missing' error label are STALE — Lane/Hotfix-Audit moved to §6 (Framework Self-Assessment) in sprint_report v2; validation regexes are content-based (/Lane Audit/ etc) so they still match anywhere, label-only drift. [SPRINT-33 043-05]
 # ClearGate Flashcards
 
 One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
