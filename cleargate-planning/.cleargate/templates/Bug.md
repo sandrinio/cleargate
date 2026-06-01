@@ -35,6 +35,7 @@ status: "Draft | Triaged | In Fix | Completed"
 severity: "P0-Critical | P1-High | P2-Medium | P3-Low"
 reporter: "{name}"
 approved: false
+context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 created_at: "2026-04-17T00:00:00Z"
 updated_at: "2026-04-17T00:00:00Z"
 created_at_version: "strategy-phase-pre-init"
@@ -64,7 +65,7 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 # BUG-{ID}: {Bug Name}
 
-## 0.5 Open Questions
+### Open Questions
 
 > Populate during drafting. Resolve every entry before flipping ambiguity to 🟢.
 
@@ -80,9 +81,9 @@ last_synced_body_sha: null # sha256 of body at last sync
 ## 2. Reproduction Protocol
 *(AI agents need strict, deterministic steps. "If it can't be reproduced reliably, it can't be fixed safely.")*
 
-1. Go to...
-2. Click...
-3. Observe...
+- Go to...
+- Click...
+- Observe...
 
 ## 3. Evidence & Context
 *(Provide the raw truth: stack traces, terminal errors, network payloads. Do not paraphrase.)*
@@ -101,6 +102,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 *(The agent must write or run a specific test that proves the bug exists, then prove the fix resolves it.)*
 
 **Command:** `npm test ...`
+
+---
+
+## Context Source
+
+> Discovery audit. Populated from the approved Epic, verified codebase grounding, and recorded direct approval.
+
+**context_source:** {approved Epic / verified codebase grounding + recorded direct approval}
 
 ---
 

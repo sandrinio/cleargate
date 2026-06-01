@@ -21,8 +21,8 @@ mechanically extracted from the document's own structure:
   - Open Questions   ← §6 AI Interrogation Loop
   - Edge Cases       ← §2 OUT-OF-SCOPE list + §5 error scenarios
   - Risks            ← §3 The Reality Check
-  - Existing Surfaces ← §3.5 Existing Surfaces
-  - Why not simpler? ← §3.6 Why not simpler?
+  - Existing Surfaces ← ## Existing Surfaces
+  - Why not simpler? ← ## Why not simpler?
   - Ambiguity        ← bottom-of-doc ambiguity gate block
 
 Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.
@@ -38,7 +38,7 @@ sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for o
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft"  # lifecycle: Draft → Active → Completed
 ambiguity: "🔴 High"
-context_source: "PROPOSAL-{ID}.md"
+context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 owner: "{PM/PO name}"
 target_date: "{YYYY-MM-DD}"
 created_at: "2026-04-17T00:00:00Z"
@@ -110,14 +110,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 | Performance | {e.g., Must complete in < 200ms} |
 | Security | {e.g., No PII in logs} |
 
-## 3.5 Existing Surfaces
+## Existing Surfaces
 
 > L1 reuse audit. List source-tree implementations the epic could extend. Cite file:line.
 
 - **Surface:** `path/to/file.ext:NN` — {what it does}
 - **Coverage of this epic's scope:** {≥80% extension / partial / none — and why}
 
-## 3.6 Why not simpler?
+## Why not simpler?
 
 > L2 / L3 right-size + justify-complexity. Answer both.
 
@@ -125,7 +125,7 @@ last_synced_body_sha: null # sha256 of body at last sync
 - **Why isn't extension / parameterization / config sufficient?** {one paragraph}
 
 ## 4. Technical Grounding (The "Shadow Spec")
-*(AI Planning Engine: Populate this strictly from the approved proposal.md)*
+*(AI Planning Engine: Populate this strictly from the approved Epic and verified codebase grounding.)*
 
 **Affected Files:**
 - `path/to/file.ext` — {Why it changes}
@@ -157,10 +157,10 @@ Feature: {Epic Name}
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
 Requirements to pass to Green (Ready for Coding Agent):
-- [ ] Proposal document has `approved: true`.
+- [ ] `approved: true` is set in the YAML frontmatter.
 - [ ] The `<agent_context>` block is complete and validated.
 - [ ] §4 Technical Grounding contains 100% real, verified file paths.
 - [ ] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).
 - [ ] 0 "TBDs" exist in the document.
-- [ ] §3.5 Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
-- [ ] §3.6 Why not simpler? has both sub-bullets answered.
+- [ ] Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
+- [ ] Why not simpler? has both sub-bullets answered.

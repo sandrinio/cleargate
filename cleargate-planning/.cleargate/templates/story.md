@@ -3,7 +3,7 @@ FOLLOW THIS EXACT STRUCTURE. Output sections in order 1-4.
 YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Actor, Complexity Label.
 §1 The Spec: User Story + Detailed Requirements + Out of Scope.
 §2 The Truth: Gherkin acceptance criteria + manual verification steps.
-§3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from approved proposal.md.
+§3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from the approved Epic and verified codebase grounding.
 §4 Quality Gates: Minimum test expectations + Definition of Done checklist.
 Output location: .cleargate/delivery/pending-sync/STORY-{EpicID}-{StoryID}-{StoryName}.md
 
@@ -61,7 +61,7 @@ sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for o
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft"  # lifecycle: Draft → In Review → Completed
 ambiguity: "🔴 High"
-context_source: "PROPOSAL-{ID}.md"
+context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 actor: "{Persona Name}"
 complexity_label: "L2"
 parallel_eligible: "y"
@@ -125,21 +125,6 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 - **Risk:** {what could go wrong}
 - **Mitigation:** {agent's proposed mitigation}
 
-### 1.6 Existing Surfaces
-
-> L1 reuse audit. List source-tree implementations the request could extend. Cite file:line.
-> Cite paths with at least one '/' separator; root files use './name.ext'. Bare filenames and dotted code references are ignored.
-
-- **Surface:** `path/to/file.ext:NN` — {what it does}
-- **Coverage of this requirement:** {≥80% / partial / none — and why}
-
-### 1.7 Why not simpler?
-
-> L2 / L3 right-size + justify-complexity. Answer both.
-
-- **Smallest existing surface that could carry this:** {citation or "none — net-new abstraction required"}
-- **Why isn't extension / parameterization / config sufficient?** {one paragraph}
-
 ## 2. The Truth (Executable Tests)
 
 ### 2.1 Acceptance Criteria (Gherkin)
@@ -197,6 +182,21 @@ Feature: {Story Name}
 - [ ] All Gherkin scenarios from §2.1 covered.
 - [ ] Peer/Architect Review passed.
 
+## Existing Surfaces
+
+> L1 reuse audit. List source-tree implementations the request could extend. Cite file:line.
+> Cite paths with at least one '/' separator; root files use './name.ext'. Bare filenames and dotted code references are ignored.
+
+- **Surface:** `path/to/file.ext:NN` — {what it does}
+- **Coverage of this requirement:** {≥80% / partial / none — and why}
+
+## Why not simpler?
+
+> L2 / L3 right-size + justify-complexity. Answer both.
+
+- **Smallest existing surface that could carry this:** {citation or "none — net-new abstraction required"}
+- **Why isn't extension / parameterization / config sufficient?** {one paragraph}
+
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
@@ -206,8 +206,8 @@ Feature: {Story Name}
 
 Requirements to pass to Green (Ready for Execution):
 - [ ] Gherkin scenarios completely cover all detailed requirements in §1.2.
-- [ ] Implementation Guide (§3) maps to specific, verified file paths from the approved proposal.
+- [ ] Implementation Guide (§3) maps to specific, verified file paths from the approved Epic and verified codebase grounding.
 - [ ] No "TBDs" exist anywhere in the specification or technical logic.
-- [ ] §1.6 Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
-- [ ] §1.7 Why not simpler? has both sub-bullets answered (no "TBD" / no "{}").
+- [ ] Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
+- [ ] Why not simpler? has both sub-bullets answered (no "TBD" / no "{}").
 
