@@ -298,6 +298,27 @@ async function main() {
     process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
   }
 
+  // ── WS8(e) Dist Fail-Closed Assertion ────────────────────────────────────
+  // Verify that cleargate-cli/dist/cli.js is present BEFORE attempting the
+  // Step 2.6 cascade. Absent dist means the build is stale and the lifecycle/
+  // orphan/parent-rollup/backsync/merge gates will silently no-op — that is
+  // worse than failing loudly. Exit 1 early so the operator fixes the build.
+  //
+  // Test seam bypass: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 skips this assertion
+  // (the deliberate skip-env path for test environments where the CLI binary
+  // is intentionally absent — e.g. sandbox-only sprint dirs).
+  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
+    const cliBinEarly = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+    if (!fs.existsSync(cliBinEarly)) {
+      process.stderr.write(
+        `dist not built — run \`npm run build\` in cleargate-cli/\n` +
+        `  Expected: ${cliBinEarly}\n` +
+        `  The lifecycle/orphan/parent-rollup/backsync/merge gates require a built CLI dist.\n`
+      );
+      process.exit(1);
+    }
+  }
+
   // ── Step 2.6: Lifecycle Reconciliation (CR-017) ──────────────────────────
   // Block close if any artifact referenced in this sprint's commits is still
   // non-terminal in pending-sync (excluding carry_over: true).
