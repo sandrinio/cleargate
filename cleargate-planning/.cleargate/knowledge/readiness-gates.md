@@ -194,3 +194,20 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: success-criteria-populated
       check: "section(5) has ≥1 listed-item"
 ```
+
+```yaml
+- work_item_type: hotfix
+  transition: ready-for-merge
+  severity: enforcing
+  criteria:
+    - id: anomaly-populated
+      check: "section(2) has ≥1 listed-item"
+    - id: files-touched-declared
+      check: "section(3) has ≥1 declared-item"
+    - id: verification-steps-nonempty
+      check: "section(4) has ≥1 unchecked-checkbox"
+    - id: severity-set
+      check: "frontmatter(.).severity != null"
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+```
