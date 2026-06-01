@@ -78,6 +78,34 @@ fi
 SPRINT_DIR="${REPO_ROOT}/.cleargate/sprint-runs/${SPRINT_ID}"
 mkdir -p "${SPRINT_DIR}"
 
+# ─── Fallback guard (CR-026 / STORY-043-09) ─────────────────────────────────
+# If the PreToolUse:Task hook already wrote a same-session auto-marker for THIS
+# EXACT SPAWN (same work_item_id + agent_type + session_id), this script is a
+# no-op fallback. Exit 0 without writing a duplicate marker.
+#
+# SPAWN-SCOPED: a stale auto-marker from a DIFFERENT prior spawn (different
+# work_item_id or different agent_type) must NOT trigger a skip — it is not a
+# duplicate for this spawn. Fail toward writing: when no exact same-spawn match
+# is found, always write. (A duplicate is harmless; a missing marker loses
+# attribution — bias toward writing.)
+if [[ -n "${CLAUDE_SESSION_ID:-}" ]]; then
+  for _marker in "${SPRINT_DIR}"/.dispatch-*.json; do
+    [[ -f "${_marker}" ]] || continue
+    _session_id="$(jq -r '.session_id // ""' "${_marker}" 2>/dev/null || true)"
+    _writer="$(jq -r '.writer // ""' "${_marker}" 2>/dev/null || true)"
+    _work_item_id="$(jq -r '.work_item_id // ""' "${_marker}" 2>/dev/null || true)"
+    _agent_type="$(jq -r '.agent_type // ""' "${_marker}" 2>/dev/null || true)"
+    if [[ "${_session_id}" == "${CLAUDE_SESSION_ID}" \
+       && "${_writer}" == pre-tool-use-task.sh* \
+       && "${_work_item_id}" == "${WORK_ITEM_ID}" \
+       && "${_agent_type}" == "${AGENT_TYPE}" ]]; then
+      printf '[%s] fallback: same-spawn auto-marker present for session=%s work_item=%s agent=%s (writer=%s), no-op\n' \
+        "$(date -u +%FT%TZ)" "${CLAUDE_SESSION_ID}" "${WORK_ITEM_ID}" "${AGENT_TYPE}" "${_writer}" >> "${LOG}"
+      exit 0
+    fi
+  done
+fi
+
 # ─── Resolve session_id ─────────────────────────────────────────────────────
 SESSION_ID="${CLAUDE_SESSION_ID:-}"
 

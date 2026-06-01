@@ -79,9 +79,9 @@ Each agent dispatch has a target duration. Note the start time before each `Agen
 
 If a Task call has been pending for **>2× the budget** with no visible progress, surface it to the human and offer to interrupt. There is no automatic stall detection — the parent session blocks on `Agent` calls and cannot poll mid-run. The human's interrupt is the only reliable kill path until ambient watcher infra exists.
 
-### Dispatch marker — write before every spawn
+### Dispatch marker — written automatically before every spawn (fallback only)
 
-The token-ledger hook attributes tokens by reading `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`. You write that file immediately before each `Agent` call:
+The token-ledger hook attributes tokens by reading `.cleargate/sprint-runs/<sprint>/.dispatch-<session-id>.json`. The **primary path** is the PreToolUse:Task hook (`pre-tool-use-task.sh`), which auto-writes the marker on every `Agent` call without manual orchestrator intervention. The manual script below is a **fallback** for spawns the auto-hook cannot attribute (e.g. a generic Architect dispatch whose Task() prompt lacks a parseable work-item marker):
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
@@ -90,7 +90,7 @@ bash .cleargate/scripts/write_dispatch.sh <work_item_id> <agent_type>
 - `<work_item_id>`: e.g. `STORY-020-02`, `CR-016`, `BUG-021`. For the Reporter at sprint close use the sprint ID (e.g. `SPRINT-19`).
 - `<agent_type>`: exact string — `developer | architect | qa | reporter | devops | cleargate-wiki-contradict`.
 
-If you forget the marker, ledger attribution falls back to transcript-grep heuristics (unreliable). The hook deletes the file after consumption — write fresh per dispatch.
+The script is idempotent: if a same-session auto-marker (written by `pre-tool-use-task.sh`) already exists for the current session, it exits 0 without writing a duplicate. Omitting the manual call when the auto-hook fires is correct; calling it when unsure is safe (the guard prevents duplication). The hook deletes the marker after consumption — write fresh per dispatch if needed.
 
 ---
 
@@ -178,6 +178,7 @@ After human confirms, update sprint frontmatter `status: Active` (via `cleargate
 Before any Developer dispatches in a milestone, spawn the Architect once for the whole milestone:
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh M<N> architect
 ```
 
@@ -257,6 +258,7 @@ git worktree list
 ### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
@@ -301,6 +303,7 @@ bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/
 > **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN architect
 ```
 
@@ -322,6 +325,7 @@ TPV is a WIRING gate, not a correctness gate. A test that imports the right modu
 ### C.4 Spawn Developer
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
 
@@ -354,6 +358,7 @@ If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 ### C.5 Spawn QA-Verify
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
@@ -419,6 +424,7 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
 
 1. Mark the dispatch:
    ```bash
+   # Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
    bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN devops
    ```
 
@@ -504,7 +510,7 @@ Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` 
 
 ### C.10 Mid-Sprint Triage
 
-When the user injects new input mid-sprint (between story kickoff and merge), classify it before routing. Use the keyword-heuristic classifier (`classify()` from `cleargate-cli/src/lib/triage-classifier.ts`) as a first-pass advisory, then confirm. See authoritative rubric: `.cleargate/knowledge/mid-sprint-triage-rubric.md`.
+When the user injects new input mid-sprint (between story kickoff and merge), classify it before routing. Apply the keyword-heuristic rubric from `.cleargate/knowledge/mid-sprint-triage-rubric.md` as a first-pass advisory, then confirm with the user. The four classes are: `bug`, `clarification`, `scope`, `approach` — match the user's language against the keyword banks in the rubric doc.
 
 | Class | Trigger | Counter | Human Approval | First-pass action |
 |---|---|---|---|---|
@@ -513,7 +519,7 @@ When the user injects new input mid-sprint (between story kickoff and merge), cl
 | `scope` | Net-new requirement | None | YES for mid-sprint add | Quarantine to next sprint (default); escalate if goal-critical |
 | `approach` | Different impl, same spec | None | No (yes if cross-story impact) | Reset Dev context; re-spawn with updated approach |
 
-**Confidence signal:** `classify()` returns `confidence: 'low'` when no keyword matched. LOW confidence classifications MUST be confirmed with the human before routing.
+**Confidence signal:** When no keyword in the rubric matches the user's input, treat the classification as low-confidence. LOW confidence classifications MUST be confirmed with the human before routing.
 
 **Scope-only note:** This rubric covers USER input only. QA-FAIL bounces continue to use `qa_bounces` (existing §C.5 path). TPV-gap bounces use `arch_bounces` (§C.3.5 path).
 
@@ -591,6 +597,7 @@ No flags. Script validates Steps 1–2.6 (lifecycle reconciler runs at Step 2.6;
 If the report stub does not exist, dispatch the Reporter:
 
 ```bash
+# Fallback only — auto-marker written by PreToolUse:Task hook in most sessions.
 bash .cleargate/scripts/write_dispatch.sh SPRINT-NN reporter
 ```
 
