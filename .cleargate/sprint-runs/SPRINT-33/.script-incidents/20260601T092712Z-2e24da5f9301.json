@@ -1,0 +1,11 @@
+{
+  "ts": "2026-06-01T09:27:12Z",
+  "command": "CLEARGATE_STATE_FILE=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-33/state.json node /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/update_state.mjs STORY-043-06 Done",
+  "args": [],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/run_script.sh: line 92: CLEARGATE_STATE_FILE=/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-33/state.json node /Users/ssuladze/Documents/Dev/ClearGate/.cleargate/scripts/update_state.mjs STORY-043-06 Done: No such file or directory",
+  "agent_type": null,
+  "work_item_id": null
+}
