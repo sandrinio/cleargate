@@ -6,6 +6,10 @@ One-liner gotcha log. Newest first. Grep by tag (e.g. `grep '#schema'`).
 Active cards have no marker; `[S]` = stale, `[R]` = resolved (see `.claude/skills/flashcard/SKILL.md` Rules 7–8).
 Format: `YYYY-MM-DD · #tags · [marker]? lesson`
 
+2026-06-01 · #gate #test-harness · `gate check` non-verbose prints ONLY the `✅ <type>.<transition> passed` summary + `❌` failing-predicate lines (per-criterion detail is `-v` only, gate.ts:288/298). Grepping for a PASSING predicate name never matches — assert pass via ABSENCE of `❌ <predicate-id>`, or use `-v`. [SPRINT-33 043-03]
+2026-06-01 · #test-harness #awk · awk range `/^## N./,/^## [0-9]/` self-terminates on its own start line (start matches end pattern) → captures nothing. Use flag-based awk `/start/{f=1;next} f&&/^## /{exit} f`. [SPRINT-33 043-03]
+2026-06-01 · #gate #template · evalSection (readiness-predicates.ts) splits body on `^## ` only — H3 (`### `) headings create NO section index. Demote a leading `## Open Questions` to `### ` to fix a positional `section(N)` off-by-one without moving content. [SPRINT-33 043-03]
+
 2026-06-01 · #qa-red #test-design #heading · When writing a RED test for heading-anchoring: `### X` contains `## X` as a substring, so it PASSES the old literal-indexOf predicate by accident — a `###` releveled case is NOT a valid baseline-fail. Use a NUMERIC prefix (`## 3.6 X`) to guarantee the baseline fails. [SPRINT-33 043-02]
 
 2026-06-01 · #qa-red #worktree #hook-test · _find_git_root walks past the worktree .git FILE to the main-repo .git DIR — so `${GIT_ROOT}/.claude/hooks/...` always targets the LIVE hook, the wrong target for an in-worktree hook self-test. Resolve the hook SCRIPT-relative to the in-worktree canonical sibling (cleargate-planning/.claude/hooks/) instead. [SPRINT-33 043-01]

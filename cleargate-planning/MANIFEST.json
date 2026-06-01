@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.14.0",
-  "generated_at": "2026-06-01T05:57:58.764Z",
+  "generated_at": "2026-06-01T07:07:02.630Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -438,21 +438,21 @@
     },
     {
       "path": ".cleargate/templates/Bug.md",
-      "sha256": "cebca344b6b820525c603444cf52626e120ebaa1ac28da099dc19c9cff39302c",
+      "sha256": "c697d927c293cc1f2930c29ffad851584f2c56011f7f8679022105d63c9d374a",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/CR.md",
-      "sha256": "5e4a064b44c6c6c0ec49249305526b0e6e1a62976de4f62313eedaabe432a35a",
+      "sha256": "8a8569ccac958b0f30a05b51729009c78ccca34c3eede8281d0c498f9bf84bfa",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/epic.md",
-      "sha256": "f9cf44db19288f0756b76bc8b13a075d4089990324db6febd072f5cf93d59cd0",
+      "sha256": "b91be4d85c625bfb9c22f462a5b8fbc343308b47baa5e9a797df83ab230cc8e4",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -494,7 +494,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "3a29814d55fbc58c69e9dfa5cfaa992bc81194d661fa85d934b2a6c425065be0",
+      "sha256": "eeafb3e6d20df4faa0828a20760dfcb20266ee67b428c4219e0b4231913252d4",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

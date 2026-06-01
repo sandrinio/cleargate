@@ -1,0 +1,11 @@
+{
+  "ts": "2026-06-01T06:14:52Z",
+  "command": "bash",
+  "args": ["/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-043-03/.cleargate/scripts/test/test_template_gate_correctness.red.sh"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate",
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "ERROR: required path not found: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-043-03/cleargate-cli/dist/cli.js",
+  "agent_type": null,
+  "work_item_id": null
+}
