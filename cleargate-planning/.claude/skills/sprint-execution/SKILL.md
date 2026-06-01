@@ -287,7 +287,18 @@ On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch wit
 
 **Skip if:** `state.json.stories[<id>].lane === 'fast'` OR `execution_mode: v1`.
 
-After QA-Red commits Red tests, spawn the Architect in `Mode: TPV` to perform wiring-only validation before Dev dispatch. TPV does NOT evaluate test logic correctness — it verifies wiring so Dev does not waste a full dispatch on a mis-wired test harness.
+After QA-Red commits Red tests, run the wiring/pre-gate scan first:
+
+```bash
+bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
+```
+
+**Conditional TPV dispatch (scan-flag gated — a clean standard-lane story proceeds to §C.4 with NO Architect TPV dispatch):**
+
+- **If the scan returns exit 0 with no flags:** skip the live Architect `Mode: TPV` dispatch and proceed directly to §C.4 Spawn Developer. No Architect agent is spawned for TPV on the clean path.
+- **If the scan returns a flag (exit 1) or scan-could-not-run (exit 2):** spawn the Architect in `Mode: TPV` to perform wiring-only validation before Dev dispatch. TPV does NOT evaluate test logic correctness — it verifies wiring so Dev does not waste a full dispatch on a mis-wired test harness.
+
+> **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
 
 ```bash
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN architect
@@ -380,7 +391,12 @@ bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/
 
 If pre-gate scan reveals new dependencies / structural issues → return to Developer (do NOT spawn Architect for mechanical failures). 3+ pre-gate failures → escalate.
 
-If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
+**Conditional post-flight dispatch (scan-flag gated — a clean standard-lane story dispatches ≤4 agents, not 6; ≤5 when one re-entry fires; 6 when both flag):**
+
+- **If the scan returns exit 0 with no flags (clean scan):** skip the live Architect post-flight dispatch and proceed directly to §C.7 Story Merge. No Architect agent is spawned on the clean path. This drops a fully-clean standard-lane story from 6 dispatches to 4 (QA-Red → Developer → QA-Verify → DevOps — both §C.3.5 TPV and §C.6 post-flight skipped on a fully-clean scan).
+- **If the scan returns a flag (exit 1) or scan-could-not-run (exit 2):** spawn the live Architect for post-flight review. On `FAIL`: increment `arch_bounces`. ≥ 3 → escalate.
+
+> **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
 
 ### C.7 Story Merge
 
@@ -394,7 +410,7 @@ If pre-gate passes, spawn Architect for post-flight review. On `FAIL`: increment
 |---|---|
 | `STORY-NNN-NN-dev.md` | Always (all lanes) |
 | `STORY-NNN-NN-qa.md` | Always, unless lane=fast explicitly skipped QA-Verify |
-| `STORY-NNN-NN-arch.md` | v2 standard-lane only |
+| `STORY-NNN-NN-arch.md` | v2 standard-lane only, AND only when the §C.6 pre-gate scan flagged (Architect post-flight was dispatched); absent on a clean-scan story |
 | `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
 
 Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**
@@ -425,10 +441,10 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
    - Required reports present:
        - {STORY-ID}-dev.md    ✓
        - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
-       - {STORY-ID}-arch.md   ✓ (v2 standard lane only)
+       - {STORY-ID}-arch.md   ✓ (v2 standard lane only, AND only when pre-gate scan flagged — absent if Architect was not dispatched)
 
    ACTIONS (in order):
-   1. Verify all required reports exist; halt if any missing.
+   1. Verify all required reports exist; halt if any missing. Exception: arch.md is required ONLY when the §C.6 pre-gate scan flagged (Architect was dispatched); a clean-scan story legitimately has no arch.md and must NOT halt.
    2. Checkout sprint branch.
    3. git merge story/{STORY-ID} --no-ff -m "merge(story/{STORY-ID}): {commit subject}"
    4. If canonical scaffold touched: cd cleargate-cli && npm run prebuild
