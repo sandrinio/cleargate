@@ -47,3 +47,5 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 ## CRs
 
 | [[CR-074]] | cr | Draft | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
+| [[CR-075]] | cr | Draft | .cleargate/delivery/pending-sync/CR-075_Cleargate_Cli_Standalone_Test_Suite.md |
+| [[CR-076]] | cr | Draft | .cleargate/delivery/pending-sync/CR-076_Trim_Published_Npm_Package.md |
