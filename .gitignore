@@ -65,3 +65,7 @@ node_modules/
 
 # Transient pre-gate scan output (pre_gate_runner.sh) — regenerated per scan
 .cleargate/reports/
+
+# Transient run_script.sh incident captures — diagnostic, regenerated on failure
+.cleargate/sprint-runs/**/.script-incidents/
+.cleargate/sprint-runs/_off-sprint/.script-incidents/
