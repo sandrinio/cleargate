@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-34"
 parent: ""
 children: []
-status: "Draft"
+status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-06-03T17:10:02.970Z"
-last_ingest_commit: "a0974a6381af672b7ac15f326a7e6f85d4f90975"
+last_ingest: "2026-06-03T17:53:01.863Z"
+last_ingest_commit: "8e08695c032677114dd55fb155802e36360e7597"
 repo: "planning"
 ---
 

@@ -6,15 +6,15 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 approved: true
 start_date: null
 end_date: null
 synced_at: null
 created_at: 2026-06-03T00:00:00Z
-updated_at: 2026-06-03T00:00:00Z
+updated_at: 2026-06-03T17:53:15Z
 created_at_version: cleargate@0.14.0
-updated_at_version: cleargate@0.14.0
+updated_at_version: 20fe79f5-dirty
 context_source: |
   SPRINT-34 bundles the six polyglot-portability CRs (CR-077..082, parent EPIC-045)
   surfaced by ClearGate's first v2-parallel dogfood, SPRINT-66 (new_app/Chyro) —
@@ -36,7 +36,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-03T17:10:02Z
+  last_stamp: 2026-06-03T17:53:01Z
   sessions: []
 ---
 
