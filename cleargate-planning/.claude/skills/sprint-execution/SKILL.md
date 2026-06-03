@@ -255,6 +255,18 @@ git worktree list
 
 **Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a subdirectory of the outer worktree. (`cleargate-enforcement.md` §1.3.)
 
+After creating the worktree, provision configured gitignored config into it:
+
+```bash
+bash .cleargate/scripts/provision_worktree_config.sh .worktrees/STORY-NNN-NN
+```
+
+This symlinks (or copies, per `config.yml worktree.provision_mode`) the roots in
+`config.yml worktree.provision_config` (default `[.env]`) so the target's build/tests
+load their config in-worktree without a manual step. The provisioned roots are exempt
+from the `stray_env_files` pre-gate scan — the same configured list serves as both the
+provisioning spec and the scan-exemption list (single source of truth, CR-079).
+
 ### C.3 Spawn QA-Red (standard lane only — fast lane skips this step)
 
 ```bash

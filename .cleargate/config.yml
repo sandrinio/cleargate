@@ -25,3 +25,11 @@ gates:
   test: "npm --prefix cleargate-cli test"
   typecheck: "npm --prefix cleargate-cli run typecheck"
   lint: "npx cleargate wiki lint"
+
+worktree:
+  # Gitignored config roots provisioned into each new story worktree (CR-079).
+  # Symlinked by default (worktree-root/<root> -> absolute repo-root/<root>);
+  # use 'copy' mode for worktrees that need a divergent config.
+  provision_config:
+    - .env
+  provision_mode: symlink   # symlink (default) | copy
