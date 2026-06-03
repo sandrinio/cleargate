@@ -48,7 +48,9 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-33]] — status: Active
+- [[SPRINT-33]] — status: Completed
+
+- [[SPRINT-34]] — status: Draft
 
 
 
@@ -104,6 +106,8 @@ _No active epics._
 - [[EPIC-031]] — status: Draft
 
 - [[EPIC-044]] — status: Draft
+
+- [[EPIC-045]] — status: Draft
 
 
 

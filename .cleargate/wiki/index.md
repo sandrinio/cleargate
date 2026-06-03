@@ -41,11 +41,19 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[EPIC-043]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-043_Framework_Hygiene_And_Efficiency_Remediation.md |
 | [[EPIC-044]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md |
+| [[EPIC-045]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-045_Polyglot_Portability_And_Parallel_Dogfood_Hardening.md |
 ## Sprints
 
 | [[SPRINT-33]] | sprint | Active | .cleargate/sprint-runs/SPRINT-33/SPRINT-33_REPORT.md |
+| [[SPRINT-34]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-34_Polyglot_Portability_Hardening.md |
 ## CRs
 
 | [[CR-074]] | cr | Draft | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
 | [[CR-075]] | cr | Draft | .cleargate/delivery/pending-sync/CR-075_Cleargate_Cli_Standalone_Test_Suite.md |
 | [[CR-076]] | cr | Draft | .cleargate/delivery/pending-sync/CR-076_Trim_Published_Npm_Package.md |
+| [[CR-077]] | cr | Draft | .cleargate/delivery/pending-sync/CR-077_Repo_Derived_Test_Conventions_And_Gate_Commands.md |
+| [[CR-078]] | cr | Draft | .cleargate/delivery/pending-sync/CR-078_Init_Sprint_Sets_Active_And_Applies_Lane_Audit.md |
+| [[CR-079]] | cr | Draft | .cleargate/delivery/pending-sync/CR-079_Worktree_Config_Provisioning.md |
+| [[CR-080]] | cr | Draft | .cleargate/delivery/pending-sync/CR-080_Script_Wrapper_Path_And_Env_Correctness.md |
+| [[CR-081]] | cr | Draft | .cleargate/delivery/pending-sync/CR-081_QA_Loop_Semantic_Fixture_Lint_And_Red_Now_Green.md |
+| [[CR-082]] | cr | Draft | .cleargate/delivery/pending-sync/CR-082_Deferred_Verification_Tracking_And_Close_Gate.md |
