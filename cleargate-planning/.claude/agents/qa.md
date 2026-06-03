@@ -141,7 +141,7 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 ## Output shape
 ```
 STORY: STORY-NNN-NN
-QA: PASS | FAIL
+QA: PASS | PASS-PENDING-SMOKE | FAIL
 TYPECHECK: pass | fail
 TESTS: X passed, Y failed, Z skipped (full suite)
 ACCEPTANCE_COVERAGE: N of M Gherkin scenarios have matching tests
@@ -151,6 +151,13 @@ VERDICT: <one paragraph — what specifically to fix, or "ship it">
 flashcards_flagged:
   - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
+
+**Verdict decision order (CR-081 × CR-082 composed):**
+1. **(a) Deferred-acceptance check (CR-082):** Does the story declare a `deferred_verification` entry whose heavy acceptance scenario was NOT run in this QA pass (out of static scope)? If yes and every OTHER static scenario passes → return `PASS-PENDING-SMOKE`. The story merges to the sprint branch but is NOT fully Done; the close gate (Step 2.9) enforces the deferred check before sprint-close. `PASS-PENDING-SMOKE` shadows `PASS` when a deferred entry is unrun.
+2. **(b) Full-coverage check (CR-081):** Else, are all Gherkin scenarios covered by passing tests — including red-now-green tests counting as their own green? → return full `PASS`.
+3. **(c)** Else → `FAIL`.
+
+Note: CR-081's red-now-green clause applies to the STATIC scenarios (step b); CR-082's PASS-PENDING-SMOKE is gated on an UNRUN DEFERRED scenario (step a). A story can be red-now-green on its static scenarios AND still be PASS-PENDING-SMOKE because a separate heavy scenario is deferred. The deferred-check (step a) is evaluated BEFORE the full-PASS branch (step b).
 
 `flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). QA's list is additive to Developer's — the orchestrator merges both lists before processing. The orchestrator reads this field after QA approval and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 

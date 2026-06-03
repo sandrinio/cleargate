@@ -63,6 +63,15 @@
  *   CLEARGATE_SKIP_BUNDLE_CHECK=1    — skip Step 3.5 bundle generation + size check entirely
  *                                      (CR-036 test seam; analogous to CLEARGATE_SKIP_MERGE_CHECK).
  *                                      Never use in production — Step 3.5 is v2-fatal in production.
+ *   CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 — skip Step 2.9 entirely (test environments where
+ *                                            deferred-verification state is irrelevant; mirrors
+ *                                            CLEARGATE_SKIP_WORKTREE_CHECK).
+ *   CLEARGATE_FORCE_DEFERRED_VERIFY=<json> — inject a JSON map of deferred-verify state without
+ *                                            reading real story files or result artifacts (mirrors
+ *                                            CLEARGATE_FORCE_WORKTREE_PATHS). Shape:
+ *                                            { "<STORY-ID>": { declared:[{command,blocks}],
+ *                                              result:"green"|"red"|"unrun"|null } }
+ *                                            Used to exercise FAIL/PASS/no-op paths in the node:test.
  */
 
 import fs from 'node:fs';
@@ -695,6 +704,224 @@ async function main() {
             `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
           );
           process.exit(1);
+        }
+      }
+    }
+  }
+
+  // ── Step 2.9: Deferred-Verification Close Gate (CR-082) ─────────────────────
+  // Block close if any story in this sprint declares a deferred_verification entry
+  // with blocks: close and does NOT have a matching green result artifact.
+  // NO-OP when no story declares any deferred_verification (the common case — SPRINT-34's path).
+  // Fail-open if story-file scan throws (delivery dir absent) — print skip, continue.
+  // Test seams: CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 bypasses entirely;
+  //             CLEARGATE_FORCE_DEFERRED_VERIFY=<json> injects state without reading files.
+  process.stdout.write('Step 2.9: checking deferred verifications...\n');
+  {
+    if (process.env.CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK === '1') {
+      process.stdout.write('Step 2.9 skipped: CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 set (test seam).\n');
+    } else {
+      /**
+       * Parse minimal frontmatter from a markdown file: returns an object of
+       * key: value pairs from the YAML block between the first two `---` lines.
+       * List fields (e.g. deferred_verification: [...]) are returned as raw strings.
+       * @param {string} raw
+       * @returns {Record<string,string>}
+       */
+      function parseFrontmatterFields(raw) {
+        const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+        if (!fm) return {};
+        const fields = {};
+        for (const line of fm[1].split('\n')) {
+          const m = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)/);
+          if (m) fields[m[1]] = m[2].trim();
+        }
+        return fields;
+      }
+
+      /**
+       * Extract the deferred_verification list from raw frontmatter text.
+       * Looks for the multi-line YAML list following `deferred_verification:`.
+       * Returns an array of { description?, command, blocks } objects, or [].
+       * @param {string} raw
+       * @returns {Array<{description?: string, command: string, blocks: string}>}
+       */
+      function parseDeferredVerifications(raw) {
+        const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+        if (!fm) return [];
+        const block = fm[1];
+        // Find the deferred_verification key and its value
+        const keyIdx = block.indexOf('deferred_verification:');
+        if (keyIdx === -1) return [];
+        const afterKey = block.slice(keyIdx + 'deferred_verification:'.length);
+        const inlineVal = afterKey.match(/^\s*\[([^\]]*)\]/);
+        if (inlineVal) {
+          const inner = inlineVal[1].trim();
+          if (!inner) return []; // empty list []
+        }
+        // Parse YAML-list items: lines starting with "- " at same or deeper indent
+        // For simplicity: if the inline value is empty or the list is multi-line,
+        // scan for list entries. A minimal deferred_verification entry has a `command:` field.
+        const lines = afterKey.split('\n');
+        const entries = [];
+        let currentEntry = null;
+        for (const line of lines) {
+          const listItem = line.match(/^(\s*)-\s+(.*)/);
+          const keyVal = line.match(/^\s+([a-zA-Z_]+)\s*:\s*(.*)/);
+          if (listItem) {
+            if (currentEntry) entries.push(currentEntry);
+            currentEntry = {};
+            const rest = listItem[2].trim();
+            if (rest.startsWith('{')) {
+              // Inline object: { description: ..., command: ..., blocks: ... }
+              const descM = rest.match(/description\s*:\s*([^,}]+)/);
+              const cmdM = rest.match(/command\s*:\s*([^,}]+)/);
+              const blkM = rest.match(/blocks\s*:\s*([^,}]+)/);
+              if (descM) currentEntry.description = descM[1].trim().replace(/['"]/g, '');
+              if (cmdM) currentEntry.command = cmdM[1].trim().replace(/['"]/g, '');
+              if (blkM) currentEntry.blocks = blkM[1].trim().replace(/['"]/g, '');
+            }
+          } else if (keyVal && currentEntry !== null) {
+            const k = keyVal[1].trim();
+            const v = keyVal[2].trim().replace(/['"]/g, '');
+            currentEntry[k] = v;
+          } else if (line.match(/^[a-zA-Z_]/) && !line.match(/^\s/)) {
+            // Hit a top-level key — end of list
+            break;
+          }
+        }
+        if (currentEntry) entries.push(currentEntry);
+        // Filter to only entries that have a command (valid entries)
+        return entries.filter((e) => e && (e.command || e.blocks));
+      }
+
+      // Determine the declared deferred-verify entries per story
+      /** @type {Record<string, {declared: Array<{command:string,blocks:string}>, result: string|null}>} */
+      let deferredMap = {};
+      let storyFileScanAvailable = true;
+
+      if (process.env.CLEARGATE_FORCE_DEFERRED_VERIFY) {
+        // Test seam: inject state without reading real story files
+        try {
+          deferredMap = JSON.parse(process.env.CLEARGATE_FORCE_DEFERRED_VERIFY);
+        } catch (parseErr) {
+          process.stderr.write(
+            `Step 2.9 warning: CLEARGATE_FORCE_DEFERRED_VERIFY is not valid JSON: ${/** @type {Error} */ (parseErr).message}\n`
+          );
+          storyFileScanAvailable = false;
+        }
+      } else {
+        // Scan delivery/pending-sync/ + delivery/archive/ for sprint's story files
+        try {
+          const deliveryBase = path.join(REPO_ROOT, '.cleargate', 'delivery');
+          const dirsToScan = [
+            path.join(deliveryBase, 'pending-sync'),
+            path.join(deliveryBase, 'archive'),
+          ];
+          for (const dir of dirsToScan) {
+            if (!fs.existsSync(dir)) continue;
+            for (const fname of fs.readdirSync(dir)) {
+              if (!fname.endsWith('.md')) continue;
+              const fpath = path.join(dir, fname);
+              let raw;
+              try {
+                raw = fs.readFileSync(fpath, 'utf8');
+              } catch {
+                continue;
+              }
+              const fields = parseFrontmatterFields(raw);
+              if (fields['sprint_cleargate_id'] !== sprintId) continue;
+              // This file belongs to the sprint — check for deferred_verification
+              const entries = parseDeferredVerifications(raw);
+              const storyId = fields['story_id'] || fields['cr_id'] || fname.replace('.md', '');
+              if (entries.length > 0) {
+                deferredMap[storyId] = { declared: entries, result: null };
+              }
+            }
+          }
+        } catch (scanErr) {
+          storyFileScanAvailable = false;
+          process.stdout.write(
+            `Step 2.9 skipped: story-file scan unavailable (non-fatal): ${/** @type {Error} */ (scanErr).message}\n`
+          );
+        }
+      }
+
+      if (!storyFileScanAvailable) {
+        // fail-open: scan threw, already printed message above
+      } else {
+        // Check: any stories with deferred_verification declared?
+        const storiesWithDeferred = Object.keys(deferredMap);
+        if (storiesWithDeferred.length === 0) {
+          // NO-OP: no deferred verifications — silent pass (SPRINT-34's own close path)
+          process.stdout.write('Step 2.9 passed: no deferred verifications declared.\n');
+        } else {
+          const deferred_verify_dir = path.join(sprintDir, 'deferred-verify');
+          const failures = [];
+
+          for (const storyId of storiesWithDeferred) {
+            const { declared, result: forcedResult } = deferredMap[storyId];
+            const closeEntries = declared.filter(
+              (e) => !e.blocks || e.blocks === 'close'
+            );
+            if (closeEntries.length === 0) continue;
+
+            if (forcedResult !== undefined && forcedResult !== null) {
+              // Test seam: result injected via CLEARGATE_FORCE_DEFERRED_VERIFY
+              if (forcedResult !== 'green') {
+                for (const entry of closeEntries) {
+                  failures.push({ storyId, command: entry.command, reason: forcedResult ?? 'unrun' });
+                }
+              }
+            } else {
+              // Read result artifact from deferred-verify/<STORY-ID>.json
+              const resultFile = path.join(deferred_verify_dir, `${storyId}.json`);
+              if (!fs.existsSync(resultFile)) {
+                for (const entry of closeEntries) {
+                  failures.push({ storyId, command: entry.command, reason: 'no result file' });
+                }
+              } else {
+                let resultJson;
+                try {
+                  resultJson = JSON.parse(fs.readFileSync(resultFile, 'utf8'));
+                } catch {
+                  for (const entry of closeEntries) {
+                    failures.push({ storyId, command: entry.command, reason: 'unreadable result file' });
+                  }
+                  continue;
+                }
+                if (resultJson.status !== 'green' || resultJson.exit_code !== 0) {
+                  for (const entry of closeEntries) {
+                    failures.push({
+                      storyId,
+                      command: entry.command,
+                      reason: `status=${resultJson.status ?? 'unknown'} exit_code=${resultJson.exit_code ?? 'unknown'}`,
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          if (failures.length > 0) {
+            process.stderr.write(
+              `Step 2.9 failed: ${failures.length} deferred verification(s) not green:\n`
+            );
+            for (const f of failures) {
+              process.stderr.write(
+                `  - ${f.storyId}: command="${f.command}" reason=${f.reason}\n`
+              );
+            }
+            process.stderr.write(
+              `  Run each command, write the result to ${deferred_verify_dir}/<STORY-ID>.json,\n` +
+              `  then re-run close_sprint.mjs.\n`
+            );
+            process.exit(1);
+          } else {
+            process.stdout.write(
+              `Step 2.9 passed: all ${storiesWithDeferred.length} story/stories' deferred verifications are green.\n`
+            );
+          }
         }
       }
     }
