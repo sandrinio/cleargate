@@ -69,3 +69,7 @@ node_modules/
 # Transient run_script.sh incident captures — diagnostic, regenerated on failure
 .cleargate/sprint-runs/**/.script-incidents/
 .cleargate/sprint-runs/_off-sprint/.script-incidents/
+
+# Ephemeral dispatch markers (write_dispatch.sh / pre-tool-use-task.sh) — consumed by hook
+.cleargate/sprint-runs/**/.dispatch-*.json
+.cleargate/sprint-runs/_off-sprint/.dispatch-*.json
