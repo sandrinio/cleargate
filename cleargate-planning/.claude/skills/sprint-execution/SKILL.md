@@ -149,7 +149,11 @@ Sprint branch is **never committed to directly**. All work lands via story-branc
 node .cleargate/scripts/init_sprint.mjs SPRINT-NN
 ```
 
-This writes `.cleargate/sprint-runs/SPRINT-NN/state.json` and flips `.cleargate/sprint-runs/.active` to `SPRINT-NN`. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
+This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
+
+**Lane ingest (CR-078):** `init_sprint.mjs` reads lane assignments from `<sprintDir>/plans/waves.json` (`lane_assignments: { "STORY-ID": "fast"|"standard" }` top-level key) when the file is present. When `waves.json` is absent it falls back to parsing the Sprint Plan §2.4 Lane Audit table (`| Story-ID | fast | rationale |`). Stories not declared in either source keep the `standard` default. Fast-lane stories receive `lane_assigned_by: 'sdr-lane-audit'`; no manual `cleargate story lane …` reclassification is needed after init.
+
+**`.active` sentinel (CR-078):** `init_sprint.mjs` atomically writes the sprint ID to `.active` as its final step. This is the single place the sentinel is SET at kickoff; `cleargate sprint close` (`sprint.ts`) is the single place it is CLEARED. If a prior `.active` value differs from the sprint being initialised, init emits `WARN: .active was SPRINT-NN, overwriting with SPRINT-MM — prior sprint may not have been closed` to stderr but does not block.
 
 `init_sprint.mjs` also writes `<sprintDir>/sprint-context.md` from `.cleargate/templates/sprint_context.md`, populated with `sprint_id` + goal (extracted from sprint plan §0 `- **Sprint Goal:** …` bullet, or placeholder if absent) + active CR list. Every Dev/QA/Architect/DevOps dispatch reads this file as preflight (see §B + §C contracts + agent prompts `## Preflight`).
 
