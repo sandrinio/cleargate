@@ -41,6 +41,11 @@ if [[ ! -d "$WORKTREE" ]]; then
   exit 2
 fi
 
+# F5 — normalize WORKTREE to an absolute path so that REPORT_FILE and every
+# downstream non-subshell `cd "$WORKTREE"` resolve correctly regardless of
+# whether the caller passed a relative or absolute path (CR-080).
+WORKTREE="$(cd "$WORKTREE" && pwd)"
+
 # ---------------------------------------------------------------------------
 # Locate gate-checks.json — auto-seed if missing
 # ---------------------------------------------------------------------------
