@@ -62,3 +62,6 @@ cleargate-planning/.cleargate/sprint-runs/
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/
+
+# Transient pre-gate scan output (pre_gate_runner.sh) — regenerated per scan
+.cleargate/reports/
