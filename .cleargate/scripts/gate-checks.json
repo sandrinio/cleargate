@@ -10,6 +10,7 @@
     "typecheck": "npm --prefix cleargate-cli run typecheck",
     "new_deps_check": true,
     "stray_env_files": [".env", ".env.local", ".env.production"],
-    "file_count_report": true
+    "file_count_report": true,
+    "qa_red_lint": true
   }
 }

@@ -107,7 +107,7 @@ Dispatch verification depth by reading `lane.value` from the pack's JSON block (
 - **`runtime` lane** (NEW — CLI / integration / runtime-surface stories):
   - Everything in `standard`, PLUS:
   - **Full test suite** re-run (not just touched-file scope) — `cleargate gate test` against the full package.
-  - Coverage check: every Gherkin scenario has a passing test (zero MISSING entries).
+  - Coverage check: every Gherkin scenario has a passing test (zero MISSING entries). A red test that now passes against the Developer's commit counts as its own green — no separate green file required (red-now-green, CR-081).
   - **exit-code matrix:** invoke each new/modified command with `--help`, the happy path, and at least one explicit error path; assert exit codes match documented values.
   - **Integration smoke:** if the story changes a script under `.cleargate/scripts/`, run the script's bash test harness from a `mktemp -d` fixture (mirrors test_prep_qa_context.sh pattern at `.cleargate/scripts/test/`).
 
@@ -131,6 +131,7 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 4. **Map commit to acceptance criteria.** For each Gherkin scenario in the Story:
    - Find the corresponding test in the diff
    - If no test matches, that's a FAIL with reason `missing test for "<scenario name>"`
+   - **Red-now-green clause (CR-081):** A QA-Red test file that was failing at baseline and now PASSES against the Developer's commit fully satisfies the green-test / acceptance-coverage requirement. Do NOT require a separate green-path file distinct from the now-passing red file — a duplicate is redundant under reuse-over-recreate (Rule 18). Map each Gherkin scenario to the now-passing red test; absence of a second file is NOT a MISSING entry and must not produce a FAIL.
 5. **Check for regressions** — follow the **Lane-Aware Playbook**: on `standard` lane run scoped tests (touched-file neighborhoods); on `runtime` lane run the complete package suite. If anything in scope broke, FAIL.
 6. **Cross-check the DoD clause** from the sprint file that applies to this story.
 7. **Record flashcards on recurring QA failure patterns.** `Skill(flashcard, "record: #qa <lesson>")`. Examples:

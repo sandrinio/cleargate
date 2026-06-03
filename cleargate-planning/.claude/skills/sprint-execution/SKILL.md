@@ -311,6 +311,8 @@ After QA-Red commits Red tests, run the wiring/pre-gate scan first:
 bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
 ```
 
+**Semantic fixture lint (CR-081 — included in the pre-gate scan above):** `pre_gate_runner.sh arch` automatically invokes `qa_red_lint.mjs` (check #5 inside `run_arch()`) against the worktree's QA-Red test files (`*.red.node.test.ts` and other red-test forms). This is a pre-gate step — it runs as part of the scan, before any TPV or Developer dispatch. If `qa_red_lint` flags a semantic fixture error (R-enum: invalid enum literal; R-query: duplicate-text `queryByText`/`getByText`), the scan exits non-zero and routes back to QA-Red via `arch_bounces` (identical to a TPV wiring gap — increment `arch_bounces` via `node .cleargate/scripts/update_state.mjs STORY-NNN-NN --arch-bounce`, then re-dispatch §C.3 QA-Red with the lint flag description). The lint check is gated by `arch.qa_red_lint` in `gate-checks.json` (default `true`).
+
 **Conditional TPV dispatch (scan-flag gated — a clean standard-lane story proceeds to §C.4 with NO Architect TPV dispatch):**
 
 - **If the scan returns exit 0 with no flags:** skip the live Architect `Mode: TPV` dispatch and proceed directly to §C.4 Spawn Developer. No Architect agent is spawned for TPV on the clean path.

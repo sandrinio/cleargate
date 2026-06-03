@@ -117,6 +117,8 @@ Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast
 
 You DO NOT verify test logic correctness — that is Dev's TDD challenge.
 
+> **Note (CR-081):** Semantic fixture correctness (invalid enum literals, unsatisfiable duplicate-text queries) is caught by the separate `qa_red_lint` pre-gate step (CR-081), NOT by TPV. TPV stays wiring-only — never fold semantic-correctness checks here.
+
 Return:
 - `TPV: APPROVED` — Dev proceeds.
 - `TPV: BLOCKED-WIRING-GAP — <one-sentence specific issue>` — orchestrator routes back to QA-Red; `arch_bounces` increments via `node update_state.mjs <story-id> --arch-bounce`.
