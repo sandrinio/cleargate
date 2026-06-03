@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "CR-080": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-06-03T17:51:41.430Z",
+      "updated_at": "2026-06-03T19:54:31.795Z",
       "notes": "",
       "lane": "fast",
       "lane_assigned_by": "sprint-plan-2.4-lane-audit",
@@ -100,6 +100,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-079 → Done",
-  "updated_at": "2026-06-03T19:43:41.022Z"
+  "last_action": "transition CR-080 → Done",
+  "updated_at": "2026-06-03T19:54:31.795Z"
 }
