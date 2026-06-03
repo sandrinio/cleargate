@@ -22,6 +22,23 @@ Frozen dependency versions for this sprint. Orchestrator populates from `package
 | TypeScript | `^5.8.0` |
 | (add rows per workspace below) |  |
 
+## Test Stack
+
+Repo-derived test conventions. Written best-effort by `cleargate init` (detector); the
+orchestrator may correct any field per-sprint. Agents read this block as OVERRIDING their
+built-in defaults — Developer/QA/Architect use these values, not any hardcoded runner.
+
+| Field | Value |
+|-------|-------|
+| Backend runner    | _(e.g. `pytest -q` · `go test ./...` · `npm test` · populate at init)_ |
+| Frontend runner   | _(e.g. js unit runner — blank if single-stack)_ |
+| Typecheck command | _(e.g. `mypy .` · `tsc --noEmit` · blank if none)_ |
+| Red-test naming   | _(e.g. `*.red.test.tsx` · `test_*_red.py` · `*_red_test.go` · populate at init)_ |
+
+_If unresolved at init: leave the table stubbed. The pre-gate scan emits a one-line
+"test_stack unresolved — populate sprint_context.md §Test Stack" advisory and treats the
+typecheck/test gate as advisory (not FAIL) until populated. (§0.5 backstop decision.)_
+
 ## Cross-Cutting Rules
 
 Sprint-wide architecture rules and UI/API tokens that every story must honour. Populated from the parent Epic's `<architecture_rules>` block.

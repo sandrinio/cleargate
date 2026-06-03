@@ -80,17 +80,11 @@ flashcards_flagged:
 
 ## Inner-loop test runner
 
-All tests use **`node:test` + `node:assert/strict`** — this is the single, mandatory runner across all ClearGate packages (EPIC-028, 2026-05-18). vitest is fully eliminated; adding it back is forbidden and blocked by the `check:no-vitest` pre-commit guard.
+Use the project's test runner and red-test naming as declared in `sprint_context.md` §Test Stack. Run the backend runner (and frontend runner if present) before committing.
 
-**File naming:** `*.node.test.ts` for all new test files.
+**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()`. For static-import un-interceptability (e.g. toast, clipboard), use the `__overrides__` pattern: a `__mocks__/` stub with a mutable `__overrides__` object that the test sets before each call.
 
-**Run commands per package:**
-- `mcp/` and `cleargate-cli/`: `tsx --test --test-concurrency=1 --experimental-test-module-mocks 'test/**/*.node.test.ts'`
-- `admin/`: `node --conditions browser --import tsx tests/run-tests.mjs` — the `--conditions browser` flag is required; it triggers jsdom-bootstrap via `setup-node-test.mjs` for Svelte component tests.
-
-**Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()` from `node:test`. For static-import un-interceptability in admin/ (e.g. toast, clipboard), use the `__overrides__` pattern: a `__mocks__/` stub with a mutable `__overrides__` object that the test sets before each call — see `admin/TESTING.md` for full pattern description.
-
-**Full-suite verification at commit-time.** Use the project's standard test command (`npm test`, etc.) before committing.
+**Full-suite verification at commit-time.** Use the project's standard test command before committing.
 
 ## Script Invocation
 
@@ -123,8 +117,7 @@ These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 These files are **immutable** for Developer dispatches. Do not Read, Edit, Write, or stage them:
 
-- `**/*.red.test.ts` — QA-Red-authored test files (vitest naming, legacy)
-- `**/*.red.node.test.ts` — QA-Red-authored test files (node:test naming, SPRINT-22+)
+- QA-Red-authored red-test files (naming per `sprint_context.md` §Test Stack)
 
 These files are written by the QA-Red dispatch (SKILL.md §C.3) and committed to the story branch before Developer spawns. The pre-commit hook (`pre-commit-surface-gate.sh`) rejects any Developer commit that stages modifications to these files after a `qa-red(STORY-NNN-NN):` commit exists on the branch.
 

@@ -21,7 +21,7 @@ gates:
   # Worker cap lives in cleargate-cli/vitest.config.ts (poolOptions.forks.maxForks=2).
   # Override via VITEST_MAX_FORKS env (e.g. VITEST_MAX_FORKS=8 on CI). See
   # FLASHCARD `#vitest #leak #ram` for context.
-  precommit: "npm run typecheck --workspace=cleargate-cli && npm test --workspace=cleargate-cli"
-  test: "npm test --workspace=cleargate-cli"
-  typecheck: "npm run typecheck --workspace=cleargate-cli"
+  precommit: "npm --prefix cleargate-cli run typecheck && npm --prefix cleargate-cli test"
+  test: "npm --prefix cleargate-cli test"
+  typecheck: "npm --prefix cleargate-cli run typecheck"
   lint: "npx cleargate wiki lint"

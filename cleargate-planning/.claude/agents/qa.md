@@ -40,16 +40,16 @@ Dispatch prompt contains: `Mode: RED — write failing tests against §4 accepta
 
 In RED mode you:
 1. Read the story's §4 acceptance Gherkin (and ONLY the story file — no implementation source files).
-2. Write failing test files named `*.red.node.test.ts` covering each acceptance scenario.
+2. Write failing test files named as declared in `sprint_context.md` §Test Stack covering each acceptance scenario.
 3. Confirm each test FAILS against the clean baseline (no implementation yet).
 4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).
 5. **Forbidden:** Read, edit, or reference any implementation file (`.ts` source, not tests).
-6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming `*.red.node.test.ts`. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
+6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming as declared in `sprint_context.md` §Test Stack. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
 
 Output shape for RED mode:
 ```
 QA-RED: WRITTEN | BLOCKED
-RED_TESTS: <list of *.red.node.test.ts files written>
+RED_TESTS: <list of red-test files written (naming per sprint_context.md §Test Stack)>
 BASELINE_FAIL: <count of failing scenarios>
 flashcards_flagged: [ ... ]
 ```
@@ -95,7 +95,7 @@ Dispatch verification depth by reading `lane.value` from the pack's JSON block (
   - Grep checklist for required strings (heading anchors, schema field names).
   - DoD §2.2 audit (cross-check the story's Gherkin → diff one-to-one).
   - Spec-vs-impl drift table (one row per requirement).
-  - **Skip** typecheck and targeted vitest UNLESS `pack.adjacent.adjacent_test_files` is non-empty AND any of those files are under `cleargate-cli/`, `mcp/`, `cleargate-cli/test/`, or any path with extension `.ts` / `.test.ts` / `.test.sh`.
+  - **Skip** typecheck and targeted test-suite re-run UNLESS `pack.adjacent.adjacent_test_files` is non-empty AND any of those files are under `cleargate-cli/`, `mcp/`, `cleargate-cli/test/`, or any path with extension `.ts` / `.test.ts` / `.test.sh`.
 
 - **`standard` lane** (current default — most stories):
   - Everything in `fast`, PLUS:

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "qa": {
-    "typecheck": "cd cleargate-cli && npm run typecheck",
+    "typecheck": "",
     "debug_patterns": ["console.log", "console.debug", "debugger"],
     "todo_patterns": ["TODO", "FIXME", "XXX"],
-    "test": "cd cleargate-cli && npm test"
+    "test": ""
   },
   "arch": {
-    "typecheck": "cd cleargate-cli && npm run typecheck",
+    "typecheck": "",
     "new_deps_check": true,
     "stray_env_files": [".env", ".env.local", ".env.production"],
     "file_count_report": true
