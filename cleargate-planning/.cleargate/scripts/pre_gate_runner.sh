@@ -312,6 +312,34 @@ run_arch() {
         echo "  ${dir}: ${count} files" >> "$REPORT_FILE"
       done
   fi
+
+  # 5. QA-Red semantic fixture lint (CR-081)
+  # Glob red test files under the worktree, run qa_red_lint.mjs.
+  # Gate behind arch.qa_red_lint config key (default true).
+  # Uses ABSOLUTE paths — no cd (avoids cwd-leak per FLASHCARD #pre-gate #cwd-leak).
+  # Uses grep -q (not grep -c || echo 0 — avoids double-count hazard per FLASHCARD #test-harness #bash).
+  local qa_red_lint_enabled
+  qa_red_lint_enabled="$(read_config_field "arch.qa_red_lint" "$CONFIG_FILE")"
+  # Default to enabled when key is absent (empty string → treat as true)
+  if [[ -z "$qa_red_lint_enabled" || "$qa_red_lint_enabled" == "true" ]]; then
+    local lint_script="${SCRIPT_DIR}/qa_red_lint.mjs"
+    if [[ -f "$lint_script" ]]; then
+      local lint_out lint_exit
+      lint_exit=0
+      lint_out="$(node "${lint_script}" "${WORKTREE}" 2>&1)" || lint_exit=$?
+      if [[ $lint_exit -eq 0 ]]; then
+        record_result "$REPORT_FILE" "qa_red_lint" "PASS" "no semantic fixture issues"
+      else
+        record_result "$REPORT_FILE" "qa_red_lint" "FAIL" "$(echo "$lint_out" | head -5 | tr '\n' '|')"
+        echo "$lint_out" >> "$REPORT_FILE"
+        OVERALL_EXIT=1
+      fi
+    else
+      record_result "$REPORT_FILE" "qa_red_lint" "INFO" "skipped (qa_red_lint.mjs not found at ${lint_script})"
+    fi
+  else
+    record_result "$REPORT_FILE" "qa_red_lint" "INFO" "skipped (arch.qa_red_lint=false in config)"
+  fi
 }
 
 # ---------------------------------------------------------------------------
