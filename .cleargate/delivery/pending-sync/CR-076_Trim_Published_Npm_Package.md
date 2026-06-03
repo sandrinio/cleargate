@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
-approved: false
+approved: true
 area: framework/hygiene
 context_source: |
   Direct observation from the 2026-06-02 cleargate@0.14.0 publish run. `npm pack
@@ -18,7 +18,7 @@ context_source: |
   as work items" — both accepted). Routes to EPIC-043 per the tech-debt-findings
   memory directive.
 created_at: 2026-06-02T00:00:00Z
-updated_at: 2026-06-02T00:00:00Z
+updated_at: 2026-06-03T00:00:00Z
 created_at_version: cleargate@0.14.0
 updated_at_version: cleargate@0.14.0
 server_pushed_at_version: null
@@ -41,7 +41,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-02T10:15:52Z
+  last_stamp: 2026-06-03T17:08:28Z
   sessions: []
 ---
 
@@ -51,11 +51,11 @@ draft_tokens:
 
 - **Question:** Drop `dist/*.map` from the published tarball entirely, or keep them?
 - **Recommended:** Drop from the published package (the build can still emit them for local debugging; exclude via `.npmignore` or by narrowing `files[]`, or set tsup `sourcemap` off for the publish build). ~30 MB of 53 MB; consumers of a CLI binary almost never need its sourcemaps, and they bloat every install.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Accepted 2026-06-03 (owner: accept all) — drop `dist/*.map` from the published tarball (build may still emit them locally).
 
 - **Question:** The scaffold payload ships twice (`templates/` AND `dist/templates/`). Which copy does the INSTALLED CLI actually read at `cleargate init` time — and therefore which can be dropped from `files[]`?
 - **Recommended:** Verify first (the bin is `dist/cli.js`, so it most likely resolves `dist/templates/` via `__dirname`). If confirmed, drop `templates` from `files[]` and ship only `dist` (which already contains `dist/templates/`). **Hard prerequisite:** do NOT remove a copy until the init template-resolution path is proven, or `cleargate init` breaks in the field.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Accepted 2026-06-03 (owner: accept all) — prove the init read-path FIRST (hard prerequisite), then drop the redundant payload copy from `files[]`.
 
 ## 1. The Context Override (Old vs. New)
 
@@ -110,7 +110,7 @@ draft_tokens:
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity — recorded follow-up, not yet Gate-1-approved**
+**Current Status: 🟢 Low Ambiguity — Gate-1 approved (owner accepted all recommendations 2026-06-03)**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -119,5 +119,5 @@ Requirements to pass to Green (Ready for Execution):
 - [x] All impacted downstream Epics/Stories are identified and reverted to 🔴 High Ambiguity. — *No downstream Epic/Story depends on this leaf hygiene fix; the only cross-item coupling is the shared `npm pack` tarball assertion, flagged in §2 (CR-075). Nothing to revert.*
 - [x] Execution Sandbox contains exact file paths.
 - [x] Verification command is provided.
-- [ ] `approved: true` is set in the YAML frontmatter. — *Intentionally Draft. Owner directed filing; approval is a separate Gate-1 step pending the §0.5 decisions (esp. the which-payload-copy verification).*
+- [x] `approved: true` is set in the YAML frontmatter. — *Approved 2026-06-03 (owner: accept all); both §0.5 decisions recorded, payload-copy proof retained as the CR's opening execution step.*
 - [x] Existing Surfaces cites at least one source-tree path the CR extends.

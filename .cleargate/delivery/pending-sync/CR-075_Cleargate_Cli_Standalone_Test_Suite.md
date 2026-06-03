@@ -5,7 +5,7 @@ parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
-approved: false
+approved: true
 area: framework/hygiene
 context_source: |
   SPRINT-33 EXECUTION-LOG findings (cross-repo test coupling logged during 043-02
@@ -21,7 +21,7 @@ context_source: |
   as work items" — both accepted). Routes to EPIC-043 per the tech-debt-findings
   memory directive.
 created_at: 2026-06-02T00:00:00Z
-updated_at: 2026-06-02T00:00:00Z
+updated_at: 2026-06-03T00:00:00Z
 created_at_version: cleargate@0.14.0
 updated_at_version: cleargate@0.14.0
 server_pushed_at_version: null
@@ -44,7 +44,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-02T10:12:49Z
+  last_stamp: 2026-06-03T17:08:06Z
   sessions: []
 ---
 
@@ -54,15 +54,15 @@ draft_tokens:
 
 - **Question:** How should the suite be decoupled — split into tiers (a default standalone-safe `npm test` + an opt-in `npm run test:integration` for the infra/monorepo-coupled tests), or keep one suite and add skip-when-absent guards that no-op the infra/monorepo cases?
 - **Recommended:** Tiered. A default `npm test` that runs green on a bare standalone clone (no monorepo parent, no Docker) is the honest contract for a published package; the infra/monorepo-coupled tests move behind an explicit `test:integration` script. Skip-guards alone hide coverage loss as green.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Accepted 2026-06-03 (owner: accept all) — adopt the Recommended tiered split (default `npm test` standalone-green; infra/monorepo tests behind `test:integration`).
 
 - **Question:** The `changelog-format` test shells `npm pack --workspace=cleargate-cli` — replace with an in-package `npm pack` (run from cwd) so it works in the standalone repo?
 - **Recommended:** Yes. Post-split there is no `cleargate-cli` workspace; the `--workspace=` form is a monorepo artifact and errors. Plain `npm pack` in the package root is equivalent.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Accepted 2026-06-03 (owner: accept all) — replace the `--workspace=` form with in-package `npm pack`.
 
 - **Question:** Node version — the ~4 `it`/`require is not defined` failures only appeared under Node 25 (target is Node 24 LTS). Pin via `.nvmrc`/CI and treat the Node-25 harness drift as a separate sub-task?
 - **Recommended:** Add `.nvmrc` = 24 + a CI matrix note; file the Node-25 harness incompatibility as a follow-up rather than blocking this CR on it.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Accepted 2026-06-03 (owner: accept all) — pin `.nvmrc`=24 + CI note; Node-25 harness drift filed as a non-blocking follow-up.
 
 ## 1. The Context Override (Old vs. New)
 
@@ -120,7 +120,7 @@ draft_tokens:
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity — recorded follow-up, not yet Gate-1-approved**
+**Current Status: 🟢 Low Ambiguity — Gate-1 approved (owner accepted all recommendations 2026-06-03)**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -129,5 +129,5 @@ Requirements to pass to Green (Ready for Execution):
 - [x] All impacted downstream Epics/Stories are identified and reverted to 🔴 High Ambiguity. — *No downstream Epic/Story depends on this leaf hygiene fix; the only cross-item coupling is the shared `npm pack` tarball assertion, flagged in §2 (CR-076). Nothing to revert.*
 - [x] Execution Sandbox contains exact file paths.
 - [x] Verification command is provided.
-- [ ] `approved: true` is set in the YAML frontmatter. — *Intentionally Draft. Owner directed filing; approval is a separate Gate-1 step pending the §0.5 decisions.*
+- [x] `approved: true` is set in the YAML frontmatter. — *Approved 2026-06-03 (owner: accept all); all three §0.5 decisions recorded.*
 - [x] Existing Surfaces cites at least one source-tree path the CR extends.

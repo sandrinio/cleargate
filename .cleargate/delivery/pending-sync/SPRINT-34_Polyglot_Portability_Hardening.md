@@ -26,6 +26,9 @@ cached_gate_result:
   pass: true
   failing_criteria: []
   last_gate_check: 2026-06-03T16:35:34Z
+pushed_by: sandro.suladze@gmail.com
+pushed_at: 2026-06-03T16:44:48.335Z
+push_version: 1
 stamp_error: no ledger rows for work_item_id SPRINT-34
 draft_tokens:
   input: null
@@ -33,11 +36,8 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-03T16:44:37Z
+  last_stamp: 2026-06-03T17:10:02Z
   sessions: []
-pushed_by: sandro.suladze@gmail.com
-pushed_at: 2026-06-03T16:44:48.335Z
-push_version: 1
 ---
 
 # SPRINT-34: Polyglot Portability Hardening
@@ -165,7 +165,7 @@ Most CRs touch disjoint surfaces and are parallel-capable. The two constraints t
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity — sprint plan drafted from dogfood findings, not yet Gate-1/Gate-2-approved**
+**Current Status: 🟢 Low Ambiguity — Ready for Execution (EPIC-045 §6 forks resolved; all 8 CRs approved 🟢 2026-06-03; topology stays execution_mode: v2-parallel per owner)**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -176,4 +176,4 @@ Requirements to pass to Green (Ready for Execution):
 - [x] Shared-file surface analysis names every file touched by >1 CR with a merge order. — *qa.md (077→081→082), architect.md (077→081), gate-checks.json (077→079), SKILL.md (078→079→082), changelog-format test (075→076).*
 - [x] Lane Audit justifies every non-`standard` lane. — *CR-080 + CR-078 marked fast with ≤80-char rationale; all others standard.*
 - [x] All selected items have parent epics / decomposition (no orphan epics in scope). — *CR-077…082 → EPIC-045; CR-075/CR-076 → EPIC-043. No undecomposed epic is in sprint scope.*
-- [ ] `approved: true` is set in the YAML frontmatter. — *Intentionally Draft. Pending Gate-1 approval AND the four open EPIC-045 §6/§0.5 forks (test-stack source, sequencing, F3c payload-strip, F11 mechanism); EPIC-045 itself is still 🔴.*
+- [x] `approved: true` is set in the YAML frontmatter. — *Approved. The four EPIC-045 §6/§0.5 forks (test-stack source, sequencing, F3c payload-strip, F11 mechanism) are all resolved (accepted 2026-06-03); parent EPIC-045 is now 🟢; and all eight CRs (CR-077…082 + carried CR-075/CR-076) are approved 🟢.*

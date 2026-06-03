@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-06-03T16:44:38.697Z"
-last_ingest_commit: ""
+last_ingest: "2026-06-03T17:10:02.970Z"
+last_ingest_commit: "a0974a6381af672b7ac15f326a7e6f85d4f90975"
 repo: "planning"
 ---
 
