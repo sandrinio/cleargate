@@ -88,12 +88,11 @@ fi
 
 # ── Sub-scenario: gate-checks.json specifically has no "cd cleargate-cli" ────
 # The F6 literal must be gone from the shipped payload gate-checks.json.
-CD_CLI_COUNT=$(grep -c "cd cleargate-cli" "$GATE_CHECKS" 2>/dev/null || echo "0")
-if [[ "$CD_CLI_COUNT" -eq 0 ]]; then
+if ! grep -q "cd cleargate-cli" "$GATE_CHECKS" 2>/dev/null; then
   pass "gate-checks.json — no 'cd cleargate-cli' F6 literal in shipped payload"
 else
-  fail "gate-checks.json — F6 literal 'cd cleargate-cli' still present (count: ${CD_CLI_COUNT})" \
-    "$(grep -n "cd cleargate-cli" "$GATE_CHECKS")"
+  fail "gate-checks.json — F6 literal 'cd cleargate-cli' still present (count: $(grep -c 'cd cleargate-cli' "$GATE_CHECKS"))" \
+    "$(grep -n 'cd cleargate-cli' "$GATE_CHECKS")"
 fi
 
 # ── Sub-scenario: sprint_context.md template has a ## Test Stack block ───────
