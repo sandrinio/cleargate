@@ -255,11 +255,34 @@ run_arch() {
     try { JSON.parse('${stray_env_json}').forEach(p => console.log(p)); } catch(e) {}
   " 2>/dev/null)
 
+  # Read the provisioned-config exemption list (CR-079 single source).
+  # config.yml lives two directories above SCRIPT_DIR (.cleargate/scripts/../..).
+  local CONFIG_YML
+  CONFIG_YML="$(cd "${SCRIPT_DIR}/../.." && pwd)/.cleargate/config.yml"
+  local provisioned_config=()
+  while IFS= read -r _pline; do
+    [[ -z "$_pline" ]] || provisioned_config+=("$_pline")
+  done < <(read_provision_config "${CONFIG_YML}")
+
+  # Helper: returns 0 (true) if a pattern is in the provisioned-config list.
+  is_provisioned() {
+    local _pat="$1"
+    local _p
+    for _p in "${provisioned_config[@]:-}"; do
+      [[ "$_p" = "$_pat" ]] && return 0
+    done
+    return 1
+  }
+
   local stray_found=0
   local stray_details=""
   for pat in "${stray_patterns[@]:-}"; do
     [[ -z "$pat" ]] && continue
-    if [[ -f "${WORKTREE}/${pat}" ]]; then
+    if [[ -f "${WORKTREE}/${pat}" || -L "${WORKTREE}/${pat}" ]]; then
+      # Skip patterns that are in the provisioned-config list (CR-079 exemption).
+      if is_provisioned "${pat}"; then
+        continue
+      fi
       stray_details+="${pat}"$'\n'
       stray_found=1
     fi

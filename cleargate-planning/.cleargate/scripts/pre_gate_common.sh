@@ -179,6 +179,54 @@ append_ld_event() {
 }
 
 # ---------------------------------------------------------------------------
+# read_provision_config <config_yml_path>
+# Reads the worktree.provision_config list from config.yml (CR-079).
+# Returns one entry per line. Defaults to ".env" if absent/unset.
+# Single source of truth: both provision_worktree_config.sh and
+# pre_gate_runner.sh source this function so provisioning and exemption
+# always use the same list.
+# YAML read strategy: awk extracts lines indented under
+# "provision_config:" until the next non-list line or EOF.
+# Node is available but the awk approach keeps it dependency-light and
+# avoids a full YAML parse.
+# ---------------------------------------------------------------------------
+read_provision_config() {
+  local config_yml="${1:-}"
+  if [[ -z "${config_yml}" || ! -f "${config_yml}" ]]; then
+    # No config.yml — return the default list
+    printf '.env\n'
+    return
+  fi
+
+  # Extract the sequence items under "provision_config:" using awk.
+  # Handles YAML like:
+  #   worktree:
+  #     provision_config:
+  #       - .env
+  #       - .env.local
+  # Stops on the first line that is NOT an indented "  - <value>" after
+  # the provision_config: key.
+  local extracted
+  extracted="$(awk '
+    /^[[:space:]]*provision_config:/ { in_list=1; next }
+    in_list && /^[[:space:]]*-[[:space:]]+/ {
+      sub(/^[[:space:]]*-[[:space:]]+/, "")
+      sub(/[[:space:]]*$/, "")
+      print
+      next
+    }
+    in_list { in_list=0 }
+  ' "${config_yml}" 2>/dev/null || true)"
+
+  if [[ -z "${extracted}" ]]; then
+    # Key absent or empty — default to .env
+    printf '.env\n'
+  else
+    printf '%s\n' "${extracted}"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # diff_package_json <worktree_path> <branch>
 # Prints new runtime deps (non-dev) introduced vs <branch>^.
 # Returns lines like: "new runtime dep: <name>"
