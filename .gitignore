@@ -21,6 +21,11 @@ Thumbs.db
 # Active-sprint sentinel — per-machine runtime state, not team-shared
 .cleargate/sprint-runs/.active
 
+# Canonical scaffold ships an EMPTY skeleton — runtime sprint-runs ledger/state
+# must never land under it. A misrouted token-ledger write (wrong root) created
+# cleargate-planning/.cleargate/sprint-runs/_off-sprint/ on 2026-06-02; guard against recurrence.
+cleargate-planning/.cleargate/sprint-runs/
+
 # Hook execution log — per-machine runtime, dirties git status on every session
 /.cleargate/hook-log/
 
