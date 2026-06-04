@@ -6,10 +6,10 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 35 | 0 | 26 |
-| Sprints | 34 | 2 | 29 |
+| Epics | 39 | 0 | 27 |
+| Sprints | 35 | 2 | 29 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 79 | 0 | 65 |
+| CRs | 79 | 0 | 73 |
 | Bugs | 26 | 0 | 24 |
 
 ## Active Epics
@@ -200,6 +200,22 @@ _No active epics._
 
 - [[CR-070]] (crs) — Completed
 
+- [[CR-075]] (crs) — Completed
+
+- [[CR-076]] (crs) — Completed
+
+- [[CR-077]] (crs) — Completed
+
+- [[CR-078]] (crs) — Completed
+
+- [[CR-079]] (crs) — Completed
+
+- [[CR-080]] (crs) — Completed
+
+- [[CR-081]] (crs) — Completed
+
+- [[CR-082]] (crs) — Completed
+
 - [[EPIC-000]] (epics) — Completed
 
 - [[EPIC-001]] (epics) — Abandoned
@@ -251,6 +267,8 @@ _No active epics._
 - [[EPIC-032]] (epics) — Completed
 
 - [[EPIC-033]] (epics) — Completed
+
+- [[EPIC-045]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 

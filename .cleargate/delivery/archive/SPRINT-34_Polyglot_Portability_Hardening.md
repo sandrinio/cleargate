@@ -6,10 +6,10 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: null
-status: Active
+status: Completed
 approved: true
 start_date: 2026-06-03T00:00:00Z
-end_date: null
+end_date: 2026-06-04T00:00:00Z
 synced_at: null
 created_at: 2026-06-03T00:00:00Z
 updated_at: 2026-06-03T17:53:15Z
@@ -27,8 +27,8 @@ cached_gate_result:
   failing_criteria: []
   last_gate_check: 2026-06-03T16:35:34Z
 pushed_by: sandro.suladze@gmail.com
-pushed_at: 2026-06-03T16:44:48.335Z
-push_version: 1
+pushed_at: 2026-06-04T07:25:47.659Z
+push_version: 2
 draft_tokens:
   input: 0
   output: 0
