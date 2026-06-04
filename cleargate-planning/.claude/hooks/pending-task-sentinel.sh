@@ -51,7 +51,7 @@ mkdir -p "${SPRINT_DIR}"
 TOOL_NAME_EARLY="$(printf '%s' "${INPUT}" | jq -r '.tool_name // empty')"
 
 if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPRINT_ID}" != "_off-sprint" ]]; then
-  # Collect flagged cards from all STORY-*-dev.md and STORY-*-qa.md in SPRINT_DIR (flat layout).
+  # Collect flagged cards from all *-dev.md / *-qa.md reports (any id: STORY/CR/BUG/...), flat + reports/ subdir (CR-082 moved reports to reports/).
   UNPROCESSED_CARDS=()
   UNPROCESSED_HASHES=()
 
@@ -59,7 +59,7 @@ if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "$
   REPORT_FILES=()
   while IFS= read -r f; do
     REPORT_FILES+=("$f")
-  done < <(ls -t "${SPRINT_DIR}"/STORY-*-dev.md "${SPRINT_DIR}"/STORY-*-qa.md 2>/dev/null)
+  done < <(ls -t "${SPRINT_DIR}"/*-dev.md "${SPRINT_DIR}"/*-qa.md "${SPRINT_DIR}"/reports/*-dev.md "${SPRINT_DIR}"/reports/*-qa.md 2>/dev/null)
 
   for REPORT_FILE in "${REPORT_FILES[@]}"; do
     [[ ! -f "${REPORT_FILE}" ]] && continue
