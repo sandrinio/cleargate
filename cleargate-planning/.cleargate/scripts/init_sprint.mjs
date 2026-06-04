@@ -147,9 +147,62 @@ function main() {
   }
 
   const now = new Date().toISOString();
+
+  // --- CR-078 F2: Ingest SDR lane assignments ---
+  // Read lane assignments from plans/waves.json (canonical machine-readable source).
+  // Falls back to parsing the Sprint Plan §2.4 Lane Audit table when waves.json is absent.
+  // Emits a WARN (not a hard fail) when neither source declares any lane.
+  const wavesJsonPath = path.join(sprintDir, 'plans', 'waves.json');
+  let laneAssignments = {};
+  let laneSourceFound = false;
+
+  // Try waves.json first
+  if (fs.existsSync(wavesJsonPath)) {
+    try {
+      const wavesData = JSON.parse(fs.readFileSync(wavesJsonPath, 'utf8'));
+      // waves.json may carry a top-level `lane_assignments: { "STORY-ID": "fast"|"standard" }` map
+      if (wavesData.lane_assignments && typeof wavesData.lane_assignments === 'object') {
+        laneAssignments = wavesData.lane_assignments;
+        laneSourceFound = Object.keys(laneAssignments).length > 0;
+      }
+    } catch (err) {
+      process.stderr.write(`WARN: could not parse plans/waves.json: ${err.message}\n`);
+    }
+  }
+
+  // Fallback: parse Sprint Plan §2.4 Lane Audit table
+  if (!laneSourceFound && sprintFilePath) {
+    try {
+      const planContent = fs.readFileSync(sprintFilePath, 'utf8');
+      // Match the §2.4 Lane Audit table rows: `| Story-ID | lane | rationale |`
+      // Accepts both backtick-wrapped and bare story IDs in the first column.
+      const tableRowRe = /^\|\s*`?([A-Z][-A-Z0-9]*(?:-\d+)?(?:-\d+)?)`?\s*\|\s*(fast|standard)\s*\|/gm;
+      let match;
+      while ((match = tableRowRe.exec(planContent)) !== null) {
+        const storyId = match[1].trim();
+        const lane = match[2].trim();
+        laneAssignments[storyId] = lane;
+        laneSourceFound = true;
+      }
+    } catch (err) {
+      process.stderr.write(`WARN: could not read sprint plan for lane audit: ${err.message}\n`);
+    }
+  }
+
+  if (!laneSourceFound) {
+    process.stderr.write(
+      `WARN: no lane assignments found (no plans/waves.json lane_assignments and no §2.4 Lane Audit table) — all stories default to standard\n`
+    );
+  }
+
   const stories = {};
   for (const id of storyIds) {
     const carry = preserved[id] || {};
+    // Apply SDR lane assignment when available; carry-over lanes take precedence over
+    // sdr-lane-audit (they were already explicitly set in the previous sprint).
+    const sdrLane = laneAssignments[id];
+    const assignedLane = carry.lane ?? sdrLane ?? 'standard';
+    const assignedBy = carry.lane_assigned_by ?? (sdrLane ? 'sdr-lane-audit' : 'migration-default');
     stories[id] = {
       state: carry.state ?? 'Ready to Bounce',
       qa_bounces: carry.qa_bounces ?? 0,
@@ -157,8 +210,8 @@ function main() {
       worktree: carry.worktree ?? null,
       updated_at: now,
       notes: carry.notes ?? '',
-      lane: carry.lane ?? 'standard',
-      lane_assigned_by: carry.lane_assigned_by ?? 'migration-default',
+      lane: assignedLane,
+      lane_assigned_by: assignedBy,
       lane_demoted_at: carry.lane_demoted_at ?? null,
       lane_demotion_reason: carry.lane_demotion_reason ?? null,
     };
@@ -233,6 +286,26 @@ function main() {
       fs.renameSync(ctxTmp, ctxOut);
     }
   }
+
+  // --- CR-078 F1: Write .active sentinel (FINAL step) ---
+  // Atomically set <projectRoot>/.cleargate/sprint-runs/.active to the sprint ID,
+  // mirroring the state.json atomic-write idiom (tmp + rename).
+  // Emits a one-line WARN when the prior .active is non-empty and differs from this sprint.
+  const activeFile = path.join(REPO_ROOT, '.cleargate', 'sprint-runs', '.active');
+  let priorActive = '';
+  try {
+    priorActive = fs.readFileSync(activeFile, 'utf8').trim();
+  } catch {
+    // File absent or unreadable — treat as empty; non-fatal
+  }
+  if (priorActive && priorActive !== sprintId) {
+    process.stderr.write(
+      `WARN: .active was ${priorActive}, overwriting with ${sprintId} — prior sprint may not have been closed\n`
+    );
+  }
+  const activeTmp = `${activeFile}.tmp.${process.pid}`;
+  fs.writeFileSync(activeTmp, sprintId + '\n', 'utf8');
+  fs.renameSync(activeTmp, activeFile);
 
   process.stdout.write(`Initialized state.json for sprint ${sprintId} with ${storyIds.length} stories\n`);
 }

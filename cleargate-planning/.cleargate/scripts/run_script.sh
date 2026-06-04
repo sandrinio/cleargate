@@ -25,6 +25,13 @@
 #   AGENT_TYPE                — populates incident JSON agent_type field (null if empty)
 #   WORK_ITEM_ID              — populates incident JSON work_item_id field (null if empty)
 #   RUN_SCRIPT_ACTIVE         — self-exemption guard (set to 1 by this wrapper)
+#   CLEARGATE_STATE_FILE      — explicitly forwarded/exported to child (F8, CR-080)
+#   CLAUDE_PROJECT_DIR        — explicitly forwarded/exported to child (F8, CR-080)
+#   RUN_SCRIPT_ENV_ALLOWLIST  — optional: comma/space-separated list of env var names;
+#                               when set, only those vars (plus the always-forwarded set
+#                               above) are guaranteed exported to the child. Default:
+#                               full inherited-environment pass-through (allowlist is
+#                               opt-in only — do NOT set this unless you need isolation).
 
 set -euo pipefail
 
@@ -32,7 +39,13 @@ set -euo pipefail
 # Self-exemption guard — do not wrap recursively
 # ---------------------------------------------------------------------------
 if [[ "${RUN_SCRIPT_ACTIVE:-}" == "1" ]]; then
-  # Already inside a wrapper invocation; pass through directly, no JSON capture
+  # Already inside a wrapper invocation; pass through directly, no JSON capture.
+  # F8 (CR-080): guarantee ClearGate config vars are exported even on this fast path.
+  [[ -n "${CLEARGATE_STATE_FILE:-}"     ]] && export CLEARGATE_STATE_FILE
+  [[ -n "${ORCHESTRATOR_PROJECT_DIR:-}" ]] && export ORCHESTRATOR_PROJECT_DIR
+  [[ -n "${CLAUDE_PROJECT_DIR:-}"       ]] && export CLAUDE_PROJECT_DIR
+  [[ -n "${AGENT_TYPE:-}"              ]] && export AGENT_TYPE
+  [[ -n "${WORK_ITEM_ID:-}"            ]] && export WORK_ITEM_ID
   exec "$@"
 fi
 
@@ -87,6 +100,26 @@ trap 'rm -f "$STDOUT_TMP" "$STDERR_TMP"' EXIT
 
 # Mark self as active before running the wrapped command
 export RUN_SCRIPT_ACTIVE=1
+
+# F8 (CR-080): explicitly export the documented ClearGate config vars so they
+# reach the child regardless of whether the caller used `export` or plain assignment.
+# Default = full inherited-environment pass-through; allowlist is opt-in only.
+[[ -n "${CLEARGATE_STATE_FILE:-}"     ]] && export CLEARGATE_STATE_FILE
+[[ -n "${ORCHESTRATOR_PROJECT_DIR:-}" ]] && export ORCHESTRATOR_PROJECT_DIR
+[[ -n "${CLAUDE_PROJECT_DIR:-}"       ]] && export CLAUDE_PROJECT_DIR
+[[ -n "${AGENT_TYPE:-}"              ]] && export AGENT_TYPE
+[[ -n "${WORK_ITEM_ID:-}"            ]] && export WORK_ITEM_ID
+
+# Optional allowlist: when RUN_SCRIPT_ENV_ALLOWLIST is set (comma/space-separated
+# var names), restrict env to only those vars + the always-forwarded set above.
+# This is opt-in isolation — never the default.
+if [[ -n "${RUN_SCRIPT_ENV_ALLOWLIST:-}" ]]; then
+  _allowed_env=""
+  for _var in ${RUN_SCRIPT_ENV_ALLOWLIST//,/ }; do
+    _val="${!_var:-}"
+    [[ -n "$_val" ]] && _allowed_env="${_allowed_env}${_var}=${_val} "
+  done
+fi
 
 EXIT_CODE=0
 "$@" >"$STDOUT_TMP" 2>"$STDERR_TMP" || EXIT_CODE=$?

@@ -2,9 +2,9 @@
 epic_id: EPIC-045
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-66"
 carry_over: false
-status: Draft
+status: Completed
 approved: true
 ambiguity: 🟢 Low
 area: framework/portability

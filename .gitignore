@@ -62,3 +62,14 @@ cleargate-planning/.cleargate/sprint-runs/
 # Node — per-package .gitignore files handle node_modules/dist/.env
 # but belt-and-suspenders at root:
 node_modules/
+
+# Transient pre-gate scan output (pre_gate_runner.sh) — regenerated per scan
+.cleargate/reports/
+
+# Transient run_script.sh incident captures — diagnostic, regenerated on failure
+.cleargate/sprint-runs/**/.script-incidents/
+.cleargate/sprint-runs/_off-sprint/.script-incidents/
+
+# Ephemeral dispatch markers (write_dispatch.sh / pre-tool-use-task.sh) — consumed by hook
+.cleargate/sprint-runs/**/.dispatch-*.json
+.cleargate/sprint-runs/_off-sprint/.dispatch-*.json

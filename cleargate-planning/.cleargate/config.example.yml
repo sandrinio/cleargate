@@ -65,3 +65,19 @@
 #   test: "cargo test"
 #   typecheck: "cargo check"
 #   lint: "cargo clippy"
+
+# worktree:
+#   # Gitignored config roots provisioned into each new story worktree (CR-079).
+#   # Each root in this list is symlinked (or copied, per provision_mode) from the
+#   # repo root into the worktree when `provision_worktree_config.sh` is called.
+#   # The same list is exempt from the stray_env_files pre-gate scan so officially-
+#   # provisioned roots do not false-flag. Default: [".env"].
+#   provision_config:
+#     - .env
+#     - .env.local   # example — add any additional gitignored config roots
+#   provision_mode: symlink   # symlink (default) | copy
+#   # symlink: creates absolute symlink worktree-root/<root> -> repo-root/<root>.
+#   #          Symlink stays live with the source .env; trivially torn down with
+#   #          the worktree. Requires target to resolve via absolute path (done
+#   #          automatically by provision_worktree_config.sh).
+#   # copy:    copies the file so the worktree can hold a divergent config.

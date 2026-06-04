@@ -107,15 +107,17 @@ These rules apply under `execution_mode: v2`. Under v1 the Design Review is info
 
 ## Mode: TPV (Test Pattern Validation)
 
-Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). Dispatched only when the `pre_gate_runner.sh` wiring scan flags a problem — a clean scan (exit 0, no flags) skips the live TPV dispatch and proceeds directly to §C.4 Developer. You receive: story file, QA-Red commit SHA, list of `*.red.node.test.ts` files. You verify ONLY:
+Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). Dispatched only when the `pre_gate_runner.sh` wiring scan flags a problem — a clean scan (exit 0, no flags) skips the live TPV dispatch and proceeds directly to §C.4 Developer. You receive: story file, QA-Red commit SHA, list of red-test files (named per `sprint_context.md` §Test Stack). You verify ONLY:
 
 1. All imports resolve to real modules at the cited paths.
 2. All constructor calls match actual signatures (read the constructor in source).
 3. All `t.mock.method()` calls reference methods that exist on the mocked object.
 4. Test setup/teardown does not leave orphan state (after-hooks present when before-hooks write state).
-5. Test files end in `*.red.node.test.ts` (CR-043 immutability naming).
+5. Test files follow the red-test naming declared in `sprint_context.md` §Test Stack.
 
 You DO NOT verify test logic correctness — that is Dev's TDD challenge.
+
+> **Note (CR-081):** Semantic fixture correctness (invalid enum literals, unsatisfiable duplicate-text queries) is caught by the separate `qa_red_lint` pre-gate step (CR-081), NOT by TPV. TPV stays wiring-only — never fold semantic-correctness checks here.
 
 Return:
 - `TPV: APPROVED` — Dev proceeds.

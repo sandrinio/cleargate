@@ -40,16 +40,16 @@ Dispatch prompt contains: `Mode: RED — write failing tests against §4 accepta
 
 In RED mode you:
 1. Read the story's §4 acceptance Gherkin (and ONLY the story file — no implementation source files).
-2. Write failing test files named `*.red.node.test.ts` covering each acceptance scenario.
+2. Write failing test files named as declared in `sprint_context.md` §Test Stack covering each acceptance scenario.
 3. Confirm each test FAILS against the clean baseline (no implementation yet).
 4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).
 5. **Forbidden:** Read, edit, or reference any implementation file (`.ts` source, not tests).
-6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming `*.red.node.test.ts`. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
+6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming as declared in `sprint_context.md` §Test Stack. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
 
 Output shape for RED mode:
 ```
 QA-RED: WRITTEN | BLOCKED
-RED_TESTS: <list of *.red.node.test.ts files written>
+RED_TESTS: <list of red-test files written (naming per sprint_context.md §Test Stack)>
 BASELINE_FAIL: <count of failing scenarios>
 flashcards_flagged: [ ... ]
 ```
@@ -95,7 +95,7 @@ Dispatch verification depth by reading `lane.value` from the pack's JSON block (
   - Grep checklist for required strings (heading anchors, schema field names).
   - DoD §2.2 audit (cross-check the story's Gherkin → diff one-to-one).
   - Spec-vs-impl drift table (one row per requirement).
-  - **Skip** typecheck and targeted vitest UNLESS `pack.adjacent.adjacent_test_files` is non-empty AND any of those files are under `cleargate-cli/`, `mcp/`, `cleargate-cli/test/`, or any path with extension `.ts` / `.test.ts` / `.test.sh`.
+  - **Skip** typecheck and targeted test-suite re-run UNLESS `pack.adjacent.adjacent_test_files` is non-empty AND any of those files are under `cleargate-cli/`, `mcp/`, `cleargate-cli/test/`, or any path with extension `.ts` / `.test.ts` / `.test.sh`.
 
 - **`standard` lane** (current default — most stories):
   - Everything in `fast`, PLUS:
@@ -107,7 +107,7 @@ Dispatch verification depth by reading `lane.value` from the pack's JSON block (
 - **`runtime` lane** (NEW — CLI / integration / runtime-surface stories):
   - Everything in `standard`, PLUS:
   - **Full test suite** re-run (not just touched-file scope) — `cleargate gate test` against the full package.
-  - Coverage check: every Gherkin scenario has a passing test (zero MISSING entries).
+  - Coverage check: every Gherkin scenario has a passing test (zero MISSING entries). A red test that now passes against the Developer's commit counts as its own green — no separate green file required (red-now-green, CR-081).
   - **exit-code matrix:** invoke each new/modified command with `--help`, the happy path, and at least one explicit error path; assert exit codes match documented values.
   - **Integration smoke:** if the story changes a script under `.cleargate/scripts/`, run the script's bash test harness from a `mktemp -d` fixture (mirrors test_prep_qa_context.sh pattern at `.cleargate/scripts/test/`).
 
@@ -131,6 +131,7 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 4. **Map commit to acceptance criteria.** For each Gherkin scenario in the Story:
    - Find the corresponding test in the diff
    - If no test matches, that's a FAIL with reason `missing test for "<scenario name>"`
+   - **Red-now-green clause (CR-081):** A QA-Red test file that was failing at baseline and now PASSES against the Developer's commit fully satisfies the green-test / acceptance-coverage requirement. Do NOT require a separate green-path file distinct from the now-passing red file — a duplicate is redundant under reuse-over-recreate (Rule 18). Map each Gherkin scenario to the now-passing red test; absence of a second file is NOT a MISSING entry and must not produce a FAIL.
 5. **Check for regressions** — follow the **Lane-Aware Playbook**: on `standard` lane run scoped tests (touched-file neighborhoods); on `runtime` lane run the complete package suite. If anything in scope broke, FAIL.
 6. **Cross-check the DoD clause** from the sprint file that applies to this story.
 7. **Record flashcards on recurring QA failure patterns.** `Skill(flashcard, "record: #qa <lesson>")`. Examples:
@@ -140,7 +141,7 @@ Verify that a Developer's claim of "done" is real. Approve with `QA: PASS` or re
 ## Output shape
 ```
 STORY: STORY-NNN-NN
-QA: PASS | FAIL
+QA: PASS | PASS-PENDING-SMOKE | FAIL
 TYPECHECK: pass | fail
 TESTS: X passed, Y failed, Z skipped (full suite)
 ACCEPTANCE_COVERAGE: N of M Gherkin scenarios have matching tests
@@ -150,6 +151,13 @@ VERDICT: <one paragraph — what specifically to fix, or "ship it">
 flashcards_flagged:
   - "YYYY-MM-DD · #tag1 #tag2 · lesson ≤120 chars"
 ```
+
+**Verdict decision order (CR-081 × CR-082 composed):**
+1. **(a) Deferred-acceptance check (CR-082):** Does the story declare a `deferred_verification` entry whose heavy acceptance scenario was NOT run in this QA pass (out of static scope)? If yes and every OTHER static scenario passes → return `PASS-PENDING-SMOKE`. The story merges to the sprint branch but is NOT fully Done; the close gate (Step 2.9) enforces the deferred check before sprint-close. `PASS-PENDING-SMOKE` shadows `PASS` when a deferred entry is unrun.
+2. **(b) Full-coverage check (CR-081):** Else, are all Gherkin scenarios covered by passing tests — including red-now-green tests counting as their own green? → return full `PASS`.
+3. **(c)** Else → `FAIL`.
+
+Note: CR-081's red-now-green clause applies to the STATIC scenarios (step b); CR-082's PASS-PENDING-SMOKE is gated on an UNRUN DEFERRED scenario (step a). A story can be red-now-green on its static scenarios AND still be PASS-PENDING-SMOKE because a separate heavy scenario is deferred. The deferred-check (step a) is evaluated BEFORE the full-PASS branch (step b).
 
 `flashcards_flagged` is a YAML list of strings, each matching the `FLASHCARD.md` one-liner format (`YYYY-MM-DD · #tag1 #tag2 · lesson`). Default is `[]` (empty list — omit if no new cards). QA's list is additive to Developer's — the orchestrator merges both lists before processing. The orchestrator reads this field after QA approval and blocks creation of the next story's worktree until each card is approved (appended to `.cleargate/FLASHCARD.md`) or explicitly rejected (reason recorded in sprint §4 Execution Log). See protocol §4.
 

@@ -1,20 +1,20 @@
 ---
 sprint_id: SPRINT-34
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-34
 carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 approved: true
-start_date: null
+start_date: 2026-06-03T00:00:00Z
 end_date: null
 synced_at: null
 created_at: 2026-06-03T00:00:00Z
-updated_at: 2026-06-03T00:00:00Z
+updated_at: 2026-06-03T17:53:15Z
 created_at_version: cleargate@0.14.0
-updated_at_version: cleargate@0.14.0
+updated_at_version: 20fe79f5-dirty
 context_source: |
   SPRINT-34 bundles the six polyglot-portability CRs (CR-077..082, parent EPIC-045)
   surfaced by ClearGate's first v2-parallel dogfood, SPRINT-66 (new_app/Chyro) —
@@ -29,15 +29,21 @@ cached_gate_result:
 pushed_by: sandro.suladze@gmail.com
 pushed_at: 2026-06-03T16:44:48.335Z
 push_version: 1
-stamp_error: no ledger rows for work_item_id SPRINT-34
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-06-03T17:10:02Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-4-8
+  last_stamp: 2026-06-04T05:02:18Z
+  sessions:
+    - session: c07f3070-a358-43aa-8d8e-48ecc5dd8373
+      model: claude-opus-4-8
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-06-04T05:00:21Z
 ---
 
 # SPRINT-34: Polyglot Portability Hardening

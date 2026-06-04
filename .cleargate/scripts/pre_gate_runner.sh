@@ -41,6 +41,11 @@ if [[ ! -d "$WORKTREE" ]]; then
   exit 2
 fi
 
+# F5 — normalize WORKTREE to an absolute path so that REPORT_FILE and every
+# downstream non-subshell `cd "$WORKTREE"` resolve correctly regardless of
+# whether the caller passed a relative or absolute path (CR-080).
+WORKTREE="$(cd "$WORKTREE" && pwd)"
+
 # ---------------------------------------------------------------------------
 # Locate gate-checks.json — auto-seed if missing
 # ---------------------------------------------------------------------------
@@ -255,11 +260,34 @@ run_arch() {
     try { JSON.parse('${stray_env_json}').forEach(p => console.log(p)); } catch(e) {}
   " 2>/dev/null)
 
+  # Read the provisioned-config exemption list (CR-079 single source).
+  # config.yml lives two directories above SCRIPT_DIR (.cleargate/scripts/../..).
+  local CONFIG_YML
+  CONFIG_YML="$(cd "${SCRIPT_DIR}/../.." && pwd)/.cleargate/config.yml"
+  local provisioned_config=()
+  while IFS= read -r _pline; do
+    [[ -z "$_pline" ]] || provisioned_config+=("$_pline")
+  done < <(read_provision_config "${CONFIG_YML}")
+
+  # Helper: returns 0 (true) if a pattern is in the provisioned-config list.
+  is_provisioned() {
+    local _pat="$1"
+    local _p
+    for _p in "${provisioned_config[@]:-}"; do
+      [[ "$_p" = "$_pat" ]] && return 0
+    done
+    return 1
+  }
+
   local stray_found=0
   local stray_details=""
   for pat in "${stray_patterns[@]:-}"; do
     [[ -z "$pat" ]] && continue
-    if [[ -f "${WORKTREE}/${pat}" ]]; then
+    if [[ -f "${WORKTREE}/${pat}" || -L "${WORKTREE}/${pat}" ]]; then
+      # Skip patterns that are in the provisioned-config list (CR-079 exemption).
+      if is_provisioned "${pat}"; then
+        continue
+      fi
       stray_details+="${pat}"$'\n'
       stray_found=1
     fi
@@ -283,6 +311,34 @@ run_arch() {
         count=$(find "$dir" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ')
         echo "  ${dir}: ${count} files" >> "$REPORT_FILE"
       done
+  fi
+
+  # 5. QA-Red semantic fixture lint (CR-081)
+  # Glob red test files under the worktree, run qa_red_lint.mjs.
+  # Gate behind arch.qa_red_lint config key (default true).
+  # Uses ABSOLUTE paths — no cd (avoids cwd-leak per FLASHCARD #pre-gate #cwd-leak).
+  # Uses grep -q (not grep -c || echo 0 — avoids double-count hazard per FLASHCARD #test-harness #bash).
+  local qa_red_lint_enabled
+  qa_red_lint_enabled="$(read_config_field "arch.qa_red_lint" "$CONFIG_FILE")"
+  # Default to enabled when key is absent (empty string → treat as true)
+  if [[ -z "$qa_red_lint_enabled" || "$qa_red_lint_enabled" == "true" ]]; then
+    local lint_script="${SCRIPT_DIR}/qa_red_lint.mjs"
+    if [[ -f "$lint_script" ]]; then
+      local lint_out lint_exit
+      lint_exit=0
+      lint_out="$(node "${lint_script}" "${WORKTREE}" 2>&1)" || lint_exit=$?
+      if [[ $lint_exit -eq 0 ]]; then
+        record_result "$REPORT_FILE" "qa_red_lint" "PASS" "no semantic fixture issues"
+      else
+        record_result "$REPORT_FILE" "qa_red_lint" "FAIL" "$(echo "$lint_out" | head -5 | tr '\n' '|')"
+        echo "$lint_out" >> "$REPORT_FILE"
+        OVERALL_EXIT=1
+      fi
+    else
+      record_result "$REPORT_FILE" "qa_red_lint" "INFO" "skipped (qa_red_lint.mjs not found at ${lint_script})"
+    fi
+  else
+    record_result "$REPORT_FILE" "qa_red_lint" "INFO" "skipped (arch.qa_red_lint=false in config)"
   fi
 }
 
