@@ -154,24 +154,31 @@ const rEnum = {
     // TS: { field: "value" } or field="value" in JSX/React props
 
     for (const [fieldName, allowedValues] of allFieldSets) {
+      // Scan every line with the given regex (capture group 1 = the literal),
+      // flagging any literal not in allowedValues. Shared by the Python-kwarg
+      // and TS-object-prop passes below (identical flag logic, different regex).
+      const scanForOutOfSet = (regex) => {
+        let lineIndex = 0;
+        for (const line of lines) {
+          lineIndex++;
+          for (const match of line.matchAll(regex)) {
+            const literal = match[1];
+            if (!allowedValues.has(literal)) {
+              flags.push({
+                line: lineIndex,
+                message: `R-enum: field "${fieldName}" value "${literal}" is not in the declared set [${[...allowedValues].map(v => `"${v}"`).join(', ')}]. Fix: use one of the declared values.`,
+              });
+            }
+          }
+        }
+      };
+
       // Python kwarg: fieldName="value" or fieldName='value'
       const pythonKwargRegex = new RegExp(
         `\\b${fieldName}\\s*=\\s*["']([^"']+)["']`,
         'g'
       );
-      let lineIndex = 0;
-      for (const line of lines) {
-        lineIndex++;
-        for (const match of line.matchAll(pythonKwargRegex)) {
-          const literal = match[1];
-          if (!allowedValues.has(literal)) {
-            flags.push({
-              line: lineIndex,
-              message: `R-enum: field "${fieldName}" value "${literal}" is not in the declared set [${[...allowedValues].map(v => `"${v}"`).join(', ')}]. Fix: use one of the declared values.`,
-            });
-          }
-        }
-      }
+      scanForOutOfSet(pythonKwargRegex);
 
       // TS object prop: fieldName: "value" — only when it looks like a value assignment (in { } context)
       // We look for patterns like:   fieldName: "value"  but NOT  fieldName: TypeName  (declaration)
@@ -181,19 +188,7 @@ const rEnum = {
         `(?:,|\\{|^)\\s*${fieldName}\\s*:\\s*["']([^"']+)["']`,
         'g'
       );
-      lineIndex = 0;
-      for (const line of lines) {
-        lineIndex++;
-        for (const match of line.matchAll(tsObjPropRegex)) {
-          const literal = match[1];
-          if (!allowedValues.has(literal)) {
-            flags.push({
-              line: lineIndex,
-              message: `R-enum: field "${fieldName}" value "${literal}" is not in the declared set [${[...allowedValues].map(v => `"${v}"`).join(', ')}]. Fix: use one of the declared values.`,
-            });
-          }
-        }
-      }
+      scanForOutOfSet(tsObjPropRegex);
     }
 
     return flags;
