@@ -4,7 +4,7 @@ parent_ref: EPIC-045
 parent_cleargate_id: EPIC-045
 sprint_cleargate_id: "SPRINT-52"
 carry_over: false
-status: Draft
+status: Completed
 approved: true
 area: framework/qa-loop
 context_source: |

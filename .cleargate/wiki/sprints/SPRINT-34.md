@@ -6,9 +6,10 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-06-03T17:53:01.863Z"
-last_ingest_commit: "8e08695c032677114dd55fb155802e36360e7597"
+last_ingest: "2026-06-04T05:02:19.748Z"
+last_ingest_commit: "b93240836dc454c8a666db8ef0209d350965678e"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-34"
 ---
 
 # SPRINT-34: SPRINT-34
