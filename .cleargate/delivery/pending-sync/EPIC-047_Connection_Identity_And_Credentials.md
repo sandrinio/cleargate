@@ -20,8 +20,8 @@ cached_gate_result:
     - id: parent-approved
       detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
     - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: auth/token-store.ts"
-  last_gate_check: 2026-06-04T09:07:02Z
+      detail: "cited paths do not exist on disk: mcp/src/db/schema.ts, mcp/src/admin-api/members.ts, mcp/src/admin-api/tokens.ts, mcp/src/auth/service-token.ts, mcp/src/auth/revocation.ts, cleargate-cli/src/commands/join.ts, cleargate-cli/src/auth/acquire.ts, auth/token-store.ts"
+  last_gate_check: 2026-06-04T14:08:16Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T06:05:45Z
+  last_stamp: 2026-06-04T14:08:15Z
   sessions: []
 ---
 
@@ -167,10 +167,10 @@ Feature: Connection Identity & Credentials
 - ✅ **Revoke propagation:** Redis pub/sub. — *Human: "yes."* Per-subject channels + a `rev:project:<id>` whole-tenant channel.
 - ✅ **App-token verify mechanism:** indexed `token_id` lookup + single bcrypt compare — **NOT** the legacy whole-table scan (load analysis: scan makes connect-cost grow with total tenant count and is the reconnect-storm amplifier).
 
-*Still open:*
-- **AI Question:** "Pairing-code revocation authority: operator-only, or also the connector-owner who minted it?" — **Human Answer:** {Waiting}
-- **AI Question:** "Does the native-lane register reuse the `cleargate join` access token directly, or mint a derived connection credential at register?" — **Human Answer:** {Waiting}
-- **AI Question:** "Verify-result cache: is a short positive-TTL cache on the **broker** (keyed by credential hash, invalidated by the revoke subscription) acceptable given fail-closed semantics — or must every connect hit `mcp` live? The cache is what makes a post-restart reconnect cheap; the risk is a cache entry outliving a missed revoke message." — **Human Answer:** {Waiting}
+*Resolved (2026-06-04, SPRINT-36 decomposition — Sandro):*
+- ✅ **Pairing-code revocation authority:** **operator + connector-owner** — both a project operator and the connector-owner who minted the code may revoke it. (Widens the revoke API to accept owner-scoped revoke; STORY-047-02/03.)
+- ✅ **Native-lane register credential:** **reuse the `cleargate join` access token directly** — the broker verifies the existing join access token as-is at each register (no derived connection credential minted at M1). (STORY-047-03 `member` kind + STORY-047-07 lane wiring.)
+- ✅ **Verify-result cache:** **short positive-TTL cache on the broker**, keyed by credential hash, invalidated by the revoke subscription (fail-closed; a reconnect within the window skips `mcp`+bcrypt). Accepted — the cache is tied to the subscriber so it never outlives a revoke. (STORY-047-05.)
 
 ---
 
