@@ -46,6 +46,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 
 | [[SPRINT-33]] | sprint | Active | .cleargate/sprint-runs/SPRINT-33/SPRINT-33_REPORT.md |
 | [[SPRINT-34]] | sprint | Active | .cleargate/sprint-runs/SPRINT-34/SPRINT-34_REPORT.md |
+| [[SPRINT-35]] | sprint | Shipped | .cleargate/sprint-runs/SPRINT-35/SPRINT-35_REPORT.md |
 ## CRs
 
 | [[CR-074]] | cr | Draft | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |

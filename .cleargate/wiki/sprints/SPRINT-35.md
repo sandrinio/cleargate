@@ -1,13 +1,32 @@
 ---
-sprint_id: SPRINT-35
-status: Shipped
-generated_at: 2026-06-04T16:00:00Z
-generated_by: Reporter agent
-template_version: 2
-pushed_by: sandro.suladze@gmail.com
-pushed_at: 2026-06-04T13:15:27.146Z
-push_version: 2
+type: sprint
+id: "SPRINT-35"
+parent: ""
+children: []
+status: "Shipped"
+remote_id: ""
+raw_path: ".cleargate/sprint-runs/SPRINT-35/SPRINT-35_REPORT.md"
+last_ingest: "2026-06-04T13:15:27.446Z"
+last_ingest_commit: ""
+repo: "planning"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-35/SPRINT-35_REPORT.md"
+last_report_ingest_commit: "9eb54b961ad6bad672636867ca10ac96ab3ff2e4"
 ---
+
+# SPRINT-35: SPRINT-35
+
+<!-- Sprint Report v2 Template — template_version: 2 -->
+<!-- Event-type vocabulary (STORY-013-05 / protocol §§2–17):
+     User-Review: UR:review-feedback | UR:bug
+     Change-Request: CR:bug | CR:spe
+
+## Blast radius
+Affects: None.
+
+## Open questions
+None.
+<!-- BEGIN sprint-report -->
+## Sprint Report
 
 <!-- Sprint Report v2 Template — template_version: 2 -->
 <!-- Event-type vocabulary (STORY-013-05 / protocol §§2–17):
@@ -293,3 +312,4 @@ The autonomy-warnings log (`.cleargate/hook-log/autonomy-warnings.log`) records 
 | Date | Author | Change |
 |---|---|---|
 | 2026-06-04 | Reporter agent | Initial generation |
+<!-- END sprint-report -->
