@@ -1,6 +1,14 @@
 {
   "sprint": "SPRINT-35",
   "generated_at": "2026-06-04T08:29:54Z",
+  "lane_assignments": {
+    "STORY-046-01": "fast",
+    "STORY-046-02": "standard",
+    "STORY-046-03": "standard",
+    "STORY-046-04": "standard",
+    "STORY-048-01": "standard",
+    "STORY-048-02": "standard"
+  },
   "waves": [
     {
       "wave": "wave1",
