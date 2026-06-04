@@ -7,15 +7,15 @@ lifecycle_init_mode: warn
 execution_mode: v1
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 start_date: 2026-06-05
 end_date: 2026-06-19
 synced_at: null
 area: connector
 created_at: 2026-06-04T00:00:00Z
-updated_at: 2026-06-04T00:00:00Z
+updated_at: 2026-06-04T09:15:55Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 855614c0-dirty
 cached_gate_result:
   pass: false
   failing_criteria:
@@ -29,7 +29,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T08:58:31Z
+  last_stamp: 2026-06-04T09:15:43Z
   sessions: []
 ---
 
