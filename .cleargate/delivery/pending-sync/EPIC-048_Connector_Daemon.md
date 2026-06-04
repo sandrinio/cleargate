@@ -19,9 +19,7 @@ cached_gate_result:
   failing_criteria:
     - id: parent-approved
       detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: cleargate-cli/src/commands/mcp-serve.ts, cleargate-cli/src/auth/acquire.ts, cleargate-cli/src/auth/token-store.ts, cleargate-cli/src/auth/factory.ts, connector/docs/event-contract.md, connector/docs/spike-findings-claude-2.1.161.md"
-  last_gate_check: 2026-06-03T22:18:34Z
+  last_gate_check: 2026-06-04T09:07:03Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,7 +35,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T06:05:59Z
+  last_stamp: 2026-06-04T07:57:07Z
   sessions: []
 ---
 
@@ -51,17 +49,21 @@ draft_tokens:
   <architecture_rules>
     <rule>Node/TS, shipped as an optional ClearGate companion (default off); reuse cleargate-cli auth plumbing (acquire.ts, token-store keychain). No runtime code enters the shipped npm planning payload.</rule>
     <rule>Spawn-per-turn: claude -p "<prompt>" --output-format stream-json --verbose --include-partial-messages < /dev/null. The /dev/null is mandatory; --include-partial-messages is required for token deltas.</rule>
-    <rule>Allowlist-map known record types → event contract; LOG unmapped types (drift); never forward raw stream-json. Pinned to claude 2.1.161 — snapshot shapes as CI fixtures, re-verify on upgrade.</rule>
-    <rule>EOF is the terminus, not `result` (multiple results per turn). Detect errors via is_error, never subtype. Render text from text_delta only.</rule>
-    <rule>Cancel = staged process-tree teardown (SIGTERM→grace→SIGKILL + independent descendant reap). A bare process.kill(pid) orphans detached children on Linux.</rule>
+    <rule>Allowlist-map known record types → event contract; LOG unmapped types (drift); never forward raw stream-json. Forward pin claude 2.1.162 (baseline re-verified 2026-06-04; original spike 2.1.161) — snapshot shapes as CI fixtures, re-verify on upgrade.</rule>
+    <rule>EOF is the terminus, not `result` (multiple results per turn). Detect errors via is_error, never subtype. Render text from text_delta only; skip signature_delta. Handle BOTH error classes: in-band is_error and out-of-band spawn-failure (no stream).</rule>
+    <rule>Cancel = staged process-tree teardown (SIGTERM→grace→SIGKILL + independent descendant reap, cross-platform). A bare process.kill(pid) orphans detached children on Linux.</rule>
+    <rule>All `claude` invocation sits behind a `Backend` interface — zero direct claude-CLI refs in the turn path (grep-verifiable). Build this seam BEFORE turn-lifecycle work.</rule>
+    <rule>Runtime version-drift guard: compare live `claude --version` to the 2.1.162 pin at startup/register; degrade + drift-log on mismatch, never crash.</rule>
   </architecture_rules>
   <target_files>
+    <file path="connector/daemon/src/backend.ts" action="create" />
     <file path="connector/daemon/src/dial.ts" action="create" />
     <file path="connector/daemon/src/turn-runner.ts" action="create" />
     <file path="connector/daemon/src/normalize.ts" action="create" />
     <file path="connector/daemon/src/teardown.ts" action="create" />
     <file path="connector/daemon/src/sessions.ts" action="create" />
   </target_files>
+  <milestone_sequence>Build as ordered milestones, not a monolith: M-a spawn-helper + cross-platform teardown (reusable, independently tested) → M-b Backend seam → M-c stream normalizer → M-d turn-runner/WS lifecycle → M-e sessions → M-f metrics → M-g sandboxing/security.</milestone_sequence>
 </agent_context>
 ```
 
@@ -79,13 +81,16 @@ The Connector is the half that actually runs Claude Code where the user's worksp
 
 **✅ IN-SCOPE (Build This)**
 - [ ] WS dial-out to the broker + register (announce `protocol_version`) + reconnect/re-attach by `connection_id`, with **full-jitter backoff** (spreads the post-deploy reconnect storm across the drain window so 100 connectors don't re-verify simultaneously) and **resume-from-`seq`** (re-attach a turn from the last delivered `seq`, pairing with the broker's bounded replay ring so a drop is a hiccup, not a lost turn).
-- [ ] Spawn-per-turn with the exact verified command; map content blocks → `turn_start`/`thinking_delta`/`text_delta`/`tool_use`/`tool_result`/`turn_result`/`error`/`stream_end`.
+- [ ] **`Backend` seam (build before turn-lifecycle).** All `claude` invocation sits behind a `Backend` interface; the turn path has **zero direct `claude`-CLI references** (grep-verifiable DoD), resolved via a `registry[backend_id]`, no `isinstance`/type-branch. Keeps "claude-first" honest rather than "claude-only by accident" — and makes the Gemini/Codex adapter a later drop-in, not a rewrite.
+- [ ] Spawn-per-turn with the exact verified command; map content blocks → `turn_start`/`thinking_delta`/`text_delta`/`tool_use`/`tool_result`/`turn_result`/`error`/`stream_end`. **Skip `signature_delta` by name** (non-displayable crypto); treat a same-session second `system/init` as **continuation, not a new `turn_start`**.
 - [ ] Multi-result/EOF lifecycle: read to stdout EOF, emit `stream_end` + `turn_end`; never treat first `result` as terminal.
-- [ ] Staged process-tree teardown on cancel/disconnect/exit; independent descendant tracking + reap.
-- [ ] Sessions delegated to `claude`: new (no `--resume`), continue (`--resume <id>`), list (top-level `<id>.jsonl` only, exclude `subagents/` + memory artifacts).
-- [ ] Metrics from `result.modelUsage.<model>` + `total_cost_usd`; `context_pct` from in-stream `contextWindow`. Per-agent via `task_*`/`parent_tool_use_id`.
-- [ ] Config-driven sandboxing: `--allowedTools` (default Read/Grep/Glob), pinned working dir, permission mode, concurrency cap.
-- [ ] CI fixtures snapshotting `system/task_*` + `modelUsage` shapes; unmapped-type logging.
+- [ ] **Two error classes** in the state machine: in-band `is_error:true` (recoverable `turn_result`) **and** out-of-band spawn failure (bad binary / `ENOENT` → no parseable stream → distinct fatal `error`, never a turn hung waiting on an EOF that already happened).
+- [ ] Staged process-tree teardown on cancel/disconnect/exit; independent descendant tracking + reap — **cross-platform** (a detached child sits in its own PGID, so `kill(-pgid)` misses it on Linux/Docker per GH#19045; Windows needs `taskkill /T /F`). Node lacks a `psutil`-equivalent → audit a `tree-kill`-class dep or a thin native helper.
+- [ ] Sessions delegated to `claude`: new (no `--resume`), continue (`--resume <id>`), list (top-level `<id>.jsonl` only, exclude `subagents/` + memory). **Reset = omit `--resume`; delete = stop resuming — NEVER unlink the transcript** (`claude` owns disk via `cleanupPeriodDays`). `<cwd>`-as-dashes path-mangling self-check at startup.
+- [ ] Metrics from `result.modelUsage.<model>` + `total_cost_usd`; `context_pct` from in-stream `contextWindow`, marked **derived/display-only/approximate**. Per-agent via `task_*`/`parent_tool_use_id`. **Honor the `null` (unknown/unsupported) vs `0` (measured zero) convention**; flag a session aggregate `partial:true` if any turn lacked a metric.
+- [ ] **Runtime version-drift guard**: at startup + register, compare live `claude --version` to the pinned `2.1.162`; on drift, register/`status` reports **degraded** + a named **`drift` log channel** fires for unmapped record types — never crash. (Our whole contract rests on observed CLI bytes; this turns the prose pin into a runtime assertion.)
+- [ ] Config-driven sandboxing: `--allowedTools` (conservative default `Read,Grep,Glob`; write/exec opt-in only), **realpath-pinned cwd-jail** the turn cannot escape, **argv-only spawn (no shell)**, **tool-I/O size-cap + `truncated:true` + secret redaction done IN THE DAEMON** (the broker can't — payload is opaque, so the daemon is the only place to cap/redact), permission mode, concurrency cap.
+- [ ] CI fixtures snapshotting `system/task_*` + `modelUsage` shapes; unmapped-type logging. **Seed fixtures from the existing real captures** at `connector/harness/spike/captures/*.ndjson` rather than re-capturing.
 
 **❌ OUT-OF-SCOPE (Do NOT Build This)**
 - The broker / registry / routing (→ EPIC-046) and credential minting (→ EPIC-047).
@@ -98,10 +103,12 @@ The Connector is the half that actually runs Claude Code where the user's worksp
 
 | Constraint Type | Limit / Rule |
 |---|---|
-| Version | Pinned to `claude` 2.1.161; shapes are undocumented + version-sensitive → CI fixtures + re-verify on upgrade |
+| Version | Forward pin `claude` 2.1.162 (baseline re-verified 2026-06-04; spike provenance 2.1.161); shapes undocumented + version-sensitive → CI fixtures + re-verify on upgrade |
 | Process hygiene | No orphans — staged tree teardown mandatory; macOS "graceful reap" does NOT generalize to Linux (GH #19045 unverified) |
 | Stream | EOF is terminus; errors via `is_error` not `subtype`; render text from `text_delta` only (double-emit) |
 | Stdin | `< /dev/null` mandatory or 3s stall |
+| Backend coupling | Turn path has **zero direct `claude`-CLI refs** (behind a `Backend` interface) — claude-first, not claude-only-by-accident |
+| Sandboxing | Code-executing service → realpath cwd-jail, argv-only/no-shell spawn, tool-I/O cap+redact **in the daemon** (broker can't see opaque payload), conservative default allowlist |
 | Boundary | Optional companion; never in the shipped npm planning payload |
 
 ## Existing Surfaces

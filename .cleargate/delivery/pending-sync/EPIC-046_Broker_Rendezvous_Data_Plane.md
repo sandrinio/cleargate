@@ -19,9 +19,7 @@ cached_gate_result:
   failing_criteria:
     - id: parent-approved
       detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
-    - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: mcp/src/server.ts, mcp/src/mcp/transport.ts, mcp/src/db/schema.ts, mcp/src/redis/client.ts"
-  last_gate_check: 2026-06-03T22:16:51Z
+  last_gate_check: 2026-06-04T09:07:03Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,7 +35,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T06:04:55Z
+  last_stamp: 2026-06-04T07:43:35Z
   sessions: []
 ---
 
@@ -93,7 +91,7 @@ A user's local Claude Code sits behind NAT with no inbound port — no app can r
 - [ ] Envelope routing by `connection_id` + `turn_id` + `app_id`; opaque, ordered relay of `event` frames via a `route(envelope) → local | remote(instance_id)` call site (v1 always `local`; the `remote` branch is a stub).
 - [ ] `cancel` pass-through; `turn_end`/EOF in-flight tracking (a turn closes on `turn_end`, never on a `result`).
 - [ ] Heartbeat as a **single sweep timer** over a `lastSeen` table (NOT one timer per socket) → presence; offline → immediate clean `error`, never hang.
-- [ ] Audit metadata per turn (who/which app/connection/turn_id/result/bytes/timestamps) — **off the relay's critical path** (see §6 for write-path decision).
+- [ ] Audit metadata per turn (who/which app/connection/turn_id/result/bytes/timestamps) — **off the relay's critical path**, buffered + **batch-flushed to an `mcp` ingest endpoint** via the broker's service token (broker holds no DB creds; §6).
 
 *Frame-handling discipline (the load-bearing build — see §3a)*
 - [ ] **Separable opaque framing** `[u32 header_len][header][opaque payload]`: parse the header **only**; forward payload bytes untouched (`subarray` views, no copy). **Zero `JSON.parse` / re-encode of payload, ever** (lint/test-enforced). This is the keystone that keeps per-frame cost ~2 µs and kills GC pressure at 30k fps.
@@ -109,6 +107,7 @@ A user's local Claude Code sits behind NAT with no inbound port — no app can r
 - [ ] **Blue-green deploy with connection draining**: at any instant one instance owns all connections; on deploy, stop new connects to old, drain in-flight turns, new connects → new. No cross-instance frame routing. Combined with resume, a deploy is a drain, not a 100-user storm.
 - [ ] **Observability counters**: event-loop lag (`monitorEventLoopDelay`), per-stream `bufferedAmount` high-water, frames/sec, stalled/dropped counts, GC pause histogram. Alert on loop lag > 10 ms or any stream pinned at the buffer cap.
 - [ ] **Load-test gate**: synthetic 200 streams × 150 fps + injected slow consumer + injected 5 MB `tool_result`, sustained 30 min → p99 < 100 ms, flat RSS, loop lag < 10 ms.
+- [ ] **Broker-edge abuse controls** (the public-surface threat the connector-local sandboxing can't cover): hard **envelope-size cap** (reject oversized frames pre-route), **registry-exhaustion guard** (max connections per project + global; reject past ceiling, don't OOM), **WS-handshake/slowloris timeout** (drop half-open upgrades), and a **per-IP connect rate-limit** at the edge (reuse the `mcp` fixed-window Redis-counter pattern, broker-scoped key). Distinct from the per-turn fairness caps above — this is connection/frame admission, not turn admission.
 
 **❌ OUT-OF-SCOPE (Do NOT Build This)**
 - Credential minting/verification logic (→ EPIC-047; broker only *calls* verify). The **indexed-token-verify fix** that defuses the reconnect storm lives in EPIC-047.
@@ -154,7 +153,7 @@ Per frame: read header (~30 B, fixed-offset, not `JSON.parse`) + map lookup + fo
 **Affected Files:**
 - `connector/broker/src/{server,ws-gateway,registry,router}.ts` — new service. Create. Add `framing.ts` (separable header/payload codec), `backpressure.ts` (bounded buffers + drain), `resume.ts` (seq/replay), `fairness.ts` (turn caps), `bus.ts` (pub/sub abstraction — used for revocation now, cross-instance routing later).
 - Reuses the plane's existing **Redis** instance for the pub/sub bus (revocation subscribe in v1; presence write-through + cross-instance later).
-- Audit: writes turn-metadata rows off the critical path — **open Q (§6):** batched-async POST to `mcp` vs a broker-owned write-only `auditLog` append. **NOT** a synchronous per-turn `mcp` call (would pit audit against the verify storm on the max:20 pool).
+- Audit: broker buffers turn-metadata rows and **flushes batches to a small `mcp` ingest endpoint** (`POST /admin-api/v1/audit/batch`, authed by the broker's existing service token) — broker holds **no DB credentials**. Off the per-turn critical path; bounded buffer (drop-oldest + counter on overflow); ~seconds loss-on-crash accepted. (Synchronous-per-turn and broker-owned-DB-credential rejected — §6.)
 
 **Data Changes:**
 - In-memory registry behind interface: `Map<connection_id, { socket, project_id, protocol_version, presence, instance_id, boundApps: Set<app_id> }>` + write-through `presence:{connection_id} → instance_id` (TTL, heartbeat-refreshed; ignored on read at N=1).
@@ -227,9 +226,9 @@ Feature: Broker Rendezvous Data Plane
 - ✅ **TLS termination:** reverse proxy (Coolify/nginx) in front; broker speaks plaintext WS behind it. — *capacity panel #7; removes TLS cost from the loop.*
 - ✅ **Instance count:** single active instance for v1 (3–4× headroom at target), **multi-instance deferred behind designed-in seams**; deploy safety via blue-green drain + resume, not via N instances. — *architecture-skeptic recommendation.*
 - ✅ **Revoke channel:** Redis pub/sub. — *Human: "yes."*
+- ✅ **Audit write path:** **batched-async to `mcp`** — broker buffers rows and flushes batches to a small `mcp` ingest endpoint via its **existing service token**; broker holds **no DB credentials**. ~seconds of loss-on-crash accepted (audit is forensic metadata, not billing/routing). Synchronous-per-turn and broker-owned-DB-credential both rejected. — *Human, 2026-06-04.*
 
 *Still open:*
-- **AI Question:** "Audit write path: **batched-async POST to `mcp`** (broker stays DB-less; preserves 'one DB owner'; a few seconds of audit-loss risk on broker crash) vs a **broker-owned write-only `auditLog` Postgres append** on a separate small pool (lower latency, but the broker now holds a scoped DB credential)? Both keep audit **off** the per-turn critical path and off the verify pool — the earlier 'synchronous per-turn `mcp` call' is rejected by the load analysis." — **Human Answer:** {Waiting}
 - **AI Question:** "Tuning constants to fix at the load-test gate, or pin now? per-connection send-buffer cap (~1 MB), large-frame chunk threshold (~128 KB), replay-ring size (~256 frames / 1 MB), heartbeat sweep interval (~15–30 s)." — **Human Answer:** {Waiting}
 
 ---

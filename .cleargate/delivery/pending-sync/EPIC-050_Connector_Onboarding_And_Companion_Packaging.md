@@ -20,8 +20,8 @@ cached_gate_result:
     - id: parent-approved
       detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
     - id: existing-surfaces-verified
-      detail: "cited paths do not exist on disk: cleargate-cli/src/auth/token-store.ts, cleargate-cli/src/config.ts, .cleargate/config.json, cleargate-cli/src/commands/join.ts, .cleargate/.join.json"
-  last_gate_check: 2026-06-04T06:35:29Z
+      detail: "cited paths do not exist on disk: .cleargate/config.json"
+  last_gate_check: 2026-06-04T09:07:04Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T06:35:29Z
+  last_stamp: 2026-06-04T07:43:54Z
   sessions: []
 ---
 
@@ -173,6 +173,7 @@ Feature: Connector Onboarding & Companion Packaging
 - **AI Question:** "Install mechanism for `@cleargate/connector`: global `npm i -g`, `npx`-on-demand, or a CLI-managed vendored dir under `~/.cleargate/connector`?" — **Human Answer:** {Waiting}
 - **AI Question:** "Version coupling: how does the CLI pin/upgrade the connector package against its `protocol_version` — exact pin, semver range, or handshake-and-warn?" — **Human Answer:** {Waiting}
 - **AI Question:** "Confirm the charter expansion (planning-only → planning + connectivity) ships here as a deliberate Gate-1 — yes?" — **Human Answer:** {Waiting}
+- ✅ **Tunnel Phase-0 (borrowed — prior effort's EPIC-012 Phase-1): OUT as a built feature.** Decided 2026-06-04. We do **not** add a local inbound listener to the daemon (it fights the dial-out design and opens the product's worst security surface — a code-executing daemon reachable over a tunnel). Instead, early phone→Claude dogfood = **reach the M0 broker over Tailscale** (phone + laptop on the same private mesh); captured as an **ops note** on SPRINT-35, zero extra code. The only window where building the listener would pay off is dogfooding *before any broker exists* — but M0 is one sprint, so waiting for it is cheaper.
 
 ---
 

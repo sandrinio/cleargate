@@ -1,0 +1,30 @@
+{
+  "sprint": "SPRINT-35",
+  "generated_at": "2026-06-04T08:29:54Z",
+  "waves": [
+    {
+      "wave": "wave1",
+      "stories": ["STORY-046-01"],
+      "parallel": false,
+      "rationale": "scaffold root; parallel_eligible=n (clause 1) — serialized as the foundation all other stories depend on"
+    },
+    {
+      "wave": "wave2",
+      "stories": ["STORY-046-02", "STORY-048-01"],
+      "parallel": true,
+      "rationale": "disjoint file surfaces (connector/broker/src/* vs connector/daemon/src/*), both parallel_eligible=y, no shared db_write_set, no dependency edge between them; both depend only on STORY-046-01 (wave1, satisfied)"
+    },
+    {
+      "wave": "wave3",
+      "stories": ["STORY-046-03", "STORY-048-02"],
+      "parallel": true,
+      "rationale": "disjoint file surfaces (connector/broker/* vs connector/daemon/*), both parallel_eligible=y, no shared db_write_set, no dependency edge between them; predecessors (STORY-046-02, STORY-048-01) land in wave2"
+    },
+    {
+      "wave": "wave4",
+      "stories": ["STORY-046-04"],
+      "parallel": false,
+      "rationale": "e2e harness; parallel_eligible=n (clause 1) — serialized; depends on both STORY-046-03 and STORY-048-02 (wave3, clause 5)"
+    }
+  ]
+}
