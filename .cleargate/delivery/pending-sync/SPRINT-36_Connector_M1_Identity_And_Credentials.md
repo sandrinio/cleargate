@@ -7,7 +7,7 @@ lifecycle_init_mode: warn
 execution_mode: v1
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 start_date: 2026-06-20
 end_date: 2026-07-04
 synced_at: null
@@ -16,6 +16,12 @@ created_at: 2026-06-04T00:00:00Z
 updated_at: 2026-06-04T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: pending
+cached_gate_result:
+  pass: false
+  failing_criteria:
+    - id: discovery-checked
+      detail: expected context_source != "null", got undefined
+  last_gate_check: 2026-06-04T14:17:15Z
 stamp_error: no ledger rows for work_item_id SPRINT-36
 draft_tokens:
   input: null
@@ -23,14 +29,8 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T14:17:15Z
+  last_stamp: 2026-06-04T15:07:21Z
   sessions: []
-cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: discovery-checked
-      detail: expected context_source != "null", got undefined
-  last_gate_check: 2026-06-04T14:17:15Z
 ---
 
 # SPRINT-36: Connector M1 — Connection Identity & Credentials (Real Auth)

@@ -1,0 +1,196 @@
+{
+  "sprint_id": "SPRINT-36",
+  "generated_by": "architect-SDR",
+  "generated_at": "2026-06-04",
+  "execution_mode": "v1",
+  "repos": {
+    "mcp": {
+      "root": "/Users/ssuladze/Documents/Dev/ClearGate/mcp",
+      "origin": "sandrinio/cleargate-mcp",
+      "head_sha_at_sdr": "9f2204d",
+      "branch_at_sdr": "main",
+      "stories": ["STORY-047-01", "STORY-047-02", "STORY-047-03", "STORY-047-04"]
+    },
+    "connector": {
+      "root": "/Users/ssuladze/Documents/Dev/ClearGate/connector",
+      "broker_subdir": "broker",
+      "head_sha_at_sdr": "8473301",
+      "branch_at_sdr": "main",
+      "stories": ["STORY-047-05", "STORY-047-06", "STORY-047-07"],
+      "note": "A 'connector/...' path in any story = the connector REPO ROOT, not a nested dir. Broker code lives under broker/src and broker/test."
+    }
+  },
+  "lane_assignments": {
+    "STORY-047-01": "standard",
+    "STORY-047-02": "standard",
+    "STORY-047-03": "standard",
+    "STORY-047-04": "standard",
+    "STORY-047-05": "standard",
+    "STORY-047-06": "standard",
+    "STORY-047-07": "standard"
+  },
+  "lane_rationale": "All 7 forced standard by sprint policy (SPRINT-36 §0/§Execution Guidelines: 'do not fast-lane any of these stories' — highest-stakes auth surface). Independent of the rubric, every story also trips a forbidden-surface or size flag: 047-01/02/03 touch mcp/src/db/ + auth + migrations; 047-04 is security-relevant revocation; 047-05/06/07 are auth/credential flows on the broker edge. No fast-lane eligibility.",
+  "waves": [
+    {
+      "wave": 1,
+      "stories": ["STORY-047-01"],
+      "repo": "mcp",
+      "parallel": false,
+      "depends_on": [],
+      "compatibility_basis": "mcp foundation: dedicated connections/pairings/app_tokens schema + the indexed credential-verify primitive (mcp/src/auth/credential-verify.ts). Every other story depends on it. Adds migration 0010_* (NOT 0009 — two 0009_*.sql already exist on disk; next free index is 10).",
+      "primary_files": [
+        "mcp/src/db/schema.ts",
+        "mcp/src/auth/credential-verify.ts",
+        "mcp/src/db/migrations/0010_<name>.sql",
+        "mcp/test/credential-verify.node.test.ts"
+      ]
+    },
+    {
+      "wave": 2,
+      "stories": ["STORY-047-02", "STORY-047-04"],
+      "repo": "mcp",
+      "parallel": true,
+      "depends_on": ["STORY-047-01"],
+      "compatibility_basis": "Both depend only on 047-01. Write-sets verified disjoint against real code: 047-02 owns mcp/src/admin-api/connections.ts (create) + admin-api/index.ts registration + pairings/app_tokens DML; 047-04 owns mcp/src/auth/revocation.ts (publish-on-revoke) + its own test. No shared source file. Caveat: schema.ts is created by 047-01 and FROZEN by wave2 (047-02 only INSERTs/UPDATEs the tables, does not re-define columns; 047-04 writes db_write_set:[]). Redis: 047-02 writes rev:apptoken/rev:pairing KEYS; 047-04 adds PUBLISH on rev:connection/rev:apptoken/rev:project CHANNELS — key vs channel namespaces, disjoint.",
+      "primary_files": {
+        "STORY-047-02": [
+          "mcp/src/admin-api/connections.ts",
+          "mcp/src/admin-api/index.ts",
+          "mcp/test/connections-lifecycle.node.test.ts"
+        ],
+        "STORY-047-04": [
+          "mcp/src/auth/revocation.ts",
+          "mcp/test/revocation-publish.node.test.ts"
+        ]
+      }
+    },
+    {
+      "wave": 3,
+      "stories": ["STORY-047-03"],
+      "repo": "mcp",
+      "parallel": false,
+      "depends_on": ["STORY-047-01", "STORY-047-02"],
+      "compatibility_basis": "Adds POST /admin-api/v1/connections/verify into the connections.ts created by 047-02 (serial: must land after 047-02 merges). Re-reads the merged connections.ts before editing. Also edits mcp/src/db/client.ts (pool headroom). Consumes 047-01 credential-verify.ts + existing jwt.ts/revocation.ts (member kind) + rate-limit.ts buildAnonymousRateLimit + service-token auth guard.",
+      "primary_files": [
+        "mcp/src/admin-api/connections.ts",
+        "mcp/src/db/client.ts",
+        "mcp/test/connections-verify-endpoint.node.test.ts"
+      ]
+    },
+    {
+      "wave": 4,
+      "stories": ["STORY-047-05"],
+      "repo": "connector",
+      "parallel": false,
+      "depends_on": ["STORY-047-03"],
+      "compatibility_basis": "Broker verify-client + fail-closed + short-TTL positive cache + project_id stamp. Depends on the live mcp verify endpoint contract (047-03). Cross-repo gate: ALL mcp stories (01-04) merge before any connector story starts. Touches broker/src/registry.ts (consume stamped project_id, fail closed if absent) — first of the two registry.ts touches.",
+      "primary_files": [
+        "connector/broker/src/auth/verify-client.ts",
+        "connector/broker/src/registry.ts",
+        "connector/broker/test/verify-client.node.test.ts"
+      ]
+    },
+    {
+      "wave": 5,
+      "stories": ["STORY-047-06"],
+      "repo": "connector",
+      "parallel": false,
+      "depends_on": ["STORY-047-04", "STORY-047-05"],
+      "compatibility_basis": "Broker revoke-subscriber (PSUBSCRIBE rev:*) + kill-in-flight + whole-tenant kill. Depends on 047-04 publish channels AND 047-05 verify-cache invalidate(subject) hook. Second registry.ts touch (project-scoped drop + revokedProjects set) — serial via wave4->wave5 to avoid registry.ts collision. Adds ioredis dependency to broker/package.json (currently only 'ws').",
+      "primary_files": [
+        "connector/broker/src/auth/revoke-subscriber.ts",
+        "connector/broker/src/registry.ts",
+        "connector/broker/src/router.ts",
+        "connector/broker/src/relay.ts",
+        "connector/broker/src/server.ts",
+        "connector/broker/test/revoke-subscriber.node.test.ts"
+      ]
+    },
+    {
+      "wave": 6,
+      "stories": ["STORY-047-07"],
+      "repo": "connector",
+      "parallel": false,
+      "depends_on": ["STORY-047-05", "STORY-047-06"],
+      "compatibility_basis": "Wire the 3 register lanes through verify-client, DELETE auth-stub.ts wholesale, add per-turn audit row. Depends on 047-05 (verify-client) + 047-06 (revoke-subscriber). Rewrites ws-gateway.ts register/hello call sites (ws-gateway.ts:232 verifyCredential, :284 verifyAppToken) and the 046-02 register/hello tests in the same atomic commit. Adds connector/broker/src/auth/audit.ts.",
+      "primary_files": [
+        "connector/broker/src/ws-gateway.ts",
+        "connector/broker/src/auth/audit.ts",
+        "connector/broker/src/router.ts",
+        "connector/broker/test/lanes-and-audit.node.test.ts"
+      ],
+      "deletes": ["connector/broker/src/auth-stub.ts"]
+    }
+  ],
+  "merge_order": [
+    "STORY-047-01",
+    "STORY-047-02",
+    "STORY-047-04",
+    "STORY-047-03",
+    "STORY-047-05",
+    "STORY-047-06",
+    "STORY-047-07"
+  ],
+  "merge_order_note": "047-02 and 047-04 are wave-2 parallel; either may merge first (disjoint files). 047-02 listed before 047-04 only because 047-03 (wave 3) re-reads the merged connections.ts that 047-02 produces — so 047-02 MUST land before 047-03 regardless. 047-04 has no downstream mcp consumer (047-06 in connector consumes its channels, gated by the full mcp->connector cross-repo cut).",
+  "shared_surface_warnings": [
+    {
+      "file": "mcp/src/admin-api/connections.ts",
+      "stories": ["STORY-047-02", "STORY-047-03"],
+      "resolution": "serial wave2->wave3: 047-02 creates the file (pairing/app-token mint+consume+revoke routes); 047-03 re-reads the merged file and ADDS the /verify route + per-kind dispatch. 047-03 must not start until 047-02 is merged.",
+      "hazard": "section-collision / append"
+    },
+    {
+      "file": "mcp/src/admin-api/index.ts",
+      "stories": ["STORY-047-02"],
+      "resolution": "047-02 (only) adds `await registerConnectionsRoutes(scoped, { db, redis })` to the scoped plugin block (index.ts:133-144 area). NOT cited in either story's §3.1 file table — MUST be added to 047-02's surface or the routes never mount. 047-03 reuses the same registration (no second edit needed; it only adds a route inside connections.ts). Flagged: §3.1 surface-table gap.",
+      "hazard": "missing-surface (registration wiring omitted from both story file tables)"
+    },
+    {
+      "file": "mcp/src/db/schema.ts",
+      "stories": ["STORY-047-01", "STORY-047-02"],
+      "resolution": "047-01 defines all 3 tables (connections/pairings/app_tokens) + indexes + the migration. 047-02 only DMLs pairings/app_tokens (no column re-definition). Serial wave1->wave2; no co-wave edit. If 047-02 needs a `created_by` owner column (per its open-Q default-accept), that column MUST be added to 047-01's schema in wave 1 — see ADR flag below.",
+      "hazard": "schema-ownership / column-dependency across waves"
+    },
+    {
+      "file": "connector/broker/src/registry.ts",
+      "stories": ["STORY-047-05", "STORY-047-06"],
+      "resolution": "serial wave4->wave5: 047-05 sources project_id from verify response + fails closed if absent; 047-06 adds project-scoped drop iteration + the in-memory revokedProjects refusal set. Different methods, but same file — serialize to avoid merge collision.",
+      "hazard": "append / same-file co-edit"
+    },
+    {
+      "file": "connector/broker/src/router.ts",
+      "stories": ["STORY-047-06", "STORY-047-07"],
+      "resolution": "serial wave5->wave6: 047-06 invokes the existing routePrompt/cancel teardown path as a kill-in-flight caller (may not edit router.ts at all if it calls the relay teardown directly); 047-07 adds the audit hook call site at routePrompt (router.ts:160-187). Serialize; 047-07 re-reads merged router.ts.",
+      "hazard": "append at routePrompt"
+    },
+    {
+      "file": "connector/broker/src/server.ts",
+      "stories": ["STORY-047-06"],
+      "resolution": "047-06 (only) starts the dedicated revoke-subscriber on broker boot. server.ts today (lines 1-32) boots only the gateway+registry. No co-story collision.",
+      "hazard": "none (single-story edit)"
+    }
+  ],
+  "dependency_edges": [
+    "STORY-047-01 -> STORY-047-02",
+    "STORY-047-01 -> STORY-047-04",
+    "STORY-047-01 -> STORY-047-03",
+    "STORY-047-02 -> STORY-047-03",
+    "STORY-047-03 -> STORY-047-05",
+    "STORY-047-04 -> STORY-047-06",
+    "STORY-047-05 -> STORY-047-06",
+    "STORY-047-05 -> STORY-047-07",
+    "STORY-047-06 -> STORY-047-07"
+  ],
+  "cross_repo_gate": "All four mcp stories (047-01..04) merge to mcp/main (local-only, unpushed) BEFORE any connector story (047-05..07) starts. 047-05 depends on the live 047-03 verify endpoint contract; 047-06 depends on 047-04 publish channels. Merges are local-only on each repo's main (owner releases; no push). Export ORCHESTRATOR_PROJECT_DIR=/Users/ssuladze/Documents/Dev/ClearGate so the token ledger buckets correctly (cross-repo flashcard 2026-06-04). Every Dev/QA dispatch MUST carry: code-repo root + branch + commit SHA + path-prefix mapping (context packs assume meta-repo paths, absent here).",
+  "new_dependencies": [
+    {
+      "package": "ioredis",
+      "added_by": "STORY-047-06",
+      "repo": "connector/broker/package.json",
+      "version": "^5.4.0",
+      "registry_current": "5.11.1",
+      "rationale": "broker/package.json today has only 'ws' (no redis client). 047-06 needs a dedicated PSUBSCRIBE connection. Pin ^5.4.0 to match the mcp plane (mcp pins ioredis ^5.4.0; registry current 5.11.1 satisfies the caret). Verified via npm view ioredis version on 2026-06-04."
+    }
+  ],
+  "no_new_dependency_notes": "047-05 uses global fetch (Node 24 built-in) for the mcp verify HTTP call + node:crypto for the SHA-256 credential-hash cache key — NO new dependency. 047-05's tests stand up an in-test node:http server (no mock lib)."
+}

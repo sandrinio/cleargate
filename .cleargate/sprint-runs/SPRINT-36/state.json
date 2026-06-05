@@ -1,0 +1,93 @@
+{
+  "schema_version": 3,
+  "sprint_id": "SPRINT-36",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-047-01": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-04T20:10:40.905Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-02": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-04T20:59:53.605Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-03": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-04T23:17:46.180Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-04": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-04T21:26:17.535Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-05": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-04T23:36:42.657Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-06": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-05T00:10:43.813Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-047-07": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-06-05T00:45:56.361Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "migration-default",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "transition STORY-047-07 → Done",
+  "updated_at": "2026-06-05T00:45:56.361Z"
+}
