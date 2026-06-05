@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "5164bbb023f7aea142e86a607af3a4a16ffd5a97"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "85153958fa2ebb41bfc85b3c7628d9791a051c79"
 repo: "planning"
 ---
 

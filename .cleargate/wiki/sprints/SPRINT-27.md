@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "6b51f2e2ee0a3388833aed569d6ed7feccec11eb"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "46d8e1d2bd30047a674f31bb09b263dbdfbe39de"
 repo: "planning"
 ---
 

@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-21_Framework_Hardening_Test_Surfaced.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "fe5494939db909438e2087b1c13b7248982313e0"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "28642e312bd5eb624293c5f36e7225c80b0f1f58"
 repo: "planning"
 ---
 

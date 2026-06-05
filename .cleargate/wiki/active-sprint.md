@@ -9,7 +9,7 @@
 
 - [[SPRINT-15]] — status: Completed
 
-- [[SPRINT-28]] — status: Active
+- [[SPRINT-28]] — status: Completed
 
 
 
@@ -48,7 +48,9 @@
 
 - [[SPRINT-34]] — status: Completed
 
-- [[SPRINT-35]] — status: Active
+- [[SPRINT-35]] — status: Completed
+
+- [[SPRINT-36]] — status: Completed
 
 
 

@@ -7,10 +7,10 @@
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
 | Epics | 39 | 0 | 27 |
-| Sprints | 35 | 2 | 30 |
+| Sprints | 36 | 0 | 32 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 79 | 0 | 73 |
-| Bugs | 26 | 0 | 24 |
+| CRs | 80 | 0 | 73 |
+| Bugs | 27 | 0 | 24 |
 
 ## Active Epics
 
@@ -348,7 +348,7 @@ _No active epics._
 
 - [[SPRINT-27]] (sprints) — Completed
 
-- [[SPRINT-28]] (sprints) — Active
+- [[SPRINT-28]] (sprints) — Completed
 
 - [[SPRINT-30]] (sprints) — Completed
 
@@ -357,5 +357,9 @@ _No active epics._
 - [[SPRINT-33]] (sprints) — Completed
 
 - [[SPRINT-34]] (sprints) — Completed
+
+- [[SPRINT-35]] (sprints) — Completed
+
+- [[SPRINT-36]] (sprints) — Completed
 
 

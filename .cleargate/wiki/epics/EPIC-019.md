@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "c7d604589b09485cc2e553119a9e6eb00597f38d"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "08bdacb0657f9a24021eb40ba9b31b7f5379b38a"
 repo: "planning"
 ---
 

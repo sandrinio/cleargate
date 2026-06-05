@@ -6,8 +6,8 @@ children: []
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-18_Prepare_Close_Observe_Mechanics.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "e14ee5f2ab44447067dd056999e4384901c9b066"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "05bfcfe4087f3cb77f019ba77084b13990718656"
 repo: "planning"
 ---
 

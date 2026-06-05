@@ -6,8 +6,12 @@
 
 - [[EPIC-030]] (epic) — Draft
 - [[EPIC-031]] (epic) — Draft
+- [[EPIC-044]] (epic) — Draft
+- [[EPIC-046]] (epic) — Draft
+- [[EPIC-047]] (epic) — Draft
+- [[EPIC-048]] (epic) — Draft
+- [[EPIC-050]] (epic) — Draft
 - [[SPRINT-18]] (sprint) — Approved
-- [[SPRINT-28]] (sprint) — Active
 - [[SPRINT-31]] (sprint) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
@@ -15,21 +19,23 @@
 - [[PROPOSAL-013]] (proposal) — Approved
 - [[PROPOSAL-029]] (proposal) — Ready
 - [[PROPOSAL-074]] (proposal) — Draft
+- [[INITIATIVE-001]] (initiative) — In Triage
 - [[CR-068]] (cr) — Approved
 - [[CR-069]] (cr) — Approved
-- [[CR-070]] (cr) — Approved
 - [[CR-071]] (cr) — Approved
 - [[CR-072]] (cr) — Approved
 - [[CR-073]] (cr) — Approved
+- [[CR-074]] (cr) — Draft
+- [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft
 - [[BUG-030]] (bug) — Triaged
 
 ## Archive
 
-- Epics: 27 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 26 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Epics: 29 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Sprints: 31 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 63 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 24 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- CRs: 72 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 25 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 
@@ -37,24 +43,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Epics
-
-| [[EPIC-043]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-043_Framework_Hygiene_And_Efficiency_Remediation.md |
-| [[EPIC-044]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md |
-| [[EPIC-045]] | epic | Draft | .cleargate/delivery/pending-sync/EPIC-045_Polyglot_Portability_And_Parallel_Dogfood_Hardening.md |
-## Sprints
-
-| [[SPRINT-33]] | sprint | Active | .cleargate/sprint-runs/SPRINT-33/SPRINT-33_REPORT.md |
-| [[SPRINT-34]] | sprint | Active | .cleargate/sprint-runs/SPRINT-34/SPRINT-34_REPORT.md |
-| [[SPRINT-35]] | sprint | Shipped | .cleargate/sprint-runs/SPRINT-35/SPRINT-35_REPORT.md |
-## CRs
-
-| [[CR-074]] | cr | Draft | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
-| [[CR-075]] | cr | Draft | .cleargate/delivery/pending-sync/CR-075_Cleargate_Cli_Standalone_Test_Suite.md |
-| [[CR-076]] | cr | Draft | .cleargate/delivery/pending-sync/CR-076_Trim_Published_Npm_Package.md |
-| [[CR-077]] | cr | Draft | .cleargate/delivery/pending-sync/CR-077_Repo_Derived_Test_Conventions_And_Gate_Commands.md |
-| [[CR-078]] | cr | Draft | .cleargate/delivery/pending-sync/CR-078_Init_Sprint_Sets_Active_And_Applies_Lane_Audit.md |
-| [[CR-079]] | cr | Draft | .cleargate/delivery/pending-sync/CR-079_Worktree_Config_Provisioning.md |
-| [[CR-080]] | cr | Draft | .cleargate/delivery/pending-sync/CR-080_Script_Wrapper_Path_And_Env_Correctness.md |
-| [[CR-081]] | cr | Draft | .cleargate/delivery/pending-sync/CR-081_QA_Loop_Semantic_Fixture_Lint_And_Red_Now_Green.md |
-| [[CR-082]] | cr | Draft | .cleargate/delivery/pending-sync/CR-082_Deferred_Verification_Tracking_And_Close_Gate.md |

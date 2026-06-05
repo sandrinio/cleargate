@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-22_SDLC_Hardening.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "bdf3d2f7cc064cfdec4a0efea8a76dd9401a1f3c"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "92e11546669fc72e6d1524d91f6aee2ee2d0f6d1"
 repo: "planning"
 ---
 

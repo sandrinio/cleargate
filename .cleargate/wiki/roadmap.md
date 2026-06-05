@@ -52,7 +52,9 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-34]] — status: Completed
 
-- [[SPRINT-35]] — status: Active
+- [[SPRINT-35]] — status: Completed
+
+- [[SPRINT-36]] — status: Completed
 
 
 

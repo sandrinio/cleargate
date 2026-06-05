@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: warn
 remote_id: null
 source_tool: local
-status: Active
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-05-17T00:00:00Z

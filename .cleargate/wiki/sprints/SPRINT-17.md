@@ -6,8 +6,8 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-17_Plan_Phase_Delivery.md"
-last_ingest: "2026-05-31T08:08:46.362Z"
-last_ingest_commit: "9b31a79509974fb86f001a874e4dec87d09c077e"
+last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest_commit: "6a2695bb2500db987244fd5cd4a467a58b6c9566"
 repo: "planning"
 ---
 

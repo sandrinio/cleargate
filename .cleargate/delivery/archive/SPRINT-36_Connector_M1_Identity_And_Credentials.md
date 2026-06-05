@@ -7,7 +7,7 @@ lifecycle_init_mode: warn
 execution_mode: v1
 remote_id: null
 source_tool: null
-status: Active
+status: Completed
 start_date: 2026-06-20
 end_date: 2026-07-04
 synced_at: null
@@ -29,7 +29,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T15:07:21Z
+  last_stamp: 2026-06-05T17:44:24Z
   sessions: []
 ---
 
