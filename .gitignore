@@ -21,6 +21,9 @@ Thumbs.db
 # Active-sprint sentinel — per-machine runtime state, not team-shared
 .cleargate/sprint-runs/.active
 
+# CR-084: regenerated sprint-dashboard snapshot — per-machine, not team-shared
+.cleargate/sprint-runs/*/dashboard.html
+
 # Canonical scaffold ships an EMPTY skeleton — runtime sprint-runs ledger/state
 # must never land under it. A misrouted token-ledger write (wrong root) created
 # cleargate-planning/.cleargate/sprint-runs/_off-sprint/ on 2026-06-02; guard against recurrence.

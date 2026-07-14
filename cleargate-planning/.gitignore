@@ -46,6 +46,9 @@ yarn-error.log*
 # Unresolved conflicts cache — runtime-generated, not team-shared
 /.cleargate/.conflicts.json
 
+# CR-084: regenerated sprint-dashboard snapshot — per-machine, not team-shared
+.cleargate/sprint-runs/*/dashboard.html
+
 # ── ClearGate worktrees ───────────────────────────────────────────────────────
 # Story worktrees — ephemeral per-story git worktrees (v2 execution)
 .worktrees/
