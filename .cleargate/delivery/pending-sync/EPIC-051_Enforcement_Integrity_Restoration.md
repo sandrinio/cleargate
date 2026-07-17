@@ -21,7 +21,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-07-17T18:52:35Z
+  last_gate_check: 2026-07-17T19:58:54Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-07-17T18:51:16Z
+  last_stamp: 2026-07-17T19:58:54Z
   sessions: []
 ---
 
@@ -174,6 +174,11 @@ Feature: Enforcement Integrity Restoration
     Given a sprint authored from the Sprint Plan Template
     When `cleargate sprint init` runs the decomposition gate
     Then the gate reads a non-empty epics/proposals list (or fails closed if none is declared)
+
+  Scenario: A gate that cannot find its inputs fails loud (error path)
+    Given a decomposition or lifecycle-init gate whose inputs are missing
+    When the gate runs without --allow-drift
+    Then it exits with an Error, not a silent pass
 ```
 
 ## 6. AI Interrogation Loop — RESOLVED (Gate 1, 2026-07-17)
