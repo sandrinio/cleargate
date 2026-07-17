@@ -112,7 +112,7 @@ Conversation resolves the open questions. When all are resolved → ambiguity fl
 
 ### Gate 2 — Sprint Ready (per sprint, Prepare phase internal)
 
-Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written under `execution_mode: v2`. Without all three, the sprint cannot transition.
+Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written. Without all three, the sprint cannot transition.
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
@@ -643,6 +643,22 @@ wiki:
 
 Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.
 
+### §21.2 Ingest Bucket Allowlist
+
+By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
+
+```yaml
+wiki:
+  ingest_buckets:
+    - epics
+    - sprints      # sprint reports
+    - crs
+    - bugs
+    - initiatives
+```
+
+When set, only the listed buckets get per-item wiki pages, index rows, and synthesis listings — `cleargate wiki build`, `cleargate wiki ingest`, and the PostToolUse ingest hook all skip every other bucket (exit 0, no-op). Omit the key entirely to ingest all buckets. This is how a repo keeps high-churn `stories` (and unused `proposals`) out of the wiki while still tracking them in the raw delivery tree and sprint reports.
+
 ---
 
 ## Type & Payload Contract
@@ -824,20 +840,15 @@ gaps to the next sprint's Gate-2 checklist, not to interrupt current execution.
 **When in doubt: write a blockers report (`STORY-NNN-NN-<agent>-blockers.md`) and
 return BLOCKED. Do not interpret silence as permission to proceed on ambiguous scope.**
 
-## 23. Parallel-Wave Execution Contract
+## 23. Execution Contract
 
-Once a sprint declares `execution_mode: v2-parallel`, the Orchestrator may execute each
-Architect-planned wave as one fire-and-forget `parallel()` Workflow of worktree-isolated
+Every sprint executes the same way: the Orchestrator runs each Architect-planned wave as
+one `parallel()` Workflow — via the Workflow tool (`/workflows`) — of worktree-isolated
 per-story **segments** that return a schema-typed verdict, consolidated at a serial
 **barrier**. This section is the binding contract for that flow. It **inherits §22** — every
 true-blocker rule, the autonomy contract, and the five true-blocker kinds carry over
-unchanged; §23 only adds the parallel-execution-specific invariants.
-
-**Kill-switch (zero behavior change).** `execution_mode: v2-serial` (the default for v2
-sprints) OR `CLEARGATE_PARALLEL_WAVES=off` in the session env routes to the existing serial
-five-dispatch Phase C loop with **zero behavior change** — no `launch_wave.mjs` invocation
-occurs, and each story runs one at a time. The parallel-wave code never executes on the
-kill-switch path. `execution_mode: v2-parallel` with no override selects the wave loop.
+unchanged; §23 adds the wave-execution-specific invariants. There is no alternate dispatch
+path: if the Workflow tool is unavailable, the Orchestrator halts rather than degrading.
 
 ### 23.1 Segment verdict schema (discriminated union)
 

@@ -89,7 +89,7 @@ Use the project's test runner and red-test naming as declared in `sprint_context
 ## Script Invocation
 
 Any bash/node script you invoke MUST go through the wrapper:
-`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden.
 
 ## Guardrails
 - **Never touch another story's files.** If the plan says your story touches `A.ts` and you discover you need `B.ts`, return `BLOCKED: scope bleed — need to edit B.ts which belongs to STORY-XYZ`.
@@ -104,8 +104,6 @@ Any bash/node script you invoke MUST go through the wrapper:
 - Not the Reporter — one-paragraph notes max.
 
 ## Worktree Contract
-
-These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 1. **Verify your working directory before any edit.** Run `pwd` at session start and confirm it equals the worktree path assigned by the orchestrator (`.worktrees/STORY-NNN-NN/`). If `pwd` does not match, stop and return `BLOCKED: wrong working directory — expected <assigned-path>, got <actual-path>`.
 
@@ -126,8 +124,6 @@ If making a Red test pass requires modifying its assertion (i.e., the spec was w
 **Bypass:** `SKIP_RED_GATE=1` env var disables the pre-commit check. Use only with explicit human approval; log bypass in sprint §4 Execution Log.
 
 ## Lane-Aware Execution
-
-These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 **On spawn:** read `.cleargate/sprint-runs/<sprint-id>/state.json` for the current sprint (locate the active sprint via `.cleargate/sprint-runs/.active`). Look up the story's `lane` field under `state.json.stories[<story-id>].lane`. Default to `"standard"` if the field is absent, the story key is missing, or `state.json` does not exist.
 
@@ -150,8 +146,6 @@ If `state.json` lane flips from `"fast"` to `"standard"` mid-sprint (`lane_demot
 The Developer's first response line still emits `STORY=NNN-NN` (or `CR=NNN`, `BUG=NNN`, `EPIC=NNN`, `PROPOSAL=NNN` / `PROP=NNN`) per BUG-010's detector contract. Lane is **NOT** part of the first-line marker.
 
 ## Circuit Breaker
-
-These rules apply under `execution_mode: v2`. Under v1 they are informational.
 
 **Trigger condition:** halt when EITHER of the following is true:
 - ~50 tool calls have elapsed with no successful test run, OR

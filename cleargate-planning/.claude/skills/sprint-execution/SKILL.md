@@ -94,16 +94,9 @@ The script is idempotent: if a same-session auto-marker (written by `pre-tool-us
 
 ---
 
-## 2. v1 / v2 Mode Switch
+## 2. Execution Model — one path, no modes
 
-Every step below is gated by the active sprint's `execution_mode:` frontmatter:
-
-| Mode | Effect |
-|---|---|
-| `v1` | All §§ rules in `cleargate-enforcement.md` are advisory — document workflow; no script enforcement. Rework counters, flashcard gate, surface contract, etc. are informational. |
-| `v2` | All §§ rules are mandatory. Hooks block on violations. Worktree isolation, pre-gate scans, file-surface contract, flashcard gate, sprint close — all enforced. |
-
-Default is `v1`. Read the field before spawning Developer/QA/Reporter. If absent, treat as `v1`. **Do not infer mode from sprint number — read the frontmatter.**
+There is one and only one way a sprint executes, and it has no name and no toggle. Every rule in `cleargate-enforcement.md` is **always enforced** (`CLEARGATE_ADVISORY=1` is the sole break-glass, and it only softens gate *strength*, never the execution path). Every sprint runs its Architect-produced `waves.json` through the Workflow tool (`/workflows`) via the `launch_wave` contract (§C.0). There is no alternate loop and no topology toggle. If `/workflows` is unavailable, the Orchestrator halts and says so — it does not run stories outside a wave segment.
 
 ---
 
@@ -123,7 +116,7 @@ Six checks, all must pass:
 2. No leftover worktrees — `git worktree list` must not contain `.worktrees/STORY-*`.
 3. Sprint branch ref free — `git show-ref refs/heads/sprint/S-NN` returns nothing.
 4. `main` clean — `git status --porcelain` empty.
-5. Per-item readiness gates pass — every work-item ID in §1 Consolidated Deliverables has fresh `cached_gate_result.pass: true` (or terminal status). Under `execution_mode: v2` a failing item hard-blocks; under `v1` it warns. Failure punch-list names each item + its failing criteria.
+5. Per-item readiness gates pass — every work-item ID in §1 Consolidated Deliverables has fresh `cached_gate_result.pass: true` (or terminal status). A failing item hard-blocks. Failure punch-list names each item + its failing criteria.
 6. **Verify `devops` subagent reachable** — attempt `Agent(subagent_type=devops, prompt: "echo preflight-check")` immediately after session start. If it returns "Agent type 'devops' not found", halt and ask the human to restart the Claude Code session; do NOT proceed under assumption the escape hatch will cover every merge. This check is manual (not enforced by `cleargate sprint preflight`); document result in sprint §4 Execution Log.
 
 On failure, surface the punch list verbatim and halt. Per-item resolution:
@@ -157,9 +150,9 @@ This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/spr
 
 `init_sprint.mjs` also writes `<sprintDir>/sprint-context.md` from `.cleargate/templates/sprint_context.md`, populated with `sprint_id` + goal (extracted from sprint plan §0 `- **Sprint Goal:** …` bullet, or placeholder if absent) + active CR list. Every Dev/QA/Architect/DevOps dispatch reads this file as preflight (see §B + §C contracts + agent prompts `## Preflight`).
 
-### A.4 Architect Sprint Design Review (v2 only)
+### A.4 Architect Sprint Design Review
 
-Mandatory under `execution_mode: v2`; optional but encouraged under `v1`. Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
+Mandatory before any story executes. Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
 
 ```
 Task instruction: "SPRINT DESIGN REVIEW — write Sprint Plan §2 Execution Strategy.
@@ -198,27 +191,19 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 
 ## 5. Phase C — Per-Story Execution Loop
 
-Run this loop **per story**, in the order the milestone plan declares (parallel waves vs sequential chains). Each iteration: Worktree → **QA-Red** → **TPV (Test Pattern Validation, Architect-only)** → Developer → QA-Verify → (Architect pass for `lane: standard` v2 only) → Merge → Flashcard Gate.
+Run this loop **per story**, in the wave order the milestone plan / `waves.json` declares. Each iteration: Worktree → **QA-Red** → **TPV (Test Pattern Validation, Architect-only)** → Developer → QA-Verify → (Architect pass for `lane: standard` only) → Merge → Flashcard Gate.
 
 > **Naming note.** State-machine values (`Bouncing`, `Ready to Bounce`), `state.json` counter fields (`qa_bounces`, `arch_bounces`), and script names (`validate_bounce_readiness.mjs`) retain the legacy "bounce" term because they are code-bound. The narrative in this skill uses "execution loop", "story cycle", and "rework" to describe the same mechanics.
 
-### C.0 Execution mode — serial loop vs parallel waves (kill-switch)
+### C.0 Execution — run each wave via `/workflows`
 
-Before running any story, read the sprint frontmatter `execution_mode` and pick the loop:
+Execution has no modes and no alternate path. The Architect's Sprint Design Review always produces `waves.json`; the Orchestrator runs **every** wave through the Workflow tool (`/workflows`) via the `launch_wave` contract (§C.0.1) — worktree-isolated per-story segments, serial-barrier merge. This is the only dispatch path: there is no alternate loop and no topology toggle. If `/workflows` is unavailable, halt and surface the reason — never run stories outside a wave segment.
 
-| `execution_mode` | Override | Loop |
-|---|---|---|
-| `v2-serial` (or `v1`/`v2`) | — | **Serial** — run §C.1–§C.9 below, one story at a time, in milestone-plan order. |
-| `v2-parallel` | `CLEARGATE_PARALLEL_WAVES=off` set in the session env | **Serial** — kill-switch active; revert to the serial loop. |
-| `v2-parallel` | (none) | **Parallel waves** — launch each Architect-planned wave via `launch_wave.mjs` (§C.0.1). |
+A single-story wave is one segment (inherently sequential). The per-story steps §C.1–§C.9 below describe **what a wave segment does** — they are the body of a segment, not a separate loop.
 
-**Kill-switch contract (zero behavior change).** Either revert path — `execution_mode: v2-serial` OR `CLEARGATE_PARALLEL_WAVES=off` — runs **today's serial five-dispatch Phase C loop** (§C.1–§C.9) verbatim, with **zero behavior change**: no `launch_wave.mjs` invocation appears, and every story executes through the existing Worktree → QA-Red → TPV → Developer → QA-Verify → Architect → Merge → Flashcard sequence one at a time. The parallel-wave code never runs on the kill-switch path. This guarantee is what lets the next sprint adopt `v2-parallel` and instantly fall back if a wave misbehaves. The selector function is `shouldRunParallel(execution_mode, env)` in `.cleargate/scripts/launch_wave.mjs`.
+#### C.0.1 Wave launch — the `launch_wave` contract
 
-> **SPRINT-32 note.** This sprint ships the parallel-wave capability but runs SERIALLY (serial loop above). The §C.0.1 wave mechanics below ship for the NEXT (self-hosting) sprint. Full contract: protocol §23 "Parallel-Wave Execution Contract".
-
-#### C.0.1 Parallel-wave launch (`execution_mode: v2-parallel`)
-
-When parallel waves are active, the Orchestrator runs each wave from the Architect's `waves.json` (produced by the planning workflow, STORY-033-03) as one `parallel()` Workflow of worktree-isolated per-story **segments**, then consolidates at a serial **barrier**:
+The Orchestrator runs each wave from the Architect's `waves.json` (produced by the planning workflow, STORY-033-03) as one `parallel()` Workflow of worktree-isolated per-story **segments**, then consolidates at a serial **barrier**:
 
 1. **Pre-launch (worktrees).** Pre-create each wave story's worktree **serially** via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` (ClearGate-managed worktrees — NOT the Workflow tool's `isolation:'worktree'`, which checks out tracked-files-only off the wrong base; spike decision 2). Serial pre-creation avoids concurrent `git worktree add` racing the repo index. The flashcard **WRITE-gate** suppression (`SKIP_FLASHCARD_GATE=1`, inherited by every segment because per-thunk child env is not settable — spike Q5; reading is unaffected) is **owned by `launch_wave.mjs`, not the Orchestrator** (BUG-034): `launchWave()` snapshots the prior value, sets `=1` before `parallel()`, and restores the exact prior value in a `try/finally`. The Orchestrator MUST NOT set or restore this var by hand — doing so would double-manage it and reintroduce the leak.
 
@@ -230,7 +215,7 @@ When parallel waves are active, the Orchestrator runs each wave from the Archite
 
 5. **Barrier — serial merge (§C.7).** For each GREEN story in turn, DevOps merges `story/STORY-X` to `sprint/S-NN` — **one worktree at a time, never two concurrently** — see §C.7.
 
-6. **Barrier — advance.** The `SKIP_FLASHCARD_GATE` value was ALREADY restored by `launch_wave.mjs`'s `finally` the moment `launchWave()` returned or threw (BUG-034 — no longer a prose obligation; a mid-barrier throw can no longer leak gate suppression into the serial fallback). If every verdict is GREEN, advance to the next wave. If any verdict is `ESCALATED`/`BLOCKED`, **halt the wave loop for the human** (fully autonomous up to this point per §6 Q3 / protocol §22); on the human's "re-approach", `resumeFromRunId` re-enters the **same run** and re-dispatches only the ESCALATED/BLOCKED story's segment — GREEN segments **short-circuit on resume with zero new ledger rows** (spike Q4: 0 tokens on replay), so re-merging GREEN stories is a no-op.
+6. **Barrier — advance.** The `SKIP_FLASHCARD_GATE` value was ALREADY restored by `launch_wave.mjs`'s `finally` the moment `launchWave()` returned or threw (BUG-034 — no longer a prose obligation; a mid-barrier throw can no longer leak gate suppression). If every verdict is GREEN, advance to the next wave. If any verdict is `ESCALATED`/`BLOCKED`, **halt the wave loop for the human** (fully autonomous up to this point per §6 Q3 / protocol §22); on the human's "re-approach", `resumeFromRunId` re-enters the **same run** and re-dispatches only the ESCALATED/BLOCKED story's segment — GREEN segments **short-circuit on resume with zero new ledger rows** (spike Q4: 0 tokens on replay), so re-merging GREEN stories is a no-op.
 
 **Idempotent segments.** Segments are **idempotent** as a belt-and-suspenders safety net: a `resumeFromRunId` re-run of a GREEN segment, or a re-launch after a partial failure, must produce no duplicate side effects (no double-commit, no double-merge, no duplicate ledger row). The RUN_ID-keyed ledger no-op (STORY-033-02) and the serial barrier merge together enforce this; segment idempotency is the redundant guard if either upstream protection regresses.
 
@@ -278,7 +263,7 @@ provisioning spec and the scan-exemption list (single source of truth, CR-079).
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
 
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 
@@ -301,9 +286,9 @@ On `QA-RED: WRITTEN`: orchestrator commits the Red tests on the story branch wit
 
 **Fast lane skip:** if `state.json.stories[<id>].lane === "fast"`, skip this entire step AND §C.3.5 and proceed directly to §C.4 Spawn Developer.
 
-### C.3.5 TPV Gate (Architect-only — standard lane, v2 only)
+### C.3.5 TPV Gate (Architect-only — standard lane)
 
-**Skip if:** `state.json.stories[<id>].lane === 'fast'` OR `execution_mode: v1`.
+**Skip if:** `state.json.stories[<id>].lane === 'fast'`.
 
 After QA-Red commits Red tests, run the wiring/pre-gate scan first:
 
@@ -347,7 +332,7 @@ TPV is a WIRING gate, not a correctness gate. A test that imports the right modu
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN developer
 ```
 
-**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
 
 Then spawn with `subagent_type=developer`. Inputs the prompt must include verbatim:
 
@@ -380,7 +365,7 @@ If `STATUS=blocked`: route per §C.8 (Blockers Triage).
 bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 ```
 
-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
 
 Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
 
@@ -400,13 +385,13 @@ flashcards_flagged: [ ... ]
 
 **On `QA: PASS`:** update state to `QA Passed`, proceed.
 
-### C.6 Architect Pass (v2, `lane: standard` only)
+### C.6 Architect Pass (`lane: standard` only)
 
 `lane: fast` skips this step entirely.
 
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 
-**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden under v2.
+**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
 
 ```bash
 bash .cleargate/scripts/pre_gate_runner.sh arch .worktrees/STORY-NNN-NN/ sprint/S-NN
@@ -425,7 +410,7 @@ If pre-gate scan reveals new dependencies / structural issues → return to Deve
 
 **DevOps-owned.** The orchestrator does NOT run `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, or `npm run prebuild` directly. All mechanical merge work is delegated to the DevOps agent.
 
-**Serial barrier merge (parallel waves only).** Under `execution_mode: v2-parallel`, when a wave's verdicts consolidate at the barrier, the merge is **serial**: DevOps merges each GREEN `story/STORY-X` to `sprint/S-NN` **one worktree at a time** — **no two worktrees merge concurrently**. Even though the wave's segments ran in parallel and committed to FS-isolated `.worktrees/STORY-X` (each with its own `.git` index, so the per-worktree pre-commit surface gate never races), the shared `sprint/S-NN` branch is a single-writer axis. The Orchestrator therefore loops over the GREEN stories in order and dispatches DevOps for **one merge at a time**, awaiting `STATUS=done` before the next. A mixed GREEN+ESCALATED wave merges the GREEN stories immediately at the barrier (serial), then resumes only the ESCALATED segment via `resumeFromRunId` — the already-merged GREEN segments short-circuit on resume (zero new ledger rows). Serial-loop sprints merge each story as it completes, exactly as below.
+**Serial barrier merge.** When a wave's verdicts consolidate at the barrier, the merge is **serial**: DevOps merges each GREEN `story/STORY-X` to `sprint/S-NN` **one worktree at a time** — **no two worktrees merge concurrently**. Even though the wave's segments ran in parallel and committed to FS-isolated `.worktrees/STORY-X` (each with its own `.git` index, so the per-worktree pre-commit surface gate never races), the shared `sprint/S-NN` branch is a single-writer axis. The Orchestrator therefore loops over the GREEN stories in order and dispatches DevOps for **one merge at a time**, awaiting `STATUS=done` before the next. A mixed GREEN+ESCALATED wave merges the GREEN stories immediately at the barrier (serial), then resumes only the ESCALATED segment via `resumeFromRunId` — the already-merged GREEN segments short-circuit on resume (zero new ledger rows).
 
 **Required reports — verify before dispatch:**
 
@@ -433,7 +418,7 @@ If pre-gate scan reveals new dependencies / structural issues → return to Deve
 |---|---|
 | `STORY-NNN-NN-dev.md` | Always (all lanes) |
 | `STORY-NNN-NN-qa.md` | Always, unless lane=fast explicitly skipped QA-Verify |
-| `STORY-NNN-NN-arch.md` | v2 standard-lane only, AND only when the §C.6 pre-gate scan flagged (Architect post-flight was dispatched); absent on a clean-scan story |
+| `STORY-NNN-NN-arch.md` | standard-lane only, AND only when the §C.6 pre-gate scan flagged (Architect post-flight was dispatched); absent on a clean-scan story |
 | `STORY-NNN-NN-devops.md` | Written BY DevOps during this step (not a prerequisite) |
 
 Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do not dispatch DevOps with missing reports.**
@@ -465,7 +450,7 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
    - Required reports present:
        - {STORY-ID}-dev.md    ✓
        - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
-       - {STORY-ID}-arch.md   ✓ (v2 standard lane only, AND only when pre-gate scan flagged — absent if Architect was not dispatched)
+       - {STORY-ID}-arch.md   ✓ (standard lane only, AND only when pre-gate scan flagged — absent if Architect was not dispatched)
 
    ACTIONS (in order):
    1. Verify all required reports exist; halt if any missing. Exception: arch.md is required ONLY when the §C.6 pre-gate scan flagged (Architect was dispatched); a clean-scan story legitimately has no arch.md and must NOT halt.
@@ -486,7 +471,7 @@ Missing `dev.md` or `qa.md` (when required) → return to spawn that agent. **Do
 
 **On `STATUS=blocked`:** DevOps has written `{STORY-ID}-devops-blockers.md`. Surface the blockers report to the human. DevOps does NOT auto-resolve conflicts — orchestrator escalates and waits for human resolution before re-dispatching DevOps.
 
-**Forbidden orchestrator patterns (v2):** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
+**Forbidden orchestrator patterns:** `git merge`, `git worktree remove`, `git branch -d`, `update_state.mjs`, `npm run prebuild` in the orchestrator's main session bash log. If any appear, classify as edge case and document in sprint §4 Execution Log.
 
 #### DevOps Escape Hatch — subagent_type=devops unavailable
 
@@ -504,7 +489,7 @@ When Developer returns `BLOCKED: circuit breaker triggered`, read `.cleargate/sp
 
 3 consecutive circuit-breaker hits on the same story → `update_state.mjs STORY-NNN-NN Escalated`, halt.
 
-### C.9 Flashcard Gate (v2 mandatory; v1 dogfood)
+### C.9 Flashcard Gate
 
 After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
 
@@ -522,9 +507,9 @@ HASH=$(printf '%s' "<card text>" | shasum -a 1 | cut -c1-12)
 touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}
 ```
 
-Under v2, the `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` spawn until every card has a `.processed-<hash>` marker. Bypass only with `SKIP_FLASHCARD_GATE=1` — log the bypass in sprint §4.
+The `pending-task-sentinel.sh` PreToolUse hook blocks the next `Task` spawn until every card has a `.processed-<hash>` marker. Bypass only with `SKIP_FLASHCARD_GATE=1` — log the bypass in sprint §4.
 
-**Between-wave relocation (parallel waves only).** Under `execution_mode: v2-parallel` the flashcard gate moves from **between-story** to **between-wave**. The PreToolUse write-gate cannot fire mid-wave (it would block a segment's own `Task` spawns inside the running `parallel()` Workflow and deadlock the wave), so `launch_wave.mjs` sets `SKIP_FLASHCARD_GATE=1` (relocating only the WRITE-gate; flashcard reading inside segments is unaffected) for the duration of the `parallel()` dispatch and restores it in a `try/finally` (BUG-034 — code-enforced, not a prose obligation). Each segment returns its cards in its verdict's `flashcards_flagged[]` instead of blocking. At the barrier, BEFORE launching the next wave, the Orchestrator collects the union of every segment's `flashcards_flagged[]` (dedupe by exact-string), approves/rejects each card exactly as in the per-story table above, and writes the `.processed-<hash>` markers — `HASH=$(printf '%s' "<card text>" | shasum -a 1 | cut -c1-12); touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}`. Because `launchWave()`'s `finally` has already restored the gate to its exact prior value by the time it returns, the write-gate is active again before any non-wave dispatch — even if validation or merge throws. The markers are written **between waves**, not between stories.
+**Between-wave relocation.** The flashcard gate runs **between waves**, not between stories. The PreToolUse write-gate cannot fire mid-wave (it would block a segment's own `Task` spawns inside the running `parallel()` Workflow and deadlock the wave), so `launch_wave.mjs` sets `SKIP_FLASHCARD_GATE=1` (relocating only the WRITE-gate; flashcard reading inside segments is unaffected) for the duration of the `parallel()` dispatch and restores it in a `try/finally` (BUG-034 — code-enforced, not a prose obligation). Each segment returns its cards in its verdict's `flashcards_flagged[]` instead of blocking. At the barrier, BEFORE launching the next wave, the Orchestrator collects the union of every segment's `flashcards_flagged[]` (dedupe by exact-string), approves/rejects each card exactly as in the per-story table above, and writes the `.processed-<hash>` markers — `HASH=$(printf '%s' "<card text>" | shasum -a 1 | cut -c1-12); touch .cleargate/sprint-runs/<sprint-id>/.processed-${HASH}`. Because `launchWave()`'s `finally` has already restored the gate to its exact prior value by the time it returns, the write-gate is active again before any non-wave dispatch — even if validation or merge throws. The markers are written **between waves**, not between stories.
 
 ### C.10 Mid-Sprint Triage
 
@@ -579,9 +564,9 @@ bash .cleargate/scripts/run_script.sh <command> [args...]
 
 ---
 
-## 6. Phase D — Sprint Walkthrough (v2)
+## 6. Phase D — Sprint Walkthrough
 
-Mandatory under v2. After all stories merged into `sprint/S-NN` (every story state ∈ `TERMINAL_STATES`) and **before** sprint→main merge, invite the user to test on the sprint branch. Classify every piece of feedback:
+Mandatory. After all stories merged into `sprint/S-NN` (every story state ∈ `TERMINAL_STATES`) and **before** sprint→main merge, invite the user to test on the sprint branch. Classify every piece of feedback:
 
 | Event | Definition | Bug-Fix Tax |
 |---|---|---|
@@ -722,7 +707,7 @@ node .cleargate/scripts/update_state.mjs STORY-NNN-NN [--qa-bounce | --arch-boun
 
 ---
 
-## 9. File-Surface Contract (v2)
+## 9. File-Surface Contract
 
 Each story's §3.1 "Context & Files" table is the **authoritative file surface** for its commit. The pre-commit hook (`.git/hooks/pre-commit` → `.claude/hooks/pre-commit-surface-gate.sh`) blocks commits that touch off-surface files.
 
@@ -731,7 +716,7 @@ Off-surface edits require **either**:
 1. A `CR:scope-change` approved before the commit, OR
 2. An updated §3.1 table committed in the same story (self-amending — must be justified in commit message).
 
-Bypass with `SKIP_SURFACE_GATE=1` only when absolutely necessary; log in sprint §4. Under v1 the hook only warns.
+Bypass with `SKIP_SURFACE_GATE=1` only when absolutely necessary; log in sprint §4.
 
 ---
 

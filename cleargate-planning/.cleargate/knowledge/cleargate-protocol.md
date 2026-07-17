@@ -112,7 +112,7 @@ Conversation resolves the open questions. When all are resolved → ambiguity fl
 
 ### Gate 2 — Sprint Ready (per sprint, Prepare phase internal)
 
-Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written under `execution_mode: v2`. Without all three, the sprint cannot transition.
+Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed + 🟢, (b) the sprint-level Brief is resolved, (c) the Architect Sprint Design Review (§2 of the Sprint Plan) is written. Without all three, the sprint cannot transition.
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
@@ -797,20 +797,58 @@ npm run check:no-pm-sdk
 
 Comments (lines starting with `//`, `#`, `/*`, or `*`) are excluded from the scan. The script prints `✓ no forbidden PM-SDK imports` on a clean tree.
 
-## 23. Parallel-Wave Execution Contract
+---
 
-Once a sprint declares `execution_mode: v2-parallel`, the Orchestrator may execute each
-Architect-planned wave as one fire-and-forget `parallel()` Workflow of worktree-isolated
+## 22. Sprint Execution Autonomy
+
+Once a sprint's frontmatter / state.json carries `sprint_status: "Active"`, no agent
+— Orchestrator, Architect, Developer, QA, DevOps, or Reporter — MAY issue a user-facing
+prompt (`AskUserQuestion`, `ExitPlanMode`, interactive stdin read) EXCEPT under one of the
+five true-blocker cases below.
+
+**Rationale:** all ambiguity is supposed to clear at Gate 2 (pre-sprint). Mid-execution
+questions are evidence that Gate 2 was incomplete; the right answer is to surface those
+gaps to the next sprint's Gate-2 checklist, not to interrupt current execution.
+
+**Scope:** the contract activates at sprint Active. Architect's Sprint Design Review
+(SDR) — which runs after initial Gate 2 but before sprint goes Active — is EXEMPT.
+
+### True blockers (escalation REQUIRED)
+
+1. **Destructive action approval.** force-push, `git reset --hard`, dropping a DB table,
+   deleting an untracked file the user might own, killing a process. Ask before performing.
+2. **Secret / credential handling.** Anything that would require reading from .env files,
+   fetching a secret, or persisting credential material. Ask before reading or writing.
+3. **User-intent decision.** A question whose answer is genuinely "what does the user
+   want?" and cannot be inferred from sprint goal, story Gherkin, or prior decisions.
+4. **True technical impossibility.** Required infrastructure unavailable (e.g. test DB
+   unreachable, MCP down). Write blockers report AND surface to user.
+5. **Spec-internal contradiction.** Story Gherkin contradicts itself, or two stories
+   in the same wave specify incompatible behavior on a shared surface. Write blockers
+   report — Gate-1/Gate-2 escape that human must triage.
+
+### Not blockers — agent decides
+
+- Choice between two reasonable implementations that both meet the acceptance Gherkin.
+- Test-pattern selection within established repo precedent.
+- Minor wording / UX copy choices. Default to conservative; document in dev report.
+- Refactor-or-not within the touched surface. Default NO refactor.
+- Library version selection within the Architect's pre-validated table.
+- Error-message phrasing.
+- Log-line format.
+
+**When in doubt: write a blockers report (`STORY-NNN-NN-<agent>-blockers.md`) and
+return BLOCKED. Do not interpret silence as permission to proceed on ambiguous scope.**
+
+## 23. Execution Contract
+
+Every sprint executes the same way: the Orchestrator runs each Architect-planned wave as
+one `parallel()` Workflow — via the Workflow tool (`/workflows`) — of worktree-isolated
 per-story **segments** that return a schema-typed verdict, consolidated at a serial
 **barrier**. This section is the binding contract for that flow. It **inherits §22** — every
 true-blocker rule, the autonomy contract, and the five true-blocker kinds carry over
-unchanged; §23 only adds the parallel-execution-specific invariants.
-
-**Kill-switch (zero behavior change).** `execution_mode: v2-serial` (the default for v2
-sprints) OR `CLEARGATE_PARALLEL_WAVES=off` in the session env routes to the existing serial
-five-dispatch Phase C loop with **zero behavior change** — no `launch_wave.mjs` invocation
-occurs, and each story runs one at a time. The parallel-wave code never executes on the
-kill-switch path. `execution_mode: v2-parallel` with no override selects the wave loop.
+unchanged; §23 adds the wave-execution-specific invariants. There is no alternate dispatch
+path: if the Workflow tool is unavailable, the Orchestrator halts rather than degrading.
 
 ### 23.1 Segment verdict schema (discriminated union)
 

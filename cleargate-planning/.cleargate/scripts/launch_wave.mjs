@@ -8,11 +8,9 @@
  * Orchestrator at the barrier. The Orchestrator consolidates serially: validate → process
  * flashcards (between-wave) → merge GREEN stories one worktree at a time → restore env.
  *
- * SPRINT-32 constraint (SDR §2.1): this sprint BUILDS the wave capability but runs SERIALLY.
- * No live `parallel()` dispatch executes here. The launcher ships for the NEXT (self-hosting)
- * sprint. The testable JS surface is the exported `validateVerdicts` barrier validator (plus
- * the helper constructors); the `parallel()` dispatch itself is exercised only when the
- * next sprint runs under `execution_mode: v2-parallel`.
+ * This launcher IS the execution path: every wave runs through it via the Workflow tool
+ * (`/workflows`). The testable JS surface is the exported `validateVerdicts` barrier validator
+ * plus the helper constructors; the `parallel()` dispatch is driven by the live Workflow runtime.
  *
  * Spike facts honored (STORY-033-01-spike-result.md, FLASHCARD #workflow #token-ledger #worktree):
  *   - Per-agent SubagentStop attribution is DEAD under workflows → the barrier writes one
@@ -24,10 +22,6 @@
  *     ClearGate's OWN `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN`.
  *   - `resumeFromRunId` caches completed GREEN agents (0 tokens on replay) → complete-then-resume
  *     re-dispatches only the ESCALATED/BLOCKED segment.
- *
- * Kill-switch: `execution_mode: v2-serial` in sprint frontmatter OR `CLEARGATE_PARALLEL_WAVES=off`
- * in the session env routes to today's serial Phase C loop with ZERO behavior change — no
- * launch_wave.mjs invocation occurs on that path.
  *
  * Verdict schema (discriminated union, STORY-033-04 §1.2 — inherits protocol §23):
  *   {
@@ -118,26 +112,6 @@ export function mintRunId(storyId, sprintId) {
 export function worktreeAddCommand(storyId, sprintBranch) {
   const story = String(storyId);
   return `git worktree add .worktrees/${story} -b story/${story} ${sprintBranch}`;
-}
-
-// ---------------------------------------------------------------------------
-// Kill-switch — does this run go parallel, or revert to the serial Phase C loop?
-// ---------------------------------------------------------------------------
-
-/**
- * Decide whether the wave loop should run in parallel. Returns false (serial) when EITHER
- * the sprint frontmatter `execution_mode` is `v2-serial` OR the session env carries
- * `CLEARGATE_PARALLEL_WAVES=off`. Either revert path runs today's serial five-dispatch
- * Phase C loop with ZERO behavior change — no launch_wave.mjs invocation occurs.
- *
- * @param {string|undefined} executionMode  sprint-frontmatter `execution_mode` value
- * @param {NodeJS.ProcessEnv} [env]         session env (defaults to process.env)
- * @returns {boolean}                       true → parallel waves; false → serial loop
- */
-export function shouldRunParallel(executionMode, env = process.env) {
-  if ((env.CLEARGATE_PARALLEL_WAVES || '').toLowerCase() === 'off') return false;
-  if (executionMode === 'v2-serial') return false;
-  return executionMode === 'v2-parallel';
 }
 
 // ---------------------------------------------------------------------------
@@ -267,7 +241,7 @@ export function validateVerdicts(verdicts) {
  * before dispatch, and the EXACT prior value is restored (deleted iff it was unset) in a
  * `finally` that runs even when `parallel()` or `validateVerdicts()` throws. Previously this
  * was an Orchestrator prose obligation (SKILL.md §C.0.1); a mid-barrier throw left the gate
- * suppressed session-wide, leaking into the serial fallback EPIC-033 promises is untouched.
+ * suppressed session-wide; the code-enforced restore closes that leak.
  *
  * `validateVerdicts()` (the designed throw site) runs INSIDE the protected region so the
  * `finally` always restores the gate before the validation Error propagates to the caller.
@@ -334,8 +308,8 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
 // wave to drive in this sprint, so direct execution is informational only.
 if (import.meta.url === `file://${process.argv[1]}`) {
   process.stdout.write(
-    'launch_wave.mjs — parallel-wave launcher (EPIC-033). ' +
-      'Exports validateVerdicts, mintRunId, worktreeAddCommand, shouldRunParallel, launchWave. ' +
-      'Not invoked under execution_mode: v2-serial or CLEARGATE_PARALLEL_WAVES=off (serial Phase C loop).\n',
+    'launch_wave.mjs — wave launcher (EPIC-033). ' +
+      'Exports validateVerdicts, mintRunId, worktreeAddCommand, launchWave. ' +
+      'Every wave runs through this launcher via the Workflow tool (/workflows).\n',
   );
 }

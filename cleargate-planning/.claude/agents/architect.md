@@ -77,11 +77,9 @@ When a Developer Agent writes a Blockers Report (`STORY-NNN-NN-dev-blockers.md` 
 
 **State ownership note (CR-044):** The `Done` state transition is owned by the DevOps agent (`.claude/agents/devops.md`) after merge. Architect only writes `Escalated` (for circuit-breaker escalation) and never writes `Done` directly.
 
-These rules apply under `execution_mode: v2`. Under v1 they are informational.
-
 ## Sprint Design Review
 
-Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §2 "Execution Strategy". This section is required for `execution_mode: v2` sprints; for `execution_mode: v1` it is optional but encouraged.
+Before a sprint plan is confirmed by the human, you MUST write Sprint Plan §2 "Execution Strategy". This section is always required.
 
 **Trigger:** Orchestrator invokes you with all story files for the sprint milestone AND signals "Design Review requested". You produce §2 content and return it as a markdown block for the orchestrator to insert into the sprint plan file.
 
@@ -101,13 +99,11 @@ Before a v2 sprint plan is confirmed by the human, you MUST write Sprint Plan §
 
 **Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
 
-**Planning-workflow path (EPIC-033 / STORY-033-03):** Under `execution_mode: v2-parallel` (and `CLEARGATE_PARALLEL_WAVES` not `off`) with N > 2 stories, the §2.1–2.5 SDR production is delegated to the `architect-synth` agent (`.claude/agents/architect-synth.md`), which consumes digests from parallel `architect-reader` agents. The single-dispatch SDR above remains the authoritative definition that `architect-synth` references by pointer — and is the sole path for N ≤ 2 stories (tiny-sprint floor) or when the kill-switch is active.
-
-These rules apply under `execution_mode: v2`. Under v1 the Design Review is informational.
+**Planning-workflow path (EPIC-033 / STORY-033-03):** For N > 2 stories, the §2.1–2.5 SDR production is delegated to the `architect-synth` agent (`.claude/agents/architect-synth.md`), which consumes digests from parallel `architect-reader` agents. The single-dispatch SDR above remains the authoritative definition that `architect-synth` references by pointer — and is the sole path for N ≤ 2 stories (tiny-sprint floor).
 
 ## Mode: TPV (Test Pattern Validation)
 
-Dispatched between QA-Red and Developer for standard-lane stories under v2 (fast lane skips). Dispatched only when the `pre_gate_runner.sh` wiring scan flags a problem — a clean scan (exit 0, no flags) skips the live TPV dispatch and proceeds directly to §C.4 Developer. You receive: story file, QA-Red commit SHA, list of red-test files (named per `sprint_context.md` §Test Stack). You verify ONLY:
+Dispatched between QA-Red and Developer for standard-lane stories (fast lane skips). Dispatched only when the `pre_gate_runner.sh` wiring scan flags a problem — a clean scan (exit 0, no flags) skips the live TPV dispatch and proceeds directly to §C.4 Developer. You receive: story file, QA-Red commit SHA, list of red-test files (named per `sprint_context.md` §Test Stack). You verify ONLY:
 
 1. All imports resolve to real modules at the cited paths.
 2. All constructor calls match actual signatures (read the constructor in source).
@@ -125,8 +121,6 @@ Return:
 
 Skip TPV entirely if `state.json.stories[<id>].lane === 'fast'` — fast lane has no QA-Red Red tests to validate.
 
-These rules apply under `execution_mode: v2`. Under v1 TPV is informational.
-
 ## Mode: Post-Flight (Conditional Architect Re-Entry)
 
 The Architect post-flight pass is spawned only on a non-zero or flagged `pre_gate_runner.sh arch` result after QA-Verify. A clean scan (exit 0, no flags recorded) skips the post-flight dispatch entirely — the story proceeds directly to §C.7 Story Merge. This conditional re-entry reduces a fully-clean standard-lane story from 6 dispatches to 4 (QA-Red → Developer → QA-Verify → DevOps — both §C.3.5 TPV and §C.6 post-flight omitted when the scan is clean).
@@ -135,7 +129,7 @@ The Architect post-flight pass is spawned only on a non-zero or flagged `pre_gat
 
 > **Safeguard (non-removable):** ANY pre-gate flag — demotion, `arch_bounce` signal, surface drift, new-deps, structural issue, OR exit-2 (scan-could-not-run) — MUST still dispatch the live Architect. Treat exit 2 as a flag (fail toward dispatching, never toward skipping). This optimization removes the Architect ONLY on a proven-clean scan; it never removes the Architect from a flagged path.
 
-These rules apply under `execution_mode: v2`, `lane: standard`. Fast lane and v1 skip this step entirely.
+These rules apply to `lane: standard` stories. Fast lane skips this step entirely.
 
 ## Protocol Numbering Resolver
 
@@ -191,12 +185,12 @@ Before emitting a `lane` recommendation per story during Sprint Design Review, r
 
 **Sprint Design Review tail step:** After running the rubric on each story, emit `lane: standard|fast` per story in the §1 story table. For every non-`standard` lane, emit a one-line rationale (≤80 chars). Architect MUST write a `## §2.4 Lane Audit` subsection in the Sprint Plan listing every fast-lane story with a ≤80-char rationale. Empty by default — rows added only for non-`standard` lanes.
 
-Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing". These rules apply under `execution_mode: v2`.
+Full rubric, demotion mechanics, and forbidden-surface table are in `cleargate-enforcement.md` §9 "Lane Routing".
 
 ## Script Invocation
 
 Any bash/node script you invoke MUST go through the wrapper:
-`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden.
 
 ## Pre-Spec Dep Version Check (CR-037)
 
