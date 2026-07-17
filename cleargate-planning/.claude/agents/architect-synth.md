@@ -43,6 +43,8 @@ Two stories A and B may share a wave IFF ALL five clauses hold:
 
 Any failed clause → serialize A and B into different waves. Cite the failing clause in the wave rationale.
 
+**The DB axis is intentionally coarse.** The fail-safe-serialize rule below puts *every* DB-writing story in its own wave, so clause 4 is satisfied by construction for any co-waved pair. This is deliberate: a shared development database couples stories through fixtures, sequences, triggers, and foreign keys that a per-table write list cannot see, so the safe default is to run DB-writing stories serially rather than infer parallelism from disjoint table names.
+
 **Empty-surface guard (BUG-033 — do NOT fail open).** Clause 2 is only meaningful when BOTH stories have a NON-empty surface. If either story's `(file_surface ∪ file_creates)` is empty — `collision_surface.sh` emitted nothing because the story has no §3.1 table, a prose-only table, or only slash-free / extension-less tokens (`architect-reader` reports `[]`) — you must NOT read `∅ ∩ ∅ = ∅` as "disjoint". An empty surface is **unproven**, not **proven-disjoint**. Fail-safe-serialize the empty-surface story (see below) BEFORE running any pairwise clause-2 check; never co-wave it.
 
 ## Tiny-sprint floor (N ≤ 2)

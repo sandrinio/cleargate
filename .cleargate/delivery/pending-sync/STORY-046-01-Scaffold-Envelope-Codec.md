@@ -1,7 +1,7 @@
 ---
 story_id: STORY-046-01
 parent_epic_ref: EPIC-046
-parent_cleargate_id: null
+parent_cleargate_id: "EPIC-046"
 sprint_cleargate_id: null
 carry_over: false
 status: Draft

@@ -43,3 +43,14 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## CRs
+
+| [[CR-074]] | cr | Approved | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
+| [[CR-084-Sprint-Dashboard-In-CLI-Payload]] | cr | Draft | .cleargate/delivery/pending-sync/CR-084-Sprint-Dashboard-In-CLI-Payload.md |
+| [[CR-085-Drive-Execution-Loop-States-Live]] | cr | Draft | .cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md |
+## Epics
+
+| [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
+## Sprints
+
+| [[SPRINT-38]] | sprint | Draft | .cleargate/delivery/pending-sync/SPRINT-38_Enforcement_Integrity_Restoration.md |

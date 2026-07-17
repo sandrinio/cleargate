@@ -1,7 +1,7 @@
 ---
 sprint_id: SPRINT-35
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-35"
 carry_over: false
 lifecycle_init_mode: warn
 execution_mode: v1

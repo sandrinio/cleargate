@@ -3,23 +3,25 @@ epic_id: EPIC-048
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-ambiguity: 🔴 High
-context_source: INITIATIVE-001 triage + connector/PRD.md v0.3.1 + connector/docs/{event-contract,spike-findings-claude-2.1.161,envelope-protocol}.md + verified codebase grounding + recorded direct approval
+status: In Review
+ambiguity: 🟢 Low
+approved_by: Sandro
+approved_at: 2026-06-06T00:00:00Z
+context_source: INITIATIVE-001 triage + connector/PRD.md v0.3.1 + connector/docs/{event-contract,spike-findings-claude-2.1.161,envelope-protocol}.md + verified codebase grounding + recorded direct approval (SPRINT-37 M2 scope + §6 decisions acked 2026-06-06)
 owner: Sandro
 target_date: 2026-08-15
 area: connector
 created_at: 2026-06-04T00:00:00Z
-updated_at: 2026-06-04T00:00:00Z
+updated_at: 2026-06-06T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
   pass: false
   failing_criteria:
-    - id: parent-approved
-      detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
-  last_gate_check: 2026-06-04T09:07:03Z
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: cleargate-cli/src/commands/mcp-serve.ts, cleargate-cli/src/auth/acquire.ts, cleargate-cli/src/auth/token-store.ts, cleargate-cli/src/auth/factory.ts, connector/docs/event-contract.md, connector/docs/spike-findings-claude-2.1.161.md"
+  last_gate_check: 2026-06-05T20:09:17Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -35,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-06-04T07:57:07Z
+  last_stamp: 2026-06-05T20:09:48Z
   sessions: []
 ---
 
@@ -167,21 +169,23 @@ Feature: Connector Daemon
 
 ## 6. AI Interrogation Loop (Human Input Required)
 
-- **AI Question:** "Reuse `cleargate-cli/src/auth/*` by importing it, or factor it into a shared `@cleargate/auth` lib both the CLI and daemon depend on?" — **Human Answer:** {Waiting}
-- **AI Question:** "Daemon repo layout: `connector/daemon` sub-package now, or its own `@cleargate/connector` package from the start?" — **Human Answer:** {Waiting}
-- **AI Question:** "Linux/Docker teardown is unverified (GH #19045) — should this epic include a teardown verification spike on Linux as a gating story?" — **Human Answer:** {Waiting}
-- **AI Question:** "Default verbosity `tools` (text + tool I/O), with `full`/`text` configurable — confirm?" — **Human Answer:** {Waiting}
+- **AI Question:** "Reuse `cleargate-cli/src/auth/*` by importing it, or factor it into a shared `@cleargate/auth` lib both the CLI and daemon depend on?" — **Human Answer:** **Import directly** for M2 (keep the sprint scoped to the daemon); a shared `@cleargate/auth` lib is a later clean-up CR. **Caveat (Architect SDR must confirm):** the imported auth subtree must be **PM-SDK-clean** (EPIC-027) — if it transitively pulls a PM-tool SDK, factor the minimal auth surface into a shared lib instead. (Sandro, 2026-06-06)
+- **AI Question:** "Daemon repo layout: `connector/daemon` sub-package now, or its own `@cleargate/connector` package from the start?" — **Human Answer:** **Keep `connector/daemon` as a sub-package** for M2 — package promotion is orthogonal churn that doesn't advance the resilience goal; revisit at EPIC-050 (onboarding & packaging) where companion packaging is the actual deliverable. (Sandro, 2026-06-06)
+- **AI Question:** "Linux/Docker teardown is unverified (GH #19045) — should this epic include a teardown verification spike on Linux as a gating story?" — **Human Answer:** **Yes — STORY-048-09 is a gating verification story**, sequenced early: prove zero-orphan teardown on Linux/Docker (OrbStack available locally) and fix any platform-specific escape before downstream stories rely on `teardown.ts`. (Sandro, 2026-06-06)
+- **AI Question:** "Default verbosity `tools` (text + tool I/O), with `full`/`text` configurable — confirm?" — **Human Answer:** **Confirmed — keep `tools` as the default**; add a `text`/`full` config knob only if it falls naturally out of the 048-08 sandboxing config plumbing, otherwise defer (not load-bearing for the M2 resilience goal). (Sandro, 2026-06-06)
 
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🔴 High Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
+
+*Readied 2026-06-06 for SPRINT-37 (Connector M2). The 4 §6 questions are resolved (recommended defaults acked by Sandro). The M0 turn-path (STORY-048-01/02) shipped in SPRINT-35, so M2 decomposes the remaining hardening scope into **STORY-048-03 … 048-09** (real-credential register · reconnect+backoff · resume/idempotency · version-drift guard · sessions+metrics · sandboxing · Linux/Docker teardown gating). Parent-approval recorded via the proposal-gate waiver (`approved_by`/`approved_at`) per direct approval.*
 
 Requirements to pass to Green (Ready for Coding Agent):
-- [ ] `approved: true` is set in the YAML frontmatter.
-- [ ] The `<agent_context>` block is complete and validated.
-- [ ] §4 Technical Grounding contains 100% real, verified file paths.
-- [ ] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).
-- [ ] 0 "TBDs" exist in the document.
+- [x] Parent approval recorded — proposal-gate waiver (`approved_by` + `approved_at` in frontmatter), per recorded direct approval.
+- [x] The `<agent_context>` block is complete and validated.
+- [x] §4 Technical Grounding contains 100% real, verified file paths (`connector/daemon/**` now exist on disk — M0 shipped).
+- [x] §6 AI Interrogation Loop resolved (all 4 human answers integrated into the spec).
+- [x] 0 "TBDs" exist in the document.
 - [x] Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
 - [x] Why not simpler? has both sub-bullets answered.

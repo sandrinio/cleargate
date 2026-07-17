@@ -1,8 +1,8 @@
 ---
 bug_id: BUG-035
 parent_ref: STORY-047-01
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "STORY-047-01"
+sprint_cleargate_id: "SPRINT-36"
 carry_over: false
 status: Completed
 severity: P1-High
