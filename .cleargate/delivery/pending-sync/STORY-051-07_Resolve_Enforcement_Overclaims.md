@@ -5,6 +5,7 @@ parent_cleargate_id: EPIC-051
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
+approved: true
 ambiguity: 🟢 Low
 context_source: EPIC-051 decomposition (framework self-audit 2026-07-17) + verified codebase grounding + recorded direct approval
 area: framework/enforcement
