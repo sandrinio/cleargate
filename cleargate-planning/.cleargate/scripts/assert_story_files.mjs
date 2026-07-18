@@ -17,7 +17,6 @@
  *
  * Env:
  *   CLEARGATE_REPO_ROOT  override repo root (for test isolation)
- *   CLEARGATE_EXEC_MODE  override execution_mode ('v1'|'v2') — for test isolation
  *
  * Returns (from assertWorkItemFiles):
  *   { missing: string[], present: string[], unapproved: string[], empty: string[] }
@@ -229,9 +228,6 @@ function main() {
     process.exit(0);
   }
 
-  // Allow test-isolation override of execution_mode
-  const execMode = process.env.CLEARGATE_EXEC_MODE ?? 'v2';
-
   const { missing, present, unapproved, empty } = assertWorkItemFiles(sprintFilePath, REPO_ROOT);
 
   const hasProblems = missing.length > 0 || unapproved.length > 0 || empty.length > 0;
@@ -254,12 +250,7 @@ function main() {
     process.stderr.write(`STUB-EMPTY (${empty.length}): ${empty.join(', ')}\n`);
   }
 
-  if (execMode === 'v2') {
-    process.exit(1);
-  } else {
-    // v1: warn only, exit 0
-    process.exit(0);
-  }
+  process.exit(1);
 }
 
 main();
