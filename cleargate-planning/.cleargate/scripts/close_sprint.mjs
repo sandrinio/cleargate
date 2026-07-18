@@ -42,13 +42,13 @@
  *                                       run git worktree list from a real git root).
  *   CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 — comma-separated fake worktree paths injected into
  *                                          Step 2.7 instead of running git worktree list.
- *                                          Used to exercise the v2 block / v1 advisory paths
+ *                                          Used to exercise the block / advisory paths
  *                                          without a real .worktrees/STORY-* directory.
  *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 entirely (test environments where git
  *                                      refs are absent or merge state is irrelevant).
  *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject merge status for Step 2.8 without
  *                                                  running git merge-base. Used to exercise
- *                                                  the v2 block / v1 advisory paths.
+ *                                                  the block / advisory paths.
  *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT for Step 2.8 git commands
  *                                      (used in tests that need a controlled git repo).
  *   CLEARGATE_SKIP_SPRINT_TRENDS=1   — skip Step 6.5 entirely (test environments).
@@ -62,7 +62,7 @@
  *                                      --flashcard-cleanup scan.
  *   CLEARGATE_SKIP_BUNDLE_CHECK=1    — skip Step 3.5 bundle generation + size check entirely
  *                                      (CR-036 test seam; analogous to CLEARGATE_SKIP_MERGE_CHECK).
- *                                      Never use in production — Step 3.5 is v2-fatal in production.
+ *                                      Never use in production — Step 3.5 is fatal in production.
  *   CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 — skip Step 2.9 entirely (test environments where
  *                                            deferred-verification state is irrelevant; mirrors
  *                                            CLEARGATE_SKIP_WORKTREE_CHECK).
@@ -636,7 +636,7 @@ async function main() {
 
   // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
   // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
-  // On miss: list unmerged commits + exit 1 (v2 enforcing); warn + continue (v1 advisory).
+  // On miss: list unmerged commits + exit 1 (always enforced; `CLEARGATE_ADVISORY=1` warns + continues).
   // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
   // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
