@@ -295,6 +295,10 @@ The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/
 - Under v1: the hook prints a warning but exits 0 (advisory only).
 - `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
 
+### §6.2a Test-ratchet gate — RETIRED (STORY-051-02)
+
+The scaffold previously shipped a second pre-commit hook, `pre-commit-test-ratchet.sh` (wiring `.cleargate/scripts/test_ratchet.mjs`), which spawned `npx vitest run` against a `test-baseline.json` file to gate on pass-count regression. Vitest was fully eliminated repo-wide by EPIC-028 (2026-05-18) and no `test-baseline.json` ever existed post-elimination, so a live invocation always failed with a vitest spawn `ETIMEDOUT` — a dead gate manufacturing false enforcement rather than real signal (FLASHCARD 2026-06-04 `#test #monorepo #ratchet`, CR-075). Per EPIC-051 Q6 (resolved: RETIRE, not repair), the hook, its script, and its bash test have been deleted from every scaffold copy (canonical, live-outer tracked, and the npm payload mirror). `pre-commit-surface-gate.sh` (§6.2 above) is now the **sole** scaffold-installed pre-commit gate; the dispatcher (`pre-commit.sh`) required no edit — it discovers hooks by lexical glob and simply has one fewer file to find. The authoritative test discipline was never this ratchet: it is each package's own `npm run typecheck` + `npm test` (node:test), enforced independently by CI and by each package's own pre-commit convention.
+
 ### §6.3 §3.1 table contract
 
 The §3.1 table in `story.md` template uses a two-column `| Item | Value |` pipe table. The parser:
