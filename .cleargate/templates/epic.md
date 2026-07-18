@@ -117,6 +117,15 @@ last_synced_body_sha: null # sha256 of body at last sync
 - **Surface:** `path/to/file.ext:NN` — {what it does}
 - **Coverage of this epic's scope:** {≥80% extension / partial / none — and why}
 
+## Prior work
+
+> Duplicate-check evidence, enforced by the `prior-work-recorded` readiness predicate.
+> Paste the `cleargate-wiki-query` result here: link each related item as a wiki-style
+> reference, or replace the line below with an explicit empty-result sentinel.
+> Accepted sentinels are listed in readiness-gates.md (Predicate Vocabulary entry 8).
+
+- <replace with related-work wikilinks, or an explicit empty-result sentinel>
+
 ## Why not simpler?
 
 > L2 / L3 right-size + justify-complexity. Answer both.
