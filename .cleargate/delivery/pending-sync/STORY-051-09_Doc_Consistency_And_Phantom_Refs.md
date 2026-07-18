@@ -2,7 +2,7 @@
 story_id: STORY-051-09
 parent_epic_ref: EPIC-051
 parent_cleargate_id: EPIC-051
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-33"
 carry_over: false
 status: Draft
 approved: true
