@@ -63,12 +63,15 @@ cached_gate_result:
   pass: null
   failing_criteria: []
   last_gate_check: null
+epics: []          # canonical epic IDs this sprint decomposes; decomposition gate reads this (fail-closed if empty — see readiness-gates.md)
+proposals: []      # proposal IDs carried; each must resolve to a decomposed epic
+context_source: "" # sprint's own decomposition evidence (which epics/proposals it decomposes), NOT an upstream approval doc
 ---
 
 # SPRINT-{ID}: {Sprint Number / Name}
 
 ## 0. Stakeholder Brief
-*(Sponsor-readable summary. Pushed to PM tool. Pair with §3 Risks below.)*
+*(Sponsor-readable summary. Pushed via cleargate push. Pair with §3 Risks below.)*
 
 - **Sprint Goal:** {1 sentence}
 - **Business Outcome:** {what the user / sponsor gets}

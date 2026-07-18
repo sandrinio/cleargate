@@ -182,6 +182,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).context_source != null"
 ```
 
+STORY-051-03 (Q7): for the `sprint` bucket, `discovery-checked` is deliberately self-referential (`frontmatter(.).context_source`, not `frontmatter(context_source).<field>`). A sprint's `context_source` documents its own decomposition evidence — which `epics:`/`proposals:` it decomposes — not an upstream approval doc the way the epic bucket's `frontmatter(context_source).approved == true` (line 73) reads a *separate* file. Do not "fix" this to the upstream form; it is intentional. Array-non-empty enforcement of `epics:`/`proposals:` is the `cleargate sprint init` decomposition gate's job (fails closed on `declaredNone`/`error` unless `--allow-drift`), not this predicate's — this criterion only asserts the field is populated at all.
+
 ```yaml
 - work_item_type: initiative
   transition: ready-for-decomposition
