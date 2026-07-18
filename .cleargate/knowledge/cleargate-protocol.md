@@ -116,7 +116,7 @@ Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed +
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
-Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. Under `execution_mode: v2` a failing per-item gate hard-blocks; under `v1` it warns. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
+Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. **A failing per-item gate hard-blocks (always enforced).** See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
 
 ### Gate 4 — Close-Ack (per sprint, Close phase)
 
@@ -861,7 +861,7 @@ Every segment returns exactly one verdict object. The discriminant is `verdict`:
 | `runId` | string | always | the segment's stable, distinct `RUN_ID` |
 | `devSha` | string | always | Developer commit SHA |
 | `qaSha` | string | always | QA-Verify commit SHA |
-| `archSha` | string | optional | Architect-pass SHA (standard lane v2 only) |
+| `archSha` | string | optional | Architect-pass SHA (standard lane only) |
 | `flashcards_flagged` | string[] | always (may be empty) | cards processed at the between-wave barrier |
 | `counters` | `{ qa_bounces, arch_bounces, breaker_hits }` | always | all three numeric |
 | `tokens` | `{ input, output, cache_creation, cache_read, model }` | always | per-segment cost the ledger consumes |

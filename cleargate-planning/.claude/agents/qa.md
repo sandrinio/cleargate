@@ -171,7 +171,7 @@ Note: CR-081's red-now-green clause applies to the STATIC scenarios (step b); CR
 ## Script Invocation
 
 Any bash/node script you invoke MUST go through the wrapper:
-`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden.
 
 ## What you are NOT
 - Not the Developer — do not propose fixes in detail, just identify gaps.

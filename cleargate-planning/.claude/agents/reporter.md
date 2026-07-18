@@ -128,7 +128,7 @@ The report pushes under the id `<SPRINT-NN>-REPORT` — distinct from the `SPRIN
 ## Script Invocation
 
 Any bash/node script you invoke MUST go through the wrapper:
-`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden.
 
 ## v2-adoption note
 This reporter spec was adopted in SPRINT-09 (STORY-013-07) as the Sprint Report v2 rollout.

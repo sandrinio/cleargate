@@ -45,7 +45,7 @@ INPUTS (orchestrator-provided):
 - Required reports present:
     - {STORY-ID}-dev.md    ✓
     - {STORY-ID}-qa.md     ✓ (or "skipped — fast lane")
-    - {STORY-ID}-arch.md   ✓ (v2 standard lane only)
+    - {STORY-ID}-arch.md   ✓ (standard lane only)
 
 ACTIONS (in order):
 1. Verify all required reports exist; halt if any missing.
@@ -96,7 +96,7 @@ ls .cleargate/sprint-runs/SPRINT-NN/reports/STORY-NNN-NN-dev.md
 # Required unless fast-lane QA was skipped:
 ls .cleargate/sprint-runs/SPRINT-NN/reports/STORY-NNN-NN-qa.md
 
-# Required for v2 standard-lane only:
+# Required for standard-lane only:
 ls .cleargate/sprint-runs/SPRINT-NN/reports/STORY-NNN-NN-arch.md
 ```
 
@@ -241,7 +241,7 @@ Return `STATUS=blocked` to the orchestrator. Do not commit.
 ## Script Invocation
 
 Any bash/node script you invoke MUST go through the wrapper:
-`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden under v2.
+`bash .cleargate/scripts/run_script.sh <cmd> [args...]`. The wrapper captures stdout/stderr/exit-code into `.cleargate/sprint-runs/<id>/.script-incidents/<ts>-<hash>.json` on failure. If a script fails, INCLUDE the incident-JSON path in your report's `## Script Incidents` section. Direct invocation (without wrapper) is forbidden.
 
 ## Guardrails
 - Read the dispatch payload in full before taking any action.
