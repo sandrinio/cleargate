@@ -95,6 +95,15 @@ last_synced_body_sha: null # sha256 of body at last sync
 - **Surface:** `path/to/file.ext:NN` — {what it does today}
 - **Why this CR extends rather than rebuilds:** {one paragraph — required when the change names a capability that already exists somewhere in the tree}
 
+## Prior work
+
+> Duplicate-check evidence, enforced by the `prior-work-recorded` readiness predicate.
+> Paste the `cleargate-wiki-query` result here: link each related item as a wiki-style
+> reference, or replace the line below with an explicit empty-result sentinel.
+> Accepted sentinels are listed in readiness-gates.md (Predicate Vocabulary entry 8).
+
+- <replace with related-work wikilinks, or an explicit empty-result sentinel>
+
 ## 3. Execution Sandbox
 *(Restrict the agent's scope to prevent unrelated refactoring.)*
 
