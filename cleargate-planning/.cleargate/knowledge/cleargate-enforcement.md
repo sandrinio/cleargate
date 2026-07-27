@@ -17,7 +17,7 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 | §9 | protocol §24 | Lane Routing |
 | §10 | protocol §25 | Lifecycle Reconciliation (CR-017) |
 | §11 | protocol §26 | Decomposition Gate (CR-017) |
-| §12 | protocol §27 | Gate 3.5 — Sprint Close Acknowledgement (CR-019) |
+| §12 | protocol §27 | Gate 4 — Sprint Close Acknowledgement (CR-019) |
 | §15 | — | Operator Emergency Levers (STORY-070-01) |
 
 ---
@@ -291,8 +291,7 @@ Off-surface edits require one of:
 
 The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/hooks/pre-commit-surface-gate.sh` and dispatched from `.claude/hooks/pre-commit.sh`. The dispatcher is symlinked to `.git/hooks/pre-commit`.
 
-- Under v2: off-surface files cause a non-zero exit — the commit is blocked.
-- Under v1: the hook prints a warning but exits 0 (advisory only).
+- Off-surface files cause a non-zero exit — the commit is blocked (always enforced; STORY-070-01: `execution_mode` retired).
 - `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
 
 ### §6.2a Test-ratchet gate — RETIRED (STORY-051-02)
@@ -445,11 +444,11 @@ If the Architect cannot deliver the decomposition before the activating sprint's
 
 ---
 
-## 12. Gate 3.5 — Sprint Close Acknowledgement (CR-019) (source: protocol §27)
+## 12. Gate 4 — Sprint Close Acknowledgement (CR-019) (source: protocol §27)
 
 ### §12.1 Gate Posture
 
-Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_item` push-approval (§4 Gate 3), which already requires `approved: true` + explicit human confirmation. Authorising the execution loop ("start sprint NN") does NOT authorise the close. Close requires its own dedicated human approval.
+Sprint close is a **Gate-4 action** — the same posture as the Gate-1-green `cleargate_push_item` approval, which already requires `approved: true` + explicit human confirmation. Authorising the execution loop ("start sprint NN") does NOT authorise the close. Close requires its own dedicated human approval.
 
 ### §12.2 Two-Step Protocol
 
@@ -458,7 +457,7 @@ Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_it
 
 ### §12.3 Flag Reservation
 
-`--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-3 breach equivalent to calling `cleargate_push_item` without `approved: true`.
+`--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-4 breach equivalent to calling `cleargate_push_item` without `approved: true`.
 
 `close_sprint.mjs` mechanically refuses `--assume-ack` (exit 2) unless `CLEARGATE_CI_ACK=1` is set. The token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI.
 

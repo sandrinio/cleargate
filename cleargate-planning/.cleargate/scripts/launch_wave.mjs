@@ -224,7 +224,7 @@ export function validateVerdicts(verdicts) {
 }
 
 // ---------------------------------------------------------------------------
-// launchWave — the parallel() driver (next-sprint surface; not exercised this sprint).
+// launchWave — the parallel() driver (the live wave-execution path, protocol §23).
 // ---------------------------------------------------------------------------
 
 /**
@@ -246,8 +246,8 @@ export function validateVerdicts(verdicts) {
  * `validateVerdicts()` (the designed throw site) runs INSIDE the protected region so the
  * `finally` always restores the gate before the validation Error propagates to the caller.
  *
- * The `parallel`/`segmentRunner` seams are injected so this is testable without a live
- * Workflow runtime (SPRINT-32 runs serial — no real dispatch). When omitted, the function
+ * The `parallel`/`segmentRunner` seams are injected as a testability affordance — this makes
+ * the function testable without a live Workflow runtime. When omitted, the function
  * documents the shape and performs NO env mutation; the live launcher wires the Workflow
  * `parallel()` primitive.
  *
@@ -273,7 +273,7 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
   const segmentPlan = stories.map((story) => ({ story, runId: mintRunId(story, sprintId) }));
 
   if (typeof parallel !== 'function' || typeof segmentRunner !== 'function') {
-    // No live runtime seam supplied (the SPRINT-32 serial-build case). Return the plan so a
+    // No live runtime seam supplied (the seam-not-supplied / plan-only case). Return the plan so a
     // caller can inspect the worktree commands + minted RUN_IDs without dispatching agents.
     // NO env mutation here — nothing is dispatched, so the gate need not be suppressed.
     return segmentPlan.map((seg) => ({
@@ -304,8 +304,8 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
   }
 }
 
-// When run directly (`node launch_wave.mjs`) print a short usage note — there is no live
-// wave to drive in this sprint, so direct execution is informational only.
+// When run directly (`node launch_wave.mjs`), direct execution prints a usage note;
+// live waves run via the Workflow tool (`/workflows`).
 if (import.meta.url === `file://${process.argv[1]}`) {
   process.stdout.write(
     'launch_wave.mjs — wave launcher (EPIC-033). ' +
