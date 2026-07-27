@@ -176,6 +176,15 @@ async function main() {
   const reportBodyStdin = args.includes('--report-body-stdin');
   const assumeAck = args.includes('--assume-ack') || reportBodyStdin;
 
+  if (args.includes('--assume-ack') && process.env.CLEARGATE_CI_ACK !== '1') {
+    process.stderr.write(
+      'Error: --assume-ack requires CLEARGATE_CI_ACK=1.\n' +
+      'This token is never set unprompted by an agent — it is set for a single invocation\n' +
+      'only after an explicit human close authorization (Gate 4), or by CI (enforcement §12.3).\n'
+    );
+    process.exit(2);
+  }
+
   const sprintDir = process.env.CLEARGATE_SPRINT_DIR
     ? path.resolve(process.env.CLEARGATE_SPRINT_DIR)
     : path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
@@ -636,7 +645,7 @@ async function main() {
 
   // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
   // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
-  // On miss: list unmerged commits + exit 1 (always enforced; `CLEARGATE_ADVISORY=1` warns + continues).
+  // On miss: list unmerged commits + exit 1 (always enforced).
   // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
   // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.

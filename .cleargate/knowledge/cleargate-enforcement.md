@@ -460,6 +460,8 @@ Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_it
 
 `--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-3 breach equivalent to calling `cleargate_push_item` without `approved: true`.
 
+`close_sprint.mjs` mechanically refuses `--assume-ack` (exit 2) unless `CLEARGATE_CI_ACK=1` is set. The token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI.
+
 ## 13. Sprint Execution Gate (Gate 3) (source: new in CR-021)
 
 Before sprint state transitions Ready → Active, the orchestrator MUST invoke
@@ -500,16 +502,14 @@ This gate is **always enforced** (STORY-070-01: single always-enforced behavior)
 
 Before any close action, the script verifies no leftover story worktrees remain. Runs `git worktree list --porcelain` and matches paths under `.worktrees/`.
 
-- **Enforcement (v2):** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
-- **Advisory (v1):** prints `Step 2.7 warning: leftover worktree at <path> (advisory in v1)` to stderr but continues.
+- **Always enforced:** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
 - **Test seams:** `CLEARGATE_SKIP_WORKTREE_CHECK=1` (full bypass), `CLEARGATE_FORCE_WORKTREE_PATHS` (test injection).
 
 ### §14.2 Step 2.8 — Sprint-Merged-to-Main Verify
 
 Verifies the sprint branch (`sprint/S-NN`) tip is an ancestor of `main`. Runs `git merge-base --is-ancestor <sprint-tip> <main-tip>`.
 
-- **Enforcement (v2):** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
-- **Advisory (v1):** prints `Step 2.8 warning: sprint branch unmerged (advisory in v1)` to stderr but continues.
+- **Always enforced:** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
 - **Test seams:** `CLEARGATE_SKIP_MERGE_CHECK=1`, `CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged`, `CLEARGATE_REPO_ROOT` (test override).
 
 ### §14.3 Steps 6.5 / 6.6 / 6.7 — Post-close additions
@@ -541,7 +541,9 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, all gate failures in the CLI (`cleargate sprint preflight`, `cleargate sprint init`, etc.) are **downgraded from hard exits to stderr warnings** prefixed with `[advisory]`. The command exits 0.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:140`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+
+**`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 
 **Semantics:**
 - Only the exact string `'1'` is truthy. Values `'0'`, `'true'`, `'yes'`, `''`, or absent → gate failures remain fatal.
