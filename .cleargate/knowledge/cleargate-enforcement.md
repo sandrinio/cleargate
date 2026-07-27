@@ -291,6 +291,9 @@ Off-surface edits require one of:
 
 The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/hooks/pre-commit-surface-gate.sh` and dispatched from `.claude/hooks/pre-commit.sh`. The dispatcher is symlinked to `.git/hooks/pre-commit`.
 
+The dispatcher resolves its own path through the `.git/hooks/pre-commit` symlink before globbing for `pre-commit-*.sh` siblings, so the chain works whether the link was created with a relative or an absolute target.
+Inside a linked worktree the gate reads the `.cleargate/sprint-runs/.active` sentinel and `state.json` from the **main working tree** (the parent of `git rev-parse --git-common-dir`), because `.active` is gitignored and single-writer in the main checkout; staged files, the whitelist, and the story file itself still resolve against the worktree, so a §3.1 self-amendment takes effect in the same commit.
+
 - Off-surface files cause a non-zero exit — the commit is blocked (always enforced; STORY-070-01: `execution_mode` retired).
 - `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
 
@@ -302,12 +305,13 @@ The scaffold previously shipped a second pre-commit hook, `pre-commit-test-ratch
 
 The §3.1 table in `story.md` template uses a two-column `| Item | Value |` pipe table. The parser:
 - Scans between the `### 3.1` heading and the next `### ` heading.
-- Only processes rows where the Value cell contains `.` or `/` (path-shaped values).
-- Strips backticks from values.
-- Splits on `, ` to handle multiple paths in one cell.
-- Ignores header and separator rows.
+- Splits each Value cell on `, ` into segments.
+- Takes the **first backtick-quoted span** in each segment as that segment's declared path; a segment with no backticks contributes nothing.
+- Keeps a candidate only if it contains no whitespace and contains `.` or `/`.
+- Trailing prose is therefore ignored: `` `path/to/x.ts` — rationale `` declares `path/to/x.ts`. Bold or emphasis around the backticks is harmless.
+- Ignores header and separator rows; non-path rows ("New Files Needed: Yes/No", "Mirrors") are silently skipped.
 
-Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped.
+**Paths MUST be backtick-quoted.** An un-backticked §3.1 declares nothing, and the gate then warns and exits 0 (§6.6) rather than blocking. Every template ships backticked examples.
 
 ### §6.4 Whitelist
 
@@ -315,13 +319,35 @@ Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped
 
 ### §6.5 Install (dogfood)
 
-On `cleargate init`, the scaffold automatically installs the `.git/hooks/pre-commit` symlink. For existing dogfood repositories, install once by hand:
+`cleargate init` does not install the `.git/hooks/pre-commit` symlink — `.git/hooks/` is per-clone git plumbing, outside the npm payload and outside `.cleargate/.install-manifest.json`. Install it once per clone, by hand:
 
 ```bash
 ln -sf ../../.claude/hooks/pre-commit.sh .git/hooks/pre-commit
 ```
 
+An absolute link target works equally well; the dispatcher resolves either form (§6.2). Linked worktrees need no separate install — git runs the main working tree's `$GIT_DIR/hooks` for every worktree.
+
 Log this step in the sprint §4 Execution Log.
+
+### §6.6 Exit-0 paths (what does not block)
+
+`file_surface_diff.sh` has several early returns that exit 0 without blocking. `SKIP_SURFACE_GATE=1` is the only *intentional bypass*; the rest are *non-applicability* paths — legitimate cases where the gate has nothing to check, not silent holes, except where noted.
+
+| # | Condition | Status |
+|---|---|---|
+| E1 | `SKIP_SURFACE_GATE=1` | The sole intentional bypass. Prints to stderr. |
+| E2 | Sentinel present but empty | Feeds E5. |
+| E3 | `state.json` missing for the named sprint | Feeds E5. Reads from the main-checkout sprint-state root (§6.2). |
+| E4 | No story id resolvable from `state.json` | Feeds E5. |
+| E5 | No active story file found | Legitimate when there genuinely is no active sprint (e.g. commits on `main` outside a sprint). Message names the roots searched. |
+| E6 | Zero paths parsed from §3.1 | A backtick-less §3.1 declares nothing (§6.3). **Known non-applicability path, tracked for promotion to a hard block by a carry-over CR.** |
+| E7 | Nothing staged | Legitimate — `git commit --allow-empty`, `--amend` with no index change. |
+| E8 | Zero off-surface files | The success path. |
+| E9 | `pre-commit-surface-gate.sh` cannot find `file_surface_diff.sh` | **Known non-applicability path** (wrapper, not this script), tracked by a carry-over CR. |
+| E10 | Dispatcher glob's unmatched-literal guard | Required — skips the literal glob pattern when no `pre-commit-*.sh` sibling exists. |
+| E11 | Dispatcher skips a non-executable sibling silently | **Known non-applicability path**, mitigated in practice by `chmodSync(0o755)` on every payload-copied `.sh` (BUG-018), tracked by a carry-over CR. |
+
+After the dispatcher/sentinel/parser fixes above, `SKIP_SURFACE_GATE=1` is the sole *bypass*; E6, E9, and E11 remain as documented, enumerated exit-0s rather than silent ones.
 
 ---
 
