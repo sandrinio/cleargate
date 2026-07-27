@@ -9,7 +9,7 @@
 | Epics | 40 | 1 | 27 |
 | Sprints | 38 | 1 | 32 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 83 | 0 | 75 |
+| CRs | 84 | 0 | 75 |
 | Bugs | 27 | 0 | 24 |
 
 ## Active Epics

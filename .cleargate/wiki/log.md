@@ -1070,3 +1070,8 @@
   action: "create"
   target: "CR-086"
   path: ".cleargate/delivery/pending-sync/CR-086_File_Surface_Gate_End_To_End.md"
+- timestamp: "2026-07-27T22:21:48.779Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-087"
+  path: ".cleargate/delivery/pending-sync/CR-087_Downstream_Safe_Pre_Commit_Chain.md"
