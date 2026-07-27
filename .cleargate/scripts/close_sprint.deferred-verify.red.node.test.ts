@@ -92,6 +92,7 @@ function baseEnv(sprintDir: string): NodeJS.ProcessEnv {
     CLEARGATE_SKIP_SKILL_CANDIDATES: '1', // skip Step 6.6
     CLEARGATE_SKIP_FLASHCARD_CLEANUP: '1',// skip Step 6.7
     CLEARGATE_SKIP_BUNDLE_CHECK: '1',     // skip Step 3.5
+    CLEARGATE_CI_ACK: '1',                // satisfy the STORY-051-08 --assume-ack CI-token guard
   };
 }
 

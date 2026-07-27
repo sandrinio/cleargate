@@ -176,6 +176,15 @@ async function main() {
   const reportBodyStdin = args.includes('--report-body-stdin');
   const assumeAck = args.includes('--assume-ack') || reportBodyStdin;
 
+  if (args.includes('--assume-ack') && process.env.CLEARGATE_CI_ACK !== '1') {
+    process.stderr.write(
+      'Error: --assume-ack is reserved for CI. Set CLEARGATE_CI_ACK=1 in an automated CI\n' +
+      'environment to use it. A conversational orchestrator MUST NOT pass --assume-ack\n' +
+      'or set CLEARGATE_CI_ACK (enforcement §12.3).\n'
+    );
+    process.exit(2);
+  }
+
   const sprintDir = process.env.CLEARGATE_SPRINT_DIR
     ? path.resolve(process.env.CLEARGATE_SPRINT_DIR)
     : path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
@@ -636,7 +645,7 @@ async function main() {
 
   // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
   // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
-  // On miss: list unmerged commits + exit 1 (always enforced; `CLEARGATE_ADVISORY=1` warns + continues).
+  // On miss: list unmerged commits + exit 1 (always enforced).
   // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
   // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
