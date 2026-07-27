@@ -297,6 +297,8 @@ Inside a linked worktree the gate reads the `.cleargate/sprint-runs/.active` sen
 - Off-surface files cause a non-zero exit — the commit is blocked (always enforced; STORY-070-01: `execution_mode` retired).
 - `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
 
+Before delegating, the wrapper runs each package's `check:no-vitest` script for the prefixes it knows about. A prefix runs only if its directory exists **and** that directory's `package.json` defines the script; otherwise it is skipped, not failed (§6.6 E12). Output is not suppressed — a failing check prints npm's output plus a `[surface-gate] BLOCKED:` line naming the package.
+
 ### §6.2a Test-ratchet gate — RETIRED (STORY-051-02)
 
 The scaffold previously shipped a second pre-commit hook, `pre-commit-test-ratchet.sh` (wiring `.cleargate/scripts/test_ratchet.mjs`), which spawned `npx vitest run` against a `test-baseline.json` file to gate on pass-count regression. Vitest was fully eliminated repo-wide by EPIC-028 (2026-05-18) and no `test-baseline.json` ever existed post-elimination, so a live invocation always failed with a vitest spawn `ETIMEDOUT` — a dead gate manufacturing false enforcement rather than real signal (FLASHCARD 2026-06-04 `#test #monorepo #ratchet`, CR-075). Per EPIC-051 Q6 (resolved: RETIRE, not repair), the hook, its script, and its bash test have been deleted from every scaffold copy (canonical, live-outer tracked, and the npm payload mirror). `pre-commit-surface-gate.sh` (§6.2 above) is now the **sole** scaffold-installed pre-commit gate; the dispatcher (`pre-commit.sh`) required no edit — it discovers hooks by lexical glob and simply has one fewer file to find. The authoritative test discipline was never this ratchet: it is each package's own `npm run typecheck` + `npm test` (node:test), enforced independently by CI and by each package's own pre-commit convention.
@@ -346,6 +348,7 @@ Log this step in the sprint §4 Execution Log.
 | E9 | `pre-commit-surface-gate.sh` cannot find `file_surface_diff.sh` | **Known non-applicability path** (wrapper, not this script), tracked by a carry-over CR. |
 | E10 | Dispatcher glob's unmatched-literal guard | Required — skips the literal glob pattern when no `pre-commit-*.sh` sibling exists. |
 | E11 | Dispatcher skips a non-executable sibling silently | **Known non-applicability path**, mitigated in practice by `chmodSync(0o755)` on every payload-copied `.sh` (BUG-018), tracked by a carry-over CR. |
+| E12 | A `check:no-vitest` prefix directory is absent, has no `package.json`, or does not define the script | Skipped, not failed — the prefix list is meta-repo vocabulary in a file that ships everywhere (CR-087). Tracked for generalisation by [[EPIC-045]] portability. |
 
 After the dispatcher/sentinel/parser fixes above, `SKIP_SURFACE_GATE=1` is the sole *bypass*; E6, E9, and E11 remain as documented, enumerated exit-0s rather than silent ones.
 
