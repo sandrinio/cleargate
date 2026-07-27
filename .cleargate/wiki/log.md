@@ -1065,3 +1065,8 @@
   action: "update"
   target: "SPRINT-38"
   path: ".cleargate/delivery/pending-sync/SPRINT-38_Enforcement_Integrity_Restoration.md"
+- timestamp: "2026-07-27T15:58:32.854Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-086"
+  path: ".cleargate/delivery/pending-sync/CR-086_File_Surface_Gate_End_To_End.md"

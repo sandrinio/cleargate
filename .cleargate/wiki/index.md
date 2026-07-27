@@ -48,6 +48,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-074]] | cr | Approved | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
 | [[CR-084-Sprint-Dashboard-In-CLI-Payload]] | cr | Draft | .cleargate/delivery/pending-sync/CR-084-Sprint-Dashboard-In-CLI-Payload.md |
 | [[CR-085-Drive-Execution-Loop-States-Live]] | cr | Draft | .cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md |
+| [[CR-086]] | cr | Approved | .cleargate/delivery/pending-sync/CR-086_File_Surface_Gate_End_To_End.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
