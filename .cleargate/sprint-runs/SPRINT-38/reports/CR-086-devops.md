@@ -40,3 +40,49 @@
 ## Notes
 - Working tree confirmed clean both before the merge (`git status` → "nothing to commit, working tree clean") and after all steps completed.
 - Required-reports prerequisite (`CR-086-dev.md`/`-qa.md`/`-arch.md`) was explicitly waived by this dispatch; verdicts (QA-Verify PASS 5/5 acceptance + 21/21 e2e, Architect post-flight PASS) were supplied inline in the dispatch payload and are reflected in the Post-Merge Tests section above (independently re-verified by DevOps, not merely trusted).
+
+## Post-consolidation regen
+
+Mechanical-only dispatch, no merge — Phase D.5 consolidation pass (`8d69ae12`) edited two canonical scaffold scripts after the last prebuild ran, leaving the derived tiers stale by design. This dispatch re-ran prebuild and regenerated the manifest to close the gap.
+
+**Step 1 — dirty-tree check (before touching anything).**
+Confirmed on `sprint/S-38`. `git status` showed exactly the three expected dirty paths and nothing else:
+- `cleargate-planning/MANIFEST.json` (stale `generated_at`-only bump from an earlier run — superseded below)
+- `.cleargate/sprint-runs/SPRINT-38/.session-totals.json` (runtime, hook-owned)
+- `.cleargate/sprint-runs/SPRINT-38/token-ledger.jsonl` (runtime, hook-owned)
+
+No other paths dirty — proceeded.
+
+**Step 2 — prebuild.**
+`cd cleargate-cli && npm run prebuild` →
+```
+[build-manifest] 76 files → cleargate-planning/MANIFEST.json
+[prebuild] cleargate-planning payload copied: 90 files → cleargate-cli/templates/cleargate-planning
+```
+Clean run, no errors.
+
+**Step 3 — four verifications (all passed):**
+1. `diff cleargate-planning/.cleargate/scripts/file_surface_diff.sh cleargate-cli/templates/cleargate-planning/.cleargate/scripts/file_surface_diff.sh` → empty, exit 0 (byte-identical).
+2. `diff cleargate-planning/.cleargate/scripts/close_sprint.mjs cleargate-cli/templates/cleargate-planning/.cleargate/scripts/close_sprint.mjs` → empty, exit 0 (byte-identical).
+3. `grep -c "close_sprint.deferred-verify.red.node.test.ts" cleargate-planning/MANIFEST.json` → `0` (stale test entry no longer listed).
+4. `find cleargate-cli/templates/cleargate-planning -name '*.node.test.ts'` → no output (no stray test files in the npm payload).
+
+No mismatches — nothing to blocker-report.
+
+**MANIFEST.json diff (the only substantive change):** `generated_at` timestamp bump + `sha256` updates for the two touched scripts only (`.cleargate/scripts/close_sprint.mjs`, `.cleargate/scripts/file_surface_diff.sh`) — 3 lines changed (6 total incl. timestamp), consistent with a D.5-edit-driven regen and nothing else drifting.
+
+**Step 4 — commit (meta-repo side only).**
+Staged and committed only `cleargate-planning/MANIFEST.json` on `sprint/S-38` (the two runtime files — `.session-totals.json`, `token-ledger.jsonl` — were left uncommitted/untouched, hook-owned):
+- Commit SHA: `25f359f2`
+- Message: `chore(SPRINT-38): post-consolidation prebuild — payload + manifest regen`
+- Diff stat: 1 file changed, 3 insertions(+), 3 deletions(-)
+
+**`cleargate-cli/templates/**` side (separate gitignored repo) — dirtiness check:**
+Checked `cleargate-cli`'s own git status and diff. Finding: `templates/cleargate-planning/` is entirely **gitignored inside the `cleargate-cli` repo itself** (`.gitignore:5` → `templates/cleargate-planning/`, confirmed via `git check-ignore -v`), and has been since STORY-002-05 (commit `3f1149a`, "gitignored as a build artifact"). `git ls-files templates/cleargate-planning/...` returns nothing — the directory is untracked and untrackable by design; it is a prebuild-regenerated artifact shipped to npm purely via `package.json` `files[]`, not via git history. `git diff --stat -- templates/cleargate-planning` and `git status --porcelain -- templates/cleargate-planning` both returned empty. So: **no dirty state to report there** — this is expected repo hygiene, not a gap. (`cleargate-cli`'s own working tree does carry unrelated pre-existing untracked debris — `test/dashboard/serve.node.test.ts` and a batch of `.script-incidents/*.json` under `_off-sprint` — none of which this dispatch touched or is responsible for.)
+
+**Not done (per dispatch instruction, deliberately out of scope):** no touch to live gitignored `/.claude/**`; no `dist` rebuild; no merge to `main`; no `close_sprint.mjs` invocation.
+
+STATUS=done
+- MERGE_SHA: N/A (no merge performed this dispatch — regen-only)
+- COMMIT_SHA: `25f359f2`
+- VERIFICATIONS: file_surface_diff.sh diff-empty (pass) · close_sprint.mjs diff-empty (pass) · manifest stale-test-entry absent (pass) · payload contains zero `*.node.test.ts` (pass)
