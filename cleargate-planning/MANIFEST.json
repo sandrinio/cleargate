@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.17.1",
-  "generated_at": "2026-07-27T19:31:43.379Z",
+  "generated_at": "2026-07-27T19:54:28.743Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -228,7 +228,7 @@
     },
     {
       "path": ".cleargate/scripts/close_sprint.mjs",
-      "sha256": "d96f5063d574fd24146d0a4bd55dce15bb756425f3ace3026f60d6d5189e2c4e",
+      "sha256": "a87fd53efee441899f74a99d808c139e85e953b38a84cee7c1411489b8edac57",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -256,7 +256,7 @@
     },
     {
       "path": ".cleargate/scripts/file_surface_diff.sh",
-      "sha256": "5d53297c2021f12eaf348faec45dcc91b9b09f448e73b3850bc75bcf84cbf518",
+      "sha256": "58765f105c182a728ec3b09ecd64d7503af70210cf540941103e26fc5a3f1030",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
