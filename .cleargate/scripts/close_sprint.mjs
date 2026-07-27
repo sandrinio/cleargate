@@ -117,7 +117,8 @@ function usage() {
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
     '\n' +
     'Options:\n' +
-    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this)\n' +
+    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this);\n' +
+    '                         refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3)\n' +
     '  --report-body-stdin    Read SPRINT-<#>_REPORT.md body from stdin; implies ack (STORY-014-10)\n'
   );
   process.exit(2);
@@ -1023,14 +1024,16 @@ async function main() {
     if (!fs.existsSync(reportFileForCheck)) {
       process.stdout.write(
         `\nWaiting for Reporter to produce ${reportBasename}...\n` +
-        'After Reporter succeeds, re-run with --assume-ack to complete the close.\n'
+        'After Reporter succeeds, re-run with --assume-ack to complete the close.\n' +
+        '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n'
       );
       process.exit(0);
     }
     // In non-assume-ack mode with existing report, prompt user
     process.stdout.write(
       `\n${reportBasename} found at ${reportFileForCheck}\n` +
-      'Review the report, then confirm close by re-running with --assume-ack\n'
+      'Review the report, then confirm close by re-running with --assume-ack\n' +
+      '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n'
     );
     process.exit(0);
   }

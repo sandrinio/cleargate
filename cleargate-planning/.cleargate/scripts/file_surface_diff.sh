@@ -68,8 +68,8 @@ resolve_sprint_state_root() {
 }
 SPRINT_STATE_ROOT="$(resolve_sprint_state_root)"
 
-ACTIVE_SENTINEL="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs/.active"
-STATE_JSON_GLOB="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs"
+SPRINT_RUNS_DIR="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs"
+ACTIVE_SENTINEL="${SPRINT_RUNS_DIR}/.active"
 
 # Parse args
 STORY_FILE=""
@@ -92,6 +92,17 @@ fi
 
 # ---- Resolve active story file ---------------------------------------------
 
+# Locate STORY-<num>_*.md under one root: pending-sync first, then archive.
+# Echoes the empty string when neither directory holds a match.
+find_story_file() {
+  local root="$1" story_num="$2" match
+  match="$(ls "${root}/.cleargate/delivery/pending-sync/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
+  if [[ -z "${match}" ]]; then
+    match="$(ls "${root}/.cleargate/delivery/archive/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
+  fi
+  echo "${match}"
+}
+
 resolve_story_file() {
   local sprint_id=""
   if [[ -f "${ACTIVE_SENTINEL}" ]]; then
@@ -102,7 +113,7 @@ resolve_story_file() {
     return
   fi
 
-  local state_json="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs/${sprint_id}/state.json"
+  local state_json="${SPRINT_RUNS_DIR}/${sprint_id}/state.json"
   if [[ ! -f "${state_json}" ]]; then
     echo ""
     return
@@ -145,15 +156,9 @@ if latest[0]:
   # story file was authored on the main branch after this worktree was cut.
   local story_num="${story_id#STORY-}"
   local story_file
-  story_file="$(ls "${REPO_ROOT}/.cleargate/delivery/pending-sync/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
-  if [[ -z "${story_file}" ]]; then
-    story_file="$(ls "${REPO_ROOT}/.cleargate/delivery/archive/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
-  fi
+  story_file="$(find_story_file "${REPO_ROOT}" "${story_num}")"
   if [[ -z "${story_file}" && "${SPRINT_STATE_ROOT}" != "${REPO_ROOT}" ]]; then
-    story_file="$(ls "${SPRINT_STATE_ROOT}/.cleargate/delivery/pending-sync/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
-    if [[ -z "${story_file}" ]]; then
-      story_file="$(ls "${SPRINT_STATE_ROOT}/.cleargate/delivery/archive/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
-    fi
+    story_file="$(find_story_file "${SPRINT_STATE_ROOT}" "${story_num}")"
   fi
   echo "${story_file}"
 }
@@ -258,12 +263,6 @@ is_whitelisted() {
     # Try direct fnmatch with case
     if [[ "${file}" == ${pattern} ]]; then
       return 0
-    fi
-    # Try matching basename
-    local basename="${file##*/}"
-    local pat_base="${pattern##*/}"
-    if [[ "${basename}" == ${pat_base} && "${pat_base}" == "${basename}" ]]; then
-      : # need full path match
     fi
     # Try: if pattern has **, match any path segment
     local simple_pat="${pattern//\*\*\//*/}"
