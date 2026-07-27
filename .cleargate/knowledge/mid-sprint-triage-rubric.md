@@ -10,7 +10,7 @@ This document is the authoritative rubric for classifying mid-sprint user input.
 
 When a user injects input during an active sprint (between story kickoff and story merge), the orchestrator must classify it before routing. Unclassified input leads to either silent scope creep or unnecessary story restarts. The four classes below are mutually exclusive and exhaustive.
 
-**Classifier aid:** `cleargate-cli/src/lib/triage-classifier.ts` exports a `classify()` pure function that performs keyword-heuristic pre-classification. Output is advisory — the orchestrator confirms before acting. `confidence: 'low'` always requires human verification.
+**Classifier aid:** Classification is a keyword-heuristic rubric step — match the user's input against the keyword banks below (see also protocol §2 Classification Table) to arrive at a first-pass class. Output is advisory — the orchestrator confirms before acting. A low-confidence match (no keyword bank matches cleanly) always requires human verification.
 
 ---
 
@@ -152,7 +152,6 @@ When a user injects input during an active sprint (between story kickoff and sto
 
 - **SKILL.md §C.10** — NEW Mid-Sprint Triage section (operational routing table, added by CR-047).
 - **SKILL.md §C.11** — Mid-cycle User Input table (pre-CR-047 §C.10; renumbered to §C.11 by this CR).
-- **`cleargate-cli/src/lib/triage-classifier.ts`** — keyword-heuristic classifier (advisory, not authoritative).
 - **SKILL.md §C.3.5** — TPV Gate (Architect-only wiring check between QA-Red and Developer).
 
 ---

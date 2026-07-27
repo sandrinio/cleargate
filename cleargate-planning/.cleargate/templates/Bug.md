@@ -14,9 +14,9 @@ mechanically extracted from the document's own structure:
 
   - Prior work    ← cleargate-wiki-query result (cite [[IDs]] or write "none found")
   - Summary        ← §1 The Anomaly (repro)
-  - Open Questions ← §0.5 Open Questions
-  - Edge Cases     ← §2 Impact (edge conditions)
-  - Risks          ← §2 Impact
+  - Open Questions ← ### Open Questions
+  - Edge Cases     ← §2 Reproduction Protocol (edge conditions)
+  - Risks          ← §4 Execution Sandbox (suspected blast radius)
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 
 Halt for human review. When ambiguity reaches 🟢, proceed to call cleargate_push_item.

@@ -50,7 +50,7 @@ QUESTION_SUMMARY=$(printf '%s' "$PAYLOAD" | jq -r '.tool_input.question // ""' 2
 
 DISPATCH_DIR="${CLAUDE_PROJECT_DIR:-.}/.cleargate/sprint-runs/$SPRINT_ID"
 AGENT=$(ls -t "$DISPATCH_DIR"/.dispatch-*.json 2>/dev/null | head -1 | \
-  xargs -I {} jq -r '.agent // "unknown"' {} 2>/dev/null || echo "unknown")
+  xargs -I {} jq -r '.agent_type // "unknown"' {} 2>/dev/null || echo "unknown")
 [ -n "$AGENT" ] || AGENT="unknown"
 
 printf '%s\tAskUserQuestion\t%s\t%s\n' "$(date -u +%FT%TZ)" "$AGENT" "$QUESTION_SUMMARY" >> "$LOG" 2>/dev/null || true
