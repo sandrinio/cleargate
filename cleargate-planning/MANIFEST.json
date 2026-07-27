@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.17.1",
-  "generated_at": "2026-07-27T14:12:41.370Z",
+  "generated_at": "2026-07-27T19:31:43.379Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -95,7 +95,7 @@
     },
     {
       "path": ".claude/hooks/pre-commit.sh",
-      "sha256": "90260116726bfc88191fda353d038445d5838e7cd811db67029b5555f2dbc555",
+      "sha256": "314d545389e23b1e67136f3eb86643e952264dbe9b8cb3e4df61cf6ff17c3588",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-enforcement.md",
-      "sha256": "73a7698cd26e4317d59c55225dda2d5480b34bab429fd526cc2b1e83e8d27331",
+      "sha256": "dbeac8921f4213fd79e272ecd2be4b10bca7b55e94e1a69f5dbd39897fbca302",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -256,7 +256,7 @@
     },
     {
       "path": ".cleargate/scripts/file_surface_diff.sh",
-      "sha256": "b5c528fcaffb1b32f11be430f13ced5886bebbd8c5b8c8473750ea196e7e0e59",
+      "sha256": "5d53297c2021f12eaf348faec45dcc91b9b09f448e73b3850bc75bcf84cbf518",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
