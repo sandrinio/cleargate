@@ -178,9 +178,9 @@ async function main() {
 
   if (args.includes('--assume-ack') && process.env.CLEARGATE_CI_ACK !== '1') {
     process.stderr.write(
-      'Error: --assume-ack is reserved for CI. Set CLEARGATE_CI_ACK=1 in an automated CI\n' +
-      'environment to use it. A conversational orchestrator MUST NOT pass --assume-ack\n' +
-      'or set CLEARGATE_CI_ACK (enforcement §12.3).\n'
+      'Error: --assume-ack requires CLEARGATE_CI_ACK=1.\n' +
+      'This token is never set unprompted by an agent — it is set for a single invocation\n' +
+      'only after an explicit human close authorization (Gate 4), or by CI (enforcement §12.3).\n'
     );
     process.exit(2);
   }
