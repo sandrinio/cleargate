@@ -5,7 +5,7 @@ parent_cleargate_id: CR-086
 sprint_cleargate_id: SPRINT-38
 carry_over: false
 area: framework/enforcement
-status: Approved
+status: Completed
 approved: true
 context_source: SPRINT-38 shipping review 2026-07-27 (workflow wfdakdjhq — 24 agents over real npm tarballs 0.10.0-0.17.1, 16 findings confirmed / 0 refuted; A/B measured on identical repo state) + CR-086 Architect post-flight carry-over CR-A + direct human approval to fix in-sprint before close
 created_at: 2026-07-27T00:00:00Z

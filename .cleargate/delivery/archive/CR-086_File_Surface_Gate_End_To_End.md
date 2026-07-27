@@ -5,7 +5,7 @@ parent_cleargate_id: "STORY-051-01"
 sprint_cleargate_id: SPRINT-38
 carry_over: false
 area: framework/enforcement
-status: Approved
+status: Completed
 approved: true
 context_source: SPRINT-38 advisory sprint-diff review 2026-07-27 (workflow wu653hnqt, 28 findings raised / 21 adversarially refuted / 7 confirmed) + orchestrator reproduction of findings 1-3 + direct human approval to fix in-sprint rather than carry
 created_at: 2026-07-27T00:00:00Z
