@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.17.1",
-  "generated_at": "2026-07-18T22:39:34.465Z",
+  "generated_at": "2026-07-27T12:52:04.619Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-enforcement.md",
-      "sha256": "220a32336b04a05ef099a7fbe6bcdd9be8441bbb540c36dbf98ce3137af0024b",
+      "sha256": "dc9d30ca841723382e347f82a6a3e016fce1eb71be83f4953944e6dcb1ff4680",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -228,14 +228,14 @@
     },
     {
       "path": ".cleargate/scripts/close_sprint.deferred-verify.red.node.test.ts",
-      "sha256": "d45d297206a7b57eeb12abd2fdea9d632a479f1aa8b5177f47c02ede67fcab58",
+      "sha256": "2b0c8fc2c6a7e0c2c818a3d6809cf12a9fa243300c3dd52e811420c0daad8152",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/scripts/close_sprint.mjs",
-      "sha256": "aee173eed81542ed03ab2c962cf6182e9f19d3506a60d96c7d76ea46d3302b3f",
+      "sha256": "d96f5063d574fd24146d0a4bd55dce15bb756425f3ace3026f60d6d5189e2c4e",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
