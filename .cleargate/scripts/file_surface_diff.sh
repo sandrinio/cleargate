@@ -5,11 +5,22 @@
 # Usage: file_surface_diff.sh [--story-file <path>] [--whitelist <path>]
 #
 # Environment:
-#   SKIP_SURFACE_GATE=1    — bypass the gate (exit 0 always)
+#   SKIP_SURFACE_GATE=1    — bypass the gate (exit 0 always); the sole bypass.
 #   CLEARGATE_REPO_ROOT    — override repo root (default: CWD git toplevel)
 #
+# §3.1 paths MUST be backtick-quoted — the parser takes the first
+# backtick-quoted span per comma-segment of the Value cell and ignores
+# trailing prose; an un-backticked cell declares nothing (§6.3).
+#
+# Sprint runtime state (.active sentinel, state.json) is resolved against the
+# MAIN working tree, not CLEARGATE_REPO_ROOT/REPO_ROOT — see
+# resolve_sprint_state_root() below. This makes the gate fire inside a linked
+# worktree, where .active is gitignored and absent (§6.2).
+#
 # Exit codes:
-#   0  — all staged files are on-surface or whitelisted (or SKIP_SURFACE_GATE=1)
+#   0  — all staged files are on-surface or whitelisted (or SKIP_SURFACE_GATE=1,
+#        or no active story/sprint found, or §3.1 declares zero backtick-quoted
+#        paths — see enforcement.md §6.6 for the full exit-0 ledger)
 #   1  — off-surface files detected
 
 set -euo pipefail
@@ -18,8 +29,47 @@ set -euo pipefail
 
 REPO_ROOT="${CLEARGATE_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 WHITELIST_DEFAULT="${REPO_ROOT}/.cleargate/scripts/surface-whitelist.txt"
-ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
-STATE_JSON_GLOB="${REPO_ROOT}/.cleargate/sprint-runs"
+
+# SPRINT_STATE_ROOT: where sprint runtime state (.active sentinel, state.json)
+# lives. Inside a linked worktree, REPO_ROOT is the worktree itself, but
+# .cleargate/sprint-runs/.active is gitignored and written only into the MAIN
+# working tree by init_sprint.mjs — so a worktree never sees it. Resolve the
+# main working tree as the parent of `git rev-parse --git-common-dir`, which
+# is absolute-and-unambiguous in a linked worktree and (with the fallback
+# below) in a plain checkout too. The story file itself stays on REPO_ROOT —
+# see resolve_story_file() — so a self-amending §3.1 committed in the
+# worktree still takes effect in the same commit.
+resolve_sprint_state_root() {
+  local common parent
+  # git >= 2.31: absolute, unambiguous, no CWD-relative normalisation needed.
+  common="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+  if [[ -z "${common}" ]]; then
+    # Fallback for git < 2.31: --git-common-dir may be CWD-relative (e.g.
+    # ".git" from the toplevel, "../.git" from a subdirectory).
+    common="$(git -C "${REPO_ROOT}" rev-parse --git-common-dir 2>/dev/null || true)"
+    if [[ -z "${common}" ]]; then
+      echo "${REPO_ROOT}"
+      return
+    fi
+    case "${common}" in
+      /*) ;;
+      *)  common="${REPO_ROOT}/${common}" ;;
+    esac
+  fi
+  parent="$(cd "${common}/.." 2>/dev/null && pwd || true)"
+  if [[ -n "${parent}" && -d "${parent}/.cleargate/sprint-runs" ]]; then
+    echo "${parent}"
+  else
+    # Not a git repo, or a topology (e.g. --separate-git-dir) where "parent
+    # of the common dir" is not the main working tree — preserve today's
+    # behaviour rather than guess.
+    echo "${REPO_ROOT}"
+  fi
+}
+SPRINT_STATE_ROOT="$(resolve_sprint_state_root)"
+
+ACTIVE_SENTINEL="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs/.active"
+STATE_JSON_GLOB="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs"
 
 # Parse args
 STORY_FILE=""
@@ -52,7 +102,7 @@ resolve_story_file() {
     return
   fi
 
-  local state_json="${REPO_ROOT}/.cleargate/sprint-runs/${sprint_id}/state.json"
+  local state_json="${SPRINT_STATE_ROOT}/.cleargate/sprint-runs/${sprint_id}/state.json"
   if [[ ! -f "${state_json}" ]]; then
     echo ""
     return
@@ -87,12 +137,23 @@ if latest[0]:
     return
   fi
 
-  # Convert e.g. STORY-014-01 -> find file
+  # Convert e.g. STORY-014-01 -> find file. REPO_ROOT (the worktree) is the
+  # primary lookup: enforcement §6.1 permits a self-amending §3.1 committed
+  # in the same story, and that amendment lives in the worktree, not the
+  # main checkout, until merge. Fall back to SPRINT_STATE_ROOT (the main
+  # checkout) only when the worktree has no matching story file — e.g. the
+  # story file was authored on the main branch after this worktree was cut.
   local story_num="${story_id#STORY-}"
   local story_file
   story_file="$(ls "${REPO_ROOT}/.cleargate/delivery/pending-sync/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
   if [[ -z "${story_file}" ]]; then
     story_file="$(ls "${REPO_ROOT}/.cleargate/delivery/archive/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
+  fi
+  if [[ -z "${story_file}" && "${SPRINT_STATE_ROOT}" != "${REPO_ROOT}" ]]; then
+    story_file="$(ls "${SPRINT_STATE_ROOT}/.cleargate/delivery/pending-sync/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
+    if [[ -z "${story_file}" ]]; then
+      story_file="$(ls "${SPRINT_STATE_ROOT}/.cleargate/delivery/archive/STORY-${story_num}_"*.md 2>/dev/null | head -1 || true)"
+    fi
   fi
   echo "${story_file}"
 }
@@ -102,7 +163,7 @@ if [[ -z "${STORY_FILE}" ]]; then
 fi
 
 if [[ -z "${STORY_FILE}" || ! -f "${STORY_FILE}" ]]; then
-  echo "[surface-gate] WARNING: No active story file found — skipping surface check" >&2
+  echo "[surface-gate] WARNING: No active story file found (searched ${REPO_ROOT} and ${SPRINT_STATE_ROOT}) — skipping surface check" >&2
   exit 0
 fi
 
@@ -112,9 +173,20 @@ parse_surface_paths() {
   local story_file="$1"
   # Extract rows between "### 3.1" and the next "### " header.
   # Table rows: | Item | Value |
-  # Only rows where Value cell looks like a path (contains . or /)
-  # Strip backticks. Split on ", " for multiple paths in one cell.
+  # Only rows where Value cell looks like a path (contains . or /).
+  # A real-world Value cell often carries trailing prose after the path,
+  # e.g. `path/to/x.md` — R3/R4: rationale. Backticks are the only reliable
+  # path delimiter, so they must bound the split, not be stripped before it:
+  # split the cell on ", " FIRST, then take the first backtick-quoted span
+  # in each resulting segment. A segment with no backticks contributes
+  # nothing — paths MUST be backtick-quoted (§6.3).
   awk '
+    function first_backticked(s,   a, rest, b) {
+      a = index(s, "`");            if (a == 0) return ""
+      rest = substr(s, a + 1)
+      b = index(rest, "`");         if (b == 0) return ""
+      return substr(rest, 1, b - 1)
+    }
     /^### 3\.1/ { in_section=1; next }
     in_section && /^### / { in_section=0; next }
     in_section && /^\|/ {
@@ -128,14 +200,15 @@ parse_surface_paths() {
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)
       # Only process if value looks like a path (contains . or /)
       if (val !~ /[.\/]/) next
-      # Strip backticks
-      gsub(/`/, "", val)
-      # Handle multiple paths separated by ", "
-      npaths=split(val, paths, ", ")
+      # Handle multiple paths separated by ", "; the first backticked span
+      # in a segment is that segments declared path, trailing prose ignored.
+      npaths=split(val, segs, ", ")
       for (i=1; i<=npaths; i++) {
-        p=paths[i]
+        p=first_backticked(segs[i])
+        if (p == "") continue
         gsub(/^[[:space:]]+|[[:space:]]+$/, "", p)
-        if (p != "" && (p ~ /[.\/]/)) print p
+        if (p ~ /[[:space:]]/) continue        # a quoted phrase, not a path
+        if (p ~ /[.\/]/) print p
       }
     }
   ' "${story_file}"
@@ -148,7 +221,7 @@ while IFS= read -r p; do
 done < <(parse_surface_paths "${STORY_FILE}")
 
 if [[ ${#declared_paths[@]} -eq 0 ]]; then
-  echo "[surface-gate] WARNING: No file paths found in §3.1 of ${STORY_FILE} — skipping surface check" >&2
+  echo "[surface-gate] WARNING: No file paths found in §3.1 of ${STORY_FILE} — §3.1 paths must be backtick-quoted — skipping surface check" >&2
   exit 0
 fi
 
