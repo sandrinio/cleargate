@@ -1,3 +1,4 @@
+2026-07-27 · #test-harness #danger · Integration tests that spawn the REAL outer close_sprint.mjs can mutate LIVE delivery docs (parent rollup flipped EPIC-044 Draft→Completed during a 051-08 test:integration run) — check `git status` on .cleargate/delivery/** after any such run. [SPRINT-38 051-08]
 2026-07-27 · #enforcement #docs · When a ruling changes a POLICY, fix EVERY place the old policy is asserted — error strings too, not just doc sites. 051-08's guard stderr contradicted the §12.3 it shipped with. [SPRINT-38 051-08]
 2026-07-27 · #test-harness #qa-red · Anchor doc-coherence assertions on literal heading text (content.indexOf), not line numbers — sibling-story edits drift them within one wave. [SPRINT-38 051-08]
 2026-07-27 · #test-harness #close-sprint · A close_sprint test case that reaches exit 0 runs Steps 7/7.4/7.5 → shells out to dist/cli.js against the LIVE repo; no CLEARGATE_SKIP_* seam exists, only the dist-existence check. [SPRINT-38 051-08]
