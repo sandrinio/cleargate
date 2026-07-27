@@ -1,7 +1,7 @@
 ---
 cr_id: CR-086
 parent_ref: STORY-051-01
-parent_cleargate_id: null
+parent_cleargate_id: "STORY-051-01"
 sprint_cleargate_id: SPRINT-38
 carry_over: false
 area: framework/enforcement
