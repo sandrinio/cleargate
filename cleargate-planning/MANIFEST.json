@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.19.0",
-  "generated_at": "2026-07-28T12:57:43.539Z",
+  "cleargate_version": "0.20.0",
+  "generated_at": "2026-07-28T14:15:54.031Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -376,69 +376,6 @@
     {
       "path": ".cleargate/scripts/surface-whitelist.txt",
       "sha256": "c1c14349265d741570dc4b0e61501c2a9e898a25cefad93911ef1298cf4d74c7",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/cr077_eviction.red.sh",
-      "sha256": "ecaa8104b925d5fd11a7d47a7bafe0f45199ebea79dc05c3f975fd46b545de6f",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/cr078_init.test.sh",
-      "sha256": "955a7388f42aa89c4a9ff90d8bc27534249c3cd4be4ad01f1feb760d05fa4328",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/cr079_provision.red.sh",
-      "sha256": "b59ce43780433800ce7b8c4b8136689e1170c7a27e6bbf8cc4b1ebd0e25b08eb",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/cr080_wrapper.test.sh",
-      "sha256": "d3953989d3be1540f7e2297c7869fae23d385e8ed2b64346a787775a98d2881e",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/cr081_qa_red_lint.red.sh",
-      "sha256": "fa66c6d78489c55b5084e46151557716ff1145b0ac5f064dac507ff7259b3040",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/test_assert_story_files.sh",
-      "sha256": "2cad934feec65dec2287c85931d6e0e745d03decf109ec46446f986fd7de0ab1",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/test_file_surface.sh",
-      "sha256": "3f84989ecb675b6735e3149d474cc4ed34b0fd1db99b4bb392f1de455596fb0a",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/test_flashcard_gate.sh",
-      "sha256": "40fb023b0db1556295b92858b303ba90745ef89c3131bc760232e5cd8ebe7815",
-      "tier": "script",
-      "overwrite_policy": "always",
-      "preserve_on_uninstall": false
-    },
-    {
-      "path": ".cleargate/scripts/test/test_prep_qa_context.sh",
-      "sha256": "fd198bbc5d1faeaebd18ac72e5bcc2d84f931f035175bd51048ee04dcbd7ae0d",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
