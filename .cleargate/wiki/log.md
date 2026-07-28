@@ -1095,3 +1095,8 @@
   action: "create"
   target: "CR-090"
   path: ".cleargate/delivery/pending-sync/CR-090_Delivery_Hygiene_And_SDR_Wiring.md"
+- timestamp: "2026-07-28T12:52:11.528Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-091"
+  path: ".cleargate/delivery/pending-sync/CR-091_Unbundle_TypeScript_Compiler.md"

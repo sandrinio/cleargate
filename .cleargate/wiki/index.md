@@ -53,6 +53,7 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-088]] | cr | Completed | .cleargate/delivery/pending-sync/CR-088_Upgrade_Pin_And_Prune.md |
 | [[CR-089]] | cr | Completed | .cleargate/delivery/pending-sync/CR-089_Payload_Telemetry_Hygiene.md |
 | [[CR-090]] | cr | Completed | .cleargate/delivery/pending-sync/CR-090_Delivery_Hygiene_And_SDR_Wiring.md |
+| [[CR-091]] | cr | Completed | .cleargate/delivery/pending-sync/CR-091_Unbundle_TypeScript_Compiler.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
