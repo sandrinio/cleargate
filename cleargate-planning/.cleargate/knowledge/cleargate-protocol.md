@@ -116,7 +116,7 @@ Sprint Plan moves Draft → Ready when (a) every referenced item is decomposed +
 
 ### Gate 3 — Sprint Execution (per sprint, Prepare → Execute boundary)
 
-Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. Under `execution_mode: v2` a failing per-item gate hard-blocks; under `v1` it warns. See `cleargate-enforcement.md` §<N> for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
+Before sprint execution begins, `cleargate sprint preflight <sprint-id>` runs **five** checks: previous sprint Completed, no leftover worktrees, sprint branch ref free, `main` clean, and per-item readiness gates pass for every work item in §1 Consolidated Deliverables. **A failing per-item gate hard-blocks (always enforced).** See `cleargate-enforcement.md` §13 for full enforcement spec; specified by CR-021 (env health) + CR-027 (composite per-item gate + Discovery/Risk criteria).
 
 ### Gate 4 — Close-Ack (per sprint, Close phase)
 
@@ -158,7 +158,7 @@ Follow these steps in exact order:
 
 | Tool | When to Call |
 |---|---|
-| `cleargate_pull_initiative` | User wants to pull a remote initiative or sprint into local context. Pass `remote_id`. Writes to `.cleargate/plans/`. |
+| `cleargate_pull_initiative` | User wants to pull a remote initiative or sprint into local context. Pass `remote_id`. Writes to `.cleargate/delivery/pending-sync/`. |
 | `cleargate_push_item` | An approved local file needs to be pushed. Pass `file_path`, `item_type`, and `parent_id` if it is a Story. Requires `approved: true`. |
 | `cleargate_sync_status` | A work item changes state (e.g., moved to Done). Pass `remote_id` and `new_status`. |
 
@@ -180,7 +180,7 @@ These rules prevent hallucinated or out-of-scope changes.
 When the user wants to ingest context from the PM tool before any execution:
 
 1. Call `cleargate_pull_initiative` with the remote ID provided by the user.
-2. The tool writes the result to `.cleargate/plans/` using the appropriate local format.
+2. The tool writes the result to `.cleargate/delivery/pending-sync/` using the appropriate local format.
 3. Read the pulled file to understand scope, constraints, and sprint context.
 4. Use this as the input context when beginning an Initiative draft.
 
@@ -201,13 +201,15 @@ Is this a PUSH request? ──YES──→ check approved: true → cleargate_pu
       ↓
 Classify: Epic / Story / CR / Bug
       ↓
-Does an approved: true Initiative exist for this work?
-      ├── NO  → Draft Initiative → HALT at Gate 1
-      └── YES → Draft work item (Epic/Story/CR/Bug) → HALT at Gate 2
+Multi-Epic scope, persistent Brief useful? (Initiative optional, per §3)
+      ├── YES → Draft Initiative → resolve → archive → Draft work item(s)
+      └── NO  → Draft work item (Epic/Story/CR/Bug) directly into its template
                       ↓
-             Human resolves §6 + sets 🟢
+             Present Brief → HALT at Gate 1 (Brief)
                       ↓
-             Human confirms push → cleargate_push_item → archive
+             Human resolves open questions + sets 🟢
+                      ↓
+             Gate-1-green push → cleargate_push_item → archive
 ```
 
 ---
@@ -251,7 +253,7 @@ Invoked automatically at triage (read-only). Searches the wiki index and existin
 
 **lint**
 
-Enforcement run. Checks for drift between wiki pages and their raw source files. Exits non-zero on any violation; a non-zero exit halts Gate 1 (Initiative approval) and Gate 3 (Push). Run with `--suggest` to receive candidate cross-ref patches without blocking (exits 0).
+Enforcement run. Checks for drift between wiki pages and their raw source files. Exits non-zero on any violation; a non-zero exit halts at Gate 1 (Brief) — where the Gate-1-green push (`cleargate_push_item`) also fires. Run with `--suggest` to receive candidate cross-ref patches without blocking (exits 0).
 
 ---
 
@@ -345,8 +347,8 @@ Drift detection is commit-SHA comparison — not content hashing — eliminating
 
 `cleargate wiki lint` exits non-zero and blocks execution at:
 
-- **Gate 1 (Initiative approval):** lint must pass before the agent may proceed past the Initiative halt.
-- **Gate 3 (Push):** lint must pass before `cleargate_push_item` is called.
+- **Gate 1 (Brief):** lint must pass before the agent proceeds past the Brief halt.
+- **The Gate-1-green push:** lint must pass before `cleargate_push_item` is called.
 
 Lint checks performed:
 
@@ -366,7 +368,7 @@ Ingest reliability follows a three-level fallback:
 
 1. **PostToolUse hook (primary)** — fires automatically on every Write or Edit under `.cleargate/delivery/**`. No agent action required.
 2. **Protocol rule (secondary)** — when the hook is unavailable (e.g. non-Claude-Code environment), every agent that writes a raw delivery file must explicitly invoke the `cleargate-wiki-ingest` subagent before returning.
-3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 or Gate 3 and refuses to proceed until the page is up to date.
+3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 (Brief) or the Gate-1-green push and refuses to proceed until the page is up to date.
 
 ---
 
@@ -509,7 +511,7 @@ Two-capability bundle: (1) `draft_tokens` frontmatter stamp populated by a PostT
 - Every invocation logs to `.cleargate/hook-log/gate-check.log`; `cleargate doctor` surfaces last-24h failures.
 
 ### §12.6 Cross-references
-- §4 Phase Gates: "Gate 2 (Ambiguity) is machine-checked via `cleargate gate check`; see §12."
+- §4 Phase Gates: "Gate 1 (Brief) is machine-checked via `cleargate gate check`; see §12."
 - §10.8 Wiki-lint enforcement: extended by the gate-check hook; staleness check added per §12.4.
 
 ---
@@ -861,7 +863,7 @@ Every segment returns exactly one verdict object. The discriminant is `verdict`:
 | `runId` | string | always | the segment's stable, distinct `RUN_ID` |
 | `devSha` | string | always | Developer commit SHA |
 | `qaSha` | string | always | QA-Verify commit SHA |
-| `archSha` | string | optional | Architect-pass SHA (standard lane v2 only) |
+| `archSha` | string | optional | Architect-pass SHA (standard lane only) |
 | `flashcards_flagged` | string[] | always (may be empty) | cards processed at the between-wave barrier |
 | `counters` | `{ qa_bounces, arch_bounces, breaker_hits }` | always | all three numeric |
 | `tokens` | `{ input, output, cache_creation, cache_read, model }` | always | per-segment cost the ledger consumes |

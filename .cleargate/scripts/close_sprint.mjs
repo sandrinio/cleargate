@@ -42,13 +42,13 @@
  *                                       run git worktree list from a real git root).
  *   CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 — comma-separated fake worktree paths injected into
  *                                          Step 2.7 instead of running git worktree list.
- *                                          Used to exercise the v2 block / v1 advisory paths
+ *                                          Used to exercise the block / advisory paths
  *                                          without a real .worktrees/STORY-* directory.
  *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 entirely (test environments where git
  *                                      refs are absent or merge state is irrelevant).
  *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject merge status for Step 2.8 without
  *                                                  running git merge-base. Used to exercise
- *                                                  the v2 block / v1 advisory paths.
+ *                                                  the block / advisory paths.
  *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT for Step 2.8 git commands
  *                                      (used in tests that need a controlled git repo).
  *   CLEARGATE_SKIP_SPRINT_TRENDS=1   — skip Step 6.5 entirely (test environments).
@@ -62,7 +62,7 @@
  *                                      --flashcard-cleanup scan.
  *   CLEARGATE_SKIP_BUNDLE_CHECK=1    — skip Step 3.5 bundle generation + size check entirely
  *                                      (CR-036 test seam; analogous to CLEARGATE_SKIP_MERGE_CHECK).
- *                                      Never use in production — Step 3.5 is v2-fatal in production.
+ *                                      Never use in production — Step 3.5 is fatal in production.
  *   CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 — skip Step 2.9 entirely (test environments where
  *                                            deferred-verification state is irrelevant; mirrors
  *                                            CLEARGATE_SKIP_WORKTREE_CHECK).
@@ -117,7 +117,8 @@ function usage() {
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
     '\n' +
     'Options:\n' +
-    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this)\n' +
+    '  --assume-ack           Skip user acknowledgement prompt (automated tests ONLY — conversational orchestrators MUST NOT pass this);\n' +
+    '                         refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3)\n' +
     '  --report-body-stdin    Read SPRINT-<#>_REPORT.md body from stdin; implies ack (STORY-014-10)\n'
   );
   process.exit(2);
@@ -175,6 +176,15 @@ async function main() {
   const sprintId = args[0];
   const reportBodyStdin = args.includes('--report-body-stdin');
   const assumeAck = args.includes('--assume-ack') || reportBodyStdin;
+
+  if (args.includes('--assume-ack') && process.env.CLEARGATE_CI_ACK !== '1') {
+    process.stderr.write(
+      'Error: --assume-ack requires CLEARGATE_CI_ACK=1.\n' +
+      'This token is never set unprompted by an agent — it is set for a single invocation\n' +
+      'only after an explicit human close authorization (Gate 4), or by CI (enforcement §12.3).\n'
+    );
+    process.exit(2);
+  }
 
   const sprintDir = process.env.CLEARGATE_SPRINT_DIR
     ? path.resolve(process.env.CLEARGATE_SPRINT_DIR)
@@ -636,7 +646,7 @@ async function main() {
 
   // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
   // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
-  // On miss: list unmerged commits + exit 1 (v2 enforcing); warn + continue (v1 advisory).
+  // On miss: list unmerged commits + exit 1 (always enforced).
   // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
   // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
@@ -1014,14 +1024,16 @@ async function main() {
     if (!fs.existsSync(reportFileForCheck)) {
       process.stdout.write(
         `\nWaiting for Reporter to produce ${reportBasename}...\n` +
-        'After Reporter succeeds, re-run with --assume-ack to complete the close.\n'
+        'After Reporter succeeds, re-run with --assume-ack to complete the close.\n' +
+        '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n'
       );
       process.exit(0);
     }
     // In non-assume-ack mode with existing report, prompt user
     process.stdout.write(
       `\n${reportBasename} found at ${reportFileForCheck}\n` +
-      'Review the report, then confirm close by re-running with --assume-ack\n'
+      'Review the report, then confirm close by re-running with --assume-ack\n' +
+      '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n'
     );
     process.exit(0);
   }

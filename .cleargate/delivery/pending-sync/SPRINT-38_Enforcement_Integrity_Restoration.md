@@ -1,7 +1,7 @@
 ---
 sprint_id: SPRINT-38
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-38"
 carry_over: false
 lifecycle_init_mode: block
 area: framework/enforcement
@@ -12,7 +12,7 @@ proposals: []
 context_source: EPIC-051 (approved Gate 1, 2026-07-17) + framework self-audit 2026-07-17 (artifact 47060f0b)
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 start_date: 2026-07-17
 end_date: 2026-07-31
 synced_at: null
@@ -31,7 +31,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-07-17T18:58:50Z
+  last_stamp: 2026-07-18T17:39:26Z
   sessions: []
 ---
 
@@ -66,32 +66,35 @@ Restore enforcement integrity across the ClearGate scaffold: every gate document
 **Milestone map:** **M0** (P0 gate restore) = 01·02·03·04 → *checkpoint* → **M1** (P1 integrity & drift) = 05·06·07 → **M2** (P2 coherence) = 08·09.
 
 ## 2. Execution Strategy
-*(Placeholder — the Architect writes §§2.1–2.5 during the Sprint Design Review, A.4. Notes below are decomposition-time intent, not the SDR.)*
+*(Written by Architect SDR, 2026-07-18. Authoritative wave data: `.cleargate/sprint-runs/SPRINT-38/plans/waves.json`.)*
+
+Nine stories, all `lane: standard`, across three milestones — **M0** {01,02,03,04} (fail-closed gate restoration), **M1** {05,06,07} (vocab sweep + drift guard + gate teeth), **M2** {08,09} (break-glass reconciliation + doc coherence). Waves never cross a milestone boundary; each milestone fully merges before the next, which auto-satisfies every cross-milestone shared-file edge.
 
 ### 2.1 Phase Plan
-To be produced by the Architect SDR. Decomposition-time intent: M0 stories 01/02/03/04 are file-disjoint (each owns its own script + test) and can run as one parallel wave. M1: 05 (vocab sweep) must land **before** 07/09 (shared CLAUDE.md/protocol.md); 06 is disjoint. M2: 08/09 sequence after 05.
 
-### 2.2 Merge Ordering (Shared-File Surface Analysis)
+| Wave | Milestone | Stories | Parallel? | Goal linkage |
+|------|-----------|---------|-----------|--------------|
+| **wave1** | M0 | 01, 02, 03, 04 | **Yes** | Restores the four gates CR-070/CR-074 silenced: file-surface (01), dead-vitest ratchet retirement (02), decomposition fail-closed (03), `CLEARGATE_EXEC_MODE=v1` bypass removal (04). |
+| **wave2** | M1 | 05 | No | "No dead vocabulary" — sweeps ~15 live `execution_mode`/v1/v2 phrases from shipping surfaces to 0. |
+| **wave3** | M1 | 06, 07 | **Yes** | 06 adds the canonical↔live↔root drift GUARD to `cleargate doctor`; 07 gives duplicate-check + Ambiguity-Gate real machine teeth. |
+| **wave4** | M2 | 08 | No | Narrows the `CLEARGATE_ADVISORY` §15 overclaim + gives `--assume-ack` a `CLEARGATE_CI_ACK` guard. |
+| **wave5** | M2 | 09 | No | P2 coherence: four-gate spine repo-wide, phantom-ref/orphan cleanup, `.agent`→`.agent_type` fix. |
 
-| Shared File | Stories Touching It | Merge Order | Rationale |
-|---|---|---|---|
-| `CLAUDE.md` / `cleargate-planning/CLAUDE.md` | 05, 07, 08 | 05 → 07 → 08 | 05 sweeps dead vocab first; 07/08 edit specific wording on top |
-| `cleargate-planning/.cleargate/knowledge/cleargate-protocol.md` | 05, 09 | 05 → 09 | 05 sweeps vocab; 09 renumbers gates on the swept text |
-| `cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md` | 02, 08 | 02 → 08 | 02 drops ratchet claim; 08 narrows §15 |
+### 2.2 Merge Ordering
+Canonical order: **01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09** (wave1 order-free; wave3 06/07 order-free within itself). The load-bearing serial spine is the `CLAUDE.md` bounded-block edit chain **05 → 07 → 08 → 09** (each a distinct paragraph, rebasing on the prior) plus the **08-edits / 09-deletes** ordering of `close_sprint.deferred-verify.red.node.test.ts` (edit before delete). Full shared-file table + dependency edges in `waves.json`.
 
 ### 2.3 Shared-Surface Warnings
-- STORY-05 (vocab sweep) MUST exclude `file_surface_diff.sh` (owned by 01) and `test_ratchet.mjs` (retired by 02) from its worklist — declared in both stories' §1.3.
-- M1/M2 doc stories (05/07/08/09) touch overlapping doc surfaces; the Architect must serialize their merge per §2.2.
+- `CLAUDE.md` bounded block (05/07/08/09) — four stories, four distinct paragraphs; strict 05→07→08→09 or the rebase chain breaks.
+- `close_sprint.deferred-verify.red.node.test.ts` (08/09) — edit-vs-delete, order-critical; if 09 slips ahead, the 08 Developer must drop that file edit (target gone).
+- `story.md` template (05/07) — 07's new `## Prior work` heading must land after the highest `section(N)`-indexed heading or it silently re-points readiness predicates.
+- `cleargate-protocol.md` (05/09) — 05 must NOT renumber §4 (it is the spine 09 re-maps onto); 05 = line 119 + 864 only.
+- Dogfood three-copy drift (ALL stories) — dominant hazard (FLASHCARD 2026-07-17 `#dogfood #sync`); diff-before-overwrite mandatory; payload via `npm run prebuild` only. 06 institutionalizes the guard.
 
 ### 2.4 Lane Audit
-*(No fast-lane stories — all 9 carry real behavior + tests. Architect confirms during SDR.)*
-
-| Story | Lane | Rationale (≤80 chars) |
-|---|---|---|
-| — | — | none — all standard |
+**None — all nine stories are `lane: standard`.** Each trips ≥1 fast-lane disqualifier (enforcement-gate/predicate-lib/config-adjacent surface, `expected_bounce_exposure: med` on 03/06/07/08/09, or multi-file L3 on 05/06/07/09).
 
 ### 2.5 ADR-Conflict Flags
-- None identified. All stories implement decisions ratified at Gate 1 (§6 of EPIC-051); no conflict with CR-070/CR-074 (this epic completes them).
+**None — the epic is corrective, aligning the codebase back to already-locked decisions** (CR-070/CR-074 execution_mode retirement; `CLEARGATE_ADVISORY` as sole lever; EPIC-028 node:test-only; the blind-`cp` dogfood-sync lesson). **One orchestrator flag (not a conflict):** STORY-08's Ambiguity Gate sits at 🟡 because its implemented §15 scope enumerates two honor sites (preflight + sprint-init assertion), exceeding the literal Q1 text ("only preflight") — the §1.4 ratification is recorded, but the epic-level Q1 text should be reconciled before 08 (wave 4) executes or QA-Verify will flag the mismatch.
 
 ## Risks & Dependencies
 

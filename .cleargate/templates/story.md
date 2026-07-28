@@ -32,9 +32,9 @@ When the rubric is ambiguous, surface the decision to the human as a one-liner (
 
 §0.1 v2 Decomposition Signals:
   `parallel_eligible`: "y" if this story can run concurrently with other stories in the same milestone; "n" if it has a strict predecessor dependency. Default "y". Set by Architect during Sprint Design Review.
-  `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones in a v2 sprint to surface risk early.
+  `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones to surface risk early.
   `lane`: "standard" | "fast" — Architect-set during Sprint Design Review per the seven-check rubric in cleargate-enforcement.md §9. Default "standard". Absent in pre-EPIC-022 stories means standard per the migration default in update_state.mjs.
-  All three fields are v2-only signals. Under v1 sprints they are informational; defaults apply for stories authored before SPRINT-09.
+  All three fields are always-on signals; defaults apply for stories authored before SPRINT-09.
 
 POST-WRITE BRIEF
 After Writing this document, render a Brief in chat with the following sections,
@@ -152,7 +152,7 @@ Feature: {Story Name}
 
 ### 3.1 Context & Files
 
-> **v2 gate input:** under v2 execution mode, this table is a pre-commit gate input (cleargate-enforcement.md §6). Every file staged in this story's commit must appear in the Value column, or be covered by `.cleargate/scripts/surface-whitelist.txt`. Non-path rows (e.g. "Mirrors", "New Files Needed: Yes/No") are ignored by the parser.
+> **Pre-commit gate input:** this table is the authoritative file surface for the story's commit (cleargate-enforcement.md §6, always enforced). Every file staged in this story's commit must appear in the Value column, or be covered by `.cleargate/scripts/surface-whitelist.txt`. Non-path rows (e.g. "Mirrors", "New Files Needed: Yes/No") are ignored by the parser.
 
 | Item | Value |
 |---|---|
@@ -190,6 +190,15 @@ Feature: {Story Name}
 
 - **Surface:** `path/to/file.ext:NN` — {what it does}
 - **Coverage of this requirement:** {≥80% / partial / none — and why}
+
+## Prior work
+
+> Duplicate-check evidence, enforced by the `prior-work-recorded` readiness predicate.
+> Paste the `cleargate-wiki-query` result here: link each related item as a wiki-style
+> reference, or replace the line below with an explicit empty-result sentinel.
+> Accepted sentinels are listed in readiness-gates.md (Predicate Vocabulary entry 8).
+
+- <replace with related-work wikilinks, or an explicit empty-result sentinel>
 
 ## Why not simpler?
 

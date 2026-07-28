@@ -23,7 +23,24 @@ else
   echo "[red-gate] BYPASS: SKIP_RED_GATE=1 set — skipping Red-test immutability check. Log bypass in sprint §4." >&2
 fi
 
-if ! npm run check:no-vitest -s --prefix mcp 2>/dev/null || ! npm run check:no-vitest -s --prefix cleargate-cli 2>/dev/null || ! npm run check:no-vitest -s --prefix admin 2>/dev/null; then exit 1; fi
+# CR-087: this prefix list is meta-repo vocabulary living in a file that ships
+# to every target repo. Each entry runs ONLY where the directory exists AND
+# its package.json actually defines the script, so the chain is inert — not
+# fatal — anywhere else. Do not add a SKIP_-style bypass here (CR-087 §4.5).
+for _cg_pkg in mcp cleargate-cli admin; do
+  _cg_dir="${REPO_ROOT}/${_cg_pkg}"
+  [ -d "${_cg_dir}" ] || continue
+  [ -f "${_cg_dir}/package.json" ] || continue
+  grep -qE '"check:no-vitest"[[:space:]]*:' "${_cg_dir}/package.json" || continue
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "[surface-gate] WARNING: npm not on PATH — skipping check:no-vitest for ${_cg_pkg}/." >&2
+    continue
+  fi
+  if ! npm run check:no-vitest --prefix "${_cg_dir}"; then
+    echo "[surface-gate] BLOCKED: check:no-vitest failed in ${_cg_pkg}/ — vitest residue detected (output above)." >&2
+    exit 1
+  fi
+done
 
 SCRIPT="${REPO_ROOT}/.cleargate/scripts/file_surface_diff.sh"
 if [[ ! -f "${SCRIPT}" ]]; then

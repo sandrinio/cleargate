@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **7 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **9 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key whose value is a relative path to another document (e.g. `context_source`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(context_source).approved == true` reads the file named by the evaluated document's `context_source` key and asserts its `approved` field equals `true`.
@@ -34,6 +34,12 @@ Resolves the given ID via the wiki index, reads that page's compiled frontmatter
 
 **7. `existing-surfaces-verified`**
 Closed-set predicate (no parameters). Locates the `## Existing Surfaces` section in the document body, extracts path-shaped substrings via regex, asserts each cited path exists on disk relative to the project root. Passes when section is absent (defers to `reuse-audit-recorded`) OR all cited paths exist OR section contains a "no overlap found" / "no existing surface" / "no prior implementation" / "audit returned empty" sentinel. Sandbox-rejected paths (escaping project root) are treated as missing. Example: `existing-surfaces-verified` against an Epic body whose `## Existing Surfaces` cites `cleargate-cli/src/lib/work-item-type.ts:detectWorkItemTypeFromFm` passes when that path exists.
+
+**8. `prior-work-recorded`**
+Closed-set predicate (no parameters). STORY-051-07: backstops the duplicate-check discipline with a machine check. Locates the `## Prior work` section in the document body. Passes when the section is absent (migration grace for items authored before this predicate existed). When present, passes only if it records real evidence: a `[[WORK-ITEM-ID]]` wikilink, or one of the empty-result sentinels `none found` / `no prior work` / a standalone `none`. Fails, naming the missing evidence, when the section is present but contains neither — this is the case a freshly template-authored, never-filled-in `## Prior work` section hits, because the scaffolded body is deliberately token-free. Example: `prior-work-recorded` against a story whose `## Prior work` section reads `- [[STORY-003-05]]` passes; the same section left as the unedited template placeholder fails.
+
+**9. `ambiguity-gate-resolved`**
+Closed-set predicate (no parameters). STORY-051-07: backstops the "Ambiguity Gate criteria are evaluated literally" discipline with a machine check. Locates the `## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)` section by heading-title **prefix** match (the parenthetical emoji suffix means an exact-equality match never fires). Passes when the section is absent. When present, reads the `Current Status:` line: if it does not claim 🟢, passes (no self-contradiction to flag at 🟡/🔴). If it claims 🟢, passes only when the section has zero `- [ ]` unchecked checkboxes; fails, naming the unchecked count, otherwise. Example: a Status line reading `Current Status: 🟢 Low` with one remaining `- [ ]` box fails; checking that box flips the predicate to pass.
 
 ---
 
@@ -91,6 +97,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "existing-surfaces-verified"
     - id: simplest-form-justified
       check: "body contains '## Why not simpler?'"
+    - id: prior-work-recorded
+      check: "prior-work-recorded"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
 ```
 
 ```yaml
@@ -135,6 +145,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "existing-surfaces-verified"
     - id: simplest-form-justified
       check: "body contains '## Why not simpler?'"
+    - id: prior-work-recorded
+      check: "prior-work-recorded"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
 ```
 
 ```yaml
@@ -154,6 +168,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body contains '## Existing Surfaces'"
     - id: existing-surfaces-verified
       check: "existing-surfaces-verified"
+    - id: prior-work-recorded
+      check: "prior-work-recorded"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
 ```
 
 ```yaml
@@ -169,6 +187,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "body does not contain marker 'TBD'"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
+    - id: prior-work-recorded
+      check: "prior-work-recorded"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
 ```
 
 ```yaml
@@ -181,6 +203,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
 ```
+
+STORY-051-03 (Q7): for the `sprint` bucket, `discovery-checked` is deliberately self-referential (`frontmatter(.).context_source`, not `frontmatter(context_source).<field>`). A sprint's `context_source` documents its own decomposition evidence — which `epics:`/`proposals:` it decomposes — not an upstream approval doc the way the epic bucket's `frontmatter(context_source).approved == true` (line 73) reads a *separate* file. Do not "fix" this to the upstream form; it is intentional. Array-non-empty enforcement of `epics:`/`proposals:` is the `cleargate sprint init` decomposition gate's job (fails closed on `declaredNone`/`error` unless `--allow-drift`), not this predicate's — this criterion only asserts the field is populated at all.
 
 ```yaml
 - work_item_type: initiative

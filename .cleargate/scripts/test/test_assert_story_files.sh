@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# test_assert_story_files.sh — 4-scenario Gherkin test for STORY-014-02
+# test_assert_story_files.sh — 4-scenario Gherkin test for STORY-014-02 / STORY-051-04
 #
 # Tests:
-#   Scenario 1: v2 init refuses when stories are missing
-#   Scenario 2: v2 init succeeds when all stories exist
-#   Scenario 3: v1 init warns but does not block
-#   Scenario 4: assert_story_files standalone CLI
+#   Scenario 1: init refuses when stories are missing
+#   Scenario 2: init succeeds when all stories exist
+#   Scenario 3: init blocks a missing story regardless of any execution_mode fixture field
+#   Scenario 4: assert_story_files standalone CLI (missing blocks; CLEARGATE_EXEC_MODE=v1 is inert; present → OK)
 #
 # Run: bash .cleargate/scripts/test/test_assert_story_files.sh
 # Requires Node 24+.
@@ -111,17 +111,29 @@ make_sprint_file() {
   echo "$sprint_file"
 }
 
-# Create a minimal story file in pending-sync/
+# Create a minimal APPROVED, non-stub story file in pending-sync/
+# (must have `approved: true` frontmatter + at least one "## " body heading,
+# or assertWorkItemApproved flags it UNAPPROVED / STUB-EMPTY.)
 make_story_file() {
   local dir="$1" story_id="$2"
   local pending_sync="${dir}/.cleargate/delivery/pending-sync"
   mkdir -p "$pending_sync"
-  echo "# ${story_id}: Placeholder" > "${pending_sync}/${story_id}_Placeholder.md"
+  {
+    echo "---"
+    echo "approved: true"
+    echo "---"
+    echo ""
+    echo "# ${story_id}: Placeholder"
+    echo ""
+    echo "## 1. The Spec"
+    echo ""
+    echo "Placeholder body."
+  } > "${pending_sync}/${story_id}_Placeholder.md"
 }
 
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Scenario 1: v2 init refuses when stories are missing ==="
+echo "=== Scenario 1: init refuses when stories are missing ==="
 # ---------------------------------------------------------------------------
 TMP1="$(mktemp -d)"
 trap 'rm -rf "$TMP1"' EXIT
@@ -150,7 +162,7 @@ rm -rf "$TMP1"
 
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Scenario 2: v2 init succeeds when all stories exist ==="
+echo "=== Scenario 2: init succeeds when all stories exist ==="
 # ---------------------------------------------------------------------------
 TMP2="$(mktemp -d)"
 trap 'rm -rf "$TMP2"' EXIT
@@ -172,22 +184,20 @@ CLEARGATE_REPO_ROOT="$TMP2" node "$SCRIPTS_DIR/init_sprint.mjs" \
 assert_eq "Sc2: exit code 0" "0" "$EXIT_CODE"
 assert_exists "Sc2: state.json created" "$STATE_JSON"
 
-# Verify execution_mode in state.json is v2
-if [ -f "$STATE_JSON" ]; then
-  EM="$(node -e "const s=JSON.parse(require('fs').readFileSync('$STATE_JSON','utf8')); console.log(s.execution_mode)")"
-  assert_eq "Sc2: state.json execution_mode=v2" "v2" "$EM"
-fi
-
 trap - EXIT
 rm -rf "$TMP2"
 
 # ---------------------------------------------------------------------------
 echo ""
-echo "=== Scenario 3: v1 init warns but does not block ==="
+echo "=== Scenario 3: init blocks a missing story regardless of any execution_mode fixture field ==="
 # ---------------------------------------------------------------------------
 TMP3="$(mktemp -d)"
 trap 'rm -rf "$TMP3"' EXIT
 
+# The "v1" argument only decorates the sprint file's own frontmatter (a
+# leftover fixture field) — nothing reads it anymore (execution_mode was
+# retired by CR-070/CR-074). This proves that fixture value has zero effect
+# on the always-enforced block.
 SPRINT_ID="SPRINT-097"
 make_sprint_file "$TMP3" "$SPRINT_ID" "v1" \
   "STORY-097-01" "STORY-097-02" > /dev/null
@@ -201,9 +211,8 @@ EXIT_CODE=0
 STDERR_OUT="$(CLEARGATE_REPO_ROOT="$TMP3" node "$SCRIPTS_DIR/init_sprint.mjs" \
   "$SPRINT_ID" --stories "STORY-097-01,STORY-097-02" 2>&1 >/dev/null)" || EXIT_CODE=$?
 
-assert_eq "Sc3: exit code 0 (v1 warns but continues)" "0" "$EXIT_CODE"
-assert_exists "Sc3: state.json created despite missing file" "$STATE_JSON"
-assert_contains "Sc3: stderr contains WARN" "WARN" "$STDERR_OUT"
+assert_eq "Sc3: exit code non-zero (missing story blocks regardless of execution_mode fixture field)" "1" "$EXIT_CODE"
+assert_not_exists "Sc3: state.json NOT created" "$STATE_JSON"
 assert_contains "Sc3: stderr mentions STORY-097-02" "STORY-097-02" "$STDERR_OUT"
 
 trap - EXIT
@@ -231,6 +240,15 @@ STDERR_OUT="$(CLEARGATE_REPO_ROOT="$TMP4" node "$SCRIPTS_DIR/assert_story_files.
 
 assert_eq "Sc4: standalone exits non-zero when missing" "1" "$EXIT_CODE"
 assert_contains "Sc4: stderr lists STORY-096-02 as missing" "STORY-096-02" "$STDERR_OUT"
+
+# Regression: the retired CLEARGATE_EXEC_MODE=v1 bypass must be inert — the
+# gate still hard-fails on the missing item even with the old env var set.
+EXIT_CODE=0
+STDERR_OUT="$(CLEARGATE_REPO_ROOT="$TMP4" CLEARGATE_EXEC_MODE="v1" node "$SCRIPTS_DIR/assert_story_files.mjs" \
+  "$SPRINT_FILE" 2>&1 >/dev/null)" || EXIT_CODE=$?
+
+assert_eq "Sc4: CLEARGATE_EXEC_MODE=v1 does not bypass the block (removed bypass is inert)" "1" "$EXIT_CODE"
+assert_contains "Sc4: stderr still lists STORY-096-02 as missing under CLEARGATE_EXEC_MODE=v1" "STORY-096-02" "$STDERR_OUT"
 
 # Now add the missing story file and re-run — should exit 0
 make_story_file "$TMP4" "STORY-096-02"

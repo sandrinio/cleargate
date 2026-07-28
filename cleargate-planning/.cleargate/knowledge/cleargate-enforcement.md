@@ -17,7 +17,7 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 | §9 | protocol §24 | Lane Routing |
 | §10 | protocol §25 | Lifecycle Reconciliation (CR-017) |
 | §11 | protocol §26 | Decomposition Gate (CR-017) |
-| §12 | protocol §27 | Gate 3.5 — Sprint Close Acknowledgement (CR-019) |
+| §12 | protocol §27 | Gate 4 — Sprint Close Acknowledgement (CR-019) |
 | §15 | — | Operator Emergency Levers (STORY-070-01) |
 
 ---
@@ -291,20 +291,29 @@ Off-surface edits require one of:
 
 The gate runs as `.cleargate/scripts/file_surface_diff.sh` invoked via `.claude/hooks/pre-commit-surface-gate.sh` and dispatched from `.claude/hooks/pre-commit.sh`. The dispatcher is symlinked to `.git/hooks/pre-commit`.
 
-- Under v2: off-surface files cause a non-zero exit — the commit is blocked.
-- Under v1: the hook prints a warning but exits 0 (advisory only).
+The dispatcher resolves its own path through the `.git/hooks/pre-commit` symlink before globbing for `pre-commit-*.sh` siblings, so the chain works whether the link was created with a relative or an absolute target.
+Inside a linked worktree the gate reads the `.cleargate/sprint-runs/.active` sentinel and `state.json` from the **main working tree** (the parent of `git rev-parse --git-common-dir`), because `.active` is gitignored and single-writer in the main checkout; staged files, the whitelist, and the story file itself still resolve against the worktree, so a §3.1 self-amendment takes effect in the same commit.
+
+- Off-surface files cause a non-zero exit — the commit is blocked (always enforced; STORY-070-01: `execution_mode` retired).
 - `SKIP_SURFACE_GATE=1` env variable bypasses the gate entirely (use sparingly; log bypass in sprint §4 Execution Log).
+
+Before delegating, the wrapper runs each package's `check:no-vitest` script for the prefixes it knows about. A prefix runs only if its directory exists **and** that directory's `package.json` defines the script; otherwise it is skipped, not failed (§6.6 E12). Output is not suppressed — a failing check prints npm's output plus a `[surface-gate] BLOCKED:` line naming the package.
+
+### §6.2a Test-ratchet gate — RETIRED (STORY-051-02)
+
+The scaffold previously shipped a second pre-commit hook, `pre-commit-test-ratchet.sh` (wiring `.cleargate/scripts/test_ratchet.mjs`), which spawned `npx vitest run` against a `test-baseline.json` file to gate on pass-count regression. Vitest was fully eliminated repo-wide by EPIC-028 (2026-05-18) and no `test-baseline.json` ever existed post-elimination, so a live invocation always failed with a vitest spawn `ETIMEDOUT` — a dead gate manufacturing false enforcement rather than real signal (FLASHCARD 2026-06-04 `#test #monorepo #ratchet`, CR-075). Per EPIC-051 Q6 (resolved: RETIRE, not repair), the hook, its script, and its bash test have been deleted from every scaffold copy (canonical, live-outer tracked, and the npm payload mirror). `pre-commit-surface-gate.sh` (§6.2 above) is now the **sole** scaffold-installed pre-commit gate; the dispatcher (`pre-commit.sh`) required no edit — it discovers hooks by lexical glob and simply has one fewer file to find. The authoritative test discipline was never this ratchet: it is each package's own `npm run typecheck` + `npm test` (node:test), enforced independently by CI and by each package's own pre-commit convention.
 
 ### §6.3 §3.1 table contract
 
 The §3.1 table in `story.md` template uses a two-column `| Item | Value |` pipe table. The parser:
 - Scans between the `### 3.1` heading and the next `### ` heading.
-- Only processes rows where the Value cell contains `.` or `/` (path-shaped values).
-- Strips backticks from values.
-- Splits on `, ` to handle multiple paths in one cell.
-- Ignores header and separator rows.
+- Splits each Value cell on `, ` into segments.
+- Takes the **first backtick-quoted span** in each segment as that segment's declared path; a segment with no backticks contributes nothing.
+- Keeps a candidate only if it contains no whitespace and contains `.` or `/`.
+- Trailing prose is therefore ignored: `` `path/to/x.ts` — rationale `` declares `path/to/x.ts`. Bold or emphasis around the backticks is harmless.
+- Ignores header and separator rows; non-path rows ("New Files Needed: Yes/No", "Mirrors") are silently skipped.
 
-Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped.
+**Paths MUST be backtick-quoted.** An un-backticked §3.1 declares nothing, and the gate then warns and exits 0 (§6.6) rather than blocking. Every template ships backticked examples.
 
 ### §6.4 Whitelist
 
@@ -312,13 +321,36 @@ Non-path rows (e.g., "Mirrors", "New Files Needed: Yes/No") are silently skipped
 
 ### §6.5 Install (dogfood)
 
-On `cleargate init`, the scaffold automatically installs the `.git/hooks/pre-commit` symlink. For existing dogfood repositories, install once by hand:
+`cleargate init` does not install the `.git/hooks/pre-commit` symlink — `.git/hooks/` is per-clone git plumbing, outside the npm payload and outside `.cleargate/.install-manifest.json`. Install it once per clone, by hand:
 
 ```bash
 ln -sf ../../.claude/hooks/pre-commit.sh .git/hooks/pre-commit
 ```
 
+An absolute link target works equally well; the dispatcher resolves either form (§6.2). Linked worktrees need no separate install — git runs the main working tree's `$GIT_DIR/hooks` for every worktree.
+
 Log this step in the sprint §4 Execution Log.
+
+### §6.6 Exit-0 paths (what does not block)
+
+`file_surface_diff.sh` has several early returns that exit 0 without blocking. `SKIP_SURFACE_GATE=1` is the only *intentional bypass*; the rest are *non-applicability* paths — legitimate cases where the gate has nothing to check, not silent holes, except where noted.
+
+| # | Condition | Status |
+|---|---|---|
+| E1 | `SKIP_SURFACE_GATE=1` | The sole intentional bypass. Prints to stderr. |
+| E2 | Sentinel present but empty | Feeds E5. |
+| E3 | `state.json` missing for the named sprint | Feeds E5. Reads from the main-checkout sprint-state root (§6.2). |
+| E4 | No story id resolvable from `state.json` | Feeds E5. |
+| E5 | No active story file found | Legitimate when there genuinely is no active sprint (e.g. commits on `main` outside a sprint). Message names the roots searched. |
+| E6 | Zero paths parsed from §3.1 | A backtick-less §3.1 declares nothing (§6.3). **Known non-applicability path, tracked for promotion to a hard block by a carry-over CR.** |
+| E7 | Nothing staged | Legitimate — `git commit --allow-empty`, `--amend` with no index change. |
+| E8 | Zero off-surface files | The success path. |
+| E9 | `pre-commit-surface-gate.sh` cannot find `file_surface_diff.sh` | **Known non-applicability path** (wrapper, not this script), tracked by a carry-over CR. |
+| E10 | Dispatcher glob's unmatched-literal guard | Required — skips the literal glob pattern when no `pre-commit-*.sh` sibling exists. |
+| E11 | Dispatcher skips a non-executable sibling silently | **Known non-applicability path**, mitigated in practice by `chmodSync(0o755)` on every payload-copied `.sh` (BUG-018), tracked by a carry-over CR. |
+| E12 | A `check:no-vitest` prefix directory is absent, has no `package.json`, or does not define the script | Skipped, not failed — the prefix list is meta-repo vocabulary in a file that ships everywhere (CR-087). Tracked for generalisation by [[EPIC-045]] portability. |
+
+After the dispatcher/sentinel/parser fixes above, `SKIP_SURFACE_GATE=1` is the sole *bypass*; E6, E9, and E11 remain as documented, enumerated exit-0s rather than silent ones.
 
 ---
 
@@ -441,11 +473,11 @@ If the Architect cannot deliver the decomposition before the activating sprint's
 
 ---
 
-## 12. Gate 3.5 — Sprint Close Acknowledgement (CR-019) (source: protocol §27)
+## 12. Gate 4 — Sprint Close Acknowledgement (CR-019) (source: protocol §27)
 
 ### §12.1 Gate Posture
 
-Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_item` push-approval (§4 Gate 3), which already requires `approved: true` + explicit human confirmation. Authorising the execution loop ("start sprint NN") does NOT authorise the close. Close requires its own dedicated human approval.
+Sprint close is a **Gate-4 action** — the same posture as the Gate-1-green `cleargate_push_item` approval, which already requires `approved: true` + explicit human confirmation. Authorising the execution loop ("start sprint NN") does NOT authorise the close. Close requires its own dedicated human approval.
 
 ### §12.2 Two-Step Protocol
 
@@ -454,7 +486,9 @@ Sprint close is a **Gate-3-class action** — same posture as `cleargate_push_it
 
 ### §12.3 Flag Reservation
 
-`--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-3 breach equivalent to calling `cleargate_push_item` without `approved: true`.
+`--assume-ack` is reserved for **automated test environments only**. The conversational orchestrator (the human-facing agent) is a non-test environment and MUST NOT pass `--assume-ack` on its own initiative. Violation of this rule is a Gate-4 breach equivalent to calling `cleargate_push_item` without `approved: true`.
+
+`close_sprint.mjs` mechanically refuses `--assume-ack` (exit 2) unless `CLEARGATE_CI_ACK=1` is set. The token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI.
 
 ## 13. Sprint Execution Gate (Gate 3) (source: new in CR-021)
 
@@ -496,16 +530,14 @@ This gate is **always enforced** (STORY-070-01: single always-enforced behavior)
 
 Before any close action, the script verifies no leftover story worktrees remain. Runs `git worktree list --porcelain` and matches paths under `.worktrees/`.
 
-- **Enforcement (v2):** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
-- **Advisory (v1):** prints `Step 2.7 warning: leftover worktree at <path> (advisory in v1)` to stderr but continues.
+- **Always enforced:** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
 - **Test seams:** `CLEARGATE_SKIP_WORKTREE_CHECK=1` (full bypass), `CLEARGATE_FORCE_WORKTREE_PATHS` (test injection).
 
 ### §14.2 Step 2.8 — Sprint-Merged-to-Main Verify
 
 Verifies the sprint branch (`sprint/S-NN`) tip is an ancestor of `main`. Runs `git merge-base --is-ancestor <sprint-tip> <main-tip>`.
 
-- **Enforcement (v2):** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
-- **Advisory (v1):** prints `Step 2.8 warning: sprint branch unmerged (advisory in v1)` to stderr but continues.
+- **Always enforced:** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
 - **Test seams:** `CLEARGATE_SKIP_MERGE_CHECK=1`, `CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged`, `CLEARGATE_REPO_ROOT` (test override).
 
 ### §14.3 Steps 6.5 / 6.6 / 6.7 — Post-close additions
@@ -537,7 +569,9 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, all gate failures in the CLI (`cleargate sprint preflight`, `cleargate sprint init`, etc.) are **downgraded from hard exits to stderr warnings** prefixed with `[advisory]`. The command exits 0.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:140`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+
+**`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 
 **Semantics:**
 - Only the exact string `'1'` is truthy. Values `'0'`, `'true'`, `'yes'`, `''`, or absent → gate failures remain fatal.

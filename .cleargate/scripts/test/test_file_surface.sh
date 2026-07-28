@@ -4,6 +4,9 @@
 #
 # Usage: bash .cleargate/scripts/test/test_file_surface.sh
 # Exit: 0 if all pass, 1 if any fail
+#
+# The gate blocks unconditionally on off-surface staged files;
+# SKIP_SURFACE_GATE=1 is the only bypass (see STORY-051-01).
 
 set -euo pipefail
 
@@ -67,10 +70,9 @@ create_story_file() {
 
 create_sprint_state() {
   local dir="$1"
-  local mode="${2:-v2}"
   mkdir -p "${dir}/.cleargate/sprint-runs/SPRINT-10"
   echo "SPRINT-10" > "${dir}/.cleargate/sprint-runs/.active"
-  echo "{\"execution_mode\":\"${mode}\",\"stories\":{\"STORY-014-01\":{\"state\":\"In Progress\",\"updated_at\":\"2026-04-21T12:00:00Z\"}}}" > "${dir}/.cleargate/sprint-runs/SPRINT-10/state.json"
+  echo "{\"stories\":{\"STORY-014-01\":{\"state\":\"In Progress\",\"updated_at\":\"2026-04-21T12:00:00Z\"}}}" > "${dir}/.cleargate/sprint-runs/SPRINT-10/state.json"
 }
 
 # ============================================================================
@@ -83,7 +85,7 @@ echo "Scenario 1: Gate catches off-surface edit"
 TMPDIR1="$(mktemp -d)"
 setup_git_repo "${TMPDIR1}"
 create_story_file "${TMPDIR1}" "hello.mjs" "README.md"
-create_sprint_state "${TMPDIR1}" "v2"
+create_sprint_state "${TMPDIR1}"
 
 touch "${TMPDIR1}/hello.mjs" "${TMPDIR1}/README.md" "${TMPDIR1}/unrelated.txt"
 git -C "${TMPDIR1}" add hello.mjs README.md unrelated.txt
@@ -115,7 +117,7 @@ echo "Scenario 2: Gate passes when staged files match surface"
 TMPDIR2="$(mktemp -d)"
 setup_git_repo "${TMPDIR2}"
 create_story_file "${TMPDIR2}" "hello.mjs" "README.md"
-create_sprint_state "${TMPDIR2}" "v2"
+create_sprint_state "${TMPDIR2}"
 
 touch "${TMPDIR2}/hello.mjs" "${TMPDIR2}/README.md"
 git -C "${TMPDIR2}" add hello.mjs README.md
@@ -141,7 +143,7 @@ echo "Scenario 3: Whitelist admits generated files"
 TMPDIR3="$(mktemp -d)"
 setup_git_repo "${TMPDIR3}"
 create_story_file "${TMPDIR3}" "hello.mjs"
-create_sprint_state "${TMPDIR3}" "v2"
+create_sprint_state "${TMPDIR3}"
 
 mkdir -p "${TMPDIR3}/.cleargate/scripts"
 {
@@ -166,33 +168,33 @@ fi
 rm -rf "${TMPDIR3}"
 
 # ============================================================================
-# Scenario 4: v1 mode is advisory
+# Scenario 4: SKIP_SURFACE_GATE=1 bypasses
 # ============================================================================
 
 echo ""
-echo "Scenario 4: v1 mode is advisory"
+echo "Scenario 4: SKIP_SURFACE_GATE=1 bypasses"
 
 TMPDIR4="$(mktemp -d)"
 setup_git_repo "${TMPDIR4}"
 create_story_file "${TMPDIR4}" "hello.mjs"
-create_sprint_state "${TMPDIR4}" "v1"
+create_sprint_state "${TMPDIR4}"
 
 touch "${TMPDIR4}/hello.mjs" "${TMPDIR4}/unrelated.txt"
 git -C "${TMPDIR4}" add hello.mjs unrelated.txt
 
 EXIT_CODE=0
-STDERR_OUT="$(CLEARGATE_REPO_ROOT="${TMPDIR4}" bash "${SCRIPT}" 2>&1 >/dev/null)" || EXIT_CODE=$?
+STDERR_OUT="$(CLEARGATE_REPO_ROOT="${TMPDIR4}" SKIP_SURFACE_GATE=1 bash "${SCRIPT}" 2>&1 >/dev/null)" || EXIT_CODE=$?
 
 if [[ "${EXIT_CODE}" -eq 0 ]]; then
-  pass "v1 mode exits 0 (advisory)"
+  pass "SKIP_SURFACE_GATE=1 exits 0 (bypassed)"
 else
-  fail "v1 mode exits 0" "got exit ${EXIT_CODE}"
+  fail "SKIP_SURFACE_GATE=1 exits 0" "got exit ${EXIT_CODE}"
 fi
 
-if echo "${STDERR_OUT}" | grep -qi "warning"; then
-  pass "v1 mode prints warning"
+if echo "${STDERR_OUT}" | grep -qi "bypassing gate"; then
+  pass "SKIP_SURFACE_GATE=1 reports the gate was bypassed"
 else
-  fail "v1 mode prints warning" "stderr was: ${STDERR_OUT}"
+  fail "SKIP_SURFACE_GATE=1 reports bypass" "stderr was: ${STDERR_OUT}"
 fi
 
 rm -rf "${TMPDIR4}"
