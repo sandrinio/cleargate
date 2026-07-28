@@ -1,12 +1,15 @@
 ---
-story: STORY-051-09
-sprint: SPRINT-38
-wave: 5
-agent: qa
-modes: [red, verify]
-verdict: PASS (after one FAIL + one sustained FAIL, both orchestrator-caused)
-qa_bounces: 1
-transcribed_by: orchestrator
+story: "STORY-051-09"
+sprint: "SPRINT-38"
+wave: "5"
+agent: "qa"
+modes: "[red, verify]"
+verdict: "PASS (after one FAIL + one sustained FAIL, both orchestrator-caused)"
+qa_bounces: "1"
+transcribed_by: "orchestrator"
+story_id: "STORY-051-09"
+sprint_id: "SPRINT-38"
+arch_bounces: "0"
 ---
 
 # STORY-051-09 — QA report

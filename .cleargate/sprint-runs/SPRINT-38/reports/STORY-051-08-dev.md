@@ -1,11 +1,11 @@
 ---
-story: STORY-051-08
-sprint: SPRINT-38
-wave: 4
-agent: developer
-status: done
-transcribed_by: orchestrator
-transcription_note: >
+story: "STORY-051-08"
+sprint: "SPRINT-38"
+wave: "4"
+agent: "developer"
+status: "done"
+transcribed_by: "orchestrator"
+transcription_note: ">"
   The developer agent definition writes a file only on the BLOCKED path
   (STORY-NNN-NN-dev-blockers.md); the success path returns its report as text.
   DevOps (§C.7) requires STORY-NNN-NN-dev.md to exist before merge. This file is
@@ -20,6 +20,10 @@ commits:
     sha: 7015658cf860a54ab62bea1066ef6edbd3c0cbfc
   - repo: cleargate-cli (QA-Red tests, branch sprint/S-38)
     sha: 377ad1c
+story_id: "STORY-051-08"
+sprint_id: "SPRINT-38"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-051-08 — Developer report

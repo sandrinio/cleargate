@@ -55,4 +55,4 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
 ## Sprints
 
-| [[SPRINT-38]] | sprint | Active | .cleargate/delivery/pending-sync/SPRINT-38_Enforcement_Integrity_Restoration.md |
+| [[SPRINT-38]] | sprint | Active | .cleargate/sprint-runs/SPRINT-38/SPRINT-38_REPORT.md |

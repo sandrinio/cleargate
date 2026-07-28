@@ -1,16 +1,20 @@
 ---
-story: STORY-051-08
-sprint: SPRINT-38
-wave: 4
-agent: qa
-mode: verify
-verdict: PASS
-acceptance_coverage: 5 of 5
-transcribed_by: orchestrator
-transcription_note: >
+story: "STORY-051-08"
+sprint: "SPRINT-38"
+wave: "4"
+agent: "qa"
+mode: "verify"
+verdict: "PASS"
+acceptance_coverage: "5 of 5"
+transcribed_by: "orchestrator"
+transcription_note: ">"
   The qa agent definition does not write a success-path report file; it returns
   the report as text. DevOps (§C.7) requires STORY-NNN-NN-qa.md before merge.
   Transcribed by the orchestrator from the agent's returned verdict.
+story_id: "STORY-051-08"
+sprint_id: "SPRINT-38"
+qa_bounces: "0"
+arch_bounces: "1"
 ---
 
 # STORY-051-08 — QA report

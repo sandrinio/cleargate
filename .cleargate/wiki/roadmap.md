@@ -102,8 +102,8 @@ Sprints with `completed_at` set.
 ## Active Epics
 
 
-- [[EPIC-051]] — status: Active
 
+_No active epics._
 
 
 ## Planned Epics
@@ -183,5 +183,7 @@ Sprints with `completed_at` set.
 - [[EPIC-043]] — status: Completed
 
 - [[EPIC-045]] — status: Completed
+
+- [[EPIC-051]] — status: Completed
 
 

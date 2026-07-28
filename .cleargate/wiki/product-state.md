@@ -6,17 +6,17 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 40 | 1 | 27 |
+| Epics | 40 | 0 | 28 |
 | Sprints | 38 | 1 | 32 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 84 | 0 | 75 |
+| CRs | 84 | 0 | 77 |
 | Bugs | 27 | 0 | 24 |
 
 ## Active Epics
 
 
-- [[EPIC-051]] — status: Active
 
+_No active epics._
 
 
 ## Shipped This Cycle
@@ -220,6 +220,10 @@
 
 - [[CR-084-Sprint-Dashboard-In-CLI-Payload]] (crs) — Completed
 
+- [[CR-086]] (crs) — Completed
+
+- [[CR-087]] (crs) — Completed
+
 - [[EPIC-000]] (epics) — Completed
 
 - [[EPIC-001]] (epics) — Abandoned
@@ -273,6 +277,8 @@
 - [[EPIC-033]] (epics) — Completed
 
 - [[EPIC-045]] (epics) — Completed
+
+- [[EPIC-051]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 

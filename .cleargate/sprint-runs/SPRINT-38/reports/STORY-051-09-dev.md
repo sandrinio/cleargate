@@ -1,11 +1,11 @@
 ---
-story: STORY-051-09
-sprint: SPRINT-38
-wave: 5
-agent: developer
-status: done
-transcribed_by: orchestrator
-transcription_note: >
+story: "STORY-051-09"
+sprint: "SPRINT-38"
+wave: "5"
+agent: "developer"
+status: "done"
+transcribed_by: "orchestrator"
+transcription_note: ">"
   developer writes a report file only on the BLOCKED path; DevOps §C.7 requires
   STORY-NNN-NN-dev.md before merge. Content is the agent's returned report.
 commits:
@@ -17,6 +17,10 @@ commits:
     subject: "docs(EPIC-051): STORY-051-09 cite AD#5 for the two enforcement.md scope additions"
   - repo: cleargate-cli (QA-Red tests, branch sprint/S-38)
     sha: 63d9016
+story_id: "STORY-051-09"
+sprint_id: "SPRINT-38"
+qa_bounces: "1"
+arch_bounces: "0"
 ---
 
 # STORY-051-09 — Developer report
