@@ -50,6 +50,9 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-085-Drive-Execution-Loop-States-Live]] | cr | Draft | .cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md |
 | [[CR-086]] | cr | Approved | .cleargate/delivery/pending-sync/CR-086_File_Surface_Gate_End_To_End.md |
 | [[CR-087]] | cr | Approved | .cleargate/delivery/pending-sync/CR-087_Downstream_Safe_Pre_Commit_Chain.md |
+| [[CR-088]] | cr | Completed | .cleargate/delivery/pending-sync/CR-088_Upgrade_Pin_And_Prune.md |
+| [[CR-089]] | cr | Completed | .cleargate/delivery/pending-sync/CR-089_Payload_Telemetry_Hygiene.md |
+| [[CR-090]] | cr | Completed | .cleargate/delivery/pending-sync/CR-090_Delivery_Hygiene_And_SDR_Wiring.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |

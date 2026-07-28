@@ -152,7 +152,11 @@ This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/spr
 
 ### A.4 Architect Sprint Design Review
 
-Mandatory before any story executes. Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
+Mandatory before any story executes. **The SDR is what produces `waves.json`** — the wave plan §C.0 executes. Without it there is no wave composition and no parallelism.
+
+Which path you take depends on story count. **You (the Orchestrator) own the dispatch in both cases** — the Architect has no `Task` tool and cannot fan out to sub-agents on its own.
+
+**N ≤ 2 stories — single dispatch (tiny-sprint floor).** Spawn the Architect with all candidate stories' §3 Implementation Guides + ADRs + flashcards + sprint plan path:
 
 ```
 Task instruction: "SPRINT DESIGN REVIEW — write Sprint Plan §2 Execution Strategy.
@@ -160,7 +164,33 @@ You have WRITE ACCESS to Sprint Plan §2 ONLY. Produce §§2.1–2.4 (Phase Plan
 Merge Ordering, Shared-Surface Warnings, ADR-Conflict Flags) plus §2.4 Lane Audit."
 ```
 
-Architect returns a markdown block; you insert it into the sprint plan file. Then halt and ask the human to confirm the sprint plan before any story executes.
+With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.
+
+**N > 2 stories — reader/synth fan-out (EPIC-033 / STORY-033-03).** Two dispatch rounds:
+
+1. **Fan out `architect-reader`, one instance per story, in a single parallel batch.** Each reads exactly one story file and returns a structured digest (its `file_surface` comes from `.cleargate/scripts/collision_surface.sh <story-file>`). Readers do not schedule and do not emit `waves.json`.
+
+   ```
+   Task instruction (one per story): "SDR READER — read <story-file> and return the
+   digest shape pinned in .claude/agents/architect-reader.md. Report file_surface
+   faithfully, including an empty list. Do NOT invent paths, schedule, or plan waves."
+   ```
+
+2. **Then dispatch `architect-synth` once**, passing all N digests verbatim. It evaluates the five-clause wave-compatibility predicate and emits the §2.1–2.5 SDR block, the Wave Assignment table, and the `waves.json` artifact to `<sprintDir>/plans/waves.json`.
+
+   ```
+   Task instruction: "SDR SYNTH — consume the N reader digests below, evaluate the
+   five-clause wave-compatibility predicate, and emit §§2.1–2.5 plus the Wave
+   Assignment table and waves.json. Fail-safe-serialize any story with an empty
+   (file_surface ∪ file_creates) — empty is unproven, never proven-disjoint (BUG-033)."
+   <digests>
+   ```
+
+   Do not skip the reader round and hand story files straight to `architect-synth` — it consumes digests, never raw story files.
+
+In both paths: insert the returned markdown block into the sprint plan file, then **halt and ask the human to confirm the sprint plan** before any story executes.
+
+> **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.
 
 ### A.5 Flip sprint status
 
