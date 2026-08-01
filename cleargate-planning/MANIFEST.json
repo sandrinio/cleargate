@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.20.0",
-  "generated_at": "2026-08-01T08:05:18.129Z",
+  "generated_at": "2026-08-01T10:27:43.694Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -137,7 +137,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "4adfb493bd23b99018d2750a022a8694824be6d65345de5bfb0eca143feb166a",
+      "sha256": "6eff28c02018d71e3a245b62518fef9c795d42ab59e3af02b7aed2e7a31e2472",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -208,6 +208,13 @@
     {
       "path": ".cleargate/knowledge/sprint-closeout-checklist.md",
       "sha256": "d44f57445188bdefb18b39c6c121a1f52d32d9ca6122df91e54855e87fc2233e",
+      "tier": "protocol",
+      "overwrite_policy": "merge-3way",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/README.md",
+      "sha256": "d970d0424ad3ec640606ebc9b8031c2c7a13560249eadcc24c522180c9c8ebff",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

@@ -319,33 +319,69 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     # Steps 3+4 are kept as final fallbacks; the transcript grep is now the last resort,
     # not the primary path, which eliminates the EPIC-001 lexical-first misattribution.
 
+    # CR-097: a carried work_item_id must be consistent with the sprint we are
+    # bucketing into. A `SPRINT-*` id that is not THIS sprint is self-evidently
+    # wrong — it says "this turn belongs to another sprint" while being written
+    # into this sprint's ledger. Observed: SPRINT-99's ledger attributed 66.7M
+    # tokens to SPRINT-38, whose sprint ended weeks earlier.
+    work_item_plausible() {
+      case "$1" in
+        ''|none|unknown|null) return 1 ;;
+        SPRINT-*) [[ "$1" == "${SPRINT_ID}" ]] || return 1 ;;
+      esac
+      return 0
+    }
+
     # Step 1: Read most-recent prior ledger row's work_item_id.
+    #
+    # CR-097: also require that row to belong to THIS sprint. The ledger is
+    # per-sprint by path, but a bucket can be re-pointed (a stale `.active`, a
+    # re-created sprint id), and once a wrong id lands in a row every later row
+    # copies it — the fallback is self-perpetuating.
     PRIOR_LEDGER_WORK_ITEM=""
     if [[ -f "${LEDGER}" ]]; then
-      PRIOR_LEDGER_WORK_ITEM="$(tail -1 "${LEDGER}" 2>/dev/null \
+      PRIOR_LEDGER_ROW="$(tail -1 "${LEDGER}" 2>/dev/null)"
+      PRIOR_LEDGER_WORK_ITEM="$(printf '%s' "${PRIOR_LEDGER_ROW}" \
         | jq -r '.work_item_id // empty' 2>/dev/null)"
-      # Only accept non-empty, non-"none", non-"unknown" values.
-      if [[ -n "${PRIOR_LEDGER_WORK_ITEM}" && \
-            "${PRIOR_LEDGER_WORK_ITEM}" != "none" && \
-            "${PRIOR_LEDGER_WORK_ITEM}" != "unknown" && \
-            "${PRIOR_LEDGER_WORK_ITEM}" != "null" ]]; then
+      PRIOR_LEDGER_SPRINT="$(printf '%s' "${PRIOR_LEDGER_ROW}" \
+        | jq -r '.sprint_id // empty' 2>/dev/null)"
+      if work_item_plausible "${PRIOR_LEDGER_WORK_ITEM}" && \
+         [[ "${PRIOR_LEDGER_SPRINT}" == "${SPRINT_ID}" ]]; then
         WORK_ITEM_ID="${PRIOR_LEDGER_WORK_ITEM}"
         printf '[%s] work_item_id from prior ledger row: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+      elif [[ -n "${PRIOR_LEDGER_WORK_ITEM}" ]]; then
+        printf '[%s] rejected prior-ledger work_item_id %s (sprint %s != %s)\n' \
+          "$(date -u +%FT%TZ)" "${PRIOR_LEDGER_WORK_ITEM}" "${PRIOR_LEDGER_SPRINT:-none}" "${SPRINT_ID}" >> "${HOOK_LOG}"
       fi
     fi
 
     # Step 2: Read most-recent dispatch-marker log line (if Step 1 did not resolve).
+    #
+    # CR-097: scope the marker to THIS session.
+    #
+    # HOOK_LOG is append-only and never rotated, so `tail -1` returned the last
+    # dispatch marker ever written — in the observed failure, one from five days
+    # and one session earlier, belonging to a sprint that had already closed. A
+    # brand-new sprint's first turn adopted it, and Step 1 then copied it into
+    # every subsequent row. Markers carry `session=`; a marker from a different
+    # session says nothing about this turn, so match on it and let resolution
+    # fall through to the transcript scan when there is no match.
     if [[ -z "${WORK_ITEM_ID}" && -f "${HOOK_LOG}" ]]; then
-      DISPATCH_MARKER_WORK_ITEM="$(grep -E '^\[.+\] dispatch-marker: ' "${HOOK_LOG}" 2>/dev/null \
-        | tail -1 \
-        | grep -oE 'work_item=[^ ]+' \
-        | head -1 \
-        | sed 's/work_item=//')"
-      if [[ -n "${DISPATCH_MARKER_WORK_ITEM}" && \
-            "${DISPATCH_MARKER_WORK_ITEM}" != "none" && \
-            "${DISPATCH_MARKER_WORK_ITEM}" != "unknown" ]]; then
+      DISPATCH_MARKER_WORK_ITEM=""
+      if [[ -n "${SESSION_ID}" ]]; then
+        DISPATCH_MARKER_WORK_ITEM="$(grep -E '^\[.+\] dispatch-marker: ' "${HOOK_LOG}" 2>/dev/null \
+          | grep -F "session=${SESSION_ID} " \
+          | tail -1 \
+          | grep -oE 'work_item=[^ ]+' \
+          | head -1 \
+          | sed 's/work_item=//')"
+      fi
+      if work_item_plausible "${DISPATCH_MARKER_WORK_ITEM}"; then
         WORK_ITEM_ID="${DISPATCH_MARKER_WORK_ITEM}"
-        printf '[%s] work_item_id from dispatch-marker log: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+        printf '[%s] work_item_id from dispatch-marker log (session-scoped): %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
+      elif [[ -n "${DISPATCH_MARKER_WORK_ITEM}" ]]; then
+        printf '[%s] rejected dispatch-marker work_item_id %s (not valid for sprint %s)\n' \
+          "$(date -u +%FT%TZ)" "${DISPATCH_MARKER_WORK_ITEM}" "${SPRINT_ID}" >> "${HOOK_LOG}"
       fi
     fi
 

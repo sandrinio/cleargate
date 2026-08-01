@@ -58,6 +58,8 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-093]] | cr | In Review | .cleargate/delivery/pending-sync/CR-093_File_Argument_Owns_Project_Root.md |
 | [[CR-094]] | cr | Approved | .cleargate/delivery/pending-sync/CR-094_Ambiguity_Status_Is_First_Glyph.md |
 | [[CR-095]] | cr | In Review | .cleargate/delivery/pending-sync/CR-095_Parent_Approved_Waiver_Soundness_And_Remedy.md |
+| [[CR-096]] | cr | Approved | .cleargate/delivery/pending-sync/CR-096_Scaffold_Version_Tracking_And_Orientation_Doc.md |
+| [[CR-097]] | cr | Approved | .cleargate/delivery/pending-sync/CR-097_Dashboard_Truthfulness_And_Single_Tab.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
