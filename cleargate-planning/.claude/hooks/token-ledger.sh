@@ -85,6 +85,31 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     SPRINT_ID="$(tr -d '[:space:]' < "${ACTIVE_SENTINEL}")"
   fi
 
+  # BUG-036: note — but do not act on — a sentinel naming a sprint with no plan
+  # file. In the ClearGate meta-repo the sentinel named SPRINT-99, which had no
+  # plan anywhere under delivery/, and 66,679,111 tokens accumulated in a phantom
+  # run directory with nothing saying so.
+  #
+  # This deliberately still routes to the named directory. Rerouting to
+  # _off-sprint would relocate data without adding detection, and it would break
+  # attribution for any legitimately sparse checkout. The condition is caught
+  # where it belongs: `sprint init` now refuses to create a plan-less sprint at
+  # all, and `doctor --session-start` reports a stale sentinel on every session.
+  # This line exists so the hook log dates the drift when it does occur.
+  if [[ -n "${SPRINT_ID}" ]]; then
+    PLAN_FOUND=""
+    for _dir in pending-sync archive; do
+      for _plan in "${REPO_ROOT}/.cleargate/delivery/${_dir}/${SPRINT_ID}_"*.md \
+                   "${REPO_ROOT}/.cleargate/delivery/${_dir}/${SPRINT_ID}.md"; do
+        if [[ -e "${_plan}" ]]; then PLAN_FOUND=1; break 2; fi
+      done
+    done
+    if [[ -z "${PLAN_FOUND}" ]]; then
+      printf '[%s] WARNING: sentinel names %s but no plan file exists under delivery/ — sentinel may be stale\n' \
+        "$(date -u +%FT%TZ)" "${SPRINT_ID}" >> "${HOOK_LOG}"
+    fi
+  fi
+
   if [[ -n "${SPRINT_ID}" ]]; then
     SPRINT_DIR="${REPO_ROOT}/.cleargate/sprint-runs/${SPRINT_ID}"
     mkdir -p "${SPRINT_DIR}"

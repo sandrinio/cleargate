@@ -9,7 +9,17 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 There are exactly **9 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
-Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key whose value is a relative path to another document (e.g. `context_source`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(context_source).approved == true` reads the file named by the evaluated document's `context_source` key and asserts its `approved` field equals `true`.
+Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
+
+A naming `<ref>` resolves through exactly one mechanism, in this order:
+1. **Work-item id** — `INITIATIVE-001`, `PROPOSAL-012`, `EPIC-043`, `STORY-033-03`. Matched by filename stem (`<ID>.md` or `<ID>_<Name>.md`) under `.cleargate/delivery/pending-sync/`, then `.cleargate/delivery/archive/`.
+2. **Relative path** — resolved against the citing document's directory, then the project root, then the two delivery directories.
+
+CR-098: `<ref>` used to be `context_source`, which meant three incompatible things at once — the definition above called it a path, `discovery-checked` read it as an opaque presence flag, and every template shipped it as prose. BUG-008's prose-vs-path heuristic existed only to guess between them, and is now deleted. `context_source` keeps the one meaning it always had in practice: prose evidence, read only by `discovery-checked` as a presence flag. Naming the parent is `parent_ref`'s job.
+
+Two rules follow, and they are deliberately asymmetric:
+- **`<ref>` unset** → the gate looks for a recorded direct approval: `proposal_gate_waiver` carrying `approved_by` + `approved_at` (or a non-empty scalar), or top-level `approved_by` + `approved_at`. This is the documented route for an item whose parent was approved directly with no Proposal/Initiative on disk.
+- **`<ref>` set but unresolvable** → hard fail, no waiver escape. Naming a parent that is not on disk is a broken reference, not an approval.
 
 **2. `body contains "<string>"` / `body does not contain "<string>"`**
 Performs a case-sensitive substring search on the document body (everything after the frontmatter block). The negated form `body does not contain` passes when the string is absent. Example: `body does not contain 'TBD'` fails if the literal string `TBD` appears anywhere in the body.
@@ -76,10 +86,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: parent-approved-proposal
-      check: "frontmatter(context_source).approved == true"
+      check: "frontmatter(parent_ref).approved == true"
       or_group: parent-approved
     - id: parent-approved-initiative
-      check: "frontmatter(context_source).status == 'Triaged'"
+      check: "frontmatter(parent_ref).status == 'Triaged'"
       or_group: parent-approved
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
@@ -204,7 +214,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "frontmatter(.).context_source != null"
 ```
 
-STORY-051-03 (Q7): for the `sprint` bucket, `discovery-checked` is deliberately self-referential (`frontmatter(.).context_source`, not `frontmatter(context_source).<field>`). A sprint's `context_source` documents its own decomposition evidence — which `epics:`/`proposals:` it decomposes — not an upstream approval doc the way the epic bucket's `frontmatter(context_source).approved == true` (line 73) reads a *separate* file. Do not "fix" this to the upstream form; it is intentional. Array-non-empty enforcement of `epics:`/`proposals:` is the `cleargate sprint init` decomposition gate's job (fails closed on `declaredNone`/`error` unless `--allow-drift`), not this predicate's — this criterion only asserts the field is populated at all.
+STORY-051-03 (Q7), as amended by CR-098: `discovery-checked` is self-referential (`frontmatter(.).context_source`) in **every** bucket, and `context_source` is never used to name another document. A sprint's `context_source` documents its own decomposition evidence — which `epics:`/`proposals:` it decomposes; an epic's documents its own grounding. Upstream approval is read from `parent_ref` (see the epic bucket's `frontmatter(parent_ref).approved == true` above), which is a different key precisely so that neither reading has to guess. Array-non-empty enforcement of `epics:`/`proposals:` is the `cleargate sprint init` decomposition gate's job (fails closed on `declaredNone`/`error` unless `--allow-drift`), not this predicate's — this criterion only asserts the field is populated at all.
 
 ```yaml
 - work_item_type: initiative

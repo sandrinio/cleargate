@@ -33,6 +33,10 @@ Do NOT output these instructions.
 
 ---
 epic_id: "EPIC-{ID}"
+parent_ref: null  # PROPOSAL-{ID} | INITIATIVE-{ID} — the approved parent this epic decomposes.
+                  # Read by the `parent-approved` readiness gate (CR-098). Leave null only when
+                  # the parent was approved directly; then record proposal_gate_waiver or
+                  # top-level approved_by + approved_at, or the gate blocks decomposition.
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close

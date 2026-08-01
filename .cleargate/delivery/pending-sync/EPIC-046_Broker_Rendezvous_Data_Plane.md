@@ -1,6 +1,7 @@
 ---
+parent_ref: INITIATIVE-001
 epic_id: EPIC-046
-parent_cleargate_id: null
+parent_cleargate_id: "INITIATIVE-001"
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
@@ -18,8 +19,8 @@ cached_gate_result:
   pass: false
   failing_criteria:
     - id: parent-approved
-      detail: "OR-group failed — all alternatives failed: parent-approved-proposal / parent-approved-initiative: context_source is prose, not a path, and no proposal_gate_waiver is recorded. Either point context_source at the parent document as a relative path (e.g. \"INITIATIVE-002_Name.md\" — resolved against this file, then the delivery tree), or record the waiver as proposal_gate_waiver with approved_by + approved_at, or set top-level approved_by + approved_at"
-  last_gate_check: 2026-08-01T07:59:32Z
+      detail: "OR-group failed — all alternatives failed: parent-approved-proposal: expected approved == true, got undefined; parent-approved-initiative: expected status == \"Triaged\", got \"In Triage\""
+  last_gate_check: 2026-08-01T12:59:28Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null

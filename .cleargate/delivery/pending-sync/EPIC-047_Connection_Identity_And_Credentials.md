@@ -1,6 +1,7 @@
 ---
+parent_ref: INITIATIVE-001
 epic_id: EPIC-047
-parent_cleargate_id: null
+parent_cleargate_id: "INITIATIVE-001"
 sprint_cleargate_id: null
 carry_over: false
 status: Draft

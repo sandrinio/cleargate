@@ -18,9 +18,29 @@ fi
 "${CG[@]}" doctor --session-start || true
 
 # --- Sprint-active skill auto-load directive (STORY-026-01) ---
+#
+# BUG-036: the sentinel is not self-validating. It named SPRINT-99 in the
+# ClearGate meta-repo — a sprint with no plan file anywhere — and this line
+# announced an active sprint on every session for as long as that lasted.
+# Directing the agent to load sprint-execution for a sprint that does not exist
+# is worse than saying nothing, so check for the plan before emitting it.
 ACTIVE_FILE="${REPO_ROOT}/.cleargate/sprint-runs/.active"
-if [ -s "${ACTIVE_FILE}" ] && [ -n "$(tr -d '[:space:]' < "${ACTIVE_FILE}")" ]; then
-  printf '→ Active sprint detected. Load skill: sprint-execution\n'
+if [ -s "${ACTIVE_FILE}" ]; then
+  SPRINT_ID="$(tr -d '[:space:]' < "${ACTIVE_FILE}")"
+  if [ -n "${SPRINT_ID}" ]; then
+    PLAN_FOUND=""
+    for _dir in pending-sync archive; do
+      for _plan in "${REPO_ROOT}/.cleargate/delivery/${_dir}/${SPRINT_ID}_"*.md \
+                   "${REPO_ROOT}/.cleargate/delivery/${_dir}/${SPRINT_ID}.md"; do
+        if [ -e "${_plan}" ]; then PLAN_FOUND=1; break 2; fi
+      done
+    done
+    if [ -n "${PLAN_FOUND}" ]; then
+      printf '→ Active sprint detected. Load skill: sprint-execution\n'
+    else
+      printf '⚠️  .cleargate/sprint-runs/.active names %s, which has no plan file — sentinel is stale. Not loading sprint-execution.\n' "${SPRINT_ID}"
+    fi
+  fi
 fi
 
 # ── §14.9 SessionStart sync nudge (STORY-010-08) ─────────────────────────────

@@ -1,10 +1,10 @@
 ---
 bug_id: BUG-036
 parent_ref: EPIC-043
-parent_cleargate_id: "EPIC-043"
+parent_cleargate_id: EPIC-043
 sprint_cleargate_id: "SPRINT-99"
 carry_over: false
-status: Triaged
+status: Completed
 severity: P2-Medium
 reporter: sandrinio
 approved: true
@@ -34,21 +34,29 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-08-01T11:29:50Z
+  last_stamp: 2026-08-01T19:37:09Z
   sessions: []
 ---
 
 # BUG-036: The `.active` Sentinel Is Trusted Without Anyone Checking the Sprint Exists
 
-### Open Questions
+### Open Questions — RESOLVED 2026-08-01
 
 - **Question:** Should `cleargate doctor` fail (non-zero) when `.active` names a sprint with no plan file, or only warn?
 - **Recommended:** Warn at `--session-start` and list it under `doctor`'s findings, but do not fail. A sprint can legitimately exist for a few minutes before its plan lands, and a hard failure on a routine banner would train people to ignore the banner. The failure mode here is silence, not insufficient severity.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** **Warn, do not fail.** Implemented as recommended, and asserted: `a stale sentinel warns but does not fail — severity is deliberate` checks that neither `outcome.configError` nor `outcome.blocker` is set.
 
 - **Question:** How did SPRINT-99 come to exist at all — did `sprint init` run without a plan file, or was the sentinel hand-edited?
 - **Recommended:** Determine before fixing. If `sprint init` can create `state.json` for a sprint whose plan does not exist, that is the deeper defect and this bug's fix is a detector for it rather than the cure. `sprint init` runs a decomposition gate (CR-017), so it should not have been reachable.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** **`sprint init` did it, and the deeper defect is real.** Determined by reading the handler, not by inference.
+
+  `sprintInitHandler` locates the plan file, then runs CR-017's fail-closed decomposition gate inside `if (sprintPlanPath) { … }`. When no plan file exists, `sprintPlanPath` is `null`, so **the entire gate is skipped** and execution falls straight through to `init_sprint.mjs`, which writes `state.json` and the `.active` sentinel.
+
+  The guard CR-017 added to make a plan-less sprint unreachable fails open on precisely the input it exists to catch. That is the cause; the sentinel being unvalidated is how it stayed invisible.
+
+  Both are fixed here: a **cure** (Gate 0 — `sprint init` refuses to initialise a sprint with no plan) and a **detector** (`doctor --session-start` and the SessionStart hook report a stale sentinel).
+
+  Evidence that the fixtures were passing on the strength of the bug: four `sprint.dashboard.node.test.ts` cases ran against an empty tmp dir with no delivery tree, and reached the post-init dashboard hook only because every gate was skipped. They now seed a real plan + epic + child story.
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -71,6 +79,8 @@ Deterministic, from any ClearGate project:
 3. Start a new session, or run `cleargate doctor --session-start`.
 4. **Observe:** the banner reports an active sprint. No command anywhere reports that SPRINT-999 has no plan.
 5. `cleargate sprint dashboard` — post-CR-097 this now warns. Every other consumer stays silent.
+
+> **Post-fix:** step 4 now reports the stale sentinel, from both `doctor --session-start` and the SessionStart hook, and step 1 is no longer reachable through `sprint init` — only by hand-editing the sentinel, which is what this protocol does.
 
 ## 3. Evidence & Context
 
@@ -122,22 +132,48 @@ Note `last_action: "Sprint SPRINT-99 initialised"` — something ran `sprint ini
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
-**Investigate / Modify:**
-- `cleargate-cli/src/commands/sprint-file-locate.ts` — `resolveSprintIdFromSentinel()`, the shared sentinel reader every consumer goes through. The natural place for a validated variant.
-- `cleargate-cli/src/commands/doctor.ts` — `--session-start` banner; should report a sentinel naming a sprint with no plan.
-- `cleargate-cli/src/commands/sprint.ts` — `sprintInitHandler`; determine whether it can create `state.json` without a plan file (open question 2).
-- `cleargate-planning/.claude/hooks/session-start.sh` — emits the `Active sprint detected` line.
-- `cleargate-planning/.claude/hooks/token-ledger.sh` — routes on the sentinel; `[[CR-097]]` bounded the *attribution*, not the routing.
+**Modified:**
+- `cleargate-cli/src/commands/sprint-file-locate.ts` — added `findSprintPlanFile()` (promoted from `dashboard/collect.ts`, where it was a private duplicate) and `resolveActiveSprint()`, which returns `{ sprintId, planPath, stale }`. `resolveSprintIdFromSentinel()` is unchanged and still reports what the sentinel *says*; the new function reports whether that is true.
+- `cleargate-cli/src/commands/sprint.ts` — **Gate 0**, the cure. Runs before every other gate, since the others assume a plan. `--allow-drift` waives it; `sprintFilePath` (the documented `SprintFileOptions` override) satisfies it directly.
+- `cleargate-cli/src/commands/doctor.ts` — `runSessionStart` reports a stale sentinel. Emitted early, before the `pending-sync` read that returns early when that directory is unreadable.
+- `cleargate-planning/.claude/hooks/session-start.sh` — emits the stale-sentinel warning *instead of* `→ Active sprint detected. Load skill: sprint-execution`. Directing the agent to load the sprint-execution skill for a sprint that does not exist is worse than saying nothing.
+- `cleargate-planning/.claude/hooks/token-ledger.sh` — logs a `WARNING:` line to the hook log when the sentinel names a plan-less sprint.
+- `cleargate-cli/src/dashboard/collect.ts` — imports the shared locator instead of its own copy.
 
-**Out of scope:** the dashboard, which `[[CR-097]]` already handles. Deleting this repo's SPRINT-99 state is an operational cleanup, not part of the fix.
+**Deliberately NOT changed: ledger routing.** §4 listed it, and the first cut rerouted stale-sentinel rows to `_off-sprint`. That was reverted. Rerouting relocates data without adding detection, it breaks attribution for any legitimately sparse checkout (four existing hook tests, whose fixtures model an active sprint without a full delivery tree), and it is a *fail* response to a condition whose severity was decided as *warn* in open question 1. With Gate 0 preventing phantoms at the source and the banner reporting stale sentinels every session, rerouting buys nothing.
+
+**Out of scope:** the dashboard, which `[[CR-097]]` already handles.
+
+**Operational cleanup, done separately:** this repo's `SPRINT-99` run directory and its `.active` sentinel were removed after the fix was verified against them (backed up first). `doctor --session-start` is now silent on the sentinel, as it should be.
 
 ## 5. Verification Protocol (The Failing Test)
 
-**Command:** `cd cleargate-cli && npm test`
+**Command:** `cd cleargate-cli && npm test` — **2307 pass / 0 fail / 1 skipped** (from 2283). `npm run typecheck` clean.
 
-A failing test that proves the bug: seed a project whose `.active` names a sprint with no plan file, run the `doctor --session-start` handler, and assert the banner mentions the stale sentinel. It fails today — the banner reports a healthy active sprint.
+New file `test/commands/sprint-sentinel-validation.node.test.ts`, 14 tests in three groups: the locator, the cure, the detector. The specific failing test §5 asked for — seed a project whose `.active` names a plan-less sprint, run `runSessionStart`, assert the banner names it — is `stale sentinel → banner names it and says the ledger is routing to it`.
 
-The fix is proven when that test passes and the existing session-start tests still do.
+**Verified against the live phantom before it was cleaned up**, which is stronger than the fixtures:
+
+```
+$ cleargate doctor --session-start
+⚠️  stale sprint sentinel: .cleargate/sprint-runs/.active names SPRINT-99, which has no
+   plan file under .cleargate/delivery/{pending-sync,archive}/.
+   Token-ledger rows are being routed to sprint-runs/SPRINT-99/. If SPRINT-99 is not a
+   real sprint, delete the sentinel.
+
+$ bash .claude/hooks/session-start.sh | tail -1
+⚠️  .cleargate/sprint-runs/.active names SPRINT-99, which has no plan file — sentinel is
+   stale. Not loading sprint-execution.
+
+$ cleargate sprint init SPRINT-99 --stories STORY-99-01
+[cleargate sprint init] no plan file for SPRINT-99 found under .cleargate/delivery/{pending-sync,archive}/
+  Refusing to initialise run state for a sprint that does not exist — this is what produces a phantom sprint
+  and a stale .active sentinel. Write SPRINT-99_<Name>.md in pending-sync/ first, or pass --allow-drift.
+```
+
+The third block is the one that matters: the command that created SPRINT-99 can no longer create it.
+
+**Snapshot locks** follow the repo's copy-on-fix convention — `token-ledger.bug-036.sh` and `session-start.bug-036.sh` are the new byte-equality locks; `token-ledger.cr-097.sh` and `session-start.cr-008.sh` are demoted to existence-only historical baselines.
 
 ---
 
