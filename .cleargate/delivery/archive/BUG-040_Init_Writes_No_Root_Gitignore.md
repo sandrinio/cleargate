@@ -4,7 +4,7 @@ parent_ref: EPIC-021
 parent_cleargate_id: EPIC-021
 sprint_cleargate_id: null
 carry_over: false
-status: In Fix
+status: Completed
 severity: P1-High
 reporter: sandrinio
 approved: true
@@ -31,7 +31,7 @@ context_source: |
 created_at: 2026-08-02T00:00:00Z
 updated_at: 2026-08-02T00:00:00Z
 created_at_version: cleargate@0.21.0
-updated_at_version: cleargate@0.21.0
+updated_at_version: cleargate@0.22.0
 server_pushed_at_version: null
 cached_gate_result:
   pass: true

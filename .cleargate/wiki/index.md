@@ -31,7 +31,7 @@
 - Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
 - CRs: 93 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 29 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- Bugs: 30 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 
@@ -39,6 +39,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## Bugs
-
-| [[BUG-040]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-040_Init_Writes_No_Root_Gitignore.md |

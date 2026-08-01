@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-051_Enforcement_Integrity_Restoration.md"
-last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest: "2026-08-01T23:21:41.814Z"
 last_ingest_commit: "e5444d52a21b1661b98f32112a6b97573dde56b6"
 repo: "planning"
 ---

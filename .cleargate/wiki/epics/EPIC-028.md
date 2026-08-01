@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md"
-last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest: "2026-08-01T23:21:41.814Z"
 last_ingest_commit: "a743603981ddb8788e7bde8cc42dc1fe5ef1a8f4"
 repo: "planning"
 ---

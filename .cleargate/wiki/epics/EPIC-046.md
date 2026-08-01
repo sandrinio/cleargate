@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-046_Broker_Rendezvous_Data_Plane.md"
-last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest: "2026-08-01T23:21:41.814Z"
 last_ingest_commit: "a640863cd4532ce2a199d0bb477d74902e776586"
 repo: "planning"
 ---
