@@ -1,3 +1,15 @@
+# ⚠ THIS FILE DOES NOT SHIP. Do not edit it expecting a user to receive the change.
+#
+# npm-packlist strips any file named `.gitignore` from a published tarball,
+# unconditionally, so this file has never existed in a released artifact
+# (CR-090). CR-072 expanded it anyway and closed Completed; BUG-040 is that
+# discovery. `cleargate init` now GENERATES the root ignore instead — the
+# content a user actually receives lives in
+# `cleargate-cli/src/init/root-gitignore.ts`. Change it there.
+#
+# This copy is kept only as the meta-repo's own reference for the intended
+# full pattern set.
+
 # ── Secrets ─────────────────────────────────────────────────────────────────
 # Local environment files (API keys, tokens, credentials)
 # The allowlist lines below MUST come AFTER .env* so the negation overrides.

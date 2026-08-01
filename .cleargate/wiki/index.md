@@ -39,3 +39,6 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## Bugs
+
+| [[BUG-040]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-040_Init_Writes_No_Root_Gitignore.md |

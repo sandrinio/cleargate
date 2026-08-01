@@ -1110,3 +1110,8 @@
   action: "create"
   target: "SPRINT-38"
   path: ".cleargate/delivery/archive/SPRINT-38_Enforcement_Integrity_Restoration.md"
+- timestamp: "2026-08-01T22:50:47.175Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-040"
+  path: ".cleargate/delivery/pending-sync/BUG-040_Init_Writes_No_Root_Gitignore.md"
