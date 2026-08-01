@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest: "2026-08-01T22:23:04.405Z"
 last_ingest_commit: "db53f81843ad19394191eb9fe3a8628ddc7c3061"
 repo: "planning"
 ---

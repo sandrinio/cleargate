@@ -6,20 +6,14 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md"
-last_ingest: "2026-07-14T14:07:50.836Z"
-last_ingest_commit: ""
+last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 ---
 
 # CR-085-Drive-Execution-Loop-States-Live: CR-085-Drive-Execution-Loop-States-Live
 
 # CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
-
-## 0.5 Open Questions
-
-> Resolve every entry before flipping ambiguity to 🟢.
-
-- **Question:** Who drives the state f
 
 ## Blast radius
 Affects: None.

@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-048"
 parent: ""
 children: []
-status: "Draft"
+status: "In Review"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-048_Connector_Daemon.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
-last_ingest_commit: "69d4814e7370023ba8352eea1f7de913e3acd8d9"
+last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 ---
 

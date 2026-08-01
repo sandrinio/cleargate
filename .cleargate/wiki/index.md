@@ -9,10 +9,11 @@
 - [[EPIC-044]] (epic) — Draft
 - [[EPIC-046]] (epic) — Draft
 - [[EPIC-047]] (epic) — Draft
-- [[EPIC-048]] (epic) — Draft
+- [[EPIC-048]] (epic) — In Review
 - [[EPIC-050]] (epic) — Draft
 - [[SPRINT-18]] (sprint) — Approved
 - [[SPRINT-31]] (sprint) — Draft
+- [[SPRINT-37]] (sprint) — Draft
 - [[PROPOSAL-008]] (proposal) — Draft
 - [[PROPOSAL-009]] (proposal) — Draft
 - [[PROPOSAL-012]] (proposal) — Approved
@@ -20,22 +21,17 @@
 - [[PROPOSAL-029]] (proposal) — Ready
 - [[PROPOSAL-074]] (proposal) — Draft
 - [[INITIATIVE-001]] (initiative) — In Triage
-- [[CR-068]] (cr) — Approved
-- [[CR-069]] (cr) — Approved
-- [[CR-071]] (cr) — Approved
-- [[CR-072]] (cr) — Approved
-- [[CR-073]] (cr) — Approved
-- [[CR-074]] (cr) — Draft
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft
+- [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft
 - [[BUG-030]] (bug) — Triaged
 
 ## Archive
 
-- Epics: 29 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 31 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Epics: 30 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 72 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 25 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- CRs: 93 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 29 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 
@@ -43,34 +39,3 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
-## CRs
-
-| [[CR-074]] | cr | Approved | .cleargate/delivery/pending-sync/CR-074_Split_Execution_Mode_Topology_Axis.md |
-| [[CR-084-Sprint-Dashboard-In-CLI-Payload]] | cr | Draft | .cleargate/delivery/pending-sync/CR-084-Sprint-Dashboard-In-CLI-Payload.md |
-| [[CR-085-Drive-Execution-Loop-States-Live]] | cr | Draft | .cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md |
-| [[CR-086]] | cr | Approved | .cleargate/delivery/pending-sync/CR-086_File_Surface_Gate_End_To_End.md |
-| [[CR-087]] | cr | Approved | .cleargate/delivery/pending-sync/CR-087_Downstream_Safe_Pre_Commit_Chain.md |
-| [[CR-088]] | cr | Completed | .cleargate/delivery/pending-sync/CR-088_Upgrade_Pin_And_Prune.md |
-| [[CR-089]] | cr | Completed | .cleargate/delivery/pending-sync/CR-089_Payload_Telemetry_Hygiene.md |
-| [[CR-090]] | cr | Completed | .cleargate/delivery/pending-sync/CR-090_Delivery_Hygiene_And_SDR_Wiring.md |
-| [[CR-091]] | cr | Completed | .cleargate/delivery/pending-sync/CR-091_Unbundle_TypeScript_Compiler.md |
-| [[CR-092]] | cr | Completed | .cleargate/delivery/pending-sync/CR-092_Project_Root_And_Scaffold_Hygiene.md |
-| [[CR-093]] | cr | In Review | .cleargate/delivery/pending-sync/CR-093_File_Argument_Owns_Project_Root.md |
-| [[CR-094]] | cr | Approved | .cleargate/delivery/pending-sync/CR-094_Ambiguity_Status_Is_First_Glyph.md |
-| [[CR-095]] | cr | In Review | .cleargate/delivery/pending-sync/CR-095_Parent_Approved_Waiver_Soundness_And_Remedy.md |
-| [[CR-096]] | cr | Approved | .cleargate/delivery/pending-sync/CR-096_Scaffold_Version_Tracking_And_Orientation_Doc.md |
-| [[CR-097]] | cr | Approved | .cleargate/delivery/pending-sync/CR-097_Dashboard_Truthfulness_And_Single_Tab.md |
-| [[CR-098]] | cr | Completed | .cleargate/delivery/pending-sync/CR-098_Context_Source_Double_Duty.md |
-| [[CR-099]] | cr | Draft | .cleargate/delivery/pending-sync/CR-099_Dogfood_Split_Integrity.md |
-## Epics
-
-| [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
-## Sprints
-
-| [[SPRINT-38]] | sprint | Active | .cleargate/sprint-runs/SPRINT-38/SPRINT-38_REPORT.md |
-## Bugs
-
-| [[BUG-036]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-036_Active_Sentinel_Trusted_Without_Validation.md |
-| [[BUG-037]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-037_Upgrade_Blanks_Detected_Gate_Commands.md |
-| [[BUG-038]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-038_Pre_Edit_Gate_Ships_Unsubstituted_Pin.md |
-| [[BUG-039]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-039_State_Update_Never_Resolves_State_File.md |

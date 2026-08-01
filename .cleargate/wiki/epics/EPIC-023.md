@@ -9,9 +9,9 @@ children:
   - "[[STORY-023-04]]"
 status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-023_MCP_Native_Source_Of_Truth.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
-last_ingest_commit: "8fe03601d8cb5bfbbfd4610e266aed070a75ed6b"
+raw_path: ".cleargate/delivery/archive/EPIC-023_MCP_Native_Source_Of_Truth.md"
+last_ingest: "2026-08-01T22:23:04.405Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 

@@ -4,14 +4,14 @@ parent_ref: EPIC-021
 parent_cleargate_id: "EPIC-021"
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 approved_at: 2026-05-19T00:00:00Z
 approved_by: sandrinio
 created_at: 2026-05-18T00:00:00Z
-updated_at: 2026-05-18T00:00:00Z
+updated_at: 2026-08-02T00:00:00Z
 created_at_version: cleargate@0.13.0
-updated_at_version: cleargate@0.13.0
+updated_at_version: cleargate@0.20.0
 server_pushed_at_version: null
 area: cli/init
 cached_gate_result:

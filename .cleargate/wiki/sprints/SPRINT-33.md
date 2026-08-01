@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest: "2026-08-01T22:23:04.405Z"
 last_ingest_commit: "6e23e2f35012c083f40fa1e641c3590d25abffec"
 repo: "planning"
 ---

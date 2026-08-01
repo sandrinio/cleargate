@@ -6,7 +6,7 @@ children: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest: "2026-08-01T22:23:04.405Z"
 last_ingest_commit: "39f8f74ac7c91dafd7f370dd4b61ef5d2bf0361f"
 repo: "planning"
 ---

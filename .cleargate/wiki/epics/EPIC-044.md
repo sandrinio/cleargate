@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md"
-last_ingest: "2026-06-05T17:46:40.242Z"
+last_ingest: "2026-08-01T22:23:04.405Z"
 last_ingest_commit: "67a785d3d14637f0f7c2192b5ae948aa1bbee1b5"
 repo: "planning"
 ---

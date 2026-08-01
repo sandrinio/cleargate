@@ -54,7 +54,7 @@
 
 - [[SPRINT-37]] — status: Draft
 
-- [[SPRINT-38]] — status: Active
+- [[SPRINT-38]] — status: Completed
 
 
 
