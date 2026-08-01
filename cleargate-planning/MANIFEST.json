@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.20.0",
-  "generated_at": "2026-07-28T14:22:26.411Z",
+  "generated_at": "2026-08-01T08:05:18.129Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -130,7 +130,7 @@
     },
     {
       "path": ".claude/hooks/stamp-and-gate.sh",
-      "sha256": "2c654dc3a6707d394f782f68d7318410d4acbbcb70c0a9d0d674d966241fc310",
+      "sha256": "63f9213137a51282c2c88bf3959ab5c44db0a588bfad99bc02766da4d42f2b87",
       "tier": "hook",
       "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false

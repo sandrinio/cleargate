@@ -20,6 +20,11 @@ fi
 FILE=$(jq -r '.tool_input.file_path' 2>/dev/null || echo "")
 [ -z "$FILE" ] && exit 0
 case "$FILE" in *.cleargate/delivery/*) : ;; *) exit 0 ;; esac
+# CR-093: the delivery tree also carries non-work-item artifacts — SPRINT-NN_waves.json
+# and whatever sidecars an agent drops beside an item. stamp/gate/ingest all parse
+# frontmatter, so each rewrite of waves.json logged a spurious
+# "unable to detect work-item type from frontmatter" and a gate exit 1.
+case "$FILE" in *.md) : ;; *) exit 0 ;; esac
 TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Ordered chain — stamp MUST precede gate (gate may read draft_tokens)
 "${CG[@]}" stamp-tokens "$FILE" >>"$LOG" 2>&1
@@ -37,7 +42,19 @@ if [ "$SR2" -ne 0 ]; then
   grep '^❌' "$GATE_OUT" 2>/dev/null | sed -E "s/^❌ /⚠️ gate failed: ${WORK_ITEM_ID} — /"
 fi
 rm -f "$GATE_OUT"
-"${CG[@]}" wiki ingest "$FILE" >>"$LOG" 2>&1
+# CR-093: capture ingest output rather than sending it straight to the log.
+# A rejected ingest reached the log and nowhere else: this hook always exits 0
+# (severity enforcement is at wiki lint), so there was no failing command and no
+# message anywhere the agent could see it. An entire sprint's work items — plan,
+# stories, bugs, CR — silently never reached the wiki. Re-emit to hook stdout,
+# the same channel the gate ⚠️ path above uses.
+INGEST_OUT=$(mktemp)
+"${CG[@]}" wiki ingest "$FILE" >"$INGEST_OUT" 2>&1
 SR3=$?
+cat "$INGEST_OUT" >>"$LOG"
+if [ "$SR3" -ne 0 ]; then
+  grep -v '^[[:space:]]*$' "$INGEST_OUT" 2>/dev/null | sed 's/^/⚠️ wiki ingest failed: /'
+fi
+rm -f "$INGEST_OUT"
 echo "[$TS] stamp=$SR1 gate=$SR2 ingest=$SR3 file=$FILE" >>"$LOG"
 exit 0   # ALWAYS 0 — severity enforcement is at wiki lint, not hook

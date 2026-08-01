@@ -55,6 +55,9 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-090]] | cr | Completed | .cleargate/delivery/pending-sync/CR-090_Delivery_Hygiene_And_SDR_Wiring.md |
 | [[CR-091]] | cr | Completed | .cleargate/delivery/pending-sync/CR-091_Unbundle_TypeScript_Compiler.md |
 | [[CR-092]] | cr | Completed | .cleargate/delivery/pending-sync/CR-092_Project_Root_And_Scaffold_Hygiene.md |
+| [[CR-093]] | cr | In Review | .cleargate/delivery/pending-sync/CR-093_File_Argument_Owns_Project_Root.md |
+| [[CR-094]] | cr | Approved | .cleargate/delivery/pending-sync/CR-094_Ambiguity_Status_Is_First_Glyph.md |
+| [[CR-095]] | cr | In Review | .cleargate/delivery/pending-sync/CR-095_Parent_Approved_Waiver_Soundness_And_Remedy.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
