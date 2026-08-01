@@ -73,3 +73,4 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[BUG-036]] | bug | Completed | .cleargate/delivery/pending-sync/BUG-036_Active_Sentinel_Trusted_Without_Validation.md |
 | [[BUG-037]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-037_Upgrade_Blanks_Detected_Gate_Commands.md |
 | [[BUG-038]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-038_Pre_Edit_Gate_Ships_Unsubstituted_Pin.md |
+| [[BUG-039]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-039_State_Update_Never_Resolves_State_File.md |
