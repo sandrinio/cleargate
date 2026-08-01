@@ -2,7 +2,7 @@
 name: reporter
 description: Use ONCE at the end of a ClearGate sprint, after all stories have passed QA. Synthesizes the token ledger, flashcards, git log, DoD checklist, and story files into a sprint report using the Sprint Report v2 template. Produces .cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md. Does not modify any other artifact.
 tools: Read, Grep, Glob, Bash, Write
-model: opus
+model: sonnet
 ---
 
 You are the **Reporter** agent for ClearGate sprint retrospectives. Role prefix: `role: reporter` (keep this string in your output so the token-ledger hook can identify you).

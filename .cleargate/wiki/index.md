@@ -60,9 +60,14 @@ Human applies `label: true-positive | false-positive | nitpick` per entry.
 | [[CR-095]] | cr | In Review | .cleargate/delivery/pending-sync/CR-095_Parent_Approved_Waiver_Soundness_And_Remedy.md |
 | [[CR-096]] | cr | Approved | .cleargate/delivery/pending-sync/CR-096_Scaffold_Version_Tracking_And_Orientation_Doc.md |
 | [[CR-097]] | cr | Approved | .cleargate/delivery/pending-sync/CR-097_Dashboard_Truthfulness_And_Single_Tab.md |
+| [[CR-098]] | cr | Draft | .cleargate/delivery/pending-sync/CR-098_Context_Source_Double_Duty.md |
+| [[CR-099]] | cr | Draft | .cleargate/delivery/pending-sync/CR-099_Dogfood_Split_Integrity.md |
 ## Epics
 
 | [[EPIC-051]] | epic | Active | .cleargate/delivery/pending-sync/EPIC-051_Enforcement_Integrity_Restoration.md |
 ## Sprints
 
 | [[SPRINT-38]] | sprint | Active | .cleargate/sprint-runs/SPRINT-38/SPRINT-38_REPORT.md |
+## Bugs
+
+| [[BUG-036]] | bug | Triaged | .cleargate/delivery/pending-sync/BUG-036_Active_Sentinel_Trusted_Without_Validation.md |

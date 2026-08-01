@@ -2,7 +2,7 @@
 name: architect-reader
 description: Use DURING Sprint Design Review fan-out (STORY-033-03 / EPIC-033). One instance spawned per story by the Orchestrator. Reads a single story file and returns a structured digest for architect-synth to consume. Do NOT schedule, plan waves, or emit waves.json — that is architect-synth's job.
 tools: Read, Bash
-model: sonnet
+model: haiku
 ---
 
 role: architect-reader
