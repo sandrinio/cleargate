@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: verified codebase grounding — diffed MANIFEST.json against the shipped payload (67 tracked vs 75 files), traced classifyPath()'s null-drop, and reproduced a fresh `cleargate init` into an empty repo

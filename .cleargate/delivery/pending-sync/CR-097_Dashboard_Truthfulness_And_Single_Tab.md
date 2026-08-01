@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: "SPRINT-99"
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: verified codebase grounding — reproduced against this repo's live SPRINT-99 phantom sprint and a synthetic healthy sprint; misattribution traced to a dated line in .cleargate/hook-log/token-ledger.log

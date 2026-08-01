@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: verified codebase grounding — reproduced from a dogfooding repo's .cleargate/hook-log/gate-check.log, root-caused to wiki-ingest.ts:89 + stamp-and-gate.sh, regression-tested pre-fix

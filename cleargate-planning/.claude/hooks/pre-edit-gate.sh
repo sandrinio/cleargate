@@ -100,8 +100,14 @@ else
   HOOK_PIN=""
   HOOK_SH="${REPO_ROOT}/.claude/hooks/stamp-and-gate.sh"
   if [ -f "${HOOK_SH}" ]; then
-    HOOK_PIN=$(grep -oP '(?<=# cleargate-pin: )[\S]+' "${HOOK_SH}" 2>/dev/null || \
-               grep -oE 'cleargate@[^"]+' "${HOOK_SH}" 2>/dev/null | head -1 | sed 's/.*@//' || true)
+    # BUG-038: this was a PCRE lookbehind, which BSD/macOS grep rejects outright
+    # ("invalid option -- P"), so the primary parse never ran on macOS and the
+    # result depended entirely on the fallback below. `sed -n …p` is portable
+    # across GNU and BSD.
+    HOOK_PIN=$(sed -n 's/^# cleargate-pin: *//p' "${HOOK_SH}" 2>/dev/null | head -1)
+    if [ -z "${HOOK_PIN}" ]; then
+      HOOK_PIN=$(grep -oE 'cleargate@[^"]+' "${HOOK_SH}" 2>/dev/null | head -1 | sed 's/.*@//')
+    fi
   fi
   if [ -z "${HOOK_PIN}" ]; then
     HOOK_PIN="__CLEARGATE_VERSION__"
@@ -129,10 +135,14 @@ DOCTOR_EXIT=$?
 DOCTOR_OUT=$(cat "${_DOCTOR_TMPFILE}")
 rm -f "${_DOCTOR_TMPFILE}"
 
-# Parse reason from doctor output
-REASON=$(printf '%s' "${DOCTOR_OUT}" | grep -oP '(?<=blocked: )\S+' 2>/dev/null || \
-         printf '%s' "${DOCTOR_OUT}" | sed -n 's/blocked: //p' 2>/dev/null || \
-         echo "unknown")
+# Parse reason from doctor output.
+#
+# BUG-038: this was a PCRE lookbehind via `grep -oP`, which BSD/macOS grep does
+# not support — it exits "invalid option -- P", so on macOS the primary parse has
+# never run and REASON has always come from the sed fallback. Since the fallback
+# is portable and produces the same value, lead with it and drop the PCRE branch.
+REASON=$(printf '%s' "${DOCTOR_OUT}" | sed -n 's/.*blocked: \([^ ]*\).*/\1/p' | head -1)
+[ -z "${REASON}" ] && REASON="unknown"
 
 # Count approved stories in pending-sync (for log entry)
 PENDING_DIR="${REPO_ROOT}/.cleargate/delivery/pending-sync"

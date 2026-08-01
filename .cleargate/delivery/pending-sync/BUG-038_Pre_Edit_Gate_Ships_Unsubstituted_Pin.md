@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
-status: Triaged
+status: Completed
 severity: P3-Low
 reporter: sandrinio
 approved: true
@@ -88,10 +88,12 @@ fi
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
-**Modify:**
-- `cleargate-planning/MANIFEST.json` — set `.claude/hooks/pre-edit-gate.sh` to `overwrite_policy: "pin-aware"`, which is the authoritative marker.
-- `cleargate-cli/src/init/copy-payload.ts` — add it to `HOOK_FILES_WITH_PIN`. Better: derive that set from the manifest so the two cannot diverge again, which is the actual root cause here.
-- `cleargate-planning/.claude/hooks/pre-edit-gate.sh:103` — replace `grep -oP` with a portable form (`sed -n 's/^# cleargate-pin: //p'`).
+**Modified:**
+- `cleargate-cli/scripts/build-manifest.ts` — `.claude/hooks/pre-edit-gate.sh` added to the pin-aware rules; `MANIFEST.json` regenerated. `upgrade` now substitutes it.
+- `cleargate-cli/src/init/copy-payload.ts` — **`HOOK_FILES_WITH_PIN` deleted entirely.** Rather than adding a third entry to a list that had already fallen out of sync once, init now substitutes wherever the placeholder appears: `if (opts.pinVersion && srcContent.includes(PIN_PLACEHOLDER))`. The placeholder is a deliberate sentinel, so any payload file carrying it wants substitution by definition, and no list can drift. `Buffer.includes` is checked before decoding, so binary payload files are never round-tripped through utf8.
+- `cleargate-planning/.claude/hooks/pre-edit-gate.sh` — **both** PCRE parses replaced with portable `sed`.
+
+**A second `grep -oP` was found by the regression test, not by reading.** The original filing named line 103. Line 139 had the same defect, parsing `blocked: <reason>` out of doctor output — also PCRE, also never executed on macOS. The test swept every payload hook; those two were the only occurrences.
 
 **Out of scope:** the resolver's three-branch structure, which is correct and shared by every hook.
 
@@ -99,9 +101,11 @@ fi
 
 **Command:** `cd cleargate-cli && npm test`
 
-A failing test: run the init pipeline into a temp dir with a pin, then assert `grep -r "__CLEARGATE_VERSION__" .claude/` returns nothing. It fails today on `pre-edit-gate.sh`. Repeat the assertion after the upgrade handler runs, which fails for the separate manifest reason.
+New file `test/docs/pin-placeholder-coverage.node.test.ts`, 4 tests — the stronger guard, as suggested. It reads the **canonical payload** and asserts every file containing `PIN_PLACEHOLDER` is `pin-aware` in `MANIFEST.json`, so it fails when someone adds the placeholder to a new hook rather than after that hook ships broken. Plus: init keeps no allowlist, and no payload hook invokes `grep -oP` (comment lines stripped first, since the fix documents why it was wrong).
 
-A stronger regression guard, given the root cause is two lists disagreeing: assert that every payload file containing `PIN_PLACEHOLDER` is marked `pin-aware` in `MANIFEST.json`. That fails today and would have caught this when the file was written.
+Suite: **2328 pass / 0 fail / 1 skipped**, typecheck clean.
+
+The snapshot lock `pre-edit-gate.bug-038.sh` shows the fix in the artifact: line 107 renders as `HOOK_PIN="0.5.0"` where the `cr-008` lock had the literal placeholder.
 
 ---
 

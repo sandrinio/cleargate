@@ -2,9 +2,9 @@
 bug_id: BUG-039
 parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-01
 carry_over: false
-status: Triaged
+status: Completed
 severity: P1-High
 reporter: sandrinio
 approved: true
@@ -34,7 +34,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-08-01T20:15:41Z
+  last_stamp: 2026-08-01T21:50:39Z
   sessions: []
 ---
 
@@ -96,10 +96,11 @@ Because agents in a running sprint export the variable, this defect is invisible
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
-**Investigate / Modify:**
-- `cleargate-cli/src/commands/state.ts` (or wherever `state update` is wired in `cli.ts`) — resolve the state file before spawning: honour `--sprint`, else `resolveActiveSprint(cwd)`, then pass `CLEARGATE_STATE_FILE` in the child env. Respect an already-set env var so the agent path is unchanged.
-- `cleargate-cli/src/cli.ts` — the `--sprint` option is currently accepted and dropped.
-- `cleargate-planning/.cleargate/scripts/update_state.mjs:71` — keep the throw as a backstop, but the CLI should never reach it.
+**Modified:**
+- `cleargate-cli/src/commands/state.ts` — added `resolveStateFileEnv()`, called by `stateUpdateHandler` before spawning. Order: an already-set `CLEARGATE_STATE_FILE` wins (agent path, untouched), else `--sprint`, else `resolveActiveSprint(cwd)`. Resolves to `<cwd>/.cleargate/sprint-runs/<id>/state.json` and passes it in the child env. A stale sentinel warns and proceeds, per [[BUG-036]]'s severity call.
+- `cleargate-planning/.cleargate/scripts/update_state.mjs:71` — untouched. The throw stays as a backstop; the CLI no longer reaches it.
+
+**Correction to this section as originally filed.** It said `cli.ts` "accepts and drops" `--sprint`. That was wrong: `cli.ts` maps `--sprint` to `cliOpts.sprintId` correctly, and always did. The handler was the one ignoring it — it never read `cli.sprintId` at all. No change to `cli.ts` was needed.
 
 **Checked, and NOT affected:** `cleargate state validate <sprint-id>` shells out to `validate_state.mjs`, which reads the same env var — but it works, because the sprint id is a positional argument and the wrapper resolves the path from it:
 

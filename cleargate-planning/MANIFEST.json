@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.20.0",
-  "generated_at": "2026-08-01T19:50:10.105Z",
+  "generated_at": "2026-08-01T21:50:08.121Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -102,9 +102,9 @@
     },
     {
       "path": ".claude/hooks/pre-edit-gate.sh",
-      "sha256": "a9fae2eae43cf493a5bf79e9d15b909a27750515817a2ed0b45d77892b49ab2c",
+      "sha256": "e48564fedcf617601b404288350a286db4e25cf704e308e9ed0d88ae95b462e6",
       "tier": "hook",
-      "overwrite_policy": "always",
+      "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
     },
     {

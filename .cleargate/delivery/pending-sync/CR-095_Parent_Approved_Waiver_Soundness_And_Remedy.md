@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: verified codebase grounding — reproduced against EPIC-027/030/046/047 in this repo plus a synthetic empty-waiver probe; root-caused to readiness-predicates.ts evalFrontmatter and gate.ts OR-group assembly

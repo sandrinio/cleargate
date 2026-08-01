@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: verified codebase grounding — defect reported from a live drafting session (token-ledger CR blocked by a false 🟢 read), reproduced against readiness-predicates.ts:987 pre-fix

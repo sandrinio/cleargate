@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
-status: Triaged
+status: Completed
 severity: P1-High
 reporter: sandrinio
 approved: true
@@ -117,11 +117,13 @@ Consequence: every fresh install reports one permanently `user-modified` file, v
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
-**Investigate / Modify:**
-- `cleargate-planning/MANIFEST.json` — the `overwrite_policy` for `.cleargate/scripts/gate-checks.json`. `merge-3way` or a new `regenerate` policy fits a file the installer writes.
-- `cleargate-cli/src/init/detect-test-stack.ts` — the rewrite. Whatever policy is chosen, the manifest sha must be recorded **after** this runs, not before.
-- `cleargate-cli/src/commands/upgrade.ts` — either preserve the three command fields across an overwrite, or re-run detection after the payload lands.
-- `cleargate-cli/src/init/copy-payload.ts` — where the install snapshot is written relative to post-copy processing.
+**Modified:**
+- `cleargate-cli/src/commands/upgrade.ts` — after the file pass and snapshot re-stamp, re-run `detectTestStack` + `applyTestStack`. Skipped on `--dry-run`; wrapped so a detection failure warns rather than failing an upgrade whose scaffold is already written.
+- `cleargate-cli/src/commands/init.ts` — the install snapshot re-hashes `POST_PROCESSED_FILES` (currently just `gate-checks.json`) from disk with `hashNormalized`, instead of copying the payload sha verbatim.
+
+**Policy left as `always`, deliberately.** `merge-3way` would prompt on a machine-generated file; `preserve` would freeze it and silently miss upstream schema additions. Re-running detection after the overwrite keeps both properties — upstream's schema lands, then the repo's own commands are written back over it. The regression test asserts exactly that: a new upstream key survives *and* `qa.test` is restored.
+
+**Pin-aware hooks deliberately excluded from the re-hash.** [[BUG-023]] established that their snapshot sha stays the *payload* sha and `computeCurrentSha` reverse-substitutes `pin_version` before comparing. Re-hashing those would break that contract.
 
 **Out of scope:** the `prune` and pin-substitution paths, which `[[CR-088]]` fixed and which were verified working in the same run (`0.19.0` → `0.20.0` re-pinned both pin-aware hooks correctly and pruned 9 retired files).
 
@@ -129,11 +131,11 @@ Consequence: every fresh install reports one permanently `user-modified` file, v
 
 **Command:** `cd cleargate-cli && npm test`
 
-A failing test that proves the bug: seed a temp repo with a detectable test stack, run the init pipeline, assert `qa.test` is non-empty, run the upgrade handler against a newer payload, and assert `qa.test` is **still** non-empty. It fails today at the second assertion.
+New file `test/commands/upgrade-preserves-gate-commands.node.test.ts`, 4 tests. Suite: **2328 pass / 0 fail / 1 skipped**, typecheck clean.
 
-A second test should assert that a freshly-initialised repo has zero `user-modified` files — i.e. every on-disk sha matches the install manifest.
+The central test seeds a detectable stack, applies detection, performs the payload overwrite (reproducing the defect — it asserts `qa.test` really does go blank at that point), then re-runs detection and asserts both that the command is restored *and* that an added upstream key survived.
 
-`test/commands/upgrade-pin-and-prune.node.test.ts` is the natural home; it already drives the upgrade handler against a synthetic payload.
+**Verified end-to-end against a clean install** — see the E2E section below.
 
 ---
 
