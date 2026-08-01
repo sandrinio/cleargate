@@ -18,8 +18,8 @@ cached_gate_result:
   pass: false
   failing_criteria:
     - id: parent-approved
-      detail: "OR-group failed — all alternatives failed: parent-approved-proposal: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter; parent-approved-initiative: context_source is prose but no proposal_gate_waiver (approved_by + approved_at) found in frontmatter"
-  last_gate_check: 2026-06-04T09:07:03Z
+      detail: "OR-group failed — all alternatives failed: parent-approved-proposal / parent-approved-initiative: context_source is prose, not a path, and no proposal_gate_waiver is recorded. Either point context_source at the parent document as a relative path (e.g. \"INITIATIVE-002_Name.md\" — resolved against this file, then the delivery tree), or record the waiver as proposal_gate_waiver with approved_by + approved_at, or set top-level approved_by + approved_at"
+  last_gate_check: 2026-08-01T07:59:32Z
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
