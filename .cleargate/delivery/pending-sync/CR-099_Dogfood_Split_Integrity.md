@@ -65,6 +65,18 @@ draft_tokens:
 
 A second, quieter consequence: because that one file is tracked, every developer's local edits to it appear as repo changes, and a `cleargate init` re-sync silently rewrites a tracked file.
 
+**Measured drift in this repo (2026-08-01).** Comparing all 11 live agents against canonical, four are stale — and canonical is newer in every case, so the live instance is running outdated instructions:
+
+| Agent | Differing lines | What live is missing |
+|---|---|---|
+| `qa` | 22 | Test-file naming still hardcoded to `*.red.node.test.ts`; canonical reads it from `sprint_context.md` §Test Stack. Also missing the TPV wiring-soundness rules. |
+| `devops` | 6 | Stale `v2 standard lane` vocabulary that canonical has already dropped. |
+| `cleargate-wiki-ingest` | 3 | The entire §21.2 bucket-allowlist behaviour, and the `INITIATIVE-` bucket row. |
+| `cleargate-wiki-lint` | 2 | Frontmatter description quoting only — cosmetic. |
+
+The `qa` and `cleargate-wiki-ingest` gaps are behavioural, not cosmetic: a sprint run today would use the stale test-naming rule and would ingest buckets the config excludes. Nothing surfaces this — there is no drift check for the live instance, which is the general form of the problem this CR describes. `cleargate doctor` has a drift guard for *installed* files, but the meta-repo's live `/.claude/` is not an install.
+
+
 ## 2. Blast Radius & Invalidation
 
 - [ ] Invalidate/Update CR: none. This is documentation and one `git rm --cached`.
