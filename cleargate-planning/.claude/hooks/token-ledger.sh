@@ -637,6 +637,29 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
     fi
   fi
 
+  # --- CR-101: refresh the dashboard snapshot -------------------------------
+  # A ledger row just landed, and token spend is one of the six stat tiles, so
+  # the artifact on disk is now behind. Re-render it.
+  #
+  # Three properties are load-bearing and all three are about never being the
+  # reason a subagent stop fails or slows down:
+  #   1. BACKGROUNDED (&) — this hook fires after every single agent completion;
+  #      a foreground CLI spawn would add its startup cost to each one.
+  #   2. FULLY REDIRECTED — an inherited stdout held open by a background child
+  #      can hang the hook runtime waiting on EOF.
+  #   3. `|| true` + `command -v` guard — no cleargate on PATH, or a render that
+  #      throws, must be a no-op and not a non-zero exit.
+  #
+  # Plain `sprint dashboard` (no flags) is the artifact path: it writes
+  # dashboard.html and opens nothing. A live daemon is unaffected — it serves
+  # collect() fresh per request and never reads this file.
+  # CLEARGATE_NO_DASHBOARD=1 suppresses it (the CLI honours the same token).
+  if [[ "${CLEARGATE_NO_DASHBOARD:-}" != "1" && "${CLEARGATE_NO_DASHBOARD:-}" != "true" ]]; then
+    if command -v cleargate >/dev/null 2>&1; then
+      ( cd "${REPO_ROOT}" && cleargate sprint dashboard >/dev/null 2>&1 & ) || true
+    fi
+  fi
+
   # --- delete processed sentinel ---
   if [[ -n "${PROCESSED_FILE}" && -f "${PROCESSED_FILE}" ]]; then
     rm -f "${PROCESSED_FILE}"

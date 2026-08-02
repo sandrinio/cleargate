@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.22.0",
-  "generated_at": "2026-08-01T23:21:02.938Z",
+  "cleargate_version": "0.23.0",
+  "generated_at": "2026-08-02T15:50:43.777Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -137,7 +137,7 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "b3427dad7028e70dac1597c129705a0deda1cc82b3658deea1d6aaf4413e7d4e",
+      "sha256": "da0680fe5dcf681f6e3491b366e4bf3232e7d37a43480e7ae870d5a6d553a2b9",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -158,14 +158,14 @@
     },
     {
       "path": ".claude/skills/sprint-dashboard/SKILL.md",
-      "sha256": "38a247191edbd5ba5937ed7a72c525c70e4b445519d3f1b7de2019d1c658a630",
+      "sha256": "9f2f7e54e7908018dfdb48448bbc477f199d84d1d324f3ac02e8b4548be4c50e",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "204ee095b3b00d89dca9c9f6b80bc6cb2c3da9d61d8af33295cb406d528743d7",
+      "sha256": "68291e39c22086b0b9a3663e21bdc33fec617d4dc7dde538d9b0cabe382db2fe",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

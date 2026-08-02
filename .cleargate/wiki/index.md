@@ -39,3 +39,7 @@ Advisory log of detected contradictions between wiki pages. Populated by ingest 
 
 See [contradictions.md](contradictions.md) for the append-only finding log.
 Human applies `label: true-positive | false-positive | nitpick` per entry.
+## CRs
+
+| [[CR-101]] | cr | Draft | .cleargate/delivery/pending-sync/CR-101_Dashboard_Auto_Update_Daemon.md |
+| [[CR-102]] | cr | Draft | .cleargate/delivery/pending-sync/CR-102_Dashboard_Editorial_Visual_System.md |

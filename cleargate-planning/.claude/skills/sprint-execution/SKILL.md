@@ -150,6 +150,8 @@ This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/spr
 
 `init_sprint.mjs` also writes `<sprintDir>/sprint-context.md` from `.cleargate/templates/sprint_context.md`, populated with `sprint_id` + goal (extracted from sprint plan §0 `- **Sprint Goal:** …` bullet, or placeholder if absent) + active CR list. Every Dev/QA/Architect/DevOps dispatch reads this file as preflight (see §B + §C contracts + agent prompts `## Preflight`).
 
+**Dashboard (CR-101) — nothing for you to do.** `sprint init` also starts the background sprint dashboard, which opens itself in the human's browser once it is listening and then tracks the sprint live: the page re-polls every ~2s, and the SubagentStop token-ledger hook re-renders the durable `dashboard.html` after every agent completes. Do **not** run `cleargate sprint dashboard --serve` from an orchestrator dispatch — it blocks the process until Ctrl-C. If a human asks to see progress, point them at the URL `sprint init` printed, or run `cleargate sprint dashboard --open` (non-blocking, exits 0). `cleargate sprint close` tears the daemon down; `--stop` is the manual off switch. Suppress it entirely with `CLEARGATE_NO_DASHBOARD=1` in headless/CI runs.
+
 ### A.4 Architect Sprint Design Review
 
 Mandatory before any story executes. **The SDR is what produces `waves.json`** — the wave plan §C.0 executes. Without it there is no wave composition and no parallelism.
