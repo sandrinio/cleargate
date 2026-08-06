@@ -45,6 +45,29 @@ function usage() {
  * Strategy: split on ^## headings, find the one starting with "1. Consolidated Deliverables".
  * This avoids regex lookahead pitfalls with end-of-string anchors in JS.
  */
+/**
+ * Sub-section headings inside §1 that describe work which is NOT in scope.
+ * A sprint plan that records what it deferred — and why — is doing the right
+ * thing; before this filter existed, every ID named in such a table was
+ * scanned as though it were selected, so documenting a deferral produced
+ * spurious "file not found" / "not ready" preflight failures for items that
+ * were deliberately archived, backlogged, or pushed to a later sprint.
+ */
+const EXCLUDED_SUBSECTION_RE =
+  /(not\s+selected|not\s+in\s+(this\s+)?(scope|sprint)|out\s+of\s+scope|moved\s+(to|out)|deferred|explicitly\s+not|considered\s+and\s+not|parking\s+lot)/i;
+
+/**
+ * Remove spans that name an ID without selecting it:
+ *   - `~~STORY-001-01~~`  strikethrough = withdrawn from scope by convention
+ *   - anything between <!-- cleargate:ignore-ids --> and its closing marker,
+ *     the explicit escape hatch for prose that must cite a deferred ID.
+ */
+function stripNonSelectingSpans(text) {
+  return text
+    .replace(/<!--\s*cleargate:ignore-ids\s*-->[\s\S]*?<!--\s*\/\s*cleargate:ignore-ids\s*-->/g, '')
+    .replace(/~~[\s\S]*?~~/g, '');
+}
+
 function extractDeliverablesSection(content) {
   // Split on lines that start a new ## section (lookahead keeps delimiter in next part)
   const parts = content.split(/^(?=## )/m);
@@ -52,8 +75,22 @@ function extractDeliverablesSection(content) {
     /^## 1\.? Consolidated Deliverables\b/m.test(p)
   );
   if (!deliverables) return null;
-  // Strip the header line itself, return the rest
-  return deliverables.replace(/^## [^\n]*\n/, '');
+  // Strip the header line itself, keep the rest
+  const body = deliverables.replace(/^## [^\n]*\n/, '');
+
+  // Drop ### sub-sections that describe explicitly NOT-selected work, then
+  // drop strikethrough / opted-out spans from what remains. Both steps only
+  // ever REMOVE text, so a plan using none of these conventions extracts
+  // exactly what it did before.
+  const kept = body
+    .split(/^(?=### )/m)
+    .filter((chunk) => {
+      const heading = (chunk.match(/^### [^\n]*/) || [''])[0];
+      return !EXCLUDED_SUBSECTION_RE.test(heading);
+    })
+    .join('');
+
+  return stripNonSelectingSpans(kept);
 }
 
 /**
