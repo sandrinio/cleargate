@@ -36,17 +36,27 @@ Now resolved incidentally: the global is a genuine registry install of `0.24.0` 
 
 *Candidate fix:* have `doctor` compare the running version against the registry and warn when it does not exist there.
 
-### 2. `assert_story_files.mjs` silently truncates date-style BUG IDs — MEDIUM
+### 2. Three ID parsers give three different wrong answers on date-form IDs — HIGH
 
-`.cleargate/scripts/assert_story_files.mjs:110`:
+*(Upgraded from MEDIUM after `new-app-28` reported a third instance. This is not a truncation bug in one script; it is three independent grammars that disagree.)*
 
-```js
-const re = /(STORY-\d+-\d+|(CR|BUG|EPIC|HOTFIX)-\d+|(PROPOSAL|PROP)-\d+)/g;
+Against `BUG-2026-08-24`:
+
+```
+lifecycle-reconcile.ts:120   -> NO MATCH        (item is invisible)
+active-criteria.ts:102       -> "BUG-2026-08"   (wrong id)
+assert_story_files.mjs:110   -> "BUG-2026"      (wrong id)
 ```
 
-Against `BUG-2026-08-24` this matches `BUG-2026` — a **silent wrong partial**, not a miss. The extractor then asserts a file exists for a work item ID that was never authored, while the real one goes unchecked. `new_app` carries a local fix for this that is not upstream; taking theirs on that file regresses them.
+All three agree on `BUG-007`. The reconciler's `\b` anchor combined with `\d{3}` means date-form ids do not truncate there — they vanish silently.
 
-The `STORY-\d+-\d+` alternative already models a two-segment ID, so the shape is expressible — `BUG` simply was not given one.
+**This silently disables the CR-103 drift feature shipped in 0.24.0.** `detectDriftIds()` calls `reconcileLifecycle()`, i.e. parser #1. Any repo using date-form work-item ids gets a guaranteed no-op: every such item is reported clean forever. That is worse than not shipping the feature, because the index now carries an implicit "checked, no drift" claim it never evaluated. `new_app` uses date-form ids throughout (`CR-2026-08-05-*`), so it is affected today.
+
+`new-app-28` independently found `CR-112` sitting in `archive/` marked `status: Draft` / `🟡 Pending Approval` despite `approved: true` and the work having shipped seven weeks earlier, and that stale frontmatter propagated a false claim into a downstream planning document. The reconciler that exists to catch exactly this cannot see a large class of that repo's items.
+
+*Candidate fix:* one shared ID grammar in a single module, all three call sites derived from it — the same shape as CR-103's page-builder unification. Patching the three regexes separately would leave the divergence intact.
+
+`new_app` also carries a local guard in `patch_dashboard.mjs` for the dashboard's version of this same bug, which is a fourth instance.
 
 ### 3. `pin-aware` overwrite policy destroys local hook edits with no prompt — MEDIUM
 
@@ -82,6 +92,33 @@ This makes "audit your local forks before taking theirs" misleading advice: it g
 
 Worse in `new_app` specifically, where `.claude/` is gitignored (`.gitignore:84`): the agent tier has **no git baseline at all**, so there is no recoverable "before" to diff or restore from. A pre-upgrade tarball is the only witness. Same shape as defect 3 (`pin-aware`), and the same fix applies — warn when an unconditional overwrite is about to replace a file that differs from the payload.
 
+### 7. `collision_surface.sh` cannot parse bullet-list file surfaces — MEDIUM
+
+The shipped parser is table-only — `collision_surface.sh:38`, `# ---- Parse §3.1 file surface table (multi-column fix)`. A story whose §3.1 declares its file surface as a bullet list yields zero parseable paths, which the BUG-033 fail-safe contract then treats as "no surface."
+
+`new_app` carries two local fixes (`1e04861d` blind to this sprint's item formats, `00992f44` parse bullet-list file surfaces, not tables only). Neither is upstream, and the file is `overwrite_policy: always`, so every upgrade reverts them with no prompt. Recoverable there only because `.cleargate/scripts/` is git-tracked in that repo.
+
+Requested the diffs for upstreaming.
+
+---
+
+## Product problem: work items filed against ClearGate are stranded by pre-member state
+
+`new_app` holds **eight** work items authored against this package, unpushed since 2026-08-05 because that repo is pre-member and `push` exits 2:
+
+- `CR-2026-08-05-status-reconcile-from-git` — ~166 lines, and by description already a spec for the `doctor` drift check proposed under defect 5
+- `CR-2026-08-05-wiki-ingests-story-digests`
+- `CR-2026-08-05-requirement-level-grounding-contract` — overlaps EPIC-052
+- `CR-2026-08-05-cleargate-research-command`
+- `BUG-2026-08-05-wiki-pages-assert-uncomputed-defaults` — likely the same defect CR-103 just fixed
+- `BUG-2026-08-06-lifecycle-reconciler-path-construction`
+- `CR-2026-08-01-preflight-stale-gate-deadlock`
+- `CR-2026-08-01-dashboard-blind-to-date-form-ids` — defect 2, filed three weeks before this session rediscovered it
+
+The repos best positioned to find ClearGate defects are precisely the ones running it as a consumer, and those are exactly the repos where `push` is unreachable. Bug reports accumulate invisibly. Two of these describe defects this session spent effort rediscovering from scratch.
+
+*Not read.* `new_app` is outside this session's working directories; relay or explicit permission requested rather than reaching in.
+
 ---
 
 ## Cross-repo hazards (not defects)
@@ -114,5 +151,7 @@ Also corrected: `cleargate upgrade` **does** bump the hook pins (CR-088, shipped
 - [ ] Confirm with the user whether a second upgrade was ever actually started — only `doc-processor-8a` remains unaccounted for, and `doc_processor` is off-limits.
 - [ ] `new_app`: commit or deliberately discard the stale manifest diff BEFORE upgrading. Do not tidy the tree first.
 - [ ] Collect `doc-processor-5b`'s two CLI defects, one a hard blocker, at its sprint close.
-- [ ] Decide whether defects 1–3 become formal BUGs.
+- [ ] Decide whether defects 1–7 become formal BUGs. Defect 2 is the priority — it disables a feature shipped today.
+- [ ] Retrieve the eight stranded work items from `new_app` (relay or permission).
+- [ ] Get the two `collision_surface.sh` fixes from `new_app` for upstreaming.
 - [ ] Decide whether `ships_migration` is upstreamed as a CR against `templates/story.md`.
