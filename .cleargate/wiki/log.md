@@ -1160,3 +1160,8 @@
   action: "create"
   target: "BUG-041"
   path: ".cleargate/delivery/pending-sync/BUG-041_Work_Item_Id_Grammar_Divergence.md"
+- timestamp: "2026-08-24T14:31:48.568Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "BUG-041"
+  path: ".cleargate/delivery/pending-sync/BUG-041_Work_Item_Id_Grammar_Divergence.md"

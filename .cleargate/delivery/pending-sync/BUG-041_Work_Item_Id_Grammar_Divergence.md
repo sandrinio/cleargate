@@ -4,10 +4,10 @@ parent_ref: null
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 severity: P1-High
 reporter: cross-session canvass (new-app-28, new-app-68) + meta-repo verification
-approved: false
+approved: true
 area: cli
 context_source: |
   Surfaced 2026-08-24 during the 0.24.0 upgrade rollout canvass. `new-app-28` reported a
@@ -207,7 +207,7 @@ cd cleargate-cli && npm run typecheck && npm test
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -216,6 +216,6 @@ Requirements to pass to Green:
 - [x] Expected-vs-actual is stated with evidence read from source.
 - [x] Execution Sandbox names exact file paths.
 - [x] A failing test is specified before the fix.
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter. Approved by the human 2026-08-24; shipped in cleargate 0.24.1.
 - [x] The canonical ID grammar is agreed. Settled empirically over 1,464 items: trailing slug mandatory on date-form, `-` separated, four types; ten prefixes total; four shapes including non-numeric. See §3.
 - [x] Sub-lettered ids need no policy ruling. All 11 known instances are `Done` in `archive/` from pre-adoption sprints; the rubric already forbids the shape and has held since SPRINT-39. The parser rejects it at authoring time and resolves historical ids to themselves for archive reads.

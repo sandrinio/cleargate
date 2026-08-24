@@ -107,16 +107,40 @@ function extractDeliverablesSection(content) {
  *
  * STORY before CR/BUG/EPIC/HOTFIX, PROPOSAL before PROP — BUG-010 longest-first rule.
  */
+// BUG-041: one grammar. Kept byte-compatible with the canonical TypeScript source at
+// cleargate-cli/src/lib/work-item-id.ts — this script is a standalone .mjs in the payload
+// and cannot import it, so the two are duplicated ON PURPOSE and must be changed together.
+// The shared test corpus in cleargate-cli/test/lib/work-item-id.node.test.ts is what keeps
+// them honest; a divergence here is exactly the class of bug BUG-041 exists to end.
+const TYPE_PREFIXES = [
+  'INITIATIVE', 'PROPOSAL', 'PLATFORM', 'HOTFIX', 'SPRINT',
+  'STORY', 'AUDIT', 'SPIKE', 'EPIC', 'PROP', 'BUG', 'CR',
+];
+const PREFIX_ALT = TYPE_PREFIXES.join('|');
+// Longest-alternative-first. date-form before numeric-multi or BUG-2026-08-24 degrades to
+// BUG-2026-08; sub-lettered before numeric-multi or STORY-047-02a..02f alias onto one id.
+const BODY_ALT = [
+  String.raw`\d{4}-\d{2}-\d{2}(?:-[A-Za-z0-9]+)*`,
+  String.raw`\d+-\d+[a-z]`,
+  String.raw`\d+-\d+`,
+  String.raw`\d+`,
+  String.raw`[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+){1,}`,
+].join('|');
+
+function normaliseId(id) {
+  return id.replace(/^PROP-(\d)/, 'PROPOSAL-$1');
+}
+
 export function extractWorkItemIds(text) {
-  const re = /(STORY-\d+-\d+|(CR|BUG|EPIC|HOTFIX)-\d+|(PROPOSAL|PROP)-\d+)/g;
+  // No trailing \b: the package pattern had one after \d{3}, so `BUG-2026-08-24` consumed
+  // `BUG-202`, failed the boundary on the following `6`, and vanished entirely.
+  const re = new RegExp(String.raw`\b(?:${PREFIX_ALT})-(?:${BODY_ALT})`, 'g');
   const raw = [];
   let m;
   while ((m = re.exec(text)) !== null) {
-    raw.push(m[0]);
+    raw.push(normaliseId(m[0]));
   }
-  // BUG-009 normalize: PROP-NNN → PROPOSAL-NNN
-  const normalised = raw.map((id) => id.replace(/^PROP-(\d+)$/, 'PROPOSAL-$1'));
-  return [...new Set(normalised)];
+  return [...new Set(raw)];
 }
 
 /**
@@ -128,7 +152,19 @@ export function findWorkItemFile(repoRoot, workItemId) {
     path.join(repoRoot, '.cleargate', 'delivery', 'pending-sync'),
     path.join(repoRoot, '.cleargate', 'delivery', 'archive'),
   ];
-  const prefix = `${workItemId}_`;
+  // BUG-041, the larger half: this required `${id}_`, but `-` is the slug separator for
+  // 100% of date-form ids and 59% of numeric multi-segment ones — 789 of 1,464 items in a
+  // production repo (54%) were unreachable regardless of any regex fix. The separator is
+  // still REQUIRED, so `STORY-152-3` cannot claim `STORY-152-33_Foo.md`.
+  const id = normaliseId(workItemId);
+  const matches = (entry) => {
+    if (!entry.endsWith('.md')) return false;
+    const stem = entry.slice(0, -3);
+    for (const base of new Set([id, workItemId])) {
+      if (stem === base || stem.startsWith(`${base}_`) || stem.startsWith(`${base}-`)) return true;
+    }
+    return false;
+  };
   for (const dir of searchDirs) {
     let entries;
     try {
@@ -136,9 +172,7 @@ export function findWorkItemFile(repoRoot, workItemId) {
     } catch {
       continue;
     }
-    const match = entries.find(
-      (e) => e.startsWith(prefix) && e.endsWith('.md')
-    );
+    const match = entries.find(matches);
     if (match) return path.join(dir, match);
   }
   return null;
@@ -290,4 +324,7 @@ function main() {
   process.exit(1);
 }
 
-main();
+// BUG-041: `main()` used to run on import, which made extractWorkItemIds and
+// findWorkItemFile structurally unimportable — and is why neither had a test.
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) main();

@@ -26,7 +26,6 @@
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
-- [[BUG-041]] (bug) — Draft — Work-Item ID Grammar Diverges Across Ten Sites — Date-Form IDs Silently Vanish
 
 ## Archive
 
@@ -34,7 +33,7 @@
 - Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
 - CRs: 97 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 30 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- Bugs: 31 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 
