@@ -116,6 +116,43 @@ for (const [k,re] of Object.entries(t)) console.log(k.padEnd(30),'->',JSON.strin
 
 3. **The dashboard degrades to empty state.** Per `new_app`'s local diagnosis, every panel keyed on the `STORY-\d{3}-\d{2}` assumption renders as though nothing has happened. Empty state is indistinguishable from "sprint not started".
 
+**Empirical grammar, measured over all 1,464 items in `new_app`'s delivery tree** (supplied by `new-app-28`; the derived consequences below were verified here by execution).
+
+Ten type prefixes are in use, not the six any parser models: `STORY` 824, `BUG` 267, `EPIC` 149, `CR` 106, `SPRINT` 86, `HOTFIX` 13, `INITIATIVE` 4, `SPIKE` 1, `PLATFORM` 1, `AUDIT` 1.
+
+| Shape | Count | Form | Slug separator |
+|---|---|---|---|
+| Date-form | 306 | `(BUG\|CR\|HOTFIX\|STORY)-\d{4}-\d{2}-\d{2}-<slug>` | `-` in 306 of 306 |
+| Numeric multi-segment | 820 | `TYPE-\d+-\d+` | mixed — `-` 482, `_` 327 |
+| Sub-lettered | 11 | `STORY-\d+-\d+[a-z]` | — |
+| Numeric single | 313 | `TYPE-\d+` | `_` 312, `-` 1 |
+| Non-numeric | 25 | no numeric segment at all | — |
+
+Three grammar facts that settle the open design question: a date-form id **always** carries a trailing slug (zero bare), the slug separator for date-form is **always** `-`, and `STORY` does occur in date form (`STORY-2026-08-01-mcp-iserror-auth-classification`). Non-numeric ids exist (`BUG-bare-health-falls-through-to-spa`, `STORY-drift-static-gate-release-artifact-drift`), so **any grammar requiring a digit drops 25 items silently**.
+
+**Second failure mode — silent aliasing, not truncation.** A greedy `STORY-\d+-\d+` collapses the six `STORY-047-02a…02f` items to a single `STORY-047-02`. Verified:
+
+```
+STORY-047-02a -> STORY-047-02
+STORY-047-02b -> STORY-047-02
+STORY-047-02f -> STORY-047-02
+distinct in: 4 | distinct out: 1
+```
+
+This is worse than truncating to a nonexistent id, because the result *is* a real id — six distinct work items silently merge into one and no downstream consumer can tell. Note that `templates/story.md:23` explicitly forbids this shape ("consecutive IDs … **never** 03a/03b") and this repo has zero such ids, so the fix is a policy choice, not just a parser one: either accept the shape or **reject it loudly**. Silent aliasing is the one outcome that must not survive.
+
+**Third failure mode, and the largest — `findWorkItemFile` cannot reach 54% of the corpus.** `prefix = `${id}_`` requires an underscore, but `-` is the separator for 100% of date-form ids and 59% of numeric multi-segment ones. That is **789 of 1,464 items unreachable**, independent of any regex:
+
+```
+STORY-047-02a_Foo.md   startsWith("STORY-047-02a_") -> true
+STORY-047-02a-foo.md   -> false
+STORY-047-02a.md       -> false
+```
+
+Fixing the ten regexes without fixing the matcher leaves half the tree unfindable. The matcher is the higher-value half of this bug.
+
+**The twice-paid-for downstream fix is itself incomplete.** `new_app`'s local extractor — the one destroyed by `0cd1911b` and re-derived by `20792717` — covers no `SPRINT`, no `INITIATIVE`, no `SPIKE`/`PLATFORM`/`AUDIT`, truncates the 11 sub-lettered ids, and drops all 25 non-numeric ones. It handles roughly 80% of the shapes in its own repo. Adopt it as a starting point, not as the answer.
+
 **Field scale (reported by `new-app-28`, not independently verified):** `new_app` holds 1,464 work items, 293 date-form (20%). In the unexecuted queue it inverts — **43 of 54 items targeted at SPRINT-82/83 are date-form (80%)**. The newer the work, the more affected. Drift detection would report that entire queue permanently clean.
 
 **This has already been fixed twice downstream and destroyed once by an upgrade.** `assert_story_files.mjs` in `new_app`: `867260bf` (2026-06-14) fixed date-based BUG IDs; `0cd1911b` (2026-07-30) reverted it via a scaffold upgrade — `always` tier, no prompt; `20792717` (2026-08-01) re-derived it from scratch. See BUG-041's sibling findings on `overwrite_policy: always`.
@@ -125,7 +162,7 @@ for (const [k,re] of Object.entries(t)) console.log(k.padEnd(30),'->',JSON.strin
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Modify:**
-- `cleargate-cli/src/lib/work-item-id.ts` — **new.** Single exported grammar plus `extractIds()` / `classifyType()`, covering `<TYPE>-\d+` (any digit count), `<TYPE>-\d{4}-\d{2}-\d{2}(-slug)?`, and `STORY-\d+-\d+`. Longest-alternative-first.
+- `cleargate-cli/src/lib/work-item-id.ts` — **new.** Single exported grammar plus `extractIds()`, `classifyType()` and `matchesId(filename, id)`. Must cover all ten type prefixes, all four shapes including non-numeric, and must **reject sub-lettered ids loudly rather than alias them**. Longest-alternative-first. The filename matcher is part of this module, not an afterthought — it is the larger half of the defect.
 - `cleargate-cli/src/lib/lifecycle-reconcile.ts` — replace `ID_PATTERN` and the six `\d{3}` classifiers with the shared grammar.
 - `cleargate-cli/src/lib/active-criteria.ts` — same.
 - `cleargate-cli/src/dashboard/collect.ts` — same, both sites.
@@ -176,4 +213,5 @@ Requirements to pass to Green:
 - [x] Execution Sandbox names exact file paths.
 - [x] A failing test is specified before the fix.
 - [ ] `approved: true` is set in the YAML frontmatter.
-- [ ] The canonical ID grammar is agreed — specifically whether a date-form ID may carry a trailing slug, and whether `STORY-\d+-\d+` and `<TYPE>-\d{4}-\d{2}-\d{2}` are the only two multi-segment shapes. Blocked on retrieving `CR-2026-08-01-dashboard-blind-to-date-form-ids`, which may already answer this.
+- [x] The canonical ID grammar is agreed. Settled empirically over 1,464 items: trailing slug mandatory on date-form, `-` separated, four types; ten prefixes total; four shapes including non-numeric. See §3.
+- [ ] One policy decision remains: **accept sub-lettered ids, or reject them loudly?** `templates/story.md:23` forbids them and this repo has none, but `new_app` has 11 in active use. Either answer is implementable; silent aliasing is not acceptable under either.
