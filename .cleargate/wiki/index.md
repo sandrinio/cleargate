@@ -25,8 +25,6 @@
 - [[INITIATIVE-001]] (initiative) — In Triage — Broker / Rendezvous Plane for Local Claude Code Connectors
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
-- [[CR-103]] (cr) — Approved — Wiki Page & Index Fidelity — One Builder, No Fabricated Sections
-- [[CR-104]] (cr) — Approved — Performance Budgets — Optional in the Epic, Inherited by the Story
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 
 ## Archive
@@ -34,7 +32,7 @@
 - Epics: 30 Completed · 3 Abandoned · [expand](archive/epics.md)
 - Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 95 Completed · 1 Abandoned · [expand](archive/crs.md)
+- CRs: 97 Completed · 1 Abandoned · [expand](archive/crs.md)
 - Bugs: 30 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions

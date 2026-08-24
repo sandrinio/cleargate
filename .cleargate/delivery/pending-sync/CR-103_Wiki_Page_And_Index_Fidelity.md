@@ -4,7 +4,7 @@ parent_ref: null
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: Completed
 approved: true
 area: cli
 context_source: |
