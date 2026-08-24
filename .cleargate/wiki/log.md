@@ -1155,3 +1155,8 @@
   action: "update"
   target: "CR-104"
   path: ".cleargate/delivery/pending-sync/CR-104_Performance_Budgets_Optional_And_Inherited.md"
+- timestamp: "2026-08-24T13:48:00.970Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-041"
+  path: ".cleargate/delivery/pending-sync/BUG-041_Work_Item_Id_Grammar_Divergence.md"

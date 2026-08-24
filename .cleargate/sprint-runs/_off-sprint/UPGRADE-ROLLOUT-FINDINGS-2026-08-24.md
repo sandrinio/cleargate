@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-24
 **Trigger:** User initiated `cleargate` upgrades in two repositories via separate Claude sessions; this session canvassed all seven live peer sessions to coordinate, answer questions, and capture defects.
-**Status:** rollout in progress — one upgrade session found and advised, second not yet identified.
+**Status:** `new_app` upgrade **complete and verified** — 0.24.0 binary + 0.24.0 scaffold, `doctor` exit 0, 84/84 local scaffold tests pass. Second repo never identified; likely never started.
 
 ---
 
@@ -54,7 +54,9 @@ All three agree on `BUG-007`. The reconciler's `\b` anchor combined with `\d{3}`
 
 `new-app-28` independently found `CR-112` sitting in `archive/` marked `status: Draft` / `🟡 Pending Approval` despite `approved: true` and the work having shipped seven weeks earlier, and that stale frontmatter propagated a false claim into a downstream planning document. The reconciler that exists to catch exactly this cannot see a large class of that repo's items.
 
-*Candidate fix:* one shared ID grammar in a single module, all three call sites derived from it — the same shape as CR-103's page-builder unification. Patching the three regexes separately would leave the divergence intact.
+**Filed as [[BUG-041]] (P1-High).** Escalated after `new-app-28` reported four more sites: the real count is **ten**, six of them in `lifecycle-reconcile.ts` alone. Also confirmed there — `close_sprint.mjs:414/420` loads the reconciler for Step 2.6b, so cross-sprint orphan reconciliation at **every sprint close** has run the NO-MATCH parser since long before 0.24.0. And the bug has already been fixed twice downstream and destroyed once by an `always`-tier upgrade (`867260bf` fixed → `0cd1911b` reverted → `20792717` re-derived), which is the argument for fixing it upstream rather than letting each consumer re-patch. Field scale in `new_app`: 293 of 1,464 items are date-form (20%), rising to **43 of 54 (80%) in the unexecuted SPRINT-82/83 queue**.
+
+*Candidate fix:* one shared ID grammar in a single module, all call sites derived from it — the same shape as CR-103's page-builder unification. Patching the three regexes separately would leave the divergence intact.
 
 `new_app` also carries a local guard in `patch_dashboard.mjs` for the dashboard's version of this same bug, which is a fourth instance.
 
@@ -92,13 +94,40 @@ This makes "audit your local forks before taking theirs" misleading advice: it g
 
 Worse in `new_app` specifically, where `.claude/` is gitignored (`.gitignore:84`): the agent tier has **no git baseline at all**, so there is no recoverable "before" to diff or restore from. A pre-upgrade tarball is the only witness. Same shape as defect 3 (`pin-aware`), and the same fix applies — warn when an unconditional overwrite is about to replace a file that differs from the payload.
 
-### 7. `collision_surface.sh` cannot parse bullet-list file surfaces — MEDIUM
+### 7. `collision_surface.sh` is blind to every heading variant except legacy §3.1 — HIGH
+
+*(Upgraded from MEDIUM once `new-app-68` supplied the measurement.)*
 
 The shipped parser is table-only — `collision_surface.sh:38`, `# ---- Parse §3.1 file surface table (multi-column fix)`. A story whose §3.1 declares its file surface as a bullet list yields zero parseable paths, which the BUG-033 fail-safe contract then treats as "no surface."
 
 `new_app` carries two local fixes (`1e04861d` blind to this sprint's item formats, `00992f44` parse bullet-list file surfaces, not tables only). Neither is upstream, and the file is `overwrite_policy: always`, so every upgrade reverts them with no prompt. Recoverable there only because `.cleargate/scripts/` is git-tracked in that repo.
 
-Requested the diffs for upstreaming.
+**Measured impact, from `1e04861d`:** SPRINT-81's regenerated SDR produced a **16-wave zero-parallel plan**. Not from real collisions — 11 of 16 reader digests returned an empty file surface, and empty is fail-safe-serialized by the BUG-033 contract. The synth serialized on *missing data*. Root cause: `parse_surface_paths` matched `^### 3\.1` only, the legacy story-template heading, which no SPRINT-81 item used ("Implementation Files Touched", "Affected Files", "Execution Sandbox"). The warning it emitted reads as "this item declares no surface" rather than "the parser cannot see this format" — silent and one-directional.
+
+Patch received (207 lines, both commits): `1e04861d` widens heading variants, tokenizes within table cells, tightens `looks_like_path` to require a known extension; `00992f44` adds bullet-list parsing. The direction-of-error reasoning in the commit is the part worth upstreaming verbatim — over-inclusion over-serializes (safe), under-inclusion reads as "proven disjoint" and parallelizes colliding items (unsafe).
+
+**This is the same failure shape as defect 2:** a silent wrong-partial that fails safe and therefore never gets noticed. Worth naming as a pattern in the CR.
+
+### 8. `upgrade` output cannot distinguish a clean overwrite from a destructive one — HIGH
+
+Reported by `new-app-68` post-upgrade. `cleargate upgrade` prints `[always] overwritten: <path>` **identically** whether the file was `state=clean` (disk matched the manifest baseline, nothing lost) or `state=user-modified` (local work just died). `--dry-run` distinguishes the two; the actual run discards the distinction.
+
+The classification already exists and is already computed. Anyone who skips the dry-run gets no signal that local work was destroyed. This is one step upstream of defects 3 and 6 and is the single highest-value fix of the set: it makes the silent-overwrite class visible without changing any overwrite policy.
+
+*Candidate fix:* carry the `state=` classification into the run's output for `always` and `pin-aware`, and emit a distinct marker for the `user-modified` case.
+
+### 9. `close_sprint.mjs` usage text contradicts the policy it cites — MEDIUM
+
+`close_sprint.mjs:120` describes `--assume-ack` as:
+
+> `automated tests ONLY — conversational orchestrators MUST NOT pass this`
+
+`cleargate-enforcement.md:491` says the opposite in the relevant case: the token "is set for a single invocation only after an **explicit human close authorization (Gate 4)**, or by CI." §12.3's prohibition is on passing the flag *"on its own initiative"* — unprompted — not on the human-authorized path.
+
+The help text drops the carve-out while citing the section that grants it. Measured consequence: `new_app` softened its own `CLAUDE.md` in June 2026 on this basis, and in this session its agent independently concluded its Gate-4 path was "broken on disk" and was about to escalate a non-existent regression to the user. Two readers, same wrong conclusion, same string.
+
+*Candidate fix:* restate the usage line to match §12.3 — reserved for CI **and** for a single human-authorized invocation, never unprompted.
+
 
 ---
 
@@ -153,5 +182,6 @@ Also corrected: `cleargate upgrade` **does** bump the hook pins (CR-088, shipped
 - [ ] Collect `doc-processor-5b`'s two CLI defects, one a hard blocker, at its sprint close.
 - [ ] Decide whether defects 1–7 become formal BUGs. Defect 2 is the priority — it disables a feature shipped today.
 - [ ] Retrieve the eight stranded work items from `new_app` (relay or permission).
-- [ ] Get the two `collision_surface.sh` fixes from `new_app` for upstreaming.
+- [x] `collision_surface.sh` patch received.
+- [ ] Upstream three CRs from `new_app`: `collision_surface.sh` parser, `ships_migration` + `migration_surface.sh` (both absent here), `assert_story_files.mjs` (dated-ID regex, separator-anchored matching, `isMain` guard) + its test suite — which becomes the first upstream test for `extractWorkItemIds` / `findWorkItemFile`, currently unimportable because `main()` is called at line 293 unguarded.
 - [ ] Decide whether `ships_migration` is upstreamed as a CR against `templates/story.md`.
