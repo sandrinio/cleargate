@@ -109,9 +109,17 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 ## 3. The Reality Check (Context)
 
+> State a constraint only where one genuinely applies. **Omitting a row is a valid, intentional
+> outcome** — an absent Performance row means "no performance dimension here", not "the author
+> forgot". Do not invent a number to fill the table.
+>
+> When you do state a budget, write it in the shape `<metric> <percentile> <bound>, measured by
+> <method>`. A bare millisecond figure with no measurement method is unfalsifiable at QA time —
+> nobody can fail a story for missing a number that was never operationalized.
+
 | Constraint Type | Limit / Rule |
 |---|---|
-| Performance | {e.g., Must complete in < 200ms} |
+| Performance *(if applicable)* | {e.g., `push_item` p95 < 100ms over the local adapter, measured by test/perf/push.bench.ts against the previous release as baseline} |
 | Security | {e.g., No PII in logs} |
 
 ## Existing Surfaces
@@ -160,7 +168,12 @@ Feature: {Epic Name}
 *(AI Planning Engine: List edge cases, contradictions, or missing details found while drafting. The Epic stays 🔴 until the Human answers all of these.)*
 
 - **AI Question:** "{e.g., You mentioned we need to send an email, but src/services/email doesn't support templates yet. Should we build the template engine first, or hardcode this one?}"
-- **Human Answer:** {Waiting for user}
+- **Human Answer:** Unresolved — replace this entire line with the human's decision.
+
+> The literal token `Unresolved` above is load-bearing: the `interrogation-resolved` readiness
+> criterion checks that the body does NOT contain it. Leave it in place while the question is open
+> and the epic cannot pass its gate; remove it only by writing the actual answer. Do not delete the
+> token while leaving the question unanswered — that defeats the criterion.
 
 ---
 

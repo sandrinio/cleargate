@@ -30,6 +30,14 @@ Also split the inverse: two candidate stories that each touch the same 1-2 files
 At epic-decomposition time there are no remote IDs yet — splits and merges are free. Prefer two focused L1/L2 stories over one L3. Prefer L3 over L4.
 When the rubric is ambiguous, surface the decision to the human as a one-liner ("candidate covers A+B — split into X and Y?") rather than guessing.
 
+Performance inheritance (run during epic-decomposition):
+  If the parent Epic's §3 Reality Check carries a populated Performance row AND this story's scope
+  touches that budget, restate the budget in §2.1 as a Gherkin `Then` clause and add the matching
+  row to §4.1 Minimum Test Expectations. A budget that stays in the Epic never reaches the agent
+  writing the code, and prose that QA does not diff is decorative — §2.1 is the only landing spot
+  QA-Verify actually checks.
+  If the parent Epic omits the Performance row, this story states nothing. Do not invent a budget.
+
 §0.1 v2 Decomposition Signals:
   `parallel_eligible`: "y" if this story can run concurrently with other stories in the same milestone; "n" if it has a strict predecessor dependency. Default "y". Set by Architect during Sprint Design Review.
   `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones to surface risk early.
@@ -177,6 +185,7 @@ Feature: {Story Name}
 |---|---|---|
 | Unit tests | {N} | {e.g., "1 per exported function"} |
 | E2E / acceptance tests | {N} | {e.g., "1 per Gherkin scenario in §2.1"} |
+| Performance test *(if applicable)* | {N} | Required only when the parent Epic states a budget and §2.1 carries it as a `Then` clause. Name the measurement method and the baseline. Delete this row when the Epic states no budget. |
 
 ### 4.2 Definition of Done (The Gate)
 - [ ] Minimum test expectations (§4.1) met.

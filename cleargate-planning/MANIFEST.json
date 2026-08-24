@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.23.0",
-  "generated_at": "2026-08-02T16:23:27.331Z",
+  "cleargate_version": "0.24.0",
+  "generated_at": "2026-08-24T13:00:56.558Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -228,7 +228,7 @@
     },
     {
       "path": ".cleargate/scripts/assert_story_files.mjs",
-      "sha256": "04b1dde4738fe2be74dc1ba65c6bbb01bbad2a67f876dc5a0409e3e1e0e68031",
+      "sha256": "edfbd82611a75a336ae19ea1379256719b7364ff2d27fcaae9f9e86a11d0afdf",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -431,7 +431,7 @@
     },
     {
       "path": ".cleargate/templates/epic.md",
-      "sha256": "a4db3e7354f25f05c8a5c4091d0e5cdd4afc5863f9de6365888a4e1a99c97043",
+      "sha256": "5ca331b554dc6c0017c436ee2f4f79e6180f7ed00c185579a885cad508153424",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -473,7 +473,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "8af840714d317ea63acd1df9f5d4e11cf960dfc859d2e9eed77045de645b2a40",
+      "sha256": "a7fd59c09171ef1b740f0f92d5514aa2f5e5649e157ce8e1e14cd73981f0d800",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
