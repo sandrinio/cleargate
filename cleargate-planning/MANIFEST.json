@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.24.1",
-  "generated_at": "2026-08-24T14:31:05.575Z",
+  "cleargate_version": "0.24.2",
+  "generated_at": "2026-08-24T14:57:36.372Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -88,7 +88,7 @@
     },
     {
       "path": ".claude/hooks/pre-commit-surface-gate.sh",
-      "sha256": "8a953a783f25c4e433cb2b85a0ecaf388558152f77827d16f3cc4bc79fee8c6e",
+      "sha256": "009f20b61d60c57848b0927bd06c9666f74f6fed1d4ec164f9cd5b6000a198d2",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -228,7 +228,7 @@
     },
     {
       "path": ".cleargate/scripts/assert_story_files.mjs",
-      "sha256": "adb1eca4531b32cf0ced3dc19237cf27b2d672738fb69f36eb1e80d1448772ee",
+      "sha256": "ef7b02262e9a9fbb3ad4a52548f01cee7f8d62577c98c9303612b771d808441d",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -304,6 +304,13 @@
       "preserve_on_uninstall": false
     },
     {
+      "path": ".cleargate/scripts/lib/work-item-id.mjs",
+      "sha256": "51a5e836f031e6e268070f2159818d9fb5729944fdd49cdc0d73f7dc10cdb1ab",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
       "path": ".cleargate/scripts/pre_gate_common.sh",
       "sha256": "97405ff603b61843d032a95aadd0489505675201d727cb0fa5befb83410e6b0b",
       "tier": "script",
@@ -319,7 +326,7 @@
     },
     {
       "path": ".cleargate/scripts/prefill_report.mjs",
-      "sha256": "bee417d96150410f78262a7fb4f485bf2f2e4191b8818085bdf60a664ebf7d62",
+      "sha256": "86238389fce01ab5edc9f298dc8ec7ecffa2c5d3b2b9b10bd9563d9f51f63ea5",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

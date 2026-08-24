@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateState } from './validate_state.mjs';
+import { extractWorkItemIds } from './lib/work-item-id.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -214,11 +215,13 @@ function main() {
 
   for (const reportPath of reportFiles) {
     const filename = path.basename(reportPath);
-    // Extract story_id from filename: STORY-NNN-NN-dev.md or STORY-NNN-NN-qa.md
-    const storyMatch = filename.match(/^(STORY-\d+-\d+)-(dev|qa)\.md$/);
-    if (!storyMatch) continue;
-
-    const storyId = storyMatch[1];
+    // BUG-041: was /^(STORY-\d+-\d+)-(dev|qa)\.md$/, so a report named after a date-form
+    // item — `BUG-2026-08-24-slug-dev.md` — matched nothing and its report was skipped
+    // silently. Split the role off the end, then let the id half be anything valid.
+    const roleMatch = filename.match(/^(.*)-(dev|qa)\.md$/);
+    if (!roleMatch) continue;
+    const [storyId] = extractWorkItemIds(roleMatch[1]);
+    if (!storyId) continue;
     const content = fs.readFileSync(reportPath, 'utf8');
     const { hasFrontmatter, frontmatter, body, fields } = parseFrontmatter(content);
 

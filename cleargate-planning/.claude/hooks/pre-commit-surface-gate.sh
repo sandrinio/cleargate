@@ -42,6 +42,24 @@ for _cg_pkg in mcp cleargate-cli admin; do
   fi
 done
 
+# BUG-041: keep the work-item ID grammar singular. Fourteen divergent parsers
+# accumulated because nothing could enumerate them — and when this gate first ran
+# against an already-unified tree it still found nine live hand-rolled patterns,
+# five of which carried the same silent-wrong-answer defect. The module alone is a
+# convention; conventions are what produced fourteen. Same inert-elsewhere shape as
+# the check:no-vitest loop above.
+for _cg_pkg in cleargate-cli; do
+  _cg_dir="${REPO_ROOT}/${_cg_pkg}"
+  [ -d "${_cg_dir}" ] || continue
+  [ -f "${_cg_dir}/package.json" ] || continue
+  grep -qE '"check:no-inline-id-regex"[[:space:]]*:' "${_cg_dir}/package.json" || continue
+  command -v npm >/dev/null 2>&1 || continue
+  if ! npm run --silent check:no-inline-id-regex --prefix "${_cg_dir}"; then
+    echo "[surface-gate] BLOCKED: check:no-inline-id-regex failed in ${_cg_pkg}/ (output above)." >&2
+    exit 1
+  fi
+done
+
 SCRIPT="${REPO_ROOT}/.cleargate/scripts/file_surface_diff.sh"
 if [[ ! -f "${SCRIPT}" ]]; then
   echo "[surface-gate] WARNING: file_surface_diff.sh not found — skipping" >&2
