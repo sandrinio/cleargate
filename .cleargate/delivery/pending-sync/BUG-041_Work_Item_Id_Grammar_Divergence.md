@@ -139,7 +139,11 @@ STORY-047-02f -> STORY-047-02
 distinct in: 4 | distinct out: 1
 ```
 
-This is worse than truncating to a nonexistent id, because the result *is* a real id — six distinct work items silently merge into one and no downstream consumer can tell. Note that `templates/story.md:23` explicitly forbids this shape ("consecutive IDs … **never** 03a/03b") and this repo has zero such ids, so the fix is a policy choice, not just a parser one: either accept the shape or **reject it loudly**. Silent aliasing is the one outcome that must not survive.
+This is worse than truncating to a nonexistent id, because the result *is* a real id — six distinct work items silently merge into one and no downstream consumer can tell.
+
+**No policy change is required to fix it.** `templates/story.md:23` forbids the shape ("consecutive IDs … **never** 03a/03b"), this repo has zero such ids, and all 11 in `new_app` are `status: Done` in `archive/` from SPRINT-27/35/37/39 — zero live, zero in `pending-sync/`, none in an open sprint, against SPRINT-81 closed. They are pre-adoption artifacts: the rubric arrived with `f39a2b4d` (2026-05-11), the commit that retrofitted ClearGate onto that repo's existing history, and nothing since SPRINT-39 uses the shape. (Their `created_at` stamps all read 2026-05-11 because the retrofit backfilled them, so the ordering evidence is the sprint numbering and the retrofit commit, not the timestamps.)
+
+So the requirement on the parser is narrow: **reject the shape loudly at authoring time, and resolve historical ids to themselves when reading `archive/`** so backward-looking queries still work. Silent aliasing is the one outcome that must not survive.
 
 **Third failure mode, and the largest — `findWorkItemFile` cannot reach 54% of the corpus.** `prefix = `${id}_`` requires an underscore, but `-` is the separator for 100% of date-form ids and 59% of numeric multi-segment ones. That is **789 of 1,464 items unreachable**, independent of any regex:
 
@@ -214,4 +218,4 @@ Requirements to pass to Green:
 - [x] A failing test is specified before the fix.
 - [ ] `approved: true` is set in the YAML frontmatter.
 - [x] The canonical ID grammar is agreed. Settled empirically over 1,464 items: trailing slug mandatory on date-form, `-` separated, four types; ten prefixes total; four shapes including non-numeric. See §3.
-- [ ] One policy decision remains: **accept sub-lettered ids, or reject them loudly?** `templates/story.md:23` forbids them and this repo has none, but `new_app` has 11 in active use. Either answer is implementable; silent aliasing is not acceptable under either.
+- [x] Sub-lettered ids need no policy ruling. All 11 known instances are `Done` in `archive/` from pre-adoption sprints; the rubric already forbids the shape and has held since SPRINT-39. The parser rejects it at authoring time and resolves historical ids to themselves for archive reads.
