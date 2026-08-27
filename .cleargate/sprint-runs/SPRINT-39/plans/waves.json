@@ -1,0 +1,166 @@
+{
+  "sprint": "SPRINT-39",
+  "generated_at": "2026-08-27T00:00:00Z",
+  "generator": "architect-synth (EPIC-033 / STORY-033-03)",
+  "story_count": 18,
+  "edge_source": "SPRINT-39 §2.1 Phase Plan + §2.2 Merge Ordering (all 18 digests returned dep_predecessors: [] — Bug/CR/Story templates carry no such frontmatter field; clause 5 would see zero edges without this override)",
+  "milestone_barrier": "Waves never cross a milestone boundary. Milestones execute as ordered blocks M0 -> M1 -> M2 -> M3 -> M4 with a barrier between them: every wave of milestone N completes and merges before the first wave of milestone N+1 is cut. §2.1 permits M1/M3/M4 to run concurrently with M0, but a linear wave list cannot express cross-milestone concurrency without a cross-milestone wave, so the milestones are serialized. This is the safe direction (over-serialization) and it satisfies every cross-milestone edge in §2.2: STORY-054-03 -> CR-105 (CLAUDE.md, M1->M3), STORY-054-03 -> STORY-054-06 (story.md, M1->M2), STORY-054-02 -> CR-108 (work-item-type.ts, M1->M4), STORY-054-06 -> CR-108 (templates/*.md, M2->M4).",
+  "milestones": [
+    {
+      "milestone": "M0",
+      "name": "Gate index integrity",
+      "waves": ["wave1", "wave2"],
+      "stories": ["BUG-042", "STORY-054-05"],
+      "note": "Serial. Blocks M2. BUG-042 supplies the three section(N) index corrections; STORY-054-05 pins them. Barrier: both merged before M1 wave2 is cut."
+    },
+    {
+      "milestone": "M1",
+      "name": "Spike type",
+      "waves": ["wave3", "wave4", "wave5"],
+      "stories": ["STORY-054-01", "STORY-054-04", "STORY-054-02", "STORY-054-03"],
+      "note": "§2.1 wave1 (01 ‖ 04) is the sprint's only genuinely parallel EPIC-054 pair. §2.1 wave2 (02 -> 03) is serial and rebases on M0's readiness-gates.md corrections."
+    },
+    {
+      "milestone": "M2",
+      "name": "Task breakdown",
+      "waves": ["wave6", "wave7"],
+      "stories": ["STORY-054-06", "STORY-054-07"],
+      "note": "Strictly after M0 — WS6 shifts section(N) indices in three gated templates and must land on corrected, pinned indices. 07 cannot be verified until 06's section exists."
+    },
+    {
+      "milestone": "M3",
+      "name": "CLAUDE.md write integrity",
+      "waves": ["wave8", "wave9"],
+      "stories": ["BUG-043", "CR-105"],
+      "note": "Serial. §2.1 declares it fully parallel with M0–M2, but its CLAUDE.md contact with STORY-054-03 (§2.2 order 03 -> 105) places it after M1 in the serialized ordering."
+    },
+    {
+      "milestone": "M4",
+      "name": "Execution-layer hygiene",
+      "waves": ["wave10", "wave11", "wave12", "wave13"],
+      "stories": ["BUG-044", "BUG-045", "BUG-046", "CR-106", "CR-107", "CR-108", "CR-110", "CR-111"],
+      "note": "Three Red-first bug fixes fan out in wave10; each is the hard predecessor of a CR downstream. CR-111 is the sprint's final template edit by design, so STORY-054-05's pinning test adjudicates it."
+    }
+  ],
+  "lane_assignments": {
+    "BUG-042": "standard",
+    "STORY-054-05": "standard",
+    "STORY-054-01": "standard",
+    "STORY-054-04": "standard",
+    "STORY-054-02": "standard",
+    "STORY-054-03": "standard",
+    "STORY-054-06": "standard",
+    "STORY-054-07": "standard",
+    "BUG-043": "standard",
+    "CR-105": "standard",
+    "BUG-044": "standard",
+    "BUG-045": "standard",
+    "BUG-046": "standard",
+    "CR-106": "standard",
+    "CR-107": "standard",
+    "CR-108": "standard",
+    "CR-110": "standard",
+    "CR-111": "standard"
+  },
+  "lane_audit_note": "§2.4 declares no fast-lane items: all 18 touch gated or mirrored surfaces. Every story is a two-tree dogfood edit (live + cleargate-planning/ canonical), which alone disqualifies fast lane.",
+  "surface_caveats": [
+    "collision_surface.sh was fixed mid-kickoff (BUG-049) to parse Bug/CR Execution Sandbox prose and over-reports tokens from trailing '— description' text. Artefact tokens treated as exact strings only, never expanded: 'mcp/', 'cleargate-planning/' (bare), 'cleargate-cli/test/', '*.node.test.ts', 'state.json', 'Sprint Plan Template.md', 'cleargate-planning/.cleargate/templates/*', '.cleargate/templates/{Bug,CR,epic,initiative,story,hotfix}.md'.",
+    "Bare-directory and glob tokens are matched by exact string per the existing predicate and are NOT expanded into collisions with specific files beneath them. Expanding 'cleargate-planning/' (BUG-046, CR-108, CR-111) or 'cleargate-cli/test/' (BUG-042, BUG-043, CR-105, BUG-045) would have collapsed wave10 and wave12 into fully serial chains with no real conflict behind them.",
+    "CR-105's file_creates carries '*.node.test.ts' and 'cleargate-cli/test/' — glob/bare-dir artefacts, not literal created files. CR-105 is serialized behind BUG-043 on a genuine clause-2 hit (inject-claude-md.ts, upgrade.ts) regardless.",
+    "No digest had an empty (file_surface ∪ file_creates); the BUG-033 empty-surface guard did not fire for any story.",
+    "No digest had a non-empty db_write_set; the coarse DB collision axis did not serialize anything this sprint."
+  ],
+  "waves": [
+    {
+      "wave": "wave1",
+      "milestone": "M0",
+      "stories": ["BUG-042"],
+      "parallel": false,
+      "rationale": "Single-story wave. Sprint entry point per §2.1 — three index corrections plus mirror. Serialized ahead of STORY-054-05 by a §2.1 dependency edge (clause 5) and by the §2.2 readiness-gates.md chain 042 -> 05 -> 02 -> 06 -> 111."
+    },
+    {
+      "wave": "wave2",
+      "milestone": "M0",
+      "stories": ["STORY-054-05"],
+      "parallel": false,
+      "rationale": "Fail-safe-serialized: parallel_eligible=n (clause 1). Also a clause-5 successor of BUG-042 and a clause-2 collision with it on .cleargate/knowledge/readiness-gates.md. Pins the indices BUG-042 corrected; must be authored against the pre-fix tree and merged after it."
+    },
+    {
+      "wave": "wave3",
+      "milestone": "M1",
+      "stories": ["STORY-054-01", "STORY-054-04"],
+      "parallel": true,
+      "rationale": "All five clauses pass: both parallel_eligible=y; (file_surface ∪ file_creates) disjoint — 01 owns .cleargate/templates/spike.md (+ mirror, both file_creates) plus two existing templates, 04 owns cleargate-cli/src/wiki/*.ts and config.yml (+ mirror); file_creates disjoint; db_write_set empty on both; no §2.1/§2.2 edge between them. Neither reads a gated template. This is §2.1 M1 wave 1 verbatim."
+    },
+    {
+      "wave": "wave4",
+      "milestone": "M1",
+      "stories": ["STORY-054-02"],
+      "parallel": false,
+      "rationale": "Fail-safe-serialized: parallel_eligible=n (clause 1). Appends spike gate blocks to readiness-gates.md and must rebase on M0's corrections — §2.2 chain position 3 of 5 on that file. Also holds the work-item-type.ts registry row that CR-108 (wave12) reads, M4's only cross-milestone edge."
+    },
+    {
+      "wave": "wave5",
+      "milestone": "M1",
+      "stories": ["STORY-054-03"],
+      "parallel": false,
+      "rationale": "Fail-safe-serialized: parallel_eligible=n (clause 1). Clause-5 successor of STORY-054-02 and clause-2 collision with it on cleargate-protocol.md (+ mirror), §2.2 order 02 -> 03. Also heads two cross-milestone chains: story.md 03 -> 06 (wave6) and CLAUDE.md 03 -> 105 (wave9)."
+    },
+    {
+      "wave": "wave6",
+      "milestone": "M2",
+      "stories": ["STORY-054-06"],
+      "parallel": false,
+      "rationale": "Fail-safe-serialized: parallel_eligible=n (clause 1). Strictly after M0 per the load-bearing §2.1 ordering — it adds a ## heading to three gated templates and would shift an already-wrong index into a differently-wrong one with no test to notice. Clause-2 collisions with STORY-054-05 (templates), STORY-054-02 (readiness-gates.md) and STORY-054-03 (story.md); §2.2 position 4 of 5 on readiness-gates.md and head of the templates/*.md chain."
+    },
+    {
+      "wave": "wave7",
+      "milestone": "M2",
+      "stories": ["STORY-054-07"],
+      "parallel": false,
+      "rationale": "Single-story wave, parallel_eligible=y but nothing left in M2 to pair with. Clause-5 successor of STORY-054-06 — 07 wires architect/developer/qa to the ## Task Breakdown section and cannot be verified until 06's section exists. Surface (.claude/agents/{developer,architect,qa}.md + mirrors) is otherwise disjoint from the whole sprint except CR-111's developer.md/qa.md in wave13."
+    },
+    {
+      "wave": "wave8",
+      "milestone": "M3",
+      "stories": ["BUG-043"],
+      "parallel": false,
+      "rationale": "Single-story wave. Head of M3, serial per §2.1. Clause-2 collision with CR-105 on cleargate-cli/src/init/inject-claude-md.ts and cleargate-cli/src/commands/upgrade.ts; §2.2 order 043 -> 105 because 105's remove-then-prepend runs the greedy BLOCK_REGEX on every install, which turns occasional data loss into routine data loss if the regex is still unfixed."
+    },
+    {
+      "wave": "wave9",
+      "milestone": "M3",
+      "stories": ["CR-105"],
+      "parallel": false,
+      "rationale": "Single-story wave. Clause-5 successor of BUG-043 (inject-claude-md.ts, upgrade.ts) and of STORY-054-03 (CLAUDE.md root + canonical, §2.2 order 03 -> 105 so 105 relocates an already-corrected block). Placed after M1 rather than concurrently with M0–M2 because of that cross-milestone CLAUDE.md edge."
+    },
+    {
+      "wave": "wave10",
+      "milestone": "M4",
+      "stories": ["BUG-044", "BUG-045", "BUG-046"],
+      "parallel": true,
+      "rationale": "All five clauses pass: three parallel_eligible=y stories on three disjoint surfaces — update_state.mjs (+ mirror, + state-scripts.test.mjs) · cleargate-cli/src/commands/hotfix.ts · collision_surface.sh + architect-{reader,synth}.md + cleargate-enforcement.md + SKILL.md. file_creates empty on all three; db_write_set empty; no §2.1/§2.2 edge among them. All three are Red-first and each is the hard predecessor of a CR downstream. §2.1 M4 wave 1 verbatim. Note BUG-046's 'mcp/' and 'cleargate-planning/' and BUG-045's 'cleargate-cli/test/' are prose artefacts matched by exact string and not expanded."
+    },
+    {
+      "wave": "wave11",
+      "milestone": "M4",
+      "stories": ["CR-106", "CR-107"],
+      "parallel": true,
+      "rationale": "All five clauses pass: both parallel_eligible=y; surfaces disjoint — 106 owns the state scripts (update_state/validate_state/init_sprint/state-events + mirrors), 107 owns SKILL.md, close_sprint.mjs, config.yml and cleargate-enforcement.md (+ mirrors); file_creates disjoint (106 creates state-events.mjs in both trees, 107 creates nothing); db_write_set empty; no edge between them. Both are clause-5 successors of wave10: 106 needs BUG-044's 20-way concurrency test in the tree so the event-log refactor is adjudicated by it, 107 needs BUG-046 so it layers onto corrected worktree documentation rather than the false claim."
+    },
+    {
+      "wave": "wave12",
+      "milestone": "M4",
+      "stories": ["CR-108", "CR-110"],
+      "parallel": true,
+      "rationale": "All five clauses pass: both parallel_eligible=y; surfaces disjoint on exact-string match — 108 owns hotfix.ts, work-item-type.ts, cli.ts, new.ts and the template placeholder normalization, 110 owns SKILL.md, sprint_context.md, init_sprint.mjs and reporter.md (+ mirrors); file_creates disjoint (108 creates new.ts + new-command.node.test.ts, 110 creates nothing); db_write_set empty; no edge between them, and §2.1 states explicitly that 110 is surface-disjoint from 108. Predecessors all satisfied: 108 needs BUG-045 (wave10, corrected allocator — generalizing a broken one propagates the defect to nine types), STORY-054-02 (wave4, registry row) and STORY-054-06 (wave6, templates); 110 needs BUG-046 (wave10), CR-107 (wave11) and CR-106 (wave11, init_sprint.mjs). 108's brace-glob and bare-directory tokens are artefacts and are not expanded."
+    },
+    {
+      "wave": "wave13",
+      "milestone": "M4",
+      "stories": ["CR-111"],
+      "parallel": false,
+      "rationale": "Single-story terminal wave, serialized by design. parallel_eligible=y but it is the tail of four separate §2.2 merge chains: readiness-gates.md (042 -> 05 -> 02 -> 06 -> 111), templates/*.md (06 -> 108 -> 111), SKILL.md (046 -> 107 -> 110 -> 111) and .claude/agents/{developer,qa}.md (shared with STORY-054-07, wave7). It adds a test-layer table to story.md/CR.md/Bug.md, shifting section(N) indices in three gated templates — the exact defect class BUG-042 corrects and STORY-054-05 pins — so it is the sprint's last template edit deliberately, in order that the pinning test adjudicates it. If STORY-054-05 slips, CR-111 slips with it."
+    }
+  ]
+}

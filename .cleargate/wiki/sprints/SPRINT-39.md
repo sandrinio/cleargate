@@ -3,11 +3,11 @@ type: sprint
 id: "SPRINT-39"
 parent: ""
 children: []
-status: "Draft"
+status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-39_Decomposition_Surfaces.md"
-last_ingest: "2026-08-25T22:12:23.161Z"
-last_ingest_commit: ""
+last_ingest: "2026-08-27T08:14:39.601Z"
+last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 ---
 
@@ -26,7 +26,7 @@ Ship the spike charter type end-to-end and the task-breakdown section end-to-end
 
 ## 1. Consolidated Deliverables
 
-[+26,421 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-39_Decomposition_Surfaces.md]
+[+30,256 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-39_Decomposition_Surfaces.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

@@ -20,7 +20,7 @@
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
-- [[SPRINT-39]] (sprint) — Draft — Decomposition Surfaces — Spike Before, Tasks Within
+- [[SPRINT-39]] (sprint) — Active — Decomposition Surfaces — Spike Before, Tasks Within
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -45,7 +45,7 @@
 - [[BUG-046]] (bug) — Triaged — Collision surface treats worktree-unreachable paths as ordinary files
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
-- [[BUG-049]] (bug) — Triaged — Collision surface reads only the Story template, so every Bug and CR is force-serialized
+- [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
 
 ## Archive
 

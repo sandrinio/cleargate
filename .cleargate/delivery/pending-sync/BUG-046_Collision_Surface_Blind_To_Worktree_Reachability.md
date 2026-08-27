@@ -43,7 +43,7 @@ last_synced_body_sha: null
 
 - **Question:** Should an unreachable surface serialize the story, or refuse it?
 - **Recommended:** **Refuse loudly at SDR.** Serialization is BUG-033's remedy for an *unknown* surface; this is a *known-unreachable* one, and running it serially fails exactly as hard as running it in parallel — the Developer still lands in a worktree where the path does not exist. Serializing would convert a loud failure into a slow loud failure.
-- **Human decision:** Refuse loudly — recorded 2026-08-26.
+- **Human decision:** Refuse loudly — recorded 2026-08-26. **Scoped forward (decided 2026-08-26 at the SPRINT-39 SDR halt):** the refusal applies only to wave plans computed *after* this fix merges. It must NOT retroactively invalidate an in-flight `waves.json`. Rationale: this bug lands in SPRINT-39 wave10 while waves 11–13 are unexecuted, and `CR-108` (wave12) carries `cleargate-cli/src/**` paths the new check would refuse — a retroactive refusal would invalidate a wave plan the human had already confirmed, mid-sprint. Implement as a generation-time check, not a dispatch-time one.
 
 - **Question:** Does this bug also deliver multi-repo routing (run CLI stories in the CLI checkout)?
 - **Recommended:** No. Detection + honest documentation is the bug fix. A general strategy for executing stories whose surface spans repos is a design problem worth its own item — it has to answer worktree isolation, per-repo branch naming, cross-repo merge ordering, and atomicity. Filed as a follow-on.
@@ -118,10 +118,24 @@ Contradicted documentation, verbatim:
 
 **Current exposure in SPRINT-39:** 9 of 15 items reference `cleargate-cli/src` paths. The sprint's wave plan happens to place at most one such item per wave (`STORY-054-04` in M1 w1, `BUG-045` in M4 w1, `CR-108` serial), so it is safe **by planning, not by enforcement** — nothing would stop a future sprint from co-waving two.
 
+## 3.5 Folded-In Scope (added 2026-08-26 at the SPRINT-39 SDR halt)
+
+Three further extractor defects surfaced during SPRINT-39's fan-out. All live in the same script and predicate this bug already owns, so they are folded in rather than filed separately.
+
+**(a) `dep_predecessors` has no home, so predicate clause 5 is blind.** All 18 SPRINT-39 reader digests returned `dep_predecessors: []` — no work-item template carries the field and `collision_surface.sh` emits nothing for it. Clause 5 ("no dependency edge") therefore evaluates against an always-empty set. Left uncorrected it would have co-waved `STORY-054-07` with `CR-108`/`CR-110`, and `BUG-043` with all three M4 bugs; no clause would have blocked any of it. Every edge in SPRINT-39's `waves.json` was hand-carried by the Orchestrator from the sprint plan's §2.1/§2.2 — the predicate derived none of it. **This is the most consequential of the three: a missed edge causes a real collision, whereas the other two cause unnecessary serialization.** Fix shape: give `dep_predecessors` a declared home (frontmatter field or a parsed §2.2-style row) and have the reader emit it.
+
+**(b) Over-reporting from trailing description text.** The Bug/CR sandbox parser added by [[BUG-049]] emits every backticked token on a collected line, including references inside the trailing `— description`. Observed: `BUG-046` picked up `mcp/` from *"replace the false `mcp/` claim"*; `CR-106` picked up `state.json`; `BUG-045` picked up `cleargate-cli/test/`. Fix shape: cut each bullet at the first ` — ` before extracting.
+
+**(c) §3.1 prose cells containing `/` are read as paths.** Pre-existing, not introduced by BUG-049. `looks_like_path` accepts any token containing a slash, so table cells like `New *.node.test.ts under cleargate-cli/test/` and `Yes — one *.node.test.ts under cleargate-cli/test/` are emitted as file surface. Masked until now because the reader agents were silently sanitizing them — a fidelity gap in its own right. Fix shape: reject cells containing spaces, or require the whole cell to be a single path token.
+
+**Direction note:** (b) and (c) both fail toward over-serialization, which the script's own header calls the safe direction — they cost wall-clock, not correctness. (a) fails the other way and is the one that matters.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**
-- `.cleargate/scripts/collision_surface.sh` — classify each emitted path; annotate or fail on unreachable entries.
+- `.cleargate/scripts/collision_surface.sh` — classify each emitted path; annotate or fail on unreachable entries. Also §3.5(b) cut-at-em-dash and §3.5(c) reject prose cells.
+- `.claude/agents/architect-reader.md` — also emit `dep_predecessors` per §3.5(a).
+- Work-item templates (`story.md`, `CR.md`, `Bug.md` + mirrors) — declared home for `dep_predecessors` per §3.5(a).
 - `.claude/agents/architect-reader.md` — carry the classification into the digest.
 - `.claude/agents/architect-synth.md` — refuse (do not co-wave, do not serialize) a story with unreachable surface entries; message names the paths.
 - `.cleargate/knowledge/cleargate-enforcement.md` §1.3 — replace the false `mcp/` claim with the verified behaviour.
@@ -143,7 +157,11 @@ Contradicted documentation, verbatim:
 5. A repo with no `.gitignore` produces zero flags.
 6. `architect-synth` given a digest containing an unreachable entry **refuses** — it does not emit a wave containing that story, and its message names the path.
 7. All existing `test_file_surface.sh` cases stay green (regression guard).
-8. **Documentation assertion:** no file under `.cleargate/knowledge/` or `.claude/` claims that gitignored or nested-repo paths are visible inside a worktree.
+8. §3.5(a): a work item declaring a predecessor produces a non-empty `dep_predecessors`; `architect-synth` refuses to co-wave two items joined by an edge **without** the Orchestrator supplying it.
+9. §3.5(b): a sandbox bullet `- \`a/b.ts\` — see \`c/d.ts\`` yields only `a/b.ts`.
+10. §3.5(c): a §3.1 cell `New *.node.test.ts under cleargate-cli/test/` yields no path.
+11. §Open-Questions scoping: the reachability refusal fires at wave-plan generation, never against an already-written `waves.json`.
+12. **Documentation assertion:** no file under `.cleargate/knowledge/` or `.claude/` claims that gitignored or nested-repo paths are visible inside a worktree.
 
 **Parity check:** all five modified files diff clean against their `cleargate-planning/` mirrors.
 
