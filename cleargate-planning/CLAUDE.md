@@ -15,7 +15,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 3. `.cleargate/FLASHCARD.md` — lessons tagged by topic (`#schema`, `#auth`, etc.). Grep for your area before starting.
 4. `.cleargate/knowledge/cleargate-enforcement.md` — hook-enforced rules (worktree mechanics, file-surface contract, lifecycle reconciler, lane rubric, doctor exit codes, etc.). Read only when a CLI hook surfaces an error or when triaging an enforcement question.
 
-**Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
+**Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Spike / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
 **Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / DevOps / Reporter). The skill is the canonical sprint-loop spec (Architect → QA-Red → Developer → QA-Verify → Reporter, with DevOps for merge/teardown); the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
 
@@ -36,7 +36,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 **Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously. `close_sprint.mjs` now refuses `--assume-ack` unless `CLEARGATE_CI_ACK=1` (CI-only); the token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI. Pre-close enforces Steps 2.7 (no leftover worktrees) + 2.8 (sprint branch merged to main); failure halts close. Post-close prints a 6-item handoff list (Step 8) summarizing commits, merge state, wiki ingest, flashcards, artifacts, and next-sprint preflight.
 
 **Drafting work items:**
-- Use the templates in `.cleargate/templates/` (`epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`).
+- Use the templates in `.cleargate/templates/` (`epic.md`, `story.md`, `CR.md`, `Bug.md`, `Sprint Plan Template.md`, `initiative.md`, `spike.md`).
 - Save drafts to `.cleargate/delivery/pending-sync/{TYPE}-{ID}-{Name}.md`.
 - After `cleargate_push_item` returns a Remote ID, update the frontmatter AND move the file to `.cleargate/delivery/archive/` — these two happen atomically, never one without the other.
 - **Story granularity.** When decomposing an epic into stories, run the Granularity Rubric at the top of `story.md`. If a candidate story trips any signal (unrelated goals joined, >5 Gherkin scenarios, subsystems span, L4 complexity), emit two stories with consecutive IDs instead. Splits and merges are free at decomposition time — no remote IDs exist yet.

@@ -98,6 +98,15 @@ The script is idempotent: if a same-session auto-marker (written by `pre-tool-us
 
 There is one and only one way a sprint executes, and it has no name and no toggle. Every rule in `cleargate-enforcement.md` is **always enforced** (`CLEARGATE_ADVISORY=1` is the sole break-glass, and it only softens gate *strength*, never the execution path). Every sprint runs its Architect-produced `waves.json` through the Workflow tool (`/workflows`) via the `launch_wave` contract (§C.0). There is no alternate loop and no topology toggle. If `/workflows` is unavailable, the Orchestrator halts and says so — it does not run stories outside a wave segment.
 
+### 2.1 Spikes run before the loop, not inside it
+
+A spike is bounded discovery, not a sprint story, and none of this skill's machinery applies to it:
+
+- A spike runs **before sprint kickoff** — it resolves an unknown that would otherwise block Architect planning; it is never scheduled into a milestone's wave.
+- A spike takes **no `state.json` slot** — it is absent from the sprint's story registry entirely, not merely excluded from a wave.
+- The sprint loop gives a spike **no worktree** — `C.2 Create worktree` is a per-story mechanic and never runs for one.
+- Prototype code from a spike lives on a throwaway `spike/SPIKE-NNN` branch that is **discarded and never merged** — nothing it produces lands in `sprint/S-<id>` or `main`.
+
 ---
 
 ## 3. Phase A — Sprint Kickoff (Ready → Active)
@@ -763,6 +772,7 @@ These live elsewhere — do not duplicate inline:
 - **Wiki ingest / lint / contradiction detection** → `cleargate-protocol.md` §10.
 - **Doctor exit codes** → `cleargate-enforcement.md` §8.
 - **Hotfix flow** → V-Bounce-style hotfix handling, see flashcard tag `#hotfix` and `wiki/topics/hotfix-ledger.md`.
+- **Spike charter, timebox and gate criteria** → `.cleargate/templates/spike.md`; the pre-sprint doctrine is §2.1 above.
 
 When in doubt, read the source-of-truth doc — this skill cites them, it does not replace them.
 
