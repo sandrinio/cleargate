@@ -917,3 +917,22 @@ report — it issues **no `AskUserQuestion`**. The Orchestrator halts the wave l
 `resumeFromRunId` after resolution. Fully autonomous up to that halt (§22 autonomy contract,
 §6 Q3): once Gate 2 is signed off, every wave auto-launches with no per-wave "go"; only a
 non-GREEN verdict interrupts.
+
+## Guidance Surface Reach
+
+A rule is only as useful as the surface it is written on. Three surfaces carry authoring
+and execution guidance in this repo, and each reaches a different audience at a different
+moment:
+
+| Surface | Reaches | At what moment |
+|---|---|---|
+| Template `<instructions>` block | the **drafting** agent only — stripped from every authored instance | draft time |
+| An agent's own `.md` (`.claude/agents/*.md`) | that **executing** agent | dispatch time |
+| Always-on `CLAUDE.md` | every agent in every session | **before** a template is chosen — the only surface reachable at triage |
+
+Authored instances carry zero `<instructions>` blocks (FLASHCARD 2026-08-25 `#agents
+#scaffold #danger`, EPIC-054) — the block is stripped once drafting is done, so it never
+reaches an agent that executes against the finished document. A rule an executing agent
+needs cannot live only in a template; a rule needed before any template is chosen cannot
+live anywhere but `CLAUDE.md`. Placing a rule on the wrong surface does not make it wrong —
+it makes it unreachable by the agent who needed it.

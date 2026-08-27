@@ -15,7 +15,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 3. `.cleargate/FLASHCARD.md` — lessons tagged by topic (`#schema`, `#auth`, etc.). Grep for your area before starting.
 4. `.cleargate/knowledge/cleargate-enforcement.md` — hook-enforced rules (worktree mechanics, file-surface contract, lifecycle reconciler, lane rubric, doctor exit codes, etc.). Read only when a CLI hook surfaces an error or when triaging an enforcement question.
 
-**Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
+**Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Spike / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
 **Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / DevOps / Reporter). The skill is the canonical sprint-loop spec (Architect → QA-Red → Developer → QA-Verify → Reporter, with DevOps for merge/teardown); the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
 
