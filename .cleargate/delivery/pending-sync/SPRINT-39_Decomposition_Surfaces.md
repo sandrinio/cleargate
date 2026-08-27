@@ -1,7 +1,7 @@
 ---
 sprint_id: SPRINT-39
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 lifecycle_init_mode: block
 area: planning-layer

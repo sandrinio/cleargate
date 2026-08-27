@@ -104,6 +104,28 @@ The triggering prose was ``matches on filename prefix \`STORY-054-\``` and ``All
 
 **Workaround applied to unblock SPRINT-39:** the three offending sentences were reworded to avoid the bare prefix token. The document's meaning is unchanged; the parser's input is.
 
+## 3.5 Second instance — prose sprint mention mis-attributes an item's owning sprint
+
+Found 2026-08-27 during SPRINT-39 M0. **Different file, different mechanism, same class:** an ID written in prose is read as a structural declaration.
+
+`.cleargate/scripts/backfill_hierarchy.mjs:120` populates a missing `sprint_cleargate_id` with a last-resort fallback — `SPRINT_REGEX = /\bSPRINT-(\d+)\b/` (`:92`) matched against the **first 50 body lines**. The PostToolUse stamp hook runs the backfill corpus-wide, so any item whose body happens to mention a sprint early gets attributed to it.
+
+Observed on three in-flight SPRINT-39 items, each from an ordinary prose sentence:
+
+| Item | Attributed to | Source line |
+|---|---|---|
+| `BUG-044` | `SPRINT-38` | body line 43 — a repro step naming an example path under `.cleargate/sprint-runs/SPRINT-38/` |
+| `CR-106` | `SPRINT-03` | body line 42 — a backward-compatibility note |
+| `CR-111` | `SPRINT-01` | body line 48 — a `**Surface:**` citation |
+
+Seven items **not** in SPRINT-39 (`BUG-047`, `BUG-048`, `BUG-049`, `BUG-050`, `CR-109`, `EPIC-055`, `EPIC-057`) were symmetrically mis-tagged **into** it for the same reason. All 19 were corrected by hand on 2026-08-27; the backfill is idempotent once the key is non-null (`:266-272`), so the corrections hold.
+
+**Why this is worse than the phantom-id case:** it fails *silently*. BUG-048's phantom hard-blocks preflight with a visible error. This writes a plausible-looking wrong value into frontmatter that then propagates — `cleargate push` forwards it to the remote, `wiki ingest` copies it into the compiled page, and `close_sprint.mjs` lifecycle reconciliation reads it. Nothing surfaces the error.
+
+**Distinct fix recommendation.** BUG-048's fix refines a regex; this one should **delete the fallback**. A sprint is a scheduling fact that belongs in `state.json`, the sprint plan's deliverables table, or explicit frontmatter — never inferred from prose. Sniffing `fm.sprint_id` / `fm.sprint` / a `SPRINT-`-shaped `parent_epic_ref` (`:107-113`) is sound and should stay; the body-regex fallback at `:118-121` should be removed and the key left `null` for a human or `cleargate sprint init` to set. If the fallback is kept instead, it must at minimum be scoped to frontmatter and skip fenced/quoted prose — the same discipline [[BUG-041]] applied to id grammars.
+
+**Ambiguity note.** Whether to fold this into BUG-048's fix or split it into its own item is an open call for the human — the two share a root cause but no code. Recorded here rather than filed separately to avoid adding another unscheduled item.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**

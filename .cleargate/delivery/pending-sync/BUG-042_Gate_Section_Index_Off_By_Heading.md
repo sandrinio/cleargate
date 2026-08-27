@@ -1,8 +1,8 @@
 ---
 bug_id: BUG-042
 parent_ref: EPIC-054
-parent_cleargate_id: null
-sprint_cleargate_id: null
+parent_cleargate_id: "EPIC-054"
+sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
 status: Draft

@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "BUG-042": {
-      "state": "Bouncing",
+      "state": "QA Passed",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": ".worktrees/BUG-042",
-      "updated_at": "2026-08-27T08:29:20.393Z",
+      "updated_at": "2026-08-27T09:23:54.752Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -220,6 +220,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-042 \u2192 Bouncing",
-  "updated_at": "2026-08-27T08:29:20.393Z"
+  "last_action": "transition BUG-042 → QA Passed",
+  "updated_at": "2026-08-27T09:23:54.752Z"
 }
