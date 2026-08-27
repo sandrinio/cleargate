@@ -123,7 +123,30 @@ Feature: Task Breakdown section
 | Primary File | `.cleargate/templates/story.md` |
 | Related Files | `.cleargate/templates/CR.md`, `.cleargate/templates/Bug.md`, `.cleargate/knowledge/readiness-gates.md` |
 | Mirrors | `cleargate-planning/.cleargate/templates/story.md`, `cleargate-planning/.cleargate/templates/CR.md`, `cleargate-planning/.cleargate/templates/Bug.md`, `cleargate-planning/.cleargate/knowledge/readiness-gates.md` |
-| New Files Needed | No |
+| cleargate-cli (added 2026-08-28, M2 plan) | `cleargate-cli/src/lib/readiness-predicates.ts`, `cleargate-cli/test/lib/readiness-predicates-prior-work-ambiguity.node.test.ts` |
+| New Files Needed | Yes — `cleargate-cli/test/lib/readiness-predicates-task-breakdown.red.node.test.ts` (§4.1 asks for 2 unit tests; none is authorable in the outer repo) |
+
+**§3.1 AMENDMENT (orchestrator, 2026-08-28 — M2 plan finding).** The eight outer paths above
+were correct and complete for the surface-gated commit. **The entire `cleargate-cli` half was
+missing**, and Requirement 5 is unimplementable without it:
+
+| # | Site | Why it is not optional |
+|---|---|---|
+| 1 | `cleargate-cli/src/lib/readiness-predicates.ts` | `task-breakdown-complete` must be a **named** predicate. R5's "passes on absence" is inexpressible as `section(N)` — `evalSection` returns a hard *"section N not found"* — and a `section(N)` form would require editing `evalSection`, which **Cross-Cutting Rule 3 freezes sprint-wide**. Model on `evalPriorWorkRecorded` (`:995-1044`), one of three existing named predicates that pass on absence. Also add the vocabulary entry. |
+| 2 | `cleargate-cli/test/lib/readiness-predicates-task-breakdown.red.node.test.ts` (NEW) | §4.1 demands 2 unit tests. QA-Red authors it; `evaluate('task-breakdown-complete', …)` throws `unsupported predicate shape` from `parsePredicate:135` — a genuine non-vacuous red at the assertion line. |
+| 3 | `cleargate-cli/test/lib/readiness-predicates-prior-work-ambiguity.node.test.ts` | **Four stale sites** that go *stale-green*, not red — it builds its bodies as in-test string arrays (`:220-262`, `:363-385`) so it can never fail. `:214-219` comment, `:274` title, `:356` title, and `:390-393`'s "documents nine shapes" (becomes ten). `:275`/`:388` evaluate `section(4) has >=1 listed-item` — the exact check `dod-declared` carries today — against a synthetic body that reads neither template nor registry, so it **impersonates a witness it never was**. Retitle both to name the synthetic body; point at S1b as the real witness. |
+
+**Not in §3.1 by design:** `cleargate-planning/MANIFEST.json` (4 rows: `:202`, `:426`, `:433`, `:489`)
+is regenerated and staged by **DevOps post-merge**, whitelisted at `surface-whitelist.txt:12`.
+
+**Execution route:** MAIN CHECKOUT on `sprint/S-39`. A worktree is impossible — `cleargate-cli`
+is its own git repo with **zero tracked files** in the outer repo (BUG-046), so it does not
+materialise in one. Two commits, **cli first, outer second**.
+
+**Registry value that moves: exactly one.** `story.dod-declared` `section(4)`→`section(5)` at
+`readiness-gates.md:149`, both trees. Forgetting it reds **three** tests — S1b, S3a **and** S3b
+(S3a/S3b assert an exact finding *count* and break on pollution with a message that reads like a
+`CR.md` problem) — plus the manual `test_template_gate_correctness.red.sh` T2-D outside the suite.
 
 ### 3.2 Technical Logic
 Insert the section, then recompute the affected `section(N)` indices using the same split rule the evaluator uses and update `readiness-gates.md` in the same commit. In `story.md` the insertion after §3 moves `## 4. Quality Gates` from index 4 to index 5, so `dod-declared` must move with it. Re-run STORY-054-05's pinning test as the adjudicator rather than recounting by eye — recounting by eye is how the two drifted criteria in BUG-042 were born. The new criterion passes on absence, so it is a presence-conditional check, not a required-section check.

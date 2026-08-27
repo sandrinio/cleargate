@@ -113,10 +113,37 @@ Feature: Task Breakdown agent wiring
 
 | Item | Value |
 |---|---|
-| Primary File | `.claude/agents/developer.md` |
-| Related Files | `.claude/agents/architect.md`, `.claude/agents/qa.md` |
-| Mirrors | `cleargate-planning/.claude/agents/developer.md`, `cleargate-planning/.claude/agents/architect.md`, `cleargate-planning/.claude/agents/qa.md` |
+| Primary File | `cleargate-planning/.claude/agents/developer.md` |
+| Related Files | `cleargate-planning/.claude/agents/architect.md`, `cleargate-planning/.claude/agents/qa.md` |
+| Payload (added 2026-08-28) | `cleargate-cli/templates/cleargate-planning/.claude/agents/qa.md` |
+| Live (untracked — Gate-4 re-sync, NOT this commit) | `.claude/agents/developer.md`, `.claude/agents/architect.md`, `.claude/agents/qa.md` |
 | New Files Needed | No |
+
+**§3.1 AMENDMENT (orchestrator, 2026-08-28 — M2 plan finding). The original table was INVERTED.**
+It listed the live `.claude/agents/*.md` as Primary and the `cleargate-planning/` copies as
+Mirrors. That is backwards: **the live `.claude/` tree is fully untracked** (`git ls-files .claude/`
+returns 0, per CR-099), so editing it produces nothing committable, while the `cleargate-planning/`
+copies are the tracked source. §3.2 already says this correctly in prose — the table contradicted
+its own story. Labels corrected above.
+
+**One path was missing, and omitting it lands two red:**
+`cleargate-cli/templates/cleargate-planning/.claude/agents/qa.md`.
+`cleargate-cli/test/docs/readme-qa-doc-truth-043-06.red.node.test.ts:283-315` pins canonical↔payload
+byte-parity for **`qa.md` alone** — not `architect.md`, not `developer.md` — via a `strictEqual`
+plus an S6 `diff -q` guard. It is a **default-tier** test, so it runs.
+
+**Refresh it with `node cleargate-cli/scripts/copy-planning-payload.mjs`, NOT `npm run prebuild`**
+— prebuild also rewrites the tracked `cleargate-planning/MANIFEST.json`, which is DevOps's
+post-merge artifact, not this story's. *(Orchestrator ruling, M2 Open Decision 2.)*
+
+`copy-planning-payload.mjs:21` resolves its source to the **main checkout** always — run from a
+worktree it copies unmodified content and the parity failure persists. That is the second
+independent reason this story runs on the main checkout.
+
+**Not in §3.1 by design:** `cleargate-planning/MANIFEST.json` rows `:20`, `:55`, `:69` — DevOps post-merge.
+
+**Execution route:** MAIN CHECKOUT on `sprint/S-39`. `cleargate-cli` is involved but takes **zero
+cli commits** — the payload copier writes a gitignored path. One outer commit.
 
 ### 3.2 Technical Logic
 The Architect already produces exactly these rows in its per-story blueprint; this story changes where that output lands, not how it is produced. QA already reads DoD items, so the new assertion is one more item in an existing pass. Because the live `.claude/` tree is gitignored and fully untracked, the canonical mirror is the tracked source and the live copy is re-synced separately — a story that edits only the live tree leaves nothing in the commit.
