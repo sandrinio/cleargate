@@ -247,3 +247,31 @@ STORY-051-03 (Q7), as amended by CR-098: `discovery-checked` is self-referential
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
 ```
+
+```yaml
+- work_item_type: spike
+  transition: ready-to-investigate
+  severity: advisory
+  criteria:
+    - id: question-stated
+      check: "section(1) has ≥1 listed-item"
+    - id: timebox-and-kill-criteria-set
+      check: "section(2) has ≥2 listed-item"
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
+```
+
+```yaml
+- work_item_type: spike
+  transition: ready-to-conclude
+  severity: advisory
+  criteria:
+    - id: decision-log-populated
+      check: "section(4) has ≥1 declared-item"
+    - id: outcome-declared
+      check: "section(5) has ≥1 listed-item"
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+```
