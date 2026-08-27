@@ -141,6 +141,89 @@ exactly one of the six sites.
 *grammar*; it did not touch the type and bucket *registries*, which is why they were free to drift after it
 shipped.
 
+### 3.1 Re-measured 2026-08-27 against STORY-054-04's commits — seven corrections, one new drift row
+
+> Appended by the Architect post-flight pass on STORY-054-04 (outer `de75fd34`, `cleargate-cli`
+> `a52134b5`; both awaiting DevOps merge at the time of writing). **Evidence only** — no scope change, no frontmatter change, no gate criterion
+> checked. Everything below was executed against the tree, not recalled.
+
+**(i) The count in §1 is now low.** "Fourteen independent wiki-bucket lists" predates 054-04's
+enumeration. Measured today: **fifteen** live bucket-name sites — thirteen now carry `spikes`
+(eleven in `cleargate-cli`, plus both `config.yml` `wiki.ingest_buckets` allowlists), two
+deliberately do not (see (v)). A **sixteenth** is prose:
+`cleargate-planning/.cleargate/config.example.yml:10` reads
+`# Valid buckets: epics | stories | sprints | proposals | initiatives | crs | bugs` — stale in two
+directions, omitting both `spikes` and `topics`. It is a commented reference list nothing parses,
+i.e. the same "prose states a fact no test checks" class as the rest of this bug.
+
+**(ii) §1(b) and the §3 evidence block are one element short.** `src/wiki/load-wiki.ts:13` now reads
+`['epics','stories','sprints','proposals','crs','bugs','topics','spikes']`. A fixer running the §2
+repro (`sed -n '13p' cleargate-cli/src/wiki/load-wiki.ts`) gets a line that does not match the quoted
+evidence and could conclude the defect was already fixed. **The substantive claim is unchanged and
+still true: `initiatives` is still absent, and `loadWikiPages` is still consumed only by
+`wiki-lint.ts:66`, so initiative pages are still unlinted.**
+
+**(iii) §1(c) is strengthened, not weakened.** All three product-state sites
+(`src/wiki/synthesis/product-state.ts` `buckets`, its hand-written `total_*` block, and
+`templates/synthesis/product-state.md`'s mustache table) gained `spikes` and still lack
+`initiatives`. STORY-054-04 is a worked demonstration of the claim: adding one bucket required all
+three edits, and omitting the mustache row alone would have rendered nothing at all.
+
+**(iv) §5's two open premises are both settled — this is the most important correction here.**
+§5 says *"the test does not exist yet; writing it is part of the fix"* and poses the
+export-the-constants vs parse-the-source fork as an open decision. Both are resolved by `a52134b5`:
+
+- `cleargate-cli/test/wiki/bucket-registry-parity.red.node.test.ts` **exists** and is picked up by the
+  default runner glob.
+- It took the **parse-source-text** fork. **No private constant was exported** — the half-unification
+  this bug warns about did not start.
+- Its `KNOWN_BUCKET_GAPS` table is exactly this bug's §1(b)+(c), enumerated as five rows, each
+  carrying a reason string citing `BUG-051`:
+  `initiatives` × {`load-wiki.BUCKET_DIRS`, `product-state.buckets`, `product-state.total_*`,
+  `synthesis-template.mustache`} and `stories` × `synthesis-template.mustache`.
+- P2 collects **every** finding and names the specific site by label — which is precisely what §5
+  says a correct test must do.
+
+**Consequence for whoever fixes this bug: the fix is materially smaller than the bug describes.**
+It is *close the five gaps, delete the five rows, and delete the size assertion with them* — not
+*write a parity test from scratch*. A fixer who follows §5 literally writes a **second** parity
+test, which would be the sixteenth list and the exact defect this bug exists to end.
+
+**Recommended DoD sentence for §5 (not applied here — scope):** *"`KNOWN_BUCKET_GAPS` drops 5 → 0
+and the table, P3 and P4 are deleted with it."* Without an exit condition owned by this bug, the
+size assertion resists growth and shrinkage symmetrically and 5 stays 5 indefinitely.
+
+**(v) One new drift row, deliberate and correctly out of 054-04's scope.** `spikes` is absent from:
+
+- `src/lib/wiki/contradict.ts:313` `getBucketFromId` — a `SPIKE-` id falls through to `topics`.
+  **`contradict.ts` is not in §4's Modify list; it should be.** Measured blast radius, so the fixer
+  does not have to re-derive it: `preparePhase4`'s SHA-idempotency probe (`:88-96`) looks for
+  `wiki/topics/SPIKE-NNN.md`, never finds it, and **never skips** — Phase 4 re-prepares on every
+  ingest of an unchanged spike charter; the neighborhood lookups at `:345`, `:353`, `:365` miss real
+  spike pages. **No phantom page is created** — `stampContradictSha` (`:478-486`) reads before
+  writing and swallows ENOENT, so the mis-resolved write is a no-op. Wasted work and thinner
+  context, not a corrupt artifact.
+- `src/lib/wiki-comments-render.ts:33` `resolveBucket` / `:45` `getPrimaryId` — already listed in §4.
+  A spike's frontmatter yields `null`, so `renderComments` early-returns (`:118-120`) and comments
+  are silently unrouted. Unreachable until `push.ts` can type a spike (STORY-054-02).
+
+**(vi) Adjacent measured fact, NOT introduced by 054-04, corroborating the class.**
+`derive-bucket.ts` `PREFIX_MAP` has **no `HOTFIX-` row**, so `deriveBucket('HOTFIX-001_x.md')`
+throws (`:73`). `wiki build` swallows it and skips the file silently (`src/wiki/scan.ts:59-64`);
+`wiki ingest` prints and `exit(1)` (`src/commands/wiki-ingest.ts:128-139`). Hotfixes are therefore
+invisible to the wiki today. Relevant to `CR-108`, which will make hotfix items easier to create.
+
+**(vii) §5's named command does not filter.** `npm --prefix cleargate-cli test -- <file>` silently
+ignores the trailing path (`scripts/run-default-tests.mjs:23` hardcodes its glob and never reads
+`process.argv`) and runs the full suite. The working form is
+`npm --prefix cleargate-cli exec -- tsx --test cleargate-cli/test/<path>`.
+
+**Left for the human, deliberately not decided here:** whether this bug's severity should rise now
+that part of its fix is already built; whether the `contradict.ts` gap should be closed inside
+STORY-054-02; and whether the Ambiguity-Gate criterion *"Verification command (failing test) is
+provided"* is now satisfied by the shipped parity test. **That box is left unchecked** — checking it
+would flip a quarantined item toward 🟢 by interpretation, which is the human's call.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / Modify:**
