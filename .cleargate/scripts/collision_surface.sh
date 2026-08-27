@@ -62,6 +62,38 @@ parse_surface_paths() {
       return (s ~ /\//) || \
              (s ~ /\.(ts|tsx|cts|mts|js|jsx|cjs|mjs|json|jsonc|sh|bash|md|sql|svelte|vue|css|scss|sass|less|ya?ml|toml|ini|env|txt|prisma|html|htm|py|rs|go|rb|java|kt)$/)
     }
+    # BUG-049: emit every backticked token on a line that looks like a path.
+    # Bug/CR Execution Sandbox sections declare their surface as prose bullets
+    # (`- `path` — note`), not as a §3.1 table, so the table parser never saw them.
+    function emit_backticked(line,   n, parts, i, j, m, sub2, tok, p) {
+      n = split(line, parts, "`")
+      # Odd indices are outside backticks; even indices are inside.
+      for (i = 2; i <= n; i += 2) {
+        tok = parts[i]
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", tok)
+        m = split(tok, sub2, ", ")
+        for (j = 1; j <= m; j++) {
+          p = sub2[j]
+          gsub(/^[[:space:]]+|[[:space:]]+$/, "", p)
+          if (p != "" && looks_like_path(p)) print p
+        }
+      }
+    }
+    # ---- Bug §4 / CR §3 "Execution Sandbox" prose (BUG-049) ----------------
+    # Collect only under an affirmative label (Modify / Create / Investigate).
+    # A "Do NOT modify" list is ANTI-surface: including it would over-report and
+    # wrongly serialize items that could safely share a wave. Checked first,
+    # because that label also contains the word "modify".
+    /^## [0-9]+\.[[:space:]]*Execution Sandbox/ { in_sandbox=1; collecting=0; next }
+    in_sandbox && /^## / { in_sandbox=0; collecting=0; next }
+    in_sandbox && /^\*\*/ {
+      lower = tolower($0)
+      if (lower ~ /do not/)                        { collecting=0; next }
+      if (lower ~ /modify|create|investigate/)     { collecting=1; emit_backticked($0); next }
+      collecting=0; next
+    }
+    in_sandbox && collecting && /^[[:space:]]*[-*][[:space:]]/ { emit_backticked($0); next }
+
     /^### 3\.1/ { in_section=1; next }
     in_section && /^### / { in_section=0; next }
     in_section && /^\|/ {

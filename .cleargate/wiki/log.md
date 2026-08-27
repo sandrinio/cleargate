@@ -1395,3 +1395,8 @@
   action: "update"
   target: "SPRINT-39"
   path: ".cleargate/delivery/pending-sync/SPRINT-39_Decomposition_Surfaces.md"
+- timestamp: "2026-08-27T07:48:47.317Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-049"
+  path: ".cleargate/delivery/pending-sync/BUG-049_Collision_Surface_Only_Reads_Story_Template.md"

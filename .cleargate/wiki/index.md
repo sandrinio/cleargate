@@ -45,6 +45,7 @@
 - [[BUG-046]] (bug) — Triaged — Collision surface treats worktree-unreachable paths as ordinary files
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
+- [[BUG-049]] (bug) — Triaged — Collision surface reads only the Story template, so every Bug and CR is force-serialized
 
 ## Archive
 
