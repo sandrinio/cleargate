@@ -16,6 +16,7 @@ wiki:
     - crs
     - bugs
     - initiatives
+    - spikes
 
 gates:
   # Meta-repo gate commands run cleargate-cli's node:test suite via `npm --prefix`
