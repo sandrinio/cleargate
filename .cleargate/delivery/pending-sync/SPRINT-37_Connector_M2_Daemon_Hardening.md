@@ -13,7 +13,7 @@ end_date: 2026-07-21
 synced_at: null
 area: connector
 created_at: 2026-06-06T00:00:00Z
-updated_at: 2026-06-06T00:00:00Z
+updated_at: 2026-06-05T20:14:31Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: pending
 approved: false

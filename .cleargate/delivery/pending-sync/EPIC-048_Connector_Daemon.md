@@ -12,7 +12,7 @@ owner: Sandro
 target_date: 2026-08-15
 area: connector
 created_at: 2026-06-04T00:00:00Z
-updated_at: 2026-06-06T00:00:00Z
+updated_at: 2026-06-05T20:09:17Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

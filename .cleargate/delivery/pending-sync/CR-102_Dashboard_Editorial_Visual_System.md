@@ -19,7 +19,7 @@ context_source: |
   cleargate-cli/src/dashboard/render.ts:114-288 (the live STYLE block) and :296-824 (the SSR
   builders and render()), read field by field to inventory what must survive.
 created_at: 2026-08-02T00:00:00Z
-updated_at: 2026-08-02T16:05:00Z
+updated_at: 2026-08-02T14:16:10Z
 created_at_version: 0.22.0
 updated_at_version: 0.23.0
 server_pushed_at_version: null

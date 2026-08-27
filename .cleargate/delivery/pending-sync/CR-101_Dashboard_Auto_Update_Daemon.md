@@ -14,7 +14,7 @@ context_source: |
   2026-08-02: "lets wire it so it automatically updates when things change", after confirming
   the sprint-dashboard skill ships to clients but nothing keeps its output current.
 created_at: 2026-08-02T00:00:00Z
-updated_at: 2026-08-02T16:05:00Z
+updated_at: 2026-08-02T14:14:25Z
 created_at_version: 0.22.0
 updated_at_version: 0.23.0
 server_pushed_at_version: null

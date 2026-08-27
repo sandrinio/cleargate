@@ -13,9 +13,14 @@
 - [[EPIC-050]] (epic) — Draft — Connector Onboarding & Companion Packaging
 - [[EPIC-052]] (epic) — Draft — Requirement-Level Grounding — Make "Is This Shipped?" Answerable
 - [[EPIC-053]] (epic) — Draft — Downstream DB Collision Detection — Fail-Safe by Default, Derived Not Declared
+- [[EPIC-054]] (epic) — Draft — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
+- [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
+- [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
+- [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
+- [[SPRINT-39]] (sprint) — Draft — Decomposition Surfaces — Spike Before, Tasks Within
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -25,7 +30,21 @@
 - [[INITIATIVE-001]] (initiative) — In Triage — Broker / Rendezvous Plane for Local Claude Code Connectors
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
+- [[CR-105]] (cr) — Draft — The ClearGate block leads CLAUDE.md
+- [[CR-106]] (cr) — Draft — Execution state becomes an append-only event log with a derived fold
+- [[CR-107]] (cr) — Draft — Sprint→main merge goes through a pull request
+- [[CR-108]] (cr) — Draft — `cleargate new <type>` — one scaffolder for every work-item type
+- [[CR-109]] (cr) — Draft — Machine fields move out of the work-item document
+- [[CR-110]] (cr) — Draft — The sprint goal gets an acceptance check, and the Orchestrator holds it
+- [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
+- [[BUG-042]] (bug) — Draft — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
+- [[BUG-043]] (bug) — Draft — CLAUDE.md marker handling loses user prose — two ways
+- [[BUG-044]] (bug) — Triaged — Concurrent `update_state.mjs` invocations silently lose story transitions
+- [[BUG-045]] (bug) — Triaged — `hotfix new` ID allocation scans only `pending-sync/`, so archived IDs get reused
+- [[BUG-046]] (bug) — Triaged — Collision surface treats worktree-unreachable paths as ordinary files
+- [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
+- [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
 
 ## Archive
 
