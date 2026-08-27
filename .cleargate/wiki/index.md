@@ -38,7 +38,7 @@
 - [[CR-110]] (cr) — Draft — The sprint goal gets an acceptance check, and the Orchestrator holds it
 - [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
-- [[BUG-042]] (bug) — Draft — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
+- [[BUG-042]] (bug) — Draft ⚠︎ drift — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
 - [[BUG-043]] (bug) — Draft — CLAUDE.md marker handling loses user prose — two ways
 - [[BUG-044]] (bug) — Triaged — Concurrent `update_state.mjs` invocations silently lose story transitions
 - [[BUG-045]] (bug) — Triaged — `hotfix new` ID allocation scans only `pending-sync/`, so archived IDs get reused
@@ -47,6 +47,9 @@
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
 - [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
 - [[BUG-050]] (bug) — Draft — `countDeclaredItems` scores a bare `**Label:**` line as a declared item, so every `≥1` section criterion is fail-open
+- [[BUG-051]] (bug) — Draft — Work-item type and wiki bucket registries have silently drifted apart
+- [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
+- [[BUG-053]] (bug) — Draft — Commits made inside cleargate-cli are completely ungated
 
 ## Archive
 

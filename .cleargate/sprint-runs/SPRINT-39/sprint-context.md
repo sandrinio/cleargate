@@ -37,12 +37,27 @@ built-in defaults — Developer/QA/Architect use these values, not any hardcoded
 | Frontend runner   | n/a — single stack |
 | Typecheck command | `npm --prefix cleargate-cli run typecheck` (`tsc --noEmit`) |
 | Red-test naming   | `*.red.node.test.ts` |
+| **Targeted** run  | `npm --prefix cleargate-cli exec -- tsx --test cleargate-cli/test/<path>` |
 
 **Never `cd cleargate-cli && npm test`.** Use `npm --prefix`. The meta-repo root has no npm
 workspaces and `cd` leaks cwd into the pre-commit gate (FLASHCARD 2026-06-03 `#gate #npm #workspace`).
 Never `--workspace` either. Source: `cleargate-cli/package.json` `scripts.test` → `scripts/run-default-tests.mjs`;
 `test/**/*.node.test.ts` is the discovery glob, `test/fixtures/**` is excluded.
 Runner is **node:test via tsx**. Adding vitest is forbidden (EPIC-028 closure 2026-05-18).
+
+> **CORRECTED 2026-08-27 (orchestrator).** `npm --prefix cleargate-cli test -- <file>` does **NOT**
+> filter to that file. `cleargate-cli/scripts/run-default-tests.mjs:23` builds its file list from a
+> hardcoded `globSync([...])` array and never reads `process.argv`, so a trailing path argument is
+> silently dropped and the **full 2493-test suite runs instead**. This is a silent wrong-command, not
+> an error — the run simply takes minutes and reports totals for everything.
+>
+> For a single file use the **Targeted run** row above. Verified 2026-08-27: 14/14 in 1.9s, no `cd`,
+> no workspace flag. The full-suite command stays correct for full-suite runs.
+>
+> The full suite currently reports **1 pre-existing failure** — `test/commands/sync.node.test.ts`,
+> `Error: cannot reach https://cleargate-mcp.soula.ge (fetch failed)`. There is no outbound network in
+> this sandbox. It fails identically on `main`; it is not yours, do not chase it, and do not report a
+> suite as broken because of it.
 
 _If unresolved at init: leave the table stubbed. The pre-gate scan emits a one-line
 "test_stack unresolved — populate sprint_context.md §Test Stack" advisory and treats the
@@ -70,6 +85,18 @@ Sprint-wide architecture rules and UI/API tokens that every story must honour. P
    at `cleargate-cli/test/fixtures/gate-section-index/expected-headings.ts`. **Editing the fixture to
    match whatever the tree now produces is a QA kick-back** — it silently re-breaks the gate.
 5. **Never `--no-verify`.** Never `git reset --hard`, force-push, or rewrite history. If a hook fails, fix the cause.
+6. **Commits made *inside* `cleargate-cli/` are UNGATED — verify by hand.** Verified 2026-08-27:
+   `cleargate-cli/.git/hooks/` contains only `*.sample` files and no `core.hooksPath` is configured, so
+   **zero** hooks are installed in that repo. Every commit made from the `cleargate-cli` checkout therefore
+   bypasses the surface gate, `check:no-vitest`, `check:no-inline-id-regex`, **and** the typecheck/test
+   pre-commit — silently, without anyone passing `--no-verify`. STORY-054-05's three commits were ungated
+   this way. The outer repo *does* have a `pre-commit` hook, and `.cleargate/config.yml` `gates.precommit`
+   runs cli typecheck + tests, so **outer**-repo commits are gated; cli-repo commits are not.
+   Until this is fixed (filed as [[BUG-053]]), any story committing inside `cleargate-cli` MUST run
+   `npm --prefix cleargate-cli run typecheck` and the test suite explicitly, and report both numbers in its
+   report. Rule 5 still stands, but understand that for cli commits it is currently vacuous — there is no
+   hook to bypass. Do **not** install hooks there mid-sprint: the outer hook resolves `.cleargate/**`
+   relative to its own root and would misbehave from inside `cleargate-cli`.
 
 ## Active FLASHCARD Tags
 
@@ -101,6 +128,56 @@ Exported helpers and modules from already-merged stories in this sprint. The Arc
 | BUG-042 | `cr.sandbox-paths-declared` = `section(6)` → `## 3. Execution Sandbox` | `readiness-gates.md:174` |
 | BUG-042 | Vocabulary rule — **`N` is a position, not a printed ordinal.** Read before editing any `section(N)` | `readiness-gates.md:36` (Predicate Vocabulary) |
 
+| STORY-054-05 | `EXPECTED_HEADINGS` (`Record<string,string>`, 12 rows) — the ONLY export of this story | `cleargate-cli/test/fixtures/gate-section-index/expected-headings.ts:35-56` |
+| STORY-054-05 | `TEMPLATE_FOR` map + `KNOWN_UNPINNABLE` set — **live in the test file, not the fixture** | `cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts:111-118` / `:121-124` |
+| STORY-054-05 | Failure-message contract (exact, asserted verbatim by S3a/S3b) | `gate-section-index-pinning.node.test.ts:290` |
+| STORY-054-05 | Two-tree byte-parity machine check for `readiness-gates.md` + all six templates (S1c) | `gate-section-index-pinning.node.test.ts:443-460` |
+
+**Facts downstream Developers must NOT re-derive (STORY-054-05, added post-flight 2026-08-27):**
+
+- **The fixture is INDEX-FREE.** `EXPECTED_HEADINGS` maps `<type>.<criterion-id>` -> the full
+  heading LINE text; no `section(N)` integer appears in it. So when your story inserts a `## `
+  heading **and correctly recomputes** the shifted `section(N)` in `readiness-gates.md`, the
+  fixture needs **zero** edits — the criterion resolves to the same heading text as before.
+  Cross-Cutting Rule 4's "AND update the fixture" is over-broad: touch the fixture ONLY when a
+  criterion's target heading text is renamed, or when a new pinnable criterion appears. Opening
+  the fixture "to update it" when nothing needs updating is one keystroke from the tampering the
+  rule forbids.
+- **Adding a gated template is a FOUR-site edit, not two (T2 was one site short).** All four in
+  the same commit: (1) `TEMPLATE_FOR` (`gate-section-index-pinning.node.test.ts:111-118`) —
+  e.g. `spike: 'spike.md'`; (2) one row per new pinnable criterion in `expected-headings.ts`;
+  (3) **S1a's hardcoded totals** at `:432` (`14`) and `:434` (`12`); (4) **S6's hardcoded `12`**
+  at `:644` (and `:634`'s `KNOWN_UNPINNABLE.size, 2` if you add to that set). Sites 3-4 can only
+  be bumped once the registry blocks exist, so they belong in the same commit as the gate blocks.
+- **STORY-054-01 should add the `TEMPLATE_FOR` row even though it ships no gate blocks.** `S1c`
+  (`:443-460`) derives its live<->canonical byte-parity list from `Object.values(TEMPLATE_FOR)`
+  (`:446`), so `spike.md`'s Cross-Cutting-Rule-1 parity is **unchecked** until the row exists.
+  One line, cannot fail (S1c `continue`s on missing paths, `:451`), buys parity coverage a wave
+  early. STORY-054-02 MUST add it if 054-01 did not.
+- **14 = 12 pinnable + 2 un-pinnable.** The two `proposal.*` criteria are in `KNOWN_UNPINNABLE`
+  (`:121-124`) because `proposal` is a registered gated type with no `proposal.md` in either
+  tree. The escape hatch is closed: making the test green by adding a criterion to
+  `KNOWN_UNPINNABLE` trips S6's `size === 2` (`:634`).
+- **The YAML-list unwrap is load-bearing.** `loadGateBlocksFromText` (`:144-167`) replicates
+  `gate.ts:85`'s `Array.isArray(parsed) ? parsed[0] : parsed`. `readiness-gates.md`'s fenced
+  yaml blocks are LISTS; dropping the unwrap yields `undefined` criteria and a vacuous green at
+  0. Any future code reading those blocks must carry the same unwrap.
+- **Failure-message contract, exact (`:290`)** — `<type>.<criterion-id>: section(<N>) in <template> resolves to "<actual heading line>", expected "<fixture heading line>"`.
+  S3a (`:546`) and S3b (`:584`, `:588`) assert this string **verbatim** against today's `CR.md`
+  layout, so they go red on ANY `CR.md` restructuring at or above position 6 — correct-or-not.
+  Budget for that edit; do not read it as a gate defect.
+- **Nine of the twelve fixture rows are single-witness.** Only `cr.sandbox-paths-declared`,
+  `cr.blast-radius-populated` and `epic.affected-files-declared` have a second, fixture-
+  independent witness (S2a/S2b/S2c + S3a/S3b hardcode their heading text). For the other nine —
+  including `story.dod-declared`, `story.implementation-files-declared` and
+  `bug.repro-steps-deterministic`, all touched by STORY-054-06 — editing the fixture row to match
+  a drifted tree goes GREEN. QA-Verify on any heading-inserting story must read the
+  `readiness-gates.md` diff, not just the test result.
+- **`src/` is untouched and stays untouched.** `evalSection` is not exported and not imported;
+  `resolveHeadingLine` (`:228-238`) replicates its three load-bearing lines and **S4** (`:594-608`)
+  pins them by source text. If you change `readiness-predicates.ts:640/646/648`, S4 tells you to
+  re-sync the checker.
+
 **Facts downstream Developers must NOT re-derive:**
 
 - The registry holds **14** `section(N)` criteria: **12 pinnable + 2 un-pinnable** (`proposal.architecture-populated`, `proposal.touched-files-populated` — `proposal` is a registered type with no `proposal.md` template in either tree). STORY-054-05 asserts `KNOWN_UNPINNABLE` size **2**. Unchanged by BUG-042.
@@ -120,3 +197,16 @@ _(populated by Architect on CR:scope-change or CR:approach-change; never rewrite
 - `2026-08-27 · M0/R5 · ORCHESTRATOR DECISION — two locators now exist for `## 3. Execution Sandbox`:` `collision_surface.sh:87` locates it by heading **text**, the gate by **position** (`section(6)`). They agree today only by coincidence and diverge the moment STORY-054-06 inserts a heading. **Not folded into BUG-046** — that item already absorbed three refinements and is at its scope limit. Carried to the sprint report as a candidate follow-on CR.
 - `2026-08-27 · M0/DoD · ORCHESTRATOR CONFIRMATION — npm payload regeneration is a Gate-4/close step, not per-story.` `cleargate-cli/templates/cleargate-planning/**` is gitignored and rebuilt by `prebuild`. No story regenerates or commits it.
 - `2026-08-27 · M0/R1 · ORCHESTRATOR CONFIRMATION — EPIC-031 is NOT reopened during SPRINT-39.` Post-fix it reports `section 8 not found (body has 7 sections)`. Accepted under BUG-042's recorded lazy-re-check decision. Do not soften the criterion, do not bulk-rewrite the archive; record the residue in the sprint report.
+- `2026-08-27 · STORY-054-05/post-flight R11 · M2 OBLIGATION — STORY-054-06 takes the ZERO-SHIFT placement.` Insert `## Task Breakdown` in `CR.md` immediately **after** `## 3. Execution Sandbox` (new position 7) and in `Bug.md` immediately **after** `## 2. Reproduction Protocol` (new position 3). Then `cr.sandbox-paths-declared` stays `section(6)`, `bug.repro-steps-deterministic` stays `section(2)`, the worked example at `readiness-gates.md:36` stays true, and S2a/S3a/S3b's hardcoded assertion strings need no edit. `story.md` keeps its specified placement after §3 — that costs exactly one digit (`story.dod-declared` `section(4)`→`section(5)`, **both trees**) and **no fixture edit** (the heading text is unchanged; the fixture is index-free). **Fallback if placement above Execution Sandbox is chosen anyway:** the DoD must additionally (a) move `section(6)`→`section(7)` in both trees, (b) rewrite the worked example at `readiness-gates.md:36` in both trees **while preserving the backticked path `cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts`** — dropping it turns **S7** red (`:656-659`), (c) update the hardcoded message strings at `gate-section-index-pinning.node.test.ts:546`, `:584`, `:588`, and (d) if the insertion is also above `## 2. Blast Radius & Invalidation`, update `:472` and `:483` and the `section(3)` registry value. Same obligation binds **CR-111** if its test-layer table lands as a `## ` heading.
+- `2026-08-27 · STORY-054-05/post-flight R11 · CANDIDATE FOLLOW-ON CR (sprint report, not this sprint) — pin the vocabulary worked example.` S7 (`:649-663`) reads the Predicate Vocabulary paragraph but its extractor (`:373`) pulls only backticked test paths; the sentence "`## 3. Execution Sandbox` in `CR.md` is `section(6)`" is never parsed. An S8 (~8 lines, reusing `templateBodyOf`/`resolveHeadingLine`) that extracts ``` `## X` in `Y.md` is `section(N)` ``` and asserts the resolution would make the prose self-enforcing. Not taken here: new scope on a merged, QA-passed story's file. EPIC-052 WS1 (`## Grounding` in five templates, next sprint) will re-falsify the example, so route it there or to a standalone CR.
+- `2026-08-27 · STORY-054-05/post-flight R12 · GUARD NOTE (M1, STORY-054-01) — `spike.md` carries no literal `SPRINT-<digits>` in the first 50 lines of its POST-FRONTMATTER BODY.` Write `SPRINT-NN` / `SPRINT-<n>` in guidance prose. Phrased against the body, not the raw file: `<instructions>`-block mentions are harmless under both render paths (see the R12 correction below) — do not spend a dispatch purging them. Free before the template ships, expensive afterwards.
+- `2026-08-27 · STORY-054-05/post-flight R12 · GUARD NOTE (M2 STORY-054-06, M4 CR-111) — no NEW `SPRINT-<digits>` literal in any prose added to `story.md`, `CR.md`, `Bug.md`.` Applies to `<instructions>` prose and body prose alike. Pre-existing occurrences (`story.md` raw lines 28 and 45, both inside `<instructions>`) are **BUG-048's to clean — do not expand scope to remove them.**
+- `2026-08-27 · STORY-054-05/post-flight R12 · GUARD NOTE (M4, CR-108) — a scaffolded item's `sprint_cleargate_id` must be RESOLVED-OR-OMITTED, never a literal `null`.` The write guard at `backfill_hierarchy.mjs:280` treats `null` as absent. **New coupling, verified:** `parseFm` (`:70`) bails on `!raw.startsWith('---')`, and all seven authoring templates open with `<instructions>` at line 1 — so an item rendered **verbatim** (today's `cleargate hotfix new`, `hotfix.ts:179-182`, `{ID}`/`{SLUG}`/`{ISO}` only, zero `<instructions>` handling) is **skipped entirely** by the backfill. **Stripping `<instructions>` on render is exactly what makes a scaffolded item backfill-visible for the first time.** CR-108 therefore cannot ship the strip without settling `sprint_cleargate_id` in the same commit, or it converts today's latent-zero exposure into a live one.
+- `2026-08-27 · STORY-054-05/post-flight · CORRECTION to M0 R12 — the templates are NOT "already poisoned".` R12 states that `cleargate new story` would emit `SPRINT-09` at body line 28 and the next backfill would stamp it. Verified false on both paths: (a) verbatim render → file starts with `<instructions>`, `parseFm` returns `null`, file skipped; (b) stripped render → body starts after the frontmatter, and `awk 'NR>105' story.md | head -50 | grep 'SPRINT-[0-9]'` returns nothing (both hits are at raw lines 28/45, inside `<instructions>`). The 19 real mis-attributions came from hand-authored items that already start with `---` and name a sprint in their first 50 body lines — that mechanism is untouched and the close-gate obligation above still stands. The three guard notes stay worth recording; they hold under either render path.
+- `2026-08-27 · STORY-054-05/post-flight T2 · CORRECTION to M0 T2 — adding a gated template is a FOUR-site edit, not two.` T2 names `TEMPLATE_FOR` + fixture rows. It stops one site short: **S1a's hardcoded totals** (`gate-section-index-pinning.node.test.ts:432` = `14`, `:434` = `12`) and **S6's hardcoded `12`** (`:644`, plus `:634`'s `KNOWN_UNPINNABLE.size, 2`) must be bumped in the same commit. The totals are intentional tripwires — "silence is not a pass" — but a Developer who edits only sites 1-2 lands a red S1a/S6 and may wrongly conclude the fixture is wrong. **M1/M2 plans must restate T2 with all four sites.**
+- `2026-08-27 · M1/preflight · ORCHESTRATOR FINDING — STORY-054-04's file surface was 4 sites; the real count is 13.` Executed the story's own §1.5 Risk-1 mitigation ("grep for each of the four known list literals before implementing and assert the count"). Two of the thirteen are hard blockers the original file list could not reveal: `derive-bucket.ts PREFIX_MAP` (`deriveBucket()` **throws** on an unknown prefix — Scenario 1 unreachable) and `wiki-ingest.ts BUCKET_SYNTHESIS_MAP` (unknown bucket → `?? []` → silently recompiles nothing — Scenario 2 unreachable). §3.1 amended with a per-site justification table; gate re-passes at 11 criteria; complexity relabelled L2→L3. **Not new scope** — every added site is required by already-approved Gherkin.
+- `2026-08-27 · M1/preflight · ORCHESTRATOR CORRECTION — my own §3.1 row 13 was destructive and is fixed.` It read "mirror — same commit, byte-identical". The two `config.yml` files are legitimately different documents: live is 36 lines carrying `gates:` (including the precommit command itself) and `worktree:`; canonical is an 18-line `cleargate init` seed carrying neither. A literal byte-identical sync **deletes this repo's pre-commit gate configuration.** Row 13 now scopes the obligation to the `wiki.ingest_buckets` list only, with a key-scoped diff recipe. Cross-Cutting Rule 1's byte-identical clause covers `.cleargate/knowledge/**` and `.cleargate/templates/**` — shipped documents — not instance state.
+- `2026-08-27 · M1/preflight · TEST-STACK CORRECTION — the targeted-run command in §Test Stack was wrong.` `npm --prefix cleargate-cli test -- <file>` silently ignores the trailing path (`run-default-tests.mjs:23` hardcodes its glob, never reads `process.argv`) and runs the full 2493-test suite. I put that command in §Test Stack and in the wave-2 DevOps dispatch; DevOps caught it mid-run and killed it rather than let a forbidden full-suite run stand as evidence. Corrected recipe verified at 14/14 in 1.9s.
+- `2026-08-27 · M1/preflight · NEW CROSS-CUTTING RULE 6 — cli-repo commits are ungated.` `cleargate-cli/.git/hooks/` holds only `*.sample` and no `core.hooksPath` is set, so every commit authored from that checkout bypasses the surface gate, `check:no-vitest`, `check:no-inline-id-regex`, and typecheck/test — with nobody passing `--no-verify`. STORY-054-05's three commits were ungated this way (green, but by discipline rather than enforcement). Filed as **BUG-053**. Do **not** install hooks there mid-sprint; the outer hook resolves `.cleargate/**` against its own root.
+- `2026-08-27 · M1/preflight · THREE DEFECTS FILED, ALL QUARANTINED, NONE TAKEN INTO THIS SPRINT.` **BUG-051** — three disagreeing frontmatter→type maps (`push.ts` knows `sprint_id` not `initiative_id`; `sync/work-items.ts` the reverse; neither knows `hotfix_id`), `wiki lint` blind to `wiki/initiatives/`, `product-state.md` missing its Initiatives row, and `sync work-items` typing a sprint as `story` via a silent fallthrough. **BUG-052** — `file_surface_diff.sh:126` filters on three state strings none of which is in `VALID_STATES`, a dead branch that makes the gate fall back to `max(updated_at)`; root cause of the wave-2 bypass, and the home for the previously-unfiled orchestrator-lane question. **BUG-053** — above. All three are `approved: false`, 🟡, `sprint_cleargate_id: null`.
+
