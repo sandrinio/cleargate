@@ -108,7 +108,9 @@ The triggering prose was ``matches on filename prefix \`STORY-054-\``` and ``All
 
 Found 2026-08-27 during SPRINT-39 M0. **Different file, different mechanism, same class:** an ID written in prose is read as a structural declaration.
 
-`.cleargate/scripts/backfill_hierarchy.mjs:120` populates a missing `sprint_cleargate_id` with a last-resort fallback — `SPRINT_REGEX = /\bSPRINT-(\d+)\b/` (`:92`) matched against the **first 50 body lines**. The PostToolUse stamp hook runs the backfill corpus-wide, so any item whose body happens to mention a sprint early gets attributed to it.
+`.cleargate/scripts/backfill_hierarchy.mjs:120` populates a missing `sprint_cleargate_id` with a last-resort fallback — `SPRINT_REGEX = /\bSPRINT-(\d+)\b/` (`:92`) matched against the **first 50 body lines**. Any item whose body happens to mention a sprint early gets attributed to it.
+
+> **Corrected 2026-08-27 (architect post-flight).** An earlier draft of this section said the `PostToolUse` stamp hook runs the backfill. **It does not.** `.claude/settings.json` wires `PostToolUse` to `stamp-and-gate.sh`, which runs `stamp-tokens` → `gate check` → ingest and never invokes this script; a repo-wide grep for the name returns only the script's own header and its tests. It is a **manual one-shot** over flat `pending-sync/` + `archive/`. The mechanism and blast radius below are unchanged — but the defect fires in corpus-wide **batches** when someone runs it, not per-Write.
 
 Observed on three in-flight SPRINT-39 items, each from an ordinary prose sentence:
 

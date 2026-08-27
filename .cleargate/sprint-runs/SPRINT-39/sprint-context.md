@@ -95,7 +95,20 @@ Exported helpers and modules from already-merged stories in this sprint. The Arc
 
 | Story | Module / Export | Path |
 |-------|----------------|------|
-| (populated as stories merge) | | |
+| BUG-042 | _no module_ — publishes three corrected `section(N)` indices + one vocabulary rule | `.cleargate/knowledge/readiness-gates.md` (+ `cleargate-planning/` mirror, byte-identical) |
+| BUG-042 | `epic.affected-files-declared` = `section(8)` → `## 4. Technical Grounding` | `readiness-gates.md:99` |
+| BUG-042 | `cr.blast-radius-populated` = `section(3)` → `## 2. Blast Radius & Invalidation` | `readiness-gates.md:170` |
+| BUG-042 | `cr.sandbox-paths-declared` = `section(6)` → `## 3. Execution Sandbox` | `readiness-gates.md:174` |
+| BUG-042 | Vocabulary rule — **`N` is a position, not a printed ordinal.** Read before editing any `section(N)` | `readiness-gates.md:36` (Predicate Vocabulary) |
+
+**Facts downstream Developers must NOT re-derive:**
+
+- The registry holds **14** `section(N)` criteria: **12 pinnable + 2 un-pinnable** (`proposal.architecture-populated`, `proposal.touched-files-populated` — `proposal` is a registered type with no `proposal.md` template in either tree). STORY-054-05 asserts `KNOWN_UNPINNABLE` size **2**. Unchanged by BUG-042.
+- `epic.scope-in-populated` (`section(3)`) and all three `hotfix` criteria were **already correct** and are deliberately untouched. Their printed ordinals are off by one from their indices and that is right. Do not "align" them.
+- Heading positions today — `CR.md`: `1 ## 0.5 Open Questions · 2 ## 1. Context Override · 3 ## 2. Blast Radius · 4 ## Existing Surfaces · 5 ## Prior work · 6 ## 3. Execution Sandbox · 7 ## 4. Verification Protocol · 8 ## Context Source · 9 ## Ambiguity Gate`. `story.md`: `1 §1 · 2 §2 · 3 §3 · 4 §4 Quality Gates · 5 Existing Surfaces · 6 Prior work · 7 Why not simpler? · 8 Ambiguity Gate`.
+- `cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts` is **named in `readiness-gates.md:36` but created by STORY-054-05 (wave2)**. That path is contractual — 054-05 must use it verbatim. See M0 plan **R11**.
+- Post-fix corpus residue, already accepted: EPIC-031 hard-fails `section 8 not found (body has 7 sections)`; 6/14 pending-sync epics and 23/25 CRs resolve to the named heading. Do not soften the criterion or bulk-rewrite the archive. See M0 plan **R1**.
+- A label-bearing empty section still passes `≥1 declared-item` (a bare `**Modify:**` counts as one item). BUG-042 did **not** close that; **BUG-050** owns it and is quarantined. Do not "harden" `countDeclaredItems`. See M0 plan **R10**.
 
 ## Mid-Sprint Amendments
 
