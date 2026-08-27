@@ -58,6 +58,36 @@ As a ClearGate maintainer, I want a spike charter template, so that bounded disc
 - Requirement 4: The template's own ambiguity gate states the inversion in its body text — 🟢 means the question is sharp, the timebox is set, and the kill criteria are falsifiable; it does not mean the answer is known.
 - Requirement 5: §5 records `spawned_items` and instructs the author to move the file to `archive/` on conclusion, mirroring the Initiative lifecycle.
 - Requirement 6: Byte-identical mirror at `cleargate-planning/.cleargate/templates/spike.md`.
+- Requirement 7 (**ADDED 2026-08-27, orchestrator decision — M1 Open Decision #1**): the template carries a
+  `## Prior work` section, placed **after** §5 Outcome & Spawned Items and **before** the Ambiguity Gate.
+  The M1 plan's default was to omit it; overruled. CLAUDE.md's duplicate-check rule requires the
+  `cleargate-wiki-query` result be recorded "in the document's own `## Prior work` section" for **anything**
+  written under `.cleargate/delivery/pending-sync/`, and a spike charter lands there. Omitting the section
+  does not exempt a spike from the rule — it leaves the drafting agent with nowhere to put mandated
+  evidence, so it either skips the check or invents a heading. **An invented heading shifts every
+  `section(N)` below it, which is the exact defect BUG-042 and STORY-054-05 exist to prevent.** A spike is
+  also the artefact where "has this already been investigated?" carries the most value, because the cost of
+  missing it is a whole re-run timebox.
+  Copy the section shape verbatim from `.cleargate/templates/Bug.md` (its `## Prior work` block, including
+  the accepted-sentinel note) so the predicate's sentinel vocabulary matches.
+
+  **Resulting heading layout — this supersedes the M1 plan's six-row schema table:**
+
+  | Position | Heading line (exact) | Gated by 054-02? |
+  |---|---|---|
+  | 1 | `## 1. The Question` | yes |
+  | 2 | `## 2. Timebox & Kill Criteria` | yes |
+  | 3 | `## 3. Decision Unblocked` | no |
+  | 4 | `## 4. Decision Log` | yes |
+  | 5 | `## 5. Outcome & Spawned Items` | yes |
+  | 6 | `## Prior work` | no |
+  | 7 | `## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)` | no |
+
+  **Safe by construction:** every position 054-02 gates is ≤5, so none shifts. STORY-054-02's four fixture
+  rows and four `section(N)` values are unchanged by this decision. All other M1 schema constraints stand
+  unaltered — in particular there is still **no** `## 0.5 Open Questions`, no `## Existing Surfaces`, no
+  `## Why not simpler?`, no `## Context Source`, and the seven template invariants apply to `## Prior work`
+  as well (no `- ` bullets that would score `listed-item`; use the sentinel line shape from `Bug.md`).
 
 ### 1.3 Out of Scope
 Type registration, gate blocks, KNOWN_TYPES, and the wiki bucket — those are STORY-054-02 and STORY-054-04. This story ships the document shape only; a spike drafted from it will not yet pass a `cleargate gate check` because no `work_item_type: spike` block exists until 02.

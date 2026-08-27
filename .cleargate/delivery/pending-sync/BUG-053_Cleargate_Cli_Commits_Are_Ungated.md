@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-053
 parent_ref: EPIC-043
-parent_cleargate_id: null
+parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: null
 carry_over: false
 status: Draft

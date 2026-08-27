@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-052
 parent_ref: EPIC-043
-parent_cleargate_id: null
+parent_cleargate_id: "EPIC-043"
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
@@ -115,6 +115,35 @@ Two further hazards in the same lookup, worth fixing together rather than one at
   wave this sprint runs.
 - The `max(updated_at)` fallback is not obviously wrong at a glance, which is why the dead filter above it
   survived: the gate keeps producing plausible answers.
+
+### 3.1 Two corollaries measured 2026-08-27, after filing
+
+**(a) Marking a story `Done` makes it the gate's active story for the very next commit.** The fallback is
+`max(updated_at)` with **no terminal-state filter** (`:135-144`), so the state write that records completion
+is itself what promotes that story to "active". The next commit is then judged against the §3.1 of a story
+that is finished — and a §3.1 written before execution cannot possibly have pre-declared the artifacts that
+record the story's own completion.
+
+Observed live: DevOps merged STORY-054-01 cleanly (`827a77e1`), set the story `Done`, and its very next
+commit was rejected with the DevOps **report file** cited as off-surface for STORY-054-01. The loop is
+self-defeating in the ordinary case, not an edge case — every story hits it at merge time.
+
+**(b) The real blocker is narrower than (a), and much cheaper to fix: the whitelist omits the loop's own
+reports.** `.cleargate/scripts/surface-whitelist.txt` already admits the auto-generated artifacts —
+`.cleargate/sprint-runs/**/state.json`, `.cleargate/sprint-runs/**/token-ledger.jsonl`,
+`.cleargate/sprint-runs/**/.pending-task-*.json`, `cleargate-planning/MANIFEST.json`, `.cleargate/hook-log/*`.
+It does **not** admit the per-story agent reports the loop itself writes:
+`STORY-NNN-NN-{dev,qa,qa-red,devops,arch-postflight}.md`.
+
+Those reports are the same kind of object as the ledger — written by the loop, never by a human, never part
+of any story's declared surface, and required for a merge to be auditable. Proof the gap is precisely this:
+after unstaging **only** the DevOps report, the identical commit passed the gate with **no bypass**
+(`edf5ca0e`), because `state.json` and `MANIFEST.json` were already whitelisted.
+
+**Recommended fix order.** (b) first — one whitelist line, e.g. `.cleargate/sprint-runs/**/*.md`, or narrower
+if a human prefers to keep hand-authored sprint docs gated. That alone removes the recurring merge-time
+block and most of the pressure to reach for `SKIP_SURFACE_GATE=1`. Then (a) and the dead filter, which are
+the deeper correctness problem but need the orchestrator-lane decision in Open Questions settled first.
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 

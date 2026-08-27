@@ -115,6 +115,40 @@ Template bodies that seed the labels:
 
 ---
 
+### 3.1 Scope is WIDER than "bare bold labels" — measured 2026-08-27
+
+This bug was filed against the shape `**Modify:**` — a bold subsection label with nothing beneath it. That
+framing understates it. The regex is
+
+```
+/^(\*{1,2}|_{1,2})?[A-Z][^|*\n]*(\*{1,2}|_{1,2})?:/
+```
+
+The emphasis markers are **optional**. What it actually matches is *any* line that begins with a capital
+letter and reaches a colon without crossing a `|` or `*` — which ordinary guidance prose does constantly.
+
+Measured against `.cleargate/templates/spike.md` as authored by STORY-054-01, by executing the real
+exported `evaluate()` (not by inspection):
+
+| Section | `declared-item` score | Lines responsible |
+|---|---|---|
+| §1 The Question | **1** | `...must be falsifiable: a reader...` |
+| §2 Timebox & Kill Criteria | **2** | `**Timebox:**` and `**Kill criteria:**` |
+| §4 Decision Log | 0 | table — header + separator + zero data rows |
+| §5 Outcome & Spawned Items | **1** | `State the concluding verdict here: the answer...` |
+
+§1 and §5 carry **no bold label at all**. They are plain instructional sentences, and they score. So the
+fail-open reaches every prose section in every template, not merely sections that happen to ship a label.
+
+**Consequence for gate authoring, while this bug is open and `readiness-predicates.ts` is frozen:** a
+presence gate over a *prose* section must use `listed-item` (`/^\s*- /gm`) paired with a template that ships
+zero bullets there; `declared-item` is safe only over a *table* section. STORY-054-02's Requirement 4 was
+amended on this basis — it originally specified `declared-item` for three prose sections, which would have
+shipped a brand-new gate already fail-open on the day it landed.
+
+**Discovery credit:** surfaced by QA-Verify on STORY-054-01, which measured the sections by execution rather
+than by eye. The orchestrator's own mechanical check missed it because it tested the `listed-item` shape.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Modify:**

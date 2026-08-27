@@ -13,7 +13,7 @@
 - [[EPIC-050]] (epic) — Draft — Connector Onboarding & Companion Packaging
 - [[EPIC-052]] (epic) — Draft — Requirement-Level Grounding — Make "Is This Shipped?" Answerable
 - [[EPIC-053]] (epic) — Draft — Downstream DB Collision Detection — Fail-Safe by Default, Derived Not Declared
-- [[EPIC-054]] (epic) — Draft — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
+- [[EPIC-054]] (epic) — Draft ⚠︎ drift — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
@@ -50,6 +50,7 @@
 - [[BUG-051]] (bug) — Draft — Work-item type and wiki bucket registries have silently drifted apart
 - [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
 - [[BUG-053]] (bug) — Draft — Commits made inside cleargate-cli are completely ungated
+- [[BUG-054]] (bug) — Draft — Nine of twelve gate criteria pass on their own unedited template
 
 ## Archive
 
