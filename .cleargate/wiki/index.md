@@ -46,6 +46,7 @@
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
 - [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
+- [[BUG-050]] (bug) — Draft — `countDeclaredItems` scores a bare `**Label:**` line as a declared item, so every `≥1` section criterion is fail-open
 
 ## Archive
 

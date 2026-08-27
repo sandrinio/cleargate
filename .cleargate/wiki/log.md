@@ -1415,3 +1415,8 @@
   action: "update"
   target: "SPRINT-39"
   path: ".cleargate/delivery/pending-sync/SPRINT-39_Decomposition_Surfaces.md"
+- timestamp: "2026-08-27T08:45:29.035Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-050"
+  path: ".cleargate/delivery/pending-sync/BUG-050_Declared_Item_Counter_Scores_Bare_Labels.md"
