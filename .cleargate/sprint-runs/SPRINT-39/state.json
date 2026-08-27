@@ -16,11 +16,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-05": {
-      "state": "Bouncing",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
-      "worktree": "cleargate-cli (branch story/STORY-054-05 \u2014 NOT a worktree; cleargate-cli is gitignored in the outer repo)",
-      "updated_at": "2026-08-27T12:30:10.761Z",
+      "worktree": null,
+      "updated_at": "2026-08-27T13:44:32.120Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -220,6 +220,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-054-05 \u2192 Bouncing",
-  "updated_at": "2026-08-27T12:30:10.761Z"
+  "last_action": "transition STORY-054-05 → Done",
+  "updated_at": "2026-08-27T13:44:32.120Z"
 }
