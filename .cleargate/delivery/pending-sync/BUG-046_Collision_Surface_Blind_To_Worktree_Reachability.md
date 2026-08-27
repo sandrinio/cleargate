@@ -130,6 +130,24 @@ Three further extractor defects surfaced during SPRINT-39's fan-out. All live in
 
 **Direction note:** (b) and (c) both fail toward over-serialization, which the script's own header calls the safe direction — they cost wall-clock, not correctness. (a) fails the other way and is the one that matters.
 
+### 3.5(d) Fourth over-reporting case — `Reference (read-only)` rows are emitted as surface
+
+Observed live on 2026-08-27 while sanity-checking SPRINT-39 wave 3, so this is evidence from the sprint's own run, not a hypothetical.
+
+`STORY-054-01`'s §3.1 table declares:
+
+| Item | Value |
+|---|---|
+| Primary File | `.cleargate/templates/spike.md` |
+| Related Files | `cleargate-planning/.cleargate/templates/spike.md` |
+| **Reference (read-only)** | `.cleargate/templates/initiative.md`, `.cleargate/templates/hotfix.md` |
+
+`collision_surface.sh` emits **all four** paths. The §3.1 parser consumes every backticked token on every row of the table without reading the row **label**, so a row explicitly marked *read-only* is reported as though the story writes it.
+
+**Why it matters.** The wave-compatibility predicate treats `file_surface` as a write set. Two stories that merely *read* the same template are certified as colliding and get needlessly serialized — the mirror image of BUG-046's main defect, which certifies non-colliding stories that actually collide. Here it cost nothing (054-01 and 054-04 are disjoint on real surfaces anyway), but it is the same class as the trailing-`— description` and prose-cell-with-`/` cases already in §3.5, and any fix must handle all four together.
+
+**Suggested handling:** the §3.1 parser should read the row label and skip rows whose label matches `/read-only|reference|do not modify/i`, mirroring the `do not` check the Execution Sandbox parser already performs (`collision_surface.sh:87-90`, added by BUG-049). The two parsers currently disagree: the Sandbox parser honours a "Do NOT modify" label, the §3.1 table parser ignores labels entirely. **Unifying that is the actual fix — not adding a second special case.**
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**
