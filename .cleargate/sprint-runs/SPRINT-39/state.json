@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "BUG-042": {
-      "state": "QA Passed",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
-      "worktree": ".worktrees/BUG-042",
-      "updated_at": "2026-08-27T09:23:54.752Z",
+      "worktree": null,
+      "updated_at": "2026-08-27T12:28:32.188Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -220,6 +220,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-042 → QA Passed",
-  "updated_at": "2026-08-27T09:23:54.752Z"
+  "last_action": "transition BUG-042 → Done",
+  "updated_at": "2026-08-27T12:28:32.188Z"
 }

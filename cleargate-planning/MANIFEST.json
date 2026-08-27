@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.24.2",
-  "generated_at": "2026-08-24T14:57:36.372Z",
+  "generated_at": "2026-08-27T09:19:58.330Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -242,7 +242,7 @@
     },
     {
       "path": ".cleargate/scripts/collision_surface.sh",
-      "sha256": "5c99ea4b0f0a1221289ca7e508ba8e2dc53b9d1d9e41563cc55bf3c2923a70b9",
+      "sha256": "00e2cd132bd77be2095f1e125bb9ca8ce4926b70cfe341e6035d546b58bb0fda",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
