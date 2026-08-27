@@ -33,6 +33,8 @@ Splits the document body on `## ` heading boundaries (1-indexed) and counts item
 
 Example: `section(2) has ≥1 checked-checkbox` asserts that the second `##` section contains at least one checked markdown checkbox. Example: `section(3) has ≥1 declared-item` passes when §3 contains at least one bullet, table data row, or definition-list term.
 
+**`N` is a position, not a printed ordinal.** Sections are counted in document order over `## ` headings, so a template whose first heading is `## 0.5 Open Questions` or `## 0. AI Coding Agent Handoff` shifts every later section by one — and unnumbered headings (`## Existing Surfaces`, `## Prior work`, `## Why not simpler?`) consume positions too. `## 3. Execution Sandbox` in `CR.md` is `section(6)`, not `section(3)`. Inserting any `## ` heading into a gated template renumbers every criterion below it. The pinning test (`cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts`) enumerates every `section(N)` criterion and asserts it resolves to the heading its id names — it is what turns that renumbering into a build break. Update the fixture there in the same commit as any template heading change.
+
 **4. `file-exists(<path>)`**
 Asserts that a file exists on disk at the given path, resolved relative to the project root. Example: `file-exists(.cleargate/knowledge/cleargate-protocol.md)` passes when that file is present in the working tree.
 
@@ -96,7 +98,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: scope-in-populated
       check: "section(3) has ≥1 declared-item"
     - id: affected-files-declared
-      check: "section(5) has ≥1 declared-item"
+      check: "section(8) has ≥1 declared-item"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
     - id: discovery-checked
@@ -167,11 +169,11 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: blast-radius-populated
-      check: "section(2) has ≥1 declared-item"
+      check: "section(3) has ≥1 declared-item"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: sandbox-paths-declared
-      check: "section(3) has ≥1 declared-item"
+      check: "section(6) has ≥1 declared-item"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
