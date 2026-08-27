@@ -647,7 +647,7 @@ Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--s
 
 ### §21.2 Ingest Bucket Allowlist
 
-By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
+By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`, `spikes`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
 
 ```yaml
 wiki:
@@ -677,9 +677,9 @@ z.string().min(1).max(64).regex(/^[a-z][a-z0-9_-]*$/)
 
 Applied after lowercase-normalize. Types that fail this regex are rejected at the MCP transport layer with an L1 `TYPE_INVALID` error.
 
-### KNOWN_TYPES — advisory registry (8 entries)
+### KNOWN_TYPES — advisory registry (9 entries)
 
-These 8 types have first-class gate and reporting support. Any type outside this list passes validation but triggers an L2 `TYPE_UNKNOWN` warning in the server log.
+These 9 types have first-class gate and reporting support. Any type outside this list passes validation but triggers an L2 `TYPE_UNKNOWN` warning in the server log.
 
 | Type | Description |
 |---|---|
@@ -691,6 +691,7 @@ These 8 types have first-class gate and reporting support. Any type outside this
 | `proposal` | Stakeholder-authored item awaiting triage |
 | `sprint` | Sprint plan artifact |
 | `sprint_report` | Sprint closeout report |
+| `spike` | Bounded pre-sprint discovery charter |
 
 ### RESERVED_PAYLOAD_KEYS (5 entries)
 

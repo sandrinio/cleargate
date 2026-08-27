@@ -99,6 +99,10 @@ one way and what evidence would answer it the other way. A question phrased as a
 open-ended investigation ("look into the caching layer") is not sharp enough to pass
 the gate below; a question phrased as a yes/no or a choice between named options is.
 
+Once drafted, write the question itself as a single bulleted line beneath this
+guidance, rather than as continued prose — the readiness gate below counts bulleted
+lines in this section, not paragraphs.
+
 ## 2. Timebox & Kill Criteria
 
 **Timebox:** State a wall-clock or working-day bound this spike may not exceed without
@@ -109,6 +113,11 @@ stated timebox is exploration, not a charter, and the gate below cannot turn gre
 or lose. A kill criterion that can never actually trigger during the timebox above is
 decorative; if nothing written here could stop the spike before the timebox expires,
 this section is not done yet.
+
+Once both are set, write the timebox as one bulleted line and the kill criteria as
+one or more further bulleted lines beneath the labels above, rather than as
+paragraphs — the readiness gate below counts bulleted lines in this section, not the
+bold labels or the prose that follows them.
 
 ## 3. Decision Unblocked
 
@@ -134,6 +143,10 @@ item as a `spawned_items` entry in the frontmatter above, using its canonical id
 (Epic, Story, CR, or Bug). On conclusion, set `concluded_at` in the frontmatter and
 move this file to `.cleargate/delivery/archive/`, mirroring the Initiative lifecycle —
 the spike's job ends the moment its answer is recorded and handed off.
+
+Once decided, write the verdict as a bulleted line beneath this paragraph, rather
+than as continued prose — the readiness gate below counts bulleted lines in this
+section, not paragraphs.
 
 ## Prior work
 
