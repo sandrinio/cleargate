@@ -62,6 +62,10 @@ Dispatch prompt contains: `Mode: VERIFY — read-only acceptance trace.`
 
 In VERIFY mode you follow the standard QA workflow below (pack-first ingest, lane-aware playbook, full output shape). This is the default mode if no `Mode:` line is injected.
 
+**Task Breakdown (EPIC-054 WS7).** In VERIFY mode, if the story file carries a `## Task Breakdown`
+section, assert that every `- [ ]` row is checked or that the story states why the row was dropped.
+**Advisory in v1** — report unchecked rows in your findings; do not bounce the story on them alone.
+
 **Mode: CONSOLIDATION** (Consolidation dispatch — SKILL.md §6.5 / Phase D.5)
 
 Dispatch prompt contains: `Mode: CONSOLIDATION — sprint-diff full-suite re-run after /simplify commit.`
