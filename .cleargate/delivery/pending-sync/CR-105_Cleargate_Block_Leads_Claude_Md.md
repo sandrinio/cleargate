@@ -93,7 +93,20 @@ last_synced_body_sha: null
 - `cleargate-cli/src/init/inject-claude-md.ts` — replace the append branch with prepend; make replacement relocate rather than swap in place.
 - `cleargate-cli/src/commands/init.ts` — adopt the new contract at the call site.
 - `cleargate-cli/src/commands/upgrade.ts` — apply relocation on the take-theirs branch, after BUG-043's fix.
-- `cleargate-planning/CLAUDE.md` — canonical payload; no content change, but confirm the block is the first content so the shipped source models the contract.
+- `cleargate-planning/CLAUDE.md` — canonical payload. **§3 AMENDMENT (orchestrator, 2026-08-28):
+  the original row was WRONG, not merely incomplete.** It said "no content change, but confirm the
+  block is the first content." Measured: the file is 64 lines with `<!-- CLEARGATE:START -->` at
+  **`:7`** — six lines of payload-wrapper preamble precede it (`# ClearGate — Injected CLAUDE.md
+  Block`, the explanatory paragraph, and a `---`). Those must **stay**: `extractBlock` ships only
+  the bounded block, so the preamble never reaches a downstream repo. **"Confirm the block is the
+  first content" can only fail.** A content change *is* required: `:3` reads *"…If one already
+  exists, init **appends** the bounded block below without touching the user's existing content."*
+  — verbatim the obsolete logic §1 evicts. Rewrite that sentence to describe prepend-and-relocate;
+  do **not** move the markers.
+- `cleargate-cli/src/init/inject-claude-md.ts:10` — **added by the same amendment.** Its docstring
+  carries the same stale contract (`- If existing no match:  append block with 2 leading newlines
+  (preserve user content above)`). It is one line above the code §1 changes and would otherwise
+  ship describing the evicted behaviour.
 - `CLAUDE.md` — this repo's own root file; relocate the block to lead, dogfooding the change.
 - New `*.node.test.ts` under `cleargate-cli/test/`.
 
