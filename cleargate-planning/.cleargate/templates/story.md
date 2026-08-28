@@ -4,6 +4,7 @@ YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Acto
 §1 The Spec: User Story + Detailed Requirements + Out of Scope.
 §2 The Truth: Gherkin acceptance criteria + manual verification steps.
 §3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from the approved Epic and verified codebase grounding.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
 §4 Quality Gates: Minimum test expectations + Definition of Done checklist.
 Output location: .cleargate/delivery/pending-sync/STORY-{EpicID}-{StoryID}-{StoryName}.md
 
@@ -176,6 +177,14 @@ Feature: {Story Name}
 | Endpoint | Method | Auth | Request Shape | Response Shape |
 |---|---|---|---|---|
 | `/api/resource` | GET/POST | Bearer/None | `{ id: string }` | `{ status: string }` |
+
+## Task Breakdown
+
+> **Required at L3 and above. Optional at L2. Omit the whole section at L1.**
+> An absent section passes the gate; a section that is present but carries no task rows does not.
+> Write one row per executable step, in execution order:
+> `- [ ] <action>` with an optional trailing `-> <requirement-id>`. The requirement reference is
+> reserved for grounding ids and is not interpreted today.
 
 ## 4. Quality Gates
 
