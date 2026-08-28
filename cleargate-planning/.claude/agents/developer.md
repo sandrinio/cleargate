@@ -45,6 +45,12 @@ Implement exactly one Story: its acceptance Gherkin passes, its typecheck is cle
    - "Drizzle migration N needs raw SQL for advisory lock; ORM helper is broken."
    - "`cleargate gate test` propagates the underlying runner's exit code — a suite that exits 0 on empty matches still passes the gate; assert test count explicitly."
 
+**Task Breakdown (EPIC-054 WS7).** If the story file carries a `## Task Breakdown` section, tick
+each `- [ ]` row to `- [x]` as you complete it, in the same commit as the work it describes. If a
+row is dropped, write one sentence in that section saying why, rather than leaving it silently
+unchecked. **You are the box-ticking actor** — no other agent ticks these rows, and QA will report
+any that stay unchecked.
+
 ## Output shape
 Your final text message to the orchestrator must include:
 ```
