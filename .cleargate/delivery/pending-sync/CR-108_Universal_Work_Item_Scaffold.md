@@ -83,13 +83,45 @@ last_synced_body_sha: null
 - **Surface:** `cleargate-cli/src/lib/work-item-type.ts` — the existing type registry the new command's type argument must validate against.
 - **Why this CR extends rather than rebuilds:** Every mechanism this CR needs already runs in production for one type. The ID allocator, the template renderer, the frontmatter stamper, the dry-run harness, and the type registry all exist and are individually correct. What does not exist is the *generalization* — a type→template map and a single entry point. Rebuilding would mean writing a second allocator and a second stamper, which is precisely the divergence BUG-041 was filed to eliminate.
 
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Correct CR-108 ## Prior work line 92: name the CLAUDE.md overlap with CR-105/BUG-043 (orchestrator, pre-dispatch)
+- [ ] Branch story/CR-108 from cli main (post-BUG-045); cut the outer half from sprint/S-39
+- [ ] Decide and record the {ID} semantic (full-id) and the {PARENT_EPIC_ID} split before touching any template
+- [ ] Build the type -> {template, padWidth, allocator} map in work-item-type.ts; add KNOWN_UNSCAFFOLDABLE = {proposal}, size-asserted
+- [ ] QA-Red: author N1-N13 in test/commands/new-command.node.test.ts; measure the red set, do not predict it
+- [ ] Create src/commands/new.ts reusing maxHotfixId (BUG-045-corrected), work-item-id.ts, stampFrontmatter, the wx lock idiom
+- [ ] Register top-level `new <type> <slug>` in cli.ts; reduce hotfix.ts:719 to a delegate
+- [ ] Normalize placeholders in EIGHT templates x 2 trees; fix hotfix.md:11, initiative.md:23/38/39, hotfix.md:39
+- [ ] Edit CLAUDE.md:33 and cleargate-planning/CLAUDE.md:39 in the SAME commit; run the ANCHORED block-equal check
+- [ ] Add one CHANGELOG.md bullet under the existing ## Unreleased
+- [ ] Run gate-section-index-pinning (expect 18/18/0/0), typecheck, full suite; record all numbers
+- [ ] Re-measure every hotfix.ts line citation in the item after the edit (N7 of the rulings)
+
 ## Prior work
 
 - `cleargate wiki query "work item scaffold id allocation frontmatter stamp"` → **none found** for a universal scaffolder.
 - Direct precedent in the tree, not in the wiki: `cleargate hotfix new` (shipped) is the single-type implementation this CR generalizes.
 - [[BUG-041]] — collapsed duplicated ID grammars into one; shipped in cleargate 0.24.1. This CR applies the identical remedy one layer up. The accompanying flashcard ("pin duplicated grammars with a shared-corpus test", 2026-08-24) prescribes the test shape used in §4.
 - [[STORY-054-02]] (SPRINT-39) — registers the `spike` type in KNOWN_TYPES. Adjacent surface; ordering constraint recorded in §3.
-- [[CR-105]], [[BUG-043]] — also SPRINT-39, also two-tree template/marker edits, but on `CLAUDE.md` handling rather than the templates themselves. No overlap.
+- [[CR-105]], [[BUG-043]] — also SPRINT-39, also two-tree template/marker edits.
+  **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan §Q5-A F1). The original claim "No overlap"
+  is FALSE and this item's own §3 falsifies it** — §3 declares root `CLAUDE.md` and
+  `cleargate-planning/CLAUDE.md`, which is exactly the pair CR-105 rewrote in `71037e5a`. The
+  overlap is at file level and it is real. Three consequences bind this item:
+  (1) its target sentence now sits at root `CLAUDE.md:33` / canonical `:39` — CR-105's relocation
+  renumbered the root file wholesale, so any pre-2026-08-29 line citation is wrong;
+  (2) that sentence is **inside the bounded block**, adjacent to [[BUG-057]]'s at `:34`;
+  (3) the two-tree hash coupling binds it and **nothing warns at test time** — an edit inside the
+  block in one tree without the mirror makes `drift-check.ts` set `outcome.blocker = true` on bare
+  `cleargate doctor`. The `block-equal` check in §4 is the only thing that catches it, and it must
+  use the **anchored** grammar: the unanchored form returns a confident `true` about the wrong
+  10606 characters, because `CLAUDE.md:50` mentions the markers inline. That is BUG-043's own
+  defect reproduced inside the check meant to guard against it.
 
 ## 3. Execution Sandbox
 

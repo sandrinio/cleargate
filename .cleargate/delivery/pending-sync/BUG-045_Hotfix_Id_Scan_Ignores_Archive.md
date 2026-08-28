@@ -121,6 +121,20 @@ Corroborating protocol text (CLAUDE.md, *Drafting work items*): *"After `clearga
 
 **Hand-off to [[CR-108]]:** these cases are the acceptance floor for the generalized allocator. CR-108 §4 case 4 re-runs the same scenario parameterized across every registered type.
 
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Branch story/BUG-045 from cleargate-cli main @ e4cb49f (main checkout, NOT a worktree)
+- [ ] QA-Red: author test/commands/hotfix-id-archive-scan.red.node.test.ts with R1-R7; confirm R1,R2,R6 red against e4cb49f
+- [ ] Widen maxHotfixId to accept N dirs; call maxHotfixId(pendingDir, archiveDir) at hotfix.ts:164; no new regex, no mtime filter
+- [ ] Confirm countActiveHotfixes is byte-unchanged (R7)
+- [ ] Add one bullet to cleargate-cli/CHANGELOG.md under the existing ## Unreleased
+- [ ] Run npm --prefix cleargate-cli run typecheck and the full suite; record both numbers (Rule 6)
+- [ ] Verify grep -rn "maxHotfixId" cleargate-cli/src still returns exactly two hits
+
 ## Prior work
 
 - `cleargate wiki query "work item id allocation archive scan"` → **none found**.

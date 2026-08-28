@@ -80,10 +80,36 @@ last_synced_body_sha: null
 - **Surface:** `.cleargate/templates/story.md:184-189` — §4.1 Minimum Test Expectations table. Extended with one row, not replaced; the Unit/E2E/Performance rows and their guidance stay verbatim.
 - **Surface:** `.cleargate/templates/story.md` §4.2 DoD — already asserts "Minimum test expectations (§4.1) met." This CR gives that assertion something a predicate can read.
 - **Surface:** `.cleargate/templates/CR.md` §4 Verification Protocol / `Bug.md` §5 — existing verification sections; the table is added beside the existing command line.
-- **Surface:** `.cleargate/knowledge/readiness-gates.md` — the predicate vocabulary and per-bucket criteria lists. New criterion registered in the existing `story`/`cr`/`bug` blocks using existing section-predicate machinery.
+- **Surface:** `.cleargate/knowledge/readiness-gates.md` — the predicate vocabulary and per-bucket criteria lists. **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F6 — the decisive finding). The mechanism
+  claim is FALSE; the surface is still needed.** Measured with the real exported `evaluate()`
+  against the shipped templates, identical in both trees: `story.md section(5)` already scores
+  **6** `declared-item`, `CR.md section(8)` scores 1, `Bug.md section(6)` scores 1. So **no
+  `section(N) has >=N declared-item` threshold is both non-vacuous and satisfiable** — any N <= 6
+  is green on the unedited `story.md` before an author writes a word. Shipping it that way would
+  add a **tenth** vacuous criterion to a registry [[BUG-054]] already measures at 9-of-12 vacuous.
+  **Corrected mechanism:** reuse STORY-054-06's closed-set predicate shape, whose absence-passes
+  branch also supplies grandfathering for free. Note also that the version guard §2 contemplates
+  cannot exist: `readiness-predicates.ts:290-291` implements `>=` as `Number(a) >= Number(expected)`,
+  so `created_at_version >= 'cleargate@0.25.0'` evaluates `NaN >= NaN`.
 - **Surface:** `.claude/agents/developer.md:96` — *"Never mock the database. Integration tests against real Postgres + Redis (SPRINT-01 flashcard)."* The rule exists; this CR gives it a planning-time declaration to attach to.
 - **Surface:** `cleargate-cli/test/**` — 24 `*.integration.node.test.ts` + 6 `*.red.integration.node.test.ts`, plus 1 in `mcp/`. The convention being documented is already the de-facto standard; this CR writes it down rather than inventing it.
 - **Why this CR extends rather than rebuilds:** §4.1 already exists, already has the right shape, and is already referenced by the DoD — it is missing one row and any enforcement. The naming convention already exists in 30 files. Nothing new is designed here; three templates gain a row, one predicate is registered against machinery that already evaluates sections, and an established convention is written down.
+
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Cut story/CR-111 from sprint/S-39 after CR-108 and CR-110 merge; branch the cli half from cli main
+- [ ] Re-measure story.md's §4.1 table position and developer.md's DB-rule line AFTER all predecessors land (N7)
+- [ ] Add predicate #11 test-layers-declared to readiness-predicates.ts as a SIBLING of evalTaskBreakdownComplete; do not touch evalSection
+- [ ] QA-Red: author T1-T11; T8 asserts the criterion FAILS on the shipped story.md/CR.md/Bug.md
+- [ ] Add the Integration row to story.md §4.1 (both trees) and the **Test layers.** block to CR.md §4 / Bug.md §5 (both trees) — NO ## heading
+- [ ] Register test-layers-declared in readiness-gates.md story/cr/bug blocks (both trees); bump :9's "exactly 10" to 11
+- [ ] cleargate-planning/.claude/agents/developer.md + qa.md + skills/sprint-execution/SKILL.md §C.3: all three naming forms, incl. the hyphen case
+- [ ] Run gate-section-index-pinning (expect 18/18/0/0); run typecheck + full cli suite; record all numbers
+- [ ] Verify git diff on readiness-predicates.ts touches zero lines inside :640-690 and adds no export
 
 ## Prior work
 

@@ -37,6 +37,9 @@ last_synced_body_sha: null
 
 # CR-106: Execution state becomes an append-only event log with a derived fold
 
+> **CITATION REPAIR (orchestrator, 2026-08-29).** The live `.claude/skills/sprint-execution/SKILL.md` had drifted from canonical (777 vs 787 lines) because STORY-054-03's Gate-4 re-sync never ran. Live was re-synced from canonical today and is now byte-identical. Canonical is purely additive over the old live file -- a 9-line `### 2.1 Spikes run before the loop` block after `:99` and one reference line after `:765` -- so every citation in this file below `:100` shifted by +9 and every one below `:766` by +10. Repaired here: `:252`->`:261`. Each target was re-read after the re-sync and confirmed to carry the quoted text.
+
+
 ## 0.5 Open Questions
 
 > Populate during drafting. Resolve every entry before flipping ambiguity to 🟢.
@@ -65,7 +68,7 @@ last_synced_body_sha: null
 - **`events.jsonl` is the truth. `state.json` is a fold over it.** Every lifecycle transition becomes one appended JSON line: `{ts, sprint_id, story_id, from, to, actor, run_id, wave, reason}`. POSIX `O_APPEND` writes below `PIPE_BUF` (4096 bytes) are atomic, so concurrent appends cannot interleave and contention goes to zero regardless of wave width.
 - **`state.json` keeps its exact current schema and path.** After each append the folder rewrites it. It gains exactly one writer — the folder — and folds are idempotent, so the lost-update race is structurally impossible rather than merely unlikely. **No reader changes.** All 27 non-test consumers keep working untouched.
 - **This finishes a pattern ClearGate already uses everywhere else.** `token-ledger.jsonl` is append-only JSONL, hook-owned, with an explicit "never edit by hand" rule (CLAUDE.md). `wiki/log.md` is an append-only YAML event stream. The CLAUDE.md doctrine already reads *"Wiki, memory, and `context_source` are derived caches… the code wins; the cache rebuilds."* `state.json` is the last machine-written surface still modelled as a mutable document.
-- **Idempotency stops being a prose obligation.** `SKILL.md:252` currently *asks* segments to be idempotent as a "belt-and-suspenders safety net" for `resumeFromRunId`. With events keyed by `run_id`, a replayed GREEN segment appends a duplicate that the fold discards. The guarantee moves out of prose and into the data model.
+- **Idempotency stops being a prose obligation.** `SKILL.md:261` currently *asks* segments to be idempotent as a "belt-and-suspenders safety net" for `resumeFromRunId`. With events keyed by `run_id`, a replayed GREEN segment appends a duplicate that the fold discards. The guarantee moves out of prose and into the data model.
 
 ## 2. Blast Radius & Invalidation
 
@@ -88,6 +91,22 @@ last_synced_body_sha: null
 - **Surface:** `.cleargate/scripts/_migrate-schema-v3.mjs:1-20` — established precedent for a versioned, idempotent, tmp+rename state migrator with a strip-on-read contract. The genesis/legacy handling reuses this shape rather than inventing one.
 - **Surface:** `.claude/hooks/token-ledger.sh` + `.cleargate/sprint-runs/<id>/token-ledger.jsonl` — the existing append-only JSONL event surface in the very same directory. This CR mirrors its idiom (append-only, single owner, never hand-edited).
 - **Why this CR extends rather than rebuilds:** The output contract (`state.json`, `state.schema.json`) and every one of its 27 non-test consumers stay exactly as they are. What changes is only the *producer* — a write path that today reconstructs the whole document from a stale read becomes an append plus a deterministic fold. `atomicWrite`, the schema, the migrator idiom, and the JSONL convention are all existing surfaces being composed, not replaced. A rebuild would mean changing the read contract, which is precisely what makes this cheap to adopt and what this CR deliberately avoids.
+
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Confirm BUG-044 is merged and node --test .cleargate/scripts/state-scripts.test.mjs is 12/12/0
+- [ ] Create .cleargate/scripts/state-events.mjs: appendEvent(), fold(), EVENT_SCHEMA; fold() takes ONLY the event array
+- [ ] QA-Red: author E2-E9; confirm the red set by MEASUREMENT, not prediction
+- [ ] Rewrite update_state.mjs write path to appendEvent + fold; route :116 and :122 migration writes through it
+- [ ] Extend validate_state.mjs with the fold-vs-file drift check (additive; must not fail a tree with no events.jsonl)
+- [ ] Seed events.jsonl in init_sprint.mjs; collapse the duplicated tmp+rename idiom at :231-233
+- [ ] Mirror all four scripts into cleargate-planning/ byte-identically, same commit
+- [ ] Run both eviction greps; run node --test; record pass/fail/skipped verbatim
+- [ ] Re-measure every line citation in the item and in this plan that points into a file this commit edited (N7)
 
 ## Prior work
 

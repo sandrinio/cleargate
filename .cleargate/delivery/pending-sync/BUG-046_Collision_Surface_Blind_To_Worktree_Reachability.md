@@ -9,7 +9,7 @@ status: Triaged
 severity: P1-High
 reporter: sandrinio
 approved: true
-context_source: verified codebase grounding — collision_surface.sh read in full (114 lines, no reachability check); git ls-files + check-ignore confirm mcp/ cleargate-cli/ admin/ are gitignored with 0 tracked files; cleargate-enforcement.md:89 and SKILL.md:277 assert the opposite. Discovered 2026-08-26 while answering how cross-repo stories execute; approved in the same conversation.
+context_source: verified codebase grounding — collision_surface.sh read in full (114 lines, no reachability check); git ls-files + check-ignore confirm mcp/ cleargate-cli/ admin/ are gitignored with 0 tracked files; cleargate-enforcement.md:89 and SKILL.md:286 assert the opposite. Discovered 2026-08-26 while answering how cross-repo stories execute; approved in the same conversation.
 created_at: 2026-08-26T00:00:00Z
 updated_at: 2026-08-25T21:17:13Z
 created_at_version: cleargate@0.24.2
@@ -39,6 +39,20 @@ last_synced_body_sha: null
 
 # BUG-046: Collision surface treats worktree-unreachable paths as ordinary files
 
+
+> **SCOPE NARROWED BY SPLIT (orchestrator, 2026-08-29).** At the M4 planning halt the M4 Architect
+> measured this item as **four independent defects across thirteen files in two trees with thirteen
+> verification cases** — CR-108-sized for one wave-10 dispatch. By explicit human decision it is
+> split on the Architect's line, which is clean. **This item retains the worktree-reachability
+> defect and its refusal path (cases 1-7, 11, 12 and the parity check).** The `dep_predecessors`
+> blindness and the four parser over-reporting cases move to **[[BUG-062]]** — §3.5(a)-(d) below are
+> retained as *recorded evidence of where they were found*, struck through as scope, because
+> deleting them would erase the measurement that justified the split. **Nothing in §3.5 is this
+> item's work any more.** The two items share `collision_surface.sh` and MUST NOT run in the same wave.
+
+> **CITATION REPAIR (orchestrator, 2026-08-29).** The live `.claude/skills/sprint-execution/SKILL.md` had drifted from canonical (777 vs 787 lines) because STORY-054-03's Gate-4 re-sync never ran. Live was re-synced from canonical today and is now byte-identical. Canonical is purely additive over the old live file -- a 9-line `### 2.1 Spikes run before the loop` block after `:99` and one reference line after `:765` -- so every citation in this file below `:100` shifted by +9 and every one below `:766` by +10. Repaired here: `:277`->`:286`. Each target was re-read after the re-sync and confirmed to carry the quoted text.
+
+
 ### Open Questions
 
 - **Question:** Should an unreachable surface serialize the story, or refuse it?
@@ -61,7 +75,7 @@ last_synced_body_sha: null
 
 > `.cleargate/knowledge/cleargate-enforcement.md:89` — *"If a story requires edits to `mcp/`, the Developer Agent must edit `mcp/` from inside the outer worktree (`.worktrees/STORY-NNN-NN/mcp/...`) — the nested repo's files are visible there as a subdirectory, not as a separate git context."*
 
-`.claude/skills/sprint-execution/SKILL.md:277` repeats the claim. Both are wrong: `mcp/` is gitignored in the outer repo with zero tracked files, so `.worktrees/STORY-X/mcp/` is never created. An agent following this instruction finds nothing and has no documented recourse.
+`.claude/skills/sprint-execution/SKILL.md:286` repeats the claim. Both are wrong: `mcp/` is gitignored in the outer repo with zero tracked files, so `.worktrees/STORY-X/mcp/` is never created. An agent following this instruction finds nothing and has no documented recourse.
 
 **Why P1-High:** it is fail-open on a safety predicate. The wave planner's entire job is to certify that co-waved stories cannot collide; here it certifies safety for a story it cannot execute at all. The failure surfaces late (at Developer dispatch, after a worktree and branch have been cut) and its stated remedy in the docs is itself wrong, so an agent hitting it is actively misdirected.
 
@@ -112,13 +126,20 @@ admin: 0
 Contradicted documentation, verbatim:
 
 - `.cleargate/knowledge/cleargate-enforcement.md:89` — *"the nested repo's files are visible there as a subdirectory"*
-- `.claude/skills/sprint-execution/SKILL.md:277` — *"visible as a subdirectory of the outer worktree"*
+- `.claude/skills/sprint-execution/SKILL.md:286` — *"visible as a subdirectory of the outer worktree"*
 
 **Relationship to [[BUG-033]]:** BUG-033 established that an *empty* collision surface is **unproven, never proven-disjoint**, and must fail-safe-serialize. This bug is the same fail-open one layer down: a *populated* surface whose entries are unreachable is equally unproven, and today reads as fully verified. BUG-033 fixed the empty case and did not consider the unreachable case.
 
 **Current exposure in SPRINT-39:** 9 of 15 items reference `cleargate-cli/src` paths. The sprint's wave plan happens to place at most one such item per wave (`STORY-054-04` in M1 w1, `BUG-045` in M4 w1, `CR-108` serial), so it is safe **by planning, not by enforcement** — nothing would stop a future sprint from co-waving two.
 
-## 3.5 Folded-In Scope (added 2026-08-26 at the SPRINT-39 SDR halt)
+## 3.5 Folded-In Scope — **MOVED TO [[BUG-062]] 2026-08-29, RETAINED AS EVIDENCE**
+
+*(added 2026-08-26 at the SPRINT-39 SDR halt; split out 2026-08-29 by human decision)*
+
+> Everything in this section is now **[[BUG-062]]**'s scope, not this item's. It stays here
+> because it is the live measurement from SPRINT-39's own fan-out that justified the split —
+> 18 digests returning `dep_predecessors: []`, and four over-reporting cases observed on real
+> items. A future reader of BUG-046 needs to know these defects exist and where they went.
 
 Three further extractor defects surfaced during SPRINT-39's fan-out. All live in the same script and predicate this bug already owns, so they are folded in rather than filed separately.
 
@@ -151,9 +172,7 @@ Observed live on 2026-08-27 while sanity-checking SPRINT-39 wave 3, so this is e
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**
-- `.cleargate/scripts/collision_surface.sh` — classify each emitted path; annotate or fail on unreachable entries. Also §3.5(b) cut-at-em-dash and §3.5(c) reject prose cells.
-- `.claude/agents/architect-reader.md` — also emit `dep_predecessors` per §3.5(a).
-- Work-item templates (`story.md`, `CR.md`, `Bug.md` + mirrors) — declared home for `dep_predecessors` per §3.5(a).
+- `.cleargate/scripts/collision_surface.sh` — classify each emitted path; annotate or fail on unreachable entries. **The §3.5(b) cut-at-em-dash and §3.5(c) prose-cell fixes moved to [[BUG-062]]** — this item touches the same script, so the two must not be co-waved.
 - `.claude/agents/architect-reader.md` — carry the classification into the digest.
 - `.claude/agents/architect-synth.md` — refuse (do not co-wave, do not serialize) a story with unreachable surface entries; message names the paths.
 - `.cleargate/knowledge/cleargate-enforcement.md` §1.3 — replace the false `mcp/` claim with the verified behaviour.
@@ -175,15 +194,35 @@ Observed live on 2026-08-27 while sanity-checking SPRINT-39 wave 3, so this is e
 5. A repo with no `.gitignore` produces zero flags.
 6. `architect-synth` given a digest containing an unreachable entry **refuses** — it does not emit a wave containing that story, and its message names the path.
 7. All existing `test_file_surface.sh` cases stay green (regression guard).
-8. §3.5(a): a work item declaring a predecessor produces a non-empty `dep_predecessors`; `architect-synth` refuses to co-wave two items joined by an edge **without** the Orchestrator supplying it.
-9. §3.5(b): a sandbox bullet `- \`a/b.ts\` — see \`c/d.ts\`` yields only `a/b.ts`.
-10. §3.5(c): a §3.1 cell `New *.node.test.ts under cleargate-cli/test/` yields no path.
-11. §Open-Questions scoping: the reachability refusal fires at wave-plan generation, never against an already-written `waves.json`.
-12. **Documentation assertion:** no file under `.cleargate/knowledge/` or `.claude/` claims that gitignored or nested-repo paths are visible inside a worktree.
+8. §Open-Questions scoping: the reachability refusal fires at wave-plan generation, never against an already-written `waves.json`.
+9. **Documentation assertion:** no file under `.cleargate/knowledge/` or `.claude/` claims that gitignored or nested-repo paths are visible inside a worktree.
 
-**Parity check:** all five modified files diff clean against their `cleargate-planning/` mirrors.
+**Cases 8-11 of the M4 plan (`dep_predecessors`, the three parser cases) moved to [[BUG-062]].**
+
+**Parity check:** all modified files diff clean against their `cleargate-planning/` mirrors.
+
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order. **Three rows and four QA cases were removed when this item
+> was split — they are [[BUG-062]]'s now.**
+
+- [ ] Cut story/BUG-046 from sprint/S-39; confirm cleargate-planning/.claude/** is tracked and .claude/** is not
+- [ ] QA-Red: author C1-C7, C12, C13 in test_file_surface.sh; confirm C1 and C6 red (C8-C11 moved to [[BUG-062]])
+- [ ] collision_surface.sh: add git ls-files/check-ignore classification; annotate or exit non-zero; guard against set -e on check-ignore's exit 1
+- [ ] cleargate-planning/.claude/agents/architect-reader.md: emit the reachability classification in the digest
+- [ ] cleargate-planning/.claude/agents/architect-synth.md: add the third refusal branch + its own exact rationale string
+- [ ] cleargate-planning/.claude/skills/sprint-execution/SKILL.md :286 — replace the false subdirectory claim
+- [ ] .cleargate/knowledge/cleargate-enforcement.md :89 + canonical mirror — same correction, byte-identical
+- [ ] Mirror collision_surface.sh and both test scripts into cleargate-planning/
+- [ ] Run gate-section-index-pinning; assert 18/18/0/0; do NOT open expected-headings.ts
+- [ ] Verify every mirrored pair diffs clean; verify git diff --name-only contains zero .claude/ live paths
 
 ## Prior work
+
+- [[BUG-062]] — split out of this item 2026-08-29: `dep_predecessors` blindness plus the four
+  parser over-reporting cases. Shares `collision_surface.sh`; must not be co-waved with this item.
 
 - `cleargate wiki query "collision surface worktree reachability gitignored"` → **none found**.
 - [[BUG-033]] — *collision surface fail-open* (empty surface read as proven-disjoint). Direct ancestor: same predicate, same fail-open class, adjacent case. Its "unproven, never proven-disjoint" rule is the principle this bug extends.

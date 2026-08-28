@@ -82,8 +82,34 @@ last_synced_body_sha: null
 - **Surface:** `.cleargate/templates/sprint_context.md` `## Sprint Goal` — the existing per-sprint goal carrier that every Dev/QA/Architect/DevOps dispatch already reads as preflight. The check lives beside it, reusing that propagation path rather than inventing one.
 - **Surface:** `.cleargate/scripts/init_sprint.mjs` — already renders `sprint-context.md` from the template and already extracts the goal from sprint plan §0.
 - **Surface:** `.cleargate/templates/sprint_context.md` §Test Stack — the established precedent for "unresolved → one-line advisory, gate degrades to advisory, never blocks." The degradation path is copied from it verbatim.
-- **Surface:** `.claude/agents/reporter.md` §E.2 verdict — exists; changes input from judgement to recorded check.
+- **Surface:** `.claude/agents/reporter.md` — **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan
+  F1). The original justification is FALSE, and this is the dangerous mode — the row stays, the
+  reason changes.** Measured: `reporter.md` is 274 lines and contains **zero** occurrences of
+  `verdict`, `met`, `partial` or `missed`, and has **no §E.2**. The `met | partial | missed`
+  vocabulary lives exclusively in `.claude/skills/sprint-execution/SKILL.md` (canonical `:45`,
+  `:695`, and one further site). So there is no existing verdict to change the input of.
+  **Corrected justification:** `reporter.md` is the file that must be taught to *read* the recorded
+  check and quote its `GOAL_RELATION` line. Deleting this row — the obvious response to a false
+  justification — would drop the only agent that consumes the check. See CR-105 §3's `init.ts`
+  row for the same failure mode caught one wave earlier.
 - **Why this CR extends rather than rebuilds:** the goal already has a home (`sprint-context.md`), a populator (`init_sprint.mjs`), a propagation path (every agent's preflight read), and a consumer (the Reporter verdict). All four stay. What is added is one section and the requirement that it be filled — the smallest change that turns a prose goal into a checkable one. A new gate, a new artifact, or a metrics engine would each be a larger mechanism than the problem needs.
+
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Correct CR-110's Existing-Surfaces reporter.md justification (orchestrator, pre-dispatch): replace, do not delete (F1)
+- [ ] Cut story/CR-110 from sprint/S-39 after CR-106 and CR-107 merge; re-measure canonical SKILL.md offsets (N2)
+- [ ] Add ## Goal Acceptance Check to BOTH sprint_context.md trees, verbatim per this plan, byte-identical
+- [ ] QA-Red: author G1-G8 in cr078_init.test.sh; G2 asserts the advisory TEXT, G5 feeds a failed check
+- [ ] init_sprint.mjs: advisory ONLY (the render is free, F2); detect the placeholder string, mirror :270-275's idiom
+- [ ] Mirror init_sprint.mjs byte-identically into cleargate-planning/
+- [ ] cleargate-planning/.claude/skills/sprint-execution/SKILL.md: §A.5 derive+record, §0.5 re-read at phase boundaries, §E.2 verdict reads the check
+- [ ] cleargate-planning/.claude/agents/reporter.md: read the check; quote each milestone's GOAL_RELATION; add NO verdict vocabulary
+- [ ] Add GOAL_RELATION: advances | off critical path as a SEPARATE per-milestone line (Q5-B); cite SPRINT-39 M3/M4 as the worked example
+- [ ] Run cr078_init.test.sh + gate-section-index-pinning (18/18/0/0); verify all four mirrored pairs diff clean
 
 ## Prior work
 

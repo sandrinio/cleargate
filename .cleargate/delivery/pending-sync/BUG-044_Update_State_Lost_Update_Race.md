@@ -136,6 +136,20 @@ No `flock`, no `O_EXCL` lockfile, no compare-and-swap, no re-read before write. 
 
 **Parity check:** `diff .cleargate/scripts/update_state.mjs cleargate-planning/.cleargate/scripts/update_state.mjs` is empty.
 
+## Task Breakdown
+
+> Rows authored by the M4 Architect in `.cleargate/sprint-runs/SPRINT-39/plans/M4.md`
+> and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
+> worktree was cut. Execution order.
+
+- [ ] Cut story/BUG-044 from sprint/S-39; confirm both trees' update_state.mjs diff clean
+- [ ] Commit A: fix state-scripts.test.mjs:90 to the two-assertion form + import SCHEMA_VERSION; run, expect 8/8/0
+- [ ] Commit B (QA-Red): author S1-S5 red; seed at schema_version 3, drive `Bouncing`, never `--state`; expect 12/8/4
+- [ ] Implement the lock in .cleargate/scripts/update_state.mjs: 'wx' acquire after :95, process.on('exit') release, Atomics.wait retry, liveness + age steal
+- [ ] Mirror byte-identically into cleargate-planning/.cleargate/scripts/update_state.mjs
+- [ ] Commit C with both trees; run node --test; record pass/fail/skipped verbatim
+- [ ] Verify diff between trees is empty; verify no file outside the three-row surface is staged
+
 ## Prior work
 
 - `cleargate wiki query "state.json lost update race"` → **none found**. Second probe `"execution state json concurrency"` → **none found**.
