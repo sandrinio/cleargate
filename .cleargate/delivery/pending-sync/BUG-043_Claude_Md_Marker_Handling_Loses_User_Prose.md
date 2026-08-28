@@ -125,6 +125,23 @@ Preconditions for Defect A: the file must be classified as drifted and the opera
 - `cleargate-cli/src/commands/upgrade.ts` — the take-theirs branch (:361-378).
 - New `*.node.test.ts` under `cleargate-cli/test/`.
 
+**§4 AMENDMENT (orchestrator, 2026-08-28 — M2 post-flight audit).** Three sites were missing.
+This sprint is **5-for-5 on surface declarations being wrong or incomplete**; treat the list
+above as a starting point, not a boundary.
+
+| # | Site | Why it is not optional |
+|---|---|---|
+| 1 | `cleargate-cli/src/lib/drift-check.ts` | Imports `readBlock` (`:16`) and calls it at `:111` and `:118`. The original §4 explicitly cleared `uninstall.ts` as inheriting-for-free **and missed the one consumer whose behaviour actually shifts under anchoring**: a CRLF or trailing-whitespace marker makes `readBlock` return null, and `doctor --drift` then reports `claude-md-block-mismatch`. Asymmetric omission — the file that needed clearing was cleared, the file that needed changing was not named. |
+| 2 | `cleargate-cli/test/lib/claude-md-surgery.node.test.ts` | Owns today's behaviour, including the greedy prose-mention case at `:126`. **`:211-218` hardcodes an absolute path to this machine** (`/Users/ssuladze/Documents/Dev/ClearGate/CLAUDE.md`) — verified. Any fix must keep it green, and it is worth noting the portability defect separately. |
+| 3 | `cleargate-cli/test/commands/init.node.test.ts:263-278` | Carries **its own copy** of the old greedy regex. A fix that changes only `src/` leaves a second, divergent grammar asserting the old behaviour — the BUG-041 shape this bug's own §4 already warns about. |
+
+**Measured, and this is the load-bearing part for the Developer:** anchoring breaks **zero** of
+these. Both regexes were patched to `/^…$/m` in an out-of-tree mirror and the six default-tier
+files that touch `CLAUDE.md` ran **90 tests / 88 pass / 0 fail / 2 skipped** *both before and
+after*. **Green-to-green is not evidence of inertness** — Defect A is untested entirely: no
+`test/commands/upgrade*` file mentions `CLAUDE.md` at all. The new test this bug requires is
+what will first exercise it.
+
 **Explicitly NOT in scope:**
 - Relocating the block to the top of the file — that is a deliberate behaviour change, owned by CR-105.
 - `cleargate-cli/src/commands/uninstall.ts` — it calls `removeBlock` and inherits the regex fix for free; no separate change.
