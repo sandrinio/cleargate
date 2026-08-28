@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-057
 parent_ref: EPIC-043
-parent_cleargate_id: "EPIC-043"
+parent_cleargate_id: EPIC-043
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
@@ -23,9 +23,12 @@ draft_tokens:
   model: null
   sessions: []
 cached_gate_result:
-  pass: null
-  failing_criteria: []
-  last_gate_check: null
+  pass: false
+  failing_criteria:
+    - id: repro-steps-deterministic
+      detail: section 2 has 1 declared-item (≥3 required)
+  last_gate_check: 2026-08-28T21:15:41Z
+  transition: ready-for-fix
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -40,7 +43,19 @@ last_synced_body_sha: null
 
 ## 1. The Anomaly (Expected vs. Actual)
 
-`CLAUDE.md:162` instructs every drafting agent:
+> **CITATION RENUMBERING (orchestrator, 2026-08-29, per M3 `## Cross-story risks` item 2 and
+> Open decision 5).** [[CR-105]] relocated the bounded block in root `CLAUDE.md` from lines 129-186
+> to lines 1-58, which renumbered every line of this repo's own prose below it. The lines this Bug
+> cites did not change content; only their offsets moved. **`CLAUDE.md:162` -> `:34`** (the
+> `{TYPE}-{ID}-{Name}.md` save-path instruction) and **`CLAUDE.md:161` -> `:33`** (the template
+> list). Both citations have been updated in place throughout this file. The canonical mirror
+> `cleargate-planning/CLAUDE.md` was NOT relocated -- it is the injection spec, and its equivalents
+> remain at `:40` and `:39`. Verified by grep after the relocation commit `71037e5`.
+> One stale citation is knowingly left standing: FLASHCARD card `2026-08-28 #id-parsing #danger`
+> still reads `CLAUDE.md:162`. `FLASHCARD.md` is an append-only dated log and rewriting a past
+> entry is worse than a dead offset; the card's lesson is the `deriveBucket` mismatch, not the line.
+
+`CLAUDE.md:34` instructs every drafting agent:
 
 > - Save drafts to `.cleargate/delivery/pending-sync/{TYPE}-{ID}-{Name}.md`.
 
@@ -54,7 +69,7 @@ const underscoreIdx = stem.indexOf('_');
 const id = underscoreIdx === -1 ? stem : stem.slice(0, underscoreIdx);
 ```
 
-**Expected:** a file named per `CLAUDE.md:162` ingests to `wiki/<bucket>/<ID>.md`.
+**Expected:** a file named per `CLAUDE.md:34` ingests to `wiki/<bucket>/<ID>.md`.
 
 **Actual:** it ingests to `wiki/<bucket>/<ENTIRE-STEM>.md`. The prefix match still
 succeeds, so the bucket is right and **nothing errors** — the page is simply keyed
@@ -62,7 +77,7 @@ on a string no `[[ID]]` wikilink, `wiki query`, or lint cross-check will ever
 resolve.
 
 The de-facto convention in the tree is `{ID}_{SLUG}.md` (underscore), which
-`deriveBucket` keys correctly. `CLAUDE.md:162` documents a third shape that
+`deriveBucket` keys correctly. `CLAUDE.md:34` documents a third shape that
 matches neither the code nor the corpus.
 
 ## 2. Reproduction Protocol
@@ -98,7 +113,7 @@ ls .cleargate/wiki/bugs/ | grep -x 'BUG-035.md' || echo 'NO PAGE for BUG-035'
   dispatches `cleargate-wiki-query` before drafting — cannot surface it by id.
 - Only `.cleargate/templates/spike.md:30` (new in [[STORY-054-01]]) states an
   output-location convention at all, and it correctly says `{ID}_{SLUG}.md`.
-  No other template names one, so `CLAUDE.md:162` is the sole guidance the
+  No other template names one, so `CLAUDE.md:34` is the sole guidance the
   other nine types get.
 - Failure mode is **silent**: the prefix match succeeds, the bucket resolves,
   ingest exits 0. This is the same shape as [[BUG-042]] — a derived value that
@@ -130,7 +145,7 @@ i.e. `id` matches `^[A-Z]+-\d+(-\d+)?$`. It fails on 24 files today.
 ## Context Source
 
 Discovered 2026-08-27 while scoping the Route A correction to STORY-054-03,
-after the Architect post-flight found `CLAUDE.md:161` omitted `spike.md`.
+after the Architect post-flight found `CLAUDE.md:33` omitted `spike.md`.
 Deliberately **not** folded into STORY-054-03: that story's surface is spike
 doctrine, while this defect predates it and affects all ten drafting types.
 

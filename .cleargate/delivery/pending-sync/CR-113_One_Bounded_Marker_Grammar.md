@@ -83,6 +83,20 @@ last_synced_body_sha: null
   unfixed, in a file the installer writes.
 - **The equivalence corpus covers all three.** Adding a fourth marker pair must be a one-row edit
   to a table, not a fourth grammar.
+- **SCOPE WIDENED 2026-08-29 (CR-105 TPV ruling T7): "one marker grammar" includes the
+  MARKER-LINE form used by tests, not only the block-span form this CR was filed about.** Measured:
+  two test files re-type the single-marker half of BUG-043's convention as
+  `new RegExp('^' + escaped + '[ \\t]*$', 'gm')` — `claude-md-anchoring.red.node.test.ts:304-308`
+  and `claude-md-block-leads.red.node.test.ts:44-48`, byte-identical, `[ \t]*` decision included.
+  They are a fourth and fifth instance of the class. **Nothing in the tree detects them:** the
+  shared-corpus probe compares two `src/` exports and is structurally blind to a test-local copy,
+  `check:no-inline-id-regex` is scoped to work-item ids, there is no marker-grammar gate, and
+  `cleargate-cli` has zero installed git hooks. The distinction between the marker-line grammar and
+  the block-span grammar holds only until someone changes the whitespace tolerance — at which point
+  both test copies keep asserting the old convention and stay green. T7 required both copies be
+  rewritten to a regex-free line filter (`content.split('\n').filter(l => l.trimEnd() === marker)`,
+  verified 20/20 equivalent over 10 fixtures x 2 markers), which **deletes** rather than deduplicates
+  them; this CR must ensure the deletion holds and that no gate is needed because no grammar remains.
 
 ## 2. Blast Radius & Invalidation
 
