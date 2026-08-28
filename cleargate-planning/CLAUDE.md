@@ -1,6 +1,6 @@
 # ClearGate — Injected CLAUDE.md Block
 
-This file is the content `cleargate init` injects into a downstream user's `CLAUDE.md` between bounded markers. If the user has no existing `CLAUDE.md`, init writes this as a standalone file wrapped with the markers. If one already exists, init appends the bounded block below without touching the user's existing content. Re-running `cleargate init` updates the block in place.
+This file is the content `cleargate init` injects into a downstream user's `CLAUDE.md` between bounded markers. If the user has no existing `CLAUDE.md`, init writes this as a standalone file wrapped with the markers. If one already exists, init removes any existing block and **prepends** the current one, so the block always leads the file; the user's existing content follows it untouched. Re-running `cleargate init` relocates the block back to the top.
 
 ---
 
