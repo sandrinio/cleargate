@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **9 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **10 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
@@ -52,6 +52,15 @@ Closed-set predicate (no parameters). STORY-051-07: backstops the duplicate-chec
 
 **9. `ambiguity-gate-resolved`**
 Closed-set predicate (no parameters). STORY-051-07: backstops the "Ambiguity Gate criteria are evaluated literally" discipline with a machine check. Locates the `## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)` section by heading-title **prefix** match (the parenthetical emoji suffix means an exact-equality match never fires). Passes when the section is absent. When present, reads the `Current Status:` line: if it does not claim 🟢, passes (no self-contradiction to flag at 🟡/🔴). If it claims 🟢, passes only when the section has zero `- [ ]` unchecked checkboxes; fails, naming the unchecked count, otherwise. Example: a Status line reading `Current Status: 🟢 Low` with one remaining `- [ ]` box fails; checking that box flips the predicate to pass.
+
+**10. `task-breakdown-complete`**
+Closed-set predicate (no parameters). Locates the `## Task Breakdown` section by heading title
+(numeric prefixes tolerated). Passes when the section is absent — every item authored before this
+criterion existed lacks it, and an L1 item omits it deliberately. When present, passes only if it
+carries at least one task row (`- [ ]` or `- [x]`); a present-but-row-free section fails, naming
+the gap. The optional trailing `-> <requirement-id>` on a row is accepted and not otherwise
+interpreted. Example: `task-breakdown-complete` against a Story whose `## Task Breakdown` reads
+`- [ ] add the predicate branch -> R5` passes; the unedited template scaffold fails.
 
 ---
 
@@ -146,7 +155,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: implementation-files-declared
       check: "section(3) has ≥1 declared-item"
     - id: dod-declared
-      check: "section(4) has ≥1 listed-item"
+      check: "section(5) has ≥1 listed-item"
     - id: gherkin-present
       check: "body contains 'Scenario:'"
     - id: discovery-checked
@@ -161,6 +170,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
 ```
 
 ```yaml
@@ -184,6 +195,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
 ```
 
 ```yaml
@@ -203,6 +216,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
 ```
 
 ```yaml

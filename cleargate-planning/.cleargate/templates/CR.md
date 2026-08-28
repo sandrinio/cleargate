@@ -5,6 +5,7 @@ Use this template when CHANGING an existing feature. For net-new functionality, 
 §1 The Context Override: What to remove/forget + the new truth. AI agents hallucinate when old context conflicts with new requests.
 §2 Blast Radius & Invalidation: Which downstream items does this CR break? A CR acts as a "Gate Reset" on affected items.
 §3 Execution Sandbox: Exact file paths to modify.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
 §4 Verification Protocol: How to confirm new logic works and old logic is fully evicted.
 Output location: .cleargate/delivery/pending-sync/CR-{ID}.md
 
@@ -109,6 +110,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 **Modify:**
 - `src/...`
+
+## Task Breakdown
+
+> **Required at L3 and above. Optional at L2. Omit the whole section at L1.**
+> An absent section passes the gate; a section that is present but carries no task rows does not.
+> Write one row per executable step, in execution order:
+> `- [ ] <action>` with an optional trailing `-> <requirement-id>`. The requirement reference is
+> reserved for grounding ids and is not interpreted today.
 
 ## 4. Verification Protocol
 *(How do we confirm new logic works and old logic is completely removed?)*

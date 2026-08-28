@@ -5,6 +5,7 @@ YAML Frontmatter: Bug ID, Parent Ref, Status, Severity, Reporter, Approved gate.
 §2 Reproduction Protocol: Deterministic steps to recreate.
 §3 Evidence & Context: Raw logs, stack traces, payloads — no paraphrasing.
 §4 Execution Sandbox: Exact file paths to investigate. Restrict scope to prevent unrelated refactoring.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
 §5 Verification Protocol: The failing test that proves the bug exists and proves the fix resolves it.
 Output location: .cleargate/delivery/pending-sync/BUG-{ID}.md
 
@@ -97,6 +98,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 **Investigate / Modify:**
 - `src/...`
+
+## Task Breakdown
+
+> **Required at L3 and above. Optional at L2. Omit the whole section at L1.**
+> An absent section passes the gate; a section that is present but carries no task rows does not.
+> Write one row per executable step, in execution order:
+> `- [ ] <action>` with an optional trailing `-> <requirement-id>`. The requirement reference is
+> reserved for grounding ids and is not interpreted today.
 
 ## 5. Verification Protocol (The Failing Test)
 *(The agent must write or run a specific test that proves the bug exists, then prove the fix resolves it.)*
