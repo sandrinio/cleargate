@@ -2,7 +2,7 @@
 bug_id: BUG-046
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Triaged
@@ -15,13 +15,6 @@ updated_at: 2026-08-25T21:17:13Z
 created_at_version: cleargate@0.24.2
 updated_at_version: dff83bd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -35,6 +28,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id BUG-046
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-08-29T10:03:59Z
+  sessions: []
 ---
 
 # BUG-046: Collision surface treats worktree-unreachable paths as ordinary files
@@ -208,16 +210,16 @@ Observed live on 2026-08-27 while sanity-checking SPRINT-39 wave 3, so this is e
 > worktree was cut. Execution order. **Three rows and four QA cases were removed when this item
 > was split — they are [[BUG-062]]'s now.**
 
-- [ ] Cut story/BUG-046 from sprint/S-39; confirm cleargate-planning/.claude/** is tracked and .claude/** is not
-- [ ] QA-Red: author C1-C7, C12, C13 in test_file_surface.sh; confirm C1 and C6 red (C8-C11 moved to [[BUG-062]])
-- [ ] collision_surface.sh: add git ls-files/check-ignore classification; annotate or exit non-zero; guard against set -e on check-ignore's exit 1
-- [ ] cleargate-planning/.claude/agents/architect-reader.md: emit the reachability classification in the digest
-- [ ] cleargate-planning/.claude/agents/architect-synth.md: add the third refusal branch + its own exact rationale string
-- [ ] cleargate-planning/.claude/skills/sprint-execution/SKILL.md :286 — replace the false subdirectory claim
-- [ ] .cleargate/knowledge/cleargate-enforcement.md :89 + canonical mirror — same correction, byte-identical
-- [ ] Mirror collision_surface.sh and both test scripts into cleargate-planning/
-- [ ] Run gate-section-index-pinning; assert 18/18/0/0; do NOT open expected-headings.ts
-- [ ] Verify every mirrored pair diffs clean; verify git diff --name-only contains zero .claude/ live paths
+- [x] Cut story/BUG-046 from sprint/S-39; confirm cleargate-planning/.claude/** is tracked and .claude/** is not
+- [x] QA-Red: author C1-C7, C12, C13 in test_file_surface.sh; confirm C1 and C6 red (C8-C11 moved to [[BUG-062]]) — extended to C1 C2 C2b C4 C6 C12 C13 C13b across two rounds per TPV's P1-P7 amendment (`BUG-046-tpv.md`)
+- [x] collision_surface.sh: add git ls-files/check-ignore classification; annotate or exit non-zero; guard against set -e on check-ignore's exit 1 — classifies via `git ls-files --error-unmatch` / `git check-ignore -q` / git-native nested-repo probe, annotates UNREACHABLE on stderr, exit stays 0 (T8: exit code is free)
+- [x] cleargate-planning/.claude/agents/architect-reader.md: emit the reachability classification in the digest — new `unreachable_surface` digest field, sourced from collision_surface.sh's stderr
+- [x] cleargate-planning/.claude/agents/architect-synth.md: add the third refusal branch + its own exact rationale string — `"unreachable file surface — refused: <path>, ..."`, distinct from BUG-033's fail-safe-serialize string
+- [x] cleargate-planning/.claude/skills/sprint-execution/SKILL.md :286 — replace the false subdirectory claim — TPV's exact replacement sentence
+- [x] .cleargate/knowledge/cleargate-enforcement.md :89 + canonical mirror — same correction, byte-identical — TPV's exact replacement sentence, both copies
+- [x] Mirror collision_surface.sh and both test scripts into cleargate-planning/ — collision_surface.sh mirrored (test scripts were already QA-Red's byte-identical mirrors)
+- [x] Run gate-section-index-pinning; assert 18/18/0/0; do NOT open expected-headings.ts — measured `tests 14, pass 14, fail 0, skipped 0`; S1a/S6 confirm 18 = 16 pinnable + 2 known-unpinnable, unchanged; `expected-headings.ts` not opened
+- [x] Verify every mirrored pair diffs clean; verify git diff --name-only contains zero .claude/ live paths — confirmed for all seven touched files; `git diff --name-only | grep -c '^\.claude/'` → 0
 
 ## Prior work
 
