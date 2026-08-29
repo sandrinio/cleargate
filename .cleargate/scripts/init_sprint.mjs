@@ -38,6 +38,39 @@ const REPO_ROOT = process.env.CLEARGATE_REPO_ROOT
   ? path.resolve(process.env.CLEARGATE_REPO_ROOT)
   : path.resolve(__dirname, '..', '..');
 
+// --- CR-110: Goal Acceptance Check advisory ---
+// Mirrors sprint_context.md's own template text verbatim (kept in one place so drift between
+// the constant and the shipped placeholder is impossible to miss in review). Detection compares
+// against this with whitespace normalized, not a raw literal match — a placeholder that is
+// re-wrapped for page readability must still be recognised as unresolved.
+const GOAL_ACCEPTANCE_CHECK_PLACEHOLDER =
+  '_(populated by orchestrator at §A.5, confirmed by the human at the same halt that confirms the sprint plan)_';
+
+function normalizeWhitespace(s) {
+  return s.replace(/\s+/g, ' ').trim();
+}
+
+// Returns the first non-blank line under a "## <heading>" section (up to the next "## "
+// heading), or null if the heading is absent or the section has no non-blank line. Mirrors
+// cr078_init.test.sh's first_nonempty_under_heading awk helper.
+function extractSectionFirstNonEmptyLine(content, heading) {
+  const lines = content.split('\n');
+  let inSection = false;
+  for (const line of lines) {
+    if (line === heading) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && /^## /.test(line)) {
+      return null;
+    }
+    if (inSection && line.trim().length > 0) {
+      return line.trim();
+    }
+  }
+  return null;
+}
+
 function usage() {
   process.stderr.write(
     'Usage: node init_sprint.mjs <sprint-id> --stories ID1,ID2,... [--force]\n'
@@ -292,6 +325,20 @@ function main() {
         } catch {
           // Goal extraction failed — leave placeholder; non-fatal
         }
+      }
+
+      // --- CR-110: Goal Acceptance Check advisory (F2 — render is free; advisory only) ---
+      // The check is populated by the orchestrator at §A.5 (a later, human-confirmed step), not
+      // extracted here — so this only DETECTS whether the placeholder survived unedited and warns.
+      // Non-blocking: WARN and continue, mirroring sprint_context.md's own §Test Stack degradation
+      // idiom ("test_stack unresolved — populate sprint_context.md §Test Stack"). Detects the
+      // placeholder STRING, not an empty section — a populated mechanical check or the literal
+      // `not-mechanically-verifiable` token must never trip this.
+      const gacValue = extractSectionFirstNonEmptyLine(ctxContent, '## Goal Acceptance Check');
+      if (gacValue !== null && normalizeWhitespace(gacValue) === normalizeWhitespace(GOAL_ACCEPTANCE_CHECK_PLACEHOLDER)) {
+        process.stderr.write(
+          `WARN: Goal Acceptance Check unresolved — populate sprint-context.md §Goal Acceptance Check\n`
+        );
       }
 
       // Write atomically via tmpFile + renameSync (mirrors state.json pattern)
