@@ -18,6 +18,10 @@
  *
  * Migration: reads v1 state.json transparently; upgrades to v2 on first touch
  *   (injects lane fields with defaults; emits one stderr log line).
+ *
+ * Concurrency (BUG-044): the whole read-modify-write below -- including the two migration
+ * writes that run ahead of the action dispatch -- is serialized behind an exclusive lockfile
+ * at `<state.json>.lock`. See acquireLock() for the retry/steal policy.
  */
 
 import fs from 'node:fs';
@@ -29,6 +33,117 @@ import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+
+// BUG-044 lock tuning.
+//
+// LOCK_RETRY_BUDGET_MS is a PER-HOLDER budget, not a flat total: the deadline resets whenever
+// the observed holder (the lock payload's pid+at pair) changes. A lock whose holder keeps
+// changing is making progress and is never refused on that basis alone; a lock whose holder
+// never changes is refused once ITS OWN 2s budget elapses. This is deliberately not a single
+// flat ceiling across all contenders -- a flat budget large enough for many serialized holders
+// to each get a turn would also be large enough to let a genuinely stuck live lock hang every
+// caller for that same long ceiling.
+const LOCK_RETRY_BUDGET_MS = 2000;
+// Backstop steal for a live-LOOKING lock whose pid has been recycled by the OS -- the primary
+// steal signal is process.kill(pid, 0) liveness, below; this is only a fallback for the rare
+// case where a dead writer's pid has since been reassigned to a new, unrelated live process.
+const LOCK_STALE_AGE_MS = 5 * 60 * 1000;
+// Poll interval while waiting on a live, unexpired lock.
+const LOCK_POLL_INTERVAL_MS = 25;
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+// Liveness check for a lock's recorded pid. `process.kill(pid, 0)` sends no signal; it only
+// probes existence/permission. ESRCH means the process is gone (stealable). EPERM means the
+// process exists but is owned by another user -- that is ALIVE, not dead; treat it as such,
+// and treat any other unexpected errno the same conservative way (do not steal).
+function isPidAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    if (err && err.code === 'ESRCH') return false;
+    return true;
+  }
+}
+
+// Acquire an exclusive lock at `lockPath`, blocking (via short synchronous sleeps -- main() is
+// synchronous top-to-bottom, so no async timer can run here) until it succeeds or the current
+// holder's own retry budget elapses. Registers the release as a `process.on('exit')` handler
+// immediately on success -- NOT a `finally` -- because `process.exit()` skips `finally` blocks
+// entirely, and the idempotent no-op path (the single commonest path in normal operation) exits
+// via `process.exit(0)`. This also means release naturally happens strictly after the action
+// dispatch's `atomicWrite()`/`renameSync()` has returned, since main() cannot begin exiting
+// until its synchronous body -- including that rename -- has finished running.
+function acquireLock(lockPath) {
+  const payload = JSON.stringify({ pid: process.pid, at: new Date().toISOString() });
+  let holderKey = null;
+  let deadlineAt = null;
+
+  for (;;) {
+    let fd;
+    try {
+      fd = fs.openSync(lockPath, 'wx'); // O_CREAT|O_EXCL|O_WRONLY -- atomic create-or-EEXIST
+    } catch (err) {
+      if (err.code !== 'EEXIST') throw err;
+
+      // Contended. Stat/read the lock ONLY on this branch -- the uncontended path above never
+      // touches the filesystem beyond its own single openSync.
+      let lockInfo = null;
+      try {
+        lockInfo = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+      } catch {
+        // Lock vanished between our EEXIST and this read (its holder just released it), or its
+        // holder is mid-write of the small payload. Either way this is a fleeting window; retry
+        // without touching the per-holder deadline.
+        sleepSync(LOCK_POLL_INTERVAL_MS);
+        continue;
+      }
+
+      const pid = lockInfo && lockInfo.pid;
+      const alive = isPidAlive(pid);
+      const ageMs = lockInfo && lockInfo.at ? Date.now() - Date.parse(lockInfo.at) : Infinity;
+      const stale = !alive || ageMs > LOCK_STALE_AGE_MS;
+
+      if (stale) {
+        try {
+          fs.unlinkSync(lockPath);
+        } catch {
+          // Another process may have already stolen/released it first -- fine, loop and retry.
+        }
+        continue;
+      }
+
+      // Live holder: per-holder retry budget (see LOCK_RETRY_BUDGET_MS above).
+      const holderKeyNow = `${pid}:${lockInfo.at}`;
+      if (holderKeyNow !== holderKey) {
+        holderKey = holderKeyNow;
+        deadlineAt = Date.now() + LOCK_RETRY_BUDGET_MS;
+      }
+      if (Date.now() >= deadlineAt) {
+        throw new Error(`could not acquire lock for ${lockPath} -- held by pid ${pid}`);
+      }
+
+      sleepSync(LOCK_POLL_INTERVAL_MS);
+      continue;
+    }
+
+    // Acquired. One openSync total on this path; write the payload, register the release, done.
+    fs.writeSync(fd, payload);
+    fs.closeSync(fd);
+    process.on('exit', () => {
+      try {
+        fs.unlinkSync(lockPath);
+      } catch {
+        // Already released, or stolen by another process after a crash -- nothing to do.
+      }
+    });
+    return;
+  }
+}
 
 function usage() {
   process.stderr.write(
@@ -91,6 +206,16 @@ function main() {
 
   if (!fs.existsSync(stateFile)) {
     process.stderr.write(`Error: state.json not found at ${stateFile}\n`);
+    process.exit(1);
+  }
+
+  // BUG-044: acquire before the first read below, and hold across the whole read-modify-write
+  // (including both migration writes ahead of the action dispatch) -- see acquireLock().
+  const lockPath = `${stateFile}.lock`;
+  try {
+    acquireLock(lockPath);
+  } catch (err) {
+    process.stderr.write(`Error: ${err.message}\n`);
     process.exit(1);
   }
 
