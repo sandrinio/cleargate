@@ -17,6 +17,7 @@
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
+- [[EPIC-058]] (epic) — Draft — Additive Multi-Host Execution Adapters
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
