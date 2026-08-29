@@ -164,7 +164,7 @@ the only judgement is *whether* to copy `architect-synth.md`, per the decision a
 
 ---
 
-## NEW Gate-4 obligation — the npm payload goes stale ON the BUG-044 merge
+## ~~NEW Gate-4 obligation~~ — SUPERSEDED, see "prebuild is per-merge, not Gate-4" below
 
 Raised by the BUG-044 Architect post-flight. `cleargate-cli/templates/cleargate-planning/.cleargate/
 scripts/update_state.mjs` matches canonical **today** at 246 lines, and becomes **246-vs-371** the
@@ -218,3 +218,61 @@ boundary permanently — shipped code, unshipped changelog, nothing red.
 
 The guard belongs in `verify-pack.mjs` — the `prepublishOnly` chokepoint — not in the test suite,
 which by construction cannot see the region. Candidate follow-on CR; not this sprint's.
+
+
+---
+
+## CORRECTION — `prebuild` is a PER-MERGE obligation, not a Gate-4 step. A test enforces it.
+
+Recorded 2026-08-29 after BUG-045's DevOps merge halted on an unexpected suite failure. This
+supersedes the "NEW Gate-4 obligation" entry above, which framed the payload drift as something
+to clean up at close.
+
+**What happened.** BUG-045's post-merge full suite came back `tests 2590 · suites 910 · pass 2587
+· fail 2 · skipped 1` — one more failure than every prior measurement. DevOps halted rather than
+waving it through, which was correct. The extra failure was
+`test/scaffold/skill-md-conditional-architect.red.node.test.ts`, a file BUG-045's branch never
+touched (`git diff e4cb49f..c589a039` over it is empty).
+
+**Why it failed, and it was a REAL failure.** Its **S5** case asserts the generated payload
+`cleargate-cli/templates/cleargate-planning/.claude/skills/sprint-execution/SKILL.md` is
+byte-identical to canonical `cleargate-planning/.claude/skills/sprint-execution/SKILL.md`. The
+diff it printed was **exactly BUG-046's doctrine correction at line 286** — the payload still
+carried the false claim BUG-046 was chartered to remove:
+
+```
+< ... that path does NOT exist in a worktree: `mcp/` has zero tracked files in the outer repo,
+    so edit it in the main checkout instead.
+> ... the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a
+    subdirectory of the outer worktree.
+```
+
+So the false claim survived in the **generated npm payload** — a surface neither BUG-046's C13
+grep nor its post-flight census covered, because both scanned canonical and live doctrine, not the
+build artifact. It would have shipped to every fresh `cleargate init` until someone ran `prebuild`.
+
+**The reframing.** S5 makes payload↔canonical parity a **tested invariant**. Any commit that edits
+a canonical scaffold file reds the `cleargate-cli` suite from that moment until `npm --prefix
+cleargate-cli run prebuild` runs. It is therefore a **per-merge** obligation for any story touching
+`cleargate-planning/**`, not a Gate-4 tidy-up. Deferring it means every subsequent cli suite run is
+red-by-default, which masks real regressions — exactly what nearly happened here.
+
+**Current state — measured, not assumed.** The full payload tree was regenerated at ~14:54 (both
+halves of `prebuild`: the payload copy and the manifest). All six files changed by BUG-044 and
+BUG-046 are now **in sync**:
+
+```
+SKILL.md · architect-reader.md · architect-synth.md
+cleargate-enforcement.md · collision_surface.sh · update_state.mjs      all in sync
+```
+
+`cleargate-planning/MANIFEST.json` carries a pending 15-insertion / 15-deletion diff, consistent
+with `build-manifest` having run — that is the manifest reconciliation the Gate-4 list already
+expects, and it should be committed rather than reverted.
+
+**Open question worth one measurement at close:** S5's outcome depends on whether the payload
+happens to be in sync when the suite runs, and nothing in the suite regenerates it (no test invokes
+`copy-planning-payload.mjs` — grepped). So a canonical edit made *after* a prebuild will red S5 on
+the next run with a diagnostic that names S5's own story, not the story that actually changed
+canonical. Worth a follow-on: have the pre-commit hook run `prebuild` when
+`cleargate-planning/**` is staged, so the payload can never lag a commit.
