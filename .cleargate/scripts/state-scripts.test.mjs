@@ -63,45 +63,76 @@ function makeStory(stateVal = 'Ready to Bounce', overrides = {}) {
   };
 }
 
-// ---- BUG-044 helpers: deterministic read-window widening for lost-update races ----
+// ---- BUG-044 helpers: a true full-quorum barrier for deterministic lost-update races ----
 //
 // A lost-update race is timing-dependent; a test that spawns N processes and hopes they happen
 // to interleave badly is worthless when the race doesn't fire on a given run (FLASHCARD
-// 2026-08-28 #test-harness #danger; this story's own QA-Red dispatch repeats the warning). We
-// force the read-modify-write window open instead: a `--import`-preloaded shim monkey-patches
-// the process-global `fs.readFileSync` so the FIRST read of the target state file sleeps
-// synchronously before returning. `import fs from 'node:fs'` in every module of the process
-// resolves to the SAME shared object, so patching a property on it from a `--import` preload is
-// visible to update_state.mjs's own later `import fs from 'node:fs'` — verified empirically
-// (scratch repro: shim.mjs patches fs.readFileSync, target.mjs imports fs independently and
-// still hits the patched function) before writing this file. Spawning N such processes
-// back-to-back (spawn() is non-blocking; the loop issuing all N calls completes in low
-// single-digit ms) lands every process's read inside the same widened window, forcing them to
-// observe the identical pre-mutation snapshot.
+// 2026-08-28 #test-harness #danger; this story's own QA-Red dispatch repeats the warning).
 //
-// This does NOT deadlock a correctly-locked fix: the lock retry loop (if the story's lock is
-// implemented) runs BEFORE the shimmed read — the read only happens once a process holds the
-// lock — so a correct fix simply serializes the N delayed reads one at a time (slower: each
-// holder pays the delay once; never hung).
+// First attempt (measured, then discarded): a `--import`-preloaded shim that sleeps a FIXED
+// delay on the first read of the target path, so N spawned processes land inside the same
+// widened window. This reliably reproduced the bug most of the time but was NOT airtight --
+// reruns showed occasional accidental greens (measured: 2 of 6 reruns of S1 passed on the
+// unfixed baseline at a 600ms delay). Root cause, traced: `spawn()` issuing N processes
+// back-to-back does not bound how long any ONE of them takes to actually start running (V8
+// isolate boot + ESM resolution of update_state.mjs's three imports, under contention from the
+// other N-1 processes cold-starting at once) -- a slow straggler can arrive at the read AFTER an
+// earlier process has already written, so the straggler's read observes the already-updated
+// file and "accidentally" preserves it. A fixed delay cannot rule this out; it can only make it
+// less likely, and less-likely is exactly the "hoping" this dispatch forbids.
+//
+// Final mechanism: a real cross-process barrier via the filesystem. On its first read of the
+// target path, each process drops an arrival marker into a shared directory, then blocks
+// (synchronous poll + Atomics.wait sleep) until EITHER all N markers are present (true full
+// quorum -- every process is now guaranteed to observe the identical pre-mutation snapshot,
+// regardless of how long any straggler took to get there) OR no NEW marker has appeared for
+// CG_TEST_BARRIER_INACTIVITY_MS straight (the escape hatch: once a correct fix serializes
+// processes one at a time behind a lock, no second process can ever reach this read while the
+// first holds the lock, so quorum will never complete -- inactivity is how a single serialized
+// holder detects "no more siblings are coming any time soon" and proceeds instead of hanging
+// forever). Unlike the fixed-delay version, the wait duration adapts to the real arrival rate:
+// pre-fix it patiently waits out however long process-startup jitter takes, as long as arrivals
+// keep trickling in; post-fix each serialized holder pays at most one inactivity window.
+//
+// `import fs from 'node:fs'` resolves to one shared object across every module in a process, so
+// patching a property on it from a `--import` preload is visible to update_state.mjs's own later
+// `import fs from 'node:fs'` -- verified empirically (scratch repro: a shim.mjs patches
+// fs.readFileSync, an independently-`import fs`-ing target.mjs still hits the patched function)
+// before writing this file.
 
-function makeReadDelayShimFile(tmpDir) {
-  const shimPath = path.join(tmpDir, '.read-delay-shim.mjs');
+function makeBarrierShimFile(tmpDir) {
+  const shimPath = path.join(tmpDir, '.barrier-shim.mjs');
   const shimSrc = [
     "import fsShim from 'node:fs';",
     "import pathShim from 'node:path';",
     '',
-    "const DELAY_MS = Number(process.env.CG_TEST_READ_DELAY_MS || 0);",
-    "const TARGET = process.env.CG_TEST_READ_DELAY_TARGET;",
+    "const BARRIER_DIR = process.env.CG_TEST_BARRIER_DIR;",
+    "const BARRIER_N = Number(process.env.CG_TEST_BARRIER_N || 0);",
+    "const TARGET = process.env.CG_TEST_BARRIER_TARGET;",
+    "const INACTIVITY_MS = Number(process.env.CG_TEST_BARRIER_INACTIVITY_MS || 300);",
     '',
-    'if (DELAY_MS > 0 && TARGET) {',
+    'if (BARRIER_DIR && BARRIER_N > 0 && TARGET) {',
     '  const resolvedTarget = pathShim.resolve(TARGET);',
     '  const originalReadFileSync = fsShim.readFileSync;',
     '  let armed = true;',
     '  fsShim.readFileSync = function patchedReadFileSync(p, ...rest) {',
     '    if (armed && pathShim.resolve(String(p)) === resolvedTarget) {',
     '      armed = false;',
+    '      const markerId = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;',
+    '      fsShim.writeFileSync(pathShim.join(BARRIER_DIR, markerId), "1");',
     '      const sab = new Int32Array(new SharedArrayBuffer(4));',
-    '      Atomics.wait(sab, 0, 0, DELAY_MS);',
+    '      let lastCount = fsShim.readdirSync(BARRIER_DIR).length;',
+    '      let lastChangeAt = Date.now();',
+    '      while (lastCount < BARRIER_N) {',
+    '        Atomics.wait(sab, 0, 0, 15);',
+    '        const count = fsShim.readdirSync(BARRIER_DIR).length;',
+    '        if (count !== lastCount) {',
+    '          lastCount = count;',
+    '          lastChangeAt = Date.now();',
+    '        } else if (Date.now() - lastChangeAt > INACTIVITY_MS) {',
+    '          break;',
+    '        }',
+    '      }',
     '    }',
     '    return originalReadFileSync.call(fsShim, p, ...rest);',
     '  };',
@@ -112,15 +143,15 @@ function makeReadDelayShimFile(tmpDir) {
   return shimPath;
 }
 
-// Async spawn of update_state.mjs, optionally preloaded with the read-delay shim above.
-// Returns a Promise so callers can Promise.all() a batch of genuinely concurrent invocations
-// (spawnSync would block the event loop and serialize them, defeating the point of S1/S2).
+// Async spawn of update_state.mjs, optionally preloaded with the barrier shim above. Returns a
+// Promise so callers can Promise.all() a batch of genuinely concurrent invocations (spawnSync
+// would block the event loop and serialize them, defeating the point of S1/S2).
 function spawnUpdateStateAsync(args, opts = {}) {
   return new Promise((resolve) => {
     const env = { ...process.env, ...opts.env };
     const spawnArgs = [];
-    if (opts.readDelayShim) {
-      spawnArgs.push('--import', pathToFileURL(opts.readDelayShim).href);
+    if (opts.barrierShim) {
+      spawnArgs.push('--import', pathToFileURL(opts.barrierShim).href);
     }
     spawnArgs.push(path.join(SCRIPTS_DIR, 'update_state.mjs'), ...args);
     const child = spawn(process.execPath, spawnArgs, { env });
@@ -405,16 +436,18 @@ describe('Scenario 6: validate_state catches a corrupted counter', () => {
 
 
 // ============================================================================
-// BUG-044 — update_state.mjs lost-update race (QA-Red baseline, commit B)
+// BUG-044 -- update_state.mjs lost-update race (QA-Red baseline, commit B)
 // Scenarios S1-S5 per SPRINT-39 plans/M4.md "### Test scenarios, with the mutants each must
 // kill" (BUG-044 section). S0 is commit A above (the schema_version fix). The table's S6 row
 // ("existing scenarios 1-6 stay green") is not a new test -- satisfied by Scenarios 1-6 above
-// continuing to pass in the same `node --test` run as these.
+// continuing to pass in the same `node --test` run as these. A trailing addendum (past S5) covers
+// the two unguarded migration writes at update_state.mjs:116/:122, flagged separately by this
+// story's QA-Red dispatch text -- not one of the plan's S1-S5 rows.
 // ============================================================================
 
 // ---- BUG-044 S1: 20 concurrent invocations, 20 distinct story ids ----
 describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct stories -- all 20 transitions must persist', () => {
-  let tmpBase, stateFile, shimPath;
+  let tmpBase, stateFile, shimPath, barrierDir;
   const N = 20;
   const ids = Array.from({ length: N }, (_, i) => `STORY-FAKE-${String(i + 1).padStart(2, '0')}`);
 
@@ -429,7 +462,8 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
     // seeding at v1 would make a 20-way test exercise 20 concurrent MIGRATIONS, not the race
     // (BUG-044 Gotchas, M4.md plan: "Seed S1's fixture at schema_version: 3 with no execution_mode").
     writeStateJson(stateFile, makeState(stories, { schema_version: 3, execution_mode: undefined }));
-    shimPath = makeReadDelayShimFile(tmpBase);
+    barrierDir = fs.mkdtempSync(path.join(tmpBase, 'barrier-'));
+    shimPath = makeBarrierShimFile(tmpBase);
   });
 
   after(() => {
@@ -440,11 +474,13 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
     const results = await Promise.all(
       ids.map((id) =>
         spawnUpdateStateAsync([id, 'Bouncing'], {
-          readDelayShim: shimPath,
+          barrierShim: shimPath,
           env: {
             CLEARGATE_STATE_FILE: stateFile,
-            CG_TEST_READ_DELAY_MS: '200',
-            CG_TEST_READ_DELAY_TARGET: stateFile,
+            CG_TEST_BARRIER_DIR: barrierDir,
+            CG_TEST_BARRIER_N: String(N),
+            CG_TEST_BARRIER_TARGET: stateFile,
+            CG_TEST_BARRIER_INACTIVITY_MS: '300',
           },
         })
       )
@@ -471,8 +507,9 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
 
 // ---- BUG-044 S2: two concurrent invocations against the SAME story id ----
 describe('BUG-044 S2: two concurrent update_state invocations, same story id -- file stays valid JSON, no corruption', () => {
-  let tmpBase, stateFile, shimPath;
+  let tmpBase, stateFile, shimPath, barrierDir;
   const ID = 'STORY-FAKE-SAME';
+  const N = 2;
 
   before(() => {
     tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s2-'));
@@ -483,7 +520,8 @@ describe('BUG-044 S2: two concurrent update_state invocations, same story id -- 
       stateFile,
       makeState({ [ID]: makeStory('Ready to Bounce') }, { schema_version: 3, execution_mode: undefined })
     );
-    shimPath = makeReadDelayShimFile(tmpBase);
+    barrierDir = fs.mkdtempSync(path.join(tmpBase, 'barrier-'));
+    shimPath = makeBarrierShimFile(tmpBase);
   });
 
   after(() => {
@@ -494,11 +532,13 @@ describe('BUG-044 S2: two concurrent update_state invocations, same story id -- 
     const results = await Promise.all(
       [0, 1].map(() =>
         spawnUpdateStateAsync([ID, 'Bouncing'], {
-          readDelayShim: shimPath,
+          barrierShim: shimPath,
           env: {
             CLEARGATE_STATE_FILE: stateFile,
-            CG_TEST_READ_DELAY_MS: '200',
-            CG_TEST_READ_DELAY_TARGET: stateFile,
+            CG_TEST_BARRIER_DIR: barrierDir,
+            CG_TEST_BARRIER_N: String(N),
+            CG_TEST_BARRIER_TARGET: stateFile,
+            CG_TEST_BARRIER_INACTIVITY_MS: '300',
           },
         })
       )
@@ -638,5 +678,76 @@ describe("BUG-044 S5: a live lock (this process's own pid) is respected -- the i
     assert.strictEqual(final.stories[ID].state, 'Ready to Bounce', 'state must be untouched -- the invocation must not have proceeded past the live lock');
 
     assert.ok(fs.existsSync(lockFile), 'the live lock itself should still be present -- this process never released it');
+  });
+});
+
+// ---- BUG-044 QA-Red addendum: the two UNGUARDED migration writes (:116, :122) ----
+// Not one of the plan's S1-S5 rows -- flagged separately by the QA-Red dispatch: "the two
+// unguarded migration writes at update_state.mjs:116 and :122 (plan finding) -- they are in
+// scope and the item's SS2 does not mention them." S1 above deliberately seeds at
+// schema_version 3 (per the plan's own Gotcha) specifically to bypass the migrator, which means
+// S1 can never catch a fix that locks only the action-branch atomicWrite calls (:155 etc.) and
+// forgets to extend the critical section back to the pre-migration read/migration writes at
+// :114-117 / :120-123 (M4.md plan Gotcha 2 -- itself listed as one of S1's own mutants, but one
+// S1's v3 seed structurally cannot exercise). This scenario seeds a FRESH v1 fixture so every
+// concurrent process actually walks the migration branch before the action dispatch.
+describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 state.json (forces the migration writes at :116/:122)', () => {
+  let tmpBase, stateFile, shimPath, barrierDir;
+  const N = 10;
+  const ids = Array.from({ length: N }, (_, i) => `STORY-FAKE-MIG-${String(i + 1).padStart(2, '0')}`);
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-mig-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    const stories = {};
+    for (const id of ids) stories[id] = makeStory('Ready to Bounce');
+    // Deliberately v1 (makeState's default) -- every concurrent process below must walk BOTH
+    // migrateV1ToV2 (:114-117) and migrateStateToV3 (:120-123) before reaching the action
+    // dispatch. The barrier forces all N processes' single read (before ANY of them has written
+    // anything, migration or otherwise) to observe the identical pre-migration v1 snapshot.
+    writeStateJson(stateFile, makeState(stories));
+    barrierDir = fs.mkdtempSync(path.join(tmpBase, 'barrier-'));
+    shimPath = makeBarrierShimFile(tmpBase);
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('all N concurrent transitions persist AND the file ends fully migrated to schema_version 3', async () => {
+    const results = await Promise.all(
+      ids.map((id) =>
+        spawnUpdateStateAsync([id, 'Bouncing'], {
+          barrierShim: shimPath,
+          env: {
+            CLEARGATE_STATE_FILE: stateFile,
+            CG_TEST_BARRIER_DIR: barrierDir,
+            CG_TEST_BARRIER_N: String(N),
+            CG_TEST_BARRIER_TARGET: stateFile,
+            CG_TEST_BARRIER_INACTIVITY_MS: '300',
+          },
+        })
+      )
+    );
+
+    for (const r of results) {
+      assert.strictEqual(r.status, 0, `every invocation should exit 0; stderr: ${r.stderr}`);
+    }
+
+    const final = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    assert.strictEqual(final.schema_version, 3, 'file should end fully migrated to schema_version 3, not stuck mid-migration');
+    assert.ok(!('execution_mode' in final), 'execution_mode should have been stripped by the v2->v3 migration');
+
+    const bounced = ids.filter((id) => final.stories[id].state === 'Bouncing');
+    const lost = ids.filter((id) => !bounced.includes(id));
+    assert.strictEqual(
+      bounced.length,
+      N,
+      `expected all ${N} transitions to persist through the migration path; only ${bounced.length} did -- ` +
+      `lost: ${lost.join(', ')} (the two unguarded migration writes at update_state.mjs:116/:122 raced -- ` +
+      `a lock scoped only to the action-branch writes at :155/:176/:193/:210/:241 does not protect this path)`
+    );
   });
 });
