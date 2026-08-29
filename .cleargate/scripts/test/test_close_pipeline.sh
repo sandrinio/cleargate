@@ -653,6 +653,479 @@ STATEOF
   rm -rf "$tmpdir"
 }
 
+
+# ── CR-107 helpers: sprint→main merge via PR ──────────────────────────────
+# QA-Red baseline for CR-107 (F2a squash-merge detection, F2b stale-local-
+# main, fail-closed vcs.sprint_pr gate). Reuses the existing
+# CLEARGATE_FORCE_MERGE_STATUS / CLEARGATE_REPO_ROOT seams (close_sprint.mjs
+# :47-52) — no fourth seam added, per the M4 CR-107 plan's "Reuse" section.
+#
+# Invocation note (pre-existing, unrelated defect — see QA report): bare
+# `close_sprint.mjs` passed to run_script.sh resolves "command not found"
+# because .cleargate/scripts is not on PATH and the file has no +x bit.
+# Scenarios 1/2/4/5 above rely on this (mostly vacuously — see report). All
+# CR-107 scenarios below route through `node "${SCRIPTS_DIR}/close_sprint.mjs"`
+# instead, matching run_script.sh's own documented usage.
+
+cs_write_vcs_config() {
+  # $1 = target dir (becomes CLEARGATE_REPO_ROOT), $2 = true|false
+  local dir="$1" value="$2"
+  mkdir -p "${dir}/.cleargate"
+  cat > "${dir}/.cleargate/config.yml" << YAMLEOF
+vcs:
+  sprint_pr: ${value}
+YAMLEOF
+}
+
+cs_make_state_dir() {
+  # One Done story, no fast lane (Step 2.5 auto-skips, no REPORT.md needed).
+  local dir
+  dir="$(mktemp -d)"
+  write_state_json "$dir" '"CR-107-TEST": {"state": "Done", "qa_bounces": 0, "arch_bounces": 0, "worktree": null, "updated_at": "2026-08-29T00:00:00Z", "notes": ""}'
+  echo "$dir"
+}
+
+# Bare "origin" + a "work" clone, one seed commit on main, pushed. Sets
+# CS_ROOT / CS_BARE / CS_WORK (single-use globals — each scenario resets).
+cs_reset_repo() {
+  CS_ROOT="$(mktemp -d)"
+  CS_BARE="${CS_ROOT}/origin.git"
+  CS_WORK="${CS_ROOT}/work"
+  git init --bare -q "$CS_BARE"
+  git init -q "$CS_WORK" > /dev/null 2>&1
+  git -C "$CS_WORK" config user.email "qa-red@cleargate.test"
+  git -C "$CS_WORK" config user.name "QA Red"
+  git -C "$CS_WORK" config commit.gpgsign false
+  echo seed > "${CS_WORK}/seed.txt"
+  git -C "$CS_WORK" add seed.txt
+  git -C "$CS_WORK" commit -q -m "seed"
+  git -C "$CS_WORK" branch -M main
+  git -C "$CS_WORK" remote add origin "$CS_BARE"
+  git -C "$CS_WORK" push -q origin main
+}
+
+# Same, but with NO origin remote at all (P3's "no remote" fixture).
+cs_reset_repo_no_remote() {
+  CS_ROOT="$(mktemp -d)"
+  CS_WORK="${CS_ROOT}/work"
+  git init -q "$CS_WORK" > /dev/null 2>&1
+  git -C "$CS_WORK" config user.email "qa-red@cleargate.test"
+  git -C "$CS_WORK" config user.name "QA Red"
+  git -C "$CS_WORK" config commit.gpgsign false
+  echo seed > "${CS_WORK}/seed.txt"
+  git -C "$CS_WORK" add seed.txt
+  git -C "$CS_WORK" commit -q -m "seed"
+  git -C "$CS_WORK" branch -M main
+}
+
+# Create sprint/S-<num> off main in CS_WORK, one commit, pushed to origin if
+# one exists. Leaves CS_WORK checked out on main afterward.
+cs_make_sprint_branch() {
+  local num="$1"
+  git -C "$CS_WORK" checkout -q -b "sprint/S-${num}" main
+  echo "feature-${num}" > "${CS_WORK}/feature-${num}.txt"
+  git -C "$CS_WORK" add "feature-${num}.txt"
+  git -C "$CS_WORK" commit -q -m "CR-107 QA-Red fixture: sprint feature ${num}"
+  if git -C "$CS_WORK" remote get-url origin > /dev/null 2>&1; then
+    git -C "$CS_WORK" push -q origin "sprint/S-${num}"
+  fi
+  git -C "$CS_WORK" checkout -q main
+}
+
+# Simulate "PR merged on GitHub, not yet pulled locally": clone a SECOND
+# working copy from origin, merge sprint into ITS main (no-ff), push. Then,
+# in CS_WORK (the "local, stale" copy) run an AMBIENT fetch (simulating a
+# background/IDE fetch that already happened) which updates
+# refs/remotes/origin/main WITHOUT touching CS_WORK's local refs/heads/main.
+# Implementation-agnostic: satisfies BOTH of F2b's named fixes (an internal
+# fetch-then-check, or a refs/remotes/origin/main fallback) since either one
+# only needs origin/main to be resolvable in CS_WORK's own .git, which it now is.
+cs_simulate_stale_local_main() {
+  local num="$1"
+  local merger="${CS_ROOT}/merger"
+  git clone -q "$CS_BARE" "$merger"
+  git -C "$merger" config user.email "qa-red@cleargate.test"
+  git -C "$merger" config user.name "QA Red"
+  git -C "$merger" config commit.gpgsign false
+  git -C "$merger" checkout -q main
+  git -C "$merger" merge -q --no-ff "origin/sprint/S-${num}" -m "Merge sprint/S-${num} into main (simulated PR merge)"
+  git -C "$merger" push -q origin main
+  git -C "$CS_WORK" fetch -q origin
+}
+
+# Minimal PATH sandbox: git/node/bash/sh/coreutils + shasum/cut (needed by
+# run_script.sh's own incident-writer on any downstream non-zero exit) —
+# deliberately NO gh, regardless of where the host's real gh binary lives.
+cs_make_no_gh_path() {
+  local shim
+  shim="$(mktemp -d)"
+  local tool
+  for tool in git node bash sh env cat mktemp diff rm mkdir sed awk tr date ls dirname basename wc cp mv chmod stat find xargs uname head tail shasum cut printf true false expr; do
+    local resolved
+    resolved="$(command -v "$tool" 2>/dev/null || true)"
+    [[ -n "$resolved" ]] && ln -sf "$resolved" "${shim}/${tool}"
+  done
+  echo "$shim"
+}
+
+# ── CR-107 P1: vcs.sprint_pr absent/false → local-merge path unchanged ────
+# Regression guard — the whole regression story for every existing install
+# rests on this default. Uses the FORCE_MERGE_STATUS seam directly: no git
+# repo needed, since a forced status short-circuits close_sprint.mjs before
+# any execSync('git ...') call (close_sprint.mjs:666-673).
+
+scenario_cr107_p1_vcs_off_regression() {
+  local state_dir cfg_dir out ec
+
+  # P1a: vcs block ABSENT entirely + FORCE_MERGE_STATUS=merged.
+  state_dir="$(cs_make_state_dir)"
+  cfg_dir="$(mktemp -d)"
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${cfg_dir}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         CLEARGATE_FORCE_MERGE_STATUS=merged \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+  if echo "$out" | grep -q "Step 2.8 passed: refs/heads/sprint/S-97 is merged to refs/heads/main."; then
+    pass "CR-107 P1a: vcs block absent + FORCE_MERGE_STATUS=merged -> Step 2.8 passes, message byte-identical to today"
+  else
+    fail "CR-107 P1a: vcs block absent must leave Step 2.8 byte-identical to today" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
+  fi
+  rm -rf "$state_dir" "$cfg_dir"
+
+  # P1b: vcs.sprint_pr EXPLICIT false + FORCE_MERGE_STATUS=unmerged.
+  state_dir="$(cs_make_state_dir)"
+  cfg_dir="$(mktemp -d)"
+  cs_write_vcs_config "$cfg_dir" "false"
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${cfg_dir}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         CLEARGATE_FORCE_MERGE_STATUS=unmerged \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+  if [[ $ec -ne 0 ]] && echo "$out" | grep -q "Step 2.8 failed: sprint/S-97 not merged to main."; then
+    pass "CR-107 P1b: vcs.sprint_pr:false + FORCE_MERGE_STATUS=unmerged -> today's generic refusal, unchanged"
+  else
+    fail "CR-107 P1b: vcs.sprint_pr:false must not alter the unmerged refusal path" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
+  fi
+  rm -rf "$state_dir" "$cfg_dir"
+}
+
+# ── CR-107 P2: vcs.sprint_pr:true, gh absent → non-zero exit, named error ──
+# The load-bearing case (M4 F3): a Developer who copies the existing
+# mergeCheckAvailable=false fail-open idiom (close_sprint.mjs:686-692) writes
+# the WRONG behaviour here. Real git ancestry is TRUE (merge-commit already
+# landed) so the pre-existing --is-ancestor path would silently say "merged"
+# and the pipeline would sail on to Step 4 with exit 0 — this scenario proves
+# that danger is real today. Per the dispatch: assert the EXIT CODE, not just
+# stderr text (a message-only check would have passed the buggy branch too).
+
+scenario_cr107_p2_gh_absent_refuses() {
+  local state_dir out ec shim
+
+  cs_reset_repo
+  cs_make_sprint_branch 97
+  git -C "$CS_WORK" merge -q --no-ff "sprint/S-97" -m "merge sprint/S-97"
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+  shim="$(cs_make_no_gh_path)"
+
+  out="$(env -i PATH="$shim" HOME="$HOME" TMPDIR="${TMPDIR:-/tmp}" \
+         CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 \
+         CLEARGATE_SKIP_BUNDLE_CHECK=1 \
+         CLEARGATE_SKIP_SPRINT_TRENDS=1 \
+         CLEARGATE_SKIP_SKILL_CANDIDATES=1 \
+         CLEARGATE_SKIP_FLASHCARD_CLEANUP=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  # Primary assertion (per dispatch): the EXIT CODE, not stderr text alone.
+  if [[ $ec -ne 0 ]]; then
+    pass "CR-107 P2a: vcs.sprint_pr:true + gh absent (real ancestor=true, PATH has no gh) -> non-zero exit"
+  else
+    fail "CR-107 P2a: vcs.sprint_pr:true + gh absent must halt with non-zero exit, never fall through" "exit=$ec (pipeline reached: $(echo "$out" | tail -1))"
+  fi
+
+  # Secondary/soft: the refusal names the missing binary. Word-boundary match
+  # to avoid matching substrings of unrelated words.
+  if echo "$out" | grep -qiE '(^|[^a-zA-Z])gh([^a-zA-Z]|$)'; then
+    pass "CR-107 P2b (soft): refusal message names 'gh' as the missing binary"
+  else
+    fail "CR-107 P2b (soft): refusal message should name 'gh' as the missing binary" "got: $(echo "$out" | tail -3)"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT" "$shim"
+}
+
+# ── CR-107 P3: vcs.sprint_pr:true, no remote → same fail-closed refusal ───
+
+scenario_cr107_p3_no_remote_refuses() {
+  local state_dir out ec
+
+  cs_reset_repo_no_remote
+  cs_make_sprint_branch 97
+  git -C "$CS_WORK" merge -q --no-ff "sprint/S-97" -m "merge sprint/S-97"
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 \
+         CLEARGATE_SKIP_BUNDLE_CHECK=1 \
+         CLEARGATE_SKIP_SPRINT_TRENDS=1 \
+         CLEARGATE_SKIP_SKILL_CANDIDATES=1 \
+         CLEARGATE_SKIP_FLASHCARD_CLEANUP=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  if [[ $ec -ne 0 ]]; then
+    pass "CR-107 P3a: vcs.sprint_pr:true + no origin remote (real ancestor=true) -> non-zero exit"
+  else
+    fail "CR-107 P3a: vcs.sprint_pr:true + no remote must halt, never fall through to local merge" "exit=$ec (pipeline reached: $(echo "$out" | tail -1))"
+  fi
+
+  if echo "$out" | grep -qiE 'remote|origin'; then
+    pass "CR-107 P3b (soft): refusal message names the missing remote/origin"
+  else
+    fail "CR-107 P3b (soft): refusal message should name the missing remote" "got: $(echo "$out" | tail -3)"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P4: vcs.sprint_pr:true, merge-commit PR → regression guard ─────
+# "This already works today" (F2) — --is-ancestor already reports merged for
+# any real merge-commit. P4 pins that so a Developer does not "fix" a check
+# that is not broken (M4 test table). Expected GREEN at baseline.
+
+scenario_cr107_p4_merge_commit_regression() {
+  local state_dir out ec
+
+  cs_reset_repo
+  cs_make_sprint_branch 97
+  git -C "$CS_WORK" merge -q --no-ff "sprint/S-97" -m "merge sprint/S-97"
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  if echo "$out" | grep -q "Step 2.8 passed: refs/heads/sprint/S-97 is merged to refs/heads/main."; then
+    pass "CR-107 P4: vcs.sprint_pr:true + real merge-commit PR -> Step 2.8 recognises the merge (regression guard, already works)"
+  else
+    fail "CR-107 P4: a real merge-commit ancestor must still be recognised as merged" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P5: vcs.sprint_pr:true, squash-merged PR → fails loudly, names squash ──
+# F2a. --is-ancestor already reports "not merged" for a squash-merge (P5a is
+# an ACCIDENTAL green at baseline — same generic message as any unmerged
+# sprint). P5b is the real feature: the failure must name squash specifically,
+# distinguishing "you used an unsupported strategy" from "you forgot to merge".
+
+scenario_cr107_p5_squash_merge_detected() {
+  local state_dir out ec
+
+  cs_reset_repo
+  cs_make_sprint_branch 97
+  git -C "$CS_WORK" merge -q --squash "sprint/S-97" > /dev/null 2>&1
+  git -C "$CS_WORK" commit -q -m "squash merge sprint/S-97"
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  if [[ $ec -ne 0 ]]; then
+    pass "CR-107 P5a (accidental green — see report): squash-merged sprint fails today via the generic 'not merged' path"
+  else
+    fail "CR-107 P5a: squash-merged sprint must not exit 0" "exit=$ec"
+  fi
+
+  if echo "$out" | grep -qi "squash"; then
+    pass "CR-107 P5b: failure NAMES squash as the unsupported strategy"
+  else
+    fail "CR-107 P5b: failure must name squash, not just report generic 'not merged' (F2a)" "got: $(echo "$out" | grep -i 'step 2.8\|not merged')"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P6: stale local `main` after a PR merge must not read "not merged" ──
+# F2b. Local refs/heads/main never advances by design; refs/remotes/origin/main
+# is updated by an ambient fetch (see cs_simulate_stale_local_main). Correct
+# behaviour recognises the merge regardless of which of F2b's two named fixes
+# (internal fetch, or origin/main fallback) is chosen.
+
+scenario_cr107_p6_stale_local_main() {
+  local state_dir out ec
+
+  cs_reset_repo
+  cs_make_sprint_branch 97
+  cs_simulate_stale_local_main 97
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  if echo "$out" | grep -q "Step 2.8 passed"; then
+    pass "CR-107 P6: PR merged on origin, local main stale -> Step 2.8 still recognises the merge (F2b)"
+  else
+    fail "CR-107 P6: a stale LOCAL main must not read as 'not merged' once origin/main is resolvable" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P9: the vcs gate must not be reachable-around via the non-numeric
+#    sprint-id skip at close_sprint.mjs:659 (dispatch item 6 / Gotchas) ──────
+
+scenario_cr107_p9_nonnumeric_sprint_id_not_a_bypass() {
+  local state_dir out ec
+
+  cs_reset_repo_no_remote
+  cs_make_sprint_branch 97
+  git -C "$CS_WORK" merge -q --no-ff "sprint/S-97" -m "merge sprint/S-97"
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+
+  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         CLEARGATE_SKIP_DEFERRED_VERIFY_CHECK=1 \
+         CLEARGATE_SKIP_BUNDLE_CHECK=1 \
+         CLEARGATE_SKIP_SPRINT_TRENDS=1 \
+         CLEARGATE_SKIP_SKILL_CANDIDATES=1 \
+         CLEARGATE_SKIP_FLASHCARD_CLEANUP=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-TEST 2>&1)"
+  ec=$?
+
+  if echo "$out" | grep -q 'Step 2.8 skipped: sprint-id "SPRINT-TEST" has no numeric portion.'; then
+    fail "CR-107 P9: vcs.sprint_pr:true must not be reachable-around via the non-numeric-id skip at :659" "got the bare skip message, exit=$ec"
+  else
+    pass "CR-107 P9: vcs gate still applies for a non-numeric sprint id (no.T unconditional skip)"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P7 + eviction check: canonical SKILL.md doc-truth ──────────────
+# No close_sprint.mjs surface exists for "PR body generation" (the M4
+# Corrected file surface names no new script) — SKILL.md's Phase D prose is
+# where this recipe will live per the M4 plan's Modify list. These are
+# therefore doc-truth assertions against canonical SKILL.md, not unit tests
+# against a named function — see QA report for the "why not a code test"
+# rationale (no invented interface, to stay wiring-sound for TPV).
+
+scenario_cr107_p7_pr_body_and_eviction() {
+  local canonical_skill phase_d e5
+
+  canonical_skill="${REPO_ROOT}/cleargate-planning/.claude/skills/sprint-execution/SKILL.md"
+  if [[ ! -f "$canonical_skill" ]]; then
+    fail "CR-107 P7/eviction: canonical SKILL.md exists" "not found: $canonical_skill"
+    return
+  fi
+
+  phase_d="$(sed -n '/^## 6\. Phase D/,/^## 6\.5/p' "$canonical_skill")"
+  e5="$(sed -n '/^### E\.5 Sprint/,/^## 8\./p' "$canonical_skill")"
+
+  # P7: Phase D references the PR AND the body recipe avoids shelling out to
+  # `gh pr view` (no-network requirement) — single compound assertion so an
+  # absent section does not read as a vacuous pass on the second half alone.
+  if echo "$phase_d" | grep -qi 'pull request\|\bPR\b' && ! echo "${phase_d}${e5}" | grep -q 'gh pr view'; then
+    pass "CR-107 P7: Phase D references the PR without shelling out to 'gh pr view'"
+  else
+    fail "CR-107 P7: Phase D must gain a PR link and build the body without 'gh pr view' (no network)" "phase_d mentions PR: $(echo "$phase_d" | grep -qi 'pull request\|\bPR\b' && echo yes || echo no)"
+  fi
+
+  # Inputs named: sprint goal + DoD + report (deterministic body sources).
+  if echo "${phase_d}${e5}" | grep -qi 'sprint goal' \
+     && echo "${phase_d}${e5}" | grep -qi 'DoD\|Definition of Done' \
+     && echo "${phase_d}${e5}" | grep -qi 'REPORT'; then
+    pass "CR-107 P7c: PR-body recipe names sprint goal + DoD + report as its inputs"
+  else
+    fail "CR-107 P7c: PR-body recipe must name sprint goal + DoD + report as inputs" "not all three found in Phase D / E.5"
+  fi
+
+  # Eviction check (§4): §E.5 must contain no UNCONDITIONAL git merge — the
+  # local merge is reachable only on the vcs.sprint_pr:false branch. Coarse
+  # proxy: the bare command line, without any vcs.sprint_pr mention anywhere
+  # in the section, means it is (still) unconditional.
+  if echo "$e5" | grep -q 'git merge sprint/S-NN --no-ff' && ! echo "$e5" | grep -qi 'vcs.sprint_pr'; then
+    fail "CR-107 eviction check: §E.5 contains an unconditional 'git merge sprint/S-NN --no-ff' (no vcs.sprint_pr mention in the section)" "local merge must be reachable only on the vcs.sprint_pr:false branch"
+  else
+    pass "CR-107 eviction check: §E.5 either has no bare git-merge line, or gates it on vcs.sprint_pr"
+  fi
+}
+
+# ── CR-107 scope addition: BUG-046 post-flight doctrine fix ───────────────
+# cleargate-enforcement.md §1.6 (both trees): the "strips gitignored" clause
+# is a non-differentiator and must be removed; "cuts off the wrong base" is
+# the real difference and must survive. Section heading/numbering (§1.6)
+# must NOT move — Cross-Cutting Rule 4 / gate-section-index-pinning is out
+# of this file's scope entirely (cleargate-enforcement.md is not a gated
+# template), so no fixture coupling exists here to re-verify.
+
+scenario_cr107_doctrine_strips_gitignored() {
+  local live_enf canon_enf f label
+
+  live_enf="${REPO_ROOT}/.cleargate/knowledge/cleargate-enforcement.md"
+  canon_enf="${REPO_ROOT}/cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md"
+
+  for f in "$live_enf" "$canon_enf"; do
+    if [[ "$f" == "$live_enf" ]]; then label="live"; else label="canonical"; fi
+
+    if [[ ! -f "$f" ]]; then
+      fail "CR-107 doctrine: $label cleargate-enforcement.md exists" "not found: $f"
+      continue
+    fi
+
+    if grep -q 'strips gitignored' "$f"; then
+      fail "CR-107 doctrine: $label §1.6 no longer claims worktree isolation 'strips gitignored'" "clause still present (non-differentiator per BUG-046 post-flight)"
+    else
+      pass "CR-107 doctrine: $label §1.6 strips-gitignored clause removed"
+    fi
+
+    if grep -qi 'wrong base' "$f"; then
+      pass "CR-107 doctrine: $label §1.6 'cuts off the wrong base' clause retained (the real differentiator)"
+    else
+      fail "CR-107 doctrine: $label §1.6 'cuts off the wrong base' clause retained" "not found — the real differentiator must survive the edit"
+    fi
+  done
+}
+
 # ── Run all scenarios ─────────────────────────────────────────────────────
 
 echo "=== test_close_pipeline.sh ==="
@@ -692,6 +1165,42 @@ scenario_cr036_b
 echo ""
 echo "--- CR-036 Scenario C: v1 close with missing bundle → advisory ---"
 scenario_cr036_c
+
+echo ""
+echo "--- CR-107 P1: vcs.sprint_pr absent/false -> local-merge path unchanged (regression) ---"
+scenario_cr107_p1_vcs_off_regression
+
+echo ""
+echo "--- CR-107 P2: vcs.sprint_pr:true, gh absent -> non-zero exit, named error ---"
+scenario_cr107_p2_gh_absent_refuses
+
+echo ""
+echo "--- CR-107 P3: vcs.sprint_pr:true, no remote -> same fail-closed refusal ---"
+scenario_cr107_p3_no_remote_refuses
+
+echo ""
+echo "--- CR-107 P4: vcs.sprint_pr:true, merge-commit PR -> regression guard (already works) ---"
+scenario_cr107_p4_merge_commit_regression
+
+echo ""
+echo "--- CR-107 P5: vcs.sprint_pr:true, squash-merged PR -> fails loudly, names squash ---"
+scenario_cr107_p5_squash_merge_detected
+
+echo ""
+echo "--- CR-107 P6: stale local main after a PR merge -> not read as unmerged ---"
+scenario_cr107_p6_stale_local_main
+
+echo ""
+echo "--- CR-107 P9: non-numeric sprint id must not bypass the vcs gate ---"
+scenario_cr107_p9_nonnumeric_sprint_id_not_a_bypass
+
+echo ""
+echo "--- CR-107 P7 + eviction check: canonical SKILL.md doc-truth ---"
+scenario_cr107_p7_pr_body_and_eviction
+
+echo ""
+echo "--- CR-107 doctrine: BUG-046 post-flight strips-gitignored clause ---"
+scenario_cr107_doctrine_strips_gitignored
 
 echo ""
 echo "--- Mirror checks: three-surface landing ---"
