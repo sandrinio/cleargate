@@ -124,11 +124,11 @@ it will be cargo-culted by the next reader.
 > and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
 > worktree was cut. Execution order.
 
-- [x] Confirm BUG-044 is merged and node --test .cleargate/scripts/state-scripts.test.mjs is 12/12/0
+- [x] Confirm BUG-044 is merged and node --test .cleargate/scripts/state-scripts.test.mjs is 12/12/0 — merged; actual baseline was 15/13/0 (the § PRECONDITION passage below already corrects the 12/12/0 estimate), not a dropped row.
 - [x] Create .cleargate/scripts/state-events.mjs: appendEvent(), fold(), EVENT_SCHEMA; fold() takes ONLY the event array
 - [x] QA-Red: author E2-E9; confirm the red set by MEASUREMENT, not prediction
 - [x] Rewrite update_state.mjs write path to appendEvent + fold; route :116 and :122 migration writes through it
-- [x] Extend validate_state.mjs with the fold-vs-file drift check (additive; must not fail a tree with no events.jsonl)
+- [x] Extend validate_state.mjs with the fold-vs-file drift check (additive; must not fail a tree with no events.jsonl) — landed round 1 as an exported-but-uncalled helper; wired into update_state.mjs's write path in round 2 (arch post-flight kick-back) to make it load-bearing.
 - [x] Seed events.jsonl in init_sprint.mjs; collapse the duplicated tmp+rename idiom at :231-233
 - [x] Mirror all four scripts into cleargate-planning/ byte-identically, same commit
 - [x] Run both eviction greps; run node --test; record pass/fail/skipped verbatim
