@@ -487,6 +487,14 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
     );
 
     for (const r of results) {
+      // TPV round-2 (BUG-044-tpv.md SS2.E, measured 2026-08-29): a non-zero exit here with stderr
+      // mentioning "could not acquire lock ... held by pid N" means the LOCK IS CORRECT and the
+      // retry budget is too small for THIS barrier -- it is NOT the three causes the count-mismatch
+      // message below lists. The barrier arms on the first read of the state file, which under
+      // this plan's own Gotcha 2 sits INSIDE the lock, so every serialized holder pays the
+      // barrier's inactivity window (S1's 20 holders -> ~6s serialized). See T3: implement the
+      // retry budget PER-HOLDER, with the deadline reset on holder change -- do not read a
+      // non-zero exit here as evidence of a lock-design defect.
       assert.strictEqual(r.status, 0, `every invocation should exit 0 even under the race; stderr: ${r.stderr}`);
     }
 
@@ -498,10 +506,62 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
     assert.strictEqual(
       bounced.length,
       N,
-      `expected all ${N} transitions to persist; only ${bounced.length} did -- lost: ${lost.join(', ')} ` +
-      `(lost-update race: 'wx' exclusive lock missing, acquired after the :99 read, or not held ` +
-      `across the full read-modify-write window)`
+      `expected all ${N} transitions to persist when every invocation above already exited 0; only ` +
+      `${bounced.length} did -- lost: ${lost.join(', ')} (a TRUE lost-update race: 'wx' exclusive lock ` +
+      `missing, acquired after the :99 read, or not held across the full read-modify-write window -- ` +
+      `NOT a retry-budget issue, since every invocation already reported exit 0 above)`
     );
+  });
+});
+
+// ---- BUG-044 T1 (TPV round-2 ruling T1, BUG-044-tpv.md SS3): an error exit must leave no lock ----
+// TPV M6 finding: nine non-zero process.exit() sites fire INSIDE the critical section
+// (update_state.mjs:102,:110,:130,:135,:146,:166,:184,:201,:223) and NONE was covered by S1-S5 --
+// S3 covers only the no-op path at :229. A release registered only on the happy paths (no
+// process.on('exit')) leaks the lock on every one of them: `state.json.lock` is NOT gitignored,
+// and validate_bounce_readiness.mjs:98-101 hard-fails on any dirty tree, halting the NEXT story in
+// the sprint with a diagnostic that never names update_state. This case is GREEN AT BASELINE --
+// today's code writes no lock file at all, so `!existsSync` passes vacuously; it is a
+// regression guard of S3's class (TPV SS3 T1) and must not be reshaped to force a red baseline.
+describe('BUG-044 T1: an error exit leaves no lock file behind (M6 -- nine uncovered in-lock exit sites)', () => {
+  let tmpBase, stateFile, lockFile;
+  const ESCALATED_ID = 'STORY-FAKE-ESCALATED';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-t1-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    lockFile = `${stateFile}.lock`;
+    // Seed an already-Escalated story so a single --qa-bounce invocation hits :184 directly
+    // (Scenario 4's own second test builds this exact fixture shape, reused here).
+    writeStateJson(
+      stateFile,
+      makeState(
+        { [ESCALATED_ID]: makeStory('Escalated', { qa_bounces: 3 }) },
+        { schema_version: 3, execution_mode: undefined }
+      )
+    );
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('two independent in-lock error-exit paths (:184 already-Escalated, :135 story-not-found) both leave no lock file', () => {
+    const env = { ...process.env, CLEARGATE_STATE_FILE: stateFile };
+
+    // Path 1: :184 -- --qa-bounce against an already-Escalated story.
+    const r1 = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ESCALATED_ID, '--qa-bounce'], { encoding: 'utf8', env, timeout: 10000 });
+    assert.notStrictEqual(r1.status, 0, 'exit code should be non-zero for an already-Escalated story');
+    assert.ok(r1.stderr.includes('already Escalated'), `stderr should say "already Escalated"; got: ${r1.stderr}`);
+    assert.ok(!fs.existsSync(lockFile), `error exit at :184 must not leave a lock file; found ${lockFile}`);
+
+    // Path 2: :135 -- story id not present in state.json.
+    const r2 = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), 'STORY-DOES-NOT-EXIST', 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    assert.notStrictEqual(r2.status, 0, 'exit code should be non-zero for a story not present in state.json');
+    assert.ok(r2.stderr.includes('not found'), `stderr should name the missing story; got: ${r2.stderr}`);
+    assert.ok(!fs.existsSync(lockFile), `error exit at :135 must not leave a lock file; found ${lockFile}`);
   });
 });
 
@@ -548,8 +608,14 @@ describe('BUG-044 S2: two concurrent update_state invocations, same story id -- 
       assert.strictEqual(r.status, 0, `both invocations should exit 0; stderr: ${r.stderr}`);
     }
 
-    // Guards against "releasing the lock before renameSync" (M4.md plan mutant): that mutant can
-    // let a reader observe a mid-rename, half-written file. A successful JSON.parse <=> no torn write.
+    // TPV round-2 ruling T2 (BUG-044-tpv.md SS1/M3, SS3/T2, measured 2026-08-29): M3 (lock
+    // released between writeFileSync(tmp) and renameSync) SURVIVES this assertion 10 of 10 runs
+    // -- atomicWrite's tmp+rename already gives valid-JSON independent of any lock, so this is
+    // NOT a release-before-renameSync guard. S2's real justification is the item's SS5 case 2
+    // acceptance requirement ("file stays valid JSON under a same-story race"); keep the case,
+    // strike the mutant claim. M3 is an accepted documented residual -- QA-Verify MUST read the
+    // update_state.mjs diff and confirm release happens strictly after renameSync returns; no
+    // test enforces it (BUG-044 kick-back criterion 9).
     const raw = fs.readFileSync(stateFile, 'utf8');
     let final;
     assert.doesNotThrow(() => { final = JSON.parse(raw); }, `state.json must stay valid JSON after a same-story race; got: ${raw}`);
@@ -733,6 +799,10 @@ describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 sta
     );
 
     for (const r of results) {
+      // TPV round-2 (BUG-044-tpv.md SS2.E): same barrier-inside-lock coupling as S1 -- a non-zero
+      // exit here with "could not acquire lock ... held by pid N" means the retry budget is too
+      // small for this barrier, not a lock-design defect; see T3 (per-holder budget, reset on
+      // holder change).
       assert.strictEqual(r.status, 0, `every invocation should exit 0; stderr: ${r.stderr}`);
     }
 
@@ -745,9 +815,11 @@ describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 sta
     assert.strictEqual(
       bounced.length,
       N,
-      `expected all ${N} transitions to persist through the migration path; only ${bounced.length} did -- ` +
-      `lost: ${lost.join(', ')} (the two unguarded migration writes at update_state.mjs:116/:122 raced -- ` +
-      `a lock scoped only to the action-branch writes at :155/:176/:193/:210/:241 does not protect this path)`
+      `expected all ${N} transitions to persist through the migration path when every invocation above ` +
+      `already exited 0; only ${bounced.length} did -- lost: ${lost.join(', ')} (the two unguarded ` +
+      `migration writes at update_state.mjs:116/:122 raced -- a lock scoped only to the action-branch ` +
+      `writes at :155/:176/:193/:210/:241 does not protect this path; NOT a retry-budget issue, since ` +
+      `every invocation already reported exit 0 above)`
     );
   });
 });
