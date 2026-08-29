@@ -276,3 +276,31 @@ happens to be in sync when the suite runs, and nothing in the suite regenerates 
 the next run with a diagnostic that names S5's own story, not the story that actually changed
 canonical. Worth a follow-on: have the pre-commit hook run `prebuild` when
 `cleargate-planning/**` is staged, so the payload can never lag a commit.
+
+---
+
+## GATE-4 FOLLOW-UP — flip `vcs.sprint_pr` to `true` AFTER this sprint closes
+
+Recorded 2026-08-29 alongside the CR-107 ruling. **Do this after SPRINT-39's close completes, not
+during it.**
+
+CR-107 ships `vcs.sprint_pr: false` in both `.cleargate/config.yml` (live, 37 lines) and
+`cleargate-planning/.cleargate/config.yml` (canonical seed, 19 lines). The human's recorded intent
+in CR-107 §0.5 is *"enabled in this repo"*, and the capability is measured satisfiable today:
+`origin` = `git@github.com:sandrinio/cleargate.git`, `gh` 2.90.0 on PATH, authenticated with `repo`
+scope.
+
+It ships `false` because CR-107 is **fail-closed on the sprint's terminal boundary**, and arming it
+now would make the first real exercise of the new gate the close of the sprint that built it — the
+one operation that cannot be cheaply retried. The flip is one line and reversible; a halted Gate 4,
+after worktrees are already torn down, is not.
+
+**The action:** after SPRINT-39 is closed, set `vcs.sprint_pr: true` in the **live**
+`.cleargate/config.yml` only. Leave the canonical seed at `false` — it is the shipped first-install
+default, and ClearGate installs into repos with no GitHub remote, where `true` would fail-close
+every close. SPRINT-40 then becomes the first PR-gated close, with a sprint of soak behind the code.
+
+**Do not diff the two config files against each other, ever** — they are deliberately different
+(live carries this repo's `gates:` and `worktree:` blocks; canonical carries `wiki.ingest_buckets`
+only). STORY-054-04's post-flight R22 measured that treating them as mirrors deletes this repo's
+gate and worktree configuration.

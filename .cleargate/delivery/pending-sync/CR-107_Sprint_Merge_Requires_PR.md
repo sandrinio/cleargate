@@ -204,6 +204,44 @@ last_synced_body_sha: null
 
 **Do NOT modify:** DevOps agent, story→sprint merge (`SKILL.md:454`, §C.7), worktree lifecycle.
 
+## § ORCHESTRATOR RULING — `vcs.sprint_pr` ships `false` in BOTH `config.yml` files (2026-08-29)
+
+The Developer surfaced a genuine conflict between two Gate-1 artifacts rather than picking one
+silently, which was the right call. §0.5's Open Question prose records *"enabled in this repo"*;
+the M4 plan's Corrected-file-surface table pins **both** `config.yml` files to `false`. They cannot
+both be followed.
+
+**Measured — the feature IS mechanically satisfiable here**, so this is not a capability question:
+`origin` = `git@github.com:sandrinio/cleargate.git`, `gh` 2.90.0 on PATH, authenticated with `repo`
+scope. Enabling it today would work.
+
+**Ruled: ship `false` in both files.** Four reasons, in order of weight:
+
+1. **CR-107 is fail-closed by design, and it guards the sprint's terminal boundary.** Arming it now
+   makes the **first real exercise** of the new gate the close of the very sprint that built it —
+   and a close is the one operation that cannot be cheaply retried. Any hiccup (`gh` token expiry,
+   a network blip, an unexpected merge strategy) converts into a halted Gate 4.
+2. **The path has fixture coverage and zero production exercise.** `test_close_pipeline.sh` proves
+   the branch behaves correctly against seeded repos; nothing has yet run it against a real close.
+   And that harness is **live-only** — canonical ships 10 of the live 23 test scripts, so the
+   `close_sprint.mjs` change reaches every install untested.
+3. **Asymmetric cost.** Flipping `false → true` later is a one-line, reversible config edit. A
+   blocked Gate 4 is a halt in the middle of a close pipeline that has already torn down worktrees.
+4. **Consistency with how this sprint handled every other self-hosting hazard** — CR-106's retained
+   lock, BUG-044's zero-soak note, the deferred `architect-synth` re-sync. The pattern throughout has
+   been: land the capability, do not arm it inside its own sprint.
+
+**This sequences the human's decision; it does not overturn it.** *"Enabled in this repo"* remains
+the intended steady state and is recorded as a Gate-4 follow-up: flip both `config.yml` files to
+`true` **after** SPRINT-39 closes through the existing local-merge path, so the first PR-gated close
+is SPRINT-40's, with a sprint's worth of soak behind it.
+
+`config.example.yml` in both trees documents the key with its `false` default and a comment
+explaining what enabling it requires (`gh` on PATH + an authenticated remote + merge-commit
+strategy).
+
+---
+
 ## 4. Verification Protocol
 
 **Command/Test:** `bash .cleargate/scripts/test/test_close_pipeline.sh`
