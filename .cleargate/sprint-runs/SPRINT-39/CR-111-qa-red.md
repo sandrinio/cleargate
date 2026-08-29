@@ -316,3 +316,146 @@ flashcards_flagged:
   - "2026-08-30 · #test-harness #cross-repo #danger · npm test's stdout is BLOCK-buffered when redirected to a file — tail/wc -l can show zero growth for 6+ min on a genuinely-progressing 2500-test run; check ps CPU%, don't kill on line-count alone."
   - "2026-08-30 · #test-harness #gate #danger · readiness-predicates.ts:3's own docstring ('exactly N closed-set predicate shapes') is a hardcoded count separate from readiness-gates.md:9's — bump both when adding a predicate."
 ```
+
+---
+
+# ROUND 2 — post-TPV amendments (CR-111-tpv.md, `TPV: PASS WITH AMENDMENTS`)
+
+role: qa
+
+`arch_bounces` NOT incremented — TPV's verdict is a coverage ruling, wiring was sound. All eight
+amendments (A1-A8) applied to the same two files; no new file added, no scenario removed.
+
+## Amendments applied
+
+| # | Amendment | File | Change |
+|---|---|---|---|
+| A1 (BLOCKING) | Replace T1's unsatisfiable throw-pin | lib | T1 -> T1′: a `**Test layers.**` declaration (CR-shaped) whose table omits the Integration row must FAIL, detail must name it. Throw assertion deleted (Architect-granted exception, applied pre-Developer). |
+| A2 (BLOCKING) | Pin template CONTENT + T8 detail | lib | New `T8b` describe (3 its): canonical `story.md`/`CR.md`/`Bug.md` must literally carry the Integration row / `**Test layers.**` block. T8's existing 3 its gain a `result.detail` match on `/(integration|test.?layer)/i`. |
+| A3 (BLOCKING) | Pin the grandfathering trigger | lib | New 3rd `it()` in T5: the exact pre-CR-111 §4.1 shape (Unit + E2E + Performance, no Integration row, no label) must PASS. |
+| A4 (BLOCKING) | Fix T9's end anchor | lib | `extractEvalSection` rewritten: anchors on evalSection's own frozen signature text, then walks matched braces to ITS OWN closing brace (not to the next function's marker). New `FROZEN_SHA256` computed against the corrected extraction (`9d9b5f5d…38c1fc`, verified byte-identical under an inserted sibling — see Direction B below). |
+| A5 | Widen T11 | docs | New `test()`: `readiness-predicates.ts:3`'s docstring count must read "Supports exactly 12 closed-set predicate shapes." — second, independent site from `readiness-gates.md:9`. |
+| A6 | T4 parses YAML, doesn't grep | docs | New `test()`: canonical `readiness-gates.md`'s fenced yaml blocks all parse via `js-yaml` with zero throws, count stays 11 (registered on existing blocks, no new block). Regression-guard shape (green today, stays green). |
+| A7a | SKILL.md's own File-naming sentence | docs | New `test()`: the exact `File-naming:` line inside §C.3 must itself carry `*.red.integration.node.test.ts`, not just "somewhere in the section." |
+| A7b | T10 not dischargeable by deletion | docs | Removed the `if (!stillHyphenated) return;` early-out — doc mention of the hyphen form/pattern is now required unconditionally. |
+| A7c | T7 requires real prose, not a comment dump | docs | New `assertLiteralInProseLine` helper: the literal must sit on a line that is not a bare `<!-- … -->` HTML comment. Applied to the developer.md/qa.md T7 tests. |
+| A8 | Declare + exercise the type-agnostic contract | lib | Header comment states the `doc.body`-only contract explicitly; new describe/it: identical body, three different `fm` shapes (story-typed/cr-typed/untyped) must produce an identical `{pass, detail}`. |
+
+## New scenario counts (targeted, out of tree in a synthetic mutant harness AND in the real story/CR-111 checkout — identical)
+
+| File | Before (Round 1) | After (Round 2) |
+|---|---|---|
+| `readiness-predicates-test-layers-declared.red.node.test.ts` (lib) | 12t 3p 9f 0s | **17t 2p 15f 0s** |
+| `test-layers-declared-doctrine.red.node.test.ts` (docs) | 8t 0p 8f 0s | **11t 1p 10f 0s** |
+| **Combined new-tree** | 20t 3p 17f | **28t 3p 25f** |
+
+Pass count drops by net 0 in absolute pass-count-of-3 terms but its COMPOSITION changed: T1's throw-pin
+(a pass, but scaffolding) is replaced by T1′ (a genuine red today), and `A6`'s new YAML-parse
+regression guard (a genuine green today, stays green) takes its place — T9's two subtests are
+unaffected, still green. `pass = T9×2 + A6×1 = 3`, matching the total.
+
+Verified by direct execution, twice: once in `story/CR-111` itself (`npx tsx --test <file>`, both
+files individually — 17/2/15 and 11/1/10, exact), and once inside a from-scratch, non-git mutant
+harness under scratchpad (see "Rebuilt mutants" below) where a REFERENCE implementation (the
+predicate + all seven doc/template edits CR-111 specifies) scores a clean **28/28** against these
+same two files — proving the Round-2 baseline is fully satisfiable by a correct implementation,
+not accidentally over-constrained.
+
+## Full-suite, one clean run from `story/CR-111` (cli), redirected to a log, N10-compliant
+
+```
+$ npm test          # nohup > /tmp/qa_round2_fullsuite.log 2>&1 &, waited on PID exit, no tail/head
+ℹ tests 2676
+ℹ pass 2647
+ℹ fail 28
+ℹ cancelled 0
+ℹ skipped 1
+ℹ duration_ms 431275 (~7m11s)
+```
+
+`28 = 3 inherited (unchanged, verbatim: reporter-content live/canonical drift — CR-110, clears at
+Gate-4; N6b/BUG-067 stampFrontmatter; sync.node.test.ts MCP_TOKEN network timeout) + 25 new-tree
+(15 lib + 10 docs, itemised above).` Cli repo confirmed clean before and after
+(`git status --porcelain` → 0 rows both times, cli @ `6475274` before this round's edits).
+
+**Adjacent regression files, run by hand per TPV's non-amendment note #2 (both unchanged, both
+outside this story's own red set):**
+- `test/docs/gate-section-index-pinning.node.test.ts` → `14/14/0/0`, unchanged (I edited no
+  template, no gates.md, no `## ` heading in the real tree — only the two red-test files).
+- `test/scripts/template-stubs.integration.node.test.ts` → `50/50/0`, unchanged.
+
+`npm run typecheck` — clean, exit 0. `check:no-vitest` / `check:no-inline-id-regex` — both clean.
+
+## Kill table — every named mutant, rebuilt and measured myself (not taken on TPV's word)
+
+Built a synthetic, non-git mutant harness under scratchpad (`cli/` + a sibling `cleargate-planning/`,
+matching the REAL repo's on-disk layout so the test files' own `CLI_ROOT`/`META_ROOT` path
+derivation resolves correctly with **zero code changes to the test files**). One REFERENCE build
+(the predicate exactly as specified + all seven doc/template edits), then one mutant per named
+axis, each a minimal deviation from REFERENCE on exactly the axis TPV named. Reference target for
+these 28-scenario files: **28/28** (full green — no T1-style unsatisfiable scaffold survives
+Round 2).
+
+| Mutant | Score (of 28) | Failing scenario(s) | Kills via |
+|---|---|---|---|
+| **REFERENCE** (correct) | **28/28** | — | baseline |
+| **M3d** — REF unchanged, sibling fn inserted BETWEEN `evalSection` and `applyCountOp` | **28/28 — no longer bounced** | — | **A4 confirmed (Direction B, below)** |
+| M5 (null predicate, templates edited as REF does) | 24/28 | T1′; T8×3 (detail) | A1 + A2c |
+| **M5-notemplates** (null predicate, templates left UNEDITED — TPV's exact original shape) | 21/28 | T1′; T8b×3 (content); T8×3 (detail) | **A1 + A2a/b + A2c together** |
+| M6 (validates only rows it finds, never requires all three) | 27/28 | T1′ only | **A1** |
+| M7 (trigger widened to any layer row) | 27/28 | T5's A3 scenario only | **A3** |
+| M12 (readiness-predicates.ts:3 left stale at "11"; readiness-gates.md correctly bumped to "11") | 27/28 | T11's A5 sub-test only | **A5** |
+| M13 (3 canonical gate blocks hand-appended into invalid YAML) | 27/28 | T4's A6 sub-test only | **A6** |
+| M14 (hyphen file deleted, docs left silent about it) | 27/28 | T10 only | **A7b** |
+| M15 (developer.md/qa.md/SKILL.md replaced by one HTML-comment token dump each) | 24/28 | T7×3 (dev.md/qa.md/SKILL-section) + T7's A7a | **A7a + A7c together** |
+| **REFC** — TPV's REF-C shape: branches on `doc.fm.work_item_type`, correct on every OTHER fixture | 27/28 | A8's fm-invariance scenario only | **A8** |
+
+Every mutant is killed by EXACTLY the assertion(s) its amendment was written for — no collateral
+kills, no unexplained survivors. `M5-notemplates` in particular reproduces TPV's own construction
+verbatim (`apply_common.sh m5 no-templates`) and is caught by the FULL combination A1+A2, matching
+Finding 1 exactly (7 of 28 fail, vs. TPV's reported 1 of 20 fail on the Round-1 baseline).
+
+## Direction B — the M3d shape, confirmed un-bounced
+
+Built the REFERENCE implementation, then — as a SEPARATE, additional edit — inserted a second
+(stub) function directly between `evalSection` and `applyCountOp`, exactly the placement TPV's
+M3d exercises (a Developer choice a real implementation might reasonably make, keeping
+section-related evaluators adjacent). Confirmed independently, twice:
+
+1. **Standalone extraction check** (before writing any assertion): ran the OLD and NEW
+   `extractEvalSection` against the source both with and without the injected sibling.
+   - OLD (text-marker-to-next-function): identical hash without the insertion, **different** hash
+     with it — reproduces the false "evalSection changed" TPV measured.
+   - NEW (signature-anchor + matched-brace-to-own-close): **identical hash in both cases**
+     (`9d9b5f5d…38c1fc`) — byte-for-byte proof the fix is blind to the insertion.
+2. **Full targeted run of both red files against the M3d tree**: **28/28**, same as REFERENCE —
+   T9 stays green, nothing else regresses. The correct implementation is no longer bounced.
+
+## flashcards_flagged
+
+- "2026-08-30 · #test-harness #tpv #recipe · Rebuild a synthetic REFERENCE + one-mutant-per-axis harness with the test files' OWN CLI_ROOT/META_ROOT layout unmodified — proves amendments in isolation, no collateral kills hidden."
+- "2026-08-30 · #test-harness #danger · A brace-counting pin anchored on a function's OWN frozen signature (not the next function's marker) survives any insertion after it — verified: identical hash with/without an injected sibling function."
+
+---
+
+```
+QA-RED ROUND 2: WRITTEN
+RED_TESTS:
+  cleargate-cli/test/lib/readiness-predicates-test-layers-declared.red.node.test.ts (12t/3p/9f -> 17t/2p/15f)
+  cleargate-cli/test/docs/test-layers-declared-doctrine.red.node.test.ts (8t/0p/8f -> 11t/1p/10f)
+BASELINE_FAIL: 28  (25 new-tree: 15 lib + 10 docs; 3 inherited/unrelated — N6b BUG-067, sync.node.test.ts
+  MCP_TOKEN network, reporter-content live/canonical drift, all unchanged verbatim)
+AMENDMENTS_APPLIED: A1 A2 A3 A4 A5 A6 A7(a/b/c) A8 — all eight, same commit, no new file
+KILL_TABLE: REFERENCE 28/28; M3d 28/28 (un-bounced, Direction B confirmed); M5 24/28; M5-notemplates
+  21/28; M6 27/28; M7 27/28; M12 27/28; M13 27/28; M14 27/28; M15 24/28; REFC 27/28 — every mutant
+  killed by exactly its motivating assertion(s), zero collateral, zero unexplained survivors
+TYPECHECK: pass (npm run typecheck, clean, exit 0)
+SUITE (full, one clean run, redirected + waited on PID, no tail/head): tests 2676, pass 2647,
+  fail 28, skipped 1, 431s
+ADJACENT REGRESSION FILES (unchanged): gate-section-index-pinning.node.test.ts 14/14/0/0;
+  template-stubs.integration.node.test.ts 50/50/0
+arch_bounces: NOT incremented (TPV verdict: coverage ruling, wiring sound)
+flashcards_flagged:
+  - "2026-08-30 · #test-harness #tpv #recipe · Rebuild a synthetic REFERENCE + one-mutant-per-axis harness with the test files' OWN CLI_ROOT/META_ROOT layout unmodified — proves amendments in isolation, no collateral kills hidden."
+  - "2026-08-30 · #test-harness #danger · A brace-counting pin anchored on a function's OWN frozen signature (not the next function's marker) survives any insertion after it — verified: identical hash with/without an injected sibling function."
+```
