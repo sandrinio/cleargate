@@ -335,8 +335,9 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
+- Test-layer naming (CR-111): integration-layer tests are `*.integration.node.test.ts`; QA-Red's failing-first variant for that layer is `*.red.integration.node.test.ts` (see the File-naming clause below), not the general `*.red.node.test.ts` form. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention.
 
-> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
+> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red) for non-integration reds; integration-layer reds use *.red.integration.node.test.ts instead. Forbidden: editing implementation files.`
 
 QA-Red returns:
 

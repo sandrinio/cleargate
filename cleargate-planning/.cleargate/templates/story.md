@@ -193,6 +193,7 @@ Feature: {Story Name}
 | Test Type | Minimum Count | Notes |
 |---|---|---|
 | Unit tests | {N} | {e.g., "1 per exported function"} |
+| Integration tests | {N} | {e.g., "1 per *.integration.node.test.ts scenario — real Postgres/Redis, no mocks"} |
 | E2E / acceptance tests | {N} | {e.g., "1 per Gherkin scenario in §2.1"} |
 | Performance test *(if applicable)* | {N} | Required only when the parent Epic states a budget and §2.1 carries it as a `Then` clause. Name the measurement method and the baseline. Delete this row when the Epic states no budget. |
 

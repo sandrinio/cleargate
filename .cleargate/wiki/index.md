@@ -32,11 +32,11 @@
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
 - [[CR-105]] (cr) — Draft — The ClearGate block leads CLAUDE.md
-- [[CR-106]] (cr) — Draft — Execution state becomes an append-only event log with a derived fold
+- [[CR-106]] (cr) — Draft ⚠︎ drift — Execution state becomes an append-only event log with a derived fold
 - [[CR-107]] (cr) — Draft ⚠︎ drift — Sprint→main merge goes through a pull request
-- [[CR-108]] (cr) — Draft — `cleargate new <type>` — one scaffolder for every work-item type
+- [[CR-108]] (cr) — Draft ⚠︎ drift — `cleargate new <type>` — one scaffolder for every work-item type
 - [[CR-109]] (cr) — Draft — Machine fields move out of the work-item document
-- [[CR-110]] (cr) — Draft — The sprint goal gets an acceptance check, and the Orchestrator holds it
+- [[CR-110]] (cr) — Draft ⚠︎ drift — The sprint goal gets an acceptance check, and the Orchestrator holds it
 - [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
 - [[CR-112]] (cr) — Draft — Heading-anchored predicates replace positional `section(N)`
 - [[CR-113]] (cr) — Draft — One bounded-marker grammar
@@ -67,6 +67,7 @@
 - [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
+- [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 
 ## Archive
 

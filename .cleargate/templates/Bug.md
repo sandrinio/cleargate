@@ -112,6 +112,14 @@ last_synced_body_sha: null # sha256 of body at last sync
 
 **Command:** `npm test ...`
 
+**Test layers.** Declare all three below. `0` is a valid, explicit answer and must carry a reason in the Notes column; an absent row is not a decision.
+
+| Test Type | Minimum Count | Notes |
+|---|---|---|
+| Unit tests | {N} | {e.g., "1 per changed function"} |
+| Integration tests | {N} | {e.g., "1 per *.integration.node.test.ts scenario — real Postgres/Redis, no mocks"} |
+| E2E / acceptance tests | {N} | {e.g., "1 per Gherkin scenario"} |
+
 ---
 
 ## Prior work
