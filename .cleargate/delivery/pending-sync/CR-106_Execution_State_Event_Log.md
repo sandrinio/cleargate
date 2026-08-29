@@ -2,7 +2,7 @@
 cr_id: CR-106
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -13,17 +13,12 @@ updated_at: 2026-08-25T20:50:14Z
 created_at_version: cleargate@0.24.2
 updated_at_version: dff83bd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-08-25T20:50:14Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: .claude/hooks/token-ledger.sh"
+  last_gate_check: 2026-08-29T13:31:27Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -33,6 +28,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id CR-106
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-08-29T13:31:27Z
+  sessions: []
 ---
 
 # CR-106: Execution state becomes an append-only event log with a derived fold

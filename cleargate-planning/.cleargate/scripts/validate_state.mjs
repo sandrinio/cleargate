@@ -8,12 +8,28 @@
  * confirms schema version, and reports invariant violations.
  *
  * Exports validateState(state) for use by other scripts.
+ *
+ * CR-106: also exports checkFoldDrift(stateFile), an ADDITIVE check -- a state.json whose bytes
+ * differ from JSON.stringify(fold(readEvents(events.jsonl)), null, 2) + '\n' means something wrote
+ * to state.json without going through the log (a hand-edit, or a bug), and the derived cache has
+ * silently diverged from the source of truth. Per the CR's own § Open Questions: "the log wins and
+ * the fold overwrites" is update_state.mjs's job on its NEXT invocation; this check exists to make
+ * that drift VISIBLE rather than silent. A tree with no events.jsonl yet (every legacy sprint,
+ * every sprint not yet touched since this CR shipped) cannot drift by definition -- CANNOT fail
+ * this check, only skip it.
+ *
+ * TPV T11 (CR-106 round 2): state-scripts.test.mjs imports validateState at module-load time for
+ * ALL 31 tests in that file, including the ones that predate CR-106 entirely. Keep validateState
+ * exported unchanged; keep this module free of import-time side effects -- the CLI-invocation
+ * guard below (`process.argv[1] === ...`) is what makes a bare `import` of this module safe today.
+ * Do not move the drift check's own I/O to module scope.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SCHEMA_VERSION, VALID_STATES, BOUNCE_CAP } from './constants.mjs';
+import { fold, readEvents } from './state-events.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -118,6 +134,53 @@ export function validateState(state) {
   return { valid: errors.length === 0, errors };
 }
 
+/**
+ * CR-106: additive fold-vs-file drift check. Compares the on-disk state.json bytes against
+ * JSON.stringify(fold(readEvents(events.jsonl)), null, 2) + '\n' -- the exact format
+ * state-events.mjs's atomicWrite produces. A tree with no events.jsonl yet cannot drift by
+ * definition and is reported as skipped, never as invalid (Task Breakdown: "additive; must not
+ * fail a tree with no events.jsonl").
+ * @param {string} stateFile - absolute path to state.json
+ * @returns {{ valid: boolean, errors: string[], skipped: boolean }}
+ */
+export function checkFoldDrift(stateFile) {
+  const eventsFile = path.join(path.dirname(stateFile), 'events.jsonl');
+
+  if (!fs.existsSync(eventsFile)) {
+    return { valid: true, errors: [], skipped: true };
+  }
+
+  let onDiskBytes;
+  try {
+    onDiskBytes = fs.readFileSync(stateFile, 'utf8');
+  } catch (err) {
+    return { valid: false, errors: [`could not read ${stateFile}: ${err.message}`], skipped: false };
+  }
+
+  let events;
+  try {
+    events = readEvents(eventsFile);
+  } catch (err) {
+    return { valid: false, errors: [`could not read/parse ${eventsFile}: ${err.message}`], skipped: false };
+  }
+
+  const foldedBytes = `${JSON.stringify(fold(events), null, 2)}\n`;
+
+  if (foldedBytes !== onDiskBytes) {
+    return {
+      valid: false,
+      errors: [
+        `state.json content differs from fold(events.jsonl) -- the derived cache has drifted from ` +
+        `the event log (a hand-edit, or a write that bypassed update_state.mjs); the log at ` +
+        `${eventsFile} is the source of truth, re-run any update_state.mjs invocation to re-fold it`,
+      ],
+      skipped: false,
+    };
+  }
+
+  return { valid: true, errors: [], skipped: false };
+}
+
 // CLI mode
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
@@ -171,12 +234,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
   const { valid, errors } = validateState(state);
 
-  if (valid) {
+  // CR-106: additive drift check -- never the reason a tree with no events.jsonl fails (skipped:
+  // true short-circuits to zero errors), and never runs before validateState() has had its say.
+  const drift = checkFoldDrift(stateFile);
+  const allErrors = [...errors, ...drift.errors];
+
+  if (valid && drift.valid) {
     process.stdout.write(`state.json at ${stateFile} is valid (schema_version=${state.schema_version})\n`);
     process.exit(0);
   } else {
     process.stderr.write(`Validation failed for ${stateFile}:\n`);
-    for (const err of errors) {
+    for (const err of allErrors) {
       process.stderr.write(`  - ${err}\n`);
     }
     process.exit(1);
