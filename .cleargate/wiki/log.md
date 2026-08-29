@@ -1450,3 +1450,8 @@
   action: "update"
   target: "BUG-052"
   path: ".cleargate/delivery/pending-sync/BUG-052_Surface_Gate_Resolves_Wrong_Story.md"
+- timestamp: "2026-08-29T20:52:05.311Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-108"
+  path: ".cleargate/delivery/pending-sync/CR-108_Universal_Work_Item_Scaffold.md"

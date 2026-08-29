@@ -6,7 +6,7 @@ YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Acto
 §3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from the approved Epic and verified codebase grounding.
 Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
 §4 Quality Gates: Minimum test expectations + Definition of Done checklist.
-Output location: .cleargate/delivery/pending-sync/STORY-{EpicID}-{StoryID}-{StoryName}.md
+Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 Document Hierarchy Position: LEVEL 2 (Proposal → Epic → Story)
 
@@ -63,8 +63,8 @@ Do NOT output these instructions.
 </instructions>
 
 ---
-story_id: "STORY-{EpicID}-{StoryID}-{StoryName}"
-parent_epic_ref: "EPIC-{ID}"
+story_id: "{ID}"
+parent_epic_ref: "{PARENT_EPIC_ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
@@ -105,7 +105,7 @@ last_synced_status: null   # required for conflict-detector; status at last sync
 last_synced_body_sha: null # sha256 of body at last sync
 ---
 
-# STORY-{EpicID}-{StoryID}: {Story Name}
+# {ID}: {Story Name}
 **Complexity:** {L1/L2/L3/L4} — {brief description}
 
 ## 1. The Spec (The Contract)

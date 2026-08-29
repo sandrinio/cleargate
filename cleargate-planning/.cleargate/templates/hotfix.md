@@ -8,7 +8,7 @@ YAML Frontmatter: Hotfix ID, severity, originating signal, lane: "hotfix".
 §2 Files Touched: ≤2 files (constraint from EPIC-022 §3).
 §3 Verification Steps: Non-empty before merging (blocks merge if empty).
 §4 Rollback: Git revert instructions.
-Output location: .cleargate/delivery/pending-sync/HOTFIX-{ID}-{Slug}.md
+Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 POST-WRITE BRIEF
 After Writing this document, render a Brief in chat with the following sections,
@@ -36,7 +36,7 @@ status: "Draft"  # lifecycle: Draft → In Fix → Completed
 severity: "P2"
 originating_signal: "user-report"
 created_at: "{ISO}"
-created_at_version: "cleargate@0.5.0"
+created_at_version: "strategy-phase-pre-init"
 merged_at: null
 commit_sha: null
 verified_by: null
