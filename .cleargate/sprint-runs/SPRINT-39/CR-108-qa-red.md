@@ -122,11 +122,155 @@ flashcards_flagged:
   - "2026-08-29 · #test-harness #qa-red · Per-test dynamic import (await import in before()) beats a static top-level import of a not-yet-existing module — gives per-test red/green instead of one collapsed file failure. [SPRINT-39 CR-108 QA-Red]"
 ```
 
+
+---
+
+# Round 2 — CR-108 TPV amendments (2026-08-30)
+
+`role: qa · Mode: QA-RED, round 2 · SPRINT-39 · wave 12 · M4 · CR-108`
+
+**Not a bounce.** TPV (`CR-108-tpv.md`) returned `TPV: PASS WITH AMENDMENTS`; `arch_bounces` was
+explicitly not incremented — TPV reproduced round 1's baseline exactly (`tests 45 · suites 14 ·
+pass 5 · fail 40`) and its own correct reference implementation scored `43/45` on the first
+attempt with no iteration. Both of my round-1 escalated findings were ruled and upheld:
+RULING 1 (`stampFrontmatter`) is out of CR-108's scope and is now [[BUG-067]]; RULING 2
+(`story.md`'s `story_id` token) is in scope and required, unchanged from round 1.
+
+## What changed — same file, `cleargate-cli/test/commands/new-command.node.test.ts`
+
+Applied all six **mandatory** amendments and two of three **recommended** ones to the SAME
+test file (no implementation touched; test file only):
+
+| Amendment | What | Why (TPV's motivating measurement) |
+|---|---|---|
+| A1 | `spawnNewCommand`'s subprocess `cwd` is `CLI_ROOT`, not the tmp fixture repo | N5 as shipped fails `ERR_MODULE_NOT_FOUND` for EVERY implementation, including a correct one — `--import tsx/esm` cannot resolve from a `mktemp`'d dir with no `node_modules` above it |
+| A2 | New **N5b** describe block: pre-create the lock, assert refusal + no item file, assert the lock is absent after a normal successful run. N5 retitled "liveness smoke" | Once A1 lands, a **lock-free** implementation passes N5 8/8 — the concurrency assertion alone discriminates nothing |
+| A3 | N13's two `assert.equal(len, <frozen byte count>)` replaced with `assert.ok(anchoredLen > unanchoredLen)`. `assert.equal(a, b)` kept verbatim | CR-108's own mandated `CLAUDE.md:33`/`:39` edit, correctly mirrored to both trees, reds both frozen-length cases |
+| A4 | New **N11** describe block — one case per `SCAFFOLDABLE_TYPES` member asserting the underscore-separated filename shape | Survivor **M6b** (hyphen separator for `spike`/`initiative`/`hotfix`/`story`) scored `43/45`, identical to a correct implementation — N4/N9 only pin the underscore for `cr`/`bug`/`sprint` |
+| A5 | New N4d test — mirror of N4's epic case: `pending-sync/` absent, `archive/BUG-050` present → `BUG-051` | Survivor **M12** (one `try/catch` around the whole `[pending, archive]` scan loop) scored `43/45` — BUG-045's own flashcarded defect, reintroduced registry-wide |
+| A6 | `REPO_ROOT` honours `CLEARGATE_META_ROOT` (idiom from `bucket-registry-parity.red.node.test.ts:105-125`) | Without it, `REPO_ROOT` always resolves to the main checkout (a worktree never materialises `cleargate-cli/`, BUG-046) — a correct implementation scored 10 false reds against un-normalised templates |
+| A7 (recommended) | New **A7** describe block — `SCAFFOLD_REGISTRY`'s eight `template` rows asserted by value against a case-exact `readdirSync` listing | Hardening: today's M2 (case-insensitive-filesystem) kill rests on APFS folding semantics, not a stated data contract |
+| A9 (recommended) | N7 retitled from "byte-identical to pre-CR output" to "the renderer performs exactly the three `{ID}`/`{SLUG}`/`{ISO}` substitutions and nothing else" | The assertion never measured byte-identity to a snapshot; it reconstructs `expected` from the live template each run |
+
+**N6b** (RULING 1): retitled to `N6b — EXPECTED RED, tracked by BUG-067 (...) — excluded from
+CR-108's acceptance line`; comment rewritten to cite the ruling and the three obligations
+(O1 filed as [[BUG-067]], O2 this test stays red, O3 `newHandler` must never call
+`stampFrontmatter`). Stays in the file, stays red, by design.
+
+**A8** (recommended) applied to a **different file** — `gate-section-index-pinning.node.test.ts`
+— in a separate commit (different file, different concern): added `sprint: 'Sprint Plan
+Template.md'` to `TEMPLATE_FOR`, closing the only zero-coverage gap among CR-108's eight
+templates. Measured: `tests 14 · pass 14 · fail 0 · skipped 0` — unchanged, exactly as TPV
+predicted (`sprint` carries 0 `section(N)` criteria).
+
+## Baseline, re-measured
+
+Targeted run, `cleargate-cli` `story/CR-108` @ `90f0b1f` (round-2 test-file commit) + `649e6df`
+(A8 commit), no implementation:
+
+```
+tests 57 · suites 17 · pass 5 · fail 52 · cancelled 0 · skipped 0 · todo 0
+```
+
+57 = 45 (round 1) + 1 (N4d, A5) + 2 (N5b, A2) + 8 (N11, A4) + 1 (A7). 5 green unchanged (N1's
+classify sanity, N3's size self-check, N7, N13 ×2 — all independent of `new.ts`'s new exports).
+Typecheck: `npm --prefix cleargate-cli run typecheck` → clean, 0 errors (three consecutive runs
+across the round-2 edit sequence). Stable across three consecutive re-runs of the targeted suite
+(no flakiness introduced).
+
+Did not run the full 9.6-minute suite — N10 permits "at most once, at the end, if at all," and
+the change is confined to one self-contained test file with no exports consumed elsewhere in the
+tree; typecheck-clean + a stable targeted-run count is sufficient evidence of no cross-file
+regression.
+
+## Direction-B check (§ "confirm the three false reds are gone")
+
+Built a from-scratch correct reference implementation out-of-tree (`<scratchpad>/meta/`, TPV's
+own §0 harness shape: normalised copies of the eight templates, `SCAFFOLD_REGISTRY`/
+`KNOWN_UNSCAFFOLDABLE` additions to `work-item-type.ts`, a new `src/commands/new.ts` with a
+real `wx`-lockfile allocator, per-directory ENOENT-tolerant scanning, and a global-substitution
+renderer) — deliberately my own shape, not TPV's, to avoid rubber-stamping their build. Not
+committed anywhere; destroyed after use.
+
+First run: `pass 55 · fail 2` — **N5 also failed**, not just N6b. Root cause (a real bug in my
+throwaway reference, not a test-file defect): the spawned-subprocess path never overrides
+`cli.exit`, so it hits the real `process.exit()`, which does **not** unwind a pending `finally`
+block — the first subprocess's lock release never ran, orphaning the lock for the rest. Fixed by
+moving lock release out of a `try/finally` wrapping the `exit()` call, into a scope that
+completes and returns *before* `exit()` is ever invoked. Re-run, three consecutive times:
+
+```
+tests 57 · pass 56 · fail 1   (N6b only)      — run 1
+tests 57 · pass 56 · fail 1   (N6b only)      — run 2
+tests 57 · pass 56 · fail 1   (N6b only)      — run 3
+```
+
+**N6b is the only red, confirmed independently, stable across three runs.** This is the
+direction-B target A1/A3/A6 exist to reach.
+
+Separately verified A3 in isolation: applied CR-108's own mandated `CLAUDE.md` edit (replaced
+the "Use the templates in…" sentence with a `cleargate new` directive) to BOTH scratch trees
+identically, then re-ran N13 alone: `tests 2 · pass 2 · fail 0`. Measured lengths post-edit:
+anchored 11809 > unanchored 10654 (my own edit's wording differs slightly from TPV's — the
+point is the relation, not a byte count, and it holds).
+
+## Survivors rebuilt myself, not taken on TPV's word
+
+**M6b** (hyphen separator for `spike`/`initiative`/`hotfix`/`story` only), rebuilt as a mutation
+of my own correct reference (`filename = ${fullId}${sep}${sanitizedSlug}.md`, `sep` conditional
+on a 4-type hyphen set):
+
+```
+tests 57 · pass 52 · fail 5
+  FAIL story: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$
+  FAIL initiative: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$
+  FAIL hotfix: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$
+  FAIL spike: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$
+  FAIL N6b (expected)
+```
+
+**Killed. Exactly the four predicted types, exactly once each, nothing else moved.**
+
+**M12** (one `try/catch` around the whole `[pending, archive]` scan loop instead of
+per-directory), rebuilt as a mutation of `maxIdForType`:
+
+```
+tests 57 · pass 55 · fail 2
+  FAIL N4 > bug (N4d, TPV A5): pending-sync/ absent, archive/BUG-050 present -> BUG-051
+  FAIL N6b (expected)
+```
+
+**Killed — only by N4d.** Confirmed the coin-flip claim directly: the pre-existing N4-epic case
+(`archive/` absent) did **not** fail against this mutant (only N4d, `pending-sync/` absent,
+caught it) — `pending-sync/` is scanned first in array order and its max is already accumulated
+by the time `archive/` throws inside the single catch.
+
+## Report corrections adopted from TPV (no `sprint-context.md` edit — orchestrator's to make)
+
+- `gate-section-index-pinning` acceptance is `tests 14 · pass 14 · fail 0 · skipped 0`, not
+  `18/18` — `18` is the criteria count printed inside test titles (S1a), not the test-case
+  count. Confirmed by direct execution both before and after A8.
+- The `skill-md-conditional-architect.red.node.test.ts` failure noted in round 1 is
+  payload-state-dependent, not a stable second baseline exception — it was red at round-1's
+  instant (stale gitignored payload) and is green now. CR-108 does not touch `SKILL.md`.
+
+## flashcards_flagged (round 2 additions — genuinely new, grep-checked against FLASHCARD.md;
+the round-1 cards and the BUG-044-barrier / STORY-054-04-cross-repo cards TPV also cited are
+already recorded, not re-added here)
+
+```yaml
+flashcards_flagged:
+  - "2026-08-30 · #test-harness #danger · A subprocess spawned with cwd=<tmp fixture> cannot resolve --import tsx/esm — no node_modules above /var/folders. Spawn with cwd=CLI_ROOT, pass the fixture root as a handler argument instead. [SPRINT-39 CR-108 QA-Red round 2]"
+  - "2026-08-30 · #test-harness #node-exit #danger · process.exit() does NOT unwind a pending try/finally — a lock-release in `finally` around an exit() call never runs on the real (non-test-seam) exit path, orphaning the lock for every later contender. Release before calling exit(), never rely on finally racing it. [SPRINT-39 CR-108 QA-Red round 2, own reference-impl bug]"
+  - "2026-08-30 · #test-harness #fixtures #danger · A shape assertion pinned via a few named-type fixtures (CR-108's N4/N9: cr/bug/sprint only) leaves every OTHER type's shape unpinned — a hyphen separator for spike/initiative/hotfix/story scored identical to a correct fix. Parameterise shape assertions over the WHOLE registry. [SPRINT-39 CR-108 QA-Red round 2 / TPV M6b]"
+```
+
 ---
 
 STORY: CR-108
 QA-RED: WRITTEN
 RED_TESTS:
-  - cleargate-cli/test/commands/new-command.node.test.ts
-BASELINE_FAIL: 40 (of 45 test() cases; 5 green by design — see report)
+  - cleargate-cli/test/commands/new-command.node.test.ts (round 2, amended: commit 90f0b1f)
+  - cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts (A8, commit 649e6df)
+BASELINE_FAIL: 52 (of 57 test() cases in new-command.node.test.ts; 5 green by design — see report)
 STATUS=done
