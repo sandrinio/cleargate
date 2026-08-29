@@ -7,7 +7,7 @@ carry_over: false
 area: planning-layer
 status: Draft
 approved: true
-context_source: verified codebase grounding (SKILL.md A.5 surfaces the goal but never asks how it is verified; sprint_context.md §Sprint Goal is prose-only; reporter verdict met/partial/missed is a judgement with nothing to check against; close_sprint.mjs:295 validates only §3 process-metric ROWS EXIST, never declared outcome targets) + recorded direct approval 2026-08-25
+context_source: verified codebase grounding (SKILL.md A.5 surfaces the goal but never asks how it is verified; sprint_context.md §Sprint Goal is prose-only; reporter verdict met/partial/missed is a judgement with nothing to check against; close_sprint.mjs:404 validates only §3 process-metric ROWS EXIST, never declared outcome targets) + recorded direct approval 2026-08-25
 created_at: 2026-08-25T22:10:31Z
 updated_at: 2026-08-25T22:10:31Z
 created_at_version: cleargate@0.24.2
@@ -53,7 +53,7 @@ last_synced_body_sha: null
 
 - **Forget that surfacing the goal is sufficient.** `SKILL.md` §A.5 instructs the Orchestrator to surface the sprint goal verbatim and treat it as the acceptance condition. It never asks **how the goal will be verified**. The goal therefore enters execution as prose and stays prose.
 - **Forget that the close verdict is an evaluation.** The Reporter returns `met | partial | missed` (`SKILL.md` §E.2). With no recorded check, that verdict is a judgement call with nothing to check against — and it is explicitly advisory, so nothing depends on it being right.
-- **Forget that declared metrics are consumed.** A sprint plan's §0 Metrics line is falsifiable and machine-shaped — SPRINT-39 declares `gated section(N) criteria resolving to their named heading 9/12 → 12/12`. Nothing reads it. `close_sprint.mjs:295` validates that the *Reporter's* §3 process-metric **rows are present** (bug-fix tax, first-pass rate); it never evaluates the sprint's declared outcome targets. Declared intent is write-only.
+- **Forget that declared metrics are consumed.** A sprint plan's §0 Metrics line is falsifiable and machine-shaped — SPRINT-39 declares `gated section(N) criteria resolving to their named heading 9/12 → 12/12`. Nothing reads it. `close_sprint.mjs:404` validates that the *Reporter's* §3 process-metric **rows are present** (bug-fix tax, first-pass rate); it never evaluates the sprint's declared outcome targets. Declared intent is write-only.
 - **Forget that the Orchestrator's goal anchor is durable.** Every sub-agent re-reads `sprint-context.md` cold on each dispatch. The Orchestrator holds the goal only in conversation context, which compacts across a long sprint. It is the single participant whose anchor is volatile.
 
 **New Logic (The New Truth):**
@@ -133,6 +133,21 @@ last_synced_body_sha: null
 
 **Do NOT modify:** `close_sprint.mjs` (the verdict stays advisory — this CR does not make close depend on it), the readiness gates, or the §0 Metrics line's format.
 
+**§ CITATION REPAIR (orchestrator, 2026-08-29, per the CR-107 Architect post-flight).**
+[[CR-107]] grew `close_sprint.mjs` from **1251 to 1423 lines**, so every offset this item cites
+moved. Repaired in place: **`:288-300` → `:397-409`** (the required-row regex list) and
+**`:295` → `:404`** (the §3 process-metric row validation). Both were verified by reading the new
+offsets, not by arithmetic.
+
+**This repair is load-bearing, not cosmetic.** Post-merge, the old `:288-300` resolves onto
+`close_sprint.mjs`'s `--assume-ack` / `CLEARGATE_CI_ACK` guard — code that is coherent,
+load-bearing and completely unrelated. A Developer following the stale citation would read a
+plausible-looking block and edit the sprint-close authorization path while believing they were
+looking at the Reporter's required-row list. The failure mode is a wrong edit that looks right,
+which is worse than a dead offset.
+
+---
+
 ## 4. Verification Protocol
 
 **Command/Test:** `bash .cleargate/scripts/test/cr078_init.test.sh` + `npm --prefix cleargate-cli test`
@@ -148,7 +163,7 @@ last_synced_body_sha: null
 a decision before dispatch). The sprint-goal verdict is spoken in the close Brief; it is NOT written
 into `sprint_report.md`. Ruled: not this sprint.** Adopting the Architect's own recommendation, for
 its stated reason: the report template carries zero goal/verdict content today, and adding a section
-interacts with `close_sprint.mjs:288-300`'s required-row regex list — which this CR itself places in
+interacts with `close_sprint.mjs:397-409`'s required-row regex list — which this CR itself places in
 Do-NOT-modify. The `GOAL_RELATION` line (M4 §Q5-B) already gives the Reporter what it needs without
 touching the close gate. **This CR ships the acceptance check; it does not reshape the report.**
 Case 5 above is satisfied by the Reporter's spoken verdict in the Brief — do not add a report
@@ -160,7 +175,7 @@ section to satisfy it, and do not modify `close_sprint.mjs`.
 
 ## Context Source
 
-**context_source:** Verified codebase grounding — `SKILL.md` §A.5/§0.5/§E.2 read directly; `sprint_context.md` template and SPRINT-38's rendered copy confirm the goal propagates to agents but not to the Orchestrator; `close_sprint.mjs:295` confirmed to validate Reporter §3 row presence only. Direct approval recorded 2026-08-25 in the design conversation, framed by the human as: the Orchestrator must hold a goal to deliver the sprint goal and make sure it is testable where applicable.
+**context_source:** Verified codebase grounding — `SKILL.md` §A.5/§0.5/§E.2 read directly; `sprint_context.md` template and SPRINT-38's rendered copy confirm the goal propagates to agents but not to the Orchestrator; `close_sprint.mjs:404` confirmed to validate Reporter §3 row presence only. Direct approval recorded 2026-08-25 in the design conversation, framed by the human as: the Orchestrator must hold a goal to deliver the sprint goal and make sure it is testable where applicable.
 
 ---
 

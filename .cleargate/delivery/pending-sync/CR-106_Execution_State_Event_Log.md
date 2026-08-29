@@ -91,8 +91,8 @@ it will be cargo-culted by the next reader.
   value being written was derived rather than read.
 
   What is true, and is the CR's real gain: **the truth moves to an append-only log that cannot lose
-  a write**, and the critical section over the cache shrinks from BUG-044's whole
-  read-migrate-write to **~1 ms**. See the T3 ruling below for the consequence.
+  a write**, and the critical section is **unchanged in span** and now also encloses
+  the log appends — see the post-flight correction below. See the T3 ruling below for the consequence.
 - **This finishes a pattern ClearGate already uses everywhere else.** `token-ledger.jsonl` is append-only JSONL, hook-owned, with an explicit "never edit by hand" rule (CLAUDE.md). `wiki/log.md` is an append-only YAML event stream. The CLAUDE.md doctrine already reads *"Wiki, memory, and `context_source` are derived caches… the code wins; the cache rebuilds."* `state.json` is the last machine-written surface still modelled as a mutable document.
 - **Idempotency stops being a prose obligation.** `SKILL.md:261` currently *asks* segments to be idempotent as a "belt-and-suspenders safety net" for `resumeFromRunId`. With events keyed by `run_id`, a replayed GREEN segment appends a duplicate that the fold discards. The guarantee moves out of prose and into the data model.
 
@@ -171,7 +171,12 @@ prevent."*
 The measurement decides it. Lock-free: **loses updates in ~1 of 5 full runs**, with a known ~20%
 flake on S1 and the addendum — TPV's own words, *"not an acceptable acceptance signal."* Retained
 short lock: **`29 · 21 · 29 · 0 · 0`, stable, ~7.4 s** — which is also *faster* than today's 14.5 s
-baseline, because the critical section shrinks from BUG-044's whole read-migrate-write to ~1 ms.
+baseline. **CORRECTED 2026-08-29 (post-flight measurement): the critical section did NOT shrink.**
+It spans the same range as BUG-044's (`:274` acquire, `process.on('exit')` release) and is now a
+**superset**, because the `events.jsonl` appends happen inside it too. The "~1 ms" figure came from
+TPV's reference sketch and does not describe what shipped. Consequence: **[[EPIC-055]] is unblocked
+on correctness but NOT on contention** — it must re-plan against a serialised writer rather than a
+lock-free one.
 
 Accepting a knowingly-stale `state.json` is not available as a trade here: **all 27 non-test readers
 read that file**, and §2's own promise is *"Invalidate/Update: none — no consumer changes."* A cache

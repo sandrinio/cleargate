@@ -304,3 +304,48 @@ every close. SPRINT-40 then becomes the first PR-gated close, with a sprint of s
 (live carries this repo's `gates:` and `worktree:` blocks; canonical carries `wiki.ingest_buckets`
 only). STORY-054-04's post-flight R22 measured that treating them as mirrors deletes this repo's
 gate and worktree configuration.
+
+---
+
+## PRE-FLIP obligations for `vcs.sprint_pr: true` (CR-107 post-flight PF-2, PF-3)
+
+Both are advisory on a path currently gated behind `false`, so neither blocked the merge. **Both
+must be settled before the post-close flip to `true`**, or the first PR-gated close hits them.
+
+**PF-2 — the failure message over-claims.** The shipped squash probe (`git merge-base` +
+`git commit-tree` + `git cherry`) is genuinely correct *in general*, not merely on the fixture: the
+post-flight built the topologies the one-commit fixture cannot and measured TRUE for a **3-commit
+squash** and for a **squash after main advanced** — strictly better than a naive per-commit
+`git cherry`, which would return false on every real sprint. **But for a rebase-merge it returns
+FALSE**, while the message says *"squash- or rebase-merged"*. The two forms are exactly
+complementary and were measured on the same repo. Fix the prose, or detect both, before flipping.
+
+**PF-3 — the production stale-ref case is still open, and the harness cannot see it.**
+`cs_simulate_stale_local_main` ends with `git fetch`, so P6 **cannot distinguish** "fetches" from
+"reads a pre-fetched ref". In production `gh pr merge` is **server-side and updates no local ref**,
+so after a real PR merge **both** `refs/heads/main` and `refs/remotes/origin/main` are stale, and
+Step 2.8 still fails. The local-first/origin-fallback ordering is exactly as ruled and is correct;
+what is missing is that *something* must refresh the remote-tracking ref before the check. Invisible
+to the harness by construction — do not expect a test to catch it.
+
+## Canonical↔payload parity: only ONE file has a witness
+
+Standing gap, named by the CR-107 post-flight. `SKILL.md` has a byte-parity test
+(`skill-md-conditional-architect` S5). `close_sprint.mjs` has only an anchor-string grep.
+**`cleargate-enforcement.md` has nothing** — which is exactly why its payload copy silently carried
+the "strips gitignored" clause until a merge surfaced it. Worth a follow-on: one parity test over
+the whole canonical→payload set rather than per-file witnesses.
+
+## S5 is EXPECTED-RED after the CR-107 merge — do not chase it
+
+The generated payload lags canonical `SKILL.md` from the moment CR-107 merges. Nothing blocks on
+it: `.git/hooks/` carries one hook, it runs only the surface gate, and `gates.precommit` is
+reachable only via an explicit `cleargate gate precommit`. **Do not run `prebuild` mid-sprint to
+clear it** — `build-manifest.ts:317` also rewrites the *tracked* `cleargate-planning/MANIFEST.json`,
+churning a tracked file on every run. `prebuild` runs **once, here at Gate 4**.
+
+## Doc-truth correction owed to `sprint-context.md` Rule 6
+
+It states that `gates.precommit` runs the cli typecheck + tests on outer-repo commits. **It does
+not** — no git hook invokes it. The rule's practical instruction (run them by hand and report) is
+still right; only its stated mechanism is wrong. Correct the wording at close.
