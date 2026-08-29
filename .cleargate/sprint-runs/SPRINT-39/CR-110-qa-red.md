@@ -123,3 +123,133 @@ line 33, predates this dispatch) and zero new warnings from the additions.
 - No live `.claude/**` path touched (N1) — confirmed absent from this worktree entirely.
 - `expected-headings.ts` not opened (N6).
 - No `tail`/`head` piping of a suite run (N10) — captured to log files, status line read directly.
+
+---
+
+# Round 2 — TPV amendments applied (CR-110-tpv.md, PASS WITH AMENDMENTS)
+
+role: qa · Mode: QA-RED round 2 · SPRINT-39 · wave 12 · CR-110
+
+TPV verdict: `PASS WITH AMENDMENTS` — 7 amendments, A1–A4 blocking. **Not a bounce**;
+`arch_bounces` was NOT incremented (TPV's own explicit statement). All seven amendments applied
+to the QA-Red baseline in this worktree (never the Developer's job — amending one's own acceptance
+test post-hoc is the BUG-046 T9 tampering shape).
+
+## Amendments applied
+
+| # | Amendment | Assertion(s) touched | Kind |
+|---|---|---|---|
+| A1 | Scope `G5a`/`G5d` to a single `## ` section of `reporter.md` whose heading matches `/[Gg]oal/`, via a new `gv()` awk helper (resets its accumulator on each new goal-heading) | G5a, G5d (modified) | BLOCKING |
+| A2 | New `run_g2c()`: run the REAL committed `sprint_context.md` template (both trees) through `init_sprint.mjs` (same shape as `run_g1`) and assert the advisory fires — not the harness's own synthetic fixture | G2c-red-live-advisory, G2c-red-canonical-advisory (new, +2) | BLOCKING |
+| A3 | Widen `G5c` from the literal `non-empty`+`met` word-pair to the presence-implies-success family (`non-empty\|populated\|has content\|is not empty\|carries content\|beyond its placeholder` × `met\|achieved\|satisfied\|success`, either order) | G5c (modified) | BLOCKING |
+| A4 | Add a third `make_future_template` flavour, `mechanical` (a real named command, no `not-mechanically-verifiable` token); new G3d (exit 0) / G3e (no false "unresolved") | G3d, G3e (new, +2) | BLOCKING |
+| A5 | Widen `G7`: strip `` ` `` / `*` / `"` before the enum-adjacency regex, widen the gap `{1,4}` → `{1,12}`, add a standalone-backticked-token AND-clause (`` `met` `` + `` `partial` `` + `` `missed` `` each present anywhere) | G7 (modified) | non-blocking |
+| A6 | New `RULE1-init-script-parity`: `diff -q` the two `init_sprint.mjs` copies, same shape as `G1c` | RULE1-init-script-parity (new, +1) | non-blocking |
+| A7 | Replace `G3c`'s whole-file token grep with a positional assertion: the first non-empty line under `## Goal Acceptance Check` in the rendered file must be byte-equal to the recorded value (`first_nonempty_under_heading` awk helper) | G3c (modified) | non-blocking |
+
+Net new assertions: **+5** (G2c×2, G3d, G3e, RULE1-init-script-parity). Total assertion count:
+**34 → 39**. Both trees edited byte-identically in the same pass (`diff -q` clean, `md5
+e2b2c158a25e69c6a350246c5fa5a1b3` both files); `bash -n` clean on both; `shellcheck -S warning`
+reports only the pre-existing `CONSTANTS_SCRIPT` unused warning (line 33, predates round 1) —
+zero new warnings.
+
+## New baseline (measured, 3 stable runs, no `tail`/`head` piping per N10)
+
+`bash .cleargate/scripts/test/cr078_init.test.sh` → **25 passed, 14 failed**, exit 1. Identical
+across 3 consecutive runs (`diff` of the full `^PASS:|^FAIL:` label sets across run 1 and run 3:
+empty). Real repo `.active` unaffected (SPRINT-39, untouched) — confirmed after every run.
+
+New failures beyond the round-1 baseline: `G2c-red-live-advisory`, `G2c-red-canonical-advisory`
+(A2, both correctly red — the real committed templates carry no `## Goal Acceptance Check` section
+yet). All other round-1 red/green assertions are unchanged in direction; A1/A3/A5/A7's rewrites do
+not flip any assertion's baseline status (confirmed by direct measurement, not assumed — see below).
+
+## Verification 1 — no false positive on today's `reporter.md` / `SKILL.md`, all still correctly red
+
+Confirmed by the 25/14 baseline run itself: `G5a`, `G5d` (A1-scoped) remain **RED** — `reporter.md`
+has no `## ` heading matching `/[Gg]oal/` yet, so `gv()` returns empty. `G5c` (A3-widened) and `G7`
+(A5-widened) remain **GREEN-AT-BASELINE** — verified no co-occurrence of a presence/populated
+phrasing with a success token within 90 chars (checked directly: `reporter.md:269`'s "non-empty
+content" and `:193`'s "not met" are not adjacent to any success token), and no markup-stripped or
+standalone-backticked `met`/`partial`/`missed` triplet exists in `reporter.md` today. `G3c`
+(A7-positional) remains **GREEN** (F2 "render is free" still holds — nothing in `init_sprint.mjs`
+mutates the Goal Acceptance Check section's own content, so a REF build's own positional value
+survives verbatim; see the REF measurement below for the isolated confirmation).
+
+## Verification 2 — a correct reference implementation, built and measured out-of-tree
+
+Built two full out-of-tree reference implementations against the amended harness (never touching
+the worktree — `tar cf - --exclude=.git` copy to scratch, `cp -a` per variant, mirroring TPV's own
+isolation method):
+
+- **REF** — unwrapped placeholder (matches the now-pinned `plans/M4.md` "Schema change" choice),
+  normalised (whitespace-collapsing) detection in `init_sprint.mjs`, a `## Goal Acceptance Check`
+  section in `reporter.md` (names the section, uses "satisfied", quotes `GOAL_RELATION`, no
+  presence-implies-success shortcut, no vocab-triplet duplication), and a `## Goal Relation`
+  section in `SKILL.md` (defines `GOAL_RELATION: advances | off critical path`, decoupled from the
+  sprint verdict).
+- **B** — the wrapped-but-self-consistent reference TPV named: `## Goal Acceptance Check`'s
+  placeholder ships word-wrapped across two physical lines (CR-body-verbatim shape) in both trees;
+  detection is the same normalised (whitespace-collapsing) comparison, so it recognises its own
+  wrapped template AND the still-unwrapped G2 synthetic fixture identically.
+
+```
+REF: cr078_init.test.sh: 38 passed, 1 failed   (FAIL: SAFETY VIOLATION only)
+B:   cr078_init.test.sh: 38 passed, 1 failed   (FAIL: SAFETY VIOLATION only)
+```
+
+Both reach the round-2 target (**38/1**, SAFETY only) exactly as CR-110-tpv.md's Expected Outcome
+#3 requires. `diff` of REF's and B's full `PASS`/`FAIL` label sets: **empty** — B's wrapped
+placeholder and REF's unwrapped placeholder are fully equivalent under normalised detection,
+confirming A2 (G2c) plus the existing G2b both pass for a self-consistent wrapped implementation
+once detection normalises whitespace rather than doing a raw literal compare (M3, below, is the
+mutant that keeps the literal-compare failure mode alive and is separately confirmed killed).
+
+## Verification 3 — kill table, every surviving mutant rebuilt out-of-tree and measured
+
+All ten mutants (M1c, M1d, M2, M3, M5, M6a, M6d, M6e, M10, V_G3c) were rebuilt from the REF base
+(one targeted deviation each, matching CR-110-tpv.md's own description of each mutant) and measured
+against the amended harness — not taken on TPV's word. `diff` of each mutant's PASS/FAIL label set
+against REF's confirms the kill is **isolated to the predicted assertion(s)**, zero collateral flips:
+
+| Mutant | Pre-amendment (TPV, round 1) | Post-amendment (measured, round 2) | Killed by | Isolated? |
+|---|---|---|---|---|
+| M1c — decoy "## Note on terminology" section replaces the real reporter.md contract | 33/1 SURVIVES | **36/3** | `G5a`, `G5d` (A1) | yes — only those 2 flip vs REF |
+| M1d — one bare HTML comment line in `reporter.md` + one in `SKILL.md`, no real contract | 33/1 SURVIVES | **36/3** | `G5a`, `G5d` (A1) | yes |
+| M2 — "populated ⇒ achieved" stated without adjacent `non-empty`/`met` | 33/1 SURVIVES | **37/2** | `G5c` (A3) | yes |
+| M3 — wrapped template + unwrapped-literal detection (dead in production) | 33/1 SURVIVES | **36/3** | `G2c-red-live-advisory`, `G2c-red-canonical-advisory` (A2) | yes |
+| M5 — advisory keyed on the token's PRESENCE, false-fires on a populated mechanical check | 33/1 SURVIVES | **37/2** | `G3e-goal-check-mechanical-no-false-unresolved` (A4) | yes |
+| M6a — verbatim paste of `SKILL.md:702` (enum definition site) | 33/1 SURVIVES | **37/2** | `G7` (A5) | yes |
+| M6d — `` `met` \| `partial` \| `missed` `` backticked-pipe form | 33/1 SURVIVES | **37/2** | `G7` (A5) | yes |
+| M6e — three-bullet backticked definition list | 33/1 SURVIVES | **37/2** | `G7` (A5) | yes |
+| M10 — `init_sprint.mjs` advisory logic in the LIVE tree only; canonical mirror untouched | 33/1 SURVIVES | **37/2** | `RULE1-init-script-parity` (A6) | yes |
+| V_G3c — render replaces the recorded value with `(check recorded)`, post-detection | 33/1 (vacuous "kill") | **37/2** | `G3c-goal-check-token` (A7) | yes |
+
+Determinism: `bash -n` clean and `node --check` clean on every variant's `init_sprint.mjs` (both
+trees); all ten mutant runs plus REF/B measured once each (grep/diff/awk-based assertions, no
+timing or ordering dependency — the harness's own round-1 baseline 3-run determinism check already
+established the harness is deterministic; the mutant deltas here are pure content diffs against
+that same deterministic harness).
+
+## Two corrections carried forward (per TPV, not independently re-derived here)
+
+- **`gate-section-index-pinning` acceptance is `tests 14 · pass 14 · fail 0 · skipped 0`, not
+  `18/18/0/0`.** `18` is the criteria count printed inside two test names (S1a, S6), not the
+  test-case count. Out of this worktree's reachable surface (`cleargate-cli` is untracked here per
+  FLASHCARD 2026-08-26 `#worktree #collision-surface #danger`) — recorded for the Developer/QA-Verify
+  brief, not re-measured from this worktree.
+- **`cleargate-cli/test/scripts/init-sprint-context.red.node.test.ts`** is a second, previously
+  unnamed consumer of `sprint_context.md` (asserts `## Mid-Sprint Amendments` is the file's last
+  `## ` heading; green today, 3/3). Same out-of-worktree-surface caveat — not encoded here (G4a/G4b
+  already catch the mutant that would break it), but the Developer must re-run it and QA-Verify must
+  check it.
+
+## Guardrails honored (round 2)
+
+- No production code, template, or `init_sprint.mjs` edited in the worktree — every reference
+  implementation and mutant was built and measured entirely out-of-tree (scratch copies), mirroring
+  TPV's own isolation method. `git status --porcelain` in the worktree shows only the two test-file
+  edits.
+- Both trees edited byte-identically, same commit (verified `diff -q` + `md5` above).
+- No file outside CR-110's declared `§3 Execution Sandbox` opened for editing.
+- No `tail`/`head` piping of any suite run (N10).

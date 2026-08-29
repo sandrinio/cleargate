@@ -307,13 +307,23 @@ fi
 # plan at kickoff the way ## Sprint Goal is). The detection logic, however the
 # Developer wires it, is only ever handed a STRING that is either byte-equal
 # to the placeholder below or something else -- this harness pins both cases.
-# ASSUMPTION (flagged for the Developer/TPV): the placeholder is fixtured here
-# as ONE unwrapped line, matching every other placeholder in the current
-# template (## Sprint Goal's is one line). The CR body's verbatim block is
-# word-wrapped for doc readability; if the real template ships it wrapped
-# across two lines, the detection must normalise whitespace, or this fixture
-# needs a matching update -- call this out explicitly, do not silently accept
-# either.
+# RESOLVED (orchestrator amendment to plans/M4.md, post-TPV round 2): the
+# placeholder is now pinned to ONE UNWRAPPED LINE at the source -- matches
+# sprint_context.md:13's ## Sprint Goal placeholder and every other
+# placeholder in the shipped template. This fixture's GAC_PLACEHOLDER stays
+# unwrapped, unchanged. G2c below additionally runs the REAL committed
+# template (both trees) through init_sprint.mjs so the wrap question is no
+# longer fixture-dependent either way (TPV round-2 A2).
+#
+# ROUND-2 TPV AMENDMENTS APPLIED (CR-110-tpv.md, PASS WITH AMENDMENTS,
+# arch_bounces NOT incremented): A1 scopes G5a/G5d to a goal-named ## section
+# of reporter.md; A2 adds G2c (real committed template through init_sprint.mjs,
+# both trees); A3 widens G5c past the literal non-empty+met spelling; A4 adds
+# a `mechanical` make_future_template flavor + G3d/G3e; A5 widens G7 past
+# markup and the standalone-backticked-token form; A6 adds an init_sprint.mjs
+# two-tree parity check; A7 replaces G3c's whole-file token grep with a
+# positional assertion on the recorded value. See CR-110-qa-red.md round-2
+# section for the full kill table.
 # ════════════════════════════════════════════════════════════════════════════
 
 GAC_PLACEHOLDER='_(populated by orchestrator at §A.5, confirmed by the human at the same halt that confirms the sprint plan)_'
@@ -332,6 +342,13 @@ make_future_template() {
   local gac_body
   if [[ "${flavor}" = "token" ]]; then
     gac_body='not-mechanically-verifiable — confirmed via 2026-08-29 stakeholder walkthrough.'
+  elif [[ "${flavor}" = "mechanical" ]]; then
+    # TPV round-2 A4: a real, named, POPULATED mechanical condition -- the
+    # CR's primary success path. Neither prior flavor exercises this: a
+    # detector keyed on the literal not-mechanically-verifiable token's
+    # PRESENCE (rather than on unresolved-ness) survives both `placeholder`
+    # and `token` unscathed and false-fires "unresolved" here (mutant M5).
+    gac_body='`bash .cleargate/scripts/test/cr078_init.test.sh` exits 0.'
   else
     gac_body="${GAC_PLACEHOLDER}"
   fi
@@ -432,6 +449,42 @@ else
 fi
 
 # ────────────────────────────────────────────────────────────────────────────
+# G2c (TPV round-2 A2): run the REAL committed sprint_context.md TEMPLATE
+# (both trees), not this harness's synthetic make_future_template fixture,
+# through init_sprint.mjs and assert the advisory fires. G2b alone is
+# satisfiable by detection keyed to the harness's own fixture shape while the
+# advisory is provably DEAD against the shipped template (mutant M3: wrapped
+# template + unwrapped-literal detection, 33/1) -- and it bounces a correct,
+# self-consistent implementation that wraps the template AND keys detection
+# on its own wrapped literal (TPV variant B, bounced 32/2 on G2b alone). Same
+# shape as G1's run_g1 helper.
+# ────────────────────────────────────────────────────────────────────────────
+run_g2c() {
+  local template_src="$1"
+  local label="$2"
+  local scratch
+  scratch="$(make_scratch)"
+  mkdir -p "${scratch}/.cleargate/sprint-runs/SPRINT-99" "${scratch}/.cleargate/templates"
+  cp "${template_src}" "${scratch}/.cleargate/templates/sprint_context.md"
+
+  local stderr_out
+  stderr_out="$(
+    CLEARGATE_REPO_ROOT="${scratch}" CLEARGATE_ADVISORY=1 \
+      node "${INIT_SCRIPT}" SPRINT-99 --stories STORY-99-01 --force 2>&1 >/dev/null
+  )"
+
+  if echo "${stderr_out}" | command grep -qi 'goal acceptance check' && echo "${stderr_out}" | command grep -qi 'unresolved'; then
+    pass "${label}: advisory fires on the REAL shipped template's unresolved Goal Acceptance Check"
+  else
+    fail "${label}: no advisory fired on the real shipped template -- detection may be keyed to a fixture-only shape the shipped placeholder does not match (TPV A2 -- kills the dead-advisory-in-production shape)" \
+      "template_src=${template_src}; stderr: ${stderr_out}"
+  fi
+}
+
+run_g2c "${REPO_ROOT}/.cleargate/templates/sprint_context.md" "G2c-red-live-advisory"
+run_g2c "${REPO_ROOT}/cleargate-planning/.cleargate/templates/sprint_context.md" "G2c-red-canonical-advisory"
+
+# ────────────────────────────────────────────────────────────────────────────
 # G3: the literal token `not-mechanically-verifiable` is accepted as
 # POPULATED, not treated as unresolved.
 # ────────────────────────────────────────────────────────────────────────────
@@ -458,11 +511,67 @@ else
   pass "G3b-goal-check-token: no unresolved-advisory fires when the token is already recorded (GREEN-AT-BASELINE -- no advisory logic exists yet to false-fire; pins the future non-regression, FLASHCARD 2026-08-28 #test-harness #qa 'gap-closing red test can be green on today's baseline by design')"
 fi
 
+# TPV round-2 A7: assert the RECORDED VALUE positionally, not a whole-file
+# grep for the literal token -- the Goal Acceptance Check section's own
+# GUIDANCE PROSE (below the recorded value in every rendered file, harness
+# fixture and real template alike) contains the literal
+# 'not-mechanically-verifiable' string too, so a whole-file grep is satisfied
+# by boilerplate for every implementation, correct or not (G3c was vacuous by
+# construction -- its only "kill" was deleting the whole section, already
+# caught by G1a/G1b). first_nonempty_under_heading extracts the first
+# non-blank line under a given "## " heading, up to the next "## " heading.
+first_nonempty_under_heading() {
+  local file="$1"
+  local heading="$2"
+  awk -v h="${heading}" '
+    $0 == h { in_b = 1; next }
+    in_b && /^## / { in_b = 0 }
+    in_b && NF > 0 { print; exit }
+  ' "${file}"
+}
+
+GAC_TOKEN_VALUE='not-mechanically-verifiable — confirmed via 2026-08-29 stakeholder walkthrough.'
 CTX_G3="${SCRATCH_G3}/.cleargate/sprint-runs/SPRINT-99/sprint-context.md"
-if [[ -f "${CTX_G3}" ]] && command grep -q 'not-mechanically-verifiable' "${CTX_G3}"; then
-  pass "G3c-goal-check-token: rendered sprint-context.md preserves the literal token verbatim (F2: render is free)"
+G3C_LINE=""
+if [[ -f "${CTX_G3}" ]]; then
+  G3C_LINE="$(first_nonempty_under_heading "${CTX_G3}" '## Goal Acceptance Check')"
+fi
+if [[ "${G3C_LINE}" = "${GAC_TOKEN_VALUE}" ]]; then
+  pass "G3c-goal-check-token: rendered sprint-context.md's first non-empty line under ## Goal Acceptance Check is byte-equal to the recorded token value (TPV A7 -- positional, not satisfiable by the section's own guidance prose)"
 else
-  fail "G3c-goal-check-token: rendered sprint-context.md lost or mangled the literal token" "checked: ${CTX_G3}"
+  fail "G3c-goal-check-token: rendered sprint-context.md's recorded value under ## Goal Acceptance Check does not match what was recorded verbatim" \
+    "expected '${GAC_TOKEN_VALUE}'; got '${G3C_LINE}'; checked: ${CTX_G3}"
+fi
+
+# ────────────────────────────────────────────────────────────────────────────
+# G3d/G3e (TPV round-2 A4): a populated MECHANICAL Goal Acceptance Check -- a
+# real named command, not the not-mechanically-verifiable token -- is the
+# CR's PRIMARY success path and was previously never fixtured (the harness
+# had only `placeholder` and `token` flavors). Kills mutant M5: an advisory
+# keyed on the literal token's PRESENCE rather than on unresolved-ness, which
+# false-fires "unresolved" on every populated mechanical check in production.
+# ────────────────────────────────────────────────────────────────────────────
+SCRATCH_G3D="$(make_scratch)"
+mkdir -p "${SCRATCH_G3D}/.cleargate/sprint-runs/SPRINT-99"
+make_future_template "${SCRATCH_G3D}" "mechanical"
+
+INIT_STDERR_G3D="$(
+  CLEARGATE_REPO_ROOT="${SCRATCH_G3D}" CLEARGATE_ADVISORY=1 \
+    node "${INIT_SCRIPT}" SPRINT-99 --stories STORY-99-01 --force 2>&1 >/dev/null
+)"
+INIT_EXIT_G3D=$?
+
+if [[ "${INIT_EXIT_G3D}" -eq 0 ]]; then
+  pass "G3d-goal-check-mechanical: init exits 0 when the Goal Acceptance Check already carries a populated mechanical (named-command) condition"
+else
+  fail "G3d-goal-check-mechanical: unexpected non-zero exit" "exit=${INIT_EXIT_G3D}"
+fi
+
+if echo "${INIT_STDERR_G3D}" | command grep -qi 'unresolved'; then
+  fail "G3e-goal-check-mechanical-no-false-unresolved: a populated mechanical check must not trip the unresolved advisory -- an advisory keyed on the token's PRESENCE rather than on unresolved-ness (CR-110 M5 mutant) fires here" \
+    "stderr was: ${INIT_STDERR_G3D}"
+else
+  pass "G3e-goal-check-mechanical-no-false-unresolved: no unresolved-advisory fires on a populated mechanical check (GREEN-AT-BASELINE -- no advisory logic exists yet to false-fire; pins the CR's primary success path)"
 fi
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -527,10 +636,24 @@ check_frontmatter_intact "${REPO_ROOT}/cleargate-planning/.cleargate/templates/s
 # ────────────────────────────────────────────────────────────────────────────
 REPORTER_MD="${REPO_ROOT}/cleargate-planning/.claude/agents/reporter.md"
 
-if command grep -qi 'Goal Acceptance Check' "${REPORTER_MD}"; then
-  pass "G5a-reporter-reads-check: reporter.md names ## Goal Acceptance Check"
+# gv() (TPV round-2 A1): extracts the body of the section headed by the most
+# recent "## " heading whose text matches /[Gg]oal/, resetting the
+# accumulator on every new goal-heading. A whole-file grep for
+# 'Goal Acceptance Check' or 'GOAL_RELATION' is satisfied by an unrelated
+# paragraph anywhere in the file (mutant M1c: a "## Note on terminology"
+# section instructing the exact behaviour CR-110 removes) or by a single bare
+# HTML comment line carrying only the greped tokens and zero instruction
+# (mutant M1d) -- both measured 33/1 against the unscoped form. Scoping to a
+# goal-named section is the honest ceiling; a forbidden-instruction grep was
+# attempted and dropped (false-positives the correct reference's own
+# "Do not substitute your own judgement..." prose -- negation is not
+# greppable).
+gv() { awk '/^## / { in_b = ($0 ~ /[Gg]oal/); if (in_b) s=""; next } in_b { s = s "\n" $0 } END { print s }' "$1"; }
+
+if gv "${REPORTER_MD}" | command grep -qi 'Goal Acceptance Check'; then
+  pass "G5a-reporter-reads-check: reporter.md names ## Goal Acceptance Check inside a goal-named ## section"
 else
-  fail "G5a-reporter-reads-check: reporter.md does not mention Goal Acceptance Check" "${REPORTER_MD}"
+  fail "G5a-reporter-reads-check: reporter.md does not mention Goal Acceptance Check inside a ## section whose heading matches /[Gg]oal/ (TPV A1 -- scoped past M1c/M1d, which satisfy an unscoped whole-file grep)" "${REPORTER_MD}"
 fi
 
 if command grep -qi 'satisfied' "${REPORTER_MD}"; then
@@ -539,23 +662,29 @@ else
   fail "G5b-reporter-derives-not-judges: reporter.md has no 'satisfied' language -- verdict derivation from the recorded check is unspecified" "${REPORTER_MD}"
 fi
 
-# Scoped to CO-OCCURRENCE of "non-empty" and "met" within ~80 chars, either
-# order -- reporter.md ALREADY contains an unrelated "non-empty" at :269
-# ("All seven sections required ... non-empty content", about report-section
-# completeness, nothing to do with the goal verdict). A bare substring check
-# on "non-empty" is a false-positive trap against that pre-existing line and
-# would be permanently unsatisfiable; measured, not assumed.
-if command grep -qiE 'non-empty[^.]{0,80}\bmet\b|\bmet\b[^.]{0,80}non-empty' "${REPORTER_MD}"; then
-  fail "G5c-reporter-rejected-mutant: reporter.md ties 'non-empty' to 'met' -- the rejected 'section non-empty => met' shortcut (CR-110 G5 mutant)" \
+# Widened past the literal non-empty+met word-pair (TPV round-2 A3) to the
+# whole presence-implies-success FAMILY -- the M4 plan's own named central
+# mutant (M2: "populated ⇒ achieved", e.g. "If the section has content beyond
+# its placeholder, the goal is satisfied" / "A populated check counts as an
+# achieved goal") writes the identical rejected rule without putting
+# "non-empty" and "met" within 80 chars of each other, and measured 33/1
+# against the narrower form. reporter.md ALREADY contains an unrelated
+# "non-empty" at :269 ("All seven sections required ... non-empty content",
+# about report-section completeness) and an unrelated "not met" at :193
+# ("conditions are not met (v1 state...)", about lane-metrics activation) --
+# neither co-occurs with a success/achievement token within 90 chars;
+# measured, not assumed.
+if command grep -qiE '(non-empty|populated|has content|is not empty|carries content|beyond its placeholder)[^.]{0,90}\b(met|achieved|satisfied|success)|\b(met|achieved|satisfied|success)[^.]{0,90}(non-empty|populated|has content|is not empty|carries content)' "${REPORTER_MD}"; then
+  fail "G5c-reporter-rejected-mutant: reporter.md ties a presence/populated phrasing to a met/achieved/satisfied/success verdict -- the rejected 'populated => achieved' shortcut (CR-110 G5 mutant, widened past the literal non-empty+met spelling by TPV A3)" \
     "${REPORTER_MD}"
 else
-  pass "G5c-reporter-rejected-mutant: reporter.md does not fall back to a presence/non-empty check for the verdict (GREEN-AT-BASELINE, pins the non-regression; scoped past the pre-existing unrelated 'non-empty' at reporter.md:269)"
+  pass "G5c-reporter-rejected-mutant: reporter.md does not fall back to a presence-implies-success check for the verdict (GREEN-AT-BASELINE, pins the non-regression; scoped past the pre-existing unrelated 'non-empty' at :269 and 'not met' at :193)"
 fi
 
-if command grep -qi 'GOAL_RELATION' "${REPORTER_MD}"; then
-  pass "G5d-reporter-quotes-goal-relation: reporter.md quotes GOAL_RELATION"
+if gv "${REPORTER_MD}" | command grep -qi 'GOAL_RELATION'; then
+  pass "G5d-reporter-quotes-goal-relation: reporter.md quotes GOAL_RELATION inside a goal-named ## section"
 else
-  fail "G5d-reporter-quotes-goal-relation: reporter.md does not mention GOAL_RELATION (F1 corrected justification)" "${REPORTER_MD}"
+  fail "G5d-reporter-quotes-goal-relation: reporter.md does not mention GOAL_RELATION inside a ## section whose heading matches /[Gg]oal/ (F1 corrected justification; TPV A1 scoping)" "${REPORTER_MD}"
 fi
 
 # G7: the met|partial|missed vocabulary triplet stays SKILL.md-exclusive.
@@ -568,10 +697,25 @@ fi
 # of verdict, met, partial, missed") -- false by word-boundary grep, measured;
 # the enum-scoped form is what G7's actual mutant (vocabulary duplication)
 # needs.
-if command grep -qiE 'met[^a-z]{1,4}partial[^a-z]{1,4}missed' "${REPORTER_MD}"; then
-  fail "G7-reporter-no-vocab-dup: reporter.md duplicates the met|partial|missed enum -- BUG-041-class drift" "${REPORTER_MD}"
+# Widened (TPV round-2 A5): strip inline markup (backtick/asterisk/quote)
+# before matching and widen the adjacency gap from {1,4} to {1,12}, plus a
+# standalone-backticked-token clause. The {1,4}-gap, markup-blind form
+# escapes the two most common enum shapes in .claude/agents/*.md: a verbatim
+# paste of canonical SKILL.md:702 (the enum's DEFINITION site --
+# "`met` = goal achieved as written. `partial` = ... `missed` = ..."), a
+# backticked-pipe form ("`met` | `partial` | `missed`"), and a three-bullet
+# definition list -- all measured 33/1 against the narrower form.
+G7_VOCAB_DUP=0
+if tr -d '`*"' < "${REPORTER_MD}" | command grep -qiE 'met[^a-z]{1,12}partial[^a-z]{1,12}missed'; then
+  G7_VOCAB_DUP=1
+fi
+if command grep -q '`met`' "${REPORTER_MD}" && command grep -q '`partial`' "${REPORTER_MD}" && command grep -q '`missed`' "${REPORTER_MD}"; then
+  G7_VOCAB_DUP=1
+fi
+if [[ "${G7_VOCAB_DUP}" -eq 1 ]]; then
+  fail "G7-reporter-no-vocab-dup: reporter.md duplicates the met|partial|missed enum -- BUG-041-class drift (TPV A5 -- widened past inline markup and the standalone-backticked-token form)" "${REPORTER_MD}"
 else
-  pass "G7-reporter-no-vocab-dup: reporter.md does not duplicate the met|partial|missed enum (GREEN-AT-BASELINE, pins the non-regression)"
+  pass "G7-reporter-no-vocab-dup: reporter.md does not duplicate the met|partial|missed enum (GREEN-AT-BASELINE, pins the non-regression; TPV A5 widened, no false positive on the pre-existing bare 'met'/'missed' at :99/:193/:243)"
 fi
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -627,6 +771,25 @@ check_no_sprint_context_gate() {
 }
 check_no_sprint_context_gate "${REPO_ROOT}/.cleargate/knowledge/readiness-gates.md" "RULE4a-live"
 check_no_sprint_context_gate "${REPO_ROOT}/cleargate-planning/.cleargate/knowledge/readiness-gates.md" "RULE4b-canonical"
+
+# ────────────────────────────────────────────────────────────────────────────
+# RULE1-init-script-parity (TPV round-2 A6): Cross-Cutting Rule 1 (two-tree
+# edits are byte-identical) has exactly one machine witness for this CR's
+# surface -- G1c, templates only. Nothing diffs the two init_sprint.mjs
+# copies; INIT_SCRIPT resolves to the live tree only (:32), so a live-tree-
+# only edit to init_sprint.mjs (mutant M10) scores 33/1. The only other
+# candidate witness, cleargate-cli's canonical-live-parity test, does not
+# name init_sprint.mjs among its four scripts and is *.integration.node.test.ts
+# (excluded from the default suite) -- not a real witness either. Same shape
+# as G1c.
+# ────────────────────────────────────────────────────────────────────────────
+if diff -q "${REPO_ROOT}/.cleargate/scripts/init_sprint.mjs" \
+           "${REPO_ROOT}/cleargate-planning/.cleargate/scripts/init_sprint.mjs" >/dev/null 2>&1; then
+  pass "RULE1-init-script-parity: live and canonical init_sprint.mjs are byte-identical (Cross-Cutting Rule 1)"
+else
+  fail "RULE1-init-script-parity: live and canonical init_sprint.mjs have diverged (Cross-Cutting Rule 1 violated)" \
+    "$(diff "${REPO_ROOT}/.cleargate/scripts/init_sprint.mjs" "${REPO_ROOT}/cleargate-planning/.cleargate/scripts/init_sprint.mjs")"
+fi
 
 # ────────────────────────────────────────────────────────────────────────────
 # SAFETY: Verify the real repo .active is still SPRINT-34
