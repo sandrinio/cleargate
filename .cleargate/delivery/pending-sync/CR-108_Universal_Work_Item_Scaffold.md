@@ -217,6 +217,29 @@ Two consequences:
 The item's *"Normalize placeholders in EIGHT templates"* row is consistent with eight, not nine —
 which is itself evidence the proposal gap was noticed and never written down.
 
+### § RULING — `cleargate new proposal` REJECTS with a named error; CR-108 does not author `proposal.md`
+
+Resolving the decision the finding above says must be made before dispatch. Measured: `proposal` is
+**live**, not vestigial — **16** `PROPOSAL-*`/`PROP-*` items across `pending-sync/` + `archive/`,
+**15** compiled `wiki/proposals/` pages, and `proposals` is a declared `wiki.ingest_buckets` entry.
+So narrowing the CR's claim to "the eight types that have templates" and saying nothing is not
+honest: `cleargate new proposal` is a command a user would reasonably run.
+
+**Ruling, three parts:**
+
+1. **CR-108 scaffolds the eight types that have templates.**
+2. **`proposal` is rejected with a named error naming the missing template** — it must not fall
+   through, must not silently resolve to another template, and must not exit 0. The rejection is a
+   required test case, not an implementation detail.
+3. **CR-108 does NOT author `proposal.md`.** Designing a work-item template is doctrine work — which
+   sections, which readiness gate, which Ambiguity-Gate criteria — and it carries its own gate
+   registration. Folding it in would add an unbounded design surface to a CR whose acceptance is
+   "one scaffolder plus a byte-identical `hotfix new` regression", and would make that regression
+   case unverifiable.
+
+The gap itself is **filed separately as [[BUG-065]]** — a registered type with 16 live items and no
+authoring template is registry drift of the same family as [[BUG-051]], and it predates this CR.
+
 ### § What CR-108 may and may not lift from BUG-045's allocator
 
 - **`...dirs: string[]` generalises the SCAN, not the ALLOCATION.** `maxHotfixId` returns `number`
