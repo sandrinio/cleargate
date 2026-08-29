@@ -459,3 +459,112 @@ flashcards_flagged:
   - "2026-08-30 · #test-harness #tpv #recipe · Rebuild a synthetic REFERENCE + one-mutant-per-axis harness with the test files' OWN CLI_ROOT/META_ROOT layout unmodified — proves amendments in isolation, no collateral kills hidden."
   - "2026-08-30 · #test-harness #danger · A brace-counting pin anchored on a function's OWN frozen signature (not the next function's marker) survives any insertion after it — verified: identical hash with/without an injected sibling function."
 ```
+
+---
+
+# ROUND 3 — A9: harness repair (META_ROOT env override), one file, one change
+
+role: qa
+
+Not a bounce. Coordinator framing confirmed and applied literally: `arch_bounces` NOT incremented
+— this is a QA-Red harness defect (T8b pointed at a tree the deliverable can never land in), not a
+rejection of Round 2's amendments, which stand unchanged.
+
+## The defect, confirmed before fixing
+
+`test/lib/readiness-predicates-test-layers-declared.red.node.test.ts`'s `META_ROOT` was
+`path.resolve(CLI_ROOT, '..')` with no env branch — always the outer repo's MAIN checkout
+(`sprint/S-39`), never the worktree (`story/CR-111`) where the Developer will actually land the
+three template edits. `T8b` (A2's template-CONTENT pin, added this round-2) therefore had exactly
+one truth value forever, regardless of implementation: FAIL. My own header comment claiming this
+file "follows the same CLI_ROOT/META_ROOT/CANON pattern" as the doctrine file was false — the
+doctrine file's `REPO_ROOT` already carried the `CLEARGATE_META_ROOT` override (`:81-83`, since
+Round 1); this file never did. I did not catch it in Round 1 or Round 2 because every verification
+I ran (targeted, out-of-tree mutant harness) pointed `CANON`/`CANON_ROOT` at whichever tree I built
+by hand for that run — none of my Round-2 mutant trees exercised "the real story/CR-111 worktree,
+selected by env var, the way DevOps/QA-Verify will actually run this file post-Developer." That gap
+is exactly what this dispatch closes.
+
+## A9 — applied
+
+`test/lib/readiness-predicates-test-layers-declared.red.node.test.ts`, `META_ROOT` only:
+
+```ts
+const META_ROOT = process.env.CLEARGATE_META_ROOT
+  ? path.resolve(process.env.CLEARGATE_META_ROOT)
+  : path.resolve(CLI_ROOT, '..');
+```
+
+Byte-identical in shape to the doctrine file's `REPO_ROOT` (`:81-83`). No assertion text, no
+scenario, no count changed — confirmed by diff (the only functional lines touched are the 4-line
+`META_ROOT` declaration; the rest of the diff is header-comment prose explaining the change).
+
+## Requirement 3 — swept both files for other hardcoded-root sites
+
+`test-layers-declared-doctrine.red.node.test.ts`: already fully covered. All four of its path
+constants (`DEVELOPER_MD`, `QA_MD`, `SKILL_MD`, `READINESS_GATES_MD`) derive from `CANON_ROOT`,
+which derives from the already-env-aware `REPO_ROOT`. `READINESS_PREDICATES_SRC` derives from
+`CLI_ROOT` (untouched, correct — the cli checkout is on `story/CR-111`).
+
+`readiness-predicates-test-layers-declared.red.node.test.ts`: swept for every `path.resolve`/
+`path.join` site (`grep -n`). Exactly one hardcoded-root site existed — `META_ROOT`, now fixed.
+`READINESS_PREDICATES_SRC` (line 130, unchanged) derives from `CLI_ROOT`, same correct case as the
+doctrine file's — per constraint 4, not touched.
+
+**No third site found.** Both files now derive every canonical-tree path through an
+env-overridable root.
+
+## Verification
+
+**1. Unset run reproduces Round 2 exactly** (confirms the change is strictly additive):
+
+```
+$ npx tsx --test test/lib/readiness-predicates-test-layers-declared.red.node.test.ts
+ℹ tests 17
+ℹ pass 2
+ℹ fail 15
+ℹ skipped 0
+```
+Identical to Round 2's banked number. `test-layers-declared-doctrine.red.node.test.ts` (untouched
+this round) re-run for completeness: `11t/1p/10f/0s`, identical to Round 2.
+
+**2. `CLEARGATE_META_ROOT` pointed at a scratch copy of `cleargate-planning/` with the three
+template edits applied by hand** (via the same `edit_story_md`/`edit_cr_md`/`edit_bug_md` helpers
+built and verified in Round 2's mutant harness — not re-derived, reused):
+
+```
+$ CLEARGATE_META_ROOT=<scratch>/r3-canon npx tsx --test test/lib/readiness-predicates-test-layers-declared.red.node.test.ts
+ℹ tests 17
+ℹ pass 5
+ℹ fail 12
+```
+`pass 5 = T9×2 (unaffected, reads CLI_ROOT/src) + T8b×3 (flipped GREEN — the templates now
+literally carry the row/label at the selected root)`. `T8` stays red — its 3 `it()`s call
+`evaluate('test-layers-declared', …)` against the REAL `cleargate-cli/src/lib/readiness-predicates.ts`
+(unaffected by `CLEARGATE_META_ROOT`, and the predicate is not yet implemented there on this
+branch), so it throws/fails exactly as it did before. **Confirmed: T8b flips to green while T8
+stays red under a tree that carries the template edits but not yet the predicate** — the two
+scenarios are independently wired to their own root/source, exactly as constraint 1 requires, and
+T8b is now reachable at all, which is the entire point of A9.
+
+## flashcards_flagged
+
+- "2026-08-30 · #test-harness #cross-repo #danger · A red-test file whose header CLAIMS to follow a sibling file's CLEARGATE_META_ROOT idiom must be diffed against it, not trusted — one file had the override, the other didn't, and the gap made an A2 template-content pin permanently unsatisfiable (no escape hatch, worse than a false-red)."
+
+---
+
+```
+QA-RED ROUND 3: WRITTEN
+RED_TESTS:
+  cleargate-cli/test/lib/readiness-predicates-test-layers-declared.red.node.test.ts (META_ROOT only; 17t/2p/15f unset, unchanged)
+  cleargate-cli/test/docs/test-layers-declared-doctrine.red.node.test.ts (untouched; 11t/1p/10f, unchanged)
+BASELINE_FAIL: 28 (unchanged — unset targeted numbers identical to Round 2; full suite NOT re-run per dispatch instruction)
+AMENDMENT_APPLIED: A9 — META_ROOT now honours CLEARGATE_META_ROOT, byte-identical in shape to the doctrine file's REPO_ROOT. No assertion/scenario/count change.
+THIRD_SITE_SWEEP: none found — doctrine file already fully env-aware; lib file had exactly the one site, now fixed.
+VERIFIED: (a) unset run == Round 2 exactly (17t/2p/15f/0s); (b) CLEARGATE_META_ROOT pointed at a hand-edited scratch cleargate-planning/ -> T8b×3 flip GREEN (pass 5 = T9x2+T8bx3), T8x3 stay red (predicate not yet implemented at CLI_ROOT) — the pair is independently wired and T8b is now reachable at all.
+TYPECHECK: pass (npm run typecheck, clean, exit 0)
+FULL SUITE: NOT re-run (dispatch instruction — targeted runs only)
+arch_bounces: NOT incremented — harness repair, not a rejection of Round 2's amendments
+flashcards_flagged:
+  - "2026-08-30 · #test-harness #cross-repo #danger · A red-test file whose header CLAIMS to follow a sibling file's CLEARGATE_META_ROOT idiom must be diffed against it, not trusted — one file had the override, the other didn't, and the gap made an A2 template-content pin permanently unsatisfiable (no escape hatch, worse than a false-red)."
+```
