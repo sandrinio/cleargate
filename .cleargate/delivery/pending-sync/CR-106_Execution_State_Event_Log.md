@@ -191,6 +191,91 @@ Two further scope clarifications, both **inside already-declared files** — no 
   duplicate deliberately and say so. `init_sprint.mjs` is already a declared surface, so collapsing
   the duplication is in scope.
 
+**§ AMENDMENT (orchestrator, 2026-08-29, per the BUG-044 Architect post-flight — BUG-044 is merged
+and every line citation in this CR is now stale).** `update_state.mjs` went **246 -> 371 lines** in
+three insertion-only hunks. Offset map: lines `1-20` shift **+0**, `21-32` **+4**, `33-96` **+115**,
+`97-246` **+125**. All eleven anchors this CR depends on, re-measured against the merged file:
+
+| Cited here | Now | What it is |
+|---|---|---|
+| `:78` | **`:193`** | `JSON.stringify(state, null, 2) + '\n'` — case 7's byte-compatibility anchor |
+| `:76-80` | **`:191-195`** | `atomicWrite` |
+| `:99` | **`:224`** | the read the fold must evict |
+| `:114-117` | **`:239-242`** | `migrateV1ToV2` + `atomicWrite` |
+| `:120-123` | **`:245-248`** | `migrateStateToV3` + `atomicWrite` |
+| `:187-189` | **`:312-314`** | auto-escalation at `BOUNCE_CAP` |
+| `:204-206` | **`:329-331`** | auto-escalation, second site |
+| `:227-229` | **`:352-354`** | the idempotency no-op that returns without writing |
+| `:233-235` | **`:358-360`** | `newState === 'Done'` sets `worktree = null` |
+| `:246` | **`:371`** | `main()` is synchronous top-to-bottom |
+| `:52-66` | **`:167-181`** | `migrateV1ToV2`, exported, external caller surface |
+
+**`:78-99` is no longer a contiguous span** — lines `212-221` are now the lock acquire. Rewrite it as
+two citations, never one range. And the eviction grep now returns **seven** hits, not the few this
+CR's §4 implied — read them all before concluding the read-modify-write is gone.
+
+**§ AMENDMENT — THE TRAP (orchestrator, 2026-08-29, per the same post-flight, finding 2). This is
+the most dangerous thing in this CR and no case as written catches it.**
+
+The test harness's cross-process arrival barrier **arms on `fs.readFileSync` of the state file**
+(`state-scripts.test.mjs:118-119`, target set at `:482`, `:600`, `:794`). **This CR deletes exactly
+that read.** If it does so without re-targeting the barrier, the barrier never arms, S1 / S2 / the
+migration addendum silently degrade to unsynchronised spawns, and **E1 reads green with the harness
+disarmed** — the CR would appear to prove the race is gone while actually having removed the only
+thing that could detect it.
+
+**The tell is wall-clock, and it is unambiguous: a run reporting `15/15` in under 6 seconds has
+disarmed the barrier, not fixed the race.** BUG-044's own post-fix baseline is **~14.6s** (measured
+five times across Developer, QA-Verify and post-flight: 14.62-15.94s). **Any acceptance run for this
+CR must report wall-clock alongside pass/fail, and a sub-6s green is a kick-back, not a success.**
+Re-target the barrier onto whatever read or append the new writer actually performs.
+
+**§ AMENDMENT — two scenarios MUST be deleted with the lock, and saying so is part of the work.**
+S4 (dead-pid lock is stolen) and S5 (live lock is respected) are **pure lock semantics with zero
+race content**. They hard-break the moment the lock is removed. Deleting them is correct and
+expected — but it must be **stated in the commit and the report**, not done silently, because a
+reviewer seeing the suite shrink otherwise cannot distinguish "removed obsolete lock tests" from
+"deleted tests that failed". E1's protection applies to the 20-way concurrency test and the
+addendum, **not** to S4/S5.
+
+**§ RESOLVED (orchestrator, 2026-08-29) — E5 vs the inherited migration addendum. The conflict is
+an artefact of a restatement, not a real design tension, and the item settles it in its own words.**
+
+The BUG-044 post-flight flagged that E5 and BUG-044's migration addendum assert opposite things: the
+addendum seeds a **v1 `state.json` with no `events.jsonl`** and asserts migration happens, while E5
+says *"a sprint dir with `state.json` and no `events.jsonl` is not rewritten and does not throw."*
+Both cannot hold as stated.
+
+**They do not actually conflict.** §2's last bullet — the human's decision — reads:
+*"a sprint directory with `state.json` and no `events.jsonl` must keep working **read-only** (closed
+sprints: SPRINT-03 ... SPRINT-38 ...) ... Chosen: **legacy-immutable — never rewrite a CLOSED
+sprint's state.**"* The criterion the human chose is **closed-ness**. E5's restatement substituted
+*"has no `events.jsonl`"* as a proxy for *"is closed"*, and it is that proxy — not the human's rule —
+that collides with the addendum. A v1 `state.json` in an **active** sprint is not a legacy sprint;
+it is a sprint mid-upgrade, and refusing to migrate it would make it impossible to adopt the event
+log on any sprint already in flight.
+
+**Ruling — E5 keys on closed-ness, and the addendum stands unchanged:**
+
+1. **E5's predicate is `sprint_status` reaching its terminal value, NOT the absence of
+   `events.jsonl`.** A dir whose `state.json` carries the terminal `sprint_status` is never
+   rewritten and never has genesis events synthesised for it.
+2. **A transition against an ACTIVE sprint still migrates and still writes**, exactly as
+   `update_state.mjs` does today. BUG-044's addendum keeps its v1 seed and is **not** re-seeded at
+   `schema_version: 3` — TPV measured it the sole killer of the skip-the-migration-writes mutant,
+   and re-seeding it would forfeit the only coverage of `:239-242` / `:245-248`.
+3. **E5's test fixture must therefore be a CLOSED sprint**, not merely one lacking a log — otherwise
+   the scenario passes for the wrong reason and stops discriminating. Write it against a terminal
+   `sprint_status`.
+4. The human's stated concern was **read-time** genesis synthesis (*"The folder synthesises a genesis
+   event set from the existing `state.json` on first append, or the sprint is treated as
+   legacy-immutable"*). Nothing in this ruling permits synthesising genesis events on a read of any
+   sprint, closed or active.
+
+This narrows E5 rather than the addendum, which is the direction that preserves both the human's
+decision and the mutant coverage. It is recorded here rather than left to a Developer, because
+resolving it by whichever test gets touched last is exactly how the wrong half wins.
+
 **§ PRECONDITION (per `TPV RULING — BUG-044` T4). This CR owes the RUNNER; BUG-044 owed the GREEN.**
 `.cleargate/scripts/state-scripts.test.mjs` is invoked by nothing — `grep -rn "state-scripts"` across
 the tree returns only planning documents. Adding a runner was outside BUG-044's three-row surface, so
