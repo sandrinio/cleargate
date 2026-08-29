@@ -183,7 +183,7 @@ describe('Scenario 1: init_sprint creates fresh state.json', () => {
     fs.rmSync(tmpBase, { recursive: true, force: true });
   });
 
-  test('creates state.json with schema_version=1, both stories Ready to Bounce, counters 0, exit 0', () => {
+  test('creates state.json with schema_version=SCHEMA_VERSION, both stories Ready to Bounce, counters 0, exit 0', () => {
     const result = runScript(
       'init_sprint.mjs',
       ['S-FAKE', '--stories', 'STORY-FAKE-01,STORY-FAKE-02'],
