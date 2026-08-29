@@ -228,3 +228,229 @@ for the shipped-to-everyone half of this change.
 - "2026-08-29 · #test-harness #danger · test_close_pipeline.sh scenarios pass bare filenames to run_script.sh (no `node`, no path) — PATH lacks .cleargate/scripts and the file has no +x, so every one resolves 'command not found' (exit 127), and an 'exits non-zero' assertion reads that as PASS. Route through `node <path>` explicitly."
 
 STATUS=done
+
+---
+
+## Round 2 (TPV rulings applied)
+
+role: qa
+
+TPV verdict: `RULINGS-REQUIRED` (8 rulings, 3 blocking). Wiring was sound —
+`arch_bounces` did not increment. All edits below are **test-file only**;
+`close_sprint.mjs` (live/canonical), `config.yml` (live/canonical/examples),
+and `cleargate-enforcement.md` remain byte-unchanged in the worktree.
+
+### T1 (BLOCKING) — repaired
+
+`scenario_cr107_p5_squash_merge_detected`'s P5a now asserts the Step 2.8
+**verdict line itself** (`Step 2.8 failed: sprint/S-97 not merged to main.`),
+not `$ec`. Measured cause of the original defect confirmed exactly as TPV
+described: P5's fixture omits `CLEARGATE_SKIP_BUNDLE_CHECK=1` (P2/P3/P9 set
+it, P5 never did), so the non-zero exit the old assertion relied on came
+from Step 3.5's bundle hard-block, not Step 2.8. Did **not** add
+`CLEARGATE_SKIP_BUNDLE_CHECK=1` as a shortcut — assert the step's own text,
+per the ruling.
+
+### T2 (BLOCKING) — added
+
+New scenario `scenario_cr107_p10_never_merged_negative_control` (P10a/P10b),
+registered in the run-all section immediately after P9. Fixture: `cs_reset_repo`
++ `cs_make_sprint_branch 97` + `cs_write_vcs_config "$CS_WORK" true`, **no
+merge of any kind**. P10a asserts the generic not-merged verdict; P10b
+asserts the output does NOT match `squash`.
+
+### T3 (BLOCKING) — split into eviction-a / eviction-b
+
+The single eviction check inside `scenario_cr107_p7_pr_body_and_eviction`
+is now two assertions over the §E.5 slice:
+- **eviction-a (retention):** `grep -qE 'git merge[^|]*sprint/'` (loose match,
+  survives a reword) AND a `vcs.sprint_pr` mention anywhere in §E.5.
+- **eviction-b (gating):** both literal `vcs.sprint_pr: true` and
+  `vcs.sprint_pr: false` present in §E.5, i.e. the section must name BOTH
+  branches, not just the key once.
+
+### T4 (advisory) — applied, stub preferred over skip
+
+Added `cs_make_gh_stub_path()` (a directory holding one executable no-op
+`gh` script) and prepended it to `PATH` (not `env -i` — preserves the rest
+of the ambient environment) in P4, P5, P6, and P10. Rationale measured, not
+assumed: these four scenarios exercise `vcs.sprint_pr:true`'s git-only
+ancestor/squash logic, which needs a `gh` binary to satisfy the presence
+gate but — per the validated squash-probe recipe (merge-base / commit-tree /
+cherry) — never actually invokes it. Chose the stub over a named skip per
+the ruling's own preference ("a skip that fires on the grader's machine is
+a silent hole").
+
+### T5/T6/T7/T8 — not QA-Red's to apply
+
+T5 (local-first, origin-fallback binding + message naming the matched ref)
+is a **Developer** dispatch constraint — no test change requested, and none
+made; P4's exact-string assertion (`...is merged to refs/heads/main.`) was
+left untouched, confirmed still a legitimate regression guard by the mutant
+run below. T6 (`cleargate-enforcement.md` two-tree `diff`) and T7 (config
+key in all four files) are Developer obligations with no witness in this
+harness by design (T7 is F4-required — no parity check exists or should
+exist). T8 (pre-existing vacuity) is out of scope; none of the 10
+pre-existing scenario functions were touched.
+
+### Baseline re-measurement (worktree, test-only diff, no production change)
+
+Redirected to log files, read after completion (N10). Run twice:
+
+```
+$ bash .cleargate/scripts/test/test_close_pipeline.sh > run1.log 2>&1; echo $?
+1
+$ tail -1 run1.log
+=== Results: 20 passed, 23 failed ===
+
+$ bash .cleargate/scripts/test/test_close_pipeline.sh > run2.log 2>&1; echo $?
+1
+$ tail -1 run2.log
+=== Results: 20 passed, 23 failed ===
+
+$ diff <(grep -E "^PASS:|^FAIL:" run1.log) <(grep -E "^PASS:|^FAIL:" run2.log); echo $?
+0   (deterministic — identical across two runs)
+```
+
+20/23 = the prior 18/22 baseline, **plus 3 net new assertions** (P10a, P10b;
+eviction split 1→2, net +1) — 18+2=20 passed, 22+1=23 failed. Every row that
+was green stayed green; every row that was red stayed red; P5a flipped
+identity (still green at baseline, now for the *correct* reason — see the
+per-case table).
+
+### Per-case RED/GREEN table (this round's rows only; measured, not predicted)
+
+| Case | Baseline (this commit) | Notes |
+|---|---|---|
+| P5a (T1, rewritten) | **PASS (green)** | Baseline's Step 2.8 message is already the generic `not merged to main.` string even pre-feature — legitimate green, no longer an accidental one (see mutant proof below: this is what changes under M2b). |
+| P5b | FAIL (red, unchanged) | No squash detection yet. |
+| P10a (T2, new) | **PASS (green)** | The generic not-merged message already fires for a never-merged sprint today — regression guard, like P1/P4. |
+| P10b (T2, new) | **PASS (green)** | Nothing mentions "squash" today — negative control holds trivially pre-feature; its value is entirely in what it catches post-feature (see M8 below). |
+| eviction-a (T3) | FAIL (red) | No `vcs.sprint_pr` mention in §E.5 today. |
+| eviction-b (T3) | FAIL (red) | Same. |
+| P4, P6 (T4 shim added) | PASS / FAIL (unchanged) | Adding the `gh` stub to PATH did not change baseline pass/fail status for either — confirmed by direct measurement, not assumption. |
+
+### Mutation proof — the three survivors, built and measured out-of-tree
+
+Per the dispatch's "measure every red/green" instruction, and following the
+same out-of-tree methodology TPV used: a `tar` copy of `.worktrees/CR-107`
+excluding `.git` (source md5 verified equal to the worktree,
+`8eabeddb79ce78713eba706bd4874ac0`), built in the scratchpad. **The worktree
+itself was never touched by any of this** — confirmed `git status --porcelain`
+empty and `HEAD` unchanged (`20efc39e`) both before and after.
+
+**Reference implementation** (out-of-tree only, never committed): `vcs.sprint_pr`
+read via a dependency-free line scan of `config.yml`; fail-closed `gh`/origin
+gate placed before the `sprintNumMatch` test; `--is-ancestor` against
+`refs/heads/main` first, `refs/remotes/origin/main` as fallback (message
+names whichever ref matched); real squash detection via
+`merge-base`/`commit-tree`/`cherry`; canonical `SKILL.md` §6 + §E.5 edited
+with both `vcs.sprint_pr: true` and `vcs.sprint_pr: false` branches named;
+`cleargate-enforcement.md` doctrine clause removed in both trees (byte-identical).
+
+```
+=== Results: 33 passed, 10 failed ===   exit 1
+```
+
+The 10 remaining failures are **exactly** the pre-existing legitimately-remaining
+set TPV named: `Scenario 1b, 1c, 2a, 4a, 4b, 4c, 5a, 6a`, `CR-036 Scenario B`,
+`Mirror check: reporter.md` (worktree-only, `.claude/` untracked). **Every
+single CR-107 assertion (P1–P10, P7/P7c, eviction-a/b, doctrine ×4) is
+green** — 23 of 23. This matches TPV's predicted `33 passed, 10 failed`
+number pair exactly.
+
+**Mutant M2b** (loosened `refs/remotes/origin/main` *fallback* only — local
+`--is-ancestor` kept as the primary path, matching TPV's own characterization
+that P4 stays green — replaced by "the branch merely exists on origin";
+static squash string, no real probe):
+
+```
+=== Results: 30 passed, 13 failed ===   exit 1
+```
+Killed by: **P5a, P5b, P10a**. Stayed green: P1a, P1b, P2a, P2b, P3a, P3b,
+**P4** (as TPV's table predicts — real local merge-commit still resolves via
+the untouched local `--is-ancestor` path), **P6** (still "passed", for the
+wrong reason — not required to kill), P9, P10b, eviction-a, eviction-b,
+P7/P7c. **T1+T2 kill this mutant. Confirmed.**
+
+**Mutant M8** (correct `--is-ancestor` + real origin fallback, kept
+byte-identical to the reference; squash detection replaced by a hardcoded
+boolean, no probe):
+
+```
+=== Results: 32 passed, 11 failed ===   exit 1
+```
+Killed by: **P10b only** — exactly matching TPV's own table row
+(`M8 → PASS/KILL`). Everything else, including P5a and P5b, stays green
+(P5b passes because the hardcoded string still happens to say "squash" for
+the one fixture that IS a real squash — the danger was never P5, it was
+always the false-positive on a never-merged sprint, which only P10b can see).
+**T2 kills this mutant on its own. Confirmed.**
+
+**Mutant M9** (§E.5's local-merge branch deleted entirely, unconditional
+`gh pr merge --merge --delete-branch=false`, canonical tree only — mirroring
+the live tree was skipped since this is a throwaway measurement, not a
+commit):
+
+```
+=== Results: 31 passed, 12 failed ===   exit 1
+```
+Killed by: **eviction-a AND eviction-b** (both fire — eviction-a fails
+because no `git merge...sprint/` substring survives the deletion).
+
+**Mutant M9b** (local merge left **unconditional**, reworded to
+`git merge "sprint/S-${NN}" --no-ff ...`, no `vcs.sprint_pr` mention anywhere
+in §E.5):
+
+```
+=== Results: 31 passed, 12 failed ===   exit 1
+```
+Killed by: **eviction-a AND eviction-b** (eviction-a fails on the missing
+`vcs.sprint_pr` mention despite the loose merge-regex still matching the
+reworded line — proving the loose match alone does not create a false
+green). **T3 kills both eviction mutants. Confirmed.**
+
+### Summary: all three TPV survivors now die; reference implementation survives all four mutant runs plus its own clean run
+
+| Implementation | Result | P5a | P5b | P10a | P10b | eviction-a | eviction-b |
+|---|---|---|---|---|---|---|---|
+| Reference | 33/10 | PASS | PASS | PASS | PASS | PASS | PASS |
+| M2b (fail-open ancestor) | 30/13 | **KILL** | KILL | **KILL** | pass | pass | pass |
+| M8 (hardcoded squash string) | 32/11 | pass | pass | pass | **KILL** | pass | pass |
+| M9 (local merge deleted) | 31/12 | pass | pass | pass | pass | **KILL** | **KILL** |
+| M9b (local merge reworded, ungated) | 31/12 | pass | pass | pass | pass | **KILL** | **KILL** |
+
+No mutant scores identically to the reference implementation. Every
+previously-surviving mutant is now killed by at least one of the four new/
+repaired assertions, and the reference implementation is green on every one
+of the 23 CR-107-scoped assertions across all five runs (its own plus the
+four mutant deltas confirm nothing else broke).
+
+### Not applied (with reason)
+
+Nothing from the blocking or advisory-applied set was left unapplied. T5,
+T6, T7, T8 are explicitly not QA-Red's to apply per the dispatch's own
+"Not for you" section, and are recorded above for the Developer/orchestrator.
+
+### Commands run, with exit codes read from completed logs (N10 compliance)
+
+All logs redirected to files; read only after the command completed —
+matches Round 1's N10 discipline.
+
+```
+$ bash -n .cleargate/scripts/test/test_close_pipeline.sh; echo $?
+0
+
+$ git status --porcelain            # before AND after every out-of-tree run
+(empty, both times)
+
+$ git rev-parse HEAD                # before AND after
+20efc39eaee1bfa417c7d55d42a1d62b3b01bdf6   (unchanged throughout)
+```
+
+### flashcards_flagged
+
+- "2026-08-29 · #test-harness #danger · A `gh`-gated feature makes every downstream green depend on the host PATH — pin a stub `gh` binary via PATH-prepend rather than trusting the ambient environment to have one."
+- "2026-08-29 · #test-harness #mutation · An eviction check split into retention + gating halves catches both 'deleted entirely' and 'left unconditional, reworded' mutants; a single grep-for-the-old-literal catches neither."
+
+STATUS=done

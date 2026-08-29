@@ -768,6 +768,32 @@ cs_make_no_gh_path() {
   echo "$shim"
 }
 
+# A directory holding a STUB `gh` executable, meant to be PREPENDED to PATH
+# (not a PATH replacement) — TPV T4 (advisory, applied): P4/P5/P6/P10 all
+# exercise vcs.sprint_pr:true's git-only ancestor/squash logic, which needs
+# `gh` present on PATH (the fail-closed presence gate) but — per the
+# validated detection recipe — never actually INVOKES gh: merge-status
+# detection is pure git plumbing (merge-base / commit-tree / cherry), never
+# a GitHub API call. Without this stub, P4/P5/P6/P10 would go RED against a
+# CORRECT implementation on any machine without a real `gh` binary on PATH —
+# measured by TPV with a gh-free PATH. Prepending (not `env -i`) keeps the
+# rest of the ambient environment exactly as it was before this fixture
+# existed, so it changes nothing else about these scenarios' behaviour.
+cs_make_gh_stub_path() {
+  local shim
+  shim="$(mktemp -d)"
+  cat > "${shim}/gh" << 'GHEOF'
+#!/bin/sh
+# QA-Red stub: exists only so a presence check (`command -v gh`, `gh
+# --version`) succeeds deterministically. Detection is pure git plumbing;
+# this stub is never expected to be exec'd for real work.
+echo "gh stub (QA-Red)" 1>&2
+exit 0
+GHEOF
+  chmod +x "${shim}/gh"
+  echo "$shim"
+}
+
 # ── CR-107 P1: vcs.sprint_pr absent/false → local-merge path unchanged ────
 # Regression guard — the whole regression story for every existing install
 # rests on this default. Uses the FORCE_MERGE_STATUS seam directly: no git
@@ -911,15 +937,17 @@ scenario_cr107_p3_no_remote_refuses() {
 # that is not broken (M4 test table). Expected GREEN at baseline.
 
 scenario_cr107_p4_merge_commit_regression() {
-  local state_dir out ec
+  local state_dir out ec shim
 
   cs_reset_repo
   cs_make_sprint_branch 97
   git -C "$CS_WORK" merge -q --no-ff "sprint/S-97" -m "merge sprint/S-97"
   cs_write_vcs_config "$CS_WORK" "true"
   state_dir="$(cs_make_state_dir)"
+  shim="$(cs_make_gh_stub_path)"
 
-  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+  out="$(PATH="${shim}:${PATH}" \
+         CLEARGATE_STATE_FILE="${state_dir}/state.json" \
          CLEARGATE_SPRINT_DIR="${state_dir}" \
          CLEARGATE_REPO_ROOT="${CS_WORK}" \
          CLEARGATE_SKIP_WORKTREE_CHECK=1 \
@@ -933,7 +961,7 @@ scenario_cr107_p4_merge_commit_regression() {
     fail "CR-107 P4: a real merge-commit ancestor must still be recognised as merged" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
   fi
 
-  rm -rf "$state_dir" "$CS_ROOT"
+  rm -rf "$state_dir" "$CS_ROOT" "$shim"
 }
 
 # ── CR-107 P5: vcs.sprint_pr:true, squash-merged PR → fails loudly, names squash ──
@@ -943,7 +971,7 @@ scenario_cr107_p4_merge_commit_regression() {
 # distinguishing "you used an unsupported strategy" from "you forgot to merge".
 
 scenario_cr107_p5_squash_merge_detected() {
-  local state_dir out ec
+  local state_dir out ec shim
 
   cs_reset_repo
   cs_make_sprint_branch 97
@@ -951,8 +979,10 @@ scenario_cr107_p5_squash_merge_detected() {
   git -C "$CS_WORK" commit -q -m "squash merge sprint/S-97"
   cs_write_vcs_config "$CS_WORK" "true"
   state_dir="$(cs_make_state_dir)"
+  shim="$(cs_make_gh_stub_path)"
 
-  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+  out="$(PATH="${shim}:${PATH}" \
+         CLEARGATE_STATE_FILE="${state_dir}/state.json" \
          CLEARGATE_SPRINT_DIR="${state_dir}" \
          CLEARGATE_REPO_ROOT="${CS_WORK}" \
          CLEARGATE_SKIP_WORKTREE_CHECK=1 \
@@ -960,10 +990,21 @@ scenario_cr107_p5_squash_merge_detected() {
          bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
   ec=$?
 
-  if [[ $ec -ne 0 ]]; then
-    pass "CR-107 P5a (accidental green — see report): squash-merged sprint fails today via the generic 'not merged' path"
+  # T1 (TPV RULING -- CR-107, BLOCKING): assert the Step 2.8 VERDICT LINE
+  # ITSELF, not $ec. Measured by TPV: P5's fixture omits
+  # CLEARGATE_SKIP_BUNDLE_CHECK (P2/P3/P9 set it; P5 never did), so the
+  # non-zero exit this scenario used to assert on came from Step 3.5's
+  # bundle hard-block, NOT from Step 2.8. Under mutant M2b (loosened
+  # --is-ancestor + a hardcoded squash string), Step 2.8 itself printed
+  # "Step 2.8 passed" for a squash-merged sprint and the old exit-code-only
+  # assertion still reported PASS -- P5a was structurally incapable of
+  # failing for a Step-2.8 reason. Do NOT "fix" this by adding
+  # CLEARGATE_SKIP_BUNDLE_CHECK=1 instead -- the exit code would still be an
+  # indirect proxy; assert the step's own verdict text.
+  if echo "$out" | grep -q "Step 2.8 failed: sprint/S-97 not merged to main."; then
+    pass "CR-107 P5a: squash-merged sprint -> Step 2.8's OWN verdict reads not-merged (not silently 'passed')"
   else
-    fail "CR-107 P5a: squash-merged sprint must not exit 0" "exit=$ec"
+    fail "CR-107 P5a: Step 2.8 must itself report the squash-merged sprint as not-merged" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
   fi
 
   if echo "$out" | grep -qi "squash"; then
@@ -972,7 +1013,7 @@ scenario_cr107_p5_squash_merge_detected() {
     fail "CR-107 P5b: failure must name squash, not just report generic 'not merged' (F2a)" "got: $(echo "$out" | grep -i 'step 2.8\|not merged')"
   fi
 
-  rm -rf "$state_dir" "$CS_ROOT"
+  rm -rf "$state_dir" "$CS_ROOT" "$shim"
 }
 
 # ── CR-107 P6: stale local `main` after a PR merge must not read "not merged" ──
@@ -982,15 +1023,17 @@ scenario_cr107_p5_squash_merge_detected() {
 # (internal fetch, or origin/main fallback) is chosen.
 
 scenario_cr107_p6_stale_local_main() {
-  local state_dir out ec
+  local state_dir out ec shim
 
   cs_reset_repo
   cs_make_sprint_branch 97
   cs_simulate_stale_local_main 97
   cs_write_vcs_config "$CS_WORK" "true"
   state_dir="$(cs_make_state_dir)"
+  shim="$(cs_make_gh_stub_path)"
 
-  out="$(CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+  out="$(PATH="${shim}:${PATH}" \
+         CLEARGATE_STATE_FILE="${state_dir}/state.json" \
          CLEARGATE_SPRINT_DIR="${state_dir}" \
          CLEARGATE_REPO_ROOT="${CS_WORK}" \
          CLEARGATE_SKIP_WORKTREE_CHECK=1 \
@@ -1004,7 +1047,7 @@ scenario_cr107_p6_stale_local_main() {
     fail "CR-107 P6: a stale LOCAL main must not read as 'not merged' once origin/main is resolvable" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
   fi
 
-  rm -rf "$state_dir" "$CS_ROOT"
+  rm -rf "$state_dir" "$CS_ROOT" "$shim"
 }
 
 # ── CR-107 P9: the vcs gate must not be reachable-around via the non-numeric
@@ -1039,6 +1082,49 @@ scenario_cr107_p9_nonnumeric_sprint_id_not_a_bypass() {
   fi
 
   rm -rf "$state_dir" "$CS_ROOT"
+}
+
+# ── CR-107 P10: never-merged negative control -- F2a's ONLY real witness ──
+# TPV T2 (BLOCKING). Without this fixture, a hardcoded squash string
+# (mutant M8) is indistinguishable from real squash detection, and a
+# loosened ancestry check (mutant M2b, the fail-open on `main`) is
+# indistinguishable from a correct one -- both measured 30/10, byte-identical
+# to the reference implementation, because no scenario in this file has
+# vcs.sprint_pr:true + gh present + origin present + a sprint that was
+# NEVER merged by any strategy. Fixture: sprint branch created and pushed,
+# then left alone -- no local merge, no squash-merge, no simulated PR merge.
+
+scenario_cr107_p10_never_merged_negative_control() {
+  local state_dir out ec shim
+
+  cs_reset_repo
+  cs_make_sprint_branch 97
+  cs_write_vcs_config "$CS_WORK" "true"
+  state_dir="$(cs_make_state_dir)"
+  shim="$(cs_make_gh_stub_path)"
+
+  out="$(PATH="${shim}:${PATH}" \
+         CLEARGATE_STATE_FILE="${state_dir}/state.json" \
+         CLEARGATE_SPRINT_DIR="${state_dir}" \
+         CLEARGATE_REPO_ROOT="${CS_WORK}" \
+         CLEARGATE_SKIP_WORKTREE_CHECK=1 \
+         CLEARGATE_SKIP_LIFECYCLE_CHECK=1 \
+         bash "$RUN_SCRIPT" node "${SCRIPTS_DIR}/close_sprint.mjs" SPRINT-97 2>&1)"
+  ec=$?
+
+  if echo "$out" | grep -q "Step 2.8 failed: sprint/S-97 not merged to main."; then
+    pass "CR-107 P10a: never-merged sprint -> Step 2.8 correctly reports not-merged"
+  else
+    fail "CR-107 P10a: a sprint never merged by any strategy must fail Step 2.8 with the generic not-merged verdict" "exit=$ec, Step 2.8 line: $(echo "$out" | grep 'Step 2.8')"
+  fi
+
+  if echo "$out" | grep -qi "squash"; then
+    fail "CR-107 P10b: never-merged sprint must NOT be misreported as a squash merge (no witness otherwise for a hardcoded-string mutant)" "got: $(echo "$out" | grep -i 'step 2.8\|squash')"
+  else
+    pass "CR-107 P10b: never-merged sprint's failure does not falsely name 'squash'"
+  fi
+
+  rm -rf "$state_dir" "$CS_ROOT" "$shim"
 }
 
 # ── CR-107 P7 + eviction check: canonical SKILL.md doc-truth ──────────────
@@ -1079,14 +1165,35 @@ scenario_cr107_p7_pr_body_and_eviction() {
     fail "CR-107 P7c: PR-body recipe must name sprint goal + DoD + report as inputs" "not all three found in Phase D / E.5"
   fi
 
-  # Eviction check (§4): §E.5 must contain no UNCONDITIONAL git merge — the
-  # local merge is reachable only on the vcs.sprint_pr:false branch. Coarse
-  # proxy: the bare command line, without any vcs.sprint_pr mention anywhere
-  # in the section, means it is (still) unconditional.
-  if echo "$e5" | grep -q 'git merge sprint/S-NN --no-ff' && ! echo "$e5" | grep -qi 'vcs.sprint_pr'; then
-    fail "CR-107 eviction check: §E.5 contains an unconditional 'git merge sprint/S-NN --no-ff' (no vcs.sprint_pr mention in the section)" "local merge must be reachable only on the vcs.sprint_pr:false branch"
+  # Eviction check (§4), split into TWO assertions per TPV T3 (BLOCKING).
+  # The old single check tested "the old literal string is gone", not "the
+  # merge is conditional" -- two mutants scored 30/10, tied with the
+  # reference implementation, against it: M9 (the local merge DELETED
+  # entirely, replaced by an unconditional `gh pr merge`, which breaks
+  # every vcs.sprint_pr:false install -- the DEFAULT, and the only path
+  # available to any repo without a GitHub remote) and M9b (the local merge
+  # left UNCONDITIONAL, merely reworded so the old literal no longer
+  # matches). The CR's own §4 wording -- "the local merge is reachable only
+  # on the vcs.sprint_pr:false branch" -- has two halves; test both.
+
+  # eviction-a (retention): §E.5 must still contain a LOCAL git-merge
+  # command -- matched LOOSELY (not the exact old literal) so a rewording
+  # cannot manufacture a false green -- AND mention vcs.sprint_pr somewhere
+  # in the section at all.
+  if echo "$e5" | grep -qE 'git merge[^|]*sprint/' && echo "$e5" | grep -qi 'vcs\.sprint_pr'; then
+    pass "CR-107 eviction-a: §E.5 retains a local git-merge command, alongside a vcs.sprint_pr mention"
   else
-    pass "CR-107 eviction check: §E.5 either has no bare git-merge line, or gates it on vcs.sprint_pr"
+    fail "CR-107 eviction-a: §E.5 must retain a local git-merge (loosely matched) AND mention vcs.sprint_pr" "merge found: $(echo "$e5" | grep -qE 'git merge[^|]*sprint/' && echo yes || echo no); vcs.sprint_pr mentioned: $(echo "$e5" | grep -qi 'vcs\.sprint_pr' && echo yes || echo no)"
+  fi
+
+  # eviction-b (gating): §E.5 must distinguish the TWO branches explicitly --
+  # both `vcs.sprint_pr: true` and `vcs.sprint_pr: false` referenced, not
+  # just the key name mentioned once (which an unconditional-merge mutant
+  # could still satisfy under a looser check).
+  if echo "$e5" | grep -q 'vcs.sprint_pr: true' && echo "$e5" | grep -q 'vcs.sprint_pr: false'; then
+    pass "CR-107 eviction-b: §E.5 distinguishes the vcs.sprint_pr:true and vcs.sprint_pr:false branches"
+  else
+    fail "CR-107 eviction-b: §E.5 must distinguish BOTH vcs.sprint_pr branches (true AND false), not just mention the key" "true branch found: $(echo "$e5" | grep -q 'vcs.sprint_pr: true' && echo yes || echo no); false branch found: $(echo "$e5" | grep -q 'vcs.sprint_pr: false' && echo yes || echo no)"
   fi
 }
 
@@ -1193,6 +1300,10 @@ scenario_cr107_p6_stale_local_main
 echo ""
 echo "--- CR-107 P9: non-numeric sprint id must not bypass the vcs gate ---"
 scenario_cr107_p9_nonnumeric_sprint_id_not_a_bypass
+
+echo ""
+echo "--- CR-107 P10: never-merged negative control (F2a's only witness) ---"
+scenario_cr107_p10_never_merged_negative_control
 
 echo ""
 echo "--- CR-107 P7 + eviction check: canonical SKILL.md doc-truth ---"
