@@ -91,6 +91,24 @@ last_synced_body_sha: null
 ## Existing Surfaces
 
 - **Surface:** `.claude/skills/sprint-execution/SKILL.md:723` — `git merge sprint/S-NN --no-ff`; the local sprint→main merge this CR routes through a PR.
+- **§ SCOPE ADDITION (orchestrator, 2026-08-29, per BUG-046 post-flight finding D4 — a one-line
+  doctrine fix folded here because this CR already edits this file in both trees, in a different
+  section).** `cleargate-enforcement.md:101` (§1.6 Wave worktree contract, and its byte-identical
+  canonical mirror) justifies preferring ClearGate-managed worktrees over the Workflow tool's
+  `isolation:'worktree'` with two reasons, and **the first is a non-differentiator**: *"which strips
+  gitignored `/.claude/` + `/mcp/` and cuts off the wrong base"*. A ClearGate-managed worktree
+  strips gitignored content too — `git worktree add` checks out tracked files only — so that clause
+  distinguishes nothing. Only *"cuts off the wrong base"* is a real difference.
+
+  This is the **fourth** live site of the misconception [[BUG-046]] was chartered to correct, and it
+  survived because BUG-046's C13 grep hunts the word *"subdirectory"* while C13b needs
+  `worktree`+`tracked` on one line — neither matches this phrasing. Evaluated literally the sentence
+  states a true fact about a different tool, so it was correctly **not** a BUG-046 kick-back; it is
+  nonetheless the same misconception in different words. **Fix: delete the strips-gitignored clause
+  from both trees, keep the base clause, and re-verify `diff` between the two copies is empty.**
+  Do not renumber or restructure §1.6 — Cross-Cutting Rule 4 freezes `## ` heading positions
+  sprint-wide, and `gate-section-index-pinning` must stay at `18 = 16 pinnable + 2 known-unpinnable`.
+
 - **Surface:** `.cleargate/knowledge/cleargate-enforcement.md:110-138` — the walkthrough gate ("MUST NOT merge to main while any `UR:bug` is unresolved"). This CR gives that rule an enforceable external representation.
 - **Surface:** `.cleargate/scripts/close_sprint.mjs:588-631` — Step 2.7/2.8 preflight, already shells out to `git worktree list --porcelain` with a graceful "unavailable → non-fatal skip" fallback. This CR reuses that exact degradation idiom for `gh`.
   **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F1 — the citation is stale and sends the

@@ -9,7 +9,7 @@ status: Draft
 severity: P1-High
 reporter: orchestrator
 approved: false
-context_source: "Split out of BUG-046 on 2026-08-29 by explicit human decision at the M4 planning halt, on the M4 Architect's measurement that BUG-046 carried four independent defects across 13 files and 13 verification cases — CR-108-sized for a single wave-10 dispatch. The split line is the Architect's and is clean: BUG-046 keeps reachability + refusal (cases C1-C7, C12, C13); this item takes dep_predecessors and the parser unification (C8-C11). Every claim below is inherited verbatim from BUG-046 §3.5(a)-(d), where it was measured live during SPRINT-39's own fan-out rather than reasoned. Grounding: .cleargate/scripts/collision_surface.sh:87-90 (the Sandbox parser's `do not` check added by BUG-049) and its §3.1 table parser, .claude/agents/architect-reader.md:35, .cleargate/sprint-runs/SPRINT-39/plans/waves.json."
+context_source: "Split out of BUG-046 on 2026-08-29 by explicit human decision at the M4 planning halt, on the M4 Architect's measurement that BUG-046 carried four independent defects across 13 files and 13 verification cases — CR-108-sized for a single wave-10 dispatch. The split line is the Architect's and is clean: BUG-046 keeps reachability + refusal (cases C1-C7, C12, C13); this item takes dep_predecessors and the parser unification (C8-C11). Every claim below is inherited verbatim from BUG-046 §3.5(a)-(d), where it was measured live during SPRINT-39's own fan-out rather than reasoned. Grounding: .cleargate/scripts/collision_surface.sh:118-125 (the Sandbox parser's `do not` check added by BUG-049) and its §3.1 table parser, .claude/agents/architect-reader.md:35, .cleargate/sprint-runs/SPRINT-39/plans/waves.json."
 created_at: 2026-08-29T00:00:00Z
 updated_at: 2026-08-29T00:00:00Z
 created_at_version: cleargate@0.24.2
@@ -55,7 +55,7 @@ last_synced_body_sha: null
 - **Question:** Should the four over-reporting cases be fixed as four guards, or as one unification of
   the two parsers that already disagree?
 - **Recommended:** Unification. BUG-046 §3.5(d) already argues this: the Execution-Sandbox parser
-  honours a `Do NOT modify` label (`collision_surface.sh:87-90`) and the §3.1 table parser ignores
+  honours a `Do NOT modify` label (`collision_surface.sh:118-125`) and the §3.1 table parser ignores
   labels entirely. Adding a `/reference|read-only/i` special case leaves the two parsers disagreeing
   on the next label anyone invents.
 - **Human decision:** *(open)*
@@ -103,7 +103,7 @@ contract, not because they carry the same risk.
 
 ## 3. Evidence & Context
 
-- `.cleargate/scripts/collision_surface.sh:87-90` — the Execution-Sandbox parser's `do not` label
+- `.cleargate/scripts/collision_surface.sh:118-125` — the Execution-Sandbox parser's `do not` label
   check, added by [[BUG-049]]. The §3.1 table parser has no equivalent.
 - `.claude/agents/architect-reader.md:35` — reads digest fields from frontmatter; the natural home
   for a declared `dep_predecessors`.
