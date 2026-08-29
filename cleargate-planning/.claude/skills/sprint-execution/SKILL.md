@@ -38,11 +38,16 @@ If you are running a sprint and you have not loaded this skill yet, **stop and l
 
 Five touchpoints where the goal is the tiebreaker:
 
-1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint.
+1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint, and derive + record the Goal Acceptance Check at the same halt (§A.5 below).
 2. **Architect dispatch (§B).** Pass the sprint goal in the dispatch prompt. The milestone plan should reference how each story advances the goal, not only what files it changes.
 3. **Mid-sprint CR triage (§C.10 rubric → §C.11 routing).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
 4. **Escalation (§8).** When `qa_bounces ≥ 3`, `arch_bounces ≥ 3`, or 3 circuit-breaker hits flip a story to `Escalated`, frame the human-decision question through the goal lens: "Drop this story → goal still met? Re-approach → goal still met by sprint end?"
-5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief.
+5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief, derived from `sprint-context.md`'s `## Goal Acceptance Check`, not judged (§E.2).
+
+**Compaction-proof anchor (CR-110).** The Orchestrator re-reads `sprint-context.md`'s `## Sprint
+Goal` and `## Goal Acceptance Check` sections at every one of the five touchpoints above — not
+only at kickoff — because the Orchestrator is the one participant whose own anchor is conversation
+context, which compacts across a long sprint. The file, not memory, is the source of truth.
 
 **What goal-first is NOT:**
 - Not authority to skip stories the orchestrator deems "off-goal" — splits and merges are decomposition-time decisions, never mid-sprint.
@@ -209,6 +214,16 @@ After human confirms, update sprint frontmatter `status: Active` (via `cleargate
 
 > 🎯 **Goal check.** Before the first Architect dispatch, surface the sprint goal verbatim from the plan's `sprint_goal:` frontmatter (or §1 if unstructured) in chat: *"Sprint goal: <verbatim>. Success = this is met by close. Stories are the means; this is the end."* All subsequent halts and decisions reference back to this line.
 
+**Derive + record the Goal Acceptance Check (CR-110), at this same halt.** Ask: what concrete
+command, artifact, or observable state is true when the sprint goal above is met? Propose it to the
+human alongside the sprint plan confirmation — do not add a second halt. Write the answer into
+`sprint-context.md`'s `## Goal Acceptance Check` section, replacing its placeholder, once the human
+confirms it in the same breath as confirming the plan. If no mechanical condition can be stated,
+record the literal token `not-mechanically-verifiable` plus the qualitative evidence that will
+stand in for it (walkthrough outcome, stakeholder confirmation) — an explicit, valid outcome, not a
+gate failure. A goal for which no check can be stated at all is usually a goal too vague to execute
+against; surface that to the human rather than forcing a synthetic metric.
+
 ---
 
 ## 4. Phase B — Per-Milestone Architect Plan
@@ -227,6 +242,17 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action (Sprint Goal + Cross-Cutting Rules + Active CRs sections constrain every decision).
 
 > 🎯 **Goal check.** Pass the sprint goal verbatim in the Architect's dispatch prompt. The plan should explicitly tie each story to the goal under "Per-story blueprint" — e.g. *"STORY-NNN-NN advances goal by <one sentence>"*. Plans that don't reference the goal go back to the Architect with a re-dispatch.
+
+**`GOAL_RELATION` — a separate, per-milestone line, decoupled from the sprint verdict (CR-110,
+§Q5-B).** Every milestone plan states one line near its top: `GOAL_RELATION: advances | off
+critical path`. This answers "does this milestone relate to the Sprint Goal at all?" — a different
+axis from the sprint verdict (`met`/`partial`/`missed`, §0.5/§E.2), and it does not alter that
+verdict: a milestone can legitimately be `off critical path` while the sprint's overall goal
+verdict stays `met`. Worked example: SPRINT-39's M3 and M4 are both `off critical path` — their
+work is real and necessary, it simply is not what the sprint goal was measured by — while the
+sprint's goal verdict, decided on M1+M2 evidence, is unaffected. Folding this relation into the
+sprint verdict enum would force the Reporter to mark the whole sprint `partial` whenever any one
+milestone is unrelated to the goal — the exact linkage this decoupling forbids.
 
 ---
 
@@ -700,6 +726,12 @@ Reporter writes `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` and returns t
 > Ready to authorize close (Gate 4)?
 
 > 🎯 **Goal check.** The verdict line is mandatory and is the first line of the Brief. `met` = goal achieved as written. `partial` = some sprint-goal acceptance criteria met, others not — explain which in REPORT §1. `missed` = goal not achieved despite stories merging. A `partial` or `missed` verdict does NOT block close, but it is a first-class signal to the human that close-ack should be deliberate, not reflexive.
+
+**The verdict reads the check, it does not judge (CR-110).** The Reporter derives the verdict
+above from `sprint-context.md`'s `## Goal Acceptance Check` — the condition recorded and human-
+confirmed at §A.5 — not from its own read of how the sprint went. Per OD-4 this verdict is spoken
+in the Brief only; it is never written into `SPRINT-<#>_REPORT.md`. See `.claude/agents/reporter.md`
+§Goal Acceptance Check for the full instruction.
 
 ### E.3 Step B — surface and HALT
 
