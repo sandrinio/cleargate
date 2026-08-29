@@ -81,3 +81,15 @@
 #   #          the worktree. Requires target to resolve via absolute path (done
 #   #          automatically by provision_worktree_config.sh).
 #   # copy:    copies the file so the worktree can hold a divergent config.
+
+# vcs:
+#   # CR-107: sprint->main merge goes through a GitHub pull request instead
+#   # of a local `git merge`. The PR is opened at the start of the sprint
+#   # walkthrough (Phase D) and merged at Gate 4 close (Phase E), instead of
+#   # close_sprint.mjs verifying a purely local merge commit. Requires the
+#   # `gh` CLI on PATH and a GitHub `origin` remote — close_sprint.mjs's
+#   # Step 2.8 fails closed (non-zero exit, named error, never a silent
+#   # fallthrough to the local merge) if either is missing while this is
+#   # true. Default false: every install without a GitHub remote keeps
+#   # today's local-merge behaviour unchanged.
+#   sprint_pr: false

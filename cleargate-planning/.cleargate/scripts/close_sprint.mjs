@@ -112,6 +112,115 @@ const REPO_ROOT = process.env.CLEARGATE_REPO_ROOT
   : path.resolve(__dirname, '..', '..');
 const SCRIPTS_DIR = __dirname;
 
+/**
+ * CR-107: dependency-free line-scan reader for `vcs.sprint_pr` in
+ * <repoRoot>/.cleargate/config.yml. No YAML parser — close_sprint.mjs
+ * imports none today, and js-yaml lives only in the meta-repo root
+ * node_modules/, which does not exist inside a worktree and does not exist
+ * in a target install. Precedent: pre_gate_common.sh:193 read_provision_config
+ * (awk, "keeps it dependency-light and avoids a full YAML parse").
+ * An absent `vcs:` block, or an absent `sprint_pr` key, means `false`.
+ * @param {string} repoRoot
+ * @returns {boolean}
+ */
+function readVcsSprintPr(repoRoot) {
+  const configPath = path.join(repoRoot, '.cleargate', 'config.yml');
+  let text;
+  try {
+    text = fs.readFileSync(configPath, 'utf8');
+  } catch {
+    return false;
+  }
+  let inVcsBlock = false;
+  let vcsIndent = 0;
+  for (const line of text.split('\n')) {
+    const vcsHeader = /^(\s*)vcs:\s*$/.exec(line);
+    if (vcsHeader) {
+      inVcsBlock = true;
+      vcsIndent = vcsHeader[1].length;
+      continue;
+    }
+    if (!inVcsBlock) continue;
+    if (line.trim() === '') continue;
+    const indentMatch = /^(\s*)/.exec(line);
+    const indent = indentMatch ? indentMatch[1].length : 0;
+    if (indent <= vcsIndent) {
+      inVcsBlock = false;
+      continue;
+    }
+    const kv = /^\s*sprint_pr:\s*(\S+)/.exec(line);
+    if (kv) return kv[1].trim() === 'true';
+  }
+  return false;
+}
+
+/**
+ * CR-107: true if a `gh` binary resolves on PATH. Used as a fail-CLOSED
+ * presence gate for `vcs.sprint_pr: true` — the binary is never invoked for
+ * real work by anything in this file; merge/squash detection below is pure
+ * git plumbing.
+ * @returns {boolean}
+ */
+function isGhOnPath() {
+  try {
+    execSync('command -v gh', { stdio: 'ignore', env: process.env });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * CR-107: true if an `origin` remote is configured in repoRoot.
+ * @param {string} repoRoot
+ * @returns {boolean}
+ */
+function hasOriginRemote(repoRoot) {
+  try {
+    execSync('git remote get-url origin', { stdio: 'ignore', cwd: repoRoot, env: process.env });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * CR-107 F2a: real squash/rebase-merge detection — a genuine probe, not a
+ * hardcoded string. Builds a throwaway commit carrying the sprint branch's
+ * tip TREE on top of the merge-base, then asks `git cherry` whether that
+ * diff is already reachable from mainRef (`git cherry` prefixes an
+ * already-applied patch with `-`). Stays silent (false) on a never-merged
+ * sprint — validated against both a real squash-merge fixture and a
+ * never-merged negative control.
+ * @param {string} sprintBranch
+ * @param {string} mainRef
+ * @param {string} repoRoot
+ * @returns {boolean}
+ */
+function isSquashMerged(sprintBranch, mainRef, repoRoot) {
+  try {
+    const mergeBase = execSync(
+      `git merge-base ${mainRef} ${sprintBranch}`,
+      { encoding: 'utf8', cwd: repoRoot, env: process.env, stdio: ['ignore', 'pipe', 'ignore'] }
+    ).trim();
+    const sprintTree = execSync(
+      `git rev-parse ${sprintBranch}^{tree}`,
+      { encoding: 'utf8', cwd: repoRoot, env: process.env, stdio: ['ignore', 'pipe', 'ignore'] }
+    ).trim();
+    const probe = execSync(
+      `git commit-tree ${sprintTree} -p ${mergeBase} -m probe`,
+      { encoding: 'utf8', cwd: repoRoot, env: process.env, stdio: ['ignore', 'pipe', 'ignore'] }
+    ).trim();
+    const cherryOut = execSync(
+      `git cherry ${mainRef} ${probe}`,
+      { encoding: 'utf8', cwd: repoRoot, env: process.env, stdio: ['ignore', 'pipe', 'ignore'] }
+    );
+    return cherryOut.split('\n').some((line) => line.trim().startsWith('-'));
+  } catch {
+    return false;
+  }
+}
+
 function usage() {
   process.stderr.write(
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
@@ -647,20 +756,48 @@ async function main() {
   // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
   // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
   // On miss: list unmerged commits + exit 1 (always enforced).
-  // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture).
+  // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture) —
+  // UNLESS vcs.sprint_pr is enabled, in which case the fail-CLOSED gh/origin
+  // gate below still runs regardless (CR-107: a vcs-gated refusal must not
+  // be reachable-around via this skip).
   // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
   //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
+  // CR-107: `vcs.sprint_pr` (read from REPO_ROOT/.cleargate/config.yml, no
+  // YAML dependency) gates a merge-via-pull-request path. Fail-CLOSED on an
+  // absent `gh` binary or an absent `origin` remote — never silently fall
+  // through to the local-merge assumption (unlike Step 2.7's `git worktree
+  // list` degradation above, which is intentionally fail-open).
   {
     if (process.env.CLEARGATE_SKIP_MERGE_CHECK === '1') {
       process.stdout.write('Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam).\n');
     } else {
+      // vcs.sprint_pr fail-CLOSED gate — placed BEFORE the sprintNumMatch
+      // test so a non-numeric sprint-id cannot bypass it.
+      const vcsSprintPr = readVcsSprintPr(REPO_ROOT);
+      if (vcsSprintPr) {
+        if (!isGhOnPath()) {
+          process.stderr.write(
+            `Step 2.8 failed: vcs.sprint_pr is enabled but the gh CLI is not on PATH.\n` +
+            `  Install the GitHub CLI (https://cli.github.com), or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
+          );
+          process.exit(1);
+        }
+        if (!hasOriginRemote(REPO_ROOT)) {
+          process.stderr.write(
+            `Step 2.8 failed: vcs.sprint_pr is enabled but no 'origin' remote is configured.\n` +
+            `  Add a GitHub 'origin' remote, or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
+          );
+          process.exit(1);
+        }
+      }
+
       const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
       if (!sprintNumMatch) {
         process.stdout.write(`Step 2.8 skipped: sprint-id "${sprintId}" has no numeric portion.\n`);
       } else {
         const sprintBranch = `refs/heads/sprint/S-${sprintNumMatch[1]}`;
-        const mainBranch = 'refs/heads/main';
-        process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainBranch}...\n`);
+        let mainRef = 'refs/heads/main';
+        process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainRef}...\n`);
 
         // Step 2.8 always enforced (STORY-070-01: execution_mode retired).
         const forcedStatus = process.env.CLEARGATE_FORCE_MERGE_STATUS;
@@ -674,7 +811,7 @@ async function main() {
         } else {
           try {
             execSync(
-              `git merge-base --is-ancestor ${sprintBranch} ${mainBranch}`,
+              `git merge-base --is-ancestor ${sprintBranch} ${mainRef}`,
               { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
             );
             isMerged = true;
@@ -682,6 +819,27 @@ async function main() {
             const exitStatus = /** @type {any} */ (mergeErr).status;
             if (exitStatus === 1) {
               isMerged = false;
+              // CR-107 F2b: local refs/heads/main goes stale after a PR is
+              // merged on GitHub, until the human pulls. Fall back to
+              // refs/remotes/origin/main — ONLY as a fallback, never a
+              // replacement — and only when vcs.sprint_pr is enabled, so
+              // the vcs.sprint_pr:false path stays byte-identical to today.
+              if (vcsSprintPr && hasOriginRemote(REPO_ROOT)) {
+                const originRef = 'refs/remotes/origin/main';
+                try {
+                  execSync(
+                    `git merge-base --is-ancestor ${sprintBranch} ${originRef}`,
+                    { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
+                  );
+                  isMerged = true;
+                  mainRef = originRef;
+                } catch {
+                  // Still not merged (or origin/main unresolvable). The
+                  // local check already established a verdict, so this
+                  // fallback never triggers the git-unavailable fail-open
+                  // below — it can only confirm a merge, not un-confirm one.
+                }
+              }
             } else {
               // exit 128: refs missing or other git failure — fail-open with warning
               mergeCheckAvailable = false;
@@ -696,21 +854,35 @@ async function main() {
         if (!mergeCheckAvailable) {
           // fail-open: refs missing or git unavailable — continue to Step 3
         } else if (isMerged) {
-          process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainBranch}.\n`);
+          process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainRef}.\n`);
         } else {
           // Always enforced (STORY-070-01: execution_mode retired)
           let unmergedLog = '';
           if (!forcedStatus) {
             try {
               unmergedLog = execSync(
-                `git log ${mainBranch}..${sprintBranch} --oneline`,
+                `git log ${mainRef}..${sprintBranch} --oneline`,
                 { encoding: 'utf8', cwd: REPO_ROOT, env: process.env }
               );
             } catch { /* unmerged-log fetch failed — proceed without */ }
           }
+          // CR-107 F2a: squash/rebase merges leave no merge commit, so
+          // --is-ancestor correctly (if unhelpfully) reports "not merged"
+          // for a sprint that WAS merged that way. Name it explicitly via a
+          // real probe, never a static string — and only when vcs.sprint_pr
+          // is enabled and no forced status short-circuited the real check.
+          let squashNote = '';
+          if (vcsSprintPr && !forcedStatus && isSquashMerged(sprintBranch, mainRef, REPO_ROOT)) {
+            squashNote =
+              `  This sprint looks squash- or rebase-merged: its changes are already reachable from ` +
+              `${mainRef}, but no merge commit makes ${sprintBranch} an ancestor. Squash and rebase ` +
+              `merge strategies are unsupported when vcs.sprint_pr is enabled — merge the pull request ` +
+              `with a merge commit instead (gh pr merge --merge).\n`;
+          }
           process.stderr.write(
             `Step 2.8 failed: sprint/S-${sprintNumMatch[1]} not merged to main.\n` +
             (unmergedLog ? `  Unmerged commits:\n${unmergedLog}` : '') +
+            squashNote +
             `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
           );
           process.exit(1);
