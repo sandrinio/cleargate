@@ -143,3 +143,183 @@ BUG-044 post-flight Group C) are **not** touched — that file is QA-Red-owned a
 None. All verification was direct `node --test` / `node --check` / manual `node <script>` invocations
 in this worktree and in `/tmp/cr106-*` scratch sprint directories; no `run_script.sh`-wrapped script was
 invoked.
+
+## Round 2 (arch bounce — fold-drift floor)
+
+role: developer · round 2 · SPRINT-39 · wave 11 · M4 · CR-106
+
+**Base:** `d6edc45d`. **New commit:** see report header at close of this session (single amendment
+commit on `story/CR-106`, no push, no merge, no `--no-verify`, no `dist/` rebuild).
+
+### The fix, verbatim
+
+`update_state.mjs` now imports `checkFoldDrift` from `validate_state.mjs` (already exported at
+`:146`, previously dead — its only caller was that module's own CLI guard) and calls it immediately
+after the closed-sprint check, before any migration, genesis synthesis, or append:
+
+```js
+const drift = checkFoldDrift(stateFile);
+if (!drift.skipped && !drift.valid) {
+  for (const e of drift.errors) process.stderr.write(`Error: ${e}\n`);
+  process.stderr.write(
+    `Refusing to fold: delete ${eventsFile} to re-synthesize genesis from state.json.\n`
+  );
+  process.exit(1);
+}
+```
+
+`checkFoldDrift` itself was not touched (it already existed, byte-for-byte, from round 1). Its
+`fs.existsSync(eventsFile)` skip gate is what satisfies requirement 1 (never fires on the genesis
+path) for free — no separate genesis-detection logic was added at the call site. Requirement 2
+(coverage, not equality) holds by construction of where I placed the call: it runs BEFORE this
+invocation's own genesis synthesis and BEFORE its own action append, so it is comparing the
+document as the PREVIOUS invocation left it (state.json) against fold() of the log as the PREVIOUS
+invocation left it (events.jsonl) — two artifacts that a correct prior run always leaves
+byte-identical (fold is deterministic, case 2). A byte-equality check at that specific checkpoint is
+therefore never tripped by "a legitimate transition changes fields" — the transition about to
+happen hasn't been folded into either side yet. It only fires when the pair was already
+inconsistent before this invocation touched anything, which is exactly the missing-stories case: a
+truncated or stale `events.jsonl` folds to fewer stories than the `state.json` beside it, byte
+equality catches that as a strict special case of "does not cover," and refuses.
+
+Total diff: one import-line addition, one 15-line guard block. No other file changed except the
+`cleargate-planning/` mirror (byte-identical, confirmed via `diff`) and the CR item's own Task
+Breakdown checkboxes (see below). `validate_state.mjs`, `state-events.mjs`, `init_sprint.mjs`,
+`state.schema.json`, `constants.mjs`, and `state-scripts.test.mjs` are all untouched — confirmed via
+`git diff --stat`, all empty except the two `update_state.mjs` copies.
+
+### Requirement 1 — does not fire on genesis
+
+Verified by direct repro, not by inspection alone. A byte-copy of the live
+`.cleargate/sprint-runs/SPRINT-39/state.json` (18 stories, `sprint_status: "Active"`,
+`CR-106.state: "Bouncing"`) with **no `events.jsonl` at all** (genesis path) was transitioned three
+times, into three fresh scratch copies each time (a spent genesis dir cannot be re-run as genesis a
+second time, since the first run creates the log):
+
+```
+Run 1: Updated CR-106: state="Done"    exit=0   events.jsonl: 19 lines   diff: 4 changed lines
+Run 2: Updated CR-106: state="Done"    exit=0   events.jsonl: 19 lines   diff: 4 changed lines
+Run 3: Updated CR-106: state="Done"    exit=0   events.jsonl: 19 lines   diff: 4 changed lines
+```
+
+Diff shape, every run, identical to the post-flight's own measured shape — exactly the four fields a
+correct transition should change (per-story `state`, per-story `updated_at`, top-level
+`last_action`, top-level `updated_at`):
+
+```
+139c139
+<       "state": "Bouncing",
+---
+>       "state": "Done",
+143c143
+<       "updated_at": "2026-08-29T13:24:30.319Z",
+---
+>       "updated_at": "2026-08-29T13:29:16.442Z",
+223,224c223,224
+<   "last_action": "arch-bounce CR-106: arch_bounces=1",
+<   "updated_at": "2026-08-29T13:24:30.319Z"
+---
+>   "last_action": "transition CR-106 → Done",
+>   "updated_at": "2026-08-29T13:29:16.442Z"
+```
+
+(`last_action` reads `"arch-bounce CR-106..."` pre-transition rather than the post-flight's
+`"transition CR-107 → Bouncing"` because the live sprint file has moved on between the post-flight's
+review and this round-2 fix — the orchestrator's own arch-bounce of CR-106 landed in between. The
+shape of the diff — four fields, nothing else — is what's being verified, and it is identical.)
+
+### Requirement 2 — refuses on drift, never deletes
+
+Same live-file byte-copy, this time with a **zero-byte `events.jsonl`** placed beside it (the
+post-flight's exact repro), run three times against the same seed (state never advances on refusal,
+so re-running the identical seed is valid — unlike the genesis case above):
+
+```
+Run 1: Error: state.json content differs from fold(events.jsonl) -- the derived cache has drifted
+       from the event log (a hand-edit, or a write that bypassed update_state.mjs); the log at
+       <scratch>/events.jsonl is the source of truth, re-run any update_state.mjs invocation to
+       re-fold it
+       Refusing to fold: delete <scratch>/events.jsonl to re-synthesize genesis from state.json.
+       exit=1   stories on disk after: 18
+Run 2: identical message, exit=1, stories on disk after: 18
+Run 3: identical message, exit=1, stories on disk after: 18
+```
+
+No stray `.tmp.<pid>` or `.lock` file left behind after any of the three runs (`ls` on the scratch
+dir shows only `state.json` + `events.jsonl`, both unchanged in byte count) — the lock's
+`process.on('exit')` release fires cleanly on `process.exit(1)`, as it did before this change.
+
+**Regression-proof by stash, not by prediction** (mandatory for non-trivial logic, per the dev
+skill). `git stash push --include-untracked -- .cleargate/scripts/update_state.mjs` reverted the
+file to `d6edc45d`'s state (confirmed: `grep checkFoldDrift update_state.mjs` → 0 hits), then the
+exact same zero-byte-log repro was re-run against a fresh scratch copy of the same 18-story seed:
+
+```
+Updated CR-106: state="Done"    exit=0    stories on disk after: 1
+```
+
+Reproduces the post-flight's finding exactly — 17 of 18 stories silently deleted, exit 0, no
+stderr. `git stash pop` restored the fix; `diff .cleargate/scripts/update_state.mjs
+cleargate-planning/.cleargate/scripts/update_state.mjs` confirmed empty (parity intact) and
+`node --check` passed on both files after the restore.
+
+### Full suite, three runs (plus a fourth post-restore confirmation)
+
+`node --test .cleargate/scripts/state-scripts.test.mjs`, all four runs `tests 31 · suites 22 ·
+pass 31 · fail 0 · skipped 0`:
+
+| Run | wall-clock |
+|---|---|
+| 1 | 16.4s |
+| 2 | 17.6s |
+| 3 | 17.5s |
+| 4 (post stash-pop restore) | 17.4s |
+
+Stable at ~16.4-17.6s, matching my own round-1 range (16.0-16.8s) and the post-flight's independent
+21s measurement (both well above the sub-6s disarm tell) — the barrier is armed, the new drift check
+adds one `readEvents` + one `fold` + one string comparison to the hot path per invocation, which is
+consistent with the small additional per-run cost. No test file was modified (forbidden surface,
+QA-Red-owned); the acceptance case the post-flight suggested ("seed a valid multi-story state.json,
+truncate events.jsonl to zero bytes, assert exit 1 and state.json unchanged") was NOT added here —
+it belongs to a future QA-Red pass, not to this dev round, per `## Forbidden Surfaces` and the
+dispatch's explicit "Do not modify any test."
+
+### Eviction greps — re-confirmed unaffected
+
+```
+command grep -n "readFileSync.*stateFile" .cleargate/scripts/update_state.mjs   # 0 hits (unchanged)
+command grep -n "atomicWrite(stateFile" .cleargate/scripts/update_state.mjs     # 1 hit, :443 (was :428; +15 lines from the new guard)
+```
+
+### Task Breakdown
+
+All nine rows in the CR item's `## Task Breakdown` were still `- [ ]` going into this round (round 1
+never ticked them, though every underlying task was demonstrably complete — the round-1 report and
+the post-flight both document each one done). Per the box-ticking-actor contract, I ticked all nine
+in this round's commit, since I am the developer landing on this branch and no other agent will tick
+them. Two rows got a one-sentence annotation rather than a bare checkmark:
+
+- Row 1 ("...is 12/12/0") — the literal number in the row is stale; the item's own
+  `§ PRECONDITION` section (authored well before this round) already corrects it to 15/13/0. Ticked,
+  annotated, not silently checked against a number that was never true.
+- Row 5 (fold-vs-file drift check) — landed round 1 as an exported-but-uncalled helper; this round
+  is what wires it into the write path and makes it load-bearing, per the post-flight's own framing
+  ("makes an existing helper load-bearing"). Annotated to reflect the two-round history rather than
+  implying it was fully done in round 1.
+
+### Out of scope, confirmed untouched
+
+Per the dispatch's explicit "Do not fix these" list: `close_sprint.mjs` (CR-107's surface this same
+wave), the retained-lock span/contention story (EPIC-055's problem), the eviction-grep-1
+rename-vs-eviction distinction, `events.jsonl` gitignore/whitelist status, the `wave` field, and the
+`actor: 'migration'` genesis-vs-adoption distinction. None of these files or behaviors were touched.
+`git diff --stat` against `d6edc45d` shows exactly three files: the two `update_state.mjs` copies and
+the CR item's own markdown (Task Breakdown ticks + the gate-check hook's automatic frontmatter
+re-stamp, triggered by editing a `pending-sync/` file — not authored by me). An unrelated full
+`cleargate wiki` re-ingest was triggered as a side effect of that same edit (pulling in several
+wholly unrelated pending items into `wiki/index.md`); I reverted those four wiki files
+(`git checkout --`) before committing, since they were out of this round's scope and not requested.
+
+### flashcards_flagged (round 2)
+
+- `2026-08-29 · #event-log #danger #load-bearing · An exported-but-uncalled safety check (checkFoldDrift) is not a safety check -- wire it into the write path in the SAME commit that exports it, or it protects nothing until someone remembers.`

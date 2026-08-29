@@ -594,3 +594,206 @@ state-mutating git command was run: no commit, no merge, no branch switch, no wo
 `cleargate init`, no `dist/` rebuild, and **`close_sprint.mjs` was not run**. The one artefact I
 created inside the worktree (a scratch `S-77` sprint dir from an `init_sprint.mjs` probe) was
 removed; `git -C .worktrees/CR-106 status --porcelain` is empty.
+
+---
+
+## Round 2 (scoped re-check)
+
+role: architect · Mode: POST-FLIGHT round 2 · SPRINT-39 · wave 11 · M4 · CR-106
+Commit under review: `c84a0958` on `story/CR-106`, worktree `.worktrees/CR-106`, base `d6edc45d`.
+Scope: the three questions in the dispatch. Round-1 findings were not re-derived.
+
+### VERDICT: **PASS**
+
+The kick-back defect is closed, and it is closed on the route I actually named — not only on the
+degenerate zero-byte case QA reproduced. Measured below, four probes, all against byte-copies in the
+session scratchpad. **The live `.cleargate/sprint-runs/SPRINT-39/state.json` was never touched** (it
+still has 18 stories and still has no `events.jsonl`).
+
+---
+
+### Check 1 — STALE log, not just EMPTY: **covered, measured**
+
+The reason it is covered is worth stating precisely, because it is stronger than what I asked for.
+`checkFoldDrift` (`validate_state.mjs:146-181`) is **byte-equality**, not a coverage floor:
+
+```js
+const foldedBytes = `${JSON.stringify(fold(events), null, 2)}\n`;
+if (foldedBytes !== onDiskBytes) { /* invalid */ }
+```
+
+A coverage floor ("the folded story set must still cover the set on disk") is a strict subset of
+byte-equality. So a log that folds to *any* document differing from the cache — fewer stories, same
+stories with older values, different `last_action` — is refused. It cannot fold through and drop
+stories, because dropping a story is a byte difference by construction. The Developer wired the
+existing stronger helper rather than writing my weaker one; that is the better outcome.
+
+Probes (fixed script, `CLEARGATE_STATE_FILE` pointed at scratch). Seed for all four: a byte-copy of
+the live 18-story `state.json`, run once through the genesis path to produce a **consistent pair**
+(`state.json` 18 stories / `events.jsonl` 19 lines).
+
+| Probe | Log condition | Transition | Result |
+|---|---|---|---|
+| **A** — subset | 5 genesis events deleted → 14 lines, **valid JSONL, non-empty, plausible**, folds to **13** stories | `CR-110 Bouncing` | **exit 1**, refused. `state.json` sha256 unchanged, **18 stories intact**. No `.lock`, no `.tmp`. |
+| **B** — revert simulation | consistent pair, then `state.json` advanced by an out-of-log writer (`CR-110 → Bouncing` + `last_action` + both `updated_at`, written in fold's own format); log left stale at 19 lines | `CR-111 Bouncing` | **exit 1**, refused. Unchanged, 18 intact, no stray files. |
+| **C** — control | untouched consistent pair | `CR-111 Bouncing` | **exit 0**, succeeded. 18 stories, log 19 → 20. No false positive on a real field-changing transition. |
+| **D** — valid prefix | last event truncated → 18 lines, all 18 stories present, log is a legal prefix | `CR-111 Bouncing` | **exit 1**, refused. Unchanged, 18 intact. |
+
+**Probe B is the exact route from round 1** — `git revert -m 1` leaves a live, non-empty,
+no-longer-updated `events.jsonl` while the old writer resumes mutating `state.json`; the skew appears
+on re-merge. It refuses. The pre-fix behaviour on this same shape was exit 0 and seventeen stories
+deleted.
+
+**The advised remediation actually recovers — verified, not assumed.** Applying the error's own
+instruction to probe B (`rm events.jsonl`, then re-run):
+
+```
+Updated CR-111: state="Bouncing"   exit=0
+stories: 18 · CR-110.state: "Bouncing" (the out-of-log writer's advance SURVIVED) · log: 19 lines
+```
+
+Genesis re-synthesises from the cache, the out-of-log advance is preserved, and the pair is
+consistent again. The revert → re-merge sequence now has a working, one-command recovery.
+
+**Two bounded observations, neither blocking, neither on the do-not-reopen list.**
+
+1. **The two stderr lines contradict each other.** Line 1: *"the log … is the source of truth."*
+   Line 2: *"delete `events.jsonl` to re-synthesize genesis from `state.json`."* The only recovery
+   shipped discards the log and keeps the cache. There is no "re-fold from the log" command —
+   `update_state.mjs` refuses and `validate_state.mjs` only reports. In practice, therefore, **the
+   cache wins on divergence**, which is the safe direction (it never loses stories) but is the
+   opposite of what line 1 claims. Fix the prose, not the behaviour.
+2. **The check runs before migration** (`:313`, migrations at `:325`/`:330`), so it compares raw
+   on-disk bytes. A pre-v3 `state.json` beside a v3-folded `events.jsonl` therefore refuses —
+   confirmed by probe E (`schema_version: 2` + `execution_mode` beside the seed log → exit 1). That
+   pair is unreachable from first-party code (the old writer never creates a log; the new writer
+   always writes a v3 fold), needs a checkout skew to produce, and the delete-the-log remediation
+   clears it. Noted for whoever owns the check next; not a defect in this commit.
+
+### Check 2 — the new in-lock exit site: **structurally safe**
+
+Code read, per the dispatch. The release is **registered at acquire time, not per exit site**:
+
+- `acquireLock` (`update_state.mjs:107-170`) creates the lockfile with `openSync(lockPath,'wx')`,
+  writes the payload, then registers `process.on('exit', () => unlinkSync(lockPath))` at **`:163-169`**
+  before returning. Called once, at **`:274`**.
+- The new guard is at **`:313-320`**, exit at **`:319`** — textually and dynamically *after* `:274`,
+  inside the same synchronous `main()` body (`:251-446`, called unconditionally at `:448` with no
+  wrapping try/catch).
+- `process.on('exit')` fires on `process.exit(n)` (which is why BUG-044 chose it over `finally` —
+  `finally` is skipped by `process.exit`), on natural return from `main()`, and after an uncaught
+  throw. There is no code path from `:274` to process termination that bypasses it.
+
+The property that matters is that coverage is **dominated by the registration site, not enumerated
+per exit site**. Every post-acquire exit is covered — `:277, :285, :293, :304, :319 (new), :337,
+:342, :364, :379, :389, :402, :420, :428` plus the fall-through at `:445-446` and any throw from
+`checkFoldDrift`/`appendEvent`/`fold`/`atomicWrite`. That is exactly the shape BUG-044's M6/T1
+finding wanted: adding an in-lock exit site cannot leak a lock here, because no site is responsible
+for release. The two pre-acquire exits (`:183` usage, `:263` state.json-not-found) are correctly
+uncovered — no lockfile exists yet.
+
+Empirically consistent: probes A, B and D each left **no `.lock` and no `.tmp.<pid>`** in the scratch
+dir, including on a repeat refusal against the same seed.
+
+One residual, **pre-existing at `a9304776` and not introduced by this commit**: a throw from
+`writeSync`/`closeSync` in the two-syscall window between lockfile creation (`:115`) and handler
+registration (`:163`) would leak. Self-healing via the stale-holder steal (`isPidAlive` → dead pid →
+`unlinkSync`, `:135-143`). Not this CR's, not re-opened here.
+
+### Check 3 — N7, corrected delta only
+
+The hunk inserts **15 lines after old `:306`** (6 comment + 9 code), plus one in-place import
+rewrite at `:49` that shifts nothing. Therefore, measured against `d6edc45d`:
+
+> **`update_state.mjs`: every line ≥ 307 shifts +15. Lines ≤ 306 are unchanged. File 433 → 448.**
+> **`state-events.mjs` (298), `validate_state.mjs` (252), `init_sprint.mjs` (327): zero diff between
+> `d6edc45d` and `c84a0958` — every round-1 citation into those three files is FINAL.**
+
+Verified by reading each corrected anchor, not by arithmetic alone.
+
+### Disturbance check on the round-1 obligations (confirmed untouched, not re-audited)
+
+`git diff --stat d6edc45d c84a0958` is exactly three files: the two `update_state.mjs` copies
+(+17/-0 each) and the CR item's own markdown. Individually confirmed **UNTOUCHED**:
+`state-events.mjs`, `validate_state.mjs`, `init_sprint.mjs`, `close_sprint.mjs`,
+`state-scripts.test.mjs`, `state.schema.json`, `constants.mjs`, `surface-whitelist.txt`.
+Spot-confirmed still in their round-1 condition, no re-audit: lock span unchanged · eviction grep 1
+still 0 hits (rename, not eviction) · `events.jsonl` in neither `.gitignore` nor
+`surface-whitelist.txt` · `wave: null` still hardcoded, 1 site · genesis `actor: 'migration'` at
+`state-events.mjs:158`.
+
+Two-tree parity: `diff` empty for all four scripts. Independent suite run:
+**`tests 31 · suites 22 · pass 31 · fail 0 · skipped 0`, wall-clock 17s** — barrier armed (the
+T4 canary still proves the lost-update race in 792ms).
+
+---
+
+## STALE_CITATIONS — round 2 (corrected delta only)
+
+Everything not listed here is **FINAL** as of round 1. The only mover is `update_state.mjs`, +15 at
+lines ≥ 307.
+
+### Now stale a third time — re-anchor these
+
+| Location | Round-1 correction | Round-2 correction |
+|---|---|---|
+| `CR-106…:114-117` (BUG-044 re-anchor row) | `update_state.mjs:310-312` | **`:325-327`** |
+| `CR-106…:120-123` (re-anchor row) | `:315` | **`:330`** |
+| `CR-106…:187-189` (re-anchor row) | `:376-377` | **`:391-392`** (`state-events.mjs:236` FINAL) |
+| `CR-106…:204-206` (re-anchor row) | `:389-390` | **`:404-405`** (`state-events.mjs:243` FINAL) |
+| `CR-106…:227-229` (re-anchor row) | `:408-421`, exit `:413` | **`:423-436`**, exit **`:428`** |
+| `CR-106…:246` (re-anchor row) | `:251` / `:433` | `:251` FINAL / **`:448`** |
+| `CR-106…:239` | `:310-312` / `:315` | **`:325-327`** / **`:330`** |
+| `plans/M4.md:602` | `:413` | **`:428`** |
+| `plans/M4.md:1027` | `:310-312` | **`:325-327`** |
+| `plans/M4.md:1120` | `:408-421` | **`:423-436`** |
+| `plans/M4.md:1125` | `:376-377` / `:389-390` | **`:391-392`** / **`:404-405`** |
+| `plans/M4.md:2816` (`process.exit` sites) | fourteen: `:183,:263,:277,:285,:293,:304,:322,:327,:349,:364,:374,:387,:405,:413` | **fifteen: `:183, :263, :277, :285, :293, :304, :319, :337, :342, :364, :379, :389, :402, :420, :428`** |
+| `CR-085…:90, :122` | `:397-421`, `VALID_STATES` at `:401-406` | **`:412-436`**, `VALID_STATES` at **`:416-421`** |
+| My own round-1 §1 decision-path table | `:325`, `:372`, `:376`, `:385`, `:389`, `:410` | **`:340`, `:387`, `:391`, `:400`, `:404`, `:425`** (`:237-238` FINAL) |
+| My own round-1 §3 post-acquire exit list | as above | as the fifteen-site row above |
+| Dev round-1 report N7 rows citing `update_state.mjs ≥307` | — | apply **+15**; eviction grep 2 is now **`:443`** |
+
+### One addition, not a correction
+
+| Location | Round-1 | Round-2 |
+|---|---|---|
+| `plans/M4.md:1079` | `checkFoldDrift` at `validate_state.mjs:146` — **one caller** (its own CLI) | **two callers**: add `update_state.mjs:313`. The helper is now load-bearing on the write path; the round-1 note that it "protects nothing" is discharged. |
+
+### Treat as FINAL — do not re-anchor again
+
+- **All seven `init_sprint.mjs` GATING WAVE 12 rows** (`plans/M4.md:1652, :1752, :1754, :1782, :1784,
+  :1786, :1795-1812`) — `init_sprint.mjs` has a zero diff this round. The `+14` corrections stand;
+  CR-110 can be dispatched against them.
+- Every citation resolving into `state-events.mjs` (`:90-94, :91-93, :92, :158, :236, :238, :243,
+  :245, :252, :262, :269-270, :271, :291`) — file untouched.
+- Every citation resolving into `validate_state.mjs` (`:43, :55-57, :114, :146`) — file untouched.
+- Every `update_state.mjs` citation at ≤ 306: `:193-207` (`migrateV1ToV2`), `:209-215` + throw `:212`
+  (BUG-039), `:223` (`readStateDocument`), `:237-238` (`baseEventFields`), `:251` (`function main`),
+  `:257` (`args[1]`), `:274` (`acquireLock`).
+- Every `delete` verdict from round 1 (`plans/M4.md:201, :604, :1073, :1131, :2220, :2869, :188-226`;
+  `CR-106…:244`) — still deleted.
+- The archive/knowledge `init_sprint.mjs` `+14` block and the FLASHCARD.md section — untouched.
+- `sprint-context.md`, `.claude/agents/**`, `.claude/skills/**` — still no line citations into any of
+  the four scripts.
+
+---
+
+## FLASHCARDS_PROPOSED — round 2
+
+Not written by me. None duplicates my round-1 five, TPV's four, the Developer's three, or QA's two.
+
+- `2026-08-29 · #event-log #recovery #danger · If the only shipped recovery from cache-vs-log divergence is "delete the log", the CACHE is the source of truth in practice — whatever the error message claims. Ship a re-fold-from-log path, or stop saying the log wins.`
+- `2026-08-29 · #review #floor-check · When you spec a coverage floor ("folded set must cover the set on disk"), check for an existing EQUALITY helper first — byte-equality strictly subsumes coverage, and wiring a dead helper beats writing a weaker new one.`
+- `2026-08-29 · #lock #danger · A lock whose release is registered ONCE at acquire (process.on('exit')) is safe to add new in-lock exit sites to; one whose release is per-exit-site is not. Check which kind you have BEFORE adding an early return inside a critical section.`
+
+---
+
+## Script Incidents — round 2
+
+None. Every command was a read (`sed`/`awk`/`grep`/`git diff --stat`/`git show`), a `node --test`
+run, or a `node update_state.mjs` invocation against **byte-copies** in the session scratchpad. No
+state-mutating git command: no commit, no merge, no branch switch, no worktree removal, no revert, no
+clone, no `cleargate init`, no `dist/` rebuild, and **`close_sprint.mjs` was not run**. The live
+`.cleargate/sprint-runs/SPRINT-39/state.json` was read once and never written;
+`git -C .worktrees/CR-106 status --porcelain` is empty.

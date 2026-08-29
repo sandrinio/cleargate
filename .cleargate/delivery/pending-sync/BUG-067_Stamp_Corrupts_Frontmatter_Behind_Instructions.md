@@ -124,8 +124,36 @@ templates across two trees**, so its checklist lists them; the hazard is recorde
 
 **Blast radius, measured.** Exactly one production caller: `src/commands/stamp.ts`, two call sites
 (the `--dry-run` tmpdir copy, and the real file). No other `src/` module imports `stampFrontmatter`.
-The PostToolUse hook (`stamp-and-gate.sh:30`) runs **`stamp-tokens`**, a different command, so there
-is **no automatic trigger** — this fires only when a human or agent runs `cleargate stamp` by hand.
+**CORRECTION (2026-08-30, CR-108 architect post-flight) — an earlier draft of this section claimed
+there is "no automatic trigger". That is FALSE, and it understated this bug by the widest possible
+margin.**
+
+The original reasoning stopped at the command name: the PostToolUse hook (`stamp-and-gate.sh:30`)
+runs `stamp-tokens`, not `stamp`, so it was assumed safe. But **`stamp-tokens.ts:92` carries the
+identical sniff** — `rawContent.trimStart().startsWith('---')` — and the hook runs it on **every**
+Write/Edit under `.cleargate/delivery/**`. Verified directly: `stamp-and-gate.sh:30` is
+`"${CG[@]}" stamp-tokens "$FILE"`, and `stamp-tokens.ts:92` is byte-for-byte the same check as
+`stamp-frontmatter.ts:54`.
+
+Reproduced end-to-end against a real scaffolded item:
+
+```
+$ cleargate stamp-tokens BUG-001_scaffold_probe.md
+[stamped] … (BUG-001)          exit 0
+$ # frontmatter afterwards:
+keys:           stamp_error, draft_tokens
+bug_id visible: GONE — demoted to body text
+```
+
+**So the trigger is automatic, silent, and already wired.** The defect is therefore two functions in
+two commands, one of which fires on every qualifying file edit without anyone invoking it. The
+`hotfix` type has been exposed this way since v0.24.2; [[CR-108]] takes it from one type to eight and
+points every install's `CLAUDE.md` at the front door.
+
+This correction does not change [[CR-108]]'s merge decision — the defect is pre-existing
+(`stamp-tokens.ts` untouched since v0.24.2) and CR-108 neither creates nor touches either sniff. It
+changes this bug's **severity and urgency**: there is no "only if someone runs it by hand" mitigation
+to rely on.
 
 **Corpus census, 523 files** across `pending-sync/`, `archive/` and both template trees:
 
@@ -144,6 +172,10 @@ every item authored thereafter. **That is the argument for fixing this early, no
 
 **Investigate / modify:**
 - `cleargate-cli/src/lib/stamp-frontmatter.ts` — `:54`, the `hasFrontmatter` positional check.
+- `cleargate-cli/src/commands/stamp-tokens.ts` — **`:92`, the identical sniff, and the one that is
+  hook-wired.** Both must move together; fixing only `stamp-frontmatter.ts` leaves the automatic
+  path intact and would read as fixed.
+- `.claude/hooks/stamp-and-gate.sh` — `:30`, the automatic trigger.
 - `cleargate-cli/test/lib/stamp-frontmatter.node.test.ts` — regression coverage.
 - `.cleargate/scripts/prep_doc_refresh.mjs` — `:160/:165/:170/:175`, the checklist that instructs
   the corrupting command; should not emit a `stamp` instruction for `<instructions>`-led files.

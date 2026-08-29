@@ -293,3 +293,204 @@ Breakdown checkboxes were never ticked — cosmetic, does not affect the shipped
 ## flashcards_flagged
 
 - "2026-08-29 · #test-harness #reuse · 'Exactly one atomicWrite copy left' must be scoped to the write-path a CR touches -- 5 unrelated scripts each keep their own private atomicWrite, correctly out of scope."
+
+---
+
+## Round 2 — verifying the arch post-flight fix
+
+role: qa · SPRINT-39 · wave 11 · M4 · Mode: VERIFY (round 2, post arch-bounce) · CR-106
+
+Worktree `.worktrees/CR-106`, branch `story/CR-106`. Base of this round: `d6edc45d` (my own round-1
+PASS). New commit: `c84a0958`. Scope: the fix and its blast radius only — the fifteen round-1
+constraints were not re-derived, only checked for disturbance.
+
+## QA: PASS
+
+## The diff, confirmed minimal
+
+`git diff --stat d6edc45d c84a0958` (in the worktree): exactly three files — the two
+`update_state.mjs` copies (outer + `cleargate-planning/` mirror, +17/-0 each) and the CR item's own
+markdown (Task Breakdown ticks + an automatic gate-check frontmatter re-stamp, not hand-authored).
+`git diff --stat` on each of `state.schema.json`, `constants.mjs`, `state-scripts.test.mjs`,
+`validate_state.mjs`, `state-events.mjs`, `init_sprint.mjs` individually between the two commits →
+**all six empty**. `checkFoldDrift` itself is untouched — it existed byte-for-byte since round 1; the
+only change is one new import + a 15-line guard block in `update_state.mjs`, placed at `:307-320`,
+immediately after the closed-sprint check (`:300-305`) and before migration/genesis/append.
+
+## Requirement 1 — reproduced the refusal myself, in scratch, never against the real sprint file
+
+Copied the live `.cleargate/sprint-runs/SPRINT-39/state.json` (verified 18 stories) to a session
+scratchpad dir, placed a zero-byte `events.jsonl` beside it, ran the fixed script:
+
+```
+$ CLEARGATE_STATE_FILE=<scratch>/state.json node .cleargate/scripts/update_state.mjs CR-106 Done
+exit=1
+stderr: Error: state.json content differs from fold(events.jsonl) -- the derived cache has drifted
+        from the event log (a hand-edit, or a write that bypassed update_state.mjs); the log at
+        <scratch>/events.jsonl is the source of truth, re-run any update_state.mjs invocation to
+        re-fold it
+        Refusing to fold: delete <scratch>/events.jsonl to re-synthesize genesis from state.json.
+```
+
+Non-zero exit, named stderr error, `state.json` byte-diffed against the original — **identical, all
+18 stories intact.** No `.lock` or `.tmp.<pid>` file left in the scratch dir. Re-ran the same refusal
+a second time on the same seed — same result, no accumulated lock.
+
+## Requirement 2 — not a bare throw
+
+Inspected the captured stderr bytes directly (not just eyeballed): `'\n    at '` (the E5 stack-frame
+tell) is **absent** from the stderr stream, both greppped and via a byte-level Python check. Two
+clean `Error: ...` / `Refusing to fold: ...` lines, nothing else. Controlled `stderr.write` +
+`process.exit(1)`, confirmed, not inferred from the source read alone.
+
+## Requirement 3 — load-bearing, independently re-derived (not trusted from the Developer's stash)
+
+Built my own pre-fix copy of `update_state.mjs` (`git show d6edc45d:.cleargate/scripts/update_state.mjs`
+into a scratch copy of the scripts dir — confirmed zero `checkFoldDrift` references), ran it against a
+**fresh copy of the same 18-story seed** with the same zero-byte `events.jsonl`:
+
+```
+$ node <scratch-scripts-prefix>/update_state.mjs CR-106 Done   # CLEARGATE_STATE_FILE=<fresh-copy>
+Updated CR-106: state="Done"
+exit=0
+```
+
+Story count after: **1**. The survivor's `lane`/`lane_assigned_by`/`lane_demoted_at`/
+`lane_demotion_reason` fields are gone (checked the actual JSON, not just the count). This is an
+independent reproduction, not a re-statement of the Developer's number — same seed, my own
+pre-fix binary, my own scratch dir. **The check is load-bearing.**
+
+## Requirement 4 — genesis path unaffected
+
+Fresh scratch copy of the live seed, **no `events.jsonl` at all**, ran the fixed script:
+
+```
+exit=0, stdout: Updated CR-106: state="Done"
+events.jsonl: 19 lines (18 genesis + 1 action)
+stories after: 18
+```
+
+Diff against the pre-existing original — exactly the same 4-line shape the post-flight and the
+Developer both measured (per-story `state`, per-story `updated_at`, top-level `last_action`,
+top-level `updated_at`). Confirmed: the new check never fires on this path (its own
+`existsSync(eventsFile)` skip gate).
+
+## Requirement 5 — floor is coverage, not equality (tested the claim, not just read it)
+
+Against the now-consistent pair produced by the genesis run above:
+
+1. `CR-108 → Bouncing` (already in that state) → clean no-op, exit 0, `events.jsonl` unchanged at 19
+   lines (idempotency path, not the drift path).
+2. `CR-110 → Bouncing` (real transition, `Ready to Bounce → Bouncing`) → **succeeded**, exit 0,
+   `events.jsonl` grew 19 → 20, all 18 stories retained, `CR-110.state === "Bouncing"` on disk.
+
+A real, field-changing transition against a consistent pair is never refused. This directly tests
+the Developer's placement argument (compares a previously-consistent pair, before this invocation's
+own writes) rather than accepting the argument on prose alone.
+
+## Full suite — 3 independent runs, wall-clock
+
+`node --test .cleargate/scripts/state-scripts.test.mjs`, redirected to log files, status line read
+from the completed log:
+
+| Run | tests | suites | pass | fail | skipped | wall-clock |
+|---|---|---|---|---|---|---|
+| 1 | 31 | 22 | 31 | 0 | 0 | 17.62s |
+| 2 | 31 | 22 | 31 | 0 | 0 | 20.25s |
+| 3 | 31 | 22 | 31 | 0 | 0 | 22.15s |
+
+Unchanged at `31·22·31·0·0`. All three well above the sub-6s disarm tell (barrier armed); this
+session's wall-clock ran a bit higher than the Developer's 16.4-17.6s range, consistent with local
+machine load, not a behavioral change (test *count* and pass/fail are what's load-bearing here, and
+they match exactly).
+
+## No test modified
+
+`git diff --stat d6edc45d c84a0958 -- <file>` run individually for `state-scripts.test.mjs`,
+`state.schema.json`, `constants.mjs` → **all three empty**, confirmed directly (not re-stating the
+Developer's own diff-stat claim).
+
+## Two-tree parity
+
+`diff .cleargate/scripts/update_state.mjs cleargate-planning/.cleargate/scripts/update_state.mjs` in
+the worktree → **empty**. Identical.
+
+## Round-1 constraints checked for disturbance (not re-derived)
+
+- **`fold()` still pure in its single array argument** — `state-events.mjs` has a zero diff between
+  `d6edc45d` and `c84a0958`; the function this round's guard calls (`checkFoldDrift`) reads
+  `state.json` + `events.jsonl` from disk itself, outside `fold()`, and passes only the parsed event
+  array into `fold()`. Purity undisturbed by construction (file untouched).
+- **Lock still encloses read-log → fold → write-cache** — read the surrounding code directly:
+  `acquireLock(lockPath)` at `:274`, the new guard at `:313-320`, sits between the closed-sprint check
+  (`:300-305`) and the migration/genesis/append/fold/write block that follows, all inside the same
+  `main()` body the lock spans. The new call site is strictly inside the existing span, not outside
+  or after it.
+- **`process.on('exit')` release still fires on the new refusal exit path** — this is the new in-lock
+  exit site BUG-044's T1/M6 finding was about. Directly tested: after both refusal runs above (a
+  fresh seed and a repeat run on the same seed), `ls` on the scratch dir shows **no `.lock` file**
+  either time. Lock release confirmed on this specific exit path, not assumed from the general
+  `process.on('exit')` mechanism.
+
+## Adjudication of the two declared deviations
+
+- **Reverted wiki re-ingest side effects (4 files).** `git show --name-only c84a0958` contains **zero**
+  paths under `.cleargate/wiki/` — confirmed directly, not taken on the Developer's word. Whatever the
+  wiki rebuild pulled in from unrelated pending items is derived-cache content keyed off those other
+  items' own files, not authored content belonging to this CR; reverting it before commit was correct
+  and nothing authored was lost (the commit's only markdown change is the CR-106 item file itself).
+- **Ticked Task Breakdown rows, merge-resolved to the Developer's version.** Read the file directly:
+  no conflict markers (`<<<<<<<`/`=======`/`>>>>>>>`) anywhere in
+  `CR-106_Execution_State_Event_Log.md`. All nine rows are `- [x]`, and the two annotated rows match
+  the description exactly — row 1 corrects the stale "12/12/0" to the item's own already-stated
+  15/13/0 baseline; row 5 notes the two-round history (exported-but-uncalled round 1, wired round 2).
+  File is coherent.
+
+## Blast radius — cli suite
+
+No new re-check needed: the only production file touched this round (`update_state.mjs`) is a strict
+subset of what round 1's blast-radius sweep already covered (round 1's Architect post-flight built a
+scratch meta-root and ran the full 314-test cli suite against all four scripts including
+`update_state.mjs`, finding zero CR-106-caused regressions). This round adds one new call to an
+already-imported module (`validate_state.mjs`, already an import in `d6edc45d`) with no new external
+dependency. `cleargate-cli/` remains absent from the worktree (confirmed, per flashcard
+`#worktree #collision-surface #danger`) — nothing new to spawn-path-test that round 1 didn't already
+clear. `node --check` passes on both the outer and mirrored `update_state.mjs`.
+
+## MISSING
+
+None — this round verifies a bugfix to existing write-path behavior, not new acceptance scenarios.
+The post-flight's own suggested acceptance test ("seed a valid multi-story state.json, truncate
+events.jsonl to zero bytes, assert exit 1 and state.json unchanged") was correctly NOT added by the
+Developer (forbidden surface, QA-Red-owned) — I verified that exact scenario by hand instead
+(Requirement 1/3 above), which is the QA-Verify substitute for a missing automated case on a
+Forbidden Surface.
+
+## REGRESSIONS
+
+None. Full suite stable at `31·22·31·0·0` across 3 runs; all fifteen round-1 constraints undisturbed
+per the targeted checks above.
+
+## Script Incidents
+
+None. All verification was direct `node --test` (redirected to log files), `node --check`, `git show`
+/`git diff` read-only queries, and manual `node <script>` invocations against scratch fixtures in the
+QA scratchpad (never against the live `.cleargate/sprint-runs/SPRINT-39/state.json` itself — only
+byte-copies of it). No `run_script.sh`-wrapped script was invoked.
+
+## VERDICT
+
+Ship it. The fix closes exactly the hole the post-flight measured: reproduced the refusal
+independently (18/18 intact, exit 1, named stderr, no stack frame, no stray lock), independently
+re-derived load-bearing-ness against my own pre-fix copy of the script (not the Developer's stash),
+confirmed the genesis path is untouched (same 4-line diff shape), and tested — not merely read — the
+coverage-not-equality claim with two real transitions against a consistent pair (idempotent no-op and
+a field-changing transition, both succeeded). The three round-1 constraints most exposed by a new
+in-lock call site (fold purity, lock span, exit-path lock release) are all confirmed undisturbed. Both
+declared deviations (reverted wiki side effects, Task-Breakdown merge resolution) check out on direct
+inspection — no conflict markers, no authored content lost, no wiki paths in the commit. Diff is
+exactly as narrow as claimed: one file's write path plus its mirror plus the item's own bookkeeping.
+
+## flashcards_flagged
+
+- "2026-08-29 · #qa #test-harness · Testing a 'refuses only on drift, never on a legit transition' claim requires RUNNING a real state-changing transition against a consistent pair, not just reading the call-site placement argument."

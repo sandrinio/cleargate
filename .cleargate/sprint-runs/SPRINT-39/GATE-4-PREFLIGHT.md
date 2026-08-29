@@ -581,3 +581,39 @@ agent definitions. It is an **incomplete feature boundary**: the reading half sh
 half was never scoped. Needs either an architect-agent edit or an explicit absent-value fallback
 ("treat a missing `GOAL_RELATION` as `advances`"). File as a follow-up CR next sprint; do not widen
 CR-110's surface at merge time.
+
+
+---
+
+## The cli full-suite expected-red set has grown — what "green" means at close
+
+QA-Verify on CR-108 was asked to confirm the arithmetic `12 = 10 + 1 + 1` with nothing hiding in it.
+**It found two hiding.** The measured decomposition is `fail 14`:
+
+| Count | Cause | Resolves by |
+|---|---|---|
+| 10 | cross-repo template-visibility — the full-suite run correctly does not set `CLEARGATE_META_ROOT`, so `REPO_ROOT` reads the main checkout's un-normalised templates | **merging CR-108's outer half** to `sprint/S-39` |
+| 1 | `N6b` — expected-red, [[BUG-067]], RULING 1 | not this sprint (deliberate) |
+| 1 | `sync.node.test.ts` network case | pre-existing, documented |
+| **2** | **CR-110-caused drift** — canonical `SKILL.md`/`reporter.md` now ahead of two *derived* copies | **`npm run prebuild`** (payload) + **live `.claude/` re-sync** (this machine) |
+
+The last row is the one to carry into the close. CR-110 merged canonical-only, as N1 requires — so the
+gitignored npm payload and the untracked live `.claude/` are both behind, and each shows up as a
+suite failure. **Neither is a defect and neither is CR-108's**, confirmed by `git log`: CR-108's
+commits touch neither file in either tree.
+
+**Consequences for Gate 4:**
+
+- The two prebuild/re-sync steps already on this list are now **load-bearing for a green suite**, not
+  just hygiene. Skipping them leaves two permanent reds that look like regressions.
+- **Do not treat `fail 1` as the close-time target.** Before the Gate-4 prebuild and re-sync, the
+  honest expectation is `fail 4` (N6b + sync + the two drift failures) on top of whatever the merge
+  ordering resolves. After both, `fail 2` (N6b + sync).
+- CR-111 (wave 13) will be measured against this same suite. Its dispatch must state the expected-red
+  set explicitly, or its Developer will read inherited failures as their own and try to fix them —
+  which is how a correct implementation gets bounced.
+
+**Merge-ordering constraint for CR-108** (two separate git repos, order matters): merge the outer
+half (`ac7c9801`) to `sprint/S-39` **at or before** the point the cli half (`b4ae1976`) is measured
+against `main`. Otherwise the 10 template-visibility false-reds persist on `cleargate-cli main`.
+Independent of the two CR-110 drift failures, which this merge does not touch.
