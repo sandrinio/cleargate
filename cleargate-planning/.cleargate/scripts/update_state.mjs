@@ -46,7 +46,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES, BOUNCE_CAP } from './constants.mjs';
-import { validateState, validateShapeIgnoringVersion } from './validate_state.mjs';
+import { validateState, validateShapeIgnoringVersion, checkFoldDrift } from './validate_state.mjs';
 import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 import {
   appendEvent,
@@ -300,6 +300,21 @@ function main() {
   if (TERMINAL_SPRINT_STATUSES.includes(doc.sprint_status)) {
     process.stderr.write(
       `Error: sprint ${doc.sprint_id} is closed (sprint_status="${doc.sprint_status}"); state.json is immutable\n`
+    );
+    process.exit(1);
+  }
+
+  // CR-106 round 2 (arch post-flight kick-back): refuse to fold a log that would delete stories
+  // already on disk. checkFoldDrift() skips cleanly on the genesis path (no events.jsonl yet --
+  // fs.existsSync gate inside checkFoldDrift itself), so this can never fire before the log
+  // exists; it only fires once a log is already present and has fallen out of sync with the
+  // cache (truncated file, stale log from a reverted writer, hand-edit). Controlled stderr.write
+  // + process.exit -- never a bare throw -- before any append or write below.
+  const drift = checkFoldDrift(stateFile);
+  if (!drift.skipped && !drift.valid) {
+    for (const e of drift.errors) process.stderr.write(`Error: ${e}\n`);
+    process.stderr.write(
+      `Refusing to fold: delete ${eventsFile} to re-synthesize genesis from state.json.\n`
     );
     process.exit(1);
   }

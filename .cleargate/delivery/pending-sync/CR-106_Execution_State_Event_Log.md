@@ -2,7 +2,7 @@
 cr_id: CR-106
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -13,17 +13,12 @@ updated_at: 2026-08-25T20:50:14Z
 created_at_version: cleargate@0.24.2
 updated_at_version: dff83bd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-08-25T20:50:14Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: .claude/hooks/token-ledger.sh"
+  last_gate_check: 2026-08-29T13:31:27Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -33,6 +28,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id CR-106
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-08-29T13:31:27Z
+  sessions: []
 ---
 
 # CR-106: Execution state becomes an append-only event log with a derived fold
@@ -110,15 +114,15 @@ it will be cargo-culted by the next reader.
 > and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
 > worktree was cut. Execution order.
 
-- [ ] Confirm BUG-044 is merged and node --test .cleargate/scripts/state-scripts.test.mjs is 12/12/0
-- [ ] Create .cleargate/scripts/state-events.mjs: appendEvent(), fold(), EVENT_SCHEMA; fold() takes ONLY the event array
-- [ ] QA-Red: author E2-E9; confirm the red set by MEASUREMENT, not prediction
-- [ ] Rewrite update_state.mjs write path to appendEvent + fold; route :116 and :122 migration writes through it
-- [ ] Extend validate_state.mjs with the fold-vs-file drift check (additive; must not fail a tree with no events.jsonl)
-- [ ] Seed events.jsonl in init_sprint.mjs; collapse the duplicated tmp+rename idiom at :231-233
-- [ ] Mirror all four scripts into cleargate-planning/ byte-identically, same commit
-- [ ] Run both eviction greps; run node --test; record pass/fail/skipped verbatim
-- [ ] Re-measure every line citation in the item and in this plan that points into a file this commit edited (N7)
+- [x] Confirm BUG-044 is merged and node --test .cleargate/scripts/state-scripts.test.mjs is 12/12/0 — merged; actual baseline was 15/13/0 (the § PRECONDITION passage below already corrects the 12/12/0 estimate), not a dropped row.
+- [x] Create .cleargate/scripts/state-events.mjs: appendEvent(), fold(), EVENT_SCHEMA; fold() takes ONLY the event array
+- [x] QA-Red: author E2-E9; confirm the red set by MEASUREMENT, not prediction
+- [x] Rewrite update_state.mjs write path to appendEvent + fold; route :116 and :122 migration writes through it
+- [x] Extend validate_state.mjs with the fold-vs-file drift check (additive; must not fail a tree with no events.jsonl) — landed round 1 as an exported-but-uncalled helper; wired into update_state.mjs's write path in round 2 (arch post-flight kick-back) to make it load-bearing.
+- [x] Seed events.jsonl in init_sprint.mjs; collapse the duplicated tmp+rename idiom at :231-233
+- [x] Mirror all four scripts into cleargate-planning/ byte-identically, same commit
+- [x] Run both eviction greps; run node --test; record pass/fail/skipped verbatim
+- [x] Re-measure every line citation in the item and in this plan that points into a file this commit edited (N7)
 
 ## Prior work
 
