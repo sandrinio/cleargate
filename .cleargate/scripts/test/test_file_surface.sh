@@ -279,7 +279,13 @@ cs_run() {
   # Sets globals CS_OUT (combined stdout+stderr) and CS_EC (exit code).
   local dir="$1" story="$2"
   CS_EC=0
-  CS_OUT="$(CLEARGATE_REPO_ROOT="${dir}" bash "${COLLISION_SCRIPT}" "${story}" 2>&1)" || CS_EC=$?
+  local errf; errf="$(mktemp)"
+  CS_STDOUT="$(CLEARGATE_REPO_ROOT="${dir}" bash "${COLLISION_SCRIPT}" "${story}" 2>"${errf}")" || CS_EC=$?
+  CS_STDERR="$(cat "${errf}")"; rm -f "${errf}"
+  # P7: CS_OUT keeps the combined-capture contract; CS_STDOUT isolates the
+  # machine-readable surface that architect-synth actually consumes.
+  CS_OUT="${CS_STDOUT}
+${CS_STDERR}"
 }
 
 flagged_unreachable() {
@@ -295,9 +301,9 @@ echo "Scenario 5 (BUG-046 C1): gitignored path is flagged unreachable"
 
 TMPDIR5="$(mktemp -d)"
 cs_init_repo "${TMPDIR5}"
-mkdir -p "${TMPDIR5}/vendor"
 echo "/vendor/" > "${TMPDIR5}/.gitignore"
-echo "export const x = 1;" > "${TMPDIR5}/vendor/lib.ts"
+# P1: deliberately NOT created on disk. A gitignored path is unreachable in a
+# worktree whether or not it happens to exist in this checkout.
 STORY5="$(cs_story "${TMPDIR5}" "Modify" "vendor/lib.ts")"
 
 cs_run "${TMPDIR5}" "${STORY5}"
@@ -317,7 +323,7 @@ echo "Scenario 6 (BUG-046 C2): nested independent repo path flagged with a disti
 
 TMPDIR6="$(mktemp -d)"
 cs_init_repo "${TMPDIR6}"
-mkdir -p "${TMPDIR6}/mcp/.git"   # fake nested-repo boundary, mirrors real mcp/
+cs_init_repo "${TMPDIR6}/mcp"          # P2: a REAL nested repo, not an empty .git dir
 echo "/mcp/" > "${TMPDIR6}/.gitignore"
 STORY6="$(cs_story "${TMPDIR6}" "Modify" "mcp/src/index.ts")"
 
@@ -330,6 +336,22 @@ else
 fi
 
 rm -rf "${TMPDIR6}"
+
+# ---- C2b (P2): nested repo under a name no hardcoded prefix list contains ---
+echo ""
+echo "Scenario 6b (BUG-046 C2b): a nested repo NOT named mcp/cleargate-cli/admin is still flagged"
+TMPDIR6B="$(mktemp -d)"
+cs_init_repo "${TMPDIR6B}"
+cs_init_repo "${TMPDIR6B}/thirdparty"
+echo "/thirdparty/" > "${TMPDIR6B}/.gitignore"
+STORY6B="$(cs_story "${TMPDIR6B}" "Modify" "thirdparty/sdk/client.ts")"
+cs_run "${TMPDIR6B}" "${STORY6B}"
+if flagged_unreachable "${CS_OUT}" "thirdparty/sdk/client.ts" && echo "${CS_OUT}" | command grep -qi "nested"; then
+  pass "BUG-046 C2b: nested repo under an arbitrary name flagged 'nested' (guards hardcoded prefix list)"
+else
+  fail "BUG-046 C2b: nested repo under an arbitrary name flagged 'nested'" "output was: ${CS_OUT}"
+fi
+rm -rf "${TMPDIR6B}"
 
 # ---- C3: file_creates path not yet on disk is NOT flagged (false-positive
 #          guard -- the item's own highest-risk case) -----------------------
@@ -395,14 +417,30 @@ mkdir -p "${TMPDIR9}/tracked"
 echo "content" > "${TMPDIR9}/tracked/file.ts"
 git -C "${TMPDIR9}" add tracked/file.ts
 git -C "${TMPDIR9}" commit -q -m "add tracked file"
-STORY9="$(cs_story "${TMPDIR9}" "Modify" "tracked/file.ts")"
+# P5: two rows. The tracked one must not flag; the declared-new one forces the
+# classifier to actually run its ignored-probe in a repo with no .gitignore.
+mkdir -p "${TMPDIR9}/.cleargate/delivery/pending-sync"
+STORY9="${TMPDIR9}/.cleargate/delivery/pending-sync/STORY-BUG046-CS_Test.md"
+{
+  echo "---"; echo "story_id: STORY-BUG046-CS"; echo "---"; echo ""
+  echo "# Fixture Story"; echo ""
+  echo "### 3.1 Context & Files"; echo ""
+  echo "| Item | Value |"; echo "|---|---|"
+  echo "| Modify | \`tracked/file.ts\` |"
+  echo "| New Files Needed | \`fresh/module.ts\` |"
+  echo ""; echo "### 3.2 Technical Logic"; echo "test"
+} > "${STORY9}"
 
 cs_run "${TMPDIR9}" "${STORY9}"
 
-if [[ "${CS_EC}" -eq 0 ]] && ! echo "${CS_OUT}" | command grep -qi "unreachable"; then
-  pass "BUG-046 C5: no .gitignore -> zero flags, exit 0, no crash (green-by-design -- guards .gitignore-required classifier)"
-else
+CS5_EXPECT="tracked/file.ts
+fresh/module.ts"
+if [[ "${CS_EC}" -ne 0 ]] || echo "${CS_OUT}" | command grep -qi "unreachable"; then
   fail "BUG-046 C5: no .gitignore -> zero flags, exit 0, no crash" "exit=${CS_EC} output=${CS_OUT}"
+elif [[ "${CS_STDOUT}" != "${CS5_EXPECT}" ]]; then
+  fail "BUG-046 C5b: stdout still emits the parsed surface, one path per line" "expected [${CS5_EXPECT}] got [${CS_STDOUT}] -- architect-synth reads STDOUT; annotations belong on stderr"
+else
+  pass "BUG-046 C5: no .gitignore -> zero flags, exit 0, stdout surface contract intact"
 fi
 
 rm -rf "${TMPDIR9}"
@@ -421,10 +459,12 @@ echo "Scenario 10 (BUG-046 C6): architect-synth.md documents a REFUSAL for unrea
 SYNTH_MD="${REPO_ROOT}/cleargate-planning/.claude/agents/architect-synth.md"
 if [[ ! -f "${SYNTH_MD}" ]]; then
   fail "BUG-046 C6: architect-synth.md exists" "not found at ${SYNTH_MD}"
-elif command grep -qi "refus" "${SYNTH_MD}" && command grep -qi "unreachable" "${SYNTH_MD}"; then
-  pass "BUG-046 C6: architect-synth.md documents a refusal for unreachable entries"
+elif ! command grep -iE "unreachab" "${SYNTH_MD}" | command grep -qiE "refus"; then
+  fail "BUG-046 C6: architect-synth.md documents a refusal for unreachable entries" "no SINGLE line couples 'unreachab*' to 'refus*' in ${SYNTH_MD}"
+elif command grep -iE "unreachab" "${SYNTH_MD}" | command grep -qiE "serializ"; then
+  fail "BUG-046 C6: refusal is not a serialize" "a line couples 'unreachab*' to 'serializ*' — the human's 2026-08-26 decision is REFUSE, not serialize"
 else
-  fail "BUG-046 C6: architect-synth.md documents a refusal for unreachable entries" "no refus*/unreachable text found in ${SYNTH_MD}"
+  pass "BUG-046 C6: architect-synth.md documents a refusal (not a serialize) for unreachable entries"
 fi
 
 # ---- C12: refusal is scoped to wave-plan GENERATION only ------------------
@@ -467,6 +507,14 @@ if [[ "${LW_COUNT}" -ne 1 ]]; then
   C12_OK=0
   C12_WHY="${C12_WHY} | launch_wave.mjs 'reachab' count changed from baseline 1 to ${LW_COUNT} -- dispatch-time check suspected"
 fi
+# Census: the ONLY files under .cleargate/scripts/ (excluding test/) allowed to
+# carry reachability vocabulary are collision_surface.sh and launch_wave.mjs.
+CENSUS="$(command grep -rilE "unreachab|reachab" "${REPO_ROOT}/.cleargate/scripts" 2>/dev/null \
+  | command grep -v "/test/" | command grep -vE "/(collision_surface\.sh|launch_wave\.mjs|assert_story_files\.mjs)$" | sort || true)"
+if [[ -n "${CENSUS}" ]]; then
+  C12_OK=0
+  C12_WHY="${C12_WHY} | reachability vocabulary appeared in a NEW script (dispatch-time check suspected): ${CENSUS}"
+fi
 
 if [[ "${C12_OK}" -eq 1 ]]; then
   pass "BUG-046 C12: refusal scoped to generation, reader/dispatch untouched"
@@ -479,8 +527,9 @@ fi
 echo ""
 echo "Scenario 12 (BUG-046 C13): no file under .cleargate/knowledge/ or cleargate-planning/.claude/ claims gitignored/nested-repo paths are visible inside a worktree"
 
-DOC_HITS="$(command grep -rniE "visible[^.]*(as a )?subdirectory" \
+DOC_HITS="$(command grep -rniE "(visible|appears?|shows? up|present)[^.]*(as a )?subdirectory" \
   "${REPO_ROOT}/.cleargate/knowledge" \
+  "${REPO_ROOT}/cleargate-planning/.cleargate/knowledge" \
   "${REPO_ROOT}/cleargate-planning/.claude" \
   2>/dev/null || true)"
 
@@ -490,6 +539,28 @@ else
   fail "BUG-046 C13: no false 'visible as a subdirectory' claim anywhere in knowledge/ or canonical .claude/" "hits: ${DOC_HITS}"
 fi
 
+
+# ---- C13b (P6): the corrective claim is PRESENT, not merely absent ---------
+# Without this, deleting the two sentences outright turns C13 green while
+# destroying the "never git worktree add inside mcp/" rule entirely.
+
+echo ""
+echo "Scenario 13 (BUG-046 C13b): each of the three doctrine files states the positive rule"
+
+C13B_MISSING=""
+for f in \
+  "${REPO_ROOT}/.cleargate/knowledge/cleargate-enforcement.md" \
+  "${REPO_ROOT}/cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md" \
+  "${REPO_ROOT}/cleargate-planning/.claude/skills/sprint-execution/SKILL.md" ; do
+  if ! command grep -iE "worktree" "$f" | command grep -qiE "tracked"; then
+    C13B_MISSING="${C13B_MISSING} $f"
+  fi
+done
+if [[ -z "${C13B_MISSING}" ]]; then
+  pass "BUG-046 C13b: all three doctrine files couple 'worktree' to 'tracked' on one line"
+else
+  fail "BUG-046 C13b: all three doctrine files couple 'worktree' to 'tracked' on one line" "missing in:${C13B_MISSING}"
+fi
 
 # ============================================================================
 # Summary
