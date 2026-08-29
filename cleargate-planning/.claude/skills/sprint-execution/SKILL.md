@@ -283,7 +283,7 @@ Story branch is cut from the **sprint branch**, never from main. Verify:
 git worktree list
 ```
 
-**Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a subdirectory of the outer worktree. (`cleargate-enforcement.md` §1.3.)
+**Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer might expect to edit it at `.worktrees/STORY-NNN-NN/mcp/...` — but that path does NOT exist in a worktree: `mcp/` has zero tracked files in the outer repo, so edit it in the main checkout instead. (`cleargate-enforcement.md` §1.3.)
 
 After creating the worktree, provision configured gitignored config into it:
 

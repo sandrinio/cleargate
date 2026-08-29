@@ -86,7 +86,7 @@ All commands must be run from the **repo root** (not from inside `.worktrees/`),
 
 **The `mcp/` directory is a nested independent git repository.** Running `git worktree add` inside `mcp/` would create a worktree scoped to the nested repo, not to the outer ClearGate repo. This is a git footgun: the outer repo cannot track, merge, or remove the inner worktree via its own git commands.
 
-**Rule:** Never run `git worktree add` inside `mcp/`. If a story requires edits to `mcp/`, the Developer Agent must edit `mcp/` from inside the outer worktree (`.worktrees/STORY-NNN-NN/mcp/...`) — the nested repo's files are visible there as a subdirectory, not as a separate git context. MCP-native worktree support is deferred to Q3.
+**Rule:** Never run `git worktree add` inside `mcp/`. If a story requires edits to `mcp/` — the nested repo has ZERO tracked files in the outer repo, so a worktree materializes no such directory at all — edit it in the main checkout. MCP-native worktree support is deferred to Q3.
 
 ### §1.4 Local state.json is in-flight authority
 
