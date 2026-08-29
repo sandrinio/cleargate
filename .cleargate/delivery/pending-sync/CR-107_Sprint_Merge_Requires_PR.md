@@ -2,7 +2,7 @@
 cr_id: CR-107
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -23,7 +23,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-08-25T20:50:14Z
+  last_gate_check: 2026-08-29T10:18:10Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -93,7 +93,43 @@ last_synced_body_sha: null
 - **Surface:** `.claude/skills/sprint-execution/SKILL.md:723` — `git merge sprint/S-NN --no-ff`; the local sprint→main merge this CR routes through a PR.
 - **Surface:** `.cleargate/knowledge/cleargate-enforcement.md:110-138` — the walkthrough gate ("MUST NOT merge to main while any `UR:bug` is unresolved"). This CR gives that rule an enforceable external representation.
 - **Surface:** `.cleargate/scripts/close_sprint.mjs:588-631` — Step 2.7/2.8 preflight, already shells out to `git worktree list --porcelain` with a graceful "unavailable → non-fatal skip" fallback. This CR reuses that exact degradation idiom for `gh`.
+  **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F1 — the citation is stale and sends the
+  Developer to the wrong half of the file).** `:588-631` is **Step 2.7 ONLY.** Measured: Step 2.7
+  opens at `:587` and runs to ~`:645`; the `execSync('git worktree list --porcelain')` call is at
+  **`:609`**; the graceful *"unavailable → non-fatal skip"* idiom this CR copies is at
+  **`:630-631`**. **Step 2.8 begins at `:647`.** The idiom named here IS inside the cited range —
+  the row is right about what to copy — but the range does not cover Step 2.8, which is the code
+  this CR actually changes. Read `:630-631` for the pattern and `:647`+ for the target.
+  **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F3 — the idiom being copied is fail-OPEN and
+  §4 case 2 requires fail-CLOSED).** `close_sprint.mjs:686-692`: any `git merge-base` exit other
+  than 1 sets `mergeCheckAvailable = false`, writes a warning, and `:694-695` comments
+  *"fail-open: refs missing or git unavailable — continue to Step 3"*. §4 case 2 requires that
+  `vcs.sprint_pr: true` with `gh` absent **halts with a named error and never falls through to a
+  silent local merge** — the opposite behaviour, in a very similar shape, a few lines away. A
+  Developer who copies `:686-692` writes the wrong thing and the case still passes if it only
+  asserts stderr text. **Case 2 must assert a non-zero exit code, not just the message.**
+  **Do not "loosen" `--is-ancestor` to "a PR exists and is closed"** — a closed-unmerged PR would
+  then satisfy the only gate protecting `main`. That is a fail-open on the sprint's terminal
+  boundary.
 - **Surface:** `.cleargate/config.yml` — per-repo config; currently has no `vcs:` section. Extended, not replaced.
+  **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F4 — these two files are NOT mirrors and
+  MUST NOT be made byte-identical).** Measured: live `.cleargate/config.yml` is **37 lines**
+  (`wiki.{index_token_ceiling, bucket_pagination_ceiling, ingest_buckets}` + `gates:` at `:21-29` +
+  `worktree:` at `:31-37`); canonical `cleargate-planning/.cleargate/config.yml` is **19 lines**
+  (`wiki.ingest_buckets` only). Both are tracked, as are both `config.example.yml` files, and the
+  two examples also differ. The live file carries **this repo's own gate and worktree
+  configuration**; the canonical is the shipped first-install seed. STORY-054-04's post-flight R22
+  measured this and recorded that a Developer who treats them as mirrors *"deletes this repo's gate
+  and worktree configuration."* **Add `vcs.sprint_pr` to both, with different surrounding content,
+  and diff nothing.** §4 correctly ships no parity check for config — do not add one.
+
+- **§ AMENDMENT (orchestrator, 2026-08-29, per M4 plan F5 — OMISSION: the verification command is
+  meta-repo-only).** `.cleargate/scripts/test/test_close_pipeline.sh` exists live and has **no counterpart
+  in the canonical tree** — there is no `test_close_pipeline.sh` under canonical's
+  `scripts/test` directory, which ships 10 of the live 23 test scripts. So **the canonical `close_sprint.mjs` change ships to every install untested.** Mirroring
+  the test script is out of scope here, but this is precisely why F2a/F2b's fix must be
+  conservative: keep `--is-ancestor`, add the fetch/origin fallback and the squash detection, and
+  change nothing else in Step 2.8.
 - **Why this CR extends rather than rebuilds:** The sprint→main merge, the walkthrough gate, and the close preflight all exist and stay. This CR changes *how one merge is executed* and gives an existing prose gate a durable artifact. The graceful-degradation pattern it needs for a missing `gh` binary is already implemented verbatim in `close_sprint.mjs`'s handling of an unavailable `git worktree list`, so the fallback is a copy of a proven surface rather than new error-handling design.
 
 ## Task Breakdown
