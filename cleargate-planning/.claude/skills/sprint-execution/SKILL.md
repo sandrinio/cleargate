@@ -620,6 +620,8 @@ Log every event in sprint §4. **Sprint branch MUST NOT merge to main while any 
 
 > 🎯 **Goal check.** Open the walkthrough invitation with the sprint goal verbatim, not a feature checklist: *"Sprint goal: `<verbatim>`. The branch is ready on `sprint/S-NN`. Test it and tell me — does the running build achieve the goal?"* This forces the framing to be outcome-vs-spec rather than feature-tour.
 
+**Pull request (`vcs.sprint_pr: true` in `.cleargate/config.yml`, CR-107).** At the start of Phase D, push `sprint/S-NN` and open a pull request against `main` via `gh pr create`. The open PR is the physical form of the `cleargate-enforcement.md` §2 walkthrough gate — the human reads the diff and tests the branch, instead of only testing it, and the gate stops being a promise and becomes an object with a URL. The PR body is generated deterministically from artifacts that already exist — the sprint goal, the DoD checklist, and the `SPRINT-<#>_REPORT.md` summary — so it costs no new authored content and requires no network round-trip to build — no lookup of the pull request's live state is involved. Gate-4 close (§E.5) merges the PR. When `vcs.sprint_pr` is `false` (the default), Phase D proceeds exactly as above and no PR is opened.
+
 ---
 
 ## 6.5 Phase D.5 — Consolidation
@@ -716,11 +718,19 @@ During Gate 4 sign-off, read `.cleargate/sprint-runs/<id>/.doc-refresh-checklist
 
 ### E.5 Sprint→main merge
 
-After sign-off and after all walkthrough `UR:bug` items resolved:
+After sign-off and after all walkthrough `UR:bug` items resolved, the merge path depends on `vcs.sprint_pr` in `.cleargate/config.yml` (CR-107):
+
+**`vcs.sprint_pr: false` (default — the only path available to any install without a GitHub remote):**
 
 ```bash
 git checkout main
 git merge sprint/S-NN --no-ff -m "Sprint S-NN: <goal>"
+```
+
+**`vcs.sprint_pr: true`:** merge the pull request opened at the start of Phase D (§6) instead of running a local merge — `gh pr merge --merge` (merge-commit strategy only; squash and rebase merges destroy the ancestry `close_sprint.mjs` Step 2.8 checks).
+
+```bash
+gh pr merge --merge <pr-number-or-url>
 ```
 
 Then flip sprint frontmatter `status: Completed`, archive the sprint file (`pending-sync/` → `archive/`).
