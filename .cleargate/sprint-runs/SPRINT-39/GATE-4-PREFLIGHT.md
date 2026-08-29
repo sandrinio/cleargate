@@ -185,3 +185,36 @@ suite's 32 children contend on `os.tmpdir()` paths), so the backstop needs a *su
 fire at all. When it does fire it is compound: the release unlinks **unconditionally** with no
 ownership check, so a stolen-from process would delete the new holder's lock. Accepted because the
 age ceiling was mandated verbatim by the plan and CR-106 deletes the lock next wave.
+
+---
+
+## USE-PROHIBITION — do not run `cleargate hotfix new` from `dist/` or the global binary before Gate 4
+
+From the BUG-045 Architect post-flight. N9 forbids *verifying* through `dist/`; this adds the
+*use* prohibition, because the failure is live and silent.
+
+Measured right now: `pending-sync/` holds **0** `HOTFIX-*` items and `archive/` holds **1**
+(`HOTFIX-001_init_skip_strips_exec_bit.md`). The stale `dist/cli.js` (built Aug 28 12:14) and the
+global `cleargate@0.24.2` both carry the **pre-BUG-045** archive-blind scan, so either one would
+allocate **`HOTFIX-001` — a live collision on its first invocation**, writing a second item with an
+id already in use.
+
+Safe to leave for the remaining waves: the blast radius is one command, no remaining wave calls it,
+and the write targets a new path so nothing is overwritten. **The likely victim is a human filing a
+hotfix from the global binary** — so the prohibition is worth stating rather than assuming.
+Cleared by the Gate-4 `dist` rebuild plus publish-and-reinstall.
+
+## Follow-on worth filing — `## Unreleased` has no guarantee of ever being released
+
+From the same post-flight. `grep -rn "Unreleased" cleargate-cli/{test,scripts,src}` returns **zero
+hits**, there is no release script, and `parseChangelog` slices from `matches[0].index` — the first
+bracketed `## [X.Y.Z]` heading. `test/changelog-format.node.test.ts:128` matches only
+`^## \[(\d+\.\d+\.\d+)\] — \d{4}-\d{2}-\d{2}$`, so **everything above the first version heading is
+invisible to every check in the suite.**
+
+Consequence: if a releaser bumps to 0.25.0 and inserts the dated heading *below* a still-present
+`## Unreleased`, **all five format scenarios pass** and BUG-045's entry is stranded above the parse
+boundary permanently — shipped code, unshipped changelog, nothing red.
+
+The guard belongs in `verify-pack.mjs` — the `prepublishOnly` chokepoint — not in the test suite,
+which by construction cannot see the region. Candidate follow-on CR; not this sprint's.

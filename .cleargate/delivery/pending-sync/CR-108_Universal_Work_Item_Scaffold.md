@@ -141,6 +141,104 @@ last_synced_body_sha: null
 
 **Do NOT modify:** `stamp-frontmatter.ts` internals (reused as-is), the push/pull path, `sprint_context.md`, `sprint_report.md`.
 
+## § PRE-DISPATCH AMENDMENTS (orchestrator, 2026-08-29, per the BUG-045 Architect post-flight)
+
+BUG-045 merged into `cleargate-cli` `main`; `hotfix.ts` is now **211 lines** and every offset this
+CR cites moved. Shift function: `1-47` unchanged · `48-65` restructured to `54-75` · `66-163` **+8**
+· `164-211` **+9**. Re-measured against the merged file:
+
+| Cited in this item | Now | What it is |
+|---|---|---|
+| `hotfix.ts:164` (×3) | **`:173`** | the `maxHotfixId(pendingDir, archiveDir)` call |
+| `:165` | **`:174`** | `nextId = maxId + 1` |
+| `:166` | **`:175`** | `padStart(3, '0')` |
+| `:118-121` | **`:128`** | `resolveTemplatePath` |
+| `:179` | **`:189-191`** | the three `.replace()` substitutions |
+| `:192` | **`:201`** | `writeFileSync` |
+| — | `:54` | `maxHotfixId(...dirs: string[])` definition |
+
+**`hotfix.ts:719` in the Task Breakdown is a phantom** — the file is 211 lines and never had a
+`:719`. The row means *reduce `hotfixNewHandler` to a delegate*; it carries no usable citation.
+
+**The `§ AMENDMENT` recording OD-3 cites `hotfix.ts:188-191` and is CORRECT — do not "harmonise" it.**
+That ruling was measured against the post-BUG-045 branch. Every *other* copy of that render
+statement in the tree (`:179-182`, `:180-182`, `:179-181`, `:178-192`, `:178-182` — eight sites) is
+stale. The OD-3 citations are the minority and the only right ones; conforming them to the majority
+breaks exactly what gates this CR.
+
+**Two §0.5/§1 claims are now factually false and are REPLACED, not deleted.** *"`hotfix.ts:164`
+scans only `pendingDir` today"* and *"Forget that `hotfix.ts:164`'s ID scan is correct"* described
+the pre-BUG-045 world. BUG-045 shipped the union scan, so the correct statement is: **the allocator
+already scans `pending-sync` ∪ `archive` with per-directory ENOENT tolerance and a surviving type
+filter; this CR generalises that corrected allocator rather than fixing it.**
+
+### § BLOCKER-CLASS FINDING — "every work-item type" is not a single well-defined set
+
+Two live `WorkItemType` exports, same name, same directory, neither importing the other, and
+`stamp-tokens.ts` imports from **both** (`:14` and `:20`):
+
+- `src/lib/work-item-id.ts:56` — `type WorkItemType = (typeof TYPE_PREFIXES)[number]`, **12
+  UPPERCASE** prefixes: `INITIATIVE PROPOSAL PLATFORM HOTFIX SPRINT STORY AUDIT SPIKE EPIC PROP BUG CR`.
+- `src/lib/work-item-type.ts:8` — `type WorkItemType = 'story' | 'epic' | 'proposal' | 'cr' | 'bug'
+  | 'initiative' | 'sprint' | 'hotfix' | 'spike'`, **9 lowercase**.
+
+`PLATFORM`, `AUDIT` and legacy `PROP` exist in the id grammar with **no** counterpart in the 9-type
+registry. Without an explicit bridge that uppercases **and rejects** those three,
+**`cleargate new platform` scaffolds a tenth type with no template and no wiki bucket, and exits 0.**
+
+### § BLOCKER-CLASS FINDING — the template mapping is NOT `${type}.md`, and `proposal` has none
+
+Measured against `.cleargate/templates/`:
+
+| type | template file |
+|---|---|
+| story | `story.md` |
+| epic | `epic.md` |
+| cr | **`CR.md`** (uppercase) |
+| bug | **`Bug.md`** (capitalised) |
+| initiative | `initiative.md` |
+| sprint | **`Sprint Plan Template.md`** (spaces, no type token) |
+| hotfix | `hotfix.md` |
+| spike | `spike.md` |
+| **proposal** | **NONE — the file does not exist** |
+
+Two consequences:
+
+1. **`proposal` is a registered type with no template.** `cleargate new proposal` cannot work as
+   specified. Decide before dispatch whether this CR authors `proposal.md`, or narrows its own
+   claim from "every work-item type" to the eight that have one. **Do not let a Developer discover
+   this at implementation time and silently pick one.**
+2. **A naive `path.join(templatesDir, `${type}.md`)` is wrong for three of nine and must not ship.**
+   Worse, it will appear to work: macOS APFS is case-insensitive by default, so `cr.md` and `bug.md`
+   resolve to `CR.md` and `Bug.md` on the developer's machine and fail on Linux — for users and for
+   any CI. **Use an explicit type → filename map, and assert every entry resolves with
+   case-sensitive matching** (compare against a `readdirSync` listing, not `existsSync`).
+
+The item's *"Normalize placeholders in EIGHT templates"* row is consistent with eight, not nine —
+which is itself evidence the proposal gap was noticed and never written down.
+
+### § What CR-108 may and may not lift from BUG-045's allocator
+
+- **`...dirs: string[]` generalises the SCAN, not the ALLOCATION.** `maxHotfixId` returns `number`
+  because a HOTFIX id is a scalar; a story id is a pair. Lift the **loop body** into
+  `collectIds(type, ...dirs)` and give each type its own `nextId()` — do not reshape the existing
+  signature and call it general.
+- **`max + 1` does not generalise to `story`.** `numericStem('STORY-054-06')` returns the **epic**
+  number `054` (executed, not reasoned). Story allocation needs the parent epic as an argument. The
+  live STORY union max is `099`, from the sentinel `STORY-099-01_Dogfood_Lane_Fast_Smoke.md`.
+- **Pad width cannot leak from the corpus** — `padStart(3, '0')` is at the call site and `parseInt`
+  discards width before the max is taken. A per-type width table is fine, but note it is
+  **under-determined by the corpus**: SPIKE has 0 live items, HOTFIX and INITIATIVE 1 each. Derive
+  it from the type registry, never from what happens to be on disk.
+- **`countActiveHotfixes`'s mtime semantics are cap-specific.** Nothing else may inherit them.
+- **Keep the single shared scan over both directories — do not add per-type indexing.** Not on cost
+  (501 files, two `readdirSync`), but because one shared `archive/` makes a dropped type filter
+  return a *plausible* id — BUG-045's M9 mutant allocated `HOTFIX-115` and collided with nothing —
+  whereas per-type directories would return empty and look like a different bug. Indexing adds a
+  second place for the partition to be wrong.
+
+---
+
 ## 4. Verification Protocol
 
 **Command/Test:** `npm --prefix cleargate-cli test`
