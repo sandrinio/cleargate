@@ -571,7 +571,7 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:140`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
 
 **`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 

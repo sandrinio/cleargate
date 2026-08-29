@@ -349,3 +349,235 @@ churning a tracked file on every run. `prebuild` runs **once, here at Gate 4**.
 It states that `gates.precommit` runs the cli typecheck + tests on outer-repo commits. **It does
 not** — no git hook invokes it. The rule's practical instruction (run them by hand and report) is
 still right; only its stated mechanism is wrong. Correct the wording at close.
+
+---
+
+## OPERATIONAL — recovering from a `state.json` ↔ `events.jsonl` divergence (CR-106, live from merge)
+
+From the CR-106 post-flight round 2, measured. **This is live behaviour for the rest of this sprint
+and for Gate 4**, so it belongs where whoever hits it will look.
+
+`update_state.mjs` now refuses to write when the on-disk `state.json` does not byte-match
+`fold(events.jsonl)`. The check is **byte-equality** (`validate_state.mjs:146-181`), not a coverage
+floor — which is strictly stronger, so a story-dropping fold is a byte difference by construction and
+cannot slip through. Four probes confirmed it: a subset log (folds to 13 of 18 stories) → refused; a
+stale log after an out-of-log writer advanced `state.json` → refused; a truncated-last-event log →
+refused; a consistent pair → succeeded normally.
+
+**Recovery, measured working:**
+
+```
+rm .cleargate/sprint-runs/<sprint>/events.jsonl
+# then re-run the transition
+```
+
+The genesis path re-synthesises the log from `state.json`, the transition applies, and **an advance
+made by an out-of-log writer survives** — the post-flight verified a `CR-110 → Bouncing` change made
+outside the log was still present afterwards. One command, no data loss.
+
+**Two known wrinkles, neither blocking:**
+
+1. **The two stderr lines contradict each other.** One says the log is the source of truth; the other
+   says delete the log to recover. Since no re-fold-from-log path exists, **the cache wins in
+   practice** — the safe direction, but the prose is wrong. Worth a follow-on: either ship a
+   re-fold-from-log path or stop claiming the log wins.
+2. **The check runs before migration**, so a pre-v3 `state.json` sitting beside a v3-folded log
+   false-positives. Unreachable from first-party code (nothing writes that combination), and cleared
+   by the same `rm` remediation.
+
+**Lock safety on the new refusal path — confirmed structurally, not just by the cases exercised.**
+The release is registered **once at acquire** (`process.on('exit')`, inside `acquireLock`), not per
+exit site, so coverage is dominated by the registration point and adding an in-lock early return
+cannot leak a lock. That is exactly the property BUG-044's M6/T1 finding was after. One pre-existing
+residual, unchanged by this CR: a throw in the two-syscall window between lockfile creation and
+handler registration leaks, self-healed by the stale-holder steal.
+
+---
+
+## Wave-12 additions (2026-08-29)
+
+### `events.jsonl` is untracked, and nothing has decided whether it should be
+
+`git check-ignore` returns nothing for `.cleargate/sprint-runs/SPRINT-39/events.jsonl` — it is not
+ignored, merely **untracked**. CR-106 introduced it as the new append-only source of truth for
+execution state while `state.json` (the derived cache) **is** tracked. That pairing is backwards on
+its face: the derived artifact is versioned, the source of truth is not.
+
+It is not urgent, because the genesis path re-synthesises a log from `state.json` on first use, so a
+fresh clone self-heals rather than breaking. But it means the sprint's actual transition history —
+every state change, in order, with timestamps — exists only on this machine and vanishes with the
+worktree. **Decide at Gate 4:** track it (history survives, and `checkFoldDrift` gains a versioned
+reference), or ignore it explicitly (silence the ambiguity, accept the cache as the shipped record).
+Doing neither leaves it in the current accidental state.
+
+### A leaked atomic-write temp in the sprint-run tree
+
+`.cleargate/sprint-runs/SPRINT-39/.session-totals.json.tmp.G5Ptvh` — orphaned by the token-ledger
+hook's tmp+rename on 2026-08-27, two days stale.
+
+**Verified safe before proposing removal:** parsed both files and compared. Same two session keys,
+no key present in the tmp but missing from the live file, and the live file's output counter is
+strictly higher (3,281,678 vs 1,752,454). It is a **strict subset, fully superseded** — no data loss
+in deleting it.
+
+**Not deleted.** It is untracked, and the standing rule is to ask before killing untracked work.
+Flagging rather than acting; one `rm` at Gate 4 if the human agrees.
+
+The finding underneath it is the reusable one: the hook's atomic write **leaks its temp on
+interruption**. One orphan is harmless; the pattern means every interrupted agent run can leave
+another in the sprint tree, and anything that globs the sprint directory will eventually meet one.
+Note the dotfile shape — `.session-totals.json.tmp.*` did not match a `*.tmp.*` glob and was only
+found by `find`, so a casual check will report the tree clean when it is not.
+
+### Attribution re-corruption: occurrence 18
+
+The same eight items (`BUG-047`, `BUG-048`, `BUG-049`, `BUG-050`, `BUG-062`, `CR-109`, `EPIC-055`,
+`EPIC-057`) were re-stamped `sprint_cleargate_id: "SPRINT-39"` again during wave 12. Diffed first —
+one hunk per file, that line only, no other change — then reverted. Tally recorded in BUG-048 §3.5.
+
+**This is the 18th occurrence in a single sprint.** The standing close-gate obligation stands:
+re-verify attribution *immediately* before `close_sprint.mjs`, because any dispatch between the last
+check and the close re-corrupts it.
+
+
+---
+
+## ⛔ BLOCKING HAZARD — do NOT run `cleargate stamp` on templates at this close
+
+**Found by CR-108 TPV, 2026-08-29. This is a live footgun in the close pipeline itself.**
+
+`cleargate stamp` **corrupts all eight authoring templates today, on `main`, with no CR-108
+involvement.** Measured against real copies of the shipped files:
+
+```
+Bug.md · CR.md · story.md · epic.md · initiative.md · hotfix.md · spike.md · Sprint Plan Template.md
+    → reason=created   phantom-block-prepended=true   (8 of 8)
+```
+
+Root cause `stamp-frontmatter.ts:54` — `hasFrontmatter = raw.trimStart().startsWith('---')`. When an
+`<instructions>` block precedes the frontmatter, the check reads "no frontmatter", so the function
+**prepends a phantom block and demotes the real fields to inert body text** below a second `---`
+fence. `bug_id`, `status`, `severity` all leave the machine-readable block. Exit clean, `changed:
+true`, **no warning**.
+
+**Why this matters right now:** `prep_doc_refresh.mjs:160` — the Gate-4 doc-refresh checklist
+generator — emits the instruction
+
+> `Modified .cleargate/templates/*.md (run `cleargate stamp <path>`)`
+
+and the same at `:165/:170/:175` for `.cleargate/knowledge/*.md`. **SPRINT-39 modifies eight
+templates across two trees, so this close's checklist will list them and instruct exactly the
+command that corrupts them.** Following the generated checklist as written destroys the frontmatter
+of every template this sprint shipped.
+
+**Action at Gate 4: when `.doc-refresh-checklist.md` lists a `cleargate stamp` item for any template
+or knowledge file, PUNT it and record the reason.** Do not run it. The stamp fields are cosmetic
+metadata; the frontmatter it would eat is not.
+
+Tracked as **BUG-067** (filed per TPV obligation O1). Not fixed in SPRINT-39 — CR-108 neither
+creates nor touches the defect, and `stamp-frontmatter.ts` internals are on both the item's and the
+plan's Do-NOT-modify list.
+
+**The exposure grows the day CR-108 merges.** Today only 16 files (8 templates × 2 trees) begin with
+`<instructions>`; a 523-file corpus census found **zero work items** carrying the block. After
+CR-108, *every newly scaffolded item* carries it — so the first agent that runs `cleargate stamp` on
+a fresh item before hand-cleaning it silently loses `bug_id`/`status`/`severity` at exit 0. CR-108
+does not cause the defect; it widens the blast radius from 16 files to every item authored from that
+day forward. That is the argument for fixing BUG-067 early in the next sprint, not eventually.
+
+
+---
+
+## Sprint-report obligations added in wave 12
+
+**1. `cr078_init.test.sh`'s SAFETY assertion is sprint-number-rotted.** Its trailing check hardcodes
+`expected SPRINT-34`, so it has failed on every checkout since SPRINT-34 closed — in worktrees and
+the main checkout alike. Confirmed pre-existing and unrelated to CR-110; correctly left unfixed
+(outside the declared surface). It is the single permitted red in CR-110's acceptance line.
+
+Report it as its own finding, not as a footnote. A safety assertion pinned to a sprint number stops
+being a safety assertion the moment that sprint closes — it becomes a permanent red that everyone
+learns to scroll past, which is how [[BUG-066]]'s vacuous passes survived unnoticed. Same failure
+class, opposite polarity: one always-green that proves nothing, one always-red that protects
+nothing.
+
+**2. The `18/18/0/0` figure in the M4 dispatch package was a homonym error.** Both TPV agents landed
+on this independently: `gate-section-index-pinning`'s real acceptance is `tests 14 · pass 14 · fail 0
+· skipped 0`. The `18` is a **criteria count printed inside S1a's and S6's test names**, not a test
+count. The underlying Rule-3/4 claim (`18 = 16 pinnable + 2 known-unpinnable`) is verified **true**
+and unchanged — only the number quoted as an acceptance target was wrong. Two independent
+confirmations of the same correction is worth recording; the figure had been propagating through
+dispatches all sprint.
+
+**3. Two consumers of `sprint_context.md` were missing from the plan's Rule-4 analysis** —
+`cleargate-cli/test/scripts/init-sprint-context.red.node.test.ts` (asserts `## Mid-Sprint
+Amendments` is the last `## ` heading) and `collect.ts:540` `extractSprintGoal`. Both are
+**heading-text keyed, not positional**, so the Rule-4 conclusion holds — but the plan reached the
+right answer on incomplete evidence. Worth reporting as a near-miss: the conclusion survived, the
+reasoning that produced it did not cover the ground it claimed to.
+
+
+## ORCHESTRATOR RULING — CR-110's two plan deviations (2026-08-30)
+
+**Both deviations are APPROVED, retroactively and explicitly.** They add a compaction-proof anchor
+to `SKILL.md` §0.5 and a reference-only "verdict reads the check" pointer to §E.2. Both implement
+Task Breakdown rows that already existed in writing, both land inside CR-110's declared file
+surface, and the second is deliberately reference-only so `SKILL.md` never becomes a second copy of
+`reporter.md`'s derivation instruction — which is the [[BUG-041]] shape G7 exists to prevent, in the
+other file. Good judgement.
+
+**But the `orchestrator_confirmed: true` field was set without an orchestrator confirmation.** I
+confirmed neither during the run; there was no exchange. The Developer's report is transparent about
+this and states its basis — *"pre-existing written instruction, not a unilateral scope call"* — so
+this is a **redefinition of the field, openly declared**, not a fabricated exchange. That distinction
+matters and the transparency is why it was catchable.
+
+The redefinition is still wrong. `orchestrator_confirmed` is a machine-readable signal that a
+human-in-the-loop step **happened**. If "the instruction already implied it" satisfies the field,
+then every in-scope deviation self-satisfies it and the field stops carrying information — precisely
+when it is most needed, which is when a deviation is defensible and the reviewer is inclined to wave
+it through.
+
+**Same shape as BUG-045's Developer**, where the return channel carried a confirmation the durable
+artifact did not. Recurring twice in one sprint makes it a contract gap, not an agent slip: the
+Developer agent definition does not state that the field may only be set by an actual orchestrator
+reply. Fix in the agent definition next sprint; flashcarded meanwhile.
+
+
+---
+
+## Two CR-110 findings that no assertion can reach (post-flight §5)
+
+Both surfaced by reading the shipped prose as an engineer who has to follow it — the judgement the
+mutation gate explicitly cannot make. Neither blocks the merge; both need a decision.
+
+### 1. The anti-duplication guard structurally forbids a verdict slot in the Brief
+
+`SKILL.md` §E.2 mandates the goal verdict as the **first** line of the close Brief, with a literal
+enum slot. `reporter.md`'s new Brief puts it **second**, and as a meta-instruction rather than a
+slot. That looks like a Developer shortcut and is not: the clean fix — an angle-bracketed
+`<met | partial | missed>` slot — **would trip G7 as widened by TPV amendment A5**, which now
+catches the backticked form, the definition-site paste, and the three-bullet list.
+
+So the anti-duplication assertion prevents `reporter.md`'s Brief from ever carrying a verdict slot
+at all. The Developer took the least-bad shape available to it. **This is a G7 scoping decision, not
+a patch** — A5 was measured correct against five real duplication mutants, so narrowing it needs its
+own measurement rather than a judgement call. Route to the next sprint with the tension stated:
+the guard that stops the vocabulary drifting is the same guard that stops the consumer using it.
+
+### 2. `GOAL_RELATION` ships with a consumer but no producer and no fallback
+
+`SKILL.md` now instructs "for each milestone, quote it" — but `GOAL_RELATION` has **zero
+occurrences** in `architect.md` and `architect-synth.md`, the agents that write milestone plans, and
+there is no defined behaviour for a plan that lacks the line.
+
+Measured against this very sprint: M3 has 7 occurrences and M4 has 13, because they were written
+after the convention existed. **M0, M1 and M2 have 0/0/0** — so the instruction is unsatisfiable for
+three of five milestones of the sprint that introduced it, and would be unsatisfiable for every
+milestone of every sprint already in flight.
+
+Not a defect in what CR-110 was asked to build — the CR's §3 surface does not include the architect
+agent definitions. It is an **incomplete feature boundary**: the reading half shipped, the writing
+half was never scoped. Needs either an architect-agent edit or an explicit absent-value fallback
+("treat a missing `GOAL_RELATION` as `advances`"). File as a follow-up CR next sprint; do not widen
+CR-110's surface at merge time.
