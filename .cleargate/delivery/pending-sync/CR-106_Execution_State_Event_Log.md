@@ -65,7 +65,19 @@ last_synced_body_sha: null
 
 **New Logic (The New Truth):**
 
-- **`events.jsonl` is the truth. `state.json` is a fold over it.** Every lifecycle transition becomes one appended JSON line: `{ts, sprint_id, story_id, from, to, actor, run_id, wave, reason}`. POSIX `O_APPEND` writes below `PIPE_BUF` (4096 bytes) are atomic, so concurrent appends cannot interleave and contention goes to zero regardless of wave width.
+- **`events.jsonl` is the truth. `state.json` is a fold over it.** Every lifecycle transition becomes one appended JSON line: `{ts, sprint_id, story_id, from, to, actor, run_id, wave, reason}`. **§ AMENDMENT (orchestrator, 2026-08-29, per M4 §CR-106 "WRONG PREMISE"). The design is correct;
+the stated reason was not, and it is REPLACED here — the row stays, per the CR-105 rule.** The
+original sentence read *"POSIX `O_APPEND` writes below `PIPE_BUF` (4096 bytes) are atomic"*. Two
+errors in one sentence: `PIPE_BUF` governs **pipes and FIFOs** and says nothing about a regular
+file, and a `.jsonl` append is a regular-file write; and on this machine `getconf PIPE_BUF /`
+returns **512**, not 4096 — so even the number is wrong for the platform the sprint runs on.
+The property actually relied on is that **`O_APPEND` makes the seek-to-end and the write a single
+atomic operation with respect to other writers on the same file**, which POSIX does guarantee for
+regular files and which Node reaches via `fs.appendFileSync(path, line, 'utf8')` (flag `'a'`).
+Concurrent appends therefore cannot interleave and contention goes to zero regardless of wave
+width. **Record this guarantee — not `PIPE_BUF` — in the `state-events.mjs` code comment.** Do not
+size a record against 4096 and call it safe: that number has no meaning here, and a comment citing
+it will be cargo-culted by the next reader.
 - **`state.json` keeps its exact current schema and path.** After each append the folder rewrites it. It gains exactly one writer — the folder — and folds are idempotent, so the lost-update race is structurally impossible rather than merely unlikely. **No reader changes.** All 27 non-test consumers keep working untouched.
 - **This finishes a pattern ClearGate already uses everywhere else.** `token-ledger.jsonl` is append-only JSONL, hook-owned, with an explicit "never edit by hand" rule (CLAUDE.md). `wiki/log.md` is an append-only YAML event stream. The CLAUDE.md doctrine already reads *"Wiki, memory, and `context_source` are derived caches… the code wins; the cache rebuilds."* `state.json` is the last machine-written surface still modelled as a mutable document.
 - **Idempotency stops being a prose obligation.** `SKILL.md:261` currently *asks* segments to be idempotent as a "belt-and-suspenders safety net" for `resumeFromRunId`. With events keyed by `run_id`, a replayed GREEN segment appends a duplicate that the fold discards. The guarantee moves out of prose and into the data model.
@@ -147,7 +159,62 @@ New cases, all required:
 5. **Legacy sprint immutability.** A sprint dir with `state.json` and no `events.jsonl` is not rewritten and does not throw.
 6. **Atomic append.** Concurrent appends produce no interleaved or truncated lines; every line parses as JSON.
 
-**Eviction check:** `command grep -n "readFileSync.*stateFile" .cleargate/scripts/update_state.mjs` returns nothing — the read-modify-write is gone, not merely guarded.
+**§ AMENDMENT (orchestrator, 2026-08-29, per M4 §CR-106 Omissions 1-3 and `TPV RULING — BUG-044` T4).
+Three cases are ADDED and the eviction check is widened. Nothing above is deleted.**
+
+7. **NEW — byte compatibility with the current writer.** Drive a real transition sequence through the
+   OLD path and the NEW path against identical seeds; assert the resulting `state.json` files are
+   **byte-identical**. Case 4 (schema conformance) is strictly weaker and does not reach this.
+   `close_sprint.mjs` is the largest single reader — it runs the lifecycle reconciler and the Step
+   2.6d backsync — so §2's *"Invalidate/Update: none"* is only true if the fold's output is
+   byte-compatible, not merely schema-valid. Kills any fold that reorders keys, changes indentation
+   from `JSON.stringify(state, null, 2) + '\n'` (`update_state.mjs:78`), or drops a field the schema
+   permits but does not require. **This is the case that protects the 27 readers.**
+8. **NEW — the vacuity mutant.** Assert `fold()` receives **only** the event array and performs **no**
+   read of `state.json`. Grep the module: `readFileSync` must appear only for `events.jsonl`.
+   Kills *a "fold" that reads the existing `state.json` and merges into it* — which passes cases 2,
+   3, 4 and 6, produces correct-looking output, and **reintroduces the exact read-modify-write race
+   this CR exists to remove.** This is CR-106's most dangerous mutant and nothing in the original
+   §4 catches it.
+9. **NEW — eviction, both halves.** See the widened check below.
+
+Two further scope clarifications, both **inside already-declared files** — no new surface:
+
+- **`update_state.mjs:114-117` and `:120-123`** (`migrateV1ToV2` + `atomicWrite`, `migrateStateToV3`
+  + `atomicWrite`) are two full `state.json` writes that happen **before** the action branch. Under
+  this CR they are also `state.json` writes and must either route through the fold or be explicitly
+  exempted with a stated reason. The original eviction check cannot see them — they call
+  `atomicWrite`, not `readFileSync`.
+- **`init_sprint.mjs:231-233`** seeds `state.json` with its own inline tmp+rename, duplicating the
+  idiom rather than importing it. *"Seed `events.jsonl` at sprint init"* must not assume a shared
+  helper exists. Either import from `state-events.mjs` (preferred — that is the new module's job) or
+  duplicate deliberately and say so. `init_sprint.mjs` is already a declared surface, so collapsing
+  the duplication is in scope.
+
+**§ PRECONDITION (per `TPV RULING — BUG-044` T4). This CR owes the RUNNER; BUG-044 owed the GREEN.**
+`.cleargate/scripts/state-scripts.test.mjs` is invoked by nothing — `grep -rn "state-scripts"` across
+the tree returns only planning documents. Adding a runner was outside BUG-044's three-row surface, so
+it lands here. Three corrected facts, measured, for whoever wires it:
+
+- post-fix wall-clock is **14-22s**, not the 5-10s the original estimate assumed;
+- the file spawns **32 real node child processes** per run;
+- it **must run single-concurrency** — S1's lock-serialization time is already within ~3s of S5's
+  hard 10s ceiling, and a parallel runner closes that gap.
+
+By the time this CR runs, the baseline is **`tests 15 · suites 13 · pass 15 · fail 0 · skipped 0`**
+(BUG-044's post-fix line). Acceptance is those three numbers, reported verbatim.
+
+**§ MITIGATIONS REQUIRED (human decision at the M4 planning halt, 2026-08-29).** The M4 Architect
+recommended deferring this CR (OD-1): it replaces the write path for `state.json` while
+`.cleargate/sprint-runs/SPRINT-39/state.json` is **live and being written by the running sprint**,
+from a main checkout sitting on `sprint/S-39` — so from the moment this merges, the new writer is
+the writer for this sprint's own waves 12 and 13, with zero soak time. **The human ruled: ship it,
+with the mitigations.** The mitigations are cases **7**, **8** and **9** above, plus a named
+rollback: `git revert -m 1 <merge commit>` in the outer repo — **never `git reset --hard`.**
+
+**Eviction check — BOTH halves must pass:**
+1. `command grep -n "readFileSync.*stateFile" .cleargate/scripts/update_state.mjs` returns nothing — the read-modify-write is gone, not merely guarded.
+2. `command grep -n "atomicWrite(stateFile" .cleargate/scripts/update_state.mjs` returns **only** the fold's own call site — the `:116`/`:122` migration writes are not still on the old path.
 
 **Parity check:** `diff .cleargate/scripts/state-events.mjs cleargate-planning/.cleargate/scripts/state-events.mjs` is empty (dogfood-split rule, CLAUDE.md).
 

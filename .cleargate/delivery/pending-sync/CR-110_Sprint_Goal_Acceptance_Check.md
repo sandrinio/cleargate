@@ -144,6 +144,16 @@ last_synced_body_sha: null
 5. Reporter emits `met` only when the recorded check is satisfied; `partial`/`missed` name the unmet part.
 6. Existing `cr078_init.test.sh` cases stay green.
 
+**§ AMENDMENT (orchestrator, 2026-08-29, resolving M4 OD-4 — the Architect flagged this as needing
+a decision before dispatch). The sprint-goal verdict is spoken in the close Brief; it is NOT written
+into `sprint_report.md`. Ruled: not this sprint.** Adopting the Architect's own recommendation, for
+its stated reason: the report template carries zero goal/verdict content today, and adding a section
+interacts with `close_sprint.mjs:288-300`'s required-row regex list — which this CR itself places in
+Do-NOT-modify. The `GOAL_RELATION` line (M4 §Q5-B) already gives the Reporter what it needs without
+touching the close gate. **This CR ships the acceptance check; it does not reshape the report.**
+Case 5 above is satisfied by the Reporter's spoken verdict in the Brief — do not add a report
+section to satisfy it, and do not modify `close_sprint.mjs`.
+
 **Parity check:** all four modified files diff clean against their `cleargate-planning/` mirrors.
 
 ---

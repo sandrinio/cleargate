@@ -100,6 +100,13 @@ Corroborating protocol text (CLAUDE.md, *Drafting work items*): *"After `clearga
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
+**§ AMENDMENT (orchestrator, 2026-08-29, per TPV T9(b) and M4 §Q5-C): `cleargate-cli/CHANGELOG.md`
+is a required surface and was undeclared.** It is read by users *and* printed by `cleargate
+upgrade`, so it is the only user-facing carrier this fix has. Add a `### Fixed` subsection above
+`### Changed` under the existing `## Unreleased` heading (`CHANGELOG.md:6`, which currently has
+no `### Fixed`). **Do NOT bump `package.json`** — `test/changelog-format.node.test.ts:140-149`
+pins the topmost `## [X.Y.Z]` heading to `0.24.2`, and the version bump is a Gate-4 release step.
+
 **Investigate / modify:**
 - `cleargate-cli/src/commands/hotfix.ts` — `maxHotfixId` call site and, if the helper is local to this file, the helper itself.
 - `cleargate-cli/test/` — new regression test (see §5).
@@ -113,11 +120,27 @@ Corroborating protocol text (CLAUDE.md, *Drafting work items*): *"After `clearga
 **Command:** `npm --prefix cleargate-cli test`
 
 1. **The failing test.** `HOTFIX-001` in `archive/`, `pending-sync/` empty → next allocation is `HOTFIX-002`. **Must fail against the current tree.**
-2. Ids split across both directories (`001` archived, `002` pending) → next is `003`.
+2. Ids split across both directories. **§ AMENDMENT (orchestrator, 2026-08-29, per TPV
+   `TPV RULING — BUG-045` T9(a)). The original fixture is DECORATIVE — it does not
+   discriminate.** Measured against `e4cb49f`: `001` archived / `002` pending → `003` is
+   **GREEN at baseline**, because `pendingDir`'s own archive-blind max is already `2`, so a
+   completely unfixed implementation passes it. The archive must hold the **higher** id for
+   the case to be diagnostic — QA-Red re-derived it that way as R2, measured red, and it is
+   the sole killer of the scan-the-wrong-set mutant. **§2's Reproduction Protocol is NOT
+   affected and must not be edited** — TPV measured it diagnostic (create → `mv` to archive →
+   create is red at baseline) and ruled it in as R15.
 3. `archive/` missing → no throw, allocation proceeds from `pending-sync/` alone.
 4. Malformed filenames in either directory are ignored.
 5. Zero-padding: `HOTFIX-009` present → next is `HOTFIX-010`.
 6. Existing `hotfix new` behaviour with a populated `pending-sync/` is unchanged (regression guard).
+
+**§ AMENDMENT (orchestrator, 2026-08-29, per TPV T9(c)) — collision-freedom is NOT a sufficient
+acceptance criterion, and this is the finding that would otherwise have shipped a wrong fix.**
+TPV built a mutant that drops the `classifyType(id) === 'HOTFIX'` filter while widening the
+helper. It passes every case above **and** this item's own real-tree collision argument: on
+this repo it allocates `HOTFIX-115`, because it tracks the CR/EPIC/STORY numbering and
+therefore collides with nothing. A fix is accepted only if the type filter demonstrably
+survives — see R14, which is the only case that kills it.
 
 **Hand-off to [[CR-108]]:** these cases are the acceptance floor for the generalized allocator. CR-108 §4 case 4 re-runs the same scenario parameterized across every registered type.
 

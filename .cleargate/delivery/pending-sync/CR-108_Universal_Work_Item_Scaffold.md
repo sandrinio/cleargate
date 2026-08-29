@@ -154,6 +154,37 @@ Required cases:
 6. **Stamp round-trip.** Scaffold → `cleargate stamp` → re-stamp: `created_at` is preserved, `updated_at` advances, second identical re-stamp is a no-op.
 7. **`hotfix new` regression.** Existing behaviour byte-identical to pre-CR output.
 
+**§ AMENDMENT (orchestrator, 2026-08-29, resolving M4 OD-3 — the Architect flagged this as
+"must be decided before dispatch"). `cleargate new <type>` does NOT strip `<instructions>`
+blocks. Ruled: no stripping.** Measured, not inferred:
+
+- Eight of ten templates carry exactly one `<instructions>` block (`Bug.md`, `CR.md`,
+  `Sprint Plan Template.md`, `epic.md`, `hotfix.md`, `initiative.md`, `spike.md`, `story.md`);
+  only `sprint_context.md` and `sprint_report.md` carry none. **`hotfix.md` is in the carrying set.**
+- The shipping renderer strips nothing. `hotfixNewHandler` reads the template and performs exactly
+  three substitutions — `cleargate-cli/src/commands/hotfix.ts:188-191`:
+  `.replace(/\{ID\}/g, idStr).replace(/\{SLUG\}/g, opts.slug).replace(/\{ISO\}/g, now)`.
+  `grep -n 'instructions' src/commands/hotfix.ts` returns nothing.
+- The one real scaffolded artefact, `archive/HOTFIX-001_init_skip_strips_exec_bit.md`, carries
+  **zero** `<instructions>` blocks while its own template carries one. The renderer cannot have
+  removed it, so **it was hand-cleaned after scaffolding** — a human editorial step, not a
+  renderer behaviour.
+
+Three reasons, in order of weight:
+
+1. **Case 7 above demands byte-identical output.** Stripping violates it by construction, since
+   `hotfix.md` carries a block. The two requirements are mutually exclusive as written, and
+   byte-identical regression is the one protecting a command that already ships to users.
+2. **The block is the drafting agent's contract** — it is what tells the agent to render a Brief
+   and halt (the universal pre-push handshake in CLAUDE.md). Stripping at scaffold time deletes
+   the instruction from the artefact the agent then reads.
+3. **Stripping is separable.** If hand-cleaning proves a real burden across nine types it is its
+   own CR with its own regression case; it is not a precondition of "one scaffolder for every
+   type", and folding it in would make case 7 unverifiable.
+
+Implement substitution-only rendering, matching `hotfix.ts:188-191`. Any `<instructions>`
+handling is **out of scope and a kick-back**.
+
 **Eviction check:** `command grep -rn "maxHotfixId" cleargate-cli/src` returns at most the general allocator — no type-specific duplicate remains.
 
 **Parity check:** all nine template mirrors diff clean against `cleargate-planning/`.
