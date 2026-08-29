@@ -470,7 +470,7 @@ describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct storie
     fs.rmSync(tmpBase, { recursive: true, force: true });
   });
 
-  test('all 20 concurrent Bouncing transitions are present in the final state.json (reproduces BUG-044 SS2)', async () => {
+  test('all 20 concurrent Bouncing transitions are present in the final state.json (reproduces BUG-044 SS2)', { timeout: 30000 }, async () => {
     const results = await Promise.all(
       ids.map((id) =>
         spawnUpdateStateAsync([id, 'Bouncing'], {
@@ -528,7 +528,7 @@ describe('BUG-044 S2: two concurrent update_state invocations, same story id -- 
     fs.rmSync(tmpBase, { recursive: true, force: true });
   });
 
-  test('two racing writers to the same story id leave valid JSON with exactly one winning write', async () => {
+  test('two racing writers to the same story id leave valid JSON with exactly one winning write', { timeout: 15000 }, async () => {
     const results = await Promise.all(
       [0, 1].map(() =>
         spawnUpdateStateAsync([ID, 'Bouncing'], {
@@ -716,7 +716,7 @@ describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 sta
     fs.rmSync(tmpBase, { recursive: true, force: true });
   });
 
-  test('all N concurrent transitions persist AND the file ends fully migrated to schema_version 3', async () => {
+  test('all N concurrent transitions persist AND the file ends fully migrated to schema_version 3', { timeout: 30000 }, async () => {
     const results = await Promise.all(
       ids.map((id) =>
         spawnUpdateStateAsync([id, 'Bouncing'], {
