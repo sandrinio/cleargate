@@ -12,9 +12,10 @@ import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { spawnSync, spawn } from 'node:child_process';
 import os from 'node:os';
+import { SCHEMA_VERSION } from './constants.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPTS_DIR = __dirname;
@@ -87,7 +88,14 @@ describe('Scenario 1: init_sprint creates fresh state.json', () => {
     assert.ok(fs.existsSync(stateFile), 'state.json should exist');
 
     const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-    assert.strictEqual(state.schema_version, 1, 'schema_version must be 1');
+    // BUG-044 commit A (M4.md plan, ruling N3): two-assertion form, not one.
+    // A bare literal alone drifts silently when SCHEMA_VERSION bumps (this is exactly how this
+    // assertion went stale: b87f6ac0 bumped constants.mjs to v3 without updating the `1` here).
+    // A SCHEMA_VERSION-only comparison would be self-fulfilling and hide the same drift. Assert
+    // both: the contract (state matches the constant) AND the deliberate pin (the constant is
+    // still 3 today — the next bump must break this assertion on purpose).
+    assert.strictEqual(state.schema_version, SCHEMA_VERSION, 'schema_version must equal SCHEMA_VERSION (constants.mjs)');
+    assert.strictEqual(SCHEMA_VERSION, 3, 'SCHEMA_VERSION pin -- the next bump must update this assertion on purpose');
     assert.strictEqual(state.sprint_id, 'S-FAKE');
 
     for (const id of ['STORY-FAKE-01', 'STORY-FAKE-02']) {
