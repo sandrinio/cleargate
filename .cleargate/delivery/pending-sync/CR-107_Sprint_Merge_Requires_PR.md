@@ -80,7 +80,24 @@ last_synced_body_sha: null
     `--is-ancestor` correctly reports "not merged" for a sprint that *was* merged.
   - **F2b — stale local `main`.** `close_sprint.mjs:662` reads `refs/heads/main`, the **local**
     ref. After any PR merge the local ref is behind until the human pulls, so the check reads
-    "not merged" on **every** PR-merged sprint. Fetch first, or consult `refs/remotes/origin/main`.
+    "not merged" on **every** PR-merged sprint.
+
+    **§ CORRECTION (orchestrator, 2026-08-29, per `TPV RULING — CR-107` T5). The original wording
+    here — "fetch first, OR consult `refs/remotes/origin/main`" — is ambiguous and one reading of
+    it BOUNCES a correct implementation.** Read as a *replacement*, "consult `origin/main`" is
+    TPV's mutant **M3b**, which scores 28/12: it is killed by P4, whose fixture merges into
+    **local** `main` and never pushes, leaving `refs/remotes/origin/main` at the seed commit —
+    and P4 pins the verdict string `Step 2.8 passed: refs/heads/sprint/S-97 is merged to
+    refs/heads/main.` **verbatim, including the ref name.**
+
+    **Binding, proven by measurement:** check **`refs/heads/main` FIRST**; consult
+    `refs/remotes/origin/main` **only as a fallback when the local check fails**; and keep the
+    `Step 2.8 passed: <sprint> is merged to <ref>` message naming **whichever ref actually
+    satisfied it**. That ordering, and only that ordering, satisfies **P4 and P6 together**.
+
+    QA-Red's fixture note that the two named fixes *"reduce to the same observable requirement"*
+    is **wrong** — P4 is exactly where the difference bites. This corrects the M4 plan's F2b
+    wording, not the Developer.
   Keep `--is-ancestor` itself. Note `close_sprint.mjs:659` skips Step 2.8 entirely when the sprint
   id has no numeric portion — a `vcs`-gated path must not be reachable only through that skip.
 - [ ] Database schema impacts? **No.**
