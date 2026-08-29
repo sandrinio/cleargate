@@ -63,6 +63,83 @@ function makeStory(stateVal = 'Ready to Bounce', overrides = {}) {
   };
 }
 
+// ---- BUG-044 helpers: deterministic read-window widening for lost-update races ----
+//
+// A lost-update race is timing-dependent; a test that spawns N processes and hopes they happen
+// to interleave badly is worthless when the race doesn't fire on a given run (FLASHCARD
+// 2026-08-28 #test-harness #danger; this story's own QA-Red dispatch repeats the warning). We
+// force the read-modify-write window open instead: a `--import`-preloaded shim monkey-patches
+// the process-global `fs.readFileSync` so the FIRST read of the target state file sleeps
+// synchronously before returning. `import fs from 'node:fs'` in every module of the process
+// resolves to the SAME shared object, so patching a property on it from a `--import` preload is
+// visible to update_state.mjs's own later `import fs from 'node:fs'` — verified empirically
+// (scratch repro: shim.mjs patches fs.readFileSync, target.mjs imports fs independently and
+// still hits the patched function) before writing this file. Spawning N such processes
+// back-to-back (spawn() is non-blocking; the loop issuing all N calls completes in low
+// single-digit ms) lands every process's read inside the same widened window, forcing them to
+// observe the identical pre-mutation snapshot.
+//
+// This does NOT deadlock a correctly-locked fix: the lock retry loop (if the story's lock is
+// implemented) runs BEFORE the shimmed read — the read only happens once a process holds the
+// lock — so a correct fix simply serializes the N delayed reads one at a time (slower: each
+// holder pays the delay once; never hung).
+
+function makeReadDelayShimFile(tmpDir) {
+  const shimPath = path.join(tmpDir, '.read-delay-shim.mjs');
+  const shimSrc = [
+    "import fsShim from 'node:fs';",
+    "import pathShim from 'node:path';",
+    '',
+    "const DELAY_MS = Number(process.env.CG_TEST_READ_DELAY_MS || 0);",
+    "const TARGET = process.env.CG_TEST_READ_DELAY_TARGET;",
+    '',
+    'if (DELAY_MS > 0 && TARGET) {',
+    '  const resolvedTarget = pathShim.resolve(TARGET);',
+    '  const originalReadFileSync = fsShim.readFileSync;',
+    '  let armed = true;',
+    '  fsShim.readFileSync = function patchedReadFileSync(p, ...rest) {',
+    '    if (armed && pathShim.resolve(String(p)) === resolvedTarget) {',
+    '      armed = false;',
+    '      const sab = new Int32Array(new SharedArrayBuffer(4));',
+    '      Atomics.wait(sab, 0, 0, DELAY_MS);',
+    '    }',
+    '    return originalReadFileSync.call(fsShim, p, ...rest);',
+    '  };',
+    '}',
+    '',
+  ].join('\n');
+  fs.writeFileSync(shimPath, shimSrc, 'utf8');
+  return shimPath;
+}
+
+// Async spawn of update_state.mjs, optionally preloaded with the read-delay shim above.
+// Returns a Promise so callers can Promise.all() a batch of genuinely concurrent invocations
+// (spawnSync would block the event loop and serialize them, defeating the point of S1/S2).
+function spawnUpdateStateAsync(args, opts = {}) {
+  return new Promise((resolve) => {
+    const env = { ...process.env, ...opts.env };
+    const spawnArgs = [];
+    if (opts.readDelayShim) {
+      spawnArgs.push('--import', pathToFileURL(opts.readDelayShim).href);
+    }
+    spawnArgs.push(path.join(SCRIPTS_DIR, 'update_state.mjs'), ...args);
+    const child = spawn(process.execPath, spawnArgs, { env });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (d) => { stdout += d; });
+    child.stderr.on('data', (d) => { stderr += d; });
+    child.on('close', (status) => resolve({ status, stdout, stderr }));
+  });
+}
+
+// Spawn a throwaway child, wait for it to exit, and return its now-guaranteed-dead pid. Standard
+// "dead pid" fixture technique; carries the usual (negligible, in a fast local test) PID-reuse
+// race shared by every liveness-check test of this shape.
+function deadPid() {
+  const result = spawnSync(process.execPath, ['-e', '']);
+  return result.pid;
+}
+
 // ---- Scenario 1: init_sprint creates fresh state.json ----
 describe('Scenario 1: init_sprint creates fresh state.json', () => {
   let tmpBase;
@@ -323,5 +400,243 @@ describe('Scenario 6: validate_state catches a corrupted counter', () => {
       result.stderr.includes('invariant violation') || result.stderr.includes('qa_bounces'),
       `stderr should name the invariant; got: ${result.stderr}`
     );
+  });
+});
+
+
+// ============================================================================
+// BUG-044 — update_state.mjs lost-update race (QA-Red baseline, commit B)
+// Scenarios S1-S5 per SPRINT-39 plans/M4.md "### Test scenarios, with the mutants each must
+// kill" (BUG-044 section). S0 is commit A above (the schema_version fix). The table's S6 row
+// ("existing scenarios 1-6 stay green") is not a new test -- satisfied by Scenarios 1-6 above
+// continuing to pass in the same `node --test` run as these.
+// ============================================================================
+
+// ---- BUG-044 S1: 20 concurrent invocations, 20 distinct story ids ----
+describe('BUG-044 S1: 20 concurrent update_state invocations, 20 distinct stories -- all 20 transitions must persist', () => {
+  let tmpBase, stateFile, shimPath;
+  const N = 20;
+  const ids = Array.from({ length: N }, (_, i) => `STORY-FAKE-${String(i + 1).padStart(2, '0')}`);
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s1-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    const stories = {};
+    for (const id of ids) stories[id] = makeStory('Ready to Bounce');
+    // Seed at schema_version 3, execution_mode omitted (JSON.stringify drops `undefined` keys) --
+    // seeding at v1 would make a 20-way test exercise 20 concurrent MIGRATIONS, not the race
+    // (BUG-044 Gotchas, M4.md plan: "Seed S1's fixture at schema_version: 3 with no execution_mode").
+    writeStateJson(stateFile, makeState(stories, { schema_version: 3, execution_mode: undefined }));
+    shimPath = makeReadDelayShimFile(tmpBase);
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('all 20 concurrent Bouncing transitions are present in the final state.json (reproduces BUG-044 SS2)', async () => {
+    const results = await Promise.all(
+      ids.map((id) =>
+        spawnUpdateStateAsync([id, 'Bouncing'], {
+          readDelayShim: shimPath,
+          env: {
+            CLEARGATE_STATE_FILE: stateFile,
+            CG_TEST_READ_DELAY_MS: '200',
+            CG_TEST_READ_DELAY_TARGET: stateFile,
+          },
+        })
+      )
+    );
+
+    for (const r of results) {
+      assert.strictEqual(r.status, 0, `every invocation should exit 0 even under the race; stderr: ${r.stderr}`);
+    }
+
+    // Also exercises the "file stays valid JSON" property (SS5 case 2) -- a torn/corrupt file
+    // would throw here rather than silently under-count.
+    const final = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    const bounced = ids.filter((id) => final.stories[id].state === 'Bouncing');
+    const lost = ids.filter((id) => !bounced.includes(id));
+    assert.strictEqual(
+      bounced.length,
+      N,
+      `expected all ${N} transitions to persist; only ${bounced.length} did -- lost: ${lost.join(', ')} ` +
+      `(lost-update race: 'wx' exclusive lock missing, acquired after the :99 read, or not held ` +
+      `across the full read-modify-write window)`
+    );
+  });
+});
+
+// ---- BUG-044 S2: two concurrent invocations against the SAME story id ----
+describe('BUG-044 S2: two concurrent update_state invocations, same story id -- file stays valid JSON, no corruption', () => {
+  let tmpBase, stateFile, shimPath;
+  const ID = 'STORY-FAKE-SAME';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s2-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    writeStateJson(
+      stateFile,
+      makeState({ [ID]: makeStory('Ready to Bounce') }, { schema_version: 3, execution_mode: undefined })
+    );
+    shimPath = makeReadDelayShimFile(tmpBase);
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('two racing writers to the same story id leave valid JSON with exactly one winning write', async () => {
+    const results = await Promise.all(
+      [0, 1].map(() =>
+        spawnUpdateStateAsync([ID, 'Bouncing'], {
+          readDelayShim: shimPath,
+          env: {
+            CLEARGATE_STATE_FILE: stateFile,
+            CG_TEST_READ_DELAY_MS: '200',
+            CG_TEST_READ_DELAY_TARGET: stateFile,
+          },
+        })
+      )
+    );
+
+    for (const r of results) {
+      assert.strictEqual(r.status, 0, `both invocations should exit 0; stderr: ${r.stderr}`);
+    }
+
+    // Guards against "releasing the lock before renameSync" (M4.md plan mutant): that mutant can
+    // let a reader observe a mid-rename, half-written file. A successful JSON.parse <=> no torn write.
+    const raw = fs.readFileSync(stateFile, 'utf8');
+    let final;
+    assert.doesNotThrow(() => { final = JSON.parse(raw); }, `state.json must stay valid JSON after a same-story race; got: ${raw}`);
+    assert.strictEqual(final.stories[ID].state, 'Bouncing', 'the surviving write should reflect the (only) target state both writers computed');
+    assert.strictEqual(Object.keys(final.stories).length, 1, 'no story entries should be duplicated or dropped by the race');
+  });
+});
+
+// ---- BUG-044 S3: idempotent no-op must not leave a lock behind ----
+describe('BUG-044 S3: idempotent no-op leaves no lock file behind, and a third invocation does not hang', () => {
+  let tmpBase, stateFile, lockFile;
+  const ID = 'STORY-FAKE-NOOP';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s3-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    lockFile = `${stateFile}.lock`;
+    writeStateJson(
+      stateFile,
+      makeState({ [ID]: makeStory('Ready to Bounce') }, { schema_version: 3, execution_mode: undefined })
+    );
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('transition, then repeat (idempotent no-op), leaves no lock file and a third call succeeds without hanging', () => {
+    const env = { ...process.env, CLEARGATE_STATE_FILE: stateFile };
+
+    const first = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    assert.strictEqual(first.status, 0, `first transition should exit 0; stderr: ${first.stderr}`);
+
+    // Hits the idempotency no-op branch at update_state.mjs:227-229 (process.exit(0) -- the
+    // commonest path in normal operation, and the one that a `finally`-only release would skip).
+    const second = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    assert.strictEqual(second.status, 0, `no-op should exit 0; stderr: ${second.stderr}`);
+    assert.ok(second.stdout.includes('No-op:'), `no-op stdout should say "No-op:"; got: ${second.stdout}`);
+
+    assert.ok(!fs.existsSync(lockFile), `no lock file should remain after an idempotent no-op; found ${lockFile}`);
+
+    // A `finally`-only release ships a tool that self-deadlocks on its second no-op (Gotcha 1) --
+    // this third call is the check that would hang forever under that mutant.
+    const third = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    assert.notStrictEqual(third.status, null, 'third invocation must not hang/time out (finally-only release deadlocks here)');
+    assert.strictEqual(third.status, 0, `third invocation should also succeed; stderr: ${third.stderr}`);
+  });
+});
+
+// ---- BUG-044 S4: a lock left by a dead process is stolen, not honoured forever ----
+describe('BUG-044 S4: stale lock (dead pid) is stolen; the invocation succeeds and the stale lock does not survive', () => {
+  let tmpBase, stateFile, lockFile;
+  const ID = 'STORY-FAKE-STALELOCK';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s4-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    lockFile = `${stateFile}.lock`;
+    writeStateJson(
+      stateFile,
+      makeState({ [ID]: makeStory('Ready to Bounce') }, { schema_version: 3, execution_mode: undefined })
+    );
+    const pid = deadPid();
+    fs.writeFileSync(lockFile, JSON.stringify({ pid, at: new Date().toISOString() }), 'utf8');
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('invocation steals a dead-pid lock, transitions the story, and leaves no stale lock file, within the retry budget', () => {
+    const env = { ...process.env, CLEARGATE_STATE_FILE: stateFile };
+    const start = Date.now();
+    const result = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    const elapsedMs = Date.now() - start;
+
+    assert.notStrictEqual(result.status, null, 'invocation must not hang/time out on a dead-pid lock');
+    assert.strictEqual(result.status, 0, `a dead-pid lock should be stealable; stderr: ${result.stderr}`);
+    assert.ok(elapsedMs < 10000, `steal should complete within the retry budget; took ${elapsedMs}ms`);
+
+    const final = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    assert.strictEqual(final.stories[ID].state, 'Bouncing', 'the transition should have taken effect after stealing the dead lock');
+
+    assert.ok(!fs.existsSync(lockFile), `the stale lock should not survive a successful invocation; found ${lockFile}`);
+  });
+});
+
+// ---- BUG-044 S5: a live lock is respected, never stolen ----
+describe("BUG-044 S5: a live lock (this process's own pid) is respected -- the invocation refuses to proceed", () => {
+  let tmpBase, stateFile, lockFile;
+  const ID = 'STORY-FAKE-LIVELOCK';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug044-s5-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    lockFile = `${stateFile}.lock`;
+    writeStateJson(
+      stateFile,
+      makeState({ [ID]: makeStory('Ready to Bounce') }, { schema_version: 3, execution_mode: undefined })
+    );
+    // This TEST process's own pid -- guaranteed alive for the duration of the assertion below.
+    fs.writeFileSync(lockFile, JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8');
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('invocation does NOT steal a live lock; exits non-zero within the budget and leaves state untouched', () => {
+    const env = { ...process.env, CLEARGATE_STATE_FILE: stateFile };
+    const start = Date.now();
+    const result = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+    const elapsedMs = Date.now() - start;
+
+    assert.notStrictEqual(result.status, null, 'invocation must not hang; it should give up within the retry budget');
+    assert.notStrictEqual(result.status, 0, `a live lock must not be stolen -- invocation should refuse and exit non-zero; got status ${result.status}, stderr: ${result.stderr}`);
+    assert.ok(elapsedMs < 10000, `refusal should happen within the retry budget; took ${elapsedMs}ms`);
+
+    const final = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    assert.strictEqual(final.stories[ID].state, 'Ready to Bounce', 'state must be untouched -- the invocation must not have proceeded past the live lock');
+
+    assert.ok(fs.existsSync(lockFile), 'the live lock itself should still be present -- this process never released it');
   });
 });
