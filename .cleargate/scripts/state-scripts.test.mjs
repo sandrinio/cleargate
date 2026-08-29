@@ -16,6 +16,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync, spawn } from 'node:child_process';
 import os from 'node:os';
 import { SCHEMA_VERSION } from './constants.mjs';
+import { validateState } from './validate_state.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPTS_DIR = __dirname;
@@ -820,6 +821,520 @@ describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 sta
       `migration writes at update_state.mjs:116/:122 raced -- a lock scoped only to the action-branch ` +
       `writes at :155/:176/:193/:210/:241 does not protect this path; NOT a retry-budget issue, since ` +
       `every invocation already reported exit 0 above)`
+    );
+  });
+});
+
+// ============================================================================
+// CR-106: execution state becomes an append-only event log -- QA-Red baseline
+// ============================================================================
+//
+// Scenarios E2-E9 per CR-106_Execution_State_Event_Log.md §4 (as amended 2026-08-29) and
+// SPRINT-39 plans/M4.md "### Test scenarios, with the mutants each must kill" (CR-106 section).
+// Baseline before this section: node --test .cleargate/scripts/state-scripts.test.mjs ->
+// tests 15 · suites 13 · pass 15 · fail 0 · skipped 0 (~14.4-14.6s wall-clock, BUG-044 post-fix).
+//
+// E1 is INHERITED, not authored here: the "BUG-044 S1: 20 concurrent update_state invocations"
+// describe block above IS E1 -- it must stay green after the lock is replaced by the single-writer
+// fold, unmodified, per the item's own §4 case 1 ("do not delete or weaken it").
+//
+// S4 and S5 above (dead-pid-lock-is-stolen / live-lock-is-respected) are PURE LOCK SEMANTICS with
+// zero race content (item § AMENDMENT "two scenarios MUST be deleted with the lock, and saying so
+// is part of the work"). They are NOT deleted by THIS commit -- QA-Red does not touch
+// update_state.mjs or remove the lock -- but per that amendment: whoever removes the lock in the
+// SAME commit must also delete S4 and S5 (T1 stays -- it is a real M6 exit-site regression guard,
+// green at baseline by design, not a lock-lifecycle test), and must STATE that deletion in their
+// commit message and report, not do it silently. Recorded here so the obligation travels with the
+// test file, not just the QA-Red report.
+//
+// `.cleargate/scripts/state-events.mjs` does not exist yet at QA-Red time (this dispatch's own
+// forbidden list: no production code, no state-events.mjs, no edits to update_state.mjs). It is
+// imported DYNAMICALLY (not via a top-level `import`) so its absence fails ONLY the E2-E9 tests
+// below -- never the whole file's module load, which would collaterally fail the inherited
+// BUG-044 suite above for an unrelated reason (a missing-module load error aborts the entire
+// `node --test` file, not just one describe block).
+let stateEventsModule = null;
+let stateEventsImportError = null;
+try {
+  stateEventsModule = await import('./state-events.mjs');
+} catch (err) {
+  stateEventsImportError = err;
+}
+function requireStateEvents() {
+  if (!stateEventsModule) {
+    assert.fail(
+      `.cleargate/scripts/state-events.mjs not found or failed to import -- expected until CR-106 ` +
+      `creates it (appendEvent, fold, EVENT_SCHEMA). Import error: ${stateEventsImportError && stateEventsImportError.message}`
+    );
+  }
+  return stateEventsModule;
+}
+
+// Minimal event-shape helper, per CR-106 §1 "New Logic": {ts, sprint_id, story_id, from, to,
+// actor, run_id, wave, reason}.
+//
+// GENESIS CONVENTION -- QA-RED WORKING ASSUMPTION, flagged explicitly in the QA-Red report as a
+// spec gap: nothing in the CR item, the M4 plan, or BUG-044's artifacts defines how a story's
+// non-transition fields (lane, worktree, notes, bounce counters, ...) reach the fold when fold()
+// takes ONLY the event array (no state.json, no external state -- that is exactly E8's own
+// property). This helper's convention: a story's first appearance in the log is an event with
+// from: null, and E7 additionally carries an `initial: {...}` payload on that first event for the
+// fields the documented 9-field shape does not cover. If the Developer's real genesis-event
+// contract differs, this convention -- not the byte-compatibility/determinism properties the tests
+// below exercise -- is what needs adjusting.
+function makeEvent(overrides = {}) {
+  return {
+    ts: '2026-08-29T00:00:00.000Z',
+    sprint_id: 'S-FAKE',
+    // sprint_status is NOT one of the CR's documented 9 event fields -- same QA-Red-assumption
+    // caveat as the genesis convention above: carried per-event (redundant, but consistent with
+    // how sprint_id is already carried per-event in the documented shape) so fold() has SOME
+    // source for state.json's top-level sprint_status without reading state.json itself (E8).
+    sprint_status: 'Active',
+    story_id: 'STORY-FAKE-E',
+    from: null,
+    to: 'Ready to Bounce',
+    actor: 'test',
+    run_id: 'run-0',
+    wave: 1,
+    reason: null,
+    ...overrides,
+  };
+}
+
+// Freezes `new Date()` / `Date.now()` to a fixed instant inside a spawned child, via --import
+// preload -- same mechanism as makeBarrierShimFile above (global reassignment before the entry
+// script's own imports run). Lets E7 drive a REAL invocation of TODAY'S unmodified
+// update_state.mjs and get a reproducible `new Date().toISOString()` value out of it, so its
+// output can be compared byte-for-byte against a hand-built event log using the SAME timestamp.
+function makeFrozenDateShimFile(tmpDir, isoString) {
+  const shimPath = path.join(tmpDir, '.frozen-date-shim.mjs');
+  const shimSrc = [
+    `const FROZEN_MS = new Date(${JSON.stringify(isoString)}).getTime();`,
+    'const RealDate = Date;',
+    'class FrozenDate extends RealDate {',
+    '  constructor(...args) {',
+    '    if (args.length === 0) { super(FROZEN_MS); return; }',
+    '    super(...args);',
+    '  }',
+    '  static now() { return FROZEN_MS; }',
+    '}',
+    'globalThis.Date = FrozenDate;',
+    '',
+  ].join('\n');
+  fs.writeFileSync(shimPath, shimSrc, 'utf8');
+  return shimPath;
+}
+
+// Tiny throwaway runner script (written to fs.mkdtempSync, not a repo file -- same technique as
+// makeBarrierShimFile) that imports the REAL appendEvent() and calls it once with argv-supplied
+// arguments, so E6 can drive N genuinely concurrent appendEvent() calls via N real child
+// processes (mirrors spawnUpdateStateAsync's rationale: spawnSync would serialize them and defeat
+// the point of a concurrency test).
+//
+// QA-RED ASSUMPTION, flagged in the report: appendEvent(eventsFile, event) -- eventsFile first,
+// mirroring atomicWrite(stateFile, state)'s own (path, payload) argument order. Nothing in the CR
+// item specifies appendEvent()'s signature; if it differs, this runner needs a one-line fix.
+function makeAppendEventRunnerFile(tmpDir) {
+  const runnerPath = path.join(tmpDir, '.append-event-runner.mjs');
+  const moduleUrl = pathToFileURL(path.join(SCRIPTS_DIR, 'state-events.mjs')).href;
+  const src = [
+    `import { appendEvent } from ${JSON.stringify(moduleUrl)};`,
+    '',
+    'const [, , eventsFile, eventJson] = process.argv;',
+    'const event = JSON.parse(eventJson);',
+    'appendEvent(eventsFile, event);',
+    '',
+  ].join('\n');
+  fs.writeFileSync(runnerPath, src, 'utf8');
+  return runnerPath;
+}
+
+// ---- CR-106 E2: fold determinism ----
+describe('CR-106 E2: fold(events) is deterministic and derives updated_at from log content, not wall-clock', () => {
+  test('fold(events) called twice over the identical array yields byte-identical JSON', () => {
+    const { fold } = requireStateEvents();
+    const events = [
+      makeEvent({ story_id: 'STORY-FAKE-E2A', run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: 'STORY-FAKE-E2A', run_id: 'run-2', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:05:00.000Z' }),
+    ];
+
+    const first = fold(events);
+    const second = fold(events);
+
+    assert.strictEqual(
+      JSON.stringify(first, null, 2),
+      JSON.stringify(second, null, 2),
+      'fold(events) must be a pure function of its input -- two calls over the same array must produce byte-identical output'
+    );
+  });
+
+  test('updated_at is derived from max(event.ts), not from Date.now() at fold time', () => {
+    const { fold } = requireStateEvents();
+    const events = [
+      makeEvent({ story_id: 'STORY-FAKE-E2B', run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: 'STORY-FAKE-E2B', run_id: 'run-2', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:05:00.000Z' }),
+    ];
+    const result = fold(events);
+    assert.strictEqual(
+      result.updated_at,
+      '2026-08-29T00:05:00.000Z',
+      'top-level updated_at must equal max(event.ts) across the log (2026-08-29, a fixed past date) -- ' +
+      'a fold embedding Date.now() would produce today\'s real wall-clock date instead, deterministically wrong'
+    );
+  });
+
+  test('story insertion order in fold(events).stories matches EVENT LOG order, not a re-sort', () => {
+    const { fold } = requireStateEvents();
+    const events = [
+      makeEvent({ story_id: 'STORY-FAKE-Z', run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: 'STORY-FAKE-A', run_id: 'run-2', ts: '2026-08-29T00:01:00.000Z' }),
+      makeEvent({ story_id: 'STORY-FAKE-M', run_id: 'run-3', ts: '2026-08-29T00:02:00.000Z' }),
+    ];
+    const result = fold(events);
+    assert.deepStrictEqual(
+      Object.keys(result.stories),
+      ['STORY-FAKE-Z', 'STORY-FAKE-A', 'STORY-FAKE-M'],
+      'stories must appear in the order their genesis events were logged (Z, A, M) -- an ' +
+      'alphabetical or re-sorted iteration (e.g. via an intermediate Set/Object.keys pass) would ' +
+      'reorder this to A, M, Z'
+    );
+  });
+});
+
+// ---- CR-106 E3: replay idempotency ----
+describe('CR-106 E3: a duplicate run_id leaves the fold unchanged (keyed on run_id, not ts or (story_id,to))', () => {
+  test('appending a duplicate event (same run_id) does not change fold() output', () => {
+    const { fold } = requireStateEvents();
+    const events = [
+      makeEvent({ story_id: 'STORY-FAKE-E3A', run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: 'STORY-FAKE-E3A', run_id: 'run-2', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:05:00.000Z' }),
+    ];
+    const replayed = { ...events[1] }; // identical run_id -- e.g. a re-sent/replayed segment
+    const eventsWithReplay = [...events, replayed];
+
+    const before = fold(events);
+    const after = fold(eventsWithReplay);
+
+    assert.strictEqual(
+      JSON.stringify(after, null, 2),
+      JSON.stringify(before, null, 2),
+      'a replayed event sharing an already-seen run_id must be a no-op on the fold'
+    );
+  });
+
+  test('two DIFFERENT stories sharing the same ts are BOTH applied -- discriminates run_id-keyed dedupe from ts-keyed dedupe', () => {
+    const { fold } = requireStateEvents();
+    const sameTs = '2026-08-29T00:05:00.000Z';
+    const events = [
+      makeEvent({ story_id: 'STORY-FAKE-E3B-1', run_id: 'run-a', ts: sameTs }),
+      makeEvent({ story_id: 'STORY-FAKE-E3B-2', run_id: 'run-b', ts: sameTs }),
+    ];
+    const result = fold(events);
+    assert.ok(result.stories['STORY-FAKE-E3B-1'], 'first story (ts-shared) must be present');
+    assert.ok(result.stories['STORY-FAKE-E3B-2'], 'second story sharing the same ts as the first must NOT be dropped by a ts-keyed dedupe');
+  });
+
+  test('a story bouncing to the SAME target state twice across two cycles is not collapsed by a (story_id,to)-keyed dedupe', () => {
+    const { fold } = requireStateEvents();
+    const id = 'STORY-FAKE-E3C';
+    const events = [
+      makeEvent({ story_id: id, run_id: 'run-1', from: null, to: 'Ready to Bounce', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: id, run_id: 'run-2', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:01:00.000Z' }),
+      makeEvent({ story_id: id, run_id: 'run-3', from: 'Bouncing', to: 'QA Passed', ts: '2026-08-29T00:02:00.000Z' }),
+      makeEvent({ story_id: id, run_id: 'run-4', from: 'QA Passed', to: 'Ready to Bounce', ts: '2026-08-29T00:03:00.000Z', reason: 'kicked back' }),
+      // Same (story_id, to) pair as run-2 ('Bouncing') but a genuinely later, distinct event (real
+      // second QA cycle) -- a (story_id,to)-keyed dedupe would wrongly discard this as "already
+      // seen" and leave the fold stuck at 'Ready to Bounce' from run-4.
+      makeEvent({ story_id: id, run_id: 'run-5', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:04:00.000Z' }),
+    ];
+
+    const result = fold(events);
+    assert.strictEqual(
+      result.stories[id].state,
+      'Bouncing',
+      'the second bounce cycle (run-5) must be applied -- a dedupe keyed on (story_id, to) instead of run_id would wrongly discard it as a duplicate of run-2'
+    );
+  });
+});
+
+// ---- CR-106 E4: schema conformance ----
+describe('CR-106 E4: fold(events) output validates against state.schema.json (via validateState, unchanged by this CR)', () => {
+  test('fold(events) produces a state object that passes validateState()', () => {
+    const { fold } = requireStateEvents();
+    const id = 'STORY-FAKE-E4';
+    const events = [
+      makeEvent({ story_id: id, run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      makeEvent({ story_id: id, run_id: 'run-2', from: 'Ready to Bounce', to: 'Bouncing', ts: '2026-08-29T00:05:00.000Z' }),
+    ];
+    const state = fold(events);
+    const { valid, errors } = validateState(state);
+    assert.ok(valid, `fold() output must validate against state.schema.json (via validateState, unchanged by this CR); errors: ${errors.join('; ')}`);
+  });
+});
+
+// ---- CR-106 E5: legacy sprint immutability, keyed on CLOSED-ness (item § RESOLVED, not on the ----
+// ---- mere absence of events.jsonl -- see CR-106_Execution_State_Event_Log.md's own resolution) --
+describe('CR-106 E5: a CLOSED sprint (terminal sprint_status) is never rewritten by a transition attempt, and does not throw', () => {
+  let tmpBase, stateFile, sprintDir;
+  const ID = 'STORY-FAKE-CLOSED';
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e5-'));
+    sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-CLOSED-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    // TERMINAL sprint_status -- 'Completed' is the literal value close_sprint.mjs Step 5 actually
+    // writes (close_sprint.mjs:1044). No events.jsonl is seeded -- this IS the shape of every real
+    // closed sprint today (SPRINT-03...SPRINT-38 all have state.json and no log). The item's own
+    // § RESOLVED amendment: E5's predicate is sprint_status reaching its terminal value, NOT the
+    // absence of events.jsonl (that proxy is what collided with the inherited migration addendum).
+    writeStateJson(
+      stateFile,
+      makeState(
+        { [ID]: makeStory('Done') },
+        { schema_version: 3, execution_mode: undefined, sprint_status: 'Completed', sprint_id: 'S-CLOSED-FAKE' }
+      )
+    );
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('a transition attempt against a closed sprint leaves state.json byte-for-byte unchanged, creates no events.jsonl, and does not crash', () => {
+    const before = fs.readFileSync(stateFile, 'utf8');
+    const eventsFile = path.join(sprintDir, 'events.jsonl');
+    assert.ok(!fs.existsSync(eventsFile), 'precondition: no events.jsonl should exist yet');
+
+    const env = { ...process.env, CLEARGATE_STATE_FILE: stateFile };
+    // ID's story is already 'Done' (terminal); target a DIFFERENT state so a silent legacy-mutation
+    // bug is not masked by an idempotent no-op on an unchanged value. update_state.mjs's own
+    // VALID_STATES check (not STATE_TRANSITIONS) is the only membership guard today, so 'Bouncing'
+    // is syntactically accepted and WOULD be applied by today's unmodified code -- this scenario is
+    // therefore expected to be RED at QA-Red time; the guard it requires does not exist yet.
+    const result = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Bouncing'], { encoding: 'utf8', env, timeout: 10000 });
+
+    assert.notStrictEqual(result.status, null, 'invocation against a closed sprint must not hang');
+    // "does not throw": this codebase's own convention for a handled, controlled refusal is
+    // `process.stderr.write('Error: ...')` + `process.exit(N)` -- never a bare `throw` (every
+    // existing error path in update_state.mjs follows this). A raw uncaught-exception stack trace
+    // is recognisable by node's default reporter emitting a "\n    at " frame; a controlled
+    // refusal does not.
+    assert.ok(
+      !/\n\s+at /.test(result.stderr),
+      `a refusal on a closed sprint must be a controlled, reported error (stderr.write + exit), not ` +
+      `an uncaught exception; stderr looked like a raw stack trace:\n${result.stderr}`
+    );
+
+    const after = fs.readFileSync(stateFile, 'utf8');
+    assert.strictEqual(after, before, 'state.json for a CLOSED sprint must be byte-for-byte unchanged by any invocation against it');
+    assert.ok(!fs.existsSync(eventsFile), 'no events.jsonl should be synthesised (no genesis-on-read) for a closed sprint either');
+  });
+});
+
+// ---- CR-106 E6: atomic append ----
+describe('CR-106 E6: N concurrent appendEvent() calls to the same events.jsonl produce no interleaved or truncated lines', () => {
+  test('20 concurrent appendEvent() calls each contribute exactly one well-formed JSON line', { timeout: 30000 }, async () => {
+    requireStateEvents(); // fail fast with a clear, informative message if state-events.mjs is absent
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e6-'));
+    try {
+      const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+      fs.mkdirSync(sprintDir, { recursive: true });
+      const eventsFile = path.join(sprintDir, 'events.jsonl');
+      fs.writeFileSync(eventsFile, '', 'utf8'); // pre-create empty, matching an init_sprint-seeded log
+
+      const runnerPath = makeAppendEventRunnerFile(tmpBase);
+      const N = 20;
+      const runIds = Array.from({ length: N }, (_, i) => `run-e6-${String(i + 1).padStart(2, '0')}`);
+
+      const results = await Promise.all(runIds.map((runId) => new Promise((resolve) => {
+        const event = makeEvent({ story_id: `STORY-FAKE-E6-${runId}`, run_id: runId, ts: '2026-08-29T00:00:00.000Z' });
+        const child = spawn(process.execPath, [runnerPath, eventsFile, JSON.stringify(event)]);
+        let stderr = '';
+        child.stderr.on('data', (d) => { stderr += d; });
+        child.on('close', (status) => resolve({ status, stderr, runId }));
+      })));
+
+      for (const r of results) {
+        assert.strictEqual(r.status, 0, `appendEvent runner for ${r.runId} should exit 0; stderr: ${r.stderr}`);
+      }
+
+      const raw = fs.readFileSync(eventsFile, 'utf8');
+      const lines = raw.split('\n').filter((l) => l.length > 0);
+      assert.strictEqual(lines.length, N, `expected exactly ${N} lines in events.jsonl, one per concurrent appendEvent() call; got ${lines.length} -- an interleaved or torn write would over/under-count`);
+
+      const seenRunIds = new Set();
+      for (const line of lines) {
+        let parsed;
+        assert.doesNotThrow(() => { parsed = JSON.parse(line); }, `every line must parse as standalone JSON (an interleaved write produces a line that fails to parse); offending line: ${line}`);
+        seenRunIds.add(parsed.run_id);
+      }
+      assert.strictEqual(seenRunIds.size, N, `expected ${N} distinct run_ids, one per concurrent call; got ${seenRunIds.size} -- a collision means two writes landed on the same line`);
+    } finally {
+      fs.rmSync(tmpBase, { recursive: true, force: true });
+    }
+  });
+});
+
+// ---- CR-106 E7: byte compatibility with the current writer ----
+describe('CR-106 E7: byte compatibility -- OLD path (real update_state.mjs, unmodified) vs NEW path (fold(events)) over an identical seed', () => {
+  test('a real Done transition through the OLD writer, replayed as events through fold(), produces byte-identical state.json', () => {
+    const { fold } = requireStateEvents();
+
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e7-'));
+    try {
+      const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+      fs.mkdirSync(sprintDir, { recursive: true });
+      const stateFile = path.join(sprintDir, 'state.json');
+      const ID = 'STORY-FAKE-E7';
+      const FROZEN_ISO = '2026-08-29T12:00:00.000Z';
+
+      const seedStory = makeStory('Ready to Bounce', { worktree: '/some/worktree/path' });
+      writeStateJson(stateFile, makeState({ [ID]: seedStory }, { schema_version: 3, execution_mode: undefined, last_action: 'seed' }));
+      const seedBytes = fs.readFileSync(stateFile, 'utf8');
+
+      // OLD PATH: drive a real transition through TODAY's unmodified update_state.mjs, with time
+      // frozen so its `new Date().toISOString()` calls are reproducible.
+      const dateShimPath = makeFrozenDateShimFile(tmpBase, FROZEN_ISO);
+      const oldPathResult = spawnSync(
+        process.execPath,
+        ['--import', pathToFileURL(dateShimPath).href, path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Done'],
+        { encoding: 'utf8', env: { ...process.env, CLEARGATE_STATE_FILE: stateFile }, timeout: 10000 }
+      );
+      assert.strictEqual(oldPathResult.status, 0, `OLD-path golden run should exit 0; stderr: ${oldPathResult.stderr}`);
+      const goldenBytes = fs.readFileSync(stateFile, 'utf8');
+      assert.notStrictEqual(goldenBytes, seedBytes, 'sanity: the OLD-path run must actually have changed the file (Done sets worktree=null and state=Done)');
+
+      // NEW PATH: the SAME transition, replayed as an event log, through the pure fold(). See the
+      // makeEvent() docstring above for the GENESIS CONVENTION caveat -- the `initial:` payload on
+      // the first event is QA-Red's own placeholder for information the documented event shape does
+      // not carry, since fold() takes ONLY the event array (E8) and cannot source it from
+      // state.json.
+      const events = [
+        makeEvent({
+          story_id: ID, run_id: 'run-genesis', from: null, to: 'Ready to Bounce', ts: seedStory.updated_at,
+          initial: { ...seedStory, state: undefined, updated_at: undefined },
+        }),
+        makeEvent({ story_id: ID, run_id: 'run-done', from: 'Ready to Bounce', to: 'Done', ts: FROZEN_ISO, actor: 'test', reason: null }),
+      ];
+      const folded = fold(events);
+      const newPathBytes = JSON.stringify(folded, null, 2) + '\n';
+
+      assert.strictEqual(
+        newPathBytes,
+        goldenBytes,
+        `fold(events) must be byte-identical to the OLD path's real output for the same transition.\n` +
+        `--- golden (OLD path) ---\n${goldenBytes}\n--- fold (NEW path) ---\n${newPathBytes}`
+      );
+    } finally {
+      fs.rmSync(tmpBase, { recursive: true, force: true });
+    }
+  });
+});
+
+// ---- CR-106 E8: the vacuity mutant ----
+describe('CR-106 E8: the vacuity mutant -- fold(events) must read NOTHING but the event array', () => {
+  test('fold(events) output does not reflect an unrelated, pre-existing state.json even when one is reachable via CLEARGATE_STATE_FILE/cwd', () => {
+    const { fold } = requireStateEvents();
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e8-'));
+    const prevEnv = process.env.CLEARGATE_STATE_FILE;
+    const prevCwd = process.cwd();
+    try {
+      const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+      fs.mkdirSync(sprintDir, { recursive: true });
+      const decoyStateFile = path.join(sprintDir, 'state.json');
+      // A decoy story that appears ONLY in this on-disk file, never in the events array below. A
+      // fold() that (illegitimately) reads state.json and merges into it would leak this story into
+      // its output; a fold() that is truly pure over its argument cannot see it at all.
+      writeStateJson(decoyStateFile, makeState(
+        { 'STORY-DECOY-NOT-IN-EVENTS': makeStory('Done') },
+        { schema_version: 3, execution_mode: undefined, last_action: 'DECOY -- must never appear in fold output' }
+      ));
+
+      // Point the SAME env var update_state.mjs uses to resolve state.json at the decoy, and ALSO
+      // chdir so a cwd-relative convention would find it too -- covers both plausible "sneaky"
+      // discovery mechanisms a vacuity-mutant fold() might use, since fold()'s own declared
+      // signature (per the item's Task Breakdown: "fold() takes ONLY the event array") accepts no
+      // path argument at all.
+      process.env.CLEARGATE_STATE_FILE = decoyStateFile;
+      process.chdir(sprintDir);
+
+      const events = [
+        makeEvent({ story_id: 'STORY-FAKE-E8', run_id: 'run-1', ts: '2026-08-29T00:00:00.000Z' }),
+      ];
+      const result = fold(events);
+
+      assert.ok(
+        !result.stories['STORY-DECOY-NOT-IN-EVENTS'],
+        'fold(events) output must NOT contain a story that exists only in an unrelated on-disk ' +
+        'state.json -- its presence means fold() read state.json (directly or via ' +
+        'CLEARGATE_STATE_FILE/cwd) and merged into it, reintroducing the exact read-modify-write ' +
+        'race this CR removes'
+      );
+      assert.notStrictEqual(
+        result.last_action,
+        'DECOY -- must never appear in fold output',
+        'fold(events) must not inherit last_action from an unrelated on-disk state.json'
+      );
+    } finally {
+      process.chdir(prevCwd);
+      if (prevEnv === undefined) delete process.env.CLEARGATE_STATE_FILE;
+      else process.env.CLEARGATE_STATE_FILE = prevEnv;
+      fs.rmSync(tmpBase, { recursive: true, force: true });
+    }
+  });
+
+  test('static check: state-events.mjs reads a file via readFileSync only for events.jsonl, never for state.json', () => {
+    const modulePath = path.join(SCRIPTS_DIR, 'state-events.mjs');
+    assert.ok(fs.existsSync(modulePath), `expected ${modulePath} to exist -- not yet created (CR-106 not yet implemented)`);
+    const src = fs.readFileSync(modulePath, 'utf8');
+    const readCalls = src.split('\n')
+      .map((line, i) => ({ line, num: i + 1 }))
+      .filter(({ line }) => /readFileSync/.test(line));
+    const suspicious = readCalls.filter(({ line }) => /stateFile|state\.json|state_json|statePath/i.test(line) && !/events?\.jsonl/i.test(line));
+    assert.strictEqual(
+      suspicious.length,
+      0,
+      `state-events.mjs must never readFileSync anything that looks like state.json -- found: ` +
+      `${suspicious.map((h) => `:${h.num} ${h.line.trim()}`).join(' | ')}`
+    );
+  });
+});
+
+// ---- CR-106 E9: eviction, both halves ----
+describe('CR-106 E9: eviction -- update_state.mjs must route ALL state.json writes through the fold, none through the old read-modify-write', () => {
+  test('grep 1: readFileSync(...stateFile...) is fully evicted from update_state.mjs', () => {
+    const src = fs.readFileSync(path.join(SCRIPTS_DIR, 'update_state.mjs'), 'utf8');
+    const hits = src.split('\n')
+      .map((line, i) => ({ line, num: i + 1 }))
+      .filter(({ line }) => /readFileSync.*stateFile/.test(line));
+    assert.strictEqual(
+      hits.length,
+      0,
+      `expected ZERO "readFileSync(...stateFile...)" call sites in update_state.mjs -- the read-modify-write ` +
+      `must be gone entirely, not merely guarded. Found ${hits.length}: ${hits.map((h) => `:${h.num} ${h.line.trim()}`).join(' | ')}`
+    );
+  });
+
+  test("grep 2: atomicWrite(stateFile is fully evicted from the action/migration branches -- only the fold's own call site remains", () => {
+    const src = fs.readFileSync(path.join(SCRIPTS_DIR, 'update_state.mjs'), 'utf8');
+    // Excludes the `function atomicWrite(stateFile, state) {` DEFINITION line -- that line is
+    // retained deliberately (the item keeps atomicWrite as the fold's output writer) and is not a
+    // call site; only CALL sites (`atomicWrite(stateFile, state);`) are eviction targets.
+    const hits = src.split('\n')
+      .map((line, i) => ({ line, num: i + 1 }))
+      .filter(({ line }) => /atomicWrite\(stateFile/.test(line) && !/function\s+atomicWrite/.test(line));
+    // BASELINE (measured 2026-08-29, matches BUG-044 post-flight): SEVEN call sites today -- :241,
+    // :247 (the two migration writes) and :280, :301, :318, :335, :366 (the five action branches).
+    // After CR-106, exactly ONE call site should remain -- the fold's own write.
+    assert.strictEqual(
+      hits.length,
+      1,
+      `expected exactly ONE "atomicWrite(stateFile" call site after CR-106 (the fold's own write) -- ` +
+      `found ${hits.length}: ${hits.map((h) => `:${h.num} ${h.line.trim()}`).join(' | ')}. Baseline today ` +
+      `(pre-CR-106, measured) is 7: the migration writes at :241/:247 plus the five action-branch ` +
+      `writes at :280/:301/:318/:335/:366 -- all seven must collapse into the fold's single call site.`
     );
   });
 });
