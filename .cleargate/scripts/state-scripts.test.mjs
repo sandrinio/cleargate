@@ -16,6 +16,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync, spawn } from 'node:child_process';
 import os from 'node:os';
 import { SCHEMA_VERSION } from './constants.mjs';
+// TPV T11 (advisory, CR-106 round 2, 2026-08-29): this is a TOP-LEVEL, module-load-time dependency
+// for ALL 29 tests in this file, including the 15 tests that predate CR-106 entirely. CR-106's Task
+// Breakdown row 5 edits validate_state.mjs. If that edit removes the `validateState` export or adds
+// an import-time side effect (the CLI-invocation guard at validate_state.mjs:122 is what makes a
+// bare `import` safe today -- keep it that way), every test in this file fails at once, at import
+// time, looking like a catastrophic unrelated regression rather than one line in one function.
 import { validateState } from './validate_state.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -284,10 +290,58 @@ describe('Scenario 3: update_state transitions a story and is idempotent', () =>
       '2026-04-21T00:00:00.000Z',
       'updated_at should be refreshed'
     );
+
+    // TPV T1 (BLOCKING, CR-106 round 2, highest severity in the whole gate, 2026-08-29): added to
+    // THIS pre-existing test -- not a new CR-106 describe block -- on TPV's own explicit instruction
+    // ("Scenario 3 is the natural host, it already drives a real transition"). Nothing else in this
+    // file couples the PRODUCTION writer (update_state.mjs) to the module CR-106 exists to add --
+    // every CR-106 E-scenario below exercises state-events.mjs in isolation, and E9 is text-only.
+    // TPV measured a ~10-line null implementation (today's read-modify-write kept verbatim, one local
+    // renamed, the seven atomicWrite(stateFile call sites collapsed to one, a closed-sprint guard
+    // added, a correct-but-never-imported state-events.mjs shipped alongside) score 29/29 at 15.5s
+    // WITHOUT these two assertions. These two assertions are what kills that mutant (TPV #19) and a
+    // vacuity mutant that smuggles a second path parameter into fold() (TPV #7) -- deterministically.
+    // This transitions this test from green-at-baseline to red-at-baseline (state-events.mjs does not
+    // exist yet); that is the intended effect, not a regression -- see the QA-Red round-2 report.
+    const { fold, readEvents } = requireStateEvents();
+    const eventsFile = path.join(path.dirname(stateFile), 'events.jsonl');
+    assert.ok(
+      fs.existsSync(eventsFile),
+      `events.jsonl should exist beside state.json (at ${eventsFile}) after a successful transition`
+    );
+    const events = readEvents(eventsFile);
+    assert.ok(
+      Array.isArray(events) && events.length >= 1,
+      'events.jsonl should hold at least one line, parsed'
+    );
+    const matching = events.filter((e) => e.story_id === 'STORY-FAKE-01' && e.to === 'Bouncing');
+    assert.ok(
+      matching.length >= 1,
+      `expected >=1 event whose story_id/to match this invocation (STORY-FAKE-01 -> Bouncing); got: ${JSON.stringify(events)}`
+    );
+
+    const rebuiltBytes = JSON.stringify(fold(events), null, 2) + '\n';
+    const onDiskBytes = fs.readFileSync(stateFile, 'utf8');
+    assert.strictEqual(
+      rebuiltBytes,
+      onDiskBytes,
+      'JSON.stringify(fold(readEvents(eventsFile)), null, 2) + "\\n" must equal the on-disk state.json ' +
+      'byte-for-byte -- the production writer must derive its cache FROM the event log it appends, not ' +
+      'merely happen to look correct while never touching the log at all'
+    );
   });
 
   test('running the same command a second time is a no-op (exit 0, file content unchanged)', () => {
     const before = fs.readFileSync(stateFile, 'utf8');
+    // TPV T8 (advisory, CR-106 round 2): under an event log, "no-op" must mean NO EVENT APPENDED --
+    // mutant #14 (append an event on the idempotency no-op path, skipping only the cache rewrite)
+    // survives every other CR-106 assertion in this file. Cheap here since the events.jsonl line
+    // count is already observable after Scenario 3's first test ran a real transition above.
+    const eventsFile = path.join(path.dirname(stateFile), 'events.jsonl');
+    const lineCountBefore = fs.existsSync(eventsFile)
+      ? fs.readFileSync(eventsFile, 'utf8').split('\n').filter((l) => l.length > 0).length
+      : 0;
+
     const result = runScript(
       'update_state.mjs',
       ['STORY-FAKE-01', 'Bouncing'],
@@ -296,6 +350,15 @@ describe('Scenario 3: update_state transitions a story and is idempotent', () =>
     assert.strictEqual(result.status, 0, `exit should be 0; stderr: ${result.stderr}`);
     const after = fs.readFileSync(stateFile, 'utf8');
     assert.strictEqual(before, after, 'file content should be identical on no-op');
+
+    if (fs.existsSync(eventsFile)) {
+      const lineCountAfter = fs.readFileSync(eventsFile, 'utf8').split('\n').filter((l) => l.length > 0).length;
+      assert.strictEqual(
+        lineCountAfter,
+        lineCountBefore,
+        `a true no-op must append NO event -- events.jsonl grew from ${lineCountBefore} to ${lineCountAfter} lines`
+      );
+    }
   });
 });
 
@@ -839,13 +902,21 @@ describe('BUG-044 QA-Red addendum: concurrent invocations against a fresh v1 sta
 // fold, unmodified, per the item's own §4 case 1 ("do not delete or weaken it").
 //
 // S4 and S5 above (dead-pid-lock-is-stolen / live-lock-is-respected) are PURE LOCK SEMANTICS with
-// zero race content (item § AMENDMENT "two scenarios MUST be deleted with the lock, and saying so
-// is part of the work"). They are NOT deleted by THIS commit -- QA-Red does not touch
-// update_state.mjs or remove the lock -- but per that amendment: whoever removes the lock in the
-// SAME commit must also delete S4 and S5 (T1 stays -- it is a real M6 exit-site regression guard,
-// green at baseline by design, not a lock-lifecycle test), and must STATE that deletion in their
-// commit message and report, not do it silently. Recorded here so the obligation travels with the
-// test file, not just the QA-Red report.
+// zero race content. Round 1's comment here (citing the item's original § AMENDMENT) said whoever
+// removes the lock must delete them in the same commit. THAT IS REVERSED as of TPV ORCHESTRATOR
+// RULING T3 (2026-08-29, BLOCKING, CR-106-tpv.md §5 T3 + CR-106 item's own § ORCHESTRATOR RULINGS —
+// T3 and T6 block): TPV measured the lock-free fold LOSING UPDATES in ~1 of 5 full runs (10 of 20
+// transitions dropped on a targeted S1-shaped run) -- `events.jsonl` is safe (O_APPEND orders the
+// appends) but the DERIVED CACHE write (read-log -> fold -> overwrite state.json) is still an
+// unserialized read-modify-write, and all 27 non-test readers read state.json, not the log. Ruling:
+// **retain mutual exclusion** around read-log -> fold -> write-cache; the critical section shrinks
+// from BUG-044's whole read-migrate-write to ~1ms. Consequence, stated here so it travels with the
+// test file: **S4 and S5 are NOT deleted, by anyone, in any commit -- they must stay and stay
+// green.** TPV's own reference implementation with the lock retained measured `29 · 21 · 29 · 0 · 0`
+// stable at ~7.4s, both S4 and S5 intact. T1 (BUG-044's, not this ruling's) also stays either way --
+// it is a real M6 exit-site regression guard, green at baseline by design, not a lock-lifecycle
+// test; the BUG-044 post-flight's "S4, S5 and T1" was one test too wide, and this file's own note
+// already resolved that the right way (kept as-is, not touched by this round).
 //
 // `.cleargate/scripts/state-events.mjs` does not exist yet at QA-Red time (this dispatch's own
 // forbidden list: no production code, no state-events.mjs, no edits to update_state.mjs). It is
@@ -902,30 +973,6 @@ function makeEvent(overrides = {}) {
   };
 }
 
-// Freezes `new Date()` / `Date.now()` to a fixed instant inside a spawned child, via --import
-// preload -- same mechanism as makeBarrierShimFile above (global reassignment before the entry
-// script's own imports run). Lets E7 drive a REAL invocation of TODAY'S unmodified
-// update_state.mjs and get a reproducible `new Date().toISOString()` value out of it, so its
-// output can be compared byte-for-byte against a hand-built event log using the SAME timestamp.
-function makeFrozenDateShimFile(tmpDir, isoString) {
-  const shimPath = path.join(tmpDir, '.frozen-date-shim.mjs');
-  const shimSrc = [
-    `const FROZEN_MS = new Date(${JSON.stringify(isoString)}).getTime();`,
-    'const RealDate = Date;',
-    'class FrozenDate extends RealDate {',
-    '  constructor(...args) {',
-    '    if (args.length === 0) { super(FROZEN_MS); return; }',
-    '    super(...args);',
-    '  }',
-    '  static now() { return FROZEN_MS; }',
-    '}',
-    'globalThis.Date = FrozenDate;',
-    '',
-  ].join('\n');
-  fs.writeFileSync(shimPath, shimSrc, 'utf8');
-  return shimPath;
-}
-
 // Tiny throwaway runner script (written to fs.mkdtempSync, not a repo file -- same technique as
 // makeBarrierShimFile) that imports the REAL appendEvent() and calls it once with argv-supplied
 // arguments, so E6 can drive N genuinely concurrent appendEvent() calls via N real child
@@ -935,14 +982,29 @@ function makeFrozenDateShimFile(tmpDir, isoString) {
 // QA-RED ASSUMPTION, flagged in the report: appendEvent(eventsFile, event) -- eventsFile first,
 // mirroring atomicWrite(stateFile, state)'s own (path, payload) argument order. Nothing in the CR
 // item specifies appendEvent()'s signature; if it differs, this runner needs a one-line fix.
+//
+// TPV T5 (BLOCKING, round 2, 2026-08-29): round 1 spawned these N children with NO arrival barrier
+// -- exactly the "spawn N and hope they interleave" pattern FLASHCARD 2026-08-28 #test-harness
+// #danger forbids by name, and the one BUG-044's own barrier harness exists to eliminate. Measured:
+// mutant #18 (appendEvent as a read-modify-write instead of an append) survived 7 of 8 targeted runs
+// with no barrier. The `fs.readFileSync(eventsFile, ...)` line below is a deliberate, DISCARDED read
+// whose only purpose is to arm the SAME barrier shim S1/S2/the migration addendum use
+// (CG_TEST_BARRIER_TARGET = eventsFile, set by the E6 test below) -- it forces all N children to
+// reach `appendEvent()` at nearly the same instant, regardless of what appendEvent() itself does
+// internally. Re-measured with this change: mutant #18 caught 8 of 8 targeted runs; a correct
+// fs.appendFileSync-based appendEvent stayed 8 of 8 clean (no false positives) -- see the QA-Red
+// round-2 report for the full validation run.
 function makeAppendEventRunnerFile(tmpDir) {
   const runnerPath = path.join(tmpDir, '.append-event-runner.mjs');
   const moduleUrl = pathToFileURL(path.join(SCRIPTS_DIR, 'state-events.mjs')).href;
   const src = [
+    `import fs from 'node:fs';`,
     `import { appendEvent } from ${JSON.stringify(moduleUrl)};`,
     '',
     'const [, , eventsFile, eventJson] = process.argv;',
     'const event = JSON.parse(eventJson);',
+    '// Barrier-arming touch (T5) -- result discarded; appendEvent() below does its own I/O.',
+    'fs.readFileSync(eventsFile, "utf8");',
     'appendEvent(eventsFile, event);',
     '',
   ].join('\n');
@@ -1134,8 +1196,13 @@ describe('CR-106 E5: a CLOSED sprint (terminal sprint_status) is never rewritten
 });
 
 // ---- CR-106 E6: atomic append ----
+//
+// TPV T5 (BLOCKING, round 2, 2026-08-29): round 1 spawned the 20 children below with no arrival
+// barrier -- see makeAppendEventRunnerFile()'s updated docstring above. Measured: mutant #18
+// (appendEvent as read-modify-write instead of fs.appendFileSync) survived 7 of 8 targeted runs
+// without a barrier; with it, caught 8 of 8, and a correct implementation stayed 8 of 8 clean.
 describe('CR-106 E6: N concurrent appendEvent() calls to the same events.jsonl produce no interleaved or truncated lines', () => {
-  test('20 concurrent appendEvent() calls each contribute exactly one well-formed JSON line', { timeout: 30000 }, async () => {
+  test('20 barrier-synchronized concurrent appendEvent() calls each contribute exactly one well-formed JSON line', { timeout: 30000 }, async () => {
     requireStateEvents(); // fail fast with a clear, informative message if state-events.mjs is absent
     const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e6-'));
     try {
@@ -1147,10 +1214,23 @@ describe('CR-106 E6: N concurrent appendEvent() calls to the same events.jsonl p
       const runnerPath = makeAppendEventRunnerFile(tmpBase);
       const N = 20;
       const runIds = Array.from({ length: N }, (_, i) => `run-e6-${String(i + 1).padStart(2, '0')}`);
+      const barrierDir = fs.mkdtempSync(path.join(tmpBase, 'barrier-'));
+      const shimPath = makeBarrierShimFile(tmpBase);
 
       const results = await Promise.all(runIds.map((runId) => new Promise((resolve) => {
         const event = makeEvent({ story_id: `STORY-FAKE-E6-${runId}`, run_id: runId, ts: '2026-08-29T00:00:00.000Z' });
-        const child = spawn(process.execPath, [runnerPath, eventsFile, JSON.stringify(event)]);
+        const child = spawn(process.execPath, [
+          '--import', pathToFileURL(shimPath).href,
+          runnerPath, eventsFile, JSON.stringify(event),
+        ], {
+          env: {
+            ...process.env,
+            CG_TEST_BARRIER_DIR: barrierDir,
+            CG_TEST_BARRIER_N: String(N),
+            CG_TEST_BARRIER_TARGET: eventsFile,
+            CG_TEST_BARRIER_INACTIVITY_MS: '300',
+          },
+        });
         let stderr = '';
         child.stderr.on('data', (d) => { stderr += d; });
         child.on('close', (status) => resolve({ status, stderr, runId }));
@@ -1175,61 +1255,91 @@ describe('CR-106 E6: N concurrent appendEvent() calls to the same events.jsonl p
       fs.rmSync(tmpBase, { recursive: true, force: true });
     }
   });
+
+  test('static check: state-events.mjs reaches the append via fs.appendFileSync or an fs.openSync(...) carrying flag \'a\'', () => {
+    // TPV T5, second half: the behavioural test above catches mutant #18 8/8 with the barrier, but
+    // TPV's own ruling records this as "a review item ... until T5 lands" -- pair it with the static
+    // floor, same discipline as E8's vacuity static check and E9's eviction greps.
+    const modulePath = path.join(SCRIPTS_DIR, 'state-events.mjs');
+    assert.ok(fs.existsSync(modulePath), `expected ${modulePath} to exist -- not yet created (CR-106 not yet implemented)`);
+    const src = fs.readFileSync(modulePath, 'utf8');
+    const usesAppendFileSync = /appendFileSync/.test(src);
+    const usesOpenSyncAppendFlag = /openSync\([^)]*['"]a['"]/.test(src);
+    assert.ok(
+      usesAppendFileSync || usesOpenSyncAppendFlag,
+      'state-events.mjs must reach the append through fs.appendFileSync or an fs.openSync(..., \'a\') -- ' +
+      'neither pattern found in the module source'
+    );
+  });
 });
 
 // ---- CR-106 E7: byte compatibility with the current writer ----
-describe('CR-106 E7: byte compatibility -- OLD path (real update_state.mjs, unmodified) vs NEW path (fold(events)) over an identical seed', () => {
-  test('a real Done transition through the OLD writer, replayed as events through fold(), produces byte-identical state.json', () => {
+//
+// TPV T2 (BLOCKING, round 2, 2026-08-29): the round-1 version of this test spawned update_state.mjs
+// LIVE as the "OLD path" comparator. That self-destructs on the Developer's OWN commit: once
+// update_state.mjs is rewritten to route through fold() too, BOTH sides of the comparison exercise
+// the identical code path, and the byte-compatibility guarantee -- the human's own named mitigation,
+// case 7 -- silently evaporates. TPV measured this on a correct lock-free rewrite: key-reorder
+// mutant 27/27 GREEN, dropped-`notes` mutant GREEN, lane-defaults mutant GREEN -- all three killed
+// pre-fix, all three survive post-fix. Only the indentation mutant kept dying, and only because this
+// test's OWN `JSON.stringify(folded, null, 2)` literal happens to pin it.
+//
+// Fix (TPV's own option 2, chosen over option 1 for the same reason FLASHCARD 2026-08-29
+// #test-harness #tpv #danger records: "Freeze the golden as a fixture, never as a live spawn."):
+// the golden below is a FROZEN, HAND-CAPTURED literal -- captured ONCE, out-of-tree, from the real,
+// unmodified update_state.mjs at QA-Red round-2 time (2026-08-29, this worktree, commit 21991c12,
+// before any Developer edit), for this exact seed + transition. It is never regenerated by spawning
+// anything; it is compared against on every run, present and future, so it cannot rot when the
+// Developer's commit changes what update_state.mjs actually does.
+const E7_ID = 'STORY-FAKE-E7';
+const E7_FROZEN_ISO = '2026-08-29T12:00:00.000Z';
+const E7_GOLDEN_STATE_JSON =
+`{
+  "schema_version": 3,
+  "sprint_id": "S-FAKE",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-FAKE-E7": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-08-29T12:00:00.000Z",
+      "notes": ""
+    }
+  },
+  "last_action": "transition STORY-FAKE-E7 → Done",
+  "updated_at": "2026-08-29T12:00:00.000Z"
+}
+`;
+
+describe('CR-106 E7: byte compatibility -- fold(events) vs a FROZEN golden captured from the real, unmodified update_state.mjs', () => {
+  test('fold(events) for an equivalent genesis+transition sequence reproduces the frozen golden byte-for-byte', () => {
     const { fold } = requireStateEvents();
 
-    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-e7-'));
-    try {
-      const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
-      fs.mkdirSync(sprintDir, { recursive: true });
-      const stateFile = path.join(sprintDir, 'state.json');
-      const ID = 'STORY-FAKE-E7';
-      const FROZEN_ISO = '2026-08-29T12:00:00.000Z';
+    // Same seed shape the golden above was captured from: makeStory('Ready to Bounce', { worktree:
+    // '/some/worktree/path' }), updated_at defaulted to '2026-04-21T00:00:00.000Z' by makeStory().
+    // See the makeEvent() docstring above for the GENESIS CONVENTION caveat -- the `initial:` payload
+    // on the first event is QA-Red's own placeholder for information the documented event shape does
+    // not carry, since fold() takes ONLY the event array (E8) and cannot source it from state.json.
+    const seedStory = makeStory('Ready to Bounce', { worktree: '/some/worktree/path' });
+    const events = [
+      makeEvent({
+        story_id: E7_ID, run_id: 'run-genesis', from: null, to: 'Ready to Bounce', ts: seedStory.updated_at,
+        initial: { ...seedStory, state: undefined, updated_at: undefined },
+      }),
+      makeEvent({ story_id: E7_ID, run_id: 'run-done', from: 'Ready to Bounce', to: 'Done', ts: E7_FROZEN_ISO, actor: 'test', reason: null }),
+    ];
+    const folded = fold(events);
+    const newPathBytes = JSON.stringify(folded, null, 2) + '\n';
 
-      const seedStory = makeStory('Ready to Bounce', { worktree: '/some/worktree/path' });
-      writeStateJson(stateFile, makeState({ [ID]: seedStory }, { schema_version: 3, execution_mode: undefined, last_action: 'seed' }));
-      const seedBytes = fs.readFileSync(stateFile, 'utf8');
-
-      // OLD PATH: drive a real transition through TODAY's unmodified update_state.mjs, with time
-      // frozen so its `new Date().toISOString()` calls are reproducible.
-      const dateShimPath = makeFrozenDateShimFile(tmpBase, FROZEN_ISO);
-      const oldPathResult = spawnSync(
-        process.execPath,
-        ['--import', pathToFileURL(dateShimPath).href, path.join(SCRIPTS_DIR, 'update_state.mjs'), ID, 'Done'],
-        { encoding: 'utf8', env: { ...process.env, CLEARGATE_STATE_FILE: stateFile }, timeout: 10000 }
-      );
-      assert.strictEqual(oldPathResult.status, 0, `OLD-path golden run should exit 0; stderr: ${oldPathResult.stderr}`);
-      const goldenBytes = fs.readFileSync(stateFile, 'utf8');
-      assert.notStrictEqual(goldenBytes, seedBytes, 'sanity: the OLD-path run must actually have changed the file (Done sets worktree=null and state=Done)');
-
-      // NEW PATH: the SAME transition, replayed as an event log, through the pure fold(). See the
-      // makeEvent() docstring above for the GENESIS CONVENTION caveat -- the `initial:` payload on
-      // the first event is QA-Red's own placeholder for information the documented event shape does
-      // not carry, since fold() takes ONLY the event array (E8) and cannot source it from
-      // state.json.
-      const events = [
-        makeEvent({
-          story_id: ID, run_id: 'run-genesis', from: null, to: 'Ready to Bounce', ts: seedStory.updated_at,
-          initial: { ...seedStory, state: undefined, updated_at: undefined },
-        }),
-        makeEvent({ story_id: ID, run_id: 'run-done', from: 'Ready to Bounce', to: 'Done', ts: FROZEN_ISO, actor: 'test', reason: null }),
-      ];
-      const folded = fold(events);
-      const newPathBytes = JSON.stringify(folded, null, 2) + '\n';
-
-      assert.strictEqual(
-        newPathBytes,
-        goldenBytes,
-        `fold(events) must be byte-identical to the OLD path's real output for the same transition.\n` +
-        `--- golden (OLD path) ---\n${goldenBytes}\n--- fold (NEW path) ---\n${newPathBytes}`
-      );
-    } finally {
-      fs.rmSync(tmpBase, { recursive: true, force: true });
-    }
+    assert.strictEqual(
+      newPathBytes,
+      E7_GOLDEN_STATE_JSON,
+      `fold(events) must be byte-identical to the FROZEN golden captured from update_state.mjs's real, ` +
+      `unmodified OLD-path output for the same transition.\n--- golden (frozen) ---\n${E7_GOLDEN_STATE_JSON}` +
+      `\n--- fold (NEW path) ---\n${newPathBytes}`
+    );
   });
 });
 
@@ -1304,6 +1414,16 @@ describe('CR-106 E8: the vacuity mutant -- fold(events) must read NOTHING but th
 
 // ---- CR-106 E9: eviction, both halves ----
 describe('CR-106 E9: eviction -- update_state.mjs must route ALL state.json writes through the fold, none through the old read-modify-write', () => {
+  // TPV T7 (advisory, round 2, 2026-08-29): grep 1 below is a NAMING RULE, not an eviction proof.
+  // A CORRECT implementation must still read state.json -- for the closed-sprint check (E5's fixture
+  // has no log) and for the inherited v1->v3 migration (kept per the item's own § RESOLVED ruling).
+  // TPV's mutant #21 (a correct implementation with an honestly-named `stateFile` on that legacy
+  // read) is bounced by this grep; mutant #6 (the vacuity mutant with its local renamed `basePath`
+  // instead of `stateFile`) is PASSED by it. The identifier alone decides pass/fail here -- put the
+  // surviving legacy/migration read behind a helper or name its local something else; this is a lint
+  // this test enforces, not a behavioural guarantee. T1's coupling pair (Scenario 3, above) and E8's
+  // behavioural vacuity check carry the real weight; do not read a green grep 1 as proof of eviction
+  // on its own.
   test('grep 1: readFileSync(...stateFile...) is fully evicted from update_state.mjs', () => {
     const src = fs.readFileSync(path.join(SCRIPTS_DIR, 'update_state.mjs'), 'utf8');
     const hits = src.split('\n')
@@ -1335,6 +1455,111 @@ describe('CR-106 E9: eviction -- update_state.mjs must route ALL state.json writ
       `found ${hits.length}: ${hits.map((h) => `:${h.num} ${h.line.trim()}`).join(' | ')}. Baseline today ` +
       `(pre-CR-106, measured) is 7: the migration writes at :241/:247 plus the five action-branch ` +
       `writes at :280/:301/:318/:335/:366 -- all seven must collapse into the fold's single call site.`
+    );
+  });
+});
+
+// ============================================================================
+// CR-106 T4 canary -- the barrier's own self-check (round 2, TPV BLOCKING)
+// ============================================================================
+//
+// NOT a CR-106 acceptance scenario. TPV measured (§1.2/1.3 of CR-106-tpv.md) that wall-clock is
+// neither necessary nor sufficient as a witness that the barrier used by S1/S2/the addendum/E1 is
+// still armed: a correct LOCKED fold ran 7.4s (would pass a naive "sub-6s=disarmed" rule) and a
+// NULL implementation ran 15.5s (would ALSO pass it). Marker-count is unsound too -- a correct
+// locked fold legitimately arms only 15 of 20 markers, because faster siblings find events.jsonl
+// already seeded and skip the bootstrap read. The witness that actually works, per TPV's own
+// ruling: prove BY CONSTRUCTION that the barrier + lost-update assertion pairing this file relies on
+// is still CAPABLE of catching a known-racy writer. If it isn't, every concurrency scenario in this
+// file (S1, S2, the migration addendum, E1) is unfalsifiable, and their green results are not
+// evidence of anything.
+
+// A throwaway, deliberately UNLOCKED read-compute-write writer -- NOT state-events.mjs, NOT
+// update_state.mjs, no production code. Structurally identical to the residual race TPV measured on
+// the lock-free fold (`vb`, §1.4: "append(P)·read(P)·append(Q)·read(Q)·write(Q)[full]·write(P)[stale]").
+// Written to fs.mkdtempSync, same technique as makeAppendEventRunnerFile/makeBarrierShimFile. Uses
+// tmp+rename (mirroring atomicWrite) so a torn READ never happens -- the property under test is lost
+// UPDATES from an unserialized read-modify-write, not filesystem corruption from a non-atomic write.
+function makeCanaryRacyWriterFile(tmpDir) {
+  const runnerPath = path.join(tmpDir, '.canary-racy-writer.mjs');
+  const src = [
+    "import fs from 'node:fs';",
+    '',
+    'const [, , stateFile, storyId, targetState] = process.argv;',
+    'const raw = fs.readFileSync(stateFile, "utf8"); // barrier shim arms here, same as S1',
+    'const state = JSON.parse(raw);',
+    'state.stories[storyId].state = targetState;',
+    'state.updated_at = new Date().toISOString();',
+    'state.last_action = `canary ${storyId}: state=${targetState}`;',
+    '// Deliberately UNLOCKED write -- no acquireLock(), no mutual exclusion around this',
+    '// read-compute-write. That absence is the entire point of the canary.',
+    'const tmpFile = `${stateFile}.tmp.${process.pid}`;',
+    'fs.writeFileSync(tmpFile, JSON.stringify(state, null, 2), "utf8");',
+    'fs.renameSync(tmpFile, stateFile);',
+    '',
+  ].join('\n');
+  fs.writeFileSync(runnerPath, src, 'utf8');
+  return runnerPath;
+}
+
+describe('CR-106 T4 canary: the barrier must still be able to PROVE a lost-update race (harness self-check)', () => {
+  let tmpBase, stateFile, shimPath, barrierDir, runnerPath;
+  const N = 20;
+  const ids = Array.from({ length: N }, (_, i) => `STORY-FAKE-CANARY-${String(i + 1).padStart(2, '0')}`);
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr106-canary-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    const stories = {};
+    for (const id of ids) stories[id] = makeStory('Ready to Bounce');
+    writeStateJson(stateFile, makeState(stories, { schema_version: 3, execution_mode: undefined }));
+    barrierDir = fs.mkdtempSync(path.join(tmpBase, 'barrier-'));
+    shimPath = makeBarrierShimFile(tmpBase);
+    runnerPath = makeCanaryRacyWriterFile(tmpBase);
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('20 barrier-synchronized UNLOCKED read-compute-write processes against the same state.json lose at least one transition', { timeout: 30000 }, async () => {
+    const results = await Promise.all(
+      ids.map((id) => new Promise((resolve) => {
+        const child = spawn(process.execPath, [
+          '--import', pathToFileURL(shimPath).href,
+          runnerPath, stateFile, id, 'Bouncing',
+        ], {
+          env: {
+            ...process.env,
+            CG_TEST_BARRIER_DIR: barrierDir,
+            CG_TEST_BARRIER_N: String(N),
+            CG_TEST_BARRIER_TARGET: stateFile,
+            CG_TEST_BARRIER_INACTIVITY_MS: '300',
+          },
+        });
+        let stderr = '';
+        child.stderr.on('data', (d) => { stderr += d; });
+        child.on('close', (status) => resolve({ status, stderr }));
+      }))
+    );
+
+    for (const r of results) {
+      assert.strictEqual(r.status, 0, `canary writer should itself exit 0 (it races on CONTENT, not on process exit code); stderr: ${r.stderr}`);
+    }
+
+    const final = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    const bounced = ids.filter((id) => final.stories[id].state === 'Bouncing');
+
+    assert.ok(
+      bounced.length < N,
+      `CANARY DISARMED: ${bounced.length} of ${N} deliberately-unlocked, barrier-synchronized racy ` +
+      `writes all landed -- the barrier + lost-update assertion technique this file relies on (S1, ` +
+      `S2, the migration addendum, E1) can no longer PROVE a known-racy writer loses updates, so a ` +
+      `green result on any of THOSE tests is no longer trustworthy evidence of correctness. ` +
+      `Investigate the barrier shim (makeBarrierShimFile) before trusting any concurrency scenario ` +
+      `in this file.`
     );
   });
 });
