@@ -8,7 +8,7 @@ YAML Frontmatter: Epic ID, Status, Ambiguity, Context Source, Owner, Target Date
 §4 Technical Grounding: Verified files and data changes.
 §5 Acceptance Criteria: Gherkin scenarios (happy path + error cases).
 §6 AI Interrogation Loop: Explicit questions the Planning AI needs the Human to answer.
-Output location: .cleargate/delivery/pending-sync/EPIC-{NNN}_{epic_name}.md
+Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 Codebase research is mandatory. Do NOT guess at affected files.
 
@@ -32,8 +32,8 @@ Do NOT output these instructions.
 </instructions>
 
 ---
-epic_id: "EPIC-{ID}"
-parent_ref: null  # PROPOSAL-{ID} | INITIATIVE-{ID} — the approved parent this epic decomposes.
+epic_id: "{ID}"
+parent_ref: null  # PROPOSAL-NNN | INITIATIVE-NNN — the approved parent this epic decomposes.
                   # Read by the `parent-approved` readiness gate (CR-098). Leave null only when
                   # the parent was approved directly; then record proposal_gate_waiver or
                   # top-level approved_by + approved_at, or the gate blocks decomposition.
@@ -72,7 +72,7 @@ last_synced_status: null   # required for conflict-detector; status at last sync
 last_synced_body_sha: null # sha256 of body at last sync
 ---
 
-# EPIC-{ID}: {Epic Name}
+# {ID}: {Epic Name}
 
 ## 0. AI Coding Agent Handoff
 *(This section is strictly for downstream AI execution agents. It contains zero business fluff.)*

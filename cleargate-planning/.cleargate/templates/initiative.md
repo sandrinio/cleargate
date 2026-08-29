@@ -20,13 +20,13 @@ WHAT THE AI DOES WITH IT:
     with frontmatter stamps `triaged_at: <ISO-8601>` and
     `spawned_items: [EPIC-NNN, STORY-NNN-NN, ...]`.
 
-OUTPUT LOCATION: `.cleargate/delivery/pending-sync/INITIATIVE-{NNN}_{short_name}.md`
+Output location: `.cleargate/delivery/pending-sync/{ID}_{SLUG}.md`
 
 DO NOT output these instructions in the rendered file.
 </instructions>
 
 ---
-initiative_id: "INITIATIVE-{NNN}"
+initiative_id: "{ID}"
 remote_id: null
 source_tool: "linear | jira | github | manual-paste"
 status: "{PM native status — e.g. Discovery, In Triage, Triaged, Completed}"
@@ -35,8 +35,8 @@ triaged_at: null
 spawned_items: []
 created_at: "{ISO-8601 timestamp}"
 updated_at: "{ISO-8601 timestamp}"
-created_at_version: "cleargate@{semver}"
-updated_at_version: "cleargate@{semver}"
+created_at_version: "strategy-phase-pre-init"
+updated_at_version: "strategy-phase-pre-init"
 server_pushed_at_version: null
 draft_tokens:
   input: null
@@ -60,7 +60,7 @@ last_synced_status: null
 last_synced_body_sha: null
 ---
 
-# INITIATIVE-{NNN}: {Initiative Name}
+# {ID}: {Initiative Name}
 
 ## 1. User Flow
 

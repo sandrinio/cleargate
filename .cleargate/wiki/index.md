@@ -33,17 +33,20 @@
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
 - [[CR-105]] (cr) — Draft — The ClearGate block leads CLAUDE.md
 - [[CR-106]] (cr) — Draft — Execution state becomes an append-only event log with a derived fold
-- [[CR-107]] (cr) — Draft — Sprint→main merge goes through a pull request
+- [[CR-107]] (cr) — Draft ⚠︎ drift — Sprint→main merge goes through a pull request
 - [[CR-108]] (cr) — Draft — `cleargate new <type>` — one scaffolder for every work-item type
 - [[CR-109]] (cr) — Draft — Machine fields move out of the work-item document
 - [[CR-110]] (cr) — Draft — The sprint goal gets an acceptance check, and the Orchestrator holds it
 - [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
+- [[CR-112]] (cr) — Draft — Heading-anchored predicates replace positional `section(N)`
+- [[CR-113]] (cr) — Draft — One bounded-marker grammar
+- [[CR-114]] (cr) — Draft — Record the relocation whitespace scar where a reader will find it
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 - [[BUG-042]] (bug) — Draft ⚠︎ drift — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
 - [[BUG-043]] (bug) — Draft — CLAUDE.md marker handling loses user prose — two ways
-- [[BUG-044]] (bug) — Triaged — Concurrent `update_state.mjs` invocations silently lose story transitions
+- [[BUG-044]] (bug) — Triaged ⚠︎ drift — Concurrent `update_state.mjs` invocations silently lose story transitions
 - [[BUG-045]] (bug) — Triaged — `hotfix new` ID allocation scans only `pending-sync/`, so archived IDs get reused
-- [[BUG-046]] (bug) — Triaged — Collision surface treats worktree-unreachable paths as ordinary files
+- [[BUG-046]] (bug) — Triaged ⚠︎ drift — Collision surface treats worktree-unreachable paths as ordinary files
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
 - [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
@@ -52,6 +55,18 @@
 - [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
 - [[BUG-053]] (bug) — Draft — Commits made inside cleargate-cli are completely ungated
 - [[BUG-054]] (bug) — Draft — Nine of twelve gate criteria pass on their own unedited template
+- [[BUG-055]] (bug) — Draft — A spike charter pushes successfully under the literal cleargate_id "unknown"
+- [[BUG-056]] (bug) — Draft — Every gate block's declared severity can be flipped with the whole suite still green
+- [[BUG-057]] (bug) — Draft — CLAUDE.md teaches a draft filename shape that deriveBucket cannot key
+- [[BUG-058]] (bug) — Draft — Predicate Vocabulary omits `marker-absence` — 11 union members, 10 documented shapes, and entry 2's worked example describes the wrong matcher
+- [[BUG-059]] (bug) — Draft — The Task Breakdown loop cannot execute as written — two defects
+- [[BUG-060]] (bug) — Draft — Four cleargate-cli test files hardcode this machine's absolute repo path
+- [[BUG-061]] (bug) — Draft — The greedy block match still eats user prose, and the reason it is greedy is no longer true
+- [[BUG-062]] (bug) — Draft — The collision extractor derives no dependency edges and reads prose as file surface
+- [[BUG-063]] (bug) — Draft — The inline-id-regex gate cannot see a capture group, which is the form it exists to catch
+- [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
+- [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
+- [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
 
 ## Archive
 

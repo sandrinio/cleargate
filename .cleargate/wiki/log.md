@@ -1465,3 +1465,8 @@
   action: "update"
   target: "EPIC-058"
   path: ".cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md"
+- timestamp: "2026-08-29T20:52:05.311Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-108"
+  path: ".cleargate/delivery/pending-sync/CR-108_Universal_Work_Item_Scaffold.md"

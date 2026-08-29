@@ -2,7 +2,7 @@
 cr_id: CR-108
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -13,17 +13,12 @@ updated_at: 2026-08-25T20:50:15Z
 created_at_version: cleargate@0.24.2
 updated_at_version: dff83bd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-08-25T20:50:15Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: cleargate-cli/src/commands/hotfix.ts, cleargate-cli/src/lib/stamp-frontmatter.ts, cleargate-cli/src/commands/stamp.ts, cleargate-cli/src/lib/work-item-type.ts"
+  last_gate_check: 2026-08-29T20:52:04Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -33,6 +28,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-5
+  last_stamp: 2026-08-29T20:52:04Z
+  sessions:
+    - session: 49c00a07-a425-4af9-9ac6-97ed8ed5ee64
+      model: <synthetic>,claude-opus-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-08-29T19:28:57Z
 ---
 
 # CR-108: `cleargate new <type>` — one scaffolder for every work-item type
@@ -89,18 +99,18 @@ last_synced_body_sha: null
 > and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
 > worktree was cut. Execution order.
 
-- [ ] Correct CR-108 ## Prior work line 92: name the CLAUDE.md overlap with CR-105/BUG-043 (orchestrator, pre-dispatch)
-- [ ] Branch story/CR-108 from cli main (post-BUG-045); cut the outer half from sprint/S-39
-- [ ] Decide and record the {ID} semantic (full-id) and the {PARENT_EPIC_ID} split before touching any template
-- [ ] Build the type -> {template, padWidth, allocator} map in work-item-type.ts; add KNOWN_UNSCAFFOLDABLE = {proposal}, size-asserted
-- [ ] QA-Red: author N1-N13 in test/commands/new-command.node.test.ts; measure the red set, do not predict it
-- [ ] Create src/commands/new.ts reusing maxHotfixId (BUG-045-corrected), work-item-id.ts, stampFrontmatter, the wx lock idiom
-- [ ] Register top-level `new <type> <slug>` in cli.ts; reduce hotfix.ts:719 to a delegate
-- [ ] Normalize placeholders in EIGHT templates x 2 trees; fix hotfix.md:11, initiative.md:23/38/39, hotfix.md:39
-- [ ] Edit CLAUDE.md:33 and cleargate-planning/CLAUDE.md:39 in the SAME commit; run the ANCHORED block-equal check
-- [ ] Add one CHANGELOG.md bullet under the existing ## Unreleased
-- [ ] Run gate-section-index-pinning (expect 18/18/0/0), typecheck, full suite; record all numbers
-- [ ] Re-measure every hotfix.ts line citation in the item after the edit (N7 of the rulings)
+- [x] Correct CR-108 ## Prior work line 92: name the CLAUDE.md overlap with CR-105/BUG-043 (orchestrator, pre-dispatch) — done pre-dispatch, see the `§ AMENDMENT` already in this section.
+- [x] Branch story/CR-108 from cli main (post-BUG-045); cut the outer half from sprint/S-39 — done pre-dispatch; verified clean at `649e6df` (cli) / `078722c6` (outer) at session start.
+- [x] Decide and record the {ID} semantic (full-id) and the {PARENT_EPIC_ID} split before touching any template — ruled by CR-108-tpv.md F3/RULING (full-id; story.md's `parent_epic_ref` uses the distinct `{PARENT_EPIC_ID}` token); applied identically across all eight templates.
+- [x] Build the type -> {template, padWidth, allocator} map in work-item-type.ts; add KNOWN_UNSCAFFOLDABLE = {proposal}, size-asserted — `SCAFFOLD_REGISTRY` (8 rows: template + padWidth) and `KNOWN_UNSCAFFOLDABLE` (size 1, `{'proposal'}`) added to `work-item-type.ts`. The allocator itself lives in `new.ts` (`maxIdForType` / `maxStorySeqForEpic`), not in the registry map, per the item's own "generalise the loop body, don't reshape the signature" guidance.
+- [x] QA-Red: author N1-N13 in test/commands/new-command.node.test.ts; measure the red set, do not predict it — done by QA-Red, both rounds (baseline `pass 5 · fail 52` of 57).
+- [x] Create src/commands/new.ts reusing maxHotfixId (BUG-045-corrected), work-item-id.ts, stampFrontmatter, the wx lock idiom — created, reusing `work-item-id.ts` (`classifyType`/`idFromFilename`/`numericStem`/`parseWorkItemId`) and the `wx`-lock idiom. **Deviation:** does NOT call `stampFrontmatter` — RULING 1 (CR-108-tpv.md §7, O3) supersedes this row's original text; `newHandler` must never call `stampFrontmatter`, since it corrupts `<instructions>`-prefixed scaffolds (filed as BUG-067) and CR-108's own §4 AMENDMENT rules that `<instructions>` is not stripped.
+- [x] Register top-level `new <type> <slug>` in cli.ts; reduce hotfix.ts:719 to a delegate — registered beside `stamp` in `cli.ts`; `hotfixNewHandler` reduced to its cap-check plus a delegate call into `newHandler({ type: 'hotfix', ... })`. `hotfix.ts` dropped from 211 to 66 lines (`maxHotfixId`, `resolveTemplatePath`, the render/write body and its own `SLUG_RE` all retired — `grep -rn "maxHotfixId" src` is zero hits).
+- [x] Normalize placeholders in EIGHT templates x 2 trees; fix hotfix.md:11, initiative.md:23/38/39, hotfix.md:39 — all eight templates normalized in both `.cleargate/templates/` and `cleargate-planning/.cleargate/templates/`, byte-identical (verified via `diff`). `hotfix.md:11`, `initiative.md:23/38/39` fixed as named; `hotfix.md:39`'s hardcoded `cleargate@0.5.0` also joined the `strategy-phase-pre-init` convention per F10. Additionally normalized (in scope per "Normalize placeholders" but not individually named by F1-F14): `Bug.md`/`CR.md`/`epic.md`/`Sprint Plan Template.md`'s `<PREFIX>-{ID}` id-field and H1 sites (F3's doubled-prefix defect class), and `Bug.md`/`CR.md`/`epic.md`'s `parent_ref` example text (was `"EPIC-{ID} | STORY-{ID}"`, which a global `{ID}` substitution would have silently corrupted into the item's own new id — changed to plain non-token prose `"EPIC-NNN | STORY-NNN-NN"`, matching the existing pipe-enum convention used elsewhere in the same templates).
+- [x] Edit CLAUDE.md:33 and cleargate-planning/CLAUDE.md:39 in the SAME commit; run the ANCHORED block-equal check — both edited identically; anchored check: `block-equal: true 11948 / 11948`.
+- [x] Add one CHANGELOG.md bullet under the existing ## Unreleased — one `### Added` bullet added (a new subsection under the same `## Unreleased` heading, not a second `## Unreleased`).
+- [x] Run gate-section-index-pinning (expect 18/18/0/0), typecheck, full suite; record all numbers — `gate-section-index-pinning`: `tests 14 · pass 14 · fail 0 · skipped 0` (TPV §8 corrects the plan's `18/18` — that is the criteria count printed inside test titles, not the test-case count; the acceptance line is `14/14/0/0`, confirmed unchanged by this story). Typecheck: clean, 0 errors. Full suite: see CR-108-dev.md for the full breakdown and the cross-repo caveat on 10 of its 12 reported failures.
+- [x] Re-measure every hotfix.ts line citation in the item after the edit (N7 of the rulings) — re-measured pre-dispatch in `§ PRE-DISPATCH AMENDMENTS`; `hotfix.ts` is now 66 lines post-CR-108 (was 211), so every citation in this item is stale again as of this commit — expected and out of scope to chase further (no downstream item cites `hotfix.ts` line numbers after this story).
 
 ## Prior work
 
