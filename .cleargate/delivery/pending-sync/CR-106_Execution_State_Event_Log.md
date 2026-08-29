@@ -78,7 +78,21 @@ Concurrent appends therefore cannot interleave and contention goes to zero regar
 width. **Record this guarantee — not `PIPE_BUF` — in the `state-events.mjs` code comment.** Do not
 size a record against 4096 and call it safe: that number has no meaning here, and a comment citing
 it will be cargo-culted by the next reader.
-- **`state.json` keeps its exact current schema and path.** After each append the folder rewrites it. It gains exactly one writer — the folder — and folds are idempotent, so the lost-update race is structurally impossible rather than merely unlikely. **No reader changes.** All 27 non-test consumers keep working untouched.
+- **`state.json` keeps its exact current schema and path.** After each append the folder rewrites it. **No reader changes.** All 27 non-test consumers keep working untouched.
+
+  **§ AMENDMENT (orchestrator, 2026-08-29, per `TPV RULING — CR-106` T3 — the design stays, the
+  justification is REPLACED, exactly as the `PIPE_BUF` sentence above was).** The original text
+  claimed the folder *"gains exactly one writer — the folder — and folds are idempotent, so the
+  lost-update race is structurally impossible rather than merely unlikely."* **Measured false for
+  the derived cache.** A lock-free fold loses updates in **~1 of 5 full runs** (TPV §1.4: S1 lost
+  10 of 20 transitions). Idempotent folds make `events.jsonl` safe — appends are atomic and the
+  log is the truth — but `state.json` is still written by an **unserialized read-log → fold →
+  overwrite**, and that is a read-modify-write like any other. Concurrency does not care that the
+  value being written was derived rather than read.
+
+  What is true, and is the CR's real gain: **the truth moves to an append-only log that cannot lose
+  a write**, and the critical section over the cache shrinks from BUG-044's whole
+  read-migrate-write to **~1 ms**. See the T3 ruling below for the consequence.
 - **This finishes a pattern ClearGate already uses everywhere else.** `token-ledger.jsonl` is append-only JSONL, hook-owned, with an explicit "never edit by hand" rule (CLAUDE.md). `wiki/log.md` is an append-only YAML event stream. The CLAUDE.md doctrine already reads *"Wiki, memory, and `context_source` are derived caches… the code wins; the cache rebuilds."* `state.json` is the last machine-written surface still modelled as a mutable document.
 - **Idempotency stops being a prose obligation.** `SKILL.md:261` currently *asks* segments to be idempotent as a "belt-and-suspenders safety net" for `resumeFromRunId`. With events keyed by `run_id`, a replayed GREEN segment appends a duplicate that the fold discards. The guarantee moves out of prose and into the data model.
 
@@ -145,6 +159,48 @@ it will be cargo-culted by the next reader.
 - `cleargate-planning/.cleargate/scripts/state-events.mjs` — canonical mirror.
 
 **Do NOT modify:** any of the 27 non-test `state.json` readers. If a reader needs changing, the fold is wrong.
+
+## § ORCHESTRATOR RULINGS — T3 and T6 (2026-08-29, pre-dispatch)
+
+TPV routed two decisions here explicitly, with *"do not route this to a Developer — resolving it by
+whichever half gets written last is exactly the failure the `§ RESOLVED` block was added to
+prevent."*
+
+### T3 — RULED: **(a) retain mutual exclusion around read-log → fold → write-cache.**
+
+The measurement decides it. Lock-free: **loses updates in ~1 of 5 full runs**, with a known ~20%
+flake on S1 and the addendum — TPV's own words, *"not an acceptable acceptance signal."* Retained
+short lock: **`29 · 21 · 29 · 0 · 0`, stable, ~7.4 s** — which is also *faster* than today's 14.5 s
+baseline, because the critical section shrinks from BUG-044's whole read-migrate-write to ~1 ms.
+
+Accepting a knowingly-stale `state.json` is not available as a trade here: **all 27 non-test readers
+read that file**, and §2's own promise is *"Invalidate/Update: none — no consumer changes."* A cache
+that silently drops transitions would make that promise false for every one of them, which is a
+correctness regression in exactly the surface this CR claims to leave untouched.
+
+**This preserves the human's OD-1 decision to ship.** It is a scope *correction* — the CR still
+delivers its architectural gain (the truth becomes an append-only log that cannot lose a write);
+what it does not deliver is the deletion of the lock, which was a consequence the item asserted
+rather than measured.
+
+Consequences, all recorded above: S4/S5 retained · M4 kick-back #4 struck · §1's
+"structurally impossible" justification replaced.
+
+### T6 — RULED: the event contract is PINNED here. A Developer may not choose differently.
+
+Each of these bounces a correct implementation if left unstated — the exact failure mode this gate
+caught on BUG-044.
+
+| # | Pinned |
+|---|---|
+| **C1** | **`appendEvent(eventsFile, event)` — path first.** E6's runner hardcodes argv order; `(event, eventsFile)` or `(sprintDir, event)` bounces on a wiring error that says nothing about behaviour. |
+| **C2** | **Genesis = the first event carries `from: null` plus an `initial: {…}` payload** holding the non-transition fields. Not a `snapshot` event kind, and not a fold that defaults every non-transition field — E7's event array is hand-built and hardcodes `initial:`. |
+| **C3** | **`sprint_status` is carried on every event.** `validateShapeIgnoringVersion` requires it (`validate_state.mjs:39-41`) and the per-event field is the tests' only source. A sprint-level event stream fails E4 and E7. |
+| **C4** | **A `kind` discriminator is REQUIRED**: `transition` \| `qa-bounce` \| `arch-bounce` \| `lane` \| `lane-demote`. The documented 9-field shape describes only `transition`, yet the other four are **4 of the 5** action branches and **5 of the 7** `atomicWrite` sites the eviction check forces through the fold. Shipping without this leaves the majority of the writer's behaviour undefined. |
+| **C5** | **All five `last_action` strings reproduce verbatim**, including the U+2192 arrow in `transition ${id} → ${to}`. Literal at `update_state.mjs:278`, `:299`, `:316`, `:333`, `:364`. Only the first is currently enforced by any test. |
+| **C6** | **Terminal `sprint_status` is `'Completed'`.** `close_sprint.mjs:1044` is the only writer; 25 of 25 closed sprints on disk carry it; none carries `Closed`. `state.schema.json:30` lists `"Closed"` as a prose *example*, not a written value — guarding both is harmless, guarding only `Closed` is wrong. |
+
+---
 
 ## 4. Verification Protocol
 
@@ -230,13 +286,21 @@ five times across Developer, QA-Verify and post-flight: 14.62-15.94s). **Any acc
 CR must report wall-clock alongside pass/fail, and a sub-6s green is a kick-back, not a success.**
 Re-target the barrier onto whatever read or append the new writer actually performs.
 
-**§ AMENDMENT — two scenarios MUST be deleted with the lock, and saying so is part of the work.**
-S4 (dead-pid lock is stolen) and S5 (live lock is respected) are **pure lock semantics with zero
-race content**. They hard-break the moment the lock is removed. Deleting them is correct and
-expected — but it must be **stated in the commit and the report**, not done silently, because a
-reviewer seeing the suite shrink otherwise cannot distinguish "removed obsolete lock tests" from
-"deleted tests that failed". E1's protection applies to the 20-way concurrency test and the
-addendum, **not** to S4/S5.
+**§ AMENDMENT — SUPERSEDED by the T3 ruling below. S4 and S5 are RETAINED, not deleted.**
+An earlier amendment here ordered S4 (dead-pid lock is stolen) and S5 (live lock is respected)
+deleted alongside the lock, on the premise that the event log removed the need for mutual exclusion.
+**That premise is measured false** (see the §1 amendment above and T3). The lock is retained, so
+S4 and S5 stay and stay green — TPV measured the retained-lock reference implementation at
+`29 · 21 · 29 · 0 · 0`, both intact.
+
+**M4 kick-back criterion #4 is STRUCK.** It reads *"BUG-044's 20-way test deleted, weakened, or
+skipped"* and its parenthetical penalised *"keeping the lock 'just in case'"*. Keeping the lock is
+now the ruled-correct outcome, not a hedge. The 20-way test's protection stands unchanged.
+
+**One correction of scope, carried from TPV §4:** the BUG-044 post-flight named *"S4, S5 and T1"* as
+the lock-only set. That is **one test too wide.** BUG-044's `T1` (`:527-567`) carries non-lock
+content — exit codes and the `already Escalated` / `not found` stderr strings for two error paths.
+Only its two `!existsSync(lockFile)` assertions would go vacuous. **T1 stays either way.**
 
 **§ RESOLVED (orchestrator, 2026-08-29) — E5 vs the inherited migration addendum. The conflict is
 an artefact of a restatement, not a real design tension, and the item settles it in its own words.**
