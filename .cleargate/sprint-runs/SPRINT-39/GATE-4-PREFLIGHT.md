@@ -617,3 +617,262 @@ commits touch neither file in either tree.
 half (`ac7c9801`) to `sprint/S-39` **at or before** the point the cli half (`b4ae1976`) is measured
 against `main`. Otherwise the 10 template-visibility false-reds persist on `cleargate-cli main`.
 Independent of the two CR-110 drift failures, which this merge does not touch.
+
+---
+
+## Attribution re-verification — 2026-08-30 03:22 (pre-CR-111-merge sweep)
+
+Standing obligation from BUG-048 §3.5 (20 recorded occurrences). Swept every
+`sprint_cleargate_id:` in `pending-sync/`.
+
+**Result: CLEAN.** All eight historical victims carry `"SPRINT-39"`:
+`BUG-047`, `BUG-048`, `BUG-049`, `BUG-050`, `BUG-062`, `CR-109`, `EPIC-055`, `EPIC-057`.
+No item leads with anything other than `---` (BUG-067 frontmatter-demotion sniff: zero hits).
+
+Two non-SPRINT-39 oddities noted and deliberately **not** touched — neither is a
+SPRINT-39 work item and neither is in the victim set:
+
+| Item | Value | Disposition |
+|---|---|---|
+| `BUG-058` | `"SPRINT-14"` | Pre-existing; BUG-058 is unscheduled. Out of scope. |
+| `BUG-036`, `CR-097` | `"SPRINT-99"` | Sentinel values, not real attributions. Out of scope. |
+
+**This sweep does not discharge the close-gate obligation.** It must be re-run
+*immediately before* `close_sprint.mjs`, because the corruption is caused by
+re-stamping — which the remaining Gate-4 steps (prebuild, wiki ingest, report
+push) can still trigger. Occurrences 18/19/20 all appeared *after* a clean sweep.
+
+---
+
+## Revised expected-red accounting after CR-111 (supersedes the earlier "fail 4 / fail 2" targets)
+
+CR-111 introduces a **cross-branch** red set that the earlier accounting did not contemplate.
+`cleargate-cli/test/lib/readiness-predicates-test-layers-declared.red.node.test.ts` resolves the
+canonical template paths through `META_ROOT`, which defaults to the outer **main checkout**
+(currently `sprint/S-39`) — not the story worktree the edits are authored in.
+
+**While `story/CR-111` is unmerged**, an unredirected full suite is expected to show **9** failures:
+
+| Count | Group | Why | Clears when |
+|---:|---|---|---|
+| 3 | inherited / unrelated | Pre-existing before CR-111. Not this sprint's. | Out of scope |
+| 3 | `T8b` × 3 | Templates in the main checkout lack the new `\| Integration tests \|` row. | DevOps merges `story/CR-111` → `sprint/S-39` |
+| 3 | `T8` × 3 | Same templates lack the trigger, so absence-passes returns `pass: true`; T8 asserts `false`. | Same merge |
+
+The six `T8`/`T8b` failures are **branch-position artefacts, not defects**. They are verified green
+by a targeted run with `CLEARGATE_META_ROOT` pointed at `.worktrees/CR-111`. QA-Verify must not
+bounce on them, and the sprint report must not record them as escaped defects.
+
+**Post-merge expectation: 3** (the inherited set only). If the count is not 3 after the CR-111
+merge, something regressed — that is the number to check at close, not the pre-merge 9.
+
+> ⚠️ **Never set `CLEARGATE_META_ROOT` for a full-suite run.** It trips unrelated tests that
+> require a real `REPO_ROOT/cleargate-cli/` sibling, which a worktree never materialises
+> (BUG-046: zero tracked files). Two pure env artefacts read exactly like a regression.
+
+### Why this was nearly a silent bounce
+
+The A2 amendment added `T8b` specifically to pin CR-111's *actual deliverable* — the template
+edits — after TPV measured a null implementation scoring 19/1 with all three templates
+byte-unchanged. But as first written, `META_ROOT` had no env branch (the file's own header comment
+at `:119` claimed it followed the sibling doctrine file's `CLI_ROOT/META_ROOT/CANON` idiom; the
+assignment at `:125` did not). `T8b` was therefore **unsatisfiable by any correct implementation**,
+with no escape hatch — strictly worse than CR-108's `REPO_ROOT` false red. Caught at orchestrator
+pre-dispatch review and repaired by QA-Red as A9 (round 3); `arch_bounces` deliberately not
+incremented, since this was a harness repair rather than a rejection of round 2.
+
+---
+
+## Doc-truth correction owed: Cross-Cutting Rule 6's second half is FALSE
+
+`sprint-context.md:88-94` (Rule 6) ends:
+
+> The outer repo *does* have a `pre-commit` hook, and `.cleargate/config.yml` `gates.precommit`
+> runs cli typecheck + tests, so **outer**-repo commits are gated; cli-repo commits are not.
+
+**The first clause is true; the causal claim is false.** Verified 2026-08-30:
+
+| Claim | Reality |
+|---|---|
+| `gates.precommit` runs on outer commits | **No.** `.git/hooks/pre-commit` is a 33-line dispatcher that chains `${HOOK_DIR}/pre-commit-*.sh`. Exactly one such file exists and is executable: `pre-commit-surface-gate.sh`. Nothing in the chain reads `gates.precommit`. |
+| …so typecheck + tests gate outer commits | **No.** `gates.precommit` is reachable only through the explicit `cleargate gate run precommit` command (`cli.ts:322`, `gate-run.ts:31`). No hook invokes it. |
+| Outer commits are gated | **Partly true, by a different mechanism.** `pre-commit-surface-gate.sh` runs the surface gate, `check:no-vitest` (`:39`) and `check:no-inline-id-regex` (`:57`). Live and canonical hooks are identical here. |
+
+**Net:** outer-repo commits are gated for *surface*, *vitest residue* and *inline id regex* — and
+**not** for typecheck or tests, in either repo. The sprint has been operating on a belief that a
+type error or a failing test could not reach a commit from the outer tree. It could.
+
+This is why the CR-108 frozen-pin and the CR-110 drift both reached committed state and were caught
+downstream by a *manual* full-suite run rather than at commit time.
+
+**Not edited in place** — `sprint-context.md` is being read by the in-flight CR-111 Developer, and
+mutating a preflight file mid-dispatch is the STORY-054-01 stale-copy hazard in reverse. Correct it
+at Gate 4, in both trees, along with the `.doc-refresh-checklist.md` pass.
+
+**Follow-up for next sprint:** either wire `gates.precommit` into the hook chain or delete the key.
+A declared gate that nothing invokes is worse than an absent one — it is cited in doctrine as
+though it fires.
+
+---
+
+## CORRECTION to the CR-111 expected-red accounting above (orchestrator error, ×2)
+
+The Developer caught two mistakes in my own dispatch and in the table above. Both are recorded
+here because they change QA-Verify's acceptance bar.
+
+**1. The "9 failures" figure undercounts. The real number is 18.**
+I scoped the merge-dependency to the lib file's `T8`/`T8b` only. The doctrine file
+(`test-layers-declared-doctrine.red.node.test.ts`) has the *same* default-to-main-checkout root —
+it honours `CLEARGATE_META_ROOT`, but its **default** is `resolve(CLI_ROOT,'..')` exactly like the
+lib file. Its canonical-doc assertions (`developer.md`, `qa.md`, `SKILL.md`, `readiness-gates.md`)
+are therefore equally unmerged-blind.
+
+| Count | Group | Clears when |
+|---:|---|---|
+| 3 | inherited / unrelated | out of scope |
+| 15 | merge-dependent (lib `T8`×3 + `T8b`×3, plus the doctrine file's canonical-doc set) | DevOps merges `story/CR-111` → `sprint/S-39` |
+| **18** | **total, unredirected, pre-merge** | |
+
+All 15 are confirmed green — **28/28** — under `CLEARGATE_META_ROOT` redirection, which is the
+stated acceptance bar. **Post-merge expectation remains 3.**
+
+**2. "5 both-trees files" is wrong; it is 4.**
+`developer.md`, `qa.md` and `SKILL.md` are **canonical-only** — the outer `.claude/` is gitignored
+in this meta-repo (CR-099), so there is no second tree to mirror. Mirror parity applies to exactly
+four files: `.cleargate/knowledge/readiness-gates.md` and `.cleargate/templates/{story,CR,Bug}.md`.
+My dispatch said "5" while its own Deliverable D said canonical-only — an internal contradiction
+the Developer resolved correctly rather than inventing a fifth pair.
+
+Same failure mode as the CR-110 dispatch that said "all four pairs" and listed three. **Twice now
+a dispatch header has carried a count that its own body contradicts.** Cheap fix for next sprint:
+never write a bare count in a dispatch — enumerate, and let the reader count.
+
+---
+
+## Branch + worktree inventory for Gate 4 (measured 2026-08-30)
+
+### Worktrees — Step 2.7 (pre-close: none may remain)
+Exactly one: `.worktrees/CR-111 [story/CR-111]`. DevOps removes it on the CR-111 merge. After that,
+`git worktree list` shows the main checkout only and 2.7 is satisfied.
+
+### SPRINT-39 story branches — safe to delete after merge
+**Outer (13):** `story/` + `BUG-044`, `BUG-046`, `CR-105`, `CR-106`, `CR-107`, `CR-108`, `CR-110`,
+`CR-111`, `STORY-054-01`, `-02`, `-03`, `-04`, `-06`, `-07`.
+*(No outer branch for BUG-042, BUG-043, BUG-045 or STORY-054-05 — those were cli-side.)*
+
+**cli (9):** `story/` + `BUG-043`, `BUG-045`, `CR-105`, `CR-108`, `CR-111`, `STORY-054-02`,
+`-04`, `-05`, `-06`.
+
+### 🚫 DO NOT DELETE — pre-existing, not this sprint's
+Deleting any of these needs an explicit human decision; they are listed so they are not swept up
+by a wildcard.
+
+| Where | Refs |
+|---|---|
+| outer | `STORY-014-01-work`, `story/STORY-014-02` … `-08`, `story/STORY-014-04-bounce` (**9 refs**, not 8 — the `-04-bounce` variant is easy to miss) |
+| outer | `cr/CR-006` |
+| outer | 17 stale sprint branches: `sprint/S-21`…`S-28`, `S-30`, `S-33`, `S-34`, `S-38`, `sprint/SPRINT-10`…`-13` |
+| both | `fix/cr-093-095-harness-defects`, `fix/preflight-idempotence-and-scope` |
+| cli | `sprint/S-38` |
+
+### ⚠️ `cleargate-cli` `stash@{0}` — ASK BEFORE DROPPING
+`WIP on story/BUG-043: 1e01ea0 fix(EPIC-043): BUG-043 upgrade refuses rather than overwrites a
+user's CLAUDE.md`. Dropping a stash is irreversible and this one sits on a SPRINT-39 branch whose
+work did ship — it may be superseded, or it may be uncommitted salvage. **Do not drop it as
+routine teardown.** Inspect with `git -C cleargate-cli stash show -p stash@{0}` and put the call to
+the human at Gate 4.
+
+---
+
+## CR-111 QA-Verify findings — dispositions
+
+**PASS**, 11/11. Three items recorded, none blocking.
+
+### 1. `cleargate gate check <file>` write-stamps its target — documented, not a discovery
+QA flagged this as "an incidental discovery: a read-only-looking command mutates the file." It is
+**designed behaviour and already written down** — `CLAUDE.md`: *"Gate check results are cached in
+the document's own frontmatter under `cached_gate_result:` by `cleargate gate check <file>`."* The
+deadlock consequence is separately filed as **BUG-047 (Gate Cache Stamp Deadlock)**. Nothing new to
+file. QA reverted the write with `git checkout --`, which is the right habit — the risk is not the
+stamp, it is stamping a work item mid-verification and committing it by accident.
+
+### 2. `existing-surfaces-verified` fails when gate-checking the WORKTREE copy — artefact, not regression
+`cleargate gate check` on the worktree's `CR-111_*.md` fails that criterion because the untracked
+`.claude/` tree never materialises inside a worktree (CR-099 × BUG-046). QA confirmed the identical
+failure is already present in the file's **pre-QA-Red** `cached_gate_result`, so it pre-dates this
+round, and that a direct `evaluate()` with `projectRoot` pointed at a tree where `.claude/` exists
+passes **9/9 pre-merge and 10/10 post-merge**. This is the same class as the SessionStart banner's
+43 blocked items. No action.
+
+### 3. `SKILL.md:383` (§C.3.5) — out of scope, referred to Architect post-flight
+Retains an unqualified red-test-naming line that the CR's §C.3 edits do not cover. Ruling deferred
+to the post-flight verdict: ship as-is or pull in now.
+
+### 4. Prose-only "2110 vs 2109 chars" in QA-Red's `evalSection` documentation
+The **load-bearing** artefact is the pinned `FROZEN_SHA256`, and QA re-extracted it independently
+and matched exactly. Only the human-readable char count in the prose is off by one. Cosmetic.
+
+---
+
+## BUG-058's premise is now stale — update before it is worked
+
+BUG-058 ("Predicate Vocabulary Omits Marker Absence") is written against a **10-vs-11** drift
+between `readiness-gates.md:9` and `readiness-predicates.ts:3`. CR-111 bumps both by one, so the
+drift is now **11-vs-12**. The defect is unchanged in substance — two independent count sites that
+must be hand-synchronised — but every literal figure in the bug body is now wrong. Fix the numbers
+when it is picked up, or a reader will conclude it was already resolved.
+
+---
+
+## CR-111 Architect post-flight — `POSTFLIGHT=pass`, with three corrections to MY numbers
+
+### A. Post-merge suite target is **≥5, not 3**
+`sprint-execution-mirror.integration.node.test.ts`'s live-vs-canonical `SKILL.md` diff **already
+fails in the main checkout** (live 797 lines vs canonical 829, drift from CR-107 + CR-110). It
+appears in **neither** the "3 inherited" set I gave QA-Verify **nor** the Developer's 18. So the
+close-gate check is: **≥5**, not 3.
+
+Second contributor, **FU-2**: CR-111's canonical-only `qa.md` edit lands *inside*
+`qa-content.integration.node.test.ts`'s live-vs-canonical parity slice. That file goes from `22/22`
+to failing **at merge**. Not a defect — N1 forbids the alternative (editing the untracked live tree
+from a story branch). It clears at the Gate-4 live re-sync, alongside FU-3.
+
+**Consequence for Gate 4:** the live `/.claude/` re-sync is now load-bearing for a green suite in
+*two* independent places. It is not hygiene and it is not optional.
+
+### B. Rule 4 was verified by a different route than QA reported — a THIRD hardcoded-root site
+`gate-section-index-pinning.node.test.ts:97` has **no `CLEARGATE_META_ROOT` branch**. QA's
+"green both redirected and unredirected" was therefore *the same main-checkout run twice* — the
+redirection was inert. The Architect did not rely on it, and instead confirmed Rule 4 by measuring
+heading lists byte-identical pre/post across all six template files and resolving every criterion
+against the worktree: **18 = 16 pinnable + 2 unpinnable, zero mismatches, both trees**. Acceptance
+stands at `14 · 14 · 0`.
+
+This is the **third** file in the same class this sprint (lib red test → A9; doctrine test → already
+correct; pinning test → still hardcoded). The pattern is now established well enough to fix as a
+class rather than one file at a time.
+
+### C. `evalSection` is **2109** chars, not 2110 — and the wrong figure ships
+I recorded this as prose-only in QA-Red's report. It is also in the **shipped test file's** comments
+at `:88` and `:494`. The load-bearing `FROZEN_SHA256` (`9d9b5f5d…`) matches exactly at all three
+revisions, so nothing is broken — but a wrong constant in a shipped comment is the seed of the next
+frozen-pin incident. Fix at Gate 4 or file it.
+
+### D. §C.3.5 ruling: **ship as-is, do not pull in** — but the hole is bigger than QA found
+QA flagged one site. There are **four** doc sites plus `pre-commit-surface-gate.sh:11`, whose regex
+`\.red\.(node\.)?test\.ts$` **never matches** `*.red.integration.node.test.ts`. That is a real
+immutability hole over six pre-existing files: red integration tests are not protected by the hook
+that is supposed to protect them. Pre-existing, not created by CR-111, and outside its declared
+sandbox — §4 item 7's unscoped wording is satisfied within §C.3, and the sandbox governs.
+
+**Follow-up carries a trigger:** file it before the next sprint's first §C.3.5 dispatch.
+
+### E. Three non-blocking plan deviations, all accepted
+1. M4's own stale `18/18/0/0` figure.
+2. `story.md`'s new row drops the "`0` is valid — state why" clause the plan specified verbatim.
+3. No CHANGELOG bullet — the blueprint's file surface omits it, contradicting §Q5-C's own
+   principle. The Developer followed the more specific instruction, which is correct precedence.
+
+### F. X14 rider verified by measurement
+cli `story/CR-111` branched from `main` @ `9df6f2a` — main's tip *after* CR-108 merged — with
+`e4cb49f` an ancestor. The rider held.
