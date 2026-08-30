@@ -7,7 +7,7 @@ lifecycle_init_mode: block
 area: planning-layer
 remote_id: null
 source_tool: null
-status: Active
+status: Completed
 start_date: 2026-08-26
 end_date: 2026-09-09
 synced_at: null

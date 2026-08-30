@@ -115,10 +115,6 @@ _No active epics._
 
 - [[EPIC-031]] — status: Draft
 
-- [[EPIC-044]] — status: Draft
-
-- [[EPIC-046]] — status: Draft
-
 - [[EPIC-047]] — status: Draft
 
 - [[EPIC-050]] — status: Draft
@@ -126,8 +122,6 @@ _No active epics._
 - [[EPIC-052]] — status: Draft
 
 - [[EPIC-053]] — status: Draft
-
-- [[EPIC-054]] — status: Draft
 
 - [[EPIC-055]] — status: Draft
 
@@ -198,8 +192,14 @@ _No active epics._
 
 - [[EPIC-043]] — status: Completed
 
+- [[EPIC-044]] — status: Completed
+
 - [[EPIC-045]] — status: Completed
 
+- [[EPIC-046]] — status: Completed
+
 - [[EPIC-051]] — status: Completed
+
+- [[EPIC-054]] — status: Completed
 
 

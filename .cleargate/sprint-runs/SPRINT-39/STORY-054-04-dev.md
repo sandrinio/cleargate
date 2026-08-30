@@ -1,9 +1,11 @@
 ---
-story_id: STORY-054-04
-role: developer
-sprint_id: SPRINT-39
-milestone: M1
-created_at: 2026-08-27
+story_id: "STORY-054-04"
+role: "developer"
+sprint_id: "SPRINT-39"
+milestone: "M1"
+created_at: "2026-08-27"
+qa_bounces: "0"
+arch_bounces: "0"
 ---
 
 # STORY-054-04 Developer report — Spikes reach the awareness layer

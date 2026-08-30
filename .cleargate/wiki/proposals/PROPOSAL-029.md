@@ -6,8 +6,8 @@ children: []
 status: "Ready"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-029_Delivery_Folder_Umbrella_Restructure.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
-last_ingest_commit: "a743603981ddb8788e7bde8cc42dc1fe5ef1a8f4"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 ---
 

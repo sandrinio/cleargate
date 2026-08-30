@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-043_Framework_Hygiene_And_Efficiency_Remediation.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
+last_ingest: "2026-08-30T22:18:10.906Z"
 last_ingest_commit: "5f8134f8b1ea5ad975d5687114fbf0f84ca1f53e"
 repo: "planning"
 ---

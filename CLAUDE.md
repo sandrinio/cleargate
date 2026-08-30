@@ -160,11 +160,11 @@ After the 2026-05-31 planning-only split, each product is its **own** git repo (
 
 **Admin deploy is mid-migration.** `cleargate-admin` is currently a *stale full-monorepo mirror* (not an admin-root repo). The old "push outer `main` to both `origin` and `cleargate-admin`" recipe is **retired** — `admin/` is no longer tracked in the outer repo, so there is nothing to mirror. Making `cleargate-admin` an admin-root repo (and flipping Coolify's base dir from `admin/` to `/`) is an open decision. Until then the deployed console can drift from the local `admin/` checkout, and the vestigial `cleargate-admin` remote on the outer repo can be dropped.
 
-## Active state (as of 2026-04-18)
+## Active state (as of 2026-08-31)
 
-- **Shipped:** SPRINT-01 (MCP v0.1, 12 stories), SPRINT-02 (Admin API, 6 stories), [SPRINT-03](.cleargate/delivery/archive/SPRINT-03_CLI_Packages.md) (CLI packages + admin CLI + `cleargate join` + invite-storage retrofit, 11 stories). Deployed via Coolify at `https://cleargate-mcp.soula.ge/`.
-- **Active:** [SPRINT-04 Knowledge Wiki](.cleargate/delivery/pending-sync/SPRINT-04_Knowledge_Wiki.md) — 9 EPIC-002 stories. Karpathy-style wiki + wiki-ingest/query/lint subagents + PostToolUse hook + `cleargate wiki {build,ingest,query,lint}` CLI. Adapted for our 3-repo case (git-SHA drift, `repo:` tag).
-- **Planned next:** [SPRINT-05 Admin UI](.cleargate/delivery/pending-sync/SPRINT-05_Admin_UI.md) — deferred one sprint from SPRINT-04 to ship the wiki first.
+- **Shipped:** SPRINT-01 through SPRINT-39 (excluding SPRINT-07/16/29/31/37, still drafted or abandoned). Most recent: [SPRINT-38 Enforcement Integrity Restoration](.cleargate/delivery/archive/SPRINT-38_Enforcement_Integrity_Restoration.md), [SPRINT-39 Decomposition Surfaces](.cleargate/delivery/archive/SPRINT-39_Decomposition_Surfaces.md) — spike charter template, Task Breakdown section in Story/CR/Bug, and the §N gate-index repair; 18 items (EPIC-054, BUG-042..046, CR-105/106/107/108/110/111). MCP deployed via Coolify at `https://cleargate-mcp.soula.ge/`.
+- **Active:** none — SPRINT-39 closed 2026-08-31.
+- **Planned next:** [SPRINT-37 Connector M2 Daemon Hardening](.cleargate/delivery/pending-sync/SPRINT-37_Connector_M2_Daemon_Hardening.md) — drafted, not yet started. Note the connector/broker line (EPIC-046/047/048, INITIATIVE-001) is a separate product destined for its own git repo.
 - **Architectural decisions locked:**
   - **Invite storage (2026-04-18):** Postgres source of truth, Redis cache-only. Reason: durability + auditability + admin-UI queryability. (This is the *MCP server's* Postgres — see "Admin owns no database" below.)
   - **Wiki drift detection (2026-04-19):** git SHA (not content hash) — drops EPIC-001 dependency; accepts spurious-recompile tradeoff.

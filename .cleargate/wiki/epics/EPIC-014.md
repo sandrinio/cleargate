@@ -16,7 +16,7 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-014_Execution_V2_Polish.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
+last_ingest: "2026-08-30T22:18:10.906Z"
 last_ingest_commit: "89539e8bfcdb817b90712e9e148c6e392145214e"
 repo: "planning"
 ---

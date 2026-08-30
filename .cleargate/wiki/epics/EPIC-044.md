@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-044"
 parent: ""
 children: []
-status: "Draft"
+status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
-last_ingest_commit: "67a785d3d14637f0f7c2192b5ae948aa1bbee1b5"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "8a306a5d6eff6e90b64b5bf128a81d682aec481f"
 repo: "planning"
 ---
 

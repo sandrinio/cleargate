@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-053_Downstream_DB_Collision_Detection.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
-last_ingest_commit: "1859a5d425935945e1e4df3242770e0c40b375b7"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "432843b8bfda7d93a2eef5af9dc4dea349e59689"
 repo: "planning"
 ---
 

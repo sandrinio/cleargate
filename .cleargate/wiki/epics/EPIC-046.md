@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-046"
 parent: ""
 children: []
-status: "Draft"
+status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-046_Broker_Rendezvous_Data_Plane.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
-last_ingest_commit: "a640863cd4532ce2a199d0bb477d74902e776586"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "8a306a5d6eff6e90b64b5bf128a81d682aec481f"
 repo: "planning"
 ---
 

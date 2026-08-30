@@ -6,8 +6,8 @@ children: []
 status: "In Triage"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/INITIATIVE-001_Broker_Rendezvous_Plane.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
-last_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 ---
 

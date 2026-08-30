@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
+last_ingest: "2026-08-30T22:18:10.906Z"
 last_ingest_commit: "766a05cb70d9f8951f856151ef0e94d1b6a7d64e"
 repo: "planning"
 ---

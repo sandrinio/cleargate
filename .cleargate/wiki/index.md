@@ -6,14 +6,11 @@
 
 - [[EPIC-030]] (epic) — Draft — AI-Driven Sprint Planning Orchestration
 - [[EPIC-031]] (epic) — Draft — Test Suite Wall-Time Reduction — Split Runner + Scoped QA
-- [[EPIC-044]] (epic) — Draft — Agent Dispatch Reliability & Token Efficiency
-- [[EPIC-046]] (epic) — Draft — Broker Rendezvous Data Plane
 - [[EPIC-047]] (epic) — Draft — Connection Identity & Credentials
 - [[EPIC-048]] (epic) — In Review — Connector Daemon
 - [[EPIC-050]] (epic) — Draft — Connector Onboarding & Companion Packaging
 - [[EPIC-052]] (epic) — Draft — Requirement-Level Grounding — Make "Is This Shipped?" Answerable
 - [[EPIC-053]] (epic) — Draft — Downstream DB Collision Detection — Fail-Safe by Default, Derived Not Declared
-- [[EPIC-054]] (epic) — Draft ⚠︎ drift — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
@@ -31,25 +28,13 @@
 - [[INITIATIVE-001]] (initiative) — In Triage — Broker / Rendezvous Plane for Local Claude Code Connectors
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
-- [[CR-105]] (cr) — Draft — The ClearGate block leads CLAUDE.md
-- [[CR-106]] (cr) — Draft ⚠︎ drift — Execution state becomes an append-only event log with a derived fold
-- [[CR-107]] (cr) — Draft ⚠︎ drift — Sprint→main merge goes through a pull request
-- [[CR-108]] (cr) — Draft ⚠︎ drift — `cleargate new <type>` — one scaffolder for every work-item type
 - [[CR-109]] (cr) — Draft — Machine fields move out of the work-item document
-- [[CR-110]] (cr) — Draft ⚠︎ drift — The sprint goal gets an acceptance check, and the Orchestrator holds it
-- [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
 - [[CR-112]] (cr) — Draft — Heading-anchored predicates replace positional `section(N)`
 - [[CR-113]] (cr) — Draft — One bounded-marker grammar
 - [[CR-114]] (cr) — Draft — Record the relocation whitespace scar where a reader will find it
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
-- [[BUG-042]] (bug) — Draft ⚠︎ drift — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
-- [[BUG-043]] (bug) — Draft — CLAUDE.md marker handling loses user prose — two ways
-- [[BUG-044]] (bug) — Triaged ⚠︎ drift — Concurrent `update_state.mjs` invocations silently lose story transitions
-- [[BUG-045]] (bug) — Triaged — `hotfix new` ID allocation scans only `pending-sync/`, so archived IDs get reused
-- [[BUG-046]] (bug) — Triaged ⚠︎ drift — Collision surface treats worktree-unreachable paths as ordinary files
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
-- [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
 - [[BUG-050]] (bug) — Draft — `countDeclaredItems` scores a bare `**Label:**` line as a declared item, so every `≥1` section criterion is fail-open
 - [[BUG-051]] (bug) — Draft — Work-item type and wiki bucket registries have silently drifted apart
 - [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
@@ -71,11 +56,11 @@
 
 ## Archive
 
-- Epics: 30 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Epics: 33 Completed · 3 Abandoned · [expand](archive/epics.md)
 - Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 97 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 31 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- CRs: 103 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 37 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 

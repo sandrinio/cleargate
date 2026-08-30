@@ -3,11 +3,11 @@ type: epic
 id: "EPIC-054"
 parent: ""
 children: []
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-054_Spike_And_Task_Decomposition_Surfaces.md"
-last_ingest: "2026-08-25T19:14:08.376Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-054_Spike_And_Task_Decomposition_Surfaces.md"
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "3a8f523f763e2c95870b25af7fabfacafcc749fc"
 repo: "planning"
 ---
 
@@ -25,7 +25,7 @@ repo: "planning"
     <rule>Spikes run pre-sprint. A spike never enters the five-agent loop and its prototype code never merges to a sprint branch.</rule>
     <rule>Every template edit lands in BOTH the live tree (.cleargate/templates/, .claude/) and the canonical mirror (cleargate-planning/**).
 
-[+27,484 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-054_Spike_And_Task_Decomposition_Surfaces.md]
+[+27,484 bytes not shown — read .cleargate/delivery/archive/EPIC-054_Spike_And_Task_Decomposition_Surfaces.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

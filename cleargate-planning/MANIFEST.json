@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.24.2",
-  "generated_at": "2026-08-30T00:05:41.322Z",
+  "generated_at": "2026-08-30T22:16:56.110Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -53,7 +53,7 @@
     },
     {
       "path": ".claude/agents/developer.md",
-      "sha256": "66387a00317d81a68283d85639d906f9afc8f9e185c1b9c1b0402fecc328ca02",
+      "sha256": "ba6a57e14a4c4322ca982e9b09aea4ccb8b7b83b24f4d9ec61793911c94f0f13",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -67,7 +67,7 @@
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "616b32d97378fdf3a7c869c49592b515e11975bb0433ea1a5b1494066fc8a5bc",
+      "sha256": "ab1ed368190923e3b6533ff41d4cbcd9dfbff571e3ebc0d90129bb9da28c4598",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -165,7 +165,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "038eb21372afc7075c31d57b07922619c3919873245ae21d5448fced5087cf71",
+      "sha256": "cf90b4bf399f7a416d4148e803f632f31395ce820ecb14d3da4dc38636c30147",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -200,7 +200,7 @@
     },
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
-      "sha256": "6ee514c97cb2a5231867fe48c960b5437419b4568a197dccf6aaa9dabe02402d",
+      "sha256": "92bdb34870409f4002ae1e8ffff31fa86f163fd76e3b54b115ed24535b5383fe",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -431,14 +431,14 @@
     },
     {
       "path": ".cleargate/templates/Bug.md",
-      "sha256": "1f9860db21d70b81e469ca717fcd8a417a0ecf8453db8406bdee7397eb4aebc4",
+      "sha256": "934a5ed70b2a17797b3e2f506a2c035b7e5a2eba28f0df69feea23af6a187f13",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/CR.md",
-      "sha256": "834e944d17e5714544198db3bc6647f1011f92d378f9869586e5d38a1be60016",
+      "sha256": "19616502a98abc632d4bab7738d2308990e70f26d645efb19467d4eef65aebde",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -494,7 +494,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "549aa6b6894c02dba3110c963db4605d62ebaaa7b27dfbd7e77251af61edf111",
+      "sha256": "6bb0c1860c0ada3795165c9d79cb3ec99be274d145812b96bcc585335c389005",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-057_Multi_Repo_Story_Execution.md"
-last_ingest: "2026-08-25T21:20:02.162Z"
-last_ingest_commit: ""
+last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest_commit: "116e576293d208b0c8e84a515c884aeed38569b1"
 repo: "planning"
 ---
 

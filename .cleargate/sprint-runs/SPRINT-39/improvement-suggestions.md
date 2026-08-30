@@ -1,0 +1,1836 @@
+# Improvement Suggestions — SPRINT-39
+
+
+## Trends
+
+Trends: 25 closed sprints visible — full analysis deferred to CR-027.
+
+## Skill Creation Candidates
+
+<!-- generated-by: suggest_improvements.mjs --skill-candidates -->
+
+_No candidates detected this sprint._
+
+## FLASHCARD Cleanup Candidates
+
+<!-- generated-by: suggest_improvements.mjs --flashcard-cleanup -->
+
+### CAND-SPRINT-39-F01: Do NOT run `cleargate stamp` on `.cleargate/templates/*.md`.
+<!-- hash:dfa287 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-31 · #templates #danger #closeout · Do NOT run `cleargate stamp` on `.cleargate/templates/*.md`. Those files carry no frontmatter, so stamp CREATES a block — and `cleargate new` copies the template verbatim, so every newly scaffolded work item would get a stray stamp block above its own frontmatter. On `sprint_context.md` it also stripped the quotes off the `"YYYY-MM-DDTHH:MM:SSZ"` placeholders. The Gate-4 doc-refresh checklist item 7 names templates; it is wrong for this repo. [SPRINT-39 Gate-4 orchestrator]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F02: `cleargate-enforcement.md` sources its §1-§12 from "protocol
+<!-- hash:bf2bac -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-31 · #docs #citations · `cleargate-enforcement.md` sources its §1-§12 from "protocol §15".."protocol §27", but `cleargate-protocol.md` only has §0-§14, §21, §22, §23 after the EPIC-024 slim — so §15-§20 and §24-§27 are DANGLING provenance pointers. Same defect class as BUG-042 (drifted §N indices), one layer up: the slim renumbered the source and the citing doc was never swept. [SPRINT-39 Gate-4 doc-refresh]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F03: "Verified BOTH redirected and unredirected" is vacuous unles
+<!-- hash:a8c9ad -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #qa #test-harness #danger · "Verified BOTH redirected and unredirected" is vacuous unless the test actually reads the env var — `gate-section-index-pinning.node.test.ts:97` has no CLEARGATE_META_ROOT branch, so QA's two runs were the same main-checkout run twice and the redirection proved nothing. Before reporting a differential result, grep the test for the variable you think you varied. [SPRINT-39 CR-111 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F04: `pre-commit-surface-gate.sh:11` matches red tests with `\.re
+<!-- hash:514de6 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-30 · #hooks #immutability #danger · `pre-commit-surface-gate.sh:11` matches red tests with `\.red\.(node\.)?test\.ts$`, which NEVER matches `*.red.integration.node.test.ts` — six pre-existing red integration tests are unprotected by the hook meant to make them immutable. A naming convention extended in docs but not in the guarding regex silently opts the new shape out of enforcement. [SPRINT-39 CR-111 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F05: Never write a BARE COUNT in a dispatch — enumerate and let t
+<!-- hash:b3bd59 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #dispatch #orchestrator · Never write a BARE COUNT in a dispatch — enumerate and let the reader count. Twice in SPRINT-39 a dispatch header carried a number its own body contradicted: CR-110 DevOps said "all four pairs" then listed three; CR-111 Developer said "5 both-trees files" while its own Deliverable D made three of them canonical-only (4 real pairs). Both agents flagged rather than invented, which is the only reason neither shipped a phantom edit. [SPRINT-39 orchestrator]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F06: `.cleargate/config.yml` `gates.precommit` is NOT wired to an
+<!-- hash:51d1d3 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-30 · #gate #hooks #danger · `.cleargate/config.yml` `gates.precommit` is NOT wired to any git hook — the outer pre-commit is a dispatcher over `pre-commit-*.sh`, and the only chained hook runs surface-gate + check:no-vitest + check:no-inline-id-regex. `gates.precommit` is reachable ONLY via the explicit `cleargate gate run precommit`. So typecheck and tests gate NOTHING on commit, in either repo — yet SPRINT-39's Rule 6 cited it as the reason outer commits are safe. A declared gate nothing invokes is worse than an absent one: doctrine quotes it as if it fires. [SPRINT-39 orchestrator]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F07: A test's HEADER COMMENT claiming it follows the `CLI_ROOT/ME
+<!-- hash:01a1e9 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #cross-repo #danger · A test's HEADER COMMENT claiming it follows the `CLI_ROOT/META_ROOT/CANON` idiom is not evidence that it does: CR-111's lib red-test said so at :119 and still hardcoded `META_ROOT = resolve(CLI_ROOT,'..')` at :125, with no `CLEARGATE_META_ROOT` branch. Its canonical-template paths therefore always read the outer MAIN checkout, so the one describe pinning the CR's actual deliverable could never go green from the worktree the deliverable lands in. Grep the assignment, not the prose. [SPRINT-39 CR-111 orchestrator]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F08: An assertion of the form "the real artefact FAILS this crite
+<!-- hash:7af1b4 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #tpv #danger · An assertion of the form "the real artefact FAILS this criterion" is satisfiable by failing for an UNRELATED reason. CR-111's T8 pinned `pass === false` on the three shipped templates; a null predicate reading "any `{placeholder}` ⇒ fail" scored 19/20 — byte-identical to a correct reference — with all three templates UNTOUCHED, i.e. shipping none of the CR. Assert on the returned detail, not just the boolean. [SPRINT-39 CR-111 TPV M5]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F09: A red test that pins a PARSE-ERROR throw (`assert.throws(/un
+<!-- hash:1c9012 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #tpv #danger · A red test that pins a PARSE-ERROR throw (`assert.throws(/unsupported predicate shape/)`) is unsatisfiable by any correct implementation — nine reference builds all failed it and only it. It is red-phase scaffolding, not acceptance; it must be replaced in the green phase (an explicit exception to "immutable post-Red") or the story can never reach a green suite. [SPRINT-39 CR-111 TPV T1]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F10: For a grandfathering predicate the TRIGGER is the entire des
+<!-- hash:01a648 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #gate #readiness-gates #danger · For a grandfathering predicate the TRIGGER is the entire design, and the baseline cannot see it: four implementations scored an identical 19/20 while failing 1, 14, 79 and 257 of 400 live corpus items (absence-fails would have failed 386). Pin the trigger with a PRE-release fixture that must PASS, or grandfathering is untested. [SPRINT-39 CR-111 TPV M5/M6/M7]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F11: Pinning a frozen function by "slice from `function X(` to th
+<!-- hash:bb419e -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-30 · #test-harness #danger · Pinning a frozen function by "slice from `function X(` to the next `function Y(`" fires on an INSERTION BETWEEN them, not just on an edit: a correct impl that placed its new sibling there kept evalSection byte-identical (2110 chars, verbatim) and still got "evalSection changed — Rule 3 forbids modifying it". End the slice at the function's own closing brace. [SPRINT-39 CR-111 TPV M3d]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F12: A regex/substring assertion over a fenced ```yaml block pass
+<!-- hash:c9e2a2 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #gate #test-harness #danger · A regex/substring assertion over a fenced ```yaml block passes on syntactically INVALID YAML — three broken gate blocks (story/cr/bug, `js-yaml` throws on all three) scored fully green, and the only guards that would catch it read the LIVE tree while the new test read CANONICAL. Parse the block, don't grep it. [SPRINT-39 CR-111 TPV M13]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F13: `npm test`'s stdout is BLOCK-buffered when redirected to a f
+<!-- hash:a4d52e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #cross-repo #danger · `npm test`'s stdout is BLOCK-buffered when redirected to a file, so a genuinely-progressing 2500-test run can show ZERO line growth for 6+ minutes. Check the process's CPU% before concluding it hung — killing on line-count alone throws away a completed 9-minute run. [SPRINT-39 CR-111 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F14: A predicate-shape count lives in TWO places that drift indep
+<!-- hash:7f4a86 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #gate #counts #danger · A predicate-shape count lives in TWO places that drift independently: `readiness-gates.md:9` ("exactly N predicate shapes") AND `readiness-predicates.ts:3`'s own docstring. Adding a predicate must bump both. Same class as the CR-108 frozen-pin: the second site survives because sweeps get scoped to the file under test. [SPRINT-39 CR-111 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F15: A frozen-value pin survived two TPV mutation rounds because 
+<!-- hash:b24014 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #qa #test-harness #danger · A frozen-value pin survived two TPV mutation rounds because both scoped their sweep to the file under test — grep the constant repo-wide, not just locally. [SPRINT-39 CR-108 QA amendment]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F16: A canonical-only edit RE-CREATES live/canonical line drift t
+<!-- hash:f8cc9f -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #citations #dogfood-split #danger · A canonical-only edit RE-CREATES live/canonical line drift that a mid-sprint re-sync had already erased, so a plan's "canonical :N (live :M)" gotcha can be stale in BOTH directions. Measured on CR-110: M4 cited SKILL.md:312 (live :303) for a line sitting at :313 in BOTH trees, and post-merge canonical :312 is an unrelated worktree warning that reads as deliberate. Cite the tree, and re-measure after the edit. [SPRINT-39 CR-110 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F17: process.exit() does NOT unwind a pending try/finally — a loc
+<!-- hash:ddd2b1 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-30 · #test-harness #node-exit #danger · process.exit() does NOT unwind a pending try/finally — a lock-release in a finally around an exit() call never runs on the real (non-test-seam) exit path, orphaning the lock for every later contender. Release BEFORE calling exit(); never rely on finally racing it. Found in a QA reference build, i.e. by writing the correct implementation, not by reading it. [SPRINT-39 CR-108 QA-Red r2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F18: A shape assertion pinned via a few NAMED-type fixtures leave
+<!-- hash:cbdc65 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #fixtures #danger · A shape assertion pinned via a few NAMED-type fixtures leaves every other type's shape unpinned: CR-108's N4/N9 covered cr/bug/sprint, so a hyphen separator for spike/initiative/hotfix/story scored IDENTICAL to a correct fix (43/45) and shipped dead [[SPIKE-001]] wikilinks at exit 0. Parameterise shape assertions over the WHOLE registry, never over a sample. [SPRINT-39 CR-108 TPV M6b]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F19: A subprocess spawned with cwd=<tmp fixture> cannot resolve -
+<!-- hash:e00107 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #cross-repo #danger · A subprocess spawned with cwd=<tmp fixture> cannot resolve --import tsx/esm — there is no node_modules above /var/folders. It then fails for EVERY implementation including a correct one, so the assertion discriminates nothing while looking like a real red. Spawn with cwd=CLI_ROOT and pass the fixture root as a handler argument. [SPRINT-39 CR-108 QA-Red r2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F20: `orchestrator_confirmed: true` means an orchestrator ACTUALL
+<!-- hash:33f744 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-30 · #dispatch #reporting #process · `orchestrator_confirmed: true` means an orchestrator ACTUALLY confirmed it, not that written instruction already implied it. CR-110's Dev set it on two in-scope deviations on the second reading and said so openly in the dev report — in-scope and well-reasoned, but the field is a machine-readable signal that a human-in-the-loop step occurred, so a Dev may never self-satisfy it. Recurs (BUG-045 same shape); dispatches should state the field's meaning. [SPRINT-39 CR-110]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F21: Verify TPV amendments by REBUILDING each surviving mutant ou
+<!-- hash:7273e2 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-30 · #test-harness #tpv #recipe · Verify TPV amendments by REBUILDING each surviving mutant out-of-tree, never by trusting the kill table — and diff the PASS/FAIL label set against a correct REF build, which catches collateral flips (an amendment that kills its mutant while quietly reddening an unrelated assertion) for free. [SPRINT-39 CR-110 QA-Red r2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F22: A grep-over-prose acceptance half is spelling coverage, and 
+<!-- hash:e4d3e7 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · A grep-over-prose acceptance half is spelling coverage, and the measurement is cheap: two HTML comment lines carrying only the greped tokens (`<!-- Goal Acceptance Check GOAL_RELATION satisfied -->` / `<!-- GOAL_RELATION advances off critical path does not -->`) flipped all 6 red prose assertions and scored a clean 33/1. Scope the tokens to ONE goal-named `## ` section, or the half asserts nothing. [SPRINT-39 CR-110 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F23: A template's own GUIDANCE prose satisfies a whole-file grep 
+<!-- hash:de2727 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #fixtures #danger · A template's own GUIDANCE prose satisfies a whole-file grep for the token the fixture records: CR-110's G3c greps the rendered sprint-context for `not-mechanically-verifiable`, which the boilerplate always ships, so a render that DELETES the recorded value stays green. Assert the recorded VALUE's position (first non-empty line under the heading), never a token the template prints about itself. [SPRINT-39 CR-110 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F24: A synthetic future-state fixture silently DECIDES the implem
+<!-- hash:584fdd -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · A synthetic future-state fixture silently DECIDES the implementation's detection shape. CR-110's harness pins the placeholder as one unwrapped line while the CR body prints it wrapped: a Developer who ships wrapped and detects wrapped (self-consistent, correct) is bounced 32/2, while wrapped-template + unwrapped-detection scores 33/1 with the advisory PROVABLY dead on the shipped template. Exercise the REAL artefact, not only the fixture. [SPRINT-39 CR-110 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F25: Cross-Cutting Rule 1 had exactly ONE machine witness in CR-1
+<!-- hash:017d17 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #dogfood-split · Cross-Cutting Rule 1 had exactly ONE machine witness in CR-110's baseline (a `diff -q` on the two sprint_context.md copies). init_sprint.mjs edited in the live tree only scored 33/1: canonical-live-parity.red.integration.node.test.ts is `.integration` and EXCLUDED by run-default-tests.mjs, and does not name init_sprint.mjs anyway. One `diff -q` per mirrored pair, or the rule is honour-system. [SPRINT-39 CR-110 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F26: stampFrontmatter's hasFrontmatter check (stamp-frontmatter.t
+<!-- hash:ca7a56 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #scaffold #frontmatter #danger · stampFrontmatter's hasFrontmatter check (stamp-frontmatter.ts:54) misreads a file whose <instructions> block precedes the frontmatter — it does not skip, it CORRUPTS: real fields (bug_id, status) are demoted to inert body text and a bogus block is prepended. Freshly scaffolded files carry <instructions>, so the scaffold→stamp path hits this by construction. [SPRINT-39 CR-108 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F27: story.md's own token vocabulary contradicts the corpus it de
+<!-- hash:fcd8a8 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #scaffold #frontmatter · story.md's own token vocabulary contradicts the corpus it describes: the template writes story_id: "STORY-{EpicID}-{StoryID}-{StoryName}" while every real story_id in pending-sync/ + archive/ is bare (STORY-054-06). A scaffolder that honours the template mints ids no other tool recognises. [SPRINT-39 CR-108 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F28: For a module that does not exist yet, a per-test dynamic imp
+<!-- hash:c48bba -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #qa-red · For a module that does not exist yet, a per-test dynamic import inside before() beats a static top-level import: static collapses the whole file into ONE failure, dynamic gives per-test red/green and therefore a countable baseline. [SPRINT-39 CR-108 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F29: A vocabulary-duplication guard must be enum- or co-occurrenc
+<!-- hash:85c962 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #qa-red #test-harness #danger · A vocabulary-duplication guard must be enum- or co-occurrence-scoped, never bare words. reporter.md already carries 3 unrelated word-boundary hits for met/missed (:99, :193, :243), so a bare-word guard is permanently unsatisfiable — it fails on prose that was always there and never catches the paste it exists to catch. [SPRINT-39 CR-110 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F30: cr078_init.test.sh's trailing SAFETY check hardcodes "expect
+<!-- hash:bbf9aa -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #test-harness #danger · cr078_init.test.sh's trailing SAFETY check hardcodes "expected SPRINT-34" and so fails on every later sprint — in the worktree AND the main checkout. A safety assertion pinned to a sprint number stops being a safety assertion the moment that sprint closes; it just becomes a permanent red everyone learns to skip past. [SPRINT-39 CR-110 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F31: init_sprint.mjs resolves its template from CLEARGATE_REPO_RO
+<!-- hash:da8f0c -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #qa-red #test-harness · init_sprint.mjs resolves its template from CLEARGATE_REPO_ROOT (:37-39), so a scratch dir can ship a FUTURE-state template and exercise render/detection logic before the real template lands — decoupling the logic test from an unsettled population mechanism. [SPRINT-39 CR-110 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F32: A cross-process barrier that arms INSIDE the critical sectio
+<!-- hash:bd4502 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · A cross-process barrier that arms INSIDE the critical section makes every serialized holder pay its inactivity window: S1's 20 holders forced correct implementations into a ~2.8s admissible retry-budget window (2000→12/14, 5000→13/14, 7000→14/14) whose LOWER bound scales with machine speed. The harness silently constrained the implementation and would have bounced a correct fix. Fix the coupling (per-holder budget, reset on holder change), never tune a constant into it. [SPRINT-39 BUG-044 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F33: A scenario's CLAIMED mutant is a HYPOTHESIS until measured. 
+<!-- hash:8350b7 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · A scenario's CLAIMED mutant is a HYPOTHESIS until measured. S2 was green 10/10 against the exact mutant the plan assigned it, while R5 — commented "orthogonal padding guard" — turned out to be the SOLE killer of two others. Measure kills; never read them off the comment. [SPRINT-39 BUG-044/045 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F34: git tracks no empty directories, so "directory absent" is th
+<!-- hash:ba2a69 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #fixtures #danger · git tracks no empty directories, so "directory absent" is the COMMON case, not the edge case. Test the absence of EACH scanned directory independently — one try/catch around the whole loop passes a single-absence fixture and silently discards the other directory's accumulated max. [SPRINT-39 BUG-045 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F35: A two-source fixture where the BUGGY source holds the higher
+<!-- hash:048685 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #fixtures · A two-source fixture where the BUGGY source holds the higher id is green at baseline and discriminates nothing: 001 archived / 002 pending → 003 passes an entirely unfixed scan. Put the max in the source the bug cannot see. [SPRINT-39 BUG-045 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F36: check:no-inline-id-regex requires the escape to follow the h
+<!-- hash:7f3624 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #id-parsing #gate #danger · check:no-inline-id-regex requires the escape to follow the hyphen IMMEDIATELY, so /^HOTFIX-(\d+)_/ is invisible while /^HOTFIX-\d+/ is caught — and any parser that USES the number must capture it, so the caught form is the one nobody writes. The gate's own motivating example (hotfix.ts:41, the shipped BUG-041 defect) is in the form it cannot see. Filed as BUG-063. [SPRINT-39 BUG-045 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F37: A grep-shaped doc assertion bans a PHRASING, not a CLAIM. BU
+<!-- hash:c7e6b6 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #doctrine #test-harness #danger · A grep-shaped doc assertion bans a PHRASING, not a CLAIM. BUG-046's C13 hunted the word "subdirectory" and missed enforcement.md:101's "not the Workflow tool, which strips gitignored /.claude/" — the same misconception, different words, in a file the story itself edited. Assert the claim's falsifiable content, or accept that grep coverage is spelling coverage. [SPRINT-39 BUG-046 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F38: Arming a REFUSAL changes the blast radius of every deferred 
+<!-- hash:b09b0e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #planning #scope-split #danger · Arming a REFUSAL changes the blast radius of every deferred false positive upstream of it. Splitting BUG-062's parser over-reporting out of BUG-046 was right on scope, but before the split an over-reported token cost a spurious SERIALIZE (safe direction) and after it the same token costs a refusal — measured 5/5 remaining items refused, 7 of 20 flags pure BUG-062 artefacts. When you defer a false-positive source, re-check what the code you ARE shipping does with it. [SPRINT-39 BUG-046 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F39: "Every work-item type" is not one set: work-item-id.ts:56 ex
+<!-- hash:d148c7 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #scaffold #registry #danger · "Every work-item type" is not one set: work-item-id.ts:56 exports WorkItemType as 12 UPPERCASE prefixes (incl. PLATFORM, AUDIT, legacy PROP) and work-item-type.ts:8 exports the SAME NAME as 9 lowercase types, neither importing the other, with stamp-tokens.ts importing both. And `proposal` is registered with no template at all. A scaffolder must bridge AND reject, or `cleargate new platform` scaffolds a tenth type with no template, no bucket, exit 0. [SPRINT-39 CR-108 prep]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F40: The template map is NOT ${type}.md — cr→CR.md, bug→Bug.md, s
+<!-- hash:b956bb -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #dogfood-split #portability #danger · The template map is NOT ${type}.md — cr→CR.md, bug→Bug.md, sprint→"Sprint Plan Template.md". A naive path.join APPEARS to work because macOS APFS is case-insensitive, then fails on Linux for every user. Assert template resolution against a readdirSync listing, never existsSync. [SPRINT-39 CR-108 prep]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F41: cleargate-cli's 30-file integration tier is excluded by run-
+<!-- hash:fb1978 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #test-tiers #danger · cleargate-cli's 30-file integration tier is excluded by run-default-tests.mjs:26 and invoked by no hook, no CI and no prepublish — its green is only as fresh as the last hand-run. A regression guard living there is as unrun as the code it guards. [SPRINT-39 BUG-045 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F42: An "exactly one block" IMPLEMENTATION that counts START SUBS
+<!-- hash:46fcfb -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · An "exactly one block" IMPLEMENTATION that counts START SUBSTRINGS survived every test: the shipped block quotes its own markers, so every install reads 2, the strip is skipped and init STACKS a block per run (187→246→305→364 lines, measured). A kick-back that forbids substring counting in TESTS does not forbid it in CODE — mutate the implementation, not just the assertion. [SPRINT-39 CR-105 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F43: A red-set census predicated on "which tests import the modul
+<!-- hash:d76ff8 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #tpv #danger · A red-set census predicated on "which tests import the module I am changing" is VOID when the change ADDS an import elsewhere: CR-105 put injectClaudeMd into upgrade.ts, and the one test it reds imports upgradeHandler. Census by the files the COMMIT touches, not by the module the story is named after. [SPRINT-39 CR-105]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F44: A doc-truth baseline that pins the block's POSITION and the 
+<!-- hash:161955 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #danger · A doc-truth baseline that pins the block's POSITION and the block's HASH still lets the relocation silently delete user prose — measured, zero witnesses. When a commit rewrites a file the user owns, one assertion must pin what SURVIVES, not only what moved. [SPRINT-39 CR-105 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F45: A declared surface that is RIGHT FOR THE WRONG REASON beats 
+<!-- hash:5d9fb6 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #surface-declaration #danger · A declared surface that is RIGHT FOR THE WRONG REASON beats an omitted one for damage: CR-105 listed init.ts as "the call site that must adopt the contract" (false), so a Dev following the justification skips the file and a recorded human decision never ships. Replace the justification; never delete the row until you know why the file is really there. [SPRINT-39 M3 / CR-105]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F46: A fixture that EXERCISES a behaviour is not coverage of it: 
+<!-- hash:e6fa00 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #test-harness #danger · A fixture that EXERCISES a behaviour is not coverage of it: block-leads scenario 5 feeds a mid-file block on every run and asserts only body substitution, so the relocation whitespace scar has executed hundreds of times with zero witnesses. Grep for the fixture, then grep for an assertion about it. [SPRINT-39 M3 / CR-114]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F47: A line citation repaired in the same commit that edits the c
+<!-- hash:358eab -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #citations #process · A line citation repaired in the same commit that edits the cited file must be re-measured AFTER the edit. CR-105 repaired upgrade-claude-md.red:10 from :364-378 to :368-388, then added two imports to upgrade.ts and re-staled it by one in the same commit. [SPRINT-39 M3]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F48: A milestone can serve NO clause of the sprint goal. "met | p
+<!-- hash:03f7db -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-29 · #goal #reporting · A milestone can serve NO clause of the sprint goal. "met | partial | missed" has no slot for that and forces a manufactured linkage, so report GOAL_RELATION: off critical path instead. Orthogonal to "not-mechanically-verifiable", which is about HOW a goal is checked, not WHETHER the work relates to it. [SPRINT-39 M3 / feeds CR-110]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F49: cleargate-cli/dist/cli.js is untracked and hand-built, so af
+<!-- hash:843403 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #dogfood-split #danger · cleargate-cli/dist/cli.js is untracked and hand-built, so after any CLI behaviour fix it silently exercises the OLD contract — measured post-CR-105: dist still carries the evicted append branch and the unanchored regex. A demo through dist reads as "the fix did not ship". And in a repo where the new contract is already satisfied it is a byte-identical no-op, so a clean demo proves nothing either. [SPRINT-39 M3]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F50: countAnchoredLines' `^marker[ \t]*$` is exactly equivalent t
+<!-- hash:623809 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-29 · #test-harness #regex · countAnchoredLines' `^marker[ \t]*$` is exactly equivalent to `split('\n').filter(l => l.trimEnd() === marker)` — verified 10 fixtures x 2 markers incl. CRLF, trailing ws, indented, inline, two-block and both real CLAUDE.md files. A marker grammar can be DELETED rather than deduplicated. [SPRINT-39 CR-105 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F51: Greedy first-START-to-last-END on a two-block file DELETES t
+<!-- hash:c9e9b5 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #test-harness #danger · Greedy first-START-to-last-END on a two-block file DELETES the intervening prose AND the second block — the "at most one block per file" comment describes an assumption the mechanism enforces by destroying the evidence. Measured; no fixture in the 9-row corpus covered it. [SPRINT-39 BUG-061]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F52: A cleargate-cli defect fix that ships no CHANGELOG entry has
+<!-- hash:f9aa8c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #dogfood-split #process · A cleargate-cli defect fix that ships no CHANGELOG entry has no user-facing record — and `cleargate upgrade` PRINTS the changelog, so the omission is silent twice. Repo convention puts the entry in the fix commit (8d1524a), but no milestone plan this sprint named CHANGELOG.md for any item. [SPRINT-39 M3]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F53: A shared-corpus equivalence test that probes a module's OUTP
+<!-- hash:f197cb -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #test-harness #tpv #danger · A shared-corpus equivalence test that probes a module's OUTPUT SHAPE (a re-derived append-string) instead of its GRAMMAR breaks the moment a later story changes that shape: CR-105 reds 4 of BUG-043's wave-8 tests. Probe the exported grammar (extractBlock/hasAnchoredBlock), never the output format. [SPRINT-39 BUG-043 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F54: A fix that NORMALISES CRLF→LF on the write path passed all 2
+<!-- hash:71590b -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #test-harness #danger · A fix that NORMALISES CRLF→LF on the write path passed all 29 new red tests AND all 136 tests in the 9 CLAUDE.md-touching files — zero witnesses. A rejected-implementation ruling in a plan is not a test; if the ruling names a harm, the red baseline must carry a fixture that reds on it. [SPRINT-39 BUG-043 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F55: Grep-per-file can pass a multi-agent prose contract that fai
+<!-- hash:1dc434 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #qa #ambiguity · Grep-per-file can pass a multi-agent prose contract that fails to COMPOSE — read all the added paragraphs together as one chain and ask where a role assumes another already acted. [SPRINT-39 STORY-054-07 QA]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F56: NEVER blanket-copy canonical .claude/hooks over live: 3 of t
+<!-- hash:e8299c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #dogfood-split #danger · NEVER blanket-copy canonical .claude/hooks over live: 3 of the 4 canonical/live diffs are `__CLEARGATE_VERSION__` vs the installed `0.20.0` — install-time substitution, not drift. Copying canonical writes `npx -y cleargate@__CLEARGATE_VERSION__` into executable hooks. Diff per file and re-sync only real residue. [SPRINT-39 Gate-4]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F57: file_surface_diff.sh globs STORY-<num>_*.md ONLY, so a BUG-/
+<!-- hash:fd3a4e -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #gate #danger · file_surface_diff.sh globs STORY-<num>_*.md ONLY, so a BUG-/CR- active item searches "STORY-BUG-043_*.md", finds nothing and exits 0. The surface gate is BLOCKING on Story waves and completely INERT on Bug/CR waves — not merely resolving the wrong item. [SPRINT-39 BUG-059]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F58: A §Reach audit that greps OUTWARD never reads the file it ju
+<!-- hash:8eb353 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #doctrine #danger · A §Reach audit that greps OUTWARD never reads the file it just edited: STORY-054-07 added "write task rows into each story file" to architect.md:60 while :224 still said "No production code. You write one markdown plan file. Nothing else." 160 lines apart, same file, all three trees. Read the edited file end to end before declaring reach. [SPRINT-39 STORY-054-07]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F59: A section(N) criterion can be RIGHT for the template and WRO
+<!-- hash:ea880e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #gate #danger · A section(N) criterion can be RIGHT for the template and WRONG for the corpus: after story.dod-declared moved 4->5, it resolved to the real DoD in 1/231 authored stories (was 209/231) — it now counts `## Existing Surfaces`. Gut a story's whole §4 and it still passes. Positional criteria decay silently as the template grows. [SPRINT-39 STORY-054-06 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F60: Piping a suite run through `tail -N` returns TAIL's exit cod
+<!-- hash:b660f1 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #test-harness #danger · Piping a suite run through `tail -N` returns TAIL's exit code, not the runner's — a red suite reads as green. Capture to a log file and read the runner's own status line instead. [SPRINT-39 STORY-054-06 QA-Red]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F61: The global `cleargate` binary is a REAL npm install (/opt/ho
+<!-- hash:7cbd89 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #gate #cross-repo #danger · The global `cleargate` binary is a REAL npm install (/opt/homebrew/bin, 0.24.2), not a link — it reads the repo's updated readiness-gates.md but has no parser for a newly added criterion, so `cleargate gate check` emits the SAME `predicate error` for a legacy item, an empty-section item AND a correctly authored one. Zero signal, looks like a failing gate. Use `node cleargate-cli/dist/cli.js gate check` after any predicate change. [SPRINT-39 STORY-054-06]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F62: The installed outer pre-commit hook (pre-commit-surface-gate
+<!-- hash:2fb23f -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #gate #cross-repo · The installed outer pre-commit hook (pre-commit-surface-gate.sh) does NOT run cli typecheck/test itself — only no-vitest, no-inline-id-regex, file_surface_diff.sh. "Registry-before-code fails the hook" (M2 N7) is not literally enforced; the manual by-hand run is the real safety net for cli commits. [SPRINT-39 STORY-054-06]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F63: CLAUDE.md:162 teaches `{TYPE}-{ID}-{Name}.md` but deriveBuck
+<!-- hash:5d7800 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #id-parsing #danger · CLAUDE.md:162 teaches `{TYPE}-{ID}-{Name}.md` but deriveBucket keys the id on everything before the first UNDERSCORE (derive-bucket.ts:63-66). 24 of 490 items use hyphens; 4 wiki pages are already keyed on the whole stem, so BUG-035 has no wiki/bugs/BUG-035.md and every [[BUG-035]] link is dead. Bucket still resolves, ingest exits 0 — silent. [SPRINT-39 BUG-057]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F64: Registering a work-item type in the triage list is HALF the 
+<!-- hash:4dfdf4 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #doctrine #gate · Registering a work-item type in the triage list is HALF the reach: CLAUDE.md:140 classifies, but :161's template list is the next actionable instruction and had no spike.md. Four merged stories left the chain broken one line past the story's own surface. When adding a type, grep every list that enumerates the OTHER types — triage, templates, save-path — not just the one the requirement names. [SPRINT-39 STORY-054-03 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F65: CLAUDE.md's canonical and live copies are NOT mirrors and ca
+<!-- hash:c21614 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-28 · #dogfood-split #danger · CLAUDE.md's canonical and live copies are NOT mirrors and can never diff silent: cleargate-planning/CLAUDE.md IS the bounded-block injection spec (64 lines); root CLAUDE.md is the repo's own doc with that block injected (186). Measured. A dispatch demanding byte-parity on this pair manufactures a false kick-back — verify the EDITED LINE, not the file. [SPRINT-39 STORY-054-03]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F66: A red-window prediction must be MEASURED, not reasoned: STOR
+<!-- hash:d53767 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #tpv · A red-window prediction must be MEASURED, not reasoned: STORY-054-02's plan predicted S1a/S1b/S5/S6; executing both partial states gave S1a/S1b/S3a/S3b/S6. S5 builds its own synthetic pairs so a real-tree mismatch never reaches it, while S3a/S3b assert an EXACT finding list that extra findings pollute. A wrong red set reads as "I broke an unrelated file". [SPRINT-39 STORY-054-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F67: gate.ts writes cached_gate_result (:305) BEFORE the severity
+<!-- hash:75138a -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #gate #test-harness #danger · gate.ts writes cached_gate_result (:305) BEFORE the severity exit routing (:331), so a gate flipped advisory->enforcing is invisible to any test asserting cached.pass/failing_criteria. severity is a human-read-only field unless a test parses the YAML block itself. [SPRINT-39 STORY-054-02 TPV]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F68: Before bumping a hardcoded count, check for HOMONYMS in the 
+<!-- hash:b328ae -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #danger · Before bumping a hardcoded count, check for HOMONYMS in the same file: gate-section-index-pinning.node.test.ts:7's `14` is the test-CASE count and :22/:41's `14` is the criteria count. A grep-and-replace on `14` corrupts the one number the story does not change. [SPRINT-39 STORY-054-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F69: work-item-type.ts PREFIX_MAP matches by `includes`, so NO or
+<!-- hash:ed4615 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #id-parsing #danger · work-item-type.ts PREFIX_MAP matches by `includes`, so NO ordering satisfies both collision directions: SPIKE- last fixes STORY-054-03_Spike-Doctrine.md -> story but leaves SPIKE-003_Sprint-Scheduling.md -> sprint. Measured. A prefix guard test pins one direction only. [SPRINT-39 STORY-054-02 R24]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F70: An agent executing IN a worktree writes its report to the WO
+<!-- hash:5b38f4 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #worktree #danger · An agent executing IN a worktree writes its report to the WORKTREE's .cleargate/sprint-runs/ — a relative path resolves against its cwd — so the main checkout never sees it and `git worktree remove` DESTROYS it (untracked, no warning without --force). STORY-054-01's dev report existed only there and was one command from gone. Always `git -C .worktrees/X status --porcelain` and rescue untracked files BEFORE teardown; better, dispatch absolute report paths into the main checkout. [SPRINT-39 wave3]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F71: A test guarded `skip: !existsSync(path)` reports SKIPPED — n
+<!-- hash:19e143 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #gate #danger · A test guarded `skip: !existsSync(path)` reports SKIPPED — never FAILED — when its root resolves wrongly. So "fail 0" is satisfied by a run that asserted nothing. Acceptance for any such suite must assert all three numbers: pass N AND fail 0 AND skipped 0. This INVERTS the usual wrong-root hazard: instead of a misleading red you get a misleading green. [SPRINT-39 STORY-054-04 P6]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F72: A cleargate-cli test that reads the OUTER repo's working tre
+<!-- hash:38c962 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #cross-repo #danger · A cleargate-cli test that reads the OUTER repo's working tree (e.g. .cleargate/config.yml via REPO_ROOT = resolve(CLI_ROOT,'..')) makes cli `main` green depend on which BRANCH the outer checkout is sitting on — a cross-BRANCH dependency, not just cross-repo. Merge a config change to sprint/S-NN only, and the cli suite is green there and red the moment anyone switches the outer checkout to main. Lasts until the sprint branch reaches main. [SPRINT-39 STORY-054-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F73: Scope CLEARGATE_META_ROOT to TARGETED runs only. Setting it 
+<!-- hash:bd618b -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #cross-repo #danger · Scope CLEARGATE_META_ROOT to TARGETED runs only. Setting it for a FULL-suite run trips unrelated tests that expect a real `REPO_ROOT/cleargate-cli/` sibling — a worktree never materializes it (BUG-046: 0 tracked files), so close-sprint-assume-ack-guard goes 2-red under the override and 20/20 without it. Two "failures" that are pure env artifact read exactly like a regression. [SPRINT-39 STORY-054-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F74: MEASURED registry-wide: 9 of 12 pinnable section(N) criteria
+<!-- hash:9d8d6a -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #gate #readiness-gates #danger · MEASURED registry-wide: 9 of 12 pinnable section(N) criteria PASS against their own unedited template — they certify nothing. 7 via declared-item (BUG-050), but 2 via listed-item (story.dod-declared, initiative.success-criteria-populated) because those templates SHIP bullets. So "use listed-item" is only half a rule; the other half is "and ship zero of the counted shape", which nothing enforces and which this repo has already broken twice. Raising the threshold does not help — bug.repro-steps-deterministic demands ≥3 and the blank Bug.md scores exactly 3. [BUG-054]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F75: CORRECTS the card below: `listed-item` is NOT inherently saf
+<!-- hash:f43fde -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #gate #readiness-gates #danger · CORRECTS the card below: `listed-item` is NOT inherently safer than `declared-item` — it is safe only paired with a template shipping ZERO bullets in the gated section, and this repo already breaks that in 2 live criteria (`story.dod-declared` scores 3 off `- [ ]` DoD boxes; `initiative.success-criteria-populated` scores 3 off `- {…}` placeholders). Measured registry-wide: 9 of 12 pinnable section(N) criteria already pass on their own shipped template. Only 3 are non-vacuous. [SPRINT-39 STORY-054-01 post-flight]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F76: A story amendment made in the MAIN checkout's working tree i
+<!-- hash:6ead5c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #worktree #planning #danger · A story amendment made in the MAIN checkout's working tree is invisible inside a worktree cut from the last commit — the Developer reads the stale §1.2/§3.1 and cannot see it. STORY-054-01's Requirement 7 existed only in the main checkout + the amendment log; the worktree showed Requirements 1-6. Worse for §3.1: `file_surface_diff.sh:150` treats the WORKTREE copy as primary, so an uncommitted surface amendment does not reach the gate either. Commit work-item amendments BEFORE cutting the worktree. [SPRINT-39 M1 wave3]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F77: `initiative.md` frontmatter ships `created_at_version: "clea
+<!-- hash:9cfb13 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #scaffold #frontmatter #danger · `initiative.md` frontmatter ships `created_at_version: "cleargate@{semver}"`, but the allocator substitutes ONLY {ID}/{SLUG}/{ISO} (hotfix.ts:179-181). Nothing renders initiative.md today, so it is latent — CR-108 generalising that allocator to all types would write a LITERAL `cleargate@{semver}` into every new initiative. 4 of 6 templates use the literal `strategy-phase-pre-init` instead; that is the safe convention. [SPRINT-39 CR-108]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F78: `npm --prefix cleargate-cli test -- <file>` does NOT filter 
+<!-- hash:e2ec73 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #npm #danger · `npm --prefix cleargate-cli test -- <file>` does NOT filter to that file. run-default-tests.mjs:23 builds its list from a hardcoded globSync([...]) and never reads process.argv, so the trailing path is dropped and the FULL 2493-test suite runs — silently, no error, just minutes. The wrapper added to fix `!`-negation globs also swallows file args. Targeted run: `npm --prefix cleargate-cli exec -- tsx --test cleargate-cli/test/<path>`. [SPRINT-39 wave2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F79: `.cleargate/config.yml` (36 lines) and `cleargate-planning/.
+<!-- hash:dff0e4 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #config #mirror #danger · `.cleargate/config.yml` (36 lines) and `cleargate-planning/.cleargate/config.yml` (18) are NOT byte-identical and must not be made so — live carries `gates:` (the precommit command itself) and `worktree:`; canonical is an init seed that carries neither. Cross-Cutting "mirrors are byte-identical" applies to knowledge/ and templates/, NOT config.yml. A whole-file sync DELETES the repo's own gate config. Diff the changed key, never the file. [SPRINT-39 STORY-054-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F80: A story's §3.1 file surface is an ESTIMATE written at decomp
+<!-- hash:22156c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #planning #collision-surface #danger · A story's §3.1 file surface is an ESTIMATE written at decomposition, and the surface gate enforces it — so an undercount blocks the commit that would satisfy the story's own Gherkin. STORY-054-04 declared 4 bucket lists; running its OWN §1.5 risk-mitigation grep found 13, two of them hard blockers invisible from the file list (deriveBucket throws on unknown prefix; BUCKET_SYNTHESIS_MAP silently returns []). Execute a story's stated mitigation at wave preflight, not at implementation. [SPRINT-39 M1]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F81: file_surface_diff.sh picks the active story by `state in ('I
+<!-- hash:332b8f -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #gate #worktree #danger · file_surface_diff.sh picks the active story by `state in ('In Progress','Ready','In Review')` — NONE of those is in VALID_STATES (constants.mjs:35), so that branch is dead and it always falls back to max(updated_at). Any parallel wave cross-judges. [SPRINT-39 M1 R16]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F82: cleargate-cli/.git/hooks holds only .sample files — ZERO ins
+<!-- hash:e9d790 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #gate #cross-repo #danger · cleargate-cli/.git/hooks holds only .sample files — ZERO installed hooks. Every cli-side commit skips the surface gate, no-vitest, no-inline-id-regex AND typecheck/test. Only OUTER commits are gated. Run the suite by hand. [SPRINT-39 M1 R17]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F83: A two-repo story has a merge ORDER only if one intermediate 
+<!-- hash:99a9fb -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #cross-repo #test-harness · A two-repo story has a merge ORDER only if one intermediate is inert. Config-before-code is inert (an unreachable allowlist entry); code-before-config is red for everyone. Where neither is inert, both commits go in ONE turn and the suite runs once, after. [SPRINT-39 M1 R19]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F84: backfill_hierarchy.mjs parseFm bails on `!raw.startsWith('--
+<!-- hash:991152 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #frontmatter #backfill #correction · backfill_hierarchy.mjs parseFm bails on `!raw.startsWith('---')`, and all 7 authoring templates open with `<instructions>` at line 1 — so a VERBATIM-rendered item is skipped entirely, never mis-stamped. Stripping `<instructions>` on render is exactly what makes a scaffolded item backfill-visible for the first time. [SPRINT-39 CR-108]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F85: An enumerating test's hardcoded totals (`criteria.length ===
+<!-- hash:388045 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #gate · An enumerating test's hardcoded totals (`criteria.length === 14`, `pinnable === 12`) are a THIRD edit site beyond the type→template map and the fixture. They are the right tripwire, but an edit-obligation note that names only two sites lands a red count the Developer misreads as a bad fixture. Count the sites. [SPRINT-39 STORY-054-05 T2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F86: A pin keyed by heading TEXT needs NO fixture edit when an in
+<!-- hash:04d77e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #gate · A pin keyed by heading TEXT needs NO fixture edit when an index is correctly recomputed — the heading resolves the same. "Always update the fixture" over-instructs: it sends a Developer into the fixture with nothing to change, one keystroke from the tampering the rule forbids. [SPRINT-39 STORY-054-05 R15]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F87: A red test that fails its fixture-guard FIRST leaves every h
+<!-- hash:85df1a -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #test-harness #tpv #danger · A red test that fails its fixture-guard FIRST leaves every helper that guard protects UNEXECUTED — 4 of 6 helpers in STORY-054-05's red file (templateBodyOf, canonicalTemplateReader, and both mutation builders) had never run when the 8/13 red baseline was captured. A red baseline certifies scenario COUNT, not helper wiring; TPV must execute them out-of-band. [SPRINT-39 STORY-054-05]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F88: CORRECTS the 2026-08-27 BUG-048 card below on TRIGGER only (
+<!-- hash:683c18 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #frontmatter #backfill #correction · CORRECTS the 2026-08-27 BUG-048 card below on TRIGGER only (mechanism stands): backfill_hierarchy.mjs is NOT wired to the PostToolUse hook — stamp-and-gate.sh runs stamp-tokens→gate check→ingest and never calls it (repo-wide grep for the name returns only the script header). It is a manual one-shot over pending-sync+archive, flat. So mis-attribution fires in corpus-wide BATCHES when someone runs it, not per-Write. And an explicit `sprint_cleargate_id: null` is NOT protection — the write guard (:280) treats null as absent. [BUG-048 §3.5]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F89: `cleargate hotfix new` writes the template VERBATIM (only {I
+<!-- hash:fd5261 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #scaffold #frontmatter #danger · `cleargate hotfix new` writes the template VERBATIM (only {ID}/{SLUG}/{ISO} substitution, hotfix.ts:178-192) and does NOT strip `<instructions>`. story.md instructions already carry SPRINT-09 at body line 28 — inside backfill_hierarchy's 50-line sniff window. Generalizing that allocator to all 9 types (CR-108) would stamp a phantom sprint on EVERY scaffolded story. Strip instructions on render or omit the key; never scaffold sprint_cleargate_id: null. [SPRINT-39 R12]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F90: A pinning test that enumerates `section(N)` CRITERIA out of 
+<!-- hash:2de5f1 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #gate #readiness-gates · A pinning test that enumerates `section(N)` CRITERIA out of the YAML gate blocks does not pin the PROSE around them. A worked example ("CR.md §3 Execution Sandbox is section(6)") or a forward path to a not-yet-created test file in the Predicate Vocabulary goes stale silently on the next heading insert. Assert doc-referenced paths exist (existsSync) and re-check worked examples whenever a template heading moves. [SPRINT-39 BUG-042 R11]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F91: backfill_hierarchy.mjs fills a missing sprint_cleargate_id f
+<!-- hash:0ff71a -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #frontmatter #backfill #danger · backfill_hierarchy.mjs fills a missing sprint_cleargate_id from /\bSPRINT-(\d+)\b/ over the first 50 BODY lines (:120), and the PostToolUse stamp hook runs it corpus-wide. A repro step or **Surface:** citation naming another sprint silently re-owns the item — 19 items mis-attributed in SPRINT-39 M0. Fails SILENTLY and propagates to push + wiki + close reconciliation. [BUG-048 §3.5]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F92: `gate check <abs-path>` roots the project on the FIXTURE's o
+<!-- hash:feddaa -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-27 · #gate #worktree #test-harness #danger · `gate check <abs-path>` roots the project on the FIXTURE's own location, not cwd (project-root.ts:82-90 — deliberate, so worktrees resolve right). So a verification command naming a fixture in the MAIN checkout silently reads main's registry and reports pre-fix results even when run from inside the worktree. Copy fixtures into the worktree, or the QA step certifies the wrong tree. [BUG-042]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F93: countDeclaredItems scores a bare bold LABEL as a declared it
+<!-- hash:81b9d7 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-27 · #gate #readiness-gates #danger · countDeclaredItems scores a bare bold LABEL as a declared item (`**Modify:**`, `**Affected Files:**` match the definition-list regex). Templates ship those labels, so emptying a section but keeping its label scores CR §3 = 1 and epic §4 = 2 — both pass `≥1`. Correcting the section(N) index does NOT close the fail-open, and a threshold bump can't either (epic ships two labels). [BUG-050]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F94: A worktree materializes TRACKED files only — gitignored root
+<!-- hash:6fd4bc -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-26 · #worktree #collision-surface #danger · A worktree materializes TRACKED files only — gitignored roots (mcp/, cleargate-cli/, admin/ = 0 tracked each) do NOT exist inside one, yet enforcement.md:89 + SKILL.md:277 both claim they are "visible as a subdirectory". collision_surface.sh never checks reachability, so the wave predicate certifies "disjoint surfaces" for stories no Developer can execute. [BUG-046]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F95: Template `<instructions>` blocks are STRIPPED from authored 
+<!-- hash:effade -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-25 · #agents #scaffold #danger · Template `<instructions>` blocks are STRIPPED from authored instances (real stories carry 0) — a rule there reaches only the DRAFTING agent, never Architect/Developer/QA reading the instance. Pre-template decisions (triage/type routing) reach nobody except via always-on CLAUDE.md. [EPIC-054]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F96: The sprint ledger is written by token-ledger.sh (SubagentSto
+<!-- hash:152a51 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #tokens · The sprint ledger is written by token-ledger.sh (SubagentStop) carrying work_item_id from the DISPATCH SENTINEL — it never re-parses an id. stamp-tokens.ts only READS it, so an id-parsing bug there is a missed lookup with a visible stamp_error, not corrupted ledger data.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F97: A gate built from the same mental model as the defect inheri
+<!-- hash:88fea3 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #gate #danger · A gate built from the same mental model as the defect inherits its blind spot: check:no-inline-id-regex required type+escape ADJACENT, so `/(SPRINT|BUG)-\d+/` never matched — the exact shape its own exemption must not swallow. Broaden to "names a type AND has an escape". [0.24.2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F98: Unifying N parsers by READING finds only the ones you can th
+<!-- hash:7167d9 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-24 · #gate #dogfood · Unifying N parsers by READING finds only the ones you can think to grep. An enumerating gate run over the already-unified tree found 9 more, 5 with the same defect. Ship the gate with the refactor, not after. [BUG-041]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F99: `dirname(import.meta.url)/../..` is one level too deep in a 
+<!-- hash:e7066c -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-24 · #npm #danger · `dirname(import.meta.url)/../..` is one level too deep in a BUNDLED dist/cli.js — resolved to node_modules/ instead of node_modules/<pkg>/, so `upgrade` release notes never printed once and warned the file was missing. Derive pkg root from an already-correct resolver. [0.24.2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F100: A parser duplicated into a payload .mjs (can't import the co
+<!-- hash:0f6e97 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #id-parsing #dogfood · A parser duplicated into a payload .mjs (can't import the compiled TS) is how the 15th divergent grammar gets born. Pin the duplicate with a shared-corpus test that runs BOTH, or don't duplicate. [BUG-041]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F101: Greedy `STORY-\d+-\d+` ALIASES: STORY-047-02a…02f all collap
+<!-- hash:2841ff -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-24 · #id-parsing #danger · Greedy `STORY-\d+-\d+` ALIASES: STORY-047-02a…02f all collapse to STORY-047-02 — six items become one REAL id, so nothing downstream can detect it. Worse than truncating to a nonexistent id. Reject unmodelled shapes loudly; never alias.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F102: THREE ID regexes disagree on date-form ids: `BUG-2026-08-24`
+<!-- hash:75953d -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #id-parsing #danger · THREE ID regexes disagree on date-form ids: `BUG-2026-08-24` → no-match (lifecycle-reconcile `\d{3}`+`\b`), `BUG-2026-08` (active-criteria), `BUG-2026` (assert_story_files). All agree on BUG-007. The no-match one silently no-ops CR-103 drift detection.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F103: An upgrade run in a dirty tree can leave .install-manifest.j
+<!-- hash:a574c8 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #upgrade #danger · An upgrade run in a dirty tree can leave .install-manifest.json written-but-unstaged: file changes commit, the manifest describing them does not. The NEXT upgrade then computes its 3-way base from a weeks-stale manifest — and `git checkout .` to tidy first is what detonates it. The dirty manifest is the accurate one.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F104: `npm i -g .` from a checkout carrying an uncommitted version
+<!-- hash:a97688 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-24 · #npm #release #danger · `npm i -g .` from a checkout carrying an uncommitted version bump served an unpublished 0.23.1 to every consumer repo on the machine. The red CHANGELOG-vs-package.json test was reporting exactly that and had been dismissed as noise.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F105: A sample that never exercises the code path disproves NOTHIN
+<!-- hash:ac96fc -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-06 · #process #danger · A sample that never exercises the code path disproves NOTHING — SPRINT-09's §1 heading lacks the literal `1`, so extraction returned `[]`, and "couldn't reproduce" got reported as "claim is false" on a bug a parallel branch was actively fixing. Prove the sample hits the path, or say inconclusive.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F106: Free-ID scans must cover pending-sync AND archive PER TYPE —
+<!-- hash:5ebdd2 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-06 · #process #danger · Free-ID scans must cover pending-sync AND archive PER TYPE — scanning pending-sync for epics but archive for CR/BUG drafted a new EPIC-051 over the archived one and clobbered its wiki page. No allocator exists; `cleargate story` is start/complete only.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F107: A criterion matching a magic token is dead unless the TEMPLA
+<!-- hash:76e3a4 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-06 · #gate #danger · A criterion matching a magic token is dead unless the TEMPLATE emits that token — `interrogation-resolved` looked for `Unresolved` while epic.md shipped `{Waiting for user}`, so it could never fail for any template-authored epic. Match the placeholder to the predicate.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F108: CR-072 expanded the root .gitignore and shipped Completed — 
+<!-- hash:22a650 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-02 · #payload #npm · CR-072 expanded the root .gitignore and shipped Completed — but npm strips that filename, so it reaches nobody. A story verified against the SOURCE artifact can be fully undelivered; verify from a packed install. [BUG-040]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F109: TIER_RULES is an ALLOWLIST and classifyPath() returns null s
+<!-- hash:e580df -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-01 · #payload #danger · TIER_RULES is an ALLOWLIST and classifyPath() returns null silently — an unmatched file still SHIPS (copy-payload walks the tree separately) but is frozen forever downstream: invisible to upgrade, doctor drift, uninstall. Fail loud on unclassified. [CR-096]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F110: The payload copier walks the WORKING TREE, so gitignored/unt
+<!-- hash:6603d3 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #payload #privacy · The payload copier walks the WORKING TREE, so gitignored/untracked files still reach npm — .sync-marker.json shipped the maintainer's last_check to every init. Hygiene guards must cover FILES, not just directories. [CR-096]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F111: HOOK_LOG is append-only and never rotated, so `tail -1` reac
+<!-- hash:60d3ca -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-01 · #hooks #danger · HOOK_LOG is append-only and never rotated, so `tail -1` reaches back across SESSIONS and SPRINTS — a sprint created today adopted a dispatch marker from 5 days earlier and 66M tokens landed on a closed sprint. Scope log-derived fallbacks by session id. [CR-097]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F112: "Every source degrades to an empty panel, never a throw" is 
+<!-- hash:184e95 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #ux #danger · "Every source degrades to an empty panel, never a throw" is right for rendering and WRONG for trust — a dashboard built from a stale sentinel + another sprint's ledger looked identical to a healthy one. Return a diagnostics list and show it. [CR-097]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F113: A routing change that starts a REAL server turns a test fail
+<!-- hash:81b01f -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #test-harness #danger · A routing change that starts a REAL server turns a test failure into a HANG — the suite looks slow, not broken, and you chase a phantom timeout. Stub the server seam in every test that hits the new path. [CR-097]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F114: `String(obj)` is ALWAYS '[object Object]' — non-empty and no
+<!-- hash:05dd84 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-01 · #gate #danger · `String(obj)` is ALWAYS '[object Object]' — non-empty and not 'false' — so a truthiness test on `proposal_gate_waiver: {}` granted the gate's own approval waiver to an empty placeholder. Validate the fields inside, never the key's presence. [CR-095]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F115: A failure message that names only the FALLBACK remedy reads 
+<!-- hash:cae8b2 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #gate #dx · A failure message that names only the FALLBACK remedy reads as "unfixable": parent-approved said "no proposal_gate_waiver" and never mentioned that pointing context_source at the on-disk parent satisfies it directly. List every route. [CR-095]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F116: An or_group whose alternatives read the SAME ref emit the sa
+<!-- hash:fe13c6 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #gate · An or_group whose alternatives read the SAME ref emit the same sentence once per alternative — dedupe by detail text or the duplication reads as two findings and buries the remedy. [CR-095]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F117: `statusLine.includes('🟢')` has no notion of NEGATION — a do
+<!-- hash:ebd8af -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-08-01 · #gate #danger · `statusLine.includes('🟢')` has no notion of NEGATION — a doc declaring 🟡 while explaining why it is not 🟢 read as claiming Green and hard-failed on the unchecked boxes 🟡 always has. Parse the FIRST glyph; substring-matching a status is never a status check. [CR-094]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F118: When a parser is wrong and the document is right, the fix is
+<!-- hash:d3a060 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #gate #process · When a parser is wrong and the document is right, the fix is the parser — a doc-side workaround (move the rationale to its own line) is invisible at the callsite and every later author re-discovers the defect the same painful way. [CR-094]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F119: A hook that always exits 0 and sends its child's output only
+<!-- hash:f6e7ac -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #hooks #danger · A hook that always exits 0 and sends its child's output only to a log has no failure surface at all — 8 work items silently missed the wiki. If you swallow an exit code, re-emit the reason to hook stdout where the agent can see it. [CR-093]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F120: A hook test that reads the GITIGNORED live `.claude/` copy v
+<!-- hash:a4bb3a -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-01 · #test-harness #dogfood · A hook test that reads the GITIGNORED live `.claude/` copy verifies whatever that machine happens to have installed and never sees a canonical edit. Point snapshot tests at cleargate-planning/, the thing that actually ships. [CR-093]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F121: process.cwd() is NOT the project root — Claude Code's Bash t
+<!-- hash:3fe207 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-28 · #cli #danger · process.cwd() is NOT the project root — Claude Code's Bash tool carries cwd across calls, so one `cd` into a subdir made `wiki ingest` reject its own argument and EXIT 0. Walk up for the project; silent-success is the worst failure mode. [CR-092]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F122: A bare `.cleargate/` dir does NOT prove a project: the hooks
+<!-- hash:968272 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #cli #portability · A bare `.cleargate/` dir does NOT prove a project: the hooks scatter hook-log/ and sprint-runs/ wherever they run, so a non-project dir accumulates one. Gate root detection on config.yml or delivery/. [CR-092]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F123: tsup marks `dependencies` external but BUNDLES devDependenci
+<!-- hash:4fc4b4 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-28 · #build #packaging · tsup marks `dependencies` external but BUNDLES devDependencies — that asymmetry is why a devDep (typescript) inlined 19.9MB while pg never did. Check which list a heavy import is in before assuming it ships. [CR-091]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F124: A test that asserts "X is absent here" by inheriting the amb
+<!-- hash:77599a -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #test-harness · A test that asserts "X is absent here" by inheriting the ambient cwd breaks the moment resolution changes — cleargate-cli sits INSIDE a real ClearGate project, so walking up found the scripts the test assumed were missing. Make such tests hermetic. [CR-092]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F125: esbuild bundles devDependencies too: ONE static import of a 
+<!-- hash:4425d8 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-28 · #build #size · esbuild bundles devDependencies too: ONE static import of a module that imports `typescript` inlined the whole 19.9MB compiler — 90% of the package — for a code path that was off by default. Audit what a top-level import drags in, not just what you call. [CR-091]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F126: A feature can be fully built, tested (53 green) and still un
+<!-- hash:8a3098 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #verify #dead-code · A feature can be fully built, tested (53 green) and still unreachable: EPIC-032's code-map had no CLI flag registered in any revision, so opts.codeMap could never be true. Grep the FLAG REGISTRATION, not just the implementation, before believing a feature ships. [CR-091]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F127: "The repo root is not a package" is a monorepo assumption — 
+<!-- hash:3b5f9a -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #portability · "The repo root is not a package" is a monorepo assumption — a single-package repo keeps tsconfig.json at the root and got ZERO packages. Gate root-as-package on tsconfig.json, not package.json, or a monorepo root emits a bogus extra page. [CR-091]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F128: npm-packlist strips ANY file named .gitignore from a tarball
+<!-- hash:955e34 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-28 · #npm #privacy · npm-packlist strips ANY file named .gitignore from a tarball unconditionally — a scaffold's ignore rules never reach an npm install, so .participant.json (holds the user's email) was committable in every release. Generate the file at init time; don't ship it. [CR-090]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F129: A switch on overwrite_policy missing a case routes that poli
+<!-- hash:00c06c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #upgrade #danger · A switch on overwrite_policy missing a case routes that policy to `default:` silently — pin-aware fell through to merge-3way and wrote the literal __CLEARGATE_VERSION__ into both hooks. Drift hashing reverse-substitutes the pin, so doctor + --dry-run both called it clean. [CR-088]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F130: An upgrade that iterates only the NEW manifest can never del
+<!-- hash:ec7ed3 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-28 · #upgrade #hooks · An upgrade that iterates only the NEW manifest can never delete: a retired pre-commit-*.sh survives and keeps running via the dispatcher's glob, blocking every git commit. Prune snapshot−manifest, deleting only files that still byte-match what was installed. [CR-088]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F131: main/module/exports["."] forced a 10.5MB CJS twin nobody imp
+<!-- hash:2f30c1 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-28 · #npm #size · main/module/exports["."] forced a 10.5MB CJS twin nobody imports (bin targets cli.js directly; the root .d.ts was a 13-byte `export {}`) — 47% of the tarball. Check reachability before assuming an entry point earns its bytes. [CR-090]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F132: check:no-vitest is itself a NO-OP in all 3 packages: package
+<!-- hash:6538cd -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-27 · #gate #danger · check:no-vitest is itself a NO-OP in all 3 packages: package.json holds \\b, the shell hands node -e a \b, and the JS single-quoted literal inside execSync('…') eats it — grep sees a literal BACKSPACE. Verified: real `import {vi} from 'vitest'` passes clean. [SPRINT-38 CR-087]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F133: A shipped pre-commit hook must guard every `npm --prefix <di
+<!-- hash:58f804 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #hooks #portability · A shipped pre-commit hook must guard every `npm --prefix <dir>` on the dir existing AND defining the script — a missing dir exits 254, `if !` turns it into exit 1, and `-s`+`2>/dev/null` make it a zero-byte commit failure. [SPRINT-38 CR-087]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F134: mcp/cleargate-cli/admin are gitignored in the meta-repo, so 
+<!-- hash:fedafa -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-27 · #hooks #worktree · mcp/cleargate-cli/admin are gitignored in the meta-repo, so an unguarded --prefix check blocks every LINKED WORKTREE of this repo too, not just downstream installs. [SPRINT-38 CR-087]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F135: A gate can be "restored" at the script level and still be de
+<!-- hash:28c933 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #gate #dogfood · A gate can be "restored" at the script level and still be dead end-to-end: verify reachability with a REAL git commit, not just the script's own exit code. [SPRINT-38 CR-086]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F136: Gitignored runtime sentinels (.active) never exist in a link
+<!-- hash:49e2f2 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #gate #worktree · Gitignored runtime sentinels (.active) never exist in a linked worktree — resolve them from `git rev-parse --git-common-dir`'s parent, not --show-toplevel, or every in-worktree commit silently skips the gate. [SPRINT-38 CR-086]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F137: pre-commit-surface-gate.sh runs `npm run check:no-vitest --p
+<!-- hash:396f69 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-27 · #danger #gate · pre-commit-surface-gate.sh runs `npm run check:no-vitest --prefix mcp|cleargate-cli|admin` → exit 254 in any repo lacking those dirs; latent only while the dispatcher was dead. Arming the gate ships a commit-blocker downstream — fix before publish. [SPRINT-38 CR-086]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F138: An architect plan's per-leg red/green ledger can mis-predict
+<!-- hash:233cc7 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #qa-red #test-harness · An architect plan's per-leg red/green ledger can mis-predict green-by-accident when an assertion also checks stderr text, not just exit status — run it, don't trust the table. [SPRINT-38 CR-086]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F139: Orchestrator rulings issued in DISPATCH text must be written
+<!-- hash:30a96e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #orchestration #scope-discipline · Orchestrator rulings issued in DISPATCH text must be written back into the milestone plan — QA audits scope against the plan and will red a legitimately-approved edit that lives only in a dispatch prompt. [SPRINT-38 051-09]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F140: Red tests written from dispatch-only scope additions read as
+<!-- hash:409358 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #qa-red #scope-discipline · Red tests written from dispatch-only scope additions read as overreach when audited against the blueprint; TPV checks wiring only — reconcile the plan BEFORE authoring the legs. [SPRINT-38 051-09]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F141: When a ruling changes a POLICY, fix EVERY place the old poli
+<!-- hash:8b4d0b -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #enforcement #docs · When a ruling changes a POLICY, fix EVERY place the old policy is asserted — error strings too, not just doc sites. 051-08's guard stderr contradicted the §12.3 it shipped with. [SPRINT-38 051-08]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F142: A close_sprint test case that reaches exit 0 runs Steps 7/7.
+<!-- hash:14da3c -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-27 · #test-harness #close-sprint · A close_sprint test case that reaches exit 0 runs Steps 7/7.4/7.5 → shells out to dist/cli.js against the LIVE repo; no CLEARGATE_SKIP_* seam exists, only the dist-existence check. [SPRINT-38 051-08]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F143: close-sprint-reconcile.integration spawns the REAL outer clo
+<!-- hash:e36024 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-27 · #test-harness #cross-repo · close-sprint-reconcile.integration spawns the REAL outer close_sprint.mjs — it reds on the repo's genuine backlog drift, not on your regression. [SPRINT-38 051-08]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F144: developer/qa agents write a report file only on the BLOCKED 
+<!-- hash:ce8cfa -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-27 · #orchestration · developer/qa agents write a report file only on the BLOCKED path, but DevOps §C.7 halts without dev.md/qa.md — orchestrator must transcribe the returned verdicts before merge. [SPRINT-38 051-08]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F145: Wrapping full-suite `npm test` through run_script.sh collide
+<!-- hash:03c375 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-19 · #test-harness #qa · Wrapping full-suite `npm test` through run_script.sh collides with run-script-wrapper.red.node.test.ts's own incident-dir assertions (false fails); invoke npm test directly for full-suite reruns. [SPRINT-38 051-06]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F146: test_assert_work_item_files.node.test.ts:194 ('v1 warns-only
+<!-- hash:701ab5 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-19 · #test-harness #cross-repo · test_assert_work_item_files.node.test.ts:194 ('v1 warns-only' case) went stale after 051-04 (284d481d) removed the EXEC_MODE bypass in assert_story_files.mjs — pre-existing red on the branch, not a 051-05 regression; the STORY-028-06 fixture needs updating. [SPRINT-38 051-05]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F147: Gate try/catch must wrap ONLY the fallible call, not exitFn(
+<!-- hash:23afb9 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-18 · #test-harness #cli · Gate try/catch must wrap ONLY the fallible call, not exitFn()/return — else a throw-based exit seam silently waives a hard block. [SPRINT-38 051-03]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F148: A cli node:test whose REPO_ROOT default resolves to the oute
+<!-- hash:1889f3 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-07-18 · #test-harness #cross-repo · A cli node:test whose REPO_ROOT default resolves to the outer-meta MAIN checkout (not the story worktree) is red pre-merge for any story editing outer files in the same commit family; CLEARGATE_META_ROOT override is the correct pre-merge path, not a defect. [SPRINT-38 051-03]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F149: prebuild's copy-planning-payload.mjs HARDCODES src=<outer-ma
+<!-- hash:35018a -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-18 · #dogfood #sync #build · prebuild's copy-planning-payload.mjs HARDCODES src=<outer-main>/cleargate-planning (metaRoot=pkgRoot/.., no env override) — it can ONLY regen the payload from the outer MAIN working tree, never a story worktree. Payload/MANIFEST regen is a once-per-wave post-merge step; never commit prebuild output per-story-branch (MANIFEST checksum collisions). [SPRINT-38 M0]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F150: init_sprint.mjs no longer writes an execution_mode key into 
+<!-- hash:f596b8 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-07-18 · #test-harness · init_sprint.mjs no longer writes an execution_mode key into state.json (STORY-070-01 retired the axis) — any test asserting s.execution_mode from init_sprint output (e.g. test_assert_story_files.sh Sc2 'execution_mode=v2') reads undefined and FAILS; drop that assertion when bringing the suite green. [SPRINT-38 051-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F151: architect-synth DB axis is coarse BY DESIGN — clause-4 (db_w
+<!-- hash:113273 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-06 · #orchestration #workflows · architect-synth DB axis is coarse BY DESIGN — clause-4 (db_write_set disjoint) is preempted by the fail-safe rule that serializes every DB-writing story; this is intentional, not a bug. Relaxing to per-table DML parallelism needs a per-target DB-isolation opt-in (shared dev DB couples via fixtures/sequences/triggers/FKs). Defer to EPIC-043.`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F152: When a story deletes a module + rewrites PRIOR-sprint red te
+<!-- hash:218bc8 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-05 · #connector #test-harness #qa-red · When a story deletes a module + rewrites PRIOR-sprint red tests that imported it in ONE commit, the FULL package suite IS the dangling-import detector — a leftover import fails at module load, so all-green ⇒ zero danglers. Don't treat prior-sprint red-test edits as acceptance-weakening when the story authorizes the rewrite. [SPRINT-36 047-07]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F153: mcp `GET /admin-api/v1/admin-users` returns the WHOLE admin_
+<!-- hash:6402a5 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #mcp #test #flaky · mcp `GET /admin-api/v1/admin-users` returns the WHOLE admin_users table; its `=== 3` test flakes when a SEPARATE process (connector EPIC-047 app-token tests on shared :5433 DB) leaves admin rows. --test-concurrency=1 DOES serialize files (no intra-run overlap; verified by handle-transition probe) → leak is cross-PROCESS. Fix: FK-safe-clear FOREIGN admins in beforeEach (bootstrapAdmin precedent), never weaken to >=3. [BUG-035]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F154: mcp/src/db/migrations/ has TWO 0009_*.sql files (0009_aspiri
+<!-- hash:886916 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #schema #migration #mcp · mcp/src/db/migrations/ has TWO 0009_*.sql files (0009_aspiring_vapor + 0009_sad_mindworm, journal idx 8 & 9) — next migration MUST be 0010_*; never trust `drizzle generate` numbering blind, grep the journal _journal.json tail first. [SPRINT-36 047-01]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F155: mcp revocation is SPLIT: RevocationStore (auth/revocation.ts
+<!-- hash:9e014d -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #auth #redis · mcp revocation is SPLIT: RevocationStore (auth/revocation.ts) writes only `revoked:<jti>` for refresh-token jtis; per-token revoke keys `rev:token:<id>` are written INLINE in admin-api/tokens.ts:181-186, NOT in revocation.ts. A story that says 'extend revocation.ts' for connection/apptoken revoke must add that path — it doesn't exist there yet. [SPRINT-36 047-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F156: broker/package.json ships ONLY `ws` — no redis/http client. 
+<!-- hash:e77903 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #connector #auth #deps · broker/package.json ships ONLY `ws` — no redis/http client. Real-auth M1 adds ioredis ^5.4.0 (match mcp plane; registry 5.11.1) for the PSUBSCRIBE subscriber (047-06); verify-client (047-05) uses Node-24 global fetch + node:crypto, no new dep. [SPRINT-36]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F157: run_script.sh FORWARDS CLEARGATE_STATE_FILE/CLAUDE_PROJECT_D
+<!-- hash:89c281 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #run_script #env · run_script.sh FORWARDS CLEARGATE_STATE_FILE/CLAUDE_PROJECT_DIR/ORCHESTRATOR_PROJECT_DIR to the child (CR-080 F8) — but ONLY if set in the WRAPPER's own env; set them as an inline prefix on the `bash run_script.sh …` call itself, not on a nested command. "wrapper strips env" is a misdiagnosis (verified by reading run_script.sh L44/107). [SPRINT-35]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F158: Cross-repo sprint (code in a separate gitignored repo): expo
+<!-- hash:690706 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #reporting #cross-repo · Cross-repo sprint (code in a separate gitignored repo): export ORCHESTRATOR_PROJECT_DIR or the SubagentStop hook mis-buckets per-agent cost to _off-sprint (ledger ends up ~1 row, unreconcilable); the v2 report hotfix-ledger + flashcard-audit passes also assume same-repo — both need a cross-repo mode. [SPRINT-35]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F159: No-hang E2E rule: probe `claude` ONCE at suite start with a 
+<!-- hash:7721ca -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #connector #e2e · No-hang E2E rule: probe `claude` ONCE at suite start with a hard kill-timer (spawnSync timeout+SIGKILL), set a READY flag, `t.skip()` live scenarios when false; deterministic replay + skip-machinery tests always run regardless. [SPRINT-35 046-04]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F160: Two concurrent same-tick app→connector WS sends can coalesce
+<!-- hash:0fe173 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #connector #ws #race · Two concurrent same-tick app→connector WS sends can coalesce into one TCP data event, breaking sequential `.once('message')` receivers — fix with a per-connector setImmediate drain queue + `allowSynchronousEvents:false` on WebSocketServer (ws ≥8.18). [SPRINT-35 046-03]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F161: IEEE-754 sentinel (MAX_SAFE_INTEGER+1) coerces at JS assignm
+<!-- hash:3aed97 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #test #payload-opaque · IEEE-754 sentinel (MAX_SAFE_INTEGER+1) coerces at JS assignment, so a JSON round-trip yields the same value — it does NOT prove no double-encode; assert `typeof payload === 'object'` instead. [SPRINT-35 046-03]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F162: EOF is the SOLE turn terminus: a `result` → turn_result and 
+<!-- hash:a800cd -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #connector #normalize · EOF is the SOLE turn terminus: a `result` → turn_result and NEVER closes; emit stream_end only on stdout 'end'. Background tasks emit ≥2 results (fixture 02-background) — closing on the first breaks them. [SPRINT-35 048-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F163: Two disjoint error classes: in-band `is_error:true` → turn_r
+<!-- hash:5c7ec4 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #connector #normalize · Two disjoint error classes: in-band `is_error:true` → turn_result{error} (recoverable); out-of-band spawn failure (ENOENT/0 parseable records) → distinct fatal error{code:'spawn_failed'}, never a hang on an already-fired EOF. [SPRINT-35 048-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F164: claude tool names arrive already-PascalCase from the assista
+<!-- hash:8d5358 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #connector #tool-use · claude tool names arrive already-PascalCase from the assistant record — do NOT apply a case transform (the spike fixture proves it). [SPRINT-35 048-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F165: exactOptionalPropertyTypes=true: never assign `prop: expr|un
+<!-- hash:9b5f08 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #typescript #strict · exactOptionalPropertyTypes=true: never assign `prop: expr|undefined` in an object literal — use conditional spread `...(cond ? {prop:val} : {})`. [SPRINT-35 048-02]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F166: Node 25: `--input-type=module` is stdin/`--eval`/`--print` o
+<!-- hash:a25503 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #node25 #spawn · Node 25: `--input-type=module` is stdin/`--eval`/`--print` only — a file-based ESM spawn target must use a `.mjs` extension (no flag), else ERR_INPUT_TYPE_NOT_ALLOWED crashes the child before it forks. [SPRINT-35 048-01]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F167: Detached child (setsid, own PGID) escapes kill(-pgid) (GH#19
+<!-- hash:2be1df -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-04 · #connector #teardown · Detached child (setsid, own PGID) escapes kill(-pgid) (GH#19045) — snapshot the full descendant tree via `ps -eo pid=,ppid=` BEFORE SIGTERM (ppid breaks on PID-1 reparent), then reap survivors. No tree-kill dep needed. [SPRINT-35 048-01]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F168: connector broker/daemon test scripts glob both src/** and te
+<!-- hash:6a9896 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #connector #test-harness · connector broker/daemon test scripts glob both src/** and test/** for *.node.test.ts — put test files where the package globs, and extend the glob in the SAME commit if you add a new test dir. [SPRINT-35]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F169: Developer makes the FROZEN *.red.node.test.ts pass — do NOT 
+<!-- hash:73170e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #tdd #process · Developer makes the FROZEN *.red.node.test.ts pass — do NOT author a parallel duplicate *.node.test.ts for the same scenarios (creates D.5 dedup); harness bugs in red tests route back to QA-Red, never a dev rewrite. [SPRINT-35]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F170: Error subclass carrying `cause`: pass via `super(msg, { caus
+<!-- hash:592d44 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #typescript #strict · Error subclass carrying `cause`: pass via `super(msg, { cause })` (ES2022), not a `public readonly cause?` ctor param — `noImplicitOverride` rejects the param-property form (Error.cause is built-in). [SPRINT-35 STORY-046-01]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F171: Cross-repo sprint (code in a separate gitignored repo): QA/D
+<!-- hash:8a029e -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #qa #cross-repo · Cross-repo sprint (code in a separate gitignored repo): QA/Dev context packs assume meta-repo paths and are absent — the orchestrator MUST pass the code-repo root + branch + commit SHA + path-prefix mapping explicitly in every dispatch prompt. [SPRINT-35]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F172: A red test that greps for "zero hits" of a token will SELF-H
+<!-- hash:bea9ae -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #qa-red #grep · A red test that greps for "zero hits" of a token will SELF-HIT its own assertion-message string literals — always `grep --exclude=<the-red-test-file>` (or scope the grep away from the test file) or it never goes green. [SPRINT-34 CR-075]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F173: cleargate init reads ROOT templates/cleargate-planning (reso
+<!-- hash:5e8752 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #npm-publish #payload #init · cleargate init reads ROOT templates/cleargate-planning (resolveDefaultPayloadDir init.ts:140-145 = dist/../templates). dist/templates/ is the DROPPABLE dup, NOT root templates. CR-076 hypothesis was inverted. [SPRINT-34]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F174: TWO files shell 'npm pack --workspace=cleargate-cli': test/c
+<!-- hash:76dcd1 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #test #workspace · TWO files shell 'npm pack --workspace=cleargate-cli': test/changelog-format.node.test.ts AND test/lib/license-contract.node.test.ts. CR-075 named only the first. [SPRINT-34]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F175: `node --test --import tsx/esm` throws ERR_REQUIRE_CYCLE_MODU
+<!-- hash:c505bd -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #test-runner #node25 #tsx · `node --test --import tsx/esm` throws ERR_REQUIRE_CYCLE_MODULE on Node ≥25 (stricter ESM/CJS cycle detection); use `--import tsx` (no `/esm`) — functionally identical, tsx auto-detects ESM. [SPRINT-34 CR-082]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F176: A Class-3 close_sprint.mjs gate (e.g. deferred_verification,
+<!-- hash:51c0f0 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #close-gate #live-on-merge #backward-compat · A Class-3 close_sprint.mjs gate (e.g. deferred_verification, CR-082) goes LIVE at the SAME sprint's own Gate-4 close — it MUST silent-no-op when zero stories declare the field, else it self-blocks the sprint that shipped it. Mirror Step 2.7/2.8 env seams (CLEARGATE_SKIP_*/CLEARGATE_FORCE_*) and add an explicit none-declared→no-op test. [SPRINT-34 CR-082]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F177: A Class-3 pre-gate check wired into pre_gate_runner.sh (e.g.
+<!-- hash:d033ac -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-04 · #pre-gate #live-on-merge #qa-red-lint · A Class-3 pre-gate check wired into pre_gate_runner.sh (e.g. qa_red_lint, CR-081) runs against the NEXT story's own *.red tests the moment it merges — it MUST exit 0 on non-applicable files (plain node:test w/ no Pydantic Literal / no queryByText) or it phantom-flags a wiring gap and stalls the serial loop. Add a negative "non-applicable file" scenario. [SPRINT-34 CR-081]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F178: `npm run <x> --workspace=<pkg>` fails "No workspaces found" 
+<!-- hash:6223d1 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-06-03 · #gate #npm #workspace · `npm run <x> --workspace=<pkg>` fails "No workspaces found" when the repo root has NO npm workspaces (meta-repo root isn't a workspace of cleargate-cli). Use `npm --prefix cleargate-cli run <x>` — works AND no `cd`, so it dodges the pre_gate cwd-leak. config.yml gates.* carried this latent-broken string. [SPRINT-34 CR-077]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F179: `X=$(grep -c PAT f || echo 0)` DOUBLES to "0\n0" on zero mat
+<!-- hash:0a46f6 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-03 · #test-harness #bash · `X=$(grep -c PAT f || echo 0)` DOUBLES to "0\n0" on zero matches (grep -c prints 0 AND exits 1, so `|| echo 0` appends) → `[[ "$X" -eq 0 ]]` throws a syntax error and falls to the FAIL branch. Use `grep -q` (no count capture) or `grep -c … | head -1`. [SPRINT-34 CR-077]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F180: pre_gate_runner.sh arch-mode (~L205) runs `cd "$WORKTREE" &&
+<!-- hash:038335 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-03 · #pre-gate #cwd-leak #worktree · pre_gate_runner.sh arch-mode (~L205) runs `cd "$WORKTREE" && eval typecheck_cmd` UN-subshelled — a typecheck cmd containing `cd cleargate-cli` leaks cwd for the rest of the script, breaking the relative REPORT_FILE ("No such file or directory"). Pass an ABSOLUTE worktree path; prefer `npm --prefix` over `cd` in gate cmds. [SPRINT-34 CR-077]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F181: write_dispatch.sh guard FIXED (043-09 re-verify): skip requi
+<!-- hash:52d742 -->
+
+**Category:** stale
+**Reason:** stale: zero grep hits across last 2 sprint dir(s)
+**Original entry:** `2026-06-01 · #dispatch #marker #write_dispatch · write_dispatch.sh guard FIXED (043-09 re-verify): skip requires exact tuple work_item_id==$1 AND agent_type==$2 AND session_id==CLAUDE_SESSION_ID AND writer prefix pre-tool-use-task.sh*; else WRITE. Fails toward writing on jq-fail/malformed/empty/non-auto-writer. Same work_item+agent re-dispatch still de-dups (tuple-keyed ledger attribution preserved). [SPRINT-33 043-09 PASS]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---
+
+### CAND-SPRINT-39-F182: A gap-closing red test can be GREEN on today's baseline by d
+<!-- hash:417d77 -->
+
+**Category:** resolved
+**Reason:** keyword found in a prior §6 Tooling section
+**Original entry:** `2026-08-28 · #test-harness #qa #danger · A gap-closing red test can be GREEN on today's baseline by design — it pins a rejected FUTURE mutant (e.g. CRLF normalisation), not a current defect; "must be red on baseline" isn't always true, measure it. [SPRINT-39 BUG-043 QA-Red round 2]`
+**Suggested action:** approve to remove via `cleargate flashcard prune` (run /improve)
+
+---

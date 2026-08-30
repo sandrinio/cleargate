@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/CR-084-Sprint-Dashboard-In-CLI-Payload.md"
-last_ingest: "2026-08-24T09:45:20.081Z"
+last_ingest: "2026-08-30T22:18:10.906Z"
 last_ingest_commit: "c5ef4013065ba78f372bac93c7fd4419d0e326f8"
 repo: "planning"
 ---
