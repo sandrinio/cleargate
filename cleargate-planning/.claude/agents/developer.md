@@ -88,6 +88,8 @@ flashcards_flagged:
 
 Use the project's test runner and red-test naming as declared in `sprint_context.md` §Test Stack. Run the backend runner (and frontend runner if present) before committing.
 
+**Test-layer naming (CR-111).** Integration-layer tests — the ones exercising real infra per "Never mock the database" below — are named `*.integration.node.test.ts`; their QA-Red (failing-first) variant is `*.red.integration.node.test.ts`, not `*.red.node.test.ts` — the general red-test naming above covers non-integration reds only. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention and is not the pattern for new files.
+
 **Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()`. For static-import un-interceptability (e.g. toast, clipboard), use the `__overrides__` pattern: a `__mocks__/` stub with a mutable `__overrides__` object that the test sets before each call.
 
 **Full-suite verification at commit-time.** Use the project's standard test command before committing.

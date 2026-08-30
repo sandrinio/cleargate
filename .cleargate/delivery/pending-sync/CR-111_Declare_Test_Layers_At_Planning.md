@@ -2,7 +2,7 @@
 cr_id: CR-111
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -13,17 +13,14 @@ updated_at: 2026-08-25T22:11:46Z
 created_at_version: cleargate@0.24.2
 updated_at_version: cleargate@0.24.2
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-08-25T22:11:47Z
+  pass: false
+  failing_criteria:
+    - id: existing-surfaces-verified
+      detail: "cited paths do not exist on disk: .claude/agents/developer.md"
+    - id: test-layers-declared
+      detail: "predicate error: Error: unsupported predicate shape: test-layers-declared"
+  last_gate_check: 2026-08-29T23:56:44Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -33,6 +30,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: <synthetic>,claude-opus-5
+  last_stamp: 2026-08-29T23:56:43Z
+  sessions:
+    - session: 49c00a07-a425-4af9-9ac6-97ed8ed5ee64
+      model: <synthetic>,claude-opus-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-08-29T22:07:06Z
 ---
 
 # CR-111: Work items declare their integration and E2E test layers at planning time
@@ -101,15 +113,15 @@ last_synced_body_sha: null
 > and committed into this item by the orchestrator on 2026-08-29 (M4 OD-5), before any
 > worktree was cut. Execution order.
 
-- [ ] Cut story/CR-111 from sprint/S-39 after CR-108 and CR-110 merge; branch the cli half from cli main
-- [ ] Re-measure story.md's §4.1 table position and developer.md's DB-rule line AFTER all predecessors land (N7)
-- [ ] Add predicate #11 test-layers-declared to readiness-predicates.ts as a SIBLING of evalTaskBreakdownComplete; do not touch evalSection
-- [ ] QA-Red: author T1-T11; T8 asserts the criterion FAILS on the shipped story.md/CR.md/Bug.md
-- [ ] Add the Integration row to story.md §4.1 (both trees) and the test-layer declaration block to CR.md §4 / Bug.md §5 (both trees) — NO ## heading
-- [ ] Register test-layers-declared in readiness-gates.md story/cr/bug blocks (both trees); bump :9's "exactly 10" to 11
-- [ ] cleargate-planning/.claude/agents/developer.md + qa.md + skills/sprint-execution/SKILL.md §C.3: all three naming forms, incl. the hyphen case
-- [ ] Run gate-section-index-pinning (expect 18/18/0/0); run typecheck + full cli suite; record all numbers
-- [ ] Verify git diff on readiness-predicates.ts touches zero lines inside :640-690 and adds no export
+- [x] Cut story/CR-111 from sprint/S-39 after CR-108 and CR-110 merge; branch the cli half from cli main
+- [x] Re-measure story.md's §4.1 table position and developer.md's DB-rule line AFTER all predecessors land (N7)
+- [x] Add predicate #11 test-layers-declared to readiness-predicates.ts as a SIBLING of evalTaskBreakdownComplete; do not touch evalSection
+- [x] QA-Red: author T1-T11; T8 asserts the criterion FAILS on the shipped story.md/CR.md/Bug.md
+- [x] Add the Integration row to story.md §4.1 (both trees) and the test-layer declaration block to CR.md §4 / Bug.md §5 (both trees) — NO ## heading
+- [x] Register test-layers-declared in readiness-gates.md story/cr/bug blocks (both trees); bump :9's "exactly 10" to 11
+- [x] cleargate-planning/.claude/agents/developer.md + qa.md + skills/sprint-execution/SKILL.md §C.3: all three naming forms, incl. the hyphen case
+- [x] Run gate-section-index-pinning (expect 18/18/0/0); run typecheck + full cli suite; record all numbers — CORRECTION: the row's "18/18/0/0" target is stale (QA-Red independently reconfirmed the real, unaffected-by-CR-111 number is `14/14/0/0` — "18" is S1a's/S6's criteria-count string inside a test TITLE, not a test-count, the same homonym class already flagged in FLASHCARD 2026-08-27). Ran it unmodified: `14/14/0/0`, unchanged. Typecheck: clean, exit 0. Full cli suite: 2676 tests, 2657 pass (unredirected), 18 fail — itemised in the dev report (3 inherited + 15 not-yet-merged-dependent, all confirmed 0/0 under `CLEARGATE_META_ROOT` redirection to this worktree).
+- [x] Verify git diff on readiness-predicates.ts touches zero lines inside :640-690 and adds no export — confirmed via `git diff --unified=0`: hunks at lines 3, 24, 139-141, 190-197, 1177+ only; no `export` added anywhere in the file.
 
 ## Prior work
 

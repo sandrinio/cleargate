@@ -1470,3 +1470,8 @@
   action: "update"
   target: "CR-108"
   path: ".cleargate/delivery/pending-sync/CR-108_Universal_Work_Item_Scaffold.md"
+- timestamp: "2026-08-29T23:56:44.692Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-111"
+  path: ".cleargate/delivery/pending-sync/CR-111_Declare_Test_Layers_At_Planning.md"
