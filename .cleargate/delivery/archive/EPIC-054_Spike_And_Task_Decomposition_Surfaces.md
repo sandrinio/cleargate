@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: planning-layer
-status: Draft
+status: Completed
 approved: true
 proposal_gate_waiver:
   approved_by: sandrinio

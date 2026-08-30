@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
-status: Draft
+status: Completed
 approved: true
 context_source: verified codebase grounding (SKILL.md A.5 surfaces the goal but never asks how it is verified; sprint_context.md §Sprint Goal is prose-only; reporter verdict met/partial/missed is a judgement with nothing to check against; close_sprint.mjs:404 validates only §3 process-metric ROWS EXIST, never declared outcome targets) + recorded direct approval 2026-08-25
 created_at: 2026-08-25T22:10:31Z

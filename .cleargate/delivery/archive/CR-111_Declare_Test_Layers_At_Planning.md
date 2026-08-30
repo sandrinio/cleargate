@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
-status: Draft
+status: Completed
 approved: true
 context_source: verified codebase grounding — story.md:184-189 §4.1 has Unit + E2E/acceptance + Performance rows but NO integration row; CR.md §4 and Bug.md §5 declare a bare command with no layer breakdown; grep of readiness-gates.md for test-plan/E2E/integration returns nothing; 30 *.integration.node.test.ts files exist under an undocumented convention. Recorded direct approval 2026-08-25.
 created_at: 2026-08-25T22:11:46Z

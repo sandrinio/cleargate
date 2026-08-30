@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
-status: Draft
+status: Completed
 approved: true
 context_source: verified codebase grounding (hotfix.ts:118-192 existing scaffolder; stamp-frontmatter.ts:94-119 existing stamper; placeholder inventory across all 9 templates) + recorded direct approval 2026-08-26
 created_at: 2026-08-26T00:00:00Z
