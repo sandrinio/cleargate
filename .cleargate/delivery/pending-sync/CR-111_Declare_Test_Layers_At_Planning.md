@@ -105,7 +105,7 @@ last_synced_body_sha: null
 - [ ] Re-measure story.md's §4.1 table position and developer.md's DB-rule line AFTER all predecessors land (N7)
 - [ ] Add predicate #11 test-layers-declared to readiness-predicates.ts as a SIBLING of evalTaskBreakdownComplete; do not touch evalSection
 - [ ] QA-Red: author T1-T11; T8 asserts the criterion FAILS on the shipped story.md/CR.md/Bug.md
-- [ ] Add the Integration row to story.md §4.1 (both trees) and the **Test layers.** block to CR.md §4 / Bug.md §5 (both trees) — NO ## heading
+- [ ] Add the Integration row to story.md §4.1 (both trees) and the test-layer declaration block to CR.md §4 / Bug.md §5 (both trees) — NO ## heading
 - [ ] Register test-layers-declared in readiness-gates.md story/cr/bug blocks (both trees); bump :9's "exactly 10" to 11
 - [ ] cleargate-planning/.claude/agents/developer.md + qa.md + skills/sprint-execution/SKILL.md §C.3: all three naming forms, incl. the hyphen case
 - [ ] Run gate-section-index-pinning (expect 18/18/0/0); run typecheck + full cli suite; record all numbers
@@ -139,7 +139,21 @@ last_synced_body_sha: null
 
 **Command/Test:** `npm --prefix cleargate-cli test`
 
-1. **The failing case.** A story file with no Integration row fails `test-layers-declared`. **Must fail against the current tree** — the criterion does not exist.
+1. **The failing case.** A file that *carries* a test-layer declaration but omits the Integration row fails `test-layers-declared`. **Must fail against the current tree** — the criterion does not exist.
+
+   > **ORCHESTRATOR AMENDMENT (2026-08-30, CR-111 TPV §4 ruling).** This item's first sentence
+   > previously read *"a story file with no Integration row fails"*, which **directly contradicted
+   > item 5** (grandfathering): a pre-release story has no Integration row, so the same input had to
+   > both fail and pass. Resolved as **absence-passes**, on measurement — absence-fails would newly
+   > fail **386 of 400** live story/cr/bug items (96.5%), and the alternative version guard is
+   > **unbuildable** (`readiness-predicates.ts:290-291` evaluates `>=` as `Number(a) >= Number(b)`,
+   > i.e. `NaN >= NaN` for semver strings).
+   >
+   > **Binding contract:** `test-layers-declared` fires only on a document that already carries a
+   > declaration (an `| Integration tests |` row, or a test-layer lead-in block); absent → **pass**
+   > with a `not-applicable:` detail; present → all three layers declared, every count a
+   > non-negative integer, and every `0` carrying a non-empty reason. In the CR's own words: **an
+   > absent row is not a decision.**
 2. `Integration tests | 0 | pure function, no I/O` **passes** — zero with a reason is a valid declaration.
 3. `Integration tests | 0 | ` with no reason **fails**.
 4. A CR and a Bug each require the same table; a missing table fails for both buckets.
