@@ -54,3 +54,13 @@
 #   test: "cargo test"
 #   typecheck: "cargo check"
 #   lint: "cargo clippy"
+
+# vcs:
+#   # CR-107: sprint->main merge goes through a GitHub pull request instead
+#   # of a local `git merge`. The PR is opened at the start of the sprint
+#   # walkthrough and merged at Gate 4 close. Requires the `gh` CLI on PATH
+#   # and a GitHub `origin` remote — close_sprint.mjs's Step 2.8 fails
+#   # closed (non-zero exit, named error) if either is missing while this
+#   # is true. Default false: every install without a GitHub remote keeps
+#   # today's local-merge behaviour unchanged.
+#   sprint_pr: false

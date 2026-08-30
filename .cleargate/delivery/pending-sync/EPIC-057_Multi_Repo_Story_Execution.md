@@ -2,7 +2,7 @@
 epic_id: EPIC-057
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
 status: Draft
@@ -11,7 +11,7 @@ proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-26T00:00:00Z
 ambiguity: 🟡 Medium
-context_source: verified codebase grounding (git ls-files + check-ignore across mcp/ cleargate-cli/ admin/ = 0 tracked, all gitignored; collision_surface.sh has no reachability logic; 9 of 16 SPRINT-39 items reference cleargate-cli/src) + recorded direct approval 2026-08-26
+context_source: verified codebase grounding (git ls-files + check-ignore across mcp/ cleargate-cli/ admin/ = 0 tracked, all gitignored; 9 of 16 SPRINT-39 items reference cleargate-cli/src) + recorded direct approval 2026-08-26
 owner: sandrinio
 target_date: 2026-11-30
 created_at: 2026-08-26T00:00:00Z

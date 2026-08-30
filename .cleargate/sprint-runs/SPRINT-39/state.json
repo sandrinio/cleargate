@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "BUG-042": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T12:28:32.188Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -16,11 +16,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-05": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T13:44:32.120Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-01": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T14:50:32.403Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -40,11 +40,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-02": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T17:55:32.386Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -52,11 +52,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-03": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T18:56:12.651Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-04": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-27T15:52:03.597Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -76,11 +76,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-06": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-28T09:06:11.979Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -88,11 +88,11 @@
       "lane_demotion_reason": null
     },
     "STORY-054-07": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-28T10:19:30.627Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -100,11 +100,11 @@
       "lane_demotion_reason": null
     },
     "BUG-043": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-28T18:53:42.293Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -112,11 +112,11 @@
       "lane_demotion_reason": null
     },
     "CR-105": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-28T21:51:32.426Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -124,11 +124,11 @@
       "lane_demotion_reason": null
     },
     "BUG-044": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T10:40:37.834Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -136,11 +136,11 @@
       "lane_demotion_reason": null
     },
     "CR-106": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
-      "arch_bounces": 0,
+      "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T19:01:55.755Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -148,11 +148,11 @@
       "lane_demotion_reason": null
     },
     "CR-107": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T13:30:03.050Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -160,11 +160,11 @@
       "lane_demotion_reason": null
     },
     "BUG-045": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T11:07:53.022Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -172,11 +172,11 @@
       "lane_demotion_reason": null
     },
     "BUG-046": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T10:34:20.979Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -184,11 +184,11 @@
       "lane_demotion_reason": null
     },
     "CR-108": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T22:03:41.980Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -196,11 +196,11 @@
       "lane_demotion_reason": null
     },
     "CR-110": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-29T20:52:19.122Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -208,11 +208,11 @@
       "lane_demotion_reason": null
     },
     "CR-111": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-08-27T07:45:25.442Z",
+      "updated_at": "2026-08-30T00:35:20.315Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -220,6 +220,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "Sprint SPRINT-39 initialised",
-  "updated_at": "2026-08-27T07:45:25.442Z"
+  "last_action": "transition CR-111 → Done",
+  "updated_at": "2026-08-30T00:35:20.315Z"
 }

@@ -1,13 +1,13 @@
 ---
 sprint_id: SPRINT-39
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 lifecycle_init_mode: block
 area: planning-layer
 remote_id: null
 source_tool: null
-status: Draft
+status: Active
 start_date: 2026-08-26
 end_date: 2026-09-09
 synced_at: null
@@ -115,13 +115,13 @@ Ship the spike charter type end-to-end and the task-breakdown section end-to-end
 | `.claude/skills/sprint-execution/SKILL.md` (+ mirror) | BUG-046, CR-107, CR-110, CR-111 | 046 → 107 → 110 → 111 | 046 fixes §C.2's false `mcp/` claim; 107 rewrites Phase D+E; 110 adds the goal-acceptance step to §A.5/§0.5/§E.2; 111 corrects §C.3 red-test naming. Four disjoint sections, one file — order avoids four-way rebase |
 | `.cleargate/scripts/init_sprint.mjs` (+ mirror) | CR-106, CR-110 | 106 → 110 | 106 seeds `events.jsonl`; 110 renders the Goal Acceptance Check section. Disjoint regions |
 | `.claude/agents/{developer,qa}.md` (+ mirrors) | CR-111 | n/a | Single owner. `architect.md` is STORY-054-07's, `architect-{reader,synth}.md` are BUG-046's — three distinct files, no contention |
-| `.claude/agents/reporter.md` (+ mirror) | CR-110 | n/a | Single owner | 046 fixes the §C.2 `mcp/` instruction; 107 rewrites Phase D + Phase E. Different sections, same file — order avoids a rebase |
+| `.claude/agents/reporter.md` (+ mirror) | CR-110 | n/a | Single owner |
 | `.cleargate/scripts/collision_surface.sh`, `.claude/agents/architect-{reader,synth}.md` (+ mirrors) | BUG-046 | n/a | Single owner. Note `architect.md` is STORY-054-07's — different file, no contention |
 | `cleargate-cli/src/commands/hotfix.ts` | BUG-045, CR-108 | 045 → 108 | 045 corrects the archive-blind ID scan; 108 generalizes the corrected allocator to all nine types. Reversing this ships the defect to every type |
 
 ### 2.3 Shared-Surface Warnings
 
-- **`readiness-gates.md` is the hot file — four of eight items touch it.** This is what serializes the sprint. Do not cut M0 and M2 worktrees concurrently.
+- **`readiness-gates.md` is the hot file — 5 of 18 items touch it** (`BUG-042`, `STORY-054-02`, `STORY-054-05`, `STORY-054-06`, `CR-111`), landing at waves 1, 2, 4, 6 and 13. It is what serializes the spine of the sprint. Do not cut M0 and M2 worktrees concurrently.
 - **Every item is a two-tree edit** (live + `cleargate-planning/` canonical), and several also need the npm payload regen. Per CLAUDE.md's dogfood-split rule, canonical does not auto-propagate; a story that edits only one tree is incomplete regardless of green tests.
 - **`STORY-054-06` changes gate-observable structure in three templates at once.** Rubric run at decomposition (2026-08-25): not split, re-rated L3/med — see the decomposition-status note above. The `med` rating is **contingent on `STORY-054-05` merging first**; if 05 slips out of the sprint, re-rate 06 to `high` and reconsider the split.
 - **M3's four design questions were answered 2026-08-26; both items are now 🟢.** Recorded decisions: `upgrade` refuses with a named error on a missing marker (never overwrites); markers are anchored to their own line so greedy stays safe; the block relocates once with a printed notice; both `init` and `upgrade` relocate. These compose — `upgrade` refuses a block-less file, so relocation applies only where a block already exists, and installing one stays `init`'s job.
@@ -130,6 +130,8 @@ Ship the spike charter type end-to-end and the task-breakdown section end-to-end
 - **Three live defects were found while grounding M4 and are now filed.** [[BUG-044]] — `update_state.mjs:78-99` performs an unguarded read-modify-write, so two concurrent segments in one wave can silently lose a transition (P1-High; silent, and the lost record is a lifecycle state). [[BUG-045]] — `hotfix.ts:164` scans only `pending-sync/` for the max ID, so archived IDs get reissued (P2-Medium; the protocol *mandates* the archive move that hides them). [[BUG-046]] — `collision_surface.sh` emits file paths with no check that they are materializable in a worktree, so the five-clause predicate certifies "disjoint surfaces" for stories a Developer cannot execute; the two documentation lines that tell an agent how to handle this case (`cleargate-enforcement.md:89`, `SKILL.md:277`) are themselves false (P1-High; fail-open on a safety predicate, and it ships to every ClearGate install). All three are Red-first.
 
 - **`BUG-046` is directly load-bearing for this sprint.** 9 of 16 items reference `cleargate-cli/src` paths, and `cleargate-cli/` is gitignored in the outer repo with 0 tracked files — so those paths cannot appear in any `.worktrees/STORY-X` checkout. The current wave plan places at most one such item per wave, which makes the sprint safe **by planning, not by enforcement**. `BUG-046` converts that luck into a check.
+- **Clause 5 of the wave predicate was blind on input (SDR finding).** All 18 reader digests returned `dep_predecessors: []` — no work-item template carries that field, so `collision_surface.sh` had nothing to emit. Uncorrected, the predicate would have co-waved `STORY-054-07` with `CR-108`/`CR-110`, and `BUG-043` with `BUG-044`/`BUG-045`/`BUG-046`, none of which any clause would have blocked. **Every dependency edge in `waves.json` was supplied by the Orchestrator from §2.1/§2.2, not derived.** This recurs on any sprint built from Bugs and CRs rather than Stories.
+- **`SKILL.md` contention is 5, not 4.** `STORY-054-03` (wave5) also carries `SKILL.md` and is absent from the §2.2 chain for that file. It lands before all four M4 items, so the order is safe — but the row understates the real contention.
 - **`CR-111` is the sprint's last template edit, by design.** It adds a test-layer table to `story.md`/`CR.md`/`Bug.md`, shifting `section(N)` indices in three gated templates — the exact defect class `BUG-042` corrects and `STORY-054-05` pins. Sequencing it last means the pinning test adjudicates it rather than the other way round. If `STORY-054-05` slips, `CR-111` slips with it.
 - **`CR-110` and `CR-111` came from the 2026-08-25 design review, after M4 was already added.** Both are contract-writing rather than behaviour-changing: the loop already does the right thing, the requirement was never written down. Low execution risk, but they push the sprint to 18 items — see the trim note.
 
@@ -147,6 +149,33 @@ Ship the spike charter type end-to-end and the task-breakdown section end-to-end
 
 - **`STORY-054-04` vs BUG-041's single-grammar principle.** Adding a `spikes` bucket means editing four hardcoded bucket lists — the same divergence class BUG-041 eliminated for id parsing. Not a blocker, but the story should note whether unifying those four lists is worth a follow-up CR.
 - **`STORY-054-06` vs EPIC-052 WS1.** Both add an unnumbered section to the same six template files. Whichever lands second re-runs STORY-054-05's pinning test. No conflict today because EPIC-052 is undecomposed, but the two must not run in overlapping sprints.
+
+- **[RESOLVED 2026-08-26 — refusal scoped forward, see BUG-046 §Open Questions]** `BUG-046` rewrites `architect-synth.md` in wave10, while waves 11–13 are still unexecuted (SDR finding).** The five-clause predicate that adjudicates the remaining waves is specified by a file being modified mid-sprint. This wave plan was computed against the *pre*-`BUG-046` predicate. `BUG-046`'s DoD requires `architect-synth` to refuse any story carrying a worktree-unreachable path — and `CR-108` in wave12 carries `cleargate-cli/src/**` paths that the new check would refuse. **Resolve before wave10 merges:** either re-run the synth after `BUG-046` lands and re-adjudicate waves 11–13, or scope its refusal to sprints planned after it. This is the self-modification hazard CLAUDE.md's dogfood-split rule warns about, arriving from a direction the rule does not cover.
+
+### 2.6 Wave Assignment (SDR output — `plans/waves.json`)
+
+> Emitted by `architect-synth` 2026-08-26 from 18 reader digests. 13 waves, 4 parallel, peak width 3.
+> Milestones execute as ordered blocks M0 → M1 → M2 → M3 → M4; no wave crosses a milestone boundary.
+
+| Wave | M | Stories | Parallel? | Rationale |
+|---|---|---|---|---|
+| wave1 | M0 | BUG-042 | No | Sprint entry; head of the `readiness-gates.md` chain |
+| wave2 | M0 | STORY-054-05 | No | `parallel_eligible=n`; clause-2 collision with 042 |
+| wave3 | M1 | STORY-054-01 ‖ STORY-054-04 | **Yes** | Disjoint: new `spike.md` vs CLI wiki lists + `config.yml` |
+| wave4 | M1 | STORY-054-02 | No | `parallel_eligible=n`; rebases on M0 |
+| wave5 | M1 | STORY-054-03 | No | Successor of 02; clause-2 on `cleargate-protocol.md` |
+| wave6 | M2 | STORY-054-06 | No | Strictly after M0; shifts `section(N)` in three templates |
+| wave7 | M2 | STORY-054-07 | No | Successor of 06 |
+| wave8 | M3 | BUG-043 | No | Head of M3; clause-2 with 105 on `inject-claude-md.ts` |
+| wave9 | M3 | CR-105 | No | Successor of 043 and of 054-03 (`CLAUDE.md`) |
+| wave10 | M4 | BUG-044 ‖ BUG-045 ‖ BUG-046 | **Yes** | Three disjoint Red-first fixes — widest wave in the sprint |
+| wave11 | M4 | CR-106 ‖ CR-107 | **Yes** | State scripts vs `SKILL.md`/`close_sprint.mjs`/`config.yml` |
+| wave12 | M4 | CR-108 ‖ CR-110 | **Yes** | Disjoint on exact-string match |
+| wave13 | M4 | CR-111 | No | Terminal by design — tail of four merge chains |
+
+**Concurrency yield: 18 items → 13 serialized steps (28% reduction).** The ceiling is set by `readiness-gates.md` (5 items) and `SKILL.md` (5 items), not by the algorithm. All 12 §2.2 merge chains verified satisfied by this wave order; no item was fail-safe-serialized for unknown metadata, empty surface, or DB writes.
+
+**Cross-milestone concurrency declared in §2.1 was not realized.** Waves cannot cross a milestone boundary, and four real cross-milestone edges pin the order regardless (`054-03`→`054-06`, `054-03`→`CR-105`, `054-02`→`CR-108`, `054-06`→`CR-108`). Only M4-before-M0/M1 was genuinely sacrificed; the cost is wall-clock, not correctness.
 
 ## Risks & Dependencies
 

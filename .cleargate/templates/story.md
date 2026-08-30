@@ -4,8 +4,9 @@ YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Acto
 §1 The Spec: User Story + Detailed Requirements + Out of Scope.
 §2 The Truth: Gherkin acceptance criteria + manual verification steps.
 §3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from the approved Epic and verified codebase grounding.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
 §4 Quality Gates: Minimum test expectations + Definition of Done checklist.
-Output location: .cleargate/delivery/pending-sync/STORY-{EpicID}-{StoryID}-{StoryName}.md
+Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 Document Hierarchy Position: LEVEL 2 (Proposal → Epic → Story)
 
@@ -24,7 +25,7 @@ A candidate story is too big — emit two stories instead, with consecutive IDs 
   • §1.2 Detailed Requirements joins unrelated user goals with "and also" / "additionally".
   • §2.1 Gherkin would need >5 scenarios covering unrelated behaviors.
   • §3.1 Files-to-touch span unrelated subsystems (e.g. API + UI + migration in one story).
-  • Complexity would land at L4 (>2 days). L4 is a planning smell — split, or carve out a spike as its own story.
+  • Complexity would land at L4 (>2 days). L4 is a planning smell — split, or carve out a SPIKE to bound the discovery first.
   • `complexity_label: L3` AND `expected_bounce_exposure: high`. L3+high consistently hits developer-agent wall-time limits (observed in SPRINT-09 on STORY-013-02/03/04, all Sonnet 4.6 stream-timeouts). Split into two L2 stories OR escalate the single L3 to Opus at dispatch — the decomposition default is to split.
 Also split the inverse: two candidate stories that each touch the same 1-2 files with overlapping scenarios should merge into one L1/L2.
 At epic-decomposition time there are no remote IDs yet — splits and merges are free. Prefer two focused L1/L2 stories over one L3. Prefer L3 over L4.
@@ -62,8 +63,8 @@ Do NOT output these instructions.
 </instructions>
 
 ---
-story_id: "STORY-{EpicID}-{StoryID}-{StoryName}"
-parent_epic_ref: "EPIC-{ID}"
+story_id: "{ID}"
+parent_epic_ref: "{PARENT_EPIC_ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
@@ -104,7 +105,7 @@ last_synced_status: null   # required for conflict-detector; status at last sync
 last_synced_body_sha: null # sha256 of body at last sync
 ---
 
-# STORY-{EpicID}-{StoryID}: {Story Name}
+# {ID}: {Story Name}
 **Complexity:** {L1/L2/L3/L4} — {brief description}
 
 ## 1. The Spec (The Contract)
@@ -177,6 +178,14 @@ Feature: {Story Name}
 |---|---|---|---|---|
 | `/api/resource` | GET/POST | Bearer/None | `{ id: string }` | `{ status: string }` |
 
+## Task Breakdown
+
+> **Required at L3 and above. Optional at L2. Omit the whole section at L1.**
+> An absent section passes the gate; a section that is present but carries no task rows does not.
+> Write one row per executable step, in execution order:
+> `- [ ] <action>` with an optional trailing `-> <requirement-id>`. The requirement reference is
+> reserved for grounding ids and is not interpreted today.
+
 ## 4. Quality Gates
 
 ### 4.1 Minimum Test Expectations
@@ -184,6 +193,7 @@ Feature: {Story Name}
 | Test Type | Minimum Count | Notes |
 |---|---|---|
 | Unit tests | {N} | {e.g., "1 per exported function"} |
+| Integration tests | {N} | {e.g., "1 per *.integration.node.test.ts scenario — real Postgres/Redis, no mocks"} |
 | E2E / acceptance tests | {N} | {e.g., "1 per Gherkin scenario in §2.1"} |
 | Performance test *(if applicable)* | {N} | Required only when the parent Epic states a budget and §2.1 carries it as a `Then` clause. Name the measurement method and the baseline. Delete this row when the Epic states no budget. |
 

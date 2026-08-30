@@ -86,7 +86,7 @@ All commands must be run from the **repo root** (not from inside `.worktrees/`),
 
 **The `mcp/` directory is a nested independent git repository.** Running `git worktree add` inside `mcp/` would create a worktree scoped to the nested repo, not to the outer ClearGate repo. This is a git footgun: the outer repo cannot track, merge, or remove the inner worktree via its own git commands.
 
-**Rule:** Never run `git worktree add` inside `mcp/`. If a story requires edits to `mcp/`, the Developer Agent must edit `mcp/` from inside the outer worktree (`.worktrees/STORY-NNN-NN/mcp/...`) — the nested repo's files are visible there as a subdirectory, not as a separate git context. MCP-native worktree support is deferred to Q3.
+**Rule:** Never run `git worktree add` inside `mcp/`. If a story requires edits to `mcp/` — the nested repo has ZERO tracked files in the outer repo, so a worktree materializes no such directory at all — edit it in the main checkout. MCP-native worktree support is deferred to Q3.
 
 ### §1.4 Local state.json is in-flight authority
 
@@ -98,7 +98,7 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 
 ### §1.6 Wave worktree contract (source: protocol §23)
 
-A wave runs multiple per-story segments concurrently, each in its OWN ClearGate-managed `.worktrees/STORY-X` (created via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` — **not** the Workflow tool's `isolation:'worktree'`, which strips gitignored `/.claude/` + `/mcp/` and cuts off the wrong base; spike decision 2). Two file-surface axes:
+A wave runs multiple per-story segments concurrently, each in its OWN ClearGate-managed `.worktrees/STORY-X` (created via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` — **not** the Workflow tool's `isolation:'worktree'`, which cuts off the wrong base; spike decision 2). Two file-surface axes:
 
 - **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (STORY-033-03's five-clause predicate), not a runtime lock.
 - **Shared sprint-branch axis (serial barrier merge).** `sprint/S-NN` is a single-writer axis. The barrier therefore merges each GREEN `story/STORY-X` to `sprint/S-NN` **serially — one worktree at a time, never two concurrently** (protocol §23.3). Concurrent `git worktree add` at wave launch is avoided by pre-creating all wave worktrees serially before any segment runs.
@@ -108,6 +108,8 @@ A wave runs multiple per-story segments concurrently, each in its OWN ClearGate-
 ## 2. User Walkthrough on Sprint Branch (source: protocol §16)
 
 **Always enforced** (STORY-070-01): the sprint branch MUST NOT merge to `main` until the walkthrough is complete and all `UR:bug` items are resolved.
+
+> **CR-107.** When `vcs.sprint_pr: true` in `.cleargate/config.yml`, this gate gains an external artefact: a GitHub pull request opened against `main` at the walkthrough trigger (§2.1) and merged at Gate 4 close (`SKILL.md` §E.5), instead of a purely local sprint→main merge. The open, unmerged PR is the physical form of this section's MUST-NOT-merge rule — it stops being a promise enforced only by this sentence and becomes an object with a URL the human reads and tests directly. `close_sprint.mjs` Step 2.8 still verifies the merge itself; the PR does not replace that check, it gives the human review step a durable surface. Default `vcs.sprint_pr: false` leaves this section's enforcement exactly as it reads above — a local `git merge`, gated by the same MUST-NOT rule.
 
 ### §2.1 Walkthrough trigger
 
@@ -569,7 +571,7 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:140`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
 
 **`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 

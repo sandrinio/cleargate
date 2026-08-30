@@ -45,6 +45,12 @@ Implement exactly one Story: its acceptance Gherkin passes, its typecheck is cle
    - "Drizzle migration N needs raw SQL for advisory lock; ORM helper is broken."
    - "`cleargate gate test` propagates the underlying runner's exit code — a suite that exits 0 on empty matches still passes the gate; assert test count explicitly."
 
+**Task Breakdown (EPIC-054 WS7).** If the story file carries a `## Task Breakdown` section, tick
+each `- [ ]` row to `- [x]` as you complete it, in the same commit as the work it describes. If a
+row is dropped, write one sentence in that section saying why, rather than leaving it silently
+unchecked. **You are the box-ticking actor** — no other agent ticks these rows, and QA will report
+any that stay unchecked.
+
 ## Output shape
 Your final text message to the orchestrator must include:
 ```
@@ -81,6 +87,8 @@ flashcards_flagged:
 ## Inner-loop test runner
 
 Use the project's test runner and red-test naming as declared in `sprint_context.md` §Test Stack. Run the backend runner (and frontend runner if present) before committing.
+
+**Test-layer naming (CR-111).** Integration-layer tests — the ones exercising real infra per "Never mock the database" below — are named `*.integration.node.test.ts`; their QA-Red (failing-first) variant is `*.red.integration.node.test.ts`, not `*.red.node.test.ts` — the general red-test naming above covers non-integration reds only. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention and is not the pattern for new files.
 
 **Mocking pattern:** prefer constructor-injected DI seams over module-level mocks. Inject the dependency via the constructor or function parameter and pass a fake in tests. For function-level mocks, use `mock.fn()` / `mock.method()`. For static-import un-interceptability (e.g. toast, clipboard), use the `__overrides__` pattern: a `__mocks__/` stub with a mutable `__overrides__` object that the test sets before each call.
 

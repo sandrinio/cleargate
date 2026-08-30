@@ -1,0 +1,122 @@
+▶ N1 — shared-corpus grammar test (BUG-041 flashcard): the two registries must agree on the SCAFFOLDABLE set
+  ✔ every scaffoldable type classifies through work-item-id.ts to the matching uppercase prefix (0.722916ms)
+  ✔ PLATFORM, AUDIT and legacy PROP are in the 12-prefix id grammar but have NO scaffold-registry counterpart (0.137333ms)
+  ✔ cleargate new platform rejects — the registry bridge (dispatch scenario 3) (5.011917ms)
+  ✔ cleargate new audit rejects — the registry bridge (dispatch scenario 3) (1.559208ms)
+  ✔ cleargate new prop rejects — the registry bridge (dispatch scenario 3) (2.020709ms)
+✔ N1 — shared-corpus grammar test (BUG-041 flashcard): the two registries must agree on the SCAFFOLDABLE set (10.277166ms)
+▶ N2 — every registered type scaffolds, EXCEPT the size-asserted KNOWN_UNSCAFFOLDABLE set
+  ✔ KNOWN_UNSCAFFOLDABLE contains exactly {proposal} (F6) (0.421583ms)
+  ✔ cleargate new proposal rejects with a NAMED error naming the missing template (F6 ruling; proposal.md is out of scope — BUG-065) (3.429292ms)
+  ✔ cleargate new epic scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (6.054083ms)
+  ✔ cleargate new cr scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (5.3285ms)
+  ✔ cleargate new bug scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (2.838125ms)
+  ✔ cleargate new initiative scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (6.561958ms)
+  ✔ cleargate new sprint scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (2.616333ms)
+  ✔ cleargate new hotfix scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (11.751209ms)
+  ✔ cleargate new spike scaffolds: id, filename, path, machine fields, <instructions> intact (dispatch scenarios 1 & 6) (4.909583ms)
+✔ N2 — every registered type scaffolds, EXCEPT the size-asserted KNOWN_UNSCAFFOLDABLE set (44.528958ms)
+▶ Case-sensitive template resolution: must use readdirSync, never existsSync
+  ✔ a wrong-case template file (cr.md present, CR.md absent) is REJECTED, not silently resolved (2.146458ms)
+  ✔ control: the correct-case CR.md resolves and scaffolds successfully (2.724583ms)
+✔ Case-sensitive template resolution: must use readdirSync, never existsSync (4.99775ms)
+▶ N3 — no unrendered renderer-owned placeholder; the human-fill whitelist is enumerated and size-asserted
+  ✔ FORBIDDEN is 9 tokens, WHITELIST is 13 tokens, no overlap, 9 + 13 = 22 (the full M-6 measured corpus) (0.156458ms)
+  ✔ story: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (3.190917ms)
+  ✔ epic: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.266209ms)
+  ✔ cr: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.176416ms)
+  ✔ bug: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.412916ms)
+  ✔ initiative: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (3.587042ms)
+  ✔ sprint: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.142666ms)
+  ✔ hotfix: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.81875ms)
+  ✔ spike: every {Token} surviving in scaffolded output is a member of the human-fill whitelist (2.24825ms)
+✔ N3 — no unrendered renderer-owned placeholder; the human-fill whitelist is enumerated and size-asserted (21.232542ms)
+▶ N4 — ID allocation scans BOTH directories, for every registered type (§4 case 4)
+  ✔ cr: CR-106 in pending-sync, CR-107 in archive -> next is CR-108 (the exact fixture named in §4) (2.746958ms)
+  ✔ bug: archive holds the higher max (BUG-050), pending only has BUG-012 -> next is BUG-051, not BUG-013 (2.421041ms)
+  ✔ epic: archive/ entirely ABSENT from disk (ENOENT) does not crash allocation; pending/EPIC-020 -> EPIC-021 (2.250416ms)
+  ✔ bug (N4d, TPV A5 — the MIRROR of the epic case above): pending-sync/ entirely ABSENT from disk, archive/BUG-050 present -> next is BUG-051 (2.570791ms)
+✔ N4 — ID allocation scans BOTH directories, for every registered type (§4 case 4) (10.101ms)
+▶ N5 — concurrent allocation (liveness smoke): simultaneous cleargate new cr invocations, each a distinct id, never a collision
+  ✔ 6 concurrent real subprocesses against the same repo each get a distinct CR id; 6 files, 6 unique ids (581.95475ms)
+✔ N5 — concurrent allocation (liveness smoke): simultaneous cleargate new cr invocations, each a distinct id, never a collision (582.081459ms)
+▶ N5b — a deterministic lock witness: pre-create the lock, assert refusal; assert no orphan after success (TPV A2)
+  ✔ newHandler refuses when the lock is already held: no item file created, non-zero exit, within its bounded retry budget (4327.756916ms)
+  ✔ the lock is released after a normal successful run — no orphan lockfile survives (2.473625ms)
+✔ N5b — a deterministic lock witness: pre-create the lock, assert refusal; assert no orphan after success (TPV A2) (4330.347959ms)
+▶ N6 — stamp round-trip after scaffold (§4 case 6)
+  ✔ scaffold -> hand-clean <instructions> -> stamp -> stamp again: created_at preserved, updated_at advances, an identical re-stamp is a no-op (13.853709ms)
+✔ N6 — stamp round-trip after scaffold (§4 case 6) (13.974375ms)
+▶ N6b — EXPECTED RED, tracked by BUG-067 (stampFrontmatter is not <instructions>-aware) — excluded from CR-108's acceptance line
+  ✖ calling stampFrontmatter directly on a freshly scaffolded (instructions-intact) file corrupts the real frontmatter — see BUG-067 (12.210208ms)
+✖ N6b — EXPECTED RED, tracked by BUG-067 (stampFrontmatter is not <instructions>-aware) — excluded from CR-108's acceptance line (12.759542ms)
+▶ N7 — hotfix new: the renderer performs exactly the three {ID}/{SLUG}/{ISO} substitutions and nothing else (§4 case 7, dispatch scenario 5; TPV A9 retitle)
+  ✔ hotfixNewHandler output equals an independently-reconstructed substitution of the live template (2.245833ms)
+✔ N7 — hotfix new: the renderer performs exactly the three {ID}/{SLUG}/{ISO} substitutions and nothing else (§4 case 7, dispatch scenario 5; TPV A9 retitle) (2.304125ms)
+▶ N8 — {ID} full-id semantic: <type>_id equals the FULL id, never bare digits and never a doubled prefix (F3)
+  ✔ bug: bug_id is a full id like "BUG-NNN" — never bare digits, never doubled (2.156167ms)
+  ✔ cr: cr_id is a full id like "CR-NNN" — never bare digits, never doubled (2.208458ms)
+  ✔ epic: epic_id is a full id like "EPIC-NNN" — never bare digits, never doubled (5.056542ms)
+  ✔ hotfix: hotfix_id is a full id like "HOTFIX-NNN" — never bare digits, never doubled (2.227ms)
+  ✔ spike: spike_id is a full id like "SPIKE-NNN" — never bare digits, never doubled (2.264959ms)
+  ✔ initiative: initiative_id is a full id like "INITIATIVE-NNN" — never bare digits, never doubled (2.181875ms)
+✔ N8 — {ID} full-id semantic: <type>_id equals the FULL id, never bare digits and never a doubled prefix (F3) (16.268125ms)
+▶ N9 — pad width is per-type, from the registry, never a lifted padStart(3,'0') (F4)
+  ✔ SPRINT renders 2-digit (SPRINT-40, not SPRINT-040) (2.576667ms)
+  ✔ BUG renders 3-digit, zero-padded (BUG-046, not BUG-46) (1.740167ms)
+✔ N9 — pad width is per-type, from the registry, never a lifted padStart(3,'0') (F4) (4.384917ms)
+▶ N10 — story allocation takes a parent epic; max+1 over numericStem does NOT generalise to story (F5)
+  ✔ cleargate new story --epic EPIC-054 yields STORY-054-08, not STORY-100 (12.630958ms)
+  ✔ cleargate new story without --epic rejects with a clear "epic" error (guards against a silent max+1 fallback) (1.659708ms)
+✔ N10 — story allocation takes a parent epic; max+1 over numericStem does NOT generalise to story (F5) (14.364166ms)
+▶ N11 — every scaffoldable type produces an UNDERSCORE-separated <FULL-ID>_<slug>.md filename (TPV A4; kills M6b)
+  ✔ story: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.754542ms)
+  ✔ epic: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.533083ms)
+  ✔ cr: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.503625ms)
+  ✔ bug: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (2.241167ms)
+  ✔ initiative: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.836333ms)
+  ✔ sprint: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.54275ms)
+  ✔ hotfix: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.6545ms)
+  ✔ spike: scaffolded basename matches ^[A-Z]+(?:-\d+)+_[A-Za-z0-9_]+\.md$ (1.696042ms)
+✔ N11 — every scaffoldable type produces an UNDERSCORE-separated <FULL-ID>_<slug>.md filename (TPV A4; kills M6b) (13.919041ms)
+▶ N12 — no {semver} survives in a scaffolded initiative (F10)
+  ✔ initiative created_at_version / updated_at_version are NOT the literal "cleargate@{semver}" (2.021834ms)
+✔ N12 — no {semver} survives in a scaffolded initiative (F10) (2.061125ms)
+▶ N13 — two-tree CLAUDE.md block-equal, ANCHORED (§Q5-A, regression pin, independent of new.ts)
+  ✔ anchored block-equal is true (Cross-Cutting Rule 1 witness) (1.400291ms)
+  ✔ the UNANCHORED form is a trap: it also reports "true", but the ANCHORED extraction is strictly LONGER (TPV A3 — relational, not a frozen byte count) (0.473416ms)
+✔ N13 — two-tree CLAUDE.md block-equal, ANCHORED (§Q5-A, regression pin, independent of new.ts) (1.968875ms)
+▶ A7 — SCAFFOLD_REGISTRY: every scaffoldable type's template row, asserted by value (TPV recommended hardening)
+  ✔ all eight rows name the correct, case-exact template file — verified against a real readdirSync listing (0.750708ms)
+✔ A7 — SCAFFOLD_REGISTRY: every scaffoldable type's template row, asserted by value (TPV recommended hardening) (0.803459ms)
+ℹ tests 57
+ℹ suites 17
+ℹ pass 56
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5426.282167
+
+✖ failing tests:
+
+test at cleargate-cli/test/commands/new-command.node.test.ts:2:3901
+✖ calling stampFrontmatter directly on a freshly scaffolded (instructions-intact) file corrupts the real frontmatter — see BUG-067 (12.210208ms)
+  AssertionError [ERR_ASSERTION]: the real bug_id must survive a stamp call on an instructions-prefixed scaffold — MEASURED to fail today (fm.bug_id is undefined; the field is now inert text inside a phantom second "---" block)
+  + actual - expected
+  
+  + undefined
+  - 'BUG-999'
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/test/commands/new-command.node.test.ts:663:12)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1619:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'BUG-999',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

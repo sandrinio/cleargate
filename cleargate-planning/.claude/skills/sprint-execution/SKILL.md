@@ -38,11 +38,16 @@ If you are running a sprint and you have not loaded this skill yet, **stop and l
 
 Five touchpoints where the goal is the tiebreaker:
 
-1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint.
+1. **Kickoff (§A.5).** Surface the sprint goal verbatim in chat before any Architect dispatch. State it as the explicit acceptance condition for the sprint, and derive + record the Goal Acceptance Check at the same halt (§A.5 below).
 2. **Architect dispatch (§B).** Pass the sprint goal in the dispatch prompt. The milestone plan should reference how each story advances the goal, not only what files it changes.
 3. **Mid-sprint CR triage (§C.10 rubric → §C.11 routing).** When classifying `CR:scope-change`, evaluate goal alignment before quarantining. If the new requirement is critical to the goal, escalate to the human with "this may need to land THIS sprint, not the next."
 4. **Escalation (§8).** When `qa_bounces ≥ 3`, `arch_bounces ≥ 3`, or 3 circuit-breaker hits flip a story to `Escalated`, frame the human-decision question through the goal lens: "Drop this story → goal still met? Re-approach → goal still met by sprint end?"
-5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief.
+5. **Walkthrough + Reporter brief (§D, §E.2).** Walkthrough invitation leads with the goal, not the feature checklist. Reporter brief MUST include a goal-achievement verdict — `met / partial / missed` — as a first-class signal in the close-gate Brief, derived from `sprint-context.md`'s `## Goal Acceptance Check`, not judged (§E.2).
+
+**Compaction-proof anchor (CR-110).** The Orchestrator re-reads `sprint-context.md`'s `## Sprint
+Goal` and `## Goal Acceptance Check` sections at every one of the five touchpoints above — not
+only at kickoff — because the Orchestrator is the one participant whose own anchor is conversation
+context, which compacts across a long sprint. The file, not memory, is the source of truth.
 
 **What goal-first is NOT:**
 - Not authority to skip stories the orchestrator deems "off-goal" — splits and merges are decomposition-time decisions, never mid-sprint.
@@ -97,6 +102,15 @@ The script is idempotent: if a same-session auto-marker (written by `pre-tool-us
 ## 2. Execution Model — one path, no modes
 
 There is one and only one way a sprint executes, and it has no name and no toggle. Every rule in `cleargate-enforcement.md` is **always enforced** (`CLEARGATE_ADVISORY=1` is the sole break-glass, and it only softens gate *strength*, never the execution path). Every sprint runs its Architect-produced `waves.json` through the Workflow tool (`/workflows`) via the `launch_wave` contract (§C.0). There is no alternate loop and no topology toggle. If `/workflows` is unavailable, the Orchestrator halts and says so — it does not run stories outside a wave segment.
+
+### 2.1 Spikes run before the loop, not inside it
+
+A spike is bounded discovery, not a sprint story, and none of this skill's machinery applies to it:
+
+- A spike runs **before sprint kickoff** — it resolves an unknown that would otherwise block Architect planning; it is never scheduled into a milestone's wave.
+- A spike takes **no `state.json` slot** — it is absent from the sprint's story registry entirely, not merely excluded from a wave.
+- The sprint loop gives a spike **no worktree** — `C.2 Create worktree` is a per-story mechanic and never runs for one.
+- Prototype code from a spike lives on a throwaway `spike/SPIKE-NNN` branch that is **discarded and never merged** — nothing it produces lands in `sprint/S-<id>` or `main`.
 
 ---
 
@@ -200,6 +214,16 @@ After human confirms, update sprint frontmatter `status: Active` (via `cleargate
 
 > 🎯 **Goal check.** Before the first Architect dispatch, surface the sprint goal verbatim from the plan's `sprint_goal:` frontmatter (or §1 if unstructured) in chat: *"Sprint goal: <verbatim>. Success = this is met by close. Stories are the means; this is the end."* All subsequent halts and decisions reference back to this line.
 
+**Derive + record the Goal Acceptance Check (CR-110), at this same halt.** Ask: what concrete
+command, artifact, or observable state is true when the sprint goal above is met? Propose it to the
+human alongside the sprint plan confirmation — do not add a second halt. Write the answer into
+`sprint-context.md`'s `## Goal Acceptance Check` section, replacing its placeholder, once the human
+confirms it in the same breath as confirming the plan. If no mechanical condition can be stated,
+record the literal token `not-mechanically-verifiable` plus the qualitative evidence that will
+stand in for it (walkthrough outcome, stakeholder confirmation) — an explicit, valid outcome, not a
+gate failure. A goal for which no check can be stated at all is usually a goal too vague to execute
+against; surface that to the human rather than forcing a synthetic metric.
+
 ---
 
 ## 4. Phase B — Per-Milestone Architect Plan
@@ -218,6 +242,17 @@ Then `Agent(subagent_type=architect, ...)` with the milestone story IDs and inst
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action (Sprint Goal + Cross-Cutting Rules + Active CRs sections constrain every decision).
 
 > 🎯 **Goal check.** Pass the sprint goal verbatim in the Architect's dispatch prompt. The plan should explicitly tie each story to the goal under "Per-story blueprint" — e.g. *"STORY-NNN-NN advances goal by <one sentence>"*. Plans that don't reference the goal go back to the Architect with a re-dispatch.
+
+**`GOAL_RELATION` — a separate, per-milestone line, decoupled from the sprint verdict (CR-110,
+§Q5-B).** Every milestone plan states one line near its top: `GOAL_RELATION: advances | off
+critical path`. This answers "does this milestone relate to the Sprint Goal at all?" — a different
+axis from the sprint verdict (`met`/`partial`/`missed`, §0.5/§E.2), and it does not alter that
+verdict: a milestone can legitimately be `off critical path` while the sprint's overall goal
+verdict stays `met`. Worked example: SPRINT-39's M3 and M4 are both `off critical path` — their
+work is real and necessary, it simply is not what the sprint goal was measured by — while the
+sprint's goal verdict, decided on M1+M2 evidence, is unaffected. Folding this relation into the
+sprint verdict enum would force the Reporter to mark the whole sprint `partial` whenever any one
+milestone is unrelated to the goal — the exact linkage this decoupling forbids.
 
 ---
 
@@ -274,7 +309,7 @@ Story branch is cut from the **sprint branch**, never from main. Verify:
 git worktree list
 ```
 
-**Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer edits `mcp/` from inside `.worktrees/STORY-NNN-NN/mcp/...` — visible as a subdirectory of the outer worktree. (`cleargate-enforcement.md` §1.3.)
+**Do not run `git worktree add` inside `mcp/`.** It is a nested git repo. If the story touches `mcp/`, the Developer might expect to edit it at `.worktrees/STORY-NNN-NN/mcp/...` — but that path does NOT exist in a worktree: `mcp/` has zero tracked files in the outer repo, so edit it in the main checkout instead. (`cleargate-enforcement.md` §1.3.)
 
 After creating the worktree, provision configured gitignored config into it:
 
@@ -300,8 +335,9 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
+- Test-layer naming (CR-111): integration-layer tests are `*.integration.node.test.ts`; QA-Red's failing-first variant for that layer is `*.red.integration.node.test.ts` (see the File-naming clause below), not the general `*.red.node.test.ts` form. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention.
 
-> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red). Forbidden: editing implementation files.`
+> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red) for non-integration reds; integration-layer reds use *.red.integration.node.test.ts instead. Forbidden: editing implementation files.`
 
 QA-Red returns:
 
@@ -611,6 +647,8 @@ Log every event in sprint §4. **Sprint branch MUST NOT merge to main while any 
 
 > 🎯 **Goal check.** Open the walkthrough invitation with the sprint goal verbatim, not a feature checklist: *"Sprint goal: `<verbatim>`. The branch is ready on `sprint/S-NN`. Test it and tell me — does the running build achieve the goal?"* This forces the framing to be outcome-vs-spec rather than feature-tour.
 
+**Pull request (`vcs.sprint_pr: true` in `.cleargate/config.yml`, CR-107).** At the start of Phase D, push `sprint/S-NN` and open a pull request against `main` via `gh pr create`. The open PR is the physical form of the `cleargate-enforcement.md` §2 walkthrough gate — the human reads the diff and tests the branch, instead of only testing it, and the gate stops being a promise and becomes an object with a URL. The PR body is generated deterministically from artifacts that already exist — the sprint goal, the DoD checklist, and the `SPRINT-<#>_REPORT.md` summary — so it costs no new authored content and requires no network round-trip to build — no lookup of the pull request's live state is involved. Gate-4 close (§E.5) merges the PR. When `vcs.sprint_pr` is `false` (the default), Phase D proceeds exactly as above and no PR is opened.
+
 ---
 
 ## 6.5 Phase D.5 — Consolidation
@@ -690,6 +728,12 @@ Reporter writes `.cleargate/sprint-runs/<id>/SPRINT-<#>_REPORT.md` and returns t
 
 > 🎯 **Goal check.** The verdict line is mandatory and is the first line of the Brief. `met` = goal achieved as written. `partial` = some sprint-goal acceptance criteria met, others not — explain which in REPORT §1. `missed` = goal not achieved despite stories merging. A `partial` or `missed` verdict does NOT block close, but it is a first-class signal to the human that close-ack should be deliberate, not reflexive.
 
+**The verdict reads the check, it does not judge (CR-110).** The Reporter derives the verdict
+above from `sprint-context.md`'s `## Goal Acceptance Check` — the condition recorded and human-
+confirmed at §A.5 — not from its own read of how the sprint went. Per OD-4 this verdict is spoken
+in the Brief only; it is never written into `SPRINT-<#>_REPORT.md`. See `.claude/agents/reporter.md`
+§Goal Acceptance Check for the full instruction.
+
 ### E.3 Step B — surface and HALT
 
 Surface the Brief verbatim to the human. **Halt.** Do not re-run with `--assume-ack`.
@@ -707,11 +751,19 @@ During Gate 4 sign-off, read `.cleargate/sprint-runs/<id>/.doc-refresh-checklist
 
 ### E.5 Sprint→main merge
 
-After sign-off and after all walkthrough `UR:bug` items resolved:
+After sign-off and after all walkthrough `UR:bug` items resolved, the merge path depends on `vcs.sprint_pr` in `.cleargate/config.yml` (CR-107):
+
+**`vcs.sprint_pr: false` (default — the only path available to any install without a GitHub remote):**
 
 ```bash
 git checkout main
 git merge sprint/S-NN --no-ff -m "Sprint S-NN: <goal>"
+```
+
+**`vcs.sprint_pr: true`:** merge the pull request opened at the start of Phase D (§6) instead of running a local merge — `gh pr merge --merge` (merge-commit strategy only; squash and rebase merges destroy the ancestry `close_sprint.mjs` Step 2.8 checks).
+
+```bash
+gh pr merge --merge <pr-number-or-url>
 ```
 
 Then flip sprint frontmatter `status: Completed`, archive the sprint file (`pending-sync/` → `archive/`).
@@ -763,6 +815,7 @@ These live elsewhere — do not duplicate inline:
 - **Wiki ingest / lint / contradiction detection** → `cleargate-protocol.md` §10.
 - **Doctor exit codes** → `cleargate-enforcement.md` §8.
 - **Hotfix flow** → V-Bounce-style hotfix handling, see flashcard tag `#hotfix` and `wiki/topics/hotfix-ledger.md`.
+- **Spike charter, timebox and gate criteria** → `.cleargate/templates/spike.md`; the pre-sprint doctrine is §2.1 above.
 
 When in doubt, read the source-of-truth doc — this skill cites them, it does not replace them.
 

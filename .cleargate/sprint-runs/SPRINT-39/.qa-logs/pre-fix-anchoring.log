@@ -1,0 +1,66 @@
+▶ Defect B — anchoring narrows the greedy match to line-alone markers
+  ✔ D: readBlock returns null for markers quoted only inline in prose (today: " and ") (0.676542ms)
+  ✔ D: injectClaudeMd does not splice into the sentence — word "and" survives (CR-105: block leads, not appends) (0.183334ms)
+  ✔ probe-4 (§3/§5): "I documented the " survives, exactly one anchored START/END remain (0.147833ms)
+  ✔ C: readBlock tolerates trailing horizontal whitespace on the marker line (0.103792ms)
+  ✔ B: CRLF was never broken — \r is a JS LineTerminator, so /m anchors span it (N1) (0.074041ms)
+  ✔ G: readBlock returns null for indented markers — deliberate behaviour change vs today (0.046084ms)
+  ✔ A / I / J: byte-identical to today — regression pins, unaffected by anchoring (0.052875ms)
+  ✔ H: KNOWN LIMITATION — a stray END alone on its own line still extends the greedy match (0.051458ms)
+  ✖ real-file pin: readBlock on canonical cleargate-planning/CLAUDE.md returns length 11762 (3.060625ms)
+✖ Defect B — anchoring narrows the greedy match to line-alone markers (5.299ms)
+▶ Defect B — CRLF write path (R3): the fix must not rewrite the user's line endings
+  ✔ B: writeBlock preserves CRLF OUTSIDE the block — the fix must not rewrite the user's line endings (N1) (0.158ms)
+  ✔ B: removeBlock preserves CRLF in the surviving prose (N1) (0.076958ms)
+✔ Defect B — CRLF write path (R3): the fix must not rewrite the user's line endings (0.362333ms)
+▶ guard divergence (N3) — writeBlock/removeBlock must not silently no-op
+  ✔ D (inline-only): writeBlock throws NOT_ANCHORED rather than silently mutating (0.2825ms)
+  ✔ D (inline-only): removeBlock throws NOT_ANCHORED rather than silently no-opping (0.087959ms)
+  ✔ G (indented): writeBlock throws NOT_ANCHORED rather than silently mutating (0.063917ms)
+  ✔ G (indented): removeBlock throws NOT_ANCHORED rather than silently no-opping (0.051708ms)
+  ✔ A (well-formed): writeBlock still changes the content — a throw-everything guard is wrong (0.053459ms)
+  ✔ C (trailing whitespace): writeBlock does NOT throw — CORRECTION vs plan's N3 table. Measured directly: [ \t]* (N2) already tolerates C, so guard/regex do not diverge for this fixture. The N3 table's "C -> NO-OP, silent" row models an intermediate anchor WITHOUT the [ \t]* tolerance, not the final N2 regex. See QA-Red report SURPRISES. (0.040958ms)
+  ✔ F (no markers at all): writeBlock still throws the pre-existing missing-marker message (0.06825ms)
+✔ guard divergence (N3) — writeBlock/removeBlock must not silently no-op (0.759041ms)
+▶ shared-corpus equivalence (N7) — surgery.ts and inject-claude-md.ts must classify identically
+  ✔ A (well-formed): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.09425ms)
+  ✔ B (CRLF): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.027042ms)
+  ✔ C (trailing ws): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.02375ms)
+  ✔ D (inline-only): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.033875ms)
+  ✔ F (no markers): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.044375ms)
+  ✔ G (indented): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.031583ms)
+  ✔ H (stray END alone on own line): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.021333ms)
+  ✔ I (EOF, no trailing newline): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.031917ms)
+  ✔ J (block at top of file): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.032042ms)
+✔ shared-corpus equivalence (N7) — surgery.ts and inject-claude-md.ts must classify identically (0.430458ms)
+ℹ tests 27
+ℹ suites 4
+ℹ pass 26
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 288.492459
+
+✖ failing tests:
+
+test at cleargate-cli/test/lib/claude-md-anchoring.red.node.test.ts:64:6
+✖ real-file pin: readBlock on canonical cleargate-planning/CLAUDE.md returns length 11762 (3.060625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  11948 !== 11762
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/test/lib/claude-md-anchoring.red.node.test.ts:172:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 11948,
+    expected: 11762,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

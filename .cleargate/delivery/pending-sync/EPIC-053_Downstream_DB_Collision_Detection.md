@@ -105,7 +105,7 @@ The author did everything right and got nothing. A downstream team that never he
 
   **Clause 4 unknown-table rule (D4).** A write resolving to a dynamic or unknown table **collides with every other DB-touching story**, not merely with itself. An unknown table cannot be proven disjoint from any known one — identical reasoning to [[BUG-033]]'s empty-surface guard.
 
-- [ ] **WS2 — L0 detection: config-driven path globs.** New top-level `db:` key in `.cleargate/config.yml` (today the file has only `wiki:`, `gates:`, `worktree:`) carrying `schema_globs`. **The default list is the BROAD one (D2)** — protecting more teams out of the box beats avoiding occasional over-serialization, because over-serialization is the safe failure direction (`collision_surface.sh:54-55`) while under-detection corrupts a shared database:
+- [ ] **WS2 — L0 detection: config-driven path globs.** New top-level `db:` key in `.cleargate/config.yml` (today the file has only `wiki:`, `gates:`, `worktree:`) carrying `schema_globs`. **The default list is the BROAD one (D2)** — protecting more teams out of the box beats avoiding occasional over-serialization, because over-serialization is the safe failure direction (`collision_surface.sh:78-79`) while under-detection corrupts a shared database:
 
   ```
   **/migrations/**          **/migrate/**            **/migration/**        **/Migrations/**

@@ -25,6 +25,25 @@ retrospective review even if the hook allowed them through in soft mode.
 
 Before any other action, Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md`. The Sprint Goal + Cross-Cutting Rules + Active CRs sections constrain every decision in this dispatch. If the file is absent, surface to orchestrator (do not infer).
 
+## Goal Acceptance Check
+
+Before rendering the Post-Output Brief, read `sprint-context.md`'s **Goal Acceptance Check**
+section — the concrete condition the orchestrator recorded at kickoff (§A.5) and the human
+confirmed, the one that is true when the Sprint Goal is met. Derive the sprint-goal verdict from
+whether that recorded condition is satisfied — run the named command, inspect the named artifact,
+or weigh the named qualitative evidence, and report what you found. Do not substitute your own
+read of how the sprint went for a condition that was actually recorded. The verdict vocabulary
+itself lives in `SKILL.md` §0.5 —
+quote it from there when you speak the Brief; do not restate its definition here.
+
+For each milestone, quote that milestone's own `GOAL_RELATION` line verbatim from its plan
+(`SKILL.md` names the two allowed values). `GOAL_RELATION` is a separate, per-milestone axis from
+the sprint verdict — a milestone can legitimately sit off the critical path while the sprint's
+overall goal verdict stands. Do not let an unrelated milestone pull the goal verdict down.
+
+Per OD-4, the resulting verdict is **spoken** in the Post-Output Brief below, in chat — it is never
+written into `SPRINT-<#>_REPORT.md` or any other file.
+
 ## Capability Surface
 
 | Capability type | Items |
@@ -40,6 +59,8 @@ Before any other action, Read `.cleargate/sprint-runs/<sprint-id>/sprint-context
 After Writing the report, render a Brief in chat:
 
 > Delivered N stories, M epics. Observe: X bugs, Y review-feedback. Carry-over: Z. Token cost: T.
+> **Goal:** `<verbatim sprint goal>` — state the verdict derived from `## Goal Acceptance Check`
+> (vocabulary defined in `SKILL.md` §0.5); name each milestone's `GOAL_RELATION`.
 > See `SPRINT-<#>_REPORT.md` for full report.
 > Ready to authorize close (Gate 4)?
 

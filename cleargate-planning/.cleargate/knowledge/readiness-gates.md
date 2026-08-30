@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **9 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **11 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
@@ -33,6 +33,8 @@ Splits the document body on `## ` heading boundaries (1-indexed) and counts item
 
 Example: `section(2) has ≥1 checked-checkbox` asserts that the second `##` section contains at least one checked markdown checkbox. Example: `section(3) has ≥1 declared-item` passes when §3 contains at least one bullet, table data row, or definition-list term.
 
+**`N` is a position, not a printed ordinal.** Sections are counted in document order over `## ` headings, so a template whose first heading is `## 0.5 Open Questions` or `## 0. AI Coding Agent Handoff` shifts every later section by one — and unnumbered headings (`## Existing Surfaces`, `## Prior work`, `## Why not simpler?`) consume positions too. `## 3. Execution Sandbox` in `CR.md` is `section(6)`, not `section(3)`. Inserting any `## ` heading into a gated template renumbers every criterion below it. The pinning test (`cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts`) enumerates every `section(N)` criterion and asserts it resolves to the heading its id names — it is what turns that renumbering into a build break. Update the fixture there in the same commit as any template heading change.
+
 **4. `file-exists(<path>)`**
 Asserts that a file exists on disk at the given path, resolved relative to the project root. Example: `file-exists(.cleargate/knowledge/cleargate-protocol.md)` passes when that file is present in the working tree.
 
@@ -50,6 +52,29 @@ Closed-set predicate (no parameters). STORY-051-07: backstops the duplicate-chec
 
 **9. `ambiguity-gate-resolved`**
 Closed-set predicate (no parameters). STORY-051-07: backstops the "Ambiguity Gate criteria are evaluated literally" discipline with a machine check. Locates the `## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)` section by heading-title **prefix** match (the parenthetical emoji suffix means an exact-equality match never fires). Passes when the section is absent. When present, reads the `Current Status:` line: if it does not claim 🟢, passes (no self-contradiction to flag at 🟡/🔴). If it claims 🟢, passes only when the section has zero `- [ ]` unchecked checkboxes; fails, naming the unchecked count, otherwise. Example: a Status line reading `Current Status: 🟢 Low` with one remaining `- [ ]` box fails; checking that box flips the predicate to pass.
+
+**10. `task-breakdown-complete`**
+Closed-set predicate (no parameters). Locates the `## Task Breakdown` section by heading title
+(numeric prefixes tolerated). Passes when the section is absent — every item authored before this
+criterion existed lacks it, and an L1 item omits it deliberately. When present, passes only if it
+carries at least one task row (`- [ ]` or `- [x]`); a present-but-row-free section fails, naming
+the gap. The optional trailing `-> <requirement-id>` on a row is accepted and not otherwise
+interpreted. Example: `task-breakdown-complete` against a Story whose `## Task Breakdown` reads
+`- [ ] add the predicate branch -> R5` passes; the unedited template scaffold fails.
+
+**11. `test-layers-declared`**
+Closed-set predicate (no parameters). CR-111: fires only on a document that already carries a
+test-layer declaration — an `| Integration tests | ... |` row, or a `**Test layers.**` lead-in
+block. **Absent → passes**, with a `not-applicable:` detail (migration grace: an item authored
+before this criterion existed carries neither, and an absent row is not itself a decision worth
+failing). When a declaration IS present, passes only if all three layers — Unit tests, Integration
+tests, E2E / acceptance tests — are declared, every count is a non-negative integer, and every `0`
+count carries a non-empty reason in its Notes cell; fails otherwise, naming the missing row or the
+unreasoned zero. Reads `doc.body` only, never `doc.fm` — the criterion is registered identically
+against `story`, `cr` and `bug` and must not branch on work-item type. Example: a `**Test layers.**`
+table with `| Integration tests | 0 | pure function, no I/O |` passes; the same row with an empty
+Notes cell, or omitted entirely, fails once the label or an Integration row has triggered the
+check.
 
 ---
 
@@ -96,7 +121,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: scope-in-populated
       check: "section(3) has ≥1 declared-item"
     - id: affected-files-declared
-      check: "section(5) has ≥1 declared-item"
+      check: "section(8) has ≥1 declared-item"
     - id: interrogation-resolved
       check: "body does not contain 'Unresolved'"
     - id: discovery-checked
@@ -144,7 +169,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: implementation-files-declared
       check: "section(3) has ≥1 declared-item"
     - id: dod-declared
-      check: "section(4) has ≥1 listed-item"
+      check: "section(5) has ≥1 listed-item"
     - id: gherkin-present
       check: "body contains 'Scenario:'"
     - id: discovery-checked
@@ -159,6 +184,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
+    - id: test-layers-declared
+      check: "test-layers-declared"
 ```
 
 ```yaml
@@ -167,11 +196,11 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
   severity: enforcing
   criteria:
     - id: blast-radius-populated
-      check: "section(2) has ≥1 declared-item"
+      check: "section(3) has ≥1 declared-item"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: sandbox-paths-declared
-      check: "section(3) has ≥1 declared-item"
+      check: "section(6) has ≥1 declared-item"
     - id: discovery-checked
       check: "frontmatter(.).context_source != null"
     - id: reuse-audit-recorded
@@ -182,6 +211,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
+    - id: test-layers-declared
+      check: "test-layers-declared"
 ```
 
 ```yaml
@@ -201,6 +234,10 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: task-breakdown-complete
+      check: "task-breakdown-complete"
+    - id: test-layers-declared
+      check: "test-layers-declared"
 ```
 
 ```yaml
@@ -242,6 +279,34 @@ STORY-051-03 (Q7), as amended by CR-098: `discovery-checked` is self-referential
       check: "section(4) has ≥1 unchecked-checkbox"
     - id: severity-set
       check: "frontmatter(.).severity != null"
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+```
+
+```yaml
+- work_item_type: spike
+  transition: ready-to-investigate
+  severity: advisory
+  criteria:
+    - id: question-stated
+      check: "section(1) has ≥1 listed-item"
+    - id: timebox-and-kill-criteria-set
+      check: "section(2) has ≥2 listed-item"
+    - id: no-tbds
+      check: "body does not contain marker 'TBD'"
+    - id: ambiguity-gate-resolved
+      check: "ambiguity-gate-resolved"
+```
+
+```yaml
+- work_item_type: spike
+  transition: ready-to-conclude
+  severity: advisory
+  criteria:
+    - id: decision-log-populated
+      check: "section(4) has ≥1 declared-item"
+    - id: outcome-declared
+      check: "section(5) has ≥1 listed-item"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
 ```

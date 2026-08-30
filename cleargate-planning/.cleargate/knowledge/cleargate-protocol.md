@@ -647,7 +647,7 @@ Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--s
 
 ### §21.2 Ingest Bucket Allowlist
 
-By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
+By default the wiki ingests every bucket (`epics`, `stories`, `sprints`, `proposals`, `initiatives`, `crs`, `bugs`, `spikes`). A repo can narrow this to an allowlist via `.cleargate/config.yml`:
 
 ```yaml
 wiki:
@@ -677,9 +677,9 @@ z.string().min(1).max(64).regex(/^[a-z][a-z0-9_-]*$/)
 
 Applied after lowercase-normalize. Types that fail this regex are rejected at the MCP transport layer with an L1 `TYPE_INVALID` error.
 
-### KNOWN_TYPES — advisory registry (8 entries)
+### KNOWN_TYPES — advisory registry (9 entries)
 
-These 8 types have first-class gate and reporting support. Any type outside this list passes validation but triggers an L2 `TYPE_UNKNOWN` warning in the server log.
+These 9 types have first-class gate and reporting support. Any type outside this list passes validation but triggers an L2 `TYPE_UNKNOWN` warning in the server log.
 
 | Type | Description |
 |---|---|
@@ -691,6 +691,7 @@ These 8 types have first-class gate and reporting support. Any type outside this
 | `proposal` | Stakeholder-authored item awaiting triage |
 | `sprint` | Sprint plan artifact |
 | `sprint_report` | Sprint closeout report |
+| `spike` | Bounded pre-sprint discovery charter |
 
 ### RESERVED_PAYLOAD_KEYS (5 entries)
 
@@ -916,3 +917,22 @@ report — it issues **no `AskUserQuestion`**. The Orchestrator halts the wave l
 `resumeFromRunId` after resolution. Fully autonomous up to that halt (§22 autonomy contract,
 §6 Q3): once Gate 2 is signed off, every wave auto-launches with no per-wave "go"; only a
 non-GREEN verdict interrupts.
+
+## Guidance Surface Reach
+
+A rule is only as useful as the surface it is written on. Three surfaces carry authoring
+and execution guidance in this repo, and each reaches a different audience at a different
+moment:
+
+| Surface | Reaches | At what moment |
+|---|---|---|
+| Template `<instructions>` block | the **drafting** agent only — stripped from every authored instance | draft time |
+| An agent's own `.md` (`.claude/agents/*.md`) | that **executing** agent | dispatch time |
+| Always-on `CLAUDE.md` | every agent in every session | **before** a template is chosen — the only surface reachable at triage |
+
+Authored instances carry zero `<instructions>` blocks (FLASHCARD 2026-08-25 `#agents
+#scaffold #danger`, EPIC-054) — the block is stripped once drafting is done, so it never
+reaches an agent that executes against the finished document. A rule an executing agent
+needs cannot live only in a template; a rule needed before any template is chosen cannot
+live anywhere but `CLAUDE.md`. Placing a rule on the wrong surface does not make it wrong —
+it makes it unreachable by the agent who needed it.

@@ -22,7 +22,8 @@ Given exactly ONE story file path, read it and return a compact structured diges
   "file_surface": ["path/to/file.ts", ...],
   "file_creates": ["path/to/new-file.ts", ...],
   "db_write_set": ["table_name", ...],
-  "dep_predecessors": ["STORY-NNN-NN", ...]
+  "dep_predecessors": ["STORY-NNN-NN", ...],
+  "unreachable_surface": ["path/to/vendor/lib.ts", ...]
 }
 ```
 
@@ -33,17 +34,18 @@ Field sources:
 - `file_creates` — paths from §3.1 rows/cells tagged as creations ("New Files Needed" row values, "Primary File (new)" cells). Union into `file_surface` for the disjointness predicate (architect-synth unions them; reader reports separately).
 - `db_write_set` — frontmatter `db_write_set` array (default `[]` if absent or empty)
 - `dep_predecessors` — frontmatter `dep_predecessors` array (default `[]` if absent)
+- `unreachable_surface` (BUG-046) — every `file_surface` path that `.cleargate/scripts/collision_surface.sh` marks UNREACHABLE on stderr (gitignored, untracked-and-undeclared, or inside a nested independent git repo — the classification itself runs inside the script, not here). Default `[]` when the script annotates nothing. This agent only carries the classification forward into the digest; deciding what happens with a non-empty list belongs to architect-synth, not this one.
 
 ## Workflow
 
 1. Read the story file at the path provided.
 2. Extract frontmatter fields: `story_id`, `parallel_eligible`, `db_write_set`, `dep_predecessors`.
-3. Run `collision_surface.sh` to get `file_surface`:
+3. Run `collision_surface.sh` to get `file_surface` from stdout AND `unreachable_surface` from its stderr `UNREACHABLE` annotations:
    ```bash
    bash .cleargate/scripts/collision_surface.sh <story-file-path>
    ```
 4. Parse §3.1 table for `file_creates` (rows whose label column contains "new" or "create", or "Primary File (new)" cells).
-5. Return the digest JSON object ONLY — no prose, no extra fields.
+5. Return the digest JSON object ONLY — no prose, no fields beyond the shape above.
 
 ## Fail-safe
 

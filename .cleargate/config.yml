@@ -16,6 +16,7 @@ wiki:
     - crs
     - bugs
     - initiatives
+    - spikes
 
 gates:
   # Meta-repo gate commands run cleargate-cli's node:test suite via `npm --prefix`
@@ -34,3 +35,14 @@ worktree:
   provision_config:
     - .env
   provision_mode: symlink   # symlink (default) | copy
+
+vcs:
+  # CR-107: sprint->main merge goes through a GitHub pull request. The PR is
+  # opened at the start of Phase D (the walkthrough) and merged at Gate 4
+  # close_sprint.mjs Step 2.8, instead of close_sprint.mjs verifying a purely
+  # local `git merge`. Requires the `gh` CLI and a GitHub `origin` remote —
+  # both present in this repo — and close_sprint.mjs fails closed if either
+  # is missing. Left off for now (M4 plan's corrected file surface pins this
+  # repo's value to false at merge time) — flip to true in a deliberate
+  # follow-up once this Step 2.8 change has closed a sprint on the local path.
+  sprint_pr: false

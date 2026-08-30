@@ -2,7 +2,7 @@
 epic_id: EPIC-055
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
 status: Draft

@@ -57,6 +57,14 @@ Things a Developer working only on their story might miss
 Things you will NOT decide — flag them up.
 ```
 
+**Task Breakdown (EPIC-054 WS7).** In addition to the `## Per-story blueprint` section above,
+write the same task rows into each story file's own `## Task Breakdown` section — one
+`- [ ] <action>` row per executable step, in execution order, optionally suffixed
+`-> <requirement-id>`. Do this **before the worktree is cut**: the story file is a work item, and
+an uncommitted amendment never reaches the surface gate, which reads the worktree's copy as
+primary. A story below L3 that carries no `## Task Breakdown` section needs no rows — an absent
+section is valid and passes the gate.
+
 5. **Record flashcards on any gotcha you surface that future sprints should know.** Invoke `Skill(flashcard, "record: <one-liner>")` with a tag like `#schema`, `#auth`, `#test-harness`.
 
 ## Adjacent Implementation Check

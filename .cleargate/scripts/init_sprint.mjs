@@ -16,6 +16,12 @@
  * STORY-070-01: execution_mode is retired. All gates are always enforced.
  * Break-glass: set CLEARGATE_ADVISORY=1 to downgrade gate failures to warnings.
  * The story-file assertion always runs in blocking mode (v2-equivalent behavior).
+ *
+ * CR-106: also seeds `events.jsonl` beside state.json -- one genesis event per story
+ * (state-events.mjs's synthesizeGenesisEvents), so state.json is the fold's output from the very
+ * first write, not merely "compatible with it". Both files are written via the same atomic
+ * tmp+rename helper (state-events.mjs's atomicWrite / writeEventsFile), collapsing the inline
+ * tmp+rename this file used to duplicate for state.json.
  */
 
 import fs from 'node:fs';
@@ -23,6 +29,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES } from './constants.mjs';
+import { atomicWrite, writeEventsFile, synthesizeGenesisEvents, fold } from './state-events.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Resolve repo root: .cleargate/scripts/ -> ../../ (two levels up)
@@ -30,6 +37,39 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = process.env.CLEARGATE_REPO_ROOT
   ? path.resolve(process.env.CLEARGATE_REPO_ROOT)
   : path.resolve(__dirname, '..', '..');
+
+// --- CR-110: Goal Acceptance Check advisory ---
+// Mirrors sprint_context.md's own template text verbatim (kept in one place so drift between
+// the constant and the shipped placeholder is impossible to miss in review). Detection compares
+// against this with whitespace normalized, not a raw literal match — a placeholder that is
+// re-wrapped for page readability must still be recognised as unresolved.
+const GOAL_ACCEPTANCE_CHECK_PLACEHOLDER =
+  '_(populated by orchestrator at §A.5, confirmed by the human at the same halt that confirms the sprint plan)_';
+
+function normalizeWhitespace(s) {
+  return s.replace(/\s+/g, ' ').trim();
+}
+
+// Returns the first non-blank line under a "## <heading>" section (up to the next "## "
+// heading), or null if the heading is absent or the section has no non-blank line. Mirrors
+// cr078_init.test.sh's first_nonempty_under_heading awk helper.
+function extractSectionFirstNonEmptyLine(content, heading) {
+  const lines = content.split('\n');
+  let inSection = false;
+  for (const line of lines) {
+    if (line === heading) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && /^## /.test(line)) {
+      return null;
+    }
+    if (inSection && line.trim().length > 0) {
+      return line.trim();
+    }
+  }
+  return null;
+}
 
 function usage() {
   process.stderr.write(
@@ -217,20 +257,27 @@ function main() {
     };
   }
 
-  const state = {
-    schema_version: SCHEMA_VERSION,
-    sprint_id: sprintId,
-    sprint_status: 'Active',
-    stories,
-    last_action: `Sprint ${sprintId} initialised`,
-    updated_at: now,
-  };
+  // CR-106: events.jsonl is the truth; state.json is derived FROM the genesis events below, not
+  // hand-assembled in parallel with them -- fold()'s genesis case (kind: 'transition', not a
+  // separate "snapshot" kind, per the item's own pinned event contract) sets last_action from the
+  // LAST genesis event processed, so a hand-built `last_action: "Sprint X initialised"` string
+  // would silently disagree with fold(events.jsonl) the moment it is written (caught by manual
+  // review -- validate_state.mjs's own new drift check flags exactly this class of mismatch).
+  // Deriving state.json via fold(genesisEvents) instead guarantees the two can never drift, by
+  // construction, from the very first write.
+  const genesisSeed = { sprint_id: sprintId, sprint_status: 'Active', stories };
+  const genesisEvents = synthesizeGenesisEvents(genesisSeed);
+  const state = fold(genesisEvents);
 
   fs.mkdirSync(sprintDir, { recursive: true });
 
-  const tmpFile = `${stateFile}.tmp.${process.pid}`;
-  fs.writeFileSync(tmpFile, JSON.stringify(state, null, 2) + '\n', 'utf8');
-  fs.renameSync(tmpFile, stateFile);
+  atomicWrite(stateFile, state);
+
+  // Seed events.jsonl in lockstep with the state.json just written. A --force re-init (which
+  // already overwrites state.json wholesale) rewrites events.jsonl fresh too, rather than
+  // appending a new genesis set underneath stale history from a prior init.
+  const eventsFile = path.join(sprintDir, 'events.jsonl');
+  writeEventsFile(eventsFile, genesisEvents);
 
   // --- CR-045: Write sprint-context.md from template ---
   // Reads .cleargate/templates/sprint_context.md, substitutes frontmatter fields,
@@ -278,6 +325,20 @@ function main() {
         } catch {
           // Goal extraction failed — leave placeholder; non-fatal
         }
+      }
+
+      // --- CR-110: Goal Acceptance Check advisory (F2 — render is free; advisory only) ---
+      // The check is populated by the orchestrator at §A.5 (a later, human-confirmed step), not
+      // extracted here — so this only DETECTS whether the placeholder survived unedited and warns.
+      // Non-blocking: WARN and continue, mirroring sprint_context.md's own §Test Stack degradation
+      // idiom ("test_stack unresolved — populate sprint_context.md §Test Stack"). Detects the
+      // placeholder STRING, not an empty section — a populated mechanical check or the literal
+      // `not-mechanically-verifiable` token must never trip this.
+      const gacValue = extractSectionFirstNonEmptyLine(ctxContent, '## Goal Acceptance Check');
+      if (gacValue !== null && normalizeWhitespace(gacValue) === normalizeWhitespace(GOAL_ACCEPTANCE_CHECK_PLACEHOLDER)) {
+        process.stderr.write(
+          `WARN: Goal Acceptance Check unresolved — populate sprint-context.md §Goal Acceptance Check\n`
+        );
       }
 
       // Write atomically via tmpFile + renameSync (mirrors state.json pattern)

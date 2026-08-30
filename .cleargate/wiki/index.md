@@ -13,14 +13,15 @@
 - [[EPIC-050]] (epic) — Draft — Connector Onboarding & Companion Packaging
 - [[EPIC-052]] (epic) — Draft — Requirement-Level Grounding — Make "Is This Shipped?" Answerable
 - [[EPIC-053]] (epic) — Draft — Downstream DB Collision Detection — Fail-Safe by Default, Derived Not Declared
-- [[EPIC-054]] (epic) — Draft — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
+- [[EPIC-054]] (epic) — Draft ⚠︎ drift — Spike & Task Decomposition Surfaces — Discovery Before, Execution Within
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
+- [[EPIC-058]] (epic) — Draft — Additive Multi-Host Execution Adapters
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
-- [[SPRINT-39]] (sprint) — Draft — Decomposition Surfaces — Spike Before, Tasks Within
+- [[SPRINT-39]] (sprint) — Active — Decomposition Surfaces — Spike Before, Tasks Within
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -31,21 +32,42 @@
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] (cr) — Draft — CR-083: Document connection-identity routes in the mcp admin-api OpenAPI spec
 - [[CR-085-Drive-Execution-Loop-States-Live]] (cr) — Draft — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
 - [[CR-105]] (cr) — Draft — The ClearGate block leads CLAUDE.md
-- [[CR-106]] (cr) — Draft — Execution state becomes an append-only event log with a derived fold
-- [[CR-107]] (cr) — Draft — Sprint→main merge goes through a pull request
-- [[CR-108]] (cr) — Draft — `cleargate new <type>` — one scaffolder for every work-item type
+- [[CR-106]] (cr) — Draft ⚠︎ drift — Execution state becomes an append-only event log with a derived fold
+- [[CR-107]] (cr) — Draft ⚠︎ drift — Sprint→main merge goes through a pull request
+- [[CR-108]] (cr) — Draft ⚠︎ drift — `cleargate new <type>` — one scaffolder for every work-item type
 - [[CR-109]] (cr) — Draft — Machine fields move out of the work-item document
-- [[CR-110]] (cr) — Draft — The sprint goal gets an acceptance check, and the Orchestrator holds it
+- [[CR-110]] (cr) — Draft ⚠︎ drift — The sprint goal gets an acceptance check, and the Orchestrator holds it
 - [[CR-111]] (cr) — Draft — Work items declare their integration and E2E test layers at planning time
+- [[CR-112]] (cr) — Draft — Heading-anchored predicates replace positional `section(N)`
+- [[CR-113]] (cr) — Draft — One bounded-marker grammar
+- [[CR-114]] (cr) — Draft — Record the relocation whitespace scar where a reader will find it
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
-- [[BUG-042]] (bug) — Draft — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
+- [[BUG-042]] (bug) — Draft ⚠︎ drift — Gate `section(N)` indices are positional, but two gates were written as if they were heading ordinals
 - [[BUG-043]] (bug) — Draft — CLAUDE.md marker handling loses user prose — two ways
-- [[BUG-044]] (bug) — Triaged — Concurrent `update_state.mjs` invocations silently lose story transitions
+- [[BUG-044]] (bug) — Triaged ⚠︎ drift — Concurrent `update_state.mjs` invocations silently lose story transitions
 - [[BUG-045]] (bug) — Triaged — `hotfix new` ID allocation scans only `pending-sync/`, so archived IDs get reused
-- [[BUG-046]] (bug) — Triaged — Collision surface treats worktree-unreachable paths as ordinary files
+- [[BUG-046]] (bug) — Triaged ⚠︎ drift — Collision surface treats worktree-unreachable paths as ordinary files
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
-- [[BUG-049]] (bug) — Triaged — Collision surface reads only the Story template, so every Bug and CR is force-serialized
+- [[BUG-049]] (bug) — Triaged ⚠︎ drift — Collision surface reads only the Story template, so every Bug and CR is force-serialized
+- [[BUG-050]] (bug) — Draft — `countDeclaredItems` scores a bare `**Label:**` line as a declared item, so every `≥1` section criterion is fail-open
+- [[BUG-051]] (bug) — Draft — Work-item type and wiki bucket registries have silently drifted apart
+- [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
+- [[BUG-053]] (bug) — Draft — Commits made inside cleargate-cli are completely ungated
+- [[BUG-054]] (bug) — Draft — Nine of twelve gate criteria pass on their own unedited template
+- [[BUG-055]] (bug) — Draft — A spike charter pushes successfully under the literal cleargate_id "unknown"
+- [[BUG-056]] (bug) — Draft — Every gate block's declared severity can be flipped with the whole suite still green
+- [[BUG-057]] (bug) — Draft — CLAUDE.md teaches a draft filename shape that deriveBucket cannot key
+- [[BUG-058]] (bug) — Draft — Predicate Vocabulary omits `marker-absence` — 11 union members, 10 documented shapes, and entry 2's worked example describes the wrong matcher
+- [[BUG-059]] (bug) — Draft — The Task Breakdown loop cannot execute as written — two defects
+- [[BUG-060]] (bug) — Draft — Four cleargate-cli test files hardcode this machine's absolute repo path
+- [[BUG-061]] (bug) — Draft — The greedy block match still eats user prose, and the reason it is greedy is no longer true
+- [[BUG-062]] (bug) — Draft — The collision extractor derives no dependency edges and reads prose as file surface
+- [[BUG-063]] (bug) — Draft — The inline-id-regex gate cannot see a capture group, which is the form it exists to catch
+- [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
+- [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
+- [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
+- [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 
 ## Archive
 

@@ -45,6 +45,7 @@ In RED mode you:
 4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).
 5. **Forbidden:** Read, edit, or reference any implementation file (`.ts` source, not tests).
 6. **Wiring soundness:** Tests must be wiring-sound for Architect TPV approval (SKILL.md §C.3.5). TPV checks: imports resolve, constructor signatures match, mocked methods exist, after-hooks present, file naming as declared in `sprint_context.md` §Test Stack. Wiring gap → orchestrator routes back to QA-Red (increments `arch_bounces`, NOT `qa_bounces`).
+7. **Test-layer naming (CR-111):** integration-layer tests are named `*.integration.node.test.ts`; the red/failing-first variant for that layer is `*.red.integration.node.test.ts`, not `*.red.node.test.ts` — that general form covers non-integration reds only. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention; new files use the dot form.
 
 Output shape for RED mode:
 ```
@@ -61,6 +62,10 @@ On `QA-RED: BLOCKED`: emit a `Spec-Gap:` sentence describing the ambiguity that 
 Dispatch prompt contains: `Mode: VERIFY — read-only acceptance trace.`
 
 In VERIFY mode you follow the standard QA workflow below (pack-first ingest, lane-aware playbook, full output shape). This is the default mode if no `Mode:` line is injected.
+
+**Task Breakdown (EPIC-054 WS7).** In VERIFY mode, if the story file carries a `## Task Breakdown`
+section, assert that every `- [ ]` row is checked or that the story states why the row was dropped.
+**Advisory in v1** — report unchecked rows in your findings; do not bounce the story on them alone.
 
 **Mode: CONSOLIDATION** (Consolidation dispatch — SKILL.md §6.5 / Phase D.5)
 

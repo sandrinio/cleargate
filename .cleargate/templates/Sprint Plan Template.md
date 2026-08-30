@@ -37,7 +37,7 @@ Do NOT output these instructions.
 </instructions>
 
 ---
-sprint_id: "SPRINT-{ID}"
+sprint_id: "{ID}"
 parent_cleargate_id: null  # canonical cleargate-id of parent work item; null for top-level
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
@@ -68,7 +68,7 @@ proposals: []      # proposal IDs carried; each must resolve to a decomposed epi
 context_source: "" # sprint's own decomposition evidence (which epics/proposals it decomposes), NOT an upstream approval doc
 ---
 
-# SPRINT-{ID}: {Sprint Number / Name}
+# {ID}: {Sprint Number / Name}
 
 ## 0. Stakeholder Brief
 *(Sponsor-readable summary. Pushed via cleargate push. Pair with §3 Risks below.)*

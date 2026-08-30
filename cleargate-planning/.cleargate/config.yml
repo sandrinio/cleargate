@@ -16,3 +16,12 @@ wiki:
     - crs
     - bugs
     - initiatives
+    - spikes
+
+vcs:
+  # CR-107: merge the sprint branch to main via a GitHub pull request instead
+  # of a local `git merge`. Requires the `gh` CLI and a GitHub `origin`
+  # remote; close_sprint.mjs's Step 2.8 fails closed if either is missing
+  # when this is true. Off by default — every install without a GitHub
+  # remote keeps the local-merge behaviour unchanged. See config.example.yml.
+  sprint_pr: false

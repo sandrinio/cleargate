@@ -25,11 +25,14 @@ Given N reader digests (one per story), compute a collision-free wave assignment
   "file_surface": ["path/to/file.ts", ...],
   "file_creates": ["path/to/new-file.ts", ...],
   "db_write_set": ["table_name", ...],
-  "dep_predecessors": ["STORY-NNN-NN", ...]
+  "dep_predecessors": ["STORY-NNN-NN", ...],
+  "unreachable_surface": ["path/to/vendor/lib.ts", ...]
 }
 ```
 
 If any digest is missing required fields (`storyId`, `parallel_eligible`, `file_surface`, `file_creates`, `db_write_set`, `dep_predecessors`), treat that story as **fail-safe-serialized** (see below).
+
+`unreachable_surface` (BUG-046) is a separate, optional field, default `[]`. See the Reachability refusal section below for how a non-empty list is handled.
 
 ## Five-clause wave-compatibility predicate
 
@@ -62,6 +65,31 @@ A story is fail-safe-serialized when ANY of:
 Fail-safe-serialized stories are placed in their own trailing serial wave, NEVER co-waved with another story. The rationale MUST contain exactly:
 - For missing/unparseable metadata OR an empty surface: `"unknown collision metadata — fail-safe-serialized"`
 - For DB-touching: `"DB-touching story serialized: db_write_set non-empty (coarse DB collision axis)"`
+
+## Reachability refusal (BUG-046) — generation-time, distinct from fail-safe-serialize
+
+`architect-reader` carries `collision_surface.sh`'s own classification into `unreachable_surface`.
+If a digest's `unreachable_surface` is non-empty, that story is UNREACHABLE and must be REFUSED:
+do not place it in ANY wave, name every offending path in the rationale, and stop — hand the
+condition back to the Orchestrator instead of writing `waves.json` for that story.
+
+The rationale MUST contain exactly this string (own, distinct from BUG-033's):
+`"unreachable file surface — refused: <path>, <path>, ..."`
+
+BUG-033's `"unknown collision metadata — fail-safe-serialized"` string covers UNKNOWN metadata;
+this branch covers a KNOWN, named defect and must never reuse that string — a reviewer needs to
+tell the two branches apart at a glance.
+
+This decision is not a slower version of the fail-safe-serialize branch above. Placing an
+UNREACHABLE story into its own trailing wave still dispatches a Developer into a worktree lacking
+the declared path — running it alone fails exactly as hard as running it alongside a sibling, only
+later and quieter. Refuse loudly instead (human decision, 2026-08-26 SDR halt).
+
+**Scope: generation-time only.** This check runs HERE, inside wave-plan GENERATION, and nowhere
+else — never at dispatch time, and never against an already-written `waves.json`. `architect-reader`
+only reports the classification (see its own file — it never acts on it); `launch_wave.mjs` (the
+dispatch-time script) is unaware of this predicate entirely. Retroactively voiding an
+already-confirmed wave plan mid-sprint is explicitly out of scope.
 
 ## Wave packing algorithm
 
