@@ -1,0 +1,44 @@
+▶ Defect B — anchoring narrows the greedy match to line-alone markers
+  ✔ D: readBlock returns null for markers quoted only inline in prose (today: " and ") (2.634667ms)
+  ✔ D: injectClaudeMd does not splice into the sentence — word "and" survives (CR-105: block leads, not appends) (1.032333ms)
+  ✔ probe-4 (§3/§5): "I documented the " survives, exactly one anchored START/END remain (0.328375ms)
+  ✔ C: readBlock tolerates trailing horizontal whitespace on the marker line (0.1495ms)
+  ✔ B: CRLF was never broken — \r is a JS LineTerminator, so /m anchors span it (N1) (0.383541ms)
+  ✔ G: readBlock returns null for indented markers — deliberate behaviour change vs today (0.123541ms)
+  ✔ A / I / J: byte-identical to today — regression pins, unaffected by anchoring (0.067125ms)
+  ✔ H: KNOWN LIMITATION — a stray END alone on its own line still extends the greedy match (0.908167ms)
+  ✔ real-file pin: readBlock on canonical cleargate-planning/CLAUDE.md is non-null and non-empty (1.210292ms)
+  ✔ real-file pin: readBlock returns the SAME body from root CLAUDE.md and canonical cleargate-planning/CLAUDE.md (CR-108 QA amendment — replaces a frozen byte-length pin, which breaks on every mandated CLAUDE.md edit, with the cross-tree identity the block is actually meant to guarantee) (0.781375ms)
+✔ Defect B — anchoring narrows the greedy match to line-alone markers (9.105708ms)
+▶ Defect B — CRLF write path (R3): the fix must not rewrite the user's line endings
+  ✔ B: writeBlock preserves CRLF OUTSIDE the block — the fix must not rewrite the user's line endings (N1) (0.115291ms)
+  ✔ B: removeBlock preserves CRLF in the surviving prose (N1) (0.076583ms)
+✔ Defect B — CRLF write path (R3): the fix must not rewrite the user's line endings (0.258042ms)
+▶ guard divergence (N3) — writeBlock/removeBlock must not silently no-op
+  ✔ D (inline-only): writeBlock throws NOT_ANCHORED rather than silently mutating (0.280084ms)
+  ✔ D (inline-only): removeBlock throws NOT_ANCHORED rather than silently no-opping (0.058334ms)
+  ✔ G (indented): writeBlock throws NOT_ANCHORED rather than silently mutating (0.049458ms)
+  ✔ G (indented): removeBlock throws NOT_ANCHORED rather than silently no-opping (0.071333ms)
+  ✔ A (well-formed): writeBlock still changes the content — a throw-everything guard is wrong (0.04125ms)
+  ✔ C (trailing whitespace): writeBlock does NOT throw — CORRECTION vs plan's N3 table. Measured directly: [ \t]* (N2) already tolerates C, so guard/regex do not diverge for this fixture. The N3 table's "C -> NO-OP, silent" row models an intermediate anchor WITHOUT the [ \t]* tolerance, not the final N2 regex. See QA-Red report SURPRISES. (0.035875ms)
+  ✔ F (no markers at all): writeBlock still throws the pre-existing missing-marker message (0.055708ms)
+✔ guard divergence (N3) — writeBlock/removeBlock must not silently no-op (0.678833ms)
+▶ shared-corpus equivalence (N7) — surgery.ts and inject-claude-md.ts must classify identically
+  ✔ A (well-formed): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.11025ms)
+  ✔ B (CRLF): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.025833ms)
+  ✔ C (trailing ws): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.029166ms)
+  ✔ D (inline-only): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.031667ms)
+  ✔ F (no markers): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.033166ms)
+  ✔ G (indented): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.04425ms)
+  ✔ H (stray END alone on own line): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.034834ms)
+  ✔ I (EOF, no trailing newline): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.024625ms)
+  ✔ J (block at top of file): surgery.hasAnchoredBlock() agrees with inject-claude-md's BLOCK_REGEX (0.023333ms)
+✔ shared-corpus equivalence (N7) — surgery.ts and inject-claude-md.ts must classify identically (0.484542ms)
+ℹ tests 28
+ℹ suites 4
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 377.074791

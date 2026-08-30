@@ -876,3 +876,52 @@ sandbox — §4 item 7's unscoped wording is satisfied within §C.3, and the san
 ### F. X14 rider verified by measurement
 cli `story/CR-111` branched from `main` @ `9df6f2a` — main's tip *after* CR-108 merged — with
 `e4cb49f` an ancestor. The rider held.
+
+---
+
+## Gate-4 step DONE: live `/.claude/` re-sync (2026-08-30)
+
+Backed up the whole live tree to the session scratchpad first (it is untracked — CR-099 — so there
+is no git safety net), then hand-ported canonical → live. `cleargate init` was **not** used: it
+rewrites live from the npm payload and would have pulled a published build, not this sprint's
+canonical.
+
+**Six files ported.** For each, `diff` first confirmed live carried nothing canonical lacked, so
+nothing was lost:
+
+| File | Why live was stale |
+|---|---|
+| `agents/qa.md` | CR-111 (FU-2) |
+| `agents/developer.md` | CR-111 |
+| `skills/sprint-execution/SKILL.md` | CR-107 + CR-110 + CR-111 (FU-3; live 797 → canonical 830) |
+| `agents/reporter.md` | **CR-110** — see below |
+| `agents/architect-reader.md` | pre-existing drift |
+| `agents/architect-synth.md` | pre-existing drift |
+
+### ⚠️ The `reporter.md` case is the BUG-024 hazard, caught one dispatch early
+Live `reporter.md` was missing CR-110's **entire `## Goal Acceptance Check` section** — 21 canonical
+lines whose whole purpose is to tell the Reporter to derive the goal verdict from the condition
+recorded at kickoff and *"not substitute your own read of how the sprint went for a condition that
+was actually recorded."*
+
+The Reporter runs **at close**. Dispatching it before this port would have produced precisely the
+failure CR-110 was written to prevent — a goal verdict invented rather than derived — in the sprint
+that shipped CR-110. That is BUG-024's exact shape: shipping a fix while still running the old code.
+
+### Remaining live-vs-canonical diffs are CORRECT — do not "fix" them
+`hooks/{pre-edit-gate,session-start,stamp-and-gate}.sh` differ because canonical carries the
+`__CLEARGATE_VERSION__` placeholder and live carries the substituted value. Expected.
+
+`.claude/{scheduled_tasks.lock, settings.local.json, worktrees}` are live-only and machine-local.
+Expected.
+
+**CR-099 invariant re-verified after the port: `git ls-files .claude/` returns 0.**
+
+### 🔎 New finding — the live hook pin is stale by four minor versions
+Live hooks pin `# cleargate-pin: 0.20.0`; `cleargate-cli/package.json` is at **0.24.2**. The pin is
+the fallback the hooks use when the local `dist/` is not resolvable — so on any machine without a
+local build, these hooks would `npx -y cleargate@0.20.0` and silently run a four-versions-old CLI
+against a 0.24.2 scaffold. Harmless in this repo today (the SessionStart banner confirms
+`cleargate CLI: local dist`), and it is why it went unnoticed. Related to the known
+`__CLEARGATE_VERSION__` substitution defect. **File as a follow-up; do not hand-edit the pin** —
+that is `init`/`upgrade`'s job and a hand-edit would drift again on the next run.
