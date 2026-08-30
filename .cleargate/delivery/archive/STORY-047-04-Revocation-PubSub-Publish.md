@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-047
 parent_cleargate_id: "EPIC-047"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-047 (INITIATIVE-001 direct-approval) §2 IN-SCOPE revoke pub/sub + §6 RESOLVED (Redis pub/sub, per-subject + rev:project:<id> whole-tenant) + verified codebase grounding
 actor: mcp identity authority (revocation path)

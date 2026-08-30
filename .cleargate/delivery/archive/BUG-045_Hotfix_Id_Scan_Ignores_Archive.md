@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
-status: Triaged
+status: "Completed"
 severity: P2-Medium
 reporter: sandrinio
 approved: true

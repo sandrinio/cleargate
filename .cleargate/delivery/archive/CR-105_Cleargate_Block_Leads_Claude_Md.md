@@ -5,7 +5,7 @@ parent_cleargate_id: "EPIC-054"
 sprint_cleargate_id: "SPRINT-39"
 carry_over: false
 area: planning-layer
-status: Draft
+status: "Completed"
 approved: true
 context_source: "Direct human ask 2026-08-26 (\"i think we need to be adding it in the top... i want it to be added to the top to cache it\") following a grounded walkthrough of how init and upgrade rewrite CLAUDE.md. Prompt-caching semantics confirmed against the bundled claude-api reference (prefix match; any byte change invalidates everything after it; render order tools → system → messages; order content by volatility, most stable first) rather than from memory. Grounding: cleargate-cli/src/init/inject-claude-md.ts:45-58, cleargate-cli/src/lib/claude-md-surgery.ts, root CLAUDE.md (block at lines 129-186 of 186)."
 created_at: 2026-08-26T00:00:00Z

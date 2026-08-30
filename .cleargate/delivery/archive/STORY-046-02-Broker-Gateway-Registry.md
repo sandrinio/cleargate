@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-046
 parent_cleargate_id: "EPIC-046"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-046 (INITIATIVE-001 direct-approval) + connector/docs/envelope-protocol.md + verified codebase grounding
 actor: App / Connector operator

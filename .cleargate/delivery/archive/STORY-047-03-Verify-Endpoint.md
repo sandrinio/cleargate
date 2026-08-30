@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-047
 parent_cleargate_id: "EPIC-047"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-047 (INITIATIVE-001 direct-approval) §6 resolved decisions + verified codebase grounding (mcp/src/**)
 actor: Broker (service principal calling mcp on behalf of a connecting Connector/app)

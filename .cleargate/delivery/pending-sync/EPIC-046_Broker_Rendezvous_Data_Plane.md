@@ -4,7 +4,7 @@ epic_id: EPIC-046
 parent_cleargate_id: "INITIATIVE-001"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🔴 High
 context_source: INITIATIVE-001 triage + connector/PRD.md v0.3.1 + connector/docs/{envelope-protocol,auth-seam}.md + verified codebase grounding + recorded direct approval
 owner: Sandro

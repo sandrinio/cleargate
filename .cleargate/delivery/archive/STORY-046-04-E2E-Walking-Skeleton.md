@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-046
 parent_cleargate_id: "EPIC-046"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-046 + EPIC-048 (INITIATIVE-001 direct-approval) + connector/docs/{envelope-protocol,event-contract,spike-findings-claude-2.1.161}.md + connector/harness/spike captures
 actor: Sandro (dogfooding operator)

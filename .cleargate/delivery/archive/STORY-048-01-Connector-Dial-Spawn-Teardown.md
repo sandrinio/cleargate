@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-048
 parent_cleargate_id: "EPIC-048"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-048 (INITIATIVE-001 direct-approval) + connector/docs/{event-contract,spike-findings-claude-2.1.161}.md + verified codebase grounding
 actor: Connector daemon (on the user's machine)

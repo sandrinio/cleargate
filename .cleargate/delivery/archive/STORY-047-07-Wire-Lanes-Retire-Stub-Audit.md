@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-047
 parent_cleargate_id: "EPIC-047"
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 ambiguity: 🟢 Low
 context_source: EPIC-047 (INITIATIVE-001 direct-approval) §2/§5/§6 RESOLVED decisions + verified codebase grounding (connector/broker/src/{ws-gateway,router,auth-stub}.ts)
 actor: Connector operator / App owner
