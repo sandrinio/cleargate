@@ -2,7 +2,12 @@
 /**
  * validate_state.mjs — Validate state.json schema and invariants
  *
- * Usage: node validate_state.mjs [--state-file <path>]
+ * Usage: node validate_state.mjs [<path>] [--state-file <path>]
+ *
+ * A lone positional argument is treated as the state file path -- the same convention every
+ * other script in .cleargate/scripts/ that takes a file uses. If both a positional argument and
+ * --state-file are supplied, both are named and --state-file wins. An argument the script does
+ * not understand is named in the error, not silently discarded (CR-117).
  *
  * Reads .cleargate/sprint-runs/<sprint-id>/state.json (or a specified path),
  * confirms schema version, and reports invariant violations.
@@ -185,10 +190,47 @@ export function checkFoldDrift(stateFile) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   const fileIdx = args.indexOf('--state-file');
+  const flagValue = fileIdx !== -1 ? args[fileIdx + 1] : undefined;
+
+  // CR-117: a lone positional argument is the state file. Any arg consumed by --state-file
+  // (the flag itself and its value) is excluded from positional/unrecognised consideration;
+  // any remaining arg that isn't a bare (non-flag) positional is named as unrecognised rather
+  // than silently discarded.
+  const consumedIdx = new Set();
+  if (fileIdx !== -1) {
+    consumedIdx.add(fileIdx);
+    if (flagValue !== undefined) consumedIdx.add(fileIdx + 1);
+  }
+
+  let positionalValue;
+  const unrecognized = [];
+  for (let i = 0; i < args.length; i++) {
+    if (consumedIdx.has(i)) continue;
+    const arg = args[i];
+    if (positionalValue === undefined && !arg.startsWith('--')) {
+      positionalValue = arg;
+    } else {
+      unrecognized.push(arg);
+    }
+  }
+
+  if (unrecognized.length > 0) {
+    process.stderr.write(`Error: unrecognised argument(s): ${unrecognized.join(', ')}\n`);
+    process.exit(1);
+  }
+
   let stateFile;
 
-  if (fileIdx !== -1 && args[fileIdx + 1]) {
-    stateFile = path.resolve(args[fileIdx + 1]);
+  if (fileIdx !== -1 && flagValue) {
+    if (positionalValue !== undefined) {
+      process.stderr.write(
+        `Both a positional path (${positionalValue}) and --state-file (${flagValue}) were ` +
+        `supplied; using --state-file: ${flagValue}\n`
+      );
+    }
+    stateFile = path.resolve(flagValue);
+  } else if (positionalValue !== undefined) {
+    stateFile = path.resolve(positionalValue);
   } else {
     // Attempt to discover via environment or fallback
     const envStateFile = process.env.CLEARGATE_STATE_FILE;

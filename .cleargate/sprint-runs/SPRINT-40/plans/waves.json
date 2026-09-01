@@ -1,0 +1,56 @@
+{
+  "sprint": "SPRINT-40",
+  "generated_at": "2026-09-01T18:56:19Z",
+  "generated_by": "architect-synth",
+  "story_count_in_milestone": 3,
+  "story_count_planned": 3,
+  "complete": true,
+  "waves": [
+    {
+      "wave": "wave1",
+      "stories": [
+        "BUG-068"
+      ],
+      "parallel": false,
+      "substrate": "worktree",
+      "rationale": "singleton: clause 1 fails against every co-wave candidate (sprint plan \u00a71 Consolidated Deliverables declares BUG-068 Parallel?=n); independently clause 2 fails vs BUG-069 on cleargate-planning/.claude/hooks/token-ledger.sh and clause 5 orders 068 before 069"
+    },
+    {
+      "wave": "wave2",
+      "stories": [
+        "BUG-069"
+      ],
+      "parallel": false,
+      "substrate": "worktree",
+      "rationale": "singleton: clause 1 fails (sprint plan \u00a71 declares BUG-069 Parallel?=n); clause 2 fails vs BUG-068 on cleargate-planning/.claude/hooks/token-ledger.sh; clause 5 requires BUG-068 to land first (semantic dependency: 068 restores the dispatch marker whose absence is the only path into 069's rewritten fallback)"
+    },
+    {
+      "wave": "wave3",
+      "stories": [
+        "CR-117"
+      ],
+      "parallel": false,
+      "substrate": "worktree",
+      "rationale": "singleton by elimination: CR-117 passes all five clauses against both M1 stories on its own side (surface .cleargate/scripts/validate_state.mjs is disjoint, db_write_set empty, no dependency edge), but clause 1 requires BOTH stories to be parallel_eligible=y and both M1 stories are declared n. Every other parallel_eligible=y story in this milestone is REFUSED, leaving no lawful partner. Lane: fast."
+    }
+  ],
+  "predicate_notes": {
+    "empty_surface_guard_BUG_033": "did not fire \u2014 all six digests carry a non-empty (file_surface \u222a file_creates)",
+    "db_axis_clause_4": "vacuous \u2014 db_write_set is empty for all six; no DB-touching story was serialized",
+    "digest_vs_plan_discrepancies": [
+      "BUG-068 and BUG-069 digests report parallel_eligible=y; sprint plan \u00a71 declares Parallel?=n for both. Resolved toward the plan (fail-safe direction: more serial).",
+      "BUG-069.dep_predecessors is [] in the digest; sprint plan \u00a72.2 and the Orchestrator both assert BUG-068 \u2192 BUG-069. Resolved toward the plan.",
+      "Sprint plan \u00a72.1 names frontmatter-cache.ts as BUG-047's surface; BUG-047's own \u00a74 Execution Sandbox names sprint.ts, gate.ts, test/ and never mentions frontmatter-cache.ts."
+    ]
+  },
+  "descoped": {
+    "decided_at": "2026-09-01",
+    "decided_by": "human",
+    "reason": "Surfaces lie in cleargate-cli/**, an independent nested git repo that is gitignored here and materializes zero tracked files in a `git worktree add` checkout. Refused by architect-synth under the BUG-046 reachability predicate; resolved by descoping to a follow-up sprint scoped for cli-main-checkout execution, NOT by waiving the predicate.",
+    "stories": [
+      "BUG-047",
+      "BUG-048",
+      "CR-115"
+    ]
+  }
+}

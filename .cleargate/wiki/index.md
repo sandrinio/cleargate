@@ -18,7 +18,7 @@
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
-- [[SPRINT-39]] (sprint) — Active — Decomposition Surfaces — Spike Before, Tasks Within
+- [[SPRINT-40]] (sprint) — Active — Field-Defect Remediation
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -32,6 +32,8 @@
 - [[CR-112]] (cr) — Draft — Heading-anchored predicates replace positional `section(N)`
 - [[CR-113]] (cr) — Draft — One bounded-marker grammar
 - [[CR-114]] (cr) — Draft — Record the relocation whitespace scar where a reader will find it
+- [[CR-115]] (cr) — Approved — `cleargate upgrade` announces what it is about to overwrite, before it overwrites it
+- [[CR-117]] (cr) — Approved — A CLI script that ignores an argument says so
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
@@ -53,11 +55,13 @@
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
 - [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
+- [[BUG-068]] (bug) — In Fix ⚠︎ drift — Every PreToolUse dispatch hook gates on the tool name `Task`; this Claude Code build spawns agents with `Agent`
+- [[BUG-069]] (bug) — In Fix ⚠︎ drift — The token ledger's no-marker fallback inherits the previous row's attribution, so one bad row poisons the sprint permanently
 
 ## Archive
 
 - Epics: 33 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 32 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Sprints: 33 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
 - CRs: 103 Completed · 1 Abandoned · [expand](archive/crs.md)
 - Bugs: 37 Completed · 1 Abandoned · [expand](archive/bugs.md)

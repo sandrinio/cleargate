@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
-# pre-tool-use-task.sh — PreToolUse:Task hook.
+# pre-tool-use-task.sh — PreToolUse:Task|Agent hook.
 #
-# CR-026: Auto-write a dispatch marker on every Task() spawn so the
+# CR-026: Auto-write a dispatch marker on every subagent spawn so the
 # SubagentStop hook (token-ledger.sh) can attribute tokens to the correct
 # work item and agent without relying on transcript-grep heuristics.
 #
 # This hook addresses BUG-024 §3.1 Defect 3: manual write_dispatch.sh calls
 # were unreliable (~5 calls vs ~19 spawns in SPRINT-18). The hook fires
-# automatically on every Task() spawn inside the orchestrator session.
+# automatically on every subagent spawn inside the orchestrator session.
+#
+# BUG-068: the host build renamed the dispatch tool from "Task" to "Agent",
+# which silently disabled this hook (the mismatch exited before logging
+# anything). The guard below now accepts tool_name in {Task, Agent} OR any
+# tool_name carrying tool_input.subagent_type, and logs every rejection.
 #
 # Input: JSON on stdin from Claude Code with fields:
 #   session_id, transcript_path, cwd, hook_event_name, tool_name, tool_input
-#   For tool_name == "Task", tool_input has: subagent_type, description, prompt.
+#   For a subagent spawn, tool_input has: subagent_type, description, prompt.
 #
 # Output: writes .cleargate/sprint-runs/<sprint>/.dispatch-<ts>-<pid>-<rand>.json
 #   with { work_item_id, agent_type, spawned_at, session_id, writer }
@@ -20,7 +25,7 @@
 #
 # Log: .cleargate/hook-log/pre-tool-use-task.log
 #
-# Exit code: 0 always. Never blocks a Task spawn.
+# Exit code: 0 always. Never blocks a subagent spawn.
 #
 # Banner-immunity: reads tool_input.prompt directly from the JSON payload —
 # no transcript involvement, so the SessionStart blocked-items banner cannot
@@ -40,12 +45,19 @@ TS="$(date -u +%FT%TZ)"
 # Read stdin once
 INPUT="$(cat)"
 
-# ─── Extract tool_name to confirm this is a Task spawn ────────────────────────
+# ─── Extract tool_name to confirm this is a subagent spawn ────────────────────
 TOOL_NAME="$(printf '%s' "${INPUT}" | jq -r '.tool_name // empty' 2>/dev/null)"
-if [[ "${TOOL_NAME}" != "Task" ]]; then
-  # Not a Task spawn — nothing to do; exit silently.
-  exit 0
-fi
+SUBAGENT_TYPE_PROBE="$(printf '%s' "${INPUT}" | jq -r '.tool_input.subagent_type // empty' 2>/dev/null)"
+case "${TOOL_NAME}" in
+  Task|Agent) ;;
+  *)
+    if [[ -z "${SUBAGENT_TYPE_PROBE}" ]]; then
+      printf '[%s] no marker: rejected tool_name=%s (not Task/Agent, no tool_input.subagent_type)\n' \
+        "${TS}" "${TOOL_NAME:-<empty>}" >> "${HOOK_LOG}"
+      exit 0
+    fi
+    ;;
+esac
 
 # ─── Resolve active sprint via sentinel ───────────────────────────────────────
 if [[ ! -f "${ACTIVE_SENTINEL}" ]]; then

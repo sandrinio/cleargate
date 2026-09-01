@@ -1563,3 +1563,150 @@ describe('CR-106 T4 canary: the barrier must still be able to PROVE a lost-updat
     );
   });
 });
+
+// ============================================================================
+// CR-117 -- validate_state.mjs argument boundary: a lone positional path is honoured, a
+// --state-file flag still works unchanged, both-supplied names both (flag wins), and an
+// argument the script does not understand is named in the error rather than discarded.
+// Discovery/validation semantics are untouched -- scope is the argv boundary only.
+// ============================================================================
+
+describe('CR-117: a lone positional path is honoured even when discovery would find multiple candidates', () => {
+  let tmpBase, scriptsDir, stateFileA, stateFileB;
+
+  before(() => {
+    // realpathSync: on macOS, os.tmpdir() lives under /var/folders/... which is itself a
+    // symlink to /private/var/folders/.... The CLI-mode guard in validate_state.mjs compares
+    // process.argv[1] against fileURLToPath(import.meta.url), and the latter is realpath'd by
+    // Node's ESM loader -- an un-realpath'd tmp dir makes that comparison silently fail (the
+    // script just imports without ever entering CLI mode: empty output, exit 0, no error).
+    tmpBase = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr117-positional-')));
+    // Copy validate_state.mjs + its module deps into a fixture .cleargate/scripts/ so the
+    // script's own REPO_ROOT (computed from import.meta.url, not cwd) resolves inside the
+    // fixture -- this lets us reproduce the exact "Multiple state.json files found" collision
+    // the CR's field report describes, without touching the real repo's sprint-runs/.
+    scriptsDir = path.join(tmpBase, '.cleargate', 'scripts');
+    fs.mkdirSync(scriptsDir, { recursive: true });
+    for (const dep of ['validate_state.mjs', 'constants.mjs', 'state-events.mjs']) {
+      fs.copyFileSync(path.join(SCRIPTS_DIR, dep), path.join(scriptsDir, dep));
+    }
+
+    const sprintRunsDir = path.join(tmpBase, '.cleargate', 'sprint-runs');
+    stateFileA = path.join(sprintRunsDir, 'S-FAKE-A', 'state.json');
+    stateFileB = path.join(sprintRunsDir, 'S-FAKE-B', 'state.json');
+    fs.mkdirSync(path.dirname(stateFileA), { recursive: true });
+    fs.mkdirSync(path.dirname(stateFileB), { recursive: true });
+    writeStateJson(
+      stateFileA,
+      makeState({ 'STORY-FAKE-A': makeStory('Ready to Bounce') }, { schema_version: SCHEMA_VERSION })
+    );
+    writeStateJson(
+      stateFileB,
+      makeState({ 'STORY-FAKE-B': makeStory('Ready to Bounce') }, { schema_version: SCHEMA_VERSION })
+    );
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('canary: with no path argument, the fixture still reproduces "Multiple state.json files found" (proves the fixture is not vacuous)', () => {
+    const env = { ...process.env };
+    delete env.CLEARGATE_STATE_FILE;
+    const result = spawnSync(process.execPath, [path.join(scriptsDir, 'validate_state.mjs')], { encoding: 'utf8', env });
+    assert.notStrictEqual(result.status, 0, 'exit code should be non-zero with 2 candidates and no path given');
+    assert.ok(
+      result.stderr.includes('Multiple state.json files found'),
+      `expected the collision error; got: ${result.stderr}`
+    );
+  });
+
+  test('a lone positional path bypasses discovery entirely and validates the named file, exit 0', () => {
+    const env = { ...process.env };
+    delete env.CLEARGATE_STATE_FILE;
+    const result = spawnSync(
+      process.execPath,
+      [path.join(scriptsDir, 'validate_state.mjs'), stateFileA],
+      { encoding: 'utf8', env }
+    );
+    assert.strictEqual(result.status, 0, `exit should be 0; stderr: ${result.stderr}`);
+    assert.ok(
+      result.stdout.includes(stateFileA),
+      `stdout should name the validated file; got: ${result.stdout}`
+    );
+    assert.ok(result.stdout.includes('is valid'), `stdout should report validity; got: ${result.stdout}`);
+  });
+});
+
+describe('CR-117: --state-file flag alone still works, unchanged', () => {
+  let tmpBase, stateFile;
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr117-flag-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    stateFile = path.join(sprintDir, 'state.json');
+    writeStateJson(
+      stateFile,
+      makeState({ 'STORY-FAKE-01': makeStory('Ready to Bounce') }, { schema_version: SCHEMA_VERSION })
+    );
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('--state-file <path> validates the named file and exits 0', () => {
+    const result = runScript('validate_state.mjs', ['--state-file', stateFile]);
+    assert.strictEqual(result.status, 0, `exit should be 0; stderr: ${result.stderr}`);
+    assert.ok(
+      result.stdout.includes(stateFile),
+      `stdout should name the validated file; got: ${result.stdout}`
+    );
+  });
+});
+
+describe('CR-117: positional and --state-file both supplied -- both are named, --state-file wins', () => {
+  let tmpBase, flagStateFile, bogusPositional;
+
+  before(() => {
+    tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-cr117-both-'));
+    const sprintDir = path.join(tmpBase, '.cleargate', 'sprint-runs', 'S-FAKE');
+    fs.mkdirSync(sprintDir, { recursive: true });
+    flagStateFile = path.join(sprintDir, 'state.json');
+    writeStateJson(
+      flagStateFile,
+      makeState({ 'STORY-FAKE-01': makeStory('Ready to Bounce') }, { schema_version: SCHEMA_VERSION })
+    );
+    // A positional that does not exist. If it were used instead of --state-file, the script
+    // would fail with "state.json not found" -- exit 0 below proves --state-file won.
+    bogusPositional = path.join(tmpBase, 'does-not-exist', 'state.json');
+  });
+
+  after(() => {
+    fs.rmSync(tmpBase, { recursive: true, force: true });
+  });
+
+  test('both paths are named in the output and the run succeeds using --state-file, not the nonexistent positional', () => {
+    const result = runScript('validate_state.mjs', [bogusPositional, '--state-file', flagStateFile]);
+    assert.strictEqual(
+      result.status,
+      0,
+      `exit should be 0 -- proves --state-file was used, not the bogus positional; stderr: ${result.stderr}`
+    );
+    const combined = result.stdout + result.stderr;
+    assert.ok(combined.includes(bogusPositional), `output should name the positional path; got: ${combined}`);
+    assert.ok(combined.includes(flagStateFile), `output should name the --state-file path; got: ${combined}`);
+  });
+});
+
+describe('CR-117: an argument the script does not understand is named in the error', () => {
+  test('an unrecognised flag exits non-zero and is named verbatim in stderr, not silently discarded', () => {
+    const result = runScript('validate_state.mjs', ['--frobnicate']);
+    assert.notStrictEqual(result.status, 0, 'exit code should be non-zero for an unrecognised argument');
+    assert.ok(
+      result.stderr.includes('--frobnicate'),
+      `stderr should name the unrecognised argument verbatim; got: ${result.stderr}`
+    );
+  });
+});

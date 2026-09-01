@@ -93,7 +93,7 @@ Behavioural risk is low and one-directional: the command does strictly more repo
 **Investigate / Modify:**
 - `cleargate-cli/src/commands/upgrade.ts` — hoist a grouped warning ahead of the write phase; reorder `--dry-run` so the file plan precedes the CHANGELOG
 - `cleargate-cli/src/lib/manifest.ts` — read-only; the classification source
-- `cleargate-cli/src/commands/init.ts` — the `config.yml` write path, for the missing-`ingest_buckets` notice
+- `cleargate-cli/src/commands/init.ts` — the `.cleargate/config.yml` write path, for the missing `ingest_buckets` notice
 
 Do not change overwrite *policy* in this CR. Files classified `overwrite` continue to be overwritten; this item changes only what the user is told and when.
 
