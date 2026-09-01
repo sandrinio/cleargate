@@ -23,9 +23,12 @@
 #     4. Writes one JSONL row to token-ledger.jsonl with sentinel attribution.
 #     5. Deletes the sentinel atomically (mv → append → rm .processed-*).
 #
-#   If no sentinel exists: falls back to legacy transcript-grep for agent_type/work_item_id
-#   and computes the full-transcript delta (single-fire: no prior rows to double-count).
-#   Fail-silent on missing sentinel — never block a subagent stop (exit 0 always).
+#   If no sentinel exists: the hook refuses to attribute rather than infer. agent_type
+#   ships as "unattributed" and work_item_id as "" (BUG-069) — the legacy transcript-grep
+#   and prior-ledger-row inheritance this replaced could fabricate or perpetuate a wrong
+#   attribution indefinitely once one wrong value landed. The full-transcript delta is
+#   still computed on this path (single-fire: no prior rows to double-count).
+#   Fail-silent either way — never block a subagent stop (exit 0 always).
 #
 # ── Active sprint detection ────────────────────────────────────────────────────
 #
@@ -38,18 +41,24 @@
 #              misrouted SPRINT-04 firings to SPRINT-03 because ledger appends
 #              themselves bumped SPRINT-03's mtime. See REPORT.md SPRINT-04.
 #
-# ── Work-item ID detection (legacy / no-sentinel path) ────────────────────────
+# ── Work-item ID / agent_type resolution when no ground truth exists (BUG-069) ─
 #
-#   Primary  : first user message in the transcript — that's the orchestrator's
-#              dispatch prompt, which by agent convention starts with
-#              `STORY=NNN-NN`, `PROPOSAL-NNN`, `EPIC-NNN`, `CR-NNN`, or `BUG-NNN`.
-#   Pattern  : (STORY|PROPOSAL|EPIC|CR|BUG)[-=]?[0-9]+(-[0-9]+)?
-#   Fallback : grep first match anywhere in the transcript.
-#   story_id : populated only when the match is a STORY-* (backward compat).
-#   work_item_id: always populated when detection succeeds; equals story_id for STORY items.
-#   (Removed): grep-first-anywhere as PRIMARY — it picked up SPRINT-05 mentions
-#              from architect plans being read by the subagent and mistagged
-#              every SPRINT-04 firing as STORY-006-01.
+#   Ground truth : the CR-026 dispatch marker (highest priority) or the per-task
+#                   pending-task sentinel (second priority) — both read above,
+#                   both written by a PreToolUse hook at dispatch time, never
+#                   inferred after the fact.
+#   Refusal      : when neither source supplies a value — or the sentinel's own
+#                   agent_type carries its literal "unknown" default
+#                   (pending-task-sentinel.sh:173) — the row ships
+#                   agent_type="unattributed" and/or work_item_id="" rather than
+#                   guessing.
+#   story_id     : populated only when work_item_id is a STORY-* (backward
+#                   compat); stays "" under a refusal.
+#   (Removed)    : transcript-grep inference (first-user-message scan and
+#                   anywhere-grep) and prior-ledger-row inheritance — both could
+#                   fabricate or perpetuate a wrong attribution indefinitely once
+#                   one wrong value landed (BUG-069 field report: 101/101 rows
+#                   attributed to "architect" in a sprint architect never ran).
 #
 # Robustness: never exits non-zero on parse failure (never block a subagent stop). Errors go to a
 # sibling hook.log so you can diagnose without fighting the runtime.
@@ -58,7 +67,9 @@ set -u
 
 # CR-026: SessionStart blocked-items banner poisons transcript-grep (BUG-024 §3.1 Defect 2).
 # Skip-pattern: any line starting with "<N> items? blocked: " is the SessionStart banner.
-# Applied in the legacy work-item ID resolution block below via sed filtering.
+# Post-BUG-069 its only remaining consumer is the BUG-029 tuple-match's transcript
+# scan below (marker-present path) — the legacy sed-filtered resolution steps that
+# used to apply it on the marker-absent path are gone.
 BANNER_SKIP_RE='^[0-9]+ items? blocked: '
 
 REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"
@@ -300,164 +311,37 @@ ACTIVE_SENTINEL="${REPO_ROOT}/.cleargate/sprint-runs/.active"
   fi
 
   # --- resolve agent_type and work_item_id ---
-  # Sentinel takes precedence; fall back to legacy transcript-grep when no sentinel.
+  # BUG-069: attribution comes ONLY from a dispatch-time ground-truth source — the
+  # CR-026 dispatch marker (read above) or the pending-task sentinel. When neither
+  # supplied a value we REFUSE to attribute rather than infer one. A wrong
+  # attribution is strictly worse than a missing one: it looks like data, and the
+  # Reporter consumes it without suspicion. The prior-row inheritance this replaced
+  # was self-referential — the fallback read its own last output, so the first wrong
+  # value was copied into every subsequent row for the life of the sprint (101/101
+  # rows in the observed field case).
+  #
+  # The two fields refuse independently: pending-task-sentinel.sh can legitimately
+  # write a sentinel with a populated agent_type and an empty work_item_id (its
+  # regex missed), so agent_type keeps real ground truth while only work_item_id
+  # refuses in that case.
+  #
+  # agent_type also refuses the literal string "unknown" — not just emptiness.
+  # pending-task-sentinel.sh:173 defaults agent_type to "unknown" (non-empty) when
+  # a spawn carries no tool_input.subagent_type, so a -z-only guard would let that
+  # fabricated value straight through.
   AGENT_TYPE="${SENTINEL_AGENT_TYPE}"
   WORK_ITEM_ID="${SENTINEL_WORK_ITEM_ID}"
 
-  if [[ -z "${AGENT_TYPE}" ]]; then
-    # Legacy: grep subagent_type from user messages, then role markers
-    AGENT_TYPE="$(jq -rs '
-      [.[] | select(.type == "user") | .message.content]
-      | tostring
-      | capture("subagent_type[\"\\s:=]+(?<t>[a-zA-Z0-9_-]+)"; "g")?.t
-      // "unknown"
-    ' "${TRANSCRIPT_PATH}" 2>/dev/null)"
-    [[ -z "${AGENT_TYPE}" || "${AGENT_TYPE}" == "null" ]] && AGENT_TYPE="unknown"
-
-    if [[ "${AGENT_TYPE}" == "unknown" ]]; then
-      for role in architect developer qa reporter devops cleargate-wiki-contradict; do
-        if grep -qiE "\\b${role}\\b agent|role: ${role}|you are the ${role}" "${TRANSCRIPT_PATH}" 2>/dev/null; then
-          AGENT_TYPE="${role}"
-          break
-        fi
-      done
-    fi
+  if [[ -z "${AGENT_TYPE}" || "${AGENT_TYPE}" == "unknown" ]]; then
+    AGENT_TYPE="unattributed"
+    printf '[%s] unattributed agent_type: no dispatch marker and no usable pending-task sentinel (session=%s sprint=%s)\n' \
+      "$(date -u +%FT%TZ)" "${SESSION_ID}" "${SPRINT_ID}" >> "${HOOK_LOG}"
   fi
 
   if [[ -z "${WORK_ITEM_ID}" ]]; then
-    # BUG-027: Before falling to transcript grep, attempt sentinel-aware lookups.
-    #
-    # Resolution order (cheapest/most-accurate first):
-    #   Step 1 — Prior ledger row (Option A, M1 open decision):
-    #     Read the most-recent row from ${LEDGER} (the file this hook appends to).
-    #     Orchestrator-architect coordination calls happen AFTER a subagent dispatch that
-    #     correctly tagged the active epic; reusing the last row's work_item_id is both
-    #     cheap and accurate. This step is the primary fix for the 12 EPIC-001
-    #     misattributions observed during the SPRINT-02 dogfood (BUG-027 context_source).
-    #   Step 2 — Most-recent dispatch-marker log line:
-    #     The hook emits "dispatch-marker: session=... work_item=... agent=..." to HOOK_LOG
-    #     on every successful dispatch-file consumption. Reading the last such line gives
-    #     accurate attribution for the same class of coordination calls.
-    #   Step 3 (legacy) — First user message transcript scan (CR-026 banner-skip).
-    #   Step 4 (last resort) — Anywhere-grep in transcript (CR-026 banner-skip).
-    #
-    # Steps 3+4 are kept as final fallbacks; the transcript grep is now the last resort,
-    # not the primary path, which eliminates the EPIC-001 lexical-first misattribution.
-
-    # CR-097: a carried work_item_id must be consistent with the sprint we are
-    # bucketing into. A `SPRINT-*` id that is not THIS sprint is self-evidently
-    # wrong — it says "this turn belongs to another sprint" while being written
-    # into this sprint's ledger. Observed: SPRINT-99's ledger attributed 66.7M
-    # tokens to SPRINT-38, whose sprint ended weeks earlier.
-    work_item_plausible() {
-      case "$1" in
-        ''|none|unknown|null) return 1 ;;
-        SPRINT-*) [[ "$1" == "${SPRINT_ID}" ]] || return 1 ;;
-      esac
-      return 0
-    }
-
-    # Step 1: Read most-recent prior ledger row's work_item_id.
-    #
-    # CR-097: also require that row to belong to THIS sprint. The ledger is
-    # per-sprint by path, but a bucket can be re-pointed (a stale `.active`, a
-    # re-created sprint id), and once a wrong id lands in a row every later row
-    # copies it — the fallback is self-perpetuating.
-    PRIOR_LEDGER_WORK_ITEM=""
-    if [[ -f "${LEDGER}" ]]; then
-      PRIOR_LEDGER_ROW="$(tail -1 "${LEDGER}" 2>/dev/null)"
-      PRIOR_LEDGER_WORK_ITEM="$(printf '%s' "${PRIOR_LEDGER_ROW}" \
-        | jq -r '.work_item_id // empty' 2>/dev/null)"
-      PRIOR_LEDGER_SPRINT="$(printf '%s' "${PRIOR_LEDGER_ROW}" \
-        | jq -r '.sprint_id // empty' 2>/dev/null)"
-      if work_item_plausible "${PRIOR_LEDGER_WORK_ITEM}" && \
-         [[ "${PRIOR_LEDGER_SPRINT}" == "${SPRINT_ID}" ]]; then
-        WORK_ITEM_ID="${PRIOR_LEDGER_WORK_ITEM}"
-        printf '[%s] work_item_id from prior ledger row: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
-      elif [[ -n "${PRIOR_LEDGER_WORK_ITEM}" ]]; then
-        printf '[%s] rejected prior-ledger work_item_id %s (sprint %s != %s)\n' \
-          "$(date -u +%FT%TZ)" "${PRIOR_LEDGER_WORK_ITEM}" "${PRIOR_LEDGER_SPRINT:-none}" "${SPRINT_ID}" >> "${HOOK_LOG}"
-      fi
-    fi
-
-    # Step 2: Read most-recent dispatch-marker log line (if Step 1 did not resolve).
-    #
-    # CR-097: scope the marker to THIS session.
-    #
-    # HOOK_LOG is append-only and never rotated, so `tail -1` returned the last
-    # dispatch marker ever written — in the observed failure, one from five days
-    # and one session earlier, belonging to a sprint that had already closed. A
-    # brand-new sprint's first turn adopted it, and Step 1 then copied it into
-    # every subsequent row. Markers carry `session=`; a marker from a different
-    # session says nothing about this turn, so match on it and let resolution
-    # fall through to the transcript scan when there is no match.
-    if [[ -z "${WORK_ITEM_ID}" && -f "${HOOK_LOG}" ]]; then
-      DISPATCH_MARKER_WORK_ITEM=""
-      if [[ -n "${SESSION_ID}" ]]; then
-        DISPATCH_MARKER_WORK_ITEM="$(grep -E '^\[.+\] dispatch-marker: ' "${HOOK_LOG}" 2>/dev/null \
-          | grep -F "session=${SESSION_ID} " \
-          | tail -1 \
-          | grep -oE 'work_item=[^ ]+' \
-          | head -1 \
-          | sed 's/work_item=//')"
-      fi
-      if work_item_plausible "${DISPATCH_MARKER_WORK_ITEM}"; then
-        WORK_ITEM_ID="${DISPATCH_MARKER_WORK_ITEM}"
-        printf '[%s] work_item_id from dispatch-marker log (session-scoped): %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
-      elif [[ -n "${DISPATCH_MARKER_WORK_ITEM}" ]]; then
-        printf '[%s] rejected dispatch-marker work_item_id %s (not valid for sprint %s)\n' \
-          "$(date -u +%FT%TZ)" "${DISPATCH_MARKER_WORK_ITEM}" "${SPRINT_ID}" >> "${HOOK_LOG}"
-      fi
-    fi
-
-    # Step 3: Legacy transcript scan — first user message (CR-026 banner-skip applied).
-    # Only runs when Steps 1+2 did not resolve.
-    if [[ -z "${WORK_ITEM_ID}" ]]; then
-      # CR-026: banner-skip applied before jq scan (BUG-024 §3.1 Defect 2).
-      # The SessionStart hook emits a banner line of the form:
-      #   "N items blocked: BUG-004: ..."
-      # This line poisons transcript-grep by matching the work-item regex first.
-      # We skip it via select(. | test(BANNER_SKIP_RE) | not) in the jq pipeline.
-      # BANNER_SKIP_RE is defined near the top of this script.
-      WORK_ITEM_RAW="$(jq -rs --arg banner_re "${BANNER_SKIP_RE}" '
-        [.[] | select(.type == "user")]
-        | [.[] | select(
-            (.message.content | if type == "array"
-              then map(.text? // "") | join(" ")
-              else (. // "") end
-            ) | test($banner_re) | not
-          )]
-        | .[0].message.content
-        | if type == "array" then map(.text? // "") | join(" ") else (. // "") end
-        | tostring
-        | scan("(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?([0-9]+(-[0-9]+)?)") | .[0:2] | join("-")
-      ' "${TRANSCRIPT_PATH}" 2>/dev/null | head -1)"
-
-      if [[ -n "${WORK_ITEM_RAW}" && "${WORK_ITEM_RAW}" != "null" && "${WORK_ITEM_RAW}" != "-" ]]; then
-        WORK_ITEM_ID="$(printf '%s' "${WORK_ITEM_RAW}" | sed 's/=/-/g')"
-      else
-        # Step 4 (last resort): CR-026: fallback grep also applies banner-skip via sed filter.
-        # This is the path that was misattributing EPIC-001 (BUG-027). Now reached only when
-        # Steps 1+2+3 all fail to resolve a work_item_id.
-        WORK_ITEM_ID="$(sed -E "/${BANNER_SKIP_RE}/d" "${TRANSCRIPT_PATH}" 2>/dev/null \
-          | grep -oE '(STORY|PROPOSAL|EPIC|CR|BUG|HOTFIX)[-=]?[0-9]+(-[0-9]+)?' \
-          | head -1 \
-          | sed 's/=/-/g')"
-        if [[ -n "${WORK_ITEM_ID}" ]]; then
-          printf '[%s] work_item_id fallback grep: %s\n' "$(date -u +%FT%TZ)" "${WORK_ITEM_ID}" >> "${HOOK_LOG}"
-        fi
-      fi
-      [[ -z "${WORK_ITEM_ID}" ]] && WORK_ITEM_ID=""
-
-      # Legacy fallback: if no work_item_id found at all, fall back to old grep for story_id only
-      if [[ -z "${WORK_ITEM_ID}" ]]; then
-        STORY_ID_LEGACY="$(grep -oE 'STORY[-=]?[0-9]{3}-[0-9]{2}' "${TRANSCRIPT_PATH}" 2>/dev/null \
-          | head -1 \
-          | sed -E 's/STORY[-=]?([0-9]{3}-[0-9]{2})/STORY-\1/')"
-        [[ -z "${STORY_ID_LEGACY}" ]] && STORY_ID_LEGACY="none"
-        WORK_ITEM_ID="${STORY_ID_LEGACY}"
-      fi
-    fi
+    WORK_ITEM_ID=""
+    printf '[%s] unattributed work_item_id: no dispatch marker and no pending-task sentinel (session=%s sprint=%s)\n' \
+      "$(date -u +%FT%TZ)" "${SESSION_ID}" "${SPRINT_ID}" >> "${HOOK_LOG}"
   fi
 
   # story_id is populated only when the work item is a STORY-* (backward compat)

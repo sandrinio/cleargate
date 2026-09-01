@@ -15,13 +15,6 @@ updated_at: 2026-09-01T18:49:08Z
 created_at_version: 0.25.0
 updated_at_version: 0.25.0
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -35,6 +28,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5
+  last_stamp: 2026-09-01T20:23:24Z
+  sessions:
+    - session: 8bcf54da-73f3-4121-84d7-7ae0579f82d8
+      model: claude-opus-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-01T20:13:06Z
 ---
 
 # BUG-069: The token ledger's no-marker fallback inherits the previous row's attribution, so one bad row poisons the sprint permanently
@@ -125,12 +133,12 @@ Do **not** touch the marker-writing path here — that is [[BUG-068]]'s scope. T
 
 ## Task Breakdown
 
-- [ ] Replace the prior-row inheritance at `token-ledger.sh:360-376` with an explicit refusal: `agent_type="unattributed"`, `work_item_id=""`
-- [ ] Log the refusal with the reason (marker absent) so the condition is visible in `token-ledger.log`
-- [ ] Audit the remaining fallback steps for the same self-referential read
-- [ ] Teach the Reporter to detect unattributed rows and refuse to publish a per-agent cost table, naming the reason
-- [ ] Re-sync npm payload and the live `/.claude/` instance
-- [ ] Add a regression test asserting two marker-less fires produce two `unattributed` rows, not two copies of row one
+- [x] Replace the prior-row inheritance at `token-ledger.sh:360-376` with an explicit refusal: `agent_type="unattributed"`, `work_item_id=""`
+- [x] Log the refusal with the reason (marker absent) so the condition is visible in `token-ledger.log`
+- [x] Audit the remaining fallback steps for the same self-referential read — Steps 2/3/4 (dispatch-marker log scrape, first-user-message scan, anywhere-grep) were also self-referential/inference-based and were deleted along with Step 1, per M1.md §2's discharge note.
+- [x] Teach the Reporter to detect unattributed rows and refuse to publish a per-agent cost table, naming the reason
+- [ ] Re-sync npm payload and the live `/.claude/` instance — superseded by M1.md §0 item 4 (post-merge orchestrator/human step, not Developer scope for this milestone); left unticked per plan.
+- [x] Add a regression test asserting two marker-less fires produce two `unattributed` rows, not two copies of row one — authored by QA-Red as `bug069_ledger_fallback.red.sh` Scenario 2, committed before this dispatch; verified green (17/17) against this change.
 
 ## 5. Verification Protocol (The Failing Test)
 

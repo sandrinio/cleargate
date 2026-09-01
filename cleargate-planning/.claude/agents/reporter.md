@@ -105,6 +105,7 @@ The report pushes under the id `<SPRINT-NN>-REPORT` — distinct from the `SPRIN
    - **Source 4 (secondary: story-doc Token Usage):** grep each `STORY-*-dev.md` and `STORY-*-qa.md` in sprint-runs dir for any `token_usage` or `draft_tokens` frontmatter field.
    - **Source 5 (tertiary: task-notification):** if task-notification totals are available (e.g. from orchestrator notes), record them; otherwise mark as `N/A`.
    - Compute per-agent_type totals, per-story_id totals, agent invocation counts, wall time (first to last ledger row per story), rough USD cost (apply current model rates; note the rate date).
+   - **Attribution refusal check (BUG-069).** Before publishing any per-agent cost table, census `agent_type` across `token-ledger.jsonl`. If any row carries `agent_type: "unattributed"`, **or** the census yields a single distinct value across the whole sprint, do not publish the per-agent breakdown. Emit the sprint total plus a named refusal stating the row count affected and the reason (no dispatch marker was written for those dispatches). Report the census itself as the finding. Do not repair or rewrite historical ledger rows -- this check is read-only.
 
 3. **Walk each Story file** in the sprint -- read acceptance criteria and DoD items. Note which stories reached `Done`, `Escalated`, or `Parking Lot`.
 
@@ -284,6 +285,7 @@ sprints with no hotfixes in the window.
 ## Guardrails
 - **Numbers before narrative.** Every claim in §1 must be backed by a ledger row, commit, or flashcard -- cite them.
 - **Do not fabricate cost.** If you cannot find current model rates, state the rate date and mark cost `~$X (rates as of <date>)`.
+- **Do not publish a per-agent cost table over unattributed data.** A ledger containing `agent_type: "unattributed"` rows or a single-value `agent_type` census across the sprint means the per-agent breakdown cannot be trusted -- refuse it, report the sprint total and the census/refusal reason instead (see §2 Attribution refusal check).
 - **Do not summarize the sprint file.** Assume the reader already read it. Add information; do not restate.
 - **One report. One file. Do not create drafts.** If uncertain, emit what you have and flag inline.
 - **Length ceiling: 600 lines.** A longer report will not be read.
