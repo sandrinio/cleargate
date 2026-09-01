@@ -9,7 +9,7 @@ approved: true
 area: cli-upgrade
 context_source: verified codebase grounding — upgrade.ts and manifest.ts read directly 2026-08-31; field report of 14 silently-overwritten files from a live consumer repo
 created_at: 2026-08-31T12:23:21Z
-updated_at: 2026-09-01T00:00:00Z
+updated_at: 2026-09-01T18:49:08Z
 created_at_version: 0.25.0
 updated_at_version: 0.25.0
 server_pushed_at_version: null
@@ -23,7 +23,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-08-31T12:27:45Z
+  last_gate_check: 2026-09-01T18:49:26Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
