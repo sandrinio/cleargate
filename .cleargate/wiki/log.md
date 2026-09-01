@@ -1370,3 +1370,8 @@
   action: "create"
   target: "BUG-068"
   path: ".cleargate/delivery/pending-sync/BUG-068_dispatch_hooks_gate_on_task_tool_name.md"
+- timestamp: "2026-09-01T20:23:24.816Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-069"
+  path: ".cleargate/delivery/pending-sync/BUG-069_ledger_fallback_inherits_prior_attribution.md"

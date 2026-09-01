@@ -55,7 +55,7 @@
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
 - [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
-- [[BUG-068]] (bug) — In Fix — Every PreToolUse dispatch hook gates on the tool name `Task`; this Claude Code build spawns agents with `Agent`
+- [[BUG-068]] (bug) — In Fix ⚠︎ drift — Every PreToolUse dispatch hook gates on the tool name `Task`; this Claude Code build spawns agents with `Agent`
 - [[BUG-069]] (bug) — In Fix — The token ledger's no-marker fallback inherits the previous row's attribution, so one bad row poisons the sprint permanently
 
 ## Archive
