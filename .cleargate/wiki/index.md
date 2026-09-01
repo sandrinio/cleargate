@@ -54,6 +54,7 @@
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
 - [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
+- [[BUG-070]] (bug) — Triaged — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
 
 ## Archive
 
