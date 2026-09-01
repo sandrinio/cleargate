@@ -9,8 +9,8 @@
 | Epics | 47 | 0 | 33 |
 | Sprints | 40 | 1 | 34 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 112 | 0 | 88 |
-| Bugs | 61 | 0 | 31 |
+| CRs | 112 | 0 | 89 |
+| Bugs | 61 | 0 | 33 |
 | Spikes | 0 | 0 | 0 |
 
 ## Active Epics
@@ -84,6 +84,10 @@ _No active epics._
 - [[BUG-046]] (bugs) — Completed
 
 - [[BUG-049]] (bugs) — Completed
+
+- [[BUG-068]] (bugs) — Completed
+
+- [[BUG-069]] (bugs) — Completed
 
 - [[CR-001]] (crs) — Completed
 
@@ -260,6 +264,8 @@ _No active epics._
 - [[CR-110]] (crs) — Completed
 
 - [[CR-111]] (crs) — Completed
+
+- [[CR-117]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 

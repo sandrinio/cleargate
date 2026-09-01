@@ -56,7 +56,9 @@
 
 - [[SPRINT-38]] — status: Completed
 
-- [[SPRINT-39]] — status: Active
+- [[SPRINT-39]] — status: Completed
+
+- [[SPRINT-40]] — status: Active
 
 
 
