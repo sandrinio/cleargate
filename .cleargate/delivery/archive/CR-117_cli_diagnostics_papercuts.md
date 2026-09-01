@@ -4,7 +4,7 @@ parent_ref: ""
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Approved
+status: "Completed"
 approved: true
 area: cli-diagnostics
 context_source: verified codebase grounding — validate_state.mjs argument handling read directly 2026-08-31; field report from a live sprint
