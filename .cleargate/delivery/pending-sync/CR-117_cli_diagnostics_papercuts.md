@@ -13,13 +13,6 @@ updated_at: 2026-09-01T18:49:08Z
 created_at_version: 0.25.0
 updated_at_version: 0.25.0
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -33,6 +26,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5
+  last_stamp: 2026-09-01T20:49:54Z
+  sessions:
+    - session: 8bcf54da-73f3-4121-84d7-7ae0579f82d8
+      model: claude-opus-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-01T20:42:29Z
 ---
 
 # CR-117: A CLI script that ignores an argument says so
@@ -90,10 +98,10 @@ Do not change discovery or validation semantics. Scope is the argument boundary 
 
 ## Task Breakdown
 
-- [ ] Treat a lone positional argument as `--state-file` in `validate_state.mjs`
-- [ ] When both a positional and `--state-file` are supplied, name both and state which was used
-- [ ] Update the usage string to document the positional form
-- [ ] Add tests for positional, flag, both-supplied, and unrecognised-argument cases
+- [x] Treat a lone positional argument as `--state-file` in `validate_state.mjs`
+- [x] When both a positional and `--state-file` are supplied, name both and state which was used
+- [x] Update the usage string to document the positional form
+- [x] Add tests for positional, flag, both-supplied, and unrecognised-argument cases
 
 ## 4. Verification Protocol
 

@@ -1375,3 +1375,8 @@
   action: "create"
   target: "BUG-069"
   path: ".cleargate/delivery/pending-sync/BUG-069_ledger_fallback_inherits_prior_attribution.md"
+- timestamp: "2026-09-01T20:49:56.706Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-117"
+  path: ".cleargate/delivery/pending-sync/CR-117_cli_diagnostics_papercuts.md"
