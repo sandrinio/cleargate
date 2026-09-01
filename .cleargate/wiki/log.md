@@ -1365,3 +1365,8 @@
   action: "update"
   target: "SPRINT-39"
   path: ".cleargate/sprint-runs/SPRINT-39/SPRINT-39_REPORT.md"
+- timestamp: "2026-09-01T19:47:16.699Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-068"
+  path: ".cleargate/delivery/pending-sync/BUG-068_dispatch_hooks_gate_on_task_tool_name.md"

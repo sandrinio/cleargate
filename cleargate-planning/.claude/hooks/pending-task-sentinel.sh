@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# PreToolUse hook for Task (Agent subagent dispatch).
+# PreToolUse hook for Task|Agent (subagent dispatch).
 #
-# Purpose: when the orchestrator spawns a subagent via the Task tool, record the
+# Purpose: when the orchestrator spawns a subagent, record the
 # dispatch metadata (agent_type, work_item_id, turn_index) into a sentinel file
 # under the active sprint dir. The SubagentStop hook reads the newest sentinel
 # to attribute the token-ledger row correctly.
@@ -15,12 +15,17 @@
 #
 # Input: JSON on stdin from Claude Code with fields:
 #   session_id, transcript_path, cwd, hook_event_name, tool_name, tool_input
-# For tool_name == "Task", tool_input has: subagent_type, description, prompt.
+# For a subagent spawn, tool_input has: subagent_type, description, prompt.
+#
+# BUG-068: the host build renamed the dispatch tool from "Task" to "Agent",
+# which silently disabled both guards below. IS_AGENT_SPAWN now accepts
+# tool_name in {Task, Agent} OR any tool_name carrying
+# tool_input.subagent_type, computed once and reused by both guards.
 #
 # Output: writes .cleargate/sprint-runs/<sprint-id>/.pending-task-<turn_index>.json
 #         with { agent_type, work_item_id, turn_index, started_at }
 #
-# Robustness: exits non-zero to block Task spawn when unprocessed flashcards exist.
+# Robustness: exits non-zero to block a subagent spawn when unprocessed flashcards exist.
 # Set SKIP_FLASHCARD_GATE=1 to bypass the flashcard gate entirely.
 # Set CLEARGATE_ADVISORY=1 to downgrade the block to a warning (exit 0).
 
@@ -49,8 +54,14 @@ mkdir -p "${SPRINT_DIR}"
 # allowing Claude Code to surface the message to the orchestrator.
 # Bypass: set SKIP_FLASHCARD_GATE=1 in environment.
 TOOL_NAME_EARLY="$(printf '%s' "${INPUT}" | jq -r '.tool_name // empty')"
+SUBAGENT_TYPE_EARLY="$(printf '%s' "${INPUT}" | jq -r '.tool_input.subagent_type // empty')"
+IS_AGENT_SPAWN=0
+case "${TOOL_NAME_EARLY}" in
+  Task|Agent) IS_AGENT_SPAWN=1 ;;
+  *) [[ -n "${SUBAGENT_TYPE_EARLY}" ]] && IS_AGENT_SPAWN=1 ;;
+esac
 
-if [[ "${TOOL_NAME_EARLY}" == "Task" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPRINT_ID}" != "_off-sprint" ]]; then
+if [[ "${IS_AGENT_SPAWN}" == "1" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPRINT_ID}" != "_off-sprint" ]]; then
   # Collect flagged cards from all *-dev.md / *-qa.md reports (any id: STORY/CR/BUG/...), flat + reports/ subdir (CR-082 moved reports to reports/).
   UNPROCESSED_CARDS=()
   UNPROCESSED_HASHES=()
@@ -153,8 +164,7 @@ fi
 # --- End flashcard gate ---
 
 {
-  TOOL_NAME="$(printf '%s' "${INPUT}" | jq -r '.tool_name // empty')"
-  if [[ "${TOOL_NAME}" != "Task" ]]; then
+  if [[ "${IS_AGENT_SPAWN}" != "1" ]]; then
     # Not a subagent dispatch — no sentinel needed.
     exit 0
   fi
