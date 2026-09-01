@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.25.0",
-  "generated_at": "2026-08-31T09:47:44.927Z",
+  "generated_at": "2026-09-01T22:18:02.982Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -74,14 +74,14 @@
     },
     {
       "path": ".claude/agents/reporter.md",
-      "sha256": "249949f59d8ff4ca3a1a572f46676b8a593226fa83e99b3ccdb4d456373cf3ed",
+      "sha256": "6898a9adf6737eafdd70ba912079868d5f7003db51d428b887dd2f4c3f292d01",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
-      "sha256": "cb9c37ceea8e93b6c86225442ec06993b55b3341b572b3218c29df5ea1fc1759",
+      "sha256": "2449e3bbcad670ffa453c53c1fe303d73e5280b76bfb2e29dc7bf062fce0fa26",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -116,7 +116,7 @@
     },
     {
       "path": ".claude/hooks/pre-tool-use-task.sh",
-      "sha256": "79fdd30e3f301cb89757aa2279a5fb8cc3a91493b62d5c801517853500368e7f",
+      "sha256": "d0e5fb16cc83f96cc7dde0ffa58e7db1ad5fcd76893997a6fe3b7683cc372906",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -137,14 +137,14 @@
     },
     {
       "path": ".claude/hooks/token-ledger.sh",
-      "sha256": "da0680fe5dcf681f6e3491b366e4bf3232e7d37a43480e7ae870d5a6d553a2b9",
+      "sha256": "ec83cebc66d73b841b544cd4f5734244d8a3f63251660944548e5d7f60b4d3b5",
       "tier": "hook",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
     },
     {
       "path": ".claude/settings.json",
-      "sha256": "cd0bb53b69cb063d760d9709939acef694043a1f7bb74f8542f84c31fd9546c9",
+      "sha256": "84d7d7ca7efc5ca36de66d22b631e5fa7d14895de11ae19f973102d72429ec56",
       "tier": "cli-config",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
