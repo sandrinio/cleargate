@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "CR-117": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-01T19:15:18.228Z",
+      "updated_at": "2026-09-01T21:01:22.936Z",
       "notes": "",
       "lane": "fast",
       "lane_assigned_by": "sdr-lane-audit",
@@ -40,6 +40,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-069 → Done",
-  "updated_at": "2026-09-01T20:39:58.809Z"
+  "last_action": "transition CR-117 → Done",
+  "updated_at": "2026-09-01T21:01:22.936Z"
 }
