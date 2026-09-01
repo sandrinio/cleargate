@@ -15,13 +15,6 @@ updated_at: 2026-09-01T18:49:08Z
 created_at_version: 0.25.0
 updated_at_version: 0.25.0
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -35,6 +28,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5
+  last_stamp: 2026-09-01T19:47:16Z
+  sessions:
+    - session: 8bcf54da-73f3-4121-84d7-7ae0579f82d8
+      model: claude-opus-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-01T19:26:57Z
 ---
 
 # BUG-068: Every PreToolUse dispatch hook gates on the tool name `Task`; this Claude Code build spawns agents with `Agent`
@@ -147,12 +155,12 @@ Canonical → payload → live mirror discipline applies: after the canonical ed
 
 ## Task Breakdown
 
-- [ ] Replace the `!= "Task"` guard in `pre-tool-use-task.sh` with an accept-predicate: tool name in `{Task, Agent}` OR `tool_input.subagent_type` present
-- [ ] Add a log line to the rejected-tool-name path so the exit is never silent again
-- [ ] Apply the same accept-predicate to both guards in `pending-task-sentinel.sh` (line 53 barrier, line 157 sentinel)
-- [ ] Change the `PreToolUse` matcher in `settings.json` from `"Task"` to `"Task|Agent"`
-- [ ] Re-sync npm payload (`npm run prebuild`) and the live `/.claude/` instance
-- [ ] Add a regression test that feeds a synthetic `Agent` PreToolUse payload to both hooks and asserts a marker is written
+- [x] Replace the `!= "Task"` guard in `pre-tool-use-task.sh` with an accept-predicate: tool name in `{Task, Agent}` OR `tool_input.subagent_type` present
+- [x] Add a log line to the rejected-tool-name path so the exit is never silent again
+- [x] Apply the same accept-predicate to both guards in `pending-task-sentinel.sh` (line 53 barrier, line 157 sentinel)
+- [x] Change the `PreToolUse` matcher in `settings.json` from `"Task"` to `"Task|Agent"`
+- [ ] Re-sync npm payload (`npm run prebuild`) and the live `/.claude/` instance — **superseded by M1.md §0 item 4**: this is an orchestrator/human post-merge step, not in this Developer's scope. Not ticked; see plan.
+- [x] Add a regression test that feeds a synthetic `Agent` PreToolUse payload to both hooks and asserts a marker is written — already committed by QA-Red as `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` (Sc1/Sc4); this dispatch made it green, no new test file needed per M1.md §3.1.
 
 ## 5. Verification Protocol (The Failing Test)
 
