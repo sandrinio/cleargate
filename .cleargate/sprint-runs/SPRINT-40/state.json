@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "BUG-068": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-01T19:15:18.228Z",
+      "updated_at": "2026-09-01T20:10:21.244Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -40,6 +40,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-117 → Ready to Bounce",
-  "updated_at": "2026-09-01T19:15:18.228Z"
+  "last_action": "transition BUG-068 → Done",
+  "updated_at": "2026-09-01T20:10:21.244Z"
 }
