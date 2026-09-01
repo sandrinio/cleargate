@@ -6,15 +6,15 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: ""
 source_tool: ""
-status: Draft
+status: Active
 start_date: 2026-08-31
 end_date: 2026-09-04
 synced_at: ""
 area: framework-integrity
 created_at: 2026-08-31T12:23:21Z
-updated_at: 2026-08-31T12:23:21Z
+updated_at: 2026-09-01T19:24:47Z
 created_at_version: 0.25.0
-updated_at_version: 0.25.0
+updated_at_version: fe9082b4-dirty
 draft_tokens:
   input: null
   output: null
@@ -36,14 +36,22 @@ context_source: "Field-defect sprint. Decomposes no epic: every item is a standa
 
 ## 0. Stakeholder Brief
 
-- **Sprint Goal:** Restore the agent-dispatch telemetry that a host tool rename silently broke, and remove the ways ClearGate currently discards what an operator told it.
-- **Business Outcome:** Sprint reports stop publishing confidently wrong cost data; the pre-dispatch flashcard gate starts enforcing again; upgrades stop replacing local customizations without saying so; and two long-standing parser and cache defects stop wedging preflight. All are trust defects — the framework was not failing loudly, it was succeeding falsely.
-- **Risks (top 3):** the dispatch fix depends on a host contract that can change again; the ledger fix cannot be verified in the field until the dispatch fix lands; canonical-only edits will appear to work and change nothing at runtime.
-- **Metrics:** dispatch markers written on 100% of agent spawns; zero ledger rows carrying inherited attribution; `upgrade` names every user-modified file before writing.
+- **Sprint Goal:** Restore the agent-dispatch telemetry that a host tool rename silently broke, so sprint accounting and the pre-dispatch flashcard gate work again.
+- **Business Outcome:** Sprint reports stop publishing confidently wrong cost data, and the flashcard gate starts enforcing again instead of silently passing every dispatch through. Both are trust defects — the framework was not failing loudly, it was succeeding falsely.
+- **Risks (top 3):** the fix depends on a host contract that can change again; the ledger fix cannot be verified in the field until the dispatch fix lands; canonical-only edits will appear to work and change nothing at runtime.
+- **Metrics:** dispatch markers written on 100% of agent spawns; zero ledger rows carrying inherited attribution.
 
 ## Sprint Goal
 
-Close the six defects confirmed by the 2026-08-31 field report and its follow-up verification, restoring dispatch telemetry and eliminating the silent-discard failures in gate-cache staleness, id extraction, and upgrade.
+Restore the agent-dispatch telemetry that a host tool rename silently broke, so sprint accounting and the pre-dispatch flashcard gate work again.
+
+> **Goal narrowed at SDR (2026-09-01).** The original goal carried a second clause — *"and remove the
+> ways ClearGate currently discards what an operator told it"* — which was carried by BUG-047,
+> BUG-048, CR-115 and CR-117 together. With the first three descoped to a follow-up sprint, only
+> CR-117 remains of that clause, which is not enough to measure a goal by. The goal is narrowed to
+> the telemetry clause so the close verdict means something; `M2 / CR-117` is therefore
+> `GOAL_RELATION: off critical path` — real and necessary work that is simply not what this sprint
+> is measured by.
 
 ## 1. Consolidated Deliverables
 
@@ -51,31 +59,61 @@ Close the six defects confirmed by the 2026-08-31 field report and its follow-up
 |---|---|---|---|---|---|
 | `BUG-068` | PreToolUse dispatch hooks gate on the tool name `Task` | standard | M1 | n | med |
 | `BUG-069` | Token-ledger fallback inherits the previous row's attribution | standard | M1 | n | med |
-| `BUG-047` | `cleargate stamp` permanently wedges an item's preflight readiness | standard | M2 | y | med |
-| `BUG-048` | An ID prefix written in prose mints a phantom work item | standard | M2 | y | med |
-| `CR-115` | `cleargate upgrade` announces what it is about to overwrite | standard | M2 | y | low |
-| `CR-117` | A CLI script that ignores an argument says so | fast | M2 | y | low |
+| `CR-117` | A CLI script that ignores an argument says so | fast | M2 | n | low |
+
+**Descoped at SDR (2026-09-01), human decision.** `BUG-047`, `BUG-048`, and `CR-115` were refused by
+`architect-synth` under the BUG-046 reachability predicate: their surfaces lie in `cleargate-cli/**`,
+an independent nested git repo that is gitignored here and materializes zero tracked files inside a
+`git worktree add` checkout. `collision_surface.sh` prescribes the remedy itself — *"Edit it from the
+main checkout."* They remain in `pending-sync/`, approved and gate-passing, for a follow-up sprint
+scoped for cli-main-checkout execution, where BUG-048's two-substrate split can be decided
+deliberately rather than under kickoff pressure.
 
 ## 2. Execution Strategy
+*(Written by `architect-synth` during Sprint Design Review, 2026-09-01, from six `architect-reader` digests.)*
 
 ### 2.1 Phase Plan
 
-- **M1 — Dispatch integrity (sequential):** `BUG-068` → `BUG-069`. Strictly ordered. `BUG-069`'s field verification is impossible while `BUG-068` prevents any marker from being written, and both edit `token-ledger.sh`. Ship as a pair; neither is independently meaningful.
-- **M2 — Operator-input integrity (parallel):** `BUG-047` ‖ `BUG-048` ‖ `CR-115` ‖ `CR-117`. Four disjoint surfaces — `frontmatter-cache.ts`, `work-item-id.ts`, `upgrade.ts`, and `validate_state.mjs`. No shared files, no ordering constraint. All four are the same defect class from different angles: the tool discards or ignores what the operator supplied, then reports a problem caused by the discard.
+Three waves, each of one story. **This sprint has no exploitable parallelism, and that is a finding, not an oversight.**
+
+- **wave1 — `BUG-068`** (P0, standard). Alone.
+- **wave2 — `BUG-069`** (standard). Alone, strictly after wave1.
+- **wave3 — `CR-117`** (fast). Alone.
+
+The M1 pair serializes on three independent grounds: clause 1 (§1 declares `Parallel? n` for both),
+clause 2 (`cleargate-planning/.claude/hooks/token-ledger.sh` is in both surfaces), and clause 5
+(BUG-068 restores the dispatch marker whose *absence* is the only path into BUG-069's rewritten
+fallback — semantic, not merely textual).
+
+`CR-117` is the case worth naming. It passes clauses 2–5 against both M1 stories: its surface
+`.cleargate/scripts/validate_state.mjs` is disjoint, its `db_write_set` is empty, and it declares no
+dependency edge. It is stranded purely by clause 1, which requires **both** candidates to be
+`parallel_eligible`, and both M1 stories are declared `n`. If zero parallelism is unacceptable, the
+lever is that declaration, not the predicate.
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
 
 | Shared File | Stories Touching It | Merge Order | Rationale |
 |---|---|---|---|
-| `cleargate-planning/.claude/hooks/token-ledger.sh` | `BUG-068`, `BUG-069` | 068 → 069 | 068 restores the marker the hook reads; 069 rewrites the fallback taken when it is absent |
+| `cleargate-planning/.claude/hooks/token-ledger.sh` | `BUG-068`, `BUG-069` | 068 → 069 | 068 restores the marker the hook reads; 069 rewrites the fallback taken when it is absent. BUG-069 is unverifiable until BUG-068 lands. |
 
 No other file is touched by more than one item.
 
 ### 2.3 Shared-Surface Warnings
 
-- `BUG-068` and `BUG-069` both edit `token-ledger.sh`, in adjacent but non-overlapping regions (marker read vs. fallback chain at lines 360-376). Serialized in M1; do not parallelize even though the hunks look separable.
-- Every M1 item requires the canonical → npm payload → live `/.claude/` re-sync. A canonical-only edit will appear to work and change nothing at runtime — this is the exact mechanism by which a prior sprint shipped a hook fix while still running the buggy hook.
-- `BUG-048` changes the shared id grammar in `work-item-id.ts`. Any other item tempted to parse an id must call that extractor rather than fork a regex — [[BUG-041]] records that divergent copies are how this codebase once produced five different answers to one question.
+- Both M1 items edit `token-ledger.sh` in adjacent but non-overlapping regions (marker read vs.
+  fallback chain at lines 360-376). Serialized; do not parallelize even though the hunks look separable.
+- Every M1 item requires the canonical → npm payload → live `/.claude/` re-sync. A canonical-only
+  edit will appear to work and change nothing at runtime — the exact mechanism by which a prior
+  sprint shipped a hook fix while still running the buggy hook.
+- **BUG-033 empty-surface guard did not fire.** All three stories carry a non-empty
+  `(file_surface ∪ file_creates)`. No story was fail-safe-serialized for unknown metadata.
+- **Clause 4 (DB) is vacuous here.** `db_write_set` is empty for all three.
+- **Digest/plan disagreement, resolved toward the plan.** The `architect-reader` digests reported
+  `parallel_eligible: y` for BUG-068 and BUG-069 while §1 declares `n`, and reported
+  `dep_predecessors: []` for BUG-069 despite the 068 → 069 dependency. The human-approved plan won
+  in both cases. Worth checking whether `architect-reader` defaults `parallel_eligible` rather than
+  reading the §1 column — if so, that defect would silently un-serialize future sprints.
 
 ### 2.4 Lane Audit
 
@@ -83,9 +121,15 @@ No other file is touched by more than one item.
 |---|---|---|
 | `CR-117` | fast | Argument-boundary change in one script; four unit cases, no collaborators |
 
+Consistent with `state.json` (`lane_assigned_by: sdr-lane-audit`). The other two are `standard`.
+The fast lane does not license co-waving — CR-117's isolation is a clause-1 consequence, not a lane one.
+
 ### 2.5 ADR-Conflict Flags
 
-- None identified. `BUG-069`'s refuse-to-attribute posture is consistent with the fail-safe-and-visible precedent already set for unknown collision metadata.
+- None outstanding. The one flag raised at SDR — a request to waive the BUG-046 reachability refusal
+  for the three `cleargate-cli/**` stories — was resolved by descoping them rather than by waiver.
+- BUG-069's refuse-to-attribute posture is consistent with the fail-safe-and-visible precedent
+  already set for unknown collision metadata.
 
 ## Risks & Dependencies
 
@@ -98,8 +142,8 @@ No other file is touched by more than one item.
 
 ## Metrics & Metadata
 
-- **Expected Impact:** dispatch markers on 100% of agent spawns (currently 0%); distinct `agent_type` values in the ledger > 1 where more than one role ran (currently 1 of 1 across 101 observed rows); `upgrade` emits a grouped pre-write warning naming every user-modified file (currently none).
-- **Priority Alignment:** `BUG-068` is P0 — it silently disables the pre-dispatch flashcard gate, which is a safety mechanism, not an accounting one. `BUG-069`, `BUG-047`, and `CR-115` are P1. `BUG-048` is P2. `CR-117` is P3, included because it is a one-file fast-lane item that fits M2's parallel slot.
+- **Expected Impact:** dispatch markers on 100% of agent spawns (currently 0%); `pre-tool-use-task.log` exists and records one line per dispatch (currently the file has never been created); distinct `agent_type` values in the ledger > 1 where more than one role ran (currently 1 of 1 across 101 observed rows).
+- **Priority Alignment:** `BUG-068` is P0 — it silently disables the pre-dispatch flashcard gate, which is a safety mechanism, not an accounting one. `BUG-069` is P1. `CR-117` is P3 and off the goal's critical path; it is in scope because it is a one-file fast-lane item with no collaborators.
 
 ---
 
