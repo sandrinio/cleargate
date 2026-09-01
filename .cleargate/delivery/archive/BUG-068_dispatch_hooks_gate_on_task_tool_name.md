@@ -4,7 +4,7 @@ parent_ref: ""
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: In Fix
+status: Completed
 severity: P0-Critical
 reporter: orchestrator (field report from doc_processor SPRINT-15)
 approved: true
