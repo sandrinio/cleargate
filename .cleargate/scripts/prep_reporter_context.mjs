@@ -437,10 +437,26 @@ function main() {
   const sprintDir = resolveSprintDir(sprintId);
   const ledgerFile = path.join(sprintDir, 'token-ledger.jsonl');
 
-  // Hard error: missing token-ledger.jsonl (R4)
-  if (!fs.existsSync(ledgerFile)) {
-    process.stderr.write(`Error: token-ledger.jsonl not found at ${ledgerFile}\n`);
-    process.exit(1);
+  // BUG-081: an ABSENT ledger is a recoverable condition, not a fatal one.
+  //
+  // The ledger is written by the SubagentStop hook. It legitimately does not
+  // exist when the hooks never fired for this sprint — an orchestrator driving
+  // the sprint from another repo without ORCHESTRATOR_PROJECT_DIR, a run driven
+  // by a different agent, or a sprint executed by hand. Hard-exiting here made
+  // Gate-4 close impossible in every one of those cases, for missing data rather
+  // than wrong data.
+  //
+  // Degrade instead: emit the bundle with no cost section and say so loudly, so
+  // the Reporter reports the absence rather than inventing or omitting a figure.
+  const ledgerMissing = !fs.existsSync(ledgerFile);
+  if (ledgerMissing) {
+    process.stderr.write(
+      `WARN: token-ledger.jsonl not found at ${ledgerFile}\n` +
+      `  Proceeding without cost data. The sprint report will record the ledger as\n` +
+      `  ABSENT — not zero, not incomplete. If this is unexpected, the SubagentStop\n` +
+      `  hook did not fire for this sprint; see ORCHESTRATOR_PROJECT_DIR when driving\n` +
+      `  a sprint from another repo.\n`
+    );
   }
 
   // Read sprint frontmatter for start_date, end_date, sprint_status
