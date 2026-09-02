@@ -221,6 +221,28 @@ function isSquashMerged(sprintBranch, mainRef, repoRoot) {
   }
 }
 
+/**
+ * BUG-076: resolve the built CLI, wherever it actually lives.
+ *
+ * `cleargate-cli/dist/cli.js` exists ONLY in the ClearGate meta-repo, where the
+ * CLI source tree sits beside the planning scaffold. Every consumer install has
+ * the CLI under `node_modules/cleargate/dist/`. Hard-coding the meta-repo path
+ * made Gate-4 close structurally unreachable for the users the framework ships
+ * to: the sprint would execute fully and then refuse to close.
+ *
+ * Returns an absolute path, or null when no built CLI can be found.
+ */
+function resolveCliBin(repoRoot, rel = 'cli.js') {
+  const candidates = [
+    path.join(repoRoot, 'cleargate-cli', 'dist', rel),          // meta-repo dogfood
+    path.join(repoRoot, 'node_modules', 'cleargate', 'dist', rel), // consumer install
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
+}
+
 function usage() {
   process.stderr.write(
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
@@ -436,11 +458,13 @@ async function main() {
   // (the deliberate skip-env path for test environments where the CLI binary
   // is intentionally absent — e.g. sandbox-only sprint dirs).
   if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
-    const cliBinEarly = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
-    if (!fs.existsSync(cliBinEarly)) {
+    const cliBinEarly = resolveCliBin(REPO_ROOT);
+    if (cliBinEarly === null) {
       process.stderr.write(
-        `dist not built — run \`npm run build\` in cleargate-cli/\n` +
-        `  Expected: ${cliBinEarly}\n` +
+        `cleargate CLI dist not found.\n` +
+        `  Looked for: <root>/cleargate-cli/dist/cli.js (meta-repo) and\n` +
+        `              <root>/node_modules/cleargate/dist/cli.js (installed)\n` +
+        `  Fix: npm install cleargate  (or \`npm run build\` in cleargate-cli/ when developing ClearGate itself)\n` +
         `  The lifecycle/orphan/parent-rollup/backsync/merge gates require a built CLI dist.\n`
       );
       process.exit(1);
@@ -459,9 +483,9 @@ async function main() {
   } else {
     try {
       // Resolve CLI binary: prefer local dist/
-      const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
+      const cliBin = resolveCliBin(REPO_ROOT);
 
-      if (fs.existsSync(cliBin)) {
+      if (cliBin !== null) {
         // Read sprint start_date from frontmatter for the --since arg
         let sinceArg = '';
         try {
@@ -500,7 +524,7 @@ async function main() {
           process.exit(1);
         }
       } else {
-        process.stdout.write('Step 2.6 skipped: CLI binary not found at cleargate-cli/dist/cli.js (non-fatal).\n');
+        process.stdout.write('Step 2.6 skipped: no built CLI found in cleargate-cli/dist or node_modules/cleargate/dist (non-fatal).\n');
       }
     } catch (step26Err) {
       // Unexpected error — fail-open (log but do not block)
@@ -516,11 +540,11 @@ async function main() {
   process.stdout.write('Step 2.6b: checking for cross-sprint orphan drift...\n');
   if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
     try {
-      const cliBin26b = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
-      if (fs.existsSync(cliBin26b)) {
+      const cliBin26b = resolveCliBin(REPO_ROOT);
+      if (cliBin26b !== null) {
         // Dynamic import the compiled reconciler function
         const reconcilerMod = await import(
-          path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+          (resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
         ).catch(() => null);
 
         if (reconcilerMod && typeof reconcilerMod.reconcileCrossSprintOrphans === 'function') {
@@ -560,83 +584,13 @@ async function main() {
     process.stdout.write('Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
   }
 
-  // ── Step 2.6c: Parent (Epic/Sprint) Rollup (CR-066) ──────────────────────
-  // Runs unconditionally (not gated by CLEARGATE_SKIP_LIFECYCLE_CHECK).
-  // For each active parent in delivery/pending-sync/, checks children coverage:
-  //   auto-flip      → rewrite status: Completed atomically, log one line.
-  //   halt-partial   → collect into haltList; exit 1 after processing all.
-  //   halt-zero-children → collect into haltList; exit 1 after processing all.
-  //   no-op / skip-deferred → silent.
-  // Defensive guard: if walkActiveParents is not a function (stale dist/), skip with warning.
-
-  /**
-   * Atomic in-place status rewrite (raw-bytes regex-replace).
-   * Follows FLASHCARD 2026-04-24 #frontmatter #write-back pattern.
-   * @param {string} filePath
-   * @param {string} newStatus
-   */
-  function setFrontmatterStatusAtomic(filePath, newStatus) {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
-    if (!fm) throw new Error(`No frontmatter in ${filePath}`);
-    const newFm = fm[1].replace(/^status:.*$/m, `status: ${newStatus}`);
-    const newRaw = raw.replace(fm[1], newFm);
-    const tmp = filePath + '.tmp.' + process.pid;
-    fs.writeFileSync(tmp, newRaw, 'utf8');
-    fs.renameSync(tmp, filePath);
-  }
-
-  // ── Step 2.6c test seam ──────────────────────────────────────────────────────
-  if (process.env.CLEARGATE_SKIP_PARENT_ROLLUP === '1') {
-    process.stdout.write('Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).\n');
-  } else {
-  process.stdout.write('Step 2.6c: rolling up parent statuses...\n');
-  try {
-    // Use __dirname-relative path so the import finds the ACTUAL built dist,
-    // not a fixture tmpdir override (CLEARGATE_REPO_ROOT may point elsewhere in tests).
-    const scriptRepoRoot26c = path.resolve(SCRIPTS_DIR, '..', '..');
-    const reconcilerMod26c = await import(
-      path.join(scriptRepoRoot26c, 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
-    ).catch(() => null);
-
-    if (!reconcilerMod26c || typeof reconcilerMod26c.walkActiveParents !== 'function') {
-      process.stdout.write('Step 2.6c skipped: walkActiveParents not in built CLI — rebuild cleargate-cli/.\n');
-    } else {
-      // Delivery paths come from REPO_ROOT (may be fixture tmpdir in tests)
-      const deliveryRoot26c = path.join(REPO_ROOT, '.cleargate', 'delivery');
-      const archiveRoot26c = path.join(deliveryRoot26c, 'archive');
-      const results26c = await reconcilerMod26c.walkActiveParents({
-        deliveryRoot: deliveryRoot26c,
-        archiveRoot: archiveRoot26c,
-      });
-      const flips26c = results26c.filter((r) => r.verdict === 'auto-flip');
-      const halts26c = results26c.filter(
-        (r) => r.verdict === 'halt-partial' || r.verdict === 'halt-zero-children',
-      );
-
-      for (const f of flips26c) {
-        setFrontmatterStatusAtomic(f.parent_path, 'Completed');
-        process.stdout.write(
-          `Step 2.6c: ${f.parent_id} status ${f.current_status} → Completed` +
-          ` (${f.terminal_children.length}/${f.terminal_children.length} children Completed:` +
-          ` ${f.terminal_children.join(', ')})\n`,
-        );
-      }
-
-      if (halts26c.length > 0) {
-        process.stderr.write(`Step 2.6c HALT: ${halts26c.length} parent(s) require manual ack:\n`);
-        for (const h of halts26c) {
-          process.stderr.write(`  - [${h.verdict}] ${h.halt_reason}\n`);
-        }
-        process.exit(1);
-      }
-
-      process.stdout.write(`Step 2.6c passed: ${flips26c.length} parent(s) auto-flipped; no halts.\n`);
-    }
-  } catch (e26c) {
-    process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
-  }
-  } // end CLEARGATE_SKIP_PARENT_ROLLUP else block
+  // BUG-077 ORDERING FIX: 2.6d (child backsync) now runs BEFORE 2.6c (parent
+  // rollup). 2.6c judges a parent by its children's FRONTMATTER status, but
+  // 2.6d is the step that flips those children from their in-flight status to
+  // `Completed` using state.json. With 2.6c first, every parent saw
+  // "0/N children terminal" and halted on a first close, even when every child
+  // was Done in state.json. The two steps have no dependency in this direction,
+  // so swapping them makes the rollup see the truth it was always meant to read.
 
   // ── Step 2.6d: Same-Sprint Story Backsync (BUG-032) ─────────────────────────
   // Flip all Done-state stories in the closing sprint from their current
@@ -653,7 +607,12 @@ async function main() {
   process.stdout.write('Step 2.6d: back-syncing same-sprint story frontmatter...\n');
   try {
     const reconcilerMod26d = await import(
-      path.join(SCRIPTS_DIR, '..', '..', 'cleargate-cli', 'dist', 'lib', 'lifecycle-reconcile.js')
+      // BUG-076: resolve via the same multi-root lookup as every other CLI
+      // reference. SCRIPTS_DIR/../.. is the meta-repo layout only; a consumer
+      // install has the lib under node_modules/cleargate/dist/.
+      (resolveCliBin(path.resolve(SCRIPTS_DIR, '..', '..'), path.join('lib', 'lifecycle-reconcile.js'))
+        ?? resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js'))
+        ?? '/nonexistent-cleargate-lib')
     ).catch(() => null);
 
     if (!reconcilerMod26d || typeof reconcilerMod26d.reconcileCurrentSprintStories !== 'function') {
@@ -692,6 +651,87 @@ async function main() {
   } catch (e26d) {
     process.stderr.write(`Step 2.6d warning: same-sprint backsync unavailable: ${e26d.message}\n`);
   }
+
+  // ── Step 2.6c: Parent (Epic/Sprint) Rollup (CR-066) ──────────────────────
+  // Runs unconditionally (not gated by CLEARGATE_SKIP_LIFECYCLE_CHECK).
+  // For each active parent in delivery/pending-sync/, checks children coverage:
+  //   auto-flip      → rewrite status: Completed atomically, log one line.
+  //   halt-partial   → collect into haltList; exit 1 after processing all.
+  //   halt-zero-children → collect into haltList; exit 1 after processing all.
+  //   no-op / skip-deferred → silent.
+  // Defensive guard: if walkActiveParents is not a function (stale dist/), skip with warning.
+
+  /**
+   * Atomic in-place status rewrite (raw-bytes regex-replace).
+   * Follows FLASHCARD 2026-04-24 #frontmatter #write-back pattern.
+   * @param {string} filePath
+   * @param {string} newStatus
+   */
+  function setFrontmatterStatusAtomic(filePath, newStatus) {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (!fm) throw new Error(`No frontmatter in ${filePath}`);
+    const newFm = fm[1].replace(/^status:.*$/m, `status: ${newStatus}`);
+    const newRaw = raw.replace(fm[1], newFm);
+    const tmp = filePath + '.tmp.' + process.pid;
+    fs.writeFileSync(tmp, newRaw, 'utf8');
+    fs.renameSync(tmp, filePath);
+  }
+
+  // ── Step 2.6c test seam ──────────────────────────────────────────────────────
+  if (process.env.CLEARGATE_SKIP_PARENT_ROLLUP === '1') {
+    process.stdout.write('Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).\n');
+  } else {
+  process.stdout.write('Step 2.6c: rolling up parent statuses...\n');
+  try {
+    // Use __dirname-relative path so the import finds the ACTUAL built dist,
+    // not a fixture tmpdir override (CLEARGATE_REPO_ROOT may point elsewhere in tests).
+    const scriptRepoRoot26c = path.resolve(SCRIPTS_DIR, '..', '..');
+    const reconcilerMod26c = await import(
+      (resolveCliBin(scriptRepoRoot26c, path.join('lib', 'lifecycle-reconcile.js')) ?? resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
+    ).catch(() => null);
+
+    if (!reconcilerMod26c || typeof reconcilerMod26c.walkActiveParents !== 'function') {
+      process.stdout.write('Step 2.6c skipped: walkActiveParents not in built CLI — rebuild cleargate-cli/.\n');
+    } else {
+      // Delivery paths come from REPO_ROOT (may be fixture tmpdir in tests)
+      const deliveryRoot26c = path.join(REPO_ROOT, '.cleargate', 'delivery');
+      const archiveRoot26c = path.join(deliveryRoot26c, 'archive');
+      const results26c = await reconcilerMod26c.walkActiveParents({
+        deliveryRoot: deliveryRoot26c,
+        archiveRoot: archiveRoot26c,
+        // BUG-078: lets a SPRINT parent resolve its roster from state.json.
+        // Nothing in a story's frontmatter names its sprint.
+        sprintRunsRoot: path.join(REPO_ROOT, '.cleargate', 'sprint-runs'),
+      });
+      const flips26c = results26c.filter((r) => r.verdict === 'auto-flip');
+      const halts26c = results26c.filter(
+        (r) => r.verdict === 'halt-partial' || r.verdict === 'halt-zero-children',
+      );
+
+      for (const f of flips26c) {
+        setFrontmatterStatusAtomic(f.parent_path, 'Completed');
+        process.stdout.write(
+          `Step 2.6c: ${f.parent_id} status ${f.current_status} → Completed` +
+          ` (${f.terminal_children.length}/${f.terminal_children.length} children Completed:` +
+          ` ${f.terminal_children.join(', ')})\n`,
+        );
+      }
+
+      if (halts26c.length > 0) {
+        process.stderr.write(`Step 2.6c HALT: ${halts26c.length} parent(s) require manual ack:\n`);
+        for (const h of halts26c) {
+          process.stderr.write(`  - [${h.verdict}] ${h.halt_reason}\n`);
+        }
+        process.exit(1);
+      }
+
+      process.stdout.write(`Step 2.6c passed: ${flips26c.length} parent(s) auto-flipped; no halts.\n`);
+    }
+  } catch (e26c) {
+    process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
+  }
+  } // end CLEARGATE_SKIP_PARENT_ROLLUP else block
 
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
   // Block close if any .worktrees/STORY-* path is present.
@@ -1276,8 +1316,8 @@ async function main() {
   // Runs after Gate 4 ack succeeds. Non-fatal: sprint stays Completed on failure.
   process.stdout.write('Step 7: pushing per-artifact status updates to MCP...\n');
   try {
-    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
-    if (fs.existsSync(cliBin)) {
+    const cliBin = resolveCliBin(REPO_ROOT);
+    if (cliBin !== null) {
       // cleargate sync work-items takes ZERO positional args (verified cli.ts:592-598).
       // CR-021 §3.2.3 spec shows a sprint-id arg — that is spec drift; drop it.
       execSync(`node ${JSON.stringify(cliBin)} sync work-items`, {
@@ -1302,8 +1342,8 @@ async function main() {
   // Non-fatal on failure: sprint stays Completed. MCP push can be retried manually.
   process.stdout.write('Step 7.4: pushing sprint plan + report to MCP...\n');
   try {
-    const cliBin74 = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
-    if (fs.existsSync(cliBin74)) {
+    const cliBin74 = resolveCliBin(REPO_ROOT);
+    if (cliBin74 !== null) {
       // Resolve sprint plan path: prefer archive/, fall back to pending-sync/
       const deliveryBase = path.join(REPO_ROOT, '.cleargate', 'delivery');
       const archiveDir = path.join(deliveryBase, 'archive');
@@ -1360,8 +1400,8 @@ async function main() {
   // CR-064 (Wave 3) inserts its MCP-push step at Step 7.4, immediately before this anchor.
   process.stdout.write('Step 7.5: ingesting sprint report into wiki...\n');
   try {
-    const cliBin = path.join(REPO_ROOT, 'cleargate-cli', 'dist', 'cli.js');
-    if (fs.existsSync(cliBin)) {
+    const cliBin = resolveCliBin(REPO_ROOT);
+    if (cliBin !== null) {
       // Resolve report path using the same legacy-fallback rule as Step 4
       // (SPRINT-NN_REPORT.md preferred; fall back to REPORT.md for legacy sprints)
       const reportPath = reportFile; // reportFile is already resolved via legacy-fallback in Step 4
