@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.25.0",
-  "generated_at": "2026-09-02T00:04:55.802Z",
+  "generated_at": "2026-09-02T00:17:06.921Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -235,7 +235,7 @@
     },
     {
       "path": ".cleargate/scripts/close_sprint.mjs",
-      "sha256": "9d7e9d164942654b695d83041a76b25b6372f33971d9fdefe8a595475568946f",
+      "sha256": "f4def83540a903b095a4cbbd4fea433bec2031a2362ffd70479eb15f595fbe20",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -250,6 +250,13 @@
     {
       "path": ".cleargate/scripts/constants.mjs",
       "sha256": "f669b158cc8cee0d70a527938f88010262ec8c0f8353c4416d519a46a251eb7e",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/count_tokens.mjs",
+      "sha256": "60735fb54c196c915e385b591935cca6bef61e72aa73816b2355ced9a4aa0222",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -292,6 +299,13 @@
     {
       "path": ".cleargate/scripts/launch_wave.mjs",
       "sha256": "aa04cd43184cd035d8a659649bdfc0587cbfbdfe41922463c5a4ce5ba9b83c8d",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/lib/ledger-digest.mjs",
+      "sha256": "2febdf476d856e92b470ad47d45d4cf64a24d558f84d614de604cc0d05cbe144",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -341,6 +355,13 @@
     {
       "path": ".cleargate/scripts/prep_qa_context.mjs",
       "sha256": "68d69678f72fd6aa64bcf359fbd74f9c5b6b4fe598374f13c1261148b9907cab",
+      "tier": "script",
+      "overwrite_policy": "always",
+      "preserve_on_uninstall": false
+    },
+    {
+      "path": ".cleargate/scripts/prep_reporter_context.mjs",
+      "sha256": "31d041da56a7187e480a1b7100c0828310f56ff5ed4b29d6fe9c6c7111c45f06",
       "tier": "script",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false

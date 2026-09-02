@@ -1177,8 +1177,34 @@ async function main() {
         throw new Error(`bundle not written at ${bundlePath}`);
       }
       const bundleSize = fs.statSync(bundlePath).size;
+      // BUG-082: the size floor is a smoke test for a TRUNCATED bundle, but it
+      // cannot tell "truncated" from "legitimately smaller". A sprint with no
+      // token ledger (BUG-081 — hooks never fired, cross-repo orchestration,
+      // a hand-run sprint) produces a valid bundle that is simply missing its
+      // cost section, and the floor rejected it — blocking close for absent
+      // data rather than bad data.
+      //
+      // Structure is the real signal: a bundle that carries its required
+      // headings is complete regardless of byte count.
+      const bundleText = fs.readFileSync(bundlePath, 'utf8');
+      const REQUIRED_BUNDLE_HEADINGS = [
+        '## Sprint Plan Slices',
+        '## State.json Summary',
+        '## REPORT Template',
+      ];
+      const missingHeadings = REQUIRED_BUNDLE_HEADINGS.filter((h) => !bundleText.includes(h));
+      if (bundleSize < MIN_BUNDLE_BYTES && missingHeadings.length > 0) {
+        throw new Error(
+          `bundle too small (${bundleSize}B < ${MIN_BUNDLE_BYTES}B) AND missing required ` +
+          `section(s) ${missingHeadings.join(', ')}: ${bundlePath}`
+        );
+      }
       if (bundleSize < MIN_BUNDLE_BYTES) {
-        throw new Error(`bundle too small (${bundleSize}B < ${MIN_BUNDLE_BYTES}B): ${bundlePath}`);
+        process.stdout.write(
+          `Step 3.5 note: bundle is ${bundleSize}B (under the ${MIN_BUNDLE_BYTES}B smoke-test floor) ` +
+          `but carries every required section — accepting. A sprint with no token ledger is ` +
+          `legitimately smaller.\n`
+        );
       }
       process.stdout.write(`Step 3.5 passed: ${bundlePath} ready (${Math.round(bundleSize / 1024)}KB).\n`);
     } catch (err) {
