@@ -93,13 +93,30 @@ echo "=== BUG-077: back-sync precedes parent rollup ==="
 
 LINE_D="$(grep -n '── Step 2.6d:' "${CLOSE_SCRIPT}" | head -1 | cut -d: -f1)"
 LINE_C="$(grep -n '── Step 2.6c:' "${CLOSE_SCRIPT}" | head -1 | cut -d: -f1)"
+LINE_6="$(grep -n '── Step 2.6:' "${CLOSE_SCRIPT}" | head -1 | cut -d: -f1)"
+LINE_B="$(grep -n '── Step 2.6b:' "${CLOSE_SCRIPT}" | head -1 | cut -d: -f1)"
 
-if [[ -z "${LINE_D}" || -z "${LINE_C}" ]]; then
-  bad "BUG-077: could not locate both step markers (2.6d=${LINE_D:-?} 2.6c=${LINE_C:-?})"
-elif (( LINE_D < LINE_C )); then
-  ok "BUG-077: Step 2.6d (line ${LINE_D}) precedes Step 2.6c (line ${LINE_C})"
+# The invariant: WRITERS (2.6d stories, 2.6c parents) precede JUDGES (2.6
+# lifecycle, 2.6b orphan drift). Asserting only 2.6d < 2.6c — as an earlier
+# version of this test did — passes while 2.6 still fails a first close.
+if [[ -z "${LINE_D}" || -z "${LINE_C}" || -z "${LINE_6}" || -z "${LINE_B}" ]]; then
+  bad "BUG-077: could not locate all four step markers (d=${LINE_D:-?} c=${LINE_C:-?} 6=${LINE_6:-?} b=${LINE_B:-?})"
 else
-  bad "BUG-077: Step 2.6c (line ${LINE_C}) runs before Step 2.6d (line ${LINE_D}) — parents cannot roll up on a first close"
+  if (( LINE_D < LINE_C )); then
+    ok "BUG-077: 2.6d (${LINE_D}) precedes 2.6c (${LINE_C}) — stories synced before parents roll up"
+  else
+    bad "BUG-077: 2.6c (${LINE_C}) runs before 2.6d (${LINE_D}) — parents judged on unsynced children"
+  fi
+  if (( LINE_C < LINE_6 )); then
+    ok "BUG-077: 2.6c (${LINE_C}) precedes 2.6 (${LINE_6}) — parents set before lifecycle judges them"
+  else
+    bad "BUG-077: 2.6 (${LINE_6}) runs before 2.6c (${LINE_C}) — lifecycle drifts on an unrolled epic"
+  fi
+  if (( LINE_D < LINE_6 && LINE_C < LINE_B )); then
+    ok "BUG-077: all writers (2.6d, 2.6c) precede all judges (2.6, 2.6b)"
+  else
+    bad "BUG-077: a judge runs before a writer — first close will report false drift"
+  fi
 fi
 
 echo

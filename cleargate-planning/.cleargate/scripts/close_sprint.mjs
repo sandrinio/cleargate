@@ -243,6 +243,19 @@ function resolveCliBin(repoRoot, rel = 'cli.js') {
   return null;
 }
 
+/** BUG-083: read just the `status:` value from a file's frontmatter. Null if unreadable. */
+function readFmStatus(filePath) {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (!fm) return null;
+    const m = fm[1].match(/^status:\s*"?([^"\n#]+)"?\s*$/m);
+    return m ? m[1].trim() : null;
+  } catch {
+    return null;
+  }
+}
+
 function usage() {
   process.stderr.write(
     'Usage: node close_sprint.mjs <sprint-id> [--assume-ack | --report-body-stdin]\n' +
@@ -471,126 +484,28 @@ async function main() {
     }
   }
 
-  // ── Step 2.6: Lifecycle Reconciliation (CR-017) ──────────────────────────
-  // Block close if any artifact referenced in this sprint's commits is still
-  // non-terminal in pending-sync (excluding carry_over: true).
-  // Invokes `cleargate sprint reconcile-lifecycle <sprint-id>` CLI wrapper.
-  // Fail-open if CLI binary is unavailable (non-blocking for test environments).
-  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 skips this step entirely (non-fatal).
-  process.stdout.write('Step 2.6: running lifecycle reconciliation...\n');
-  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK === '1') {
-    process.stdout.write('Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
-  } else {
-    try {
-      // Resolve CLI binary: prefer local dist/
-      const cliBin = resolveCliBin(REPO_ROOT);
+  // BUG-077 (round 2): 2.6d must precede EVERY step that judges an artifact by
+  // its FRONTMATTER status — not just 2.6c. Step 2.6 (lifecycle reconciliation)
+  // and 2.6b read the same field, and 2.6d is the only step that writes it from
+  // state.json. Round 1 moved 2.6d ahead of 2.6c alone, which left 2.6 still
+  // failing a first close with:
+  //   DRIFT: STORY-NNN-NN status=Approved in pending-sync, expected Completed
+  // for a story that was Done in state.json all along. Found by running a close
+  // on a fresh consumer project rather than on an already-half-closed sprint.
 
-      if (cliBin !== null) {
-        // Read sprint start_date from frontmatter for the --since arg
-        let sinceArg = '';
-        try {
-          const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
-          if (fs.existsSync(pendingDir)) {
-            const entries = fs.readdirSync(pendingDir);
-            const sprintFile = entries.find(
-              (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
-            );
-            if (sprintFile) {
-              const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
-              const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
-              if (startDateMatch && startDateMatch[1]) {
-                sinceArg = `--since ${startDateMatch[1].trim()}`;
-              }
-            }
-          }
-        } catch { /* ignore */ }
-
-        const reconcileArgs = [
-          'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
-        ];
-        if (sinceArg) reconcileArgs.push(sinceArg);
-        const reconcileCmd = reconcileArgs.join(' ');
-
-        try {
-          execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
-          process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
-        } catch (_reconcileErr) {
-          // Exit code 1 from reconcile-lifecycle means drift found
-          process.stderr.write(
-            'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
-            '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
-            '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
-          );
-          process.exit(1);
-        }
-      } else {
-        process.stdout.write('Step 2.6 skipped: no built CLI found in cleargate-cli/dist or node_modules/cleargate/dist (non-fatal).\n');
-      }
-    } catch (step26Err) {
-      // Unexpected error — fail-open (log but do not block)
-      process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
-    }
-  }
-
-  // ── Step 2.6b: Cross-Sprint Orphan Drift Check (CR-048) ─────────────────────
-  // Detect items in pending-sync/ with non-terminal status whose state.json entry
-  // in any closed sprint shows Done — i.e., completed but never archived.
-  // Always enforced (STORY-070-01: execution_mode retired).
-  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 also skips this step.
-  process.stdout.write('Step 2.6b: checking for cross-sprint orphan drift...\n');
-  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
-    try {
-      const cliBin26b = resolveCliBin(REPO_ROOT);
-      if (cliBin26b !== null) {
-        // Dynamic import the compiled reconciler function
-        const reconcilerMod = await import(
-          (resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
-        ).catch(() => null);
-
-        if (reconcilerMod && typeof reconcilerMod.reconcileCrossSprintOrphans === 'function') {
-          const deliveryRoot = path.join(REPO_ROOT, '.cleargate', 'delivery');
-          const sprintRunsRoot = path.join(REPO_ROOT, '.cleargate', 'sprint-runs');
-          const orphanResult = reconcilerMod.reconcileCrossSprintOrphans({ deliveryRoot, sprintRunsRoot });
-
-          if (orphanResult.drift.length > 0) {
-            process.stderr.write(
-              `Step 2.6b: ${orphanResult.drift.length} cross-sprint orphan(s) detected:\n`
-            );
-            for (const item of orphanResult.drift) {
-              process.stderr.write(
-                `  ${item.id} — status: ${item.pending_sync_status} in pending-sync, ` +
-                `state: ${item.state_json_state} in ${item.state_json_sprint}\n`
-              );
-            }
-            // Always enforced (STORY-070-01: execution_mode retired)
-            process.stderr.write(
-              'close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close.\n' +
-              '  Archive the listed items and re-run close_sprint.mjs.\n'
-            );
-            process.exit(1);
-          } else {
-            process.stdout.write('Step 2.6b passed: no cross-sprint orphan drift.\n');
-          }
-        } else {
-          process.stdout.write('Step 2.6b skipped: reconcileCrossSprintOrphans not available in built CLI.\n');
-        }
-      } else {
-        process.stdout.write('Step 2.6b skipped: CLI binary not found (non-fatal).\n');
-      }
-    } catch (step26bErr) {
-      process.stderr.write(`Step 2.6b warning: orphan check unavailable: ${step26bErr.message}\n`);
-    }
-  } else {
-    process.stdout.write('Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
-  }
-
-  // BUG-077 ORDERING FIX: 2.6d (child backsync) now runs BEFORE 2.6c (parent
-  // rollup). 2.6c judges a parent by its children's FRONTMATTER status, but
-  // 2.6d is the step that flips those children from their in-flight status to
-  // `Completed` using state.json. With 2.6c first, every parent saw
-  // "0/N children terminal" and halted on a first close, even when every child
-  // was Done in state.json. The two steps have no dependency in this direction,
-  // so swapping them makes the rollup see the truth it was always meant to read.
+  // BUG-077 (round 3 — the actual invariant): every step that WRITES an
+  // artifact's frontmatter status must precede every step that JUDGES it.
+  //
+  //   writers: 2.6d (stories, from state.json)  2.6c (parents, from children)
+  //   judges:  2.6  (lifecycle reconciliation)  2.6b (cross-sprint orphan drift)
+  //
+  // Order is therefore 2.6d -> 2.6c -> 2.6 -> 2.6b.
+  //
+  // Round 1 moved 2.6d ahead of 2.6c only, and 2.6 still failed a first close on
+  // the stories. Round 2 moved 2.6d ahead of 2.6 as well, and 2.6 then failed on
+  // the EPIC — because 2.6d syncs stories but 2.6c is what sets parents, and it
+  // was still running last. Each round fixed the symptom in front of it; this is
+  // the rule that covers all of them.
 
   // ── Step 2.6d: Same-Sprint Story Backsync (BUG-032) ─────────────────────────
   // Flip all Done-state stories in the closing sprint from their current
@@ -711,11 +626,56 @@ async function main() {
 
       for (const f of flips26c) {
         setFrontmatterStatusAtomic(f.parent_path, 'Completed');
+
+        // BUG-083: flipping status is only half of terminality — the lifecycle
+        // reconciler also requires a Completed artifact to LIVE in archive/.
+        // 2.6d already archives the stories it syncs; 2.6c did not archive the
+        // parents it flips, so Step 2.6 then reported the self-contradictory
+        //   "DRIFT: EPIC-001 status=Completed in pending-sync, expected Completed"
+        // — a status comparison that passes, describing a location problem.
+        let archivedTo = null;
+        try {
+          if (path.dirname(f.parent_path).endsWith(path.join('delivery', 'pending-sync'))) {
+            fs.mkdirSync(archiveRoot26c, { recursive: true });
+            const dest = path.join(archiveRoot26c, path.basename(f.parent_path));
+            fs.renameSync(f.parent_path, dest);
+            archivedTo = path.relative(deliveryRoot26c, dest);
+          }
+        } catch (archErr) {
+          process.stderr.write(
+            `Step 2.6c warning: ${f.parent_id} flipped to Completed but could not be archived: ${archErr.message}\n`
+          );
+        }
+
         process.stdout.write(
           `Step 2.6c: ${f.parent_id} status ${f.current_status} → Completed` +
           ` (${f.terminal_children.length}/${f.terminal_children.length} children Completed:` +
-          ` ${f.terminal_children.join(', ')})\n`,
+          ` ${f.terminal_children.join(', ')})` +
+          (archivedTo ? ` → archived at ${archivedTo}` : '') + `\n`,
         );
+      }
+
+      // BUG-083 (round 2): archive any parent that is ALREADY Completed but still
+      // sitting in pending-sync. The flip loop above only reaches parents it
+      // changes; a parent completed by an earlier close attempt — or edited by
+      // hand — is a no-op there and never gets moved, so Step 2.6 reports drift
+      // forever. Terminality is status AND location; reconcile both.
+      for (const r of results26c) {
+        if (flips26c.includes(r)) continue;
+        try {
+          const rawFm = readFmStatus(r.parent_path);
+          if (rawFm !== 'Completed') continue;
+          if (!path.dirname(r.parent_path).endsWith(path.join('delivery', 'pending-sync'))) continue;
+          fs.mkdirSync(archiveRoot26c, { recursive: true });
+          const dest = path.join(archiveRoot26c, path.basename(r.parent_path));
+          fs.renameSync(r.parent_path, dest);
+          process.stdout.write(
+            `Step 2.6c: ${r.parent_id} already Completed but in pending-sync → archived at ` +
+            `${path.relative(deliveryRoot26c, dest)}\n`
+          );
+        } catch {
+          // Best-effort: a parent we cannot read or move is left for Step 2.6 to report.
+        }
       }
 
       if (halts26c.length > 0) {
@@ -732,6 +692,127 @@ async function main() {
     process.stderr.write(`Step 2.6c warning: parent rollup unavailable: ${e26c.message}\n`);
   }
   } // end CLEARGATE_SKIP_PARENT_ROLLUP else block
+
+  // ── Step 2.6: Lifecycle Reconciliation (CR-017) ──────────────────────────
+  // Block close if any artifact referenced in this sprint's commits is still
+  // non-terminal in pending-sync (excluding carry_over: true).
+  // Invokes `cleargate sprint reconcile-lifecycle <sprint-id>` CLI wrapper.
+  // Fail-open if CLI binary is unavailable (non-blocking for test environments).
+  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 skips this step entirely (non-fatal).
+  process.stdout.write('Step 2.6: running lifecycle reconciliation...\n');
+  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK === '1') {
+    process.stdout.write('Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
+  } else {
+    try {
+      // Resolve CLI binary: prefer local dist/
+      const cliBin = resolveCliBin(REPO_ROOT);
+
+      if (cliBin !== null) {
+        // Read sprint start_date from frontmatter for the --since arg
+        let sinceArg = '';
+        try {
+          const pendingDir = path.join(REPO_ROOT, '.cleargate', 'delivery', 'pending-sync');
+          if (fs.existsSync(pendingDir)) {
+            const entries = fs.readdirSync(pendingDir);
+            const sprintFile = entries.find(
+              (e) => (e.startsWith(`${sprintId}_`) || e === `${sprintId}.md`) && e.endsWith('.md')
+            );
+            if (sprintFile) {
+              const raw = fs.readFileSync(path.join(pendingDir, sprintFile), 'utf8');
+              const startDateMatch = /^start_date:\s*(.+)$/m.exec(raw);
+              if (startDateMatch && startDateMatch[1]) {
+                sinceArg = `--since ${startDateMatch[1].trim()}`;
+              }
+            }
+          }
+        } catch { /* ignore */ }
+
+        const reconcileArgs = [
+          'node', JSON.stringify(cliBin), 'sprint', 'reconcile-lifecycle', JSON.stringify(sprintId),
+        ];
+        if (sinceArg) reconcileArgs.push(sinceArg);
+        const reconcileCmd = reconcileArgs.join(' ');
+
+        try {
+          execSync(reconcileCmd, { stdio: 'inherit', env: process.env });
+          process.stdout.write('Step 2.6 passed: lifecycle reconciliation clean.\n');
+        } catch (_reconcileErr) {
+          // Exit code 1 from reconcile-lifecycle means drift found
+          process.stderr.write(
+            'close_sprint: Step 2.6 FAILED — lifecycle drift blocks sprint close.\n' +
+            '  Remediate the listed artifacts and re-run close_sprint.mjs.\n' +
+            '  To carry over an artifact: set carry_over: true in its frontmatter.\n'
+          );
+          process.exit(1);
+        }
+      } else {
+        process.stdout.write('Step 2.6 skipped: no built CLI found in cleargate-cli/dist or node_modules/cleargate/dist (non-fatal).\n');
+      }
+    } catch (step26Err) {
+      // Unexpected error — fail-open (log but do not block)
+      process.stderr.write(`Step 2.6 warning: lifecycle reconciliation unavailable: ${step26Err.message}\n`);
+    }
+  }
+
+  // ── Step 2.6b: Cross-Sprint Orphan Drift Check (CR-048) ─────────────────────
+  // Detect items in pending-sync/ with non-terminal status whose state.json entry
+  // in any closed sprint shows Done — i.e., completed but never archived.
+  // Always enforced (STORY-070-01: execution_mode retired).
+  // Test seam: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 also skips this step.
+  process.stdout.write('Step 2.6b: checking for cross-sprint orphan drift...\n');
+  if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
+    try {
+      const cliBin26b = resolveCliBin(REPO_ROOT);
+      if (cliBin26b !== null) {
+        // Dynamic import the compiled reconciler function
+        const reconcilerMod = await import(
+          (resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
+        ).catch(() => null);
+
+        if (reconcilerMod && typeof reconcilerMod.reconcileCrossSprintOrphans === 'function') {
+          const deliveryRoot = path.join(REPO_ROOT, '.cleargate', 'delivery');
+          const sprintRunsRoot = path.join(REPO_ROOT, '.cleargate', 'sprint-runs');
+          const orphanResult = reconcilerMod.reconcileCrossSprintOrphans({ deliveryRoot, sprintRunsRoot });
+
+          if (orphanResult.drift.length > 0) {
+            process.stderr.write(
+              `Step 2.6b: ${orphanResult.drift.length} cross-sprint orphan(s) detected:\n`
+            );
+            for (const item of orphanResult.drift) {
+              process.stderr.write(
+                `  ${item.id} — status: ${item.pending_sync_status} in pending-sync, ` +
+                `state: ${item.state_json_state} in ${item.state_json_sprint}\n`
+              );
+            }
+            // Always enforced (STORY-070-01: execution_mode retired)
+            process.stderr.write(
+              'close_sprint: Step 2.6b FAILED — orphan drift blocks sprint close.\n' +
+              '  Archive the listed items and re-run close_sprint.mjs.\n'
+            );
+            process.exit(1);
+          } else {
+            process.stdout.write('Step 2.6b passed: no cross-sprint orphan drift.\n');
+          }
+        } else {
+          process.stdout.write('Step 2.6b skipped: reconcileCrossSprintOrphans not available in built CLI.\n');
+        }
+      } else {
+        process.stdout.write('Step 2.6b skipped: CLI binary not found (non-fatal).\n');
+      }
+    } catch (step26bErr) {
+      process.stderr.write(`Step 2.6b warning: orphan check unavailable: ${step26bErr.message}\n`);
+    }
+  } else {
+    process.stdout.write('Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).\n');
+  }
+
+  // BUG-077 ORDERING FIX: 2.6d (child backsync) now runs BEFORE 2.6c (parent
+  // rollup). 2.6c judges a parent by its children's FRONTMATTER status, but
+  // 2.6d is the step that flips those children from their in-flight status to
+  // `Completed` using state.json. With 2.6c first, every parent saw
+  // "0/N children terminal" and halted on a first close, even when every child
+  // was Done in state.json. The two steps have no dependency in this direction,
+  // so swapping them makes the rollup see the truth it was always meant to read.
 
   // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
   // Block close if any .worktrees/STORY-* path is present.
