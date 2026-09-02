@@ -2,7 +2,7 @@
 bug_id: BUG-068
 parent_ref: ""
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: "SPRINT-15"
 carry_over: false
 status: Completed
 severity: P0-Critical
