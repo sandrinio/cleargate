@@ -12,6 +12,12 @@ Thumbs.db
 # canonical definitions live in cleargate-planning/.claude/ and ARE tracked)
 /.claude/
 
+# Codex local bootstrap (root-only — this repo's own Codex workspace, like /.claude/;
+# the Codex payload shipped to users is built by EPIC-058 under cleargate-cli/scaffold/hosts/codex/)
+/.codex/
+/.agents/
+/AGENTS.md
+
 # Private project notes (design guides, reference docs) — not shipped
 /knowledge/
 
