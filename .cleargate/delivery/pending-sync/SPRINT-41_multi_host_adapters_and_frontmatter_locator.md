@@ -60,13 +60,13 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
-| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M0 step B0 + M3 wave11 | n | low |
+| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M3 | n | low |
 | `BUG-067` | Frontmatter locator: find the fence, don't require offset 0 (3 call sites) | standard | M0 | n | med |
 | `STORY-058-01` | Tracked `scaffold/core` + `scaffold/hosts/claude` payload layout | standard | M1 | n | high |
 | `STORY-058-02` | Repoint scaffold-source validation + manifest builder; drop the sibling dependency | standard | M1 | n | med |
 | `STORY-058-03` | `HostAdapter` contract, registry, behavior-preserving Claude adapter | standard | M2 | n | med |
 | `STORY-058-04` | `cleargate init --host` selector parsing and profile expansion | standard | M2 | y | med |
-| `STORY-058-05` | `cleargate host list \| add \| remove` lifecycle commands | standard | M3 (after -06; SDR 2026-09-24) | y | med |
+| `STORY-058-05` | `cleargate host` list/add/remove lifecycle commands | standard | M3 | y | med |
 | `STORY-058-06` | Install-manifest host ownership fields with legacy snapshot migration | standard | M3 | y | med |
 | `STORY-058-07` | Per-host scoping of doctor, upgrade, uninstall, prune | standard | M3 | n | med |
 | `STORY-058-08` | Clean-room verification procedure + `cleargate verify-install` driver | standard | M4 | y | low |
@@ -76,7 +76,9 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | n | med |
 | `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | n | low |
 | `BUG-089` | PreToolUse gates exit 1, which Claude Code does not treat as blocking — both gates fail open | standard | M0 | n | low |
-| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M0→M1 wave3 (SDR confirmed) | n | med |
+| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M1 | n | med |
+
+**Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.
 
 **Decomposition notes.** L3 stories include `STORY-058-07`, `-10`, `-12`, and `-13`; `-07`'s §3.2 carries an explicit split
 signal for the Architect (split into two L2s if `doctor`+`drift` and `upgrade`+`uninstall`+`prune`
