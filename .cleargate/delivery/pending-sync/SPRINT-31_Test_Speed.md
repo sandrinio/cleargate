@@ -36,6 +36,11 @@ context_source: |
   Small-sprint shape on purpose: 1 epic, 2 stories, both ≤ L2. No mid-sprint
   growth expected. mcp/ + admin/ runner splits are explicit follow-ups, not
   this sprint.
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-09-06T16:42:48Z
+  transition: ready-for-execution
 stamp_error: no ledger rows for work_item_id SPRINT-31
 draft_tokens:
   input: null
@@ -43,15 +48,20 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-24T18:16:17Z
+  last_stamp: 2026-09-06T16:42:48Z
   sessions: []
-cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-05-24T18:16:17Z
 ---
 
 # SPRINT-31: Test Speed — Runner Split + Scoped QA
+
+> **SUPERSEDED 2026-09-06 — retired as a sprint, not as work.**
+> This sprint was drafted 2026-05-24 and never kicked off. Its goal and both child stories move
+> under [[SPRINT-42]], which extends [[EPIC-031]] with STORY-031-03/04/05 from the 2026-09-06
+> execution-efficiency audit. [[STORY-031-01]] (runner split) and [[STORY-031-02]] (QA-Verify
+> scoping) remain valid and are **not** cancelled — 031-02 needs one correction first: it derives
+> touched files from the QA Context Pack, which `prep_qa_context.mjs` has never once generated.
+> Repoint it at the §Test Stack rows STORY-031-03 adds.
+> Do not kick off SPRINT-31. Retained for its evidence trail (SPRINT-30 ledger, 204-file census).
 
 ## 0. Sprint Goal
 

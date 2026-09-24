@@ -6,12 +6,22 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md"
-last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest: "2026-09-06T16:42:49.756Z"
 last_ingest_commit: "766a05cb70d9f8951f856151ef0e94d1b6a7d64e"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-31"
 ---
 
 # SPRINT-31: Test Speed — Runner Split + Scoped QA
+
+> **SUPERSEDED 2026-09-06 — retired as a sprint, not as work.**
+> This sprint was drafted 2026-05-24 and never kicked off. Its goal and both child stories move
+> under [[SPRINT-42]], which extends [[EPIC-031]] with STORY-031-03/04/05 from the 2026-09-06
+> execution-efficiency audit. [[STORY-031-01]] (runner split) and [[STORY-031-02]] (QA-Verify
+> scoping) remain valid and are **not** cancelled — 031-02 needs one correction first: it derives
+> touched files from the QA Context Pack, which `prep_qa_context.mjs` has never once generated.
+> Repoint it at the §Test Stack rows STORY-031-03 adds.
+> Do not kick off SPRINT-31. Retained for its evidence trail (SPRINT-30 ledger, 204-file census).
 
 ## 0. Sprint Goal
 
@@ -21,24 +31,7 @@ repo: "planning"
 
 ## 1. Consolidated Deliverables
 
-| ID | Type | Lane | Milestone | Parallel? | Bounce exposure |
-|---|---|---|---|---|---|
-| STORY-031-01 | Story | standard | M1 | y | low |
-| STORY-031-02 | Story | standard | M1 | y | low |
-
-Both stories are L1/L2 and touch disjoint surfaces (cleargate-cli/package.json + test files vs cleargate-planning/.claude/agents/qa.md + template). They can run in parallel in M1.
-
-## 2. Execution Strategy
-
-_(Architect Sprint Design Review writes §§2.1–2.4 at kickoff. Pre-SDR placeholder.)_
-
-### 2.1 Phase Plan
-
-- **M1 (only milestone):** STORY-031-01 + STORY-031-02 in parallel. Both merge before sprint close.
-
-### 2.2 Merge Ordering
-
-[+1,601 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md]
+[+2,235 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-31_Test_Speed.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

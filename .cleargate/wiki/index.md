@@ -18,7 +18,8 @@
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
-- [[SPRINT-40]] (sprint) — Active — Field-Defect Remediation
+- [[SPRINT-41]] (sprint) — Active — Multi-Host Adapters & Frontmatter Locator
+- [[SPRINT-42]] (sprint) — Draft — Execution-Loop Efficiency + Developer Context
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -33,6 +34,11 @@
 - [[CR-113]] (cr) — Draft — One bounded-marker grammar
 - [[CR-114]] (cr) — Draft — Record the relocation whitespace scar where a reader will find it
 - [[CR-115]] (cr) — Approved — `cleargate upgrade` announces what it is about to overwrite, before it overwrites it
+- [[CR-119]] (cr) — Triaged — The story template's §3.1 cannot express a greenfield story
+- [[CR-120]] (cr) — Draft — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs`
+- [[CR-121]] (cr) — Draft — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
+- [[CR-122]] (cr) — Draft — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
+- [[CR-123]] (cr) — Approved — Tested work items declare SPIDR coverage, and their scenarios must match it
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
@@ -53,16 +59,24 @@
 - [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
-- [[BUG-067]] (bug) — Draft — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
+- [[BUG-067]] (bug) — Triaged — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 - [[BUG-070]] (bug) — Triaged — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
+- [[BUG-072]] (bug) — Triaged — `listed-item` counts only `- ` bullets, so an ordered list scores zero
+- [[BUG-074]] (bug) — Triaged — A state transition dirties the tree and fails the next story's bounce-readiness check
+- [[BUG-075]] (bug) — Triaged — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing — a story can reach `Done` without QA
+- [[BUG-085]] (bug) — Ready — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
+- [[BUG-086]] (bug) — Draft — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
+- [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
+- [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
+- [[BUG-089]] (bug) — Ready — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
 
 ## Archive
 
 - Epics: 33 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 33 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Sprints: 34 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 104 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 39 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- CRs: 105 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 45 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 

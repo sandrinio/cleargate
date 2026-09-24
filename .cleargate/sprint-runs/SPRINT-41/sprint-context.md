@@ -1,0 +1,89 @@
+---
+sprint_id: "SPRINT-41"
+created_at: "2026-09-04T12:08:02.222Z"
+last_updated: "2026-09-11T22:19:09Z"
+---
+
+# Sprint Context
+
+Per-sprint audit artefact. Populated at sprint init (M1 planning) and re-touched after each story merges. Referenced from every Developer/QA/Architect task brief so all agents start from the same baseline.
+
+## Sprint Goal
+
+Make the frontmatter locator position-independent so freshly scaffolded work items stop corrupting and start gating, and land the first slice of multi-host adapter support with Claude Code proven intact by clean-room verification.
+
+## Goal Acceptance Check
+
+In a clean-room install created per `.cleargate/knowledge/clean-room-verification.md`, all five hold:
+
+1. `cleargate new epic <slug>` followed by one PostToolUse stamp-and-gate cycle leaves the item with a single frontmatter block and a passing gate — `gate-check.log` records `stamp=0 gate=0`, not today's `stamp=0 gate=1`.
+2. `cleargate init` with no host flag reproduces the recorded Claude baseline (SessionStart banner, PreToolUse and PostToolUse hooks firing, agents and skills discoverable, `cleargate doctor` exit 0).
+3. `cleargate init --host all` reproduces that same Claude baseline unchanged, and `.claude/settings.json` carries no Codex-owned hook entries.
+4. `cleargate init --host codex` produces an install whose hooks fire in a real Codex CLI session.
+
+5. A real story completes four role dispatches plus a DevOps merge under the pinned standalone Codex, with required hook firing, actual edit/dispatch denials under negative controls, and positive controls. Both loop transport and enforcement parity pass; missing required enforcement is not waived by disclosure. Token metering is either verified or explicitly unavailable.
+
+Condition 1 is [[BUG-067]]. Conditions 2–3 are [[STORY-058-09]]. Condition 4 is [[STORY-058-10]] and [[STORY-058-11]]. Condition 5 is [[STORY-058-12]] and [[STORY-058-13]]. Disk checks are automated; live host behavior requires recorded session evidence.
+
+## Locked Versions
+
+Frozen dependency versions for this sprint. Orchestrator populates from `package.json` snapshots at sprint init; Developers must not upgrade these mid-sprint without an explicit CR.
+
+| Package | Version |
+|---------|---------|
+| Node    | `>=24.0.0` |
+| TypeScript | `^5.8.0` |
+| (add rows per workspace below) |  |
+
+## Test Stack
+
+Repo-derived test conventions. Written best-effort by `cleargate init` (detector); the
+orchestrator may correct any field per-sprint. Agents read this block as OVERRIDING their
+built-in defaults — Developer/QA/Architect use these values, not any hardcoded runner.
+
+| Field | Value |
+|-------|-------|
+| Backend runner    | _(e.g. `pytest -q` · `go test ./...` · `npm test` · populate at init)_ |
+| Frontend runner   | _(e.g. js unit runner — blank if single-stack)_ |
+| Typecheck command | _(e.g. `mypy .` · `tsc --noEmit` · blank if none)_ |
+| Red-test naming   | _(e.g. `*.red.test.tsx` · `test_*_red.py` · `*_red_test.go` · populate at init)_ |
+
+_If unresolved at init: leave the table stubbed. The pre-gate scan emits a one-line
+"test_stack unresolved — populate sprint_context.md §Test Stack" advisory and treats the
+typecheck/test gate as advisory (not FAIL) until populated. (§0.5 backstop decision.)_
+
+## Cross-Cutting Rules
+
+Sprint-wide architecture rules and UI/API tokens that every story must honour. Populated from the parent Epic's `<architecture_rules>` block.
+
+1. (rule 1)
+2. (rule 2)
+3. (rule 3)
+
+## Active FLASHCARD Tags
+
+FLASHCARD tags that appear in any story's `<agent_context>` for this sprint. Auto-populated by grepping `.cleargate/FLASHCARD.md` at sprint init. Agents: grep the flashcard file for each tag listed here before starting work.
+
+- `#tag1` — one-line summary of the most recent card
+- `#tag2` — one-line summary
+
+## Adjacent Implementations (Reuse First)
+
+Exported helpers and modules from already-merged stories in this sprint. The Architect updates this section after each story merges. Developers check here before writing new helpers — if the module already exists, import it; duplication is a kick-back criterion.
+
+| Story | Module / Export | Path |
+|-------|----------------|------|
+| (populated as stories merge) | | |
+
+## Mid-Sprint Amendments
+
+_(populated by Architect on CR:scope-change or CR:approach-change; never rewrite, only append. Format: '<ISO-ts> · <ID> · <one-line note>')_
+
+- 2026-09-11T22:19:09Z · CR:scope-change · Owner “continue please” approves BUG-085, STORY-058-12, STORY-058-13, and BUG-089 for append-only roster registration; preserve the original 12 entries and event prefix.
+- 2026-09-11T22:19:09Z · BUG-089 / BUG-085 · M0 shared Claude block-signal repair → backed-up targeted live re-sync → new Claude session with denials and dispatch-identity proof → BUG-067. BUG-085 durable detect-and-warn remains M3 after canonical relocation; meta-repo only, no silent auto-overwrite. Architect review still required.
+- 2026-09-11T22:19:09Z · STORY-058-12 / STORY-058-13 · M6 after M5; common verdict schema, serial synchronous halt, two skill files. Primary evidence uses pinned standalone Codex 0.154.0-alpha.6.2 with recorded artifact SHA-256 and human trust of exact hooks; embedded same-version smoke is secondary. Transport and enforcement must both pass; metering may be unavailable.
+- 2026-09-11T22:19:09Z · STORY-058-10 · AGENTS.md with host-correct content, live Agent-matcher proof with no hook-ordering assumption; command rules deferred under EPIC-058. No missing mandatory gate may silently pass the final Codex evidence.
+- 2026-09-11T22:19:09Z · Execution route · Current Codex task has no Workflow tool; installed sprint-execution §2/§C.0 requires a halt. This amendment approves planning scope, not a dispatch bypass. Continue implementation on a Workflow-capable host or obtain an explicit bootstrap exception.
+- 2026-09-11T23:30:09Z · CR:approach-change · Owner directs autonomous decisions and delivery tested in new Dev/CG_TEST. The bounded exception and clean isolated baseline are approved as recorded in bootstrap-decision.md; this supersedes the prior execution-route halt and serial-only target. Build and qualify a distributable Codex wave executor with native roles before drained-wave cutover; keep normal gates, truthful evidence, Claude compatibility, and separate installed-host acceptance.
+- 2026-09-24T21:53:44Z · CR-123 · CR:scope-change — owner directs CR-123 (SPIDR scenario coverage) into the sprint and a re-plan; one append-only genesis event, 16 existing records preserved. Off critical path; not M0. Seeded order: after M0, before STORY-058-01 (which copies the templates CR-123 edits into scaffold/core). Architect SDR confirms.
+- 2026-09-24T22:30:23Z · CR:approach-change · Owner rulings after the SDR halt (BUG-046 reachability): cli items run on story branches in the cleargate-cli main checkout, orchestrated serially by hand without /workflows (extends the 09-11 bootstrap exception); local-only cli merges; dist rebuild and live .claude/ re-sync at boundaries. BUG-085's M0 step uses this repo's real live .claude/ with backup + restart + denial proof. All .cleargate/ changes committed to main. Full SDR output: plans/sdr-halt-2026-09-24.md.

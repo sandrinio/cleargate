@@ -5,29 +5,26 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 status: Draft
-approved: false
-ambiguity: 🟡 Medium
-context_source: "Direct owner request 2026-08-27: preserve the existing Claude install path, add a dedicated Copilot/Codex path, and allow all coding-agent adapters to coexist in one target repository; verified against cleargate-cli source and [[PROPOSAL-074]]."
+approved: true
+approved_by: sandrinio
+approved_at: 2026-09-04T00:00:00Z
+proposal_gate_waiver:
+  approved_by: sandrinio
+  approved_at: 2026-09-04T00:00:00Z
+  reason: Direct owner approval 2026-09-04. This epic was requested directly by the owner with sharp intent and inline references; no upstream proposal or initiative exists to point parent_ref at. Recorded per the documented direct-approval waiver path rather than authoring a retrospective proposal.
+ambiguity: 🟢 Low
+context_source: "Direct owner request 2026-08-27: preserve the existing Claude install path, add a dedicated Copilot/Codex path, and allow all coding-agent adapters to coexist in one target repository; verified against cleargate-cli source and [[PROPOSAL-074]]. AMENDED 2026-09-04 on direct owner request: add clean-room install verification as a first-class requirement — a newly created empty directory under ~/Documents/Dev/ is installed from the packed artifact and Claude Code is re-verified there as the regression baseline. Codex surface re-verified 2026-09-04 against Codex CLI v0.153.2 docs (hooks.json event/payload parity with Claude Code, .codex/agents/*.toml, .agents/skills/**, [mcp_servers] TOML, AGENTS.md 32 KiB project_doc_max_bytes cap, no CLAUDE_PROJECT_DIR equivalent)."
 owner: sandrinio
 target_date: 2026-11-30
 created_at: 2026-08-27T17:10:12Z
-updated_at: 2026-08-27T17:10:12Z
+updated_at: 2026-09-11T22:25:54Z
 created_at_version: cleargate@0.24.2
-updated_at_version: cleargate@0.24.2
+updated_at_version: 11c29fd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: parent-approved
-      detail: "OR-group failed — all alternatives failed: parent-approved-proposal / parent-approved-initiative: parent_ref is unset and no parent-approval waiver is recorded. Either set parent_ref to the parent work-item id (e.g. \"INITIATIVE-002\") or to a path relative to this file, or record the waiver as proposal_gate_waiver with approved_by + approved_at (top-level approved_by + approved_at also count)"
-  last_gate_check: 2026-08-27T17:13:06Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-09-11T22:29:15Z
   transition: ready-for-decomposition
 pushed_by: null
 pushed_at: null
@@ -37,6 +34,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id EPIC-058
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-09-04T08:19:13Z
+  sessions: []
 ---
 
 # EPIC-058: Additive Multi-Host Execution Adapters
@@ -57,6 +63,8 @@ last_synced_body_sha: null
     <rule>Host hook files MUST be thin adapters into normalized `cleargate hook` CLI handlers; planning gates, wiki ingest, dispatch attribution, and ledger policy MUST NOT be reimplemented separately per host.</rule>
     <rule>Token usage is recorded only when the host supplies verifiable telemetry; unavailable usage MUST be represented explicitly and MUST NOT be synthesized as zero tokens.</rule>
     <rule>Upgrade, doctor, and uninstall MUST operate per installed-host ownership recorded in the install manifest while preserving user-authored instructions, hooks, agents, skills, and MCP servers.</rule>
+    <rule>No change to install, upgrade, doctor, or uninstall is DONE until it has been validated by a CLEAN-ROOM install: a newly created empty directory outside this repository, installed from the packed artifact, exercised by a real host session. Green unit and fixture tests are necessary but NOT sufficient evidence.</rule>
+    <rule>Claude Code is the REGRESSION BASELINE, not merely one adapter among three. Every clean-room run MUST re-verify the Claude path — no-flag install and `--host all` — and any Claude-observable behavior change is a release blocker regardless of whether Copilot or Codex work.</rule>
   </architecture_rules>
   <target_files>
     <file path="cleargate-cli/scaffold/core/**" action="create" />
@@ -82,6 +90,11 @@ last_synced_body_sha: null
     <file path="cleargate-cli/test/commands/init.node.test.ts" action="modify" />
     <file path="cleargate-cli/test/commands/upgrade.node.test.ts" action="modify" />
     <file path="cleargate-cli/test/commands/uninstall.node.test.ts" action="modify" />
+    <file path="cleargate-cli/src/commands/verify-install.ts" action="create" />
+    <file path="cleargate-cli/test/e2e/clean-room-claude-baseline.integration.node.test.ts" action="create" />
+    <file path=".cleargate/knowledge/clean-room-verification.md" action="create" />
+    <file path="cleargate-cli/test/integration/foreign-repo.integration.node.test.ts" action="modify" />
+    <file path="cleargate-cli/test/e2e/dogfood-install.integration.node.test.ts" action="modify" />
   </target_files>
 </agent_context>
 ```
@@ -98,8 +111,10 @@ Introduce a host-adapter architecture inside the standalone `cleargate-cli` npm 
 - A packed `cleargate` npm artifact installs successfully with `init`, `--host claude`, `--host copilot`, `--host codex`, `--host portable`, and `--host all`, with fixture assertions covering every emitted file.
 - An `--host all` target passes `cleargate doctor --host all` with Claude, Copilot, and Codex assets present simultaneously and one shared `.cleargate/**` tree.
 - Adding, upgrading, or removing one host leaves byte-identical user-owned and other-host-owned files, verified by integration tests.
-- One real story completes the ClearGate Architect → QA-Red → Developer → QA-Verify → DevOps loop in Copilot and one in Codex without manually copying scaffold files.
+- One real story completes the ClearGate Architect → QA-Red → Developer → QA-Verify → DevOps loop in Copilot and one in Codex without manually copying scaffold files. SPRINT-41's Codex witness requires both loop transport and enforcement parity: mandatory hooks must fire and deny negative controls; disclosed missing enforcement is not a passing port. Unverifiable token usage is explicitly unavailable, never synthesized.
 - Existing Claude-only packed-install tests and downstream behavior remain green with `cleargate init` invoked without a host flag.
+- A clean-room install into a newly created empty directory outside this repository succeeds for `cleargate init` with no host flag and reproduces the approved Claude baseline in a real Claude Code session: SessionStart banner, PreToolUse/PostToolUse hooks firing, agents and skills discoverable by name, and `cleargate doctor` clean.
+- The same clean-room procedure re-run with `--host all` reproduces that Claude baseline unchanged, proving the Codex and Copilot surfaces are inert from Claude's perspective.
 
 ## 2. Scope Boundaries
 
@@ -110,12 +125,16 @@ Introduce a host-adapter architecture inside the standalone `cleargate-cli` npm 
 - [ ] Add `cleargate host list|add|remove` lifecycle commands for adapters after initial installation.
 - [ ] Install and surgically maintain Claude assets under `CLAUDE.md` and `.claude/**`.
 - [ ] Install and surgically maintain Copilot assets under `AGENTS.md`, `.agents/skills/**`, `.github/agents/**`, `.github/hooks/**`, `.mcp.json`, and `.vscode/mcp.json` where required by the supported VS Code runtime.
-- [ ] Install and surgically maintain Codex assets under `AGENTS.md`, `.agents/skills/**`, `.codex/agents/**`, `.codex/hooks.json`, `.codex/config.toml`, and `.codex/rules/**` where command policy requires them.
+- [ ] Install and surgically maintain Codex assets under `AGENTS.md`, `.agents/skills/**`, `.codex/agents/**`, `.codex/hooks.json`, and `.codex/config.toml`. `.codex/rules/**` command-policy work remains epic scope but is explicitly deferred from SPRINT-41 for later decomposition before epic close (owner continuation 2026-09-11 UTC); do not imply it shipped with STORY-058-10.
 - [ ] Convert the current ClearGate roles to native Copilot and Codex definitions while preserving role boundaries and structured handoff schemas.
-- [ ] Split shared skills from host-specific sprint dispatch instructions; keep flashcard and other portable skills single-source.
+- [ ] Split shared skills from host-specific sprint dispatch instructions; keep flashcard and other portable skills single-source (owned by [[STORY-058-12]]).
 - [ ] Normalize Claude, Copilot, and Codex lifecycle payloads into shared CLI hook handlers.
 - [ ] Extend install-manifest ownership, drift detection, upgrade, restart warnings, doctor, pruning, and uninstall to operate on a set of installed hosts.
 - [ ] Add packed-tarball integration tests and documented real-runtime smoke runs for Copilot CLI, VS Code Copilot, and Codex CLI.
+- [ ] Author a repeatable **clean-room verification procedure** committed at `.cleargate/knowledge/clean-room-verification.md`: create a new empty directory outside this repository, `git init` it, install the packed `cleargate` artifact, run `cleargate init` for each host selector, and record pass/fail per checked behavior.
+- [ ] Build `cleargate verify-install` (or an equivalent scripted driver) that executes the machine-checkable portion of that procedure — file presence, manifest host set, `doctor` exit code, hook wiring — so the only manual step left is starting a real host session.
+- [ ] Execute the clean-room procedure against **Claude Code specifically** as the regression baseline, for both the no-flag install and `--host all`, and record the resulting evidence artifact as a gating input to sprint close.
+- [ ] Verify in the clean room that the Claude path is unchanged: SessionStart banner text, PreToolUse and PostToolUse hooks firing on a work-item edit, `.claude/agents/**` and `.claude/skills/**` discovery, MCP registration, sprint state init, and `cleargate doctor` exit 0.
 
 **❌ OUT-OF-SCOPE (Do NOT Build This)**
 - Supporting Antigravity, Cursor, Windsurf, Cline, Aider, or hosts other than Claude Code, GitHub Copilot, and OpenAI Codex.
@@ -139,6 +158,8 @@ Introduce a host-adapter architecture inside the standalone `cleargate-cli` npm 
 | Token accounting | Claude transcript parsing cannot be reused as proof of Copilot or Codex usage; ledger rows must distinguish measured, partial, and unavailable metering. |
 | Security | Repository hook commands use pinned `cleargate` versions and must not interpolate untrusted hook payload fields into shell commands. |
 | Runtime support | Copilot CLI and VS Code Copilot are separate clients with overlapping but non-identical instruction, hook, and MCP discovery rules; both require smoke coverage. |
+| Clean-room evidence | Claude regression MUST be proven by a real install into a newly created empty directory outside this repository, exercised by a real Claude Code session. The in-repo dogfood instance cannot serve as the witness: `/.claude/**` is gitignored, hand-synced, and fully untracked (CR-099), so it reflects this machine's history rather than what the payload actually installs — the exact blind spot that let BUG-024 ship its own fix while still running the buggy hook. |
+| Clean-room location | The verification directory is created under `~/Documents/Dev/` as a sibling of this repository, NOT inside it and NOT under `/tmp`, so the run exercises real filesystem, git, and npm resolution rather than a fixture harness. It is disposable and recreated per verification run. |
 
 ## Existing Surfaces
 
@@ -152,6 +173,9 @@ Introduce a host-adapter architecture inside the standalone `cleargate-cli` npm 
 - **Surface:** `cleargate-cli/src/commands/upgrade.ts:208` — Claude-specific instruction/settings surgery and session-loaded path handling; route these behaviors through adapters.
 - **Surface:** `cleargate-cli/src/commands/uninstall.ts:325` — Claude-specific marker validation and hook cleanup; replace with selected-host cleanup plus shared-core preservation policy.
 - **Surface:** `cleargate-cli/src/lib/scaffold-source.ts:27` — local scaffold validation currently requires `.claude`, `.cleargate`, and `CLAUDE.md`; validate the new tracked core/host source layout instead.
+- **Surface:** `cleargate-cli/test/integration/foreign-repo.integration.node.test.ts:1` — existing `cleargate init` coverage into blank Node and bare Go fixtures, then scaffold-lint / gate-run / wiki-build against the installed scaffold. This is the nearest existing surface to the clean-room requirement, but it runs in an OS tmpdir against `initHandler()` in-process — it never installs the packed artifact and never starts a real host session, so it cannot witness packaging or hook-wiring defects.
+- **Surface:** `cleargate-cli/test/e2e/dogfood-install.integration.node.test.ts` — existing end-to-end install check; extend for per-host assertions.
+- **Surface:** `cleargate-cli/scripts/verify-pack.mjs` — existing packed-tarball verification invoked from `prepublishOnly`; the natural place to hang the machine-checkable half of clean-room verification.
 - **Coverage of this epic's scope:** Partial. The CLI already has safe copying, bounded-block injection, JSON merging, manifests, drift, upgrade, doctor, and uninstall, but each lifecycle path assumes one Claude-shaped payload and no host ownership.
 
 ## Prior work
@@ -159,6 +183,7 @@ Introduce a host-adapter architecture inside the standalone `cleargate-cli` npm 
 - [[PROPOSAL-074]] defines the closest `HostAdapter` precedent and host-neutral `.cleargate/**` boundary, but targets Antigravity, assumes a single host per repository, and keeps canonical payloads outside the standalone npm repository.
 - [[BUG-043]] and [[CR-105]] cover safe bounded-block placement and preservation of user prose during instruction-file updates.
 - No indexed prior work fully covers additive Claude + Copilot + Codex installation, simultaneous adapters, normalized hooks, MCP variants, and per-host doctor/upgrade/uninstall.
+- Re-checked 2026-09-04 via `cleargate-wiki-query` before the clean-room amendment. Confirms this epic as the canonical multi-host reference; [[PROPOSAL-074]] remains the Antigravity-specific single-host instance; [[SPRINT-34]] "Polyglot Portability Hardening" is adjacent (language/test-stack portability, not harness portability) and shares the "remove hardcoded assumptions" principle but does not overlap. **Clean-room install verification returned no prior work at all** — it is net-new to this epic, which is why it is specified here rather than inherited.
 
 ## Why not simpler?
 
@@ -273,6 +298,31 @@ Feature: Additive multi-host ClearGate installation
     Then no file outside the checkout is read
     And the packed tarball contains the core plus all three host payloads
     And installing from that tarball passes the Claude, portable, and all-host fixtures
+
+  Scenario: Clean-room install reproduces the Claude baseline
+    Given a newly created empty directory under `~/Documents/Dev/` outside this repository
+    And that directory is a fresh `git init` repository with no prior ClearGate state
+    And the packed `cleargate` artifact installed into it
+    When the user runs `cleargate init` with no host flag
+    Then installation completes with exit code 0
+    And a real Claude Code session started in that directory emits the ClearGate SessionStart banner
+    And a PreToolUse hook fires on an edit to a `.cleargate/delivery/**` work item
+    And the matching PostToolUse stamp-and-gate hook fires and reports its ingest result
+    And the ClearGate agents and skills are discoverable by name in that session
+    And `cleargate doctor` exits 0
+
+  Scenario: Claude keeps working when other hosts are installed alongside it
+    Given a clean-room directory installed with `cleargate init --host all`
+    When a real Claude Code session runs every check from the no-flag baseline scenario
+    Then each Claude-observable behavior from that baseline is reproduced unchanged
+    And the presence of `.codex/**`, `.github/**`, and `AGENTS.md` alters no Claude-observable behavior
+    And `.claude/settings.json` contains no Codex- or Copilot-owned hook entries
+
+  Scenario: Clean-room evidence gates the release
+    Given a change to install, upgrade, doctor, or uninstall
+    When the clean-room procedure has not been executed and its evidence artifact recorded for that change
+    Then the epic's Definition of Done is not met
+    And the change is not eligible for release
 ```
 
 ## 6. AI Interrogation Loop (Human Input Required)
@@ -286,12 +336,12 @@ No unresolved questions. The following decisions are integrated throughout this 
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
 Requirements to pass to Green (Ready for Coding Agent):
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter. (Direct owner approval 2026-09-04; parent-approved satisfied via proposal_gate_waiver.)
 - [x] The `<agent_context>` block is complete and validated.
 - [x] §4 Technical Grounding contains 100% real, verified existing file paths; proposed files are explicitly marked as creates in §0.
 - [x] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).

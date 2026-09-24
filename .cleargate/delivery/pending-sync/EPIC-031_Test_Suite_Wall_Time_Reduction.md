@@ -46,6 +46,11 @@ created_at: 2026-05-24T00:00:00Z
 updated_at: 2026-05-24T00:00:00Z
 created_at_version: cleargate@0.13.0
 updated_at_version: cleargate@0.13.0
+cached_gate_result:
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-09-06T16:42:11Z
+  transition: ready-for-decomposition
 stamp_error: no ledger rows for work_item_id EPIC-031
 draft_tokens:
   input: null
@@ -53,16 +58,8 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-05-24T18:14:20Z
+  last_stamp: 2026-09-06T16:42:10Z
   sessions: []
-cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: reuse-audit-recorded
-      detail: "'## Existing Surfaces' not found in body"
-    - id: simplest-form-justified
-      detail: "'## Why not simpler?' not found in body"
-  last_gate_check: 2026-05-24T18:14:21Z
 ---
 
 # EPIC-031: Test Suite Wall-Time Reduction — Split Runner + Scoped QA
@@ -229,6 +226,46 @@ And the QA report explicitly justifies the full-suite run in the Notes section
 ## 6. AI Interrogation Loop
 
 Resolved at draft time — no remaining open questions for the human. (Ambiguity 🟡 Medium → 🟢 Low after Brief approval.)
+
+## 7. Scope Extension — 2026-09-06
+
+This Epic was drafted 2026-05-24 against SPRINT-30 evidence. The 2026-09-06 execution-efficiency
+audit re-measured the same domain from SPRINT-39/40 transcripts and found three things the original
+decomposition did not cover. The Epic is **extended**, not superseded; the runner-split thesis
+(STORY-031-01) stands unchanged.
+
+Three child stories are added:
+
+| Story | Adds |
+|---|---|
+| STORY-031-03 | §Test Stack declares the targeted runner + the known-failure list; corrects `devops.md:56/:146`, which prescribe `npm test -- <path>` — an argument `run-default-tests.mjs:23-30` silently discards before globbing all 272 files. |
+| STORY-031-04 | QA-Red stops running the full suite. Measured at 44.2 min in SPRINT-39 (5 QA-Red runs + 1 TPV run) — 45% of all transcribed full-suite time, and larger than Developer+QA-Verify (27.6 min) or DevOps (26.9 min). The original decomposition addressed QA-Verify only. |
+| STORY-031-05 | `init_sprint.mjs` carries §Test Stack forward across the sprint boundary. SPRINT-39's hand-written version is already lost; SPRINT-41 is executing 12 items against placeholder rows. |
+
+**Correction to STORY-031-02.** As drafted it derives touched files from "the canonical adjacent-test
+mapping in the QA Context Pack". That pack has never been generated — `prep_qa_context.mjs` has
+produced **zero** `.qa-context-*` files across every sprint, and `SKILL.md` never invokes the script.
+STORY-031-02 must be repointed at the §Test Stack rows STORY-031-03 adds before it is executable.
+
+**`test:file` already exists.** `cleargate-cli/package.json:48` has shipped a correct single-file
+runner all along, measured at 0.8–1.9 s against a 5.5–9.6 min suite. Much of this Epic's value is
+surfacing it rather than building anything.
+
+## Existing Surfaces
+
+- **Surface:** `cleargate-cli/package.json:48` — `test:file`, a working single-file runner carrying `--experimental-test-module-mocks` and `CLEARGATE_CI_ACK=1`.
+- **Coverage of this requirement:** ~40% of the Epic's goal — the targeted-run capability exists and needs no code. It is referenced in no agent prompt, no `sprint-context.md`, and no flashcard, so nothing reaches for it.
+- **Surface:** `cleargate-cli/scripts/run-default-tests.mjs:23-30` — builds its file list via `globSync` and never reads `process.argv`, so `npm test -- <path>` silently runs everything.
+- **Coverage of this requirement:** none — this is the trap the Epic routes around. Patching it is explicitly rejected: 14 archived work items use `npm test -- <substring>` as a surviving vitest-era name filter and would flip from silently-green to `exit 1`.
+- **Surface:** `.cleargate/templates/sprint_context.md:36-43` — the §Test Stack table, whose preamble already declares it overrides agents' built-in defaults.
+- **Coverage of this requirement:** partial — correct authority and location for the runner declaration; missing the rows.
+- **Surface:** `.claude/agents/qa.md` "Lane-Aware Playbook" — already scopes `standard`-lane QA to touched-file neighbourhoods.
+- **Coverage of this requirement:** partial — the scoping intent exists but cites `pack.adjacent.touched_files`, a field of a pack that is never generated, so it resolves to nothing and QA falls back to everything.
+
+## Why not simpler?
+
+- **Smallest existing surface that could carry this:** `cleargate-cli/package.json:48` (`test:file`) plus `.cleargate/templates/sprint_context.md:36-43` (§Test Stack). Between them they cover the targeted-run half of this Epic with no new code at all.
+- **Why isn't extension / parameterization / config sufficient?** For the 2026-09-06 additions it *is* — STORY-031-03/04 are pure declaration and prompt corrections, and that is deliberately how they are scoped. Extension is not sufficient for the original STORY-031-01 thesis: splitting the suite into parallel-unit and serial-db requires changing how the runner partitions files, because `--test-concurrency=1` is global today solely to avoid FK-constraint conflicts on the shared DB, and no configuration flag expresses "serialise only the DB-touching files". That is the one genuinely net-new piece of work in the Epic.
 
 ---
 

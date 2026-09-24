@@ -6,11 +6,11 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 47 | 0 | 33 |
-| Sprints | 40 | 1 | 34 |
+| Epics | 47 | 0 | 35 |
+| Sprints | 42 | 1 | 35 |
 | Proposals | 16 | 0 | 14 |
-| CRs | 112 | 0 | 89 |
-| Bugs | 62 | 0 | 33 |
+| CRs | 118 | 0 | 91 |
+| Bugs | 76 | 0 | 35 |
 | Spikes | 0 | 0 | 0 |
 
 ## Active Epics
@@ -71,7 +71,11 @@ _No active epics._
 
 - [[BUG-032]] (bugs) — Completed
 
+- [[BUG-036]] (bugs) — Completed
+
 - [[BUG-040]] (bugs) — Completed
+
+- [[BUG-041]] (bugs) — Completed
 
 - [[BUG-042]] (bugs) — Completed
 
@@ -253,6 +257,10 @@ _No active epics._
 
 - [[CR-087]] (crs) — Completed
 
+- [[CR-103]] (crs) — Completed
+
+- [[CR-104]] (crs) — Completed
+
 - [[CR-105]] (crs) — Completed
 
 - [[CR-106]] (crs) — Completed
@@ -327,7 +335,11 @@ _No active epics._
 
 - [[EPIC-043]] (epics) — Completed
 
+- [[EPIC-044]] (epics) — Completed
+
 - [[EPIC-045]] (epics) — Completed
+
+- [[EPIC-046]] (epics) — Completed
 
 - [[EPIC-051]] (epics) — Completed
 
@@ -428,5 +440,7 @@ _No active epics._
 - [[SPRINT-38]] (sprints) — Completed
 
 - [[SPRINT-39]] (sprints) — Completed
+
+- [[SPRINT-40]] (sprints) — Completed
 
 

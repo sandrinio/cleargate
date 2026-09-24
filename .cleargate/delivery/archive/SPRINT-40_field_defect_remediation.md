@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: ""
 source_tool: ""
-status: Active
+status: Completed
 start_date: 2026-08-31
 end_date: 2026-09-04
 synced_at: ""

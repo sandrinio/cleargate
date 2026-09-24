@@ -5,10 +5,12 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: cli,frontmatter,stamp
-status: Draft
+status: Triaged
 severity: P1-High
 reporter: orchestrator
-approved: false
+approved: true
+approved_by: sandrinio
+approved_at: 2026-09-04T00:00:00Z
 context_source: measured reproduction in .cleargate/sprint-runs/SPRINT-39/CR-108-tpv.md §7 (RULING 1), against unmodified stamp-frontmatter.ts on main
 created_at: 2026-08-29T00:00:00Z
 updated_at: 2026-08-29T00:00:00Z
@@ -22,6 +24,15 @@ cached_gate_result:
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
+stamp_error: no ledger rows for work_item_id BUG-067
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-09-04T08:38:26Z
+  sessions: []
 ---
 
 # BUG-067 — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
@@ -168,6 +179,43 @@ before hand-cleaning it silently loses `bug_id`/`status`/`severity` at exit 0. C
 this defect and does not touch the defective line — but it widens the reachable set from 16 files to
 every item authored thereafter. **That is the argument for fixing this early, not eventually.**
 
+### FIELD CONFIRMATION — 2026-09-04, published v0.26.1, clean-room install
+
+The prediction above has now happened. CR-108 shipped, and this was reproduced **outside the meta-repo**
+in a clean-room install (`~/Documents/Dev/cg-cleanroom-20260904`: fresh `git init`, installed from the
+**global npm `cleargate@0.26.1`**, verified a real install and not a link). The corpus census figure of
+"0 files carrying the signature" is now stale — a fresh install produces one on its first authoring cycle.
+
+Verbatim, `.cleargate/hook-log/gate-check.log` after `cleargate new epic` + one PostToolUse fire:
+
+```
+[stamped] …/EPIC-001_cleanroom_probe.md (EPIC-001)
+[cleargate gate] error: unable to detect work-item type from frontmatter in: …/EPIC-001_cleanroom_probe.md
+wiki ingest: create epics/EPIC-001.md
+[2026-09-04T08:20:25Z] stamp=0 gate=1 ingest=0 file=…/EPIC-001_cleanroom_probe.md
+```
+
+The file afterwards: a phantom block at line 1 holding only `stamp_error` + `draft_tokens`, closing at
+line 11; the real frontmatter demoted below a second fence at line 46, where `epic_id: "EPIC-001"` now
+sits as body text. `stamp=0` — exit clean, exactly as this bug describes.
+
+**Two facts this run adds beyond the original filing:**
+
+1. **A SECOND consumer, on the read path, independent of any stamp.** `cleargate gate check` fails on a
+   freshly scaffolded item *before* stamping ever runs — `[cleargate gate] error: cannot parse
+   frontmatter`, reproduced on `bug` and `cr` scaffolds. Root cause is the same positional assumption in
+   a different module: `cleargate-cli/src/wiki/parse-frontmatter.ts:17` **throws** on
+   `lines[0] !== '---'`. So the locator defect is not confined to the two write-path sniffs — it is
+   three call sites sharing one assumption, and a locate-the-fence fix must cover all three.
+2. **Severity is understated as "silent data loss on stamp".** The compound effect is that a fresh
+   install's very first `cleargate new` → edit cycle produces an item that can **never** pass a gate:
+   the write path corrupts the frontmatter and the read path then cannot type it. Ingest still exits 0
+   and creates a wiki page, so the wiki shows an item the gate cannot evaluate.
+
+Discovered while running the clean-room verification that [[EPIC-058]] now mandates as a standing
+requirement. This is the argument for that requirement: the meta-repo dogfood never surfaced it,
+because agents hand-clean `<instructions>` out before the hook matters.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**
@@ -179,6 +227,13 @@ every item authored thereafter. **That is the argument for fixing this early, no
 - `cleargate-cli/test/lib/stamp-frontmatter.node.test.ts` — regression coverage.
 - `.cleargate/scripts/prep_doc_refresh.mjs` — `:160/:165/:170/:175`, the checklist that instructs
   the corrupting command; should not emit a `stamp` instruction for `<instructions>`-led files.
+- `cleargate-cli/src/wiki/parse-frontmatter.ts` — **`:17`, the READ-path third site** (added
+  2026-09-04 by clean-room field confirmation). `if (lines[0] !== '---') throw` is the same
+  positional assumption as the two write-path sniffs, and it is what makes `cleargate gate check`
+  fail on a fresh scaffold before any stamp runs. Fixing only the two write sites leaves every
+  freshly scaffolded item ungateable and would again read as fixed.
+- `cleargate-cli/test/e2e/` — a clean-room regression that scaffolds, fires the PostToolUse chain,
+  and asserts the item still gates. The meta-repo dogfood structurally cannot catch this.
 
 **Do NOT modify:** the `<instructions>`-verbatim scaffold contract. OD-3 ruled no-stripping on
 measured evidence, and §4 case 7's byte-identical requirement depends on it. The fix belongs in the
@@ -210,7 +265,16 @@ assertion therefore already exists and is already failing — this bug is what m
 - [[CR-108]] — does not cause this defect but widens its blast radius; the two must not be conflated.
 - [[BUG-047]] — `Gate Cache Stamp Deadlock`, stamp-adjacent, unrelated mechanism.
 
+- [[EPIC-058]] — `Additive Multi-Host Execution Adapters`; its clean-room verification requirement is
+  what produced this bug's 2026-09-04 field confirmation. Scheduling the two together is deliberate.
+
 No prior item reports this defect. Found 2026-08-29 by the CR-108 mutation gate.
+
+Re-checked 2026-09-04 via `cleargate-wiki-query` before filing what would have been a duplicate
+(`BUG-085`, scaffolded then removed unauthored). The query returned this item as the direct match;
+[[BUG-047]] `Gate Cache Stamp Deadlock` was the only near-miss and remains a distinct mechanism. The
+new read-path symptom was folded in here rather than filed separately, because it is the same
+positional assumption in a third module and one locate-the-fence fix closes all three sites.
 
 ## Context Source
 
@@ -218,20 +282,30 @@ No prior item reports this defect. Found 2026-08-29 by the CR-108 mutation gate.
 unmodified module, eight-template sweep, caller census, and 523-file corpus census. Filed per that
 ruling's obligation **O1**, which requires the bug exist before CR-108 merges.
 
+**Amended 2026-09-04** on direct owner request, after clean-room field confirmation against published
+`cleargate@0.26.1` in `~/Documents/Dev/cg-cleanroom-20260904`. Adds §3 FIELD CONFIRMATION, the
+read-path third call site (`parse-frontmatter.ts:17`) to §4, and proposes scheduling alongside
+[[EPIC-058]].
+
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 
-**Current Status: 🟡**
+**Current Status: 🟢**
 
 - [x] The defect is reproduced with exact input and output.
 - [x] Root cause is identified to a single line.
 - [x] Blast radius is measured, not estimated.
 - [x] Prior work is checked and recorded.
-- [ ] Fix approach is chosen (locate-the-fence vs. fail-closed) — needs human direction.
-- [ ] Scheduling decided — not in SPRINT-39; CR-108 TPV ruled it out of that CR's scope.
+- [x] Fix approach is chosen: **locate-the-fence**, decided 2026-09-04 on direct owner approval.
+- [x] Scheduling decided — proposed for [[SPRINT-41]] at M0, sequenced first and alone, on direct
+      owner instruction 2026-09-04. (Was: not in SPRINT-39; CR-108 TPV ruled it out of that CR's scope.)
 
-**Open question for the human:** fix properly (locate the frontmatter fence wherever it is) or fail
-closed for now (detect `<instructions>`, refuse to stamp, exit non-zero with a clear message)? The
-second is a few lines and removes the data-loss risk immediately; the first is the real fix. Both
-are compatible — fail-closed first is a safe interim.
+**RESOLVED 2026-09-04 — locate-the-fence.** Direct owner approval. The locator finds the frontmatter
+fence wherever it sits rather than requiring offset 0, applied to all three call sites named in §4:
+`stamp-frontmatter.ts:54`, `stamp-tokens.ts:92`, and `parse-frontmatter.ts:17`. This is §4's own
+suggested direction and the same discipline [[BUG-041]] applied to id grammars.
+
+Fail-closed remains available as an in-sprint fallback **only** if the Developer finds the locator
+change materially larger than scoped; taking it requires re-dispatch, not a silent substitution,
+because a fail-closed stamp still leaves every freshly scaffolded item ungateable on the read path.
