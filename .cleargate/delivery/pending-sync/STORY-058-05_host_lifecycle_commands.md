@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:56Z
+  last_stamp: 2026-09-24T22:38:12Z
   sessions: []
 ---
 
@@ -125,6 +125,13 @@ Feature: Host lifecycle commands
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File (new) | `cleargate-cli/src/commands/host.ts` |
+| Related Files | `cleargate-cli/src/cli.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/lib/manifest.ts` |
+| New Files Needed | Yes |
+
 - `cleargate-cli/src/commands/host.ts` — **create**. The `list` / `add` / `remove` subcommands.
 - `cleargate-cli/src/cli.ts` — **modify**. Register the `host` command group.
 - `cleargate-cli/src/hosts/registry.ts` — **modify**. Resolve the adapter to add or remove.

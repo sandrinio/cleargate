@@ -35,12 +35,14 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id STORY-058-13
 draft_tokens:
   input: null
   output: null
   cache_creation: null
   cache_read: null
   model: null
+  last_stamp: 2026-09-24T22:39:10Z
   sessions: []
 ---
 
@@ -165,9 +167,9 @@ Feature: Codex loop-completion evidence
 
 | Item | Value |
 |---|---|
-| Primary File | `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md` |
-| Related Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md`, `cleargate-planning/.claude/settings.json` |
-| New Files Needed | Yes — `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md`; plus the Codex branch of `cleargate-cli/src/commands/verify-install.ts` created by [[STORY-058-08]] |
+| Primary File (new) | `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md` |
+| Related Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md`, `cleargate-planning/.claude/settings.json`, `cleargate-cli/src/commands/verify-install.ts` |
+| New Files Needed | Yes — see Primary File |
 
 ### 3.2 Technical Logic
 

@@ -38,7 +38,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T19:05:59Z
+  last_stamp: 2026-09-24T22:39:31Z
   sessions: []
 ---
 
@@ -205,12 +205,17 @@ reader is not misled by the wiki page.)*
 
 **In scope — investigate and change:**
 
-- `.claude/**` (live, gitignored) — the drifted instance; 8 files listed in §3.
-- `cleargate-planning/.claude/**` — canonical; read-only reference for the comparison.
+- The live .claude/** instance (gitignored, per-machine) — the drifted copy; 8 files listed in §3.
+  It is inventoried and, per Task Breakdown, backed up and re-synced from canonical as this bug's
+  M0 operational step — inspected and rewritten by that step, not part of this story's tracked
+  commit surface.
+- `cleargate-planning/.claude/**` — canonical; the comparison baseline and the tree this bug's
+  commit actually touches.
 - `cleargate-cli/src/commands/doctor.ts` — most likely home for a `canonical ↔ live` parity check.
-- `.claude/hooks/session-start.sh` + canonical twin — candidate surface for a drift banner line.
-- `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh:46,61-64` — the canonical-only pin that
-  let this through; needs either a live-mode variant or an explicit recorded limitation.
+- `cleargate-planning/.claude/hooks/session-start.sh` — candidate surface for a drift banner line
+  (the live mirror is re-synced from this at the M0 step, not edited directly).
+- `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` — lines 46 and 61-64, the canonical-only
+  pin that let this through; needs either a live-mode variant or an explicit recorded limitation.
 - `CLAUDE.md` → *Dogfood split — canonical vs live* — the prose mitigation that has now failed twice.
 
 **Explicitly out of scope — do not touch:**

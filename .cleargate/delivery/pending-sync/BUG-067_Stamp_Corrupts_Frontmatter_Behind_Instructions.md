@@ -31,7 +31,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T08:38:26Z
+  last_stamp: 2026-09-24T22:39:21Z
   sessions: []
 ---
 
@@ -223,9 +223,11 @@ because agents hand-clean `<instructions>` out before the hook matters.
 - `cleargate-cli/src/commands/stamp-tokens.ts` — **`:92`, the identical sniff, and the one that is
   hook-wired.** Both must move together; fixing only `stamp-frontmatter.ts` leaves the automatic
   path intact and would read as fixed.
-- `.claude/hooks/stamp-and-gate.sh` — `:30`, the automatic trigger.
+- `cleargate-planning/.claude/hooks/stamp-and-gate.sh` — line 30, the automatic trigger. The live
+  .claude/hooks/stamp-and-gate.sh mirror is re-synced from canonical at the sprint boundary
+  (CLAUDE.md's dogfood-split rule); this story edits canonical only.
 - `cleargate-cli/test/lib/stamp-frontmatter.node.test.ts` — regression coverage.
-- `.cleargate/scripts/prep_doc_refresh.mjs` — `:160/:165/:170/:175`, the checklist that instructs
+- `.cleargate/scripts/prep_doc_refresh.mjs` — lines 160, 165, 170, and 175, the checklist that instructs
   the corrupting command; should not emit a `stamp` instruction for `<instructions>`-led files.
 - `cleargate-cli/src/wiki/parse-frontmatter.ts` — **`:17`, the READ-path third site** (added
   2026-09-04 by clean-room field confirmation). `if (lines[0] !== '---') throw` is the same

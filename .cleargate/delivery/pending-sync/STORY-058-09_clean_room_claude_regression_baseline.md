@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:58Z
+  last_stamp: 2026-09-24T22:38:49Z
   sessions: []
 ---
 
@@ -118,8 +118,15 @@ Feature: Claude regression baseline in a clean room
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File (new) | `cleargate-cli/test/e2e/clean-room-claude-baseline.integration.node.test.ts` |
+| Related Files | `.cleargate/knowledge/clean-room-verification.md` |
+| New Files Needed | `.cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md` |
+
 - `cleargate-cli/test/e2e/clean-room-claude-baseline.integration.node.test.ts` — **create**. The automated subset.
-- `.cleargate/sprint-runs/<id>/clean-room-evidence.md` — **create**. Per-run evidence artifact.
+- `.cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md` — **create**. Per-run evidence artifact.
 - `.cleargate/knowledge/clean-room-verification.md` — **reference**. The procedure being executed.
 
 ### 3.2 Technical Logic

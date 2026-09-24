@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:55Z
+  last_stamp: 2026-09-24T22:38:05Z
   sessions: []
 ---
 
@@ -114,6 +114,13 @@ Feature: Self-contained package build
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/lib/scaffold-source.ts` |
+| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/scripts/verify-pack.mjs`, `cleargate-cli/package.json` |
+| New Files Needed | No |
+
 - `cleargate-cli/src/lib/scaffold-source.ts` — **modify**. `REQUIRED_ITEMS` currently `['.claude', '.cleargate', 'CLAUDE.md']`; becomes the core/host layout check. `ScaffoldSourceError` codes preserved.
 - `cleargate-cli/scripts/build-manifest.ts` — **modify**. Tier classifier currently hard-coded to `.claude/**`.
 - `cleargate-cli/scripts/verify-pack.mjs` — **modify**. Add core + host root assertions.

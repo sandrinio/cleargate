@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:56Z
+  last_stamp: 2026-09-24T22:38:08Z
   sessions: []
 ---
 
@@ -121,6 +121,13 @@ Feature: Host selector parsing
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/cli.ts` |
+| Related Files | `cleargate-cli/src/commands/init.ts`, `cleargate-cli/src/hosts/registry.ts` |
+| New Files Needed | No |
+
 - `cleargate-cli/src/cli.ts` — **modify**. Register the repeatable `--host` option on the `init` command (currently `--force`, `--yes`, `--pin <ver>`, `--from-source <path>`).
 - `cleargate-cli/src/commands/init.ts` — **modify**. Normalize the requested set, then invoke each resolved adapter.
 - `cleargate-cli/src/hosts/registry.ts` — **modify**. Profile expansion derived from registered members.

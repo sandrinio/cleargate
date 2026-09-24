@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:58Z
+  last_stamp: 2026-09-24T22:38:30Z
   sessions: []
 ---
 
@@ -153,6 +153,13 @@ Feature: Codex payload surfaces
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File (new) | `cleargate-cli/src/hosts/codex.ts` |
+| Related Files | `cleargate-cli/src/init/inject-claude-md.ts`, `cleargate-cli/src/hooks/hook-signal.ts` |
+| New Files Needed | `cleargate-cli/scaffold/hosts/codex/**`, `cleargate-cli/src/init/inject-codex-config.ts`, `cleargate-cli/scaffold/hosts/codex/agents-md-block.md` |
+
 - `cleargate-cli/scaffold/hosts/codex/**` — **create**. `.codex/hooks.json` template and the `AGENTS.md` block source.
 - `cleargate-cli/src/hosts/codex.ts` — **create**. The Codex adapter.
 - `cleargate-cli/src/init/inject-claude-md.ts` — **modify**. Generalize the bounded-block injector to serve both `CLAUDE.md` and `AGENTS.md`.

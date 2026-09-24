@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:57Z
+  last_stamp: 2026-09-24T22:38:16Z
   sessions: []
 ---
 
@@ -113,6 +113,13 @@ Feature: Manifest host ownership
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/lib/manifest.ts` |
+| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/src/commands/init.ts` |
+| New Files Needed | No |
+
 - `cleargate-cli/src/lib/manifest.ts` — **modify**. Entry model gains `owner`; snapshot gains `hosts`; legacy default applied on load.
 - `cleargate-cli/scripts/build-manifest.ts` — **modify**. Derive `owner` from the payload root.
 - `cleargate-cli/src/commands/init.ts` — **modify**. Write `hosts` into the snapshot (Step 7 writes the snapshot today).

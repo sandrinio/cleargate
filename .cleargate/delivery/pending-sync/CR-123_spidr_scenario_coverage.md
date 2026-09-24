@@ -35,7 +35,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T21:44:17Z
+  last_stamp: 2026-09-24T22:39:45Z
   sessions: []
 ---
 
@@ -145,8 +145,10 @@ draft_tokens:
 - `cleargate-planning/.cleargate/knowledge/readiness-gates.md` — vocabulary entry for `spidr-coverage`; register it in the story, cr and bug blocks; shape count; epic `gherkin-error-path` check string.
 - `cleargate-planning/.claude/agents/qa.md` — lines 39, 42.
 - `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` — lines 340, 438.
-- `.cleargate/templates/{story,CR,Bug,epic}.md`, `.cleargate/knowledge/readiness-gates.md` — byte-identical copies of the canonical files.
-- `.claude/agents/qa.md`, `.claude/skills/sprint-execution/SKILL.md` — gitignored live copies; hand-port or `cleargate init`.
+- `.cleargate/templates/story.md`, `.cleargate/templates/CR.md`, `.cleargate/templates/Bug.md`, `.cleargate/templates/epic.md`, `.cleargate/knowledge/readiness-gates.md` — byte-identical copies of the canonical files.
+- The live .claude/agents/qa.md and .claude/skills/sprint-execution/SKILL.md copies are gitignored
+  and re-synced from canonical at the sprint boundary (hand-port or `cleargate init`); not part of
+  this CR's parsed commit surface.
 
 **Modify (`cleargate-cli` repo — branch in the main checkout, not a worktree):**
 - `cleargate-cli/src/lib/readiness-predicates.ts` — `ParsedPredicate` member, parser branch, `evaluate()` case, `evalSpidrCoverage`, header count.

@@ -17,13 +17,6 @@ updated_at: 2026-09-11T22:25:54Z
 created_at_version: cleargate@0.26.1
 updated_at_version: 11c29fd3-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -37,6 +30,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id BUG-089
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-09-24T22:39:38Z
+  sessions: []
 ---
 
 # BUG-089: Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
@@ -123,7 +125,9 @@ Not in scope, and verified so rather than assumed: `stamp-and-gate.sh` always ex
 - `cleargate-planning/.claude/hooks/pre-edit-gate.sh`
 - `cleargate-planning/.claude/hooks/pending-task-sentinel.sh`
 - `.cleargate/knowledge/cleargate-enforcement.md` — the break-glass wording that describes `CLEARGATE_ADVISORY=1` as downgrading a block that never happened.
-- The live `/.claude/` mirror of both hooks, per CLAUDE.md's dogfood-split rule — a canonical-only fix does not reach the running instance (see [[BUG-085]]).
+- The live gitignored .claude/ mirror of both hooks above is re-synced from canonical at the sprint
+  boundary, per CLAUDE.md's dogfood-split rule — a canonical-only fix does not reach the running
+  instance (see [[BUG-085]]); it is not edited directly in this story.
 
 ## Task Breakdown
 

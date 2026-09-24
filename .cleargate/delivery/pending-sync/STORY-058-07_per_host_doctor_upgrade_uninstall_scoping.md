@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:57Z
+  last_stamp: 2026-09-24T22:38:21Z
   sessions: []
 ---
 
@@ -122,6 +122,13 @@ Feature: Per-host lifecycle scoping
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/commands/doctor.ts` |
+| Related Files | `cleargate-cli/src/commands/upgrade.ts`, `cleargate-cli/src/commands/uninstall.ts`, `cleargate-cli/src/lib/drift-check.ts`, `cleargate-cli/src/lib/session-load-delta.ts` |
+| New Files Needed | No |
+
 - `cleargate-cli/src/commands/doctor.ts` — **modify**. Report core + each adapter; accept a host filter.
 - `cleargate-cli/src/commands/upgrade.ts` — **modify**. Currently performs Claude-specific instruction/settings surgery; route through adapters.
 - `cleargate-cli/src/commands/uninstall.ts` — **modify**. Currently Claude-specific marker validation and hook cleanup.
