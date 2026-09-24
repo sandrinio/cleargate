@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:55Z
+  last_stamp: 2026-09-24T23:05:29Z
   sessions: []
 ---
 
@@ -111,6 +111,13 @@ Feature: Host adapter contract
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/commands/init.ts` |
+| Related Files | `cleargate-cli/src/init/inject-claude-md.ts`, `cleargate-cli/src/init/merge-settings.ts`, `cleargate-cli/src/init/inject-mcp-json.ts` |
+| New Files Needed | `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/hosts/claude.ts` |
+
 - `cleargate-cli/src/hosts/types.ts` — **create**. The `HostAdapter` contract.
 - `cleargate-cli/src/hosts/registry.ts` — **create**. Name → adapter resolution.
 - `cleargate-cli/src/hosts/claude.ts` — **create**. Wraps existing helpers.

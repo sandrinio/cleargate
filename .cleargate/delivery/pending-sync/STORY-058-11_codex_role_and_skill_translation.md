@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:59Z
+  last_stamp: 2026-09-24T23:05:37Z
   sessions: []
 ---
 
@@ -126,10 +126,17 @@ Feature: Codex role and skill translation
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/scripts/build-codex-agents.mjs` |
+| Related Files | `cleargate-cli/package.json` (the `prebuild` script, :42, gains the codegen step), `.cleargate/knowledge/cleargate-enforcement.md`, `cleargate-planning/.claude/hooks/pending-task-sentinel.sh`, `cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh`, `cleargate-planning/.claude/hooks/pre-commit.sh`, `cleargate-planning/.claude/hooks/pre-edit-gate.sh`, `cleargate-planning/.claude/hooks/pre-tool-use-autonomy.sh`, `cleargate-planning/.claude/hooks/pre-tool-use-task.sh`, `cleargate-planning/.claude/hooks/session-start.sh`, `cleargate-planning/.claude/hooks/stamp-and-gate.sh`, `cleargate-planning/.claude/hooks/token-ledger.sh` |
+| New Files Needed | `cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh`, `cleargate-cli/scaffold/hosts/codex/.codex/agents/**` |
+
 - `cleargate-cli/scripts/build-codex-agents.mjs` — **create**. Markdown → TOML codegen at prebuild.
 - `cleargate-cli/scaffold/hosts/codex/.codex/agents/**` — **generated**. Not hand-edited.
 - `cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh` — **create**. The repo-root shim.
-- `cleargate-planning/.claude/hooks/*.sh` — **modify**. Nine scripts adopt the shim; `CLAUDE_PROJECT_DIR` behavior preserved.
+- `cleargate-planning/.claude/hooks/*.sh` (all 9: `pending-task-sentinel.sh`, `pre-commit-surface-gate.sh`, `pre-commit.sh`, `pre-edit-gate.sh`, `pre-tool-use-autonomy.sh`, `pre-tool-use-task.sh`, `session-start.sh`, `stamp-and-gate.sh`, `token-ledger.sh`) — **modify**. Nine scripts adopt the shim; `CLAUDE_PROJECT_DIR` behavior preserved.
 - `.cleargate/knowledge/cleargate-enforcement.md` — **modify**. Record the Codex enforcement delta.
 
 ### 3.2 Technical Logic

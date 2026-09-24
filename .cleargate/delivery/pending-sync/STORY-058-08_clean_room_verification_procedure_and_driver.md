@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:58Z
+  last_stamp: 2026-09-24T23:05:30Z
   sessions: []
 ---
 
@@ -118,6 +118,13 @@ Feature: Clean-room verification driver
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/cli.ts` |
+| Related Files | `cleargate-cli/scripts/verify-pack.mjs` |
+| New Files Needed | `cleargate-cli/src/commands/verify-install.ts`, `.cleargate/knowledge/clean-room-verification.md` |
+
 - `.cleargate/knowledge/clean-room-verification.md` — **create**. The procedure.
 - `cleargate-cli/src/commands/verify-install.ts` — **create**. The driver.
 - `cleargate-cli/src/cli.ts` — **modify**. Register the command.

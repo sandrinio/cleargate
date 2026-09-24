@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T10:23:54Z
+  last_stamp: 2026-09-24T23:05:26Z
   sessions: []
 ---
 
@@ -116,6 +116,13 @@ Feature: Tracked scaffold payload layout
 ## 3. The Implementation Guide
 
 ### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/scripts/copy-planning-payload.mjs` |
+| Related Files | `CLAUDE.md`, `cleargate-planning/**` |
+| New Files Needed | `cleargate-cli/scaffold/core/**`, `cleargate-cli/scaffold/hosts/claude/**` |
+
 - `cleargate-cli/scaffold/core/**` — **create**. Harness-neutral `.cleargate/**` assets.
 - `cleargate-cli/scaffold/hosts/claude/**` — **create**. Relocated Claude assets.
 - `cleargate-cli/scripts/copy-planning-payload.mjs` — **modify**. Source path repoint.

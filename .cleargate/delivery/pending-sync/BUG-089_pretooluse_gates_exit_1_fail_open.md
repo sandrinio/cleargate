@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T22:39:38Z
+  last_stamp: 2026-09-24T23:02:39Z
   sessions: []
 ---
 
@@ -125,6 +125,7 @@ Not in scope, and verified so rather than assumed: `stamp-and-gate.sh` always ex
 - `cleargate-planning/.claude/hooks/pre-edit-gate.sh`
 - `cleargate-planning/.claude/hooks/pending-task-sentinel.sh`
 - `.cleargate/knowledge/cleargate-enforcement.md` — the break-glass wording that describes `CLEARGATE_ADVISORY=1` as downgrading a block that never happened.
+- `cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md` — canonical twin of the file above; tracked outer knowledge files are edited in both trees byte-identically per house rule (verified identical pre-fix via cmp).
 - The live gitignored .claude/ mirror of both hooks above is re-synced from canonical at the sprint
   boundary, per CLAUDE.md's dogfood-split rule — a canonical-only fix does not reach the running
   instance (see [[BUG-085]]); it is not edited directly in this story.

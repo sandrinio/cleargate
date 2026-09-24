@@ -31,7 +31,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T22:39:21Z
+  last_stamp: 2026-09-24T23:02:45Z
   sessions: []
 ---
 
@@ -229,6 +229,9 @@ because agents hand-clean `<instructions>` out before the hook matters.
 - `cleargate-cli/test/lib/stamp-frontmatter.node.test.ts` — regression coverage.
 - `.cleargate/scripts/prep_doc_refresh.mjs` — lines 160, 165, 170, and 175, the checklist that instructs
   the corrupting command; should not emit a `stamp` instruction for `<instructions>`-led files.
+- `cleargate-planning/.cleargate/scripts/prep_doc_refresh.mjs` — canonical twin of the file above;
+  tracked outer scripts are edited in both trees byte-identically per house rule (verified identical
+  pre-fix via cmp).
 - `cleargate-cli/src/wiki/parse-frontmatter.ts` — **`:17`, the READ-path third site** (added
   2026-09-04 by clean-room field confirmation). `if (lines[0] !== '---') throw` is the same
   positional assumption as the two write-path sniffs, and it is what makes `cleargate gate check`
