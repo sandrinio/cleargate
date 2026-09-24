@@ -69,7 +69,8 @@ From [[EPIC-058]] `<architecture_rules>` plus the SPRINT-41 execution rulings (R
 9. **Execution (R1):** `cleargate-cli/**` work happens on branch `story/<ID>` in the cli main checkout (`/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli`), never a worktree; one item in flight. Merges go to cli `main` locally — no push, no publish.
 10. **Execution (R2):** outer tracked edits (`.cleargate/**`, `cleargate-planning/**`, `CLAUDE.md`) happen in outer worktree `.worktrees/<ID>` on `story/<ID>` cut from `sprint/S-41`. Edit canonical `cleargate-planning/.claude/**`, never the live gitignored `/.claude/**`; live re-sync happens only at boundary steps.
 11. **`dist` is live enforcement.** Live gate hooks run `cleargate-cli/dist/cli.js`. Build `dist` only from cli `main` after a merge (boundary BD). If you build on a story branch for e2e, say so in your report so the orchestrator rebuilds from `main`.
-12. Commits in `cleargate-cli` run its pre-commit hook (typecheck + full suite vs `test-baseline.json`). Never `--no-verify`.
+12. `cleargate-cli` has no pre-commit hook: run `npm run typecheck` and the affected tests yourself before every cli commit. The outer repo's pre-commit (surface gate + checks) does run — never `--no-verify` in either repo.
+13. Prior Codex-session work for some items exists in `/Users/ssuladze/Documents/Dev/CG_TEST/sprint-41-D2QMC1/` and is fetched as refs `refs/cgtest/<ID>` (cli) / `refs/cgtest/<ID>-outer` (outer). It is a starting point, not evidence: re-verify everything in this repo.
 
 ## Active FLASHCARD Tags
 
