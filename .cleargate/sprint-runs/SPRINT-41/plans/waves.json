@@ -1,237 +1,202 @@
 {
   "sprint": "SPRINT-41",
-  "generated_at": "2026-09-24T22:06:10Z",
+  "generated_at": "2026-09-24T22:53:37Z",
   "generated_by": "architect-synth",
   "role": "architect-synth",
+  "supersedes": "2026-09-24T22:06:10Z halt (waves: [], launchable: false) — cleared by owner rulings R1-R4 of 2026-09-24T22:30:23Z",
   "story_count_in_milestone": 17,
-  "story_count_planned": 0,
-  "complete": false,
-  "launchable": false,
-  "halt": {
-    "reason": "BUG-046 reachability refusal. 11 of 17 items are REFUSED: 6 carry a non-empty digest unreachable_surface; 5 more carry cleargate-cli/** file_creates that collision_surface.sh's own classifier marks UNREACHABLE (nested) but that the reader contract drops. The other 6 items have empty surfaces and are fail-safe-serialized (BUG-033). Every one of them depends, directly or transitively, on a refused item: the M0 barrier and STORY-058-01. Zero waves can be scheduled.",
-    "decision_required": "Human ruling on the execution substrate for paths inside cleargate-cli/ (an independent nested git repo; `git worktree add` in the outer repo materializes zero files under it) and for gitignored live .claude/** paths. architect-synth does not waive BUG-046. Resolve the ruling and the decomposition defects listed under refused[].fix and blocked[].fix, then re-dispatch readers and synth with the ruling recorded in the dispatch.",
-    "precedent": "SPRINT-40 waves.json .descoped (2026-09-01): refused cleargate-cli items were resolved by a human descope, 'NOT by waiving the predicate', and deferred to 'a follow-up sprint scoped for cli-main-checkout execution'.",
-    "tooling_gap": ".cleargate/scripts/launch_wave.mjs:112-114 worktreeAddCommand emits only `git worktree add .worktrees/<story> -b story/<story> <sprintBranch>` in the outer repo. It has no owning-repo or main-checkout substrate."
+  "story_count_planned": 17,
+  "complete": true,
+  "execution": {
+    "mode": "by-hand-serial",
+    "launch_wave_compatible": false,
+    "note": "All 17 items touch cleargate-cli/. R1 runs every cli half on a story branch in the single cleargate-cli main checkout, so only one item can be in flight at any time, whatever the predicate says. launch_wave.mjs only cuts outer-repo worktrees (it has no cli main-checkout substrate), so the orchestrator walks this file by hand, one wave at a time: QA-Red -> (TPV/Architect only on a flagged pre-gate scan) -> Developer -> QA-Verify -> DevOps.",
+    "owner_rulings": {
+      "R1": "cleargate-cli/** is reachable: cli half on a story branch in the cli main checkout (not a worktree); DevOps merges to cli main locally; no push or publish. Extends the 2026-09-11 bootstrap exception.",
+      "R2": "Outer tracked .cleargate/** and canonical cleargate-planning/** edits land in the outer repo on sprint/S-41. Live gitignored /.claude/** is never in a story surface; it is re-synced at boundaries only.",
+      "R3": "BUG-085's M0 step runs against this repo's real live .claude/ (backup -> re-sync from canonical -> restart Claude Code -> prove real denials and dispatch identity). Operational barrier step, not a wave.",
+      "R4": "All item files committed on main (a6e6d2b7, 363f2011; verified 17/17 tracked). Untracked outer paths that an earlier item creates are ordering edges, not refusals."
+    },
+    "repo_field": "cli = cleargate-cli main checkout only; outer = outer repo on sprint/S-41 only; both = cli half first (merge to cli main, rebuild dist from cli main), then outer half onto sprint/S-41"
   },
-  "waves": [],
-  "refused": [
+  "waves": [
     {
-      "storyId": "BUG-089",
-      "milestone": "M0",
-      "contingent_slot": "c1",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: cleargate-cli/src/hooks/hook-signal.ts, cleargate-cli/src/commands/hook.ts, cleargate-cli/src/cli.ts, cleargate-cli/test/hooks/hook-signal.node.test.ts, cleargate-cli/test/scripts/test_pre_edit_gate.sh, /.claude/",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/hooks/hook-signal.ts", "cleargate-cli/src/commands/hook.ts", "cleargate-cli/src/cli.ts", "cleargate-cli/test/hooks/hook-signal.node.test.ts", "cleargate-cli/test/scripts/test_pre_edit_gate.sh"],
-        "parser_artifact": ["/.claude/ (absolute-root token for the gitignored live dir)"]
-      },
-      "fix": "substrate ruling for nested paths; replace /.claude/ with a boundary re-sync note (live writes are never in-segment)"
+      "wave": "wave1", "milestone": "M0", "stories": ["BUG-089"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": [],
+      "rationale": "M0 sequential and blocking (owner): BUG-089 -> B0 -> BUG-067. Clause 1: plan section 1 says parallel=n (digest says y; resolved toward the plan). Clause 2 vs BUG-085: .cleargate/scripts/test/bug068_dispatch_tool_name.red.sh. Creates cleargate-cli/src/hooks/hook-signal.ts, which STORY-058-10 extends. Runs under pre-repair, fail-open live gates: treat its enforcement and ledger rows as untrusted.",
+      "dispatch_blockers": ["D1"],
+      "boundary_after": ["BD", "B0"]
     },
     {
-      "storyId": "BUG-085",
-      "milestone": "M0 (operational step) + M3 (wave)",
-      "contingent_slot": "c2 (op step) / c12 (wave)",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: .claude/**, cleargate-cli/src/commands/doctor.ts, .claude/hooks/session-start.sh, .cleargate/scripts/test/bug068_dispatch_tool_name.red.sh:46,61-64",
-      "path_classes": {
-        "gitignored_live": [".claude/**", ".claude/hooks/session-start.sh"],
-        "nested_cleargate_cli": ["cleargate-cli/src/commands/doctor.ts"],
-        "parser_artifact": [".cleargate/scripts/test/bug068_dispatch_tool_name.red.sh:46,61-64 (line-range suffix on a tracked file)"]
-      },
-      "fix": "move the .claude/** live paths out of the story surface into the M0 operational step; M3 story surface becomes doctor.ts + canonical session-start + tests (nested, so still needs the substrate ruling); strip the :46,61-64 suffix"
+      "wave": "wave2", "milestone": "M0", "stories": ["BUG-067"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["BUG-089", "B0"],
+      "rationale": "M0 sequential (owner): after the B0 barrier. Clause 1: plan parallel=n. Versus BUG-089, clauses 2-4 pass literally, but clause 5 fails on the owner's M0 chain. Clause 2 vs STORY-058-09: the cleargate-cli/test/e2e/ directory token contains -09's e2e test.",
+      "dispatch_blockers": ["D1", "D2"],
+      "boundary_after": ["BD", "RS-1"]
     },
     {
-      "storyId": "BUG-067",
-      "milestone": "M0",
-      "contingent_slot": "c3",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: cleargate-cli/src/lib/stamp-frontmatter.ts, cleargate-cli/src/commands/stamp-tokens.ts, .claude/hooks/stamp-and-gate.sh, cleargate-cli/test/lib/stamp-frontmatter.node.test.ts, :160/:165/:170/:175, cleargate-cli/src/wiki/parse-frontmatter.ts, cleargate-cli/test/e2e/",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/lib/stamp-frontmatter.ts", "cleargate-cli/src/commands/stamp-tokens.ts", "cleargate-cli/test/lib/stamp-frontmatter.node.test.ts", "cleargate-cli/src/wiki/parse-frontmatter.ts", "cleargate-cli/test/e2e/"],
-        "gitignored_live": [".claude/hooks/stamp-and-gate.sh"],
-        "parser_artifact": [":160/:165/:170/:175 (line-number token, not a path)"]
-      },
-      "fix": "substrate ruling for nested paths; declare canonical cleargate-planning/.claude/hooks/stamp-and-gate.sh instead of the live copy; drop the line-number token"
+      "wave": "wave3", "milestone": "M0->M1", "stories": ["CR-123"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["M0"],
+      "rationale": "After M0 fully merges and before STORY-058-01; off the critical path (owner). Clause 1: plan parallel=n. Clause 5: CR-123 -> 058-01 (-01 copies the canonical templates and readiness-gates.md CR-123 edits), CR-123 -> 058-11 (qa.md codegen source), CR-123 -> 058-12 (SKILL.md). Clause 2: the bare `.cleargate/` token overlaps every outer .cleargate path. Condition 1: the cli half merges and dist is rebuilt from cli main BEFORE the outer half registers spidr-coverage in the live readiness-gates.md (stamp-and-gate.sh:12-13 runs cleargate-cli/dist/cli.js first). Condition 2: live .claude/ qa.md and SKILL.md are re-synced at RS-2 and never edited inside the segment.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD", "RS-2"]
     },
     {
-      "storyId": "CR-123",
-      "milestone": "M0->M1 interstitial",
-      "contingent_slot": "c4",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: .cleargate/templates/{story,CR,Bug,epic}.md, .claude/agents/qa.md, .claude/skills/sprint-execution/SKILL.md, cleargate-cli/src/lib/readiness-predicates.ts, cleargate-cli/test/lib/readiness-predicates-spidr-coverage.red.node.test.ts, cleargate-cli/test/docs/test-layers-declared-doctrine.red.node.test.ts",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/lib/readiness-predicates.ts", "cleargate-cli/test/lib/readiness-predicates-spidr-coverage.red.node.test.ts", "cleargate-cli/test/docs/test-layers-declared-doctrine.red.node.test.ts"],
-        "gitignored_live": [".claude/agents/qa.md", ".claude/skills/sprint-execution/SKILL.md"],
-        "parser_artifact": [".cleargate/templates/{story,CR,Bug,epic}.md (brace expansion; the four expanded paths are all tracked)"]
-      },
-      "fix": "substrate ruling for nested paths; list the four live templates separately; declare live .claude copies as a boundary re-sync, not surface; label the new red test as a create only"
+      "wave": "wave4", "milestone": "M1", "stories": ["STORY-058-01"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["CR-123"],
+      "fail_safe": true,
+      "rationale": "unknown collision metadata — fail-safe-serialized. collision_surface.sh emits zero paths (section 3.1 is a bullet list, not a table). The digest's two creates were recovered by the reader, which dropped the **modify** lines cleargate-cli/scripts/copy-planning-payload.mjs and CLAUDE.md. Also clause 1 (parallel=n). Clause 5: 01 -> 02, 01 -> 11 (scaffold/core/**). Highest-bounce item; runs alone. After this merges, cleargate-planning/ is a deprecated read-only mirror, and the canonical source for every later item is cleargate-cli/scaffold/{core,hosts/claude}/**.",
+      "dispatch_blockers": ["D3"],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-01",
-      "milestone": "M1",
-      "contingent_slot": "c5",
-      "source": "synth re-classification of digest file_creates (reader contract carries file_surface only; collision_surface.sh:226 nested check runs before the :236 create-label exemption)",
-      "rationale": "unreachable file surface — refused: cleargate-cli/scaffold/core/**, cleargate-cli/scaffold/hosts/claude/**",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/scaffold/core/**", "cleargate-cli/scaffold/hosts/claude/**"]
-      },
-      "fix": "substrate ruling"
+      "wave": "wave5", "milestone": "M1", "stories": ["STORY-058-02"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-01"],
+      "rationale": "Clause 1 (parallel=n). Clause 5: 01 -> 02 (repoints the validator and manifest builder at -01's layout). Clause 2 vs 058-06: scripts/build-manifest.ts. Clause 2 vs 058-11: package.json prebuild wiring.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD", "RS-3"]
     },
     {
-      "storyId": "STORY-058-03",
-      "milestone": "M2",
-      "contingent_slot": "c7",
-      "source": "synth re-classification of digest file_creates (see STORY-058-01)",
-      "rationale": "unreachable file surface — refused: cleargate-cli/src/hosts/types.ts, cleargate-cli/src/hosts/registry.ts, cleargate-cli/src/hosts/claude.ts",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/hosts/types.ts", "cleargate-cli/src/hosts/registry.ts", "cleargate-cli/src/hosts/claude.ts"]
-      },
-      "fix": "substrate ruling"
+      "wave": "wave6", "milestone": "M2", "stories": ["STORY-058-03"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["M1"],
+      "fail_safe": true,
+      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the cleargate-cli/src/commands/init.ts **modify** line. Clause 1 (parallel=n). Clause 5: 03 -> 04 and 03 -> 05 (registry.ts), 03 -> 12 (types.ts).",
+      "dispatch_blockers": ["D3"],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-08",
-      "milestone": "M4",
-      "contingent_slot": "c13",
-      "source": "synth re-classification of digest file_creates (see STORY-058-01)",
-      "rationale": "unreachable file surface — refused: cleargate-cli/src/commands/verify-install.ts",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/commands/verify-install.ts"]
-      },
-      "fix": "substrate ruling (.cleargate/knowledge/clean-room-verification.md is a legitimate outer-repo create)"
+      "wave": "wave7", "milestone": "M2", "stories": ["STORY-058-04"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-03"],
+      "rationale": "Clause 2 vs 058-05: src/cli.ts and src/hosts/registry.ts, so the owner-permitted -04||-05 co-wave is NOT available. Clause 2 vs 058-03 and 058-06: src/commands/init.ts. Clause 5: 03 -> 04 (registry.ts is a forward reference to -03's create).",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-09",
-      "milestone": "M4",
-      "contingent_slot": "c14",
-      "source": "synth re-classification of digest file_creates (see STORY-058-01)",
-      "rationale": "unreachable file surface — refused: cleargate-cli/test/e2e/clean-room-claude-baseline.integration.node.test.ts",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/test/e2e/clean-room-claude-baseline.integration.node.test.ts"],
-        "parser_artifact": [".cleargate/sprint-runs/<id>/clean-room-evidence.md (placeholder <id>; create-exempt, but should name SPRINT-41)"]
-      },
-      "fix": "substrate ruling; replace <id> with SPRINT-41"
+      "wave": "wave8", "milestone": "M3", "stories": ["STORY-058-06"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["M2"],
+      "rationale": "Clause 2: src/lib/manifest.ts vs 058-05, scripts/build-manifest.ts vs 058-02, src/commands/init.ts vs 058-04. Clause 5: 06 -> 05, 06 -> 07, 06 -> BUG-085 (its baseline resolves from -06's ownership data). Clause 1 vs 058-07 (parallel=n).",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-11",
-      "milestone": "M5",
-      "contingent_slot": "c16",
-      "source": "synth re-classification of digest file_creates (see STORY-058-01)",
-      "rationale": "unreachable file surface — refused: cleargate-cli/scripts/build-codex-agents.mjs, cleargate-cli/scaffold/hosts/codex/.codex/agents/**, cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/scripts/build-codex-agents.mjs", "cleargate-cli/scaffold/hosts/codex/.codex/agents/**", "cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh"]
-      },
-      "fix": "substrate ruling"
+      "wave": "wave9", "milestone": "M3", "stories": ["STORY-058-05"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-04", "STORY-058-06"],
+      "moved_from": "M2 (halt slot c9, before 058-06)",
+      "rationale": "Clause 5: 06 -> 05. -05 section 1 says 'Manifest schema for ownership — STORY-058-06; this story consumes it'; -06 section 1 says 'Consuming them in `host remove` — STORY-058-05'. The halt order ran -05 in M2, ahead of the owner field its safety gate depends on (remove only when manifest `owner` == host). Moved to directly after -06; this is the only change from the halt order. Clause 2 vs 058-04: cli.ts and registry.ts. Clause 2 vs 058-06: manifest.ts.",
+      "dispatch_blockers": ["D5"],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-12",
-      "milestone": "M6",
-      "contingent_slot": "c17",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: cleargate-cli/src/hosts/types.ts",
-      "path_classes": {
-        "nested_cleargate_cli": ["cleargate-cli/src/hosts/types.ts (also absent until STORY-058-03 creates it)"]
-      },
-      "fix": "substrate ruling; re-declare the canonical SKILL.md path after STORY-058-01 relocates cleargate-planning/.claude/**"
+      "wave": "wave10", "milestone": "M3", "stories": ["STORY-058-07"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-06"],
+      "rationale": "Clause 1 (parallel=n). Clause 5: 06 -> 07 (consumes the ownership fields). Clause 2 vs BUG-085: src/commands/doctor.ts. The section 3.2 split signal is still open for the M3 plan.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
     },
     {
-      "storyId": "STORY-058-13",
-      "milestone": "M6",
-      "contingent_slot": "c18",
-      "source": "digest.unreachable_surface",
-      "rationale": "unreachable file surface — refused: .cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md, .cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md, .cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md",
-      "path_classes": {
-        "untracked_create_mislabelled": [".cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md (listed under a non-create label and also in file_creates)"],
-        "untracked_work_item": [".cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md", ".cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md"]
-      },
-      "fix": "label the evidence file 'New Files Needed'; commit the untracked work-item files. This is the only refusal that clears without a substrate ruling (cleargate-planning/.claude/settings.json is tracked, but -01 relocates it)"
+      "wave": "wave11", "milestone": "M3", "stories": ["BUG-085"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["STORY-058-07"],
+      "rationale": "BUG-085's only wave: durable detect-and-warn. It cannot reach Completed until this merges. Clause 1: plan parallel=n. Clause 2: doctor.ts vs 058-07, CLAUDE.md vs 058-01, bug068 red.sh vs BUG-089. Clause 5: 07 -> 085, and 06 -> 085 (the baseline resolves from manifest/payload data, never a hardcoded cleargate-planning/ path).",
+      "dispatch_blockers": ["D2", "D4"],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave12", "milestone": "M4", "stories": ["STORY-058-08"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["M3"],
+      "fail_safe": true,
+      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the cleargate-cli/src/cli.ts **modify** line (command registration). Clause 2 vs 058-09: .cleargate/knowledge/clean-room-verification.md. Clause 2 vs 058-13: verify-install.ts. Clause 5: 08 -> 09 (the baseline consumes the driver), 08 -> 13.",
+      "dispatch_blockers": ["D3"],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave13", "milestone": "M4", "stories": ["STORY-058-09"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "outer"], "lane": "standard",
+      "after": ["STORY-058-08"],
+      "rationale": "Clause 2 vs 058-08: .cleargate/knowledge/clean-room-verification.md. This is the digest's only non-cli unreachable path; it is a forward reference to -08's create, so an ordering edge (R4), not a refusal. Clause 5: 08 -> 09. The halt's one clause-1-4 pair (08/09) now fails clause 2 as well.",
+      "dispatch_blockers": [],
+      "boundary_after": []
+    },
+    {
+      "wave": "wave14", "milestone": "M5", "stories": ["STORY-058-10"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["M4"],
+      "rationale": "Clause 1 (parallel=n). Clause 5: BUG-089 -> 10 (extends hook-signal.ts rather than creating a second handler), 10 -> 11. Clause 2 vs 058-11: scaffold/hosts/codex/** contains -11's .codex/agents/**.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave15", "milestone": "M5", "stories": ["STORY-058-11"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-10"],
+      "fail_safe": true,
+      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the `cleargate-planning/.claude/hooks/*.sh` **modify** line (all nine hooks adopt the shim) and the prebuild wiring. Clause 5: 10 -> 11, 01 -> 11 (scaffold/core/**), CR-123 -> 11 (qa.md codegen source), 09 -> 11 (the baseline must exist to catch a shim regression, per -11 section 1).",
+      "dispatch_blockers": ["D3", "D4"],
+      "boundary_after": ["BD", "RS-4"]
+    },
+    {
+      "wave": "wave16", "milestone": "M6", "stories": ["STORY-058-12"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["M5"],
+      "rationale": "Clause 1 (parallel=n). Clause 5: 03 -> 12 (HostAdapter types.ts gains dispatchMode), CR-123 -> 12 (SKILL.md), 10 and 11 -> 12 (owner), 12 -> 13. Clause 2 vs BUG-089: .cleargate/knowledge/cleargate-enforcement.md.",
+      "dispatch_blockers": ["D4"],
+      "boundary_after": ["BD", "RS-5"]
+    },
+    {
+      "wave": "wave17", "milestone": "M6", "stories": ["STORY-058-13"], "parallel": false,
+      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "after": ["STORY-058-12"],
+      "rationale": "Clause 1 (parallel=n). Clause 5: 12 -> 13, 08 -> 13 (extends verify-install.ts), and 09, 10, 11 -> 13 (its section 3.2). Clause 2 vs BUG-089: settings.json.",
+      "dispatch_blockers": ["D4"],
+      "boundary_after": ["BD"]
     }
   ],
-  "blocked": [
+  "barrier_steps": [
     {
-      "storyId": "STORY-058-02",
-      "milestone": "M1",
-      "contingent_slot": "c6",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step), BUG-067, CR-123, STORY-058-01",
-      "fix": "rewrite §3.1 as a table; plan §2.2 places it on cleargate-cli/src/lib/manifest.ts (nested), so expect refusal until the substrate ruling"
-    },
-    {
-      "storyId": "STORY-058-04",
-      "milestone": "M2",
-      "contingent_slot": "c8",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step), BUG-067, CR-123, STORY-058-01, STORY-058-03",
-      "fix": "rewrite §3.1 as a table; plan §2.2 places it on cleargate-cli/src/commands/init.ts (nested)"
-    },
-    {
-      "storyId": "STORY-058-05",
-      "milestone": "M2",
-      "contingent_slot": "c9",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step), BUG-067, CR-123, STORY-058-01, STORY-058-03. Owner-permitted -04||-05 co-wave not exercised (BUG-033: empty surface is unproven, never disjoint)",
-      "fix": "rewrite §3.1 as a table"
-    },
-    {
-      "storyId": "STORY-058-06",
-      "milestone": "M3",
-      "contingent_slot": "c10",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step), BUG-067, CR-123, STORY-058-01, STORY-058-03",
-      "fix": "rewrite §3.1 as a table; plan §2.2 places it on cleargate-cli/src/lib/manifest.ts (nested)"
-    },
-    {
-      "storyId": "STORY-058-07",
-      "milestone": "M3",
-      "contingent_slot": "c11",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step), BUG-067, CR-123, STORY-058-01, STORY-058-03",
-      "fix": "rewrite §3.1 as a table; plan §2.2 places it on manifest.ts + doctor.ts (nested). §3.2 split signal still open"
-    },
-    {
-      "storyId": "STORY-058-10",
-      "milestone": "M5",
-      "contingent_slot": "c15",
-      "rationale": "unknown collision metadata — fail-safe-serialized; not scheduled: blocked by refused predecessors BUG-089, BUG-085 (M0 op step + M3 wave), BUG-067, CR-123, STORY-058-01, STORY-058-03, STORY-058-08, STORY-058-09",
-      "fix": "rewrite §3.1 as a table (reader: 'prose bullets, not a table'); plan §2.2 places it on cleargate-cli/src/commands/init.ts (nested)"
+      "id": "B0", "item": "BUG-085", "kind": "operational-step", "after": ["wave1"], "before": ["wave2"],
+      "runs_in": "outer main checkout, outside any segment; no state transition",
+      "steps": [
+        "Pre-req: BUG-089's cli half merged to cli main, dist rebuilt from cli main, and BUG-089's outer half merged to sprint/S-41",
+        "Take the canonical source from the sprint/S-41 tip, NOT main: BUG-089's canonical hook and settings edits are only on sprint/S-41",
+        "Back up each exact live target; re-sync with install-time pin substitution, not a blanket copy (FLASHCARD 2026-08-28 #dogfood-split: canonical `__CLEARGATE_VERSION__` vs live `0.20.0` is substitution, not drift); preserve the live-only entries scheduled_tasks.lock, settings.local.json, worktrees/",
+        "Restart Claude Code; prove real edit and dispatch denials, permitted-action controls, and correct dispatch identity",
+        "Ledger rows before this point are unattributable (plan 2.3)"
+      ]
     }
   ],
-  "contingent_order": {
-    "note": "NOT a wave plan and NOT launchable. This is the ruled order to regenerate from once the halt clears. Every slot is a singleton with parallel=false. Milestone barriers are strict; no wave crosses a milestone boundary.",
-    "edge_source": "All 17 digests report dep_predecessors: []. Clause-5 edges come from the owner-approved constraints in the SDR dispatch and from sprint plan §2.1/§2.2.",
-    "sequence": [
-      {"slot": "c1",  "milestone": "M0", "item": "BUG-089", "kind": "wave", "parallel": false, "after": []},
-      {"slot": "c2",  "milestone": "M0", "item": "BUG-085", "kind": "operational-step", "parallel": false, "after": ["BUG-089"], "note": "Backed-up targeted live .claude/ re-sync from canonical, then a fresh Claude session that proves real edit/dispatch denials, permitted-action controls and dispatch identity. Runs in the main checkout, outside any segment. Not a wave and not a state transition."},
-      {"slot": "c3",  "milestone": "M0", "item": "BUG-067", "kind": "wave", "parallel": false, "after": ["BUG-085:c2"]},
-      {"slot": "c4",  "milestone": "M0->M1", "item": "CR-123", "kind": "wave", "parallel": false, "after": ["M0"]},
-      {"slot": "c5",  "milestone": "M1", "item": "STORY-058-01", "kind": "wave", "parallel": false, "after": ["CR-123"]},
-      {"slot": "c6",  "milestone": "M1", "item": "STORY-058-02", "kind": "wave", "parallel": false, "after": ["STORY-058-01"]},
-      {"slot": "c7",  "milestone": "M2", "item": "STORY-058-03", "kind": "wave", "parallel": false, "after": ["M1"]},
-      {"slot": "c8",  "milestone": "M2", "item": "STORY-058-04", "kind": "wave", "parallel": false, "after": ["STORY-058-03"]},
-      {"slot": "c9",  "milestone": "M2", "item": "STORY-058-05", "kind": "wave", "parallel": false, "after": ["STORY-058-03", "STORY-058-04"]},
-      {"slot": "c10", "milestone": "M3", "item": "STORY-058-06", "kind": "wave", "parallel": false, "after": ["M2"]},
-      {"slot": "c11", "milestone": "M3", "item": "STORY-058-07", "kind": "wave", "parallel": false, "after": ["STORY-058-06"]},
-      {"slot": "c12", "milestone": "M3", "item": "BUG-085", "kind": "wave", "parallel": false, "after": ["STORY-058-07"], "note": "Durable detect-and-warn. The baseline resolves from -06's manifest/payload ownership data, never a hardcoded cleargate-planning/ path."},
-      {"slot": "c13", "milestone": "M4", "item": "STORY-058-08", "kind": "wave", "parallel": false, "after": ["M3"]},
-      {"slot": "c14", "milestone": "M4", "item": "STORY-058-09", "kind": "wave", "parallel": false, "after": ["STORY-058-08"]},
-      {"slot": "c15", "milestone": "M5", "item": "STORY-058-10", "kind": "wave", "parallel": false, "after": ["M4"]},
-      {"slot": "c16", "milestone": "M5", "item": "STORY-058-11", "kind": "wave", "parallel": false, "after": ["STORY-058-10"]},
-      {"slot": "c17", "milestone": "M6", "item": "STORY-058-12", "kind": "wave", "parallel": false, "after": ["M5"]},
-      {"slot": "c18", "milestone": "M6", "item": "STORY-058-13", "kind": "wave", "parallel": false, "after": ["STORY-058-12"]}
-    ]
-  },
-  "rulings": {
-    "BUG-085_placement": "BUG-085 stays ONE state.json item with exactly ONE wave entry: M3 slot c12, after STORY-058-07. The M0 half is a non-story operational step (c2): Orchestrator/DevOps-run in the main checkout, because gitignored live .claude/** can never exist inside a worktree. It is recorded as an M0 barrier gate, not a wave, and causes no state transition. BUG-085 cannot reach Completed until the c12 wave merges. This matches plans/M0.md (2026-09-12), which treats M0-B as an operational slice that 'does not make BUG-085 Done'.",
-    "CR-123_placement": "Confirmed: CR-123 runs as its own serial wave after M0 fully merges (after BUG-067) and before STORY-058-01. Two conditions apply. (1) The live .cleargate/knowledge/readiness-gates.md 'spidr-coverage' registration waits until cleargate-cli/dist/cli.js in the same checkout is rebuilt from a tree that contains the predicate: the gate hook resolves that dist first (stamp-and-gate.sh:12-13). (2) Live .claude/ copies of qa.md and SKILL.md are boundary re-syncs, not in-segment edits.",
-    "STORY-058-04_05_cowave": "Not exercised. Both surfaces are empty, so the BUG-033 guard serializes them. Order: -04 then -05, because host add reuses -04's selector/profile expansion.",
-    "M4_pair": "STORY-058-08 and -09 are the only pair that passes clauses 1-4 (both y, disjoint creates, no DB). Clause 5 fails on the owner edge 08->09 (the baseline consumes the driver)."
-  },
+  "boundary_steps": [
+    {"id": "BD", "when": "after every cli merge", "action": "Rebuild cleargate-cli/dist from cli main (npm run build). The live stamp-and-gate.sh:12, pre-edit-gate.sh:94 and session-start.sh:10 hooks run ${REPO_ROOT}/cleargate-cli/dist/cli.js first, and dist is gitignored, so it survives branch switches. If a segment builds on a story branch (e.g. for e2e), rebuild from cli main before the next outer write. `build` is `rm -rf dist && tsup`, so during a build the hooks fall back to the global cleargate binary. FLASHCARD 2026-08-29 #dogfood-split: an unrebuilt dist silently runs the old contract."},
+    {"id": "RS-1", "after": "wave2", "action": "Second targeted live re-sync: .claude/hooks/stamp-and-gate.sh from BUG-067's canonical edit (same pin-substitution rule as B0)."},
+    {"id": "RS-2", "after": "wave3", "action": "CR-123 condition 2: re-sync live .claude/agents/qa.md and .claude/skills/sprint-execution/SKILL.md."},
+    {"id": "RS-3", "after": "wave5", "action": "M1 close: the re-sync source switches to cleargate-cli/scaffold/hosts/claude/**. Run a no-op re-sync diff; per -01's acceptance it must be byte-identical."},
+    {"id": "RS-4", "after": "wave15", "action": "All nine hooks adopt the harness shim: re-sync live hooks, restart, and re-run STORY-058-09's clean-room Claude baseline before wave16."},
+    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches."}
+  ],
+  "refused": [],
+  "blocked": [],
   "lane_assignments": {
     "BUG-089": "standard",
-    "BUG-085": "standard",
     "BUG-067": "standard",
     "CR-123": "standard",
     "STORY-058-01": "standard",
     "STORY-058-02": "standard",
     "STORY-058-03": "standard",
     "STORY-058-04": "standard",
-    "STORY-058-05": "standard",
     "STORY-058-06": "standard",
+    "STORY-058-05": "standard",
     "STORY-058-07": "standard",
+    "BUG-085": "standard",
     "STORY-058-08": "standard",
     "STORY-058-09": "standard",
     "STORY-058-10": "standard",
@@ -240,15 +205,41 @@
     "STORY-058-13": "standard"
   },
   "lane_changes": [
-    {"storyId": "BUG-067", "from": "fast", "to": "standard", "failing_checks": [1, 2, 6], "note": "5+ impl files; stamp-and-gate gate-enforcement surface; plan §1 bounce exposure = med. Agrees with plans/M0.md 2026-09-12."},
-    {"storyId": "BUG-085", "from": "fast", "to": "standard", "failing_checks": [1, 2, 7], "note": "surface spans .claude/** + doctor.ts + CLAUDE.md; re-syncs gate-enforcement hooks; spans live, canonical and cli subsystems."}
+    {"storyId": "BUG-067", "from": "fast", "to": "standard", "failing_checks": [1, 2, 6], "note": "5+ impl files; stamp-and-gate gate-enforcement surface; bounce exposure med. state.json still says fast; init_sprint.mjs reads lane_assignments only at init, so apply with update_state.mjs --lane-demote."},
+    {"storyId": "BUG-085", "from": "fast", "to": "standard", "failing_checks": [1, 2, 7], "note": "doctor.ts + session-start.sh + CLAUDE.md + red test; re-syncs gate-enforcement hooks; spans live, canonical and cli. state.json still says fast."}
+  ],
+  "rulings": {
+    "BUG-085_placement": "Carried: one state.json item, one wave (wave11, M3, after 058-07). The M0 half is barrier step B0 and causes no state transition.",
+    "CR-123_placement": "Carried: wave3, after M0, before 058-01, cli half -> dist rebuild -> outer half. Conditions 1 and 2 as recorded in wave3.",
+    "STORY-058-05_reorder": "New: -05 moves from M2 to M3, directly after -06 (clause-5 edge 06 -> 05 stated in both items). Nothing else in the halt order changes.",
+    "STORY-058-04_05_cowave": "Not available: clause 2 fails on src/cli.ts and src/hosts/registry.ts.",
+    "available_but_unused": "None. Only two pairs pass clauses 2-4: BUG-089/BUG-067 (M0) and 058-05/BUG-085 (M3). Both fail clause 1 on the plan's parallel=n for the bugs and clause 5 on owner order. Under R1 every item shares the one cli checkout, so none could run concurrently anyway."
+  },
+  "dispatch_blockers": [
+    {"id": "D1", "items": ["BUG-089", "BUG-067"], "defect": "Live-only edits to files whose canonical twins are byte-identical today: BUG-089 .cleargate/knowledge/cleargate-enforcement.md, BUG-067 .cleargate/scripts/prep_doc_refresh.mjs. STORY-058-01 copies the canonical tree into scaffold/core, so a live-only fix never ships and re-creates drift.", "fix": "Add cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md and cleargate-planning/.cleargate/scripts/prep_doc_refresh.mjs to the respective section 3.1 tables."},
+    {"id": "D2", "items": ["BUG-067", "BUG-085"], "defect": "state.json lane is still fast, and fast lane skips QA-Red.", "fix": "bash .cleargate/scripts/run_script.sh node .cleargate/scripts/update_state.mjs <ID> --lane-demote \"<reason>\" for both, before wave2; update plan section 1 and 2.4."},
+    {"id": "D3", "items": ["STORY-058-01", "STORY-058-03", "STORY-058-08", "STORY-058-11"], "defect": "Section 3.1 is a bullet list; collision_surface.sh parses zero paths (re-run 2026-09-24) and file_surface_diff.sh exits 0 when section 3.1 declares nothing, so the surface gate is fail-open for their outer halves. Modify targets missing from the digests: -01 cleargate-cli/scripts/copy-planning-payload.mjs and CLAUDE.md; -03 cleargate-cli/src/commands/init.ts; -08 cleargate-cli/src/cli.ts; -11 the nine hooks and cleargate-cli/package.json (prebuild wiring).", "fix": "Convert each to a backtick-quoted table listing every modify and create target. These 4 plus 058-12 were the 5 items not touched by 363f2011."},
+    {"id": "D4", "items": ["BUG-085", "STORY-058-11", "STORY-058-12", "STORY-058-13"], "defect": "After 058-01 repoints copy-planning-payload.mjs, cleargate-planning/ feeds neither the payload nor the live re-sync. These items still write there: BUG-085 (cleargate-planning/.claude/** and hooks/session-start.sh, and its task text still compares against cleargate-planning/.claude/**), -11 (hooks/*.sh), -12 (SKILL.md, plus a create of dispatch-serial.md in the dead tree; its live-only .cleargate/scripts/launch_wave.mjs, dispatch_serial.mjs and knowledge docs have no scaffold/core twin), -13 (settings.json).", "fix": "After wave4 merges and before each item's own dispatch, re-declare against cleargate-cli/scaffold/{core,hosts/claude}/**, then commit the amendment on sprint/S-41 before cutting any outer worktree (FLASHCARD 2026-08-27 #worktree #planning)."},
+    {"id": "D5", "items": ["STORY-058-05"], "defect": "Ordering inversion with 058-06 (see rulings.STORY-058-05_reorder). Already applied here.", "fix": "Orchestrator acknowledges and moves -05's plan section 1 Milestone cell from M2 to M3."}
+  ],
+  "preconditions": [
+    "Outer branch sprint/S-41 does not exist yet (outer sprint branches stop at sprint/S-38). R2 requires it before wave1's outer half.",
+    "The cli main checkout is on main, clean apart from an untracked cleargate-0.25.0.tgz. The existing dist/cli.js (2026-09-02 19:35) postdates cli HEAD 3364802 (19:29)."
+  ],
+  "hygiene_non_blocking": [
+    "CR-123: the bare `.cleargate/` token, parsed from the heading 'copy to the live `.cleargate/` tree', declares the whole outer tree. Its red test readiness-predicates-spidr-coverage.red.node.test.ts is absent and not labelled as a create.",
+    "BUG-085: `cleargate-planning/.claude/**` is the read-only comparison baseline, but it is declared as write surface.",
+    "BUG-067: `cleargate-cli/test/e2e/` is a directory token; name the test file.",
+    "BUG-089: hook-signal.ts, hook.ts and hook-signal.node.test.ts (and src/hooks/) do not exist yet; they are creates labelled as modify.",
+    "Plan section 2.2 is stale against the item surfaces: init.ts is 03 -> 04 -> 06 (not 01 -> 03 -> 04 -> 10), and manifest.ts is 06 -> 05 (not 02 -> 06 -> 07).",
+    "058-03 section 1: sketch 058-10's Codex needs before freezing HostAdapter. The M2 plan should read -10 section 3.2."
   ],
   "predicate_notes": {
-    "empty_surface_guard_BUG_033": "fired for STORY-058-02, -04, -05, -06, -07, -10",
-    "db_axis_clause_4": "vacuous: db_write_set is empty in all 17 digests",
-    "reachability_BUG_046": "fired for 11 items (6 via digest, 5 via synth re-classification of file_creates)",
-    "reader_contract_gap": "architect-reader.md:37 defines unreachable_surface as file_surface paths only, but collision_surface.sh:216-243 classifies create-labelled paths as well and checks nested (:226) before the create exemption (:236). NESTED file_creates are therefore silently dropped.",
-    "parallel_eligible_divergence": "Digest says y but sprint plan §1 says n for BUG-067, BUG-085, BUG-089 and CR-123. Resolved toward the plan (serial).",
-    "untracked_work_items": "16 of 17 item files in .cleargate/delivery/pending-sync/ are untracked (git status ??). Only BUG-067 is tracked. No `git worktree add` checkout contains them."
+    "reachability_BUG_046": "Zero refusals. Every unreachable_surface path is under cleargate-cli/ (satisfied by R1) except 058-09's .cleargate/knowledge/clean-room-verification.md, which is a forward reference to 058-08's create (R4 ordering edge).",
+    "empty_surface_guard_BUG_033": "The digest union is non-empty for all 17. Checked against the parser: collision_surface.sh returns zero paths for 058-01, -03, -08 and -11. Their digest creates were recovered by the reader and drop every **modify** line. Treated as fail-safe-serialized. Each keeps its own singleton wave in dependency order rather than a trailing wave, because trailing placement would break clause-5 edges (e.g. 01 -> everything).",
+    "db_axis_clause_4": "Vacuous: db_write_set is empty in all 17 digests.",
+    "dep_predecessors": "Empty in all 17 digests. Clause-5 edges come from owner constraints, forward references between surfaces (R4), and body-stated consumption (058-05/-06).",
+    "parallel_eligible_divergence": "The digest says y where plan section 1 says n for BUG-067, BUG-085, BUG-089 and CR-123. Resolved toward the plan (serial). No effect on the schedule.",
+    "glob_semantics": "Glob and directory tokens are treated as containing every path beneath them (e.g. scaffold/hosts/codex/** contains .codex/agents/**; test/e2e/ contains the -09 test)."
   }
 }

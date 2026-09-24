@@ -1675,3 +1675,8 @@
   action: "update"
   target: "CR-123"
   path: ".cleargate/delivery/pending-sync/CR-123_spidr_scenario_coverage.md"
+- timestamp: "2026-09-24T22:57:44.420Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-41"
+  path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"

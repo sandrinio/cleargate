@@ -60,13 +60,13 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
-| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | fast | M0 + M3 | n | low |
-| `BUG-067` | Frontmatter locator: find the fence, don't require offset 0 (3 call sites) | fast | M0 | n | med |
+| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M0 step B0 + M3 wave11 | n | low |
+| `BUG-067` | Frontmatter locator: find the fence, don't require offset 0 (3 call sites) | standard | M0 | n | med |
 | `STORY-058-01` | Tracked `scaffold/core` + `scaffold/hosts/claude` payload layout | standard | M1 | n | high |
 | `STORY-058-02` | Repoint scaffold-source validation + manifest builder; drop the sibling dependency | standard | M1 | n | med |
 | `STORY-058-03` | `HostAdapter` contract, registry, behavior-preserving Claude adapter | standard | M2 | n | med |
 | `STORY-058-04` | `cleargate init --host` selector parsing and profile expansion | standard | M2 | y | med |
-| `STORY-058-05` | `cleargate host list \| add \| remove` lifecycle commands | standard | M2 | y | med |
+| `STORY-058-05` | `cleargate host list \| add \| remove` lifecycle commands | standard | M3 (after -06; SDR 2026-09-24) | y | med |
 | `STORY-058-06` | Install-manifest host ownership fields with legacy snapshot migration | standard | M3 | y | med |
 | `STORY-058-07` | Per-host scoping of doctor, upgrade, uninstall, prune | standard | M3 | n | med |
 | `STORY-058-08` | Clean-room verification procedure + `cleargate verify-install` driver | standard | M4 | y | low |
@@ -76,7 +76,7 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | n | med |
 | `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | n | low |
 | `BUG-089` | PreToolUse gates exit 1, which Claude Code does not treat as blocking — both gates fail open | standard | M0 | n | low |
-| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | after M0, before STORY-058-01 (Architect confirms) | n | med |
+| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M0→M1 wave3 (SDR confirmed) | n | med |
 
 **Decomposition notes.** L3 stories include `STORY-058-07`, `-10`, `-12`, and `-13`; `-07`'s §3.2 carries an explicit split
 signal for the Architect (split into two L2s if `doctor`+`drift` and `upgrade`+`uninstall`+`prune`
@@ -91,67 +91,138 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 
 ## 2. Execution Strategy
 
-*(Seeded at decomposition from the story set's own declared dependencies and shared files. The
-Architect refines §2.1–2.5 during Sprint Design Review and owns the final wave assignment.)*
+*(Architect Sprint Design Review 2026-09-24, re-run under owner rulings R1–R4 — see §4 Execution Log 2026-09-24T22:30:23Z. The first run halted on BUG-046 reachability: `sprint-runs/SPRINT-41/plans/sdr-halt-2026-09-24.md`. Wave plan: `sprint-runs/SPRINT-41/plans/waves.json`.)*
 
 ### 2.1 Phase Plan
 
-- **M0 (sequential, blocking):** implement BUG-089's shared Claude block-signal handler first; perform BUG-085's targeted, backed-up live re-sync; start a new Claude session and prove actual edit/dispatch denials plus permitted-action controls and correct dispatch identity; then implement BUG-067. BUG-089 must not wait for M5. No normal feature wave proceeds on unverified enforcement.
-- **Bootstrap constraint:** the current Codex session has no Workflow tool and the installed sprint-execution skill still requires it. No story execution is authorized outside that contract. Use a Workflow-capable Claude session for the bootstrap, or obtain an explicit bootstrap exception before implementing from Codex. Any pre-repair dispatch has untrusted enforcement/attribution and must be labelled as such, not presented as normal green-loop evidence.
-- **BUG-085 spans M0 and M3:** M0 is the operational live re-sync and proof. M3 implements detect-and-warn against the relocated canonical source, after STORY-058-01/-02 and alongside per-host doctor work. No auto-overwrite, no target-repo manifest-hash check this sprint, and no Done transition after only the M0 half. Architect placement review remains required.
-- **M1 → M2 → M3 → M4 → M5 → M6:** milestones are sequential. In M2, -04 and -05 may share a wave only after -03 and after shared-file review. In M3, -06 precedes -07. In M4, -08 precedes -09 because the baseline consumes the driver. In M5, -10 precedes -11. M6 is owner-approved: -12 then -13, after both M5 items.
-- **M6 success:** standalone Codex `0.154.0-alpha.6.2`, a dedicated config/install path, recorded checksum, and human trust of the exact hook content. Four role dispatches plus a DevOps merge prove transport; required hook firing and actual negative-control denials prove enforcement. Both must pass for the Codex-port goal. Unavailable token usage is disclosed without fabricated zero rows.
+**Execution model (R1–R4):** strictly serial, by hand, one item at a time — QA-Red → TPV/Architect only on a pre-gate flag → Developer → QA-Verify → DevOps. Every item touches `cleargate-cli/`, and R1 gives that repo one main checkout with one story branch at a time, so no two items can be in flight. The five-clause predicate agrees independently: no pair is compatible. `launch_wave.mjs` cannot drive this (it only cuts outer-repo worktrees), so `waves.json` is walked by hand.
+
+**Items touching both repos:** the cli half merges to cli `main` first, `dist` is rebuilt from cli `main`, then the outer half merges to `sprint/S-41`.
+
+- **M0 (sequential, blocking):** wave1 BUG-089 → **barrier B0** (BUG-085's M0 step) → wave2 BUG-067
+- **Between M0 and M1 (off critical path):** wave3 CR-123
+- **M1:** wave4 STORY-058-01 → wave5 -02
+- **M2:** wave6 -03 → wave7 -04
+- **M3:** wave8 -06 → wave9 **-05 (moved from M2)** → wave10 -07 → wave11 BUG-085 (durable check)
+- **M4:** wave12 -08 → wave13 -09
+- **M5:** wave14 -10 → wave15 -11
+- **M6:** wave16 -12 → wave17 -13
+
+**The one change from the halt order:** STORY-058-05 now runs after -06. -05 §1 says "Manifest schema for ownership — STORY-058-06; this story consumes it", and -06 §1 agrees ("Consuming them in `host remove` — STORY-058-05"). `host remove` may only delete files whose manifest `owner` matches the host, and that field does not exist until -06 lands.
+
+**Co-waves that pass the predicate but go unused:** none. Only BUG-089/BUG-067 and -05/BUG-085 pass clauses 2–4; both fail clause 1 (the plan marks the bugs parallel=n) and clause 5 (owner order). The owner-allowed -04/-05 co-wave fails clause 2 on `src/cli.ts` and `src/hosts/registry.ts`.
+
+**Barrier B0 — BUG-085's M0 step (not a wave, no state change):**
+1. Wait until BUG-089's cli half is merged, `dist` is rebuilt from cli `main`, and its outer half is merged to `sprint/S-41`.
+2. Re-sync live `.claude/` from the **`sprint/S-41` tip, not `main`** — BUG-089's canonical hook edits exist only on the sprint branch.
+3. Back up each exact live file first. Substitute the version pin rather than copying blindly: canonical `__CLEARGATE_VERSION__` vs live `0.20.0` is install-time substitution, not drift (flashcard 2026-08-28).
+4. Keep the live-only files: `scheduled_tasks.lock`, `settings.local.json`, `worktrees/`.
+5. Restart Claude Code. Prove real edit and dispatch denials, permitted actions, and correct dispatch identity.
+6. Ledger rows from before this point are unattributable.
+
+**Boundary steps:**
+
+| ID | When | What |
+|---|---|---|
+| BD | After every cli merge | Rebuild `dist` from cli `main` (`stamp-and-gate.sh:12`, `pre-edit-gate.sh:94` and `session-start.sh:10` run `cleargate-cli/dist/cli.js` first). |
+| RS-1 | After BUG-067 | Re-sync live `stamp-and-gate.sh`. |
+| RS-2 | After CR-123 | Re-sync live `qa.md` and `SKILL.md` (CR-123 condition 2). |
+| RS-3 | After M1 closes | The re-sync source switches to `cleargate-cli/scaffold/hosts/claude/**`. Run a re-sync diff; it must be empty. |
+| RS-4 | After -11 | All nine hooks use the new repo-root shim. Re-sync, restart, and re-run -09's clean-room Claude baseline before -12. |
+| RS-5 | After -12 | Re-sync `SKILL.md` and `dispatch-serial.md` before -13. |
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
 
-| Shared File | Stories Touching It | Merge Order | Rationale |
+| Shared File | Items | Order | Rationale |
 |---|---|---|---|
-| `cleargate-cli/src/commands/init.ts` | STORY-058-01, -03, -04, -10 | 01 → 03 → 04 → 10 | 01 moves the payload source; 03 introduces the adapter seam; 04 adds host selection on top; 10 registers the Codex adapter into the resolved set |
-| `cleargate-cli/src/lib/manifest.ts` | STORY-058-02, -06, -07 | 02 → 06 → 07 | 02 widens classification to the new roots; 06 adds ownership fields; 07 consumes them |
-| `cleargate-cli/src/wiki/parse-frontmatter.ts` | BUG-067 | first | Read-path call site; no other story touches it |
-| `cleargate-cli/src/commands/doctor.ts` | BUG-085, STORY-058-07 | after 01/02/06; serialize within M3 | Architect chooses the shared helper order; the meta-repo check must use the relocated canonical baseline and respect host scope |
-| `.claude/**` (live, gitignored) | BUG-089, BUG-085, STORY-058-01, -09, -10, -11, -12 | 089 repair → 085 re-sync → fresh session | Back up exact targets, preserve local additions; re-sync later canonical changes deliberately at boundaries, never mid-dispatch |
-| `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` | STORY-058-12, CR-123 | CR-123 → 12 (12 after -10, -11) | Dispatch-mode split edits the orchestration playbook itself — canonical edit, needs the live `.claude/` re-sync per CLAUDE.md's Dogfood split section; exact two-pointer canonical diff plus a generated Codex core and serial fragment is specified in STORY-058-12 |
-| `cleargate-planning/.cleargate/templates/{story,CR,Bug,epic}.md`, `cleargate-planning/.cleargate/knowledge/readiness-gates.md` | CR-123; STORY-058-01 copies the whole `.cleargate/**` tree into `cleargate-cli/scaffold/core/**` | CR-123 → 01 | Landing first lets -01 carry the edits in its byte-identical copy; landing after means CR-123 must edit the relocated `scaffold/core` copies instead |
-| `cleargate-planning/.claude/agents/qa.md` | CR-123; STORY-058-11 generates `.codex/agents/*.toml` from canonical agent markdown at build time | CR-123 → 11 | Build-time generation picks the edit up either way; landing first avoids a regenerate |
-| `cleargate-cli/src/lib/readiness-predicates.ts` | CR-123 | alone | No other SPRINT-41 item touches it |
+| `cleargate-cli/src/cli.ts` | BUG-089, 058-04, -05, -08* | 089 → 04 → 05 → 08 | Each adds a command registration |
+| `cleargate-cli/src/commands/init.ts` | 058-03*, -04, -06 | 03 → 04 → 06 | 03 routes install through the adapter; 04 adds `--host`; 06 records ownership |
+| `cleargate-cli/src/hosts/registry.ts` | 058-03 (create), -04, -05 | 03 → 04 → 05 | Forward reference to 03's create |
+| `cleargate-cli/src/hosts/types.ts` | 058-03 (create), -12 | 03 → 12 | 12 adds `dispatchMode` to `HostAdapter` |
+| `cleargate-cli/src/lib/manifest.ts` | 058-06, -05 (read) | 06 → 05 | `remove` depends on the `owner` field |
+| `cleargate-cli/scripts/build-manifest.ts` | 058-02, -06 | 02 → 06 | 02 widens the roots; 06 adds ownership |
+| `cleargate-cli/package.json` | 058-02, -11* | 02 → 11 | 11 adds codegen to prebuild |
+| `cleargate-cli/src/commands/doctor.ts` | 058-07, BUG-085 | 07 → 085 | Per-host scoping, then the parity check |
+| `cleargate-cli/src/hooks/hook-signal.ts` | BUG-089 (creates), 058-10 | 089 → 10 | 10 extends it; no second handler |
+| `cleargate-cli/src/commands/verify-install.ts` | 058-08 (create), -13 | 08 → 13 | 13 adds the Codex checks |
+| `cleargate-cli/test/e2e/**` | BUG-067 (folder), 058-09 | 067 → 09 | The folder entry contains -09's test |
+| `cleargate-cli/scaffold/core/**` | 058-01 (create), -11 | 01 → 11 | `harness.sh` lands inside 01's tree |
+| `cleargate-cli/scaffold/hosts/codex/**` | 058-10 (create), -11 | 10 → 11 | `.codex/agents/**` is under 10's pattern |
+| `CLAUDE.md` | 058-01*, BUG-085 | 01 → 085 | 01 rewrites *Dogfood split*; 085 extends it |
+| canonical `.claude/hooks/*.sh` | BUG-089, BUG-067, BUG-085, 058-11* | 089 → 067 → [01 relocates] → 085 → 11 | Post-M1 edits go to `scaffold/hosts/claude` |
+| canonical `settings.json` | BUG-089, 058-13 | 089 → 13 | 13 must target the relocated path |
+| canonical `sprint-execution/SKILL.md` | CR-123, 058-12 | CR-123 → 12 | 12 edits different lines |
+| canonical `agents/qa.md` | CR-123, 058-11 (reads it for codegen) | CR-123 → 11 | Avoids regenerating |
+| canonical `.cleargate/templates/*`, `readiness-gates.md` | CR-123; 058-01 copies them | CR-123 → 01 | -01's copy then carries the edits |
+| `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` | BUG-089, BUG-085 | 089 → 085 | — |
+| `.cleargate/knowledge/cleargate-enforcement.md` | BUG-089, 058-12 | 089 → 12 | — |
+| `.cleargate/knowledge/clean-room-verification.md` | 058-08 (create), -09 | 08 → 09 | Forward reference (R4), not a refusal |
+
+\* The item's own §3.1 names this path, but its parsed surface does not (defect D3).
 
 ### 2.3 Shared-Surface Warnings
 
-- `init.ts` is touched by `STORY-058-01`, `-03`, `-04`, and `-10` — the highest conflict surface in the sprint. Serialize.
-- BUG-067 touches `stamp-frontmatter.ts`, `stamp-tokens.ts`, and `parse-frontmatter.ts` together by
-  design; its blast-radius note is explicit that fixing a subset "would read as fixed" while leaving
-  the defect live. Do not split it across stories.
-- **`BUG-085` vs `STORY-058-01` is a baseline-moves-under-you hazard, not a merge conflict.** They
-  edit different files, so no VCS conflict will surface — but `-01` relocates the canonical scaffold
-  that `BUG-085`'s check reads. A parity check written in M0 passes its own tests and then silently
-  compares against a directory that no longer exists. Architect must confirm the check's baseline is
-  resolved from the manifest/payload source rather than a hardcoded `cleargate-planning/` path.
-- **`BUG-085`'s re-sync changes hook behaviour for every subsequent dispatch in this sprint.** That is
-  the point, but it means the sprint's own token ledger will be discontinuous at the M0 boundary. The
-  Reporter must treat pre-re-sync rows as unattributable rather than averaging across the seam.
-
-- **CR-123 is off the goal's critical path** (`GOAL_RELATION: off critical path`). It must not enter M0, which is enforcement repair only. Its live-tree registration of `spidr-coverage` waits for the CLI build that evaluates it (CR-123 §2); until then every story, CR and bug gate check would throw on the unknown predicate.
+- **R1 has no parallelism.** One cli checkout means one item in flight, whatever the predicate says.
+- **`dist` is live enforcement.** Every live gate hook runs `cleargate-cli/dist/cli.js`. `dist` is gitignored, so it survives branch switches; a build on a story branch puts unmerged code in charge of the outer repo's gates. `build` is `rm -rf dist && tsup`, so during a build the hooks fall back to the global binary. Build from cli `main` only, after merge (step BD); if a segment builds for e2e, rebuild from `main` before the next outer write (flashcard 2026-08-29).
+- **CR-123 condition 1:** the cli half merges and `dist` is rebuilt before the outer half registers `spidr-coverage`; otherwise every Story/CR/Bug gate check throws.
+- **CR-123 condition 2:** live `qa.md` and `SKILL.md` change only at RS-2.
+- **BUG-085 vs STORY-058-01:** the baseline moves underneath the check. After -01, `cleargate-planning/` feeds neither the payload nor the live re-sync, but BUG-085's task text still compares against `cleargate-planning/.claude/**` (defect D4).
+- **Live-only edits create drift** in files whose canonical twins are byte-identical today (BUG-089, BUG-067, -12) — the BUG-024/BUG-085 failure class (defect D1).
+- **-11 rewrites all nine hooks** Claude runs today. -09's baseline exists to catch exactly this, so re-run it at RS-4 before -12.
+- **B0 breaks the ledger's continuity.** The Reporter treats rows before B0 as unattributable. BUG-089's own segment runs under fail-open gates.
+- `init.ts` is touched by 03/04/06, not the seed's 01/03/04/10; `manifest.ts` by 06/05. The table above supersedes the seed.
 
 ### 2.4 Lane Audit
 
 | Story | Lane | Rationale (≤80 chars) |
 |---|---|---|
-| `BUG-085` | fast | Targeted re-sync plus bounded doctor predicate; review M3 scope |
-| `BUG-089` | standard | New shared CLI handler plus fail-closed hooks and real-host proof |
-| `BUG-067` | fast | Single-mechanism locator fix; red test already exists as CR-108 N6b |
-| `CR-123` | standard | New predicate + four templates + gate doc + two agent prompts, cross-repo |
+| `BUG-067` | standard (demoted from fast) | Fails checks 1, 2, 6: 5+ files, gate-enforcement surface, med bounce |
+| `BUG-085` | standard (demoted from fast) | Fails checks 1, 2, 7: re-syncs enforcement hooks; spans live/canonical/cli |
+| all others | standard | No fast-lane candidates; no promotions |
+
+`state.json` still records `fast` for both until `update_state.mjs --lane-demote` runs (defect D2).
 
 ### 2.5 ADR-Conflict Flags
 
-- **Codebase / PM-Tool Boundary (CLAUDE.md):** EPIC-058 adds no PM-tool SDK; adapters use documented
-  file and process contracts only. No conflict.
-- **Dogfood split (CLAUDE.md):** STORY-058-01 relocates the canonical scaffold into `cleargate-cli`,
-  which changes the canonical→payload→live propagation path documented in CLAUDE.md. That
-  documentation must be updated in the same story, not after.
-- **OD-3 `<instructions>`-verbatim scaffold contract:** BUG-067 must NOT be fixed by stripping
-  `<instructions>`. Its §4 pins the fix in the frontmatter locator; OD-3 ruled no-stripping on
-  measured evidence.
+- **Codebase / PM-Tool Boundary:** no host SDK or PM SDK is imported. No conflict.
+- **Dogfood split:** STORY-058-01 changes the canonical → payload → live path and must update `CLAUDE.md` in the same story. Its parsed surface omits `CLAUDE.md` (defect D3).
+- **OD-3 (`<instructions>` stays verbatim):** BUG-067 fixes the frontmatter locator; it must not strip `<instructions>`.
+- **Worktree isolation / sprint-execution §2/§C.0:** overridden for this sprint by R1 (extends the 2026-09-11 bootstrap exception). R3 lifts the bootstrap decision's ban on writing live files, for B0 only.
+- **BUG-046 reachability:** zero refusals. Every unreachable path is under `cleargate-cli/` (R1) except -09's `clean-room-verification.md`, which is -08's create (R4).
+
+### 2.6 Wave Assignment
+
+Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-41`.
+
+| Wave | Milestone | Item | Repo | Why here |
+|---|---|---|---|---|
+| wave1 | M0 | BUG-089 | both | M0 chain; shares the bug068 red test with BUG-085 |
+| B0 | M0 | BUG-085 M0 step | outer main checkout | Barrier, not a wave |
+| wave2 | M0 | BUG-067 | both | After B0; `test/e2e/` contains -09's test |
+| wave3 | M0→M1 | CR-123 | both | Before -01, -11, -12; conditions 1 and 2 |
+| wave4 | M1 | STORY-058-01 | both | Highest bounce; §3.1 still prose (D3) |
+| wave5 | M1 | STORY-058-02 | cli | After 01; shares `build-manifest.ts`, `package.json` |
+| wave6 | M2 | STORY-058-03 | cli | Creates the host registry; §3.1 still prose (D3) |
+| wave7 | M2 | STORY-058-04 | cli | After 03; shares `cli.ts`, `registry.ts` with -05 |
+| wave8 | M3 | STORY-058-06 | cli | Before 05, 07, BUG-085; shares `manifest.ts`, `init.ts` |
+| wave9 | M3 | STORY-058-05 | cli | Moved from M2: needs -06's `owner` field |
+| wave10 | M3 | STORY-058-07 | cli | After 06; shares `doctor.ts` |
+| wave11 | M3 | BUG-085 | both | Only BUG-085 wave; after 07; shares `doctor.ts`, `CLAUDE.md` |
+| wave12 | M4 | STORY-058-08 | both | Before 09 and 13; §3.1 still prose (D3) |
+| wave13 | M4 | STORY-058-09 | both | After 08 (its created doc) |
+| wave14 | M5 | STORY-058-10 | cli | After BUG-089; `hosts/codex/**` holds -11's files |
+| wave15 | M5 | STORY-058-11 | cli | After 10, 01, CR-123, 09; §3.1 still prose (D3) |
+| wave16 | M6 | STORY-058-12 | both | After 03, CR-123, 10, 11 |
+| wave17 | M6 | STORY-058-13 | both | After 12, 08 |
+
+### 2.7 Pre-dispatch defects
+
+- **D1 — BUG-089, BUG-067:** each edits one live file whose canonical twin is byte-identical today (`.cleargate/knowledge/cleargate-enforcement.md`, `.cleargate/scripts/prep_doc_refresh.mjs`). Add the `cleargate-planning/.cleargate/...` twin to each item's §3.1, or the fix never ships.
+- **D2 — BUG-067, BUG-085:** `state.json` says `fast`, and fast lane skips QA-Red. Run `update_state.mjs <ID> --lane-demote` for both before wave2.
+- **D3 — STORY-058-01, -03, -08, -11:** §3.1 is still a bullet list, so the outer pre-commit surface check guards nothing. Missing from the parsed surface: -01 `copy-planning-payload.mjs` + `CLAUDE.md`; -03 `init.ts`; -08 `cli.ts`; -11 the nine hooks + `package.json`. Convert to tables before each dispatches.
+- **D4 — BUG-085, -11, -12, -13:** after wave4 merges, `cleargate-planning/` is no longer the source; re-declare each against `cleargate-cli/scaffold/{core,hosts/claude}/**` and commit on `sprint/S-41` before the next outer worktree.
+- **D5 — STORY-058-05:** moved to M3 (applied in `waves.json` and §1).
+- **Before wave1:** cut `sprint/S-41` (R2).
 
 ## Risks & Dependencies
 
@@ -212,6 +283,7 @@ Architect refines §2.1–2.5 during Sprint Design Review and owns the final wav
 - 2026-09-24T21:53:44Z · CR:scope-change · Owner directs [[CR-123]] (SPIDR scenario coverage, approved the same day) into SPRINT-41 and a re-plan. Registered by one append-only genesis event; the 16 existing records are unchanged. Sprint goal unchanged — CR-123 is off the critical path. The re-plan is the pending Architect Sprint Design Review over all 17 items. The isolated CG_TEST workspace state predates this amendment.
 - 2026-09-24T22:25:00Z · SDR HALT · Reader/synth fan-out over 17 items wrote `waves.json` with zero waves: 11 refused under BUG-046 reachability (16 of 17 items touch the nested `cleargate-cli/` repo, which a worktree of this repo does not contain), 6 blocked behind them. BUG-085 placement ruled (M3 entry + M0 operational step); CR-123 placement confirmed. Awaiting the owner's ruling on cli-repo and live `.claude/**` execution. Full output: `sprint-runs/SPRINT-41/plans/sdr-halt-2026-09-24.md`.
 - 2026-09-24T22:30:23Z · CR:approach-change · Owner rulings on the SDR halt: (1) **cli work** runs on a story branch in the `cleargate-cli` main checkout (not a worktree), orchestrated by hand one item at a time — QA-Red → TPV/Architect only when the pre-gate scan flags → Developer → QA-Verify → DevOps — without `/workflows`; this extends the 2026-09-11 bootstrap exception. DevOps merges to cli `main` locally only; no push or publish. Outer tracked `.cleargate/**` edits land in the outer repo on `sprint/S-41`; canonical `.claude/**` edits only, live re-sync at boundaries. (2) **BUG-085's M0 step** runs against this repo's real live `.claude/`: back up, re-sync from canonical, restart Claude Code, prove real denials and dispatch identity. This supersedes the bootstrap decision's ban on writing the original live files, for this step only. (3) **All `.cleargate/` changes committed to main** in one chore commit so worktrees and the preflight see them; `.agents/`, `.codex/`, `AGENTS.md` left untouched. Next: fix the item-surface defects the synth listed, then re-dispatch readers and synth with these rulings.
+- 2026-09-24T23:20:00Z · SDR · Re-run under rulings R1–R4: all 17 items placed as 17 serial single-item waves, zero refusals; `waves.json` overwritten. STORY-058-05 moved M2→M3 after -06 (its `host remove` needs -06's manifest `owner` field). BUG-067 and BUG-085 demoted fast→standard. Pre-dispatch defects D1–D4 listed in §2.7. §2 replaced; awaiting the owner's plan confirmation.
 
 ---
 
