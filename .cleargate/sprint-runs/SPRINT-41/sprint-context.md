@@ -1,7 +1,7 @@
 ---
 sprint_id: "SPRINT-41"
 created_at: "2026-09-04T12:08:02.222Z"
-last_updated: "2026-09-11T22:19:09Z"
+last_updated: "2026-09-24T23:34:00Z"
 ---
 
 # Sprint Context
@@ -43,10 +43,10 @@ built-in defaults — Developer/QA/Architect use these values, not any hardcoded
 
 | Field | Value |
 |-------|-------|
-| Backend runner    | _(e.g. `pytest -q` · `go test ./...` · `npm test` · populate at init)_ |
-| Frontend runner   | _(e.g. js unit runner — blank if single-stack)_ |
-| Typecheck command | _(e.g. `mypy .` · `tsc --noEmit` · blank if none)_ |
-| Red-test naming   | _(e.g. `*.red.test.tsx` · `test_*_red.py` · `*_red_test.go` · populate at init)_ |
+| Backend runner    | `cleargate-cli`: `npm test` (node:test via tsx); single file `npm run test:file -- <path>`; shell suites `bash <file>.sh` |
+| Frontend runner   | — (single-stack) |
+| Typecheck command | `cleargate-cli`: `npm run typecheck` |
+| Red-test naming   | `*.red.node.test.ts`; integration layer `*.red.integration.node.test.ts`; shell `*.red.sh` |
 
 _If unresolved at init: leave the table stubbed. The pre-gate scan emits a one-line
 "test_stack unresolved — populate sprint_context.md §Test Stack" advisory and treats the
@@ -56,9 +56,20 @@ typecheck/test gate as advisory (not FAIL) until populated. (§0.5 backstop deci
 
 Sprint-wide architecture rules and UI/API tokens that every story must honour. Populated from the parent Epic's `<architecture_rules>` block.
 
-1. (rule 1)
-2. (rule 2)
-3. (rule 3)
+From [[EPIC-058]] `<architecture_rules>` plus the SPRINT-41 execution rulings (R1–R4, 2026-09-24):
+
+1. Production implementation and npm payload sources live in the standalone `cleargate-cli` repo; the outer meta-repo and `cleargate-planning/` must not become build-time dependencies.
+2. `cleargate init` with no host flag stays byte-compatible Claude installation behavior. Claude Code is the regression baseline: any Claude-observable change is a release blocker.
+3. `--host claude|copilot|codex` are additive selectors; `portable` = copilot+codex, `all` = all three; repeated/comma values normalize to a de-duplicated set; installing a host never removes or rewrites another host's owned files.
+4. One shared `.cleargate/**` surface serves every host; only instructions, agents, skills, hooks, permissions and host MCP config vary.
+5. Host hook files are thin adapters into normalized `cleargate hook` CLI handlers — never reimplement gates, ingest, attribution or ledger policy per host.
+6. Token usage is recorded only from verifiable host telemetry; unavailable usage is explicit, never synthesized as zero.
+7. Upgrade/doctor/uninstall operate per installed-host ownership in the install manifest, preserving user-authored files.
+8. No install/upgrade/doctor/uninstall change is Done without a clean-room install from the packed artifact (`.cleargate/knowledge/clean-room-verification.md` once STORY-058-08 lands).
+9. **Execution (R1):** `cleargate-cli/**` work happens on branch `story/<ID>` in the cli main checkout (`/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli`), never a worktree; one item in flight. Merges go to cli `main` locally — no push, no publish.
+10. **Execution (R2):** outer tracked edits (`.cleargate/**`, `cleargate-planning/**`, `CLAUDE.md`) happen in outer worktree `.worktrees/<ID>` on `story/<ID>` cut from `sprint/S-41`. Edit canonical `cleargate-planning/.claude/**`, never the live gitignored `/.claude/**`; live re-sync happens only at boundary steps.
+11. **`dist` is live enforcement.** Live gate hooks run `cleargate-cli/dist/cli.js`. Build `dist` only from cli `main` after a merge (boundary BD). If you build on a story branch for e2e, say so in your report so the orchestrator rebuilds from `main`.
+12. Commits in `cleargate-cli` run its pre-commit hook (typecheck + full suite vs `test-baseline.json`). Never `--no-verify`.
 
 ## Active FLASHCARD Tags
 
@@ -87,3 +98,4 @@ _(populated by Architect on CR:scope-change or CR:approach-change; never rewrite
 - 2026-09-11T23:30:09Z · CR:approach-change · Owner directs autonomous decisions and delivery tested in new Dev/CG_TEST. The bounded exception and clean isolated baseline are approved as recorded in bootstrap-decision.md; this supersedes the prior execution-route halt and serial-only target. Build and qualify a distributable Codex wave executor with native roles before drained-wave cutover; keep normal gates, truthful evidence, Claude compatibility, and separate installed-host acceptance.
 - 2026-09-24T21:53:44Z · CR-123 · CR:scope-change — owner directs CR-123 (SPIDR scenario coverage) into the sprint and a re-plan; one append-only genesis event, 16 existing records preserved. Off critical path; not M0. Seeded order: after M0, before STORY-058-01 (which copies the templates CR-123 edits into scaffold/core). Architect SDR confirms.
 - 2026-09-24T22:30:23Z · CR:approach-change · Owner rulings after the SDR halt (BUG-046 reachability): cli items run on story branches in the cleargate-cli main checkout, orchestrated serially by hand without /workflows (extends the 09-11 bootstrap exception); local-only cli merges; dist rebuild and live .claude/ re-sync at boundaries. BUG-085's M0 step uses this repo's real live .claude/ with backup + restart + denial proof. All .cleargate/ changes committed to main. Full SDR output: plans/sdr-halt-2026-09-24.md.
+- 2026-09-24T23:34:00Z · Plan confirmed · Owner goal directive 2026-09-25 (local) confirms the SDR v2 plan and authorises kickoff with autonomous in-sprint decisions. end_date → 2026-10-09. BUG-067/BUG-085 demoted fast→standard (D2).

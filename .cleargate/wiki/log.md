@@ -1700,3 +1700,8 @@
   action: "update"
   target: "BUG-067"
   path: ".cleargate/delivery/pending-sync/BUG-067_Stamp_Corrupts_Frontmatter_Behind_Instructions.md"
+- timestamp: "2026-09-24T23:34:13.071Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-41"
+  path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"

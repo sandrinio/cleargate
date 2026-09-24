@@ -8,12 +8,12 @@
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-04T12:08:02.222Z",
+      "updated_at": "2026-09-24T23:34:02.076Z",
       "notes": "",
-      "lane": "fast",
+      "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
-      "lane_demoted_at": null,
-      "lane_demotion_reason": null
+      "lane_demoted_at": "2026-09-24T23:34:02.076Z",
+      "lane_demotion_reason": "SDR 2026-09-24 lane audit: fails checks 1,2,6 (5+ files, gate-enforcement surface, med bounce)"
     },
     "STORY-058-01": {
       "state": "Ready to Bounce",
@@ -152,12 +152,12 @@
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-11T22:19:09Z",
+      "updated_at": "2026-09-24T23:34:03.009Z",
       "notes": "Approved scope addition; no implementation or runtime evidence claimed.",
-      "lane": "fast",
+      "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
-      "lane_demoted_at": null,
-      "lane_demotion_reason": null
+      "lane_demoted_at": "2026-09-24T23:34:03.009Z",
+      "lane_demotion_reason": "SDR 2026-09-24 lane audit: fails checks 1,2,7 (re-syncs enforcement hooks; spans live/canonical/cli)"
     },
     "STORY-058-12": {
       "state": "Ready to Bounce",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-123 → Ready to Bounce",
-  "updated_at": "2026-09-24T21:53:44Z"
+  "last_action": "lane-demote BUG-085: \"SDR 2026-09-24 lane audit: fails checks 1,2,7 (re-syncs enforcement hooks; spans live/canonical/cli)\"",
+  "updated_at": "2026-09-24T23:34:03.009Z"
 }

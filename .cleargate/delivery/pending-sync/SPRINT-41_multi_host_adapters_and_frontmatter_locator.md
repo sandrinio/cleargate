@@ -11,7 +11,7 @@ approved: true
 approved_by: sandrinio
 approved_at: 2026-09-04T00:00:00Z
 start_date: 2026-09-08
-end_date: 2026-09-26
+end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
 updated_at: 2026-09-11T22:25:54Z
@@ -284,12 +284,13 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-24T22:25:00Z · SDR HALT · Reader/synth fan-out over 17 items wrote `waves.json` with zero waves: 11 refused under BUG-046 reachability (16 of 17 items touch the nested `cleargate-cli/` repo, which a worktree of this repo does not contain), 6 blocked behind them. BUG-085 placement ruled (M3 entry + M0 operational step); CR-123 placement confirmed. Awaiting the owner's ruling on cli-repo and live `.claude/**` execution. Full output: `sprint-runs/SPRINT-41/plans/sdr-halt-2026-09-24.md`.
 - 2026-09-24T22:30:23Z · CR:approach-change · Owner rulings on the SDR halt: (1) **cli work** runs on a story branch in the `cleargate-cli` main checkout (not a worktree), orchestrated by hand one item at a time — QA-Red → TPV/Architect only when the pre-gate scan flags → Developer → QA-Verify → DevOps — without `/workflows`; this extends the 2026-09-11 bootstrap exception. DevOps merges to cli `main` locally only; no push or publish. Outer tracked `.cleargate/**` edits land in the outer repo on `sprint/S-41`; canonical `.claude/**` edits only, live re-sync at boundaries. (2) **BUG-085's M0 step** runs against this repo's real live `.claude/`: back up, re-sync from canonical, restart Claude Code, prove real denials and dispatch identity. This supersedes the bootstrap decision's ban on writing the original live files, for this step only. (3) **All `.cleargate/` changes committed to main** in one chore commit so worktrees and the preflight see them; `.agents/`, `.codex/`, `AGENTS.md` left untouched. Next: fix the item-surface defects the synth listed, then re-dispatch readers and synth with these rulings.
 - 2026-09-24T23:20:00Z · SDR · Re-run under rulings R1–R4: all 17 items placed as 17 serial single-item waves, zero refusals; `waves.json` overwritten. STORY-058-05 moved M2→M3 after -06 (its `host remove` needs -06's manifest `owner` field). BUG-067 and BUG-085 demoted fast→standard. Pre-dispatch defects D1–D4 listed in §2.7. §2 replaced; awaiting the owner's plan confirmation.
+- 2026-09-24T23:34:00Z · Plan confirmed · Owner goal directive: "get sprint ready for execution and you have my permission to start the sprint. during the sprint, make decisions on your own and deliver the sprint goal." This confirms the §2 plan (17 serial waves, STORY-058-05 at M3, BUG-067/BUG-085 standard) and authorises kickoff. The orchestrator set `end_date` 2026-09-26 → 2026-10-09: 17 serial items cannot fit the original window. D2 lane demotions for BUG-067 and BUG-085 were run by the orchestrator through `run_script.sh update_state.mjs --lane-demote` — a §C.7-listed script invoked outside DevOps, recorded here as an edge case (planning action, not a merge). Ambiguity Gate flipped to 🟢.
 
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
 
-**Current Status: 🟡 Medium Ambiguity** — scope is approved; the Architect's cross-milestone placement review and bootstrap execution route remain unresolved.
+**Current Status: 🟢 Low Ambiguity** — scope approved; the Architect's cross-milestone review is done (SDR re-run 2026-09-24); the execution route is ruled (R1–R4); the owner confirmed the plan and authorised kickoff on 2026-09-25.
 
 - [x] Sprint goal is one sentence and names its primary outcome.
 - [x] Risks are recorded with mitigations, including the blockers that prevent sprint init.
@@ -303,4 +304,4 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
       reads. A bug item spanning two milestones is unusual and needs an explicit ruling.
 - [x] `approved: true` is set in the YAML frontmatter.
 
-> **Why this remains 🟡.** Owner scope approval is complete, but the Architect review is not. Passing CLI readiness predicates is not authority to check that box or to bypass the installed dispatch contract.
+> **Resolved 2026-09-25.** The two open conditions that held this at 🟡 — the Architect review and the bootstrap execution route — closed with the SDR re-run and owner rulings R1–R4. Readiness predicates remain specification checks, not runtime evidence; the M0 live-enforcement proofs still run at barrier B0.
