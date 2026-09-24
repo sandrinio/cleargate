@@ -3,7 +3,7 @@
 # Verifies 4 Gherkin scenarios for the flashcard gate in pending-task-sentinel.sh.
 #
 # Scenarios (fail-closed semantics after STORY-043-01):
-#   1. Block by default: unprocessed flagged card + no CLEARGATE_ADVISORY → exit 1 + BLOCKED.
+#   1. Block by default: unprocessed flagged card + no CLEARGATE_ADVISORY → exit 2 + BLOCKED (BUG-089: host-honored signal).
 #   2. Processed marker: .processed-<hash> present → exit 0, sentinel written.
 #   3. Advisory: CLEARGATE_ADVISORY=1 + unprocessed card → exit 0 + WARNING.
 #   4. Empty flashcards_flagged: [] is a no-op.
@@ -156,7 +156,7 @@ LAST_STDERR=""
 invoke_hook "${T1}"
 RC1=$?
 
-assert_eq "S1: exit code is 1 (blocked)" "1" "${RC1}"
+assert_eq "S1: exit code is 2 (blocked, BUG-089 host-honored signal)" "2" "${RC1}"
 assert_contains "S1: stderr names unprocessed card" "${KNOWN_CARD}" "${LAST_STDERR}"
 assert_contains "S1: stderr has touch-command hint with hash" ".processed-${KNOWN_HASH}" "${LAST_STDERR}"
 assert_contains "S1: stderr says FLASHCARD GATE BLOCKED" "FLASHCARD GATE BLOCKED" "${LAST_STDERR}"
