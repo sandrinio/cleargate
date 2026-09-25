@@ -1,3 +1,4 @@
+2026-09-25 · #qa #test-harness · grep -c CLEARGATE:START over-counts (CLAUDE.md prose repeats the token); count ^<!-- CLEARGATE:START -->$ instead.
 2026-09-25 · #uninstall #settings-json #danger · isClearGateCommand (settings-json-surgery.ts:32) matches 3 of 7 shipped hooks; uninstall leaves 4 dead ones.
 2026-09-25 · #uninstall #danger · uninstall deletes .claude/settings.json wholesale (cli-config tier) BEFORE its hook surgery runs — user hooks are lost.
 2026-09-25 · #manifest #host · Legacy owner default (.claude/** ⇒ claude, else core) is exact: every pre-058-06 payload was core+claude only.
