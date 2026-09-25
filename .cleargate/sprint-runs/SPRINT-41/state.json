@@ -196,11 +196,11 @@
       "lane_demotion_reason": null
     },
     "CR-123": {
-      "state": "QA Passed",
+      "state": "Done",
       "qa_bounces": 1,
       "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-09-25T06:54:09.070Z",
+      "updated_at": "2026-09-25T07:19:21.440Z",
       "notes": "Approved scope addition; no implementation or runtime evidence claimed.",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "qa-bounce CR-123: qa_bounces=1",
-  "updated_at": "2026-09-25T06:54:09.070Z"
+  "last_action": "transition CR-123 → Done",
+  "updated_at": "2026-09-25T07:19:21.440Z"
 }
