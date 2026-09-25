@@ -1,3 +1,4 @@
+2026-09-25 · #devops #agents · An agent Bash call like rm -rf "$(cat <<< path)" stalled DevOps 40 min; clean up with literal paths, one per call.
 2026-09-25 · #host #copy #test-harness · Sealed E1 needs payloadFilter to admit claude's own CLAUDE.md; exclude only UNSELECTED hosts' root surgery targets.
 2026-09-25 · #manifest #host · Snapshot hosts = installed set, not this run's --host selection; init --host codex on a Claude install keeps claude.
 2026-09-25 · #manifest #host #danger · installedHosts(null) returns the legacy ['claude']; a prior-hosts merge must use prior ? installedHosts(prior) : [].
