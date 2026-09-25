@@ -1,6 +1,6 @@
 2026-09-25 · #codex #hooks · Codex 0.154 PreToolUse sees spawn_agent as collaborationspawn_agent; matchers full-match, so use .*spawn_agent.
 2026-09-25 · #codex #hooks #danger · Codex PreToolUse blocks only on exit 2 WITH non-empty stderr (or JSON deny); silent exit 2 and exit 1 fail open.
-2026-09-25 · #codex #hooks · Codex apply_patch hook payload: tool_input.command is patch text, no file_path; parse the *** Add/Update/Delete File lines.
+2026-09-25 · #codex #hooks · Codex apply_patch hook: tool_input.command is patch text with no file_path; parse its *** Add/Update/Delete File lines.
 2026-09-25 · #codex #trust · Project .codex/ hooks+config load only in a trusted workspace; a hook runs once hooks.state.<key>.trusted_hash matches.
 2026-09-25 · #codex #agents-md · AGENTS.md and .agents/skills load without workspace trust; .codex/agents roles and .codex/config.toml need it.
 2026-09-25 · #codex #test-harness · A scripted Responses SSE endpoint (model_providers, wire_api=responses) drives real Codex hooks at $0, no login.
