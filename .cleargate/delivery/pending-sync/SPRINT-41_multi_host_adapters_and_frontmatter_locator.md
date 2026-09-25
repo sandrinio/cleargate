@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-25T14:10:05Z
+  last_stamp: 2026-09-25T14:37:04Z
   sessions: []
 ---
 
@@ -324,6 +324,16 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
   - CLAUDE.md block byte-identical. `.cleargate/templates` and `knowledge` match `scaffold/core`, apart from live-only files.
   - Fixed live-behind drift: `.cleargate/config.example.yml` ← canonical (CR-079 worktree and `ingest_buckets` doc blocks, CR-107 wording), and the stale `cleargate-planning/` schema pointer in live `config.yml`.
   - Canonical-behind drift, pre-existing: `scaffold/core/.cleargate/scripts/validate_state.mjs` lacks CR-117 (positional state-file path; landed live-only at `d8ab60b3`). This is the `canonical-live-parity` red → carry-forward to [[BUG-085]] (M3 durable drift check): port CR-117 to canonical. `gate-checks.json` differs by design (meta-repo `npm --prefix` commands).
+- 2026-09-25T14:45:00Z · STORY-058-03 · **M2 started.**
+  - **QA-Red** (cli `11fe514`, 15 min):
+    - `test/helpers/init-fixture.ts` (frozen clock and pin, probe stub).
+    - 19 contract unit reds, all `ERR_MODULE_NOT_FOUND` on `src/hosts/*`.
+    - A 5-scenario parity integration, green by design.
+    - Baseline `/private/tmp/cg-s41-m2-init-baseline` (425 files, sha `bdc4bb1a…`), deterministic over 3 re-runs.
+  - **TPV APPROVED** with no test fix, measured in scratch: a conformant implementation takes the unit file from 0/19 to 19/19, and parity stays 5/5. It found two constraints:
+    - **D1:** a strictly verbatim move reds scenario 11, because the `init.ts:497` fallback holds `CLEARGATE:START`; move it as the constants (M2-A14).
+    - **Q1:** parity plus the injected-seam spy cannot kill "route only when the seam is set". -03 QA-Verify closes this with a static grep; -04's reds add a default-path witness (M2-A15).
+  - Developer dispatched. The M3 Architect plan is running in parallel.
 
 ---
 
