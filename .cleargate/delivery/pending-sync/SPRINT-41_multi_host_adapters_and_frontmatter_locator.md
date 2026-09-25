@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-25T14:37:04Z
+  last_stamp: 2026-09-25T15:30:39Z
   sessions: []
 ---
 
@@ -334,6 +334,11 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - **D1:** a strictly verbatim move reds scenario 11, because the `init.ts:497` fallback holds `CLEARGATE:START`; move it as the constants (M2-A14).
     - **Q1:** parity plus the injected-seam spy cannot kill "route only when the seam is set". -03 QA-Verify closes this with a static grep; -04's reds add a default-path witness (M2-A15).
   - Developer dispatched. The M3 Architect plan is running in parallel.
+- 2026-09-25T15:30:00Z · STORY-058-03 · **Done**, with 0 bounces. Dev (cli `0fb61b1`, 20 min, no deviations) → QA PASS → Architect post-flight PASS → DevOps.
+  - **QA:** the static grep was empty, the verbatim move matched hunk for hunk, and a bundled-dist double init placed each hook exactly once.
+  - **Post-flight follow-ups:** FU-5 → -04; FU-1/2/7 → -05 (sink convention, `remove()` never rejects); FU-3 → -07 doc, plus a close CR on `init --force` overwriting `settings.json` wholesale; FU-4 → -10 (`AGENTS.md` would be copied wholesale); FU-6 → close.
+  - **DevOps:** merged cli `55f5d95`. The suite ran 2829/2827/0 fail/2 skip. BD: flat payload byte-identical, and the adapter is bundled. Post-BD parity 5/5 against the M2 baseline.
+  - **Plans:** the M3 plan landed (`plans/M3.md`: -06 → -05 → -07 → BUG-085; 11 `[verify after …]` tags, of which T1–T5 are now resolved). Mid-Sprint Amendment: shared portable assets go in `scaffold/core` under a sharedRoot an adapter declares. STORY-058-04 received amendments B1–B8, with anchors re-measured as M2-A16.
 
 ---
 
