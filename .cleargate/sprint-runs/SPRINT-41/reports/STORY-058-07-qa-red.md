@@ -199,4 +199,72 @@ After (end of this dispatch, before appending this section):
 
 Identical — only hook-owned ledger/event/state files, no other outer path changed. `cli` repo status: `?? cleargate-0.25.0.tgz` (pre-existing, untouched) both before and after; HEAD moved from `23e8280` to `fe11c1d` on `story/STORY-058-07`, both commits present in `git log`.
 
+## Remediation R11 (M3-A44)
+
+**Commit:** `story/STORY-058-07` @ `4394c9b` — `qa-red(STORY-058-07): R11 uninstall→re-init reds (M3-A44)` (parent `b146faf`, the Dev commit that Architect post-flight FAILED on the M3-A44 plan gap; `src/` unchanged by this dispatch).
+
+**File written (exactly one, no existing test or helper edited):** `test/commands/uninstall-reinit.red.node.test.ts` (4 tests).
+
+### Per-test red reasons (verified against `b146faf` source)
+
+| Test | Result on `b146faf` | Reason |
+|---|---|---|
+| R11a — full uninstall removes an emptied `.claude/settings.json` | RED | `claude.ts`'s `remove()` always writes `cleaned` back via `writeAtomic`, even when `Object.keys(cleaned).length === 0` — the file survives as `{}
+` instead of being deleted; measured directly (`got: "{}
+"`). |
+| R11b — re-init after that uninstall restores the full canonical file | RED | The re-init's non-force copy skips the existing (now `{}
+`) file, then `install()` merges only `CLAUDE_HOOK_ADDITION` (2 hooks: `pre-edit-gate.sh --host claude`, `stamp-and-gate.sh`) into it — a byte mismatch against the canonical 7-hook file, confirmed by the `deepStrictEqual` buffer diff. |
+| R11c — `createClaudeAdapter().remove()` unit | RED (first half); **second half already green** | Case 1 (canonical-only) fails identically to R11a (`{}
+` survives instead of deletion) — this is the assertion that stops the test before case 2 runs. Case 2 (canonical + a user `permissions` key) was independently verified in isolation (a standalone scratch run) to already pass on `b146faf`: `removeClearGateHooks` already strips the emptied `hooks` key and leaves `{ permissions: … }` byte-identical to the expected `JSON.stringify(…, null, 2) + '
+'`, with `removed` already `['.claude/settings.json (ClearGate hooks)']`. This is the same "already-true, non-regression anchor" shape as the sealed scenario-12 START-marker test — flagged per the dispatch's own instruction, not a defect. |
+| R11d — `host remove claude` then `host add claude` restores the full canonical file | RED | Same underlying gap as R11b, reached through -05's lifecycle handlers instead of `initHandler`: `hostRemoveHandler('claude', …)` leaves `.claude/settings.json` as `{}
+` (via the same `claude.ts` `remove()`), and the subsequent non-force `hostAddHandler('claude', …)` skips the existing file and merges only the 2-hook `CLAUDE_HOOK_ADDITION` into it — byte mismatch against canonical, confirmed. |
+
+**One incidental discovery, not itself a red/green concern:** `initHandler` prints an interactive `Restore preserved items? [Y/n]` prompt whenever a `.cleargate/.uninstalled` marker is present on disk — this fires regardless of `yes: true` / `stdinIsTTY: false`, and is gated by its own `promptYesNo` seam (`init.ts:357`). R11b's copied `invokeInit` call passes `promptYesNo: async () => true` to avoid hanging on real stdin (the marker `uninstallHandler` writes in R11a/R11b is exactly the trigger). See "Flashcards" below.
+
+### Counts
+
+Every file run solo via `npm run test:file -- <path>` with `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`.
+
+| File | Run 1 | Run 2 |
+|---|---|---|
+| `test/commands/uninstall-reinit.red.node.test.ts` (new) | 4 tests, 0 pass, 4 fail | 4 tests, 0 pass, 4 fail |
+
+Stable across both runs — same 4 test names red both times, no flake.
+
+`npm run typecheck` → exit 0 (both immediately after writing the file and after every run above).
+
+Unchanged, as required (`b146faf` already conforms to E1–E13, so these are fully green — not red — at this commit, exactly as they were before this dispatch):
+
+| Check | Result |
+|---|---|
+| `test/hosts/manifest-query.red.node.test.ts` | 6/6 green |
+| `test/commands/doctor-per-host.red.node.test.ts` | 10/10 green |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6/6 green |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16/16 green |
+| `test/commands/lifecycle-per-host.red.integration.node.test.ts` | 3/3 green |
+| `test/hosts/host-adapter-contract.red.node.test.ts` | 19/19 green |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (parity, compare mode) | 5/5 green |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (parity, compare mode) | 15/15 green |
+
+- Baseline hash: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files), before and after — unchanged, never captured.
+
+### Outer `git status --porcelain` — before and after
+
+Before (start of this dispatch) and after (end of this dispatch, before appending this section) are identical:
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+Only hook-owned ledger/event/state files — no other outer path changed; nothing wrote against `/Users/ssuladze/Documents/Dev/ClearGate` (SMOKE RULE honoured). `cli` repo status: `?? cleargate-0.25.0.tgz` (pre-existing, untouched) both before and after; HEAD moved from `b146faf` to `4394c9b` on `story/STORY-058-07`.
+
+### Flashcards
+
+Grepped `.cleargate/FLASHCARD.md` for `Restore preserved items`, `promptYesNo`, and `uninstalled marker` before appending — no duplicates found.
+
+flashcards_flagged:
+  - "2026-09-26 · #init #test-harness #danger · init prompts interactively when .uninstalled exists, regardless of yes/stdinIsTTY — seam it with promptYesNo."
+
 STATUS=done
