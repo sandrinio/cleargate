@@ -1,3 +1,8 @@
+2026-09-25 · #host #contract · InstallCtx sinks are raw (callee writes \n); RemoveCtx sinks are line sinks (uninstall appends \n). Wrap when crossing.
+2026-09-25 · #init #settings-json #danger · init --force overwrites .claude/settings.json wholesale; user hooks lost despite the surgeryTargets doc.
+2026-09-25 · #test-harness #init · runInitScenario('reinit') primes with NO extra seams (init-fixture.ts:273); a seamed reinit tests only pass 2.
+2026-09-25 · #host #copy · copy-payload SKIP_FILES hardcodes CLAUDE.md; a new host's root block source (AGENTS.md) is copied wholesale.
+2026-09-25 · #settings-json #init · Never reassign existingSettings before the merge: the restart-banner delta base must stay the on-disk parse.
 2026-09-25 · #qa #test-harness · grep -c CLEARGATE:START over-counts (CLAUDE.md prose repeats the token); count ^<!-- CLEARGATE:START -->$ instead.
 2026-09-25 · #uninstall #settings-json #danger · isClearGateCommand (settings-json-surgery.ts:32) matches 3 of 7 shipped hooks; uninstall leaves 4 dead ones.
 2026-09-25 · #uninstall #danger · uninstall deletes .claude/settings.json wholesale (cli-config tier) BEFORE its hook surgery runs — user hooks are lost.
