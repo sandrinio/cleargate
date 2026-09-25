@@ -1840,3 +1840,8 @@
   action: "create"
   target: "BUG-091"
   path: ".cleargate/delivery/pending-sync/BUG-091_doctor_check_scaffold_flags_post_processed_gate_checks.md"
+- timestamp: "2026-09-25T22:00:30.749Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "BUG-085"
+  path: ".cleargate/delivery/pending-sync/BUG-085_live_instance_never_resynced_canonical_hook_fixes_inert.md"
