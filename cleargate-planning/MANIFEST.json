@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.26.1",
-  "generated_at": "2026-09-02T15:35:57.117Z",
+  "generated_at": "2026-09-25T03:40:01.315Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -81,9 +81,9 @@
     },
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
-      "sha256": "2449e3bbcad670ffa453c53c1fe303d73e5280b76bfb2e29dc7bf062fce0fa26",
+      "sha256": "ee0296721db0a931f31391142417ae2ac970e3c945207deb5d459b56e1df7d83",
       "tier": "hook",
-      "overwrite_policy": "always",
+      "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
     },
     {
@@ -102,7 +102,7 @@
     },
     {
       "path": ".claude/hooks/pre-edit-gate.sh",
-      "sha256": "e48564fedcf617601b404288350a286db4e25cf704e308e9ed0d88ae95b462e6",
+      "sha256": "a7f5b0e7622c1fb4971eff285c37b37246a4db25c693c70b31d3f203490364f2",
       "tier": "hook",
       "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
@@ -144,7 +144,7 @@
     },
     {
       "path": ".claude/settings.json",
-      "sha256": "84d7d7ca7efc5ca36de66d22b631e5fa7d14895de11ae19f973102d72429ec56",
+      "sha256": "c36adcfd0aaa353dd489b20cfb393191e4d5e69157410eba307a60d362276ba0",
       "tier": "cli-config",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-enforcement.md",
-      "sha256": "bfd78a55625bbca2ca2be268a565ec1cc0dedfbcc0f10c49d9c2357f9e3ac6df",
+      "sha256": "4c3e8083c9ae4d3adcf968a75b454135c1d51cc0b0f0bf412e3d7ea71f9a4fdb",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
