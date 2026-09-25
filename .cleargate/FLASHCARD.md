@@ -1,3 +1,9 @@
+2026-09-26 · #doctor #grep · doctor.ts holds raw NUL bytes (globMatch :887/:889); plain grep says 'Binary file matches' — use grep -a.
+2026-09-26 · #host #uninstall #contract · executeHostRemoval's ctx sinks are RAW; uninstall's are LINE sinks — strip the trailing \n first.
+2026-09-26 · #doctor #drift · check-scaffold --session-start-mode replays an old .drift-state.json; new DriftMapEntry fields may be absent.
+2026-09-26 · #host #uninstall #danger · host remove has no dry-run or dirty-tree gate (uninstall has both); edited files at ClearGate paths go.
+2026-09-26 · #zsh #git · zsh reads `git show $C:src/x` as a :s modifier ('bad substitution'); write \"${C}:src/x\".
+2026-09-26 · #qa #danger #init · A QA smoke ran init before its cd, so it wrote into the meta-repo; run (cd /literal/tmp && node cli init) in one call.
 2026-09-26 · #qa #test-harness #tsx · resolveDefaultPayloadDir() assumes bundled dist/; a tsx src smoke of bare init/host add needs a scratch dist build.
 2026-09-26 · #codex #dispatch · spawn_agent is async; serial dispatch = spawn_agent then wait_agent until the FINAL_ANSWER arrives.
 2026-09-26 · #codex #dispatch · spawn_agent fork_turns defaults to all (child inherits parent history); pass fork_turns none.
