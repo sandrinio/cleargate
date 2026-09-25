@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T17:46:22Z
+updated_at: 2026-09-25T18:51:18Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 52661c5d-dirty
+updated_at_version: fe8d3a2a-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -361,6 +361,19 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Post-BD: parity 5/5 and 15/15; the baseline is intact.
     - Attempt 1 stalled for 40 min on an `rm -rf "$(…)"` smoke-cleanup call. The orchestrator stopped it, and attempt 2 finished from smoke (c) (flashcard added).
   - **M3 prep:** M3-A1/A2 were applied to STORY-058-06's §3.1 bullet and Step 7 Task Breakdown row, and the story was re-gated green.
+- 2026-09-25T18:00:00Z · M2 close · Browser check of the dashboard (`.playwright-mcp/s41-m2-close-*.png`): 7/17 done (41%); M2 2/2 Done; -04 shows QA 0 · Arch 1 with 6 reports. The `/data` 404s come from the static preview server, not the dashboard.
+- 2026-09-25T19:10:00Z · STORY-058-06 · **M3 started (wave8).**
+  - **QA-Red** (cli `3871857`, 29 min): 4 new red files, 3 amended sealed files, the 0.10.0 legacy fixture (sha `fa0c79ac…`), and `SANCTIONED_BASELINE_DELTAS` + `primeExtra` in `init-fixture.ts`. 26 reds.
+  - **TPV REJECTED** (32 min, `arch_bounces=1`):
+    - **Q1:** the sanctioned delta must be strict. QA-Red's dual-accept, caused by an orchestrator dispatch wording error, let a build that never writes `hosts` pass parity (measured).
+    - **M3-A7:** the M3-A2 carry-forward dropped shared-root core entries.
+    - Plan defects M3-A9..A12.
+    - 6 surviving mutants.
+    - E1–E9 re-seal diff (`git apply --check` clean). D1–D13 bind the Dev. C7 story text was applied, and the story re-gated green.
+  - **M4 plan** (parallel, 37 min; `plans/M4.md`): -08 `verify-install` + procedure doc, -09 clean-room harness + packed-tarball e2e.
+    - Probe findings F1–F10: PATH control is required, or hooks run the global `cleargate`; headless `claude -p --include-hook-events` works as live evidence.
+    - `waves.json` gained a concrete RS-4 and a new `RS-CLOSE`.
+    - Drafted **[[BUG-090]]** (F5, P1: `sprint init` + `close_sprint` Step 2.9 anchor frontmatter at offset 0; the sixth BUG-067-class site) and **[[BUG-091]]** (F8, P3: `doctor --check-scaffold` false positive on the post-processed `gate-checks.json`). Both are Draft and outside the sprint, pending owner approval. SPRINT-41's own items all start with `---`, so this sprint's close gate is unaffected.
 
 ---
 
