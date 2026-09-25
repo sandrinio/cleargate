@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T15:45:54Z
+updated_at: 2026-09-25T17:46:01Z
 created_at_version: cleargate@0.26.1
-updated_at_version: dffecf8b-dirty
+updated_at_version: 52661c5d-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -124,7 +124,7 @@ Feature: Manifest host ownership
 - `cleargate-cli/src/lib/manifest.ts` — **modify**. Entry gains optional `owner`; snapshot gains optional `hosts`; `entryOwner`/`installedHosts` apply the legacy default at read time; `loadInstallSnapshot` unchanged, never writes.
 - `cleargate-cli/src/lib/manifest-builder.ts` — **create**. The bundled manifest core moved from `scripts/build-manifest.ts` (FU-2), plus `buildViewManifest`/`buildInstallView`.
 - `cleargate-cli/scripts/build-manifest.ts` — **modify**. A thin re-exporting entry; compat restricted to core + hosts/claude (FU-1); tracked-scaffold write refused (FU-4); compat written from the flat-view manifest with a build-time equality tripwire.
-- `cleargate-cli/src/commands/init.ts` — **modify**. The `--from-source` bridge uses `buildInstallView` (`resolveCliPackageRoot` and the dynamic `.ts` import retired); Step 7 filters entries by the host selection and writes `hosts`.
+- `cleargate-cli/src/commands/init.ts` — **modify**. The `--from-source` bridge uses `buildInstallView` (`resolveCliPackageRoot` and the dynamic `.ts` import retired); one hoisted `payloadFilter` predicate serves copy and Step 7 (M3-A1); Step 7 writes `hosts` as the installed set via `mergeInstalledHosts` and carries forward installed-but-unselected hosts' entries (M3-A2).
 - `cleargate-cli/scripts/verify-pack.mjs` — **modify**. Check 3c through `scripts/verify-pack-checks.mjs` (FU-3).
 
 ### 3.2 Technical Logic
@@ -153,7 +153,7 @@ Legacy migration is a read-time default, not a rewrite: absent `hosts` ⇒ `["cl
 - [ ] FU-1: restrict `buildManifest({scaffoldRoot})` compat to `core` + `hosts/claude` (all-roots collision check kept; doc comments reconciled) **before** any non-Claude `TIER_RULES` entry exists
 - [ ] FU-2: move the manifest core into bundled `src/lib/manifest-builder.ts`. Add `buildViewManifest`/`buildInstallView` as the one flat-view builder for prebuild, `--from-source` and `composeCanonicalPayload`. Retire `resolveCliPackageRoot` and the dynamic `.ts` import
 - [ ] Stamp `owner` from the payload root key (`ownerForRootKey`); add `ManifestOwner`, `entryOwner`, `installedHosts`, `LEGACY_INSTALLED_HOSTS` (read-time default, never written back)
-- [ ] Init Step 7: filter snapshot entries through `payloadFilter(registry, selected)`; write `hosts: [...selected]` as the last key
+- [ ] Init Step 7: one hoisted payloadFilter predicate for copy and snapshot; hosts = the installed set (mergeInstalledHosts of the prior snapshot's hosts and the selection, registry order) as the last key; entries of installed-but-unselected hosts carry forward
 - [ ] FU-3: `verify-pack` check 3c (`checkCompatPayload`): compat entries present in the flat view, owners ∈ {core, claude}, `owner: 'claude'` ⇔ under `.claude`
 - [ ] FU-4: `scaffoldRoot` mode refuses to write per-root manifests into the tracked `scaffold/`
 - [ ] Typecheck, targeted reds and witnesses solo, M2 parity compare with the -06 delta row

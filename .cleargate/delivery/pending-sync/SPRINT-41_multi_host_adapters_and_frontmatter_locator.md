@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T16:20:27Z
+updated_at: 2026-09-25T17:46:22Z
 created_at_version: cleargate@0.26.1
-updated_at_version: a48df99e-dirty
+updated_at_version: 52661c5d-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -348,6 +348,19 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Binding Dev constraints D1–D8 (M2-A19); M2-A20 is a forward note for -10.
   - **Re-seal** (cli `4785032`, 5 min): E1–E8 applied verbatim. The orchestrator reproduced the red-commit counts (0/11, 3/10, 0/4, 15/15), so Dev proceeds without a second TPV round.
   - **M3 prep:** STORY-058-06 received amendments C1–C6 (the M2-A13 FU-1 pre-dispatch gate) and was re-gated green. The M2 baseline hash was re-confirmed.
+- 2026-09-25T17:45:00Z · STORY-058-04 · **Done**, with 0 QA bounces and 1 Architect bounce (the TPV re-seal). **M2 complete.**
+  - **Dev** (cli `128bad6`, 18 min): followed D1–D8 verbatim; no deviations. All six files reproduced TPV's conformant counts: 11/11, 10/10, 4/4, 15/15, plus -03's 19/19 and 5/5. 25 witnesses were clean.
+  - **QA PASS** (4 min): sealed tests untouched. The static greps matched, D1–D8 were verified from the diff, and the tsx CLI smokes passed (`--help`, `--host cursor` → 2, `--host ""` → 2).
+  - **Post-flight PASS** (15 min):
+    - FU-1..8 routed. The binding -06 amendments are M3-A1 (one hoisted `include` predicate) and M3-A2 (snapshot `hosts` = the installed set via `mergeInstalledHosts`, plus new scenario 21).
+    - The -10 dispatch text gets M3-A3 (root-level surgery targets are admitted only for a selected declarer) and M3-A4 (a composed payload per selection).
+    - M3 tags T6–T10 are resolved, with anchors re-derived; T11 opens after -07.
+  - **DevOps:** merged cli `2e566b5`. The suite ran 2850/2848/0 fail/2 skip.
+    - BD: the flat payload is byte-identical, and verify-pack reported 196 files, payload 80.
+    - Real-dist smokes: `--help` lists `--host`. `--host cursor` exits 2 and leaves the target empty. No-flag re-init places each hook exactly once. `--host CLAUDE,claude` produces the same file set as no flag. `--from-source --host cursor` exits 2 and leaks no tempdir.
+    - Post-BD: parity 5/5 and 15/15; the baseline is intact.
+    - Attempt 1 stalled for 40 min on an `rm -rf "$(…)"` smoke-cleanup call. The orchestrator stopped it, and attempt 2 finished from smoke (c) (flashcard added).
+  - **M3 prep:** M3-A1/A2 were applied to STORY-058-06's §3.1 bullet and Step 7 Task Breakdown row, and the story was re-gated green.
 
 ---
 
