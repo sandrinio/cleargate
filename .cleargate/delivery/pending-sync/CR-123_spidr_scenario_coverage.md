@@ -16,9 +16,11 @@ created_at_version: cleargate@0.26.1
 updated_at_version: cleargate@0.26.1
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-09-24T23:35:07Z
+  pass: false
+  failing_criteria:
+    - id: spidr-coverage
+      detail: "predicate error: Error: unsupported predicate shape: spidr-coverage"
+  last_gate_check: 2026-09-25T06:11:38Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -28,15 +30,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-123
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-24T22:39:45Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-25T06:11:38Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-25T05:07:07Z
 ---
 
 # CR-123: Tested work items declare SPIDR coverage, and their scenarios must match it
@@ -161,13 +169,13 @@ draft_tokens:
 
 *(Refined 2026-09-25 from the SPRINT-41 M1 plan, `sprint-runs/SPRINT-41/plans/M1.md` §CR-123.)*
 
-- [ ] Re-measure every line anchor cited here against the tree at branch time ([[BUG-089]] and [[BUG-067]] have landed; [[CR-119]] / [[BUG-058]] / [[CR-112]] have not)
-- [ ] QA-Red: write `readiness-predicates-spidr-coverage.red.node.test.ts` (Verification scenarios 1-10, incl. all three unedited templates failing) and move the two doctrine counts (`test-layers-declared-doctrine.red.node.test.ts:328`, `:358`)
-- [ ] Add `spidr-coverage` to `readiness-predicates.ts` (union member, parser branch, evaluate case, `evalSpidrCoverage`, header docstring count) with a trigger anchored at column 0 and fence-aware — a `body.includes` lead-in match would fire on this CR itself, which quotes the lead-in and a blank table
-- [ ] Edit canonical `story.md` / `CR.md` / `Bug.md` / `epic.md` (bold lead-ins, no `## ` lines, no tagged gherkin inside instructions); copy byte-identical to live `.cleargate/templates/`
-- [ ] Edit canonical `readiness-gates.md` (vocabulary count and new entry, story/cr/bug registrations, epic `gherkin-error-path` check string); copy byte-identical to live `.cleargate/knowledge/readiness-gates.md`
-- [ ] Edit canonical `qa.md:39,42` and `SKILL.md:340,438` per-type acceptance pointer (keep the `:340` File-naming clause intact); live `.claude/` copies are re-synced by the orchestrator at RS-2, never edited here
-- [ ] Typecheck + targeted tests with `CLEARGATE_META_ROOT=<CR-123 worktree>`
+- [x] Re-measure every line anchor cited here against the tree at branch time ([[BUG-089]] and [[BUG-067]] have landed; [[CR-119]] / [[BUG-058]] / [[CR-112]] have not)
+- [x] QA-Red: write `readiness-predicates-spidr-coverage.red.node.test.ts` (Verification scenarios 1-10, incl. all three unedited templates failing) and move the two doctrine counts (`test-layers-declared-doctrine.red.node.test.ts:328`, `:358`)
+- [x] Add `spidr-coverage` to `readiness-predicates.ts` (union member, parser branch, evaluate case, `evalSpidrCoverage`, header docstring count) with a trigger anchored at column 0 and fence-aware — a `body.includes` lead-in match would fire on this CR itself, which quotes the lead-in and a blank table
+- [x] Edit canonical `story.md` / `CR.md` / `Bug.md` / `epic.md` (bold lead-ins, no `## ` lines, no tagged gherkin inside instructions); copy byte-identical to live `.cleargate/templates/`
+- [x] Edit canonical `readiness-gates.md` (vocabulary count and new entry, story/cr/bug registrations, epic `gherkin-error-path` check string); copy byte-identical to live `.cleargate/knowledge/readiness-gates.md`
+- [x] Edit canonical `qa.md:39,42` and `SKILL.md:340,438` per-type acceptance pointer (keep the `:340` File-naming clause intact); live `.claude/` copies are re-synced by the orchestrator at RS-2, never edited here
+- [x] Typecheck + targeted tests with `CLEARGATE_META_ROOT=<CR-123 worktree>`
 - [ ] DevOps, in this order (sprint plan §2.3 condition 1): cli merge → BD1 (`npm run build`) → outer merge (live registration) → BD2 + commit the regenerated `cleargate-planning/MANIFEST.json` → full cli suite once → `cleargate gate check` on EPIC-052, EPIC-053 and one pending story, CR and bug each (no new failures); orchestrator then runs RS-2
 
 ## 4. Verification Protocol
