@@ -1,3 +1,17 @@
+2026-09-25 · #codex #hooks · Codex 0.154 PreToolUse sees spawn_agent as collaborationspawn_agent; matchers full-match, so use .*spawn_agent.
+2026-09-25 · #codex #hooks #danger · Codex PreToolUse blocks only on exit 2 WITH non-empty stderr (or JSON deny); silent exit 2 and exit 1 fail open.
+2026-09-25 · #codex #hooks · Codex apply_patch hook payload: tool_input.command is patch text, no file_path; parse the *** Add/Update/Delete File lines.
+2026-09-25 · #codex #trust · Project .codex/ hooks+config load only in a trusted workspace; a hook runs once hooks.state.<key>.trusted_hash matches.
+2026-09-25 · #codex #agents-md · AGENTS.md and .agents/skills load without workspace trust; .codex/agents roles and .codex/config.toml need it.
+2026-09-25 · #codex #test-harness · A scripted Responses SSE endpoint (model_providers, wire_api=responses) drives real Codex hooks at $0, no login.
+2026-09-25 · #codex #test-harness · codex exec --json emits no hook events; capture hook/started|completed from codex app-server stdio instead.
+2026-09-25 · #codex #agents · Codex role TOML model= is forwarded verbatim to the provider; Claude aliases (sonnet/opus) break real spawns — omit it.
+2026-09-25 · #codex #hooks #env · Codex hooks inherit the launcher env; a leaked CLAUDE_PROJECT_DIR misroutes them — export the git toplevel per command.
+2026-09-25 · #codex #clean-room · Isolate Codex with CODEX_HOME AND HOME: ~/.agents/skills leaks into the skill roots otherwise.
+2026-09-25 · #scaffold #manifest · buildInstallView over templates/scaffold/* split roots collides on each root's MANIFEST.json; skip it at compose.
+2026-09-25 · #codex #upgrade #danger · Upgrading a codex install against the core+claude compat manifest prunes every codex-owned file.
+2026-09-25 · #npm #cli · ~/.npm/_cacache holds root-owned files here (EACCES); run npm view/install with --cache <scratch dir>.
+2026-09-25 · #codex #hooks · Codex SessionStart fires on the first turn/start, and its plain stdout reaches the model as a context message.
 2026-09-25 · #devops #grep · grep here is a gitignore-aware shim: plain grep -c on gitignored dist/cli.js prints nothing; use command grep.
 2026-09-25 · #manifest #cli · TIER_RULES/INTENTIONALLY_UNTRACKED now live in src/lib/manifest-builder.ts; scripts/build-manifest.ts only re-exports.
 2026-09-25 · #manifest #test-harness #danger · A fixture manifest entry without owner reads by the legacy rule (.codex/** => core); always stamp owner explicitly.
