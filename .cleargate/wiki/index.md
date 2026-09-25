@@ -69,6 +69,8 @@
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
 - [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
+- [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs
+- [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
 
 ## Archive
 
