@@ -110,7 +110,59 @@ First-principles hash check for the -06 `SANCTIONED_BASELINE_DELTAS` row (comput
 
 None. Every script invocation went through `npm run test:file`/`npm run typecheck` directly per Cross-Cutting Rule 18 (never a bare `cleargate`); no `.cleargate/scripts/*` wrapper script was executed by QA-Red for this story.
 
-flashcards_flagged:
-  - "2026-09-25 · #test-harness #host #qa-red · SANCTIONED_BASELINE_DELTAS must accept EITHER the not-yet-landed baseline hash or the landed delta hash — a hard currentHash-only check reds the M2 parity files before the Developer lands."
+**Original `flashcards_flagged` block WITHDRAWN per TPV Q1.** The card proposed below this line at the first QA-Red pass ("must accept EITHER the not-yet-landed baseline hash or the landed delta hash…") is retracted — TPV round 1 ruled the dual-accept design wrong (Q1 ruling: strict `currentHash`, no alternative) and supplied its own replacement card, which the orchestrator has already recorded. This file no longer asserts that card, so the flashcard gate must not pick it up here.
+
+## Re-seal (TPV round 1 → E1–E9)
+
+role: qa
+
+**New commit:** `e990607b501bc891d78ddd3533a1bd0bd2274cf1` (`story/STORY-058-06`, cli repo) — `qa-red(STORY-058-06): re-seal per TPV E1-E9`, applied from `/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/75d958ba-2473-408d-b4db-e15b774ad28f/scratchpad/tpv-058-06-reseal.patch` verbatim (`git apply --check` clean on `3871857`, then `git apply`, no other edits — `git status --short` after apply showed exactly the 5 files E1–E9 touch, plus the pre-existing untracked `cleargate-0.25.0.tgz` left alone).
+
+TPV round 1 REJECTED my dual-accept `SANCTIONED_BASELINE_DELTAS` compare (accept EITHER the not-yet-landed baseline hash OR the landed current hash). Measured finding: a build that never writes `hosts` passed both M2 parity files 5/5 and 15/15 under dual-accept — the exact "delta missing or reverted" class the mechanism exists to catch. Q1 ruling: strict compare only (`stored.sha256 === baselineHash(id)` **and** `record.sha256 === currentHash(id)`, no alternative), per T1 item 2 and *Cross-story risks* verbatim. My ambiguity 3 is overruled; ambiguities 1, 2, 4 and 5 stand as accepted (TPV's "Rulings on QA-Red's five ambiguities").
+
+Applied E1–E9 exactly as the TPV-supplied unified diff:
+- **E1/E2** (`test/helpers/init-fixture.ts`, `init-host-snapshot.red`): `captureOrCompare`'s sanctioned-delta branch is now strict (no dual-accept branch, no `landed` flag); a new scenario-15 test proves a record still holding the baseline hash fails, naming the path.
+- **E3/E4/E9** (`init-host-snapshot.red`, M3-A7/M3-A2): scenario 21(b) now asserts the core-owned `.agents/**` entry (shared by a still-installed codex) survives a no-flag re-init; a new scenario 21(e) proves a no-longer-shipped core entry is never carried forward; scenario 21(a) now also asserts `claudeSpy.install` ran exactly once and that the snapshot stays sorted by path.
+- **E5** (`manifest-host-ownership.red`): new scenario 2b proves `buildViewManifest` derives owner from the physical source root (provenance), not a `.claude` prefix test — a non-claude host composed under `.claude/**` must still be stamped with that host's name.
+- **E6** (`manifest-host-ownership.red`, scenario 7): `entryOwner('.clauderc')` must be `'core'` (not a bare string-prefix match) and `entryOwner('.claude')` must be `'claude'` (the path-segment boundary, exact-or-slash).
+- **E7** (`verify-pack-compat.red`): a new static test asserts `scripts/verify-pack.mjs`'s source text actually loads `verify-pack-checks.mjs` and pushes `checkCompatPayload(...)` results into `errors` (FU-3 wiring, not just the standalone function's own correctness).
+- **E8** (`init-from-source`, scenario 19): the `--from-source` snapshot's `cleargate_version` must equal the running cli's own `package.json` version (proving the bundled bridge doesn't hardcode a constant).
+
+I made no edits beyond applying the patch verbatim — no `src/**` change, no additional test edits.
+
+### Measured per-file counts (2 solo runs each; every run matched the orchestrator's required counts exactly)
+
+| File | Run 1 | Run 2 | Required |
+|---|---|---|---|
+| `test/lib/manifest-host-ownership.red.node.test.ts` | 18 tests, 3 pass, 15 fail | 18 tests, 3 pass, 15 fail | 3/18 ✓ |
+| `test/commands/init-host-snapshot.red.node.test.ts` | 13 tests, 4 pass, 9 fail | 13 tests, 4 pass, 9 fail | 4/13 ✓ |
+| `test/scripts/verify-pack-compat.red.node.test.ts` | 7 tests, 0 pass, 7 fail | 7 tests, 0 pass, 7 fail | 0/7 ✓ |
+| `test/lib/manifest-legacy-snapshot.red.integration.node.test.ts` | 1/1 pass | 1/1 pass | 1/1 ✓ |
+| `test/scripts/scaffold-layout.red.node.test.ts` (unchanged by patch) | 18 tests, 17 pass, 1 fail | 18 tests, 17 pass, 1 fail | 17/18 ✓ |
+| `test/commands/init-from-source.node.test.ts` (E8) | 11 tests, 10 pass, 1 fail | 11 tests, 10 pass, 1 fail | 10/11 ✓ |
+| `test/commands/init-from-source-dist.integration.node.test.ts` (unchanged by patch) | 2 tests, 1 pass, 1 fail | 2 tests, 1 pass, 1 fail | 1/2 ✓ |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (compare mode) | 5 tests, 0 pass, 5 fail | 5 tests, 0 pass, 5 fail | 0/5 ✓ |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (compare mode) | 15 tests, 0 pass, 15 fail | 15 tests, 0 pass, 15 fail | 0/15 ✓ |
+| `test/hosts/host-adapter-contract.red.node.test.ts` (sealed -03) | 19/19 pass | 19/19 pass | 19/19 ✓ |
+| `test/hosts/host-selection.red.node.test.ts` (sealed -04) | 11/11 pass | 11/11 pass | 11/11 ✓ |
+| `test/commands/init-host-selection.red.node.test.ts` (sealed -04) | 10/10 pass | 10/10 pass | 10/10 ✓ |
+| `test/commands/init-host-cli.red.integration.node.test.ts` (sealed -04) | 4/4 pass | 4/4 pass | 4/4 ✓ |
+
+`npm run typecheck` → exit 0 (re-checked after the patch, before any test run).
+
+### Baseline hash
+
+- Before (start of re-seal work): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files)
+- After (end of re-seal work, all runs complete): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (unchanged)
+
+### Parity failure message (observed, both files, every scenario)
+
+```
+sanctioned delta ".cleargate/.install-manifest.json" (STORY-058-06): current hash mismatch at scenario "<id>" (equal to the baseline hash means the delta has not landed or was reverted)
+```
+
+Names `.cleargate/.install-manifest.json` and states "has not landed or was reverted", matching the orchestrator's required wording exactly. `actual` was `12efef5a49365b232044de43c0c839fa214ab4094b64d741e83c1cfa58bae26d` (baseline hash — the current run still produces the pre-delta bytes, since Step 7 hasn't landed `hosts` yet) against `expected` `d37ce8d25785eb6fcb070673b45ad049b9c653d1e3266d6537b7b7bff013ca4f` (the -06 current hash), on all 5 scenarios in the claude-adapter file and all 15 in the init-host-parity file.
+
+flashcards_flagged: []
 
 STATUS=done
