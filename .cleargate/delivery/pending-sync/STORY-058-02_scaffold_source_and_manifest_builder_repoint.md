@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T14:08:22Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: 3c012bf9-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -139,13 +139,13 @@ Prove self-containment negatively: the acceptance test copies the checkout to a 
 
 *(Refined 2026-09-25 from the SPRINT-41 M1 plan, `sprint-runs/SPRINT-41/plans/M1.md` §STORY-058-02.)*
 
-- [ ] Validate the case-exact core/host layout with the existing error codes (directory listing, not `existsSync`)
-- [ ] Bridge `--from-source` to a temp composed Claude view with manifest; clean only that temp dir
-- [ ] Parameterize `build-manifest` over scaffold roots: per-root manifests, unchanged compatibility manifest, collision rejection
-- [ ] Emit the split `templates/scaffold/**` view; extend verify-pack with per-root presence and negative controls
-- [ ] Repoint the manifest dev fallback and the check/changelog scripts to CLI-local roots
-- [ ] Add `test/helpers/scaffold-roots.ts`; repoint canonical reads in cli tests; add the sibling-read guard
-- [ ] Prove a standalone prebuild/build/pack/verify-pack and tarball install with no sibling (plus the poisoned-sibling control)
+- [x] Validate the case-exact core/host layout with the existing error codes (directory listing, not `existsSync`)
+- [x] Bridge `--from-source` to a temp composed Claude view with manifest; clean only that temp dir
+- [x] Parameterize `build-manifest` over scaffold roots: per-root manifests, unchanged compatibility manifest, collision rejection
+- [x] Emit the split `templates/scaffold/**` view; extend verify-pack with per-root presence and negative controls
+- [x] Repoint the manifest dev fallback and the check/changelog scripts to CLI-local roots
+- [x] Add `test/helpers/scaffold-roots.ts`; repoint canonical reads in cli tests; add the sibling-read guard
+- [x] Prove a standalone prebuild/build/pack/verify-pack and tarball install with no sibling (plus the poisoned-sibling control)
 
 ## 4. Quality Gates
 
