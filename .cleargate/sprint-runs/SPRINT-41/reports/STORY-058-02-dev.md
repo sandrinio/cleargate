@@ -235,4 +235,49 @@ flashcards_flagged: [
 - Full default suite: 2806/2804/0/2 (baseline 2788/2786/0/2, delta exactly +18 new unit reds, 0 regressions).
 - 70/70 repointed test files verified; 7 have pre-existing, proven-unrelated failures, all in `.integration.` files excluded from the default suite.
 
+## QA bounce 1 — rework
+
+QA-Verify report: `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-02-qa.md`. QA=FAIL, one blocker (Finding 1); Findings 2-3 non-blocking report-accuracy corrections. Fixed on the same branch, `story/STORY-058-02`, commit `358ae35`.
+
+### Finding 1 (blocking) — fix
+
+**Root cause.** `src/commands/init.ts`'s `--from-source` bridge built the dynamic-import path to `scripts/build-manifest.ts` as `path.join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts', 'build-manifest.ts')` — a fixed two-level walk, correct only when unbundled (`src/commands/` is two levels below the package root). Under the built `dist/cli.js`, every module's `import.meta.url` collapses to the bundle file in `dist/` (one level below the package root — the exact hazard the adjacent code comment already named for a *different* problem, the `isMain` self-invocation). The extra `'..'` walked one directory ABOVE the real package root, so `node dist/cli.js init --from-source <valid scaffold root>` threw an uncaught `Error [ERR_MODULE_NOT_FOUND]` and exited 1 — never reaching the `ScaffoldSourceError`/`LAYOUT_INVALID`/`PATH_MISSING` contract.
+
+**Fix.** Added `resolveCliPackageRoot(startDir): string | undefined` (exported from `src/commands/init.ts`), which walks up from `startDir` to the first ancestor whose `package.json` has `"name": "cleargate"` AND that also has `scripts/build-manifest.ts` on disk — no hardcoded depth, so it resolves correctly from `src/commands/` (unbundled), `dist/` or a dist chunk (bundled), and any tsup out-dir. The bridge now calls `resolveCliPackageRoot(path.dirname(fileURLToPath(import.meta.url)))` and, when it returns `undefined` (an installed npm package ships no `scripts/`), throws a `ScaffoldSourceError` (`code: 'PATH_MISSING'`, `missing: ['scripts/build-manifest.ts']`) through the existing exit-2 path — no raw stack trace, and the existing `catch` block's temp-dir cleanup still runs. `resolveDefaultPayloadDir()` and every other depth computation in the file are untouched, per the dispatch's explicit scope limit.
+
+### Regression tests
+
+**(a) Unit** — added to `test/commands/init-from-source.node.test.ts` (default suite): a new `describe('QA bounce 1: resolveCliPackageRoot resolves the cli package root by structure, not depth', ...)` block, 4 tests — from `<CLI_ROOT>/src/commands`, from `<CLI_ROOT>/dist`, from a synthetic `<CLI_ROOT>/.some-build-dir`, and from an unrelated tmp dir (expects `undefined`). All 4 pass; full file 14/14 solo.
+
+**(b) Integration** — new `test/commands/init-from-source-dist.integration.node.test.ts`. Clones `CLI_ROOT` into a disposable scratch dir (`git clone --no-hardlinks`, short `TMPDIR`, symlinked `node_modules` — the same safe pattern `scaffold-standalone.red.integration.node.test.ts` already uses), runs `npm run prebuild && npm run build` **inside the clone**, then runs the real `node <clone>/dist/cli.js init --from-source <clone>/scaffold --yes` against a fresh `git init`-ed `mktemp -d` target. Asserts exit 0, `.cleargate/.install-manifest.json` and `.claude/settings.json` present, no `cleargate-from-source-*` leftover under `os.tmpdir()`, and `git status --porcelain` on the main checkout is byte-identical before and after (captured in `before()`/asserted in `after()`).
+
+**Plan deviation (unilateral call) — build location.** The coordinator's rework instructions suggested building with `tsup --out-dir` directly inside `CLI_ROOT`. I built inside a fresh clone instead: `tsup.config.ts`'s `onSuccess` hook computes `dstManifest = path.join(pkgRoot, 'dist', 'MANIFEST.json')` from the loaded config file's own `import.meta.url`, hardcoded to the literal `'dist'` segment regardless of any `--out-dir` override. Running tsup from the main checkout — even to a custom out-dir — would therefore still write into the real `<CLI_ROOT>/dist/MANIFEST.json`, gitignored but live (Cross-Cutting Rule 11): the running hooks depend on `dist/cli.js` being exactly what was built from `main` at the last BD, and a story-branch build would silently overwrite that. Cloning first sends the `onSuccess` write into the clone's own `dist/`, satisfies the "never touch the main checkout" requirement trivially (nothing is ever written there), and is asserted explicitly (`git status --porcelain` before/after). orchestrator_confirmed: false.
+
+**Red → green evidence.**
+- **Red:** ran the new integration test before committing the fix (clone only sees committed history, so it built and ran the OLD `477b942` code): `node <clone>/dist/cli.js init --from-source ...` → `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '<tmpRoot>/scripts/build-manifest.ts'` (note: `<tmpRoot>/scripts/...`, one level ABOVE the clone itself — the exact off-by-one the fix corrects), `execFileSync` threw on the non-zero exit, test failed. 0/1.
+- **Fix applied**, committed as `358ae35`.
+- **Green:** re-ran the identical test file (fresh clone, now built from the commit containing the fix): 1/1 pass, ~17s.
+
+### Verification (this rework)
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | clean, both before and after the commit |
+| New unit tests (`init-from-source.node.test.ts`, full file) | 14/14 solo |
+| New integration test (`init-from-source-dist.integration.node.test.ts`) | red pre-commit (0/1, `ERR_MODULE_NOT_FOUND`), green post-commit (1/1) |
+| `test/commands/init.node.test.ts` | 29/29 solo |
+| `test/scripts/scaffold-layout.red.node.test.ts` (sealed unit red) | 18/18 solo (re-checked again after the commit) |
+| `test/scripts/scaffold-standalone.red.integration.node.test.ts` (sealed integration red) | 7/7 solo |
+| Full suite | not re-run, per the dispatch (change confined to `init.ts` + new tests; DevOps runs it post-merge) |
+
+Commit: `358ae35` on `story/STORY-058-02` — `fix(EPIC-058): STORY-058-02 --from-source resolves cli package root under bundled dist (QA bounce 1)`.
+
+### Finding 2 (non-blocking) — report correction: `test_close_sprint_v21.integration.node.test.ts` is flaky
+
+QA reran the identical `477b942` commit three times and got three different failure subsets (5, then 7, then 4 named tests). My original report characterized this file's pre-existing failures as a fixed 5-item named list; that was one snapshot of a flaky suite, not a stable baseline. Correction: **`test_close_sprint_v21.integration.node.test.ts` has pre-existing, flaky failures whose exact named subset varies run-to-run at both `464e1e4` and `477b942`** (confirmed by QA at both commits). Not caused by this story — the story's only change to this file is the single `REPORTER_MD_SCAFFOLD` constant repoint via `canonicalPath()`, unrelated to any of the failing areas (Step 2.7/2.8/3.5/6.5-6.7/7/assume-ack timing) — but do not trust any single run's named-failure list as "the" pre-existing set for this file.
+
+### Finding 3 (non-blocking) — report correction: repoint-table row #3
+
+My 70-file repoint table marked `test/commands/gate-run.integration.node.test.ts` as "✅ solo." QA found one failing test in that file: `Scenario 7: … gates.precommit with typecheck + test` (`test/commands/gate-run.integration.node.test.ts:342`), confirmed pre-existing and identical at `464e1e4` — the assertion checks the outer live `.cleargate/config.yml`'s `gates.precommit` string for the literal substring `'npm run typecheck'`, but the real file (post-CR-077) reads `"npm --prefix cleargate-cli run typecheck && npm --prefix cleargate-cli test"`, which contains neither expected literal. Not caused by this story's repoint (which only touched this file's `CANONICAL_*` constants, unrelated to the live-config Scenario 7 assertion). Correction: **`gate-run.integration.node.test.ts` has 1 pre-existing, unrelated failure (Scenario 7) — not a clean ✅** in the row-3 table entry.
+
 STATUS=done
