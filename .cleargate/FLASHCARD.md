@@ -1,3 +1,4 @@
+2026-09-25 · #devops #grep · grep here is a gitignore-aware shim: plain grep -c on gitignored dist/cli.js prints nothing; use command grep.
 2026-09-25 · #manifest #cli · TIER_RULES/INTENTIONALLY_UNTRACKED now live in src/lib/manifest-builder.ts; scripts/build-manifest.ts only re-exports.
 2026-09-25 · #manifest #test-harness #danger · A fixture manifest entry without owner reads by the legacy rule (.codex/** => core); always stamp owner explicitly.
 2026-09-25 · #manifest #host · Legacy and carried snapshot entries lack owner; call entryOwner(e) and installedHosts(s), never e.owner or s.hosts.
