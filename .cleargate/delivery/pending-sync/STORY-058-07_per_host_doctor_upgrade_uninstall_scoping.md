@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T21:27:14Z
+updated_at: 2026-09-25T23:23:47Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 7a23ba79-dirty
+updated_at_version: 0806248a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -126,8 +126,8 @@ Feature: Per-host lifecycle scoping
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/commands/doctor.ts` |
-| Related Files | `cleargate-cli/src/commands/upgrade.ts`, `cleargate-cli/src/commands/uninstall.ts`, `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/claude.ts`, `cleargate-cli/src/lib/manifest.ts`, `cleargate-cli/src/lib/settings-json-surgery.ts`, `cleargate-cli/src/init/merge-settings.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/src/lib/drift-check.ts` — unchanged, `cleargate-cli/src/lib/session-load-delta.ts` — unchanged, `cleargate-cli/src/hosts/lifecycle.ts` — unchanged, `cleargate-cli/src/commands/host.ts` — unchanged |
-| New Files Needed | `cleargate-cli/src/hosts/manifest-query.ts`, `cleargate-cli/test/hosts/manifest-query.red.node.test.ts`, `cleargate-cli/test/commands/doctor-per-host.red.node.test.ts`, `cleargate-cli/test/commands/upgrade-per-host.red.node.test.ts`, `cleargate-cli/test/commands/uninstall-per-host.red.node.test.ts`, `cleargate-cli/test/commands/lifecycle-per-host.red.integration.node.test.ts` |
+| Related Files | `cleargate-cli/src/commands/upgrade.ts`, `cleargate-cli/src/commands/uninstall.ts`, `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/claude.ts`, `cleargate-cli/src/lib/manifest.ts`, `cleargate-cli/src/lib/settings-json-surgery.ts`, `cleargate-cli/src/init/merge-settings.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/src/lib/drift-check.ts` — unchanged, `cleargate-cli/src/lib/session-load-delta.ts` — unchanged, `cleargate-cli/src/hosts/lifecycle.ts` — unchanged, `cleargate-cli/src/commands/host.ts` — unchanged, `cleargate-cli/CHANGELOG.md`, `cleargate-cli/test/helpers/host-fixtures.ts` |
+| New Files Needed | `cleargate-cli/src/hosts/manifest-query.ts`, `cleargate-cli/test/hosts/manifest-query.red.node.test.ts`, `cleargate-cli/test/commands/doctor-per-host.red.node.test.ts`, `cleargate-cli/test/commands/upgrade-per-host.red.node.test.ts`, `cleargate-cli/test/commands/uninstall-per-host.red.node.test.ts`, `cleargate-cli/test/commands/lifecycle-per-host.red.integration.node.test.ts`, `cleargate-cli/test/commands/uninstall-reinit.red.node.test.ts` |
 | Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-07_per_host_doctor_upgrade_uninstall_scoping.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-07-devops.md` |
 
 - `cleargate-cli/src/commands/doctor.ts` — **modify**. Report core + each adapter; accept a host filter.
@@ -163,6 +163,7 @@ Restart warnings are the subtle case: each adapter declares which of its own fil
 - [ ] Uninstall: `--host` via -05's removal plan; full uninstall calls `adapter.remove()`; surgery targets not deleted wholesale; `preserve_on_uninstall` honoured
 - [ ] Widen `isClearGateCommand` to all 7 shipped hooks (census-guarded); `supersedeHookCommands` in the Claude install (BUG-089 carry-forward 2)
 - [ ] Verify the legacy-snapshot upgrade path; typecheck, witnesses and M2 parity compare solo
+- [ ] Full uninstall removes an emptied .claude/settings.json so re-init restores all 7 hooks (M3-A44); CHANGELOG entries
 
 ## 4. Quality Gates
 
