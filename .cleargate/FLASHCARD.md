@@ -1,3 +1,7 @@
+2026-09-26 · #test-harness #init #tpv · init-fixture's stub readInstallManifest records files: []; lifecycle reds must pass readInstallManifest: undefined.
+2026-09-26 · #test-harness #tpv #qa · QA-Red reds never ran on a conformant build: 4/13 -05 reds were unsatisfiable, 2 vacuous. TPV must simulate first.
+2026-09-26 · #test-harness #cli #tpv · A spawned-CLI test that drops empty lines can't see a line-sink default sink; assert stdout has no '\n\n'.
+2026-09-26 · #test-harness #host #manifest · A fixture where owner == path can't test delete-by-owner; add a pure planHostRemoval case with owner != path.
 2026-09-25 · #codex #hooks · Codex 0.154 PreToolUse sees spawn_agent as collaborationspawn_agent; matchers full-match, so use .*spawn_agent.
 2026-09-25 · #codex #hooks #danger · Codex PreToolUse blocks only on exit 2 WITH non-empty stderr (or JSON deny); silent exit 2 and exit 1 fail open.
 2026-09-25 · #codex #hooks · Codex apply_patch hook: tool_input.command is patch text with no file_path; parse its *** Add/Update/Delete File lines.

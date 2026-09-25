@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "STORY-058-05": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
-      "arch_bounces": 0,
+      "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-09-04T12:08:02.222Z",
+      "updated_at": "2026-09-25T20:37:26.067Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-058-06 → Done",
-  "updated_at": "2026-09-25T19:50:19.316Z"
+  "last_action": "arch-bounce STORY-058-05: arch_bounces=1",
+  "updated_at": "2026-09-25T20:37:26.067Z"
 }
