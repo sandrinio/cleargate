@@ -1,3 +1,4 @@
+2026-09-25 · #test-harness #tpv #danger · A banned string (e.g. import.meta.url) in a doc COMMENT still trips a raw-substring static grep; reword it.
 2026-09-25 · #test-harness #tpv #host · Sanctioned-delta rows assert currentHash strictly; dual-accept let a build that never wrote hosts pass parity.
 2026-09-25 · #manifest #host #danger · Carrying only owner!=='core' drops .agents/** of a still-installed host; carry via payloadFilter(installed).
 2026-09-25 · #manifest #scaffold · realpathSync(<pkgRoot>/scaffold) throws ENOENT in installed pkgs and tmp fixtures; wrap the equality in try/catch.
