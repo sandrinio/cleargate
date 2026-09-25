@@ -1,3 +1,8 @@
+2026-09-25 · #test-harness #tpv #host · Sanctioned-delta rows assert currentHash strictly; dual-accept let a build that never wrote hosts pass parity.
+2026-09-25 · #manifest #host #danger · Carrying only owner!=='core' drops .agents/** of a still-installed host; carry via payloadFilter(installed).
+2026-09-25 · #manifest #scaffold · realpathSync(<pkgRoot>/scaffold) throws ENOENT in installed pkgs and tmp fixtures; wrap the equality in try/catch.
+2026-09-25 · #test-harness #tpv · find|sort|xargs shasum splits 'Sprint Plan Template.md'; hash payload trees with -print0 | sort -z | xargs -0.
+2026-09-25 · #manifest #tpv · walkDir pushes every stray into global unclassifiedPaths per walk; a two-walk build warns twice unless deduped.
 2026-09-25 · #clean-room #hooks #danger · A clean room without PATH control runs the GLOBAL cleargate from hooks — you test the published release.
 2026-09-25 · #clean-room #claude-p · claude -p stream-json --verbose --include-hook-events emits hook_response (hook_name, exit_code, output).
 2026-09-25 · #clean-room #claude-p · --setting-sources project,local drops user plugins, hooks and skills from a headless session.

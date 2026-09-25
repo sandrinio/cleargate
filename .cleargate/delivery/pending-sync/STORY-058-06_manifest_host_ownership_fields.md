@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T17:46:01Z
+updated_at: 2026-09-25T18:50:36Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 52661c5d-dirty
+updated_at_version: e6059145-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -153,7 +153,7 @@ Legacy migration is a read-time default, not a rewrite: absent `hosts` ⇒ `["cl
 - [ ] FU-1: restrict `buildManifest({scaffoldRoot})` compat to `core` + `hosts/claude` (all-roots collision check kept; doc comments reconciled) **before** any non-Claude `TIER_RULES` entry exists
 - [ ] FU-2: move the manifest core into bundled `src/lib/manifest-builder.ts`. Add `buildViewManifest`/`buildInstallView` as the one flat-view builder for prebuild, `--from-source` and `composeCanonicalPayload`. Retire `resolveCliPackageRoot` and the dynamic `.ts` import
 - [ ] Stamp `owner` from the payload root key (`ownerForRootKey`); add `ManifestOwner`, `entryOwner`, `installedHosts`, `LEGACY_INSTALLED_HOSTS` (read-time default, never written back)
-- [ ] Init Step 7: one hoisted payloadFilter predicate for copy and snapshot; hosts = the installed set (mergeInstalledHosts of the prior snapshot's hosts and the selection, registry order) as the last key; entries of installed-but-unselected hosts carry forward
+- [ ] Init Step 7: one hoisted payloadFilter predicate for copy and snapshot; hosts = the installed set (mergeInstalledHosts of the prior snapshot's hosts and the selection, registry order) as the last key; prior entries that the installed set admits but this run's selection does not (installed-but-unselected hosts' own entries and the core entries under their sharedRoots) carry forward
 - [ ] FU-3: `verify-pack` check 3c (`checkCompatPayload`): compat entries present in the flat view, owners ∈ {core, claude}, `owner: 'claude'` ⇔ under `.claude`
 - [ ] FU-4: `scaffoldRoot` mode refuses to write per-root manifests into the tracked `scaffold/`
 - [ ] Typecheck, targeted reds and witnesses solo, M2 parity compare with the -06 delta row
