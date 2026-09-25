@@ -108,3 +108,61 @@ These are expected red runs against the scratch reference, written to the gitign
 - "2026-09-25 · #test-harness #hooks #tpv · A PATH `cleargate` stub answers EVERY subcommand, incl. pre-edit-gate's doctor --can-edit — stub by subcommand."
 - "2026-09-25 · #hooks #advisory · CLEARGATE_ADVISORY has ONE hook honor site (pending-task-sentinel); an edit-gate advisory test pins a §15-forbidden site."
 - "2026-09-25 · #test-harness #cross-repo · test_pre_edit_gate.sh roots at BASH_SOURCE/../../.. → outer MAIN hook, never the worktree; no override."
+
+## Re-check — 2026-09-25 (arch_bounces=1)
+
+TPV: APPROVED
+
+Re-checked the amended red files: cli `story/BUG-089` @ `a23c655` (on top of `dc78bcc`) and outer worktree @ `a32bb634`, which adds reports only. `test_flashcard_enforcement.sh` is unchanged since `5bdd45c5`. Canonical `cleargate-planning/` is unchanged on the story branch.
+
+### Repairs verified
+
+- **W1:** both `fixturePath()` stubs now answer by subcommand.
+  - Unit `:144-151`: `*--can-edit*` prints `blocked: no_approved_stories` and exits 1; `*"hook signal"*` exits with the mode's status; anything else exits 0.
+  - Integration `:115-122`: the same, with `hook signal` fixed at 0.
+  - Missing mode still omits the binary. Doctor then falls through to the npx stub (127) and still reaches the blocking branch.
+- **W2:** `test_pre_edit_gate.sh:17-21` honors `PRE_EDIT_GATE_HOOK`, falling back to the old `BASH_SOURCE` root.
+- **U15** is retargeted to `pending-task-sentinel.sh` (pending card + `CLEARGATE_ADVISORY=1` → 0). No edit-gate advisory site is pinned.
+- **A1:** U3 uses `'not-a-host'`.
+
+### Measurements
+
+Baseline means the current worktree canonical hooks. Reference means the same scratch minimal-correct implementation as before, plus a minimal `src/hooks/hook-signal.ts` for U1-U4. For U1-U4 the unit file was run as a scratch copy placed next to that module.
+
+| Suite | Baseline | Reference |
+|---|---|---|
+| unit `hook-signal.red.node.test.ts` | 4/14. U1-U4 `ERR_MODULE_NOT_FOUND`; all 8 of U5-U12 fail `1 !== 2`, i.e. they reach today's fail-open `exit 1`, the bug itself. U13-U16 pass as controls. | **14/14** |
+| integration `hook-signal.red.integration.node.test.ts` | 0/3. All fail on `--host claude` missing from `settings.json`. | **3/3** |
+| `test_pre_edit_gate.sh` (`PRE_EDIT_GATE_HOOK` → hook under test) | 9/11. Cases 4 and 7 "expected exit 2, got 1". | **11/11** |
+| `test_flashcard_enforcement.sh` | 11/12. S1 `expected=2 actual=1`. | **12/12** |
+
+Every baseline failure is either the missing module, the missing `--host claude`, or the exact fail-open exit 1. There are no harness errors. The W1 consequence is confirmed: the warn-mode mutant (`enforce` guard → `if true`) now fails U13 with `2 !== 0`. Under the Round-1 fixture it survived U13.
+
+### Five checks
+
+1. **Imports:** unchanged and resolve. The resolver path is still `src/hooks/hook-signal.ts` per §4.
+2. **Signatures:** unchanged apart from U3's host literal.
+3. **Fixture/stubs:** scoped by subcommand. The resolution routes are the same as Round 1: dist absent, PATH stub, npx stub 127. There is no bypass and no over-interception.
+4. **After-hooks:** unchanged. Measured 0 leftover `bug089-*` dirs.
+5. **Naming:** unchanged.
+
+`npm run typecheck` in the cli at `a23c655` exits 0. The pre-gate `typecheck: exit 254` is still only the missing nested `cleargate-cli/` directory in the outer worktree (rule R1).
+
+### Orchestrator note (not a wiring gap)
+
+The Developer and QA-Verify must run `test_pre_edit_gate.sh` with `PRE_EDIT_GATE_HOOK=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-089/cleargate-planning/.claude/hooks/pre-edit-gate.sh`, and the node red files with `CLEARGATE_META_ROOT=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-089`. The item's §5 commands name neither variable. Without them, both read the outer main checkout and stay red against a correct fix.
+
+A2 is still open for the orchestrator: STORY-058-10 §3.2 names `resolveBlockSignal`, while this red test pins `resolveHookSignal`.
+
+### Script Incidents (re-check)
+
+These are expected red runs, written to the gitignored outer-main bucket:
+- `/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-41/.script-incidents/20260925T001009Z-932a737a44d6.json` (baseline unit)
+- `/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-41/.script-incidents/20260925T001011Z-379741b0e173.json` (baseline integration)
+- `/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-41/.script-incidents/20260925T001050Z-932a737a44d6.json` (reference unit in-tree; U1-U4 without the module)
+
+The scratch reference has been removed. No other file was edited.
+
+### flashcards_flagged (re-check)
+
+- "2026-09-25 · #test-harness #cross-repo · A per-suite hook override is honour-system until the item's §5 command names it — pass it in every dispatch."
