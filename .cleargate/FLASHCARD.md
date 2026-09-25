@@ -1,3 +1,9 @@
+2026-09-25 · #test-harness #init #tpv · runInitScenario always sets payloadDir, checked before fromSource; pass payloadDir: undefined or fromSource is dead.
+2026-09-25 · #test-harness #node-exit #tpv · A throwing exit seam runs pending finally blocks; process.exit does not. Snapshot leak state inside the exit seam.
+2026-09-25 · #host #registry #tpv · Registry-derived-profile tests need a fake host no hard-coded list names; known names can't kill hardcoded∩registry.
+2026-09-25 · #test-harness #cli #tpv · A CLI red with the bad --host value in the LAST occurrence passes last-wins parsing; put it FIRST to prove repeatable.
+2026-09-25 · #test-harness #scaffold #host · 'Filter admits every flat-payload path' reds at -11 (.agents in core, codex shared); skip paths other hosts declare.
+2026-09-25 · #test-harness #tpv · Files-only tree records miss empty dirs: an include filter applied after mkdir leaks empty host roots; existsSync it.
 2026-09-25 · #test-harness #init · runInitScenario's extra spreads after default seams — override extra.exit to capture ExitSignal's code, no helper edit.
 2026-09-25 · #host #contract · InstallCtx sinks are raw (callee writes \n); RemoveCtx sinks are line sinks (uninstall appends \n). Wrap when crossing.
 2026-09-25 · #init #settings-json #danger · init --force overwrites .claude/settings.json wholesale; user hooks lost despite the surgeryTargets doc.
