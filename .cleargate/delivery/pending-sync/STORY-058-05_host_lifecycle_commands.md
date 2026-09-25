@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T19:52:15Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: f8242d41-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -48,7 +48,7 @@ draft_tokens:
 
 # STORY-058-05: cleargate host list | add | remove lifecycle commands
 
-**Milestone:** M2 — Host abstraction
+**Milestone:** M3 — Lifecycle scoping
 
 ## 1. The Spec (The Contract)
 
@@ -69,7 +69,7 @@ As a ClearGate user who already installed ClearGate, I want to add or remove a c
 ### 1.4 Open Questions
 - **Question:** should `host remove` of the last host be refused, or silently equivalent to `uninstall`?
 - **Recommended:** refuse and point at `uninstall`. Silent equivalence means a typo can strip the scaffold.
-- **Human decision:** {pending Gate 1}
+- **Resolved 2026-09-25 (Architect):** refuse (exit 1) with a message naming `cleargate uninstall`; unknown or not-installed host names exit 2; nothing is written on any error path.
 
 ### 1.5 Risks
 - `host remove` is the only destructive command in this epic. Its blast radius is bounded entirely by manifest ownership being correct — if [[STORY-058-06]]'s `owner` field is wrong for any entry, this command deletes the wrong file.
@@ -129,12 +129,15 @@ Feature: Host lifecycle commands
 | Item | Value |
 |---|---|
 | Primary File (new) | `cleargate-cli/src/commands/host.ts` |
-| Related Files | `cleargate-cli/src/cli.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/lib/manifest.ts` |
-| New Files Needed | Yes |
+| Related Files | `cleargate-cli/src/cli.ts`, `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/claude.ts`, `cleargate-cli/src/hosts/registry.ts` — unchanged, `cleargate-cli/src/lib/manifest.ts` — unchanged |
+| New Files Needed | `cleargate-cli/src/hosts/lifecycle.ts`, `cleargate-cli/test/hosts/host-lifecycle.red.node.test.ts`, `cleargate-cli/test/commands/host-cli.red.integration.node.test.ts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-05_host_lifecycle_commands.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-05-devops.md` |
 
 - `cleargate-cli/src/commands/host.ts` — **create**. The `list` / `add` / `remove` subcommands.
+- `cleargate-cli/src/hosts/lifecycle.ts` — **create**. The removal plan/execute pair and add/health, reused by STORY-058-07's `uninstall --host`.
+- `cleargate-cli/src/hosts/types.ts` / `cleargate-cli/src/hosts/claude.ts` — **modify**. Optional `InstallCtx.logPrefix`, byte-neutral for init.
 - `cleargate-cli/src/cli.ts` — **modify**. Register the `host` command group.
-- `cleargate-cli/src/hosts/registry.ts` — **modify**. Resolve the adapter to add or remove.
+- `cleargate-cli/src/hosts/registry.ts` — **read** (no change: `resolve` and `pathUnderRoots` suffice).
 - `cleargate-cli/src/lib/manifest.ts` — **read**. Ownership drives what `remove` may delete.
 
 ### 3.2 Technical Logic
@@ -148,12 +151,12 @@ Config-entry removal is surgical, not file deletion: removing Codex must strip C
 
 ## Task Breakdown
 
-- [ ] Register the `host` command group in `cli.ts`.
-- [ ] Implement `list` over the manifest's installed-host set.
-- [ ] Implement `add` as an idempotent single-adapter install.
-- [ ] Implement `remove` gated strictly on manifest `owner` equality.
-- [ ] Implement surgical config-entry removal preserving user entries.
-- [ ] Refuse last-host removal with an `uninstall` pointer.
+- [ ] QA-Red: lifecycle unit reds (scenarios 1-8, 11) and the spawned host-cli integration (9-10), over fixture registries R2/R3 plus the real Claude adapter
+- [ ] Create `src/hosts/lifecycle.ts`: `planHostRemoval` (deletes strictly by `entryOwner === host`, surgery targets and preserved entries kept, orphaned shared entries removed), `executeHostRemoval`, `addHost`, `computeHostHealth`, `HostLifecycleError`
+- [ ] Create `src/commands/host.ts`: `list` / `add <name>` / `remove <name>` handlers; exit 2 for unknown, not-installed or no snapshot; exit 1 for last-host refusal with an `uninstall` pointer
+- [ ] Add `InstallCtx.logPrefix` (default `'[cleargate init] '`, byte-neutral for init) and use it in `claude.ts` `install()`
+- [ ] Register the `host` command group after `init` in `cli.ts`
+- [ ] Typecheck, targeted reds, witnesses and M2 parity compare solo
 
 ## 4. Quality Gates
 
@@ -175,7 +178,7 @@ Config-entry removal is surgical, not file deletion: removing Codex must strip C
 
 - **Surface:** `cleargate-cli/src/lib/manifest.ts:36` — manifest entry model; ownership is what bounds `remove`.
 - **Surface:** `cleargate-cli/src/init/merge-settings.ts:48` — the existing non-destructive merge; the precedent for surgical un-merge.
-- **Surface:** `cleargate-cli/src/commands/uninstall.ts:325` — existing Claude-specific marker validation and hook cleanup; the closest existing removal logic.
+- **Surface:** `cleargate-cli/src/commands/uninstall.ts:325-342` (marker pre-validation) and `:434-457` (surgery) — existing Claude-specific marker validation and hook cleanup; the closest existing removal logic.
 
 ## Why not simpler?
 

@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T18:51:18Z
+updated_at: 2026-09-25T19:52:16Z
 created_at_version: cleargate@0.26.1
-updated_at_version: fe8d3a2a-dirty
+updated_at_version: f8242d41-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -374,6 +374,20 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Probe findings F1–F10: PATH control is required, or hooks run the global `cleargate`; headless `claude -p --include-hook-events` works as live evidence.
     - `waves.json` gained a concrete RS-4 and a new `RS-CLOSE`.
     - Drafted **[[BUG-090]]** (F5, P1: `sprint init` + `close_sprint` Step 2.9 anchor frontmatter at offset 0; the sixth BUG-067-class site) and **[[BUG-091]]** (F8, P3: `doctor --check-scaffold` false positive on the post-processed `gate-checks.json`). Both are Draft and outside the sprint, pending owner approval. SPRINT-41's own items all start with `---`, so this sprint's close gate is unaffected.
+- 2026-09-25T19:55:00Z · STORY-058-06 · **Done**, with 0 QA bounces and 1 Architect bounce (the TPV re-seal).
+  - **Re-seal** (cli `e990607`): TPV's E1–E9 diff was applied verbatim. The orchestrator reproduced the counts; parity went 0/5 and 0/15 by design under the strict delta.
+  - **Dev** (cli `10176ea`, 23 min): D1–D13 followed; the one deviation (a try/catch around verify-pack 3c) was accepted by QA and Arch (M3-A22). Every red went green, including strict parity 5/5 and 15/15.
+  - **QA PASS** (7 min): 13 files solo, exact. QA proved the pre-existing `test_version_bump_alignment` failure on main.
+  - **Post-flight PASS** (15 min): FU-1..16 routed as M3-A14..A23.
+    - Binding before -05 QA-Red: A14 (fixture owners), A15 (one payload per registry), A17 (mechanics), A18 (D4 anchors).
+    - -10: A19 `buildInstallView` must skip each split root's `MANIFEST.json` (a measured collision); FU-6/7.
+    - -09: A23, B5 compares the claude-visible subset from RS-4.
+    - M4 V1–V3 are resolved.
+  - **DevOps:** merged cli `6b5ee5c`. The suite ran 2885/2883/0/2, reconciled exactly (2850 + 38 − 3).
+    - BD: the payload is byte-identical (NUL-safe digest), and MANIFEST's only delta is `owner`; verify-pack 3c is live and green.
+    - Real-dist smokes: no-flag and `--from-source` snapshots end with `hosts: ["claude"]`, and every entry is owner-stamped. Doctor leaves the legacy 0.10.0 snapshot byte-unchanged.
+    - Post-BD parity 5/5 and 15/15; the baseline is intact.
+  - **-05 prep:** amendments D1–D5 (D4 per M3-A18) were applied and the story re-gated green.
 
 ---
 
