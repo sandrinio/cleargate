@@ -16,11 +16,11 @@
       "lane_demotion_reason": "SDR 2026-09-24 lane audit: fails checks 1,2,6 (5+ files, gate-enforcement surface, med bounce)"
     },
     "STORY-058-01": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-04T12:08:02.222Z",
+      "updated_at": "2026-09-25T07:48:46.884Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition CR-123 → Done",
-  "updated_at": "2026-09-25T07:19:21.440Z"
+  "last_action": "transition STORY-058-01 → Bouncing",
+  "updated_at": "2026-09-25T07:48:46.884Z"
 }
