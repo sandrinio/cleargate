@@ -91,4 +91,100 @@ flashcards_flagged:
   - "2026-09-26 · #manifest #host · selectEntriesForHosts needs payloadFilter AND an owner check — payloadFilter alone admits an unregistered host's entry (fallthrough true)."
   - "2026-09-26 · #manifest #doctor #upgrade · A required (non-optional) DriftMapEntry.owner turns a missed construction-site omission into a typecheck failure, not a silent runtime gap."
 
+## Remediation (M3-A44)
+
+**SHA:** `384a628` on `story/STORY-058-07` (parent `4394c9b`, the QA-Red R11 commit, on Dev `b146faf`).
+
+**Files:** `CHANGELOG.md`, `src/hosts/claude.ts`, `src/init/merge-settings.ts` — exactly the three named in the TPV delta round's binding constraint 4. No other file touched.
+
+### `git diff --stat 4394c9b HEAD`
+
+```
+ CHANGELOG.md               | 16 ++++++++++++++++
+ src/hosts/claude.ts        | 17 ++++++++++++++---
+ src/init/merge-settings.ts |  2 +-
+ 3 files changed, 31 insertions(+), 4 deletions(-)
+```
+
+### The gap and the fix
+
+`claude.ts`'s `remove()` always wrote the settings surgery's remainder back, so a fresh (no-user-hooks) install left `.claude/settings.json` as `{}\n` after a full uninstall instead of removing it. Because `copy-payload.ts` skips an existing file on a non-force `init`, the uninstall's own restore hint then only merged `CLAUDE_HOOK_ADDITION` (2 hooks) into that `{}` instead of installing the full canonical 7-hook file. D1 makes `remove()` unlink the file when `removeClearGateHooks` empties it entirely (nothing user-authored left); a file that still holds a user key or hook survives, labeled as before. D2 is a pure whitespace fix to `mergeSettings` (the STORY-058-07 Dev commit had accidentally re-indented one match-arm literal from 8 to 4 spaces during the `supersedeHookCommands` insertion — a lesson in always diffing an insertion-only change against the pre-story baseline, not just running the tests, since the wrong indentation was cosmetically harmless to every test in the suite). D3 adds the three verbatim CHANGELOG entries.
+
+### Count table (solo, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`)
+
+| File | Expected | Actual |
+|---|---|---|
+| `test/commands/uninstall-reinit.red.node.test.ts` (R11) | 4/4 | 4/4 |
+| `test/hosts/manifest-query.red.node.test.ts` | 6/6 | 6/6 |
+| `test/commands/doctor-per-host.red.node.test.ts` | 10/10 | 10/10 |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6/6 | 6/6 |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16/16 | 16/16 |
+| `test/commands/lifecycle-per-host.red.integration.node.test.ts` | 3/3 | 3/3 |
+| `host-adapter-contract.red.node.test.ts` | 19/19 | 19/19 |
+| `claude-adapter-init-parity.red.integration.node.test.ts` (compare) | 5/5 | 5/5 |
+| `init-host-parity.red.integration.node.test.ts` (compare) | 15/15 | 15/15 |
+| `uninstall.node.test.ts` | 20/20 | 20/20 |
+| `host-lifecycle.red.node.test.ts` | 17/17 | 17/17 |
+| `host-cli.red.integration.node.test.ts` | 3/3 | 3/3 |
+| `lib/settings-json-surgery.node.test.ts` | 13/13 | 13/13 |
+| `commands/init.node.test.ts` | 29/29 | 29/29 |
+| `changelog-format.node.test.ts` | green | 5/5 green (ran against the pre-existing on-disk `dist/`, built before this dispatch; not rebuilt here, per Rule 11) |
+| `lib/changelog-slice.node.test.ts` | 14/14 | 14/14 |
+| `upgrade-changelog.node.test.ts` | 7/7 | 7/7 |
+
+`npm run typecheck` → exit 0, before and after.
+
+### D2 numstat
+
+```
+$ git diff 170ac4c --numstat -- src/init/merge-settings.ts
+55	0	src/init/merge-settings.ts
+```
+
+Insertion-only, as the binding constraint requires — `mergeSettings` itself is byte-identical to `170ac4c`, only the `isClearGateCommand` import and the new `supersedeHookCommands` export were added.
+
+### `claude.ts` hunk — the unlink inside the `try`
+
+```diff
+-    // Surgery: settings.json — remove ClearGate hooks only
++    // Surgery: settings.json — remove ClearGate hooks only. STORY-058-07
++    // M3-A44: when stripping ClearGate's hooks empties the object entirely
++    // (nothing user-authored remains), delete the file instead of writing
++    // back "{}" — a leftover "{}" survives copy-payload.ts's non-force
++    // skip-if-exists rule, so a restoring `cleargate init` would only MERGE
++    // CLAUDE_HOOK_ADDITION (2 hooks) into it instead of installing the full
++    // canonical file.
+     const settingsPath = path.join(cwd, '.claude', 'settings.json');
+     if (fs.existsSync(settingsPath)) {
+       try {
+         const raw = fs.readFileSync(settingsPath, 'utf8');
+         const settings = JSON.parse(raw) as ClaudeSettings;
+         const cleaned = d.removeClearGateHooks(settings);
+-        writeAtomic(settingsPath, JSON.stringify(cleaned, null, 2) + '\n');
+-        removed.push('.claude/settings.json (ClearGate hooks)');
++        if (Object.keys(cleaned).length === 0) {
++          fs.unlinkSync(settingsPath);
++          removed.push('.claude/settings.json');
++        } else {
++          writeAtomic(settingsPath, JSON.stringify(cleaned, null, 2) + '\n');
++          removed.push('.claude/settings.json (ClearGate hooks)');
++        }
+       } catch (err) {
+         stderr(`Warning: could not update settings.json: ${(err as Error).message}`);
+       }
+```
+
+`fs.unlinkSync` sits lexically inside the existing `try`, after `removeClearGateHooks` and before the `catch` — the `catch`'s `Warning: could not update settings.json: …` string is unchanged and now also covers an `unlinkSync` failure, per binding constraint 1.
+
+### Baseline / outer status
+
+Baseline hash before and after: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files) — unchanged. Outer `git status --porcelain` before and after this dispatch: only the four hook-owned `.cleargate/sprint-runs/SPRINT-41/{.session-totals.json,events.jsonl,state.json,token-ledger.jsonl}` lines, plus this report file (`??`, untracked, not committed). Cli repo: `?? cleargate-0.25.0.tgz` (pre-existing, untouched) both before and after; no `dist/` build was run.
+
+### Deviations
+
+None. All three files match the binding constraint's file list exactly; D1/D2/D3 applied verbatim per M3-A44.
+
+flashcards_flagged:
+  - "2026-09-26 · #test-harness #git · A whitespace-only slip inside an Edit tool's matched span is invisible to a green test suite — diff an insertion-only change against the pre-story baseline (git diff <base> --numstat), not just the tests."
+
 STATUS=done
