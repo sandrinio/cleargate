@@ -1,3 +1,7 @@
+2026-09-25 · #host #registry #test-harness · Never pin the production host registry's membership in a sealed test (-10 adds codex); use fixture registries.
+2026-09-25 · #host #scaffold #danger · scaffold/core ships on EVERY install incl. no-flag Claude; portable assets (.agents/**) go in an adapter sharedRoot.
+2026-09-25 · #cross-repo #test-harness · Rule-15 runs the suite BEFORE BD: dist-spawning tests grade the old binary — re-run them after BD.
+2026-09-25 · #test-harness #cli · cli.ts parses argv at import: spawn tsx with cwd=CLI_ROOT, chdir to the fixture in -e, then import src/cli.ts.
 2026-09-25 · #qa #test-harness · Batch/parallel node:test runs here add spurious fails/cancels; diff fail NAMES one file at a time, solo.
 2026-09-25 · #cli #manifest · After 058-01 nothing regenerates cleargate-planning/MANIFEST.json; its readers go stale at the next version bump until -02.
 2026-09-25 · #test-harness #tpv #init · initHandler post-processes the root .gitignore (Step 5d appends a managed block): assert FIRST_INSTALL_ONLY survival on the user region, never whole-file equality.
