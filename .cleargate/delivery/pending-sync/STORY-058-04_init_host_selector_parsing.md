@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T15:29:43Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: 5f98abba-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -57,11 +57,11 @@ As a ClearGate user, I want to choose which coding-agent hosts get installed, so
 
 ### 1.2 Detailed Requirements
 - `cleargate init` accepts a repeatable `--host <value>` option alongside the existing `--force`, `--yes`, `--pin`, and `--from-source`.
-- Accepted values: `claude`, `codex`, `copilot`, plus the profiles `portable` (codex + copilot) and `all` (every host).
+- Accepted values: every host registered in `src/hosts/registry.ts` (`claude` at this story; `codex` joins with [[STORY-058-10]]; `copilot` when its adapter lands), plus the profiles `portable` (every registered host except claude) and `all` (every registered host). A profile that expands to no registered host is an error.
 - Repeated flags and comma-separated values normalize to a de-duplicated set: `--host claude --host codex,claude` yields exactly `{claude, codex}`.
 - Unknown values exit non-zero, naming the offending value and listing the valid set.
 - **No flag preserves today's behavior exactly** — a Claude-only install, no `AGENTS.md`, no `.codex/**`.
-- The resolved host set is recorded so later commands can read it (field written by [[STORY-058-06]]).
+- The resolved host set is computed once in `initHandler` (registry order); [[STORY-058-06]] persists it as the manifest `hosts` field.
 
 ### 1.3 Out of Scope
 - `cleargate host add|remove` after install — [[STORY-058-05]].
@@ -71,7 +71,7 @@ As a ClearGate user, I want to choose which coding-agent hosts get installed, so
 ### 1.4 Open Questions
 - **Question:** should `--host` with an empty value (`--host ""`) be an error or a no-op?
 - **Recommended:** error. A silently-ignored empty selector reads as "installed nothing on purpose".
-- **Human decision:** {pending Gate 1}
+- **Resolved 2026-09-25 (Architect, under the owner's autonomy directive):** error (exit 2), including an empty comma segment (`claude,`) and a whitespace-only value; validation runs before any write.
 
 ### 1.5 Risks
 - Backward compatibility is the whole risk. Any change to the no-flag path is a regression for every existing user; this is exactly what [[STORY-058-09]]'s clean-room baseline exists to catch.
@@ -86,18 +86,20 @@ Feature: Host selector parsing
 
   Scenario: No flag preserves the Claude-only install
     Given a fresh target repository
+    And a host registry in which codex is also registered
     When `cleargate init` runs with no host flag
     Then the resolved host set is exactly claude
     And no AGENTS.md or .codex files are created
 
   Scenario: Repeated and comma-separated flags normalize to one set
     Given a fresh target repository
+    And a host registry with claude and codex registered
     When `cleargate init --host claude --host codex,claude` runs
     Then the resolved host set is exactly claude and codex
     And each adapter installs once
 
   Scenario: Profiles expand from the registry
-    Given the host registry
+    Given a host registry with claude, codex, and copilot registered
     When `--host portable` is resolved
     Then it expands to codex and copilot
     And `--host all` expands to every registered host
@@ -107,11 +109,13 @@ Feature: Host selector parsing
     When `cleargate init --host cursor` runs
     Then it exits non-zero
     And the message names "cursor" and lists the valid host set
+    And nothing is written to the target repository
 
   Scenario: Empty selector is rejected
     Given a fresh target repository
     When `cleargate init --host ""` runs
     Then it exits non-zero with a message naming the empty value
+    And nothing is written to the target repository
 ```
 
 ### 2.2 Verification Steps (Manual)
@@ -125,12 +129,14 @@ Feature: Host selector parsing
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/cli.ts` |
-| Related Files | `cleargate-cli/src/commands/init.ts`, `cleargate-cli/src/hosts/registry.ts` |
-| New Files Needed | No |
+| Related Files | `cleargate-cli/src/commands/init.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/init/copy-payload.ts` |
+| New Files Needed | `cleargate-cli/test/hosts/host-selection.red.node.test.ts`, `cleargate-cli/test/commands/init-host-selection.red.node.test.ts`, `cleargate-cli/test/commands/init-host-parity.red.integration.node.test.ts`, `cleargate-cli/test/commands/init-host-cli.red.integration.node.test.ts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-04_init_host_selector_parsing.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-04-devops.md` |
 
 - `cleargate-cli/src/cli.ts` — **modify**. Register the repeatable `--host` option on the `init` command (currently `--force`, `--yes`, `--pin <ver>`, `--from-source <path>`).
 - `cleargate-cli/src/commands/init.ts` — **modify**. Normalize the requested set, then invoke each resolved adapter.
 - `cleargate-cli/src/hosts/registry.ts` — **modify**. Profile expansion derived from registered members.
+- `cleargate-cli/src/init/copy-payload.ts` — **modify**. Additive `include?: (relPath) => boolean` option; absent = include all (existing callers unchanged). `init` passes the registry-derived payload filter so an unselected host's owned or shared roots are not copied.
 
 ### 3.2 Technical Logic
 Normalization is: collect every `--host` occurrence → split each on commas → trim → lowercase → expand profiles → de-duplicate → validate. Validate *after* expansion so a profile name is never reported as an unknown host.
@@ -138,15 +144,16 @@ Normalization is: collect every `--host` occurrence → split each on commas →
 Derive `all` as "every registered adapter" and `portable` as "every registered adapter except claude" from the registry itself. Hard-coded member lists are how a third host gets added to the registry and silently omitted from `all`.
 
 ### 3.3 API Contract (if applicable)
-`initHandler({ force, yes, pin, fromSource, hosts?: string[] })` — `hosts` absent means the Claude-only default, which is what preserves backward compatibility.
+`initHandler({ force, yes, pin, fromSource, hosts?: readonly string[] })` — `hosts` carries the raw `--host` occurrences; absent or empty means the Claude-only default, which is what preserves backward compatibility. Selector errors print `[cleargate init] ERROR: --host: …` and exit 2 before any write.
 
 ## Task Breakdown
 
-- [ ] Register the repeatable `--host` option in `cli.ts`.
-- [ ] Implement collect → split → trim → expand → dedupe → validate.
-- [ ] Derive `all` and `portable` from the registry, not from literals.
-- [ ] Thread the resolved set into `initHandler`, defaulting to `['claude']` when absent.
-- [ ] Assert the no-flag path is byte-identical to today.
+- [ ] QA-Red: `host-selection` unit, `init-host-selection` unit, `init-host-parity` and `init-host-cli` integration (scenarios 1-17), all over injected fixture registries, plus the M2-A15 default-path routing witness (spy the production `claudeAdapter.install`)
+- [ ] Add `HOST_PROFILES`, `DEFAULT_HOSTS`, `HostSelectionError`, `collectHostOption`, `normalizeHostSelectors` and `payloadFilter` to `registry.ts`, profiles derived from `names()`; `names()`/`UnknownHostError.valid` return a frozen copy (-03 post-flight FU-5)
+- [ ] Add additive `include` to `copyPayload`; install core ∪ the selected adapters' owned/shared roots
+- [ ] Add `InitOptions.hosts`; validate as Step 0 right after the `registry` seam, before Step 1 and the `--from-source` `mkdtemp` (exit 2, nothing written to the target or `os.tmpdir()`); run each selected adapter's `install` once in registry order
+- [ ] Register repeatable `--host <value>` on `init` in `cli.ts` with registry-derived help
+- [ ] Prove no-flag and `--host claude` byte-identical to the pre-M2 baseline; typecheck; witnesses solo
 
 ## 4. Quality Gates
 
@@ -166,8 +173,8 @@ Derive `all` as "every registered adapter" and `portable` as "every registered a
 
 ## Existing Surfaces
 
-- **Surface:** `cleargate-cli/src/cli.ts:144` — the `init` command registration and its current four options.
-- **Surface:** `cleargate-cli/src/commands/init.ts:188` — `initHandler`, the entry point receiving the parsed options.
+- **Surface:** `cleargate-cli/src/cli.ts:145` — the `init` command registration and its current four options.
+- **Surface:** `cleargate-cli/src/commands/init.ts:215` — `initHandler`, the entry point receiving the parsed options.
 - **Surface:** `cleargate-cli/src/hosts/registry.ts` — created by [[STORY-058-03]]; this story adds profile expansion to it.
 
 ## Why not simpler?
