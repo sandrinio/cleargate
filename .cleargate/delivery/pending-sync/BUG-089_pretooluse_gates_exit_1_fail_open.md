@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-25T00:31:16Z
+  last_stamp: 2026-09-25T03:34:42Z
   sessions: []
 ---
 
@@ -148,6 +148,15 @@ Not in scope, and verified so rather than assumed: `stamp-and-gate.sh` always ex
   (one call with `--host claude`, one without). Updated both to match the canonical string; full
   `test/commands/init.node.test.ts` run (28/29 pass, 1 expected Rule-15 failure) confirms no
   duplicate-hook regression survived.
+
+**§4 self-amendment (Rework 1, Developer, 2026-09-25, coordinator-dispatched post-merge fix):**
+- `cleargate-cli/scripts/build-manifest.ts` — DevOps' post-merge full suite caught
+  `test/docs/pin-placeholder-coverage.node.test.ts` failing: `pending-task-sentinel.sh`'s
+  three-branch CLI resolver (copied from `pre-edit-gate.sh`'s) carries the same
+  `HOOK_PIN="__CLEARGATE_VERSION__"` literal, but had no dedicated `pin-aware` `TIER_RULES`
+  entry — the same gap class BUG-038 fixed for `pre-edit-gate.sh`. Added the matching entry.
+  Full report: `.cleargate/sprint-runs/SPRINT-41/reports/BUG-089-devops-blockers.md` and the
+  dev report's "Rework 1" section.
 
 ## Task Breakdown
 

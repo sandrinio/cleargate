@@ -1715,3 +1715,8 @@
   action: "update"
   target: "BUG-089"
   path: ".cleargate/delivery/pending-sync/BUG-089_pretooluse_gates_exit_1_fail_open.md"
+- timestamp: "2026-09-25T03:34:42.914Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "BUG-089"
+  path: ".cleargate/delivery/pending-sync/BUG-089_pretooluse_gates_exit_1_fail_open.md"

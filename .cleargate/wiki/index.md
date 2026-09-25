@@ -68,7 +68,7 @@
 - [[BUG-086]] (bug) — Draft — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
-- [[BUG-089]] (bug) — Ready — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
+- [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
 
 ## Archive
 
