@@ -160,4 +160,64 @@ bare `cleargate`).
 flashcards_flagged:
   - "2026-09-25 · #test-harness #init · runInitScenario's extra spreads after default seams — override extra.exit to capture ExitSignal's code, no helper edit needed."
 
+## Re-seal (TPV round 1 → E1–E8)
+
+New commit: `4785032` (`qa-red(STORY-058-04): re-seal per TPV E1-E8`), on `story/STORY-058-04`
+on top of `a178d38`. Applied E1–E8 verbatim from `reports/STORY-058-04-tpv.md` §"Required
+test edits" (M2-A17/M2-A18). No identifier adaptations were needed — `loadRegistry`,
+`makeFakeAdapter`, `buildFixtures`, `listFilesRecursive` and `composeCanonicalPayload`
+in `host-selection.red.node.test.ts` already matched the names E1/E2 assume, and `os`/
+`CLI_ROOT` were already imported in `init-host-selection.red.node.test.ts` before E7.
+
+Ambiguity 4 (from the original QA-Red report) is overruled per TPV W1: 12c's tmpdir-count
+half was not "already true because the `finally` cleans" — it was vacuously true because
+`runInitScenario` always sets `payloadDir`, which `init.ts` checks before `opts.fromSource`,
+so the `--from-source` branch (and its mkdtemp) was never reached. E7 fixes this by passing
+`payloadDir: undefined` and snapshotting the tempdir inside the exit seam. Ambiguities 1, 2,
+3 and 5 stand as originally resolved; 7b's assertion (ambiguity 1's flat-payload scope) is
+replaced by E1, not its underlying "flat view is correct" premise.
+
+### Per-file measured counts (solo, ×2 each)
+
+| File | Tests | Run 1 | Run 2 | Required |
+|---|---|---|---|---|
+| `test/hosts/host-selection.red.node.test.ts` | 11 | 0 pass / 11 fail | 0 pass / 11 fail | 0/11 |
+| `test/commands/init-host-selection.red.node.test.ts` | 10 | 3 pass / 7 fail | 3 pass / 7 fail | 3/10 (13 ×2, M2-A15) |
+| `test/commands/init-host-cli.red.integration.node.test.ts` | 4 | 0 pass / 4 fail | 0 pass / 4 fail | 0/4 |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (compare, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`) | 15 | 15 pass / 0 fail | 15 pass / 0 fail | 15/15 |
+| `test/hosts/host-adapter-contract.red.node.test.ts` (-03, re-run) | 19 | 19 pass / 0 fail | — (single run, courtesy) | 19/19 |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (-03, re-run, compare) | 5 | 5 pass / 0 fail | — (single run, courtesy) | 5/5 |
+
+All counts reproduce the TPV's "Expected counts after re-seal" table exactly. `npm run
+typecheck` → `tsc --noEmit`, exit 0, no output, both before and after the edits.
+
+Verified the three edited files' post-edit reasons match TPV's own W1/W2/W3 accounting:
+- 12c (E7) now fails at `assert.equal(capturedExitCode, 2)` (`undefined !== 2`) — a real,
+  non-vacuous red, since `payloadDir: undefined` now lets `opts.fromSource` actually be
+  read (confirmed by the assertion firing where W1 said it must: the exit-code check,
+  not a downstream tmpdir check that could pass vacuously).
+- 7b (E1) still fails today (`payloadFilter` absent), same as before — E1 changes what a
+  *correct future -11* must satisfy, not today's red reason.
+- 12a/12b (E5/E6) still fail at the pre-existing `capturedExitCode` assertion first (Step 0
+  doesn't exist yet), so the new stdout/prefix assertions are additional, not-yet-reached
+  coverage that will bind once Step 0 lands.
+- 15b (E8) fails identically to 15/16: Commander rejects `--host` as unknown, exit 1.
+
+No `src/**` change, no `test/helpers/init-fixture.ts` edit — confirmed via
+`git status --short` before the commit (only the three modified test files staged,
+`cleargate-0.25.0.tgz` left untouched).
+
+### Identifier adaptations
+
+None. Every local name E1/E2/E7/E8 assume (`loadRegistry`, `makeFakeAdapter`,
+`buildFixtures`, `listFilesRecursive`, `composeCanonicalPayload`, `os`, `CLI_ROOT`,
+`mkTmp`, `spawnCliInit`, `countEntries`) already matched the sealed file's own names.
+
+### Script Incidents
+
+None. Same constraints as the original seal: `npm run typecheck` / `npm run test:file --
+<file>` only, inside the cli checkout, never a bare `cleargate`, never `npm run build`.
+
+flashcards_flagged: []
+
 STATUS=done
