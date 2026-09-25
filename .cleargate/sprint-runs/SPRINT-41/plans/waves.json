@@ -180,8 +180,8 @@
     {"id": "RS-1", "after": "wave2", "action": "Second targeted live re-sync: .claude/hooks/stamp-and-gate.sh from BUG-067's canonical edit (same pin-substitution rule as B0)."},
     {"id": "RS-2", "after": "wave3", "action": "CR-123 condition 2: re-sync live .claude/agents/qa.md and .claude/skills/sprint-execution/SKILL.md."},
     {"id": "RS-3", "after": "wave5", "action": "M1 close: the re-sync source switches to cleargate-cli/scaffold/hosts/claude/**. Run a no-op re-sync diff; per -01's acceptance it must be byte-identical."},
-    {"id": "RS-4", "after": "wave15", "action": "All nine hooks adopt the harness shim: re-sync live hooks, restart, and re-run STORY-058-09's clean-room Claude baseline before wave16."},
-    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches."}
+    {"id": "RS-4", "after": "wave15", "action": "All nine hooks adopt the harness shim: re-sync live hooks, restart, and re-run STORY-058-09's clean-room Claude baseline before wave16: node cleargate-cli/scripts/clean-room/claude-baseline.mjs run --evidence .cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md --label \"RS-4 after STORY-058-11\" (known-fail flags per plans/M4.md), then the -09 e2e test test/e2e/clean-room-claude-baseline.red.integration.node.test.ts on cli main (M4 open decision 3)."},
+    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches. Recommended (M4 open decision 3): re-run the -09 clean-room harness with --label \"RS-5 after STORY-058-12\"."}, {"id": "RS-CLOSE", "after": "wave17", "action": "Before close_sprint.mjs: node cleargate-cli/scripts/clean-room/claude-baseline.mjs run --evidence .cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md --label close --known-fail sprint-init=<F5 BUG id>, then the harness check --write-result command from plans/M4.md B1 (M4 open decision 3). -09 evidence is invalidated by any cli source/build change after it, so the close run is what satisfies deferred_verification."}
   ],
   "refused": [],
   "blocked": [],
