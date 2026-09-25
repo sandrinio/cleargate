@@ -1,3 +1,10 @@
+2026-09-26 · #uninstall #init #settings-json #danger · An emptied .claude/settings.json left by uninstall makes re-init merge only 2 of 7 hooks.
+2026-09-26 · #init #settings-json #danger · init into an existing .claude/settings.json wires only CLAUDE_HOOK_ADDITION (2 of 7 hooks).
+2026-09-26 · #upgrade #settings-json #danger · upgrade take-theirs spreads theirs.hooks per event: user hooks under a ClearGate event are dropped.
+2026-09-26 · #codex #settings-json · isClearGateCommand matches /.claude/hooks/ only; codex hook commands never match it.
+2026-09-26 · #doctor #smoke #danger · doctor --check-scaffold writes .cleargate/.drift-state.json (not ignored here); never smoke it on OUTER.
+2026-09-26 · #hooks #flashcard-gate · A fail-closed parser under 'while read -r' misses an unterminated last line; add '|| [[ -n $line ]]'.
+2026-09-26 · #doctor #session-start · runSessionStart line 2 is the resolver line (6 tests pin out[1]); add new lines after it.
 2026-09-26 · #manifest #host · selectEntriesForHosts needs payloadFilter AND an owner check; payloadFilter alone admits unregistered owners.
 2026-09-26 · #manifest #doctor #upgrade · Make DriftMapEntry.owner required: a missed construction site then fails typecheck, not silently at runtime.
 2026-09-26 · #test-harness #upgrade #tpv · upgrade never creates CLAUDE.md (untracked); a snapshot-less dir is claude-only — seed hosts for multi-host reds.
