@@ -84,3 +84,83 @@ Expected at green: spidr 32/32, doctrine 11/11, test-layers 17/17.
 None. The wrapped typecheck exited 0. The scratch proof ran from the session scratchpad and has been deleted.
 
 flashcards_flagged: ["2026-09-25 · #test-harness #readiness-gates · readiness-gates.md has TWO epic yaml blocks; a work_item_type-only regex hits ready-for-decomposition — key on transition too"]
+
+---
+
+## Re-check (arch_bounces=1) — cli `90d28c3`
+
+### Verdict
+
+`TPV: APPROVED`
+
+QA-Red's amendment is `90d28c3` on top of `eaa4c62`. It changes the spidr unit file (+32/−10) and adds `test/e2e/spidr-coverage.red.integration.node.test.ts` (175 lines).
+
+### Round-1 gap: closed
+
+- `extractGateBlock(text, type, transition?)` (`:397-411`) now anchors on `transition: ready-for-coding` for the epic lookups in S7-1 and S7-2. Story, cr and bug still have one block each, so the unkeyed path stays correct for S8's three registration checks.
+- S8's epic guard uses `extractAllGateBlocks`. It asserts there are exactly 2 epic blocks and that neither carries `spidr-coverage`. That covers the `ready-for-coding` block that matters.
+
+### Baseline: red for the right reasons
+
+The baseline run used the unedited worktree with `CLEARGATE_META_ROOT=.worktrees/CR-123`, over four files: spidr unit, doctrine, test-layers and the new e2e. Result: **61 tests, 29 pass, 32 fail**. The failures:
+
+| Count | Where | Reason |
+|---|---|---|
+| 23 | S1-S6 and S8's fm-case | throw `unsupported predicate shape: spidr-coverage` |
+| 1 | S7-1 | `actual: "body contains 'Error'"` — the real doc line, no longer `null` |
+| 1 | S7-2 | `actual: true` — prose `Error` passes the untightened check |
+| 4 | S8 | 3 registrations plus the vocabulary entry are absent from the doc |
+| 2 | doctrine | the two moved counts |
+| 1 | e2e | `failing_criteria` lacks `spidr-coverage`. It got the four other criteria as an array, not a throw. |
+
+S8's two-block guard and the 17 test-layers tests pass, as intended.
+
+### A correct fix goes fully green (proved)
+
+I built a scratch copy: all of cli `src/`, the four test files, and the `node_modules` symlink. It carried a minimal contract-conformant `evalSpidrCoverage`, and the canonical meta-root carried simulated template and gates-doc edits per M1 plan `:71-86`.
+
+Result: **61/61 pass**, and scratch `tsc --noEmit` exits 0 on the patched `src`. Two probes of the e2e:
+
+- With the predicate implemented and `story.md` left unedited, the e2e goes red. The story carries no lead-in, so the criterion is `not-applicable` and absent from `failing_criteria`. The e2e therefore requires the template edit.
+- With the doc registered and the predicate **unimplemented** (real cli `src`), the e2e goes **green**. The cause is `gate.ts:236-241`, which catches the parse throw and records `{id: 'spidr-coverage', detail: 'predicate error: …'}` as a failing criterion. See the advisory below.
+
+### New file wiring
+
+| Check | Result |
+|---|---|
+| Imports | PASS. `gateCheckHandler` is at `src/commands/gate.ts:152`, `newHandler` at `src/commands/new.ts:202`, `readCachedGate` at `src/lib/frontmatter-cache.ts:36` (async, returns `failing_criteria: {id, detail}[]`, `:20`). |
+| Signatures | PASS. The gate options match `gate.ts:40-46`: `cwd`, `now: () => Date`, `stdout`, `stderr`, `exit`, `gatesDocPath`. The new options match `new.ts`: `cwd`, `now: string`, `exit`. `newHandler` reads templates from `cwd/.cleargate/templates` (`new.ts:249`), which is the fixture. `--epic EPIC-900` needs only a parseable id, not an existing file. The shape matches the BUG-067 harness (`frontmatter-authoring.red.integration.node.test.ts:136-138,225-228`). |
+| `CLEARGATE_META_ROOT` | PASS. Same idiom (`:46-51`). It copies canonical `story.md` and canonical `readiness-gates.md` from `CANON`, never MAIN when the override is set, and never the generated payload. It runs in-process against `src`, with no `dist`. |
+| `CLEARGATE_REPO_ROOT` isolation | PASS. It is set to the fixture root around each call and restored in `finally`, both the `undefined`-delete branch and the prior-value branch. The handlers also receive an explicit `cwd`. Measured: `git status` in the outer MAIN checkout, the CR-123 worktree and the cli repo was byte-identical before and after all runs. |
+| tmp cleanup | PASS. `mkdtemp` roots are pushed to `temporaryRoots`, and `afterEach` removes them. The only leftover is an empty `os.tmpdir()/cr123-e2e/` parent, which is cosmetic and the same pattern as the BUG-067 precedent. |
+| Naming | PASS. `*.red.integration.node.test.ts` is the integration layer per §Test Stack. The default `npm test` excludes it (`package.json:46` `!test/**/*.integration.node.test.ts`), so it must be run explicitly. The DevOps full suite will not cover it. |
+| Typecheck | PASS. `npm run typecheck` in the cli exits 0 through `run_script.sh`. The cli tsconfig excludes tests, so I also ran all three red files under a scratch strict tsconfig: exit 0. |
+
+### Advisory (non-blocking — test strength, not wiring)
+
+- **Advisory:** the e2e cannot tell a missing predicate from a working one once the doc registers `spidr-coverage` (probe above). The overall suite cannot go falsely green, because S1-S6 fail without the predicate. But QA-Verify must not cite the e2e alone as proof that the predicate evaluates through the gate.
+- **Optional tightening:** find the `spidr-coverage` entry in `cached!.failing_criteria` and assert that its `detail` does not match `/predicate error/` and does match `/t or f|cover/i`. This is the flashcard 2026-08-30 "satisfiable for an unrelated reason" class.
+- **Routing:** the orchestrator decides whether QA-Red adds it. It does not need another TPV round.
+
+### Final command set (Developer and QA-Verify; cli on `story/CR-123`)
+
+```bash
+cd /Users/ssuladze/Documents/Dev/ClearGate && bash .cleargate/scripts/run_script.sh bash -c "cd cleargate-cli && \
+  CLEARGATE_META_ROOT=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/CR-123 npm run test:file -- \
+  test/lib/readiness-predicates-spidr-coverage.red.node.test.ts \
+  test/docs/test-layers-declared-doctrine.red.node.test.ts \
+  test/lib/readiness-predicates-test-layers-declared.red.node.test.ts \
+  test/e2e/spidr-coverage.red.integration.node.test.ts"
+bash .cleargate/scripts/run_script.sh bash -c "cd cleargate-cli && npm run typecheck"
+```
+
+- **Expected at green:** 61/61. That is spidr 32, doctrine 11, test-layers 17, e2e 1.
+- **Pre-merge, no override** (vacuous for spidr, per M1 plan `:110-115`): `npm run test:file -- test/commands/gate-unit.node.test.ts test/lib/readiness-predicates.node.test.ts test/lib/work-item-type-spike.node.test.ts`.
+- **Rules:** never set `CLEARGATE_META_ROOT` on a full-suite run, and never `npm run build` on the story branch.
+- **DevOps, post-merge:** after the outer merge, also run the e2e file explicitly with no override. It is outside the default suite, and post-merge MAIN canonical carries the edits.
+
+### Script Incidents (re-check)
+
+None. The wrapped typecheck exited 0. The scratch copy (`scratchpad/tpv2`) has been deleted. No repo was edited apart from appending this section.
+
+flashcards_flagged (re-check): ["2026-09-25 · #test-harness #gate · gate.ts catches predicate throws as failing criteria; an e2e asserting only the id passes with the predicate unimplemented"]
