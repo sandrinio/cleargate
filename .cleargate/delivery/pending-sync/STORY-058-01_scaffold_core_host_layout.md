@@ -23,9 +23,11 @@ created_at_version: cleargate@0.26.1
 updated_at_version: cleargate@0.26.1
 server_pushed_at_version: null
 cached_gate_result:
-  pass: true
-  failing_criteria: []
-  last_gate_check: 2026-09-04T10:25:01Z
+  pass: false
+  failing_criteria:
+    - id: spidr-coverage
+      detail: "predicate error: Error: unsupported predicate shape: spidr-coverage"
+  last_gate_check: 2026-09-25T07:22:36Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -122,6 +124,7 @@ Feature: Tracked scaffold payload layout
 | Primary File | `cleargate-cli/scripts/copy-planning-payload.mjs` |
 | Related Files | `CLAUDE.md`, `cleargate-planning/**`, `cleargate-planning/DEPRECATED.md`, `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/tsup.config.ts`, `cleargate-cli/package.json` |
 | New Files Needed | `cleargate-cli/scaffold/core/**`, `cleargate-cli/scaffold/hosts/claude/**`, `cleargate-planning/DEPRECATED.md`, `cleargate-cli/src/lib/scaffold-layout.mjs`, `cleargate-cli/src/lib/scaffold-layout.d.mts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-01_scaffold_core_host_layout.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-01-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-01-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-01-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-01-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-01-arch.md` |
 
 - `cleargate-cli/scaffold/core/**` — **create**. Harness-neutral `.cleargate/**` assets.
 - `cleargate-cli/scaffold/hosts/claude/**` — **create**. Relocated Claude assets.
