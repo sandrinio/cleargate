@@ -217,6 +217,12 @@ reader is not misled by the wiki page.)*
 - `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` — lines 46 and 61-64, the canonical-only
   pin that let this through; needs either a live-mode variant or an explicit recorded limitation.
 - `CLAUDE.md` → *Dogfood split — canonical vs live* — the prose mitigation that has now failed twice.
+- **M0-step follow-up (amended 2026-09-25, orchestrator):** `cleargate-cli/test/hooks/pre-tool-use-task.node.test.ts`,
+  `test/hooks/token-ledger-attribution.node.test.ts`, `test/hooks/token-ledger-regression.node.test.ts`. Their
+  `HOOK_PATH` read the outer repo's per-machine LIVE `.claude/hooks/*` and pinned the pre-BUG-068/069 contracts,
+  so the M0 re-sync turned 11 of them red on cli main. They are repointed at canonical
+  (`CLEARGATE_META_ROOT`-aware) and updated to the BUG-068/069 contracts — the propagation consequence of this
+  bug's own re-sync, not a change to the BUG-068/069 logic.
 
 **Explicitly out of scope — do not touch:**
 
@@ -232,8 +238,8 @@ reader is not misled by the wiki page.)*
 - [x] Owner chose detect-and-warn and meta-repo-only scope; decisions recorded in Context Source.
 - [ ] Wire the check into `cleargate doctor` with a distinct exit code, per the doctor exit-code taxonomy in `.cleargate/knowledge/cleargate-enforcement.md`.
 - [ ] Surface one drift line in the `SessionStart` banner when the check fails, alongside the existing `ClearGate state:` line.
-- [ ] After BUG-089's repair, inventory current drift, back up each exact live file before a targeted re-sync (or reviewed force install), preserve machine-local additions, and verify matching hashes. Plain init can preserve divergent files and is not proof of re-sync. Start a new Claude session before the live checks.
-- [ ] Re-run the §2 step-6 ledger probe after a real agent dispatch; confirm a non-empty `sentinel_started_at` and a correct `agent_type`.
+- [x] After BUG-089's repair, inventory current drift, back up each exact live file before a targeted re-sync (or reviewed force install), preserve machine-local additions, and verify matching hashes. Plain init can preserve divergent files and is not proof of re-sync. Start a new Claude session before the live checks. *(Done at SPRINT-41 barrier B0, 2026-09-25: `sprint-runs/SPRINT-41/b0-live-resync.mjs --apply`, backup + hashes + fresh headless sessions — `reports/BUG-085-b0-proof.md`.)*
+- [x] Re-run the §2 step-6 ledger probe after a real agent dispatch; confirm a non-empty `sentinel_started_at` and a correct `agent_type`. *(B0 case D2: a real `qa` dispatch in a fresh session wrote `agent_type: qa`, `sentinel_started_at: 2026-09-25T03:48:13Z`.)*
 - [ ] Replace the CLAUDE.md prose reminder with a pointer to the mechanical check.
 
 ## 5. Verification Protocol (The Failing Test)
