@@ -106,4 +106,64 @@ Checked `.cleargate/FLASHCARD.md` (Rule 1, grep-before-append) before proposing 
 flashcards_flagged: []
 ```
 
+## Re-seal (TPV round 1 → R1–R10)
+
+TPV round 1 (`reports/STORY-058-05-tpv.md`, `TPV: REJECTED`) found F1: every `runInitScenario` call left the fixture's stub `readInstallManifest` in place (`files: []`), so scenarios 3, 4, 6a and 6b were unsatisfiable and 8/11 passed vacuously. Applied the TPV-authored unified diff (R1–R10) verbatim via `git apply` — no hand edits, no `src/**`, no `test/helpers/*`.
+
+**New commit:** `156c864fa457e0c634b0ce1ac388ed47c834a8f1` ("qa-red(STORY-058-05): re-seal per TPV R1-R10"), on `story/STORY-058-05`, parent `764f06380ee7d33d9f2dc769c3277f44d0a8f321`. `git apply --check` was clean before applying; `git status` after showed only the two modified test files (plus the untouched pre-existing `cleargate-0.25.0.tgz`).
+
+**Post-apply sha256 (matches TPV exactly):**
+
+| File | sha256 |
+|---|---|
+| `test/hosts/host-lifecycle.red.node.test.ts` | `171e2cdcfd43239fc72aa91226c9d77ca2299c65c6cc25e7ee753bcad2c5d42a` |
+| `test/commands/host-cli.red.integration.node.test.ts` | `4911ac5f296b516f4ce589f999aa4ab0bf3776d3211326ca26d863efaac3013b` |
+
+**`npm run typecheck`:** exit 0.
+
+**Measured per-file counts (2 solo runs each for the two red files):**
+
+| File | Run 1 | Run 2 | Red-reason breakdown |
+|---|---|---|---|
+| `test/hosts/host-lifecycle.red.node.test.ts` | 17 tests, 0 pass, 17 fail | 17 tests, 0 pass, 17 fail | 15 × `ERR_MODULE_NOT_FOUND` on `src/commands/host.ts`; 2 (scenario 3 and new 3b) on `src/hosts/lifecycle.ts` — matches TPV exactly |
+| `test/commands/host-cli.red.integration.node.test.ts` | 3 tests, 0 pass, 3 fail | 3 tests, 0 pass, 3 fail | all 3 on `error: unknown command 'host'` |
+
+`BASELINE_FAIL` is now **20** (17 + 3), up from 16 before the re-seal — matches TPV's "Expected counts after re-seal".
+
+**Sealed contract files (unchanged, single confirming run each):**
+
+| File | Result |
+|---|---|
+| `host-adapter-contract.red.node.test.ts` | 19/19 pass |
+| `host-selection.red.node.test.ts` | 11/11 pass |
+| `init-host-selection.red.node.test.ts` | 10/10 pass |
+| `init-host-cli.red.integration.node.test.ts` | 4/4 pass |
+| `manifest-host-ownership.red.node.test.ts` | 18/18 pass |
+| `init-host-snapshot.red.node.test.ts` | 13/13 pass |
+
+**Parity (compare mode, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`, no capture flag):**
+
+| File | Result |
+|---|---|
+| `claude-adapter-init-parity.red.integration.node.test.ts` | 5/5 pass |
+| `init-host-parity.red.integration.node.test.ts` | 15/15 pass |
+
+**Baseline hash**, checked before and after the whole re-seal sequence (typecheck, both red files ×2, all six sealed files, both parity files):
+
+```
+find /private/tmp/cg-s41-m2-init-baseline -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256
+```
+- Before: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2`
+- After: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2`
+
+Unchanged.
+
+**flashcards_flagged**
+
+TPV's own report already carries the four cards this round surfaced (`readInstallManifest` stub trap, "TPV must simulate first", spawned-CLI blank-line assertion, owner≡path fixture blind spot) — these are the Architect's cards from its own report and are not re-proposed here to avoid a duplicate append when the orchestrator merges both lists. Nothing new surfaced on the QA side beyond mechanically applying and verifying the patch.
+
+```yaml
+flashcards_flagged: []
+```
+
 STATUS=done
