@@ -1,3 +1,17 @@
+2026-09-26 · #codex #dispatch · spawn_agent is async; serial dispatch = spawn_agent then wait_agent until the FINAL_ANSWER arrives.
+2026-09-26 · #codex #dispatch · spawn_agent fork_turns defaults to all (child inherits parent history); pass fork_turns none.
+2026-09-26 · #codex #sandbox #danger · workspace-write makes .git read-only: worktree add/commit/merge fail; add <room>/.git root.
+2026-09-26 · #codex #sandbox · thread/start config sandbox_workspace_write.writable_roots is per thread; child agents inherit it.
+2026-09-26 · #codex #clean-room #danger · exec_command runs zsh -lc; path_helper puts /opt/homebrew/bin first → global cleargate.
+2026-09-26 · #codex #token-ledger · SubagentStop agent_transcript_path rollout: token_usage_record per response_id = exact usage.
+2026-09-26 · #codex #hooks · Child-agent tool hooks carry agent_id+agent_type; SessionStart fires per root session, never per child.
+2026-09-26 · #codex #hooks · Code-mode exec nesting: tools.apply_patch fires PreToolUse as apply_patch; exec_command as Bash.
+2026-09-26 · #codex #test-harness · hook/completed run.id ends with :<call_id>; join hook runs to spawn/apply_patch items by it.
+2026-09-26 · #codex #clean-room · ChatGPT.app's embedded codex auto-updated to 0.155.0-alpha.16.3; not a same-version target.
+2026-09-26 · #codex #trust · TUI shows 'N hooks need review' → Review hooks / Trust all; app-server runs never prompt.
+2026-09-26 · #sprint-execution #verdict · Serial verdicts: tokens {metering:'unavailable'}, null SHAs on non-GREEN; never zero/fake.
+2026-09-26 · #hooks #flashcard-gate · pending-task-sentinel's bash read skips a final line with no newline; a JS port must too.
+2026-09-26 · #clean-room #frontmatter · Authored items strip <instructions> (Guidance Surface Reach); sprint init then passes.
 2026-09-26 · #test-harness #init #tpv · init-fixture's stub readInstallManifest records files: []; lifecycle reds must pass readInstallManifest: undefined.
 2026-09-26 · #test-harness #tpv #qa · QA-Red reds never ran on a conformant build: 4/13 -05 reds were unsatisfiable, 2 vacuous. TPV must simulate first.
 2026-09-26 · #test-harness #cli #tpv · A spawned-CLI test that drops empty lines can't see a line-sink default sink; assert stdout has no '\n\n'.
