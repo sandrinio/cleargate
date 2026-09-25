@@ -185,10 +185,10 @@
     },
     "BUG-089": {
       "state": "QA Passed",
-      "qa_bounces": 0,
+      "qa_bounces": 1,
       "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-09-25T00:52:31.646Z",
+      "updated_at": "2026-09-25T03:25:24.864Z",
       "notes": "Approved scope addition; no implementation or runtime evidence claimed.",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-089 → QA Passed",
-  "updated_at": "2026-09-25T00:52:31.646Z"
+  "last_action": "qa-bounce BUG-089: qa_bounces=1",
+  "updated_at": "2026-09-25T03:25:24.864Z"
 }
