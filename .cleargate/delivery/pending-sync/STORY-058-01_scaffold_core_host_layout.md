@@ -35,15 +35,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-058-01
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-24T23:05:26Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-25T08:19:46Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-25T07:24:17Z
 ---
 
 # STORY-058-01: Tracked scaffold/core + scaffold/hosts/claude payload layout
@@ -145,12 +151,12 @@ Not applicable — no external interface changes.
 
 *(Refined 2026-09-25 from the SPRINT-41 M1 plan, `sprint-runs/SPRINT-41/plans/M1.md` §STORY-058-01.)*
 
-- [ ] Capture the post-CR-123 payload baseline (bytes, modes, fixed-time MANIFEST, source SHA)
-- [ ] Copy tracked core, root `.gitignore`, Claude assets and the CLAUDE.md block source into `scaffold/core` and `scaffold/hosts/claude` without content change
-- [ ] Add `src/lib/scaffold-layout.mjs`/`.d.mts` (moved exclusions, unconditional empty dirs, collision-checked compose)
-- [ ] Repoint the copier, `build-manifest` defaults and the tsup manifest source to CLI-local paths; reverse the prebuild order
-- [ ] Prove payload and install equivalence, modes, pin passthrough and hygiene (baseline-env integration + unit)
-- [ ] Rewrite CLAUDE.md *Dogfood split* (keep the payload label) and add `cleargate-planning/DEPRECATED.md`
+- [x] Capture the post-CR-123 payload baseline (bytes, modes, fixed-time MANIFEST, source SHA)
+- [x] Copy tracked core, root `.gitignore`, Claude assets and the CLAUDE.md block source into `scaffold/core` and `scaffold/hosts/claude` without content change
+- [x] Add `src/lib/scaffold-layout.mjs`/`.d.mts` (moved exclusions, unconditional empty dirs, collision-checked compose)
+- [x] Repoint the copier, `build-manifest` defaults and the tsup manifest source to CLI-local paths; reverse the prebuild order
+- [x] Prove payload and install equivalence, modes, pin passthrough and hygiene (baseline-env integration + unit)
+- [x] Rewrite CLAUDE.md *Dogfood split* (keep the payload label) and add `cleargate-planning/DEPRECATED.md`
 
 ## 4. Quality Gates
 
