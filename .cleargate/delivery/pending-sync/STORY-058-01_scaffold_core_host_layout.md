@@ -23,11 +23,9 @@ created_at_version: cleargate@0.26.1
 updated_at_version: cleargate@0.26.1
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: spidr-coverage
-      detail: "predicate error: Error: unsupported predicate shape: spidr-coverage"
-  last_gate_check: 2026-09-25T07:22:36Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-09-25T07:23:01Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
