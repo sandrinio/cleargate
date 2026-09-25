@@ -1725,3 +1725,8 @@
   action: "update"
   target: "BUG-089"
   path: ".cleargate/delivery/pending-sync/BUG-089_pretooluse_gates_exit_1_fail_open.md"
+- timestamp: "2026-09-25T03:46:57.735Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-41"
+  path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
