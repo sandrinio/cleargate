@@ -70,7 +70,7 @@ As a ClearGate maintainer, I want the distributable scaffold to live in tracked 
 ### 1.4 Open Questions
 - **Question:** does `cleargate-planning/` remain in the meta-repo as a deprecated mirror during the transition, or is it deleted the moment nothing reads it?
 - **Recommended:** keep it for the duration of SPRINT-41 with a `DEPRECATED.md` marker, delete at sprint close once [[STORY-058-02]] proves the pack is self-contained. Deleting it in this story would strand the live dogfood re-sync path mid-sprint.
-- **Human decision:** {pending Gate 1}
+- **Human decision:** Resolved 2026-09-25 by the orchestrator under the owner's autonomy directive (SPRINT-41 kickoff), per the M1 plan: keep `cleargate-planning/` as a deprecated, frozen, read-only snapshot with `DEPRECATED.md`; nobody edits it after this story merges; it is **not** deleted at sprint close. Deletion is a follow-up CR, filed once [[BUG-085]] and the D4 re-declarations stop reading it.
 
 ### 1.5 Risks
 - **Highest-blast-radius story in the sprint.** It moves every payload source at once; a silent content drift here corrupts every downstream install.
@@ -120,14 +120,17 @@ Feature: Tracked scaffold payload layout
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/scripts/copy-planning-payload.mjs` |
-| Related Files | `CLAUDE.md`, `cleargate-planning/**` |
-| New Files Needed | `cleargate-cli/scaffold/core/**`, `cleargate-cli/scaffold/hosts/claude/**` |
+| Related Files | `CLAUDE.md`, `cleargate-planning/**`, `cleargate-planning/DEPRECATED.md`, `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/tsup.config.ts`, `cleargate-cli/package.json` |
+| New Files Needed | `cleargate-cli/scaffold/core/**`, `cleargate-cli/scaffold/hosts/claude/**`, `cleargate-planning/DEPRECATED.md`, `cleargate-cli/src/lib/scaffold-layout.mjs`, `cleargate-cli/src/lib/scaffold-layout.d.mts` |
 
 - `cleargate-cli/scaffold/core/**` — **create**. Harness-neutral `.cleargate/**` assets.
 - `cleargate-cli/scaffold/hosts/claude/**` — **create**. Relocated Claude assets.
 - `cleargate-cli/scripts/copy-planning-payload.mjs` — **modify**. Source path repoint.
 - `CLAUDE.md` — **modify**. The *Dogfood split — canonical vs live* section documents `cleargate-planning/` as canonical; that becomes wrong the moment this lands.
 - `cleargate-planning/**` — **read-only source** for the move; not deleted in this story.
+- `cleargate-planning/DEPRECATED.md` — **create** (not shipped). Names both new roots, the freeze SHA and "do not edit". Listed as a literal path because the outer surface gate matches §3.1 by exact string (amended 2026-09-25, M1 plan).
+- `cleargate-cli/src/lib/scaffold-layout.mjs` + `.d.mts` — **create**. Moved payload exclusions, unconditional empty dirs (`.cleargate/sprint-runs`, `.cleargate/hook-log`), collision-checked `composePayload`.
+- `cleargate-cli/scripts/build-manifest.ts` (defaults/output only), `cleargate-cli/tsup.config.ts` (manifest source), `cleargate-cli/package.json` (`prebuild` order reversed) — **modify**. The minimum repoint that makes a sibling-free `npm run prebuild` possible; full generalization is [[STORY-058-02]].
 
 ### 3.2 Technical Logic
 The move is mechanical but must be verified mechanically, not by eye. Generate the payload before the change, snapshot it, perform the relocation, regenerate, and diff. The diff being empty is the story's real acceptance test — every Gherkin scenario above is a facet of it.
@@ -139,13 +142,14 @@ Not applicable — no external interface changes.
 
 ## Task Breakdown
 
-- [ ] Snapshot the current generated payload tree as the byte-comparison baseline.
-- [ ] Create `scaffold/core/**` from the harness-neutral `.cleargate/**` assets.
-- [ ] Create `scaffold/hosts/claude/**` from the `.claude/**` assets plus the CLAUDE.md block source.
-- [ ] Repoint `copy-planning-payload.mjs` at the tracked layout.
-- [ ] Regenerate and diff against the baseline; resolve to zero differences.
-- [ ] Assert hook mode bits and pin-placeholder survival.
-- [ ] Update CLAUDE.md's *Dogfood split* section to name the new canonical path.
+*(Refined 2026-09-25 from the SPRINT-41 M1 plan, `sprint-runs/SPRINT-41/plans/M1.md` §STORY-058-01.)*
+
+- [ ] Capture the post-CR-123 payload baseline (bytes, modes, fixed-time MANIFEST, source SHA)
+- [ ] Copy tracked core, root `.gitignore`, Claude assets and the CLAUDE.md block source into `scaffold/core` and `scaffold/hosts/claude` without content change
+- [ ] Add `src/lib/scaffold-layout.mjs`/`.d.mts` (moved exclusions, unconditional empty dirs, collision-checked compose)
+- [ ] Repoint the copier, `build-manifest` defaults and the tsup manifest source to CLI-local paths; reverse the prebuild order
+- [ ] Prove payload and install equivalence, modes, pin passthrough and hygiene (baseline-env integration + unit)
+- [ ] Rewrite CLAUDE.md *Dogfood split* (keep the payload label) and add `cleargate-planning/DEPRECATED.md`
 
 ## 4. Quality Gates
 

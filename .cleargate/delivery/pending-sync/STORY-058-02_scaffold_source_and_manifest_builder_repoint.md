@@ -69,7 +69,7 @@ As a ClearGate maintainer, I want `npm pack` to succeed from a standalone `clear
 ### 1.4 Open Questions
 - **Question:** should `build-manifest.ts`'s `tier` vocabulary gain a host dimension now, or wait for [[STORY-058-06]]'s `owner` field?
 - **Recommended:** wait. `tier` and `owner` are orthogonal (tier = what kind of asset, owner = which host installs it); conflating them now would force a second migration.
-- **Human decision:** {pending Gate 1}
+- **Human decision:** Resolved 2026-09-25 by the orchestrator under the owner's autonomy directive, per the M1 plan: `tier` waits; manifest entry shape unchanged; `owner`/`hosts` belong to [[STORY-058-06]].
 
 ### 1.5 Risks
 - `verify-pack.mjs` runs inside `prepublishOnly`. A wrong assertion here fails the release rather than the build, i.e. at the worst possible moment.
@@ -102,8 +102,8 @@ Feature: Self-contained package build
   Scenario: Manifest classifies core and host files
     Given the tracked scaffold layout
     When build-manifest runs
-    Then every core file and every host file appears as a manifest entry
-    And no payload file is left unclassified
+    Then every shipped core file and every shipped host file is classified as a manifest entry, or listed in INTENTIONALLY_UNTRACKED, or excluded by a TIER_RULES exclude rule
+    And no payload file is left unaccounted for
 ```
 
 ### 2.2 Verification Steps (Manual)
@@ -118,13 +118,14 @@ Feature: Self-contained package build
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/lib/scaffold-source.ts` |
-| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/scripts/verify-pack.mjs`, `cleargate-cli/package.json` |
-| New Files Needed | No |
+| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/scripts/verify-pack.mjs`, `cleargate-cli/package.json`, `cleargate-cli/src/commands/init.ts`, `cleargate-cli/scripts/copy-planning-payload.mjs`, `cleargate-cli/src/lib/manifest.ts`, `cleargate-cli/.gitignore`, `cleargate-cli/scripts/check-no-exec-mode-vocab.mjs`, `cleargate-cli/scripts/check-no-inline-id-regex.mjs`, `cleargate-cli/scripts/generate-changelog-diff.ts`, `cleargate-cli/test/**` (canonical-read repoint) |
+| New Files Needed | `cleargate-cli/test/helpers/scaffold-roots.ts` |
 
 - `cleargate-cli/src/lib/scaffold-source.ts` — **modify**. `REQUIRED_ITEMS` currently `['.claude', '.cleargate', 'CLAUDE.md']`; becomes the core/host layout check. `ScaffoldSourceError` codes preserved.
 - `cleargate-cli/scripts/build-manifest.ts` — **modify**. Tier classifier currently hard-coded to `.claude/**`.
 - `cleargate-cli/scripts/verify-pack.mjs` — **modify**. Add core + host root assertions.
 - `cleargate-cli/package.json` — **modify**. `prebuild` / `prepublishOnly` no longer depend on the sibling.
+- **Amended 2026-09-25 (SPRINT-41 M1 plan) — the rest of "drop the sibling dependency":** `src/commands/init.ts:226-246` (`--from-source <scaffold>` composes core+Claude into an owned temp flat payload, cleans only that dir); `scripts/copy-planning-payload.mjs` also emits the split `templates/scaffold/**` view (gitignored in cli `.gitignore`); `src/lib/manifest.ts:125-129` dev fallback → `<cli>/templates/cleargate-planning`; `scripts/check-no-exec-mode-vocab.mjs`, `scripts/check-no-inline-id-regex.mjs`, `scripts/generate-changelog-diff.ts` → CLI-local roots; new `test/helpers/scaffold-roots.ts`, and every cli test whose **canonical** read resolves `<cli>/../cleargate-planning/**` (~85 files) repointed to the scaffold, with a guard test against new sibling reads. Live-side reads keep `META_ROOT`. Reason: once [[STORY-058-01]] moves canonical into `cleargate-cli/scaffold/`, tests still reading the frozen snapshot would stop testing what ships. Out of scope: `src/lib/drift-check.ts:143-160` ([[BUG-085]]), `src/commands/scaffold-lint.ts:57`, `src/wiki/derive-repo.ts:10`.
 
 ### 3.2 Technical Logic
 `scaffold-source.ts`'s validation is a listing-membership check, not an `existsSync` probe — keep that discipline when the required-items set changes. The manifest classifier walks payload roots; parameterize the roots rather than adding a second hard-coded branch, so [[STORY-058-10]] adding a Codex root needs no classifier change.
@@ -136,11 +137,15 @@ Prove self-containment negatively: the acceptance test copies the checkout to a 
 
 ## Task Breakdown
 
-- [ ] Repoint `scaffold-source.ts` required-items at the core/host layout, preserving error codes.
-- [ ] Parameterize `build-manifest.ts` over payload roots.
-- [ ] Extend `verify-pack.mjs` with core + host root assertions.
-- [ ] Drop the sibling dependency from `package.json` scripts.
-- [ ] Add the no-siblings build test (copy-out-and-build, not in-place).
+*(Refined 2026-09-25 from the SPRINT-41 M1 plan, `sprint-runs/SPRINT-41/plans/M1.md` §STORY-058-02.)*
+
+- [ ] Validate the case-exact core/host layout with the existing error codes (directory listing, not `existsSync`)
+- [ ] Bridge `--from-source` to a temp composed Claude view with manifest; clean only that temp dir
+- [ ] Parameterize `build-manifest` over scaffold roots: per-root manifests, unchanged compatibility manifest, collision rejection
+- [ ] Emit the split `templates/scaffold/**` view; extend verify-pack with per-root presence and negative controls
+- [ ] Repoint the manifest dev fallback and the check/changelog scripts to CLI-local roots
+- [ ] Add `test/helpers/scaffold-roots.ts`; repoint canonical reads in cli tests; add the sibling-read guard
+- [ ] Prove a standalone prebuild/build/pack/verify-pack and tarball install with no sibling (plus the poisoned-sibling control)
 
 ## 4. Quality Gates
 
