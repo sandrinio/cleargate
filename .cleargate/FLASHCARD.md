@@ -1,3 +1,5 @@
+2026-09-26 · #upgrade #test-harness · upgrade.ts resolves its payload root differently from manifest.ts; spawn upgrade from src with an explicit packageRoot.
+2026-09-26 · #test-harness #qa-red #recipe · import() of a module missing a named export yields undefined, not a throw — one red test per export.
 2026-09-26 · #doctor #grep · doctor.ts holds raw NUL bytes (globMatch :887/:889); plain grep says 'Binary file matches' — use grep -a.
 2026-09-26 · #host #uninstall #contract · executeHostRemoval's ctx sinks are RAW; uninstall's are LINE sinks — strip the trailing \n first.
 2026-09-26 · #doctor #drift · check-scaffold --session-start-mode replays an old .drift-state.json; new DriftMapEntry fields may be absent.
