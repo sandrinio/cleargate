@@ -71,6 +71,8 @@
 - [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
 - [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs
 - [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
+- [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
+- [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
 
 ## Archive
 
