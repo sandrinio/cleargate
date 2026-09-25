@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T13:37:35Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: d6f53eab-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -144,7 +144,7 @@ export type HostName = 'claude' | 'codex' | 'copilot';
 export interface InstallCtx {
   readonly cwd: string;          // target repo root
   readonly payloadDir: string;   // flat composed payload (core + claude): InitOptions.payloadDir | --from-source temp view | npm default
-  readonly pinVersion: string;   // init passes `pinVersion ?? 'latest'`, exactly as Step 5b does today (init.ts:431)
+  readonly pinVersion: string;   // init passes `pinVersion ?? 'latest'`, exactly as Step 5b does today (init.ts:542)
   readonly force: boolean;
   readonly stdout: (s: string) => void;
   readonly stderr: (s: string) => void;
@@ -200,7 +200,7 @@ Finalized 2026-09-25 against [[STORY-058-10]]/[[STORY-058-11]] needs (AGENTS.md,
 
 ## Existing Surfaces
 
-- **Surface:** `cleargate-cli/src/commands/init.ts:194` (`initHandler`; Steps 4–5b at `:350-446`) — the scaffold installer, hook merge, CLAUDE.md injection, and `.mcp.json` registration; the primary extension point.
+- **Surface:** `cleargate-cli/src/commands/init.ts:251` (`initHandler`; Steps 4–5b at `:461-557`, inside the Steps 3–7 `try` at `:366`) — the scaffold installer, hook merge, CLAUDE.md injection, and `.mcp.json` registration; the primary extension point.
 - **Surface:** `cleargate-cli/src/init/inject-claude-md.ts:30` / `:45` (`extractBlock` / `injectClaudeMd`) — bounded-block extraction/injection.
 - **Surface:** `cleargate-cli/src/init/merge-settings.ts:48` — non-destructive Claude hook merge.
 - **Surface:** `cleargate-cli/src/init/inject-mcp-json.ts:77` (`injectMcpJson`; `:37` is `mergeMcpJson`) — `.mcp.json` merge, `McpJsonShape`.
