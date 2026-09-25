@@ -114,3 +114,76 @@ None. No `.cleargate/scripts/run_script.sh` invocation this session.
 
 QA=FAIL
 1. `src/commands/init.ts:269-275` — `--from-source` throws an uncaught `ERR_MODULE_NOT_FOUND` under the built `dist/cli.js` for a valid scaffold source (two `'..'` segments where bundling requires one), violating §1.2's "keeps working" requirement and never reaching the `ScaffoldSourceError` contract. Reproduced and confirmed the one-character-class fix resolves it. Everything else in this story (layout validation, per-root manifest, standalone pack/verify-pack, 70-file test repoint, sibling-read guard, carry-forwards 1-5) is correct and evidenced above — this is the sole blocker.
+
+## Round 2 (post QA bounce 1)
+
+Re-verify scope: Finding 1 fix only (`358ae35` on top of `477b942`). Round-1 PASS verdicts on everything else (guard-evasion, carry-forwards 1-5, scope, repoint spot-check, verify-pack, pre-existing-failure confirmations) stand unchanged. Findings 2-3 were report-accuracy corrections only, not fixes — the Dev's addendum accepts both, no code change needed or made for them.
+
+### 1. Commit contents — `git show 358ae35`
+
+- **`resolveCliPackageRoot(startDir)`** (new, exported from `src/commands/init.ts`): walks up from `startDir` looking for the first ancestor where `package.json` exists AND parses with `name === 'cleargate'` AND `scripts/build-manifest.ts` exists on disk; returns `undefined` at the filesystem root with no match. This is structural (by directory contents), not depth-based — confirmed by reading the loop (`path.dirname(dir)` fixed-point termination, no counted `'..'`). The `--from-source` bridge now calls `resolveCliPackageRoot(path.dirname(fileURLToPath(import.meta.url)))` and builds `buildManifestModulePath = path.join(cliPackageRoot, 'scripts', 'build-manifest.ts')` from the result — no more hardcoded `'..','..'`.
+- **No-ancestor path:** when `resolveCliPackageRoot` returns `undefined`, the code `throw`s a `ScaffoldSourceError({ code: 'PATH_MISSING', missing: ['scripts/build-manifest.ts'], message: '--from-source requires a cleargate-cli source checkout (scripts/build-manifest.ts not found in any ancestor directory)' })` **inside** the existing `try` block that wraps `composePayload`/the dynamic import. The existing `catch (e)` immediately below is unchanged: it still runs `fs.rmSync(tempDir, ...)` (since `fromSourceTempDir` is not yet assigned at throw time) before the `e instanceof ScaffoldSourceError` branch prints the message and calls `exit(2)`. Read the full surrounding block (`src/commands/init.ts:296-352`) to confirm the throw sits inside that try and nothing else in the try/catch structure moved.
+- **Nothing else in `init.ts` changed:** `git diff 477b942..358ae35 -- src/commands/init.ts | grep resolveDefaultPayloadDir` → only the pre-existing `@@` hunk header context line, no edits to that function's body. The rest of the file's diff is purely additive (the new function + the bridge's 2-statement swap).
+- Test-file diff: `test/commands/init-from-source.node.test.ts` (+42/-0, new `describe` block only) and new `test/commands/init-from-source-dist.integration.node.test.ts` (+116, new file). No existing assertions touched.
+
+**Verdict: matches the coordinator's description exactly.**
+
+### 2. Fresh scratch-clone reproduction at `358ae35`
+
+`git clone --no-hardlinks` into a fresh `/private/tmp` scratch dir, checked out `358ae35`, symlinked `node_modules`, `npm run build` (prebuild ran automatically as npm's `pre`-hook — `templates/scaffold/{core,hosts}` populated). Then, from a fresh `git init`-ed `mktemp`-style target dir:
+
+```
+node <clone>/dist/cli.js init --from-source <clone>/scaffold --yes
+```
+
+- **Exit code: 0.**
+- `.cleargate/.install-manifest.json` present in the target (18509 bytes).
+- `git -C <clone> status --porcelain` → **empty** (clone tree untouched by the install).
+- `find /var/folders /tmp -iname "cleargate-from-source-*"` → **no matches** (no leftover temp dir).
+
+Matches round-1's confirmation that a single-`'..'` fix resolves the crash — this is the shipped fix reproducing the same result via the real `resolveCliPackageRoot`, independently verified.
+
+### 3. Installed-package error path (no `scripts/`)
+
+Copied only `<clone>/dist`, `<clone>/package.json` and `<clone>/templates` into a separate directory (no `scripts/` — confirmed absent), symlinked `node_modules` there too, then ran:
+
+```
+node <installed>/dist/cli.js init --from-source <clone>/scaffold --yes
+```
+
+against a fresh `git init`-ed target.
+
+- **Exit code: 2.**
+- stdout/stderr, in full:
+  ```
+  [cleargate init] Target: /private/tmp/.../target2
+  --from-source requires a cleargate-cli source checkout (scripts/build-manifest.ts not found in any ancestor directory)
+  ```
+- **No raw stack trace** — a single clean message, matching the `ScaffoldSourceError` exit-2 path exactly (`stderr(`${e.message}\n`); exit(2);`).
+- `find ... -iname "cleargate-from-source-*"` → none. Target dir `git status --porcelain` → empty (nothing written before the throw).
+
+This is the case the dispatch allowed skipping if impractical; it was practical (plain `cp` + symlink, no `npm pack`/install needed) and is fully confirmed.
+
+### 4. Solo runs in the main checkout (read-only)
+
+| Check | Result |
+|---|---|
+| `test/commands/init-from-source.node.test.ts` | **14/14 pass** (10 original + 4 new `resolveCliPackageRoot` structural-resolution tests: from `src/commands`, from `<CLI_ROOT>/dist`, from a synthetic `.some-build-dir`, from an unrelated tmp dir → `undefined`) |
+| `test/commands/init-from-source-dist.integration.node.test.ts` | **1/1 pass** (8.4s; clones `CLI_ROOT`, builds inside the clone, runs the real built dist against a fresh target) — `git -C cleargate-cli status --porcelain` captured immediately before and immediately after: **byte-identical (both empty)** |
+| `npm run typecheck` | **clean, 0 errors** |
+
+No build was run and no branch was switched in the main checkout for any of these — all three are read-only `npm run test:file`/`npm run typecheck` invocations against the already-checked-out `358ae35`.
+
+### 5. Sealed red files — still byte-unchanged
+
+`git diff 20a40ff..358ae35 -- test/scripts/scaffold-layout.red.node.test.ts test/scripts/scaffold-standalone.red.integration.node.test.ts` → **empty**. Both sealed reds remain untouched through the bounce.
+
+### Findings 2-3 disposition
+
+Both accepted as-is in the Dev's addendum (report-accuracy corrections, no code change): `test_close_sprint_v21.integration.node.test.ts`'s flakiness and `gate-run.integration.node.test.ts` Scenario 7's pre-existing failure are now correctly disclosed. Nothing further to re-verify — round 1 already established both are pre-existing and unrelated to this story's diff.
+
+### Cleanup
+
+`/private/tmp/cg-s41-qa-058-02r2*` removed. No `.cleargate/reports/` or `.script-incidents` files created this round (no `run_script.sh` invocation). Main checkout: `git status --porcelain` shows only the pre-existing untracked `cleargate-0.25.0.tgz` (predates both QA rounds, not created by me).
+
+QA=PASS
