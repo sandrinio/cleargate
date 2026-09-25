@@ -14,9 +14,9 @@ approved_at: 2026-09-11T22:19:09Z
 ambiguity: 🟢 Low
 context_source: "Direct owner request 2026-09-04 during a token-efficiency investigation. Measured grounding: the live /.claude/ instance in this repo diverges from cleargate-planning/.claude/ across 8 files, which makes BUG-068's and BUG-069's shipped fixes inert in the repo that filed them. Evidence in §3 is machine-collected from this working tree, not recalled."
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-11T22:25:54Z
+updated_at: 2026-09-25T22:00:12Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 11c29fd3-dirty
+updated_at_version: 47c3e355-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -221,8 +221,9 @@ reader is not misled by the wiki page.)*
   commit actually touches. On the cli-repo story branch.
 - `cleargate-cli/src/commands/doctor.ts:268-271` — most likely home for a `canonical ↔ live` parity check.
 - `cleargate-cli/src/lib/drift-check.ts:143-160` — `canonicalRoot = cwd/cleargate-planning` composes instead from `cwd/cleargate-cli/scaffold/{core,hosts/claude}` (reuse `composePayload` from `cleargate-cli/src/lib/scaffold-layout.mjs` with a unique temp dir cleaned in `finally`, or compare per root without composing: live `.claude/**` vs `scaffold/hosts/claude/.claude/**`, live `.cleargate/**` vs `scaffold/core/.cleargate/**`); skipped when absent.
-- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/session-start.sh` — candidate surface for a drift banner line
-  (the live mirror is re-synced from this at the M0 step, not edited directly). On the cli-repo story branch.
+- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/session-start.sh` — not edited — `session-start.sh:18` already runs `doctor --session-start`; the drift line is emitted by `runSessionStart` (Decision 4).
+- `pending-task-sentinel.sh` — (a) bash-3.2 empty-array fix at `:102`; (b) JSON-array `flashcards_flagged` parsing, fail-closed.
+- `scaffold/core/.cleargate/scripts/validate_state.mjs` — CR-117 port (canonical-behind-live, found at RS-3).
 - `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` — lines 46 and 61-64, the canonical-only
   pin that let this through; needs either a live-mode variant or an explicit recorded limitation.
   Repoint `HOOKS_DIR` from `cleargate-planning/.claude/hooks` to `cleargate-cli/scaffold/hosts/claude/.claude/hooks`.
@@ -241,6 +242,14 @@ reader is not misled by the wiki page.)*
   (`CLEARGATE_META_ROOT`-aware) and updated to the BUG-068/069 contracts — the propagation consequence of this
   bug's own re-sync, not a change to the BUG-068/069 logic.
 
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/lib/drift-check.ts` |
+| Related Files | `cleargate-cli/src/commands/doctor.ts`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pending-task-sentinel.sh`, `cleargate-cli/scaffold/core/.cleargate/scripts/validate_state.mjs`, `cleargate-cli/test/scaffold/canonical-live-parity.red.integration.node.test.ts`, `cleargate-cli/test/commands/doctor-drift-guard.node.test.ts`, `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh`, `CLAUDE.md` |
+| New Files Needed | `cleargate-cli/test/lib/drift-check-scaffold.red.node.test.ts`, `cleargate-cli/test/hooks/pending-task-sentinel-cards.red.node.test.ts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/BUG-085_live_instance_never_resynced_canonical_hook_fixes_inert.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/BUG-085-devops.md` |
+| Live (gitignored, boundary step RS-BUG085) | `.claude/hooks/pending-task-sentinel.sh`, `.cleargate/sprint-runs/SPRINT-41/.processed-*` |
+
 **Explicitly out of scope — do not touch:**
 
 - The BUG-068 / BUG-069 fixes themselves. They are correct in canonical; this bug is about
@@ -251,13 +260,17 @@ reader is not misled by the wiki page.)*
 
 ## Task Breakdown
 
-- [ ] Write the failing check: compare `.claude/**` against `cleargate-cli/scaffold/hosts/claude/.claude/**` (and `.cleargate/**` against `cleargate-cli/scaffold/core/.cleargate/**`), ignoring the three known live-only entries (`scheduled_tasks.lock`, `settings.local.json`, `worktrees/`); assert exit non-zero. It must fail today on all 8 files.
+- [ ] QA-Red: drift-check-scaffold unit reds (1-10), doctor default and session-start (11-12), sentinel card-parser hook reds (13-17); re-root doctor-drift-guard; delete parity Scenario 4
+- [ ] Rewrite `checkCanonicalDrift` against `cleargate-cli/scaffold/{core,hosts/claude}`: two-way `.claude/**` with the 3 live-only exceptions, canonical-driven `.cleargate` includes (+ README, config.example.yml), pin-tolerant equality, `gate-checks.json`/`config.yml` as allowed exceptions
 - [x] Owner chose detect-and-warn and meta-repo-only scope; decisions recorded in Context Source.
-- [ ] Wire the check into `cleargate doctor` with a distinct exit code, per the doctor exit-code taxonomy in `.cleargate/knowledge/cleargate-enforcement.md`.
-- [ ] Surface one drift line in the `SessionStart` banner when the check fails, alongside the existing `ClearGate state:` line.
+- [ ] Doctor default mode exits 1 on drift (taxonomy class 1); `--session-start` prints one `ClearGate drift:` line after the state banner
 - [x] After BUG-089's repair, inventory current drift, back up each exact live file before a targeted re-sync (or reviewed force install), preserve machine-local additions, and verify matching hashes. Plain init can preserve divergent files and is not proof of re-sync. Start a new Claude session before the live checks. *(Done at SPRINT-41 barrier B0, 2026-09-25: `sprint-runs/SPRINT-41/b0-live-resync.mjs --apply`, backup + hashes + fresh headless sessions — `reports/BUG-085-b0-proof.md`.)*
 - [x] Re-run the §2 step-6 ledger probe after a real agent dispatch; confirm a non-empty `sentinel_started_at` and a correct `agent_type`. *(B0 case D2: a real `qa` dispatch in a fresh session wrote `agent_type: qa`, `sentinel_started_at: 2026-09-25T03:48:13Z`.)*
-- [ ] Replace the CLAUDE.md prose reminder with a pointer to the mechanical check.
+- [ ] `pending-task-sentinel.sh`: bash-3.2 empty-array guard (a); JSON-array card parsing with fail-closed (b)
+- [ ] Port CR-117 `validate_state.mjs` to `scaffold/core`; `canonical-live-parity` green (Scenario 4 retired with STORY-051-02)
+- [ ] Repoint `bug068_dispatch_tool_name.red.sh` to the scaffold, with a live mode
+- [ ] CLAUDE.md: three stale-sentence fixes, and the prose reminder replaced by a pointer to the mechanical check
+- [ ] RS-BUG085: pre-touch markers for newly visible cards, re-sync the live sentinel hook with backup, and prove `doctor` and SessionStart are drift-free
 
 ## 5. Verification Protocol (The Failing Test)
 
