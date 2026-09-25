@@ -1,3 +1,9 @@
+2026-09-25 · #uninstall #settings-json #danger · isClearGateCommand (settings-json-surgery.ts:32) matches 3 of 7 shipped hooks; uninstall leaves 4 dead ones.
+2026-09-25 · #uninstall #danger · uninstall deletes .claude/settings.json wholesale (cli-config tier) BEFORE its hook surgery runs — user hooks are lost.
+2026-09-25 · #manifest #host · Legacy owner default (.claude/** ⇒ claude, else core) is exact: every pre-058-06 payload was core+claude only.
+2026-09-25 · #test-harness #host · M2 init parity: a deliberate byte change is a SANCTIONED_BASELINE_DELTAS row hash-anchored on BOTH sides.
+2026-09-25 · #hooks #gate · pending-task-sentinel scans only *-dev.md/*-qa.md; arch/tpv/qa-red flashcards_flagged are never gated.
+2026-09-25 · #doctor #drift · checkCanonicalDrift diffed live vs frozen cleargate-planning/ and never tolerated pin substitution until BUG-085.
 2026-09-25 · #reports #gate #danger · flashcards_flagged must be a `- "card"` block list; an inline/fenced JSON array ["…"] is invisible to the flashcard gate.
 2026-09-25 · #npm #tsup #danger · Never static-import a scripts/*.ts CLI into src/: bundled, its isMain check fires on every cleargate command.
 2026-09-25 · #host #manifest #danger · buildManifest({scaffoldRoot}) compat takes EVERY host's classified files; the first .codex TIER_RULE leaks into Claude installs.
