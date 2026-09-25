@@ -109,3 +109,116 @@ already covered by existing active flashcards (2026-06-04/2026-07-19
 ## Verdict
 
 QA: PASS
+
+---
+
+## Rework 1 (qa_bounces=1) — post-merge DevOps blocker fix
+
+Mode: VERIFY, read-only. No files edited except this report; no git writes.
+
+### Context
+
+Post-merge (outer `sprint/S-41` @ `ebd70b09`, cli `main` @ `19a8a0f`), DevOps'
+full-suite run surfaced 1 failure:
+`test/docs/pin-placeholder-coverage.node.test.ts` — canonical
+`pending-task-sentinel.sh` now carries its own `HOOK_PIN="__CLEARGATE_VERSION__"`
+literal (copied from `pre-edit-gate.sh`'s three-branch resolver by the
+original BUG-089 fix) but `scripts/build-manifest.ts` had no dedicated
+`pin-aware` `TIER_RULES` entry for that path — same gap class as BUG-038.
+This was invisible to my original QA-Verify pass because
+`pin-placeholder-coverage.node.test.ts` reads the outer MAIN checkout's
+canonical payload (`META_ROOT = path.resolve(__dirname,'..','..','..')`, no
+`CLEARGATE_META_ROOT` override), which pre-merge still carried the unfixed
+hook. Confirmed via `.cleargate/sprint-runs/SPRINT-41/reports/BUG-089-devops-blockers.md`
+and the Developer's own dev-report "Rework 1" section — both consistent with
+each other and with the mechanism below.
+
+### `git show c400d07` (cli, `story/BUG-089-r1`, cut from `main` @ `19a8a0f`)
+
+Confirmed: the entire diff is a single 14-line addition to `TIER_RULES` in
+`scripts/build-manifest.ts` —
+
+```
+{
+  pattern: '.claude/hooks/pending-task-sentinel.sh',
+  tier: 'hook',
+  overwrite_policy: 'pin-aware',
+  preserve_on_uninstall: false,
+  nullSha: false,
+  exclude: false,
+},
+```
+
+placed immediately after the existing BUG-038 `pre-edit-gate.sh` entry, same
+shape, same fields, same tier. No other file touched. Nothing beyond "exactly
+that rule."
+
+### Targeted re-run (wrapped, cli checkout, branch `story/BUG-089-r1` @ `c400d07`)
+
+`npm run test:file -- test/docs/pin-placeholder-coverage.node.test.ts test/scripts/build-manifest.node.test.ts`
+→ **23 of 24 pass**. The 1 failure is the same named test
+(`no payload file carries the placeholder without being pin-aware`), and it
+is **expected at this exact point in the merge sequence, not a regression**:
+`pin-placeholder-coverage.node.test.ts` reads two things from the outer MAIN
+checkout — the canonical payload (`cleargate-planning/.claude/hooks/pending-task-sentinel.sh`,
+which now correctly carries the placeholder) and the **committed**
+`cleargate-planning/MANIFEST.json` snapshot (checked with
+`grep -n "pending-task-sentinel.sh" -A3 cleargate-planning/MANIFEST.json`):
+still shows `"overwrite_policy": "always"`, unchanged, `git status --porcelain`
+clean. `c400d07`'s `TIER_RULES` change only takes effect in that committed
+snapshot once someone regenerates it via `scripts/build-manifest.ts` — the
+Developer's report documents doing exactly that as a diagnostic (regenerate →
+confirm `pin-aware` + fresh sha256 → revert per Rule 14), and states plainly
+that "the outer main checkout's committed MANIFEST.json snapshot is DevOps'
+boundary-BD responsibility after this fix merges, not this commit." I did not
+regenerate it myself — the dispatch scopes me to read-only re-runs plus the
+named grep checks, and doing so would be a file write outside the report.
+This is architecturally the same class as the original pass's Rule-15
+findings (a doc-truth test reading stale outer-MAIN artifacts pre-merge/pre-rebuild),
+applied here to the generated manifest file rather than the hook source.
+
+All other 23 tests in the two named files pass, including every generic
+`build-manifest` test (`matchRule`, `classifyPath`, "fresh build writes
+MANIFEST.json" — which exercises the live `TIER_RULES` array, `c400d07`
+included, and passes) and the other 3 `pin-placeholder-coverage` tests
+(pre-edit-gate.sh specifically covered; init has no hardcoded allowlist; no
+payload hook uses `grep -oP`).
+
+### No-second-list claim (grepped, not asserted)
+
+`command grep -rln "__CLEARGATE_VERSION__" src/ scripts/` →
+`scripts/build-manifest.ts`, `src/commands/upgrade.ts`, `src/init/copy-payload.ts`,
+`src/lib/manifest.ts`. Read each:
+
+- `src/init/copy-payload.ts:157-158` — substitutes by **content scan**
+  (`srcContent.includes(PIN_PLACEHOLDER)`), no file-name list at all. Confirmed
+  no `HOOK_FILES_WITH_PIN` constant exists anywhere in `src/` (the
+  `pin-placeholder-coverage` test's own "init no longer keeps its own
+  allowlist" case already asserts and passes this).
+- `src/commands/upgrade.ts` and `src/lib/manifest.ts` — both key off
+  `file.overwrite_policy === 'pin-aware'` read dynamically from the manifest
+  data (`reverseSubstitutePinAware`, `computeCurrentSha`), not a second
+  hardcoded per-file list. One stale doc-comment at `src/lib/manifest.ts:184`
+  still says "in HOOK_FILES_WITH_PIN" (a name from the pre-BUG-038 mechanism
+  that no longer exists in code) — harmless prose drift, not a second list,
+  not blocking.
+
+Confirmed: `scripts/build-manifest.ts`'s `TIER_RULES` is the **only** place
+that needed a matching entry, and `c400d07` added it there. The Developer's
+"no second list to fix" claim holds.
+
+### Verdict
+
+QA: PASS
+
+The fix is structurally correct and minimal (mirrors the proven BUG-038
+pattern exactly), is the sole registration point needed, and my targeted
+re-run's single failure is fully explained by the outer MAIN checkout's
+`MANIFEST.json` snapshot not yet being regenerated — a DevOps boundary-BD
+step that comes after this fix merges to cli `main`, not a defect in
+`c400d07`. No new regressions found. Recommend DevOps resume from its halt
+point: merge `story/BUG-089-r1` → cli `main`, regenerate
+`cleargate-planning/MANIFEST.json`, then re-run the full suite once (per the
+original dispatch's step ordering) before rebuilding `dist`.
+
+flashcards_flagged: []
