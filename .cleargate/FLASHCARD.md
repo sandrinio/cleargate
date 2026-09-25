@@ -10,7 +10,7 @@
 2026-09-25 · #npm #test-harness · npm pack never ships .gitignore; a negative control deleting 'first file under' a root can pick one.
 2026-09-25 · #init #test-harness · initHandler always writes .mcp.json (init.ts:423); an exact top-level install census must include it.
 2026-09-25 · #host #registry #test-harness · Never pin the production host registry's membership in a sealed test (-10 adds codex); use fixture registries.
-2026-09-25 · #host #scaffold #danger · scaffold/core ships on EVERY install incl. no-flag Claude; portable assets (.agents/**) go in an adapter sharedRoot.
+2026-09-25 · #host #scaffold #danger · Undeclared scaffold/core paths ship on EVERY install; .agents/** may sit in core only once an adapter declares it sharedRoot.
 2026-09-25 · #cross-repo #test-harness · Rule-15 runs the suite BEFORE BD: dist-spawning tests grade the old binary — re-run them after BD.
 2026-09-25 · #test-harness #cli · cli.ts parses argv at import: spawn tsx with cwd=CLI_ROOT, chdir to the fixture in -e, then import src/cli.ts.
 2026-09-25 · #qa #test-harness · Batch/parallel node:test runs here add spurious fails/cancels; diff fail NAMES one file at a time, solo.
