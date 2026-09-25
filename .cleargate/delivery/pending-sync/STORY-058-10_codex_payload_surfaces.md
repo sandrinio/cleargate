@@ -164,7 +164,7 @@ Feature: Codex payload surfaces
 - `cleargate-cli/src/hosts/codex.ts` — **create**. The Codex adapter.
 - `cleargate-cli/src/init/inject-claude-md.ts` — **modify**. Generalize the bounded-block injector to serve both `CLAUDE.md` and `AGENTS.md`.
 - `cleargate-cli/src/init/inject-codex-config.ts` — **create**. TOML-preserving `[mcp_servers.cleargate]` registration.
-- `cleargate-cli/src/hooks/hook-signal.ts` — **extend the BUG-089 M0 implementation**, not create a second handler. `resolveBlockSignal(host, outcome)`: maps one internal `block`/`allow` outcome to the host-correct signal (exit code, and any JSON decision field the host contract needs). `pre-edit-gate.sh` and `pending-task-sentinel.sh` call it via a new `cleargate hook signal <block|allow>` CLI verb instead of hardcoding `exit 1`.
+- `cleargate-cli/src/hooks/hook-signal.ts` — **extend the BUG-089 M0 implementation**, not create a second handler. `resolveHookSignal({ host, decision })` (the name BUG-089 ships; clarified 2026-09-25): maps one internal `block`/`allow` outcome to the host-correct signal (exit code, and any JSON decision field the host contract needs). `pre-edit-gate.sh` and `pending-task-sentinel.sh` call it via a new `cleargate hook signal <block|allow>` CLI verb instead of hardcoding `exit 1`.
 - `cleargate-cli/scaffold/hosts/codex/agents-md-block.md` — **create**. Host-parameterized source for the AGENTS.md bounded block: the same content as `cleargate-planning/CLAUDE.md`'s injected block with `.claude/` paths and Claude-specific tool names (e.g. "the Skill tool") replaced by their Codex-correct equivalents.
 
 ### 3.2 Technical Logic
