@@ -163,3 +163,113 @@ cached `predicate error` on the real CR-123 file is confirmed to be a stale-dist
 real failure — DevOps re-gates the real file after BD1 as planned.
 
 flashcards_flagged: []
+
+---
+
+## Rework 1 (qa_bounces=1) — post-merge DevOps blocker, Bug.md/CR.md Brief-anchor fix
+
+role: qa
+
+## Mode
+
+VERIFY, read-only. Inputs: outer `story/CR-123` in `.worktrees/CR-123` at fix commit `7602348c`
+(on top of the already-merged `3d5e8e90`); cli on `main` at `45bde09` (untouched this round, already
+carries the `spidr-coverage` predicate). Dev report's "Rework 1" section reviewed in full.
+
+## 1. Commit scope
+
+`git show 7602348c --stat`: touches exactly
+`.cleargate/templates/Bug.md`, `.cleargate/templates/CR.md`,
+`cleargate-planning/.cleargate/templates/Bug.md`, `cleargate-planning/.cleargate/templates/CR.md`
+(1 line changed each) + the dev report (`CR-123-dev.md`, Rework-1 section, 82 insertions). Both
+edits are the single-line Brief-anchor rewrite:
+`- SPIDR ← §N SPIDR coverage table` → `- SPIDR ← §N Verification Protocol (SPIDR coverage table)`,
+matching the file's own pre-existing anchor convention (title + parenthetical). No `## ` line
+added — confirmed both by the diff itself (single-line changes only, no heading touched) and by
+`command grep -c '^## '` on both files (Bug.md 9, CR.md 10 — same counts as before this commit,
+per the original QA-Verify pass). `cmp` confirms both canonical/live twins are still byte-identical
+after the fix (`Bug.md IDENTICAL`, `CR.md IDENTICAL`). cli `main` is untouched — still `45bde09`,
+only a pre-existing unrelated `cleargate-0.25.0.tgz` (dated Sep 2, predates this sprint) present.
+
+## 2. Rule-16 sweep
+
+`test/scaffold/enforcement-doc-coherence.node.test.ts` alone, override set:
+**26 tests, 26 pass, 0 fail** — both previously-failing Cluster 3 Bug.md anchor tests
+("every non-whitelisted Brief anchor resolves to a verbatim body heading" and the
+§0.5/§2-Impact negative check) are now green.
+
+Full rule-16 sweep (`command grep -rl CLEARGATE_META_ROOT test | command grep -v integration`,
+16 files, run through `run_script.sh` with the override — corrected the file-list computation to
+run *inside* `cleargate-cli`, since a first attempt computed the list from the wrong cwd and
+produced an empty argument list, see Script Incidents below): **273 tests, 271 pass, 2 fail** —
+exact match to the Developer's reported count. Both failures are in
+`close-sprint-assume-ack-guard.node.test.ts`:
+- `cli.ts --assume-ack option help string mentions CLEARGATE_CI_ACK` — `ENOENT` on
+  `<worktree>/cleargate-cli/src/cli.ts`
+- `sprint.ts "sprint not closed" message mentions CLEARGATE_CI_ACK` — `ENOENT` on
+  `<worktree>/cleargate-cli/src/commands/sprint.ts`
+
+Both are the documented worktree-topology gap: that test hardcodes
+`path.join(REPO_ROOT, 'cleargate-cli', 'src', ...)`, and no outer worktree ever materializes a
+nested `cleargate-cli/` (cli work happens in the cli main checkout only, per Rule 9). Confirmed by
+re-running the same file with no override (defaults to the outer MAIN checkout, which does have a
+`cleargate-cli/` sibling): **20 tests, 20 pass, 0 fail** — matches flashcard 2026-08-27 exactly.
+No other file in the 16-file sweep failed. This matches the Developer's claim precisely.
+
+## 3. story.md decimal-anchor claim
+
+Read `resolves()` in `enforcement-doc-coherence.node.test.ts` directly
+(`test/scaffold/enforcement-doc-coherence.node.test.ts:195-207`). For a `§N` anchor it builds
+`new RegExp(\`^${num}\\.\\s+\`)` and matches it against each body heading. When `num` is a decimal
+capture like `"2.1"` (from the `§(\d+(?:\.\d+)?)` group), the interpolated pattern is
+`^2.1\.\s+` — literally: digit, any-char (from the unescaped `.` inside `num`), digit, then a
+**second, literal** `.` before whitespace. Verified directly with a throwaway node one-liner: this
+pattern matches `"2.1. Acceptance Criteria"` but NOT `"2.1 Acceptance Criteria (Gherkin)"` (the
+real heading text in `story.md:143`, which uses a space, not a second dot, after the decimal
+number) — confirmed `false`/`true` exactly as claimed. Whole-number anchors are unaffected: `num`
+= `"1"` builds `^1\.\s+`, which correctly matches `"1. The Spec (The Contract)"`.
+
+This means every decimal-numbered (`§N.M`) Brief anchor in `story.md` is structurally unresolvable
+under `resolves()`, regardless of title wording — confirmed the three pre-existing anchors
+(`§1.1`, `§1.4`, `§1.5`) already carried this property before CR-123, by diffing story.md's
+POST-WRITE BRIEF block against the pre-CR-123 `sprint/S-41` tip (unchanged apart from the CR-123
+`SPIDR ← §2.1` addition, which is a fourth instance of the same pre-existing shape). The Developer's
+claim is correct: this is a genuine, pre-existing test weakness (the `resolves()` regex, not the
+templates), and it is not exercised by any test today — `enforcement-doc-coherence.node.test.ts`'s
+Cluster 3 only iterates `REL.canonicalBug` / `REL.liveBug`; it never reads `story.md`. Not a CR-123
+regression; correctly left out of this rework's scope. Flagging as a flashcard below (own finding,
+independent confirmation of the Developer's).
+
+## 4. Verdict
+
+QA: PASS
+ACCEPTANCE_COVERAGE: 3 of 3 (commit-scope check, rule-16 sweep, decimal-anchor claim)
+MISSING: none
+REGRESSIONS: none
+VERDICT: Ship it. The Bug.md/CR.md Brief-anchor fix is minimal, correctly scoped, mirror-parity
+holds, no heading renumbering, and the CR.md proactive fix is a reasonable defect-class
+extrapolation rather than scope creep. The rule-16 sweep's 2 remaining failures are confirmed
+pre-existing worktree-topology noise, not a regression. The story.md decimal-anchor finding is
+real but out of scope — recorded as a flashcard, not a blocker.
+
+## Script Incidents
+
+First attempt at the rule-16 sweep malformed the command: `$(...)` for the file list was
+constructed in the outer shell's cwd (`/Users/ssuladze/Documents/Dev/ClearGate`, no `test/`
+directory there) instead of inside `cleargate-cli`, so `command grep -rl CLEARGATE_META_ROOT test`
+failed with `grep: test: No such file or directory` and the downstream `npm run test:file --`
+ran with an empty file list — Node's test runner then fell back to its own default auto-discovery
+across the whole cli repo, an unintended near-full-suite run. This produced the exact Rule 14 side
+effect (frontmatter-stamp back-sync into the outer MAIN checkout's `.cleargate/delivery/**` +
+`cleargate-planning/MANIFEST.json`, 30 single-line diffs) before I identified and killed the rogue
+process (`kill -9` on the `tsx --test`/`npm run test:file`/wrapper `bash -c` PIDs). Reverted with
+`git -C /Users/ssuladze/Documents/Dev/ClearGate checkout -- .cleargate/delivery
+cleargate-planning/MANIFEST.json`; confirmed no intended edits were present there beforehand, and
+confirmed clean afterward. No incident JSON was written by `run_script.sh` for that malformed
+invocation (it exited 0 from the wrapper's perspective — the failure was a plain `grep` message,
+not a non-zero wrapper exit). Re-ran with the file list correctly computed inside `cleargate-cli`;
+that corrected run (271/273, matching the Developer) is the one reported above.
+
+flashcards_flagged:
+  - "2026-09-25 · #test-harness #danger · Command substitution `$(...)` inside a `bash -c \"...\"` string is evaluated by the OUTER shell's cwd immediately, not deferred to the inner `cd` — compute file lists in a separate step first."
+  - "2026-09-25 · #test-harness #readiness-gates · resolves()'s §N.M regex needs a literal second dot after the decimal digit no real heading has — every decimal Brief anchor (story.md §1.1/§1.4/§1.5/§2.1) is structurally unresolvable; confirms Developer's independent finding."
