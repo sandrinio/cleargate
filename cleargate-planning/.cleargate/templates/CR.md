@@ -17,7 +17,7 @@ mechanically extracted from the document's own structure:
   - Summary        ← §1 The Context Override
   - Open Questions ← §0.5 Open Questions
   - Edge Cases     ← §2 Blast Radius & Invalidation
-  - SPIDR          ← §4 SPIDR coverage table
+  - SPIDR          ← §4 Verification Protocol (SPIDR coverage table)
   - Risks          ← §2 Blast Radius (downstream invalidation = risk)
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 

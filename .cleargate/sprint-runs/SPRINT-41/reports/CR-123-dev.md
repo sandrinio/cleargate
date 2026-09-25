@@ -112,3 +112,85 @@ unticked, as instructed.
 
 flashcards_flagged:
 - "2026-09-25 · #test-harness #gate · Full npm test with no CLEARGATE_META_ROOT override reads the outer MAIN checkout's canonical docs — a two-repo item's own new red tests fail there pre-merge by design (rule 15); name each failure, don't chase it."
+
+## Rework 1 (qa_bounces=1, post-merge DevOps blocker)
+
+Both halves merged (cli `main` `45bde09`, outer `sprint/S-41` `eef96600`, MANIFEST `5808e869`,
+`dist` rebuilt). DevOps' post-merge full suite found 2 failures, both in
+`test/scaffold/enforcement-doc-coherence.node.test.ts` Cluster 3: `Bug.md`'s new
+`- SPIDR ← §5 SPIDR coverage table` Brief anchor does not resolve under that test's `resolves()`
+function, because a `§N <title>` anchor's title part must be a case-insensitive substring of the
+*actual* heading N's title text — heading 5 is `## 5. Verification Protocol (The Failing Test)`
+(title `"Verification Protocol (The Failing Test)"`), and `"SPIDR coverage table"` shares no text
+with it. Full details: `/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-41/reports/CR-123-devops-blockers.md`.
+
+**Fix (outer `story/CR-123`, still checked out at `/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/CR-123`; cli untouched):**
+
+- `cleargate-planning/.cleargate/templates/Bug.md` and its live-outer twin `.cleargate/templates/Bug.md`:
+  `- SPIDR ← §5 SPIDR coverage table` → `- SPIDR ← §5 Verification Protocol (SPIDR coverage table)`
+  — same pattern as the file's own pre-existing anchors (e.g. `Risks ← §4 Execution Sandbox
+  (suspected blast radius)`): title part before the trailing parenthetical must literally overlap
+  the real heading title.
+- `cleargate-planning/.cleargate/templates/CR.md` and its live-outer twin `.cleargate/templates/CR.md`:
+  proactively fixed the identical defect class (`- SPIDR ← §4 SPIDR coverage table` →
+  `- SPIDR ← §4 Verification Protocol (SPIDR coverage table)`), even though the failing test only
+  gates `Bug.md` today — CR.md's §4 is also a whole-number heading with the same title-overlap
+  requirement, so it would trip the same way the moment Cluster 3 (or an equivalent) is extended to
+  CR.md. Not fixing it now would just relocate this exact bounce to a future dispatch.
+- `story.md`'s `- SPIDR ← §2.1 SPIDR coverage table` line was checked and deliberately left
+  unchanged. Traced `resolves()` by hand (and confirmed with a scratch script): a `§N.M` anchor's
+  numbered-heading match regex requires a **second literal dot** immediately after the decimal
+  digit (`^${num}\.\s+` where `num` already contains `"2.1"`, so the built pattern demands a string
+  shaped like `2X1.` followed by whitespace) — no real Markdown heading is ever written that way
+  (`### 2.1 Acceptance Criteria (Gherkin)` has a space, not a second dot, after `2.1`). This means
+  **every** decimal-numbered Brief anchor in story.md — including the three that predate CR-123
+  (`Summary ← §1.1 User Story`, `Open Questions ← §1.4 Open Questions`, `Risks ← §1.5 Risks`) —
+  already fails `resolves()` today, unconditionally, regardless of title wording. My new SPIDR line
+  is exactly consistent with that pre-existing, untested convention; nothing in this CR introduced
+  or worsened it, and no test currently gates story.md under Cluster 3 (only `REL.canonicalBug` /
+  `REL.liveBug` are checked). Rewriting story.md's whole Brief-anchor convention is out of this
+  rework's scope — flagging as a flashcard instead.
+- No `## ` line was added to any file (`git diff` grep-checked, clean).
+
+**Verification:**
+
+- `CLEARGATE_META_ROOT=<worktree> npx tsx --test test/scaffold/enforcement-doc-coherence.node.test.ts`
+  → **26/26 pass** (both previously-failing Cluster 3 Bug.md tests now green).
+- Rule-16 sweep — every test file matching `grep -rl CLEARGATE_META_ROOT test | grep -v integration`
+  (16 files), run once with the override through `run_script.sh`: **273 tests, 271 pass, 2 fail**,
+  0 skipped. The 2 failures are both in `test/scripts/close-sprint-assume-ack-guard.node.test.ts`
+  ("cli.ts --assume-ack option help string mentions CLEARGATE_CI_ACK" /
+  "sprint.ts \"sprint not closed\" message mentions CLEARGATE_CI_ACK"): `ENOENT` on
+  `<META_ROOT>/cleargate-cli/src/cli.ts` and `.../src/commands/sprint.ts`. That test hardcodes
+  `CLI_TS = path.join(REPO_ROOT, 'cleargate-cli', 'src', 'cli.ts')` — it expects `REPO_ROOT` to have
+  a nested `cleargate-cli/` sibling checkout, which **no outer worktree ever has** (cli work happens
+  in the cli main checkout per Rule 9, never duplicated per-worktree; `.worktrees/CR-123` has zero
+  `cleargate-cli/` files). This is not specific to CR-123 or to being behind `sprint/S-41` — it is a
+  structural property of every outer worktree, matching FLASHCARD 2026-08-27 `#test-harness
+  #cross-repo #danger` ("a worktree never materializes it"). Confirmed by running the same file with
+  no override (defaults to the outer MAIN checkout, which does have `cleargate-cli/`):
+  **20/20 pass**. Named per dispatch instruction 2; not fixed, not worked around.
+- Did not run the full suite or `npm run build`, per dispatch instruction.
+
+Commit: outer `story/CR-123` — "fix(CR-123): Bug.md Brief anchor resolves to §5 heading".
+
+STORY: CR-123
+STATUS: done
+COMMIT: outer (see next commit on story/CR-123 for sha; cli untouched, still `45bde09` on `main`)
+TYPECHECK: n/a (no cli change this round)
+TESTS: enforcement-doc-coherence (override) 26 passed 0 failed; rule-16 sweep (16 files, override) 271 passed 2 failed 0 skipped — both failures are the pre-existing `close-sprint-assume-ack-guard.node.test.ts` worktree-topology ENOENT (confirmed 20/20 pass without the override, unrelated to this fix)
+FILES_CHANGED: cleargate-planning/.cleargate/templates/Bug.md, .cleargate/templates/Bug.md, cleargate-planning/.cleargate/templates/CR.md, .cleargate/templates/CR.md, .cleargate/sprint-runs/SPRINT-41/reports/CR-123-dev.md (this file, Rework 1 section)
+NOTES: One proactive addition beyond the named defect: fixed CR.md's identical SPIDR Brief-anchor
+mismatch (not currently under test) alongside Bug.md's, to avoid an all-but-certain repeat bounce;
+orchestrator_confirmed: false (my own call, flagged below). story.md's decimal-anchor convention was
+investigated and left untouched — pre-existing, untested, unworsened by this CR.
+r_coverage: []
+plan_deviations:
+  - { what: "Also fixed CR.md's SPIDR Brief anchor (§4 SPIDR coverage table -> §4 Verification Protocol (SPIDR coverage table)), which was not named in the DevOps blocker or the rework dispatch", why: "identical defect class to the named Bug.md failure — CR.md's §4 is also a whole-number heading with the same title-overlap requirement in resolves(), and leaving it would very likely produce a near-identical second bounce", orchestrator_confirmed: false }
+adjacent_files:
+  - "cleargate-cli/test/scaffold/enforcement-doc-coherence.node.test.ts"
+  - "cleargate-planning/.cleargate/templates/story.md"
+  - ".cleargate/templates/story.md"
+flashcards_flagged:
+  - "2026-09-25 · #test-harness #readiness-gates · A §N Brief anchor's title part must textually overlap the real heading N title (resolves() in enforcement-doc-coherence.node.test.ts); inventing new anchor prose (e.g. \"SPIDR coverage table\") that names a subsection, not the heading, reads as unresolved."
+  - "2026-09-25 · #test-harness #danger · resolves()'s §N.M numbered-heading regex needs a literal SECOND dot after the decimal digit, which no real heading ever has — every decimal-numbered Brief anchor (story.md's §1.1/§1.4/§1.5/§2.1) fails resolves() unconditionally regardless of title text; only whole-number anchors (Bug.md/CR.md) are structurally resolvable."
