@@ -1,3 +1,4 @@
+2026-09-25 · #qa #test-harness #cross-repo · A main-proof worktree must be named cleargate-cli with a sibling mcp/: version_bump_alignment finds REPO_ROOT by name.
 2026-09-25 · #test-harness #tpv #danger · A banned string (e.g. import.meta.url) in a doc COMMENT still trips a raw-substring static grep; reword it.
 2026-09-25 · #test-harness #tpv #host · Sanctioned-delta rows assert currentHash strictly; dual-accept let a build that never wrote hosts pass parity.
 2026-09-25 · #manifest #host #danger · Carrying only owner!=='core' drops .agents/** of a still-installed host; carry via payloadFilter(installed).
