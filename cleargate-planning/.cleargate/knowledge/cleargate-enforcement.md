@@ -242,7 +242,7 @@ The marker files are gitignored via the existing `.cleargate/sprint-runs/` gitig
 2. For each report file, it parses the `flashcards_flagged:` YAML list (inline `[]` and block `- "text"` forms both supported).
 3. For each card, it computes the 12-char SHA-1 hash and checks for the `.processed-<hash>` marker in `SPRINT_DIR`.
 4. If any card is unprocessed:
-   - exits non-zero (blocks Task spawn) with stderr listing each unprocessed card and the `touch` command hint.
+   - exits 2 (BUG-089: resolved via the shared `cleargate hook signal` handler, host-honored — blocks the Task spawn) with stderr listing each unprocessed card and the `touch` command hint. Before BUG-089 this was a bare `exit 1`, which Claude Code treats as a non-blocking error (only `exit 2`, or a JSON `permissionDecision: "deny"`, actually blocks a PreToolUse hook) — the gate logged and printed a refusal but the dispatch proceeded anyway.
 5. If `flashcards_flagged: []` or no report files exist, the gate passes immediately.
 
 **Bypass:**
@@ -571,7 +571,7 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:167` hook honor-site that reads the same lever for the flashcard gate — it downgrades what is (as of BUG-089) a real host-honored `exit 2` block to a warning that still exits 0, not (as before BUG-089) a bare `exit 1` that Claude Code already treated as non-blocking.
 
 **`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 

@@ -37,7 +37,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T23:02:39Z
+  last_stamp: 2026-09-25T00:31:16Z
   sessions: []
 ---
 
@@ -130,16 +130,35 @@ Not in scope, and verified so rather than assumed: `stamp-and-gate.sh` always ex
   boundary, per CLAUDE.md's dogfood-split rule — a canonical-only fix does not reach the running
   instance (see [[BUG-085]]); it is not edited directly in this story.
 
+**§4 self-amendment (Developer, 2026-09-25, skill §9 file-surface contract):** three additional
+`cleargate-cli` files, outside the list above, required a matching fix in the same commit:
+- `test/commands/init.node.test.ts` — the frozen BUG-038 `pre-edit-gate.sh` init-snapshot test
+  (`payloadDir` reads the canonical hook verbatim) breaks once the hook's body changes for any
+  reason; repointed that one regular test to a new successor snapshot (below) and kept the
+  historical bug-038 lock file + its own existence-only test untouched.
+- `test/snapshots/hooks/pre-edit-gate.bug-089.sh` — new successor snapshot: the worktree's
+  `pre-edit-gate.sh` with `__CLEARGATE_VERSION__` substituted for `0.5.0` (the same substitution
+  `copyPayload` performs), verified byte-identical to the worktree hook via `diff` before being
+  committed as the new lock.
+- `src/commands/init.ts` (`HOOK_ADDITION`) + the one `test/commands/init.node.test.ts` fixture that
+  hand-authors an equivalent object (CR-059 scenario 5) — `HOOK_ADDITION`'s `pre-edit-gate.sh`
+  command string is merged into a fresh install's settings.json via exact-string dedup
+  (`mergeSettings`); leaving it without `--host claude` while the canonical payload gained it would
+  have registered `pre-edit-gate.sh` **twice** under `Edit|Write` on every fresh `cleargate init`
+  (one call with `--host claude`, one without). Updated both to match the canonical string; full
+  `test/commands/init.node.test.ts` run (28/29 pass, 1 expected Rule-15 failure) confirms no
+  duplicate-hook regression survived.
+
 ## Task Breakdown
 
-- [ ] Write the failing test first: assert each blocking branch emits a signal Claude Code actually honors, not merely a non-zero code.
-- [ ] Implement the approved shared handler once: block→2 and allow→0 for Claude, with explicit `--host claude` selection.
-- [ ] Propagate the handler result through the shell wrapper; a missing CLI, unknown host, resolver failure, or unexpected resolver status must fail closed as exit 2 on a blocking branch, not fall through as 0/1/127. Test each failure route.
-- [ ] Apply it to both blocking branches; leave the non-blocking scripts untouched.
-- [ ] Confirm `CLEARGATE_ADVISORY=1` still degrades to a warning after the change, and that `SKIP_FLASHCARD_GATE=1` still suppresses the flashcard gate where the wave path requires it.
-- [ ] Coordinate BUG-085's targeted backed-up live re-sync after the repair; start a new Claude session and prove both an uncovered enforce-mode edit and a pending-flashcard dispatch are refused, plus positive controls. Record the exact live settings/script hashes.
-- [ ] Correct the enforcement-doc wording that assumes exit 1 blocked.
-- [ ] Record a flashcard: a gate's exit code is part of its host contract, not a shell convention.
+- [x] Write the failing test first: assert each blocking branch emits a signal Claude Code actually honors, not merely a non-zero code. (QA-Red, `hook-signal.red.node.test.ts` + `.red.integration.node.test.ts`, arch_bounces=1, TPV APPROVED 2026-09-25.)
+- [x] Implement the approved shared handler once: block→2 and allow→0 for Claude, with explicit `--host claude` selection. (`src/hooks/hook-signal.ts`, `src/commands/hook.ts`, `cleargate hook signal <block|allow> --host claude` registered in `src/cli.ts`.)
+- [x] Propagate the handler result through the shell wrapper; a missing CLI, unknown host, resolver failure, or unexpected resolver status must fail closed as exit 2 on a blocking branch, not fall through as 0/1/127. Test each failure route. (U7-U12 cover missing/failed/unexpected for both scripts; both blocking branches always resolve to exactly `exit 2` regardless of the resolver's own outcome.)
+- [x] Apply it to both blocking branches; leave the non-blocking scripts untouched. (`pre-edit-gate.sh`, `pending-task-sentinel.sh` only; `pre-tool-use-task.sh`/`pre-tool-use-autonomy.sh`/`stamp-and-gate.sh` unchanged.)
+- [x] Confirm `CLEARGATE_ADVISORY=1` still degrades to a warning after the change, and that `SKIP_FLASHCARD_GATE=1` still suppresses the flashcard gate where the wave path requires it. (U15/U16 + `test_flashcard_enforcement.sh` Scenario 3/4, all green; no new `CLEARGATE_ADVISORY` honor site added to `pre-edit-gate.sh` per enforcement.md §15.)
+- [ ] Coordinate BUG-085's targeted backed-up live re-sync after the repair; start a new Claude session and prove both an uncovered enforce-mode edit and a pending-flashcard dispatch are refused, plus positive controls. Record the exact live settings/script hashes. **Dropped from this dispatch:** this is M0-B (BUG-085's own item), sequenced by the Architect to run after this repair lands, not inside it — out of BUG-089 Developer scope per the M0 plan's wave split.
+- [x] Correct the enforcement-doc wording that assumes exit 1 blocked. (`.cleargate/knowledge/cleargate-enforcement.md` §4.6 + §15, both copies, byte-identical.)
+- [x] Record a flashcard: a gate's exit code is part of its host contract, not a shell convention. (see `flashcards_flagged` in the dev report.)
 
 ## 5. Verification Protocol (The Failing Test)
 
