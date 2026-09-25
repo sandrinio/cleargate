@@ -1805,3 +1805,8 @@
   action: "update"
   target: "BUG-085"
   path: ".cleargate/delivery/pending-sync/BUG-085_live_instance_never_resynced_canonical_hook_fixes_inert.md"
+- timestamp: "2026-09-25T09:55:18.279Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-41"
+  path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
