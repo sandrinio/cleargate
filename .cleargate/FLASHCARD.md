@@ -1,3 +1,12 @@
+2026-09-25 · #clean-room #hooks #danger · A clean room without PATH control runs the GLOBAL cleargate from hooks — you test the published release.
+2026-09-25 · #clean-room #claude-p · claude -p stream-json --verbose --include-hook-events emits hook_response (hook_name, exit_code, output).
+2026-09-25 · #clean-room #claude-p · --setting-sources project,local drops user plugins, hooks and skills from a headless session.
+2026-09-25 · #claude #agents-md · Claude Code 2.1.282 loads AGENTS.md via builtin agents-md when no CLAUDE.md exists; not when both do.
+2026-09-25 · #frontmatter #sprint-init #danger · assert_story_files.mjs:162 anchors ^--- at offset 0: sprint init rejects fresh stories.
+2026-09-25 · #doctor #drift · Fresh install: doctor --check-scaffold flags gate-checks.json upstream-changed (post-applyTestStack sha).
+2026-09-25 · #gate #clean-room · Fresh `cleargate new epic` gates exit 1 by design; gate=0 needs approved_by/at, answer, real path, none found.
+2026-09-25 · #close #deferred-verify · Step 2.9 sees an item only if sprint_cleargate_id equals the sprint id, unquoted; null is skipped.
+2026-09-25 · #npm #clean-room · A local-dist install copies the payload root .gitignore that npm strips; only an extracted tarball matches users.
 2026-09-25 · #devops #agents · An agent Bash call like rm -rf "$(cat <<< path)" stalled DevOps 40 min; clean up with literal paths, one per call.
 2026-09-25 · #host #copy #test-harness · Sealed E1 needs payloadFilter to admit claude's own CLAUDE.md; exclude only UNSELECTED hosts' root surgery targets.
 2026-09-25 · #manifest #host · Snapshot hosts = installed set, not this run's --host selection; init --host codex on a Claude install keeps claude.
