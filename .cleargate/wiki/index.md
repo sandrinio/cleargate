@@ -59,7 +59,7 @@
 - [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
-- [[BUG-067]] (bug) — Triaged — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
+- [[BUG-067]] (bug) — Triaged ⚠︎ drift — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 - [[BUG-070]] (bug) — Triaged — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
 - [[BUG-072]] (bug) — Triaged — `listed-item` counts only `- ` bullets, so an ordered list scores zero
 - [[BUG-074]] (bug) — Triaged — A state transition dirties the tree and fails the next story's bounce-readiness check
