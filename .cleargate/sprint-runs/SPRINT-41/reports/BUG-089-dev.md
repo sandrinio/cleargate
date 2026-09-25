@@ -120,13 +120,61 @@ dispatch — see the item's Task Breakdown for the one-sentence reason). STORY-0
 host mapping and the `resolveHookSignal` vs `resolveBlockSignal` naming reconciliation (TPV
 Advisory A2) remain the orchestrator's cross-story amendment.
 
+## Rework 1 (qa_bounces=1, post-merge DevOps blocker)
+
+Both halves merged (outer `sprint/S-41` `ebd70b09`, cli `main` `19a8a0f`). DevOps' post-merge
+full suite found 1 failure: `test/docs/pin-placeholder-coverage.node.test.ts` — canonical
+`pending-task-sentinel.sh` now embeds `HOOK_PIN="__CLEARGATE_VERSION__"` (in its own copy of
+the three-branch CLI resolver, added by the original BUG-089 commit), but
+`cleargate-cli/scripts/build-manifest.ts` had no dedicated `pin-aware` rule for that path — the
+same gap class BUG-038 fixed for `pre-edit-gate.sh`. It fell through to the general
+`.claude/hooks/**` `always` rule, so `cleargate upgrade` would never substitute the pin. This
+was invisible pre-merge because the test reads the outer MAIN checkout's canonical (Rule 15).
+Full details: `/Users/ssuladze/Documents/Dev/ClearGate/.cleargate/sprint-runs/SPRINT-41/reports/BUG-089-devops-blockers.md`.
+
+**Fix (cli `story/BUG-089-r1`, cut from cli `main` `19a8a0f`):**
+
+- `cleargate-cli/scripts/build-manifest.ts` — added a dedicated `overwrite_policy: 'pin-aware'`
+  `TIER_RULES` entry for `.claude/hooks/pending-task-sentinel.sh`, immediately after BUG-038's
+  `pre-edit-gate.sh` entry, with a one-line BUG-089 comment. This is the **only** place that
+  needed a matching entry: `src/init/copy-payload.ts` already substitutes
+  `__CLEARGATE_VERSION__` by scanning file *content* for the placeholder (no hardcoded list, per
+  BUG-038's own fix), and `upgrade.ts`/`doctor.ts` both key off the manifest entry's
+  `overwrite_policy` field dynamically — grepped `pre-edit-gate.sh` across `src/` and `scripts/`
+  to confirm no other hardcoded per-file list exists.
+- This file is off BUG-089's original §4 list — added a §4 self-amendment line to the item
+  (below) and this Rework 1 section, per skill §9.
+
+**Verification:**
+
+- Regenerated `cleargate-planning/MANIFEST.json` in the outer MAIN checkout
+  (`npx tsx scripts/build-manifest.ts`, through the wrapper) to prove the fix — confirmed
+  `pending-task-sentinel.sh` now shows `overwrite_policy: "pin-aware"` with a fresh sha256.
+- `npm run test:file -- test/docs/pin-placeholder-coverage.node.test.ts` → **4/4 pass**.
+- `npm run test:file -- test/scripts/build-manifest.node.test.ts test/lib/manifest.node.test.ts
+  test/commands/init.node.test.ts test/commands/upgrade-pin-and-prune.node.test.ts
+  test/commands/upgrade-registers-new-files.node.test.ts
+  test/commands/upgrade-preserves-gate-commands.node.test.ts test/commands/upgrade.node.test.ts
+  test/commands/doctor.node.test.ts` → **151/151 pass**.
+- `npm run typecheck` → clean.
+- Full `npm test`, **plain** (not wrapped, per dispatch instruction 3): **2698 tests, 2695
+  pass, 0 fail, 3 skipped** — matches the expected post-merge baseline exactly.
+- Per rule 14, reverted `.cleargate/delivery/**` and `cleargate-planning/MANIFEST.json` in the
+  outer MAIN checkout after confirming (`git status --porcelain`) nothing else under those
+  paths was dirtied. The regenerated `MANIFEST.json` snapshot in outer main is DevOps' own
+  boundary-BD responsibility (after this fix lands there via merge), not authored here.
+- Did not run `npm run build`.
+
+Commit: cli `story/BUG-089-r1` @ `c400d07` — "fix(BUG-089): pin-aware manifest rule for
+pending-task-sentinel.sh".
+
 BUG: BUG-089
 STATUS: done
-COMMIT: cli 9493236, outer <see final commit below>
+COMMIT: cli c400d07 (rework 1, on top of 9493236 / merge 19a8a0f), outer ae3e9120 (see rework 1 follow-up commit on story/BUG-089 for report + §4 amendment)
 TYPECHECK: pass
-TESTS: hook-signal unit+integration 17 passed 0 failed; test_pre_edit_gate.sh 11 passed 0 failed; test_flashcard_enforcement.sh 12 passed 0 failed; bug068_dispatch_tool_name.red.sh 10 passed 0 failed; full cli suite (wrapped, mandated) 2669 passed 26 failed 3 skipped — all 26 named/explained above; full cli suite (unwrapped, diagnostic cross-check) 2686 passed 9 failed 3 skipped, exactly the Rule-15 cases
-FILES_CHANGED: cleargate-cli/src/hooks/hook-signal.ts (new), cleargate-cli/src/commands/hook.ts (new), cleargate-cli/src/cli.ts, cleargate-cli/src/commands/init.ts, cleargate-cli/test/commands/init.node.test.ts, cleargate-cli/test/snapshots/hooks/pre-edit-gate.bug-089.sh (new), cleargate-planning/.claude/hooks/pre-edit-gate.sh, cleargate-planning/.claude/hooks/pending-task-sentinel.sh, cleargate-planning/.claude/settings.json, .cleargate/knowledge/cleargate-enforcement.md, cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md, .cleargate/delivery/pending-sync/BUG-089_pretooluse_gates_exit_1_fail_open.md (Task Breakdown + §4 self-amendment)
-NOTES: One unilateral deviation from the Architect's plan: the plan's "BUG-089 prerequisite" section didn't mention `src/commands/init.ts`'s `HOOK_ADDITION` constant, but leaving it stale would have silently double-registered `pre-edit-gate.sh` on every fresh `cleargate init` — fixed in the same commit and flagged below as not orchestrator-confirmed. The BUG-038→BUG-089 snapshot succession was pre-authorized by the item text itself, so that one is orchestrator_confirmed: true. BUG-085's live-session coordination (Task Breakdown row 6) is explicitly out of scope for this dispatch (M0-B, a separate item) and left unchecked with a one-sentence reason in the item's own Task Breakdown section, per the box-ticking contract.
+TESTS: hook-signal unit+integration 17 passed 0 failed; test_pre_edit_gate.sh 11 passed 0 failed; test_flashcard_enforcement.sh 12 passed 0 failed; bug068_dispatch_tool_name.red.sh 10 passed 0 failed; pin-placeholder-coverage 4 passed 0 failed; manifest/init/upgrade/doctor suite 151 passed 0 failed; full cli suite post-rework-1 (plain, mandated) 2695 passed 0 failed 3 skipped — matches expected baseline exactly
+FILES_CHANGED: cleargate-cli/src/hooks/hook-signal.ts (new), cleargate-cli/src/commands/hook.ts (new), cleargate-cli/src/cli.ts, cleargate-cli/src/commands/init.ts, cleargate-cli/test/commands/init.node.test.ts, cleargate-cli/test/snapshots/hooks/pre-edit-gate.bug-089.sh (new), cleargate-cli/scripts/build-manifest.ts (rework 1), cleargate-planning/.claude/hooks/pre-edit-gate.sh, cleargate-planning/.claude/hooks/pending-task-sentinel.sh, cleargate-planning/.claude/settings.json, .cleargate/knowledge/cleargate-enforcement.md, cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md, .cleargate/delivery/pending-sync/BUG-089_pretooluse_gates_exit_1_fail_open.md (Task Breakdown + §4 self-amendment x2), .cleargate/sprint-runs/SPRINT-41/reports/BUG-089-dev.md (this file, rework 1 section)
+NOTES: One unilateral deviation from the Architect's plan in the original pass: the plan's "BUG-089 prerequisite" section didn't mention `src/commands/init.ts`'s `HOOK_ADDITION` constant, but leaving it stale would have silently double-registered `pre-edit-gate.sh` on every fresh `cleargate init` — fixed in the same commit and flagged below as not orchestrator-confirmed. The BUG-038→BUG-089 snapshot succession was pre-authorized by the item text itself, so that one is orchestrator_confirmed: true. Rework 1's `build-manifest.ts` fix was explicitly dispatched by the coordinator (post-merge DevOps blocker), so it is orchestrator_confirmed: true. BUG-085's live-session coordination (Task Breakdown row 6) is explicitly out of scope for this dispatch (M0-B, a separate item) and left unchecked with a one-sentence reason in the item's own Task Breakdown section, per the box-ticking contract.
 r_coverage:
   - { r_id: "R1", covered: true, deferred: false, clarified: false }
   - { r_id: "R2", covered: true, deferred: false, clarified: false }
@@ -134,14 +182,18 @@ r_coverage:
   - { r_id: "R4", covered: true, deferred: false, clarified: false }
   - { r_id: "R5", covered: false, deferred: true, clarified: false }
   - { r_id: "R6", covered: true, deferred: false, clarified: false }
+  - { r_id: "R7", covered: true, deferred: false, clarified: false }
 plan_deviations:
   - { what: "Updated src/commands/init.ts's HOOK_ADDITION (+ its CR-059 scenario 5 test fixture) to carry --host claude, matching the canonical settings.json string", why: "mergeSettings dedups PreToolUse hooks by exact command string; a stale HOOK_ADDITION literal would double-register pre-edit-gate.sh on every fresh cleargate init", orchestrator_confirmed: false }
   - { what: "Added test/snapshots/hooks/pre-edit-gate.bug-089.sh and repointed the one BUG-038 byte-comparison test in test/commands/init.node.test.ts to it, keeping the bug-038 lock + its existence-only test as historical baseline", why: "pre-authorized verbatim by the BUG-089 item's own dispatch text (skill §9 self-amend clause) for exactly this frozen-snapshot scenario", orchestrator_confirmed: true }
+  - { what: "Added a pin-aware TIER_RULES entry for pending-task-sentinel.sh in cleargate-cli/scripts/build-manifest.ts (rework 1)", why: "explicitly dispatched by the coordinator to fix DevOps' post-merge full-suite blocker (test/docs/pin-placeholder-coverage.node.test.ts)", orchestrator_confirmed: true }
 adjacent_files:
   - "cleargate-cli/src/lib/settings-json-surgery.ts"
   - "cleargate-cli/src/commands/doctor.ts"
   - ".claude/hooks/pre-edit-gate.sh"
   - ".claude/hooks/pending-task-sentinel.sh"
   - ".cleargate/delivery/pending-sync/STORY-058-10_codex_payload_surfaces.md"
+  - "cleargate-planning/MANIFEST.json"
 flashcards_flagged:
   - "2026-09-25 · #cli #settings-json #danger · mergeSettings dedups PreToolUse hooks by EXACT command string; a HOOK_ADDITION literal in src/commands/init.ts must byte-match the canonical settings.json string or a fresh install double-registers the hook."
+  - "2026-09-25 · #cli #manifest #pin-aware · A new __CLEARGATE_VERSION__ literal in any canonical hook needs its OWN pin-aware TIER_RULES entry in scripts/build-manifest.ts — copying an existing resolver block (as pending-task-sentinel.sh did from pre-edit-gate.sh) copies the placeholder but not its manifest registration; test/docs/pin-placeholder-coverage.node.test.ts only catches this post-merge, reading the outer MAIN checkout."
