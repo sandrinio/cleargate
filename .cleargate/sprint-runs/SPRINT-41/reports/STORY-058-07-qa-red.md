@@ -135,4 +135,68 @@ flashcards_flagged:
   - "2026-09-26 · #upgrade #test-harness #danger · upgrade.ts's payload-root resolver differs from manifest.ts's — spawn upgrade from src with an explicit packageRoot."
   - "2026-09-26 · #test-harness #qa-red #recipe · Dynamic import() of an existing module missing a named export gives undefined, not a throw — isolates one red test."
 
+## Re-seal (TPV R1–R10)
+
+**Commit:** `story/STORY-058-07` @ `fe11c1d` — `qa-red(STORY-058-07): re-seal R1-R10 per TPV` (parent `23e8280`, the original QA-Red commit; on cli `main` @ `170ac4c`).
+
+Patch applied verbatim from `/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/75d958ba-2473-408d-b4db-e15b774ad28f/scratchpad/reseal-058-07.patch`:
+- patch sha256 (verified before apply): `7d6a5f6bedbc6e35c5cc9af66ef249e68b4b57c99e3b1048e419c5ed8b26ef5d` — match.
+- `git apply --check` at `23e8280` — clean.
+- Post-apply sha256 (verified against the TPV report, all 5 match exactly):
+  - `test/commands/doctor-per-host.red.node.test.ts` → `5cdf80c2eb74d765f63de2cc922de6b5f89462fda27f6a65eea4c8ba5a45fdbb`
+  - `test/commands/lifecycle-per-host.red.integration.node.test.ts` → `f7ac9872280059829c0301926494d449f5daf1e42951416341fc3f8538840bbe`
+  - `test/commands/uninstall-per-host.red.node.test.ts` → `9da65f6f990e4bd6d0b4b681da9693019e0cd7d28faac9aa6c09a766eec050b3`
+  - `test/commands/upgrade-per-host.red.node.test.ts` → `deb4270018227b944de5cc29eed0a9c6024782dc634a0ab5a2a7d4752985ebbc`
+  - `test/hosts/host-adapter-contract.red.node.test.ts` → `17e16be1a791b6d5194634be7db3bb3129758a2e8fcd944df47db200901c7a3d`
+- Only those 5 files were committed. `test/hosts/manifest-query.red.node.test.ts`, `test/helpers/host-fixtures.ts` and `test/helpers/init-fixture.ts` (T2 row) are unchanged by the re-seal, per the TPV report, and were not touched or re-committed here.
+- R10 (the sealed -03 `host-adapter-contract.red.node.test.ts` edit) is sanctioned by M3-A39, per the dispatch.
+- Never used `--no-verify`; `npm run typecheck` exits 0 both immediately after applying the patch and after every run below.
+
+### Counts table — reproduced vs. expected
+
+Every file run solo via `npm run test:file -- <path>` with `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline` set. No mismatches.
+
+| File | Expected | Reproduced | Match |
+|---|---|---|---|
+| `test/hosts/manifest-query.red.node.test.ts` | 6 tests, 0 pass, 6 fail | 6 tests, 0 pass, 6 fail | yes |
+| `test/commands/doctor-per-host.red.node.test.ts` | 10 tests, 0 pass, 10 fail | 10 tests, 0 pass, 10 fail | yes |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6 tests, 0 pass, 6 fail | 6 tests, 0 pass, 6 fail | yes |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16 tests, 1 pass, 15 fail — green: "a CLAUDE.md without the START marker still exits 1 before any write" | 16 tests, 1 pass, 15 fail — same test name green | yes |
+| `test/commands/lifecycle-per-host.red.integration.node.test.ts` | 3 tests, 0 pass, 3 fail | 3 tests, 0 pass, 3 fail | yes |
+| `test/hosts/host-adapter-contract.red.node.test.ts` (sealed -03, R10) | 19 tests, 18 pass, 1 fail — red: "on a user-content fixture" | 19 tests, 18 pass, 1 fail — same test name red | yes |
+| `test/hosts/host-selection.red.node.test.ts` | 11/11 green | 11/11 green | yes |
+| `test/commands/init-host-selection.red.node.test.ts` | 10/10 green | 10/10 green | yes |
+| `test/commands/init-host-cli.red.integration.node.test.ts` | 4/4 green | 4/4 green | yes |
+| `test/lib/manifest-host-ownership.red.node.test.ts` | 18/18 green | 18/18 green | yes |
+| `test/commands/init-host-snapshot.red.node.test.ts` | 13/13 green | 13/13 green | yes |
+| `test/hosts/host-lifecycle.red.node.test.ts` | 17/17 green | 17/17 green | yes |
+| `test/commands/host-cli.red.integration.node.test.ts` | 3/3 green | 3/3 green | yes |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (parity, compare mode) | 4/5 — red: `scenario 12: "user-content"` | 4/5 — same row red | yes |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (parity, compare mode) | 12/15 — red: `scenario 14: "user-content"` ×3 host-label variants | 12/15 — same 3 rows red | yes |
+
+- Baseline hash: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files), before and after every run in this re-seal — unchanged, never captured.
+- `npm run typecheck` → exit 0.
+
+**No mismatch.** Every reproduced count and every named red/green test matches the TPV report's "Expected counts after re-seal" table exactly. No second TPV round is needed.
+
+### Outer `git status --porcelain` — before and after the re-seal
+
+Before (start of this dispatch):
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+After (end of this dispatch, before appending this section):
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+Identical — only hook-owned ledger/event/state files, no other outer path changed. `cli` repo status: `?? cleargate-0.25.0.tgz` (pre-existing, untouched) both before and after; HEAD moved from `23e8280` to `fe11c1d` on `story/STORY-058-07`, both commits present in `git log`.
+
 STATUS=done
