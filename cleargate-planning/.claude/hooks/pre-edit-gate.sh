@@ -3,7 +3,9 @@
 #
 # Registered as a PreToolUse hook for Edit|Write tool calls.
 # In warn mode (default), logs would-block decisions but always exits 0.
-# In enforce mode, exits 1 to block the tool call when planning is missing.
+# In enforce mode, exits 2 (BUG-089: resolved via the shared `cleargate hook
+# signal` handler, host-honored — Claude Code only blocks on exit 2, not the
+# historical bare `exit 1`) to block the tool call when planning is missing.
 #
 # Mode controlled by CLEARGATE_PLANNING_GATE_MODE (warn|enforce|off). Default: warn.
 # Bypass: CLEARGATE_PLANNING_BYPASS=1 → skip check, log bypass=true, exit 0.
@@ -13,6 +15,32 @@ set -u
 REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 MODE="${CLEARGATE_PLANNING_GATE_MODE:-warn}"
 LOG_FILE="${REPO_ROOT}/.cleargate/hook-log/pre-edit-gate-warn.log"
+
+# ── BUG-089: explicit host selection for the shared hook-signal handler ──────
+# settings.json passes `--host claude` explicitly at this hook's boundary
+# (cleargate-enforcement.md: host hook files are thin adapters into the
+# normalized `cleargate hook` CLI handler, never per-host reimplementations).
+# Defaults to claude when no --host flag is present (e.g. direct invocation).
+HOST="claude"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      if [ $# -ge 2 ]; then
+        HOST="$2"
+        shift 2
+      else
+        shift 1
+      fi
+      ;;
+    --host=*)
+      HOST="${1#--host=}"
+      shift 1
+      ;;
+    *)
+      shift 1
+      ;;
+  esac
+done
 
 # ── 0. Off mode — do nothing ──────────────────────────────────────────────────
 if [ "${MODE}" = "off" ]; then
@@ -163,7 +191,20 @@ if [ "${DOCTOR_EXIT}" -ne 0 ]; then
   if [ "${MODE}" = "enforce" ]; then
     printf 'ClearGate: planning-first gate — no approved story covers %s (%s). Draft a work item first.\n' \
       "${FILE}" "${REASON}" >&2
-    exit 1
+    # BUG-089: resolve the host-honored blocking exit code through the shared
+    # hook-signal handler instead of a bare `exit 1` — Claude Code treats a
+    # PreToolUse hook's exit 1 (no JSON decision) as non-blocking, so the
+    # tool call proceeded anyway. This is a blocking branch: any resolver
+    # outcome other than the expected 2 (missing CLI, resolver crash,
+    # unexpected status) still fails closed as exit 2 here, never falls
+    # through as 0/1/127.
+    "${CG[@]}" hook signal block --host "${HOST}" > /dev/null 2>&1
+    SIGNAL_EXIT=$?
+    if [ "${SIGNAL_EXIT}" -ne 2 ]; then
+      printf '[%s] mode=%s hook-signal-non-2 exit=%s host=%s — failing closed as exit 2\n' \
+        "${ISO_TS}" "${MODE}" "${SIGNAL_EXIT}" "${HOST}" >> "${LOG_FILE}"
+    fi
+    exit 2
   fi
 
   # warn mode: log written above, exit 0 (do not block)
