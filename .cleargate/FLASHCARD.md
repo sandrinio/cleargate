@@ -1,3 +1,10 @@
+2026-09-25 · #reports #gate #danger · flashcards_flagged must be a `- "card"` block list; an inline/fenced JSON array ["…"] is invisible to the flashcard gate.
+2026-09-25 · #npm #tsup #danger · Never static-import a scripts/*.ts CLI into src/: bundled, its isMain check fires on every cleargate command.
+2026-09-25 · #host #manifest #danger · buildManifest({scaffoldRoot}) compat takes EVERY host's classified files; the first .codex TIER_RULE leaks into Claude installs.
+2026-09-25 · #scaffold #host #manifest · Each templates/scaffold/<key>/ root has a MANIFEST.json; composePayload over 2+ split roots collides on it. Exclude it and merge.
+2026-09-25 · #test-harness #tpv · Sibling-read guard flags META_ROOT near a planning literal (120-char window); rename the local, never edit the sealed guard.
+2026-09-25 · #qa #test-harness · cli .integration files carry ~8 known pre-existing fails (STORY-058-02-qa.md §5); close_sprint_v21 is flaky run-to-run.
+2026-09-25 · #test-harness #qa · Base-commit scratch clone: tests hardcoding REPO_ROOT via import.meta.url need cleargate-planning + .cleargate symlinked beside it.
 2026-09-25 · #test-harness #tpv · A source-grep guard scans its own file too: its prose names the banned join. Allowlist the guard by exact path.
 2026-09-25 · #test-harness #manifest · Hash-comparing build output that holds MANIFEST.json compares wall-clock generated_at; strip it first.
 2026-09-25 · #npm #test-harness · npm pack never ships .gitignore; a negative control deleting 'first file under' a root can pick one.
