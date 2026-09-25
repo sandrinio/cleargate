@@ -337,7 +337,7 @@ Then spawn with `subagent_type=qa`. Dispatch prompt MUST inject:
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 - Test-layer naming (CR-111): integration-layer tests are `*.integration.node.test.ts`; QA-Red's failing-first variant for that layer is `*.red.integration.node.test.ts` (see the File-naming clause below), not the general `*.red.node.test.ts` form. A legacy hyphenated form (`<name>-integration.node.test.ts`, e.g. `cr-026-integration.node.test.ts`) predates this convention.
 
-> `Mode: RED — write failing tests against §4 acceptance, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red) for non-integration reds; integration-layer reds use *.red.integration.node.test.ts instead. Forbidden: editing implementation files.`
+> `Mode: RED — write failing tests against the acceptance Gherkin — Story §2.1, CR §4, Bug §5 — or, for an item written before CR-123, its numbered verification steps, no implementation Read access. Tests must fail with "not yet implemented" errors against the clean baseline. File-naming: *.red.node.test.ts (immutable post-Red) for non-integration reds; integration-layer reds use *.red.integration.node.test.ts instead. Forbidden: editing implementation files.`
 
 QA-Red returns:
 
@@ -435,7 +435,7 @@ bash .cleargate/scripts/write_dispatch.sh STORY-NNN-NN qa
 
 **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
 
-Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the story's §4 acceptance Gherkin. Do not write or modify any files.`
+Dispatch prompt MUST inject: `Mode: VERIFY — read-only acceptance trace. Verify Developer's implementation against the acceptance Gherkin — Story §2.1, CR §4, Bug §5 — or, for an item written before CR-123, its numbered verification steps. Do not write or modify any files.`
 
 - Cross-cutting rules: Read `.cleargate/sprint-runs/<sprint-id>/sprint-context.md` BEFORE any other action.
 

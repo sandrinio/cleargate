@@ -1755,3 +1755,8 @@
   action: "update"
   target: "CR-123"
   path: ".cleargate/delivery/pending-sync/CR-123_spidr_scenario_coverage.md"
+- timestamp: "2026-09-25T06:11:39.346Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "CR-123"
+  path: ".cleargate/delivery/pending-sync/CR-123_spidr_scenario_coverage.md"

@@ -5,8 +5,8 @@ YAML Frontmatter: Bug ID, Parent Ref, Status, Severity, Reporter, Approved gate.
 §2 Reproduction Protocol: Deterministic steps to recreate.
 §3 Evidence & Context: Raw logs, stack traces, payloads — no paraphrasing.
 §4 Execution Sandbox: Exact file paths to investigate. Restrict scope to prevent unrelated refactoring.
-Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
-§5 Verification Protocol: The failing test that proves the bug exists and proves the fix resolves it.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails. Task Breakdown rows implement the Gherkin scenarios in §5; no row is written for an axis marked F.
+§5 Verification Protocol: The failing test that proves the bug exists and proves the fix resolves it. §5 also carries a SPIDR coverage table (axes: Paths, Interfaces, Data, Rules) above a Gherkin block. Paths = more than one *successful* way through (the baseline error scenario is not a path). Interfaces = more than one surface exposes the behaviour (CLI / API / UI / hook). Data = behaviour differs by data type, shape or volume — usually a Scenario Outline with Examples. Rules = a business rule constrains the outcome — one scenario per rule, including breaking it. Tag each covered scenario with the matching `@paths` / `@interfaces` / `@data` / `@rules` marker directly above `Scenario:` / `Scenario Outline:`. There is no Spike row: open discovery is chartered as a SPIKE item before this Bug is written.
 Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 POST-WRITE BRIEF
@@ -17,6 +17,7 @@ mechanically extracted from the document's own structure:
   - Summary        ← §1 The Anomaly (repro)
   - Open Questions ← ### Open Questions
   - Edge Cases     ← §2 Reproduction Protocol (edge conditions)
+  - SPIDR          ← §5 SPIDR coverage table
   - Risks          ← §4 Execution Sandbox (suspected blast radius)
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 
@@ -111,6 +112,32 @@ last_synced_body_sha: null # sha256 of body at last sync
 *(The agent must write or run a specific test that proves the bug exists, then prove the fix resolves it.)*
 
 **Command:** `npm test ...`
+
+**SPIDR coverage.** One row per axis. `T` = at least one scenario below carries the axis tag
+(`@paths`, `@interfaces`, `@data`, `@rules`). `F` = no scenario carries it, and the row states
+why. There is no Spike row: open discovery is chartered as a SPIKE item (`templates/spike.md`)
+before this item is written.
+
+| Axis | Cover | Reason |
+|---|---|---|
+| Paths | {T or F} | {…} |
+| Interfaces | {T or F} | {…} |
+| Data | {T or F} | {…} |
+| Rules | {T or F} | {…} |
+
+```gherkin
+Feature: {Bug Name}
+
+  Scenario: {The §1 expected behaviour holds}
+    Given {precondition}
+    When {the action that used to trigger the bug}
+    Then {the expected behaviour from §1, not the actual buggy behaviour}
+
+  Scenario: {Error — invalid input is still rejected}
+    Given {precondition}
+    When {invalid action}
+    Then {error message}
+```
 
 **Test layers.** Declare all three below. `0` is a valid, explicit answer and must carry a reason in the Notes column; an absent row is not a decision.
 

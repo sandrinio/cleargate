@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **11 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **12 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
@@ -75,6 +75,29 @@ against `story`, `cr` and `bug` and must not branch on work-item type. Example: 
 table with `| Integration tests | 0 | pure function, no I/O |` passes; the same row with an empty
 Notes cell, or omitted entirely, fails once the label or an Integration row has triggered the
 check.
+
+**12. `spidr-coverage`**
+Closed-set predicate (no parameters). CR-123: fires only on a document whose body carries a line
+starting at column 0 with `**SPIDR coverage.**`, outside any code fence (an opener of 3 or more
+backticks or tildes, closed by the same character at a length ≥ the opener). **Absent → passes**,
+with a `not-applicable:` detail (migration grace — the trigger is column-0-anchored and fence-aware
+specifically so a document that merely *quotes* the lead-in inline or inside a fenced example, such
+as this CR's own body, never self-fires). When present, reads the first contiguous `|`-table after
+the trigger line (header and separator skipped) and requires exactly one row per axis — `Paths`,
+`Interfaces`, `Data`, `Rules` (matched exactly; first row per axis wins). Fails, naming the axis and
+the defect, on: a missing axis row; a Cover cell (trimmed) that is not exactly `T` or `F` (the
+unfilled `{T or F}` template placeholder therefore fails); an `F` row with an empty Reason cell; a
+`T` row with no scenario tagged for that axis; or an `F` row with a scenario tagged for that axis. A
+`T` row with an empty Reason passes — the Reason column is mandatory only for `F`. A tag counts only
+when it is one or more `@word` tokens on the line(s) directly above `Scenario:` / `Scenario
+Outline:`, inside a fence opened by `` ```gherkin `` and closed by `` ``` ``; known tags are the
+lowercase `@paths`, `@interfaces`, `@data`, `@rules` — unknown tags and tags outside a gherkin fence
+are ignored. Reads `doc.body` only, never `doc.fm` — registered identically against `story`, `cr`
+and `bug`, and never registered against `epic` (there is no Spike row: open discovery is chartered
+as a SPIKE item before the gated item is written). Example: a table where `Paths = T` with an
+`@paths`-tagged scenario present, and `Interfaces = F` with a populated Reason and no `@interfaces`
+scenario, passes for both axes; the same table with `Paths = T` and no `@paths` scenario anywhere
+fails, naming Paths.
 
 ---
 
@@ -148,7 +171,7 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
     - id: gherkin-happy-path
       check: "body contains 'Scenario:'"
     - id: gherkin-error-path
-      check: "body contains 'Error'"
+      check: "body contains 'Scenario: Error'"
     - id: no-tbds
       check: "body does not contain marker 'TBD'"
     - id: interrogation-resolved
@@ -188,6 +211,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "task-breakdown-complete"
     - id: test-layers-declared
       check: "test-layers-declared"
+    - id: spidr-coverage
+      check: "spidr-coverage"
 ```
 
 ```yaml
@@ -215,6 +240,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "task-breakdown-complete"
     - id: test-layers-declared
       check: "test-layers-declared"
+    - id: spidr-coverage
+      check: "spidr-coverage"
 ```
 
 ```yaml
@@ -238,6 +265,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "task-breakdown-complete"
     - id: test-layers-declared
       check: "test-layers-declared"
+    - id: spidr-coverage
+      check: "spidr-coverage"
 ```
 
 ```yaml
