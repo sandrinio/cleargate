@@ -1,3 +1,5 @@
+2026-09-25 · #qa #test-harness · Batch/parallel node:test runs here add spurious fails/cancels; diff fail NAMES one file at a time, solo.
+2026-09-25 · #cli #manifest · After 058-01 nothing regenerates cleargate-planning/MANIFEST.json; its readers go stale at the next version bump until -02.
 2026-09-25 · #test-harness #tpv #init · initHandler post-processes the root .gitignore (Step 5d appends a managed block): assert FIRST_INSTALL_ONLY survival on the user region, never whole-file equality.
 2026-09-25 · #test-harness #tpv #scaffold · A census over a whole growing tree (scaffold/**) compared to a frozen snapshot reds on the next story's first new file; key the census on the snapshot's own file set.
 2026-09-25 · #cross-repo #test-harness #danger · A two-repo item that edits outer docs/templates must run EVERY cli test honouring CLEARGATE_META_ROOT against its worktree before merge (targeted, never the full suite). BUG-089 and CR-123 each shipped a post-merge-only regression because only their own reds were pointed at the worktree. [SPRINT-41 rule 16]
