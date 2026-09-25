@@ -143,3 +143,109 @@ exiting non-zero because the RED suite is, correctly, red — not a script-harne
 ## flashcards_flagged
 
 flashcards_flagged: []
+
+## Round 2
+
+TPV round 1 verdict: `BLOCKED-WIRING-GAP`. Applied all five fixes from
+`STORY-058-01-tpv.md` §"QA-Red fixes", test-only, to the two files already committed at cli
+`744cb5e`. Edited the working tree only — `744cb5e` was not amended, nothing was committed.
+
+### Per-fix change
+
+1. **Blocker — 7c `.gitignore` (integration).** Init Step 5d always appends a managed
+   `# >>> cleargate >>>` block to the root `.gitignore` (`root-gitignore.ts:100-117`); the old
+   assertion compared the whole re-init file against the bare literal `'user-added-pattern/\n'`,
+   which no implementation could ever satisfy. Now the user edit is written **outside** the block
+   (`userGitignore = 'user-added-pattern/\n' + <file at that point>`), and the re-init assertion
+   compares against `userGitignore` verbatim, not a hardcoded literal.
+2. **Stub the resolver probe.** Added `PROBE_STUB` (precedent:
+   `test/commands/init-from-source.node.test.ts:227`) to the scenario-7 describe block, right
+   after `FIXED_NOW`. Wired `spawnSyncFn: PROBE_STUB` into all four `initHandler` calls in the
+   integration file (7b, 7c's `runInit`, and the two calls in the new 7-init test) so no test
+   spawns a real `which cleargate` / bare `cleargate --version` / network `npx`.
+3. **New test — scenario 7 init-level equivalence.** Inserted before the 7b test, gated on
+   `CLEARGATE_RELOCATION_BASELINE` like 6 and 7a. Runs a full `initHandler` from `BASELINE_DIR`
+   and from the newly composed payload (its `MANIFEST.json` rebuilt with `now` frozen to the
+   baseline's own `generated_at`, same rule as scenario 6), each into its own fixture inside
+   `withRepoRoot`, with the fixed pin/now, `yes: true`, and `PROBE_STUB`. Asserts
+   `assertTreesIdentical(targetBaseline, targetNew, ...)`; all three temp dirs cleaned in
+   `finally`. This is the only new/old test (besides scenario 6) that can catch a drift inside the
+   `CLEARGATE` block of `scaffold/hosts/claude/CLAUDE.md`, since `copyPayload` (7a) skips
+   `CLAUDE.md` entirely (`copy-payload.ts:63`).
+4. **Scenario 4c census scope (unit).** Was comparing the executable set of the whole `scaffold/`
+   tree against the frozen snapshot — red for any later story's first new executable under
+   `scaffold/` (STORY-058-11's `harness.sh`, STORY-058-10's `hosts/codex/**`). Now builds
+   `snapshotRel` from the same `coreEntries`/`claudeEntries` mapping, asserts
+   `expectedExecRel.size >= 9` (never vacuous), and compares
+   `[...actualExec].filter((rel) => snapshotRel.has(rel))` against `expectedExecRel` — keyed on the
+   snapshot's own file set. Extra/missing files stay covered by scenario 6's file-list equality.
+5. **Scenario 5 section scoping (unit).** The first CLAUDE.md test used to grep the whole file, so
+   a stray mention anywhere (Repo layout block, a guardrail) would satisfy it. Now slices from
+   `full.indexOf('## Dogfood split')` to the next `\n## ` heading, asserts the section is found,
+   and keeps the two `includes` assertions scoped to that slice only.
+
+### Typecheck
+
+Both files typecheck clean under a scratch tsconfig
+(`extends: "./tsconfig.json"`, `rootDir: "."`, includes the two red files plus `src/**/*` minus
+`**/*.test.ts`/`**/*.node.test.ts`, excludes `node_modules`/`dist`) — `npx tsc --noEmit -p
+tsconfig.scratch-qa-red.json` exited 0. The cli's own `tsconfig.json` only covers `src/**`, so this
+scratch config was required to typecheck `test/scripts/**`. The scratch file was deleted after use
+— it is not part of the diff.
+
+### Re-run baseline counts (round 2)
+
+Unit file, `CLEARGATE_META_ROOT=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-058-01`:
+
+```
+tests 15
+suites 5
+pass 1
+fail 14
+skipped 0
+```
+
+Unchanged from round 1 (fixes 4-5 changed *how* scenario 4c/5a assert, not whether they are red at
+baseline — both still fail for the right reason: scenario 4c on `ENOENT` for `scaffold/`, scenario
+5's first test now says "Dogfood split section does not yet name cleargate-cli/scaffold/core as
+canonical" instead of the old whole-file-grep message). The 1 pass is still scenario 5's
+preserve-this-invariant guard on the existing `NPM payload (generated, gitignored)` label.
+
+Integration file, no env var:
+
+```
+tests 5
+suites 2
+pass 0
+fail 2
+skipped 3
+```
+
+5 tests now (was 4) — the new scenario-7 init-equivalence test is present and correctly SKIPPED
+(3 skips total: scenario 6, 7a, and the new 7-init test, all gated on
+`CLEARGATE_RELOCATION_BASELINE`). The 2 fails (7b, 7c) are still `ERR_MODULE_NOT_FOUND` on
+`src/lib/scaffold-layout.mjs`, now via the `PROBE_STUB`-wired call sites — the stub itself never
+executes because `composePayload` throws first.
+
+Combined: **20 tests, 1 pass, 16 fail, 3 skip** (unit 15/1/14/0; integration 5/0/2/3).
+
+### Script Incidents
+
+Two incidents were recorded by `run_script.sh` for the round-2 `npm run test:file` invocations
+(non-zero exit because the suite is correctly red), then deleted per instruction:
+- `20260925T075112Z-90ef539e13bf.json` (unit re-run)
+- `20260925T075124Z-c580827c5408.json` (integration re-run)
+
+No `.script-incidents/*` files remain from either round.
+
+### Hard rules honored
+
+No `npm run build`/`prebuild`, no bare `cleargate`. No edit to any non-test file (the scratch
+tsconfig was a typecheck-only scratch file, created and deleted, never left in the tree). No `git
+checkout`, `stash`, or `reset`. No commit — `744cb5e` untouched; both files remain modified,
+uncommitted, in the working tree.
+
+QA-RED: WRITTEN
+RED_TESTS: cleargate-cli/test/scripts/scaffold-relocation.red.node.test.ts (15 tests, 1 pass, 14 fail), cleargate-cli/test/scripts/scaffold-relocation.red.integration.node.test.ts (5 tests, 0 pass, 2 fail, 3 skip)
+BASELINE_FAIL: 20 total, 16 failing (correct reasons), 1 passing (preserve-invariant guard), 3 skipped (baseline env var unset)
+flashcards_flagged: []
