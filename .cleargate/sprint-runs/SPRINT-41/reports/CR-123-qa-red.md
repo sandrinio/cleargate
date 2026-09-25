@@ -185,6 +185,8 @@ uncommitted). `test/docs/test-layers-declared-doctrine.red.node.test.ts` shows n
 per "keep everything else unchanged." No implementation, template, gates-doc, agent or skill file
 was edited. Outer worktree untouched (confirmed clean `git status --short`).
 
+**Post-approval tightening (TPV re-check):** `spidr-coverage.red.integration.node.test.ts`'s final assertion now also reads the `spidr-coverage` criterion's own `detail` and requires it does NOT match `/predicate error|unsupported predicate shape/i` (a half-implementation where the doc registers the id but `evalSpidrCoverage` doesn't exist yet would otherwise satisfy a bare `failingIds.includes('spidr-coverage')` via `gate.ts:236-241`'s parse-error catch) and DOES match `/t or f|cover/i` (the real Cover-cell defect); re-run with `CLEARGATE_META_ROOT=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/CR-123` confirms still red for the same right reason (`spidr-coverage` absent from `failing_criteria` entirely today).
+
 ## Flashcards
 
 None new — the self-fire trigger hazard (S2) and the cross-repo root idiom (path derivation) are
