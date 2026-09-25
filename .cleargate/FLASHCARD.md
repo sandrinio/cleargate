@@ -1,3 +1,8 @@
+2026-09-26 · #test-harness #upgrade #tpv · upgrade never creates CLAUDE.md (untracked); a snapshot-less dir is claude-only — seed hosts for multi-host reds.
+2026-09-26 · #settings-json #test-harness · supersedeHookCommands only drops; the new command comes from mergeSettings. A cross-matcher seed must share token 1.
+2026-09-26 · #doctor #host · doctor --host narrows at emit only; a narrowed .drift-state.json makes the next cache replay report one host.
+2026-09-26 · #test-harness #tpv #qa-red · -07 QA-Red omitted 3 binding plan tests (M3-A31/A32 11b-d); TPV diffs the plan's named tests, not just the scenarios.
+2026-09-26 · #host #tpv · Code moved into claude.ts must not carry a CLEARGATE:START literal (sealed -03 grep); build it from CLEARGATE_START.
 2026-09-26 · #upgrade #test-harness · upgrade.ts resolves its payload root differently from manifest.ts; spawn upgrade from src with an explicit packageRoot.
 2026-09-26 · #test-harness #qa-red #recipe · import() of a module missing a named export yields undefined, not a throw — one red test per export.
 2026-09-26 · #doctor #grep · doctor.ts holds raw NUL bytes (globMatch :887/:889); plain grep says 'Binary file matches' — use grep -a.
