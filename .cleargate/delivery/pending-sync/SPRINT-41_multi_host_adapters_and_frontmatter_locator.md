@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T09:55:17Z
+updated_at: 2026-09-25T16:20:27Z
 created_at_version: cleargate@0.26.1
-updated_at_version: a37948f7-dirty
+updated_at_version: a48df99e-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -339,6 +339,15 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
   - **Post-flight follow-ups:** FU-5 → -04; FU-1/2/7 → -05 (sink convention, `remove()` never rejects); FU-3 → -07 doc, plus a close CR on `init --force` overwriting `settings.json` wholesale; FU-4 → -10 (`AGENTS.md` would be copied wholesale); FU-6 → close.
   - **DevOps:** merged cli `55f5d95`. The suite ran 2829/2827/0 fail/2 skip. BD: flat payload byte-identical, and the adapter is bundled. Post-BD parity 5/5 against the M2 baseline.
   - **Plans:** the M3 plan landed (`plans/M3.md`: -06 → -05 → -07 → BUG-085; 11 `[verify after …]` tags, of which T1–T5 are now resolved). Mid-Sprint Amendment: shared portable assets go in `scaffold/core` under a sharedRoot an adapter declares. STORY-058-04 received amendments B1–B8, with anchors re-measured as M2-A16.
+- 2026-09-25T16:20:00Z · STORY-058-04 · **wave7 started.**
+  - **QA-Red** (cli `a178d38`, 14 min): 4 files. 19 reds; 18 green by design (scenario 13 ×2, the M2-A15 default-path witness, 15 parity compares).
+  - **TPV REJECTED** (28 min, `arch_bounces=1`), with exact re-seal edits E1–E8 (M2-A17/A18):
+    - **W1:** sealed 12c could never fail. `runInitScenario` always passes `payloadDir`, which init reads before `fromSource`, so the `--from-source` mkdtemp was unreachable.
+    - **W2:** 7b's whole-payload census reds for a correct -11 (`.agents/**` in core).
+    - The sealed set let 8 of 23 plausible mutants survive; the amended set kills all 23.
+    - Binding Dev constraints D1–D8 (M2-A19); M2-A20 is a forward note for -10.
+  - **Re-seal** (cli `4785032`, 5 min): E1–E8 applied verbatim. The orchestrator reproduced the red-commit counts (0/11, 3/10, 0/4, 15/15), so Dev proceeds without a second TPV round.
+  - **M3 prep:** STORY-058-06 received amendments C1–C6 (the M2-A13 FU-1 pre-dispatch gate) and was re-gated green. The M2 baseline hash was re-confirmed.
 
 ---
 
