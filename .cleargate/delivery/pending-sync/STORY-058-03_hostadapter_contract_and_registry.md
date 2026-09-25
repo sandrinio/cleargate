@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T13:37:35Z
+updated_at: 2026-09-25T14:11:07Z
 created_at_version: cleargate@0.26.1
-updated_at_version: d6f53eab-dirty
+updated_at_version: a7836beb-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -179,7 +179,7 @@ Finalized 2026-09-25 against [[STORY-058-10]]/[[STORY-058-11]] needs (AGENTS.md,
 - [ ] Create `src/hosts/types.ts` (`HostName`, `InstallCtx`, `RemoveCtx`, `RemoveReport`, `HostAdapter` with owned/shared roots and surgery targets)
 - [ ] Create `src/hosts/registry.ts` (`createHostRegistry` with name/root invariants, `defaultHostRegistry`, `UnknownHostError`, `pathUnderRoots`; Map-based lookup)
 - [ ] Create `src/hosts/claude.ts`: move `HOOK_ADDITION` verbatim; `install` = init Steps 4/5/5b verbatim; `remove` = `uninstall.ts:434-456` surgery; injectable deps
-- [ ] Route `init.ts` through `registry.resolve('claude').install(ctx)`; add the `hostRegistry` seam; move the `.mcp.json` pre-capture above the loop; drop unused imports
+- [ ] Route `init.ts` through `registry.resolve('claude').install(ctx)`; add the `hostRegistry` seam; keep -02's hoisted `.mcp.json` `let`s and assign pre/post around the adapter loop inside the Steps 3–7 `try` (M2-A1/A2); drop unused imports
 - [ ] Typecheck, the targeted reds, parity compare against the baseline, and the regression witnesses solo
 
 ## 4. Quality Gates
