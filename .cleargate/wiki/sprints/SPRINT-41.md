@@ -6,8 +6,8 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
-last_ingest: "2026-09-25T12:30:11.359Z"
-last_ingest_commit: "1e653088f0393e795466b79624b32ca0cae90cf7"
+last_ingest: "2026-09-25T14:10:05.786Z"
+last_ingest_commit: "2820e6e8c8ed22e690da5f934e5a0b1873b3fb61"
 repo: "planning"
 ---
 
@@ -20,7 +20,7 @@ repo: "planning"
 - **Risks (top 3):** Claude's intended blocking gates currently signal a non-blocking error; canonical/live hook drift prevents fixes reaching this instance; an alpha Codex loop may complete while enforcement never fires. M0 repairs and real negative controls are mandatory. The inspected active sentinel names SPRINT-41.
 - **Metrics:** Fresh-install `cleargate new` → edit → gate cycle passes; clean-room Claude baseline reproduced for both no-flag and `--host all`; `cleargate init --host codex` produces a working Codex install; one real story completes the full Architect→QA-Red→Developer→QA-Verify loop under Codex, evidenced by `STORY-058-13`.
 
-[+39,526 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md]
+[+42,298 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

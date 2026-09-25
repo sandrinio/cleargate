@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-25T12:30:09Z
+  last_stamp: 2026-09-25T14:10:05Z
   sessions: []
 ---
 
@@ -308,6 +308,22 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-25T09:55:00Z · STORY-058-01 follow-ups · Rule 10 was amended (canonical is now `cleargate-cli/scaffold/{core,hosts/claude}/**`) and *Adjacent Implementations* populated. The D4 re-declarations were committed (`a37948f7`: BUG-085, STORY-058-11/12/13 → scaffold paths; BUG-085 also gains the three stale CLAUDE.md sentences from post-flight §3). Five -01 carry-forwards were added to the M1 plan's -02 blueprint (a `composePayload` empty-dir opt-out, descriptive collision/symlink errors, a third stale-MANIFEST reader, fixture `DEPRECATED.md` leakage, and the guard allowlist). Flashcard gate: 1 approved (QA batch-noise); the Architect added 2 cards, 1 of them folded into -02's plan instead of becoming a card. **M1 is 2/3 done.**
 - 2026-09-25T10:45:00Z · STORY-058-02 · QA-Red R1 (cli `43c4556`) → TPV R1 BLOCKED. The sibling-read guard flagged itself and the sealed files, its regex had 5 false negatives, scenario 11 compared a volatile `generated_at`, scenario 12 omitted `.mcp.json`, and scenario 13's victim depended on readdir order. The Architect named the exports and the four-path allowlist in the M1 plan (`bb97b72f`). QA-Red R2 applied F1–F9 (cli `20a40ff`); TPV R2 was waived under the same rule as -01. The M2 plan was drafted in parallel (`b96a4526`), and A1–A7 were applied to STORY-058-03 (`d311771e`).
 - 2026-09-25T12:30:00Z · STORY-058-02 · Dev → cli `477b942`. The full suite was 2806/2804/0 fail/2 skip (baseline +18), all 70 repointed test files were verified, and 7 `.integration.` files carry failures the Dev calls pre-existing; QA re-checks that claim at base `464e1e4`. **Ran long:** 105 min against a 30 min budget (70-file repoint plus solo re-runs). The Dev made three unilateral calls, which QA-Verify checks: identifier renames in two tests to clear the sealed guard's proximity match; a dynamic import of `scripts/build-manifest.ts` in the `--from-source` bridge, to keep its `isMain` entry out of the bundle; and a `composeCanonicalPayload` helper that also writes a MANIFEST. QA-Verify dispatched.
+- 2026-09-25T14:10:00Z · STORY-058-02 · **Done.**
+  - **QA round 1 FAIL** (qa_bounces=1): `--from-source` crashed with `ERR_MODULE_NOT_FOUND` under the bundled `dist/cli.js`. The import path was two `'..'` too deep; the 2026-08-24 card on exactly this was missed. Every test ran in-process under tsx, so none saw it.
+  - **Rework** (cli `358ae35`): `resolveCliPackageRoot` walks up by structure. An installed package without `scripts/` now gets a clean exit 2. A clone-built integration test runs the real bundle (red → green).
+  - QA round 2 PASS. QA also confirmed the 7 "pre-existing" `.integration` fails at base `464e1e4`; `test_close_sprint_v21` is flaky and `gate-run` S7 is pre-existing. The guard rename is a legitimate false-positive fix.
+  - **Architect post-flight PASS**, run in parallel with QA round 2. All four Dev calls accepted, 12 follow-ups routed:
+    - FU-1..4 → STORY-058-06. FU-1 (the compat manifest takes every host's files) is a pre-dispatch requirement.
+    - FU-5/6 → STORY-058-10.
+    - FU-7..12 → close.
+  - The Architect also wrote M2's as-built amendments (V1–V7 re-measured at `358ae35`, M2-A1..A13). STORY-058-03's anchors were re-pointed (`6791a8f2`).
+  - **DevOps:** cli `a821d40` → suite 2810/2808/0 fail/2 skip (baseline +22, the new V7) → BD. The flat payload is byte- and mode-identical to the -01 baseline; verify-pack OK (196 files, payload 80); dist-spawning tests pass post-BD, with 7 pre-existing `.integration` fails, all untouched by the diff.
+  - Flashcard gate: 7 approved. Rejected: 2 duplicates, and 2 merged into one. **The gate cannot see these cards:** `pending-task-sentinel.sh` parses only `- "card"` lists, and the -02 reports used fenced JSON arrays → carry-forward to [[BUG-085]] (it owns that hook).
+- 2026-09-25T14:25:00Z · RS-3 · **M1 complete.**
+  - `b0-live-resync.mjs` dry-run on cli `main`: 0 changes. Live `.claude/` equals `scaffold/hosts/claude/.claude` after pin substitution; doctor's two hook drifts are pin-only, verified. No apply and no fresh-session proof needed.
+  - CLAUDE.md block byte-identical. `.cleargate/templates` and `knowledge` match `scaffold/core`, apart from live-only files.
+  - Fixed live-behind drift: `.cleargate/config.example.yml` ← canonical (CR-079 worktree and `ingest_buckets` doc blocks, CR-107 wording), and the stale `cleargate-planning/` schema pointer in live `config.yml`.
+  - Canonical-behind drift, pre-existing: `scaffold/core/.cleargate/scripts/validate_state.mjs` lacks CR-117 (positional state-file path; landed live-only at `d8ab60b3`). This is the `canonical-live-parity` red → carry-forward to [[BUG-085]] (M3 durable drift check): port CR-117 to canonical. `gate-checks.json` differs by design (meta-repo `npm --prefix` commands).
 
 ---
 

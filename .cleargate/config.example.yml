@@ -3,6 +3,17 @@
 
 # wiki:
 #   index_token_ceiling: 8000   # chars budget for wiki/index.md (STORY-015-03)
+#   # Allowlist of bucket directories the wiki ingests/builds pages for.
+#   # Only these buckets get per-item pages, index rows, and synthesis listings;
+#   # every other bucket is skipped (build + ingest + synthesis). Omit the key
+#   # entirely to ingest ALL buckets (the default). Valid buckets:
+#   # epics | stories | sprints | proposals | initiatives | crs | bugs
+#   ingest_buckets:
+#     - epics
+#     - sprints      # sprint reports
+#     - crs
+#     - bugs
+#     - initiatives
 
 # gates:
 #   precommit: "<command run before every commit — typecheck + tests>"
@@ -55,12 +66,30 @@
 #   typecheck: "cargo check"
 #   lint: "cargo clippy"
 
+# worktree:
+#   # Gitignored config roots provisioned into each new story worktree (CR-079).
+#   # Each root in this list is symlinked (or copied, per provision_mode) from the
+#   # repo root into the worktree when `provision_worktree_config.sh` is called.
+#   # The same list is exempt from the stray_env_files pre-gate scan so officially-
+#   # provisioned roots do not false-flag. Default: [".env"].
+#   provision_config:
+#     - .env
+#     - .env.local   # example — add any additional gitignored config roots
+#   provision_mode: symlink   # symlink (default) | copy
+#   # symlink: creates absolute symlink worktree-root/<root> -> repo-root/<root>.
+#   #          Symlink stays live with the source .env; trivially torn down with
+#   #          the worktree. Requires target to resolve via absolute path (done
+#   #          automatically by provision_worktree_config.sh).
+#   # copy:    copies the file so the worktree can hold a divergent config.
+
 # vcs:
 #   # CR-107: sprint->main merge goes through a GitHub pull request instead
 #   # of a local `git merge`. The PR is opened at the start of the sprint
-#   # walkthrough and merged at Gate 4 close. Requires the `gh` CLI on PATH
-#   # and a GitHub `origin` remote — close_sprint.mjs's Step 2.8 fails
-#   # closed (non-zero exit, named error) if either is missing while this
-#   # is true. Default false: every install without a GitHub remote keeps
+#   # walkthrough (Phase D) and merged at Gate 4 close (Phase E), instead of
+#   # close_sprint.mjs verifying a purely local merge commit. Requires the
+#   # `gh` CLI on PATH and a GitHub `origin` remote — close_sprint.mjs's
+#   # Step 2.8 fails closed (non-zero exit, named error, never a silent
+#   # fallthrough to the local merge) if either is missing while this is
+#   # true. Default false: every install without a GitHub remote keeps
 #   # today's local-merge behaviour unchanged.
 #   sprint_pr: false
