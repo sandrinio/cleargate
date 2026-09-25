@@ -1,3 +1,6 @@
+2026-09-25 · #host #copy #test-harness · Sealed E1 needs payloadFilter to admit claude's own CLAUDE.md; exclude only UNSELECTED hosts' root surgery targets.
+2026-09-25 · #manifest #host · Snapshot hosts = installed set, not this run's --host selection; init --host codex on a Claude install keeps claude.
+2026-09-25 · #manifest #host #danger · installedHosts(null) returns the legacy ['claude']; a prior-hosts merge must use prior ? installedHosts(prior) : [].
 2026-09-25 · #test-harness #init #tpv · runInitScenario always sets payloadDir, checked before fromSource; pass payloadDir: undefined or fromSource is dead.
 2026-09-25 · #test-harness #node-exit #tpv · A throwing exit seam runs pending finally blocks; process.exit does not. Snapshot leak state inside the exit seam.
 2026-09-25 · #host #registry #tpv · Registry-derived-profile tests need a fake host no hard-coded list names; known names can't kill hardcoded∩registry.
