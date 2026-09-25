@@ -1004,4 +1004,175 @@ flashcards_flagged:
   - "2026-09-26 · #test-harness #tpv #qa-red · -07 QA-Red omitted 3 binding plan tests (M3-A31/A32 11b-d); TPV diffs the plan's named tests, not just the scenarios."
   - "2026-09-26 · #host #tpv · Code moved into claude.ts must not carry a CLEARGATE:START literal (sealed -03 grep); build it from CLEARGATE_START."
 
+## TPV delta round — R11 (M3-A44)
+
+role: architect · 2026-09-26 · This round covers only the R11 delta. Every section above stays in force.
+
+TPV-R11: APPROVED
+
+### Subject and setup
+
+- **Subject:** cli `story/STORY-058-07` @ `4394c9b`, the QA-Red R11 commit on Dev `b146faf`.
+  - It adds one file, `test/commands/uninstall-reinit.red.node.test.ts` (4 tests).
+  - `git show --stat 4394c9b` lists only that file (+267 lines); `src/` is untouched.
+- **Scratch clone:** `/private/tmp/cg-s41-tpv-058-07b/cleargate-cli` at `4394c9b`.
+  - `node_modules` is symlinked.
+  - The parent meta-root holds `git archive` copies of the outer `HEAD`'s `.cleargate/`, `cleargate-planning/` and `CLAUDE.md`.
+  - `npm run prebuild` ran in the clone. `npm run build` also ran there, only to feed changelog-format's tarball scenario and the dist smoke below.
+  - The clone was deleted with a literal `rm -rf -- /private/tmp/cg-s41-tpv-058-07b`.
+- **What was not touched:** the main cli checkout (still `story/STORY-058-07` @ `4394c9b`, status `?? cleargate-0.25.0.tgz` only) and the outer repo. Nothing was edited, built or checked out in either.
+- **Test runs:** every file ran solo with `npm run test:file`, with `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline` set on every run. That is compare mode only; no capture flag was ever set.
+- **Baseline integrity** (`find … -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256`):
+  - before: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files)
+  - after: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files), unchanged
+
+### Wiring (TPV checks 1–5)
+
+1. **Imports: all resolve at `4394c9b`.**
+   - `test/helpers/init-fixture.ts`: `FROZEN_NOW` :35, `FIXED_PIN` :36, `ExitSignal` :43, `runInitScenario` :278
+   - `test/helpers/scaffold-roots.ts`: `canonicalPath` :36, `composeCanonicalPayload` :54
+   - `test/helpers/host-fixtures.ts`: `getP2` :217, `makeR2` :228
+   - `src/commands/uninstall.ts`: `UninstallOptions` :50, `UninstalledMarker` :75, `uninstallHandler` :293
+   - `src/commands/host.ts`: `HostCommandOptions` :25, `hostAddHandler` :133, `hostRemoveHandler` :162
+   - `createClaudeAdapter`, `initHandler` and `InitOptions`
+2. **Signatures match.**
+   - Every `uninstallHandler` option the test passes is a declared `UninstallOptions` field: `cwd`, `yes`, `force`, `now: () => Date`, `stdout`, `stderr` and `exit`.
+   - `hostRemoveHandler` and `hostAddHandler` take `(name, HostCommandOptions)`, and `hostRegistry` and `payloadDir` are both declared seams.
+   - `createClaudeAdapter().remove()` takes a `RemoveCtx`.
+   - `runInitScenario(id, { payloadDir, extra })` matches.
+   - `npm run typecheck` exits 0 on `4394c9b` plus D1–D3.
+3. The file makes no `t.mock` call.
+4. **No orphan state.**
+   - The file sets no environment variable or global. `CLEARGATE_REPO_ROOT` is set and restored inside `runInitScenario`, and nothing in `src/` reads it.
+   - The mkdtemp directories are left behind. That is the helper's existing pattern, the same as `mkShortTmpDir` in `runInitScenario`.
+   - R11b passes `promptYesNo: async () => true`, which answers the `.uninstalled` restore prompt at `init.ts:356-357`, so no test waits on stdin.
+5. **Naming:** `*.red.node.test.ts` ✓.
+
+R11b's `invokeInit` body is identical to `init-fixture.ts:180-211`, apart from the two renamed stub constants.
+
+### Simulation (D1–D3 exactly as M3-A44 specifies)
+
+- **D1:** the M3-A44 code block, verbatim, inside the existing `try` of `claude.ts` `remove()`, plus the updated `// Surgery: settings.json` comment. There is no other `claude.ts` change.
+- **D2:** the single line at `merge-settings.ts:92`, re-indented to 8 spaces. Afterwards, `git diff 170ac4c -- src/init/merge-settings.ts` shows **55 insertions, 0 deletions**: the import plus `supersedeHookCommands`.
+- **D3:** both CHANGELOG blocks, verbatim. `### Added` sits above `### Fixed`, and the two bullets follow the BUG-067 bullet.
+- **Diff stat against `4394c9b`:**
+  - `CHANGELOG.md`: +16
+  - `src/hosts/claude.ts`: +10 / −3
+  - `src/init/merge-settings.ts`: +1 / −1
+
+### Red → green table
+
+The "Sealed src" column runs `4394c9b`'s own `claude.ts`, which is `b146faf`'s. D2 and D3 are applied in that run too, but they have no runtime effect.
+
+| File | Sealed src | After D1–D3 | Expected |
+|---|---|---|---|
+| `test/commands/uninstall-reinit.red.node.test.ts` (new) | **0/4**: R11a, R11b, R11c and R11d all red | **4/4** | 4/4 ✓ |
+| `test/hosts/manifest-query.red.node.test.ts` | 6/6 | 6/6 | 6 ✓ |
+| `test/commands/doctor-per-host.red.node.test.ts` | 10/10 | 10/10 | 10 ✓ |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6/6 | 6/6 | 6 ✓ |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16/16 | 16/16 | 16 ✓ |
+| `test/commands/lifecycle-per-host.red.integration.node.test.ts` | 3/3 | 3/3 | 3 ✓ |
+| `test/hosts/host-adapter-contract.red.node.test.ts` | 19/19 | 19/19 | 19 ✓ |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (compare) | 5/5 | 5/5 | 5 ✓ |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (compare) | 15/15 | 15/15 | 15 ✓ |
+| `test/commands/uninstall.node.test.ts` | 20/20 | 20/20 | 20 ✓ |
+| `test/hosts/host-lifecycle.red.node.test.ts` | 17/17 | 17/17 | 17 ✓ |
+| `test/commands/host-cli.red.integration.node.test.ts` | 3/3 | 3/3 | 3 ✓ |
+| `test/lib/settings-json-surgery.node.test.ts` | 13/13 | 13/13 | 13 ✓ |
+| `npm run typecheck` | — | exit 0 | clean ✓ |
+
+**Extra witnesses.** D1 or D3 reaches these files, but they are not on the dispatch list. All ran on the conformant src:
+- `test/commands/init.node.test.ts`: 29/29. It covers the `.uninstalled` restore flow.
+- `test/changelog-format.node.test.ts`: 5/5, measured after the scratch `npm run build`.
+  - Before that build it was 4/5. The tarball scenario failed on `ENOENT: scandir …/dist`, which is an environment gap, not a D3 effect.
+  - The 4 format scenarios pass with the D3 text.
+- `test/lib/changelog-slice.node.test.ts`: 14/14.
+- `test/commands/upgrade-changelog.node.test.ts`: 7/7.
+
+**Dist smoke on the scratch-built conformant `dist`** (the M3-A45 smoke 3 shape). It ran as one `(cd <literal mktemp room> && …)` call, with `git init -q` in the room first:
+1. `init --yes --pin 0.0.0-m3` exited 0 and wrote the full `.claude/settings.json`.
+2. `uninstall --yes --force` exited 0, and `.claude/settings.json` was **absent** afterwards.
+3. `init --yes --pin 0.0.0-m3 </dev/null` exited 0 and printed `Created .claude/settings.json`. `diff` against `templates/cleargate-planning/.claude/settings.json` printed nothing.
+
+Step 3 also printed `Restore preserved items? [Y/n]` despite `--yes`. With stdin at EOF it took the default (Y) and restored `.cleargate/FLASHCARD.md`. That is the reason for M3-A52 in `plans/M3.md`.
+
+### Mutant table
+
+**How each mutant ran:**
+- It was applied to the conformant simulation and run solo against 14 files: the new R11 file, the 12 dispatch-listed files and `init.node`.
+- Mutants f and f2 restore the sealed `claude.ts` and patch the named caller instead.
+- "Other killers" lists failing test titles from files other than the R11 file.
+
+| ID | Mutant | R11 killer(s) | Other killers |
+|---|---|---|---|
+| a | Unlink when `Object.keys(cleaned.hooks ?? {})` is empty, even though a user key such as `permissions` remains | **R11c, second half only**, the "already-green" anchor. It is the sole killer. | none |
+| b | Deleted case labelled `.claude/settings.json (deleted)` | R11a (marker `removed[]`), R11c (first-half `deepStrictEqual`) | none |
+| c | Never unlink (`b146faf` `claude.ts`) | R11a, R11b, R11c, R11d | none |
+| d | Unlink, but push `.claude/settings.json (ClearGate hooks)` | R11a, R11c | none |
+| e | `fs.unlinkSync` before `removeClearGateHooks`, and never write back, so a file with user content is deleted | R11c (second half) | uninstall-per-host S12 "claude-only, user-content seed…"; `uninstall.node` "Surgery on CLAUDE.md + settings.json"; contract S8 "remove() delegates and inverts install()"; host-lifecycle S8 "surgery targets are never deleted wholesale" |
+| f | Fix placed in `uninstall.ts` after the adapter loop; `claude.ts` sealed. The `host remove` route (R11d) is unaffected. | R11c, R11d | none. R11a and R11b pass: that route is fixed. |
+| f2 | The converse: fix placed in `executeHostRemoval` only, so the full-uninstall route is unaffected | R11a, R11b, R11c | none. R11d passes. |
+| g | Threshold `Object.keys(cleaned).length <= 1` | R11c (second half) | the same 4 as e |
+| h | Unlink and push no label | R11a, R11c | none |
+| i | Unlink when no non-`hooks` key remains, so a file holding only user hooks is deleted | — | the same 4 as e |
+| j | Survive case labelled with the plain path | R11c (second half) | contract S8 |
+| k | Truncate the file to 0 bytes instead of unlinking it | R11a, R11b, R11c, R11d | none |
+| l | `fs.unlinkSync` moved after the `try`/`catch` (a flag set inside, unlink outside), so an unlink failure throws out of `remove()` | **SURVIVES** | **SURVIVES** (all 14 files) |
+
+**Summary:** 12 of 13 mutants are killed, and l survives.
+
+**Why l does not block:**
+- The existing `catch` is also untested for its original `writeAtomic` failure: `command grep -rn "could not update settings" test` is empty.
+- The only trigger is an unwritable `.claude/` directory.
+- Killing l would take a chmod fault-injection red and another QA-Red round, for a path that has had no coverage since before -07.
+- It is bound instead as Dev constraint 1 below, and QA-Verify checks it by reading the diff.
+
+Mutant a shows the second half of R11c (which QA-Red flagged as already passing on `b146faf`) doing real work. It must stay; it is not dead weight.
+
+### Binding Dev constraints for D1–D3 (beyond M3-A44)
+
+1. **The unlink goes inside the `try`.** D1's `fs.unlinkSync(settingsPath)` sits lexically inside the existing `try`, after `removeClearGateHooks` and before the `catch`. Mutant l survives every test, so QA-Verify confirms this by reading the `claude.ts` hunk.
+2. **D2's diff is insertion-only.** After D2, `git diff 170ac4c --numstat -- src/init/merge-settings.ts` reads `55	0`, as measured on the simulation. Any deleted line means the re-indent is wrong or `mergeSettings` changed.
+3. **`changelog-format.node.test.ts`'s tarball scenario reads `dist/`.** In the main checkout it is served by the existing BD-built `dist`.
+   - Do not build `dist` on the story branch just for this scenario (Rule 11).
+   - If the scenario fails there, name it as dist-dependent. The 4 format scenarios are the D3 witness.
+4. **No other `src/` file changes.** The Dev commit touches only `src/hosts/claude.ts`, `src/init/merge-settings.ts` and `CHANGELOG.md` (M3-A44 plus E13). f and f2 show that compensating in `uninstall.ts` or `lifecycle.ts` is caught anyway.
+
+### Plan amendment
+
+`plans/M3.md` gains **M3-A52**: M3-A45 smoke 3 step 2 re-inits with `</dev/null`, because the `.uninstalled` marker makes `init` prompt even with `--yes`.
+
+### Outer `git status --porcelain`
+
+Start of this dispatch:
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+?? .cleargate/sprint-runs/SPRINT-41/.pending-task-2101-20162-29188.json
+```
+End of this dispatch, before these two appends:
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+- The `.pending-task-*` sentinel came and went through the hook itself.
+- This dispatch writes only this report section and the M3-A52 append.
+- Nothing ran against the outer repo, so the SMOKE RULE was honoured.
+
+### Script incidents
+
+None. No `.cleargate/scripts/*` script was invoked. The only commands were:
+- `git`, `shasum` and `command grep` probes
+- `npm run test:file`, `typecheck`, `prebuild` and `build` inside the scratch clone
+- one dist smoke in a literal mktemp room under the clone
+
+The version check does not apply, because no dependency is added or pinned.
+
+flashcards_flagged:
+  - "2026-09-26 · #tpv #test-harness · An already-green anchor half can be a mutant's SOLE killer (R11c half 2 vs hooks-only-empty unlink); measure before calling it dead."
+
 STATUS=done

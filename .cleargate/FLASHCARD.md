@@ -1,3 +1,4 @@
+2026-09-26 · #tpv #test-harness · An already-green anchor can be a mutant's SOLE killer (R11c half 2); measure before calling it dead weight.
 2026-09-26 · #init #test-harness #danger · init asks 'Restore preserved items?' when .uninstalled exists, even with --yes; seam promptYesNo.
 2026-09-26 · #uninstall #init #settings-json #danger · An emptied .claude/settings.json left by uninstall makes re-init merge only 2 of 7 hooks.
 2026-09-26 · #init #settings-json #danger · init into an existing .claude/settings.json wires only CLAUDE_HOOK_ADDITION (2 of 7 hooks).
