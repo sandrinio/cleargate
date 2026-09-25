@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // SPRINT-41 barrier B0 (BUG-085's M0 step, owner ruling R3): targeted re-sync of the
-// LIVE gitignored /.claude/ from canonical cleargate-planning/.claude/ at the sprint/S-41 tip.
+// LIVE gitignored /.claude/ from canonical .claude/ (since STORY-058-01: cleargate-cli/scaffold/hosts/claude/.claude/
+// on cli main; before it: cleargate-planning/.claude/ at the sprint/S-41 tip). Reused for RS-2..RS-5.
 // One-sprint operational step, not a CLI command. Default: dry-run. --apply: back up, then write.
 //
 // Rules (sprint plan §2.1 Barrier B0):
@@ -17,7 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 const runDir = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(runDir, '../../..');
-const canon = path.join(repo, 'cleargate-planning', '.claude');
+const cli = path.join(repo, 'cleargate-cli');
+const canon = path.join(cli, 'scaffold', 'hosts', 'claude', '.claude');
 const live = path.join(repo, '.claude');
 const LIVE_ONLY = ['scheduled_tasks.lock', 'settings.local.json', 'worktrees'];
 const apply = process.argv.includes('--apply');
@@ -37,6 +39,9 @@ const isLiveOnly = (rel) => LIVE_ONLY.some((p) => rel === p || rel.startsWith(`$
 
 const branch = execFileSync('git', ['-C', repo, 'branch', '--show-current'], { encoding: 'utf8' }).trim();
 if (branch !== 'sprint/S-41') die(`main checkout is on '${branch}', expected sprint/S-41`);
+// Canonical must be the MERGED cli tree, never an in-flight story branch.
+const cliBranch = execFileSync('git', ['-C', cli, 'branch', '--show-current'], { encoding: 'utf8' }).trim();
+if (cliBranch !== 'main') die(`cli checkout is on '${cliBranch}', expected main (re-sync reads merged canonical only)`);
 const canonSettings = fs.readFileSync(path.join(canon, 'settings.json'), 'utf8');
 if (!/--host\s+claude\b/.test(canonSettings)) die('canonical settings.json lacks --host claude — BUG-089 outer half not merged');
 
