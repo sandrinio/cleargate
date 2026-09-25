@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T20:41:14Z
+updated_at: 2026-09-25T21:27:30Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 6973a134-dirty
+updated_at_version: 7a23ba79-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -413,6 +413,23 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Re-seal R1–R10 (M3-A24..A30); D1–D12 are binding.
     - The harness blocked the architect's report Write ("Subagents should return findings as text"); the orchestrator saved the report from its final message.
   - **Re-seal** (cli `156c864`, 3 min): sha256 matches TPV. The orchestrator reproduced 0/17 and 0/3. Developer dispatched.
+  - **Dev** (cli `3617c67`, 16 min): D1–D12 followed with no deviations. Both new files 17/17 and 3/3 on the first attempt; the 50 witnesses are clean.
+  - **QA PASS** (9 min) and **post-flight PASS** (16 min):
+    - FU-1..10 routed.
+    - Binding for -07: M3-A31 (sink adapter), M3-A32 (partial-path gates), M3-A33 (doctor owner plumbing).
+    - Binding for -10: M3-A35.
+    - T12 and M4 V4 resolved.
+  - **INCIDENT (2026-09-26 01:02, local time):** a QA-Verify tsx smoke ran `init --yes --pin 0.0.0-qa` before its `cd`, so a non-force init wrote into the meta-repo. Damage:
+    - `.cleargate/.install-manifest.json`, `gate-checks.json`, `.gitignore` and `.mcp.json` rewritten; `.mcp.json` was pinned to `cleargate@0.0.0-qa`, which would break the MCP server on the next session.
+    - A new `.cleargate/.gitignore`, and a full wiki build (~300 files, plus 12 new pages).
+    - Live `settings.json` was rewritten but stayed canonical-equal. No hook, agent or skill was touched.
+    - The orchestrator restored every path to HEAD, verified by the snapshot sha `fa0c79ac…`.
+    - New rule (Mid-Sprint Amendment 01:20Z): writing smokes run as `(cd <literal tmp> && node …)`, and the orchestrator checks the outer `git status` after each QA and DevOps dispatch.
+  - **DevOps:** merged cli `170ac4c`. Suite 2902/2900/0/2, exact.
+    - BD: payload and manifest unchanged.
+    - Six real-dist `host` smokes are green. A read-only `host list` in OUTER reports `installed: claude`, 3 retired paths missing, exit 1.
+    - The outer repo was untouched (verified).
+  - **-07 prep:** E1–E7, including the post-flight corrections, applied; re-gated green.
 
 ---
 
