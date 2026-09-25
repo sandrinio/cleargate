@@ -1,3 +1,4 @@
+2026-09-26 · #qa #test-harness #tsx · resolveDefaultPayloadDir() assumes bundled dist/; a tsx src smoke of bare init/host add needs a scratch dist build.
 2026-09-26 · #codex #dispatch · spawn_agent is async; serial dispatch = spawn_agent then wait_agent until the FINAL_ANSWER arrives.
 2026-09-26 · #codex #dispatch · spawn_agent fork_turns defaults to all (child inherits parent history); pass fork_turns none.
 2026-09-26 · #codex #sandbox #danger · workspace-write makes .git read-only: worktree add/commit/merge fail; add <room>/.git root.
