@@ -230,4 +230,147 @@ present are pre-existing (dated 2026-06 through 2026-08); none created or delete
 
 flashcards_flagged: []
 
+## Round 2
+
+TPV round 1 verdict: `BLOCKED-WIRING-GAP`. Applied all nine required fixes (F1-F9) plus both
+optional improvements from `STORY-058-02-tpv.md` §"Required QA-Red fixes", test-only, to the two
+files committed at cli `43c4556`. Edited the working tree only — `43c4556` was not amended, nothing
+was committed.
+
+### Per-fix change
+
+**`scaffold-layout.red.node.test.ts`**
+
+1. **F1 — allowlist.** Replaced the single-entry `ALLOWLIST` with the exact four paths the amended
+   plan (carry-forward 5, TPV R1) names: `scripts/migrate-024-citations.mjs`, the sealed
+   `test/scripts/scaffold-relocation.red.node.test.ts` (STORY-058-01's own DEPRECATED.md doc-truth
+   read), this guard's own file (its prose names the banned join), and
+   `test/scripts/scaffold-standalone.red.integration.node.test.ts` (names the sibling only to assert
+   its absence / poison it). Path-keyed, no pattern, no semantic rule — resolves the Assumption-5
+   tension I flagged in round 1 exactly as TPV ruled (option (a), extended to two sealed files, not
+   one).
+2. **F2 — regex block.** Replaced `NAMED_ROOT_JOIN_RE`/`DOTDOT_CHAIN_JOIN_RE`/`META_JOIN_RE` verbatim
+   with the TPV `ROOT_ID`/`CP_LIT`/`ROOT_ARG` composition plus `CLIMB_STRING_RE`, `TEMPLATE_JOIN_RE`,
+   and `stripLineComments`. Verified it now catches all 5 files TPV named as false negatives
+   (`gate-run.integration.node.test.ts`, `run-id-ledger-attribution.red.node.test.ts`,
+   `stamp-and-gate.node.test.ts`, `code-map-integration.red.node.test.ts`,
+   `enforcement-doc-coherence.node.test.ts`) — confirmed by grepping the failure message for each
+   filename (all 5 present) — while the src/scripts half still names exactly the plan's 4 files, no
+   more, no less.
+3. **F3 — symlink test discriminator.** Replaced the boolean `err instanceof ScaffoldSourceError &&
+   code === 'LAYOUT_INVALID'` predicate with the TPV version: asserts `missing` names
+   `hosts/claude/.claude` and does NOT wrongly flag the valid `core/.cleargate` or
+   `hosts/claude/CLAUDE.md`. Confirmed the test now fails at baseline with `symlinked
+   hosts/claude/.claude not named: .claude, .cleargate, CLAUDE.md` — it discriminates today, unlike
+   round 1's coincidental pass.
+4. **F4 — escape test accepts throw-or-exclusion.** Wrapped `mod.enumerateScaffoldRoots(src)` in a
+   try/catch: a descriptive throw naming `evil` is accepted (asserted via `assert.match(message,
+   /evil/)` then early-return); absent a throw, falls through to the original "claude present, evil
+   absent" assertions (now also asserting `claude` is present, per TPV's version, not just that
+   `evil` is absent).
+5. **F5 — scenario 7 de-vacuous.** Added one seed file per accounting class (`.gitignore` and
+   `CLAUDE.md` → `INTENTIONALLY_UNTRACKED`, `.cleargate/scripts/test/x.sh` → TIER_RULES exclude) plus
+   one deliberately unaccounted `.cleargate/stray.bin`, and changed the assertion from
+   `deepStrictEqual(result.unclassified, [])` to `length === 1` + `endsWith('.cleargate/stray.bin')`
+   on that one entry — exactly TPV's version, verbatim.
+6. **Optional — scenario 8 classified collision path.** Changed the colliding path from
+   `.cleargate/dup.txt` to `.cleargate/knowledge/dup.md` (a real `TIER_RULES` entry) in both the core
+   and the synthetic second-host fixture, so an implementation that only checks collisions among
+   manifest entries (not raw files) is still caught.
+7. **Optional — scenario 6 literal "unchanged compat".** Added a trailing block inside the same
+   `it()`: composes the same fixture's `core`+`hosts/claude` via the OLD single-root
+   `composePayload`+`buildManifest({ planningRoot })` path and asserts `result.compat.files`
+   deep-equals that legacy manifest's `files` — makes "unchanged compatibility manifest" a literal
+   equality, not just "has the right paths in it."
+
+**`scaffold-standalone.red.integration.node.test.ts`**
+
+8. **F6 — hashTree MANIFEST.json normalization.** In the file branch of `hashTree`'s walk, when
+   `entry.name === 'MANIFEST.json'`, parse it, delete `generated_at`, and hash the re-serialized
+   buffer instead of the raw bytes — exactly TPV's patch. Everything else is hashed unchanged.
+9. **F7 — scenario 11 also hashes the flat payload.** Captures `hashTree(flatOut)` (`templates/
+   cleargate-planning`) alongside `hashTree(scaffoldOut)`, remapped under a `FLAT/` prefix to avoid
+   collisions with the split view's own relative paths, both before and after the poisoned prebuild.
+10. **F8 — scenario 12 includes `.mcp.json`.** Expected top-level set is now `['.claude',
+    '.cleargate', '.gitignore', '.mcp.json', 'CLAUDE.md']` (was missing `.mcp.json`, which
+    `initHandler` always writes per `init.ts:423-441`).
+11. **F9 — scenario 13 deterministic victim + independence.** Replaced `firstFileUnder` (readdir-order
+    dependent, could pick an un-shipped `.gitignore`) with `manifestVictim(rootDir)`, which reads that
+    root's own `MANIFEST.json` and takes the alphabetically-first listed path — deterministic and
+    guaranteed to be something verify-pack/npm actually ships. Both scenario-13 tests now save the
+    victim's bytes, delete it, run verify-pack inside a `try`, and restore the victim in `finally` —
+    so the core-deletion no longer leaks into the host test (independence fixed).
+
+### Typecheck
+
+Both files typecheck clean under a scratch tsconfig with `"exclude": []` (as TPV's check-table item
+7 notes: the root `tsconfig.json`'s `exclude: ["node_modules", "dist", "**/*.test.ts"]` would
+otherwise exclude both red files from the scratch config's own resolution graph). `extends:
+"./tsconfig.json"`, `rootDir: "."`, `include` limited to the two red files. `npx tsc --noEmit -p
+<scratch>` exited 0 with zero errors — no additional fixes needed beyond round 1's two narrowing
+casts. The scratch tsconfig was deleted immediately after use; not part of the diff.
+
+### Re-run baseline counts (round 2)
+
+Unit file, run solo:
+```
+tests 18
+suites 10
+pass 1
+fail 17
+skipped 0
+```
+Matches the TPV-predicted baseline exactly: the only pass is the documented PATH_MISSING regression
+guard (scenario 2 — `ScaffoldSourceError`'s `code` union is unchanged by this story, story §3.3).
+The guard now names **70 test files** (was 64 in round 1) — confirmed the 5 new files from F2 are
+all present in the failure list (`gate-run.integration.node.test.ts`,
+`run-id-ledger-attribution.red.node.test.ts`, `stamp-and-gate.node.test.ts`,
+`code-map-integration.red.node.test.ts`, `enforcement-doc-coherence.node.test.ts`) and the
+src/scripts half still names exactly the plan's 4 files (`scripts/check-no-exec-mode-vocab.mjs`,
+`scripts/check-no-inline-id-regex.mjs`, `scripts/generate-changelog-diff.ts`, `src/lib/manifest.ts`).
+The round-1 "wrong reason" symlink pass is gone: it now fails on `symlinked hosts/claude/.claude not
+named: .claude, .cleargate, CLAUDE.md`, a real discriminator.
+
+Integration file, run solo (~19.6s wall clock, `test-concurrency=1`):
+```
+tests 7
+suites 1
+pass 2
+fail 5
+skipped 0
+```
+Matches the TPV-predicted baseline: 2 pass (the no-sibling precondition, and the full
+`prebuild && build && pack && verify-pack` pipeline itself — STORY-058-01's already-shipped
+sibling-free pipeline, an honest green, not a gap), 5 fail, all still on the single original,
+correct reason — `templates/scaffold/{core,hosts/claude}` does not exist yet (checked each failure
+message individually: all 5 are still `ENOENT`/missing-directory/missing-tarball-entry on the
+split-view payload, unchanged in class from round 1; F6-F9 did not introduce any new failure
+reasons on the unimplemented baseline).
+
+Combined: **25 tests, 3 pass (1 documented PATH_MISSING regression guard, 2 already-shipped -01
+pipeline confirmations), 22 fail** — zero harness errors, zero flaky reruns. (Round 1 was 25/4/21;
+the round-1 symlink "wrong reason" pass is now a correctly-discriminating fail, net -1 pass / +1
+fail, exactly as TPV's simulation predicted: "1 pass (PATH_MISSING) / 17 fail" for the unit file.)
+
+### Script Incidents
+
+None. No `run_script.sh` invocation this round either — all calls were direct `npx tsc`/`npx tsx
+--test` (the wrapper governs ClearGate's own governed scripts, not raw test-runner invocations).
+Checked `cleargate-cli/.cleargate/sprint-runs/_off-sprint/.script-incidents/` before and after this
+round: no new entries (`find ... -newermt "2026-09-25 00:00:00"` returned nothing new from this
+session).
+
+### Hard rules honored
+
+No `npm run build`/`prebuild`/full `npm test` in the real checkout (the only `build`/`prebuild`/
+`pack` calls happen inside the integration test's own disposable clone, unchanged from round 1). No
+bare `cleargate`. No edit to any non-test file — `git status --porcelain` shows only the two red
+test files modified, plus two pre-existing untracked items neither created by this session:
+`cleargate-0.25.0.tgz` (present before round 1 started) and `.cleargate/reports/pre-arch-scan.txt`
+(timestamped `14:18:20`, matching the `43c4556` commit — an Architect/TPV-side artifact from the
+round-1 review, not touched or created by QA). No `git checkout`/`stash`/`reset`. No commit —
+`43c4556` untouched; both files remain modified, uncommitted, in the working tree. No `cg5802-*`
+temp directory left under `/private/tmp/claude-501/` (integration file's own `after()` hook cleaned
+it).
+
 QA-RED: WRITTEN
