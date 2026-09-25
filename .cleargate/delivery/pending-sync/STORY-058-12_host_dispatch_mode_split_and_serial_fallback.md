@@ -18,14 +18,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-11T00:00:00Z
-updated_at: 2026-09-11T22:29:12Z
+updated_at: 2026-09-25T22:40:09Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 11c29fd3-dirty
+updated_at_version: 31969ea3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-11T22:29:14Z
+  last_gate_check: 2026-09-25T22:40:09Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -59,16 +59,18 @@ As a Codex user running a ClearGate sprint, I want sprint-execution instructions
 
 ### 1.2 Detailed Requirements
 - `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` stays the single source of host-generic orchestration. This story does **not** restructure, renumber, or re-order it: EPIC-058 line 67 makes any Claude-observable behavior change a release blocker, and §C.0.1 is referenced by name from `cleargate-protocol.md` §23 and from SKILL.md:275 itself.
-- Exactly two additive pointer insertions are permitted in `SKILL.md`: one after the §2 mandate (line 104) and one in §C.0 (after line 269). Each names the fallback contract for hosts that have no `/workflows` primitive. Every other line, heading, and cross-reference stays byte-identical.
+- Exactly two additive pointer insertions are permitted in `SKILL.md`: one after the §2 mandate (line 104) and one in §C.0 (after line 269). Each names the fallback contract for hosts that have no `/workflows` primitive. Every other line, heading, and cross-reference stays byte-identical. The inserted texts are pinned verbatim in the M6 plan (P1 after the §2 paragraph beginning "There is one and only one way a sprint executes"; P2 after the §C.0 paragraph beginning "A single-story wave is one segment"); each insertion is one empty line plus one paragraph line.
 - Author `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md` — net-new, containing zero host-specific tool-call syntax, defining the serial dispatch contract in full.
 - The serial contract MUST reproduce, without weakening: per-story ClearGate-managed worktree creation (`git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN`, launch_wave.mjs:112-115); the flashcard write-gate at its original per-story granularity (`cleargate-enforcement.md` §4.3, the blocking serial step); exactly-once ledger attribution through the existing dispatch-marker → `SubagentStop` chain on hosts that expose it; single-writer serial merge onto `sprint/S-NN`; the §22 true-blocker halt; and idempotent re-dispatch after a blocker.
 - The serial contract MUST NOT copy three mechanisms that exist only as `parallel()` workarounds: the `SKIP_FLASHCARD_GATE=1` suppression window (SKILL.md:275, :580 — it exists because per-thunk child env is not settable, and copying it would silently widen the flashcard blind spot); RUN_ID-keyed barrier attribution (launch_wave.mjs:14-24 — it exists because `PreToolUse` never fires and `SubagentStop` carries the orchestrator's session id under a wave); and verdict-return-instead-of-halt (launch_wave.mjs:13 — a serial loop can halt synchronously in its own turn, which is strictly better).
 - Dispatch-mode selection is an **install-time, static** property of the host adapter, not a runtime probe: extend the `HostAdapter` contract from [[STORY-058-03]] with a `dispatchMode: "wave-parallel" | "serial"` field. Claude resolves to `wave-parallel`; Codex resolves to `serial`.
 - The installed Codex core is a static host-specific rendering of the single canonical source: omit the Claude-only Workflow/parallel mandate and workarounds from that rendering, and explicitly instruct the reader to read `dispatch-serial.md`. The two-insertion byte-diff restriction applies to the canonical Claude source, not to generated Codex output. Verify that the rendered core preserves every host-neutral gate and role boundary.
 - Ship the portable sprint-execution surface that [[STORY-058-11]] now explicitly excludes: the host-generic core plus the serial dispatch fragment, installed under `.agents/skills/sprint-execution/`.
-- Implement the serial driver as `.cleargate/scripts/dispatch_serial.mjs`, importing `worktreeAddCommand` and `validateVerdicts` from `launch_wave.mjs` rather than re-deriving them, so both dispatch modes construct identical worktree commands and accept identical verdict shapes.
-- Preserve the common verdict envelope (`storyId`, run identity, GREEN/ESCALATED/BLOCKED, counters, blocker) without inventing token usage. The existing validator requires numeric token fields: extend it with a serial-only opt-in that accepts `tokens: { metering: "unavailable" }` as an additive union branch. Its default wave path must keep accepting/rejecting exactly the existing measured-token contract. Serial consumers must not append a usage-ledger row for unavailable metering; dispatch identity and state transitions remain required. Cover legacy acceptance/rejection and explicit serial unavailable acceptance in tests.
-- `launch_wave.mjs` has zero test coverage today. This story lands first-ever coverage for both the wave verdict contract it reuses and the serial path it adds.
+- Implement the serial driver as `.cleargate/scripts/dispatch_serial.mjs`, importing `worktreeAddCommand` and `validateVerdicts` from `launch_wave.mjs` rather than re-deriving them, so both dispatch modes construct identical worktree commands and accept identical verdict shapes. It is also the step-wise CLI a model orchestrator drives — `next --sprint <id> --wave <wave> [--resume]` (flashcard gate, then the next story and its exact worktree command) and `record --sprint <id> --wave <wave> --verdict <file|->` (serial-mode validation; exit 3 halts) — and it never writes `token-ledger.jsonl`. Its flashcard gate is `.cleargate/scripts/lib/flashcard-gate.mjs`, a port of `pending-task-sentinel.sh`'s scan pinned to the hook by a parity test; both files ship in `cleargate-cli/scaffold/core` with byte-identical outer twins.
+- Preserve the common verdict envelope (`storyId`, run identity, GREEN/ESCALATED/BLOCKED, counters, blocker) without inventing token usage. The existing validator requires numeric token fields: extend it with a serial-only opt-in that accepts `tokens: { metering: "unavailable" }` as an additive union branch. Its default wave path must keep accepting/rejecting exactly the existing measured-token contract. Serial consumers must not append a usage-ledger row for unavailable metering; dispatch identity and state transitions remain required. Cover legacy acceptance/rejection and explicit serial unavailable acceptance in tests. The opt-in is `validateVerdicts(verdicts, { mode: 'serial' })`; with no second argument (or `{ mode: 'wave' }`) the validator accepts and rejects exactly as before. Serial mode also accepts `devSha: null` / `qaSha: null` on a non-GREEN verdict — a story blocked before any commit has no SHA, and a fake one would be invented evidence; GREEN still requires both.
+- `launch_wave.mjs`'s validator is covered today only by the sealed STORY-033-04 barrier tests and BUG-034's restore test, both of which read the meta-repo's live copy. This story adds canonical-copy coverage: a default-mode corpus that must accept and reject exactly as the pre-story file does, the serial-mode branch, and the serial driver.
+- The installer reads `dispatchMode` through `payloadFilter`: a path under `.agents/skills/sprint-execution/` is installed only when a selected host that declares the `.agents` shared root also declares `dispatchMode: serial`. The Codex rendering is generated by `cleargate-cli/scripts/codex-sprint-execution.mjs` from the canonical `SKILL.md` (five anchored replacements; a missing anchor or a surviving Workflow token fails the build) and written with a byte-identical `dispatch-serial.md` to `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/` by `build-codex-payload.mjs --write`; prebuild `--check` fails on drift.
+- Protocol §23 gains one host-boundary sentence and §23.5 (the serial contract); `cleargate-enforcement.md` gains §17 (Host Dispatch Modes) and an updated §16 bullet 10. Each is a canonical `cleargate-cli/scaffold/core` edit with a byte-identical outer twin.
 
 ### 1.3 Out of Scope
 - Any Codex-side wave/parallel scheduler. Serial is the fallback, not a port of `parallel()`.
@@ -147,7 +149,7 @@ Feature: Host dispatch-mode split
 
 ### 2.2 Verification Steps (Manual)
 - [ ] Diff `SKILL.md` against its pre-story copy and confirm only the two pointer lines differ.
-- [ ] Run one real Claude sprint wave after the edits and confirm the Workflow path is chosen and behaves as before.
+- [ ] Run the dispatch-path probe (`CLEARGATE_CLAUDE_E2E=1 npm run test:file -- test/e2e/claude-dispatch-path.red.integration.node.test.ts`): a headless Claude Code session reading the edited playbook answers HALT, and one reading the Codex rendering answers SERIAL. A live `/workflows` wave cannot run under SPRINT-41's by-hand execution ruling (R1); RS-5's clean-room Claude baseline is the install-level witness.
 - [ ] Inspect the installed `.agents/skills/sprint-execution/` tree and confirm it contains no Workflow-tool instruction.
 
 ## 3. The Implementation Guide
@@ -159,8 +161,9 @@ Feature: Host dispatch-mode split
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` |
-| Related Files | `.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` (canonical; D1 twin as for -11), `.cleargate/knowledge/cleargate-enforcement.md` (outer live twin), `.cleargate/knowledge/cleargate-protocol.md`, `cleargate-cli/src/hosts/types.ts` |
-| New Files Needed | Yes — `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md`, `.cleargate/scripts/dispatch_serial.mjs`, `.cleargate/scripts/dispatch_serial.test.mjs` |
+| Related Files | `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md`, `.cleargate/knowledge/cleargate-protocol.md`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md`, `.cleargate/knowledge/cleargate-enforcement.md`, `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/claude.ts`, `cleargate-cli/src/hosts/codex.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/hosts/manifest-query.ts` (only if selectEntriesForHosts does not delegate to payloadFilter), `cleargate-cli/scripts/build-codex-payload.mjs`, `cleargate-cli/scripts/clean-room/codex-hooks.mjs`, `cleargate-cli/scripts/clean-room/evidence.mjs`, `cleargate-cli/test/helpers/init-fixture.ts`, `cleargate-cli/test/scaffold/portable-skills.red.node.test.ts`, `cleargate-cli/test/scripts/codex-hooks-harness.red.node.test.ts`, `cleargate-cli/test/docs/codex-enforcement-delta.red.node.test.ts`, `cleargate-cli/CHANGELOG.md` |
+| New Files Needed | `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md`, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs`, `.cleargate/scripts/dispatch_serial.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/lib/flashcard-gate.mjs`, `.cleargate/scripts/lib/flashcard-gate.mjs`, `cleargate-cli/scripts/codex-sprint-execution.mjs`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md`, `cleargate-cli/test/scripts/dispatch-verdict-modes.red.node.test.ts`, `cleargate-cli/test/scripts/dispatch-serial.red.node.test.ts`, `cleargate-cli/test/scripts/dispatch-serial-cli.red.node.test.ts`, `cleargate-cli/test/scripts/flashcard-gate-parity.red.node.test.ts`, `cleargate-cli/test/scaffold/skill-md-serial-pointers.red.node.test.ts`, `cleargate-cli/test/scaffold/dispatch-serial-doc.red.node.test.ts`, `cleargate-cli/test/docs/serial-dispatch-docs.red.node.test.ts`, `cleargate-cli/test/scripts/serial-twins.red.node.test.ts`, `cleargate-cli/test/hosts/dispatch-mode.red.node.test.ts`, `cleargate-cli/test/scripts/codex-sprint-execution-render.red.node.test.ts`, `cleargate-cli/test/commands/init-codex-sprint-execution.red.node.test.ts`, `cleargate-cli/test/e2e/claude-dispatch-path.red.integration.node.test.ts`, `cleargate-cli/test/fixtures/skill-pre-058-12/SKILL.md`, `cleargate-cli/test/fixtures/launch-wave-pre-058-12/launch_wave.mjs` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-12_host_dispatch_mode_split_and_serial_fallback.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-12-devops.md` |
 
 ### 3.2 Technical Logic
 
@@ -172,17 +175,15 @@ The split is textual, not structural. `SKILL.md` §2 (line 104) and §C.0 (lines
 
 Host selection happens once, at install time: `HostAdapter.dispatchMode` is read by the installer to decide which sprint-execution surface a host receives. There is no runtime detection of `/workflows`, because a host's dispatch capability is a property of the host, not of the session — the same static-delta pattern [[STORY-058-11]] already uses for Codex's missing `tools:` allowlist.
 
+The Codex rendering's host note maps the playbook's Claude dispatch terms to Codex: `spawn_agent` with `agent_type` and `fork_turns: "none"`, then `wait_agent` until that agent's final answer. Measured on the pinned 0.154.0-alpha.6.2 (M6 plan X2–X3): `spawn_agent` returns immediately and `fork_turns` defaults to `all`. `dispatch-serial.md` itself stays host-neutral. `session-start.sh` is unchanged: its `Load skill: sprint-execution` line resolves under Codex once `.agents/skills/sprint-execution/` is installed.
+
 ## Task Breakdown
 
-- [ ] Add the `dispatchMode` field to the `HostAdapter` contract and set it for the Claude and Codex adapters.
-- [ ] Author `dispatch-serial.md` — every reproduced invariant, every deliberately-omitted workaround, with the reason for each omission stated in the file.
-- [ ] Insert the two pointer sentences into `SKILL.md` §2 and §C.0; change nothing else.
-- [ ] Add the Claude-path-unchanged guard that fails on any other diff.
-- [ ] Implement `.cleargate/scripts/dispatch_serial.mjs` with an injectable `dispatchStory` seam, importing `worktreeAddCommand` and `validateVerdicts` from `launch_wave.mjs`.
-- [ ] Write the serial-driver unit tests: strict ordering, halt-on-blocker, resume-only-the-blocked-story, and `SKIP_FLASHCARD_GATE` never set.
-- [ ] Extend the imported verdict validator with the explicit serial unavailable-metering branch; retain strict default wave validation and prove unavailable tokens create no synthetic usage rows.
-- [ ] Wire the portable sprint-execution surface (core + serial fragment) into the Codex payload under `.agents/skills/sprint-execution/`.
-- [ ] Re-sync the live `/.claude/` instance and confirm the pointer lines are present there, per CLAUDE.md's dogfood-split rule.
+- [ ] QA-Red: verdict modes (default-mode parity corpus vs the frozen pre-story launch_wave.mjs), serial driver and CLI, flashcard-gate hook parity, SKILL.md two-insertion guard, dispatch-serial.md doc, protocol §23.5 / enforcement §17 twins, dispatchMode filter, Codex rendering, codex init install, Claude/Codex dispatch-path probe; M2 sanctioned rows and additions
+- [ ] Pass A: validateVerdicts(verdicts, { mode: 'serial' }); lib/flashcard-gate.mjs; dispatch_serial.mjs (dispatchSerial + next/record CLI); dispatch-serial.md; P1/P2 in SKILL.md; protocol §23 sentence + §23.5; enforcement §17, §16 bullet 10, Index; outer twins
+- [ ] Pass B: HostAdapter.dispatchMode (claude wave-parallel, codex serial); payloadFilter serial-surface rule; codex-sprint-execution.mjs rendering; build-codex-payload.mjs generates .agents/skills/sprint-execution; codex.live.skills expects sprint-execution; CHANGELOG
+- [ ] Prove the Claude path unchanged: the two-insertion byte guard, headings unchanged, and the headless dispatch-path probe answers HALT on Claude Code
+- [ ] Re-sync the live /.claude/ instance at RS-5 and confirm the pointer lines and dispatch-serial.md are present there
 
 ## 4. Quality Gates
 
@@ -192,7 +193,7 @@ Host selection happens once, at install time: `HostAdapter.dispatchMode` is read
 |---|---|---|
 | Unit tests | 8 | Claude-path byte-diff guard; strict ordering; halt; resume; no skip mutation; legacy measured verdict acceptance/rejection; serial-only unavailable branch; no synthetic usage rows |
 | Integration tests | 1 | Installing for a `serial` host emits the core plus the serial fragment and no Workflow-tool instruction |
-| E2E / acceptance tests | 1 | One Claude wave still runs through the Workflow path unchanged after the edits |
+| E2E / acceptance tests | 1 | Dispatch-path probe: headless Claude Code on the edited playbook answers HALT (Codex rendering: SERIAL); RS-5 re-runs the clean-room Claude baseline |
 
 ### 4.2 Definition of Done (The Gate)
 - [ ] Minimum test expectations (§4.1) met.
@@ -210,6 +211,7 @@ Host selection happens once, at install time: `HostAdapter.dispatchMode` is read
 - **Surface:** `.cleargate/scripts/launch_wave.mjs` — `worktreeAddCommand`, `validateVerdicts`, `mintRunId`, and the injectable-seam shape the serial driver mirrors and imports rather than duplicates.
 - **Surface:** `.cleargate/knowledge/cleargate-enforcement.md` — §4.3's per-story flashcard barrier, the original rule the serial path restores unmodified.
 - **Surface:** `.cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md` — `HostAdapter.subagentDispatchMode`, the existing precedent for expressing dispatch style as a host-adapter field.
+- **Surface:** `cleargate-cli/test/scripts/wave-execution-barrier.red.node.test.ts`, `cleargate-cli/test/scripts/bug-034-flashcard-gate-restore.node.test.ts` — today's only validator coverage (reads the outer live launch_wave.mjs).
 - **Coverage of this requirement:** partial — the halt branch and the invariants exist, but no fallback destination and no serial driver exist today.
 
 ## Prior work
