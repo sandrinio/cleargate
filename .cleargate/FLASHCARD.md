@@ -1,3 +1,4 @@
+2026-09-25 · #test-harness #init · runInitScenario's extra spreads after default seams — override extra.exit to capture ExitSignal's code, no helper edit.
 2026-09-25 · #host #contract · InstallCtx sinks are raw (callee writes \n); RemoveCtx sinks are line sinks (uninstall appends \n). Wrap when crossing.
 2026-09-25 · #init #settings-json #danger · init --force overwrites .claude/settings.json wholesale; user hooks lost despite the surgeryTargets doc.
 2026-09-25 · #test-harness #init · runInitScenario('reinit') primes with NO extra seams (init-fixture.ts:273); a seamed reinit tests only pass 2.
