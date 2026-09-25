@@ -60,7 +60,6 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
-| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M3 | n | low |
 | `BUG-067` | Frontmatter locator: find the fence, don't require offset 0 (3 call sites) | standard | M0 | n | med |
 | `STORY-058-01` | Tracked `scaffold/core` + `scaffold/hosts/claude` payload layout | standard | M1 | n | high |
 | `STORY-058-02` | Repoint scaffold-source validation + manifest builder; drop the sibling dependency | standard | M1 | n | med |
@@ -69,6 +68,7 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `STORY-058-05` | `cleargate host` list/add/remove lifecycle commands | standard | M3 | y | med |
 | `STORY-058-06` | Install-manifest host ownership fields with legacy snapshot migration | standard | M3 | y | med |
 | `STORY-058-07` | Per-host scoping of doctor, upgrade, uninstall, prune | standard | M3 | n | med |
+| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M3 | n | low |
 | `STORY-058-08` | Clean-room verification procedure + `cleargate verify-install` driver | standard | M4 | y | low |
 | `STORY-058-09` | Clean-room Claude regression baseline (no-flag and `--host all`) | standard | M4 | y | low |
 | `STORY-058-10` | Codex payload surfaces: hooks.json, config.toml MCP, `AGENTS.md` injection | standard | M5 | n | med |
