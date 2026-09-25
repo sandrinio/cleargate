@@ -35,12 +35,14 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id STORY-058-12
 draft_tokens:
   input: null
   output: null
   cache_creation: null
   cache_read: null
   model: null
+  last_stamp: 2026-09-25T09:53:24Z
   sessions: []
 ---
 
@@ -56,9 +58,9 @@ draft_tokens:
 As a Codex user running a ClearGate sprint, I want sprint-execution instructions that dispatch on a host with no Workflow tool, so that the five-agent loop runs to completion instead of halting at wave 1.
 
 ### 1.2 Detailed Requirements
-- `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` stays the single source of host-generic orchestration. This story does **not** restructure, renumber, or re-order it: EPIC-058 line 67 makes any Claude-observable behavior change a release blocker, and §C.0.1 is referenced by name from `cleargate-protocol.md` §23 and from SKILL.md:275 itself.
+- `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` stays the single source of host-generic orchestration. This story does **not** restructure, renumber, or re-order it: EPIC-058 line 67 makes any Claude-observable behavior change a release blocker, and §C.0.1 is referenced by name from `cleargate-protocol.md` §23 and from SKILL.md:275 itself.
 - Exactly two additive pointer insertions are permitted in `SKILL.md`: one after the §2 mandate (line 104) and one in §C.0 (after line 269). Each names the fallback contract for hosts that have no `/workflows` primitive. Every other line, heading, and cross-reference stays byte-identical.
-- Author `cleargate-planning/.claude/skills/sprint-execution/dispatch-serial.md` — net-new, containing zero host-specific tool-call syntax, defining the serial dispatch contract in full.
+- Author `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md` — net-new, containing zero host-specific tool-call syntax, defining the serial dispatch contract in full.
 - The serial contract MUST reproduce, without weakening: per-story ClearGate-managed worktree creation (`git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN`, launch_wave.mjs:112-115); the flashcard write-gate at its original per-story granularity (`cleargate-enforcement.md` §4.3, the blocking serial step); exactly-once ledger attribution through the existing dispatch-marker → `SubagentStop` chain on hosts that expose it; single-writer serial merge onto `sprint/S-NN`; the §22 true-blocker halt; and idempotent re-dispatch after a blocker.
 - The serial contract MUST NOT copy three mechanisms that exist only as `parallel()` workarounds: the `SKIP_FLASHCARD_GATE=1` suppression window (SKILL.md:275, :580 — it exists because per-thunk child env is not settable, and copying it would silently widen the flashcard blind spot); RUN_ID-keyed barrier attribution (launch_wave.mjs:14-24 — it exists because `PreToolUse` never fires and `SubagentStop` carries the orchestrator's session id under a wave); and verdict-return-instead-of-halt (launch_wave.mjs:13 — a serial loop can halt synchronously in its own turn, which is strictly better).
 - Dispatch-mode selection is an **install-time, static** property of the host adapter, not a runtime probe: extend the `HostAdapter` contract from [[STORY-058-03]] with a `dispatchMode: "wave-parallel" | "serial"` field. Claude resolves to `wave-parallel`; Codex resolves to `serial`.
@@ -150,13 +152,15 @@ Feature: Host dispatch-mode split
 
 ## 3. The Implementation Guide
 
+*Re-declared 2026-09-25 after STORY-058-01 (M1.md §D4 + STORY-058-01-arch.md §5): canonical paths → `cleargate-cli/scaffold/{core,hosts/claude}/**`. Starts only after STORY-058-02 merges, since it reads canonical through `cleargate-cli/test/helpers/scaffold-roots.ts` (created by -02). The `:104`/`:269` insertion anchors below were re-measured against `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` (byte-identical to the old canonical copy) and are unchanged.*
+
 ### 3.1 Context & Files
 
 | Item | Value |
 |---|---|
-| Primary File | `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` |
-| Related Files | `.cleargate/scripts/launch_wave.mjs`, `.cleargate/knowledge/cleargate-enforcement.md`, `.cleargate/knowledge/cleargate-protocol.md`, `cleargate-cli/src/hosts/types.ts` |
-| New Files Needed | Yes — `cleargate-planning/.claude/skills/sprint-execution/dispatch-serial.md`, `.cleargate/scripts/dispatch_serial.mjs`, `.cleargate/scripts/dispatch_serial.test.mjs` |
+| Primary File | `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` |
+| Related Files | `.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` (canonical; D1 twin as for -11), `.cleargate/knowledge/cleargate-enforcement.md` (outer live twin), `.cleargate/knowledge/cleargate-protocol.md`, `cleargate-cli/src/hosts/types.ts` |
+| New Files Needed | Yes — `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md`, `.cleargate/scripts/dispatch_serial.mjs`, `.cleargate/scripts/dispatch_serial.test.mjs` |
 
 ### 3.2 Technical Logic
 
@@ -201,8 +205,8 @@ Host selection happens once, at install time: `HostAdapter.dispatchMode` is read
 
 ## Existing Surfaces
 
-- **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md:104` — the single sentence that hard-codes the Workflow tool as the only dispatch path and halts when it is unavailable; one of the two insertion points.
-- **Surface:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md:265` — §C.0, the `launch_wave` contract and second insertion point.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:104` — the single sentence that hard-codes the Workflow tool as the only dispatch path and halts when it is unavailable; one of the two insertion points.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:265` — §C.0, the `launch_wave` contract and second insertion point.
 - **Surface:** `.cleargate/scripts/launch_wave.mjs` — `worktreeAddCommand`, `validateVerdicts`, `mintRunId`, and the injectable-seam shape the serial driver mirrors and imports rather than duplicates.
 - **Surface:** `.cleargate/knowledge/cleargate-enforcement.md` — §4.3's per-story flashcard barrier, the original rule the serial path restores unmodified.
 - **Surface:** `.cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md` — `HostAdapter.subagentDispatchMode`, the existing precedent for expressing dispatch style as a host-adapter field.
@@ -217,7 +221,7 @@ Host selection happens once, at install time: `HostAdapter.dispatchMode` is read
 
 ## Why not simpler?
 
-- **Smallest existing surface that could carry this:** `cleargate-planning/.claude/skills/sprint-execution/SKILL.md:267` — the existing "if `/workflows` is unavailable, halt" branch.
+- **Smallest existing surface that could carry this:** `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:267` — the existing "if `/workflows` is unavailable, halt" branch.
 - **Why isn't extension / parameterization / config sufficient?** The halt branch is the whole problem: it is a correct behavior with no destination. Parameterizing it needs somewhere to point, and that destination — a complete dispatch contract that reproduces worktree isolation, the flashcard gate, ledger attribution, and blocker semantics without any `parallel()` workaround — does not exist in any form today. A config flag that toggles between "halt" and "halt" is not a fallback. The alternative, forking `SKILL.md` per host, is what EPIC-058's "normalize into shared handlers" rule and its Claude-regression-baseline rule both forbid.
 
 ---

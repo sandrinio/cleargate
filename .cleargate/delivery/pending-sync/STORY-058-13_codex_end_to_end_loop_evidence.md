@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T22:39:10Z
+  last_stamp: 2026-09-25T09:53:38Z
   sessions: []
 ---
 
@@ -163,12 +163,14 @@ Feature: Codex loop-completion evidence
 
 ## 3. The Implementation Guide
 
+*Re-declared 2026-09-25 after STORY-058-01 (M1.md §D4 + STORY-058-01-arch.md §5): canonical paths → `cleargate-cli/scaffold/{core,hosts/claude}/**`. Starts only after STORY-058-02 merges, since it reads canonical through `cleargate-cli/test/helpers/scaffold-roots.ts` (created by -02). The evidence file itself stays outer.*
+
 ### 3.1 Context & Files
 
 | Item | Value |
 |---|---|
 | Primary File (new) | `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md` |
-| Related Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md`, `cleargate-planning/.claude/settings.json`, `cleargate-cli/src/commands/verify-install.ts` |
+| Related Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md`, `cleargate-cli/scaffold/hosts/claude/.claude/settings.json`, `cleargate-cli/src/commands/verify-install.ts` |
 | New Files Needed | Yes — see Primary File |
 
 ### 3.2 Technical Logic
@@ -217,8 +219,8 @@ Sequencing is forced by dependency, not preference: [[STORY-058-10]] supplies th
 
 - **Surface:** `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md` — the clean-room procedure and `verify-install` driver this story extends rather than re-derives.
 - **Surface:** `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md` — the Claude baseline whose structure, evidence artifact, and sprint-close gating this story mirrors for Codex.
-- **Surface:** `cleargate-planning/.claude/settings.json` — the authoritative list of hook events whose Codex firing this run must record.
-- **Surface:** `cleargate-planning/.claude/hooks/pre-edit-gate.sh` — one of the two gates whose real blocking behavior, not mere invocation, the run must observe.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/settings.json` — the authoritative list of hook events whose Codex firing this run must record.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-edit-gate.sh` — one of the two gates whose real blocking behavior, not mere invocation, the run must observe.
 - **Coverage of this requirement:** none — no existing story drives a real story through the loop on any host other than Claude.
 
 ## Prior work

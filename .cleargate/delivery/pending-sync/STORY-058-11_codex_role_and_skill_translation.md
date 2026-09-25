@@ -42,7 +42,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T23:05:37Z
+  last_stamp: 2026-09-25T09:53:02Z
   sessions: []
 ---
 
@@ -125,19 +125,22 @@ Feature: Codex role and skill translation
 
 ## 3. The Implementation Guide
 
+*Re-declared 2026-09-25 after STORY-058-01 (M1.md §D4 + STORY-058-01-arch.md §5): canonical paths → `cleargate-cli/scaffold/{core,hosts/claude}/**`. Starts only after STORY-058-02 merges, since it reads canonical through `cleargate-cli/test/helpers/scaffold-roots.ts` (created by -02). The 9 hook edits now land on the cli-repo story branch; the `cleargate-enforcement.md` edit keeps its D1 outer live-mirror twin.*
+
 ### 3.1 Context & Files
 
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/scripts/build-codex-agents.mjs` |
-| Related Files | `cleargate-cli/package.json` (the `prebuild` script, :42, gains the codegen step), `.cleargate/knowledge/cleargate-enforcement.md`, `cleargate-planning/.claude/hooks/pending-task-sentinel.sh`, `cleargate-planning/.claude/hooks/pre-commit-surface-gate.sh`, `cleargate-planning/.claude/hooks/pre-commit.sh`, `cleargate-planning/.claude/hooks/pre-edit-gate.sh`, `cleargate-planning/.claude/hooks/pre-tool-use-autonomy.sh`, `cleargate-planning/.claude/hooks/pre-tool-use-task.sh`, `cleargate-planning/.claude/hooks/session-start.sh`, `cleargate-planning/.claude/hooks/stamp-and-gate.sh`, `cleargate-planning/.claude/hooks/token-ledger.sh` |
+| Related Files | `cleargate-cli/package.json` (the `prebuild` script, :42, gains the codegen step), `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` (canonical; D1 twin), `.cleargate/knowledge/cleargate-enforcement.md` (outer live twin), `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pending-task-sentinel.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-commit-surface-gate.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-commit.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-edit-gate.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-tool-use-autonomy.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-tool-use-task.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/session-start.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/stamp-and-gate.sh`, `cleargate-cli/scaffold/hosts/claude/.claude/hooks/token-ledger.sh` |
 | New Files Needed | `cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh`, `cleargate-cli/scaffold/hosts/codex/.codex/agents/**` |
 
 - `cleargate-cli/scripts/build-codex-agents.mjs` — **create**. Markdown → TOML codegen at prebuild.
 - `cleargate-cli/scaffold/hosts/codex/.codex/agents/**` — **generated**. Not hand-edited.
 - `cleargate-cli/scaffold/core/.cleargate/hooks/lib/harness.sh` — **create**. The repo-root shim.
-- `cleargate-planning/.claude/hooks/*.sh` (all 9: `pending-task-sentinel.sh`, `pre-commit-surface-gate.sh`, `pre-commit.sh`, `pre-edit-gate.sh`, `pre-tool-use-autonomy.sh`, `pre-tool-use-task.sh`, `session-start.sh`, `stamp-and-gate.sh`, `token-ledger.sh`) — **modify**. Nine scripts adopt the shim; `CLAUDE_PROJECT_DIR` behavior preserved.
-- `.cleargate/knowledge/cleargate-enforcement.md` — **modify**. Record the Codex enforcement delta.
+- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/*.sh` (all 9: `pending-task-sentinel.sh`, `pre-commit-surface-gate.sh`, `pre-commit.sh`, `pre-edit-gate.sh`, `pre-tool-use-autonomy.sh`, `pre-tool-use-task.sh`, `session-start.sh`, `stamp-and-gate.sh`, `token-ledger.sh`) — **modify**, on the cli-repo story branch. Nine scripts adopt the shim; `CLAUDE_PROJECT_DIR` behavior preserved.
+- `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` — **modify**. Record the Codex enforcement delta (D1 canonical).
+- `.cleargate/knowledge/cleargate-enforcement.md` — **modify**. Outer live-mirror twin of the same edit (D1 twin rule).
 
 ### 3.2 Technical Logic
 The shim is deliberately ordered so the existing host wins: `ORCHESTRATOR_PROJECT_DIR` (already honored by `pending-task-sentinel.sh` and `pre-tool-use-task.sh`), then `CLAUDE_PROJECT_DIR`, then the stdin-derived fallback. Under Claude Code the third branch is never reached, which is what makes the change a no-op there — and that no-op must be asserted, not assumed.
@@ -182,10 +185,10 @@ developer_instructions = """<body of the canonical .md>"""
 
 ## Existing Surfaces
 
-- **Surface:** `cleargate-planning/.claude/agents/developer.md` — representative of the 11 definitions carrying `name`, `description`, `tools`, `model` frontmatter; the codegen source.
-- **Surface:** `cleargate-planning/.claude/skills/flashcard/SKILL.md` — one of 3 skills (flashcard, sprint-dashboard, sprint-execution); flashcard and sprint-dashboard are format-identical to Codex's and copy verbatim to `.agents/skills/<name>/SKILL.md`. `sprint-execution` is excluded from this story — its SKILL.md hard-mandates Claude's Workflow tool (`/workflows`, the `launch_wave` contract, `parallel()`, `resumeFromRunId`) and halts if `/workflows` is unavailable; the host-dispatch split for Codex is [[STORY-058-12]].
-- **Surface:** `cleargate-planning/.claude/hooks/pending-task-sentinel.sh:34` and `pre-tool-use-task.sh:37` — `REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"`, the existing two-branch precedent the shim generalizes.
-- **Surface:** `cleargate-planning/.claude/hooks/pre-edit-gate.sh:13` — `REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"`, a third existing variant to unify.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/agents/developer.md` — representative of the 11 definitions carrying `name`, `description`, `tools`, `model` frontmatter; the codegen source (also the source for `qa.md`, unchanged, per the post-CR-123 scaffold copy).
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/skills/flashcard/SKILL.md` — one of 3 skills (flashcard, sprint-dashboard, sprint-execution); flashcard and sprint-dashboard are format-identical to Codex's and copy verbatim to `.agents/skills/<name>/SKILL.md`. `sprint-execution` is excluded from this story — its SKILL.md hard-mandates Claude's Workflow tool (`/workflows`, the `launch_wave` contract, `parallel()`, `resumeFromRunId`) and halts if `/workflows` is unavailable; the host-dispatch split for Codex is [[STORY-058-12]].
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pending-task-sentinel.sh:34` and `pre-tool-use-task.sh:37` — `REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"`, the existing two-branch precedent the shim generalizes.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-edit-gate.sh:13` — `REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"`, a third existing variant to unify.
 - **Codex contract (external, v0.153.2 — documented, not on disk):** custom agents are TOML files under the Codex agents directory carrying `name`, `description`, `developer_instructions`, plus optional `model`, `model_reasoning_effort`, `sandbox_mode`, `mcp_servers`; skills are SKILL.md directories under the Codex skills directory; there is no per-agent tools allowlist.
 
 ## Why not simpler?

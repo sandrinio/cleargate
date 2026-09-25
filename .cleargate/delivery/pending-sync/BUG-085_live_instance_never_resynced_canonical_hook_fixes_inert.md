@@ -31,20 +31,28 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id BUG-085
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-24T22:39:31Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-25T09:51:56Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-25T04:41:52Z
 ---
 
 # BUG-085: Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
 
 **Milestones:** M0 targeted re-sync after BUG-089's repair, with a new Claude session and live denial/attribution checks; M3 durable meta-repo drift detection against the relocated canonical layout. Do not mark the whole bug Done after re-sync alone.
+
+**Re-declared 2026-09-25** (M1.md §D4 + STORY-058-01-arch.md §5): canonical paths → `cleargate-cli/scaffold/{core,hosts/claude}/**` (`.claude/**` under `scaffold/hosts/claude/`, `.cleargate/**` under `scaffold/core/`, plus `scaffold/hosts/claude/CLAUDE.md`). `cleargate-planning/` is now a frozen, deprecated snapshot (see `cleargate-planning/DEPRECATED.md`), no longer canonical. Starts only after STORY-058-02 merges, since it reads canonical through `cleargate-cli/test/helpers/scaffold-roots.ts` (created by -02). The hook-file edits and the drift-check/doctor code land on the cli-repo story branch; the CLAUDE.md fix stays outer (meta-repo).
 
 ### Resolved Decisions
 
@@ -55,7 +63,7 @@ draft_tokens:
   [[CR-115]] already established the "announce before you overwrite" principle for `cleargate
   upgrade`; auto-heal contradicts it. **Approved: detect-and-warn; no automatic overwrite.**
 - **Q2 — Meta-repo only, or does the check ship to target repos?** A target repo has no
-  `cleargate-planning/` directory, so it has no canonical tree to diff against; its only baseline is
+  `cleargate-cli/scaffold/` directory (nor the deprecated `cleargate-planning/` one), so it has no canonical tree to diff against; its only baseline is
   `.cleargate/.install-manifest.json`. **Recommended: meta-repo scope only this sprint**, and file
   the target-repo variant (manifest-hash drift) separately once the meta-repo check has a shape.
   **Approved: meta-repo scope only this sprint; target-repo manifest-hash checks remain deferred.**
@@ -63,7 +71,7 @@ draft_tokens:
 ## 1. The Anomaly (Expected vs. Actual)
 
 **Expected:** when a defect in a scaffold hook is fixed in canonical
-(`cleargate-planning/.claude/**`) and its work item is marked `Completed`, the fix is in effect in
+(`cleargate-cli/scaffold/hosts/claude/.claude/**`) and its work item is marked `Completed`, the fix is in effect in
 this repo's running agent loop — or, failing that, *something* reports that it is not.
 
 **Actual:** the fix is not in effect, and nothing reports it. The live `/.claude/` instance is a
@@ -209,14 +217,23 @@ reader is not misled by the wiki page.)*
   It is inventoried and, per Task Breakdown, backed up and re-synced from canonical as this bug's
   M0 operational step — inspected and rewritten by that step, not part of this story's tracked
   commit surface.
-- `cleargate-planning/.claude/**` — canonical; the comparison baseline and the tree this bug's
-  commit actually touches.
-- `cleargate-cli/src/commands/doctor.ts` — most likely home for a `canonical ↔ live` parity check.
-- `cleargate-planning/.claude/hooks/session-start.sh` — candidate surface for a drift banner line
-  (the live mirror is re-synced from this at the M0 step, not edited directly).
+- `cleargate-cli/scaffold/hosts/claude/.claude/**` + `cleargate-cli/scaffold/core/.cleargate/**` + `cleargate-cli/scaffold/hosts/claude/CLAUDE.md` — canonical; the comparison baseline and the tree this bug's
+  commit actually touches. On the cli-repo story branch.
+- `cleargate-cli/src/commands/doctor.ts:268-271` — most likely home for a `canonical ↔ live` parity check.
+- `cleargate-cli/src/lib/drift-check.ts:143-160` — `canonicalRoot = cwd/cleargate-planning` composes instead from `cwd/cleargate-cli/scaffold/{core,hosts/claude}` (reuse `composePayload` from `cleargate-cli/src/lib/scaffold-layout.mjs` with a unique temp dir cleaned in `finally`, or compare per root without composing: live `.claude/**` vs `scaffold/hosts/claude/.claude/**`, live `.cleargate/**` vs `scaffold/core/.cleargate/**`); skipped when absent.
+- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/session-start.sh` — candidate surface for a drift banner line
+  (the live mirror is re-synced from this at the M0 step, not edited directly). On the cli-repo story branch.
 - `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` — lines 46 and 61-64, the canonical-only
   pin that let this through; needs either a live-mode variant or an explicit recorded limitation.
+  Repoint `HOOKS_DIR` from `cleargate-planning/.claude/hooks` to `cleargate-cli/scaffold/hosts/claude/.claude/hooks`.
 - `CLAUDE.md` → *Dogfood split — canonical vs live* — the prose mitigation that has now failed twice.
+  Rebase this extension onto -01's rewrite (already merged) and add the three stale-sentence fixes
+  from STORY-058-01-arch.md §3: (a) the intro line's *"scaffold canonical at `cleargate-planning/`"*
+  → the two-repo scaffold roots; (b) both re-sync sentences' bare `cleargate init` → `node cleargate-cli/dist/cli.js init`
+  (post-BD dist rebuild — bare `cleargate` resolves to the published global install, not this repo's
+  composed payload); (c) the deprecated-snapshot bullet's incomplete reader list — add the ~85 cli
+  tests and `manifest.ts`/changelog/check scripts (owned by -02) alongside this bug's own
+  `drift-check.ts:143-160` and the doctor text. Stays outer (meta-repo), not cli.
 - **M0-step follow-up (amended 2026-09-25, orchestrator):** `cleargate-cli/test/hooks/pre-tool-use-task.node.test.ts`,
   `test/hooks/token-ledger-attribution.node.test.ts`, `test/hooks/token-ledger-regression.node.test.ts`. Their
   `HOOK_PATH` read the outer repo's per-machine LIVE `.claude/hooks/*` and pinned the pre-BUG-068/069 contracts,
@@ -234,7 +251,7 @@ reader is not misled by the wiki page.)*
 
 ## Task Breakdown
 
-- [ ] Write the failing check: compare `.claude/**` against `cleargate-planning/.claude/**`, ignoring the three known live-only entries (`scheduled_tasks.lock`, `settings.local.json`, `worktrees/`); assert exit non-zero. It must fail today on all 8 files.
+- [ ] Write the failing check: compare `.claude/**` against `cleargate-cli/scaffold/hosts/claude/.claude/**` (and `.cleargate/**` against `cleargate-cli/scaffold/core/.cleargate/**`), ignoring the three known live-only entries (`scheduled_tasks.lock`, `settings.local.json`, `worktrees/`); assert exit non-zero. It must fail today on all 8 files.
 - [x] Owner chose detect-and-warn and meta-repo-only scope; decisions recorded in Context Source.
 - [ ] Wire the check into `cleargate doctor` with a distinct exit code, per the doctor exit-code taxonomy in `.cleargate/knowledge/cleargate-enforcement.md`.
 - [ ] Surface one drift line in the `SessionStart` banner when the check fails, alongside the existing `ClearGate state:` line.
@@ -250,7 +267,7 @@ reader is not misled by the wiki page.)*
    drifted files. Today no such check exists, so this test cannot even be written against the current
    surface — that absence *is* the defect.
 2. A live-mode run of the BUG-068 scenario — the existing red test re-pointed at `.claude/hooks/`
-   rather than `cleargate-planning/.claude/hooks/` — fails at the dispatch-marker assertion, proving
+   rather than `cleargate-cli/scaffold/hosts/claude/.claude/hooks/` — fails at the dispatch-marker assertion, proving
    the live hook rejects the spawn.
 
 **Green (must pass after the fix):**
