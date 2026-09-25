@@ -1,3 +1,8 @@
+2026-09-25 · #manifest #cli · TIER_RULES/INTENTIONALLY_UNTRACKED now live in src/lib/manifest-builder.ts; scripts/build-manifest.ts only re-exports.
+2026-09-25 · #manifest #test-harness #danger · A fixture manifest entry without owner reads by the legacy rule (.codex/** => core); always stamp owner explicitly.
+2026-09-25 · #manifest #host · Legacy and carried snapshot entries lack owner; call entryOwner(e) and installedHosts(s), never e.owner or s.hosts.
+2026-09-25 · #tooling #danger · A moved '\ufeff' escape became a raw invisible U+FEFF (manifest-builder.ts:289); grep for EF BB BF after code moves.
+2026-09-25 · #clean-room #manifest · From RS-4, core-owned .agents/** is only in the --host all snapshot; compare claude-visible entries, not core+claude.
 2026-09-25 · #qa #test-harness #cross-repo · A main-proof worktree must be named cleargate-cli with a sibling mcp/: version_bump_alignment finds REPO_ROOT by name.
 2026-09-25 · #test-harness #tpv #danger · A banned string (e.g. import.meta.url) in a doc COMMENT still trips a raw-substring static grep; reword it.
 2026-09-25 · #test-harness #tpv #host · Sanctioned-delta rows assert currentHash strictly; dual-accept let a build that never wrote hosts pass parity.
