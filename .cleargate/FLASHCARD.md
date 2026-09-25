@@ -1,3 +1,5 @@
+2026-09-26 · #manifest #host · selectEntriesForHosts needs payloadFilter AND an owner check; payloadFilter alone admits unregistered owners.
+2026-09-26 · #manifest #doctor #upgrade · Make DriftMapEntry.owner required: a missed construction site then fails typecheck, not silently at runtime.
 2026-09-26 · #test-harness #upgrade #tpv · upgrade never creates CLAUDE.md (untracked); a snapshot-less dir is claude-only — seed hosts for multi-host reds.
 2026-09-26 · #settings-json #test-harness · supersedeHookCommands only drops; the new command comes from mergeSettings. A cross-matcher seed must share token 1.
 2026-09-26 · #doctor #host · doctor --host narrows at emit only; a narrowed .drift-state.json makes the next cache replay report one host.
