@@ -1,3 +1,7 @@
+2026-09-25 · #test-harness #tpv · A source-grep guard scans its own file too: its prose names the banned join. Allowlist the guard by exact path.
+2026-09-25 · #test-harness #manifest · Hash-comparing build output that holds MANIFEST.json compares wall-clock generated_at; strip it first.
+2026-09-25 · #npm #test-harness · npm pack never ships .gitignore; a negative control deleting 'first file under' a root can pick one.
+2026-09-25 · #init #test-harness · initHandler always writes .mcp.json (init.ts:423); an exact top-level install census must include it.
 2026-09-25 · #host #registry #test-harness · Never pin the production host registry's membership in a sealed test (-10 adds codex); use fixture registries.
 2026-09-25 · #host #scaffold #danger · scaffold/core ships on EVERY install incl. no-flag Claude; portable assets (.agents/**) go in an adapter sharedRoot.
 2026-09-25 · #cross-repo #test-harness · Rule-15 runs the suite BEFORE BD: dist-spawning tests grade the old binary — re-run them after BD.
