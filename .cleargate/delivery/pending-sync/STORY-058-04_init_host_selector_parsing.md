@@ -35,15 +35,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-058-04
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-24T22:38:08Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-25T16:34:35Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-25T15:31:00Z
 ---
 
 # STORY-058-04: cleargate init --host selector parsing and profile expansion
@@ -148,12 +154,12 @@ Derive `all` as "every registered adapter" and `portable` as "every registered a
 
 ## Task Breakdown
 
-- [ ] QA-Red: `host-selection` unit, `init-host-selection` unit, `init-host-parity` and `init-host-cli` integration (scenarios 1-17), all over injected fixture registries, plus the M2-A15 default-path routing witness (spy the production `claudeAdapter.install`)
-- [ ] Add `HOST_PROFILES`, `DEFAULT_HOSTS`, `HostSelectionError`, `collectHostOption`, `normalizeHostSelectors` and `payloadFilter` to `registry.ts`, profiles derived from `names()`; `names()`/`UnknownHostError.valid` return a frozen copy (-03 post-flight FU-5)
-- [ ] Add additive `include` to `copyPayload`; install core ∪ the selected adapters' owned/shared roots
-- [ ] Add `InitOptions.hosts`; validate as Step 0 right after the `registry` seam, before Step 1 and the `--from-source` `mkdtemp` (exit 2, nothing written to the target or `os.tmpdir()`); run each selected adapter's `install` once in registry order
-- [ ] Register repeatable `--host <value>` on `init` in `cli.ts` with registry-derived help
-- [ ] Prove no-flag and `--host claude` byte-identical to the pre-M2 baseline; typecheck; witnesses solo
+- [x] QA-Red: `host-selection` unit, `init-host-selection` unit, `init-host-parity` and `init-host-cli` integration (scenarios 1-17), all over injected fixture registries, plus the M2-A15 default-path routing witness (spy the production `claudeAdapter.install`)
+- [x] Add `HOST_PROFILES`, `DEFAULT_HOSTS`, `HostSelectionError`, `collectHostOption`, `normalizeHostSelectors` and `payloadFilter` to `registry.ts`, profiles derived from `names()`; `names()`/`UnknownHostError.valid` return a frozen copy (-03 post-flight FU-5)
+- [x] Add additive `include` to `copyPayload`; install core ∪ the selected adapters' owned/shared roots
+- [x] Add `InitOptions.hosts`; validate as Step 0 right after the `registry` seam, before Step 1 and the `--from-source` `mkdtemp` (exit 2, nothing written to the target or `os.tmpdir()`); run each selected adapter's `install` once in registry order
+- [x] Register repeatable `--host <value>` on `init` in `cli.ts` with registry-derived help
+- [x] Prove no-flag and `--host claude` byte-identical to the pre-M2 baseline; typecheck; witnesses solo
 
 ## 4. Quality Gates
 
