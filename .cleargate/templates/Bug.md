@@ -17,7 +17,7 @@ mechanically extracted from the document's own structure:
   - Summary        ← §1 The Anomaly (repro)
   - Open Questions ← ### Open Questions
   - Edge Cases     ← §2 Reproduction Protocol (edge conditions)
-  - SPIDR          ← §5 SPIDR coverage table
+  - SPIDR          ← §5 Verification Protocol (SPIDR coverage table)
   - Risks          ← §4 Execution Sandbox (suspected blast radius)
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 
