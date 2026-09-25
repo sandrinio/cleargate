@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T19:08:53Z
+  last_stamp: 2026-09-25T07:54:35Z
   sessions: []
 ---
 
@@ -303,6 +303,7 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-25T07:25:00Z · Process · New sprint-context rule 16: two-repo items that edit outer docs run every `CLEARGATE_META_ROOT`-honouring cli test against the worktree pre-merge. Carry-forward: `enforcement-doc-coherence` `resolves()` can never resolve decimal `§N.M` Brief anchors (story.md §1.1/§1.4/§1.5/§2.1) — pre-existing test weakness, follow-up at close.
 - 2026-09-25T07:25:00Z · Flashcard gate (CR-123): 8 approved. FLASHCARD-REJECT — "Full npm test with no CLEARGATE_META_ROOT override reads the outer MAIN checkout's canonical docs…" — reason: duplicates the 2026-08-27 cross-branch-dependency card.
 - 2026-09-25T07:35:00Z · Surface gate · Standing bypass (sprint-context rule 17): orchestrator/DevOps chore and conflict-merge commits on `sprint/S-41` may set `SKIP_SURFACE_GATE=1`. The gate resolves the "active" item by recency and whitelists no orchestration artifacts, so once a STORY is the latest-updated item it would block every sprint-plan, flashcard, events and report commit on the sprint branch. Story-branch commits stay fully gated; STORY §3.1 tables gain literal orchestration rows (first: STORY-058-01).
+- 2026-09-25T07:54:00Z · STORY-058-01 · QA-Red wrote 19 reds (cli `744cb5e`). TPV R1 returned BLOCKED-WIRING-GAP: 7c asserted whole-file `.gitignore` equality, but init Step 5d appends a managed block. There were 4 more fixes: stub the resolver probe, add the missing init-level equivalence test, key the 4c census on the snapshot's own files, and scope scenario 5 to its section. The Architect measured all 5 fixes green against a scratch plan-conformant implementation. Applied by QA-Red R2 (cli `83dbc68`: 20 tests, 16 red, 3 baseline-gated skips). TPV R2 was waived because R1 had already measured the exact fixes; the orchestrator re-ran the counts and diffed the edits against the spec. M1.md scenarios 4 and 7 were amended. Developer dispatched. The worktree surface gate skips (the story state is not `In Progress` in frontmatter), so the story-branch commits are gated only by §3.1 review at QA-Verify.
 
 ---
 
