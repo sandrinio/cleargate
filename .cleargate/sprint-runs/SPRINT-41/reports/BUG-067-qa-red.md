@@ -137,3 +137,36 @@ The `npx tsc --noEmit` run exited 0 and produced no incident.
 flashcards_flagged:
   - "2026-09-25 · #frontmatter #test-harness · writeCachedGate already fails closed on malformed frontmatter (no positional pre-check); only stampFrontmatter/stampTokens's `hasFrontmatter` sniff corrupts — a red suite covering all three writers legitimately shows 7/30 passing on baseline."
   - "2026-09-25 · #test-harness #cross-repo · A sealed QA-Red file's FIXTURE_ROOT/META_ROOT constants are session-specific (isolated CG_TEST clone paths); re-verify and re-root them for the target repo before trusting 'adopt what is sound' — don't just copy the file."
+
+## Amendment (post-TPV, 2026-09-25)
+
+Architect TPV approved (`BUG-067-tpv.md`) but flagged one fragility: the installed-hook-chain
+scenario in `frontmatter-authoring.red.integration.node.test.ts` read the **live** outer
+`pending-sync/BUG-067_Stamp_Corrupts_Frontmatter_Behind_Instructions.md` item via `META_ROOT` and
+asserted `status: Triaged` — a cli test must not depend on an outer work item's lifecycle
+(DevOps flipping status, or the item moving to `archive/` at sprint close, would silently break
+this test for a reason unrelated to the locator fix).
+
+Fix: froze the item's current bytes into a committed fixture,
+`cleargate-cli/test/fixtures/bug-067/BUG-067_source_item.md` (copied verbatim, `status: Triaged`
+at line 8), and repointed `authoredSource` in the hook-chain scenario from the `META_ROOT`-derived
+live path to `path.join(CLI_ROOT, 'test', 'fixtures', 'bug-067', 'BUG-067_source_item.md')`. Every
+assertion in the scenario is unchanged — they read `authored`/`after` bytes exactly as before, now
+sourced from the frozen fixture instead of the live item.
+
+Re-ran `test/e2e/frontmatter-authoring.red.integration.node.test.ts` in isolation with
+`CLEARGATE_META_ROOT=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-067
+CLEARGATE_BUILT_CLI=/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/dist/cli.js`: **9/9
+still fail**, same reason classes as before the amendment — the 8 template chains on
+`stampFrontmatter must retain the scaffold preamble byte-for-byte`, and the hook-chain scenario
+on the literal `stamp=0 gate=1` string (unchanged: `[2026-09-25T04:07:52Z] stamp=0 gate=1
+ingest=0 file=.../BUG-067_hook-chain.md`). `npx tsc --noEmit` still exits 0.
+
+`META_ROOT` remains used elsewhere in this file (template/readiness-gates/config seeding for the
+fixture project root, per the M0 plan's fresh-authoring-chain design) — only the hook-chain
+scenario's `authoredSource` needed the outer-item read removed; that was the sole live-lifecycle
+dependency TPV flagged.
+
+Changes remain **uncommitted**: `test/e2e/frontmatter-authoring.red.integration.node.test.ts`
+(modified) and `test/fixtures/bug-067/BUG-067_source_item.md` (new, untracked). No git write
+command was run in any tree.
