@@ -40,11 +40,11 @@
       "lane_demotion_reason": null
     },
     "STORY-058-03": {
-      "state": "Architect Passed",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-25T15:16:05.858Z",
+      "updated_at": "2026-09-25T15:27:48.405Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "migration-default",
@@ -208,6 +208,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-058-03 → Architect Passed",
-  "updated_at": "2026-09-25T15:16:05.858Z"
+  "last_action": "transition STORY-058-03 → Done",
+  "updated_at": "2026-09-25T15:27:48.405Z"
 }

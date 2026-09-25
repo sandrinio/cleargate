@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T14:11:07Z
+updated_at: 2026-09-25T15:29:00Z
 created_at_version: cleargate@0.26.1
-updated_at_version: a7836beb-dirty
+updated_at_version: 567535f2-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -175,12 +175,12 @@ Finalized 2026-09-25 against [[STORY-058-10]]/[[STORY-058-11]] needs (AGENTS.md,
 
 ## Task Breakdown
 
-- [ ] QA-Red: add `test/helpers/init-fixture.ts`, the contract unit reds (scenarios 1-11) and the parity integration (12); capture the pre-refactor baseline at the red commit
-- [ ] Create `src/hosts/types.ts` (`HostName`, `InstallCtx`, `RemoveCtx`, `RemoveReport`, `HostAdapter` with owned/shared roots and surgery targets)
-- [ ] Create `src/hosts/registry.ts` (`createHostRegistry` with name/root invariants, `defaultHostRegistry`, `UnknownHostError`, `pathUnderRoots`; Map-based lookup)
-- [ ] Create `src/hosts/claude.ts`: move `HOOK_ADDITION` verbatim; `install` = init Steps 4/5/5b verbatim; `remove` = `uninstall.ts:434-456` surgery; injectable deps
-- [ ] Route `init.ts` through `registry.resolve('claude').install(ctx)`; add the `hostRegistry` seam; keep -02's hoisted `.mcp.json` `let`s and assign pre/post around the adapter loop inside the Steps 3–7 `try` (M2-A1/A2); drop unused imports
-- [ ] Typecheck, the targeted reds, parity compare against the baseline, and the regression witnesses solo
+- [x] QA-Red: add `test/helpers/init-fixture.ts`, the contract unit reds (scenarios 1-11) and the parity integration (12); capture the pre-refactor baseline at the red commit
+- [x] Create `src/hosts/types.ts` (`HostName`, `InstallCtx`, `RemoveCtx`, `RemoveReport`, `HostAdapter` with owned/shared roots and surgery targets)
+- [x] Create `src/hosts/registry.ts` (`createHostRegistry` with name/root invariants, `defaultHostRegistry`, `UnknownHostError`, `pathUnderRoots`; Map-based lookup)
+- [x] Create `src/hosts/claude.ts`: move `HOOK_ADDITION` verbatim; `install` = init Steps 4/5/5b verbatim; `remove` = `uninstall.ts:434-456` surgery; injectable deps
+- [x] Route `init.ts` through `registry.resolve('claude').install(ctx)`; add the `hostRegistry` seam; keep -02's hoisted `.mcp.json` `let`s and assign pre/post around the adapter loop inside the Steps 3–7 `try` (M2-A1/A2); drop unused imports
+- [x] Typecheck, the targeted reds, parity compare against the baseline, and the regression witnesses solo
 
 ## 4. Quality Gates
 
