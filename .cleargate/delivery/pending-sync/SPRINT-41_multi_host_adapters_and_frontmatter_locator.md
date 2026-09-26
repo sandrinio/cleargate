@@ -504,6 +504,31 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Worktree and branches removed.
   - **Clean-room containers left for evidence:** `~/Documents/Dev/cg-cleanroom-20260926T042955Z-qa08/` and `…T050106Z-qa08-r2/`.
 
+- 2026-09-26T05:18:26Z · STORY-058-09 · **wave13.**
+  - **QA-Red** (cli `eed511c`, 17 min): evidence unit all red, e2e 3 red + 9 anchors, 5 ambiguities.
+  - **TPV REJECTED** (38 min, `arch_bounces=1`): B4 room isolation, E5-5 epics line; 63/66 mutants killed after the re-seal. Rulings #1–#3; M4-A24..A32; J1–J13. Re-seal patch `8d43e853`.
+  - **Re-seal** (cli `6c5a4c5`): unit 60 red, e2e 3 red + 10; the orchestrator reproduced the unit count.
+  - **Dev** (cli `7ce56a2` + outer `22c1e557`, 31 min): unit 60/60, e2e 13/13; artifact inputs byte-neutral (`a7e231b9…0d12`); the 19 sealed files plus parity match exactly.
+    - **Run 1 (live, first attempt): PASS.** Claude Code 2.1.283, haiku; container `~/Documents/Dev/cg-cleanroom-20260926T064145Z-claude`. Every gating row is PASS in both the no-flag and `--host all` rooms; `sprint-init` reads `FAIL-KNOWN (BUG-090)` ×2. `check` ×2 exit 0.
+    - A doc edit that landed in the main checkout was self-caught and reverted before commit.
+  - **QA PASS-PENDING-SMOKE** (8 min). The deferred `check --write-result` belongs to RS-CLOSE. A read-only audit of the container confirmed Run 1 is not vacuous.
+  - **Post-flight PASS** (20 min), merge now:
+    - Rulings: D1 (`active-sprint` sentinel drive) accepted; D2 accepted; O1 (unsanitised evidence cells, a measured latent fail-open) → fixed before RS-4, Run 1 stays as written.
+    - F1 (missing S3 canary) and F2 (host line read from `registered`) are latent until codex registers.
+    - All of it routes to M5-A1..A14 in -10 pass B. The Step 2.9 contract is verified.
+  - **DevOps:** merged outer `3deb2bc2` and cli `35580b0`.
+    - Suite 3098/3096/0/2, exact.
+    - BD: payload identical (`e44154af`); verify-pack OK (196/80); post-BD 60/60, 13/13, parity 5/5 + 15/15; `check` from OUTER PASS.
+    - Smokes 12/12 ×2. Worktree and branches removed.
+  - **Orchestrator:**
+    - M5-A10 applied to the -10 story (gate green, 14 criteria).
+    - `waves.json` RS-CLOSE `<F5 BUG id>` → `BUG-090`.
+    - M6 carry pointer written; -09 Adjacent row added.
+  - **M4 close — browser check** (`.playwright-mcp/s41-m4-close-dashboard.png`): M4 2/2, 13/17 (76%), 0 in flight, no worktrees.
+    - The same dashboard observations stand: `UNATTRIBUTED` 23.9B of 30.9B, the Execution timeline panel is empty, and `/data` 404s come from the static server.
+  - **Kept until RS-4:** the Run 1 container and its two session dirs. Kept until RS-CLOSE: `/private/tmp/cg-s41-m2-init-baseline`.
+  - **Next:** M5 (-10 codex adapter, then -11, then RS-4a/RS-4). OD1 codex login is needed at RS-4 step 5.
+
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
