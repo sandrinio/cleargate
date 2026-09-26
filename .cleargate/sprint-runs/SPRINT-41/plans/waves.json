@@ -353,7 +353,7 @@
       "steps_note": "RS-4L, then step L (plans/M6.md F10), between post-flight and DevOps; merge lane frozen from step L to this merge"
     },
     "BUG-099": {
-      "state": "QA-Verify PASS on abd9afb; DevOps next (after STORY-058-12 merge)",
+      "state": "merged",
       "base": "main",
       "upstream": [],
       "repo": "cli",
