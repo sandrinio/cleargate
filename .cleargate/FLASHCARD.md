@@ -1,3 +1,4 @@
+2026-09-26 · #qa-red #test-harness · A single diff-preview stdout call embeds many lines; join+split before per-line asserts, not array equality.
 2026-09-26 · #qa-red #test-harness · A child crashing on one missing export starves later asserts in the same script of their own failure text.
 2026-09-26 · #qa-red #test-harness #tmp · Snapshot-diff self-cleanup around a spawned child catches red-state leaks a not-yet-built exit hook can't.
 2026-09-26 · #shell #zsh · Agent shell is zsh: ${PIPESTATUS[0]} is empty; redirect to a log and read $? instead of piping.
