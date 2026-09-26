@@ -82,6 +82,7 @@ import { TERMINAL_STATES } from './constants.mjs';
 import { validateState } from './validate_state.mjs';
 import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 import { reportFilename } from './lib/report-filename.mjs';
+import { locateFrontmatterFence } from './assert_story_files.mjs';
 
 /**
  * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
@@ -243,13 +244,32 @@ function resolveCliBin(repoRoot, rel = 'cli.js') {
   return null;
 }
 
+/**
+ * BUG-090: locate a file's frontmatter wherever its fence sits (behind a leading
+ * `<instructions>` block too) via assert_story_files.mjs's locateFrontmatterFence.
+ * Returns { span, yaml } where yaml is the text between the fences, or null when
+ * there is no frontmatter or its framing cannot be read (the locator throws).
+ * @param {string} raw
+ * @returns {{span: {start:number,end:number,yamlStart:number,yamlEnd:number,eol:string}, yaml: string} | null}
+ */
+function fenceYaml(raw) {
+  let span = null;
+  try {
+    span = locateFrontmatterFence(raw);
+  } catch {
+    return null;
+  }
+  if (!span) return null;
+  return { span, yaml: raw.slice(span.yamlStart, span.yamlEnd) };
+}
+
 /** BUG-083: read just the `status:` value from a file's frontmatter. Null if unreadable. */
 function readFmStatus(filePath) {
   try {
     const raw = fs.readFileSync(filePath, 'utf8');
-    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+    const fm = fenceYaml(raw);
     if (!fm) return null;
-    const m = fm[1].match(/^status:\s*"?([^"\n#]+)"?\s*$/m);
+    const m = fm.yaml.match(/^status:\s*"?([^"\n#]+)"?\s*$/m);
     return m ? m[1].trim() : null;
   } catch {
     return null;
@@ -579,15 +599,17 @@ async function main() {
   /**
    * Atomic in-place status rewrite (raw-bytes regex-replace).
    * Follows FLASHCARD 2026-04-24 #frontmatter #write-back pattern.
+   * BUG-090: the rewrite is spliced into the located YAML span by offset, so a
+   * leading `<instructions>` block stays byte-identical and is never matched.
    * @param {string} filePath
    * @param {string} newStatus
    */
   function setFrontmatterStatusAtomic(filePath, newStatus) {
     const raw = fs.readFileSync(filePath, 'utf8');
-    const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+    const fm = fenceYaml(raw);
     if (!fm) throw new Error(`No frontmatter in ${filePath}`);
-    const newFm = fm[1].replace(/^status:.*$/m, `status: ${newStatus}`);
-    const newRaw = raw.replace(fm[1], newFm);
+    const newFm = fm.yaml.replace(/^status:.*$/m, `status: ${newStatus}`);
+    const newRaw = raw.slice(0, fm.span.yamlStart) + newFm + raw.slice(fm.span.yamlEnd);
     const tmp = filePath + '.tmp.' + process.pid;
     fs.writeFileSync(tmp, newRaw, 'utf8');
     fs.renameSync(tmp, filePath);
@@ -1026,16 +1048,17 @@ async function main() {
     } else {
       /**
        * Parse minimal frontmatter from a markdown file: returns an object of
-       * key: value pairs from the YAML block between the first two `---` lines.
+       * key: value pairs from the located YAML block (BUG-090: found behind a
+       * leading `<instructions>` block too, via fenceYaml).
        * List fields (e.g. deferred_verification: [...]) are returned as raw strings.
        * @param {string} raw
        * @returns {Record<string,string>}
        */
       function parseFrontmatterFields(raw) {
-        const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+        const fm = fenceYaml(raw);
         if (!fm) return {};
         const fields = {};
-        for (const line of fm[1].split('\n')) {
+        for (const line of fm.yaml.split('\n')) {
           const m = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*(.*)/);
           if (m) fields[m[1]] = m[2].trim();
         }
@@ -1050,9 +1073,9 @@ async function main() {
        * @returns {Array<{description?: string, command: string, blocks: string}>}
        */
       function parseDeferredVerifications(raw) {
-        const fm = raw.match(/^---\n([\s\S]*?)\n---/);
+        const fm = fenceYaml(raw);
         if (!fm) return [];
-        const block = fm[1];
+        const block = fm.yaml;
         // Find the deferred_verification key and its value
         const keyIdx = block.indexOf('deferred_verification:');
         if (keyIdx === -1) return [];

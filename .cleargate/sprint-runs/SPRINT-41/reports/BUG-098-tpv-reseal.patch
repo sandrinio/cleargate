@@ -1,0 +1,886 @@
+diff --git a/test/commands/doctor-fence.red.node.test.ts b/test/commands/doctor-fence.red.node.test.ts
+index 7838d05..f34c772 100644
+--- a/test/commands/doctor-fence.red.node.test.ts
++++ b/test/commands/doctor-fence.red.node.test.ts
+@@ -58,11 +58,21 @@ function setupDoctorFixture(tmpDir: string, sprintContent: string): void {
+ describe('BUG-098: doctor advisory + pricing behind <instructions>', () => {
+   test('D4 [red]: retired execution_mode advisory counts an instructions-led sprint file', async () => {
+     const tmpDir = makeTmpDir();
+-    const sprintContent = [
++    // Both sprint files carry `execution_mode:` inside a column-0 example header
++    // in <instructions>; only the first carries it in its REAL header. The count
++    // must be exactly 1: a whole-file scan or a first-`---`-anywhere scan counts 2
++    // (TPV re-seal, plans/M5-fixwave.md FW-A17).
++    const decoyPreamble = [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'execution_mode: "v1"',
++      '---',
+       '</instructions>',
+       '',
++    ];
++    const sprintContent = [
++      ...decoyPreamble,
+       '---',
+       'sprint_id: "SPRINT-FX-BUG098"',
+       'status: "Draft"',
+@@ -73,6 +83,20 @@ describe('BUG-098: doctor advisory + pricing behind <instructions>', () => {
+       '',
+     ].join('\n');
+     setupDoctorFixture(tmpDir, sprintContent);
++    fs.writeFileSync(
++      path.join(tmpDir, '.cleargate', 'delivery', 'pending-sync', 'SPRINT-FX-BUG098B.md'),
++      [
++        ...decoyPreamble,
++        '---',
++        'sprint_id: "SPRINT-FX-BUG098B"',
++        'status: "Draft"',
++        '---',
++        '',
++        '# SPRINT-FX-BUG098B (no execution_mode in its real header)',
++        '',
++      ].join('\n'),
++      'utf8',
++    );
+ 
+     const out: string[] = [];
+     const err: string[] = [];
+@@ -133,6 +157,27 @@ describe('BUG-098: doctor advisory + pricing behind <instructions>', () => {
+     assert.equal(exitCodes.length, 0, `runPricing must not exit on a readable instructions-led item; stderr: ${err.join('\n')}`);
+     assert.equal(out.length, 1);
+     assert.ok(out[0]!.includes('$'), `expected a USD estimate line, got: ${out[0]}`);
++
++    // A located-but-malformed framing (unterminated <instructions>: the locator
++    // throws) is "cannot parse frontmatter", exit 2 — not "no frontmatter"
++    // (plans/M5-fixwave.md §BUG-098 runPricing ruling; TPV re-seal).
++    const badPath = path.join(dir, 'EPIC-903.md');
++    fs.writeFileSync(badPath, ['<instructions>', 'never closed', '---', 'epic_id: "EPIC-903"', '---', '', '# Body', ''].join('\n'), 'utf8');
++    const err2: string[] = [];
++    let exit2 = -1;
++    try {
++      await runPricing(
++        badPath,
++        dir,
++        () => {},
++        (s) => err2.push(s),
++        (code) => { exit2 = code; throw new Error(`exit(${code})`); },
++      );
++    } catch {
++      // expected exit
++    }
++    assert.equal(exit2, 2);
++    assert.ok(err2.join('\n').includes('cannot parse frontmatter'), `expected "cannot parse frontmatter" for a throwing locator, got: ${err2.join('\n')}`);
+   });
+ 
+   test('D6 [anchor]: a file with no frontmatter → exit 2, "file has no frontmatter"', async () => {
+diff --git a/test/commands/gate-unit.node.test.ts b/test/commands/gate-unit.node.test.ts
+index 5f4cc1c..16d8bc9 100644
+--- a/test/commands/gate-unit.node.test.ts
++++ b/test/commands/gate-unit.node.test.ts
+@@ -1140,10 +1140,15 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+   test('R1 [red] (BUG-098): instructions-led Proposal parent (approved: true) → gate passes for parent-approved concern', async () => {
+     const dir = makeTmpDir();
+ 
++    // The <instructions> example header and a column-0 body line both say
++    // `approved: false`: only the real (located) header may be read (TPV re-seal).
+     const proposalPath = path.join(dir, 'PROPOSAL-901_test.md');
+     fs.writeFileSync(proposalPath, [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'approved: false',
++      '---',
+       '</instructions>',
+       '',
+       '---',
+@@ -1153,6 +1158,8 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+       '---',
+       '',
+       '# Proposal 901',
++      '',
++      'approved: false',
+     ].join('\n'), 'utf8');
+ 
+     const epicContent = [
+@@ -1172,6 +1179,7 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+     fs.writeFileSync(gatesDocPath, OR_GROUP_GATES_DOC, 'utf8');
+ 
+     const out: string[] = [];
++    const exitCodes: number[] = [];
+     try {
+       await gateCheckHandler(
+         absPath,
+@@ -1182,25 +1190,34 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+           gatesDocPath,
+           stdout: (s) => out.push(s),
+           stderr: (s) => out.push(s),
+-          exit: (code) => { throw new Error(`exit(${code})`); },
++          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+         },
+       );
+     } catch (e) {
+-      // Should not fail on parent-approved concern
++      // Only the exit seam may throw; anything else would make the assertion below vacuous.
++      if (!(e instanceof Error) || !/^exit\(\d+\)$/.test(e.message)) throw e;
+     }
+     const combined = out.join('\n');
+     // BUG-098 base: readFrontmatterFromFile reads {} behind <instructions> → the
+     // OR-group has no true leg → ❌ parent-approved fires for an approved parent.
+     assert.doesNotMatch(String(combined), /❌ parent-approved/);
++    // Non-vacuity: the gate block was evaluated (the fixture's "No TBDs here." fails
++    // no-tbds by design in this describe, so the exit code is not the signal).
++    assert.match(String(combined), /Gate: epic\.ready-for-decomposition/, `the gate must have been evaluated; exit codes ${JSON.stringify(exitCodes)}`);
+   });
+ 
+   test('R2 [red] (BUG-098): instructions-led Initiative parent (status: Triaged) → gate passes for parent-approved concern', async () => {
+     const dir = makeTmpDir();
+ 
++    // The <instructions> example header and a column-0 body line both say
++    // `status: "Draft"`: only the real (located) header may be read (TPV re-seal).
+     const initiativePath = path.join(dir, 'INITIATIVE-901_test.md');
+     fs.writeFileSync(initiativePath, [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'status: "Draft"',
++      '---',
+       '</instructions>',
+       '',
+       '---',
+@@ -1209,6 +1226,8 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+       '---',
+       '',
+       '# Initiative 901',
++      '',
++      'status: "Draft"',
+     ].join('\n'), 'utf8');
+ 
+     const epicContent = [
+@@ -1228,6 +1247,7 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+     fs.writeFileSync(gatesDocPath, OR_GROUP_GATES_DOC, 'utf8');
+ 
+     const out: string[] = [];
++    const exitCodes: number[] = [];
+     try {
+       await gateCheckHandler(
+         absPath,
+@@ -1238,13 +1258,17 @@ describe('CR-030 γ: OR-group evaluator — parent-approved', () => {
+           gatesDocPath,
+           stdout: (s) => out.push(s),
+           stderr: (s) => out.push(s),
+-          exit: (code) => { throw new Error(`exit(${code})`); },
++          exit: (code) => { exitCodes.push(code); throw new Error(`exit(${code})`); },
+         },
+       );
+     } catch (e) {
+-      // Should not fail on parent-approved concern
++      // Only the exit seam may throw; anything else would make the assertion below vacuous.
++      if (!(e instanceof Error) || !/^exit\(\d+\)$/.test(e.message)) throw e;
+     }
+     const combined = out.join('\n');
+     assert.doesNotMatch(String(combined), /❌ parent-approved/);
++    // Non-vacuity: the gate block was evaluated (the fixture's "No TBDs here." fails
++    // no-tbds by design in this describe, so the exit code is not the signal).
++    assert.match(String(combined), /Gate: epic\.ready-for-decomposition/, `the gate must have been evaluated; exit codes ${JSON.stringify(exitCodes)}`);
+   });
+ });
+diff --git a/test/commands/sprint-archive.node.test.ts b/test/commands/sprint-archive.node.test.ts
+index 1c3c5a3..2ae0df8 100644
+--- a/test/commands/sprint-archive.node.test.ts
++++ b/test/commands/sprint-archive.node.test.ts
+@@ -18,6 +18,8 @@ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import * as os from 'node:os';
+ import { sprintArchiveHandler } from '../../src/commands/sprint.js';
++import { locateFrontmatter } from '../../src/lib/frontmatter-locator.js';
++import { parseFrontmatter } from '../../src/wiki/parse-frontmatter.js';
+ 
+ // Minimal expect() shim (STORY-028-06)
+ // Backs remaining expect() calls with node:assert so vitest is not needed.
+@@ -787,9 +789,15 @@ describe('BUG-098 S6: archive stampFile never plants a phantom block on an instr
+ 
+   test('the archived instructions-led story keeps its preamble and gains a correctly-located status/completed_at stamp', () => {
+     const storyPath = path.join(fixture.pendingDir, 'STORY-099-01_Test_Story_1.md');
++    // The <instructions> block carries a column-0 example header (decoy keys):
++    // a conformant splice never touches it; a naive "first --- line" scan does.
+     const instructionsLedContent = [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'story_id: STORY-099-01',
++      'status: "Ready"',
++      '---',
+       '</instructions>',
+       '',
+       '---',
+@@ -797,12 +805,12 @@ describe('BUG-098 S6: archive stampFile never plants a phantom block on an instr
+       'parent_epic_ref: EPIC-099',
+       'status: "Ready"',
+       '---',
+-      '',
+-      '# STORY-099-01: Test Story 1',
++      '# STORY-099-01: Test Story 1 (no blank line after the closer: the splice preserves it)',
+       '',
+     ].join('\n');
+     fs.writeFileSync(storyPath, instructionsLedContent, 'utf8');
+-    const preamble = instructionsLedContent.slice(0, instructionsLedContent.indexOf('---'));
++    const spanBefore = locateFrontmatter(instructionsLedContent)!;
++    const preamble = instructionsLedContent.slice(0, spanBefore.start);
+ 
+     const { exitFn } = makeExitSeam();
+     const spawnMock = () => ({ status: 0, error: null, stdout: '', stderr: '' });
+@@ -827,7 +835,13 @@ describe('BUG-098 S6: archive stampFile never plants a phantom block on an instr
+ 
+     assert.equal(archived.slice(0, preamble.length), preamble, 'the <instructions> preamble must be byte-identical');
+     assert.ok(!/^---/.test(archived), 'no phantom fence may precede <instructions>');
+-    assert.ok(archived.includes('status: Done'), 'the located frontmatter must carry status: Done');
+-    assert.ok(archived.includes('completed_at:'), 'the located frontmatter must carry completed_at');
++    const spanAfter = locateFrontmatter(archived);
++    assert.ok(spanAfter, 'the archived file must still carry a locatable header');
++    assert.equal(spanAfter!.start, spanBefore.start, 'the real header must stay where it was');
++    assert.equal(archived.slice(spanAfter!.end), instructionsLedContent.slice(spanBefore.end), 'every byte after the real closing fence must be identical');
++    const { fm } = parseFrontmatter(archived);
++    assert.equal(fm['status'], 'Done', 'the located frontmatter must carry status: Done');
++    assert.ok(typeof fm['completed_at'] === 'string' && String(fm['completed_at']).length > 0, 'the located frontmatter must carry completed_at');
++    assert.equal(fm['story_id'], 'STORY-099-01');
+   });
+ });
+diff --git a/test/commands/sprint-frontmatter-fence.red.node.test.ts b/test/commands/sprint-frontmatter-fence.red.node.test.ts
+index 8c11d72..d31a35e 100644
+--- a/test/commands/sprint-frontmatter-fence.red.node.test.ts
++++ b/test/commands/sprint-frontmatter-fence.red.node.test.ts
+@@ -15,6 +15,11 @@ import assert from 'node:assert/strict';
+  * proposals"). This is BUG-067's phantom-block signature (measured
+  * 2026-09-26, plans/M5-fixwave.md §BUG-098).
+  *
++ * Every fixture's <instructions> block carries a column-0 example header (a
++ * `---` pair with decoy keys). The locator treats it as opaque, so a
++ * conformant fix never reads or writes it; a naive "first --- line" scan or a
++ * whole-file key scan does (TPV re-seal, plans/M5-fixwave.md FW-A17).
++ *
+  * Seams: sprintInitHandler(..., { cwd, gitRunner, spawnFn, stdout, stderr, exit }).
+  * gitRunner line format matches test/lib/lifecycle-reconcile.node.test.ts:183-192.
+  *
+@@ -74,6 +79,35 @@ function makeCapture() {
+   };
+ }
+ 
++/** An <instructions> block holding a column-0 example header with decoy keys. */
++const DECOY_PREAMBLE = [
++  '<instructions>',
++  'Guidance for the author. Example header (never the document header):',
++  '---',
++  'sprint_id: "SPRINT-DECOY"',
++  'status: "Active"',
++  'lifecycle_init_mode: "warn"',
++  'context_source: "decoy"',
++  'epics: [EPIC-999]',
++  '---',
++  '</instructions>',
++  '',
++];
++
++/** Bytes before the real (located) fence. */
++function preambleOf(raw: string): string {
++  const span = locateFrontmatter(raw);
++  assert.ok(span, 'fixture sanity: the real header is locatable');
++  return raw.slice(0, span!.start);
++}
++
++/** Bytes after the real (located) closing fence. */
++function afterCloserOf(raw: string): string {
++  const span = locateFrontmatter(raw);
++  assert.ok(span, 'the real header must still be locatable');
++  return raw.slice(span!.end);
++}
++
+ interface CwdFixture {
+   cwd: string;
+   pendingDir: string;
+@@ -107,10 +141,7 @@ function makeFixture(opts: {
+   ].filter((l) => l.length > 0);
+ 
+   const lines = [
+-    '<instructions>',
+-    'Guidance for the author.',
+-    '</instructions>',
+-    '',
++    ...DECOY_PREAMBLE,
+     '---',
+     ...fmLines,
+     '---',
+@@ -143,8 +174,7 @@ describe('BUG-098: sprintInitHandler --allow-drift never plants a phantom block'
+   test('S1 [red]: LF instructions-led plan, CR-001 Draft, allowDrift → real fence stays first, context_source merged, epics preserved', () => {
+     const { cwd, sprintPlanPath } = makeFixture({ contextSource: 'orig', crStatus: 'Draft' });
+     const before = fs.readFileSync(sprintPlanPath, 'utf8');
+-    const preamble = before.slice(0, before.indexOf('---'));
+-    const suffix = before.slice(before.indexOf('# Sprint Plan') - 2);
++    const preamble = preambleOf(before);
+ 
+     const { exitFn } = makeExitSeam();
+     const cap = makeCapture();
+@@ -187,14 +217,14 @@ describe('BUG-098: sprintInitHandler --allow-drift never plants a phantom block'
+     assert.equal(fm['sprint_id'], 'SPRINT-TEST');
+     assert.deepEqual(fm['epics'], ['EPIC-001'], 'epics must not disappear behind a phantom block');
+ 
+-    // The bytes after the closing fence are identical.
+-    assert.equal(after.slice(after.length - suffix.length), suffix);
++    // The bytes after the closing fence are identical (no inserted or normalized separator).
++    assert.equal(afterCloserOf(after), afterCloserOf(before), 'every byte after the real closing fence must be identical');
+   });
+ 
+   test('S2 [red]: CRLF instructions-led plan, CR-001 Draft, allowDrift → new block lines end \\r\\n, preamble intact', () => {
+     const { cwd, sprintPlanPath } = makeFixture({ eol: '\r\n', contextSource: 'orig', crStatus: 'Draft' });
+     const before = fs.readFileSync(sprintPlanPath, 'utf8');
+-    const preamble = before.slice(0, before.indexOf('---'));
++    const preamble = preambleOf(before);
+ 
+     const { exitFn } = makeExitSeam();
+     const cap = makeCapture();
+@@ -227,35 +257,45 @@ describe('BUG-098: sprintInitHandler --allow-drift never plants a phantom block'
+     const { fm } = parseFrontmatter(after);
+     assert.ok(String(fm['context_source']).includes('lifecycle waiver: '));
+     assert.deepEqual(fm['epics'], ['EPIC-001']);
++    assert.equal(afterCloserOf(after), afterCloserOf(before), 'every byte after the real closing fence must be identical (CRLF)');
++    const header = after.slice(span!.start, span!.end);
++    assert.ok(!/[^\r]\n/.test(header), `every line of the rewritten header must end \\r\\n, got: ${JSON.stringify(header)}`);
+   });
+ 
+   test('S3 [red]: stampSprintClose on an instructions-led sprint file — didChange true, preamble+body identical, status stamped', () => {
+     const tmpDir = makeTmpDir();
+     const sprintFile = path.join(tmpDir, 'SPRINT-TEST3.md');
+     const content = [
+-      '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
++      ...DECOY_PREAMBLE,
+       '---',
+       'sprint_id: "SPRINT-TEST3"',
+       'status: "Active"',
+       '---',
+-      '',
+-      '# Sprint Plan',
++      '# Sprint Plan (no blank line after the closer: the splice preserves the separator)',
+       '',
+     ].join('\n');
+     fs.writeFileSync(sprintFile, content, 'utf8');
+ 
+     // dynamic import to keep this test's failure isolated from module load order
+     return import('../../src/commands/sprint.js').then(({ stampSprintClose }) => {
+-      const preamble = content.slice(0, content.indexOf('---'));
++      const preamble = preambleOf(content);
+       const { didChange, stampedContent } = stampSprintClose(sprintFile, () => '2026-01-01T00:00:00.000Z');
+ 
+       assert.equal(didChange, true);
+       assert.equal(String(stampedContent).slice(0, preamble.length), preamble, 'preamble must be byte-identical');
+       assert.ok(!/^---/.test(String(stampedContent)), 'no phantom fence may precede <instructions>');
+-      assert.ok(String(stampedContent).includes('# Sprint Plan'), 'body must be preserved');
++      assert.equal(afterCloserOf(String(stampedContent)), afterCloserOf(content), 'the body (every byte after the real closing fence) must be identical');
++      assert.equal(fs.readFileSync(sprintFile, 'utf8'), String(stampedContent), 'the stamped content is what was written');
++
++      // Malformed framing (the real header behind <instructions> is never closed, so
++      // the locator throws): no write, reported as no change (TPV re-seal, FW-A17).
++      const brokenFile = path.join(tmpDir, 'SPRINT-TEST3B.md');
++      const broken = [...DECOY_PREAMBLE, '---', 'sprint_id: "SPRINT-TEST3B"', 'status: "Active"', '', '# Sprint Plan', ''].join('\n');
++      fs.writeFileSync(brokenFile, broken, 'utf8');
++      const r2 = stampSprintClose(brokenFile, () => '2026-01-01T00:00:00.000Z');
++      assert.equal(r2.didChange, false, 'a file whose framing cannot be located is never stamped');
++      assert.equal(r2.stampedContent, broken);
++      assert.equal(fs.readFileSync(brokenFile, 'utf8'), broken, 'the malformed file is byte-identical');
+ 
+       const { fm } = parseFrontmatter(String(stampedContent));
+       assert.equal(fm['status'], 'Completed');
+@@ -319,5 +359,27 @@ describe('BUG-098: sprintInitHandler --allow-drift never plants a phantom block'
+ 
+     const after = fs.readFileSync(sprintPlanPath, 'utf8');
+     assert.equal(after, before, 'a malformed frontmatter behind <instructions> must never be rewritten or shadowed by a phantom');
++
++    // Malformed framing: the real header behind <instructions> is never closed, so
++    // the locator throws. That is not "no frontmatter": nothing may be written
++    // (no block planted before <instructions>) (TPV re-seal, FW-A17).
++    const broken = [...DECOY_PREAMBLE, '---', 'sprint_id: "SPRINT-TEST"', 'context_source: "orig"', '', '# Sprint Plan', ''].join('\n');
++    fs.writeFileSync(sprintPlanPath, broken, 'utf8');
++    try {
++      sprintInitHandler(
++        { sprintId: 'SPRINT-TEST', stories: 'STORY-999-01', allowDrift: true },
++        {
++          cwd,
++          stdout: cap.stdout,
++          stderr: cap.stderr,
++          exit: makeExitSeam().exitFn,
++          spawnFn: (() => ({ status: 0, stdout: '', stderr: '' })) as never,
++          gitRunner: makeGitRunner([{ sha: 'cr0001ee', subject: 'feat(CR-001): align lifecycle' }]),
++        },
++      );
++    } catch {
++      // swallow
++    }
++    assert.equal(fs.readFileSync(sprintPlanPath, 'utf8'), broken, 'malformed framing behind <instructions> must never be rewritten or shadowed by a phantom');
+   });
+ });
+diff --git a/test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts b/test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts
+index 74f8c8a..00fe80c 100644
+--- a/test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts
++++ b/test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts
+@@ -94,7 +94,9 @@ describe('BUG-098 e2e: --allow-drift never plants a phantom block on a real temp
+ 
+     // The real template scaffolds an <instructions> preamble (CR-108).
+     assert.ok(sprintRaw.startsWith('<instructions>') || sprintRaw.includes('<instructions>'), 'fixture sanity: the real sprint template must be instructions-led');
+-    const preamble = sprintRaw.slice(0, sprintRaw.indexOf('---'));
++    const spanRaw = locateFrontmatter(sprintRaw);
++    assert.ok(spanRaw, 'fixture sanity: the real template header is locatable');
++    const preamble = sprintRaw.slice(0, spanRaw!.start);
+ 
+     const gitRunner = makeGitRunner([{ sha: 'e2ecr0001', subject: `feat(${crId}): align lifecycle` }]);
+     const { exitFn } = makeExitSeam();
+@@ -129,5 +131,7 @@ describe('BUG-098 e2e: --allow-drift never plants a phantom block on a real temp
+     assert.ok(String(fm['context_source'] ?? '').includes('lifecycle waiver: '), `expected a merged waiver note, got: ${String(fm['context_source'])}`);
+     assert.ok(String(fm['context_source'] ?? '').includes(`for ${crId}`));
+     assert.equal(fm['sprint_id'], sprintId);
++    assert.deepEqual(fm['epics'], parseFrontmatter(sprintRaw).fm['epics'], 'epics must survive the waiver write');
++    assert.equal(after.slice(spanAfter!.end), sprintRaw.slice(spanBefore!.end), 'every byte after the real closing fence must be identical');
+   });
+ });
+diff --git a/test/lib/frontmatter-merge.node.test.ts b/test/lib/frontmatter-merge.node.test.ts
+index 3382269..5b84dde 100644
+--- a/test/lib/frontmatter-merge.node.test.ts
++++ b/test/lib/frontmatter-merge.node.test.ts
+@@ -265,9 +265,15 @@ describe('Scenario: New remote field is added to merged result', () => {
+ 
+ describe('BUG-098: mergeFrontmatterConflict reads a local file behind <instructions>', () => {
+   test('FM1 [red]: instructions-led local file merges a remote-only field', () => {
++    // The <instructions> example header carries decoy values; only the real
++    // header may be merged (TPV re-seal).
+     const localFile = [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'story_id: "STORY-000-00"',
++      'title: "Decoy Title"',
++      '---',
+       '</instructions>',
+       '',
+       '---',
+@@ -285,5 +291,6 @@ describe('BUG-098: mergeFrontmatterConflict reads a local file behind <instructi
+     const result = mergeFrontmatterConflict(localFile, remoteBlock);
+     const { fm } = parseFrontmatter(result);
+     assert.strictEqual(fm['title'], 'Remote-only Title', 'a remote-only field must survive the merge even when the local side is instructions-led');
++    assert.strictEqual(fm['story_id'], 'STORY-042-01', 'the local side is the real header, not the <instructions> example');
+   });
+ });
+diff --git a/test/lib/intake.node.test.ts b/test/lib/intake.node.test.ts
+index ce387a1..e6015ed 100644
+--- a/test/lib/intake.node.test.ts
++++ b/test/lib/intake.node.test.ts
+@@ -332,11 +332,20 @@ describe('runIntakeBranch', () => {
+     // (what `cleargate new` scaffolds, CR-108) — hasAnyRemoteAuthored scans up to
+     // the first '\n---' (the <instructions> preamble), never reaching the real
+     // frontmatter's source: "remote-authored" (plans/M5-fixwave.md §BUG-098 site 13).
+-    const priorContent = [
++    // Each <instructions> block carries a column-0 example header whose `source:`
++    // disagrees with the real header, so only a located read passes both halves:
++    // a whole-file scan or a first-`---`-anywhere scan fails one of them (TPV re-seal).
++    const decoyPreamble = (source: string) => [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      `source: "${source}"`,
++      '---',
+       '</instructions>',
+       '',
++    ];
++    const priorContent = [
++      ...decoyPreamble('local-authored'),
+       '---',
+       'proposal_id: "PROP-002"',
+       'remote_id: "LIN-998"',
+@@ -355,6 +364,30 @@ describe('runIntakeBranch', () => {
+ 
+     assert.strictEqual(result.created, 0);
+     assert.strictEqual(result.warning, undefined, `expected no R10 warning once the instructions-led prior file is found; got: ${String(result.warning)}`);
++
++    // Second half: `remote-authored` appears only in the <instructions> example;
++    // the real header is local-authored, so there is no prior intake → WARN.
++    const tmp2 = makeTmpDir();
++    try {
++      const pending2 = makePendingSync(tmp2);
++      makeArchive(tmp2);
++      fs.writeFileSync(path.join(pending2, 'PROPOSAL-003-local.md'), [
++        ...decoyPreamble('remote-authored'),
++        '---',
++        'proposal_id: "PROP-003"',
++        'source: "local-authored"',
++        '---',
++        '',
++        '# Local',
++        '',
++      ].join('\n'), 'utf8');
++      const result2 = await runIntakeBranch(makeBaseOpts(tmp2, makeMockMcp([])));
++      assert.strictEqual(result2.created, 0);
++      assert.notStrictEqual(result2.warning, undefined, 'a remote-authored mention inside <instructions> is not a prior intake');
++      assert.match(String(result2.warning), /no Linear issues match label/);
++    } finally {
++      cleanup(tmp2);
++    }
+   });
+ 
+   test('dryRunZeroWrite: dryRun=true produces zero fs writes', async () => {
+diff --git a/test/lib/lifecycle-reconcile-fence.red.node.test.ts b/test/lib/lifecycle-reconcile-fence.red.node.test.ts
+index 8366597..b0ef8cf 100644
+--- a/test/lib/lifecycle-reconcile-fence.red.node.test.ts
++++ b/test/lib/lifecycle-reconcile-fence.red.node.test.ts
+@@ -11,6 +11,12 @@ import assert from 'node:assert/strict';
+  * (measured, plans/M5-fixwave.md §BUG-098 site 5), so sprint close stops at
+  * Step 2.6d and the file never reaches archive/.
+  *
++ * Each fixture's <instructions> block carries a column-0 example header whose
++ * lines equal the real ones (`status: "Draft"`, `approved: false`): a
++ * conformant splice leaves it byte-identical, while a first-`---`-anywhere
++ * regex or a whole-file line replace rewrites the example instead (TPV
++ * re-seal, plans/M5-fixwave.md FW-A17).
++ *
+  * Naming: *.red.node.test.ts (default tier).
+  */
+ 
+@@ -34,6 +40,17 @@ afterEach(() => {
+   }
+ });
+ 
++const DECOY_PREAMBLE = [
++  '<instructions>',
++  'Guidance for the author. Example header (never the document header):',
++  '---',
++  'status: "Draft"',
++  'approved: false',
++  '---',
++  '</instructions>',
++  '',
++];
++
+ interface Fixture {
+   deliveryRoot: string;
+   pendingDir: string;
+@@ -74,20 +91,9 @@ function makeFixture(storyId: string, eol: '\n' | '\r\n', storyBody: string[]):
+ describe('BUG-098: reconcileCurrentSprintStories (2.6d) sets fields on an instructions-led story', () => {
+   test('L1 [red]: LF, status: "Draft" + approved: false → both flipped, byte-exact elsewhere, file lands in archive', () => {
+     const storyId = 'STORY-900-01';
+-    const raw = [
+-      '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
+-      '---',
+-      `story_id: "${storyId}"`,
+-      'status: "Draft"',
+-      'approved: false',
+-      '---',
+-      '',
+-      `# ${storyId}: Probe`,
+-      '',
+-    ];
++    const header = ['---', `story_id: "${storyId}"`, 'status: "Draft"', 'approved: false', '---'];
++    const tail = ['', `# ${storyId}: Probe`, ''];
++    const raw = [...DECOY_PREAMBLE, ...header, ...tail];
+     const fx = makeFixture(storyId, '\n', raw);
+     const before = fs.readFileSync(fx.storyPath, 'utf8');
+ 
+@@ -103,30 +109,23 @@ describe('BUG-098: reconcileCurrentSprintStories (2.6d) sets fields on an instru
+     assert.ok(fs.existsSync(archivedPath), 'the file must be moved to archive/');
+     const after = fs.readFileSync(archivedPath, 'utf8');
+ 
+-    const expected = before
+-      .replace('status: "Draft"', 'status: "Completed"')
+-      .replace('approved: false', 'approved: true');
+-    assert.equal(after, expected, 'exactly the two named lines must change; every other byte is identical');
++    const expected = [
++      ...DECOY_PREAMBLE,
++      '---', `story_id: "${storyId}"`, 'status: "Completed"', 'approved: true', '---',
++      ...tail,
++    ].join('\n');
++    assert.equal(before, raw.join('\n'), 'fixture sanity');
++    assert.equal(after, expected, 'exactly the two named lines of the REAL header change; the example header in <instructions> and every other byte are identical');
+   });
+ 
+   test('L2 [red]: CRLF, no approved key → status replaced, approved appended \\r\\n-terminated, preamble untouched', () => {
+     const storyId = 'STORY-900-02';
+-    const raw = [
+-      '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
+-      '---',
+-      `story_id: "${storyId}"`,
+-      'status: "Draft"',
+-      '---',
+-      '',
+-      `# ${storyId}: Probe`,
+-      '',
+-    ];
++    const tail = ['', `# ${storyId}: Probe`, ''];
++    const raw = [...DECOY_PREAMBLE, '---', `story_id: "${storyId}"`, 'status: "Draft"', '---', ...tail];
+     const fx = makeFixture(storyId, '\r\n', raw);
+     const before = fs.readFileSync(fx.storyPath, 'utf8');
+-    const preamble = before.slice(0, before.indexOf('---'));
++    const preamble = DECOY_PREAMBLE.join('\r\n') + '\r\n';
++    assert.equal(before.slice(0, preamble.length), preamble, 'fixture sanity');
+ 
+     const result = reconcileCurrentSprintStories({
+       deliveryRoot: fx.deliveryRoot,
+@@ -146,5 +145,11 @@ describe('BUG-098: reconcileCurrentSprintStories (2.6d) sets fields on an instru
+     assert.equal(span!.eol, '\r\n', 'the fence must stay CRLF, not gain a bare-\\n phantom');
+     assert.ok(after.includes('status: "Completed"\r\n'), 'status must be replaced in place');
+     assert.ok(after.includes('approved: true\r\n---\r\n'), 'approved must be appended, CRLF-terminated, with the closing fence on its own line');
++    const expected = [
++      ...DECOY_PREAMBLE,
++      '---', `story_id: "${storyId}"`, 'status: "Completed"', 'approved: true', '---',
++      ...tail,
++    ].join('\r\n');
++    assert.equal(after, expected, 'every byte outside the real header is identical, and the header is exactly the two edits in CRLF');
+   });
+ });
+diff --git a/test/lib/slug.node.test.ts b/test/lib/slug.node.test.ts
+index 747af7a..172b096 100644
+--- a/test/lib/slug.node.test.ts
++++ b/test/lib/slug.node.test.ts
+@@ -253,9 +253,14 @@ describe('BUG-098: nextProposalId / findByRemoteId behind <instructions>', () =>
+   afterEach(() => cleanup(tmpDir));
+ 
+   test('SL1 [red]: an instructions-led PROPOSAL-004 with proposal_id: "PROP-004" is counted — next is PROP-005', async () => {
++    // The <instructions> example header names PROP-009: reading it (a whole-file
++    // scan or a first-`---`-anywhere scan) yields PROP-010 (TPV re-seal).
+     const content = [
+       '<instructions>',
+-      'Guidance for the author.',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'proposal_id: "PROP-009"',
++      '---',
+       '</instructions>',
+       '',
+       '---',
+@@ -273,6 +278,24 @@ describe('BUG-098: nextProposalId / findByRemoteId behind <instructions>', () =>
+   });
+ 
+   test('SL2 [red]: an instructions-led item with remote_id: "LIN-42" is found by findByRemoteId', async () => {
++    // A sibling (sorted first) names LIN-42 only in its <instructions> example
++    // header; its real header says LIN-7. Only the real header may match (TPV re-seal).
++    fs.writeFileSync(path.join(pendingSync, 'PROPOSAL-010_decoy.md'), [
++      '<instructions>',
++      'Guidance for the author. Example header (never the document header):',
++      '---',
++      'remote_id: "LIN-42"',
++      '---',
++      '</instructions>',
++      '',
++      '---',
++      'proposal_id: "PROP-010"',
++      'remote_id: "LIN-7"',
++      '---',
++      '',
++      '# Decoy',
++      '',
++    ].join('\n'), 'utf8');
+     const content = [
+       '<instructions>',
+       'Guidance for the author.',
+diff --git a/test/scripts/scripts-fence-bug098.red.node.test.ts b/test/scripts/scripts-fence-bug098.red.node.test.ts
+index fa9407a..54c4622 100644
+--- a/test/scripts/scripts-fence-bug098.red.node.test.ts
++++ b/test/scripts/scripts-fence-bug098.red.node.test.ts
+@@ -12,6 +12,11 @@ import assert from 'node:assert/strict';
+  * (BUG-090/BUG-097 pattern) — since the fix lands in canonical first and the
+  * live twin is a byte copy applied at DevOps integration.
+  *
++ * Fixtures carry decoys (TPV re-seal, plans/M5-fixwave.md FW-A17): a column-0
++ * example header inside <instructions> (defeats a first-`---`-anywhere scan)
++ * and, for the date reader, column-0 date lines in the body (defeats a
++ * last-wins whole-file key scan). Rewrites are checked byte-for-byte.
++ *
+  * Naming: *.red.node.test.ts (default tier).
+  */
+ 
+@@ -72,7 +77,11 @@ describe('BUG-098: prep_reporter_context.mjs date window behind <instructions>',
+       path.join(pendingSyncDir, `${sprintId}_fixture.md`),
+       [
+         '<instructions>',
+-        'Guidance for the author.',
++        'Guidance for the author. Example header (never the document header):',
++        '---',
++        'start_date: 2026-01-01',
++        'end_date: 2026-01-31',
++        '---',
+         '</instructions>',
+         '',
+         '---',
+@@ -83,6 +92,9 @@ describe('BUG-098: prep_reporter_context.mjs date window behind <instructions>',
+         '---',
+         '# Sprint fixture',
+         '',
++        'start_date: 2026-12-01',
++        'end_date: 2026-12-31',
++        '',
+       ].join('\n'),
+     );
+ 
+@@ -118,6 +130,9 @@ describe('BUG-098: prep_reporter_context.mjs date window behind <instructions>',
+         '---',
+         '# Sprint fixture',
+         '',
++        'start_date: 2026-12-01',
++        'end_date: 2026-12-31',
++        '',
+       ].join('\n'),
+     );
+ 
+@@ -133,24 +148,23 @@ describe('BUG-098: prep_reporter_context.mjs date window behind <instructions>',
+ describe('BUG-098: dedupe_frontmatter.mjs behind <instructions>', () => {
+   test('DD1 [red]: an instructions-led file with a duplicate approved key is deduped', () => {
+     const tmpDir = makeTmpDir();
+-    const content = [
++    // The <instructions> example header has its own duplicate key; only the real
++    // header may be deduped, and the closing fence must stay on its own line.
++    const preambleLines = [
+       '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
++      'Guidance for the author. Example header (never the document header):',
+       '---',
+-      'bug_id: BUG-098',
+-      'approved: false',
+-      'approved: true',
++      'status: Draft',
+       'status: Triaged',
+       '---',
++      '</instructions>',
+       '',
+-      '# BUG-098 body',
+-      '',
+-    ].join('\n');
++    ];
++    const tailLines = ['', '# BUG-098 body', ''];
++    const content = [...preambleLines, '---', 'bug_id: BUG-098', 'approved: false', 'approved: true', 'status: Triaged', '---', ...tailLines].join('\n');
+     const filePath = path.join(tmpDir, 'BUG-098_dup.md');
+     fs.writeFileSync(filePath, content, 'utf8');
+-    const preamble = content.slice(0, content.indexOf('---'));
++    const preamble = preambleLines.join('\n') + '\n';
+ 
+     const { stdout } = runDedupe(tmpDir);
+     assert.ok(stdout.includes('removed duplicate keys: approved'), `expected a rewrite of the duplicate, got stdout:\n${stdout}`);
+@@ -161,6 +175,12 @@ describe('BUG-098: dedupe_frontmatter.mjs behind <instructions>', () => {
+     const matches = after.match(/^approved:/gm) ?? [];
+     assert.equal(matches.length, 1, 'only the last occurrence of approved must survive');
+     assert.ok(after.includes('approved: true'));
++    assert.ok(!stdout.includes('removed duplicate keys: status'), 'the <instructions> example header must not be deduped');
++    assert.equal(
++      after,
++      [...preambleLines, '---', 'bug_id: BUG-098', 'approved: true', 'status: Triaged', '---', ...tailLines].join('\n'),
++      'the file equals the original minus the first approved: line of the real header',
++    );
+   });
+ 
+   test('DD2 [anchor]: the same file ---led is deduped', () => {
+@@ -186,5 +206,6 @@ describe('BUG-098: dedupe_frontmatter.mjs behind <instructions>', () => {
+     const matches = after.match(/^approved:/gm) ?? [];
+     assert.equal(matches.length, 1);
+     assert.ok(after.includes('approved: true'));
++    assert.equal(after, content.replace('approved: false\n', ''), 'the file equals the original minus the first approved: line');
+   });
+ });
+diff --git a/test/wiki/audit-status.node.test.ts b/test/wiki/audit-status.node.test.ts
+index 2e55710..e6ec141 100644
+--- a/test/wiki/audit-status.node.test.ts
++++ b/test/wiki/audit-status.node.test.ts
+@@ -480,24 +480,21 @@ describe('TTY guards', () => {
+ describe('BUG-098 W1: --fix --yes never plants a phantom block on an instructions-led item', () => {
+   test('an instructions-led Ready epic in archive is fixed to Abandoned; preamble identical; second run clean', async () => {
+     const epicFilename = 'EPIC-901_Test.md';
+-    const instructionsLedContent = [
++    // The <instructions> block carries a column-0 example header with its own
++    // `status: "Ready"`; only the real header's status line may change (TPV re-seal).
++    const preambleLines = [
+       '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
++      'Guidance for the author. Example header (never the document header):',
+       '---',
+-      'story_id: "EPIC-901"',
+-      'parent_epic_ref: ""',
+       'status: "Ready"',
+-      'remote_id: ""',
+       '---',
++      '</instructions>',
+       '',
+-      '# EPIC-901: Test Epic',
+-      '',
+-      'A test epic for unit testing.',
+-      '',
+-    ].join('\n');
+-    const preamble = instructionsLedContent.slice(0, instructionsLedContent.indexOf('---'));
++    ];
++    const headerLines = (status: string) => ['---', 'story_id: "EPIC-901"', 'parent_epic_ref: ""', `status: "${status}"`, 'remote_id: ""', '---'];
++    const tailLines = ['', '# EPIC-901: Test Epic', '', 'A test epic for unit testing.', ''];
++    const instructionsLedContent = [...preambleLines, ...headerLines('Ready'), ...tailLines].join('\n');
++    const preamble = preambleLines.join('\n') + '\n';
+ 
+     fx = buildFixture([
+       { subdir: 'archive', filename: epicFilename, content: instructionsLedContent },
+@@ -512,6 +509,7 @@ describe('BUG-098 W1: --fix --yes never plants a phantom block on an instruction
+     assert.equal(fixed.slice(0, preamble.length), preamble, 'the <instructions> preamble must be byte-identical');
+     assert.ok(!/^---/.test(fixed), 'no phantom fence may precede <instructions>');
+     assert.match(fixed, /status: "Abandoned"/, 'the located status line must be fixed to Abandoned');
++    assert.equal(fixed, [...preambleLines, ...headerLines('Abandoned'), ...tailLines].join('\n'), '--fix changes only the real header\'s status line');
+ 
+     const h2 = await runAudit(fx, { fix: false });
+     assert.strictEqual(h2.exitCode, 0);
+diff --git a/test/wiki/contradict.node.test.ts b/test/wiki/contradict.node.test.ts
+index 31be5fc..2b75ddd 100644
+--- a/test/wiki/contradict.node.test.ts
++++ b/test/wiki/contradict.node.test.ts
+@@ -871,20 +871,21 @@ describe('BUG-098: commitPhase4Findings stamps last_contradict_sha behind <instr
+ 
+   test('C1 [red]: the located block gains last_contradict_sha; preamble + body are otherwise byte-identical', () => {
+     const rawPath = path.join(fixture.root, 'STORY-T3.md');
+-    const rawContent = [
++    // The <instructions> block carries a column-0 example header; a conformant
++    // splice never touches it (TPV re-seal, plans/M5-fixwave.md FW-A17).
++    const preambleLines = [
+       '<instructions>',
+-      'Guidance for the author.',
+-      '</instructions>',
+-      '',
++      'Guidance for the author. Example header (never the document header):',
+       '---',
+       'status: "Draft"',
+       '---',
++      '</instructions>',
+       '',
+-      'Body',
+-      '',
+-    ].join('\n');
++    ];
++    const tailLines = ['', 'Body', ''];
++    const rawContent = [...preambleLines, '---', 'status: "Draft"', '---', ...tailLines].join('\n');
+     fs.writeFileSync(rawPath, rawContent, 'utf8');
+-    const preamble = rawContent.slice(0, rawContent.indexOf('---'));
++    const preamble = preambleLines.join('\n') + '\n';
+ 
+     commitPhase4Findings({
+       absRawPath: rawPath,
+@@ -901,5 +902,7 @@ describe('BUG-098: commitPhase4Findings stamps last_contradict_sha behind <instr
+     assert.ok(!/^---/.test(updated), 'no phantom fence may precede <instructions>');
+     assert.ok(updated.includes(`last_contradict_sha: "${FAKE_SHA}"`), 'the located frontmatter must gain last_contradict_sha');
+     assert.ok(updated.includes('Body'), 'the body must be preserved');
++    const expected = [...preambleLines, '---', 'status: "Draft"', `last_contradict_sha: "${FAKE_SHA}"`, '---', ...tailLines].join('\n');
++    assert.equal(updated, expected, 'the only diff is the one inserted line inside the real header');
+   });
+ });

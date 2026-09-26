@@ -107,13 +107,13 @@ scaffold-lint: clean
 Do not touch `scaffold/**`, `stamp-tokens.ts`, or the protocol. There are no payload changes.
 
 ## Task Breakdown
-- [ ] QA-Red: one failing test per defect, plus the preserved edge behaviours from §2
-- [ ] `gate.ts`: emit the per-criterion lines under `-v` on a pass too
-- [ ] Export buildDiffPreview from stamp.ts for unit tests
-- [ ] `stamp.ts`: render objects and arrays as compact JSON; compare them by serialized value
-- [ ] `wiki-query.ts`: drop a leading `- [[ID]]` (and its separator) from the excerpt before prefixing
-- [ ] `scaffold-lint.ts`: print "clean" once on every clean path
-- [ ] typecheck plus the four targeted test files
+- [x] QA-Red: one failing test per defect, plus the preserved edge behaviours from §2
+- [x] `gate.ts`: emit the per-criterion lines under `-v` on a pass too
+- [x] Export buildDiffPreview from stamp.ts for unit tests
+- [x] `stamp.ts`: render objects and arrays as compact JSON; compare them by serialized value
+- [x] `wiki-query.ts`: drop a leading `- [[ID]]` (and its separator) from the excerpt before prefixing
+- [x] `scaffold-lint.ts`: print "clean" once on every clean path
+- [x] typecheck plus the four targeted test files
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- <each of the four targeted test files>` (solo, one at a time).

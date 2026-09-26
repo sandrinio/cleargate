@@ -127,12 +127,12 @@ draft_tokens:
 The exact file list, contract text and test shapes are pinned by the SPRINT-41 remainder re-plan (`plans/replan-contract-first.md`).
 
 ## Task Breakdown
-- [ ] QA-Red: waves-json-v2 (init_sprint v1/v2, storyBases, launchWave bases, integrationReady, export guard), contract-first-dag-text (reader, synth, SKILL §A.4/§C.0.2 + -12 anchors, enforcement, template, architect.md, vocab), init-sprint-waves-v2 integration, 7 M2 rows incl. the shared enforcement row
-- [ ] launch_wave.mjs: storyBases, integrationReady, launchWave bases (no header/validator change)
-- [ ] architect-reader digest exports_provided / exports_consumed; architect-synth real-collision predicate, contract formation, schema_version 2 shape; architect.md §2.1 sentence
-- [ ] SKILL.md §A.4 + §C.0 intro sentence + §C.0.2 (inside A2; -12 anchors byte-identical; no banned tokens outside A2)
-- [ ] enforcement :103 wording; Sprint Plan Template §2.1 body; byte-copy the 3 twins
-- [ ] Integrate: merge cli main; regenerate codex agent TOMLs if STORY-058-11 merged first; re-verify; QA-Verify + post-flight on the integrated tree
+- [x] QA-Red: waves-json-v2 (init_sprint v1/v2, storyBases, launchWave bases, integrationReady, export guard), contract-first-dag-text (reader, synth, SKILL §A.4/§C.0.2 + -12 anchors, enforcement, template, architect.md, vocab), init-sprint-waves-v2 integration, 7 M2 rows incl. the shared enforcement row
+- [x] launch_wave.mjs: storyBases, integrationReady, launchWave bases (no header/validator change)
+- [x] architect-reader digest exports_provided / exports_consumed; architect-synth real-collision predicate, contract formation, schema_version 2 shape; architect.md §2.1 sentence
+- [x] SKILL.md §A.4 + §C.0 intro sentence + §C.0.2 (inside A2; -12 anchors byte-identical; no banned tokens outside A2)
+- [x] enforcement :103 wording; Sprint Plan Template §2.1 body; byte-copy the 3 twins
+- [x] Integrate: merge cli main; regenerate codex agent TOMLs if STORY-058-11 merged first; re-verify; QA-Verify + post-flight on the integrated tree
 - [ ] RS-CR live re-sync of 3 agents + SKILL.md; dogfood ledger rows through close
 
 ## 4. Verification Protocol
