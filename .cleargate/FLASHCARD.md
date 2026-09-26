@@ -1,3 +1,5 @@
+2026-09-26 · #frontmatter #close-gate · BUG-090 merged: close_sprint 2.6c/2.9, assert_story_files, doctor find fences past <instructions>; offset-0 cards stale.
+2026-09-26 · #devops #shell #stdin · `cat > file` with no heredoc or </dev/null blocks forever on stdin in an agent Bash call; use : > file.
 2026-09-26 · #shell #zsh #test-harness · zsh never word-splits an unquoted $LIST; a file list reaches the runner as one arg. Use bash -c.
 2026-09-26 · #test-harness #baseline · dogfood-install.integration is red at C1 base (doctor prints 'Run cleargate upgrade to review.').
 2026-09-26 · #test-harness #worktree · token-ledger-delta.integration runs LIVE <cli>/../../.claude token-ledger.sh; canonical edits can't move it.

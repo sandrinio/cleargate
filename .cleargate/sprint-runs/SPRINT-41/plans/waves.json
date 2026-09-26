@@ -196,7 +196,7 @@
       "wave": "wave13"
     },
     "STORY-058-10": {
-      "state": "building (pass C)",
+      "state": "merged",
       "base": "35580b0",
       "upstream": [],
       "repo": "cli",
@@ -210,7 +210,7 @@
       ]
     },
     "BUG-096": {
-      "state": "build-now",
+      "state": "merged",
       "base": "35580b0",
       "upstream": [],
       "repo": "cli",
@@ -222,7 +222,7 @@
       ]
     },
     "BUG-097": {
-      "state": "queued",
+      "state": "merged",
       "base": "main",
       "upstream": [],
       "repo": "cli",
@@ -235,7 +235,7 @@
       "base_note": "cli main tip when its lane opens"
     },
     "CR-124": {
-      "state": "build-now",
+      "state": "integrated (QA+post-flight PASS on 430424a; re-integrates after STORY-058-11 merges)",
       "base": "35580b0",
       "upstream": [],
       "repo": "both",
@@ -252,7 +252,7 @@
       ]
     },
     "BUG-090": {
-      "state": "build-now",
+      "state": "merged",
       "base": "contract/S-41-codex",
       "upstream": [
         "STORY-058-10"
@@ -270,7 +270,7 @@
       ]
     },
     "STORY-058-11": {
-      "state": "build-now",
+      "state": "integrating (Dev 44ba381 on re-seal 635816c)",
       "base": "contract/S-41-codex",
       "upstream": [
         "STORY-058-10"
@@ -289,7 +289,7 @@
       ]
     },
     "BUG-098": {
-      "state": "waits-for-contract C4",
+      "state": "tpv (QA-Red 2ea4832 on C4 f31c684)",
       "base": "contract/S-41-fence",
       "upstream": [
         "BUG-090"
@@ -307,7 +307,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "waits-for-contract C2",
+      "state": "waits-for-contract C2 (C2 build dispatched)",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
