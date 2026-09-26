@@ -1,3 +1,8 @@
+2026-09-26 · #cli #help · cli.ts configureHelp.visibleCommands ignores hidden:true — stamp still shows in top-level help; hidden is inert.
+2026-09-26 · #test-harness #tpv · A section() slice that keeps its heading line makes 'body names X' vacuous when the heading names X.
+2026-09-26 · #test-harness #doctor #tpv · A read-only test with runDoctor stubbed can't see doctor writes; one case must use the real default.
+2026-09-26 · #verify-install #tpv · verified = installed∩registered leaves no host checks to skip without a snapshot; fall back to verifier hosts.
+2026-09-26 · #docs #test-harness · /\bNo\b|\bnever\b/ is case-sensitive: 'Never run npm publish' fails D2; lowercase 'no' fails too.
 2026-09-26 · #qa-red #test-harness · An unregistered subcommand's --help falls through to top-level help: no subcommand flags listed.
 2026-09-26 · #hooks #flashcard-gate #danger · Post-BUG-085 a dev/qa line starting `flashcards_flagged: [` (even fenced) is gated; quoted fixtures block.
 2026-09-26 · #clean-room #hooks · No .cleargate/sprint-runs/.active → the flashcard gate is skipped; such a dispatch cannot witness it.
