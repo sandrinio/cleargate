@@ -45,6 +45,7 @@ import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseJsonl } from './lib/ledger-digest.mjs';
+import { locateFrontmatterFence } from './assert_story_files.mjs';
 
 // Bundle-size budget: ≤160KB target (CR-022 M5 raise from 80KB; SPRINT-18 hit 138KB).
 const MAX_BUNDLE_BYTES = 160 * 1024; // 163840
@@ -79,12 +80,21 @@ function atomicWrite(filePath, content) {
 }
 
 // ── Frontmatter parser (minimal: key: value pairs only) ──────────────────────
+//
+// BUG-098: the block is found with assert_story_files.mjs's position-independent
+// locateFrontmatterFence, so a leading `<instructions>` preamble is skipped.
+// Absent frontmatter, or framing the locator rejects (it throws), gives {}.
 
 function parseFrontmatter(content) {
-  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
-  if (!fmMatch) return {};
+  let span = null;
+  try {
+    span = locateFrontmatterFence(content);
+  } catch {
+    span = null;
+  }
+  if (!span) return {};
   const fields = {};
-  for (const line of fmMatch[1].split('\n')) {
+  for (const line of content.slice(span.yamlStart, span.yamlEnd).split('\n')) {
     const m = line.match(/^([a-zA-Z_][a-zA-Z0-9_]*):\s*"?([^"]*)"?\s*$/);
     if (m) {
       const val = m[2].trim();
