@@ -1,3 +1,12 @@
+2026-09-26 · #test-harness #tpv · A verdict fn fed one flat stream can't tell C3's blocked run from C4's completed one; key inputs by session.
+2026-09-26 · #test-harness #tpv #danger · A mock HTTP handler that throws leaves a fetch-awaiting test hanging forever (no timeout).
+2026-09-26 · #codex #app-server · codex app-server generate-ts --out <dir> emits the exact protocol types offline; read them, don't guess.
+2026-09-26 · #codex #app-server · Approval replies are {decision:'decline'}; there is no item/updated (only item/started, item/completed).
+2026-09-26 · #test-harness #tpv · A kept literal that itself holds the anchored line (a TOML [features] string) makes a ^…$ count unsatisfiable.
+2026-09-26 · #hooks #doctor #danger · doctor --can-edit/--session-start skip non-'---'-led files; strip <instructions> before approving.
+2026-09-26 · #test-harness #tpv · Put the whitelisted target first in a multi-target gate test, or 'exit 0 on first whitelisted' fails open unseen.
+2026-09-26 · #test-harness #upgrade · Sealed -07 fixtures use a non-hooks .codex/hooks.json; a hooks-only session-load delta drops its warning.
+2026-09-26 · #test-harness #tpv · A 'claims the matching sentinel' test where the match is also the newest can't kill newest-wins; age it oldest.
 2026-09-26 · #frontmatter #sprint-init #danger · --allow-drift phantom then hides epics: the decomposition gate reads the phantom ("no epics").
 2026-09-26 · #frontmatter #close · reconcileCurrentSprintStories throws "No frontmatter" on an instructions-led Done story; close stops at 2.6d.
 2026-09-26 · #frontmatter #intake · intake hasAnyRemoteAuthored scans up to the first \n--- — the <instructions> preamble, not frontmatter.
