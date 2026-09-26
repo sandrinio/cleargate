@@ -1,3 +1,8 @@
+2026-09-26 · #test-harness #tpv · Delta-row currentHash read from canonical passes at the red commit; refuse the baseline hash or pin a literal.
+2026-09-26 · #test-harness #tpv · 'Same exit with and without X' needs a twin run without X; two runs that both have X prove nothing.
+2026-09-26 · #hooks #flashcard-gate #tpv · Fail-closed test: mark the block's cards first, else an unmarked card blocks anyway and masks it.
+2026-09-26 · #doctor #drift · A pin regex without ^…$ lets a live hook with extra lines pass as pin-equal; anchor it, test appended text.
+2026-09-26 · #test-harness #host · Skip a both-absent delta row only for synthetic baselines (no tree/); a mis-keyed row must throw on real ones.
 2026-09-26 · #test-harness #host · A scenarios:'all' delta row breaks synthetic captureOrCompare fixtures lacking that rel.
 2026-09-26 · #test-harness #recipe · A recorded tree hash from find|shasum includes ABSOLUTE paths; relative paths give another digest.
 2026-09-26 · #hooks #flashcard-gate · Sentinel multi-block bug needs a PROSE line between blocks; adjacent headers re-arm state.
