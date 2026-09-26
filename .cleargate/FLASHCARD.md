@@ -1,3 +1,10 @@
+2026-09-26 · #clean-room #evidence #danger · Unsanitised evidence cells can inject '## Run'/'- result: PASS' lines; a FAIL run then checks green.
+2026-09-26 · #clean-room #claude-p · Claude Code 2.1.283 backgrounds a headless Agent dispatch: S2 emits two result events; parse the last.
+2026-09-26 · #clean-room #harness · claude-baseline.mjs runs main()+process.exit on import; never import it — reuse evidence.mjs/probe-items.mjs.
+2026-09-26 · #clean-room #host · A witness line copied from 'registered' is vacuous; record --host all from the room's snapshot hosts.
+2026-09-26 · #close #deferred-verify · Step 2.9 reads only status+exit_code of deferred-verify/<ID>.json; it cannot see a stale green.
+2026-09-26 · #qa #audit · A 'every spawn has cwd+scrubbed env' claim needs a per-call audit; QA passed it while 9 spawns lacked one.
+2026-09-26 · #qa #tpv #clean-room · When binding notes gloss one row differently (M4-A2 vs TPV J5), the specific grounded one wins; flag it.
 2026-09-26 · #worktree #danger · Main checkout and worktrees share relative paths; edit by the worktree's absolute path, then diff-verify.
 2026-09-26 · #clean-room #hooks · Sentinel + token-ledger hooks write to _off-sprint/ with no .active; dispatch proof needs no sprint init.
 2026-09-26 · #test-harness #tpv #clean-room · A test that runs hooks in a room it later byte-compares can never pass; probes need their own room.
