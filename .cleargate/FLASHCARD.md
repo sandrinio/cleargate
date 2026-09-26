@@ -1,3 +1,24 @@
+2026-09-26 · #codex #app-server · turn/start takes input:[UserInput], not prompt; turn/completed has params.turn.id — a params.turnId wait never resolves.
+2026-09-26 · #codex #app-server · config/batchWrite edits are {keyPath,value,mergeStrategy}; JSON-quote keyPath segments that hold paths or hook keys.
+2026-09-26 · #codex #test-harness · Untrusted workspaces list no project hooks; take the all-untrusted hooks/list after workspace trust, before hash trust.
+2026-09-26 · #codex #test-harness · A spawn turn ends before the child runs SubagentStart/Stop; settle on the final subAgentActivity item + subagentStop.
+2026-09-26 · #codex #test-harness · Route a scripted Responses mock by content (*_output→DONE, child agent_message→OK); a request-index script desyncs.
+2026-09-26 · #codex #app-server · Codex sends tools as input item {type:additional_tools} (namespaces), not body.tools; apply_patch unlisted but honored.
+2026-09-26 · #worktree #cross-repo #test-harness · Nest the cli worktree at .worktrees/<ID>/cleargate-cli: every <cli>/.. META_ROOT read hits the item's own outer tree.
+2026-09-26 · #worktree #test-harness · Outer worktrees lack gitignored /.claude; symlink it to live and add '/.claude' to .git/info/exclude.
+2026-09-26 · #worktree #npm · cli package-lock.json is gitignored and ~/.npm lacks toml-eslint-parser: npm ci --offline fails; symlink node_modules.
+2026-09-26 · #worktree #build · prebuild+build inside a cli worktree take ~4s and write only its templates/ and dist/; safe there, never in CLI main.
+2026-09-26 · #clean-room #worktree · Harness default container is CLI_ROOT/../..; from a nested worktree that is inside OUTER — refused. Pass --container.
+2026-09-26 · #test-harness #tmp · host-adapter-contract.red.node.test.ts:91 leaks cg-s41-contract-payload-* dirs; BUG-096 covers init-fixture only.
+2026-09-26 · #surface-gate #worktree · Commit a STORY outer half right after its own update_state: the gate judges MAIN state.json's max updated_at.
+2026-09-26 · #scripts #vocab · check-no-exec-mode-vocab bans 'under v2', 'v2 only', 'v2-only', 'v2 block'; write 'schema_version: 2'.
+2026-09-26 · #test-harness #init · One SANCTIONED_BASELINE_DELTAS row per rel: a second row fails its baseline assert. Share a byte-identical row.
+2026-09-26 · #codex #skill · -12's renderer throws on banned tokens outside its anchored ranges; new SKILL.md text outside §C.0 must avoid them.
+2026-09-26 · #dashboard · The dashboard groups by the sprint plan's first Story ID+Title table (Milestone column); it never reads waves.json.
+2026-09-26 · #test-harness #ports · cr097/cr101 dashboard tests bind fixed ports (4731, 43811-3): never run two full suites at once.
+2026-09-26 · #scripts #env · Agent Bash has no CLAUDE_PROJECT_DIR: run_script.sh falls to git toplevel; set ORCHESTRATOR_PROJECT_DIR explicitly.
+2026-09-26 · #scripts #init-sprint · init_sprint.mjs reads only waves.json lane_assignments (:195-211); additive schema fields need no code change.
+2026-09-26 · #git #worktree · git clone of a linked-worktree path works; a plain clone checks out that worktree's branch, so pass --branch.
 2026-09-26 · #codex #test-harness #git · `git clone --branch HEAD <local-path>` fails; resolve the ref to a sha, clone plain, then checkout it.
 2026-09-26 · #codex #test-harness · An e2e whose cliRoot is a fresh clone has no node_modules to symlink; fall back to a scratch-cached npm install.
 2026-09-26 · #test-harness #danger · node:test per-test timeout flags a hung test but never aborts in-flight subprocesses; give poll loops their own.
