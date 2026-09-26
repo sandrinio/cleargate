@@ -118,4 +118,47 @@ flashcards_flagged:
   - "2026-09-26 · #qa-red #clean-room #test-harness · A byte-neutral story's e2e reds must mark already-green regression-anchor cases explicitly, not force them red."
   - "2026-09-26 · #qa-red #test-harness · claudeLiveVerdicts' inputs shape is prose-only in the plan; QA-Red must invent + flag the DI shape as an ambiguity, not silently pin one."
 
+## Re-seal (TPV)
+
+Commit: cli `story/STORY-058-09` @ `6c5a4c5` (`qa-red(STORY-058-09): re-seal per TPV`), applying the TPV patch (SHA-256 `8d43e853e852864072f54eea2d870e65ceca558b07bc419abae7722637776708`, 826 lines) verbatim via `git apply` on top of `eed511c`. `git apply --check` was clean before applying; `npm run typecheck` was clean after.
+
+### Counts vs the expected table (each file SOLO, twice)
+
+| File | Expected | Run 1 | Run 2 |
+|---|---|---|---|
+| unit `clean-room-evidence.red.node.test.ts` | 60/0/60 | 60 tests, 0 pass, 60 fail | 60 tests, 0 pass, 60 fail |
+| e2e `clean-room-claude-baseline.red.integration.node.test.ts` | 13 tests, 10 pass, 3 fail (A3, A4, B4) | 13 tests, 10 pass, 3 fail (A3, A4, B4) | 13 tests, 10 pass, 3 fail (A3, A4, B4) |
+
+All match exactly, both runs, same failing-test names both times (`ERR_MODULE_NOT_FOUND` against `scripts/clean-room/{evidence,probe-items}.mjs` for the unit file; A3/B4 → evidence.mjs, A4 → probe-items.mjs for the e2e file). Combined red baseline: **73** (60 + 13).
+
+### Sealed sets — unchanged
+
+| Set | Expected | Measured |
+|---|---|---|
+| 13 sealed `-03..-07` contract files | 19/11/10/4/18/13/17/3/6/10/6/16/4 | exact match, all 0 fail |
+| BUG-085's three | 24/13/13 | 24/24, 13/13, 13/13 |
+| `-08`'s verify-install / verify-install-cli / clean-room-verification-doc | 42/5/9 | 42/42, 5/5, 9/9 |
+
+### Parity (compare mode, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`)
+
+- `claude-adapter-init-parity.red.integration.node.test.ts` — 5/5.
+- `init-host-parity.red.integration.node.test.ts` — 15/15.
+
+### Typecheck
+
+`npm run typecheck` — exit 0 (checked immediately after `git apply`, and again after re-running the full verification pass).
+
+### Baseline hash
+
+`bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files, absolute paths) — before applying the patch and after all verification runs. Unchanged.
+
+### Outer status
+
+- Before: `.cleargate/sprint-runs/SPRINT-41/{.session-totals.json,events.jsonl,state.json,token-ledger.jsonl}` modified (pre-existing orchestration ledger).
+- After: identical four files, no new diffs. No outer file was written by this re-seal dispatch. cli status after: only the pre-existing untracked `cleargate-0.25.0.tgz` (predates this session), left alone. HEAD is `6c5a4c5` on `story/STORY-058-09`.
+
+No count mismatches; nothing to stop for.
+
+flashcards_flagged: []
+
 STATUS=done
