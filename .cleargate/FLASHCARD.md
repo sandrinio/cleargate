@@ -1,3 +1,7 @@
+2026-09-26 · #tpv #test-harness · Two Promise.resolve() ticks can't outrun 3 awaited seams; yield setImmediate before a 'not started yet' assert.
+2026-09-26 · #host #lifecycle · addHost copies owned∪shared roots (lifecycle.ts:293), not payloadFilter: payloadFilter-only rules never reach host add.
+2026-09-26 · #tpv #test-harness · A pin check that reads its list from the module (mod.X ?? default) is vacuous; pin banned lists and texts by value.
+2026-09-26 · #codex #skill · Anchored renderer: resolve every anchor before the banned-token scan, or a deleted anchor reports a neighbour's token.
 2026-09-26 · #test-harness #codex · codex-hooks.mjs run has no CLEARGATE_CODEX_BIN fallback: pass --codex-bin <abs>; its --help refuses, no usage.
 2026-09-26 · #qa-red #esm · A static import {x} of an existing module lacking x is a SyntaxError that crashes the file; use import() + typeof.
 2026-09-26 · #merge #init-fixture · A row both items added byte-identically merges as common text; only lead comments conflict. Keep upstream's.
