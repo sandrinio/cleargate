@@ -1,3 +1,5 @@
+2026-09-26 · #qa-red #clean-room #test-harness · A byte-neutral story's e2e reds must mark already-green anchor cases, not force them red.
+2026-09-26 · #qa-red #test-harness · A prose-only DI shape (claudeLiveVerdicts inputs) must be invented and flagged as an ambiguity, not pinned silently.
 2026-09-26 · #test-harness #tpv · A multi-body shape-guard red where every body fails the first clause leaves the later clauses untested.
 2026-09-26 · #verify-install #manifest · Every pre-058-06 snapshot lacks hosts; a guard requiring hosts rejects every field install.
 2026-09-26 · #clean-room #claude-p #hooks · Claude Code 2.1.283 runs hooks as /bin/sh -c with the launcher's PATH; a PATH shim reaches hooks.
