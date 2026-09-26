@@ -1,3 +1,4 @@
+2026-09-26 · #test-harness #codex · codex-hooks.mjs run has no CLEARGATE_CODEX_BIN fallback: pass --codex-bin <abs>; its --help refuses, no usage.
 2026-09-26 · #qa-red #esm · A static import {x} of an existing module lacking x is a SyntaxError that crashes the file; use import() + typeof.
 2026-09-26 · #merge #init-fixture · A row both items added byte-identically merges as common text; only lead comments conflict. Keep upstream's.
 2026-09-26 · #hooks #dogfood-split · A hook sourcing lib/harness.sh breaks without lib/ (surface gate exits 1); sync lib/ first, never hand-port one.
