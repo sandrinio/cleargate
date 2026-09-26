@@ -99,13 +99,13 @@ plans/M5-fixwave.md "Follow-ups": sites measured at cli main 35580b0; `--allow-d
 The exact site list and test shapes are pinned by `plans/M5-fixwave.md` §BUG-098. It depends on BUG-090 (the script locator export).
 
 ## Task Breakdown
-- [ ] QA-Red: splice-helper reds; --allow-drift (LF, CRLF, malformed), stampSprintClose, archive stampFile, lifecycle_init_mode read; 2.6d set-field (LF, CRLF append); parent-approved (initiative, proposal); doctor advisory + pricing; slug ×2; merge; contradict stamp; audit-status fix; intake R10; two script spawns; fresh-install --allow-drift integration; 2 M2 delta rows
-- [ ] Add frontmatterYaml / withFrontmatterYaml to src/lib/frontmatter-locator.ts
-- [ ] sprint.ts: parseFileFrontmatter through locateFrontmatter; waiver, stampFile and stampSprintClose splice via rewriteFrontmatter; malformed YAML → no write
-- [ ] Fix setFrontmatterFieldAtomic and readFrontmatterFromFile the same way
-- [ ] Fix doctor :257/:854, frontmatter-merge, slug, contradict, wiki-audit-status, intake
-- [ ] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror at integration (after merging sprint/S-41, never during the build; FW-A17 item 3), in one outer commit
-- [ ] Typecheck and the targeted tests
+- [x] QA-Red: splice-helper reds; --allow-drift (LF, CRLF, malformed), stampSprintClose, archive stampFile, lifecycle_init_mode read; 2.6d set-field (LF, CRLF append); parent-approved (initiative, proposal); doctor advisory + pricing; slug ×2; merge; contradict stamp; audit-status fix; intake R10; two script spawns; fresh-install --allow-drift integration; 2 M2 delta rows
+- [x] Add frontmatterYaml / withFrontmatterYaml to src/lib/frontmatter-locator.ts
+- [x] sprint.ts: parseFileFrontmatter through locateFrontmatter; waiver, stampFile and stampSprintClose splice via rewriteFrontmatter; malformed YAML → no write
+- [x] Fix setFrontmatterFieldAtomic and readFrontmatterFromFile the same way
+- [x] Fix doctor :257/:854, frontmatter-merge, slug, contradict, wiki-audit-status, intake
+- [x] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror at integration (after merging sprint/S-41, never during the build; FW-A17 item 3), in one outer commit
+- [x] Typecheck and the targeted tests
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli`, then each solo via `npm run test:file --`: `test/lib/frontmatter-yaml-splice.red.node.test.ts`, `test/commands/sprint-frontmatter-fence.red.node.test.ts`, `test/commands/sprint-archive.node.test.ts`, `test/lib/lifecycle-reconcile-fence.red.node.test.ts`, `test/commands/gate-unit.node.test.ts`, `test/commands/doctor-fence.red.node.test.ts`, `test/lib/slug.node.test.ts`, `test/lib/frontmatter-merge.node.test.ts`, `test/wiki/contradict.node.test.ts`, `test/wiki/audit-status.node.test.ts`, `test/lib/intake.node.test.ts`, `test/scripts/scripts-fence-bug098.red.node.test.ts`, `test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts`.
