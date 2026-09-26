@@ -1,3 +1,6 @@
+2026-09-26 · #test-harness #host · A scenarios:'all' delta row breaks synthetic captureOrCompare fixtures lacking that rel.
+2026-09-26 · #test-harness #recipe · A recorded tree hash from find|shasum includes ABSOLUTE paths; relative paths give another digest.
+2026-09-26 · #hooks #flashcard-gate · Sentinel multi-block bug needs a PROSE line between blocks; adjacent headers re-arm state.
 2026-09-26 · #test-harness #git · Tests can't see a whitespace slip in an insertion; check git diff <base> --numstat reads N/0.
 2026-09-26 · #tpv #test-harness · An already-green anchor can be a mutant's SOLE killer (R11c half 2); measure before calling it dead weight.
 2026-09-26 · #init #test-harness #danger · init asks 'Restore preserved items?' when .uninstalled exists, even with --yes; seam promptYesNo.
