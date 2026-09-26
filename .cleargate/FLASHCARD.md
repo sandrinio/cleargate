@@ -1,3 +1,5 @@
+2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
+2026-09-26 · #worktree #test-harness · An old-base worktree reds canonical-live-parity 5d once live hooks re-sync from newer main: base lag.
 2026-09-26 · #qa #gate · gate check skips the frontmatter rewrite when cached_gate_result is current; verify via git diff, not prose.
 2026-09-26 · #qa-red #tpv · 'fn is not a function' at re-seal is the intended missing contract export, not wiring; check source first.
 2026-09-26 · #test-harness #tpv #locator · A port-parity table needs one fixture per framing rule; 13 fixtures left 7 port mutants alive.
