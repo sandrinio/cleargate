@@ -1,3 +1,4 @@
+2026-09-26 · #test-harness #shell · /bin/bash is 3.2 on macOS: no mapfile; build file-list arrays with a while IFS= read -r loop.
 2026-09-26 · #devops #test-harness · init-from-source S1 reds when parallel lanes leave cg-hook-test-* in os.tmpdir; re-run it solo first.
 2026-09-26 · #tpv #test-harness · Two Promise.resolve() ticks can't outrun 3 awaited seams; yield setImmediate before a 'not started yet' assert.
 2026-09-26 · #host #lifecycle · addHost copies owned∪shared roots (lifecycle.ts:293), not payloadFilter: payloadFilter-only rules never reach host add.
