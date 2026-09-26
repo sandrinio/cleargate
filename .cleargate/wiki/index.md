@@ -64,7 +64,7 @@
 - [[BUG-072]] (bug) — Triaged — `listed-item` counts only `- ` bullets, so an ordered list scores zero
 - [[BUG-074]] (bug) — Triaged — A state transition dirties the tree and fails the next story's bounce-readiness check
 - [[BUG-075]] (bug) — Triaged — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing — a story can reach `Done` without QA
-- [[BUG-085]] (bug) — Ready — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
+- [[BUG-085]] (bug) — Ready ⚠︎ drift — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
 - [[BUG-086]] (bug) — Draft — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
@@ -73,6 +73,7 @@
 - [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
 - [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
 - [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
+- [[BUG-094]] (bug) — Draft — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
 
 ## Archive
 

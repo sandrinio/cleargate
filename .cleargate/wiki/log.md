@@ -1865,3 +1865,8 @@
   action: "update"
   target: "BUG-085"
   path: ".cleargate/delivery/pending-sync/BUG-085_live_instance_never_resynced_canonical_hook_fixes_inert.md"
+- timestamp: "2026-09-26T02:53:23.922Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-094"
+  path: ".cleargate/delivery/pending-sync/BUG-094_state_validate_sprint_id_treated_as_path.md"
