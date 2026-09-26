@@ -1,3 +1,41 @@
+2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
+2026-09-26 · #worktree #test-harness · An old-base worktree reds canonical-live-parity 5d once live hooks re-sync from newer main: base lag.
+2026-09-26 · #qa #gate · gate check skips the frontmatter rewrite when cached_gate_result is current; verify via git diff, not prose.
+2026-09-26 · #qa-red #tpv · 'fn is not a function' at re-seal is the intended missing contract export, not wiring; check source first.
+2026-09-26 · #test-harness #tpv #locator · A port-parity table needs one fixture per framing rule; 13 fixtures left 7 port mutants alive.
+2026-09-26 · #tpv #frontmatter · Preamble-free fixtures can't tell a located-YAML read from a whole-file scan; add a col-0 key in <instructions>.
+2026-09-26 · #test-harness #tpv · A frozen contract export exercised only through a spawn is unpinned; add one direct-import test per export.
+2026-09-26 · #frontmatter #scripts · assert_story_files' offset-0 regex approves a ----closed block (---- read as closer); the locator fails closed.
+2026-09-26 · #orchestrator #cross-repo · A merge-lane full suite back-syncs outer main delivery/**; a parallel agent's git status shows it — not theirs.
+2026-09-26 · #test-harness #init #merge · init-fixture row append/append conflicts split into interleaved hunks; rebuild tail: upstream rows, then own.
+2026-09-26 · #tpv #test-harness · every() vs some() survives single-upstream fixtures; gate tests need a 2-upstream one-merged case + a root.
+2026-09-26 · #tpv #test-harness · A doc literal present twice masks deleting its operative copy; pin it inside its own section slice.
+2026-09-26 · #tpv #test-harness · A guard reading only live .claude can't see a canonical deletion until live re-sync; pin canonical too.
+2026-09-26 · #tpv #vocab · findExecModeVocabHits exempts launch_wave.mjs + enforcement.md by name; add a bare check scoped to new lines.
+2026-09-26 · #test-harness #skill · sprint-execution-mirror.integration diffs live vs canonical SKILL.md; any SKILL edit is named-red till re-sync.
+2026-09-26 · #cli #test-harness · A sealed test can pin a string[] return where blueprint prose implies a joined string; the test's types win.
+2026-09-26 · #clean-room #evidence · Once markdownCell escapes |, keep ' | ' between rooms; a '; ' join collides with in-room '; ' details.
+2026-09-26 · #worktree #git #danger · The stash stack is shared by every worktree of a repo: a lane's stash/pop can pop another lane's WIP. Never stash.
+2026-09-26 · #qa-red #test-harness · A single diff-preview stdout call embeds many lines; join+split before per-line asserts, not array equality.
+2026-09-26 · #qa-red #test-harness · A child crashing on one missing export starves later asserts in the same script of their own failure text.
+2026-09-26 · #qa-red #test-harness #tmp · Snapshot-diff self-cleanup around a spawned child catches red-state leaks a not-yet-built exit hook can't.
+2026-09-26 · #shell #zsh · Agent shell is zsh: ${PIPESTATUS[0]} is empty; redirect to a log and read $? instead of piping.
+2026-09-26 · #qa-red #init · copyPayload picks created/skipped by real dest-exists + byte diff, not overwrite_policy tiers; derive stdout from code.
+2026-09-26 · #qa-red #test-harness · A frozen-vs-canonical parity lock is a real anchor while both are identical: it becomes the regression detector.
+2026-09-26 · #close-gate #frontmatter · Step 2.6c 'no-op' silently skips archiving an <instructions>-led Completed parent; no warning, unlike auto-flip.
+2026-09-26 · #test-harness #scaffold-roots · canonicalPath('.') resolves to scaffold/core, not CLI_ROOT; import CLI_ROOT from scaffold-roots.js.
+2026-09-26 · #test-harness #qa-red · Pin a literal currentHash, not a refuse-baseline fn, when the delta's post-fix bytes are fully specified.
+2026-09-26 · #push #frontmatter · push.ts's approved:false refusal reads the same for an absent key and any non-true value; misleading pre-BUG-090.
+2026-09-26 · #qa-red #vocab #test-harness · Bare INCLUDE_PATTERN false-positives on enforcement.md/launch_wave.mjs; use findExecModeVocabHits instead.
+2026-09-26 · #qa-red #test-harness #shell · cr078_init.test.sh REPO_ROOT assumes depth-3 .cleargate/scripts/test/; run outer twin, not nested scaffold/core copy.
+2026-09-26 · #qa #worktree #danger · "Built CLI not found" in a worktree means run npm run build there first; check dist/cli.js before calling a regression.
+2026-09-26 · #qa #test-harness · Prove a failure pre-existing without checkout: git archive <base-sha> into scratch, build there, compare results.
+2026-09-26 · #qa #test-harness #danger · A K6 allow-list names touchable files, not touched ones; diff --name-only vs base finds a required file left unedited.
+2026-09-26 · #test-harness #clean-room #danger · New GATING_CHECKS ids need the live driver to emit the rows; helpers alone make decideRun FAIL 'missing gating row'.
+2026-09-26 · #plan #boundary · A precondition grep must hit the driver that wires a helper, not the module defining it, or it passes unwired.
+2026-09-26 · #codex #test-harness · Drive Codex sessions under enforce: warn lets a blocked edit complete, so edit-allow and edit-targets fail open unseen.
+2026-09-26 · #hooks #perf · Moving a whitelist exit into a per-target loop makes whitelisted Claude edits pay CLI resolve + node + grep first.
+2026-09-26 · #codex #hooks · An absolute apply_patch header via a symlinked path misses the physical REPO_ROOT strip; realpath its existing ancestor.
 2026-09-26 · #codex #app-server · turn/start takes input:[UserInput], not prompt; turn/completed has params.turn.id — a params.turnId wait never resolves.
 2026-09-26 · #codex #app-server · config/batchWrite edits are {keyPath,value,mergeStrategy}; JSON-quote keyPath segments that hold paths or hook keys.
 2026-09-26 · #codex #test-harness · Untrusted workspaces list no project hooks; take the all-untrusted hooks/list after workspace trust, before hash trust.

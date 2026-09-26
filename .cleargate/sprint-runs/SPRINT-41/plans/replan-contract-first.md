@@ -625,6 +625,32 @@ For the six CR-124-only rows: `item: 'CR-124'`, and `currentHash` = `currentPinS
 - The §4 "Contract-first ledger" (RP-A14) gets one row per remaining item at merge.
 - The Reporter cites it for CR-124's E2E row at close.
 
+
+### 7.8 TPV amendments (CR-124 live TPV, 2026-09-26; `reports/CR-124-tpv.md`)
+
+Appended by the TPV. Nothing above is rewritten; where these differ from §7.2–§7.6, these win.
+
+- **RP-A25 (§7.3, re-seal).** Before the Developer dispatch, apply `reports/CR-124-tpv-reseal.patch` (sha256 `66bc35a994e6d6195482f513b410bde613a35a9c5e471e5315b662fe25705077`) on cli `story/CR-124` at `dbd002f` as one re-seal commit. It touches only the 3 CR-124 test files (no `init-fixture.ts` row changes) and adds assertions to existing tests, so the counts stay the same: default tier 17 (10 red, 7 anchors), integration 1 red, parity pair 0/5 and 0/15 until the Developer commit. What it adds:
+  - W3: shell-metacharacter bases throw; `schema_version: 3` throws; entries with no base or an empty base are skipped.
+  - W4: an empty-string entry in `bases` falls back to the sprint branch.
+  - W5: every upstream must be merged; a root story is ready.
+  - T1: the fields are inside `## Digest shape`; canonical `file_surface: []` is kept.
+  - T2: the three serializing kinds, the `dep_predecessors` → `upstream` / not-a-build-separator rule, `1 + the max`, and the kept `## Reachability refusal (BUG-046)`, `## Tiny-sprint floor (N ≤ 2)` headings and both fail-safe rationale literals.
+  - T3a: §C.0.2 comes after the `**Idempotent segments.**` paragraph.
+  - T6: `findExecModeVocabHits` stays. It gains a bare `INCLUDE_PATTERN` check over `launch_wave.mjs` (0 hits) and over the enforcement lines that name the real-collision predicate.
+  - Integration: the spawn pins `CLEARGATE_REPO_ROOT` to the room.
+- **RP-A26 (§7.3 T6 wording).** T6 reads: "`findExecModeVocabHits(CR124_FILES)` returns `[]`, and no line of `launch_wave.mjs`, nor any enforcement line naming the real-collision predicate, matches the bare `INCLUDE_PATTERN`." A bare `INCLUDE_PATTERN` over the whole enforcement file cannot be satisfied: 3 retired-behaviour lines already match it at `35580b0`, and §7.2 item 6 forbids other byte changes.
+- **RP-A27 (§7.4/§7.6 named reds; §7.2 item 3/5 clarifications).**
+  - Until RS-CR, integration-tier runs have two named reds, in the worktree (whose `.claude` symlinks to live) and in the merge lane alike:
+    - `test/scaffold/sprint-execution-mirror.integration.node.test.ts` "diff command on live vs canonical" (3/4). Live SKILL.md ≠ canonical.
+    - `canonical-live-parity` 5c (agents).
+  - `test/integration/foreign-repo.integration.node.test.ts` is 4/6 regardless of CR-124: its `:215` `strictEqual` has its arguments swapped. This is pre-existing and named.
+  - None of these three is in `npm test`, which excludes `*.integration.node.test.ts`.
+  - In architect-synth, the Empty-surface guard keeps its heading phrase and its rule, but drops "Clause 2" / "clause-2" (no numbered clauses remain). The DB-axis paragraph drops "clause 4".
+  - The Fail-safe-serialize section stays verbatim. Its "own trailing serial wave" is read as the trailing integration layer.
+  - The synth's "Reader digest shape" block gains the same two export fields as the reader.
+  - T3a's tokens are case-sensitive; write them exactly as listed (`one merge at a time`, `owner's file wins`, `never by the Developer`).
+
 ---
 
 ## 8. Boundary steps and owner actions in the DAG
