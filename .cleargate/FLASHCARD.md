@@ -1,3 +1,4 @@
+2026-09-26 · #test-harness #worktree · An outer worktree has no gitignored cleargate-cli/; META_ROOT tests needing it ENOENT there.
 2026-09-26 · #cli #help · cli.ts configureHelp.visibleCommands ignores hidden:true — stamp still shows in top-level help; hidden is inert.
 2026-09-26 · #test-harness #tpv · A section() slice that keeps its heading line makes 'body names X' vacuous when the heading names X.
 2026-09-26 · #test-harness #doctor #tpv · A read-only test with runDoctor stubbed can't see doctor writes; one case must use the real default.
