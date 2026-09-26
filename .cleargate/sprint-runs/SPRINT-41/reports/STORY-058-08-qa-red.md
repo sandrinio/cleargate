@@ -379,4 +379,122 @@ None. Every command in this re-seal dispatch was a direct `git`/`shasum`/`wc`/
 
 flashcards_flagged: []
 
+## Round 2 (M4-A14)
+
+**Trigger.** QA-Verify FAILed Dev commit `9ac0fa3` (H17/M4-A5 fail-closed
+violation: `<h>.no-verifier` fires for a `--host h` that is registered but
+not installed). The Architect post-flight independently FAILed the same
+commit, adding a second defect (R-B: a `TypeError` crash on a parseable
+non-install-shaped snapshot body) and a doc fold-back item (R-C, Dev/outer
+work, not QA-Red's). `plans/M4.md` §"As-built resolution after STORY-058-08"
+→ **M4-A14** is the binding remediation spec; this round adds its three named
+QA-Red tests, verbatim per that section's "Tests" bullet.
+
+**Commit.** Cli repo `story/STORY-058-08`, one commit on top of `9ac0fa3`:
+
+```
+4285391 qa-red(STORY-058-08): round-2 reds U9c/U11e/U11f (M4-A14)
+```
+
+Edited only `test/commands/verify-install.red.node.test.ts` (`git diff
+--numstat`: `122  0  test/commands/verify-install.red.node.test.ts` — no
+other file touched). Every new fixture uses fake host names only (`fake`,
+via the existing `makeFakeAdapter` helper) — no production registry
+membership is pinned.
+
+**Test count vs. the dispatch's natural-split note.** M4-A14 and the dispatch
+both state "unit 41/41" as the expected post-fix count. The pre-round-2 file
+had 38 tests. Written as one `test()` per U-number with an internal loop over
+the five malformed bodies for U9c (rather than five separate `test()` calls),
+the count comes out to exactly 38 + 3 = 41, matching the plan's own number.
+Had I split U9c into five separate tests instead, the count would be 45, not
+41 — noting this because the dispatch invited me to state a deviation, and I
+chose the split that reproduces the plan's own stated number rather than a
+finer-grained one. Each of U9c's five bodies still gets its own labelled
+assertion messages (`[body=<label>] …`) inside that one test, so a future
+failure still names which body broke.
+
+### Per-test red reason (all measured directly, `9ac0fa3` + this round's commit)
+
+| Test | Assertion that fails at `9ac0fa3` | Named reason |
+|---|---|---|
+| **U9c** | `await runVerifyInstall(...)` for body `null` | Uncaught `TypeError: Cannot read properties of null (reading 'cleargate_version')` thrown from `checkVersionMatch` (`src/commands/verify-install.ts:192`), inside `runVerifyInstall` (`:587`) — the test itself never reaches its first `assert`; the thrown error is node:test's failure reason (R-B, verbatim reproduction of the Arch report's measured crash) |
+| **U11e** | `assert.deepStrictEqual(report.checks.filter(c => c.id === 'fake.no-verifier'), [])` | `fake.no-verifier` IS present (`status: 'fail'`, `details: ["this cleargate cannot verify host fake"]`) for a `--host fake` that is registered but not installed — exactly the H17 violation QA reproduced |
+| **U11f** | same assertion, snapshot deleted | `fake.no-verifier` IS present even though the snapshot (and therefore `installed`) is absent — the same R-A defect under the fallback path |
+
+All three failures were captured verbatim in the terminal output above before
+committing; none is a module-resolution error this round (the module now
+exists, per the Dev's `9ac0fa3`) — each is a real, distinguishable defect
+reproduction, matching the dispatch's "each for a named reason."
+
+### Counts, SOLO, twice
+
+| File | Run 1 | Run 2 | Expected |
+|---|---|---|---|
+| `verify-install.red.node.test.ts` | 41 tests, 38 pass, 3 fail | 41 tests, 38 pass, 3 fail | 41 total; 3 red (U9c, U11e, U11f) until the Dev's fix |
+| `verify-install-cli.red.integration.node.test.ts` | 5 tests, 5 pass, 0 fail | 5 tests, 5 pass, 0 fail | 5/5, unchanged |
+| `clean-room-verification-doc.red.node.test.ts` (`CLEARGATE_META_ROOT=.worktrees/STORY-058-08`) | 9 tests, 9 pass, 0 fail | 9 tests, 9 pass, 0 fail | 9/9, unchanged |
+
+`npm run typecheck`: exit 0, both before and after.
+
+**Sealed and parity files** — SOLO, re-run after this round's commit, all
+identical to every prior measurement:
+
+| File | Count |
+|---|---|
+| `host-adapter-contract.red.node.test.ts` | 19/19 |
+| `host-selection.red.node.test.ts` | 11/11 |
+| `host-lifecycle.red.node.test.ts` | 17/17 |
+| `manifest-query.red.node.test.ts` | 6/6 |
+| `manifest-host-ownership.red.node.test.ts` | 18/18 |
+| `init-host-selection.red.node.test.ts` | 10/10 |
+| `init-host-snapshot.red.node.test.ts` | 13/13 |
+| `doctor-per-host.red.node.test.ts` | 10/10 |
+| `upgrade-per-host.red.node.test.ts` | 6/6 |
+| `uninstall-per-host.red.node.test.ts` | 16/16 |
+| `uninstall-reinit.red.node.test.ts` | 4/4 |
+| `init-host-cli.red.integration.node.test.ts` | 4/4 |
+| `host-cli.red.integration.node.test.ts` | 3/3 |
+| `lifecycle-per-host.red.integration.node.test.ts` | 3/3 |
+| `drift-check-scaffold.red.node.test.ts` (BUG-085) | 24/24 |
+| `pending-task-sentinel-cards.red.node.test.ts` (BUG-085) | 13/13 |
+| `doctor-drift-guard.node.test.ts` (BUG-085) | 13/13 |
+
+Parity (compare mode, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`):
+`claude-adapter-init-parity.red.integration.node.test.ts` 5/5,
+`init-host-parity.red.integration.node.test.ts` 15/15.
+
+**Baseline hash** (`/private/tmp/cg-s41-m2-init-baseline`, 425 files, absolute
+paths): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` —
+identical before and after this round (never touched).
+
+### Outer status
+
+**Before:**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+?? .cleargate/sprint-runs/SPRINT-41/.pending-task-2371-50582-29650.json
+```
+
+**After:**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+No outer write of any kind this round (the pending-task json is hook-owned
+housekeeping, unrelated to and untouched by this dispatch; this report edit
+is the only outer-tree change, and it is uncommitted, per instructions). Cli
+repo at end: only the pre-existing untracked `cleargate-0.25.0.tgz`; HEAD
+`4285391` on `story/STORY-058-08`. No build, stash, `--no-verify`, amend, or
+bare `cleargate` — tests only, per the dispatch's SMOKE RULE.
+
+flashcards_flagged:
+  - "2026-09-26 · #qa-red #verify-install · A single test() with an internal loop over sub-cases keeps a plan's pinned test count exact; five separate test()s would have over-counted by 4."
+
 STATUS=done
