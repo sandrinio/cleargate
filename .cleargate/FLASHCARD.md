@@ -1,3 +1,7 @@
+2026-09-27 · #codex #app-server · A finished child thread ends {type:'notLoaded'}, never idle; an 'every thread idle' settle never fires.
+2026-09-27 · #codex #hooks · Codex SubagentStop runs on the child thread with a suffix-less run id; join a dispatch by threadId.
+2026-09-27 · #test-harness #node · node>=22 --test treats a dir arg as a module path (exit 1); pass a quoted glob 'test/**/*.test.mjs'.
+2026-09-27 · #tpv #clean-room · Probe a synthetic app-server stream against the pinned binary before sealing; 4 sealed shapes were wrong.
 2026-09-26 · #devops #concurrency · FLASHCARD.md/.processed-* may change mid-suite from another lane's report; match card text before reverting.
 2026-09-26 · #devops #shell #grep · grep -c prints 0 but exits 1, so an && chain after it silently skips; use ; and capture $? instead.
 2026-09-27 · #qa-red #test-harness #danger · A test that starts a mock HTTP server must close it in finally, or a no-throw path hangs node --test.
