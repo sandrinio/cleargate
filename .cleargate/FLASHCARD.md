@@ -1,3 +1,5 @@
+2026-09-26 · #qa-red #test-harness · A child crashing on one missing export starves later asserts in the same script of their own failure text.
+2026-09-26 · #qa-red #test-harness #tmp · Snapshot-diff self-cleanup around a spawned child catches red-state leaks a not-yet-built exit hook can't.
 2026-09-26 · #shell #zsh · Agent shell is zsh: ${PIPESTATUS[0]} is empty; redirect to a log and read $? instead of piping.
 2026-09-26 · #qa-red #init · copyPayload picks created/skipped by real dest-exists + byte diff, not overwrite_policy tiers; derive stdout from code.
 2026-09-26 · #qa-red #test-harness · A frozen-vs-canonical parity lock is a real anchor while both are identical: it becomes the regression detector.
