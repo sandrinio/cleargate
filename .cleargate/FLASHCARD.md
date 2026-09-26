@@ -1,3 +1,5 @@
+2026-09-26 · #dispatch #serial · dispatchSerial loops forever if dispatchStory returns another story's GREEN; assert v.storyId === storyId.
+2026-09-26 · #codex #skill · String.replace(x, R) expands $&/$1 in R; splice pinned doc texts with replace(x, () => R).
 2026-09-26 · #test-harness #shell · /bin/bash is 3.2 on macOS: no mapfile; build file-list arrays with a while IFS= read -r loop.
 2026-09-26 · #devops #test-harness · init-from-source S1 reds when parallel lanes leave cg-hook-test-* in os.tmpdir; re-run it solo first.
 2026-09-26 · #tpv #test-harness · Two Promise.resolve() ticks can't outrun 3 awaited seams; yield setImmediate before a 'not started yet' assert.

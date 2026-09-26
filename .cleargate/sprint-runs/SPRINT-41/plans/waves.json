@@ -124,11 +124,11 @@
       "id": "C3",
       "branch": "contract/S-41-loop",
       "repo": "cli",
-      "base": "story/STORY-058-12",
+      "base": "2695eea",
       "owner_story": "STORY-058-12",
       "skeleton_commit": "None. The branch points at the owner's Developer commit.",
       "created_by": "orchestrator: git -C .../cleargate-cli branch contract/S-41-loop <-12 pass-B SHA>",
-      "create_when": "STORY-058-12 pass-B Developer report is green",
+      "create_when": "created 2026-09-26: git -C cleargate-cli branch contract/S-41-loop 2695eea (STORY-058-12 pass B)",
       "frozen_exports": [
         "scaffold/core/.cleargate/scripts/dispatch_serial.mjs: SERIAL_EXIT, sprintBranchFor, serialLogPath, readVerdictLog, nextAction, dispatchSerial, plus the next/record CLI (M6 AD-M6-4)",
         "scaffold/core/.cleargate/scripts/launch_wave.mjs: validateVerdicts(verdicts, { mode: 'wave' | 'serial' })",
@@ -308,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "dev (TPV REJECTED -> re-seal 03cbb33 on C2; Developer passes A+B running)",
+      "state": "dev done (A 53028ea, B 2695eea = C3); integrating onto cli main 0399beb",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "waits-for-contract C3",
+      "state": "entry re-derivation against C3 2695eea",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
