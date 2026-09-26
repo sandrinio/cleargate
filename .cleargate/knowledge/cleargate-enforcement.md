@@ -100,7 +100,7 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 
 A wave runs multiple per-story segments concurrently, each in its OWN ClearGate-managed `.worktrees/STORY-X` (created via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` — **not** the Workflow tool's `isolation:'worktree'`, which cuts off the wrong base; spike decision 2). Two file-surface axes:
 
-- **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (STORY-033-03's five-clause predicate), not a runtime lock.
+- **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (the real-collision predicate, CR-124 — only ordered journals, single-writer generated artifacts and shared files needing ordered edits serialize), not a runtime lock.
 - **Shared sprint-branch axis (serial barrier merge).** `sprint/S-NN` is a single-writer axis. The barrier therefore merges each GREEN `story/STORY-X` to `sprint/S-NN` **serially — one worktree at a time, never two concurrently** (protocol §23.3). Concurrent `git worktree add` at wave launch is avoided by pre-creating all wave worktrees serially before any segment runs.
 
 ---
