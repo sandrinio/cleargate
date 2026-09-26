@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-26T00:21:15Z
+updated_at: 2026-09-26T02:55:19Z
 created_at_version: cleargate@0.26.1
-updated_at_version: c92b1de1-dirty
+updated_at_version: 6c4a0444-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -460,6 +460,32 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - `init --yes` prompting after an uninstall (M3-A52)
     - the M3 story Task Breakdown wording "shared by … uninstall" overstates it (FU-6)
   - **Prep done in parallel:** BUG-085 F1–F5; -08 A1–A5; -09 B1–B9 (+FU-16, BUG-090 as the known-fail); -10 E1–E10; -11 F1–F7; -12 H1–H11 (the H7 `build-codex-payload.mjs` surface is deferred until -10 creates it); -13 G1–G10. The stale -12 reports were relocated. Forward pointers were added to M4/M5/M6.
+
+- 2026-09-26T06:55:00Z · BUG-085 · **wave11 — M3 complete.**
+  - **QA-Red** (cli `ec29f45`, 32 min): drift-check 20/22 red, doctor-drift-guard 9/12, sentinel cards 10/12, parity Scenario 2 red. It flagged a `captureOrCompare` helper change.
+  - **TPV REJECTED** (47 min, `arch_bounces=1`):
+    - The two delta rows read `currentHash` from canonical, so parity passed at the red commit (violates M3-A8).
+    - 5 mutants survived: session-start exit code, allowed-count drift line, unparseable not blocking, unanchored pin, `README.md` include dropped.
+    - Re-seal R1–R7 (patch `7adc1598`); rulings #2 (tree-gated skip) and #3 (the M3-A53 A1 table is corrected); M3-A54..A60; G1–G16.
+  - **Re-seal** (cli `8425816`, 4 min): counts match. The orchestrator reproduced 2 files.
+  - **Dev** (cli `12ae157` + outer `68fd9426`, 24 min):
+    - All counts green; the 3 dist cases were checked on a scratch build (rule 11).
+    - Rule-16 files clean; the CLAUDE.md block is unchanged.
+    - No deviations.
+  - **QA PASS** (8 min). **Post-flight PASS** (24 min): M3-A61 (RS-BUG085 as built, via `b0-live-resync.mjs`), M3-A62 (CLAUDE.md reader-list chore), M4 V7/V8 + M4-A1..A4, M5/M6 pointers (FU-6/7).
+  - **FU-1 filed as Draft BUG-094** (P2): `cleargate state validate <id>` always fails after the CR-117 port. The wrapper passes the id positionally. No in-sprint impact; it must be fixed before the next publish.
+  - **Orchestrator prep:**
+    - Pre-marked the 6 -02 JSON cards and the 5 later-block cards.
+    - Stopped a subagent-orphaned test run (`uninstall-reinit` via tsx) that had hung 88 min on the `Restore preserved items?` prompt.
+  - **DevOps:** merged outer `ccdeb4b3` and cli `b244551`.
+    - Suite 2987/2983/2 fail/2 skip. The 2 fails are the dist-lag cases, green post-BD (13/13).
+    - BD: payload delta of exactly 2 files (sentinel, `validate_state.mjs`). New payload baseline `/private/tmp/claude-501/cg5801/payload-baseline-post-085` (identity `e44154af…`).
+    - **RS-BUG085 R1–R10 green:** exactly 1 pre-sync drift line; dry-parse 0 unmarked (control blocks); `b0-live-resync.mjs` applied exactly 1 file (sha `444becd2…`, mode 755, pin 0.20.0); post-sync `doctor` is drift-clean (exit 0); SessionStart has no drift line; `validate_state.mjs` is unchanged; bug068 10/10 in canonical and live mode.
+    - Worktree and branches removed.
+  - **M3-A62 CLAUDE.md chore** applied by the orchestrator. The block hash is unchanged and `doctor` still reports 0 drift.
+  - **M3 close — browser check** (`.playwright-mcp/s41-m3-close-dashboard.png`): M3 4/4, 11/17 (65%), 0 in flight, no worktrees.
+    - Dashboard observations for the Reporter: `UNATTRIBUTED` holds 15.7B of 22.7B tokens; the "Execution timeline" panel says "No execution log yet" despite a populated §4; `/data` 404s come from the static `http.server`.
+  - **Next:** M4 (-08, -09). The live witness for the re-synced sentinel (R10) is the next Agent dispatch.
 
 ---
 
