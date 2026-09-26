@@ -103,13 +103,13 @@ Measured by the SPRINT-41 M4 Architect probe (`plans/M4.md` "Measured facts" F5)
 - Site census for the other scripts (plans/M5-fixwave.md): `dedupe_frontmatter.mjs:60` leave (→ BUG-098); `prefill_report.mjs:41` leave (agent reports only); `prep_qa_context.mjs:125` leave (dead code); `prep_reporter_context.mjs:84` leave (→ BUG-098); `close_sprint.mjs:711` leave (already position-independent).
 
 ## Task Breakdown
-- [ ] QA-Red: fence-parity table (script vs TS locator), assert_story_files fence spawns, close_sprint Step 2.9 + 2.6c spawns, template approved-key + approveProbeStory flip, push wording, doctor can-edit/session-start, fresh-install sprint-init integration, 5 M2 sanctioned-delta rows
-- [ ] Export locateFrontmatterFence (JS port of frontmatter-locator.ts) and assertWorkItemApproved from assert_story_files.mjs; use them at :162
-- [ ] close_sprint.mjs imports locateFrontmatterFence; fix :250, :587 (span splice), :1035, :1053 (null or throw → skip)
-- [ ] Scaffold approved: false directly after status: in epic.md, story.md and hotfix.md
-- [ ] approveProbeStory flips the scaffolded approved key in place; throws on two approved lines
-- [ ] push.ts: absent-key wording; a present non-true value is rendered with JSON.stringify
-- [ ] doctor.ts: delete the positional sniffs in runSessionStart and runCanEdit
+- [x] QA-Red: fence-parity table (script vs TS locator), assert_story_files fence spawns, close_sprint Step 2.9 + 2.6c spawns, template approved-key + approveProbeStory flip, push wording, doctor can-edit/session-start, fresh-install sprint-init integration, 5 M2 sanctioned-delta rows
+- [x] Export locateFrontmatterFence (JS port of frontmatter-locator.ts) and assertWorkItemApproved from assert_story_files.mjs; use them at :162
+- [x] close_sprint.mjs imports locateFrontmatterFence; fix :250, :587 (span splice), :1035, :1053 (null or throw → skip)
+- [x] Scaffold approved: false directly after status: in epic.md, story.md and hotfix.md
+- [x] approveProbeStory flips the scaffolded approved key in place; throws on two approved lines
+- [x] push.ts: absent-key wording; a present non-true value is rendered with JSON.stringify
+- [x] doctor.ts: delete the positional sniffs in runSessionStart and runCanEdit
 - [ ] Byte-copy the 5 canonical files to the live mirror in one outer commit; typecheck and targeted tests
 
 ## 5. Verification Protocol (The Failing Test)
