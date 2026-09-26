@@ -1,3 +1,4 @@
+2026-09-27 · #qa #test-harness #concurrency · On a busy multi-lane box a backgrounded loop over many test files can starve; run them as foreground calls.
 2026-09-26 · #dispatch #serial · dispatchSerial loops forever if dispatchStory returns another story's GREEN; assert v.storyId === storyId.
 2026-09-26 · #codex #skill · String.replace(x, R) expands $&/$1 in R; splice pinned doc texts with replace(x, () => R).
 2026-09-26 · #test-harness #shell · /bin/bash is 3.2 on macOS: no mapfile; build file-list arrays with a while IFS= read -r loop.
