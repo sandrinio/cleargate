@@ -1,3 +1,6 @@
+2026-09-26 · #tpv #codex · Whole-token role check over codex's listing false-passes: role descriptions name other roles. Strip {…} bodies first.
+2026-09-26 · #tpv #test-harness · Pick each one-missing negative by what else names that role; dropping 'reporter' kills only some().
+2026-09-26 · #codex #test-harness · additional_tools items carry role:'developer'; a role check wider than properties.agent_type counts it.
 2026-09-26 · #test-harness #backfill #danger · push-hierarchy.node.test.ts runs live backfill_hierarchy.mjs over the real <cli>/.. corpus; revert pending-sync after.
 2026-09-26 · #test-harness #two-repo · Parity is not only S1c: wiki-ingest-sprint-report S14 cmps live vs canonical close_sprint.mjs; red in a pre-contract wt.
 2026-09-26 · #test-harness #codex · JSON.stringify turns newlines into a literal \n; a (?<![\w-]) lookbehind then sees 'n'. Tokenize parsed strings.
