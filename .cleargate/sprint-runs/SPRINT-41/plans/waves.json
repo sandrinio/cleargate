@@ -308,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "integrated 9a94ff2 (post-flight running; re-integrates onto cli main e720592 after BUG-098 merge)",
+      "state": "post-flight PASS on 9a94ff2; re-integrating onto cli main e720592 (PF12-A2), then QA-Verify",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
@@ -351,6 +351,17 @@
         "RS-CLOSE"
       ],
       "steps_note": "RS-4L, then step L (plans/M6.md F10), between post-flight and DevOps; merge lane frozen from step L to this merge"
+    },
+    "BUG-099": {
+      "state": "ready (fast lane): build now off cli main; merge after STORY-058-13, before RS-CLOSE (plans/M6.md OD-F1)",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "loop": "QA-Red -> Developer -> QA-Verify -> DevOps",
+      "plan": "BUG-099 item file §4/§5 + plans/M6.md F12 OD-F1",
+      "boundary_after": [
+        "BD"
+      ]
     }
   },
   "waves": [
