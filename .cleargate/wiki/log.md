@@ -1855,3 +1855,8 @@
   action: "create"
   target: "BUG-093"
   path: ".cleargate/delivery/pending-sync/BUG-093_upgrade_take_theirs_drops_user_hooks_under_cleargate_events.md"
+- timestamp: "2026-09-26T00:05:46.206Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "BUG-085"
+  path: ".cleargate/delivery/pending-sync/BUG-085_live_instance_never_resynced_canonical_hook_fixes_inert.md"

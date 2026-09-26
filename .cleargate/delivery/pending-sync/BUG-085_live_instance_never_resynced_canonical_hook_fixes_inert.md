@@ -14,9 +14,9 @@ approved_at: 2026-09-11T22:19:09Z
 ambiguity: 🟢 Low
 context_source: "Direct owner request 2026-09-04 during a token-efficiency investigation. Measured grounding: the live /.claude/ instance in this repo diverges from cleargate-planning/.claude/ across 8 files, which makes BUG-068's and BUG-069's shipped fixes inert in the repo that filed them. Evidence in §3 is machine-collected from this working tree, not recalled."
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T22:00:12Z
+updated_at: 2026-09-26T00:05:45Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 47c3e355-dirty
+updated_at_version: 5f2902d4-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -219,10 +219,10 @@ reader is not misled by the wiki page.)*
   commit surface.
 - `cleargate-cli/scaffold/hosts/claude/.claude/**` + `cleargate-cli/scaffold/core/.cleargate/**` + `cleargate-cli/scaffold/hosts/claude/CLAUDE.md` — canonical; the comparison baseline and the tree this bug's
   commit actually touches. On the cli-repo story branch.
-- `cleargate-cli/src/commands/doctor.ts:268-271` — most likely home for a `canonical ↔ live` parity check.
-- `cleargate-cli/src/lib/drift-check.ts:143-160` — `canonicalRoot = cwd/cleargate-planning` composes instead from `cwd/cleargate-cli/scaffold/{core,hosts/claude}` (reuse `composePayload` from `cleargate-cli/src/lib/scaffold-layout.mjs` with a unique temp dir cleaned in `finally`, or compare per root without composing: live `.claude/**` vs `scaffold/hosts/claude/.claude/**`, live `.cleargate/**` vs `scaffold/core/.cleargate/**`); skipped when absent.
+- `cleargate-cli/src/commands/doctor.ts:275-287` (drift block) and `:586` (`runSessionStart`) — most likely home for a `canonical ↔ live` parity check.
+- `cleargate-cli/src/lib/drift-check.ts:144-163` — `canonicalRoot = cwd/cleargate-planning` composes instead from `cwd/cleargate-cli/scaffold/{core,hosts/claude}` (reuse `composePayload` from `cleargate-cli/src/lib/scaffold-layout.mjs` with a unique temp dir cleaned in `finally`, or compare per root without composing: live `.claude/**` vs `scaffold/hosts/claude/.claude/**`, live `.cleargate/**` vs `scaffold/core/.cleargate/**`); skipped when absent.
 - `cleargate-cli/scaffold/hosts/claude/.claude/hooks/session-start.sh` — not edited — `session-start.sh:18` already runs `doctor --session-start`; the drift line is emitted by `runSessionStart` (Decision 4).
-- `pending-task-sentinel.sh` — (a) bash-3.2 empty-array fix at `:102`; (b) JSON-array `flashcards_flagged` parsing, fail-closed.
+- `pending-task-sentinel.sh` — (a) bash-3.2 empty-array fix at `:102`; (b) JSON-array `flashcards_flagged` parsing, fail-closed; (c) every `flashcards_flagged` block is scanned, not just the first (M3-A53).
 - `scaffold/core/.cleargate/scripts/validate_state.mjs` — CR-117 port (canonical-behind-live, found at RS-3).
 - `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` — lines 46 and 61-64, the canonical-only
   pin that let this through; needs either a live-mode variant or an explicit recorded limitation.
@@ -234,7 +234,7 @@ reader is not misled by the wiki page.)*
   (post-BD dist rebuild — bare `cleargate` resolves to the published global install, not this repo's
   composed payload); (c) the deprecated-snapshot bullet's incomplete reader list — add the ~85 cli
   tests and `manifest.ts`/changelog/check scripts (owned by -02) alongside this bug's own
-  `drift-check.ts:143-160` and the doctor text. Stays outer (meta-repo), not cli.
+  `drift-check.ts:144-163` and the doctor text. Stays outer (meta-repo), not cli.
 - **M0-step follow-up (amended 2026-09-25, orchestrator):** `cleargate-cli/test/hooks/pre-tool-use-task.node.test.ts`,
   `test/hooks/token-ledger-attribution.node.test.ts`, `test/hooks/token-ledger-regression.node.test.ts`. Their
   `HOOK_PATH` read the outer repo's per-machine LIVE `.claude/hooks/*` and pinned the pre-BUG-068/069 contracts,
