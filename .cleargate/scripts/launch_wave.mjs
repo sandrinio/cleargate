@@ -106,12 +106,36 @@ export function mintRunId(storyId, sprintId) {
  * SERIALLY at wave launch to avoid concurrent `git worktree add` racing the repo index.
  *
  * @param {string} storyId       e.g. "STORY-033-04"
- * @param {string} sprintBranch  e.g. "sprint/S-32"
+ * @param {string} sprintBranch  the base ref (the sprint branch, or a contract branch from a
+ *                               `schema_version: 2` plan), e.g. "sprint/S-32"
  * @returns {string}             the bash command string
  */
 export function worktreeAddCommand(storyId, sprintBranch) {
   const story = String(storyId);
   return `git worktree add .worktrees/${story} -b story/${story} ${sprintBranch}`;
+}
+
+/** CR-124: per-story worktree bases from a plan. No schema_version → {} (no per-story bases). */
+export function storyBases(plan) {
+  if (!plan || plan.schema_version === undefined) return {};
+  if (plan.schema_version !== 2) throw new TypeError(`storyBases: unsupported schema_version ${plan.schema_version}`);
+  const contractBranches = new Set((plan.contracts ?? []).map((c) => c && c.branch));
+  const out = {};
+  for (const [id, entry] of Object.entries(plan.stories ?? {})) {
+    if (!entry || typeof entry.base !== 'string' || entry.base === '') continue;
+    if (!/^[A-Za-z0-9._\/-]+$/.test(entry.base)) throw new TypeError(`storyBases: ${id} has an unsafe base '${entry.base}'`);
+    if (entry.base.startsWith('contract/') && !contractBranches.has(entry.base)) throw new TypeError(`storyBases: ${id} names undeclared contract '${entry.base}'`);
+    out[id] = entry.base;
+  }
+  return out;
+}
+/** CR-124: true iff every `upstream` story of storyId is in mergedIds. No schema_version → true (no edges). */
+export function integrationReady(plan, storyId, mergedIds) {
+  if (!plan || plan.schema_version === undefined) return true;
+  const entry = plan.stories?.[storyId];
+  if (!entry) throw new Error(`integrationReady: unknown story ${storyId}`);
+  const merged = new Set(mergedIds ?? []);
+  return (entry.upstream ?? []).every((u) => merged.has(u));
 }
 
 // ---------------------------------------------------------------------------
@@ -258,16 +282,25 @@ export function validateVerdicts(verdicts) {
  * @param {(thunks: Array<() => Promise<object>>) => Promise<object[]>} [args.parallel]  parallel() seam
  * @param {(story: string, runId: string) => Promise<object>} [args.segmentRunner]       per-segment seam
  * @param {NodeJS.ProcessEnv} [args.env]  env handle for the gate save/restore (defaults to process.env)
+ * @param {Record<string,string>} [args.bases]  per-story worktree base refs (from `storyBases(plan)`);
+ *                                              a story without a non-empty entry is cut from `sprintBranch`
  * @returns {Promise<object[]>}  the validated array of segment verdicts
  * @throws {Error} from validateVerdicts when any verdict is malformed — gate is restored first.
  */
-export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner, env = process.env }) {
+export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner, env = process.env, bases = {} }) {
   const stories = (wave && Array.isArray(wave.stories) ? wave.stories : []).slice();
+
+  // CR-124: a story's worktree base is its declared base (a contract branch or the sprint
+  // branch from a `schema_version: 2` plan) when one is given, otherwise the sprint branch.
+  const baseFor = (story) => {
+    const base = bases ? bases[story] : undefined;
+    return typeof base === 'string' && base !== '' ? base : sprintBranch;
+  };
 
   // Pre-create each wave story's worktree SERIALLY (spike risk-mitigation: concurrent
   // `git worktree add` races the repo index). The actual exec is the Orchestrator's job;
   // here we surface the commands so the launcher / tests can assert their construction.
-  const worktreeCommands = stories.map((story) => worktreeAddCommand(story, sprintBranch));
+  const worktreeCommands = stories.map((story) => worktreeAddCommand(story, baseFor(story)));
 
   // Build one thunk per story; each mints its own distinct RUN_ID.
   const segmentPlan = stories.map((story) => ({ story, runId: mintRunId(story, sprintId) }));
@@ -279,7 +312,7 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
     return segmentPlan.map((seg) => ({
       storyId: seg.story,
       runId: seg.runId,
-      worktreeCommand: worktreeAddCommand(seg.story, sprintBranch),
+      worktreeCommand: worktreeAddCommand(seg.story, baseFor(seg.story)),
       planned: true,
     }));
   }
