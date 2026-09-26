@@ -260,4 +260,123 @@ process spawned for test execution or read-only inspection, not a wrapped
 flashcards_flagged:
   - "2026-09-26 · #qa-red #test-harness · A CLI command not yet registered fails `--help` differently per flag: it falls through to the top-level help, listing no subcommand flags at all."
 
+## Re-seal (TPV R1–R17)
+
+**Commit.** Cli repo `story/STORY-058-08`, one follow-up commit on top of `81c05e9`:
+
+```
+549fdaa qa-red(STORY-058-08): re-seal R1-R17 per TPV
+```
+
+**Patch verification (before applying):**
+
+| Check | Expected | Measured |
+|---|---|---|
+| SHA-256 | `30e6ff852faac0d252cc7adc3ebf25cd7f0db1142fae8d352a85de9d127219bf` | `30e6ff852faac0d252cc7adc3ebf25cd7f0db1142fae8d352a85de9d127219bf` — match |
+| Line count | 484 | 484 — match |
+| `git apply --check` at `81c05e9` | clean | clean |
+
+**Applied cleanly** with `git apply` (no `--check`-only). `git diff --numstat` after applying, before committing:
+
+```
+362  1  test/commands/verify-install.red.node.test.ts
+2    1  test/docs/clean-room-verification-doc.red.node.test.ts
+```
+
+Matches the TPV's expected numstat exactly. The integration file
+(`test/commands/verify-install-cli.red.integration.node.test.ts`) does not
+appear in the diff — unchanged, as expected. `git status --porcelain` showed
+only these two tracked files plus the pre-existing untracked
+`cleargate-0.25.0.tgz` (untouched).
+
+Committed only those two files (`git add` named them explicitly, never `-A`
+or `.`).
+
+## Counts against the expected table
+
+| Check | Expected | Run 1 | Run 2 | Match |
+|---|---|---|---|---|
+| `npm run typecheck` | exit 0 | exit 0 | — | yes |
+| Unit (`verify-install.red.node.test.ts`), SOLO | 38/0/38 | 38 tests, 0 pass, 38 fail | 38 tests, 0 pass, 38 fail | yes |
+| Integration (`verify-install-cli.red.integration.node.test.ts`), SOLO | 5/0/5 | 5 tests, 0 pass, 5 fail | 5 tests, 0 pass, 5 fail | yes |
+| Doc (`clean-room-verification-doc.red.node.test.ts`), SOLO, `CLEARGATE_META_ROOT`=main outer checkout | 9/0/9 | 9 tests, 0 pass, 9 fail | 9 tests, 0 pass, 9 fail | yes |
+
+**Unit failure-reason breakdown** (both runs identical): of the 38 failures,
+33 are `ERR_MODULE_NOT_FOUND` on `src/commands/verify-install.js` (U1–U16 and
+their re-seal extensions/additions) and 5 are `ERR_MODULE_NOT_FOUND` on
+`src/lib/cli-package-root.js` (U17a–e, the new direct
+`findCleargatePackageRoot` tests per TPV ruling #2 / M4-A10). 33 + 5 = 38.
+Every failure is the per-test dynamic `import()` throwing on a module that
+does not exist at this commit — no other failure shape appeared.
+
+**Sealed and parity files** — SOLO, re-run after the re-seal commit, all
+identical to the TPV's "Regression witnesses" table and to the pre-re-seal
+QA-Red measurement:
+
+| File | Count |
+|---|---|
+| `host-adapter-contract.red.node.test.ts` | 19/19 |
+| `host-selection.red.node.test.ts` | 11/11 |
+| `host-lifecycle.red.node.test.ts` | 17/17 |
+| `manifest-query.red.node.test.ts` | 6/6 |
+| `manifest-host-ownership.red.node.test.ts` | 18/18 |
+| `init-host-selection.red.node.test.ts` | 10/10 |
+| `init-host-snapshot.red.node.test.ts` | 13/13 |
+| `doctor-per-host.red.node.test.ts` | 10/10 |
+| `upgrade-per-host.red.node.test.ts` | 6/6 |
+| `uninstall-per-host.red.node.test.ts` | 16/16 |
+| `uninstall-reinit.red.node.test.ts` (added to the witness set per TPV ruling #1) | 4/4 |
+| `init-host-cli.red.integration.node.test.ts` | 4/4 |
+| `host-cli.red.integration.node.test.ts` | 3/3 |
+| `lifecycle-per-host.red.integration.node.test.ts` | 3/3 |
+| `drift-check-scaffold.red.node.test.ts` (BUG-085) | 24/24 |
+| `pending-task-sentinel-cards.red.node.test.ts` (BUG-085) | 13/13 |
+| `doctor-drift-guard.node.test.ts` (BUG-085) | 13/13 |
+
+Parity: `claude-adapter-init-parity.red.integration.node.test.ts` 5/5,
+`init-host-parity.red.integration.node.test.ts` 15/15.
+
+**Baseline hash** (`/private/tmp/cg-s41-m2-init-baseline`, 425 files, absolute
+paths): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` —
+identical before and after this re-seal (never touched).
+
+No mismatches anywhere. Every measured count reproduces the TPV's "Expected
+counts after the re-seal" table exactly.
+
+## Outer status
+
+**Before (re-seal dispatch start):**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+**After (re-seal dispatch end):**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+Identical — no outer write of any kind during this re-seal dispatch (this
+report edit is the only outer-tree change, and it is uncommitted, per
+instructions). Cli repo `git status --porcelain` at end: only the
+pre-existing untracked `cleargate-0.25.0.tgz`.
+
+No writing CLI command ran against the outer repo. No `npm run build`. No
+`git stash`/`--no-verify`/reset. The one `git apply` + one `git commit`
+targeted only the two named test files in the cli main checkout, on
+`story/STORY-058-08`, which is this item's authorized branch (sprint rule 9).
+
+## Script Incidents
+
+None. Every command in this re-seal dispatch was a direct `git`/`shasum`/`wc`/
+`tsx --test`/`npm run typecheck`/`find`/`xargs shasum` invocation — no wrapped
+`.cleargate/scripts/*` script was run.
+
+flashcards_flagged: []
+
 STATUS=done
