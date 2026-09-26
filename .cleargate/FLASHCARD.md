@@ -1,3 +1,5 @@
+2026-09-27 · #codex #app-server · Code-mode tools.exec_command takes {cmd, login, workdir, yield_time_ms}; workdir defaults to the turn cwd.
+2026-09-27 · #test-harness #tmp · codex-loop e2e Part B leaves its ~166MB container in $TMPDIR; remove it by exact path after a run.
 2026-09-27 · #qa-red #test-harness #tmp · A $TMPDIR leak check needs a before/after delta on YOUR run — concurrent lanes leave same-prefix orphans.
 2026-09-27 · #codex #app-server · A finished child thread ends {type:'notLoaded'}, never idle; an 'every thread idle' settle never fires.
 2026-09-27 · #codex #hooks · Codex SubagentStop runs on the child thread with a suffix-less run id; join a dispatch by threadId.

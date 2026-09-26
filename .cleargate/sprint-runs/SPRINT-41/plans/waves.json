@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "TPV on QA-Red seal 1111659 (C3 9a94ff2)",
+      "state": "dev done (A 608e45c, B 7a7bfa6; Run 1 scripted PASS); integrating onto cli main f0c33f7 ∥ post-flight",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
