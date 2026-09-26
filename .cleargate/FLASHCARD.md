@@ -1,3 +1,5 @@
+2026-09-27 · #qa-red #clean-room · codex-hooks-harness.red is 90/90 at e720592, not the 91/91 an earlier dispatch cited.
+2026-09-27 · #merge #init-fixture · BSD diff offsets an insertion by its shared '},' suffix; prove a splice by cmp of the '>' streams, not hunk offsets.
 2026-09-27 · #serial #dispatch · dispatch_serial record accepts any wave member: a GREEN for a later story skips it; pin record to next's story.
 2026-09-27 · #cli #exit-codes · An uncaught Error in a node CLI exits 1; if exit 1 means 'invalid input', give unexpected errors their own code.
 2026-09-27 · #devops #forecast · Forecast pre-BD reds: build the merged tree in scratch, swap in pre-merge templates/+dist/, run payload readers.
