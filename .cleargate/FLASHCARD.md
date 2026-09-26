@@ -1,3 +1,8 @@
+2026-09-26 · #test-harness #tpv #locator · A port-parity table needs one fixture per framing rule; 13 fixtures left 7 port mutants alive.
+2026-09-26 · #tpv #frontmatter · Preamble-free fixtures can't tell a located-YAML read from a whole-file scan; add a col-0 key in <instructions>.
+2026-09-26 · #test-harness #tpv · A frozen contract export exercised only through a spawn is unpinned; add one direct-import test per export.
+2026-09-26 · #frontmatter #scripts · assert_story_files' offset-0 regex approves a ----closed block (---- read as closer); the locator fails closed.
+2026-09-26 · #orchestrator #cross-repo · A merge-lane full suite back-syncs outer main delivery/**; a parallel agent's git status shows it — not theirs.
 2026-09-26 · #test-harness #init #merge · init-fixture row append/append conflicts split into interleaved hunks; rebuild tail: upstream rows, then own.
 2026-09-26 · #tpv #test-harness · every() vs some() survives single-upstream fixtures; gate tests need a 2-upstream one-merged case + a root.
 2026-09-26 · #tpv #test-harness · A doc literal present twice masks deleting its operative copy; pin it inside its own section slice.
