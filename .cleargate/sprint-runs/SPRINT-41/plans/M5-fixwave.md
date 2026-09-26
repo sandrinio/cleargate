@@ -781,6 +781,312 @@ Site census rulings for the other scripts, recorded here per the bug's own task 
 6. `story_count_in_milestone` and `story_count_planned` go from 17 to 20. `execution.note`'s "All 17 items" becomes "All 20 items".
 7. `rulings` adds `"fix_wave_placement": "wave14-fw1..fw3 (BUG-096, BUG-097, BUG-090) run after wave14 → BD → RS-4a and before wave15; registered by the 2026-09-26T09:30Z amendment; plan plans/M5-fixwave.md."`
 
+## BUG-098 — remaining positional frontmatter sites (cli `story/BUG-098` + outer `.worktrees/BUG-098` on `story/BUG-098`; wave14-fw4)
+
+role: architect. This section replaces the Follow-ups bullet "BUG-098 (to file)" and resolves Open decision 4. The item is in-sprint and goal-critical ("stop corrupting").
+
+**Base and dependency (pinned).**
+- The red commit is cut from cli `main` **after BUG-090 merges**, and after BUG-090's BD.
+- Entry gate, all read-only:
+  - `command grep -n "export function locateFrontmatterFence" CLI/scaffold/core/.cleargate/scripts/assert_story_files.mjs` hits.
+  - The same grep on the live `OUTER/.cleargate/scripts/assert_story_files.mjs` hits.
+  - `node OUTER/.cleargate/scripts/close_sprint.mjs` exits 2 with usage, which proves BUG-090's live import pair links.
+- The two BUG-098 scripts `import { locateFrontmatterFence } from './assert_story_files.mjs'`. Without BUG-090's export, they fail at ESM link time, both in canonical and in the live mirror.
+- Line numbers below are at `35580b0`. Re-derive them by content at the red commit:
+  - BUG-090 deletes one line in `doctor.ts` above `:854`, so it becomes `:853`.
+  - -10 edits `doctor.ts` `runCheckScaffold`.
+  - No fix-wave item or -10 touches the other TS files.
+
+**Measured at `35580b0`, in the scratch clone.**
+- **`sprint init --allow-drift` phantom write-back reproduced.** The probe used `sprintInitHandler` with a `gitRunner` stub (`feat(CR-001)`) against a `CR-001` whose status is `Draft`. The sprint plan was `<instructions>`-led and held `context_source: "orig"`. After the run, the file starts with `---\ncontext_source: "lifecycle waiver: 2026-09-26 for CR-001"\n---\n\n<instructions>…`, and the real block is intact below it.
+  - **Cascade:** the decomposition gate then reads the phantom (first fence) and reports "sprint declares no epics or proposals — waived via --allow-drift". The plan's `epics: [EPIC-001]` became invisible.
+- `reconcileCurrentSprintStories` (Step 2.6d) on an instructions-led `Done` story throws `Error: No frontmatter in …/STORY-900-01_probe.md`. The file stays in pending-sync.
+- `prep_reporter_context.mjs` on an instructions-led sprint plan whose dates are 2026-05-01..31 writes `No flashcard entries found in sprint window (no date window available).` Once `<instructions>` is stripped, it writes `… [2026-05-01 → 2026-05-31].`
+- A broader grep, `command grep -rnE "startsWith\(['\"]---|/\^---|indexOf\(['\"]\\\\?n?---|lines\[0\] (!==|===) ['\"]---|match\(/\^---" src`, found **one site the census missed**: `src/lib/intake.ts:263`.
+- M2 baseline, all 5 scenarios, equal to canonical and live:
+  - `prep_reporter_context.mjs` `31d041da56a7187e480a1b7100c0828310f56ff5ed4b29d6fe9c6c7111c45f06`, mode 644;
+  - `dedupe_frontmatter.mjs` `6bf2816399cad2ab6f8f770de5eb920c3547b6fad9295c81f08aa6a4f894ef21`, mode **755**.
+- `backfill_hierarchy.mjs` is **not** in `scaffold/core` (`ls` ENOENT). It is live-only in the meta repo.
+
+### Site list and rulings
+
+| # | Site (at `35580b0`) | Reads/writes | Today on an `<instructions>`-led item | Ruling |
+|---|---|---|---|---|
+| 1 | `src/commands/sprint.ts:745-766` `parseFileFrontmatter` (readers `:307` `lifecycle_init_mode`, `:628` `start_date`, `:959` `epics`, `:1024` `parent_epic_ref`) | read | `{fm:{}, body: raw}` | **FIX** through `locateFrontmatter` |
+| 2 | `sprint.ts:396-411` `--allow-drift` waiver → `serializeFileContent(fm, body)` | write | phantom block planted (measured) | **FIX**: splice into the span |
+| 3 | `sprint.ts:807-812` `stampFile` (archive loop `:1105-1107`) | write | phantom `status`/`completed_at` block | **FIX**: splice |
+| 4 | `sprint.ts:823-848` `stampSprintClose` (`:1067`) | write | phantom block | **FIX**: splice |
+| 5 | `src/lib/lifecycle-reconcile.ts:775-791` `setFrontmatterFieldAtomic` (2.6d, `:910`, `:912`) | write | throws; close stops (measured) | **FIX**: splice |
+| 6 | `src/lib/readiness-predicates.ts:434-462` `readFrontmatterFromFile` (`frontmatter(<ref>).…` predicates) | read | `{}`, so `parent-approved` fails for an approved parent | **FIX**: locate, then the existing line parser over the YAML slice. The value semantics (strings) are unchanged |
+| 7 | `src/commands/doctor.ts:257` (`runHookHealth`, retired `execution_mode:` advisory) | read | miss (no advisory) | **FIX** |
+| 8 | `src/commands/doctor.ts:854` (`runPricing`) | read | exit 2 "file has no frontmatter" | **FIX**. `null` span keeps the message and exit 2; a throw becomes "cannot parse frontmatter", exit 2 (the existing branch `:862-869`) |
+| 9 | `src/lib/frontmatter-merge.ts:91-100` `parseBlock` | read | throws | **FIX**: drop the guard, so `parseFrontmatter` locates or throws. `mergeFrontmatterConflict` has no `src/` caller today (only `test/lib/frontmatter-merge.node.test.ts`); aligned for its future sync consumer |
+| 10 | `src/lib/slug.ts:160-169` `extractFrontmatterBlock` (`nextProposalId` `:87`, `findByRemoteId` `:142`) | read | skipped. `nextProposalId` can hand out a **duplicate** `PROP-NNN`, and `findByRemoteId` misses the item | **FIX** |
+| 11 | `src/lib/wiki/contradict.ts:492-516` `upsertFrontmatterField` (`last_contradict_sha` on the raw item, `:196`) | write | silently unstamped | **FIX**: splice |
+| 12 | `src/commands/wiki-audit-status.ts:248-270` `applyStatusFix` | write | unchanged, yet "applied N fix(es)" is printed and the next run still drifts | **FIX**: splice |
+| 13 | `src/lib/intake.ts:238-275` `hasAnyRemoteAuthored` (`:263` `raw.indexOf('\n---', 4)`) | read | scans the `<instructions>` preamble, not the frontmatter, so the R10 warning is wrong | **FIX** (new site; FW-A13) |
+| 14 | `scaffold/core/.cleargate/scripts/prep_reporter_context.mjs:83-96` `parseFrontmatter` (`:487` sprint dates) | read | null dates (measured) | **FIX** with `locateFrontmatterFence` |
+| 15 | `scaffold/core/.cleargate/scripts/dedupe_frontmatter.mjs:58-71` `parseFmLines` and the rebuild `:193-201` | read+write | skipped | **FIX** with `locateFrontmatterFence`; rebuild by span |
+| 16 | `.cleargate/scripts/backfill_hierarchy.mjs:69-82` `parseFm` (**live-only**, not shipped) | read+write | skipped (fail-closed) | **LEAVE**. See below |
+| 17 | `src/wiki/page-schema.ts:117`, `src/wiki/code-map/page-schema.ts:89` | read | n/a | **LEAVE**: generated wiki pages, `---`-led by construction |
+| 18 | `src/commands/push.ts:235` | read | n/a | **LEAVE**: sprint reports, `---`-led by construction |
+| 19 | `src/commands/push.ts:341`, `src/commands/sync.ts:575`, `src/lib/sync/work-items.ts:327` (push-side write-backs) | write | whole-file rewrite; the `<instructions>` preamble is dropped and the frontmatter is read from the real block | **LEAVE**. There is no phantom and no author-data loss. The protocol's end state for an authored item carries zero `<instructions>`. The paths are member-only (pre-member exits 2 first). Tracked in sprint §4 as BUG-067 carry-forward (1), filed at close |
+| 20 | `src/commands/pull.ts:172`, `src/commands/sync.ts:665` (pull-side write-backs) | write | the body is replaced by the remote's by design | **LEAVE**: the remote is authoritative for the body. Same §4 carry-forward |
+| 21 | `src/lib/merge-ui.ts:33`, `src/lib/lifecycle-reconcile.ts:276` | — | diff-hunk and git-log separators | n/a, not frontmatter |
+
+**`backfill_hierarchy.mjs` ruling: LEAVE, fail-closed** (the SPRINT-41 M0 follow-up is closed by this ruling).
+1. It is live-only (`OUTER/.cleargate/scripts/`). It is not in `scaffold/core`, not in the payload, and not in the drift check's canonical-driven set (`plans/M3.md:773`), so no user install runs it.
+2. It is a manual one-shot and not hook-wired (FLASHCARD 2026-08-27 `#frontmatter #backfill #correction`).
+3. Its fail-closed `!raw.startsWith('---')` skip is the only thing keeping freshly scaffolded, `<instructions>`-led items out of its body-regex sprint fallback (`/\bSPRINT-(\d+)\b/` over the first 50 body lines, `:88-120`). That fallback re-owned 19 items in SPRINT-39 (FLASHCARD `#frontmatter #backfill #danger`; BUG-067-arch.md §1).
+
+Making it locator-aware without first removing that fallback would widen BUG-048's blast radius to every new item. If the script ever needs `<instructions>`-led coverage, the prerequisite is a separate item that deletes the body-regex fallback. BUG-098 §4's listing of it under `scaffold/core/…/scripts` is corrected by FW-A13.
+
+### Change shape (pinned)
+
+**Shared TS helper.** Add two exports to BUG-067's `src/lib/frontmatter-locator.ts`, next to `replaceFrontmatter`. This is reuse, not a second locator.
+```ts
+/** YAML text between the fences, without the EOL that precedes the closing fence. */
+export function frontmatterYaml(raw: string, span: FrontmatterSpan): string {
+  const y = raw.slice(span.yamlStart, span.yamlEnd);
+  if (y.endsWith('\r\n')) return y.slice(0, -2);
+  if (y.endsWith('\n')) return y.slice(0, -1);
+  return y;
+}
+/** Replace only the YAML between the fences; every byte outside [span.start, span.end) is retained. */
+export function withFrontmatterYaml(raw: string, span: FrontmatterSpan, yamlText: string): string {
+  const inner = yamlText === '' ? '' : yamlText.split(/\r?\n/).join(span.eol) + span.eol;
+  return replaceFrontmatter(raw, span, `---${span.eol}${inner}---`);
+}
+```
+- An unchanged YAML text round-trips byte-identical, whether LF, CRLF or empty `---\n---`. The locator guarantees the fences are exact `---` lines.
+- The block carries no trailing EOL (FLASHCARD 2026-09-25 `#frontmatter #locator`).
+- Every TS writer in this item goes through `withFrontmatterYaml`, so the bytes outside the span stay identical.
+
+**`sprint.ts` (sites 1-4).**
+- `parseFileFrontmatter(raw)` returns `{ fm, body, span, parseOk }`:
+  - `span = locateFrontmatter(raw)`, inside try/catch. A throw becomes `null`.
+  - `span === null`: `{fm:{}, body: raw, span:null, parseOk:false}`, today's fallback.
+  - Otherwise `yaml.load(frontmatterYaml(raw, span), CORE_SCHEMA)`. A non-object or a throw gives `parseOk:false` and `fm:{}`.
+  - `body` keeps today's convention for the readers: bytes after the closing fence, minus one leading blank line.
+- Extract `dumpFrontmatterYaml(fm)`: the exact `yaml.dump` options of `serializeFileContent` (`:772-782`), then `.replace(/\n+$/, '')`.
+- New `rewriteFrontmatter(raw, parsed, fm)`:
+  - `span && parseOk` → `withFrontmatterYaml(raw, span, dumpFrontmatterYaml(fm))`;
+  - `span && !parseOk` → `raw`, unchanged. A malformed block is never overwritten or shadowed;
+  - `!span` → `serializeFileContent(fm, parsed.body)`, today's no-frontmatter fallback, which writes the only block.
+- `:407`, `stampFile` and `stampSprintClose` call `rewriteFrontmatter`. `stampSprintClose` reports `didChange: false` and skips the write when the result equals `previousContent`.
+- For `---`-led files, the bytes inside the span are the same `yaml.dump` output as today. One deliberate change: the body separator after the closing fence is now preserved instead of normalized to one blank line. The existing tests assert with `includes`, so they stay green.
+
+**`lifecycle-reconcile.ts` (site 5).**
+- `span = locateFrontmatter(raw)`, inside try/catch. `null` or a throw raises `new Error(\`No frontmatter in ${filePath}\`)`, as today.
+- `y = frontmatterYaml(raw, span)`. Apply today's transform to `y` unchanged: replace `^${field}:.*$`, or `y.trimEnd() + '\n' + \`${field}: ${rawValue}\``.
+- `newRaw = withFrontmatterYaml(raw, span, y2)`, written with the existing tmp+rename.
+- For LF `---`-led files this is byte-identical to today's `raw.replace(fm[1], newFm)`: `y` equals the old capture.
+
+**`readiness-predicates.ts` (site 6).** `lines = frontmatterYaml(raw, span).split('\n')`, with `null`/throw → `{}`. The existing loop over those lines is unchanged; its `.trim()` absorbs a CRLF `\r`. S4 of `test/docs/gate-section-index-pinning.node.test.ts` pins by content, not line numbers (`:602-615`), so moving code above `evalSection` is safe.
+
+**Remaining readers and writers.**
+- **Readers (sites 7, 10, 13):** `span` (try/catch → treated as absent), then `frontmatterYaml(raw, span)` in place of the old slice or regex capture:
+  - `doctor.ts:257` tests `/^execution_mode:/m` on it;
+  - `slug.ts` `extractFrontmatterBlock` returns it, or `null`;
+  - `intake.ts` tests its `source:` regex on it.
+- **Writers (sites 11, 12):** the existing line-edit over `frontmatterYaml(raw, span).split('\n')`, then `withFrontmatterYaml`. `null` or a throw returns `raw`, unchanged, as today.
+- **`runPricing` (site 8):** replace the sniff with a `locateFrontmatter` try: `null` → the existing "file has no frontmatter" exit 2; a throw → the existing "cannot parse frontmatter" exit 2; otherwise `parseFrontmatter` as today.
+- **`parseBlock` (site 9):** delete `if (!trimmed.startsWith('---')) throw …`. `parseFrontmatter` (located) throws on absent frontmatter.
+
+**Scripts (sites 14-15, canonical plus live, byte-identical).** Both add `import { locateFrontmatterFence } from './assert_story_files.mjs';`.
+- **`prep_reporter_context.mjs` `parseFrontmatter(content)`:**
+  - `let span = null; try { span = locateFrontmatterFence(content); } catch {}`; no span → `{}`.
+  - Otherwise the existing field loop over `content.slice(span.yamlStart, span.yamlEnd).split('\n')`. Its `"?([^"]*)"?\s*$` plus `.trim()` already tolerates `\r`.
+- **`dedupe_frontmatter.mjs`:**
+  - `parseFmLines(raw)` becomes `span` (try/catch → `null` → skipped, as today).
+  - `yaml = raw.slice(span.yamlStart, span.yamlEnd)`, `fmLines = yaml.split('\n')`; pop one trailing `''` (the final EOL) and remember it.
+  - Rebuild as `raw.slice(0, span.yamlStart) + cleaned.join('\n') + (hadFinalEol ? '\n' : '') + raw.slice(span.yamlEnd)`.
+  - CRLF lines keep their `\r`, because each element still ends in `\r`. CRLF files were skipped before; they are now deduped.
+  - The output strings are unchanged: `rewritten: <rel> (removed duplicate keys: …)` and the `Dedupe complete:` summary.
+  - Mode stays **755**. The M2 row asserts mode on both sides.
+- Both keep `check-no-inline-id-regex` clean: no type word next to an ID escape on one line.
+
+### QA-Red (BUG-098) — one red commit on cli `story/BUG-098`
+
+Canonical paths go through `canonicalPath()`. TS tests call exported entry points with the existing seams. Nothing spawns `dist/cli.js` (flashcard 2026-09-25 `#cross-repo #test-harness`). Each new `describe` is titled `BUG-098 …`.
+
+1. **`test/lib/frontmatter-yaml-splice.red.node.test.ts`** (new, 4 red: exports missing)
+   - **H1:** an LF `<instructions>`-led file; `withFrontmatterYaml(raw, span, frontmatterYaml(raw, span)) === raw`.
+   - **H2:** the same with CRLF, and the rewritten block uses `\r\n`.
+   - **H3:** empty `---\n---` round-trips.
+   - **H4:** after an edit that replaces one line, `out.slice(0, span.start) === raw.slice(0, span.start)` and the bytes after the closing fence are identical.
+2. **`test/commands/sprint-frontmatter-fence.red.node.test.ts`** (new, 5 red). Seams: `sprintInitHandler(…, { cwd, gitRunner, spawnFn: () => ({status:0,stdout:'',stderr:''}), stdout, stderr, exit: throwing })`, with the `gitRunner` line format of `test/lib/lifecycle-reconcile.node.test.ts:183-192`.
+   - **S1:** an `<instructions>`-led plan (`context_source: "orig"`, `epics: [EPIC-001]`), `CR-001` Draft, `feat(CR-001)`, `allowDrift: true`. Afterwards:
+     - the preamble bytes are identical;
+     - `locateFrontmatter(after).start` equals the original start;
+     - the parsed `fm.context_source` includes `orig` and `lifecycle waiver: `, and `for CR-001`;
+     - `sprint_id` and `epics` are preserved;
+     - the bytes after the closing fence are identical;
+     - no `---` line precedes `<instructions>`.
+   - **S2:** S1 with CRLF; the new block's lines end `\r\n`.
+   - **S3:** `stampSprintClose` on an `<instructions>`-led sprint file: `didChange === true`, the preamble and body are identical, and `fm.status === 'Completed'` with `completed_at` set.
+   - **S4:** read path. An `<instructions>`-led plan with `lifecycle_init_mode: "block"`, drift present, `allowDrift` false. Exit 1, and stderr contains `lifecycle drift blocks sprint activation (lifecycle_init_mode: block)`. Base reads `{}`, so it takes warn mode and proceeds.
+   - **S5:** an `<instructions>`-led plan whose frontmatter is malformed YAML (`epics: [unterminated`), with `allowDrift: true`. The file is byte-identical afterwards. Base plants a phantom.
+3. **`test/commands/sprint-archive.node.test.ts`** (amend, +1 red)
+   - **S6:** using the existing `buildFixture`, rewrite `STORY-099-01_Test_Story_1.md` as `<instructions>`-led before `sprintArchiveHandler`. The archived file's preamble is identical, and its located frontmatter has `status: Done` and `completed_at`.
+4. **`test/lib/lifecycle-reconcile-fence.red.node.test.ts`** (new, 2 red)
+   - **L1:** `reconcileCurrentSprintStories({deliveryRoot, sprintRunsRoot, sprintId:'SPRINT-900'})` with `STORY-900-01` Done in `state.json`. The pending-sync file is `<instructions>`-led, with `status: "Draft"` and `approved: false`. Expect:
+     - the result lists `STORY-900-01` as flipped;
+     - `archive/STORY-900-01_probe.md` exists;
+     - its bytes equal the original with exactly those two lines replaced, by `status: "Completed"` and `approved: true`.
+     - Base throws `No frontmatter in` (measured).
+   - **L2:** the same with CRLF and no `approved` key. The appended `approved: true` line ends `\r\n`, the closing fence stays on its own line, and the preamble is identical.
+5. **`test/commands/gate-unit.node.test.ts`** (amend the `CR-030 γ` block, +2 red; reuse `OR_GROUP_GATES_DOC`)
+   - **R1:** an `<instructions>`-led initiative with `status: "Triaged"` → no `❌ parent-approved`.
+   - **R2:** an `<instructions>`-led proposal with `approved: true` → no `❌ parent-approved`.
+6. **`test/commands/doctor-fence.red.node.test.ts`** (new, 2 red + 1 anchor)
+   - **D4:** `doctorHandler({}, {cwd, stdout, stderr, exit: throwing})`. Always pass `exit` (FLASHCARD 2026-09-02). Use the minimal fixture of `test/commands/doctor-retired-field.red.node.test.ts:45-112`, with the sprint file `<instructions>`-led and carrying `execution_mode: v1`. Stdout contains ``[advisory] 1 sprint files carry a retired `execution_mode:` field; consider removing.``
+   - **D5:** `runPricing(<instructions-led item with draft_tokens>, cwd, …)`. Exit is not 2, and stdout carries the USD estimate line (the success shape of `test/commands/doctor-pricing.node.test.ts:180-200`).
+   - **D6 [anchor]:** a file with no frontmatter → exit 2, and stderr contains `file has no frontmatter`.
+7. **`test/lib/slug.node.test.ts`** (amend, +2 red)
+   - **SL1:** pending-sync holds an `<instructions>`-led `PROPOSAL-004_x.md` with `proposal_id: "PROP-004"` → `nextProposalId(root) === 'PROP-005'`. Base: `PROP-001`.
+   - **SL2:** an `<instructions>`-led item with `remote_id: "LIN-42"` → `findByRemoteId(root, 'LIN-42')` returns its path. Base: `null`.
+8. **`test/lib/frontmatter-merge.node.test.ts`** (amend, +1 red)
+   - **FM1:** `mergeFrontmatterConflict(<instructions-led local file text>, <remote block>)` returns the merged block with the remote-only field present. Base throws.
+9. **`test/wiki/contradict.node.test.ts`** (amend, +1 red)
+   - **C1:** `commitPhase4Findings` with an `<instructions>`-led raw file. Its located block gains `last_contradict_sha: "<sha>"`; the preamble and body are identical, and the only diff is the one inserted line.
+10. **`test/wiki/audit-status.node.test.ts`** (amend, +1 red)
+    - **W1:** an archived `<instructions>`-led epic with `status: "Ready"`. `--fix --yes` changes only the status line (to `status: "Abandoned"`); the preamble is identical; the second run exits 0 with `audit-status: clean (0 drift)`.
+11. **`test/lib/intake.node.test.ts`** (amend, +1 red)
+    - **I1:** the `r10NoWarnIfPriorIntake` shape with the prior remote-authored file `<instructions>`-led → no R10 WARN.
+12. **`test/scripts/scripts-fence-bug098.red.node.test.ts`** (new, 2 red + 2 anchors; spawns canonical scripts)
+    - **P1:** `prep_reporter_context.mjs SPRINT-fixture` with `CLEARGATE_SPRINT_DIR`, `CLEARGATE_PENDING_SYNC_DIR`=tmp, and an `<instructions>`-led plan with `start_date: 2026-05-01` / `end_date: 2026-05-31`. The bundle contains `[2026-05-01 → 2026-05-31]` and not `(no date window available)` (measured base).
+    - **P2 [anchor]:** the same plan `---`-led.
+    - **DD1:** `dedupe_frontmatter.mjs <tmpdir>` over an `<instructions>`-led file holding `approved: false` … `approved: true`. Stdout contains `removed duplicate keys: approved`, and the file equals the original minus the first `approved:` line, preamble identical. Base: `0 rewritten, 1 skipped`.
+    - **DD2 [anchor]:** the same file `---`-led.
+13. **`test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts`** (new, integration tier, 1 red; BUG-098 §5's integration row)
+    - Flow: `runInitScenario('fresh')` (auto-cleaned after BUG-096), then `newHandler` sprint `probe` plus a `CR-001`, then `sprintInitHandler({…, allowDrift:true}, {cwd: r.dir, gitRunner, spawnFn})`.
+    - Assert S1's invariants on the real template-scaffolded plan.
+14. **`test/helpers/init-fixture.ts`** (+2 `SANCTIONED_BASELINE_DELTAS` rows, `item: 'BUG-098'`, `scenarios: 'all'`, appended after BUG-090's rows):
+
+    | rel | baselineHash | currentHash |
+    |---|---|---|
+    | `.cleargate/scripts/prep_reporter_context.mjs` | `'31d041da56a7187e480a1b7100c0828310f56ff5ed4b29d6fe9c6c7111c45f06'` | `currentPinSubstitutedHash(rel)`, refused when equal to the baseline |
+    | `.cleargate/scripts/dedupe_frontmatter.mjs` | `'6bf2816399cad2ab6f8f770de5eb920c3547b6fad9295c81f08aa6a4f894ef21'` | same pattern; mode 755 on both sides |
+
+    Both are red at the red commit on the 5 + 15 M2 parity runs (with `CLEARGATE_INIT_BASELINE`) and green after Dev.
+
+**Totals.**
+- Default tier +27: **24 red**, 3 anchors (D6, P2, DD2).
+- Integration +1, red.
+- The 20 parity runs flip, with no count change.
+
+**Anchors that must stay green (solo):**
+- the existing tests of every amended file: `sprint-archive`, `gate-unit`, `slug`, `frontmatter-merge`, `contradict`, `audit-status`, `intake`;
+- `test/lib/lifecycle-reconcile.node.test.ts`, `test/lib/close-sprint-backsync.node.test.ts`, `test/commands/sprint-init-decomp-gate.node.test.ts`, `test/commands/sprint-sentinel-validation.node.test.ts`;
+- `test/commands/sprint-archive-stamp.integration.node.test.ts` (named);
+- `test/commands/doctor.node.test.ts`, `test/commands/doctor-pricing.node.test.ts`, `test/commands/doctor-session-start.node.test.ts`;
+- `test/lib/readiness-predicates.node.test.ts`, `test/lib/frontmatter-locator.red.node.test.ts` (11/11), `test/docs/gate-section-index-pinning.node.test.ts`;
+- `test/scripts/test_prep_reporter_context.node.test.ts` and `test/scripts/dedupe-frontmatter.node.test.ts` (both read the live scripts; `---`-led fixtures);
+- `test/scripts/no-inline-id-regex.node.test.ts`;
+- BUG-090's four new fence files;
+- `npm run typecheck`.
+
+**Expected pre-merge reds (Rule 15):** none in the default tier. No default-tier test compares these two scripts live vs canonical. Integration only: `test/scaffold/canonical-live-parity.red.integration.node.test.ts` script cases, named runs.
+
+**Rule 16:** BUG-098 edits two outer live scripts, so run the `CLEARGATE_META_ROOT` list with `CLEARGATE_META_ROOT=<.worktrees/BUG-098>`, exactly as for BUG-090.
+
+### Loop depth: full loop — QA-Red → live TPV → Developer → QA-Verify → live Architect post-flight → DevOps (two-repo). No live harness run.
+
+- **Live TPV: yes.**
+  - 13 entry points, each with its own seam: `gitRunner`, `spawnFn`, throwing `exit` for `sprintInitHandler` and `doctorHandler`, the `reconcileCurrentSprintStories` fixture roots, `commitPhase4Findings` opts, audit `fix`/`yes`, and the script env seams.
+  - Two scripts whose imports depend on BUG-090.
+  - The delta rows' refuse-baseline pattern.
+  - One wrong seam makes a red vacuous (flashcard 2026-09-26: TPV must simulate the reds against a conformant build).
+- **Post-flight: yes.** It checks:
+  - 6 writers, 3 of which rewrite work items at sprint init, archive and close;
+  - the bytes-outside-span invariant, everywhere;
+  - the malformed-YAML no-write rule;
+  - the shared-helper usage, with no private re-implementations;
+  - `parent-approved` gate semantics.
+- **No live clean-room harness at QA-Verify.** The only room-visible read is `lifecycle_init_mode`, and the Sprint Plan Template's value (`"warn"`, template `:44`) equals today's default. The -09 `sprint-init` row is re-witnessed at RS-4, which now follows wave15.
+
+### DevOps (BUG-098, one turn; Rule 15 order)
+
+1. **Pre-merge:** `cp -R CLI/templates/cleargate-planning /private/tmp/cg-s41-fw-payload-pre-098`.
+2. **Outer merge first.** Merge the outer `story/BUG-098` → `sprint/S-41`. The outer half is **one commit** holding both live scripts, byte copies of canonical (`cmp`). Then, one call each, `node OUTER/.cleargate/scripts/prep_reporter_context.mjs` and `node OUTER/.cleargate/scripts/dedupe_frontmatter.mjs --dry-run /private/tmp/cg-s41-fw-empty-dir`, using a fresh empty dir.
+   - The first must print usage or a controlled error, **not** a SyntaxError about `locateFrontmatterFence`.
+   - The second must print `Dedupe complete: 0 would-rewrite, 0 skipped, 0 errors.`
+3. **Cli merge second.** Merge the cli `story/BUG-098` → `main`.
+4. **Full suite once:** **`T090+27` tests / `P090+27` pass / 0 fail / 2 skipped**, where `T090/P090` are BUG-090's post-merge numbers (cumulative over the wave: `T10+81`). Then the Rule-14 revert. Re-run dist-spawning failures after BD, solo.
+5. **BD.**
+6. **Payload identity changes.**
+   - `diff -r /private/tmp/cg-s41-fw-payload-pre-098 CLI/templates/cleargate-planning` lists exactly `.cleargate/scripts/prep_reporter_context.mjs`, `.cleargate/scripts/dedupe_frontmatter.mjs` and `MANIFEST.json`.
+   - The same 2 scripts change in `templates/scaffold/core/`, plus its per-root `MANIFEST.json`.
+   - `dedupe_frontmatter.mjs` is still mode 755.
+   - `verify-pack` OK at `V10` entries (no entry added).
+7. **Witnesses:**
+   - `cmp` live vs canonical for the 2 scripts;
+   - `node cleargate-cli/dist/cli.js doctor` exits 0 with no `scaffold drift:` line;
+   - named integration runs: the M2 parity pair (5/5, 15/15), `canonical-live-parity`, `sprint-allow-drift-fresh-install` (1/1) and `sprint-archive-stamp`;
+   - M2 baseline `bdc4bb1a…62b2`, 425 files.
+8. **No `.claude/` re-sync.** `backfill_hierarchy.mjs` stays byte-unchanged.
+9. **Orchestrator: Adjacent-Implementations row:** `frontmatterYaml(raw, span)` and `withFrontmatterYaml(raw, span, yamlText)` (`src/lib/frontmatter-locator.ts`); every TS frontmatter write now splices through them.
+
+### Collisions with STORY-058-11 (wave15, now `after: ["BUG-098"]`)
+
+- **`test/helpers/init-fixture.ts`** is the only shared file. BUG-098 appends 2 changed-file rows after BUG-090's 5. -11 then appends its 8 hook rows plus the `harness.sh` sanctioned addition, and extends `captureOrCompare` for added files. It must keep the BUG-090 and BUG-098 rows intact, and those rows must stay green under -11's extension.
+- **None of -11's declared surfaces overlap.**
+  - -11 §3.1 names no `sprint.ts`, `lifecycle-reconcile.ts`, `readiness-predicates.ts`, `doctor.ts`, `slug.ts`, `frontmatter-merge.ts`, `intake.ts`, `wiki-audit-status.ts`, `prep_reporter_context.mjs` or `dedupe_frontmatter.mjs`.
+  - The one "contradict" hit is the `cleargate-wiki-contradict.toml` agent file, not `src/lib/wiki/contradict.ts`.
+- **-11's 9-hook Claude parity** runs frozen pre-shim hooks and current hooks against the same dist. BUG-098 changes no hook-invoked output: the hooks call `doctor --session-start`, `--can-edit`, `stamp-tokens`, `gate check` and `wiki ingest`, and none of those paths is touched here. `runHookHealth`'s advisory is default-mode doctor, not session-start.
+- **-11 QA-Red** bases on cli `main` after BUG-098. Its M5-A6 harness repeat runs with no `--known-fail` (FW-A7).
+
+### Story-text amendments for BUG-098 (the orchestrator applies them on `sprint/S-41` before QA-Red seals, then re-gates)
+
+**FW-A13 — BUG-098 §4.** Replace the "Investigate / Modify" list with:
+- `cleargate-cli/src/lib/frontmatter-locator.ts`: add the exports `frontmatterYaml` and `withFrontmatterYaml` (the shared splice helper).
+- `cleargate-cli/src/commands/sprint.ts`: `parseFileFrontmatter` and its readers (`:307`, `:628`, `:959`, `:1024`), plus the writers `:396-411`, `stampFile` and `stampSprintClose`.
+- `cleargate-cli/src/lib/lifecycle-reconcile.ts` (`setFrontmatterFieldAtomic`), `src/lib/readiness-predicates.ts` (`readFrontmatterFromFile`).
+- `cleargate-cli/src/commands/doctor.ts:257,854`, `src/lib/frontmatter-merge.ts:91-100`, `src/lib/slug.ts:160-169`, `src/lib/wiki/contradict.ts:492-516`, `src/commands/wiki-audit-status.ts:248-270`, `src/lib/intake.ts:263` (new site).
+- `cleargate-cli/scaffold/core/.cleargate/scripts/{prep_reporter_context,dedupe_frontmatter}.mjs` plus the live mirrors, in one outer commit, using BUG-090's exported `locateFrontmatterFence`.
+- `cleargate-cli/test/helpers/init-fixture.ts`: 2 sanctioned-delta rows.
+- **Leave:**
+  - `.cleargate/scripts/backfill_hierarchy.mjs`: live-only and not shipped; its fail-closed skip guards against the BUG-048 body-regex sprint re-ownership.
+  - `src/wiki/page-schema.ts:117`, `src/wiki/code-map/page-schema.ts:89`, `src/commands/push.ts:235`.
+  - The push/pull/sync whole-file write-backs `push.ts:341`, `pull.ts:172`, `sync.ts:575,665`, `sync/work-items.ts:327`: sprint §4 BUG-067 carry-forward (1).
+- Add to §1 "Other readers": `src/lib/intake.ts:263` (`hasAnyRemoteAuthored` scans the `<instructions>` preamble).
+- In §3, replace "`--allow-drift` phantom write-back reproduced in /private/tmp/cg-s41-fixwave-plan" with "reproduced 2026-09-26 in /private/tmp/cg-s41-fixwave-plan; the decomposition gate then reads the phantom and reports 'no epics or proposals'".
+
+**FW-A14 — BUG-098 §5.**
+- Command: `cd cleargate-cli`, then each of these solo via `npm run test:file --`:
+  - `test/lib/frontmatter-yaml-splice.red.node.test.ts`
+  - `test/commands/sprint-frontmatter-fence.red.node.test.ts`
+  - `test/commands/sprint-archive.node.test.ts`
+  - `test/lib/lifecycle-reconcile-fence.red.node.test.ts`
+  - `test/commands/gate-unit.node.test.ts`
+  - `test/commands/doctor-fence.red.node.test.ts`
+  - `test/lib/slug.node.test.ts`
+  - `test/lib/frontmatter-merge.node.test.ts`
+  - `test/wiki/contradict.node.test.ts`
+  - `test/wiki/audit-status.node.test.ts`
+  - `test/lib/intake.node.test.ts`
+  - `test/scripts/scripts-fence-bug098.red.node.test.ts`
+  - `test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts`
+- Test-count table: Unit tests 27 (default tier); Integration tests 1, plus the two M2 parity files; E2E: the clean-room `sprint-init` row at RS-4.
+- Append this Gherkin scenario:
+```gherkin
+  @rules
+  Scenario: A malformed frontmatter behind <instructions> is never rewritten
+    Given an <instructions>-led sprint plan whose frontmatter is not valid YAML
+    When `cleargate sprint init <id> --allow-drift` records its waiver
+    Then the file is byte-identical and no block is planted before <instructions>
+```
+
+**FW-A15 — BUG-098 Task Breakdown.** Replace the 6 rows with:
+- `- [ ] QA-Red: splice-helper reds; --allow-drift (LF, CRLF, malformed), stampSprintClose, archive stampFile, lifecycle_init_mode read; 2.6d set-field (LF, CRLF append); parent-approved (initiative, proposal); doctor advisory + pricing; slug ×2; merge; contradict stamp; audit-status fix; intake R10; two script spawns; fresh-install --allow-drift integration; 2 M2 delta rows`
+- `- [ ] Add frontmatterYaml / withFrontmatterYaml to src/lib/frontmatter-locator.ts`
+- `- [ ] sprint.ts: parseFileFrontmatter through locateFrontmatter; waiver, stampFile and stampSprintClose splice via rewriteFrontmatter; malformed YAML → no write`
+- `- [ ] Fix setFrontmatterFieldAtomic and readFrontmatterFromFile the same way`
+- `- [ ] Fix doctor :257/:854, frontmatter-merge, slug, contradict, wiki-audit-status, intake`
+- `- [ ] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror in one outer commit`
+- `- [ ] Typecheck and the targeted tests`
+
 ## Cross-story risks
 
 **Collisions with STORY-058-10** (sealed red at `59d8949`; TPV running now, appending M5-A33+ to `plans/M5.md`):
@@ -849,6 +1155,12 @@ Site census rulings for the other scripts, recorded here per the bug's own task 
 - `2026-09-26 · #scripts #frontmatter · close_sprint Step 2.9 compares raw values: quoted sprint_cleargate_id "SPRINT-41" is skipped (fail-open).`
 - `2026-09-26 · #surface-gate #scripts · file_surface_diff.sh strips only STORY- from the active id; a BUG-* active item resolves no file, gate skips.`
 - `2026-09-26 · #frontmatter #sprint-init #danger · sprint.ts parseFileFrontmatter --allow-drift write-back plants a phantom block on instructions-led plans.`
+- `2026-09-26 · #frontmatter #sprint-init #danger · (BUG-098) --allow-drift phantom then hides epics: the decomposition gate reads the phantom ("no epics").`
+- `2026-09-26 · #frontmatter #close · (BUG-098) reconcileCurrentSprintStories throws "No frontmatter" on an instructions-led Done story; close stops at 2.6d.`
+- `2026-09-26 · #frontmatter #intake · (BUG-098) intake hasAnyRemoteAuthored scans up to the first \n--- — the <instructions> preamble, not frontmatter.`
+- `2026-09-26 · #frontmatter #locator · (BUG-098) The span's YAML slice ends with the EOL before the closing fence; strip it before an append or the fence glues on.`
+- `2026-09-26 · #test-harness #init · (BUG-098) dedupe_frontmatter.mjs ships mode 755; delta rows assert mode on both sides — never drop the exec bit.`
+- `2026-09-26 · #frontmatter #backfill · (BUG-098) backfill_hierarchy.mjs is live-only; its fail-closed skip is what shields fresh items from BUG-048 re-ownership.`
 
 ## Script Incidents
 

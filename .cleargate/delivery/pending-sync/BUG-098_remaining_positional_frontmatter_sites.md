@@ -62,10 +62,11 @@ draft_tokens:
   - `src/lib/slug.ts:162`
   - `src/lib/wiki/contradict.ts:495`
   - `src/commands/wiki-audit-status.ts:251`
+  - `src/lib/intake.ts:263` (`hasAnyRemoteAuthored` scans the `<instructions>` preamble)
 - **Scripts:**
   - `prep_reporter_context.mjs:84` gives null dates for an `<instructions>`-led sprint plan.
   - `dedupe_frontmatter.mjs:60` skips `<instructions>`-led files.
-  - `backfill_hierarchy.mjs` is on the SPRINT-41 M0 follow-up list.
+  - `backfill_hierarchy.mjs` (M0 follow-up list) is left failing closed: it is live-only, and its skip guards against BUG-048's sprint re-ownership.
 
 ## 2. Reproduction Protocol
 1. In a scratch dir: `git init`, then `node <cli>/dist/cli.js init --yes`, then `cleargate new sprint probe`. Leave the `<instructions>` block in place.
@@ -80,29 +81,34 @@ Edge conditions: CRLF; a file with no frontmatter (each site keeps today's fallb
 src/commands/sprint.ts:747   if (lines[0] !== '---') return { fm: {}, body: raw };
 src/commands/sprint.ts:397-406  --allow-drift: parseFileFrontmatter(rawSprint) → fm['context_source'] = waiverLine
                                 → atomicWriteStr(sprintPlanPath, serializeFileContent(fm, body))   // body = whole raw file
-plans/M5-fixwave.md "Follow-ups": sites measured at cli main 35580b0; `--allow-drift` phantom write-back reproduced in /private/tmp/cg-s41-fixwave-plan
+plans/M5-fixwave.md "Follow-ups": sites measured at cli main 35580b0; `--allow-drift` phantom write-back reproduced 2026-09-26 in /private/tmp/cg-s41-fixwave-plan; the decomposition gate then reads the phantom and reports 'no epics or proposals'
 ```
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 **Investigate / Modify:**
-- `cleargate-cli/src/commands/sprint.ts` (`parseFileFrontmatter` and its 7 callers)
-- `cleargate-cli/src/lib/lifecycle-reconcile.ts` (`setFrontmatterFieldAtomic`)
-- `cleargate-cli/src/lib/readiness-predicates.ts` (`readFrontmatterFromFile`)
-- `cleargate-cli/src/commands/doctor.ts:257,854`, `src/lib/frontmatter-merge.ts:93`, `src/lib/slug.ts:162`, `src/lib/wiki/contradict.ts:495`, `src/commands/wiki-audit-status.ts:251`
-- `cleargate-cli/scaffold/core/.cleargate/scripts/{prep_reporter_context,dedupe_frontmatter,backfill_hierarchy}.mjs` plus the live mirrors, using BUG-090's exported `locateFrontmatterFence`
-- Leave: `src/wiki/page-schema.ts:117`, `src/wiki/code-map/page-schema.ts:89`, `src/commands/push.ts:235`.
-The exact site list and test shapes are pinned by the fix-wave plan's BUG-098 section. It depends on BUG-090 (the script locator export).
+- `cleargate-cli/src/lib/frontmatter-locator.ts`: add the exports `frontmatterYaml` and `withFrontmatterYaml` (the shared splice helper).
+- `cleargate-cli/src/commands/sprint.ts`: `parseFileFrontmatter` and its readers (`:307`, `:628`, `:959`, `:1024`), plus the writers `:396-411`, `stampFile` and `stampSprintClose`.
+- `cleargate-cli/src/lib/lifecycle-reconcile.ts` (`setFrontmatterFieldAtomic`), `src/lib/readiness-predicates.ts` (`readFrontmatterFromFile`).
+- `cleargate-cli/src/commands/doctor.ts:257,854`, `src/lib/frontmatter-merge.ts:91-100`, `src/lib/slug.ts:160-169`, `src/lib/wiki/contradict.ts:492-516`, `src/commands/wiki-audit-status.ts:248-270`, `src/lib/intake.ts:263` (new site).
+- `cleargate-cli/scaffold/core/.cleargate/scripts/{prep_reporter_context,dedupe_frontmatter}.mjs` plus the live mirrors, in one outer commit, using BUG-090's exported `locateFrontmatterFence`.
+- `cleargate-cli/test/helpers/init-fixture.ts`: 2 sanctioned-delta rows.
+- **Leave:**
+  - `.cleargate/scripts/backfill_hierarchy.mjs`: live-only and not shipped; its fail-closed skip guards against the BUG-048 body-regex sprint re-ownership.
+  - `src/wiki/page-schema.ts:117`, `src/wiki/code-map/page-schema.ts:89`, `src/commands/push.ts:235`.
+  - The push/pull/sync whole-file write-backs `push.ts:341`, `pull.ts:172`, `sync.ts:575,665`, `sync/work-items.ts:327`: sprint §4 BUG-067 carry-forward (1).
+The exact site list and test shapes are pinned by `plans/M5-fixwave.md` §BUG-098. It depends on BUG-090 (the script locator export).
 
 ## Task Breakdown
-- [ ] QA-Red: `--allow-drift` write-back keeps an `<instructions>`-led plan byte-identical outside the real frontmatter; Step 2.6d sets a field on an `<instructions>`-led story; `parent-approved` reads an `<instructions>`-led approved parent; one read-parity case per remaining reader
-- [ ] Route `sprint.ts` `parseFileFrontmatter` through the shared locator and splice writes into the located span
-- [ ] Fix `setFrontmatterFieldAtomic` and `readFrontmatterFromFile` the same way
-- [ ] Fix the remaining TS readers listed in §4
-- [ ] Fix the three scripts with `locateFrontmatterFence`; byte-copy them to the live mirror in one outer commit
+- [ ] QA-Red: splice-helper reds; --allow-drift (LF, CRLF, malformed), stampSprintClose, archive stampFile, lifecycle_init_mode read; 2.6d set-field (LF, CRLF append); parent-approved (initiative, proposal); doctor advisory + pricing; slug ×2; merge; contradict stamp; audit-status fix; intake R10; two script spawns; fresh-install --allow-drift integration; 2 M2 delta rows
+- [ ] Add frontmatterYaml / withFrontmatterYaml to src/lib/frontmatter-locator.ts
+- [ ] sprint.ts: parseFileFrontmatter through locateFrontmatter; waiver, stampFile and stampSprintClose splice via rewriteFrontmatter; malformed YAML → no write
+- [ ] Fix setFrontmatterFieldAtomic and readFrontmatterFromFile the same way
+- [ ] Fix doctor :257/:854, frontmatter-merge, slug, contradict, wiki-audit-status, intake
+- [ ] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror in one outer commit
 - [ ] Typecheck and the targeted tests
 
 ## 5. Verification Protocol (The Failing Test)
-**Command:** `cd cleargate-cli`, then the red files pinned by the fix-wave plan's BUG-098 section, each solo via `npm run test:file --`.
+**Command:** `cd cleargate-cli`, then each solo via `npm run test:file --`: `test/lib/frontmatter-yaml-splice.red.node.test.ts`, `test/commands/sprint-frontmatter-fence.red.node.test.ts`, `test/commands/sprint-archive.node.test.ts`, `test/lib/lifecycle-reconcile-fence.red.node.test.ts`, `test/commands/gate-unit.node.test.ts`, `test/commands/doctor-fence.red.node.test.ts`, `test/lib/slug.node.test.ts`, `test/lib/frontmatter-merge.node.test.ts`, `test/wiki/contradict.node.test.ts`, `test/wiki/audit-status.node.test.ts`, `test/lib/intake.node.test.ts`, `test/scripts/scripts-fence-bug098.red.node.test.ts`, `test/e2e/sprint-allow-drift-fresh-install.red.integration.node.test.ts`.
 
 | Axis | Cover | Reason |
 |---|---|---|
@@ -142,13 +148,19 @@ Feature: Every work-item frontmatter reader finds the real fence
       | instructions-led LF  | each reader named in §4  |
       | instructions-led CRLF| each reader named in §4  |
       | ---led               | each reader named in §4  |
+
+  @rules
+  Scenario: A malformed frontmatter behind <instructions> is never rewritten
+    Given an <instructions>-led sprint plan whose frontmatter is not valid YAML
+    When `cleargate sprint init <id> --allow-drift` records its waiver
+    Then the file is byte-identical and no block is planted before <instructions>
 ```
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 4 | one per scenario; the outline counts once per example (final counts pinned by the fix-wave plan) |
-| Integration tests | 1 | `sprint init --allow-drift` over a real scaffolded install |
-| E2E / acceptance tests | 0 | covered by the clean-room `sprint-init` row, which must not regress |
+| Unit tests | 27 | default tier, per plans/M5-fixwave.md §BUG-098 |
+| Integration tests | 1 | fresh-install `sprint init --allow-drift`, plus the two M2 parity files |
+| E2E / acceptance tests | 1 | the clean-room `sprint-init` row at RS-4 |
 
 ---
 

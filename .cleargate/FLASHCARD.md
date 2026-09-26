@@ -1,3 +1,9 @@
+2026-09-26 · #frontmatter #sprint-init #danger · --allow-drift phantom then hides epics: the decomposition gate reads the phantom ("no epics").
+2026-09-26 · #frontmatter #close · reconcileCurrentSprintStories throws "No frontmatter" on an instructions-led Done story; close stops at 2.6d.
+2026-09-26 · #frontmatter #intake · intake hasAnyRemoteAuthored scans up to the first \n--- — the <instructions> preamble, not frontmatter.
+2026-09-26 · #frontmatter #locator · The span's YAML slice ends with the EOL before the closing fence; strip it before an append or the fence glues on.
+2026-09-26 · #test-harness #init · dedupe_frontmatter.mjs ships mode 755; delta rows assert mode on both sides — never drop the exec bit.
+2026-09-26 · #frontmatter #backfill · backfill_hierarchy.mjs is live-only; its fail-closed skip is what shields fresh items from BUG-048 re-ownership.
 2026-09-26 · #frontmatter #locator · BUG-067's locator returns the FIRST fence: a phantom block before <instructions> wins, not the real one.
 2026-09-26 · #clean-room #frontmatter #danger · approveProbeStory inserted approved: true; once templates scaffold approved: false it must flip or YAML dup-keys.
 2026-09-26 · #frontmatter #doctor · doctor runCanEdit/runSessionStart skip <instructions>-led items via trimStart().startsWith('---').
