@@ -1,3 +1,4 @@
+2026-09-26 · #devops #build · Piping npm run build into head SIGPIPEs tsup mid-rebuild and leaves dist deleted; log BD output to a file.
 2026-09-26 · #sdr #waves · Fail-safe trailing waves live only in waves[]; integrationReady reads upstream only, so encode the order as edges.
 2026-09-26 · #skill #codex · Codex render swaps SKILL A2 (C.0 to C.1) for R2; a pointer from outside A2 into §C.0.x dangles in the Codex copy.
 2026-09-26 · #shell-safety #git · Ref allowlist [A-Za-z0-9._/-] still admits '-x' (git option injection) and '..'; require an alnum first char.
