@@ -14,9 +14,9 @@ approved_at: 2026-09-11T22:19:09Z
 ambiguity: 🟢 Low
 context_source: "Direct owner request 2026-09-04 during a token-efficiency investigation. Measured grounding: the live /.claude/ instance in this repo diverges from cleargate-planning/.claude/ across 8 files, which makes BUG-068's and BUG-069's shipped fixes inert in the repo that filed them. Evidence in §3 is machine-collected from this working tree, not recalled."
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-26T00:05:45Z
+updated_at: 2026-09-26T00:21:52Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 5f2902d4-dirty
+updated_at_version: 6c6430a9-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -266,7 +266,7 @@ reader is not misled by the wiki page.)*
 - [ ] Doctor default mode exits 1 on drift (taxonomy class 1); `--session-start` prints one `ClearGate drift:` line after the state banner
 - [x] After BUG-089's repair, inventory current drift, back up each exact live file before a targeted re-sync (or reviewed force install), preserve machine-local additions, and verify matching hashes. Plain init can preserve divergent files and is not proof of re-sync. Start a new Claude session before the live checks. *(Done at SPRINT-41 barrier B0, 2026-09-25: `sprint-runs/SPRINT-41/b0-live-resync.mjs --apply`, backup + hashes + fresh headless sessions — `reports/BUG-085-b0-proof.md`.)*
 - [x] Re-run the §2 step-6 ledger probe after a real agent dispatch; confirm a non-empty `sentinel_started_at` and a correct `agent_type`. *(B0 case D2: a real `qa` dispatch in a fresh session wrote `agent_type: qa`, `sentinel_started_at: 2026-09-25T03:48:13Z`.)*
-- [ ] `pending-task-sentinel.sh`: bash-3.2 empty-array guard (a); JSON-array card parsing with fail-closed (b)
+- [ ] `pending-task-sentinel.sh`: bash-3.2 empty-array guard (a); JSON-array card parsing with fail-closed (b); (c) every `flashcards_flagged` block is scanned, not just the first (M3-A53)
 - [ ] Port CR-117 `validate_state.mjs` to `scaffold/core`; `canonical-live-parity` green (Scenario 4 retired with STORY-051-02)
 - [ ] Repoint `bug068_dispatch_tool_name.red.sh` to the scaffold, with a live mode
 - [ ] CLAUDE.md: three stale-sentence fixes, and the prose reminder replaced by a pointer to the mechanical check
