@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T21:27:30Z
+updated_at: 2026-09-26T00:21:15Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 7a23ba79-dirty
+updated_at_version: c92b1de1-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -430,6 +430,36 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - Six real-dist `host` smokes are green. A read-only `host list` in OUTER reports `installed: claude`, 3 retired paths missing, exit 1.
     - The outer repo was untouched (verified).
   - **-07 prep:** E1–E7, including the post-flight corrections, applied; re-gated green.
+- 2026-09-26T04:15:00Z · STORY-058-07 · **wave10.**
+  - **QA-Red** (cli `23e8280`, 29 min): 41 of 47 red, 5 ambiguities. The orchestrator confirmed #3–#5.
+  - **TPV REJECTED** (32 min, `arch_bounces=1`):
+    - 4 of 30 reds were unsatisfiable on a conformant build (scenarios 6, 10, 15a, 18).
+    - One sealed -03 test goes red by design (Scenario 7, the BUG-089 supersede).
+    - 3 binding plan tests were missing (M3-A31/A32 11b–d); 19 mutants survived.
+    - Re-seal R1–R10 (patch `7d6a5f6b`); rulings #1 (`--host` narrows at emit only) and #2; M3-A36..A43; E1–E13 binding.
+  - **Re-seal** (cli `fe11c1d`, 3 min): hashes match. The orchestrator reproduced 4 files.
+  - **Dev** (cli `b146faf`, 25 min): 30/30 new, contract 19/19, parity 5/5 and 15/15 (`user-content` settings hash `123d7bc7…` = T2), 20 witnesses clean. One sanctioned deviation (`confirmTypedName`).
+  - **Flashcard gate held:** it blocked the QA and post-flight dispatch until the 2 Dev cards were processed (working as designed).
+  - **QA PASS** (8 min).
+  - **Post-flight FAIL** (19 min, `arch_bounces=2`, a plan gap):
+    - Blueprint (b) left `.claude/settings.json` as `{}` after a full uninstall, so the uninstall's own restore path (re-init) wired 2 of 7 hooks. Main wires 7.
+    - Remediation M3-A44: `claude.remove()` unlinks an emptied file; CHANGELOG entries; a whitespace revert.
+    - Also: M3-A45 (smokes never `--cwd OUTER`), T11 and M4 V5/V6 resolved, M3-A46..A51 (BUG-085, -10).
+    - Two pre-existing defects filed as Drafts: **BUG-092** (P1: init into an existing settings.json wires 2 of 7 hooks) and **BUG-093** (P2: upgrade take-theirs drops user hooks under ClearGate events).
+  - **R11 QA-Red** (cli `4394c9b`, 10 min): 4/4 red.
+  - **TPV-R11 APPROVED** (16 min): 12 of 13 mutants killed. Survivor l is bound as a Dev constraint. M3-A52: `init --yes` still prompts "Restore preserved items?" after an uninstall, so the smoke uses `</dev/null`.
+  - **Dev fix** (cli `384a628`, 5 min): 3 files, D2 numstat 55/0.
+  - **QA round 2 PASS** and **post-flight round 2 PASS** (6 min each): re-init restores 7/7 hooks.
+  - **Sentinel gap found (M3-A53, binding for BUG-085 and M6):** `pending-task-sentinel.sh` scans only the FIRST `flashcards_flagged` block per report (3 `break`s). Interim: the orchestrator swept every dev/qa report and marked 5 later-block cards; all were already in FLASHCARD.md or were added.
+  - **DevOps:** merged cli `b100ea8`. Suite 2944/2942/0/2, exact.
+    - BD: payload and manifest unchanged; verify-pack OK (196 files).
+    - Smokes green: the legacy-snapshot doctor in a scratch copy, the clean-room matrix, and uninstall → re-init `SMOKE3-OK`.
+    - The outer repo was untouched.
+  - **Close follow-ups:**
+    - FU-5/6/7/12/13
+    - `init --yes` prompting after an uninstall (M3-A52)
+    - the M3 story Task Breakdown wording "shared by … uninstall" overstates it (FU-6)
+  - **Prep done in parallel:** BUG-085 F1–F5; -08 A1–A5; -09 B1–B9 (+FU-16, BUG-090 as the known-fail); -10 E1–E10; -11 F1–F7; -12 H1–H11 (the H7 `build-codex-payload.mjs` surface is deferred until -10 creates it); -13 G1–G10. The stale -12 reports were relocated. Forward pointers were added to M4/M5/M6.
 
 ---
 
