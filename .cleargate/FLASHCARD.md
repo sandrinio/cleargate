@@ -1,3 +1,7 @@
+2026-09-26 · #merge #init-fixture · A row both items added byte-identically merges as common text; only lead comments conflict. Keep upstream's.
+2026-09-26 · #hooks #dogfood-split · A hook sourcing lib/harness.sh breaks without lib/ (surface gate exits 1); sync lib/ first, never hand-port one.
+2026-09-26 · #integration #contract · Re-integration proof: diff main..HEAD over scaffold/src/scripts equals the item's own delta, minus regen files.
+2026-09-26 · #agents #scratchpad · The session scratchpad is shared by every agent; delete only files you created, by exact name, never by glob.
 2026-09-26 · #devops #npm-scripts · npm run test:integration -- <file> ignores the file arg (hardcoded glob); use npm run test:file -- <file>.
 2026-09-26 · #devops #test-order · status-vocab-phase-b runs a real npm run prebuild mid-suite; payload-vs-canonical tests can go red pre-BD.
 2026-09-26 · #frontmatter #sprint-init · sprint.ts waiver/stamp writers re-dump the located YAML via yaml.dump: template inline # comments are dropped.
