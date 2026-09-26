@@ -1,3 +1,5 @@
+2026-09-26 · #qa-red #vocab #test-harness · Bare INCLUDE_PATTERN false-positives on enforcement.md/launch_wave.mjs; use findExecModeVocabHits instead.
+2026-09-26 · #qa-red #test-harness #shell · cr078_init.test.sh REPO_ROOT assumes depth-3 .cleargate/scripts/test/; run outer twin, not nested scaffold/core copy.
 2026-09-26 · #qa #worktree #danger · "Built CLI not found" in a worktree means run npm run build there first; check dist/cli.js before calling a regression.
 2026-09-26 · #qa #test-harness · Prove a failure pre-existing without checkout: git archive <base-sha> into scratch, build there, compare results.
 2026-09-26 · #qa #test-harness #danger · A K6 allow-list names touchable files, not touched ones; diff --name-only vs base finds a required file left unedited.
