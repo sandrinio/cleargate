@@ -1,3 +1,5 @@
+2026-09-27 · #merge #integrate · git merge-tree --write-tree --name-only HEAD main previews conflicts read-only, even on a criss-cross base.
+2026-09-27 · #integrate #twins · git checkout -- errors on an untracked new twin; discard only tracked twins, then cp overwrites the new ones.
 2026-09-27 · #qa #test-harness #concurrency · On a busy multi-lane box a backgrounded loop over many test files can starve; run them as foreground calls.
 2026-09-26 · #dispatch #serial · dispatchSerial loops forever if dispatchStory returns another story's GREEN; assert v.storyId === storyId.
 2026-09-26 · #codex #skill · String.replace(x, R) expands $&/$1 in R; splice pinned doc texts with replace(x, () => R).
