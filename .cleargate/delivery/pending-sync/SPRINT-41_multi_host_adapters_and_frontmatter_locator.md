@@ -57,6 +57,8 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 > Readiness checks are specification checks, not evidence that the harness works. The Architect's cross-milestone review and M0's live enforcement proofs remain pending. No re-initialization or direct state-cache editing is authorized.
 >
 > **Amendment 2026-09-24T21:53:44Z:** the owner directed [[CR-123]] (SPIDR scenario coverage, approved the same day) into this sprint, followed by a re-plan. The set is now **17 items: 13 stories, 3 bugs, 1 CR**. CR-123 was registered by one append-only genesis event (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-25.mjs`); the 16 existing records and the event prefix are unchanged.
+>
+> **Amendment 2026-09-26T09:30:00Z:** the owner asked for a cheap fresh-folder test, from init through a few epics and stories, with the direction "log every issue you find and fix them". The journey (`sprint-runs/SPRINT-41/reports/fresh-journey-smoke.md`) found one more trigger for [[BUG-090]]: the epic and story templates scaffold no `approved:` key. The orchestrator also found [[BUG-096]], the test-fixture temp-dir leak. Four output defects became [[BUG-097]]. FJ-6 is by-design (protocol §495). BUG-090 moves from known-fail to in-sprint fix. The set is now **20 items: 13 stories, 6 bugs, 1 CR**. The three bugs were registered by append-only genesis events (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-26.mjs`); the 17 existing records and the event prefix are unchanged. They run as a fix wave after STORY-058-10 → BD → RS-4a and before STORY-058-11.
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
@@ -77,6 +79,9 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | n | low |
 | `BUG-089` | PreToolUse gates exit 1, which Claude Code does not treat as blocking — both gates fail open | standard | M0 | n | low |
 | `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M1 | n | med |
+| `BUG-090` | `sprint init` rejects fresh stories: positional frontmatter in two scripts + no `approved:` key in epic/story templates | standard | M5 | n | med |
+| `BUG-096` | Init-parity test fixture leaks a temp dir per scenario (~17k dirs / 19 GB) | standard | M5 | n | low |
+| `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | n | low |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.
 

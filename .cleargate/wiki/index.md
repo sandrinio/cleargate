@@ -69,12 +69,14 @@
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
 - [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
-- [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs
+- [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs, and no `approved:` key in the epic/story templates
 - [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
 - [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
 - [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
 - [[BUG-094]] (bug) — Draft — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
 - [[BUG-095]] (bug) — Draft — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
+- [[BUG-096]] (bug) — Triaged — The init-parity test fixture leaks a temp directory on every scenario run
+- [[BUG-097]] (bug) — Triaged — Four CLI output defects a new user hits in the first session (gate -v, stamp --dry-run, wiki query, scaffold-lint)
 
 ## Archive
 
