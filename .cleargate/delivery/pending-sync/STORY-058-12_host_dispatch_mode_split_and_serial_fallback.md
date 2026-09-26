@@ -192,7 +192,7 @@ Contract-first execution: built in `OUTER/.worktrees/STORY-058-12/cleargate-cli`
 - [x] Pass A: validateVerdicts(verdicts, { mode: 'serial' }); lib/flashcard-gate.mjs; dispatch_serial.mjs (dispatchSerial + next/record CLI); dispatch-serial.md; P1/P2 in SKILL.md; protocol §23 sentence + §23.5; enforcement §17, §16 bullet 10, Index row after §16; launch_wave.mjs usage line; outer twins
 - [x] Pass B: HostAdapter.dispatchMode (claude wave-parallel, codex serial); payloadFilter serial-surface rule; renderCodexSprintExecution (six anchors) inside build-codex-payload.mjs, which generates .agents/skills/sprint-execution; codex.live.skills requires a room-local sprint-execution; CHANGELOG
 - [x] Prove the Claude path unchanged: the two-insertion byte guard, headings unchanged, and the headless dispatch-path probe answers HALT on Claude Code
-- [ ] Re-sync the live /.claude/ instance at RS-5 and confirm the pointer lines and dispatch-serial.md are present there
+- [x] Re-sync the live /.claude/ instance at RS-5 and confirm the pointer lines and dispatch-serial.md are present there
 - [x] Integrate: merge cli main after STORY-058-10, STORY-058-11 and CR-124 merge; re-verify renderer anchors on the integrated SKILL.md; QA-Verify and post-flight on the integrated tree
 
 ## 4. Quality Gates

@@ -92,3 +92,48 @@ ERROR: sprint init blocked — 0 items missing, 1 unapproved, 0 stub-empty. Fix 
 
 ### Findings
 - none
+
+## Run 3 — 2026-09-26T21:33:12.520Z — RS-5 after STORY-058-12
+
+- result: PASS
+- cli_sha: 5f25a203140c1e92ffbbfb30d7e0540826abe408
+- artifact_inputs: 253bb8efecd5b3aeba1976ea6e530afec984add4d77bfb44749104ff9f11e7c6
+- artifact: cleargate-0.26.1.tgz sha256 64645ccf9e0833a3e0899f305b5192dc80df0f9d32d41db669d4dd59b0152e73
+- container: /Users/ssuladze/Documents/Dev/cg-cleanroom-20260926T213312Z-claude
+- claude: 2.1.283 (Claude Code) · model claude-haiku-4-5-20251001 · --setting-sources project,local
+- cleargate resolved: /Users/ssuladze/Documents/Dev/cg-cleanroom-20260926T213312Z-claude/tools/bin/cleargate
+- registered hosts: claude, codex · --host all resolved to: claude, codex
+
+| Check | no flag | --host all | Evidence |
+|---|---|---|---|
+| room-isolation | PASS | PASS |  |
+| verify-install | PASS | PASS |  |
+| doctor | PASS | PASS |  |
+| tree-comparison | PASS | PASS |  |
+| host-set | PASS | PASS | noflag=[claude]; all=[claude, codex]; registered=[claude, codex] |
+| claude.live.session-start | PASS | PASS |  |
+| claude.live.pre-tool-use | PASS | PASS |  |
+| claude.live.post-tool-use | PASS | PASS |  |
+| claude.live.dispatch | PASS | PASS |  |
+| claude.live.agents-skills | PASS | PASS |  |
+| claude.live.agents-md-exposure | N/A | PASS |  |
+| claude.live.hook-identity | PASS | PASS |  |
+| claude.live.agents-skills-parity | PASS | PASS |  |
+| claude.live.mcp-connect | INFO | INFO | noflag: cleargate: status=connected source=project; non-project entries: 4 \| all: cleargate: status=connected source=project; non-project entries: 4 |
+| sprint-init | PASS | PASS | noflag: exit 0 \| all: exit 0 |
+| check-scaffold | INFO | INFO | noflag exit 0 \| all exit 0 (F8: a pristine install reports one pre-existing upstream-changed false positive) |
+| active-sprint | INFO | INFO | noflag: sentinel drive ok (exit 0, 1 pending file(s)); .active after sprint-init: present \| all: sentinel drive ok (exit 0, 1 pending file(s)); .active after sprint-init: present |
+| verify-install-all-plain | N/A | PASS |  |
+
+### Goal Acceptance Check mapping
+- Condition 1 (BUG-067): claude.live.post-tool-use (authored epic, one PostToolUse cycle, stamp=0 gate=0)
+- Condition 2: no-flag column — session-start, pre-tool-use, post-tool-use, agents-skills, doctor
+- Condition 3: --host all column + host-set + claude.live.agents-skills-parity + claude.no-foreign-hooks + tree comparison (registered hosts: claude, codex; --host all resolved to: claude, codex)
+
+### Not exercised
+- PreToolUse AskUserQuestion (pre-tool-use-autonomy.sh) — no headless trigger
+- git pre-commit hooks (pre-commit.sh, pre-commit-surface-gate.sh) — git hooks, not host hooks
+- Enforce-mode denials — proven by B0 in the meta-repo; out of the baseline scope
+
+### Findings
+- none

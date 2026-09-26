@@ -308,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "post-flight PASS on 9a94ff2; re-integrating onto cli main e720592 (PF12-A2), then QA-Verify",
+      "state": "merged",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "QA-Red on contract/S-41-loop = 9a94ff2 (plans/M6.md F-section)",
+      "state": "TPV on QA-Red seal 1111659 (C3 9a94ff2)",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
@@ -353,7 +353,7 @@
       "steps_note": "RS-4L, then step L (plans/M6.md F10), between post-flight and DevOps; merge lane frozen from step L to this merge"
     },
     "BUG-099": {
-      "state": "ready (fast lane): build now off cli main; merge after STORY-058-13, before RS-CLOSE (plans/M6.md OD-F1)",
+      "state": "QA-Verify PASS on abd9afb; DevOps next (after STORY-058-12 merge)",
       "base": "main",
       "upstream": [],
       "repo": "cli",

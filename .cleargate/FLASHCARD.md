@@ -1,3 +1,8 @@
+2026-09-26 · #devops #concurrency · FLASHCARD.md/.processed-* may change mid-suite from another lane's report; match card text before reverting.
+2026-09-26 · #devops #shell #grep · grep -c prints 0 but exits 1, so an && chain after it silently skips; use ; and capture $? instead.
+2026-09-27 · #qa-red #test-harness #danger · A test that starts a mock HTTP server must close it in finally, or a no-throw path hangs node --test.
+2026-09-27 · #qa-red #test-harness · Asserting a hand-built object against an already-correct fn passes vacuously; take literals from the new code.
+2026-09-27 · #qa-red · A composite-result mutation has no per-id verdict: target a sentinel id and assert every other id stays PASS.
 2026-09-27 · #qa #test-harness #e2e · node:test spec reporter prints diagnostics only on failure; a paid e2e must t.diagnostic its answer on pass.
 2026-09-27 · #qa #clean-room · checkCodexEvidence reports a stale scripted run before a missing live run; staleness masks the live gap.
 2026-09-27 · #changelog #clean-room · scripts/** is not in package.json files; harness-only fixes take no CHANGELOG line.
