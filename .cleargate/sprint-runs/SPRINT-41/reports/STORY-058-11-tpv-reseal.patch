@@ -1,0 +1,850 @@
+diff --git a/test/commands/init-host-snapshot.red.node.test.ts b/test/commands/init-host-snapshot.red.node.test.ts
+index c841b56..ac16425 100644
+--- a/test/commands/init-host-snapshot.red.node.test.ts
++++ b/test/commands/init-host-snapshot.red.node.test.ts
+@@ -149,9 +149,17 @@ describe('Scenario 11 — no flag, production registry', () => {
+       }
+ 
+       const pkgManifest = loadPackageManifest({ packageRoot: payloadDir });
+-      const pkgPaths = pkgManifest.files.map((f) => f.path).sort();
++      // STORY-058-11 TPV re-seal: the flat core+claude view also carries the core-owned
++      // shared root .agents/** (declared by codex), which a no-flag install never selects
++      // (M3 amendment 2026-09-25T15:05Z). Compare against the claude-selected subset, and
++      // prove the filter drops nothing but .agents/**.
++      const { defaultHostRegistry, payloadFilter } = await import('../../src/hosts/registry.js');
++      const includeClaude = payloadFilter(defaultHostRegistry, ['claude']);
++      const dropped = pkgManifest.files.map((f) => f.path).filter((p) => !includeClaude(p));
++      assert.deepStrictEqual(dropped.filter((p) => !p.startsWith('.agents/')), [], `only .agents/** may be unselected: ${dropped.join(', ')}`);
++      const pkgPaths = pkgManifest.files.map((f) => f.path).filter((p) => includeClaude(p)).sort();
+       const snapPaths = snapshot.files.map((f) => f.path).sort();
+-      assert.deepStrictEqual(snapPaths, pkgPaths, 'snapshot path set must equal the payload manifest path set');
++      assert.deepStrictEqual(snapPaths, pkgPaths, 'snapshot path set must equal the claude-selected payload manifest path set');
+     } finally {
+       fs.rmSync(payloadDir, { recursive: true, force: true });
+     }
+diff --git a/test/commands/lifecycle-codex.red.node.test.ts b/test/commands/lifecycle-codex.red.node.test.ts
+index dc89996..ea9ba8a 100644
+--- a/test/commands/lifecycle-codex.red.node.test.ts
++++ b/test/commands/lifecycle-codex.red.node.test.ts
+@@ -205,7 +205,20 @@ describe('Test 33 — host add/remove codex', () => {
+     assert.ok(fs.readFileSync(path.join(record.dir, '.codex', 'config.toml'), 'utf8').includes('[mcp_servers.cleargate]'));
+     assert.equal((fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8').match(/^<!-- CLEARGATE:START -->$/gm) ?? []).length, 1);
+     assert.deepEqual(claudeFileHashes(record.dir), claudeBefore, 'every claude file must be byte-unchanged');
+-    assert.equal(fs.existsSync(path.join(record.dir, '.agents')), false, '.agents is absent after (the -10 payload ships none)');
++    // STORY-058-11 TPV re-seal (M5-A19: "the -10 payload ships no .agents/**, and -11 adds it"):
++    // host add codex lands both portable skills (core-owned shared root), byte-identical to the
++    // canonical Claude skill, and never sprint-execution (STORY-058-12).
++    for (const name of ['flashcard', 'sprint-dashboard']) {
++      const installed = path.join(record.dir, '.agents', 'skills', name, 'SKILL.md');
++      assert.ok(fs.existsSync(installed), `.agents/skills/${name}/SKILL.md is present after host add codex`);
++      assert.ok(
++        fs.readFileSync(installed).equals(fs.readFileSync(path.join(SCAFFOLD_ROOT, 'hosts', 'claude', '.claude', 'skills', name, 'SKILL.md'))),
++        `.agents/skills/${name}/SKILL.md is byte-identical to its .claude/skills/ source`,
++      );
++    }
++    assert.equal(fs.existsSync(path.join(record.dir, '.agents', 'skills', 'sprint-execution')), false, 'no sprint-execution for codex until STORY-058-12');
++    const rolesDir = path.join(record.dir, '.codex', 'agents');
++    assert.equal((fs.existsSync(rolesDir) ? fs.readdirSync(rolesDir) : []).filter((f) => f.endsWith('.toml')).length, 11, '11 generated roles after host add codex');
+     const snap = JSON.parse(fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as { hosts?: string[] };
+     assert.deepEqual(snap.hosts, ['claude', 'codex']);
+   });
+diff --git a/test/docs/codex-enforcement-delta.red.node.test.ts b/test/docs/codex-enforcement-delta.red.node.test.ts
+index f6150c3..c4a7d3f 100644
+--- a/test/docs/codex-enforcement-delta.red.node.test.ts
++++ b/test/docs/codex-enforcement-delta.red.node.test.ts
+@@ -26,6 +26,12 @@ const REPO_ROOT = process.env.CLEARGATE_META_ROOT
+ const OUTER_ENFORCEMENT_PATH = path.join(REPO_ROOT, '.cleargate', 'knowledge', 'cleargate-enforcement.md');
+ const CANONICAL_ENFORCEMENT_PATH = canonicalPath('.cleargate/knowledge/cleargate-enforcement.md');
+ 
++// TPV re-seal (STORY-058-11): the M5 blueprint pins the full heading, with the
++// file's own "(source: …)" suffix convention; JS regex has no `\Z`, so the
++// section runs to the next numbered `## N.` heading or to end of input.
++const HEADING_RE = /^## 16\. Host Enforcement Deltas — Codex \(source: STORY-058-11\)$/m;
++const SECTION_RE = /^## 16\. Host Enforcement Deltas — Codex \(source: STORY-058-11\)$([\s\S]*?)(?=^## \d+\.|(?![\s\S]))/m;
++
+ const REQUIRED_SUBSTRINGS = [
+   'tools:',
+   'agent_type',
+@@ -41,10 +47,18 @@ const REQUIRED_SUBSTRINGS = [
+ ];
+ 
+ describe('Test 14 — cleargate-enforcement.md §16 Host Enforcement Deltas — Codex', () => {
+-  test('the outer live copy has a "## 16. Host Enforcement Deltas — Codex" heading', () => {
++  test('the outer live copy has the "## 16. Host Enforcement Deltas — Codex (source: STORY-058-11)" heading', () => {
+     assert.ok(fs.existsSync(OUTER_ENFORCEMENT_PATH), `missing ${OUTER_ENFORCEMENT_PATH}`);
+     const raw = fs.readFileSync(OUTER_ENFORCEMENT_PATH, 'utf8');
+-    assert.ok(/^## 16\. Host Enforcement Deltas — Codex$/m.test(raw), 'missing §16 heading (not yet appended)');
++    assert.ok(HEADING_RE.test(raw), 'missing §16 heading (not yet appended)');
++  });
++
++  test('[TPV re-seal] the Index table lists §16 after the §15 row', () => {
++    const raw = fs.readFileSync(OUTER_ENFORCEMENT_PATH, 'utf8');
++    const row15 = raw.indexOf('| §15 | — | Operator Emergency Levers (STORY-070-01) |\n');
++    assert.ok(row15 !== -1, 'expected the §15 index row');
++    const next = raw.slice(row15).split('\n')[1];
++    assert.equal(next, '| §16 | — | Host Enforcement Deltas — Codex (STORY-058-11) |');
+   });
+ 
+   test('the canonical twin (scaffold/core) is byte-identical to the outer live copy', () => {
+@@ -65,7 +79,7 @@ describe('Test 14 — cleargate-enforcement.md §16 Host Enforcement Deltas —
+   for (const term of REQUIRED_SUBSTRINGS) {
+     test(`§16 contains the required term "${term}"`, () => {
+       const raw = fs.readFileSync(OUTER_ENFORCEMENT_PATH, 'utf8');
+-      const match = /^## 16\. Host Enforcement Deltas — Codex$([\s\S]*?)(?=^## \d+\.|\Z)/m.exec(raw);
++      const match = SECTION_RE.exec(raw);
+       assert.ok(match, '§16 section not found (not yet appended)');
+       const body = match ? match[1] : '';
+       assert.ok(body.includes(term), `§16 must contain "${term}"`);
+diff --git a/test/helpers/init-fixture.ts b/test/helpers/init-fixture.ts
+index e1adc89..b51bed2 100644
+--- a/test/helpers/init-fixture.ts
++++ b/test/helpers/init-fixture.ts
+@@ -470,12 +470,19 @@ const BUG085_SENTINEL_BASELINE = 'b1ab7702066788282302efa160c7b5075adec971ec1318
+ /** STORY-058-10 (G16 / FU-6): the post-BUG-085 bytes, which -10's codex branch must change. */
+ const BUG085_SENTINEL_POST = '1572281d14fb4cabf3857594c96ae3658424e21b1f217af0f002dd29cfd5ba2c';
+ 
++/** STORY-058-11: pin-substituted (FIXED_PIN) sentinel hash at C1 `d0f0d95` (post-STORY-058-10). */
++const STORY05810_SENTINEL_POST = 'edb7df4d03a3844d44d0fac8bb7495478529e4dff1dd39ed628b73733abf0673';
++
+ function bug085SentinelCurrentHash(): string {
+   const h = currentPinSubstitutedHash('.claude/hooks/pending-task-sentinel.sh');
+   if (h === BUG085_SENTINEL_BASELINE) return `<BUG-085 sentinel delta not landed: canonical still ${h}>`;
+   // TPV R-F1 (G16): refuse the post-BUG-085 hash too — red until -10 pass B edits the sentinel.
+   // -11 adds the post-(-10) hash here; never add a second row for this rel.
+   if (h === BUG085_SENTINEL_POST) return `<STORY-058-10 sentinel delta not landed: canonical still ${h}>`;
++  // STORY-058-11 (RP-A15 item 4; TPV re-seal): refuse the post-(-10) hash too —
++  // the pin-substituted canonical at contract/S-41-codex (d0f0d95; raw sha256
++  // 43a3cb26…1b30). Red until -11 adopts the shim in the sentinel.
++  if (h === STORY05810_SENTINEL_POST) return `<STORY-058-11 sentinel delta not landed: canonical still ${h}>`;
+   return h;
+ }
+ 
+diff --git a/test/hooks/cr-026-integration.node.test.ts b/test/hooks/cr-026-integration.node.test.ts
+index 5d4378f..762358c 100644
+--- a/test/hooks/cr-026-integration.node.test.ts
++++ b/test/hooks/cr-026-integration.node.test.ts
+@@ -247,13 +247,15 @@ function runPreToolUseHook(env: IntegrationEnv, prompt: string, subagentType = '
+   });
+ 
+   const hookContent = fs.readFileSync(PRE_TOOL_USE_HOOK_PATH, 'utf-8');
+-  const patchedHook = hookContent.replace(
+-    /^REPO_ROOT="\$\{ORCHESTRATOR_PROJECT_DIR:-\$\{CLAUDE_PROJECT_DIR\}\}"$/m,
+-    `REPO_ROOT="${env.tmpDir}"`
+-  );
++  // STORY-058-11 TPV re-seal: the first REPO_ROOT= line, whatever resolves it.
++  const patchedHook = hookContent.replace(/^REPO_ROOT=.*$/m, `REPO_ROOT="${env.tmpDir}"`);
+ 
+   const patchedHookPath = path.join(env.tmpDir, 'pre-tool-use-task-integration.sh');
+   fs.writeFileSync(patchedHookPath, patchedHook, { mode: 0o755 });
++  // STORY-058-11 TPV re-seal: the patched copy runs beside the hook's own lib/ (the repo-root
++  // shim it sources from its own dir), exactly as in an install. Absent before STORY-058-11.
++  const hookLibDir = path.join(path.dirname(PRE_TOOL_USE_HOOK_PATH), 'lib');
++  if (fs.existsSync(hookLibDir)) fs.cpSync(hookLibDir, path.join(path.dirname(patchedHookPath), 'lib'), { recursive: true, force: true });
+ 
+   try {
+     execFileSync('bash', [patchedHookPath], {
+@@ -292,6 +294,10 @@ function runTokenLedgerHook(
+ 
+   const patchedHookPath = path.join(env.tmpDir, `token-ledger-integration-${sessionId}.sh`);
+   fs.writeFileSync(patchedHookPath, patchedHook, { mode: 0o755 });
++  // STORY-058-11 TPV re-seal: the patched copy runs beside the hook's own lib/ (the repo-root
++  // shim it sources from its own dir), exactly as in an install. Absent before STORY-058-11.
++  const hookLibDir = path.join(path.dirname(TOKEN_LEDGER_HOOK_PATH), 'lib');
++  if (fs.existsSync(hookLibDir)) fs.cpSync(hookLibDir, path.join(path.dirname(patchedHookPath), 'lib'), { recursive: true, force: true });
+ 
+   try {
+     execFileSync('bash', [patchedHookPath], {
+diff --git a/test/hooks/harness-shim.red.node.test.ts b/test/hooks/harness-shim.red.node.test.ts
+index a9b0bd6..ba30c3c 100644
+--- a/test/hooks/harness-shim.red.node.test.ts
++++ b/test/hooks/harness-shim.red.node.test.ts
+@@ -73,21 +73,26 @@ function runCgRepoRoot(opts: {
+ // ── Test 9 (Gherkin 4): claude-first resolves the git toplevel, no env ──────
+ 
+ describe('Test 9 — claude-first resolves the git toplevel of the payload cwd, with no env set', () => {
+-  test('a subdirectory cwd in the payload resolves to the repo top level', () => {
++  test('a subdirectory cwd in the payload resolves to the repo top level (claude-first and orchestrator-first)', () => {
+     assert.ok(fs.existsSync(HARNESS_SH), `missing ${HARNESS_SH} (the shim does not exist yet)`);
+     const repo = mkGitRepo('cg-s41-11-harness-git-');
+     fs.mkdirSync(path.join(repo, 'sub', 'dir'), { recursive: true });
++    // TPV re-seal: the process cwd is a DIFFERENT, non-git dir, so only the
++    // payload cwd can yield the repo top level (a $(pwd) fallback cannot).
++    const elsewhere = mkTmp('cg-s41-11-harness-elsewhere-');
+     const env = { ...process.env };
+     delete env.CLAUDE_PROJECT_DIR;
+     delete env.ORCHESTRATOR_PROJECT_DIR;
+-    const { status, stdout, stderr } = runCgRepoRoot({
+-      mode: 'claude-first',
+-      payloadJson: JSON.stringify({ cwd: path.join(repo, 'sub', 'dir') }),
+-      cwd: repo,
+-      env,
+-    });
+-    assert.equal(status, 0, stderr);
+-    assert.equal(stdout.trim(), fs.realpathSync(repo));
++    for (const mode of ['claude-first', 'orchestrator-first']) {
++      const { status, stdout, stderr } = runCgRepoRoot({
++        mode,
++        payloadJson: JSON.stringify({ cwd: path.join(repo, 'sub', 'dir') }),
++        cwd: elsewhere,
++        env,
++      });
++      assert.equal(status, 0, stderr);
++      assert.equal(stdout.trim(), fs.realpathSync(repo), `mode ${mode}`);
++    }
+   });
+ 
+   test('a non-git cwd falls back to $(pwd)', () => {
+@@ -183,3 +188,114 @@ describe('Test 11 — the shim never consumes stdin', () => {
+     assert.equal(result.stdout.trim(), 'sentinel-untouched');
+   });
+ });
++
++describe('[TPV re-seal] Test 11 — an EMPTY payload argument never makes the shim fall back to stdin', () => {
++  test('cg_repo_root claude-first "" with no env leaves the caller\'s stdin intact (session-start passes "")', () => {
++    assert.ok(fs.existsSync(HARNESS_SH), `missing ${HARNESS_SH} (the shim does not exist yet)`);
++    const dir = mkTmp('cg-s41-11-harness-stdin-empty-');
++    const driver = [
++      '#!/usr/bin/env bash',
++      'set -u',
++      `. "${HARNESS_SH}"`,
++      'cg_repo_root claude-first "" >/dev/null',
++      'IFS= read -r sentinel',
++      'printf \'%s\\n\' "$sentinel"',
++      '',
++    ].join('\n');
++    const driverPath = path.join(mkTmp('cg-s41-11-harness-stdin-empty-driver-'), 'driver.sh');
++    fs.writeFileSync(driverPath, driver, { mode: 0o755 });
++    const env = { ...process.env };
++    delete env.CLAUDE_PROJECT_DIR;
++    delete env.ORCHESTRATOR_PROJECT_DIR;
++    const result = spawnSync('bash', [driverPath], { cwd: dir, env, input: 'sentinel-untouched\n', encoding: 'utf8' });
++    assert.equal(result.status, 0, result.stderr);
++    assert.equal(result.stdout.trim(), 'sentinel-untouched');
++  });
++});
++
++// ── TPV re-seal: git mode ────────────────────────────────────────────────────
++
++describe('[TPV re-seal] Test 10b — git mode ignores both env vars and the payload cwd', () => {
++  test('git mode resolves the git top level of $(pwd), even with CLAUDE_PROJECT_DIR, ORCHESTRATOR_PROJECT_DIR and another repo as payload cwd', () => {
++    assert.ok(fs.existsSync(HARNESS_SH), `missing ${HARNESS_SH} (the shim does not exist yet)`);
++    const repo = mkGitRepo('cg-s41-11-harness-gitmode-');
++    const other = mkGitRepo('cg-s41-11-harness-gitmode-other-');
++    fs.mkdirSync(path.join(repo, 'sub'), { recursive: true });
++    const env = { ...process.env, CLAUDE_PROJECT_DIR: '/p', ORCHESTRATOR_PROJECT_DIR: '/o' };
++    const { status, stdout, stderr } = runCgRepoRoot({
++      mode: 'git',
++      payloadJson: JSON.stringify({ cwd: other }),
++      cwd: path.join(repo, 'sub'),
++      env,
++    });
++    assert.equal(status, 0, stderr);
++    assert.equal(stdout.trim(), fs.realpathSync(repo));
++  });
++
++  test('git mode outside a git repo falls back to $(pwd)', () => {
++    assert.ok(fs.existsSync(HARNESS_SH), `missing ${HARNESS_SH} (the shim does not exist yet)`);
++    const dir = mkTmp('cg-s41-11-harness-gitmode-nogit-');
++    const env = { ...process.env, CLAUDE_PROJECT_DIR: '/p' };
++    const { status, stdout, stderr } = runCgRepoRoot({ mode: 'git', payloadJson: '', cwd: dir, env });
++    assert.equal(status, 0, stderr);
++    assert.equal(stdout.trim(), fs.realpathSync(dir));
++  });
++});
++
++// ── TPV re-seal: every hook adopts the shim with its own precedence ─────────
++
++const HOOKS_DIR = path.join(SCAFFOLD_ROOT, 'hosts', 'claude', '.claude', 'hooks');
++const SOURCE_LINE = '. "$(dirname "${BASH_SOURCE[0]}")/lib/harness.sh"';
++/** M5 blueprint table: hook → mode, and the stdin variable the hook already reads (null: no stdin read). */
++const ADOPTION: ReadonlyArray<[hook: string, mode: string, stdinVar: string | null]> = [
++  ['token-ledger.sh', 'orchestrator-first', 'INPUT'],
++  ['pending-task-sentinel.sh', 'orchestrator-first', 'INPUT'],
++  ['pre-tool-use-task.sh', 'orchestrator-first', 'INPUT'],
++  ['session-start.sh', 'claude-first', null],
++  ['stamp-and-gate.sh', 'claude-first', 'INPUT'],
++  ['pre-edit-gate.sh', 'claude-first', 'INPUT'],
++  ['pre-tool-use-autonomy.sh', 'claude-first', 'PAYLOAD'],
++  ['pre-commit-surface-gate.sh', 'git', null],
++];
++
++describe('[TPV re-seal] Test 11b — the 8 hooks source the shim from their own dir, each with its pinned mode', () => {
++  for (const [hook, mode, stdinVar] of ADOPTION) {
++    test(`${hook}: one hook-dir source line, one REPO_ROOT="$(cg_repo_root ${mode} …)" line${stdinVar ? ` fed "\${${stdinVar}}", read first` : ''}; no legacy resolution`, () => {
++      const lines = fs.readFileSync(path.join(HOOKS_DIR, hook), 'utf8').split('\n');
++      const sourceIdx = lines.map((l, i) => (l === SOURCE_LINE ? i : -1)).filter((i) => i !== -1);
++      assert.equal(sourceIdx.length, 1, `${hook}: expected exactly one line ${SOURCE_LINE}`);
++      const rootIdx = lines.map((l, i) => (/^REPO_ROOT="\$\(cg_repo_root /.test(l) ? i : -1)).filter((i) => i !== -1);
++      assert.equal(rootIdx.length, 1, `${hook}: expected exactly one REPO_ROOT="$(cg_repo_root …)" line`);
++      const rootLine = lines[rootIdx[0]!]!;
++      assert.ok(rootLine.startsWith(`REPO_ROOT="$(cg_repo_root ${mode} `), `${hook}: mode must be ${mode}; got ${rootLine}`);
++      assert.ok(sourceIdx[0]! < rootIdx[0]!, `${hook}: the shim must be sourced before REPO_ROOT is resolved`);
++      if (stdinVar) {
++        assert.ok(rootLine.includes(`"\${${stdinVar}}"`) || rootLine.includes(`"$${stdinVar}"`), `${hook}: cg_repo_root must receive the stdin payload ${stdinVar}; got ${rootLine}`);
++        const readIdx = lines.findIndex((l) => new RegExp(`^\\s*${stdinVar}="?\\$\\(cat`).test(l));
++        assert.ok(readIdx !== -1 && readIdx < rootIdx[0]!, `${hook}: ${stdinVar} must be read from stdin before REPO_ROOT is resolved`);
++      }
++      const body = lines.join('\n');
++      for (const legacy of ['${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}', '${CLAUDE_PROJECT_DIR:-', 'REPO_ROOT="${CLAUDE_PROJECT_DIR}"', 'REPO_ROOT="$(git rev-parse --show-toplevel']) {
++        assert.ok(!body.includes(legacy), `${hook}: legacy root resolution ${legacy} must be gone`);
++      }
++    });
++  }
++
++  test('pre-commit.sh is unchanged in role: it never sources the shim or resolves a repo root', () => {
++    const body = fs.readFileSync(path.join(HOOKS_DIR, 'pre-commit.sh'), 'utf8');
++    assert.ok(!body.includes('harness.sh') && !body.includes('cg_repo_root') && !body.includes('REPO_ROOT'));
++  });
++});
++
++// ── TPV re-seal: the Codex copy of the shim ─────────────────────────────────
++
++describe('[TPV re-seal] Test 11c — the Codex hook copies carry lib/harness.sh', () => {
++  test('scaffold/hosts/codex/.codex/hooks/lib/harness.sh is byte-identical to the canonical shim, mode 0755', () => {
++    const codexCopy = path.join(SCAFFOLD_ROOT, 'hosts', 'codex', '.codex', 'hooks', 'lib', 'harness.sh');
++    assert.ok(fs.existsSync(HARNESS_SH), `missing ${HARNESS_SH}`);
++    assert.ok(fs.existsSync(codexCopy), `missing ${codexCopy} (build-codex-payload.mjs must copy lib/harness.sh)`);
++    assert.ok(fs.readFileSync(codexCopy).equals(fs.readFileSync(HARNESS_SH)));
++    assert.equal(fs.statSync(codexCopy).mode & 0o777, 0o755);
++    assert.equal(fs.statSync(HARNESS_SH).mode & 0o777, 0o755);
++  });
++});
+diff --git a/test/hooks/hooks-claude-parity.red.integration.node.test.ts b/test/hooks/hooks-claude-parity.red.integration.node.test.ts
+index 4672111..114ce8c 100644
+--- a/test/hooks/hooks-claude-parity.red.integration.node.test.ts
++++ b/test/hooks/hooks-claude-parity.red.integration.node.test.ts
+@@ -201,8 +201,18 @@ function runOne(hooksDir: string, kase: HookCase, opts: { withOrchestrator: bool
+     // beside it — stage a private hooks dir containing exactly this
+     // fixture's two files so it chains into the matching surface-gate copy,
+     // never the other fixture's.
+-    const privateHooksDir = path.join(root, '.hooks-under-test');
++    // TPV re-seal (STORY-058-11): the private dir is a SIBLING of `root`
++    // (`<root>-hooks`, normalized to `<ROOT>-hooks`), never inside it — the
++    // census must never walk the hook sources themselves (their bytes are
++    // the change under test). It also carries the dir's own `lib/` when the
++    // hooks dir has one: the shimmed surface gate sources
++    // `$(dirname "${BASH_SOURCE[0]}")/lib/harness.sh`, exactly as it does
++    // in an install.
++    const privateHooksDir = `${root}-hooks`;
+     fs.mkdirSync(privateHooksDir, { recursive: true });
++    if (fs.existsSync(path.join(hooksDir, 'lib'))) {
++      fs.cpSync(path.join(hooksDir, 'lib'), path.join(privateHooksDir, 'lib'), { recursive: true });
++    }
+     fs.copyFileSync(path.join(hooksDir, 'pre-commit.sh'), path.join(privateHooksDir, 'pre-commit.sh'));
+     fs.copyFileSync(
+       path.join(hooksDir, 'pre-commit-surface-gate.sh'),
+diff --git a/test/hooks/pre-tool-use-task.node.test.ts b/test/hooks/pre-tool-use-task.node.test.ts
+index 2800f7f..ed07c30 100644
+--- a/test/hooks/pre-tool-use-task.node.test.ts
++++ b/test/hooks/pre-tool-use-task.node.test.ts
+@@ -191,13 +191,16 @@ function makePayload(opts: {
+ function runHook(env: HookEnv, payload: string): { exitCode: number; stdout: string; stderr: string } {
+   // Patch the hook to use tmpDir as CLAUDE_PROJECT_DIR
+   const hookContent = fs.readFileSync(HOOK_PATH, 'utf-8');
+-  const patchedHook = hookContent.replace(
+-    /^REPO_ROOT="\$\{ORCHESTRATOR_PROJECT_DIR:-\$\{CLAUDE_PROJECT_DIR\}\}"$/m,
+-    `REPO_ROOT="${env.tmpDir}"`
+-  );
++  // STORY-058-11 TPV re-seal: the first REPO_ROOT= line, whatever resolves it (legacy
++  // ${ORCHESTRATOR_PROJECT_DIR:-…} or the cg_repo_root shim).
++  const patchedHook = hookContent.replace(/^REPO_ROOT=.*$/m, `REPO_ROOT="${env.tmpDir}"`);
+ 
+   const patchedHookPath = path.join(env.tmpDir, `pre-tool-use-task-patched-${Date.now()}-${Math.random()}.sh`);
+   fs.writeFileSync(patchedHookPath, patchedHook, { mode: 0o755 });
++  // STORY-058-11 TPV re-seal: the patched copy runs beside the hook's own lib/ (the repo-root
++  // shim it sources from its own dir), exactly as in an install. Absent before STORY-058-11.
++  const hookLibDir = path.join(path.dirname(HOOK_PATH), 'lib');
++  if (fs.existsSync(hookLibDir)) fs.cpSync(hookLibDir, path.join(path.dirname(patchedHookPath), 'lib'), { recursive: true, force: true });
+ 
+   let exitCode = 0;
+   let stdout = '';
+diff --git a/test/hooks/session-start.node.test.ts b/test/hooks/session-start.node.test.ts
+index 44d9ebb..dc9031c 100644
+--- a/test/hooks/session-start.node.test.ts
++++ b/test/hooks/session-start.node.test.ts
+@@ -178,13 +178,15 @@ if (sub === 'sync' && args.includes('--check')) {
+ function runHook(tmpDir: string, timeoutMs: number = 10_000): { exitCode: number; stdout: string } {
+   // Read and patch the hook's REPO_ROOT
+   const original = fs.readFileSync(HOOK_PATH, 'utf-8');
+-  const patched = original.replace(
+-    /^REPO_ROOT="[^"]*"$/m,
+-    `REPO_ROOT="${tmpDir}"`,
+-  );
++  // STORY-058-11 TPV re-seal: the first REPO_ROOT= line, whatever resolves it.
++  const patched = original.replace(/^REPO_ROOT=.*$/m, `REPO_ROOT="${tmpDir}"`);
+   const patchedHookPath = path.join(tmpDir, 'session-start-patched.sh');
+   fs.writeFileSync(patchedHookPath, patched, 'utf-8');
+   fs.chmodSync(patchedHookPath, 0o755);
++  // STORY-058-11 TPV re-seal: the patched copy runs beside the hook's own lib/ (the repo-root
++  // shim it sources from its own dir), exactly as in an install. Absent before STORY-058-11.
++  const hookLibDir = path.join(path.dirname(HOOK_PATH), 'lib');
++  if (fs.existsSync(hookLibDir)) fs.cpSync(hookLibDir, path.join(path.dirname(patchedHookPath), 'lib'), { recursive: true, force: true });
+ 
+   // Filter node_modules/.bin out of PATH so the hook's resolver falls through
+   // to the test's fake dist stub at ${tmpDir}/cleargate-cli/dist/cli.js
+diff --git a/test/hooks/stamp-and-gate.node.test.ts b/test/hooks/stamp-and-gate.node.test.ts
+index 8332f5b..c8efde0 100644
+--- a/test/hooks/stamp-and-gate.node.test.ts
++++ b/test/hooks/stamp-and-gate.node.test.ts
+@@ -101,12 +101,14 @@ if (sub === 'gate') {
+   const modifiedHook = path.join(tmpDir, 'stamp-and-gate-test.sh');
+   const originalHook = fs.readFileSync(HOOK_PATH, 'utf-8');
+   // Replace the REPO_ROOT line with the tmpDir
+-  const modifiedContent = originalHook.replace(
+-    /^REPO_ROOT="[^"]*"$/m,
+-    `REPO_ROOT="${tmpDir}"`
+-  );
++  // STORY-058-11 TPV re-seal: the first REPO_ROOT= line, whatever resolves it.
++  const modifiedContent = originalHook.replace(/^REPO_ROOT=.*$/m, `REPO_ROOT="${tmpDir}"`);
+   fs.writeFileSync(modifiedHook, modifiedContent, 'utf-8');
+   fs.chmodSync(modifiedHook, 0o755);
++  // STORY-058-11 TPV re-seal: the patched copy runs beside the hook's own lib/ (the repo-root
++  // shim it sources from its own dir), exactly as in an install. Absent before STORY-058-11.
++  const hookLibDir = path.join(path.dirname(HOOK_PATH), 'lib');
++  if (fs.existsSync(hookLibDir)) fs.cpSync(hookLibDir, path.join(path.dirname(modifiedHook), 'lib'), { recursive: true, force: true });
+ 
+   const stdin = JSON.stringify({ tool_input: { file_path: filePath } });
+   // Filter node_modules/.bin out of PATH so the hook's resolver falls through
+diff --git a/test/scaffold/codex-payload.red.node.test.ts b/test/scaffold/codex-payload.red.node.test.ts
+index 8d102ee..030e053 100644
+--- a/test/scaffold/codex-payload.red.node.test.ts
++++ b/test/scaffold/codex-payload.red.node.test.ts
+@@ -103,7 +103,9 @@ describe('Test 19 — generated copies are byte-identical to canonical Claude sc
+       assert.ok(CODEX_HOOK_SCRIPTS.includes(name), `CODEX_HOOK_SCRIPTS must list ${name}`);
+       assert.ok(planned.some((e) => e.rel === `hosts/codex/.codex/hooks/${name}`), `planCodexPayload must plan hosts/codex/.codex/hooks/${name}`);
+     }
+-    for (const entry of planned) {
++    // STORY-058-11 TPV re-seal: this test covers the generated HOOK copies; -11 adds agent TOMLs and
++    // portable skills (mode 0644) to the same plan (M5-A34), covered by codex-agents-codegen.
++    for (const entry of planned.filter((e) => e.rel.startsWith('hosts/codex/.codex/hooks/'))) {
+       assert.equal(entry.mode, 0o755);
+       const onDisk = path.join(SCAFFOLD_ROOT, ...entry.rel.split('/'));
+       assert.ok(fs.existsSync(onDisk), `expected ${onDisk} to exist`);
+@@ -115,10 +117,14 @@ describe('Test 19 — generated copies are byte-identical to canonical Claude sc
+   test('each generated copy equals canonicalPath(".claude/hooks/<name>")', async () => {
+     const { planCodexPayload } = await loadBuildScript();
+     const planned = planCodexPayload(CLI_ROOT);
+-    for (const entry of planned) {
+-      const name = path.basename(entry.rel);
++    // STORY-058-11 TPV re-seal: hook entries only, keyed by the path under hooks/ so
++    // lib/harness.sh is compared to .claude/hooks/lib/harness.sh (not skipped by basename).
++    const hookEntries = planned.filter((e) => e.rel.startsWith('hosts/codex/.codex/hooks/'));
++    assert.ok(hookEntries.length > 0);
++    for (const entry of hookEntries) {
++      const name = entry.rel.slice('hosts/codex/.codex/hooks/'.length);
+       const claudeSrc = canonicalPath(`.claude/hooks/${name}`);
+-      if (!fs.existsSync(claudeSrc)) continue; // e.g. a codex-only lib file, if any
++      assert.ok(fs.existsSync(claudeSrc), `${entry.rel} has no canonical Claude source ${claudeSrc}`);
+       assert.ok(
+         Buffer.from(fs.readFileSync(claudeSrc)).equals(entry.bytes),
+         `${entry.rel} must be byte-identical to the canonical Claude script ${name}`,
+diff --git a/test/scaffold/file-surface-gate-e2e.node.test.ts b/test/scaffold/file-surface-gate-e2e.node.test.ts
+index 2d51614..8f7ad3b 100644
+--- a/test/scaffold/file-surface-gate-e2e.node.test.ts
++++ b/test/scaffold/file-surface-gate-e2e.node.test.ts
+@@ -199,6 +199,10 @@ function writeHookFiles(root: string): void {
+   fs.copyFileSync(CANONICAL_SURFACE_GATE, path.join(root, '.claude', 'hooks', 'pre-commit-surface-gate.sh'));
+   fs.chmodSync(path.join(root, '.claude', 'hooks', 'pre-commit.sh'), 0o755);
+   fs.chmodSync(path.join(root, '.claude', 'hooks', 'pre-commit-surface-gate.sh'), 0o755);
++  // STORY-058-11 TPV re-seal: the surface gate sources lib/harness.sh from its own dir; an
++  // install carries .claude/hooks/lib/** (TIER_RULES .claude/hooks/**). Absent before -11.
++  const canonicalLib = path.join(path.dirname(CANONICAL_SURFACE_GATE), 'lib');
++  if (fs.existsSync(canonicalLib)) fs.cpSync(canonicalLib, path.join(root, '.claude', 'hooks', 'lib'), { recursive: true });
+ }
+ 
+ /** `.cleargate/scripts/*` IS tracked (not gitignored) — present in a linked
+diff --git a/test/scaffold/portable-skills.red.node.test.ts b/test/scaffold/portable-skills.red.node.test.ts
+index 9b0dd2a..368d726 100644
+--- a/test/scaffold/portable-skills.red.node.test.ts
++++ b/test/scaffold/portable-skills.red.node.test.ts
+@@ -19,6 +19,7 @@ import * as path from 'node:path';
+ import * as os from 'node:os';
+ import { SCAFFOLD_ROOT, composeCanonicalPayload, composeCanonicalView } from '../helpers/scaffold-roots.js';
+ import { defaultHostRegistry, payloadFilter } from '../../src/hosts/registry.js';
++import { runInitScenario } from '../helpers/init-fixture.js';
+ 
+ const CLAUDE_SKILLS_DIR = path.join(SCAFFOLD_ROOT, 'hosts', 'claude', '.claude', 'skills');
+ const CORE_AGENTS_SKILLS_DIR = path.join(SCAFFOLD_ROOT, 'core', '.agents', 'skills');
+@@ -54,13 +55,23 @@ describe('Test 7 — payloadFilter and the no-flag flat view exclude .agents/**'
+     assert.equal(include('.agents/skills/flashcard/SKILL.md'), false);
+   });
+ 
+-  test('a no-flag (claude-only) composed flat view has no .agents/ directory', async () => {
+-    // Once scaffold/core/.agents/skills/** exists, a claude-only composed
+-    // view must still exclude it end-to-end (composePayload + payloadFilter
+-    // wired through buildInstallView), not just at the payloadFilter unit.
+-    const dst = mkTmp('cg-s41-11-skills-noflag-');
+-    await composeCanonicalPayload(dst);
+-    assert.equal(fs.existsSync(path.join(dst, '.agents')), false, 'a claude-only (no --host) flat view must not contain .agents/');
++  test('a no-flag install from the composed flat view has no .agents/ on disk or in its snapshot', async () => {
++    // TPV re-seal (STORY-058-11): the flat core+claude VIEW carries
++    // scaffold/core/.agents/** once it exists (M3 amendment: a shared root
++    // lives in scaffold/core, gated at install by payloadFilter + the -06
++    // snapshot filter). Rule 2 is about the INSTALL: a no-flag init from
++    // that view never lands .agents/** on disk or in the snapshot.
++    const payload = mkTmp('cg-s41-11-skills-noflag-');
++    await composeCanonicalPayload(payload);
++    const record = await runInitScenario('fresh', { payloadDir: payload, extra: { readInstallManifest: undefined } });
++    assert.equal(fs.existsSync(path.join(record.dir, '.agents')), false, 'a no-flag install must not contain .agents/');
++    const snap = JSON.parse(fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as {
++      files: Array<{ path: string }>;
++      hosts?: string[];
++    };
++    assert.deepEqual(snap.hosts, ['claude']);
++    assert.ok(snap.files.length > 0, 'the snapshot must list the installed files');
++    assert.ok(!snap.files.some((f) => f.path.startsWith('.agents/')), 'the no-flag snapshot must not list .agents/**');
+   });
+ });
+ 
+@@ -77,7 +88,7 @@ describe('Test 8 — a codex-selected view installs both portable skills and 11
+     assert.equal(agentsToml.filter((f) => f.endsWith('.toml')).length, 11, `expected 11 generated role TOMLs in a codex-selected view, got: ${agentsToml.join(', ')}`);
+ 
+     const manifest = JSON.parse(fs.readFileSync(path.join(dst, 'MANIFEST.json'), 'utf8')) as {
+-      files: Array<{ path: string; owner?: string }>;
++      files: Array<{ path: string; owner?: string; tier?: string; overwrite_policy?: string; preserve_on_uninstall?: boolean }>;
+     };
+     const byPath = new Map(manifest.files.map((f) => [f.path, f]));
+     for (const name of ['flashcard', 'sprint-dashboard']) {
+@@ -87,6 +98,15 @@ describe('Test 8 — a codex-selected view installs both portable skills and 11
+     }
+     for (const f of manifest.files.filter((e) => e.path.startsWith('.codex/agents/'))) {
+       assert.equal(f.owner, 'codex', `${f.path} must be owned by codex`);
++      // TPV re-seal: the TIER_RULES row, not just the owner (M5 blueprint).
++      assert.equal(f.tier, 'agent', `${f.path} tier`);
++      assert.equal(f.overwrite_policy, 'always', `${f.path} overwrite_policy`);
++      assert.equal(f.preserve_on_uninstall, false, `${f.path} preserve_on_uninstall`);
++    }
++    for (const f of manifest.files.filter((e) => e.path.startsWith('.agents/skills/'))) {
++      assert.equal(f.tier, 'skill', `${f.path} tier`);
++      assert.equal(f.overwrite_policy, 'always', `${f.path} overwrite_policy`);
++      assert.equal(f.preserve_on_uninstall, false, `${f.path} preserve_on_uninstall`);
+     }
+     assert.ok(
+       manifest.files.some((f) => f.path.startsWith('.codex/agents/')),
+diff --git a/test/scaffold/pre-commit-downstream-safe.node.test.ts b/test/scaffold/pre-commit-downstream-safe.node.test.ts
+index a67e6bf..ebfe526 100644
+--- a/test/scaffold/pre-commit-downstream-safe.node.test.ts
++++ b/test/scaffold/pre-commit-downstream-safe.node.test.ts
+@@ -178,6 +178,10 @@ function writeHookFiles(root: string): void {
+   fs.copyFileSync(CANONICAL_SURFACE_GATE, path.join(root, '.claude', 'hooks', 'pre-commit-surface-gate.sh'));
+   fs.chmodSync(path.join(root, '.claude', 'hooks', 'pre-commit.sh'), 0o755);
+   fs.chmodSync(path.join(root, '.claude', 'hooks', 'pre-commit-surface-gate.sh'), 0o755);
++  // STORY-058-11 TPV re-seal: the surface gate sources lib/harness.sh from its own dir; an
++  // install carries .claude/hooks/lib/** (TIER_RULES .claude/hooks/**). Absent before -11.
++  const canonicalLib = path.join(path.dirname(CANONICAL_SURFACE_GATE), 'lib');
++  if (fs.existsSync(canonicalLib)) fs.cpSync(canonicalLib, path.join(root, '.claude', 'hooks', 'lib'), { recursive: true });
+ }
+ 
+ /** Adds `.cleargate/scripts/file_surface_diff.sh` (untracked is fine — the
+diff --git a/test/scripts/codex-agents-codegen.red.node.test.ts b/test/scripts/codex-agents-codegen.red.node.test.ts
+index c3ea662..85a3874 100644
+--- a/test/scripts/codex-agents-codegen.red.node.test.ts
++++ b/test/scripts/codex-agents-codegen.red.node.test.ts
+@@ -169,6 +169,42 @@ describe('Test 4 — planCodexPayload determinism (agent + portable-skill entrie
+   });
+ });
+ 
++// ── TPV re-seal: --check covers extras and stale skill copies, not just agents ──
++
++describe('[TPV re-seal] Test 4c — --check flags extras under the generated dirs and a stale portable skill', () => {
++  function seededScratch(prefix: string): { scratchCli: string; script: string } {
++    const scratchCli = mkTmp(prefix);
++    fs.cpSync(path.join(CLI_ROOT, 'scaffold'), path.join(scratchCli, 'scaffold'), { recursive: true });
++    fs.mkdirSync(path.join(scratchCli, 'scripts'), { recursive: true });
++    const script = path.join(scratchCli, 'scripts', 'build-codex-payload.mjs');
++    fs.copyFileSync(BUILD_SCRIPT, script);
++    const write = spawnSync(process.execPath, [script, '--write'], { cwd: scratchCli, encoding: 'utf8' });
++    assert.equal(write.status, 0, `--write must exit 0; got ${write.status}: ${write.stdout}${write.stderr}`);
++    const control = spawnSync(process.execPath, [script, '--check'], { cwd: scratchCli, encoding: 'utf8' });
++    assert.equal(control.status, 0, `control --check after --write must exit 0; got: ${control.stdout}${control.stderr}`);
++    return { scratchCli, script };
++  }
++
++  const cases: Array<[label: string, rel: string, mutate: (abs: string) => void]> = [
++    ['an extra .codex/agents TOML', path.join('hosts', 'codex', '.codex', 'agents', 'zz-extra.toml'), (abs) => fs.writeFileSync(abs, 'name = "zz"\n')],
++    ['an extra file under core/.agents/skills', path.join('core', '.agents', 'skills', 'zz-extra', 'SKILL.md'), (abs) => {
++      fs.mkdirSync(path.dirname(abs), { recursive: true });
++      fs.writeFileSync(abs, '# zz\n');
++    }],
++    ['a stale portable skill copy', path.join('core', '.agents', 'skills', 'flashcard', 'SKILL.md'), (abs) => fs.appendFileSync(abs, '\n<!-- hand edit -->\n')],
++  ];
++  for (const [label, rel, mutate] of cases) {
++    test(`--check exits 1 and names the file for ${label}`, () => {
++      const { scratchCli, script } = seededScratch('cg-s41-11-agents-check-extra-');
++      const abs = path.join(scratchCli, 'scaffold', rel);
++      mutate(abs);
++      const check = spawnSync(process.execPath, [script, '--check'], { cwd: scratchCli, encoding: 'utf8' });
++      assert.equal(check.status, 1, `${label}: --check must exit 1; got ${check.status}`);
++      assert.ok((check.stdout + check.stderr).includes(rel.split(path.sep).join('/')), `${label}: must name ${rel}; got ${check.stdout}${check.stderr}`);
++    });
++  }
++});
++
+ // ── Test 5: escaping round-trips exactly through the real generator ────────
+ 
+ describe('Test 5 — an escaping fixture body round-trips exactly', () => {
+diff --git a/test/scripts/codex-hooks-harness.red.node.test.ts b/test/scripts/codex-hooks-harness.red.node.test.ts
+index b1ebfea..217b478 100644
+--- a/test/scripts/codex-hooks-harness.red.node.test.ts
++++ b/test/scripts/codex-hooks-harness.red.node.test.ts
+@@ -537,87 +537,203 @@ describe('[TPV R-X5] C4 edit-allow probe: strip the story <instructions> block b
+ 
+ // ── Test 15 (STORY-058-11): codexHookVerdicts roles/skills ──────────────────
+ //
+-// M5 plan §"STORY-058-11 — Test scenarios", test 15: "codexHookVerdicts
+-// roles/skills PASS on synthetic inputs, N/A without the files, and FAIL
+-// when one role is missing from the schema, or when sprint-execution is
+-// listed room-local." The plan's own verdict descriptions (`codex.live.roles`
+-// / `codex.live.skills`, M5 blueprint §"STORY-058-10 — Files" bullet under
+-// `codex-hooks.mjs` + `evidence.mjs`) are prose, not a typed DI shape.
+-//
+-// SPEC-GAP (flagged, not silently pinned — flashcard 2026-09-26 "a prose-only
+-// DI shape ... must be invented and flagged as an ambiguity"): the exact
+-// input field names below (`inputs.roles`, `inputs.skills`) and whether
+-// these two ids belong to `CODEX_GATING_IDS`, a new array, or neither are
+-// invented by this QA-Red pass, modeled on the existing `allPassInputs()`
+-// shape (one namespaced object per verdict family, e.g. `c6`/`sharedHooks`).
+-// The Developer may reshape the input fields; the OBSERVABLE contract this
+-// test pins is the plan's own three-state behavior (PASS / N/A / FAIL) and
+-// the two named ids, not the field names themselves.
+-
+-function rolesSkillsAllPassInputs(): ReturnType<typeof allPassInputs> {
+-  const inputs = allPassInputs();
+-  const ALL_11_ROLES = [
+-    'architect',
+-    'architect-reader',
+-    'architect-synth',
+-    'cleargate-wiki-contradict',
+-    'cleargate-wiki-ingest',
+-    'cleargate-wiki-lint',
+-    'cleargate-wiki-query',
+-    'developer',
+-    'devops',
+-    'qa',
+-    'reporter',
+-  ];
+-  inputs.roles = {
+-    present: true,
+-    spawnAgentSchemaDescription: `agent_type: one of ${ALL_11_ROLES.join(', ')}`,
+-    spawnedAgentType: 'qa',
+-    childRequestBodyContains: 'You are the **QA** agent for ClearGate sprint execution.',
+-    subagentStartAgentType: 'qa',
++// TPV re-seal (plans/M5.md M5-A48 ruling #1). The input shape is RAW, the way
++// every -10 verdict consumes its evidence (M5-A36; flashcard "a boolean
++// verdict input moves the check into untested code; pass raw rows"):
++//   inputs.provider        'scripted' | 'live' (runCodexSessions' provider)
++//   inputs.roles?          { names, qaFirstLine } — file observations of repo-codex:
++//                          sorted .codex/agents/*.toml basenames; the first non-empty
++//                          line of qa.toml's developer_instructions. Absent ⇒ N/A.
++//   inputs.c6.requests     C6's full mock request bodies (mockServer.requests.slice(before)),
++//                          [] under live.
++//   inputs.skills?         { root, promptInput } — realpath(repo-codex/.agents/skills) and
++//                          the raw stdout of `codex debug prompt-input`. Absent ⇒ N/A.
++// Shapes are the measured ones: the spawn schema rides in the `additional_tools`
++// input item, never body.tools (-10 pass C / post-flight seam 2); prompt-input is
++// a JSON list whose developer message holds `<skills_instructions>` with a
++// `### Skill roots` table (`- \`rN\` = \`<abs>\``) and `- <name>: <desc> (file:
++// rN/<name>/SKILL.md)` entries (measured on the pinned 0.154.0-alpha.6.2, TPV).
++// ClearGate registers no SubagentStart hook, and subAgentActivity carries no
++// agent type, so the role identity is the SubagentStop payload's agent_type as
++// token-ledger.sh logs it (the `codex-identity … agent_type=qa` line).
++
++const ALL_11_ROLES = [
++  'architect',
++  'architect-reader',
++  'architect-synth',
++  'cleargate-wiki-contradict',
++  'cleargate-wiki-ingest',
++  'cleargate-wiki-lint',
++  'cleargate-wiki-query',
++  'developer',
++  'devops',
++  'qa',
++  'reporter',
++];
++const QA_FIRST_LINE = 'You are the **QA** agent for ClearGate sprint execution.';
++const turnMeta = (agentName: string) => ({ 'x-codex-turn-metadata': JSON.stringify({ agent_name: agentName }) });
++const spawnSchemaTools = (roles: string[]) => [
++  {
++    type: 'namespace',
++    name: 'collaboration',
++    tools: [
++      {
++        type: 'function',
++        name: 'spawn_agent',
++        parameters: {
++          type: 'object',
++          properties: {
++            agent_type: { type: 'string', description: `Optional role for the new agent. Available roles: ${roles.join(', ')}.` },
++            message: { type: 'string' },
++            task_name: { type: 'string' },
++          },
++        },
++      },
++    ],
++  },
++];
++function c6Requests(opts: { roles?: string[]; schemaIn?: 'additional_tools' | 'body.tools'; spawnAgentType?: string; childText?: string; parentText?: string } = {}) {
++  const roles = opts.roles ?? ALL_11_ROLES;
++  const schemaIn = opts.schemaIn ?? 'additional_tools';
++  const parentFirst: Record<string, unknown> = {
++    model: 'gpt-5.6-terra',
++    input: [
++      ...(schemaIn === 'additional_tools' ? [{ type: 'additional_tools', role: 'developer', tools: spawnSchemaTools(roles) }] : []),
++      { type: 'message', role: 'user', content: [{ type: 'input_text', text: opts.parentText ?? 'Spawn an agent (spawn_agent) with the exact task, then reply DONE.' }] },
++    ],
++    client_metadata: turnMeta('/root'),
+   };
+-  inputs.skills = {
+-    present: true,
+-    promptInputLines: [
+-      'flashcard: file: /ROOM/.agents/skills/flashcard/SKILL.md',
+-      'sprint-dashboard: file: /ROOM/.agents/skills/sprint-dashboard/SKILL.md',
++  if (schemaIn === 'body.tools') parentFirst.tools = spawnSchemaTools(roles);
++  const parentFollowUp = {
++    model: 'gpt-5.6-terra',
++    input: [
++      {
++        type: 'function_call',
++        name: 'spawn_agent',
++        namespace: 'collaboration',
++        arguments: JSON.stringify({ task_name: 'cg_probe', message: 'STORY=001-01 Reply with exactly OK.', agent_type: opts.spawnAgentType ?? 'qa' }),
++        call_id: 'call_c6',
++      },
++      { type: 'function_call_output', call_id: 'call_c6', output: '{"task_name":"/root/cg_probe"}' },
+     ],
+-    roomLocalSprintExecutionListed: false,
++    client_metadata: turnMeta('/root'),
+   };
++  const child = {
++    model: 'gpt-5.6-terra',
++    input: [
++      { type: 'message', role: 'developer', content: [{ type: 'input_text', text: `${opts.childText ?? QA_FIRST_LINE}\n\nNever edit production code.` }] },
++      { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'STORY=001-01 Reply with exactly OK.' }] },
++    ],
++    client_metadata: turnMeta('/root/cg_probe'),
++  };
++  return [parentFirst, child, parentFollowUp];
++}
++function promptInput(entries: Array<[name: string, root: 'r0' | 'r1']>): string {
++  const lines = [
++    '<skills_instructions>',
++    '## Skills',
++    'A skill is a set of local instructions to follow that is stored in a `SKILL.md` file.',
++    '### Skill roots',
++    '- `r0` = `/CODEX_HOME/skills/.system`',
++    '- `r1` = `/ROOM/.agents/skills`',
++    '### Available skills',
++    '- imagegen: Generate or edit raster images (e.g. sprites). (file: r0/imagegen/SKILL.md)',
++    ...entries.map(([name, root]) => `- ${name}: The ${name} skill (with a (parenthesis) inside). (file: ${root}/${name}/SKILL.md)`),
++    '</skills_instructions>',
++  ];
++  return JSON.stringify([
++    { type: 'message', role: 'developer', content: [{ type: 'input_text', text: lines.join('\n') }] },
++    { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'hi' }] },
++  ]);
++}
++
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++function rolesSkillsAllPassInputs(): any {
++  const inputs = allPassInputs();
++  inputs.provider = 'scripted';
++  inputs.roles = { names: [...ALL_11_ROLES], qaFirstLine: QA_FIRST_LINE };
++  inputs.c6.requests = c6Requests();
++  inputs.skills = { root: '/ROOM/.agents/skills', promptInput: promptInput([['flashcard', 'r1'], ['sprint-dashboard', 'r1']]) };
+   return inputs;
+ }
+ 
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++type RSMutation = [label: string, id: 'codex.live.roles' | 'codex.live.skills', mutate: (i: any) => void];
++const RS_MUTATIONS: RSMutation[] = [
++  ['one role missing from the agent_type schema description', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ roles: ALL_11_ROLES.filter((r) => r !== 'reporter') }); }],
++  ['"architect" missing while "architect-reader"/"-synth" stay (whole-token match)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ roles: ALL_11_ROLES.filter((r) => r !== 'architect') }); }],
++  ['the schema only in body.tools, not the additional_tools item', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ schemaIn: 'body.tools' }); }],
++  ['C6 spawned agent_type "developer", not "qa"', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ spawnAgentType: 'developer' }); }],
++  ['the child request lacks qa.md\'s first body line (it is only in a parent request)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ childText: 'You are a generic agent.', parentText: QA_FIRST_LINE }); }],
++  ['no C6 requests recorded under the scripted provider', 'codex.live.roles', (i) => { i.c6.requests = []; }],
++  ['the codex-identity line records agent_type=default (SubagentStop identity)', 'codex.live.roles', (i) => {
++    i.c6.tokenLedgerLogLines = i.c6.tokenLedgerLogLines.map((l: string) => l.replace('agent_type=qa', 'agent_type=default'));
++    i.c6.expectedAgentType = 'default';
++  }],
++  ['sprint-execution listed room-local (under the room root)', 'codex.live.skills', (i) => { i.skills.promptInput = promptInput([['flashcard', 'r1'], ['sprint-dashboard', 'r1'], ['sprint-execution', 'r1']]); }],
++  ['flashcard listed only under a non-room root', 'codex.live.skills', (i) => { i.skills.promptInput = promptInput([['flashcard', 'r0'], ['sprint-dashboard', 'r1']]); }],
++  ['sprint-dashboard not listed', 'codex.live.skills', (i) => { i.skills.promptInput = promptInput([['flashcard', 'r1']]); }],
++  ['prompt-input output is not JSON', 'codex.live.skills', (i) => { i.skills.promptInput = 'flashcard: file: /ROOM/.agents/skills/flashcard/SKILL.md'; }],
++  ['the skills root is not the room root (r1 maps elsewhere)', 'codex.live.skills', (i) => { i.skills.root = '/OTHER/.agents/skills'; }],
++];
++
+ describe('Test 15 — codexHookVerdicts roles/skills (STORY-058-11)', () => {
+-  test('a fully-passing roles/skills input verdicts codex.live.roles and codex.live.skills PASS', async () => {
+-    const { codexHookVerdicts } = await loadEvidenceCodex();
++  test('a fully-passing raw input verdicts codex.live.roles and codex.live.skills PASS; both ids are gating', async () => {
++    const { codexHookVerdicts, CODEX_GATING_IDS } = await loadEvidenceCodex();
++    assert.ok(CODEX_GATING_IDS.includes('codex.live.roles') && CODEX_GATING_IDS.includes('codex.live.skills'), JSON.stringify(CODEX_GATING_IDS));
+     const verdicts = codexHookVerdicts(rolesSkillsAllPassInputs());
+     assert.equal(verdicts['codex.live.roles']?.status, 'PASS', JSON.stringify(verdicts['codex.live.roles']));
+     assert.equal(verdicts['codex.live.skills']?.status, 'PASS', JSON.stringify(verdicts['codex.live.skills']));
++    for (const id of GATING) assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
+   });
+ 
+-  test('inputs.roles/inputs.skills absent (the room has no codex agents/skills) verdicts N/A, not PASS or FAIL', async () => {
++  test('inputs.roles/inputs.skills absent (no roles/skills in the room) verdicts N/A, never PASS or FAIL', async () => {
+     const { codexHookVerdicts } = await loadEvidenceCodex();
+     const inputs = rolesSkillsAllPassInputs();
+-    delete (inputs as Record<string, unknown>).roles;
+-    delete (inputs as Record<string, unknown>).skills;
++    delete inputs.roles;
++    delete inputs.skills;
+     const verdicts = codexHookVerdicts(inputs);
+     assert.equal(verdicts['codex.live.roles']?.status, 'N/A', JSON.stringify(verdicts['codex.live.roles']));
+     assert.equal(verdicts['codex.live.skills']?.status, 'N/A', JSON.stringify(verdicts['codex.live.skills']));
+   });
+ 
+-  test('one role name missing from the spawn_agent schema description → codex.live.roles FAILs', async () => {
++  test('zero role files (names: []) is N/A, never a vacuous PASS', async () => {
+     const { codexHookVerdicts } = await loadEvidenceCodex();
+     const inputs = rolesSkillsAllPassInputs();
+-    inputs.roles.spawnAgentSchemaDescription = inputs.roles.spawnAgentSchemaDescription.replace('reporter, ', '').replace(', reporter', '');
+-    const verdicts = codexHookVerdicts(inputs);
+-    assert.equal(verdicts['codex.live.roles']?.status, 'FAIL', JSON.stringify(verdicts['codex.live.roles']));
++    inputs.roles.names = [];
++    assert.equal(codexHookVerdicts(inputs)['codex.live.roles']?.status, 'N/A');
+   });
+ 
+-  test('sprint-execution listed room-local → codex.live.skills FAILs (H4, H15)', async () => {
++  test('live provider: requests are not captured, the identity line alone decides (PASS, then FAIL on agent_type=default)', async () => {
+     const { codexHookVerdicts } = await loadEvidenceCodex();
+     const inputs = rolesSkillsAllPassInputs();
+-    inputs.skills.roomLocalSprintExecutionListed = true;
+-    const verdicts = codexHookVerdicts(inputs);
+-    assert.equal(verdicts['codex.live.skills']?.status, 'FAIL', JSON.stringify(verdicts['codex.live.skills']));
++    inputs.provider = 'live';
++    inputs.c6.requests = [];
++    assert.equal(codexHookVerdicts(inputs)['codex.live.roles']?.status, 'PASS', JSON.stringify(codexHookVerdicts(inputs)['codex.live.roles']));
++    inputs.c6.tokenLedgerLogLines = inputs.c6.tokenLedgerLogLines.map((l: string) => l.replace('agent_type=qa', 'agent_type=default'));
++    assert.equal(codexHookVerdicts(inputs)['codex.live.roles']?.status, 'FAIL');
+   });
++
++  test('sprint-execution under a NON-room root (user/system skills) does not fail codex.live.skills', async () => {
++    const { codexHookVerdicts } = await loadEvidenceCodex();
++    const inputs = rolesSkillsAllPassInputs();
++    inputs.skills.promptInput = promptInput([['flashcard', 'r1'], ['sprint-dashboard', 'r1'], ['sprint-execution', 'r0']]);
++    assert.equal(codexHookVerdicts(inputs)['codex.live.skills']?.status, 'PASS', JSON.stringify(codexHookVerdicts(inputs)['codex.live.skills']));
++  });
++
++  for (const [label, id, mutate] of RS_MUTATIONS) {
++    test(`single fault — ${label} → ${id} FAILs; the other roles/skills id and every -10 gating id stay PASS`, async () => {
++      const { codexHookVerdicts } = await loadEvidenceCodex();
++      const inputs = rolesSkillsAllPassInputs();
++      mutate(inputs);
++      const verdicts = codexHookVerdicts(inputs);
++      assert.equal(verdicts[id]?.status, 'FAIL', `${id}: ${JSON.stringify(verdicts[id])}`);
++      const other = id === 'codex.live.roles' ? 'codex.live.skills' : 'codex.live.roles';
++      assert.equal(verdicts[other]?.status, 'PASS', `${other}: ${JSON.stringify(verdicts[other])}`);
++      for (const g of GATING) {
++        if (label.startsWith('the codex-identity line') && g === 'codex.live.dispatch-identity') continue;
++        assert.equal(verdicts[g]?.status, 'PASS', `fixture isolation: ${g} must stay PASS; got ${JSON.stringify(verdicts[g])}`);
++      }
++    });
++  }
+ });

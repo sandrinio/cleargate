@@ -139,15 +139,123 @@ export function findWorkItemFile(repoRoot, workItemId) {
 }
 
 /**
+ * BUG-090: position-independent frontmatter fence locator.
+ *
+ * A line-for-line JS port of `linesOf`, `isFenceStart` and `locateFrontmatter`
+ * from the cli's `src/lib/frontmatter-locator.ts` ([[BUG-067]]). This script
+ * ships standalone in `scaffold/core` and cannot import the cli's TypeScript,
+ * so it carries its own copy; `test/scripts/frontmatter-fence-parity.red.node.test.ts`
+ * pins both implementations to one fixture table (same span, same null, same
+ * throw message).
+ *
+ * Every template `cleargate new` writes opens with an `<instructions>` block
+ * (CR-108), so a regex anchored at offset 0 misreads every freshly scaffolded
+ * item as having no frontmatter. `close_sprint.mjs` imports this export too.
+ */
+
+/** Split raw into lines without normalizing: each line keeps its own EOL marker (or ''). */
+function linesOf(raw) {
+  const lines = [];
+  let start = 0;
+  for (let i = 0; i < raw.length;) {
+    if (raw[i] === '\r' && raw[i + 1] === '\n') {
+      lines.push({ text: raw.slice(start, i), start, end: i, eol: '\r\n' });
+      start = i += 2;
+    } else if (raw[i] === '\n') {
+      lines.push({ text: raw.slice(start, i), start, end: i, eol: '\n' });
+      start = ++i;
+    } else {
+      i++;
+    }
+  }
+  if (start < raw.length || raw.length === 0) {
+    lines.push({ text: raw.slice(start), start, end: raw.length, eol: '' });
+  }
+  return lines;
+}
+
+function isFenceStart(line) {
+  return line.match(/^ {0,3}(`{3,}|~{3,})/);
+}
+
+/**
+ * Find the first eligible, column-zero `---` header. `<instructions>` blocks
+ * and Markdown fenced examples appearing before it are opaque — their content
+ * (including embedded `---` or `<instructions>` lines) can never become the
+ * document header. Returns `null` only for genuinely absent frontmatter;
+ * throws for physically malformed framing (unterminated header, unterminated
+ * protected preamble) so callers cannot mistake "cannot locate" for "none".
+ *
+ * @param {string} raw
+ * @returns {{start: number, end: number, yamlStart: number, yamlEnd: number, eol: '\n'|'\r\n'} | null}
+ */
+export function locateFrontmatterFence(raw) {
+  const lines = linesOf(raw);
+  let instructions = false;
+  let fence = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // A leading BOM only affects recognition of line 0; it is preamble, never
+    // part of the header itself (see the offset adjustment below).
+    const text = i === 0 ? line.text.replace(/^﻿/, '') : line.text;
+
+    // A fenced example is opaque, including instruction-looking or delimiter-
+    // looking lines inside it. While fenced, only its matching closer counts.
+    if (fence) {
+      const close = text.match(/^ {0,3}(`+|~+)\s*$/);
+      if (close && close[1][0] === fence.char && close[1].length >= fence.length) fence = null;
+      continue;
+    }
+    if (instructions) {
+      if (text === '</instructions>') instructions = false;
+      continue;
+    }
+    if (text === '<instructions>') {
+      instructions = true;
+      continue;
+    }
+    const openedFence = isFenceStart(text);
+    if (openedFence) {
+      fence = { char: openedFence[1][0], length: openedFence[1].length };
+      continue;
+    }
+    if (text !== '---') continue;
+    if (line.eol === '') throw new Error('locateFrontmatter: missing closing ---');
+
+    for (let j = i + 1; j < lines.length; j++) {
+      const close = lines[j];
+      if (close.text === '---') {
+        return {
+          start: line.start + (i === 0 && line.text.startsWith('﻿') ? 1 : 0),
+          end: close.end,
+          yamlStart: line.end + line.eol.length,
+          yamlEnd: close.start,
+          eol: line.eol,
+        };
+      }
+    }
+    throw new Error('locateFrontmatter: missing closing ---');
+  }
+
+  if (instructions) throw new Error('locateFrontmatter: unterminated <instructions> block');
+  if (fence) throw new Error('locateFrontmatter: unterminated Markdown fence');
+  return null;
+}
+
+/**
  * Inline YAML frontmatter extractor.
  * Returns { approved: boolean, has_heading: boolean }.
  *
- * - approved: frontmatter contains `approved: true` (quoted or unquoted).
- * - has_heading: body after frontmatter contains at least one "## " line.
+ * - approved: the located frontmatter contains `approved: true` (quoted or unquoted).
+ * - has_heading: body after frontmatter contains at least one "## " line. The
+ *   body starts after the closing fence, so a leading `<instructions>` block
+ *   (guidance, not content) never counts.
  *
- * Tolerate files with no frontmatter (approved=false, has_heading per body scan).
+ * Fails closed: no frontmatter, or framing the locator cannot read (it throws),
+ * gives approved=false with has_heading per a whole-file scan.
  */
-function assertWorkItemApproved(filePath) {
+export function assertWorkItemApproved(filePath) {
   let content;
   try {
     content = fs.readFileSync(filePath, 'utf8');
@@ -158,11 +266,15 @@ function assertWorkItemApproved(filePath) {
   let body = content;
   let approved = false;
 
-  // Match YAML frontmatter block: starts with --- on first line
-  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (fmMatch) {
-    const fmBlock = fmMatch[1];
-    body = fmMatch[2] ?? '';
+  let span = null;
+  try {
+    span = locateFrontmatterFence(content);
+  } catch {
+    span = null;
+  }
+  if (span) {
+    const fmBlock = content.slice(span.yamlStart, span.yamlEnd);
+    body = content.slice(span.end);
 
     // Look for `approved: true` (unquoted) or `approved: "true"` (quoted)
     const approvedMatch = fmBlock.match(/^approved:\s*["']?(true)["']?\s*$/m);
