@@ -112,11 +112,19 @@ there (even a symlink minted for convenience) silently swaps the artifact
 under test for the meta-repo's own build and engages the meta-repo drift
 check inside the room.
 
-**Scrub the environment.** Unset `CLAUDE_PROJECT_DIR`, `CLAUDE_SESSION_ID`,
-`CLAUDECODE`, `ORCHESTRATOR_PROJECT_DIR`, `SKIP_FLASHCARD_GATE`,
-`SKIP_RED_GATE`, `SKIP_SURFACE_GATE` and every `CLEARGATE_*` variable before
+**Scrub the environment.** Unset every variable whose name starts with
+`CLAUDE` (measured: an agent's own Bash exports twelve of them — not just
+`CLAUDE_PROJECT_DIR`/`CLAUDE_SESSION_ID`/`CLAUDECODE`; the `CLAUDE_CODE_*`
+set, `CLAUDE_PID` and `CLAUDE_EFFORT` are easy to miss), every `CLEARGATE_*`
+variable, every `SKIP_*` variable, and `ORCHESTRATOR_PROJECT_DIR`, before
 running anything inside the room. Left set, they route hook logs and ledger
 rows into the meta-repo instead of the room being verified.
+
+**The gate carries into the hooks.** Claude Code (measured on 2.1.283) runs
+every hook command as `/bin/sh -c "<command>"`, inheriting the launching
+process's own `PATH` — so a session started with `<C>/tools/bin` first on
+`PATH` resolves the artifact inside its hooks too, not only at the shell
+prompt that launched `claude`.
 
 ## 3. Create one clean room per host selector
 
@@ -140,9 +148,11 @@ install's snapshot pre-dates the post-`applyTestStack` sha of
 file even on a pristine room. That is a pre-existing false positive, not a
 clean-room defect, and it never gates this procedure.
 
-`scaffold-lint` lints the scaffold *source* (`cleargate-cli/scaffold/`), not
-an installed tree, so it is not a clean-room check — it never ran in a room
-in the reference run and does not belong in this section.
+`scaffold-lint` lints `<cwd>/cleargate-planning/` (`scaffold-lint.ts:57`) —
+the frozen scaffold-source snapshot it defaults to, not
+`cleargate-cli/scaffold/` — and never an installed tree either way. It is
+not a clean-room check: it never ran in a room in the reference run and does
+not belong in this section.
 
 ## 5. Live host checks — Claude Code
 
@@ -166,9 +176,21 @@ claude -p "<prompt>" --setting-sources project,local --permission-mode bypassPer
 
 Two session prompts drive the checks (verbatim wording lives in
 STORY-058-09's harness once it lands):
-- **S1** — one `Edit` on a freshly authored delivery item, to exercise
-  `SessionStart`, `PreToolUse:Edit` and `PostToolUse:Edit` (the
-  stamp-and-gate cycle).
+- **S1** — author the item first with `cleargate new epic <slug>` (never an
+  arbitrary file: a file that is not a real work item fails stamp, gate
+  *and* ingest all at once, which proves nothing about the hook cycle).
+  Apply the five F7 edits so the item gates 0, not 1:
+  1. Insert `approved_by`/`approved_at` after the `status:` line.
+  2. Answer the Human Answer line.
+  3. Delete the "literal token `Unresolved`" note block.
+  4. Cite a real path, such as `.cleargate/README.md`.
+  5. Replace the Prior-work placeholder with `none found`.
+
+  Then run one `Edit` on the item, to exercise `SessionStart`,
+  `PreToolUse:Edit` and `PostToolUse:Edit` (the stamp-and-gate cycle). An
+  unauthored fresh scaffold (the five edits skipped) logs `gate=1` by
+  design (F7) — that is expected, not a defect, so `stamp=0`/`ingest=0` are
+  this check's real pass criteria unless the item was also authored.
 - **S2** — one `Agent` dispatch of the `qa` subagent, to exercise
   `PreToolUse:Agent` and `SubagentStop` (dispatch attribution).
 
@@ -183,8 +205,12 @@ What each `claude.live.*` id reads from the stream:
   `token-ledger.jsonl` row carrying the dispatched `agent_type`.
 - `claude.live.agents-skills` — `system/init`'s `agents[]`/`skills[]` include
   the installed set.
-- `claude.live.mcp-connect` — `system/init`'s `mcp_servers` includes
-  `cleargate`.
+- `claude.live.mcp-connect` — `system/init`'s `mcp_servers` includes an
+  entry whose `name` is `cleargate`. Record-only: `.mcp.json` runs `npx -y
+  cleargate@<pin>` — the **published** package — which sits outside the
+  artifact under test either way. `mcp_servers` also lists account-level
+  `claude.ai` connectors (`source: "claudeai"`) regardless of
+  `--setting-sources`; select by name, not by count.
 - `claude.live.agents-md-exposure` — emitted only when the room has an
   `AGENTS.md` (a Codex/portable install): Claude Code 2.x ships a builtin
   `agents-md` plugin that loads `AGENTS.md` when no `CLAUDE.md` exists, so a
