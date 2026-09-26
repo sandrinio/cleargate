@@ -41,6 +41,7 @@ parent_cleargate_id: null  # canonical cleargate-id of parent work item; null fo
 sprint_cleargate_id: null  # canonical cleargate-id of owning sprint; null for off-sprint items
 carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft"  # lifecycle: Draft → Active → Completed
+approved: false
 ambiguity: "🔴 High"
 context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 owner: "{PM/PO name}"

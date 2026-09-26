@@ -1,3 +1,37 @@
+2026-09-26 · #test-harness #backfill #danger · push-hierarchy.node.test.ts runs live backfill_hierarchy.mjs over the real <cli>/.. corpus; revert pending-sync after.
+2026-09-26 · #test-harness #two-repo · Parity is not only S1c: wiki-ingest-sprint-report S14 cmps live vs canonical close_sprint.mjs; red in a pre-contract wt.
+2026-09-26 · #test-harness #codex · JSON.stringify turns newlines into a literal \n; a (?<![\w-]) lookbehind then sees 'n'. Tokenize parsed strings.
+2026-09-26 · #codex #tpv · spawn_agent agent_type.description lists roles one per line ('<name>: {<desc>}'), not a comma list; fixtures need it.
+2026-09-26 · #test-harness #npm · npm dep in a script imported from a node_modules-less clone: createRequire(<installed pkg file>).resolve, then import().
+2026-09-26 · #test-harness #clean-room · Keep a test's self-deleting evidence: hard-link files as they appear (same volume); links survive its finally rmSync.
+2026-09-26 · #frontmatter #locator #danger · A locator THROW is malformed framing, not 'no frontmatter': a !span writer fallback still plants a phantom.
+2026-09-26 · #two-repo #scripts #esm · A live twin importing a contract export won't link in an outer wt cut pre-contract-merge; copy twins at integration.
+2026-09-26 · #tpv #test-harness · A tail-of-length-N 'bytes after closer' check misses inserted bytes; compare raw.slice(span.end) on both sides.
+2026-09-26 · #tpv #test-harness · A whole-file-scan mutant is more permissive: only an expect-false case (key only in <instructions>) kills it.
+2026-09-26 · #test-harness #gate · CR-030 γ fixtures' 'No TBDs here.' contains TBD, so no-tbds always fails there; exit code is no pass signal.
+2026-09-26 · #test-harness #init #merge · Cut an item's delta rows by its '// ── ID' header to its last '},'; prefix/suffix diffs shift at shared '},'.
+2026-09-26 · #frontmatter #close-gate · BUG-090 merged: close_sprint 2.6c/2.9, assert_story_files, doctor find fences past <instructions>; offset-0 cards stale.
+2026-09-26 · #devops #shell #stdin · `cat > file` with no heredoc or </dev/null blocks forever on stdin in an agent Bash call; use : > file.
+2026-09-26 · #shell #zsh #test-harness · zsh never word-splits an unquoted $LIST; a file list reaches the runner as one arg. Use bash -c.
+2026-09-26 · #test-harness #baseline · dogfood-install.integration is red at C1 base (doctor prints 'Run cleargate upgrade to review.').
+2026-09-26 · #test-harness #worktree · token-ledger-delta.integration runs LIVE <cli>/../../.claude token-ledger.sh; canonical edits can't move it.
+2026-09-26 · #devops #build · Piping npm run build into head SIGPIPEs tsup mid-rebuild and leaves dist deleted; log BD output to a file.
+2026-09-26 · #sdr #waves · Fail-safe trailing waves live only in waves[]; integrationReady reads upstream only, so encode the order as edges.
+2026-09-26 · #skill #codex · Codex render swaps SKILL A2 (C.0 to C.1) for R2; a pointer from outside A2 into §C.0.x dangles in the Codex copy.
+2026-09-26 · #shell-safety #git · Ref allowlist [A-Za-z0-9._/-] still admits '-x' (git option injection) and '..'; require an alnum first char.
+2026-09-26 · #close-gate #frontmatter · 2.6c flips a phantom-led parent as a no-op write (no status in phantom) yet archives it and logs Completed.
+2026-09-26 · #close-gate #frontmatter · close_sprint 2.6c: one parent whose framing throws aborts every remaining flip, logged as 'No frontmatter'.
+2026-09-26 · #frontmatter #crlf · JS . and m-flag $ stop before \r: a one-line replace in a CRLF YAML slice keeps CRLF; span.eol not needed.
+2026-09-26 · #review #locator · Port-parity review: strip TS types and non-null !, then diff bodies; an empty diff backs the fixture table.
+2026-09-26 · #test-harness #two-repo · A cli worktree on a later contract (C4) legitimately diffs an outer worktree cut pre-merge — name it, don't chase it.
+2026-09-26 · #test-harness #hooks #tpv · 11 hook tests regex-patch REPO_ROOT= into tmp copies; a hook that sources lib/ needs lib/ copied beside it.
+2026-09-26 · #tpv #regex · JS regex has no \Z: without /u it is a literal Z. End of input is (?![\s\S]).
+2026-09-26 · #codex #skill · codex debug prompt-input is JSON; skills show a '- `rN` = `<root>`' table plus '(file: rN/<name>/SKILL.md)' entries.
+2026-09-26 · #test-harness #tpv · A test that runs a copied script from os.tmpdir (no node_modules) forbids npm imports in that script.
+2026-09-26 · #scaffold #host #tpv · A core shared root (.agents/**) rides in the flat Claude view; assert Rule 2 on the install, not the view.
+2026-09-26 · #qa-red #tpv · A QA-Red report can claim a hunk the commit lacks (sentinel refusal); grep the sealed tree, not the report.
+2026-09-26 · #codex #skill · Codex parses SKILL.md frontmatter as YAML: flashcard's description is cut at ' #' in the listing.
+2026-09-26 · #test-harness #concurrency · Concurrent heavy test:file batches can flake a green test; re-run solo before calling it a regression.
 2026-09-26 · #test-harness #baseline · M2 baseline hash lines embed absolute paths: run find on the absolute baseline dir, never cd + find .
 2026-09-26 · #locator #test-harness · dist bundles frontmatter-locator (no dist/lib file); run node --import tsx on src/lib/frontmatter-locator.ts.
 2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
