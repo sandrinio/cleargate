@@ -1,3 +1,5 @@
+2026-09-26 · #test-harness #concurrency · ps aux for node --test during parallel lanes matches OTHER agents' processes on the shared machine.
+2026-09-26 · #test-harness #merge · Rebuild a tail append/append conflict from each side's git show tip, not the hunks; diff vs an independent rebuild.
 2026-09-26 · #codex #skill · codex prompt-input folds a multi-line 'description: |' onto one entry line; codexSkillsVerdict's per-line regex matches.
 2026-09-26 · #test-harness #codex · 5 sealed tests copy build-codex-payload.mjs alone into scratch/scripts; a sibling ./x.mjs import breaks them — inline.
 2026-09-26 · #docs #test-harness · codex-enforcement-delta pins the Index line after §15 to be the §16 row: add later rows after §16, never after §15.
