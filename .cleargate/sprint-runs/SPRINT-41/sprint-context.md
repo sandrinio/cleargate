@@ -111,6 +111,7 @@ Exported helpers and modules from already-merged stories in this sprint. The Arc
 | BUG-090 | `locateFrontmatterFence(raw)` → `{start,end,yamlStart,yamlEnd,eol} \| null` (throws on unterminated fence/`<instructions>`/Markdown fence) and `assertWorkItemApproved(filePath)` → `{approved, has_heading}` — the .mjs port of the TS locator; `close_sprint.mjs` imports the first (ESM pair: ship both together) | `cleargate-cli/scaffold/core/.cleargate/scripts/assert_story_files.mjs` (live `.cleargate/scripts/assert_story_files.mjs`) |
 | BUG-096 | `trackedTmpDirs()` — init-fixture registers every temp dir it makes and removes them at exit | `cleargate-cli/test/helpers/init-fixture.ts` |
 | BUG-097 | `buildDiffPreview(...)` → `string[]` (compact-JSON rendering + serialized-value compare for object/array fields) | `cleargate-cli/src/commands/stamp.ts` |
+| CR-124 | `storyBases(plan)` → `{[id]: base}` (schema_version 2; unsafe or undeclared-contract base throws), `integrationReady(plan, storyId, mergedIds)`, `launchWave({…, bases})`; architect-reader `exports_provided`/`exports_consumed`; architect-synth real-collision predicate + contract formation + `schema_version: 2` shape | `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `scaffold/hosts/claude/.claude/agents/architect-{reader,synth}.md` |
 
 ## Mid-Sprint Amendments
 

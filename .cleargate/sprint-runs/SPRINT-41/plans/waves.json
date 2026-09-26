@@ -236,7 +236,7 @@
       "base_note": "cli main tip when its lane opens"
     },
     "CR-124": {
-      "state": "integrated (QA+post-flight PASS on 430424a; re-integrates after STORY-058-11 merges)",
+      "state": "merged",
       "base": "35580b0",
       "upstream": [],
       "repo": "both",
@@ -271,7 +271,7 @@
       ]
     },
     "STORY-058-11": {
-      "state": "integrating (Dev 44ba381 on re-seal 635816c)",
+      "state": "integrating (fix 76dee8c; test 46 PASS; re-integrate onto 6fc13d2)",
       "base": "contract/S-41-codex",
       "upstream": [
         "STORY-058-10"
@@ -290,7 +290,7 @@
       ]
     },
     "BUG-098": {
-      "state": "tpv (QA-Red 2ea4832 on C4 f31c684)",
+      "state": "integrated (QA+post-flight PASS on 9b2abf0; re-integrates after STORY-058-11 merges)",
       "base": "contract/S-41-fence",
       "upstream": [
         "BUG-090"
@@ -308,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "build-now (C2 contract/S-41-dispatch = 8c8c5ff)",
+      "state": "qa-red (on C2 8c8c5ff)",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",

@@ -1,3 +1,5 @@
+2026-09-26 · #devops #npm-scripts · npm run test:integration -- <file> ignores the file arg (hardcoded glob); use npm run test:file -- <file>.
+2026-09-26 · #devops #test-order · status-vocab-phase-b runs a real npm run prebuild mid-suite; payload-vs-canonical tests can go red pre-BD.
 2026-09-26 · #frontmatter #sprint-init · sprint.ts waiver/stamp writers re-dump the located YAML via yaml.dump: template inline # comments are dropped.
 2026-09-26 · #frontmatter #wiki · audit-status --fix preview greps the first status: in the WHOLE file; <instructions> example lines are shown.
 2026-09-26 · #frontmatter #locator · withFrontmatterYaml rejoins lines with span.eol: a mixed-EOL block is no identity splice; skip no-op writes.
