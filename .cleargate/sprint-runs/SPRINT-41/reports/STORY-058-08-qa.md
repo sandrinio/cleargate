@@ -171,4 +171,116 @@ flashcards_flagged:
   - "2026-09-26 · #verify-install #qa #fail-closed · <h>.no-verifier fires for --host h registered-but-not-installed; H17/M4-A5 require gating on installed too, not just registered."
   - "2026-09-26 · #clean-room #claude-p #test-harness · An S1 canary Edit target must be a real cleargate new <type> item to get a genuine stamp/gate/ingest log line; an arbitrary filename fails all three at once."
 
+## Round 2 — M4-A14
+
+QA-R2: PASS — R-A (no-verifier guard) and R-B (snapshot shape guard) both reproduce and hold under direct re-probe against the Dev's actual `fc0184d` binary (not just the unit suite); R-C folds in every one of the five M4-A14 bullets verbatim, including round 1's own gap-2 fold-back suggestion, with all D1–D10 phrases and headings intact.
+
+### 1. Scope
+
+| Check | Expected | Measured | Match |
+|---|---|---|---|
+| `git diff 4285391 fc0184d --stat` (cli) | `src/commands/verify-install.ts` only | `src/commands/verify-install.ts \| 39 ++++++++++++++++++++++++++++++++++++---` (1 file, 36 ins / 3 del) — only file | yes |
+| `test/` diff since `4285391` | empty | `git diff 4285391 fc0184d -- test/` = no output | yes |
+| Outer `adde0a23..31f266f2` diff | doc only | `.cleargate/knowledge/clean-room-verification.md \| 48 +++++++++++++++++++------` (37 ins / 11 del) — only file | yes |
+
+### 2. Typecheck
+
+`npm run typecheck` (cli main checkout, `story/STORY-058-08` @ `fc0184d`) — **exit 0**.
+
+### 3. SOLO runs
+
+| Suite | Expected | Measured |
+|---|---|---|
+| Unit `verify-install.red.node.test.ts` | 41/41 | 41 tests, 41 pass, 0 fail |
+| Integration `verify-install-cli.red.integration.node.test.ts` | 5/5 | 5 tests, 5 pass, 0 fail |
+| Doc `clean-room-verification-doc.red.node.test.ts` (`CLEARGATE_META_ROOT`=worktree @ `31f266f2`) | 9/9 | 9 tests, 9 pass, 0 fail |
+
+**Spot-checked 4 sealed files + both parity files, SOLO, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`:**
+
+| File | Round-1 count | Round-2 measured |
+|---|---|---|
+| `test/hosts/host-adapter-contract.red.node.test.ts` | 19/19 | 19/19 |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6/6 | 6/6 |
+| `test/lib/drift-check-scaffold.red.node.test.ts` (BUG-085) | 24/24 | 24/24 |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16/16 | 16/16 |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` | 5/5 | 5/5 |
+| `test/commands/init-host-parity.red.integration.node.test.ts` | 15/15 | 15/15 |
+
+**Baseline hash** (`/private/tmp/cg-s41-m2-init-baseline`, 425 files, absolute paths): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` — unchanged, matches round 1 exactly.
+
+### 4. H17 re-probe (R-A)
+
+Same fixture shape as round 1's finding: `registry={claude, fake([.fakehost])}`, `--host fake`, run directly against `runVerifyInstall` at `fc0184d`.
+
+| Case | `fake.no-verifier` present? | `manifest-hosts` |
+|---|---|---|
+| snapshot present, `hosts:['claude']`, `--host fake` (registered, not installed) | **no** (fixed — round 1 had `fail`) | `fail`, detail `["fake not installed"]` — still correctly reported |
+| snapshot deleted, `--host fake` | **no** (fixed) | `skip` (correct, per the M4-A5 fallback) |
+
+R-A confirmed fixed by direct reproduction, not just by the unit suite (U11e/U11f also independently confirm this: 41/41 green).
+
+### 5. R-B probe (fresh sibling room, new container, fc0184d binary)
+
+- Copied the round-1 evidenced room without mutating it: `cp -a <C>/repo-noflag <C>/repo-noflag-r2` (`<C>` = `/Users/ssuladze/Documents/Dev/cg-cleanroom-20260926T042955Z-qa08/`). Verified the original `repo-noflag`'s file listing is untouched (diff shows only the path-prefix change, no content divergence).
+- The doc supports only the packed-artifact route (no tsx-run alternative is described in it), so rebuilt a **new container** for the `fc0184d` binary: `git clone --no-hardlinks --branch story/STORY-058-08 <cli> <C2>/src` → clone HEAD **`fc0184dee59dbe79946fe615f2c0d035e92f10c5`** (exact match to the Dev's round-2 commit) → `npm run build` → `npm pack` → `cleargate-0.26.1.tgz`, sha256 `d1cbe3504e9271173c41e913e65066d9e1fc29a9d12e3e0f80ee5d60b3f055aa` → `npm install --global --prefix <C2>/tools` → identity gate: `command -v cleargate` → `<C2>/tools/bin/cleargate`, `verify-install --help` exit 0.
+- Wrote the literal `null` into `<C>/repo-noflag-r2/.cleargate/.install-manifest.json`, then ran `cleargate verify-install --json` (PATH pointed at `<C2>/tools/bin`, cwd = `<C>/repo-noflag-r2`, env scrubbed as in round 1).
+
+**Result:**
+```
+exit=1
+stderr: (empty — no stack trace)
+snapshot check: {"id":"snapshot","owner":"core","status":"fail","details":["unparseable: .cleargate/.install-manifest.json"]}
+installed: []
+other checks: version-match:skip, manifest-hosts:skip, payload-files:skip, pin-substituted:skip,
+  gitignore-generated:pass, doctor:pass, claude.settings-hooks:skip, claude.hooks-executable:skip,
+  claude.no-foreign-hooks:skip, claude.instruction-block:skip, claude.mcp-registration:skip
+```
+Exit 1, JSON parses, `snapshot` fails with the pinned `unparseable:` detail (never a crash/stack trace), checks 2–5 and the 5 claude checks skip, checks 6/7 (gitignore/doctor, which never depend on the snapshot) still run and pass, `ok:false`. Matches M4-A14 R-B and the Dev's own smoke exactly.
+
+New container (left in place, per the doc, alongside the round-1 container): `/Users/ssuladze/Documents/Dev/cg-cleanroom-20260926T050106Z-qa08-r2/`. `<ref>` = `story/STORY-058-08`, `<cli>` = `/Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli`.
+
+### 6. R-C doc fold-back
+
+Read `git diff adde0a23 31f266f2 -- .cleargate/knowledge/clean-room-verification.md` in full against every M4-A14 R-C bullet:
+
+| R-C bullet | Folded in? |
+|---|---|
+| §5 S1: author via `cleargate new epic <slug>` + the five F7 edits (verbatim list) before the `Edit`; state that an unauthored fresh scaffold logs `gate=1` by design and a non-work-item file fails stamp+gate+ingest | yes — verbatim, matches round 1's own QA gap-2 fold-back suggestion almost word for word |
+| §4: `scaffold-lint` targets `<cwd>/cleargate-planning/` (`scaffold-lint.ts:57`), not `cleargate-cli/scaffold/` | yes |
+| §2 scrub list: every `CLAUDE*`, every `CLEARGATE_*`, every `SKIP_*`, `ORCHESTRATOR_PROJECT_DIR` | yes |
+| §2 identity gate: hooks run as `/bin/sh -c "<command>"` inheriting the launcher's PATH (measured 2.1.283) | yes |
+| §5 `claude.live.mcp-connect`: record-only (`.mcp.json` runs published `npx -y cleargate@<pin>`, outside the artifact); select by `name`, not count, since `claude.ai` account connectors also appear | yes |
+
+**Invariants held** (independently re-measured, not just cited from the Dev report):
+- 12 pinned `## ` headings present (`grep -c "^## "` = 12).
+- Exactly one `npm publish` mention, still guarded (`No \`npm publish\`, no push.`, line 91) — no new mention added.
+- `recreated per run` (line 65), `/private/tmp` (line 45), `gitignored` (line 20), `disposable` (lines 60, 65) all intact, unchanged from round 1 — confirms the diff never touched the three "Why not" sections or `## Purpose`/`## Location`, as M4-A14 requires.
+- Doc file grew 216 → 242 lines (+37/-11 net +26), consistent with the diff shown.
+- Doc test 9/9 green (§3 above).
+
+## Outer status
+
+**Start (round 2 dispatch):**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+**End (round 2 dispatch):**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+Identical — no outer write of any kind this round besides this report edit (uncommitted, per instructions). Cli main checkout: only the pre-existing untracked `cleargate-0.25.0.tgz`, unchanged. Outer worktree `.worktrees/STORY-058-08` @ `31f266f2`: clean. No writing CLI command ran against the outer repo, the cli main checkout, or the outer worktree — every invocation ran as a single `(cd <literal clean-room path> && ...)` call against one of the two clean-room containers, never against this repo.
+
+## Script Incidents (Round 2)
+
+None. Every command was a direct `git`/`npm`/`node`/`tsx --test`/`cp`/`shasum`/`printf` invocation, or a read-only inspection — no wrapped `.cleargate/scripts/*` script was executed.
+
+flashcards_flagged: []
+
 STATUS=done

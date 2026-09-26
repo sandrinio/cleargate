@@ -146,4 +146,139 @@ None. No wrapped `.cleargate/scripts/*` script was executed.
 - "2026-09-26 · #scaffold-lint #docs · scaffold-lint lints <cwd>/cleargate-planning (the frozen snapshot), not cleargate-cli/scaffold."
 ```
 
+## Round 2 — M4-A14
+
+role: architect
+
+ARCH-R2: PASS — the code conforms to M4-A14 R-A, R-B and R-C verbatim, and nothing from round 1 regressed. Test adequacy falls short in one place, R-B's per-clause guarantees: six R-B mutants survive the sealed 41 tests. Three of them matter, because they bring back a crash or reject every field install.
+
+**Required before the DevOps merge:** QA-Red appends U9d, below, to `verify-install.red.node.test.ts` in one QA-Red commit.
+- U9d is already measured green on `fc0184d`, so no Dev change is needed.
+- Expected unit count afterwards: 42/42.
+
+### Subject
+
+| Item | Commit | Change |
+|---|---|---|
+| QA-Red round 2 | cli `4285391` | `+122/-0` in `test/commands/verify-install.red.node.test.ts` only |
+| Dev fix | cli `fc0184d` | `src/commands/verify-install.ts` `+36/-3` only |
+| Doc | outer `.worktrees/STORY-058-08` @ `31f266f2` | `.cleargate/knowledge/clean-room-verification.md` `+37/-11` only |
+
+The cli checkout and the worktree are clean.
+
+**Measurement.** Scratch clone of `fc0184d` at `/private/tmp/cg-s41-arch08-r2`, deleted afterwards with `rm -rf --`.
+- Ran U1, U9c, U9d, U11e, U11f, U12 and U12b by name pattern, from a scratch copy of the red file.
+- Nine mutants, each applied to `verify-install.ts` and then reverted.
+- This does not duplicate QA-Verify's full re-runs.
+
+### 1. R-A, R-B, R-C against M4-A14
+
+**R-A: conforms.** The host loop now guards on `installed.includes(host) && registeredNames.includes(host)`.
+
+**R-B: conforms.** `isInstallSnapshotShape` sits inside the existing `try`, so JSON-parse errors still reach the `catch`. It checks:
+- a non-null, non-array object
+- string `cleargate_version`
+- `files` is an array whose every element is an object with a string `path`
+- `hosts` is absent or an array of strings
+
+A shape failure gives the pinned detail `unparseable: .cleargate/.install-manifest.json` verbatim, and `snapshot` stays `null`. So M4-A5's fallback and the skip rule apply unchanged (U9d measures `installed === []`).
+
+**R-C: conforms.** All five items are present:
+- **§5 S1:** `cleargate new epic`, the five F7 edits, and "`gate=1` by design"
+- **§4:** `scaffold-lint` → `<cwd>/cleargate-planning/` (`scaffold-lint.ts:57`)
+- **§2 scrub:** every `CLAUDE*`, `CLEARGATE_*` and `SKIP_*` variable, plus `ORCHESTRATOR_PROJECT_DIR`
+- **§2:** the measured `/bin/sh -c` PATH-inheritance fact
+- **§5 `mcp-connect`:** record-only, the published package, `claudeai` connectors, select by name
+
+The D-row phrases are intact: 12 H2 headings, one `npm publish` line guarded by `No`, `recreated per run`, `command -v cleargate`. No new `npm publish` mention was added.
+
+Wording nit, not blocking: "`stamp=0`/`ingest=0` are this check's real pass criteria unless the item was also authored" reads correctly only with the preceding instruction to author the item. -09's M4-A23 edit replaces that paragraph anyway.
+
+### 2. Test adequacy
+
+| Mutant | Sealed 41 (U9c, U11e, U11f, U12, U1) | With U9d | Matters? |
+|---|---|---|---|
+| A1: R-A guarded on `registered` only (the round-1 code) | killed by U11e, U11f | killed | yes |
+| A2: R-A guarded on `installed` only | survives | survives | no — equivalent. Every host in `verified` is registered: `--host` passes `registry.resolve`, the snapshot branch filters by registered, and the fallback filters registered hosts that have a verifier |
+| B1: no `hosts` clause | **survives** | killed | **yes** — `hosts: 5` or `{}` makes `installedHosts` spread a non-iterable, the round-1 `TypeError` class |
+| B2: `hosts` array accepted without the string-element check | **survives** | killed | minor — `hosts: [1]` reports a bogus unregistered host, no crash |
+| B3a: `files` element without a string `path` | **survives** | killed | **yes** — `entryOwner` calls `entry.path.startsWith`, so it throws |
+| B3b: no `files` element check at all | **survives** | killed | **yes** — `files: [null]` makes `entryOwner(null)` throw |
+| B4: shape-failure detail differs from the pinned text | killed by U9c (exact `===`) | killed | yes |
+| B5: `hosts` required (over-strict) | **survives** | killed | **yes** — every pre-058-06 snapshot has no `hosts` (all published 0.26.1-and-earlier installs), so every field install would read `unparseable` |
+| B6: no `cleargate_version` clause | **survives** | killed | minor — version-match then reads "installed by undefined", no crash |
+
+**Verdict: not adequate without U9d.** B1, B3a/B3b and B5 matter. Paste the following verbatim into `test/commands/verify-install.red.node.test.ts`, immediately after the U9c `describe` block. It uses only existing file helpers: `loadVerifyInstall`, `freshInstall`, `snapshotPath`, `PAYLOAD_DIR`, `VERSION`, `defaultHostRegistry`, `stubDoctor0`.
+
+```ts
+// ── U9d — snapshot shape guard, one clause at a time (M4-A14 R-B) ───────────
+
+describe('U9d: snapshot shape guard clauses', () => {
+  test('each R-B clause alone fails the snapshot "unparseable" without throwing; a legacy snapshot without hosts still passes', async () => {
+    const { runVerifyInstall } = await loadVerifyInstall();
+    const clauseCases: ReadonlyArray<{ label: string; mutate: (snap: Record<string, unknown>) => void }> = [
+      { label: 'cleargate_version missing', mutate: (s) => { delete s.cleargate_version; } },
+      { label: 'files element {}', mutate: (s) => { (s.files as unknown[]).push({}); } },
+      { label: 'files element null', mutate: (s) => { (s.files as unknown[]).push(null); } },
+      { label: 'files element path is a number', mutate: (s) => { (s.files as unknown[]).push({ path: 1, tier: 'protocol' }); } },
+      { label: 'hosts is a string', mutate: (s) => { s.hosts = 'claude'; } },
+      { label: 'hosts is a number', mutate: (s) => { s.hosts = 5; } },
+      { label: 'hosts holds a non-string', mutate: (s) => { s.hosts = ['claude', 1]; } },
+    ];
+    for (const { label, mutate } of clauseCases) {
+      const dir = await freshInstall();
+      const snap = JSON.parse(fs.readFileSync(snapshotPath(dir), 'utf8')) as Record<string, unknown>;
+      mutate(snap);
+      fs.writeFileSync(snapshotPath(dir), JSON.stringify(snap, null, 2));
+      const report = await runVerifyInstall({ cwd: dir, payloadDir: PAYLOAD_DIR, version: VERSION, registry: defaultHostRegistry, runDoctor: stubDoctor0 });
+      const check = report.checks.find((c) => c.id === 'snapshot')!;
+      assert.equal(check.status, 'fail', `[${label}] snapshot must fail`);
+      assert.deepStrictEqual(check.details, ['unparseable: .cleargate/.install-manifest.json'], `[${label}] pinned H7 detail`);
+      assert.deepStrictEqual(report.installed, [], `[${label}] installed must be []`);
+    }
+
+    const legacy = await freshInstall();
+    const snap = JSON.parse(fs.readFileSync(snapshotPath(legacy), 'utf8')) as Record<string, unknown>;
+    delete snap.hosts;
+    fs.writeFileSync(snapshotPath(legacy), JSON.stringify(snap, null, 2));
+    const report = await runVerifyInstall({ cwd: legacy, payloadDir: PAYLOAD_DIR, version: VERSION, registry: defaultHostRegistry, runDoctor: stubDoctor0 });
+    assert.equal(report.checks.find((c) => c.id === 'snapshot')!.status, 'pass', 'a legacy snapshot without hosts is still a snapshot');
+    assert.deepStrictEqual(report.installed, ['claude'], 'legacy hosts resolve to [claude]');
+    assert.equal(report.ok, true, JSON.stringify(report.checks.filter((c) => c.status !== 'pass')));
+  });
+});
+```
+
+**Measured on `fc0184d`:**
+- U9d passes (7/7 in the pattern run, alongside U1, U9c, U11e, U11f, U12 and U12b).
+- U9d kills B1, B2, B3a, B3b, B4, B5 and B6.
+
+U9d is a regression guard, not a red: it is green on arrival by design. It needs no §3.1 change. Integration stays 5/5 and doc 9/9.
+
+### 3. Round-1 conformance: no regression
+
+- `git diff --stat 9ac0fa3 fc0184d -- src` shows `verify-install.ts` only.
+- H1–H5, H7–H16 and H18–H24 are untouched by the diff.
+- **H6** now fully conforms: a shape-invalid snapshot fails check 1, so the dependents skip.
+- **H17 and M4-A5** now conform: A1 is killed, and U11e/U11f pass.
+- **D1–D9** are intact (phrase checks above). **D10's** round-1 gap is closed by R-C.
+- Per the Dev report, the sealed and parity sets and the baseline hash are unchanged. QA-Verify owns that re-run.
+
+### 4. Adjacent Implementations row
+
+Yes, it needs one change: add the check-1 shape rule. Final row, to paste after merge:
+
+`STORY-058-08 | runVerifyInstall(opts) → VerifyInstallReport { cwd, version, registered, installed, verified, checks[{id,owner,status,details}], live[{id,host,description}], ok }; verifyInstallHandler (exit 0/1/2; usage errors decided before any read; read-only; never walks up); check 1 accepts only a snapshot-shaped object (non-null object, string cleargate_version, files[] of objects with string path, hosts absent or string[]) — anything else is "unparseable: .cleargate/.install-manifest.json" and snapshot = null; HOST_VERIFIERS (frozen { claude } — the ONE per-host extension point; -10/-13 add codex here, same commit as registration; a verifier returns all checks 'skip' when ctx.snapshot is null); CheckResult/LiveCheck/HostVerifier/VerifyCtx/VerifyInstallOptions/VerifyInstallCliOptions; stable check ids snapshot, version-match, manifest-hosts, payload-files, pin-substituted, gitignore-generated, doctor, claude.{settings-hooks,hooks-executable,no-foreign-hooks,instruction-block,mcp-registration}, <host>.no-verifier (installed ∧ registered ∧ no verifier only); live ids claude.live.{session-start,pre-tool-use,post-tool-use,dispatch,agents-skills,mcp-connect} + claude.live.agents-md-exposure iff <cwd>/AGENTS.md; findCleargatePackageRoot(startDir) — the one package-root walk (bundled + tsx), init's readRunningCliVersion routes through it; private extractTriples/stripProjectDirPrefix (export before a second verifier uses them); procedure doc is meta-repo only | cleargate-cli/src/commands/verify-install.ts, src/lib/cli-package-root.ts, src/cli.ts, src/commands/init.ts; outer .cleargate/knowledge/clean-room-verification.md`
+
+### Writes and status
+
+- **Outer write:** this appended section only. Nothing is committed.
+- **Outer `git status`:** only the orchestrator-owned ledger, state, events and session-totals files.
+- **Cli checkout:** unchanged — `story/STORY-058-08` @ `fc0184d`, plus the pre-existing untracked `cleargate-0.25.0.tgz`.
+- **Script incidents:** none.
+
+flashcards_flagged:
+  - "2026-09-26 · #test-harness #tpv · A multi-body shape-guard red where every body fails the first clause leaves the later clauses untested."
+  - "2026-09-26 · #verify-install #manifest · Every pre-058-06 snapshot lacks hosts; a guard requiring hosts rejects every field install."
+
 STATUS=done

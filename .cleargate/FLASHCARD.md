@@ -1,3 +1,5 @@
+2026-09-26 · #test-harness #tpv · A multi-body shape-guard red where every body fails the first clause leaves the later clauses untested.
+2026-09-26 · #verify-install #manifest · Every pre-058-06 snapshot lacks hosts; a guard requiring hosts rejects every field install.
 2026-09-26 · #clean-room #claude-p #hooks · Claude Code 2.1.283 runs hooks as /bin/sh -c with the launcher's PATH; a PATH shim reaches hooks.
 2026-09-26 · #upgrade #mcp #danger · upgrade re-pins hooks and pin_version but never .mcp.json; the MCP server keeps running the old CLI.
 2026-09-26 · #verify-install · A snapshot parsing to null/{}/[] crashed verify-install (TypeError); validate the shape, not just the JSON.
