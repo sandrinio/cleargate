@@ -1,3 +1,7 @@
+2026-09-26 · #codex #test-harness #git · `git clone --branch HEAD <local-path>` fails; resolve the ref to a sha, clone plain, then checkout it.
+2026-09-26 · #codex #test-harness · An e2e whose cliRoot is a fresh clone has no node_modules to symlink; fall back to a scratch-cached npm install.
+2026-09-26 · #test-harness #danger · node:test per-test timeout flags a hung test but never aborts in-flight subprocesses; give poll loops their own.
+2026-09-26 · #evidence #sanitizer · Sanitise a heading's own embedded label too, not just cells/findings, or a multi-line label forges a second heading.
 2026-09-26 · #codex #test-harness #danger · macOS /tmp→/private/tmp breaks a raw import.meta.url vs argv[1] entry-point check; realpath both sides.
 2026-09-26 · #toml #codex · toml-eslint-parser throws ParseError on a reopened [table] (dupe keys); no separate ambiguity check needed.
 2026-09-26 · #toml #codex · TOMLTable/TOMLKeyValue .range excludes the trailing newline; range-replace edits must add separators.
