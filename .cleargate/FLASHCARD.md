@@ -1,3 +1,4 @@
+2026-09-26 · #qa-red #test-harness · An unregistered subcommand's --help falls through to top-level help: no subcommand flags listed.
 2026-09-26 · #hooks #flashcard-gate #danger · Post-BUG-085 a dev/qa line starting `flashcards_flagged: [` (even fenced) is gated; quoted fixtures block.
 2026-09-26 · #clean-room #hooks · No .cleargate/sprint-runs/.active → the flashcard gate is skipped; such a dispatch cannot witness it.
 2026-09-26 · #state #danger · Post-CR-117 validate_state.mjs reads a positional as a PATH; `cleargate state validate <id>` now always fails.
