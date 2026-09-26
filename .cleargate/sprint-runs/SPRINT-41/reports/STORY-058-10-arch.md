@@ -227,3 +227,126 @@ flashcards_flagged:
   - "2026-09-26 · #hooks #perf · Moving a whitelist exit into a per-target loop makes whitelisted Claude edits pay CLI resolve + node + grep first."
   - "2026-09-26 · #codex #hooks · An absolute apply_patch header via a symlinked path misses the physical REPO_ROOT strip; realpath its existing ancestor."
 ```
+
+## Re-check after pass D (b12240b)
+
+role: architect
+
+POST-FLIGHT: PASS
+
+**Summary.** F1 is closed. Pass D conforms to M5-A47, and C1 stays valid at `d0f0d95`. The M5-A2 deviation is accepted with no pass D2: M5-A48 retires the bullet. RS-4a expectations are unchanged.
+
+**What this verdict does not cover.** It is structural. The merge still waits for QA-Verify's independent M5-A6 run to reproduce M5-A47's required outcome.
+
+**Subject.**
+- Pass D is `b12240b` on cli `story/STORY-058-10`, with parent `393c286`.
+- Worktree: `/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-058-10/cleargate-cli`. It is clean at HEAD.
+- Developer report: `reports/STORY-058-10-dev-passD.md`.
+
+### R1. Conformance to M5-A47 (`git diff 393c286 b12240b`)
+
+Line numbers are for `b12240b`, in `claude-baseline.mjs` unless noted.
+
+| Check | Result | Evidence |
+|---|---|---|
+| K11 file list | PASS | **Scope:** 2 files, +112/−23.<br>• The name-only diff excluding `claude-baseline.mjs` and `evidence.mjs` is empty.<br>• The only `evidence.mjs` hunk is inside `compareInstallTrees` (`:162-172`). |
+| M5-A1: S3 canary | PASS | **Gating:** `:351-373` runs only when `hasAgentsMd`.<br>**Canary:** `crypto.randomBytes(6).toString('hex')`. The original bytes are kept as a Buffer; the planted file is written inside `try`, and the original is restored in `finally`.<br>**Session:** S3 goes through the same `runClaudeSession` (`:229`), so the flags are identical.<br>**Transcript:** `${roomKey}.S3.stream.jsonl`, the same scheme as S1 and S2.<br>**Verdict inputs:** `s3` and `canary` reach `claudeLiveVerdicts` (`:377`, `:379`).<br>**Placement:** S3 runs after the ledger diff (`:343`) and after the gate-line, wiki and `epicRaw` reads (`:347-349`). It therefore cannot perturb the dispatch or post-tool-use inputs. |
+| M5-A1: room isolation | PASS | **Restore check:** `isolationOk` (`:387-388`) also requires `agentsMdRestored` (`:371`), which is a sha256 equality check. It is `true` when the room has no AGENTS.md.<br>**Settings check:** `!existsSync(settings.local.json)` is evaluated at return, so it also covers S2 and S3. |
+| M5-A4: host-set | PASS | **Source:** `allResolvedHosts = verifyAllClaude.parsed?.installed` (`:557`). This fixes the `:503` issue.<br>**Why the field is right:** `installed` is the snapshot's hosts regardless of `--host` (`verify-install.ts:670`). `--host claude` narrows only `verified` (`:671-676`).<br>**Row:** `:593` is cross-room, has the same status in both columns and uses the detail as its evidence. |
+| M5-A5: parity | PASS | **Return value:** `s1` is returned (`:392`).<br>**Row:** `:609-619`.<br>**Map comparison:** `comparableVerdicts` (`:658-666`) drops exactly `agents-md-exposure` and `mcp-connect`, and those key names match `claudeLiveVerdicts` (`evidence.mjs:450-451`). |
+| M5-A7: hermetic children | PASS | **Cache:** the global install uses `--cache <C>/npm-cache` (`:515`), the scratch-on-global form B-3 requires.<br>**Per-call audit:**<br>• All 9 children listed in M5-A7, plus both `git init`s, now carry `cwd` and `env` (`:495-537`).<br>• Every other driver child already had both: `runCliJson` `:106`, the sentinel drive `:198`, `runClaudeSession` `:248` and the probe spawns `:268-297`.<br>• Only `commandExists` (`:80`) and `validateContainer`'s probe lack them. The first is an exempt tool precondition, and the second runs before the container exists. |
+| M5-A8: record fields | PASS | **`startedAt`:** captured on the first line of `runCommand` (`:446`), and used in the record (`:679`) and in the crash record (`:719`).<br>**`.active`:** read after sprint-init and before the drive (`:310`). The suffix is written per room (`:643-647`). |
+| M5-A9: rule (b) | PASS | **Derivation:** now derived from `CLAUDE_OBSERVABLE` (`evidence.mjs:30`: files `CLAUDE.md` and `.mcp.json`, dir `.claude`), matched on the `${dir}/` prefix. The semantics equal the old literal.<br>**Symlinks:** the symlink rule was already in pass B (`evidence.mjs:144-145`). |
+| Helpers called, not re-implemented | PASS | **Imports:** `:41-42` and `:44-50`.<br>**No local copies:** there is no local `function hostSetVerdict`, `agentsSkillsParityVerdict` or `plantAgentsMdCanary`, and no `S3_PROMPT =`. |
+| No restructure, no `artifact.mjs` import | PASS | **Changes:** in-place insertions only; function boundaries are unchanged.<br>**`artifact` matches:** the only hits are local variable names and comments. |
+| Driver exports nothing | PASS | `^\s*export` count: 0. |
+| `compareInstallTrees` signature | PASS | **Signature:** the signature line is identical at `d0f0d95`, `393c286` and `b12240b`.<br>**Exports:** the set of `^export` lines in `evidence.mjs` hashes the same at all three (`5267e54d…`). |
+
+### R2. Ruling on the M5-A2 deviation: ACCEPT, no pass D2
+
+The bullet is not needed for correctness.
+- **Table structure.** `markdownCell` escapes every `|` (`evidence.mjs:203-209`) and is applied to all 4 cells (`:534`). Sealed scenario 2 (`clean-room-baseline-coexistence.red.node.test.ts:110-128`, 24/24 at `b12240b`) renders a cell carrying ` | ` and asserts one well-formed 4-cell row.
+- **Parsing.** `checkEvidence` (`:579-609`) never reads table cells, only the heading, `- result:` and `- artifact_inputs:` anchors. No other consumer parses cells: I grepped cli `src`, `scripts`, core scripts and outer `.cleargate/scripts`, and close Step 2.9 runs `check`.
+- **Applying the bullet would make cells worse.** Pass D's own M5-A8 suffix, `hostSetVerdict`, `mcpConnectVerdict` and the tree-comparison join all use `; ` as the in-room separator. Joining rooms with `; ` too would make the room boundary ambiguous.
+
+I retired the bullet in **M5-A48** instead of logging a close follow-up, because there is nothing left to do. M5-A48 also accepts `markdownCell`'s escape-then-truncate order as built.
+
+### R3. RS-4 precondition greps (M5-A47): all hit
+
+| Grep | Hit |
+|---|---|
+| `command grep -n "plantAgentsMdCanary(" …/claude-baseline.mjs` | `:364` |
+| `command grep -n "hostSetVerdict(" …/claude-baseline.mjs` | `:558` |
+| `command grep -n "agentsSkillsParityVerdict(" …/claude-baseline.mjs` | `:610` |
+
+### R4. C1 (`d0f0d95`) is still valid
+
+**Diffs.**
+- `git diff d0f0d95 b12240b -- scaffold src test` is empty.
+- These files are unchanged since `393c286`: `codex-hooks.mjs`, `codex-appserver.mjs`, `mock-responses.mjs`, `probe-items.mjs`, `artifact.mjs` and `build-codex-payload.mjs`.
+
+**Hook bytes.**
+- All 5 canonical hooks at `b12240b` hash exactly as in the §4 table.
+- Each generated `.codex/hooks/*.sh` copy equals its canonical script, at mode 100755.
+
+**Exports.**
+- The `evidence.mjs` export lines are identical to C1's, so the frozen codex exports are untouched.
+- The driver exports nothing.
+
+**Sprint §4 log line.** Replace the earlier wording with: "`393c286` (pass C) and `b12240b` (pass D) change no C1-frozen name, type or hook byte."
+
+**Consumers.**
+- None of the other cli story branches has a committed edit to `claude-baseline.mjs` or `evidence.mjs` since its merge-base with -10. The branches checked are BUG-090, BUG-096, BUG-097, CR-124 and STORY-058-11.
+- -11's pending `codexHookVerdicts`/`CODEX_GATING_IDS` insertion stays mechanical, because pass D's `evidence.mjs` hunk is inside `compareInstallTrees`.
+- BUG-090's QA-Verify harness run is unblocked once -10, including pass D, is on cli `main`.
+
+### R5. RS-4a expectations: unchanged
+
+**The merge.**
+- cli `main` is still `35580b0`, which is -10's base.
+- So rule 21's `git merge --no-ff main` in the -10 cli worktree is already up to date, and the -10 merge lands exactly the hook bytes in R4.
+
+**Current state.**
+- I re-hashed the live hooks now. All four equal §5's "Now" column, `session-start.sh` is still `14d73e83…`, and the pin is still `0.20.0`.
+- The expected post-apply hashes, re-derived from `b12240b` plus the pin, are identical to §5's right-hand column.
+
+**Added confidence.**
+- Per the Dev witness (`dev-passD.md:75-79`), `claude.live.dispatch` and `claude.live.hook-identity` PASS in both rooms from the packed `b12240b` artifact under Claude Code 2.1.283.
+- That is the new sentinel and ledger code, on its Claude path, running in a real session, which is exactly what RS-4a's post-apply expectations assume.
+- QA's independent witness will confirm or refute this.
+
+### Orchestrator actions
+
+1. **Merge condition.** Proceed to the merge lane on a QA-Verify PASS.
+   - **What counts as a PASS:** the independent M5-A6 witness reproduces M5-A47's outcome. That means exit 0; `agents-md-exposure` N/A in noflag and PASS in all; `host-set` and parity PASS; `verify-install-all-plain` PASS in all; and `sprint-init` FAIL-KNOWN (BUG-090) in both columns.
+   - **If QA's run FAILs:** triage per M5-A12 step 2 before any re-dispatch. A crash is a harness defect.
+2. **Task Breakdown ticks** (B-4). Row 210 ticks at the merge only if QA's witness PASSes. Row 212 still waits for RS-4L.
+3. **Deviation record.** Record pass D's `plan_deviations` entry as orchestrator-confirmed, per R2 and M5-A48.
+4. **Arch bounces.** Leave `arch_bounces` as recorded for the `393c286` FAIL. This PASS adds none.
+
+### Follow-up change for close: FU-3 extended
+
+This is still to be folded into "consolidate `artifact.mjs` with `claude-baseline.mjs`".
+- **(a) `computeArtifactInputs` inherits the caller's env.** It spawns git with an explicit `cwd` but the caller's env (`evidence.mjs:678-692`), in both `run` and `check`.
+- **(b) The scrub list keeps `GIT_*`.** The driver's `scrubbedEnv` (`claude-baseline.mjs:62-73`) does not remove `GIT_*`. git honours an inherited `GIT_DIR` or `GIT_WORK_TREE` over the cwd. So a harness launched from inside a git hook would run `git init` and `git rev-parse` against the wrong repository. The unified scrub list must drop `GIT_*` too.
+- **Not blocking.** Neither case is reachable at RS-4 or RS-CLOSE, which launch from an orchestrator shell. M5-A7 did not list either, so pass D conforms.
+
+### Script Incidents (re-check)
+
+None. No `run_script.sh` wrapper was invoked.
+
+**Probes, all read-only:**
+- `git diff/show/ls-tree/log/merge-base` in the -10 worktree and on cli `main`;
+- `shasum` of the live hooks and of the canonical hooks plus the pin;
+- `command grep` over sources and tests.
+
+Nothing was built, run, committed or checked out, and no harness ran.
+
+**Writes:** this section and the M5-A48 append to `plans/M5.md`. The outer status otherwise holds the 4 ledger files, plus other lanes' untracked reports.
+
+### flashcards_flagged (re-check)
+
+```yaml
+flashcards_flagged:
+  - "2026-09-26 · #clean-room #evidence · Once markdownCell escapes |, keep ' | ' between rooms; a '; ' join collides with in-room '; ' details."
+```

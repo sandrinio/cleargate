@@ -1,3 +1,4 @@
+2026-09-26 · #clean-room #evidence · Once markdownCell escapes |, keep ' | ' between rooms; a '; ' join collides with in-room '; ' details.
 2026-09-26 · #worktree #git #danger · The stash stack is shared by every worktree of a repo: a lane's stash/pop can pop another lane's WIP. Never stash.
 2026-09-26 · #qa-red #test-harness · A single diff-preview stdout call embeds many lines; join+split before per-line asserts, not array equality.
 2026-09-26 · #qa-red #test-harness · A child crashing on one missing export starves later asserts in the same script of their own failure text.
