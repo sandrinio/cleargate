@@ -1,3 +1,4 @@
+2026-09-26 · #qa #test-harness #danger · Extract the CLAUDE.md block with anchored ^<!-- CLEARGATE:START -->$; prose names it too.
 2026-09-26 · #test-harness #tpv · Delta-row currentHash read from canonical passes at the red commit; refuse the baseline hash or pin a literal.
 2026-09-26 · #test-harness #tpv · 'Same exit with and without X' needs a twin run without X; two runs that both have X prove nothing.
 2026-09-26 · #hooks #flashcard-gate #tpv · Fail-closed test: mark the block's cards first, else an unmarked card blocks anyway and masks it.
