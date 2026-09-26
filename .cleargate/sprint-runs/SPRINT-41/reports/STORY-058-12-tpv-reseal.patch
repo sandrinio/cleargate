@@ -1,0 +1,337 @@
+diff --git a/test/commands/init-codex-sprint-execution.red.node.test.ts b/test/commands/init-codex-sprint-execution.red.node.test.ts
+index 5e95a5f..0c30bb4 100644
+--- a/test/commands/init-codex-sprint-execution.red.node.test.ts
++++ b/test/commands/init-codex-sprint-execution.red.node.test.ts
+@@ -61,7 +61,7 @@ test("Test 34 — hosts:['codex']: .agents/skills/sprint-execution/{SKILL.md,dis
+ 
+ test("Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution/dispatch-serial.md exists and equals canonical", async () => {
+   const payloadDir = mkTmp('cg-s41-12-init-claude-payload-');
+-  await composeCanonicalView(payloadDir, []);
++  await composeCanonicalView(payloadDir, ['claude']);
+   const record = await runInitScenario('fresh', { payloadDir, extra: { hosts: ['claude'] } });
+ 
+   assert.equal(fs.existsSync(path.join(record.dir, '.agents')), false, '.agents/ must be absent for a claude-only install');
+@@ -79,7 +79,7 @@ test("Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution
+ test("Test 36 — hosts:['claude','codex']: both dispatch-serial.md files are byte-identical, and the Claude SKILL.md equals canonical (with its pointers)", async () => {
+   const registry = await makeCodexRegistry();
+   const payloadDir = mkTmp('cg-s41-12-init-both-payload-');
+-  await composeCanonicalView(payloadDir, ['codex']);
++  await composeCanonicalView(payloadDir, ['claude', 'codex']);
+   const record = await runInitScenario('fresh', { payloadDir, extra: { hostRegistry: registry, hosts: ['claude', 'codex'], readInstallManifest: undefined } });
+ 
+   const claudeDispatchSerial = path.join(record.dir, '.claude', 'skills', 'sprint-execution', 'dispatch-serial.md');
+diff --git a/test/hosts/dispatch-mode.red.node.test.ts b/test/hosts/dispatch-mode.red.node.test.ts
+index 121ed5b..12b7e36 100644
+--- a/test/hosts/dispatch-mode.red.node.test.ts
++++ b/test/hosts/dispatch-mode.red.node.test.ts
+@@ -24,11 +24,15 @@ test("Test 29 — claudeAdapter.dispatchMode === 'wave-parallel'; codexAdapter.d
+ 
+ // ── Test 30 — payloadFilter's serial-surface rule (fixture registry) ────────
+ 
+-function makeFakeAdapter(name: string, dispatchMode: 'wave-parallel' | 'serial' | undefined): HostAdapter {
++function makeFakeAdapter(
++  name: string,
++  dispatchMode: 'wave-parallel' | 'serial' | undefined,
++  roots: { owned: string[]; shared: string[] } = { owned: [], shared: ['.agents'] },
++): HostAdapter {
+   const adapter: HostAdapter & { dispatchMode?: 'wave-parallel' | 'serial' } = {
+     name: name as HostAdapter['name'],
+-    ownedRoots: () => [],
+-    sharedRoots: () => ['.agents'],
++    ownedRoots: () => roots.owned,
++    sharedRoots: () => roots.shared,
+     surgeryTargets: () => [],
+     install: async () => {},
+     remove: async () => ({ removed: [] }),
+@@ -41,7 +45,8 @@ function makeFakeAdapter(name: string, dispatchMode: 'wave-parallel' | 'serial'
+ }
+ 
+ test('Test 30 — a fixture registry with fakewave/fakeserial adapters: only a selected dispatchMode:"serial" host admits .agents/skills/sprint-execution/**', () => {
+-  const claudeLike = makeFakeAdapter('claude', 'wave-parallel');
++  // TPV re-seal: claude-like = owns .claude, declares NO shared root (as claudeAdapter does).
++  const claudeLike = makeFakeAdapter('claude', 'wave-parallel', { owned: ['.claude'], shared: [] });
+   const fakeserial = makeFakeAdapter('fakeserial', 'serial');
+   const fakewave = makeFakeAdapter('fakewave', 'wave-parallel');
+   const registry = createHostRegistry([claudeLike, fakeserial, fakewave]);
+diff --git a/test/scaffold/skill-md-serial-pointers.red.node.test.ts b/test/scaffold/skill-md-serial-pointers.red.node.test.ts
+index bd303c5..2c8c9c7 100644
+--- a/test/scaffold/skill-md-serial-pointers.red.node.test.ts
++++ b/test/scaffold/skill-md-serial-pointers.red.node.test.ts
+@@ -56,13 +56,14 @@ test('Test 20 — canonical SKILL.md differs from the frozen pre-story fixture b
+ 
+   assert.equal(canonicalLines[p1AnchorIdx + 1], '', 'expected a blank line directly after the P1 anchor');
+   assert.equal(canonicalLines[p1AnchorIdx + 2], P1, 'expected P1 verbatim directly after its blank line');
+-  // P2's anchor shifts by 2 lines (P1's insertion).
+-  assert.equal(canonicalLines[p2AnchorIdx + 2], '', 'expected a blank line directly after the P2 anchor');
+-  assert.equal(canonicalLines[p2AnchorIdx + 3], P2, 'expected P2 verbatim directly after its blank line');
++  // P2's anchor shifts by 2 lines (P1's insertion): canonical anchor at +2, blank at +3, P2 at +4.
++  assert.ok(canonicalLines[p2AnchorIdx + 2]!.startsWith(P2_AFTER_PREFIX), 'expected the P2 anchor 2 lines lower in canonical');
++  assert.equal(canonicalLines[p2AnchorIdx + 3], '', 'expected a blank line directly after the P2 anchor');
++  assert.equal(canonicalLines[p2AnchorIdx + 4], P2, 'expected P2 verbatim directly after its blank line');
+ 
+   // Removing the 4 inserted lines must reproduce the fixture byte-for-byte.
+   const withoutInsertions = canonicalLines
+-    .filter((_, i) => i !== p1AnchorIdx + 1 && i !== p1AnchorIdx + 2 && i !== p2AnchorIdx + 2 && i !== p2AnchorIdx + 3)
++    .filter((_, i) => i !== p1AnchorIdx + 1 && i !== p1AnchorIdx + 2 && i !== p2AnchorIdx + 3 && i !== p2AnchorIdx + 4)
+     .join('\n');
+   assert.equal(withoutInsertions, fixture, 'removing exactly the 4 inserted lines must reproduce the fixture byte-for-byte');
+ });
+diff --git a/test/scripts/codex-sprint-execution-render.red.node.test.ts b/test/scripts/codex-sprint-execution-render.red.node.test.ts
+index 4878d17..4bcbc8d 100644
+--- a/test/scripts/codex-sprint-execution-render.red.node.test.ts
++++ b/test/scripts/codex-sprint-execution-render.red.node.test.ts
+@@ -43,6 +43,20 @@ function canonicalSkillText(): string {
+   return fs.readFileSync(CANONICAL_SKILL_PATH, 'utf8');
+ }
+ 
++// TPV re-seal: the pinned banned list (E6.2, 11 tokens) and the pinned replacement texts
++// (M6 appendix R1/R3/R4/R5; E6.9 R2/R6), verbatim — never read back from the module under test.
++const BANNED_11 = [
++  '/workflows', 'Workflow tool', 'parallel()', 'launch_wave', 'resumeFromRunId', 'RUN_ID',
++  'mintRunId', 'SKIP_FLASHCARD_GATE=1', 'Between-wave relocation', 'C.0.1', 'C.0.2',
++];
++const R1 = "There is one and only one way a sprint executes on this host, and it has no toggle. Every rule in `cleargate-enforcement.md` is **always enforced** (`CLEARGATE_ADVISORY=1` is the sole break-glass, and it only softens gate *strength*, never the execution path). This host has no Workflow primitive, so ClearGate installed it with `dispatchMode: serial`: every sprint runs its Architect-produced `waves.json` one story at a time through the serial dispatch contract in `dispatch-serial.md` (§C.0). There is no parallel wave launch on this host and no other loop.";
++const R2 = "### C.0 Execution — the serial dispatch contract (`dispatch-serial.md`)\n\nRun every wave from the Architect's `waves.json` through `dispatch-serial.md`: one story in flight at a time, in wave order, each in its own ClearGate-managed `.worktrees/STORY-X` cut from `sprint/S-NN`; the flashcard gate between every pair of consecutive stories; and a synchronous halt, in your own turn, on any non-GREEN verdict. `node .cleargate/scripts/dispatch_serial.mjs next` names the next action and `… record` validates and records each story's verdict. A `schema_version: 2` plan runs the same way: its derived `waves`, in order, never a contract branch (`dispatch-serial.md` §2). The per-story steps §C.1–§C.9 below are the body of each serial step.";
++const R3 = "**Serial merge.** Stories run one at a time, so DevOps merges each GREEN `story/STORY-X` to `sprint/S-NN` as soon as that story passes — one worktree at a time, never two concurrently; `sprint/S-NN` is a single-writer axis. A story whose verdict is not GREEN is not merged: record its verdict and halt (`dispatch-serial.md` §2). After the human resolves the blocker, `dispatch_serial.mjs next --resume` re-dispatches only that story.";
++const R4 = "The dispatch hook (`pending-task-sentinel.sh`, registered for `Agent|.*spawn_agent`) blocks the next role dispatch until every card has a `.processed-<hash>` marker, and `dispatch_serial.mjs next` will not name the next story until they exist.\n\n**Per-story gate.** On this host the gate runs between every pair of consecutive stories. It is never relocated and never suppressed: do not set `SKIP_FLASHCARD_GATE` during a sprint (`dispatch-serial.md` §4).";
++const R5 = "> **Host: Codex — `dispatchMode: serial`.** This file is generated from ClearGate's canonical sprint-execution playbook for hosts without a Workflow primitive. §2 and §C.0 point at `dispatch-serial.md` (this directory): read it before §C. Where the rest of this playbook names a Claude Code mechanism, use the Codex one:\n>\n> | Playbook text | Under Codex |\n> |---|---|\n> | spawn via the `Agent` tool with `subagent_type=<role>` | `spawn_agent` with `agent_type: \"<role>\"`, `fork_turns: \"none\"` and the complete dispatch brief as `message`; then call `wait_agent` until that agent's final answer arrives. `spawn_agent` returns immediately, so never spawn the next role before the previous one's final answer. |\n> | `.claude/agents/<role>.md` | `.codex/agents/<role>.toml` |\n> | `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` |\n> | `.claude/hooks/<hook>.sh` | `.codex/hooks/<hook>.sh` |\n> | `write_dispatch.sh` fallback blocks, `PreToolUse:Task` | skip the fallback: the `Agent\\|.*spawn_agent` dispatch hook and the SubagentStop hook attribute every dispatch; metering is unavailable (`cleargate-enforcement.md` §16) |\n> | `AskUserQuestion` | `request_user_input`, under the same §22 rule: true blockers only |\n> | restart Claude Code | start a new Codex session |";
++const R6 = "On this host, §C.0 and `dispatch-serial.md` §2 run such a plan: its derived `waves` in order, one story at a time.";
++const A6_SENTENCE = '§C.0.2 runs such a plan.';
++
+ // ── Test 31 — rendering the canonical SKILL.md ───────────────────────────────
+ 
+ test('Test 31 — renderCodexSprintExecution(canonical) is deterministic, contains R1-R5, drops every banned token, keeps the frontmatter and every non-A1-A4 line in order', async () => {
+@@ -55,13 +69,39 @@ test('Test 31 — renderCodexSprintExecution(canonical) is deterministic, contai
+ 
+   assert.ok(out1.includes('dispatch-serial.md'), 'the rendering must mention dispatch-serial.md (R1/R2)');
+ 
+-  const banned = mod.CODEX_SKILL_BANNED ?? [
+-    '/workflows', 'Workflow tool', 'parallel()', 'launch_wave', 'resumeFromRunId', 'RUN_ID',
+-    'mintRunId', 'SKIP_FLASHCARD_GATE=1', 'Between-wave relocation', 'C.0.1', 'C.0.2',
+-  ];
+-  const survivors = banned.filter((t) => out1.includes(t));
++  assert.deepEqual([...(mod.CODEX_SKILL_BANNED ?? [])], BANNED_11, 'CODEX_SKILL_BANNED must be exactly the 11 pinned tokens');
++  const survivors = BANNED_11.filter((t) => out1.includes(t));
+   assert.deepEqual(survivors, [], `banned tokens survived the rendering: ${JSON.stringify(survivors)}`);
+ 
++  // R1–R6 verbatim (E8 31), and the exported replacements equal the pins.
++  assert.deepEqual({ ...(mod.CODEX_SKILL_REPLACEMENTS ?? {}) }, { R1, R2, R3, R4, R5, R6 }, 'CODEX_SKILL_REPLACEMENTS must equal the pinned R1–R6 texts');
++  for (const [name, text] of Object.entries({ R1, R2, R3, R4, R5, R6 })) {
++    assert.ok(out1.includes(text), `the rendering must contain ${name} verbatim`);
++  }
++
++  // Every canonical line outside A1–A4 appears in order; the A6 line appears with R6 in place of its sentence.
++  const cl = canonical.split('\n');
++  const at = (prefix: string): number => cl.findIndex((l) => l.startsWith(prefix));
++  const a1s = at('There is one and only one way a sprint executes');
++  const a1e = at('### 2.1 Spikes run before the loop, not inside it');
++  const a2s = at('### C.0 Execution — run each wave via `/workflows`');
++  const a2e = at('### C.1 Pre-execution check');
++  const a3 = at('**Serial barrier merge.**');
++  const a4s = at('The `pending-task-sentinel.sh` PreToolUse hook blocks the next');
++  const a4e = at('**Between-wave relocation.**');
++  const a6 = at('**Contract-first output (CR-124).**');
++  assert.ok([a1s, a1e, a2s, a2e, a3, a4s, a4e, a6].every((i) => i >= 0), 'test bug: an anchor is missing from the canonical SKILL.md');
++  const kept = cl
++    .map((l, i) => (i === a6 ? l.replace(A6_SENTENCE, R6) : l))
++    .filter((_, i) => !((i >= a1s && i < a1e) || (i >= a2s && i < a2e) || i === a3 || (i >= a4s && i <= a4e)));
++  const ol = out1.split('\n');
++  let j = 0;
++  for (const line of kept) {
++    while (j < ol.length && ol[j] !== line) j++;
++    assert.ok(j < ol.length, `a kept canonical line is missing or out of order in the rendering: ${JSON.stringify(line.slice(0, 100))}`);
++    j++;
++  }
++
+   // Frontmatter (the leading `---\n...\n---\n` block) must be byte-unchanged.
+   const fmMatch = /^---\n[\s\S]*?\n---\n/.exec(canonical);
+   assert.ok(fmMatch, 'expected a frontmatter block in the canonical SKILL.md');
+@@ -88,6 +128,21 @@ test('Test 32 — deleting an anchor line throws "anchor not found"; duplicating
+   const withDuplicateA3 = canonical.replace(a3Line, `${a3Line}\n\n${a3Line}`);
+   assert.throws(() => mod.renderCodexSprintExecution!(withDuplicateA3), /anchor not unique: A3/, 'duplicating the A3 line must throw "anchor not unique: A3"');
+ 
++  // TPV re-seal (E8 32): deleting each other anchor line in turn, or only the A6 sentence, throws "anchor not found: A<n>".
++  const deletions: Array<[string, string]> = [
++    ['A1', 'There is one and only one way a sprint executes'],
++    ['A2', '### C.0 Execution — run each wave via `/workflows`'],
++    ['A4', 'The `pending-task-sentinel.sh` PreToolUse hook blocks the next'],
++    ['A5', '# Sprint Execution — The Playbook'],
++    ['A6', '**Contract-first output (CR-124).**'],
++  ];
++  for (const [id, prefix] of deletions) {
++    const without = canonical.split('\n').filter((l) => !l.startsWith(prefix)).join('\n');
++    assert.throws(() => mod.renderCodexSprintExecution!(without), new RegExp(`anchor not found: ${id}\\b`), `deleting the ${id} anchor line must throw "anchor not found: ${id}"`);
++  }
++  assert.ok(canonical.split(A6_SENTENCE).length === 2, 'test bug: the A6 sentence must occur exactly once in canonical');
++  assert.throws(() => mod.renderCodexSprintExecution!(canonical.replace(A6_SENTENCE, '')), /anchor not found: A6/, 'deleting only the A6 sentence must throw "anchor not found: A6"');
++
+   const withInjectedBannedToken = canonical.replace('### C.1 Pre-execution check', '### C.1 Pre-execution check (launch_wave)');
+   assert.throws(() => mod.renderCodexSprintExecution!(withInjectedBannedToken), /banned token survived: launch_wave/, 'a banned token injected into a KEPT line must survive rendering and throw');
+ });
+diff --git a/test/scripts/dispatch-serial-cli.red.node.test.ts b/test/scripts/dispatch-serial-cli.red.node.test.ts
+index 140a22c..4872b5e 100644
+--- a/test/scripts/dispatch-serial-cli.red.node.test.ts
++++ b/test/scripts/dispatch-serial-cli.red.node.test.ts
+@@ -168,6 +168,10 @@ test('Test 14 — a flagged card in reports/STORY-001-01-dev.md blocks next (exi
+     assert.equal(a1.unprocessed.length, 1);
+     assert.equal(a1.unprocessed[0]!.hash, sha1_12(card));
+ 
++    // TPV re-seal (E6.4): the driver reads neither SKIP_FLASHCARD_GATE nor CLEARGATE_ADVISORY.
++    const r1b = run(fixture, ['next', '--sprint', SPRINT_ID, '--wave', WAVE_ID], { CLEARGATE_ADVISORY: '1', SKIP_FLASHCARD_GATE: '1' });
++    assert.equal(r1b.status, 4, `CLEARGATE_ADVISORY/SKIP_FLASHCARD_GATE must not soften the driver gate; got status=${r1b.status}`);
++
+     fs.writeFileSync(path.join(fixture.sprintDir, `.processed-${sha1_12(card)}`), '');
+     const r2 = run(fixture, ['next', '--sprint', SPRINT_ID, '--wave', WAVE_ID]);
+     assert.equal(r2.status, 0, `expected exit 0 after marking the card; got status=${r2.status} stderr=${r2.stderr}`);
+@@ -224,6 +228,14 @@ test('Test 15 — record with a synthesized tokens object exits 1, names the sto
+ 
+     const after = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : null;
+     assert.equal(after, before, 'the verdict log must be unchanged after a rejected record');
++
++    // TPV re-seal (AD-M6-4): a well-formed verdict for a story outside the wave is invalid too.
++    const outside = greenVerdictFile(fixture, 'STORY-009-09');
++    const ro = run(fixture, ['record', '--sprint', SPRINT_ID, '--wave', WAVE_ID, '--verdict', outside]);
++    assert.equal(ro.status, 1, `a verdict for a story outside the wave must exit 1; got status=${ro.status}`);
++    assert.ok(ro.stderr.includes('STORY-009-09'), `expected STORY-009-09 named on stderr, got: ${JSON.stringify(ro.stderr)}`);
++    const after2 = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : null;
++    assert.equal(after2, before, 'the verdict log must be unchanged after an out-of-wave record');
+   } finally {
+     fs.rmSync(fixture.root, { recursive: true, force: true });
+   }
+@@ -272,6 +284,27 @@ test('Test 17 — usage errors exit 2 with empty stdout: no subcommand, a malfor
+     assert.equal(r4.status, 2, `a path-traversal --wave must exit 2; got ${r4.status}`);
+     assert.equal(r4.stdout, '');
+ 
++    // TPV re-seal (E6.4): the wave-id check must hold even when waves.json names that wave.
++    const traversalFixture = makeFixtureRepo({ waves: [{ wave: '../x', stories: ['STORY-001-01'] }] });
++    try {
++      const r4b = run(traversalFixture, ['next', '--sprint', SPRINT_ID, '--wave', '../x']);
++      assert.equal(r4b.status, 2, `a path-traversal wave id declared in waves.json must still exit 2; got ${r4b.status}`);
++      assert.equal(r4b.stdout, '');
++    } finally {
++      fs.rmSync(traversalFixture.root, { recursive: true, force: true });
++    }
++
++    // TPV re-seal (AD-M6-4 main guard, flashcard #121): run through a symlinked path — a raw
++    // import.meta.url vs argv[1] compare never runs main() there and exits 0 silently.
++    const linkDir = path.join(fixture.root, 'scripts-link');
++    fs.symlinkSync(path.dirname(DISPATCH_SERIAL), linkDir);
++    const r0 = spawnSync('node', [path.join(linkDir, path.basename(DISPATCH_SERIAL))], {
++      cwd: fixture.root,
++      encoding: 'utf8',
++      env: { ...scrubbedEnv(), ORCHESTRATOR_PROJECT_DIR: fixture.root },
++    });
++    assert.equal(r0.status, 2, `no subcommand through a symlinked path must still exit 2; got ${r0.status}`);
++
+     const badSchemaFixture = makeFixtureRepo({ schema_version: 3, waves: [{ wave: WAVE_ID, stories: ['STORY-001-01'] }] });
+     try {
+       const r5 = run(badSchemaFixture, ['next', '--sprint', SPRINT_ID, '--wave', WAVE_ID]);
+diff --git a/test/scripts/dispatch-serial.red.node.test.ts b/test/scripts/dispatch-serial.red.node.test.ts
+index 79b5215..ad27706 100644
+--- a/test/scripts/dispatch-serial.red.node.test.ts
++++ b/test/scripts/dispatch-serial.red.node.test.ts
+@@ -13,6 +13,7 @@
+  */
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
++import * as path from 'node:path';
+ import { pathToFileURL } from 'node:url';
+ import { canonicalPath } from '../helpers/scaffold-roots.js';
+ 
+@@ -92,9 +93,9 @@ test('Test 5 — strict ordering: gate(1) wt(1) dispatch(1) record(1) gate(2) wt
+     },
+   });
+   const runPromise = dispatchSerial({ sprintId: SPRINT_ID, sprintBranch: SPRINT_BRANCH, wave: WAVE, ...seams });
+-  // Give the microtask queue a turn: story 2 must NOT have started yet.
+-  await Promise.resolve();
+-  await Promise.resolve();
++  // TPV re-seal: yield a full macrotask so every microtask of story 1's awaited seams
++  // (gate, worktreeExists, createWorktree) drains; story 2 must NOT have started yet.
++  await new Promise<void>((resolve) => setImmediate(resolve));
+   assert.ok(!events.includes('dispatch(STORY-001-02)'), `story 2 dispatched before story 1 resolved: ${JSON.stringify(events)}`);
+   assert.ok(resolveStory1, 'expected dispatchStory(STORY-001-01) to have been called');
+   resolveStory1!(undefined);
+@@ -153,7 +154,10 @@ test('Test 7 — a BLOCKED verdict for story 2 halts immediately; story 3 is nev
+   assert.deepEqual(dispatches, ['dispatch(STORY-001-01)', 'dispatch(STORY-001-02)']);
+   assert.deepEqual(gates, ['gate(STORY-001-01)', 'gate(STORY-001-02)']);
+   assert.ok(!events.some((e) => e.includes('STORY-001-03')), `story 3 must never be touched: ${JSON.stringify(events)}`);
+-  assert.ok(!events.includes('record(STORY-001-02)'), 'a BLOCKED verdict must not be recorded as if it were GREEN-then-continue: the function resolves right after recordVerdict(2) returns, not before');
++  // TPV re-seal (AD-M6-4): the BLOCKED verdict is validated and RECORDED (the CLI's `record`
++  // appends it and exits 3), and the function resolves right after recordVerdict(2) returns.
++  assert.equal(events[events.length - 1], 'record(STORY-001-02)', `recordVerdict(STORY-001-02) must be the last seam call, got ${JSON.stringify(events)}`);
++  assert.equal(((result as { verdict?: { verdict?: string } }).verdict ?? {}).verdict, 'BLOCKED', 'the halted result carries the BLOCKED verdict');
+ });
+ 
+ // ── Test 8 — resume ────────────────────────────────────────────────────────────
+@@ -282,6 +286,23 @@ test('Test 11 — with no dispatchStory seam, dispatchSerial returns a plan with
+   assert.equal(steps.length, 3);
+   assert.deepEqual(steps.map((s) => s.storyId), WAVE.stories);
+   for (const step of steps) assert.ok(step.worktreeCommand.includes(step.storyId));
++
++  // TPV re-seal (flashcard #64): pin the other frozen exports by direct import.
++  const mod = (await loadModule()) as unknown as {
++    SERIAL_EXIT: Record<string, number>;
++    sprintBranchFor: (id: string) => string;
++    serialLogPath: (repo: string, sprint: string, wave: string) => string;
++    readVerdictLog: (file: string) => unknown[];
++    nextAction: (args: { wave: { stories: string[] }; verdicts: unknown[]; resume?: boolean }) => Record<string, unknown>;
++  };
++  assert.deepEqual({ ...mod.SERIAL_EXIT }, { OK: 0, INVALID: 1, USAGE: 2, HALT: 3, FLASHCARDS: 4 });
++  assert.equal(mod.sprintBranchFor('SPRINT-01'), 'sprint/S-01');
++  assert.throws(() => mod.sprintBranchFor('SPRINT-9'));
++  assert.equal(mod.serialLogPath('/r', 'SPRINT-99', 'wave1'), path.join('/r', '.cleargate', 'sprint-runs', 'SPRINT-99', 'serial', 'wave1.verdicts.jsonl'));
++  assert.deepEqual(mod.readVerdictLog(path.join('/nonexistent-cg-s41-12', 'x.jsonl')), []);
++  assert.deepEqual(mod.nextAction({ wave: WAVE, verdicts: [greenVerdict('STORY-001-01')] }), { action: 'dispatch', storyId: 'STORY-001-02', resumed: false });
++  assert.equal(mod.nextAction({ wave: WAVE, verdicts: [greenVerdict('STORY-001-01'), blockedVerdict('STORY-001-02')] }).action, 'halt');
++  assert.deepEqual(mod.nextAction({ wave: WAVE, verdicts: WAVE.stories.map(greenVerdict) }), { action: 'wave-complete' });
+ });
+ 
+ // ── Test 12 — malformed verdict ───────────────────────────────────────────────
+diff --git a/test/scripts/dispatch-verdict-modes.red.node.test.ts b/test/scripts/dispatch-verdict-modes.red.node.test.ts
+index fff442b..0abaf13 100644
+--- a/test/scripts/dispatch-verdict-modes.red.node.test.ts
++++ b/test/scripts/dispatch-verdict-modes.red.node.test.ts
+@@ -161,6 +161,12 @@ test("Test 3 — serial mode rejects a synthesized tokens object, a bare {meteri
+     /'devSha' must be a non-empty string, or null on a non-GREEN serial verdict/,
+     'an absent devSha (as opposed to null) on a non-GREEN verdict must be rejected',
+   );
++  // TPV re-seal (E6.6): the qaSha analog.
++  assert.throws(
++    () => canonical.validateVerdicts([(() => { const v = blockedVerdict({ devSha: null, tokens: { metering: 'unavailable' } }); delete (v as Record<string, unknown>).qaSha; return v; })()], { mode: 'serial' }),
++    /'qaSha' must be a non-empty string, or null on a non-GREEN serial verdict/,
++    'an absent qaSha on a non-GREEN verdict must be rejected',
++  );
+ });
+ 
+ // ── Test 4 — unknown mode ────────────────────────────────────────────────────
+diff --git a/test/scripts/flashcard-gate-parity.red.node.test.ts b/test/scripts/flashcard-gate-parity.red.node.test.ts
+index ea609dd..c3b723f 100644
+--- a/test/scripts/flashcard-gate-parity.red.node.test.ts
++++ b/test/scripts/flashcard-gate-parity.red.node.test.ts
+@@ -120,9 +120,25 @@ async function assertParity(f: Fixture): Promise<{ hook: ReturnType<typeof invok
+ // ── Test 18 — cardHash matches the shell recipe ──────────────────────────────
+ 
+ test("Test 18 — cardHash('abc') equals printf '%s' abc | shasum -a 1 | cut -c1-12", async () => {
+-  const { cardHash } = await loadGate();
++  const { cardHash, flaggedCards, reportFiles } = await loadGate();
+   const expected = execFileSync('sh', ['-c', "printf '%s' abc | shasum -a 1 | cut -c1-12"], { encoding: 'utf8' }).trim();
+   assert.equal(cardHash('abc'), expected);
++
++  // TPV re-seal (flashcard #64): pin the other frozen exports by direct import.
++  assert.deepEqual(flaggedCards('flashcards_flagged:\n  - "a"\n'), { cards: ['a'], unterminated: false });
++  assert.deepEqual(flaggedCards('flashcards_flagged: [\n  "x"\n'), { cards: ['x'], unterminated: true });
++  const f = fixture();
++  try {
++    fs.writeFileSync(path.join(f.sprintDir, 'A-dev.md'), '');
++    fs.writeFileSync(path.join(f.sprintDir, 'A-qa-red.md'), '');
++    fs.writeFileSync(path.join(f.sprintDir, '.hidden-dev.md'), '');
++    fs.writeFileSync(path.join(f.reportsDir, 'B-qa.md'), '');
++    fs.mkdirSync(path.join(f.reportsDir, 'C-dev.md'));
++    const got = reportFiles(f.sprintDir).map((p) => path.relative(f.sprintDir, p)).sort();
++    assert.deepEqual(got, ['A-dev.md', path.join('reports', 'B-qa.md')]);
++  } finally {
++    fs.rmSync(f.root, { recursive: true, force: true });
++  }
+ });
+ 
+ // ── Test 19 — hook/JS parity over 7 fixture kinds (13 numbered scenarios) ────

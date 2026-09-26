@@ -1,3 +1,39 @@
+2026-09-26 · #dispatch #serial · dispatchSerial loops forever if dispatchStory returns another story's GREEN; assert v.storyId === storyId.
+2026-09-26 · #codex #skill · String.replace(x, R) expands $&/$1 in R; splice pinned doc texts with replace(x, () => R).
+2026-09-26 · #test-harness #shell · /bin/bash is 3.2 on macOS: no mapfile; build file-list arrays with a while IFS= read -r loop.
+2026-09-26 · #devops #test-harness · init-from-source S1 reds when parallel lanes leave cg-hook-test-* in os.tmpdir; re-run it solo first.
+2026-09-26 · #tpv #test-harness · Two Promise.resolve() ticks can't outrun 3 awaited seams; yield setImmediate before a 'not started yet' assert.
+2026-09-26 · #host #lifecycle · addHost copies owned∪shared roots (lifecycle.ts:293), not payloadFilter: payloadFilter-only rules never reach host add.
+2026-09-26 · #tpv #test-harness · A pin check that reads its list from the module (mod.X ?? default) is vacuous; pin banned lists and texts by value.
+2026-09-26 · #codex #skill · Anchored renderer: resolve every anchor before the banned-token scan, or a deleted anchor reports a neighbour's token.
+2026-09-26 · #test-harness #codex · codex-hooks.mjs run has no CLEARGATE_CODEX_BIN fallback: pass --codex-bin <abs>; its --help refuses, no usage.
+2026-09-26 · #qa-red #esm · A static import {x} of an existing module lacking x is a SyntaxError that crashes the file; use import() + typeof.
+2026-09-26 · #merge #init-fixture · A row both items added byte-identically merges as common text; only lead comments conflict. Keep upstream's.
+2026-09-26 · #hooks #dogfood-split · A hook sourcing lib/harness.sh breaks without lib/ (surface gate exits 1); sync lib/ first, never hand-port one.
+2026-09-26 · #integration #contract · Re-integration proof: diff main..HEAD over scaffold/src/scripts equals the item's own delta, minus regen files.
+2026-09-26 · #agents #scratchpad · The session scratchpad is shared by every agent; delete only files you created, by exact name, never by glob.
+2026-09-26 · #devops #npm-scripts · npm run test:integration -- <file> ignores the file arg (hardcoded glob); use npm run test:file -- <file>.
+2026-09-26 · #devops #test-order · status-vocab-phase-b runs a real npm run prebuild mid-suite; payload-vs-canonical tests can go red pre-BD.
+2026-09-26 · #frontmatter #sprint-init · sprint.ts waiver/stamp writers re-dump the located YAML via yaml.dump: template inline # comments are dropped.
+2026-09-26 · #frontmatter #wiki · audit-status --fix preview greps the first status: in the WHOLE file; <instructions> example lines are shown.
+2026-09-26 · #frontmatter #locator · withFrontmatterYaml rejoins lines with span.eol: a mixed-EOL block is no identity splice; skip no-op writes.
+2026-09-26 · #frontmatter #close · 2.6d: a malformed-framing Done story throws out of the loop; every later story in state.json stays unflipped.
+2026-09-26 · #review #test-harness · Old-vs-new diff: git archive <base> src into scratch, symlink node_modules, import both trees from one tsx .mts.
+2026-09-26 · #test-harness #concurrency · ps aux for node --test during parallel lanes matches OTHER agents' processes on the shared machine.
+2026-09-26 · #test-harness #merge · Rebuild a tail append/append conflict from each side's git show tip, not the hunks; diff vs an independent rebuild.
+2026-09-26 · #codex #skill · codex prompt-input folds a multi-line 'description: |' onto one entry line; codexSkillsVerdict's per-line regex matches.
+2026-09-26 · #test-harness #codex · 5 sealed tests copy build-codex-payload.mjs alone into scratch/scripts; a sibling ./x.mjs import breaks them — inline.
+2026-09-26 · #docs #test-harness · codex-enforcement-delta pins the Index line after §15 to be the §16 row: add later rows after §16, never after §15.
+2026-09-26 · #flashcard-gate #regex · bash ERE '.' matches \r but JS '.' does not: port [[:space:]]/'.' as [ \t\n\v\f\r]/[\s\S] or CRLF cards diverge.
+2026-09-26 · #tpv #codex · Whole-token role check over codex's listing false-passes: role descriptions name other roles. Strip {…} bodies first.
+2026-09-26 · #tpv #test-harness · Pick each one-missing negative by what else names that role; dropping 'reporter' kills only some().
+2026-09-26 · #codex #test-harness · additional_tools items carry role:'developer'; a role check wider than properties.agent_type counts it.
+2026-09-26 · #test-harness #backfill #danger · push-hierarchy.node.test.ts runs live backfill_hierarchy.mjs over the real <cli>/.. corpus; revert pending-sync after.
+2026-09-26 · #test-harness #two-repo · Parity is not only S1c: wiki-ingest-sprint-report S14 cmps live vs canonical close_sprint.mjs; red in a pre-contract wt.
+2026-09-26 · #test-harness #codex · JSON.stringify turns newlines into a literal \n; a (?<![\w-]) lookbehind then sees 'n'. Tokenize parsed strings.
+2026-09-26 · #codex #tpv · spawn_agent agent_type.description lists roles one per line ('<name>: {<desc>}'), not a comma list; fixtures need it.
+2026-09-26 · #test-harness #npm · npm dep in a script imported from a node_modules-less clone: createRequire(<installed pkg file>).resolve, then import().
+2026-09-26 · #test-harness #clean-room · Keep a test's self-deleting evidence: hard-link files as they appear (same volume); links survive its finally rmSync.
 2026-09-26 · #frontmatter #locator #danger · A locator THROW is malformed framing, not 'no frontmatter': a !span writer fallback still plants a phantom.
 2026-09-26 · #two-repo #scripts #esm · A live twin importing a contract export won't link in an outer wt cut pre-contract-merge; copy twins at integration.
 2026-09-26 · #tpv #test-harness · A tail-of-length-N 'bytes after closer' check misses inserted bytes; compare raw.slice(span.end) on both sides.

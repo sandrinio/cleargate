@@ -124,15 +124,16 @@
       "id": "C3",
       "branch": "contract/S-41-loop",
       "repo": "cli",
-      "base": "story/STORY-058-12",
+      "base": "2695eea",
       "owner_story": "STORY-058-12",
       "skeleton_commit": "None. The branch points at the owner's Developer commit.",
       "created_by": "orchestrator: git -C .../cleargate-cli branch contract/S-41-loop <-12 pass-B SHA>",
-      "create_when": "STORY-058-12 pass-B Developer report is green",
+      "create_when": "created 2026-09-26: git -C cleargate-cli branch contract/S-41-loop 2695eea (STORY-058-12 pass B)",
       "frozen_exports": [
         "scaffold/core/.cleargate/scripts/dispatch_serial.mjs: SERIAL_EXIT, sprintBranchFor, serialLogPath, readVerdictLog, nextAction, dispatchSerial, plus the next/record CLI (M6 AD-M6-4)",
         "scaffold/core/.cleargate/scripts/launch_wave.mjs: validateVerdicts(verdicts, { mode: 'wave' | 'serial' })",
-        "scripts/codex-sprint-execution.mjs: CODEX_SKILL_BANNED, CODEX_SKILL_REPLACEMENTS, renderCodexSprintExecution",
+        "scripts/build-codex-payload.mjs: CODEX_SKILL_BANNED, CODEX_SKILL_REPLACEMENTS, renderCodexSprintExecution, CodexRenderError",
+        "scaffold/core/.cleargate/scripts/lib/flashcard-gate.mjs: cardHash, flaggedCards, reportFiles, pendingFlashcards",
         "src/hosts/types.ts: DispatchMode and HostAdapter.dispatchMode; src/hosts/registry.ts: SERIAL_DISPATCH_SURFACE"
       ],
       "change_rule": "Same as C1.",
@@ -235,7 +236,7 @@
       "base_note": "cli main tip when its lane opens"
     },
     "CR-124": {
-      "state": "integrated (QA+post-flight PASS on 430424a; re-integrates after STORY-058-11 merges)",
+      "state": "merged",
       "base": "35580b0",
       "upstream": [],
       "repo": "both",
@@ -270,7 +271,7 @@
       ]
     },
     "STORY-058-11": {
-      "state": "integrating (Dev 44ba381 on re-seal 635816c)",
+      "state": "merged",
       "base": "contract/S-41-codex",
       "upstream": [
         "STORY-058-10"
@@ -289,7 +290,7 @@
       ]
     },
     "BUG-098": {
-      "state": "tpv (QA-Red 2ea4832 on C4 f31c684)",
+      "state": "integrated (QA+post-flight PASS on 9b2abf0; re-integrating onto cli main 0399beb after STORY-058-11 merge)",
       "base": "contract/S-41-fence",
       "upstream": [
         "BUG-090"
@@ -307,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "build-now (C2 contract/S-41-dispatch = 8c8c5ff)",
+      "state": "dev done (A 53028ea, B 2695eea = C3); integrating onto cli main 0399beb",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
@@ -328,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "waits-for-contract C3",
+      "state": "entry re-derivation against C3 2695eea",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
