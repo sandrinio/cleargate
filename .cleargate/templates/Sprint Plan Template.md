@@ -92,10 +92,11 @@ context_source: "" # sprint's own decomposition evidence (which epics/proposals 
 *(Written by Architect during Sprint Design Review. Required before sprint start.)*
 
 ### 2.1 Phase Plan
-{Parallel vs sequential story groups. List which stories run concurrently in each wave and which must be serialized.}
+{Contract-first DAG. Build set: every story whose base exists builds at once. Contracts: `contract/S-NN-<slug>` (base, owner story, frozen exports). Per story: base (sprint/S-NN or a contract branch) and upstream (integration edges). Merges: one at a time, in upstream order; re-sync if the sprint branch moved.}
 Example:
-- Wave 1 (sequential): STORY-NNN-01 → STORY-NNN-02 (02 depends on 01's schema)
-- Wave 2 (parallel): STORY-NNN-03 ‖ STORY-NNN-04
+- Contract C1 `contract/S-NN-api` (base sprint/S-NN; owner STORY-NNN-01; frozen: `src/api.ts: getThing(id: string): Promise<Thing>`)
+- Build now: STORY-NNN-01 (base sprint/S-NN) ‖ STORY-NNN-02 (base contract/S-NN-api)
+- Integrate: STORY-NNN-02 after STORY-NNN-01 merges
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
 {List files touched by more than one story. For each shared file, specify which story lands first and why.}

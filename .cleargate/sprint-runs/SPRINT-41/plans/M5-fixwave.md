@@ -1206,3 +1206,58 @@ Source: `reports/BUG-090-tpv.md` (verdict REJECTED → re-seal). The patch is `r
   2. The `approved` regex line in `assert_story_files.mjs` is byte-identical to base `:168`.
   3. Every close_sprint parse site reads `fenceYaml(raw).yaml`, never `raw`.
 - **Pre-existing, not BUG-090's.** `test/scripts/template-sync-fields.integration.node.test.ts` has 4 failures, "live template X — parseFrontmatter returns all 6 new keys". The test bug is at `:78`: `field in (fm, msg)` uses the comma operator, so it throws on every template, including the untouched `CR.md` and `Bug.md`, at any commit. Name it in QA-Verify and DevOps D7-4. Follow-up.
+
+## FW-A17 — BUG-098 TPV (2026-09-26, role: architect; append-only)
+
+Source: `reports/BUG-098-tpv.md` (verdict REJECTED → re-seal). The patch is `reports/BUG-098-tpv-reseal.patch`, sha256 `6485674b31cc0b38c4ba588651562bcc4f76c30540020f005391128f8e5eed4e`. It applies cleanly on cli `2ea4832` and changes 12 test files. No src, scaffold, script or template file changes. Counts are unchanged: default tier +27 (24 red, 3 anchors D6, P2, DD2), integration +1, and the 20 parity runs flip.
+
+**1. QA-Red test list, amended.**
+- **Decoys.** Every `<instructions>` block in BUG-098's fixtures gains a column-0 example header: a `---` pair holding site-relevant decoy keys. This kills first-`---`-anywhere scans (private re-implementations of the locator).
+  - Last-wins readers also get a column-0 decoy line in the body: R1, R2, P1 and P2.
+  - D4 adds a second sprint file that carries `execution_mode:` only inside its `<instructions>` example. The count must be exactly 1.
+  - SL2 adds a sibling file that sorts first and names `LIN-42` only inside its example header.
+  - I1 gains an expect-WARN half: `source: "remote-authored"` appears only inside the example, and the real header says `local-authored`.
+- **Exact bytes, per this plan's own wording.**
+  - S1, S2, S3 and S6 compare `raw.slice(span.end)` before and after. The sealed check compared only the last N bytes, which cannot see an inserted separator.
+  - S2 asserts that every line of the rewritten header ends CRLF.
+  - The S3 and S6 fixtures have no blank line after the closer, which pins "the body separator is preserved".
+  - L1, L2, C1 ("the only diff is the one inserted line"), W1 ("changes only the status line"), DD1 ("equals the original minus the first `approved:` line") and DD2 compare whole files.
+- **Other additions.**
+  - D5 adds the locator-throw case: an unterminated `<instructions>` block gives exit 2 and "cannot parse frontmatter".
+  - R1 and R2 re-throw any non-exit error, and assert the `Gate: epic.ready-for-decomposition` header as the non-vacuity signal. The describe's "No TBDs here." fails `no-tbds` by design, so the exit code carries no signal.
+  - FM1 asserts the local `story_id`.
+  - The e2e asserts that `epics` survives and that the bytes after the closer are identical.
+  - S3 and S5 each gain a malformed-framing half (item 2).
+
+**2. Change shape, amended (binding; supersedes "A throw becomes `null`" under `sprint.ts (sites 1-4)`).**
+- `parseFileFrontmatter` returns `framingError: true` (with `fm: {}`, `span: null`, `parseOk: false`) when `locateFrontmatter` throws. A `null` span keeps `framingError: false`.
+- `rewriteFrontmatter` checks `if (parsed.framingError) return raw;` before any other branch. The waiver write, `stampFile` and `stampSprintClose` therefore never write a file whose framing the locator rejects. `stampSprintClose` then reports `didChange: false` through the existing equality rule.
+- Readers still treat a throw as absent frontmatter (`fm: {}`).
+- **Why.** The pinned shape turned a throw into `null`, and its `!span` branch then serialized a new block in front of `<instructions>`. Measured in the TPV scratch on an unterminated-header plan and on an unterminated-`<instructions>` plan: the `--allow-drift` waiver and `stampSprintClose` both planted a phantom. That breaks the item's `@rules` Gherkin and BUG-067's locator contract ("the caller must not fall back to treating the file as having no frontmatter").
+
+**3. Build-phase twin rule.** This supersedes Task Breakdown row 6's timing for the build phase.
+- In the build phase the Developer edits canonical only. They do **not** copy the two twins into `<ow>`.
+- `<ow>` was cut from `sprint/S-41` before BUG-090's outer merge, so its live `assert_story_files.mjs` has no `locateFrontmatterFence`. Twins placed there fail ESM link. They turn `test/scripts/test_prep_reporter_context.node.test.ts` (0/2) and `test/scripts/dedupe-frontmatter.node.test.ts` (1/5) red (measured).
+- The twins are made at integration (rule 21):
+  1. `git merge --no-ff sprint/S-41` brings BUG-090's live pair.
+  2. `cp` both scripts from the integrated canonical, then `cmp`. `dedupe_frontmatter.mjs` stays mode 755.
+  3. Both land in the one outer commit.
+- Measured on the simulated integrated tree: both anchors green, and `canonical-live-parity` 11/11.
+
+**4. Named build-phase reds.** These are two-repo artifacts, not BUG-098's:
+- `test/docs/gate-section-index-pinning.node.test.ts` S1c, 13/14;
+- `test/scaffold/canonical-live-parity.red.integration.node.test.ts` 5a (integration tier).
+
+Both come from BUG-090's `approved: false` templates in C4 canonical against the pre-merge live mirror. Both clear at integration (measured 14/14 and 11/11).
+
+**5. Anchor count drift.** `gate-unit` is 27/27 at C4 and 30/30 on the integrated tree, because BUG-097 adds 3.
+
+**6. Post-flight K-gates** (for the structure that no behavioural test can pin):
+- K1: each of the 10 TS files imports its reader or writer from `frontmatter-locator` (`locateFrontmatter`, plus `frontmatterYaml`, plus `withFrontmatterYaml` for the writers). There is no private fence scan.
+- K2: `command grep -nE "lines\[0\] !== '---'|startsWith\('---'\)|indexOf\('\\\\n---'|match\(/\^---"` over those 10 files lists no BUG-098 site.
+- K3: the count of `trimStart().startsWith('---')` in `doctor.ts` is 0.
+- K4: `rewriteFrontmatter` tests `framingError` first.
+- K5: both scripts `import { locateFrontmatterFence } from './assert_story_files.mjs';`. `dedupe_frontmatter.mjs` is 755 in canonical and in live.
+- K6: `git diff --name-only 2ea4832..<dev>` stays within the 12-file allow-list in the TPV report.
+
+**7. DevOps D4 is unchanged:** the previous merge total **+27**.
