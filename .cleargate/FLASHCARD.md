@@ -1,3 +1,11 @@
+2026-09-26 · #test-harness #snapshots · init.node.test.ts holds rendered hook locks (pre-edit-gate, stamp-and-gate, session-start).
+2026-09-26 · #hooks #token-ledger · token-ledger.sh exits 0 on a missing transcript_path (:88); a host branch goes before it.
+2026-09-26 · #hooks #stamp · stamp-and-gate.sh reads stdin with jq at :20; capture INPUT first or a 2nd reader gets nothing.
+2026-09-26 · #test-harness #upgrade #tpv · A codex prune red needs codex REGISTERED at the red commit; use a fixture adapter.
+2026-09-26 · #upgrade #changelog · Never derive pkgRoot from a temp view's ../.. (BUG-041 class); keep CHANGELOG on the flat root.
+2026-09-26 · #test-harness #init · Temp-dir leak tests filter by mkdtemp prefix; renaming the prefix makes them silently vacuous.
+2026-09-26 · #codex #hooks · git rev-parse --show-toplevel is physical; resolve apply_patch paths against realpath(cwd).
+2026-09-26 · #test-harness #scaffold · canonicalPath() maps .codex/** and AGENTS.md to scaffold/core; join hosts/codex yourself.
 2026-09-26 · #clean-room #evidence #danger · Unsanitised evidence cells can inject '## Run'/'- result: PASS' lines; a FAIL run then checks green.
 2026-09-26 · #clean-room #claude-p · Claude Code 2.1.283 backgrounds a headless Agent dispatch: S2 emits two result events; parse the last.
 2026-09-26 · #clean-room #harness · claude-baseline.mjs runs main()+process.exit on import; never import it — reuse evidence.mjs/probe-items.mjs.
