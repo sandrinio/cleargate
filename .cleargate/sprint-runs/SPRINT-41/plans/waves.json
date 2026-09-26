@@ -307,7 +307,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "waits-for-contract C2 (C2 build dispatched)",
+      "state": "build-now (C2 contract/S-41-dispatch = 8c8c5ff)",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
