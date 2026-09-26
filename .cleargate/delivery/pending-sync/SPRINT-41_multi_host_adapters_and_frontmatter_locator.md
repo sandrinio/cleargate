@@ -578,6 +578,7 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 | Item | Base (sha) | Contract | Build start | Dev sha | Integrated on cli main | Re-syncs | QA-Red re-scopes | Merge (outer / cli) |
 |---|---|---|---|---|---|---|---|---|
 | STORY-058-10 | `35580b0` | owner of C1 `contract/S-41-codex` = `d0f0d95` | 2026-09-25 (serial, pre-re-plan); passes C/D in `.worktrees/STORY-058-10` 2026-09-26 | `560a4f1` A, `d0f0d95` B, `393c286` C, `b12240b` D | yes, no-op (main unchanged at `35580b0`) | 0 | 0 (TPV re-seal before Dev) | — (cli-only) / `fcb1491`; full suite 3309/3307/0/2; BD; RS-4a 11/11 |
+| BUG-096 | `35580b0` | none (lane-local; no upstream) | 2026-09-26 (parallel with CR-124/BUG-090/BUG-097) | `266c1ba` | yes — `9a3a0c0` merged main `fcb1491` (no conflicts) | 0 | 0 | — (cli-only) / `c5a311e`; full suite 3312/3310/0/2; BD; M2 baseline hash exact; hygiene 361 stale dirs removed |
 
 ---
 
