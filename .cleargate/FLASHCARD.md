@@ -1,3 +1,6 @@
+2026-09-27 · #serial #dispatch · dispatch_serial record accepts any wave member: a GREEN for a later story skips it; pin record to next's story.
+2026-09-27 · #cli #exit-codes · An uncaught Error in a node CLI exits 1; if exit 1 means 'invalid input', give unexpected errors their own code.
+2026-09-27 · #devops #forecast · Forecast pre-BD reds: build the merged tree in scratch, swap in pre-merge templates/+dist/, run payload readers.
 2026-09-26 · #frontmatter #correction · BUG-098 merged: sprint.ts writers, 2.6d, parent-approved, slug, intake, doctor, 2 scripts read past <instructions>.
 2026-09-27 · #codex #clean-room · codexHookVerdicts hardcodes -10 probe names (EPIC-001_cleanroom_probe.md, src/cg-probe.ts); reuse them.
 2026-09-27 · #contract #worktree · A contract on an owner's Dev commit lacks main's later merges; FF it to the owner's integrated commit.
