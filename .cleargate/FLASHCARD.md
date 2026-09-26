@@ -1,3 +1,10 @@
+2026-09-26 · #hooks #flashcard-gate #danger · Post-BUG-085 a dev/qa line starting `flashcards_flagged: [` (even fenced) is gated; quoted fixtures block.
+2026-09-26 · #clean-room #hooks · No .cleargate/sprint-runs/.active → the flashcard gate is skipped; such a dispatch cannot witness it.
+2026-09-26 · #state #danger · Post-CR-117 validate_state.mjs reads a positional as a PATH; `cleargate state validate <id>` now always fails.
+2026-09-26 · #hooks #test-harness #danger · 16 outer .cleargate/scripts/test/*.sh read frozen cleargate-planning/; flashcard-gate ones test a dead hook.
+2026-09-26 · #doctor #drift · drift-check reads the cli checkout's WORKING tree: on an R1 story branch OUTER reports drift for unmerged canonical.
+2026-09-26 · #doctor #regex · A regex backreference followed by a literal digit parses as an octal escape in non-u mode; wrap it as (?:\1).
+2026-09-26 · #dogfood #hooks · Re-sync live with b0-live-resync.mjs: dry-run, then --apply (branch guards, .claude backup, live pin, mode).
 2026-09-26 · #qa #test-harness #danger · Extract the CLAUDE.md block with anchored ^<!-- CLEARGATE:START -->$; prose names it too.
 2026-09-26 · #test-harness #tpv · Delta-row currentHash read from canonical passes at the red commit; refuse the baseline hash or pin a literal.
 2026-09-26 · #test-harness #tpv · 'Same exit with and without X' needs a twin run without X; two runs that both have X prove nothing.
