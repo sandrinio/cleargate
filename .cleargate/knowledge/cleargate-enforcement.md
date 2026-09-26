@@ -19,6 +19,7 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 | §11 | protocol §26 | Decomposition Gate (CR-017) |
 | §12 | protocol §27 | Gate 4 — Sprint Close Acknowledgement (CR-019) |
 | §15 | — | Operator Emergency Levers (STORY-070-01) |
+| §16 | — | Host Enforcement Deltas — Codex (STORY-058-11) |
 
 ---
 
@@ -583,3 +584,20 @@ When set to the exact string `'1'`, it downgrades gate failures at exactly two t
 **When to use:** CI environments bootstrapping a new ClearGate install, or during a sprint where a transient gate failure (e.g., stale state.json) would otherwise block a human-confirmed safe operation.
 
 **Log advisory use:** Record any use of `CLEARGATE_ADVISORY=1` in the sprint §4 Execution Log.
+
+---
+
+## 16. Host Enforcement Deltas — Codex (source: STORY-058-11)
+
+**What a `--host codex` install enforces differently from Claude Code.** Each delta below is a recorded limitation, not a parity claim. Where Codex enforcement is weaker, the rule is prompt-enforced: the role's instructions still state it, but no harness mechanism stops a violation.
+
+1. **No per-agent `tools:` allowlist.** Codex roles (`.codex/agents/<name>.toml`) have no tools field, so the canonical agents' `tools:` frontmatter is dropped by codegen and every role tool boundary is prompt-enforced under Codex — including QA's "never edits code" (`qa.md` omits `Write`). Neither `sandbox_mode` nor per-agent `mcp_servers` is presented as a substitute.
+2. **The role model tier is not translated.** Codex forwards a role `model` verbatim to the provider, and Claude's aliases (`haiku`/`sonnet`/`opus`) are not provider models, so codegen emits no `model` and Codex roles inherit the session model.
+3. **Dispatch identity.** The dispatch gate's matcher is `Agent|.*spawn_agent` (Codex reports tool_name `collaborationspawn_agent`), and the role identity comes from `tool_input.agent_type` at PreToolUse and the SubagentStop payload's `agent_type`. Claude's dispatch-marker chain is not used.
+4. **Block signal.** Codex blocks a tool call only on exit 2 **with a non-empty stderr reason**; a silent exit 2 and an exit 1 both fail open. The two blocking hooks (`pre-edit-gate.sh`, `pending-task-sentinel.sh`) write their reason to stderr and take their exit code from `cleargate hook signal`.
+5. **Edit targets.** Codex edits arrive as `apply_patch` calls with no `tool_input.file_path`; the planning gate and the stamp-and-gate hook take their targets from the patch headers via `cleargate hook edit-targets`.
+6. **Trust.** Workspace trust gates the project `.codex/` directory (config, hooks, roles), and per-hook hash trust (`trusted_hash`) gates each hook's execution — a hook whose current hash is not trusted does not run. `AGENTS.md` and `.agents/skills` load regardless of trust.
+7. **Metering is unavailable.** Codex dispatches write no token-ledger rows; `token-ledger.sh` logs a `codex-identity … metering=unavailable` line instead. Usage is never synthesized as zero.
+8. **Not registered on Codex.** The AskUserQuestion autonomy guard (Codex's equivalent tool is `request_user_input`), the git pre-commit hooks (not installed by `--host codex`), and `.codex/rules/**` command rules (deferred under EPIC-058).
+9. **Generated hook copies.** The Codex hook files (`.codex/hooks/*.sh`, `.codex/hooks/lib/harness.sh`) are byte-identical copies of the canonical Claude hooks, enforced by `build-codex-payload.mjs --check` in prebuild, pending EPIC-058's normalized `cleargate hook` CLI handlers.
+10. **`sprint-execution` is not installed for Codex.** Its SKILL.md mandates Claude's Workflow tool; the Codex rendering lands in STORY-058-12. Only the portable skills (`flashcard`, `sprint-dashboard`) are installed to `.agents/skills/`.
