@@ -1,3 +1,9 @@
+2026-09-26 · #clean-room #claude-p #hooks · Claude Code 2.1.283 runs hooks as /bin/sh -c with the launcher's PATH; a PATH shim reaches hooks.
+2026-09-26 · #upgrade #mcp #danger · upgrade re-pins hooks and pin_version but never .mcp.json; the MCP server keeps running the old CLI.
+2026-09-26 · #verify-install · A snapshot parsing to null/{}/[] crashed verify-install (TypeError); validate the shape, not just the JSON.
+2026-09-26 · #clean-room #env · An agent Bash exports 12 CLAUDE* vars (CLAUDE_CODE_CHILD_SESSION…); scrub every CLAUDE* before claude -p.
+2026-09-26 · #clean-room #claude-p · --setting-sources project,local still loads claude.ai MCP connectors (source claudeai); filter by name.
+2026-09-26 · #scaffold-lint #docs · scaffold-lint lints <cwd>/cleargate-planning (the frozen snapshot), not cleargate-cli/scaffold.
 2026-09-26 · #verify-install #qa #fail-closed · <h>.no-verifier must gate on installed too; --host h registered-not-installed fired it.
 2026-09-26 · #clean-room #claude-p · An S1 canary Edit target must be a real `cleargate new` item; an arbitrary file fails stamp+gate+ingest.
 2026-09-26 · #test-harness #worktree · An outer worktree has no gitignored cleargate-cli/; META_ROOT tests needing it ENOENT there.
