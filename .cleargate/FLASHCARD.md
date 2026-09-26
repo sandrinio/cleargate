@@ -1,3 +1,5 @@
+2026-09-26 · #test-harness #backfill #danger · push-hierarchy.node.test.ts runs live backfill_hierarchy.mjs over the real <cli>/.. corpus; revert pending-sync after.
+2026-09-26 · #test-harness #two-repo · Parity is not only S1c: wiki-ingest-sprint-report S14 cmps live vs canonical close_sprint.mjs; red in a pre-contract wt.
 2026-09-26 · #test-harness #codex · JSON.stringify turns newlines into a literal \n; a (?<![\w-]) lookbehind then sees 'n'. Tokenize parsed strings.
 2026-09-26 · #codex #tpv · spawn_agent agent_type.description lists roles one per line ('<name>: {<desc>}'), not a comma list; fixtures need it.
 2026-09-26 · #test-harness #npm · npm dep in a script imported from a node_modules-less clone: createRequire(<installed pkg file>).resolve, then import().
