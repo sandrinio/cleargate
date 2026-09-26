@@ -1,3 +1,4 @@
+2026-09-27 · #surface-gate #state · update_state to the SAME state is a no-op (updated_at unchanged); do a real transition to make the gate pick an item.
 2026-09-27 · #merge #integrate · git merge-tree --write-tree --name-only HEAD main previews conflicts read-only, even on a criss-cross base.
 2026-09-27 · #integrate #twins · git checkout -- errors on an untracked new twin; discard only tracked twins, then cp overwrites the new ones.
 2026-09-27 · #qa #test-harness #concurrency · On a busy multi-lane box a backgrounded loop over many test files can starve; run them as foreground calls.
