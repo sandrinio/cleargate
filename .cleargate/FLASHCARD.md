@@ -1,3 +1,9 @@
+2026-09-26 · #test-harness #init #merge · init-fixture row append/append conflicts split into interleaved hunks; rebuild tail: upstream rows, then own.
+2026-09-26 · #tpv #test-harness · every() vs some() survives single-upstream fixtures; gate tests need a 2-upstream one-merged case + a root.
+2026-09-26 · #tpv #test-harness · A doc literal present twice masks deleting its operative copy; pin it inside its own section slice.
+2026-09-26 · #tpv #test-harness · A guard reading only live .claude can't see a canonical deletion until live re-sync; pin canonical too.
+2026-09-26 · #tpv #vocab · findExecModeVocabHits exempts launch_wave.mjs + enforcement.md by name; add a bare check scoped to new lines.
+2026-09-26 · #test-harness #skill · sprint-execution-mirror.integration diffs live vs canonical SKILL.md; any SKILL edit is named-red till re-sync.
 2026-09-26 · #cli #test-harness · A sealed test can pin a string[] return where blueprint prose implies a joined string; the test's types win.
 2026-09-26 · #clean-room #evidence · Once markdownCell escapes |, keep ' | ' between rooms; a '; ' join collides with in-room '; ' details.
 2026-09-26 · #worktree #git #danger · The stash stack is shared by every worktree of a repo: a lane's stash/pop can pop another lane's WIP. Never stash.
