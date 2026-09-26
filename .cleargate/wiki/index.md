@@ -39,6 +39,7 @@
 - [[CR-121]] (cr) — Draft — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
 - [[CR-122]] (cr) — Draft — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
 - [[CR-123]] (cr) — Approved ⚠︎ drift — Tested work items declare SPIDR coverage, and their scenarios must match it
+- [[CR-124]] (cr) — Approved — Contract-first build-then-integrate — sprints are planned and run as a dependency DAG, not collision waves
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight

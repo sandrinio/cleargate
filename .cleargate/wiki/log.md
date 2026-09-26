@@ -1890,3 +1890,8 @@
   action: "create"
   target: "BUG-098"
   path: ".cleargate/delivery/pending-sync/BUG-098_remaining_positional_frontmatter_sites.md"
+- timestamp: "2026-09-26T13:03:08.892Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "CR-124"
+  path: ".cleargate/delivery/pending-sync/CR-124_contract_first_build_then_integrate_sprint_dag.md"

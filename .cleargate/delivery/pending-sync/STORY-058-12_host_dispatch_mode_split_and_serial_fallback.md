@@ -229,7 +229,7 @@ The Codex rendering's host note maps the playbook's Claude dispatch terms to Cod
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Low Ambiguity** — owner decisions are recorded in §1.4. Readiness is not implementation or runtime evidence; verification and DoD remain unchecked.
+**Current Status: 🔴 High Ambiguity** — reset 2026-09-26 by [[CR-124]] (the dispatch contract must carry build/integrate phases; same sprint-execution §C.0 surface); restored when the SPRINT-41 remainder re-plan amends this story. Owner decisions are recorded in §1.4. Readiness is not implementation or runtime evidence; verification and DoD remain unchecked.
 
 - [x] Gherkin scenarios completely cover all detailed requirements in §1.2.
 - [x] Implementation Guide (§3) maps to specific, verified file paths from the approved Epic and verified codebase grounding.

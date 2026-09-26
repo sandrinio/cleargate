@@ -209,7 +209,7 @@ developer_instructions = """
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Low**
+**Current Status: 🔴 High Ambiguity** — reset 2026-09-26 by [[CR-124]] (contract-first sprint DAG changes the architect-synth/reader and sprint-execution texts this story translates for Codex); restored when the SPRINT-41 remainder re-plan amends this story.
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

@@ -194,7 +194,7 @@ Feature: Parallel wave scheduling
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Ready for Decomposition**
+**Current Status: 🔴 High Ambiguity** — reset 2026-09-26 by [[CR-124]], which reverses two out-of-scope lines (per-story DAG; predicate change). Re-scope before decomposition.
 
 Requirements to pass to Green (Ready for Coding Agent):
 - [x] `approved: true` is set in the YAML frontmatter.
