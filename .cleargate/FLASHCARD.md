@@ -1,3 +1,5 @@
+2026-09-26 · #verify-install #qa #fail-closed · <h>.no-verifier must gate on installed too; --host h registered-not-installed fired it.
+2026-09-26 · #clean-room #claude-p · An S1 canary Edit target must be a real `cleargate new` item; an arbitrary file fails stamp+gate+ingest.
 2026-09-26 · #test-harness #worktree · An outer worktree has no gitignored cleargate-cli/; META_ROOT tests needing it ENOENT there.
 2026-09-26 · #cli #help · cli.ts configureHelp.visibleCommands ignores hidden:true — stamp still shows in top-level help; hidden is inert.
 2026-09-26 · #test-harness #tpv · A section() slice that keeps its heading line makes 'body names X' vacuous when the heading names X.
