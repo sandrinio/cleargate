@@ -132,7 +132,8 @@
       "frozen_exports": [
         "scaffold/core/.cleargate/scripts/dispatch_serial.mjs: SERIAL_EXIT, sprintBranchFor, serialLogPath, readVerdictLog, nextAction, dispatchSerial, plus the next/record CLI (M6 AD-M6-4)",
         "scaffold/core/.cleargate/scripts/launch_wave.mjs: validateVerdicts(verdicts, { mode: 'wave' | 'serial' })",
-        "scripts/codex-sprint-execution.mjs: CODEX_SKILL_BANNED, CODEX_SKILL_REPLACEMENTS, renderCodexSprintExecution",
+        "scripts/build-codex-payload.mjs: CODEX_SKILL_BANNED, CODEX_SKILL_REPLACEMENTS, renderCodexSprintExecution, CodexRenderError",
+        "scaffold/core/.cleargate/scripts/lib/flashcard-gate.mjs: cardHash, flaggedCards, reportFiles, pendingFlashcards",
         "src/hosts/types.ts: DispatchMode and HostAdapter.dispatchMode; src/hosts/registry.ts: SERIAL_DISPATCH_SURFACE"
       ],
       "change_rule": "Same as C1.",

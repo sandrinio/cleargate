@@ -1,3 +1,7 @@
+2026-09-26 · #codex #skill · codex prompt-input folds a multi-line 'description: |' onto one entry line; codexSkillsVerdict's per-line regex matches.
+2026-09-26 · #test-harness #codex · 5 sealed tests copy build-codex-payload.mjs alone into scratch/scripts; a sibling ./x.mjs import breaks them — inline.
+2026-09-26 · #docs #test-harness · codex-enforcement-delta pins the Index line after §15 to be the §16 row: add later rows after §16, never after §15.
+2026-09-26 · #flashcard-gate #regex · bash ERE '.' matches \r but JS '.' does not: port [[:space:]]/'.' as [ \t\n\v\f\r]/[\s\S] or CRLF cards diverge.
 2026-09-26 · #tpv #codex · Whole-token role check over codex's listing false-passes: role descriptions name other roles. Strip {…} bodies first.
 2026-09-26 · #tpv #test-harness · Pick each one-missing negative by what else names that role; dropping 'reporter' kills only some().
 2026-09-26 · #codex #test-harness · additional_tools items carry role:'developer'; a role check wider than properties.agent_type counts it.
