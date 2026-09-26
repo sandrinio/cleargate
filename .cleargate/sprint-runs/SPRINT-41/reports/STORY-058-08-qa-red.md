@@ -497,4 +497,80 @@ bare `cleargate` — tests only, per the dispatch's SMOKE RULE.
 flashcards_flagged:
   - "2026-09-26 · #qa-red #verify-install · A single test() with an internal loop over sub-cases keeps a plan's pinned test count exact; five separate test()s would have over-counted by 4."
 
+## U9d (ARCH-R2)
+
+**Trigger.** QA round 2 and the Architect post-flight round 2 (`ARCH-R2:
+PASS`) both passed Dev commit `fc0184d`. The post-flight's own mutant sweep
+against M4-A14 R-B (`reports/STORY-058-08-arch.md` §"Round 2 — M4-A14",
+"Test adequacy" table) found the sealed 41 tests inadequate for R-B's
+per-clause guarantees: six R-B mutants survive (B1, B2, B3a, B3b, B5, B6),
+three of which matter (B1, B3a/B3b, B5 — each brings back a crash, or rejects
+every legacy field install that has no `hosts` field). The Architect requires
+this regression guard, U9d, before the DevOps merge. It is a green-on-arrival
+guard, not a red — no Dev change is needed, per the Architect's own
+measurement on `fc0184d`.
+
+**Commit.** Cli repo `story/STORY-058-08`, one commit on top of `fc0184d`:
+
+```
+6251f06 qa-red(STORY-058-08): U9d shape-guard regression guard (ARCH-R2)
+```
+
+Edited only `test/commands/verify-install.red.node.test.ts` (`git diff
+--numstat`: `37  0  test/commands/verify-install.red.node.test.ts` — no other
+file touched; `git status --porcelain` showed only that file plus the
+pre-existing untracked `cleargate-0.25.0.tgz`, untouched).
+
+**Verbatim paste, confirmed.** The fenced `ts` block from
+`reports/STORY-058-08-arch.md` §"Round 2 — M4-A14" (beginning `// ── U9d —
+snapshot shape guard, one clause at a time (M4-A14 R-B)`) was pasted
+byte-for-byte immediately after the U9c `describe` block's closing `});`.
+Verified programmatically: extracting the fenced block from the arch report
+and searching for it as an exact substring of the edited test file returns a
+match — no re-typing drift. It uses only pre-existing helpers named in the
+Architect's own note (`loadVerifyInstall`, `freshInstall`, `snapshotPath`,
+`PAYLOAD_DIR`, `VERSION`, `defaultHostRegistry`, `stubDoctor0`); nothing new
+was added to the file's top-level helper set.
+
+### Counts, SOLO, twice
+
+| File | Run 1 | Run 2 | Expected |
+|---|---|---|---|
+| `verify-install.red.node.test.ts` | 42 tests, 42 pass, 0 fail | 42 tests, 42 pass, 0 fail | 42/42 — U9d is green on arrival by design |
+| `verify-install-cli.red.integration.node.test.ts` | 5 tests, 5 pass, 0 fail | 5 tests, 5 pass, 0 fail | 5/5, unchanged |
+| `clean-room-verification-doc.red.node.test.ts` (`CLEARGATE_META_ROOT=.worktrees/STORY-058-08`) | 9 tests, 9 pass, 0 fail | 9 tests, 9 pass, 0 fail | 9/9, unchanged |
+
+`npm run typecheck`: exit 0, both before and after.
+
+**Baseline hash** (`/private/tmp/cg-s41-m2-init-baseline`, 425 files, absolute
+paths): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` —
+identical before and after (never touched; no §3.1 change, per the
+Architect's note).
+
+### Outer status
+
+**Before:**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+**After:**
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+Identical — no outer write of any kind this dispatch (this report edit is the
+only outer-tree change, and it is uncommitted, per instructions). Cli repo at
+end: only the pre-existing untracked `cleargate-0.25.0.tgz`; HEAD `6251f06`
+on `story/STORY-058-08`. No build, stash, `--no-verify`, amend, or bare
+`cleargate` — tests only, per the SMOKE RULE.
+
+flashcards_flagged: []
+
 STATUS=done
