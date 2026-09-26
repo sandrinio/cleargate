@@ -1,3 +1,11 @@
+2026-09-26 · #test-harness #tpv #clean-room · A test that runs hooks in a room it later byte-compares can never pass; probes need their own room.
+2026-09-26 · #test-harness #tpv · A boolean verdict input (ledgerHasQaRow) moves the check into untested code; pass raw rows to the pure function.
+2026-09-26 · #test-harness #tpv · Positive-only verdict fixtures let 18 of 22 weakened PASS conditions survive; write one negative case per condition.
+2026-09-26 · #test-harness #tpv · Fixture rows built from a plan-list constant hide an equality pin; build them from the module's own exported list.
+2026-09-26 · #typecheck #test-harness · cleargate-cli npm run typecheck covers src/** only; TS errors in test files never surface there.
+2026-09-26 · #frontmatter #clean-room · cleargate new epic writes epic_id with double quotes; stamp re-serializes it bare. Id matchers must accept both.
+2026-09-26 · #test-harness #tpv · In a scratch clone without dist/, tests that spawn dist/cli.js report cancelled, not failed. Build dist there first.
+2026-09-26 · #orchestrator #tpv · Extract a report-embedded patch with the report's own awk recipe; a hand-picked line range can be off by one.
 2026-09-26 · #qa-red #clean-room #test-harness · A byte-neutral story's e2e reds must mark already-green anchor cases, not force them red.
 2026-09-26 · #qa-red #test-harness · A prose-only DI shape (claudeLiveVerdicts inputs) must be invented and flagged as an ambiguity, not pinned silently.
 2026-09-26 · #test-harness #tpv · A multi-body shape-guard red where every body fails the first clause leaves the later clauses untested.
