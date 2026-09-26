@@ -93,9 +93,9 @@ STORY-058-10 frontmatter deferred_verification:
 - Do not edit `close_sprint.mjs`, `claude-baseline.mjs`, `evidence.mjs`, or `checkCodexEvidence`. `scripts/clean-room/**` is not an artifact input (`computeArtifactInputs`), so existing Codex evidence runs stay valid.
 
 ## Task Breakdown
-- [ ] QA-Red: spawn `codex-hooks.mjs check` against a passing and a failing evidence file with `--write-result`; assert the -09 shape, `status`/`exit_code` values, `story` default and `--story` override, and that Step 2.9's predicate accepts the passing file
-- [ ] Write the -09 shape in `check --write-result` (`story`, `command`, `ran_at`, `exit_code`, `status`, `reason`); add `--story` to the usage line
-- [ ] Typecheck and the targeted tests; `codex-hooks-harness.red` stays 91/91
+- [x] QA-Red: spawn `codex-hooks.mjs check` against a passing and a failing evidence file with `--write-result`; assert the -09 shape, `status`/`exit_code` values, `story` default and `--story` override, and that Step 2.9's predicate accepts the passing file
+- [x] Write the -09 shape in `check --write-result` (`story`, `command`, `ran_at`, `exit_code`, `status`, `reason`); add `--story` to the usage line
+- [x] Typecheck and the targeted tests; `codex-hooks-harness.red` stays green (90/90 on main)
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/codex-hooks-write-result.red.node.test.ts` (solo).

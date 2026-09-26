@@ -1,3 +1,4 @@
+2026-09-27 · #qa #clean-room · checkCodexEvidence reports a stale scripted run before a missing live run; staleness masks the live gap.
 2026-09-27 · #changelog #clean-room · scripts/** is not in package.json files; harness-only fixes take no CHANGELOG line.
 2026-09-27 · #qa-red #clean-room · codex-hooks-harness.red is 90/90 at e720592, not the 91/91 an earlier dispatch cited.
 2026-09-27 · #merge #init-fixture · BSD diff offsets an insertion by its shared '},' suffix; prove a splice by cmp of the '>' streams, not hunk offsets.
