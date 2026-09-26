@@ -1,3 +1,5 @@
+2026-09-26 · #test-harness #baseline · M2 baseline hash lines embed absolute paths: run find on the absolute baseline dir, never cd + find .
+2026-09-26 · #locator #test-harness · dist bundles frontmatter-locator (no dist/lib file); run node --import tsx on src/lib/frontmatter-locator.ts.
 2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
 2026-09-26 · #worktree #test-harness · An old-base worktree reds canonical-live-parity 5d once live hooks re-sync from newer main: base lag.
 2026-09-26 · #qa #gate · gate check skips the frontmatter rewrite when cached_gate_result is current; verify via git diff, not prose.
