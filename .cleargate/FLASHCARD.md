@@ -1,3 +1,4 @@
+2026-09-26 · #test-harness #concurrency · Concurrent heavy test:file batches can flake a green test; re-run solo before calling it a regression.
 2026-09-26 · #test-harness #baseline · M2 baseline hash lines embed absolute paths: run find on the absolute baseline dir, never cd + find .
 2026-09-26 · #locator #test-harness · dist bundles frontmatter-locator (no dist/lib file); run node --import tsx on src/lib/frontmatter-locator.ts.
 2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
