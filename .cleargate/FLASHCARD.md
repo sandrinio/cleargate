@@ -1,3 +1,6 @@
+2026-09-26 · #qa #worktree #danger · "Built CLI not found" in a worktree means run npm run build there first; check dist/cli.js before calling a regression.
+2026-09-26 · #qa #test-harness · Prove a failure pre-existing without checkout: git archive <base-sha> into scratch, build there, compare results.
+2026-09-26 · #qa #test-harness #danger · A K6 allow-list names touchable files, not touched ones; diff --name-only vs base finds a required file left unedited.
 2026-09-26 · #test-harness #clean-room #danger · New GATING_CHECKS ids need the live driver to emit the rows; helpers alone make decideRun FAIL 'missing gating row'.
 2026-09-26 · #plan #boundary · A precondition grep must hit the driver that wires a helper, not the module defining it, or it passes unwired.
 2026-09-26 · #codex #test-harness · Drive Codex sessions under enforce: warn lets a blocked edit complete, so edit-allow and edit-targets fail open unseen.
