@@ -171,14 +171,14 @@ developer_instructions = """
 
 ## Task Breakdown
 
-- [ ] QA-Red: codegen, portable skills, shim, 9-hook Claude parity and enforcement-doc reds; roles/skills harness verdicts; snapshots; M2 parity rows and the harness.sh sanctioned addition
-- [ ] Extend build-codex-payload.mjs: 11 .codex/agents/*.toml (name, description, developer_instructions; no model, no tools; GENERATED header) and flashcard + sprint-dashboard copied byte-identical to scaffold/core/.agents/skills/
-- [ ] Classify .codex/agents/** (agent) and .agents/skills/** (skill) in TIER_RULES
-- [ ] Add .claude/hooks/lib/harness.sh and adopt it in 8 hooks with each script's current precedence; pre-commit.sh unchanged; regenerate the Codex copies
-- [ ] Prove the shim is a no-op under Claude across all 9 hooks (frozen pre-shim copies vs current, identical Claude payloads)
-- [ ] Record the Codex enforcement deltas in cleargate-enforcement.md §16 (canonical and outer twin)
+- [x] QA-Red: codegen, portable skills, shim, 9-hook Claude parity and enforcement-doc reds; roles/skills harness verdicts; snapshots; M2 parity rows and the harness.sh sanctioned addition
+- [x] Extend build-codex-payload.mjs: 11 .codex/agents/*.toml (name, description, developer_instructions; no model, no tools; GENERATED header) and flashcard + sprint-dashboard copied byte-identical to scaffold/core/.agents/skills/
+- [x] Classify .codex/agents/** (agent) and .agents/skills/** (skill) in TIER_RULES
+- [x] Add .claude/hooks/lib/harness.sh and adopt it in 8 hooks with each script's current precedence; pre-commit.sh unchanged; regenerate the Codex copies
+- [x] Prove the shim is a no-op under Claude across all 9 hooks (frozen pre-shim copies vs current, identical Claude payloads)
+- [x] Record the Codex enforcement deltas in cleargate-enforcement.md §16 (canonical and outer twin)
 - [ ] Real Codex session: roles listed and delegable, portable skills discovered (harness scripted on the branch; RS-4 scripted + live)
-- [ ] Integrate: merge cli main after STORY-058-10 merges; regenerate codex copies; re-verify; QA-Verify (scripted harness, --container) and post-flight on the integrated tree
+- [x] Integrate: merge cli main after STORY-058-10 merges; regenerate codex copies; re-verify; QA-Verify (scripted harness, --container) and post-flight on the integrated tree
 
 ## 4. Quality Gates
 
