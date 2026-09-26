@@ -165,4 +165,63 @@ flashcards_flagged: [
 ]
 ```
 
+## Re-seal (TPV R1–R7)
+
+**Commit:** cli repo, branch `story/BUG-085`:
+
+```
+8425816 qa-red(BUG-085): re-seal R1-R7 per TPV
+```
+
+Applied `/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/75d958ba-2473-408d-b4db-e15b774ad28f/scratchpad/reseal-085.patch` verbatim via `git apply` (no edits beyond the patch). Patch sha256 `7adc1598178c7b0d412eba52ff4feca516424044ddf47ffb70f3e2e5bc5989a5` — matched. `git apply --check` was clean at `ec29f45`. `git apply --stat`: 4 files, +132/−24 — matched exactly. Files touched: `test/commands/doctor-drift-guard.node.test.ts`, `test/helpers/init-fixture.ts`, `test/hooks/pending-task-sentinel-cards.red.node.test.ts`, `test/lib/drift-check-scaffold.red.node.test.ts` — nothing else staged or committed.
+
+Post-apply hash spot-checks (both landed verbatim as the TPV diff shows): `BUG085_SENTINEL_BASELINE = 'b1ab7702066788282302efa160c7b5075adec971ec1318112d13a4b949f9636e'` in `init-fixture.ts:463`; the `validate_state.mjs` row's `currentHash` returns the literal `'9702f9741f4d89f6c4a32aadd59a70ffb4cf6b455abd592f953d083ec3958fae'` at `init-fixture.ts:527`; the R2 guard `if (!storedEntry && !recordEntry && !fs.existsSync(treeDir)) continue;` at `init-fixture.ts:613`.
+
+### Counts against the expected table
+
+| File | Expected | Actual (run 1) | Actual (run 2) | Match |
+|---|---|---|---|---|
+| `test/lib/drift-check-scaffold.red.node.test.ts` | 2/24 | 2/24 | 2/24 | yes |
+| `test/commands/doctor-drift-guard.node.test.ts` | 3/13 (pre-BUG-085 dist) | 3/13 | 3/13 | yes |
+| `test/hooks/pending-task-sentinel-cards.red.node.test.ts` | 2/13 | 2/13 | 2/13 | yes |
+| `test/scaffold/canonical-live-parity.red.integration.node.test.ts` | 10/11 | 10/11 | 10/11 | yes |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` | 0/5, every failure the sentinel row's "current hash mismatch" | 0/5, all 5 failures name `.claude/hooks/pending-task-sentinel.sh": current hash mismatch` | — (single run; compare-mode, deterministic by construction — see baseline-hash-unchanged below) | yes |
+| `test/commands/init-host-parity.red.integration.node.test.ts` | 0/15, same reason | 0/15, all 15 failures name the same "current hash mismatch" | — | yes |
+| `test/commands/init-host-snapshot.red.node.test.ts` | 13/13 | 13/13 | — | yes |
+| Sealed -03..-07 contract files | 19/11/10/4/18/13/17/3/6/10/6/16/4 | 19/11/10/4/18/13/17/3/6/10/6/16/4 | — | yes |
+
+**No mismatch.** Every count reproduced exactly, on the first run, with the four re-seal-touched files independently re-run solo a second time (identical: drift-check-scaffold 2/24, doctor-drift-guard 3/13, pending-task-sentinel-cards 2/13, canonical-live-parity 10/11 both times).
+
+`npm run typecheck` → exit 0.
+
+Baseline hash (`find /private/tmp/cg-s41-m2-init-baseline -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256`, absolute paths):
+- Before: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files)
+- After: `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` (425 files) — unchanged.
+
+### Outer status
+
+Before:
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+After (identical — no re-seal pollution):
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+cli status, before and after: `?? cleargate-0.25.0.tgz` only (pre-existing, untouched). No writing CLI smoke was run.
+
+### flashcards_flagged
+
+flashcards_flagged: []
+
+Nothing new surfaced in this step beyond what the TPV report already logged — I verified the patch hash, applied it verbatim, and reproduced every expected count with zero mismatches.
+
 STATUS=done
