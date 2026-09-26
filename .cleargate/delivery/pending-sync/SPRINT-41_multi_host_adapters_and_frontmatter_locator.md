@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-26T02:55:19Z
+updated_at: 2026-09-26T05:17:56Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 6c4a0444-dirty
+updated_at_version: cb283bab-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -486,6 +486,23 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
   - **M3 close — browser check** (`.playwright-mcp/s41-m3-close-dashboard.png`): M3 4/4, 11/17 (65%), 0 in flight, no worktrees.
     - Dashboard observations for the Reporter: `UNATTRIBUTED` holds 15.7B of 22.7B tokens; the "Execution timeline" panel says "No execution log yet" despite a populated §4; `/data` 404s come from the static `http.server`.
   - **Next:** M4 (-08, -09). The live witness for the re-synced sentinel (R10) is the next Agent dispatch.
+
+- 2026-09-26T05:25:00Z · STORY-058-08 · **wave12.**
+  - **Live witness R10 (RS-BUG085):** the first dispatch after the re-sync wrote `.pending-task` with `agent_type: qa`; no flashcard-gate block.
+  - **QA-Red** (cli `81c05e9`, 21 min): 36/36 red.
+  - **TPV REJECTED** (39 min, `arch_bounces=1`): 22 mutants survived; ruling #2 required a direct `findCleargatePackageRoot` test (U17). Re-seal R1–R17 (patch `30e6ff85`); M4-A5..A13; H1–H24.
+  - **Re-seal** (cli `549fdaa`): 38/5/9 red; the orchestrator reproduced the unit file.
+  - **Dev** (cli `9ac0fa3` + outer `adde0a23`, 23 min): 38/38, 5/5, 9/9; tsx smoke 12/12 PASS.
+  - **QA FAIL** (`qa_bounces=1`): `<h>.no-verifier` fired for a registered-but-not-installed `--host` (H17). The clean-room DoD run (the doc followed verbatim, packed artifact, a real haiku S1 session) PASSED with 0 structural doc gaps and 1 fold-back.
+  - **Post-flight FAIL** (`arch_bounces=2`): the same H17 defect, plus an R-B crash on a snapshot that parses to `null`, `{}`, `[]` or a string, plus doc inaccuracies. Remediation M4-A14 R-A/R-B/R-C; V9/V12 resolved; M4-A15..A23 for -09.
+  - **Round 2:** reds U9c/U11e/U11f (cli `4285391`); Dev fix (cli `fc0184d` + outer `31f266f2`). QA-R2 PASS (R-B re-probed in a new clean-room container built from `fc0184d`). ARCH-R2 PASS, requiring the U9d regression guard (cli `6251f06`, 42/42 green on arrival).
+  - **Filed as Draft: BUG-095 (P2).** Upgrade never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block (FU-4).
+  - **DevOps:** merged outer `cb283bab` and cli `1b742b3`.
+    - Suite 3038/3036/0/2, exact.
+    - BD: payload identical to the post-085 baseline (`e44154af`); verify-pack OK (196).
+    - Real-dist smokes: 12/12 PASS; a deleted payload file is named; a `null` snapshot gives parseable JSON.
+    - Worktree and branches removed.
+  - **Clean-room containers left for evidence:** `~/Documents/Dev/cg-cleanroom-20260926T042955Z-qa08/` and `…T050106Z-qa08-r2/`.
 
 ---
 
