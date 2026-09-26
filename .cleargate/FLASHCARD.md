@@ -1,3 +1,7 @@
+2026-09-26 · #close-gate #frontmatter · 2.6c flips a phantom-led parent as a no-op write (no status in phantom) yet archives it and logs Completed.
+2026-09-26 · #close-gate #frontmatter · close_sprint 2.6c: one parent whose framing throws aborts every remaining flip, logged as 'No frontmatter'.
+2026-09-26 · #frontmatter #crlf · JS . and m-flag $ stop before \r: a one-line replace in a CRLF YAML slice keeps CRLF; span.eol not needed.
+2026-09-26 · #review #locator · Port-parity review: strip TS types and non-null !, then diff bodies; an empty diff backs the fixture table.
 2026-09-26 · #test-harness #two-repo · A cli worktree on a later contract (C4) legitimately diffs an outer worktree cut pre-merge — name it, don't chase it.
 2026-09-26 · #test-harness #hooks #tpv · 11 hook tests regex-patch REPO_ROOT= into tmp copies; a hook that sources lib/ needs lib/ copied beside it.
 2026-09-26 · #tpv #regex · JS regex has no \Z: without /u it is a literal Z. End of input is (?![\s\S]).
