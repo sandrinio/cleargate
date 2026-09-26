@@ -1,3 +1,8 @@
+2026-09-26 · #frontmatter #sprint-init · sprint.ts waiver/stamp writers re-dump the located YAML via yaml.dump: template inline # comments are dropped.
+2026-09-26 · #frontmatter #wiki · audit-status --fix preview greps the first status: in the WHOLE file; <instructions> example lines are shown.
+2026-09-26 · #frontmatter #locator · withFrontmatterYaml rejoins lines with span.eol: a mixed-EOL block is no identity splice; skip no-op writes.
+2026-09-26 · #frontmatter #close · 2.6d: a malformed-framing Done story throws out of the loop; every later story in state.json stays unflipped.
+2026-09-26 · #review #test-harness · Old-vs-new diff: git archive <base> src into scratch, symlink node_modules, import both trees from one tsx .mts.
 2026-09-26 · #test-harness #concurrency · ps aux for node --test during parallel lanes matches OTHER agents' processes on the shared machine.
 2026-09-26 · #test-harness #merge · Rebuild a tail append/append conflict from each side's git show tip, not the hunks; diff vs an independent rebuild.
 2026-09-26 · #codex #skill · codex prompt-input folds a multi-line 'description: |' onto one entry line; codexSkillsVerdict's per-line regex matches.
