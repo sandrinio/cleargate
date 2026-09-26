@@ -174,8 +174,10 @@ claude -p "<prompt>" --setting-sources project,local --permission-mode bypassPer
 - `--permission-mode bypassPermissions` still fires every PreToolUse hook —
   it changes what a denial does to the tool call, not whether the hook runs.
 
-Two session prompts drive the checks (verbatim wording lives in
-STORY-058-09's harness once it lands):
+Two session prompts drive the checks. The five F7 edits are applied
+programmatically by `authorProbeEpic` in
+`cleargate-cli/scripts/clean-room/probe-items.mjs`, before either session
+starts:
 - **S1** — author the item first with `cleargate new epic <slug>` (never an
   arbitrary file: a file that is not a real work item fails stamp, gate
   *and* ingest all at once, which proves nothing about the hook cycle).
@@ -190,9 +192,16 @@ STORY-058-09's harness once it lands):
   `PreToolUse:Edit` and `PostToolUse:Edit` (the stamp-and-gate cycle). An
   unauthored fresh scaffold (the five edits skipped) logs `gate=1` by
   design (F7) — that is expected, not a defect, so `stamp=0`/`ingest=0` are
-  this check's real pass criteria unless the item was also authored.
+  this check's real pass criteria unless the item was also authored. The
+  exact prompt: "Use the Edit tool exactly once on the file `<abs epic
+  path>` to replace the text 'Hardcode it.' with 'Hardcode it for now.'. Do
+  not use any other tool except Read if Edit requires it. Then reply DONE."
 - **S2** — one `Agent` dispatch of the `qa` subagent, to exercise
-  `PreToolUse:Agent` and `SubagentStop` (dispatch attribution).
+  `PreToolUse:Agent` and `SubagentStop` (dispatch attribution). The exact
+  prompt: "Use the Agent tool exactly once with subagent_type \"qa\" and
+  the prompt \"Reply with exactly the word OK and nothing else. Do not use
+  any tools.\" Do not retry and do not use any other tool. Then reply
+  DONE."
 
 What each `claude.live.*` id reads from the stream:
 - `claude.live.session-start` — a `SessionStart` `hook_response` with
@@ -222,6 +231,9 @@ What each `claude.live.*` id reads from the stream:
 runs the same hook cycle, and `/agents` lists the installed agents. Workspace
 trust is skipped entirely in `-p` (headless) mode.
 
+Automated by `cleargate-cli/scripts/clean-room/claude-baseline.mjs run`
+(STORY-058-09); `check` verifies the recorded evidence.
+
 ## 6. Record the evidence
 
 Record one table per run: `id | room | PASS/FAIL | pointer`, one row per
@@ -232,8 +244,8 @@ Claude baseline goes to
 `.cleargate/sprint-runs/<sprint>/clean-room-evidence.md`.
 
 Automated by `cleargate-cli/scripts/clean-room/claude-baseline.mjs run`
-(STORY-058-09) once it lands; `check` verifies the recorded evidence against
-the current artifact inputs.
+(STORY-058-09); `check` verifies the recorded evidence against the current
+artifact inputs.
 
 ## Other hosts
 
