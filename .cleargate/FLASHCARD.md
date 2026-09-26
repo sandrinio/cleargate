@@ -1,3 +1,6 @@
+2026-09-26 · #codex #test-harness #danger · macOS /tmp→/private/tmp breaks a raw import.meta.url vs argv[1] entry-point check; realpath both sides.
+2026-09-26 · #toml #codex · toml-eslint-parser throws ParseError on a reopened [table] (dupe keys); no separate ambiguity check needed.
+2026-09-26 · #toml #codex · TOMLTable/TOMLKeyValue .range excludes the trailing newline; range-replace edits must add separators.
 2026-09-26 · #qa-red #tpv · A patch's exact sha256 + `git apply --check` clean + staged-file-list equality is a fast 3-point re-seal integrity gate.
 2026-09-26 · #qa-red #test-harness · Sum the solo per-file fail counts; an exact match with the full-suite fail total proves no cross-file regression.
 2026-09-26 · #qa-red #test-harness #danger · A test's intentional stderr Error (graceful-skip cases) pollutes a stack-trace grep; check pass/fail, not presence.
