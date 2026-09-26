@@ -1,3 +1,10 @@
+2026-09-26 · #frontmatter #correction · BUG-098 merged: sprint.ts writers, 2.6d, parent-approved, slug, intake, doctor, 2 scripts read past <instructions>.
+2026-09-27 · #codex #clean-room · codexHookVerdicts hardcodes -10 probe names (EPIC-001_cleanroom_probe.md, src/cg-probe.ts); reuse them.
+2026-09-27 · #contract #worktree · A contract on an owner's Dev commit lacks main's later merges; FF it to the owner's integrated commit.
+2026-09-27 · #close #deferred-verify #danger · codex-hooks.mjs check --write-result omits status/exit_code; close_sprint Step 2.9 reads it as status=unknown.
+2026-09-27 · #test-harness #routes · A route marker that is a substring of another (CG-X vs CG-X-ALLOW) is unreachable under first-match routing.
+2026-09-27 · #codex #trust · Under human TUI trust no untrusted hooks/list is observable; grade discovery on the trusted listing only.
+2026-09-27 · #gates #existing-surfaces · Existing Surfaces paths must exist on cli main now; cite unmerged contract files by bare filename (no slash).
 2026-09-27 · #surface-gate #state · update_state to the SAME state is a no-op (updated_at unchanged); do a real transition to make the gate pick an item.
 2026-09-27 · #merge #integrate · git merge-tree --write-tree --name-only HEAD main previews conflicts read-only, even on a criss-cross base.
 2026-09-27 · #integrate #twins · git checkout -- errors on an untracked new twin; discard only tracked twins, then cp overwrites the new ones.

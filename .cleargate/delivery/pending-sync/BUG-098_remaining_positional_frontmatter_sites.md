@@ -104,7 +104,7 @@ The exact site list and test shapes are pinned by `plans/M5-fixwave.md` §BUG-09
 - [x] sprint.ts: parseFileFrontmatter through locateFrontmatter; waiver, stampFile and stampSprintClose splice via rewriteFrontmatter; malformed YAML → no write
 - [x] Fix setFrontmatterFieldAtomic and readFrontmatterFromFile the same way
 - [x] Fix doctor :257/:854, frontmatter-merge, slug, contradict, wiki-audit-status, intake
-- [ ] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror at integration (after merging sprint/S-41, never during the build; FW-A17 item 3), in one outer commit
+- [x] prep_reporter_context.mjs and dedupe_frontmatter.mjs import locateFrontmatterFence (needs BUG-090); byte-copy both to the live mirror at integration (after merging sprint/S-41, never during the build; FW-A17 item 3), in one outer commit
 - [x] Typecheck and the targeted tests
 
 ## 5. Verification Protocol (The Failing Test)

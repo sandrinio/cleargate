@@ -124,7 +124,7 @@
       "id": "C3",
       "branch": "contract/S-41-loop",
       "repo": "cli",
-      "base": "2695eea",
+      "base": "9a94ff2",
       "owner_story": "STORY-058-12",
       "skeleton_commit": "None. The branch points at the owner's Developer commit.",
       "created_by": "orchestrator: git -C .../cleargate-cli branch contract/S-41-loop <-12 pass-B SHA>",
@@ -140,7 +140,7 @@
       "consumers": [
         "STORY-058-13"
       ],
-      "base_at": "<-12 pass-B Developer SHA, recorded in sprint §4>"
+      "base_at": "9a94ff2 = story/STORY-058-12 INTEGRATE (2695eea + cli main 0399beb), fast-forwarded 2026-09-27 per plans/M6.md F6.1"
     }
   ],
   "stories": {
@@ -290,7 +290,7 @@
       ]
     },
     "BUG-098": {
-      "state": "integrated (QA+post-flight PASS on 9b2abf0; re-integrating onto cli main 0399beb after STORY-058-11 merge)",
+      "state": "merged",
       "base": "contract/S-41-fence",
       "upstream": [
         "BUG-090"
@@ -308,7 +308,7 @@
       ]
     },
     "STORY-058-12": {
-      "state": "dev done (A 53028ea, B 2695eea = C3); integrating onto cli main 0399beb",
+      "state": "integrated 9a94ff2 (post-flight running; re-integrates onto cli main e720592 after BUG-098 merge)",
       "base": "contract/S-41-dispatch",
       "upstream": [
         "STORY-058-10",
@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "entry re-derivation against C3 2695eea",
+      "state": "QA-Red on contract/S-41-loop = 9a94ff2 (plans/M6.md F-section)",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
@@ -349,7 +349,8 @@
       "boundary_after": [
         "BD",
         "RS-CLOSE"
-      ]
+      ],
+      "steps_note": "RS-4L, then step L (plans/M6.md F10), between post-flight and DevOps; merge lane frozen from step L to this merge"
     }
   },
   "waves": [
@@ -589,7 +590,7 @@
     {
       "id": "RS-4L",
       "after": "RS-4 and owner action OD1",
-      "blocks": "RS-CLOSE only",
+      "blocks": "RS-CLOSE; run before STORY-058-13 step L (plans/M6.md F10 L0)",
       "action": "codex-hooks.mjs run --provider live --codex-home <DEDICATED_CODEX_HOME> --label 'RS-4L live' -> PASS, then codex-hooks.mjs check exit 0. Run it in the harness lane, from the cli main checkout, at any point before RS-CLOSE."
     },
     {
