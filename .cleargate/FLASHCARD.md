@@ -1,3 +1,6 @@
+2026-09-26 · #qa-red #test-harness · An unregistered CLI subcommand exits 1 via commander, not your parser; assert stderr lacks 'unknown command'.
+2026-09-26 · #qa-red #codex #hooks · Raw Codex apply_patch/spawn payloads make today's Claude-only hooks fail open (0 vs 1/2): real reds, no fixture.
+2026-09-26 · #qa-red #test-harness · compareInstallTrees rule (c) flags noflag top-level names; put symlink fixtures under .claude/, not at root.
 2026-09-26 · #test-harness #snapshots · init.node.test.ts holds rendered hook locks (pre-edit-gate, stamp-and-gate, session-start).
 2026-09-26 · #hooks #token-ledger · token-ledger.sh exits 0 on a missing transcript_path (:88); a host branch goes before it.
 2026-09-26 · #hooks #stamp · stamp-and-gate.sh reads stdin with jq at :20; capture INPUT first or a 2nd reader gets nothing.
