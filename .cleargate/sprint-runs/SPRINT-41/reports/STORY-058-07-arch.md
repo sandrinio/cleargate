@@ -187,4 +187,104 @@ flashcards_flagged:
   - "2026-09-26 · #doctor #session-start · runSessionStart line 2 is the resolver line (6 tests pin out[1]); add new lines after it, not after the banner."
 ```
 
+## Round 2 — remediation (M3-A44)
+
+role: architect
+
+ARCH-R2: PASS. D1–D3 conform to M3-A44 and to TPV-R11 constraints 1–4. The round-1 FAIL is closed, measured: uninstall → re-init restores 7/7 hooks, and `host remove claude` → `host add claude` restores the canonical file. Nothing in the round-1 conformance table regressed.
+
+**Subject**
+- Commits: cli `story/STORY-058-07`, QA-Red R11 `4394c9b` (TPV-R11 APPROVED), then the Dev fix `384a628`. The checkout HEAD is `384a628`, with `?? cleargate-0.25.0.tgz` only.
+- `git diff --stat b146faf 384a628` touches 4 files:
+  - `CHANGELOG.md` +16
+  - `src/hosts/claude.ts` +14/−3
+  - `src/init/merge-settings.ts` +1/−1
+  - `test/commands/uninstall-reinit.red.node.test.ts` +267, added by `4394c9b` alone
+
+### 1. D1–D3 against M3-A44 and TPV-R11 constraints 1–4
+
+| Check | Verdict | Evidence |
+|---|---|---|
+| D1: unlink when `Object.keys(cleaned).length === 0`, label `.claude/settings.json`; otherwise write, label `(ClearGate hooks)` | pass | `claude.ts:222-229` is the M3-A44 block verbatim. The comment is updated. There is no other `claude.ts` change. |
+| Constraint 1: `unlinkSync` lexically inside the existing `try` | pass | `:224` sits between `removeClearGateHooks` (`:222`) and the `catch` (`:230-232`). The `Warning: could not update settings.json: …` string is unchanged. |
+| D2 / constraint 2: insertion-only against `170ac4c` | pass | `git diff 170ac4c --numstat -- src/init/merge-settings.ts` gives `55	0`. The only hunk against `b146faf` is the one re-indented line (`:92`). |
+| D3: CHANGELOG verbatim | pass | `### Added` sits above `### Fixed`. The two bullets follow the BUG-067 bullet. The text is byte-for-byte the M3-A44 spec. |
+| Constraint 3: no story-branch `dist` build for changelog-format | pass | Per the Dev report, `changelog-format` passed 5/5 against the pre-existing BD `dist`, and no build ran. |
+| Constraint 4 / E13: only the three files in the Dev commit | pass | `git diff --stat 4394c9b 384a628` lists `CHANGELOG.md`, `claude.ts` and `merge-settings.ts`, and nothing else. `4394c9b` adds only the R11 file. |
+
+### 2. The FAIL finding is closed (measured at `384a628`)
+
+I re-ran my round-1 probes against the checkout's source. They wrote only under `scratchpad/arch07/room-r2.DdsHOb` and the helpers' mkdtemp directories, and each ran as one `(cd <literal dir> && …)` call.
+
+| Path | Round 1 (`b146faf`) | Round 2 (`384a628`) |
+|---|---|---|
+| fresh init → `uninstall --yes --force` → non-force `init` | `{}` survives; re-init has **2** hook commands | `settings.json` absent after uninstall; re-init has **7** hook commands (1522 bytes, the first-init file) |
+| R2 `hosts: ['all']` → `host remove claude` → `host add claude` (P2) | (not probed; the plan's R11d red) | `settings.json` absent after remove; after add, **byte-equal** to `canonicalPath('.claude/settings.json')` |
+
+The TPV's scratch-`dist` smoke (M3-A45 smoke-3 shape) also printed an empty `diff` against the payload.
+
+### 3. Round-1 conformance: no regression
+
+- **Scope.** `b146faf..384a628` changes `src` only in `claude.ts` `remove()`'s settings branch, plus one whitespace line in `mergeSettings`.
+  - The E2–E12 surfaces (`doctor.ts`, `upgrade.ts`, `uninstall.ts`, `manifest-query.ts`, `cli.ts`, `types.ts`, `settings-json-surgery.ts`) are byte-unchanged.
+  - E11's files are still untouched.
+- **E1 still holds.** `command grep -c "CLEARGATE:START\|mcpServers"` on `claude.ts` returns 0; the new comment carries neither token.
+- **Line shifts.** `claude.ts` shifts +11 after `:207` (`mergeSurgeryTarget` `:248`, `displayName` `:311`). No T11, V5/V6 or M3-A51 anchor lives in `claude.ts`, so the §"As-built resolution after STORY-058-07" tables stay valid.
+- **Counts.** The Dev count table reproduces TPV-R11's expected counts for every listed file, including R11 at 4/4, contract 19/19 and parity 5/5 and 15/15. QA-Verify re-runs them; I did not.
+- **Behaviour note, not a regression.** `executeHostRemoval` prunes empty directories before it calls `adapter.remove()` (`lifecycle.ts:234` before `:239-243`). A `.claude/` directory that `claude.remove()` empties can therefore survive `host remove claude`. That is cosmetic, and `host add claude` restores into it (measured). Pre-remediation, the `{}` file stayed anyway. Filed as FU-13.
+
+### 4. Adjacent row, FU table, M3-A45
+
+- **Adjacent Implementations row.** Unchanged: it already states "Claude `remove()` deletes an emptied `.claude/settings.json` (M3-A44)". Paste it as written in round 1.
+- **FU table deltas:**
+
+| FU | Status / finding | Target | Severity |
+|---|---|---|---|
+| FU-1 | **CLOSED** at `384a628` (D1–D3, R11a–d) | — | — |
+| FU-2 | Stands, amended by M3-A52 (below) | -07 DevOps | binding |
+| FU-11 (new) | M3-A53: the sentinel scans only the first `flashcards_flagged` block; all three `break`s end the file scan | BUG-085 (hook test 17c) and M6 / -12 (AD-M6-5) | binding |
+| FU-12 (new) | The settings-surgery `catch` is untested for both a `writeAtomic` failure and an `unlinkSync` failure (TPV mutant l survives; constraint 1 was verified by reading). Add a fault-injection red the next time `claude.remove()` is touched. | Close follow-up | low |
+| FU-13 (new) | `executeHostRemoval` prunes before `adapter.remove()`, so a root the adapter empties (`.claude/`; after -10, `.codex/`) survives `host remove`. Prune again after `adapter.remove()`, or collect the adapter's removals. | -10 (it owns the `.codex` mirror of M3-A44) or close | low, cosmetic |
+
+  FU-3..FU-10 stand as written in round 1.
+- **The DevOps list (M3-A45 plus M3-A52):**
+  - **Smoke 1:** scratch-room `doctor --check-scaffold` over a copy of OUTER's legacy snapshot. Never `--cwd OUTER`.
+  - **Smoke 2:** clean-room `upgrade --dry-run` and `uninstall --dry-run --yes`. `.claude/settings.json` appears under neither `[remove]` nor `[skip]`.
+  - **Smoke 3,** all in one `(cd <literal mktemp dir> && …)` call, with `git init -q` first allowed:
+    1. `uninstall --yes --force`
+    2. `init --yes --pin 0.0.0-m3 </dev/null`
+    3. `diff <room>/.claude/settings.json CLI/templates/cleargate-planning/.claude/settings.json` must print nothing
+  - In step 2 the `.uninstalled` restore prompt appears despite `--yes` and takes the default (Y) at EOF. The restored `.cleargate/FLASHCARD.md` is expected, not a failure.
+  - Nothing else changes.
+
+### 5. Orchestrator sentinel note: CONFIRMED, and wider; M3-A53 appended
+
+- **What the loop does.** At `pending-task-sentinel.sh:112-161` (unchanged at `384a628`), all three `break`s end the whole file scan:
+  - `:114-116`: an inline `flashcards_flagged: []` anywhere
+  - `:134-136`: the end of a YAML block
+  - `:139-141`: the end of an md block
+- **Measured** on the canonical hook in a scratch fixture (`/bin/bash`, a PATH stub, gate env vars unset):
+  - A two-YAML-block report with only its first card marked → **exit 0**, with the second card unmarked.
+  - The real `STORY-058-07-dev.md` → only its first block's 2 cards are listed.
+  - An inline `[]` followed by a real block → **exit 0**.
+  - Two md blocks → only the first is listed.
+- **Exposure in SPRINT-41.** Seven dev/qa reports carry two blocks, and `CR-123-qa.md` starts with an inline `[]`.
+- **`plans/M3.md` now ends with M3-A53:**
+  - Binding for BUG-085: remove the `break`s, reset the block state, and continue scanning. JSON mode follows the same rule. Hook test 17c has four sub-cases.
+  - RS-BUG085's dry-parse surfaces the second-block cards.
+  - The orchestrator processes later blocks by hand until the live re-sync.
+  - Story-text F5.
+  - Binding for M6 AD-M6-5: the port scans every block, and the parity fixtures add a two-block report and an inline-`[]`-then-block report.
+
+**Outer `git status --porcelain`.** At the start of this round, only the four hook-owned `.cleargate/sprint-runs/SPRINT-41/{.session-totals.json,events.jsonl,state.json,token-ledger.jsonl}` lines were listed. This round writes only the `plans/M3.md` M3-A53 append and this report section. The cli checkout is unchanged: `384a628`, `?? cleargate-0.25.0.tgz`.
+
+**Script incidents:** none. No `.cleargate/scripts/*` script was invoked. The only commands were:
+- read-only `git show` / `diff` / `log`
+- `shasum` and `command grep`
+- two `tsx` probes and one hook-fixture probe, all under `scratchpad/arch07/`
+
+flashcards_flagged:
+  - "2026-09-26 · #hooks #flashcard-gate #danger · pending-task-sentinel stops at the FIRST flashcards_flagged block (3 breaks, incl. inline []); later blocks go ungated."
+  - "2026-09-26 · #host #uninstall · executeHostRemoval prunes empty dirs BEFORE adapter.remove(); a root the adapter empties survives host remove."
+
 STATUS=done

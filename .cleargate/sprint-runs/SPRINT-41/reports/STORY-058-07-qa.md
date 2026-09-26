@@ -123,4 +123,102 @@ Ship it. Sealed-test integrity is clean (Dev touched no test file, no unrelated 
 
 flashcards_flagged: []
 
+
+## Round 2 — remediation (M3-A44)
+
+**Subject:** cli `story/STORY-058-07`: QA-Red R11 `4394c9b` (adds `test/commands/uninstall-reinit.red.node.test.ts`, 4 tests, on Dev `b146faf`), then Dev remediation `384a628`. Independent re-run, read-only against the main checkout: no build, no stash, no branch switch, no bare `cleargate`, no full `npm test`.
+
+**QA-R2: PASS**
+
+### Outer status
+
+Start of this round:
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+End of this round (before this append):
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+Identical — only hook-owned ledger/event/state files, no other outer path changed; nothing wrote against `/Users/ssuladze/Documents/Dev/ClearGate` (SMOKE RULE honored). cli repo: `?? cleargate-0.25.0.tgz` (pre-existing, untouched) both before and after; HEAD confirmed at `384a628` on `story/STORY-058-07` throughout.
+
+### 1. Diff scope
+
+| Check | Command | Result |
+|---|---|---|
+| Files touched, `4394c9b..384a628` | `git diff 4394c9b 384a628 --stat` | exactly `CHANGELOG.md` (+16), `src/hosts/claude.ts` (+17/−3), `src/init/merge-settings.ts` (+2/−1) — matches TPV delta round constraint 4 exactly |
+| `test/` diff | `git diff 4394c9b 384a628 --stat -- test/` | empty — no test file touched by the remediation |
+
+### 2. D2 insertion-only guard
+
+| Check | Command | Result |
+|---|---|---|
+| `merge-settings.ts` vs `main` | `git diff 170ac4c 384a628 --numstat -- src/init/merge-settings.ts` | `55	0` — exactly as required; confirms the re-indent fix cost zero deletions and `mergeSettings` itself stayed byte-identical to `170ac4c` |
+
+### 3. `claude.ts` hunk — unlink placement
+
+Read `git diff 4394c9b 384a628 -- src/hosts/claude.ts` in full:
+- `fs.unlinkSync(settingsPath)` sits lexically **inside** the existing `try` block, immediately after `const cleaned = d.removeClearGateHooks(settings);` and before the `catch` — satisfies binding Dev constraint 1 (mutant l's guard: an `unlinkSync` failure is still caught by the unchanged `Warning: could not update settings.json: …` handler).
+- Labels match M3-A44 D1 exactly: deleted case pushes `'.claude/settings.json'` (the plain path); survives case pushes `'.claude/settings.json (ClearGate hooks)'` (unchanged from pre-remediation).
+- The threshold is `Object.keys(cleaned).length === 0` (not `<= 1`, not `hooks`-only) — matches D1 verbatim, not mutants a/g/i.
+- No other line in `claude.ts` changed beyond the comment update and this one branch.
+
+### 4. CHANGELOG text
+
+`git diff 4394c9b 384a628 -- CHANGELOG.md` confirmed verbatim against M3-A44 D3:
+- `### Added` now sits above the pre-existing `### Fixed`, holding the STORY-058-07 per-host-lifecycle-scoping bullet.
+- The two new `### Fixed` bullets (settings.json wholesale-deletion, supersede-hook-duplication) are appended immediately after the BUG-067 bullet, byte-identical to the plan text.
+
+### 5. Typecheck
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+
+### 6. Test re-run — SOLO, `CLEARGATE_INIT_BASELINE=/private/tmp/cg-s41-m2-init-baseline`
+
+Baseline hash (425 files): `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` — identical before and after every run below.
+
+| File | Expected | Reproduced | Match |
+|---|---|---|---|
+| `test/commands/uninstall-reinit.red.node.test.ts` | 4/4 | 4/4 | yes |
+| `test/hosts/manifest-query.red.node.test.ts` | 6/6 | 6/6 | yes |
+| `test/commands/doctor-per-host.red.node.test.ts` | 10/10 | 10/10 | yes |
+| `test/commands/upgrade-per-host.red.node.test.ts` | 6/6 | 6/6 | yes |
+| `test/commands/uninstall-per-host.red.node.test.ts` | 16/16 | 16/16 | yes |
+| `test/commands/lifecycle-per-host.red.integration.node.test.ts` | 3/3 | 3/3 | yes |
+| `test/hosts/host-adapter-contract.red.node.test.ts` | 19/19 | 19/19 | yes |
+| `test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` (compare) | 5/5 | 5/5 | yes |
+| `test/commands/init-host-parity.red.integration.node.test.ts` (compare) | 15/15 | 15/15 | yes |
+| `test/commands/uninstall.node.test.ts` | 20/20 | 20/20 | yes |
+| `test/hosts/host-lifecycle.red.node.test.ts` | 17/17 | 17/17 | yes |
+| `test/commands/init.node.test.ts` | 29/29 | 29/29 | yes |
+
+No mismatch anywhere; every count reproduces the TPV delta round's "Red → green table" exactly.
+
+### 7. Restore-path smoke (tsx, source, fresh literal tmp room)
+
+Each step run as its own single `(cd /private/tmp/cg-s41-qa-058-07-r2-<rand> && …)` call; room deleted afterward with a literal `rm -rf --`.
+
+| Step | Command | Result |
+|---|---|---|
+| 1 | `init --yes --from-source <CLI>/scaffold --pin 0.0.0-qa` | exit 0, full claude-only install |
+| 2 | `uninstall --yes --force` | exit 0; `.claude/settings.json` confirmed **absent** afterward (`ls` → No such file or directory) — the D1 fix live |
+| 3 | `init --yes --from-source <CLI>/scaffold --pin 0.0.0-qa </dev/null` (M3-A52 form) | exit 0; the `Restore preserved items?` prompt (present because `.cleargate/.uninstalled` existed) defaulted to Y against EOF stdin, restoring `.cleargate/FLASHCARD.md` and removing the `.uninstalled` marker — no hang, matching M3-A52's documented behavior. `copy-payload` recreated the absent `.claude/settings.json` fresh from the canonical payload; the adapter's own hook-merge step then logged `.claude/settings.json unchanged (hooks block already current)` because the freshly-copied file already contained every hook `CLAUDE_HOOK_ADDITION` would add — a different (correct) log line than the TPV's dist-built `Created .claude/settings.json`, since `--from-source` and a pinned dist build take slightly different logging paths through the same `install()` function; the on-disk result is identical either way (verified next) |
+| 4 | `diff <room>/.claude/settings.json <CLI>/scaffold/hosts/claude/.claude/settings.json` | prints nothing, exit 0 — byte-identical to canonical (canonical carries no `__CLEARGATE_VERSION__` placeholder in `settings.json` itself, so a direct diff applies) |
+
+The restore path is confirmed end-to-end: a full uninstall no longer leaves a `{}` residue, and the following `cleargate init` restores the complete 7-hook canonical file rather than merging only the 2-hook `CLAUDE_HOOK_ADDITION` into a stale stub.
+
+### VERDICT
+
+Ship it. The remediation touches exactly the three files the TPV delta round's binding constraint 4 names, with zero test-file edits. `merge-settings.ts`'s D2 fix is confirmed insertion-only against `main` (`55 0`). The `claude.ts` D1 fix places `fs.unlinkSync` correctly inside the existing `try`, ahead of the `catch`, with labels matching the plan exactly. The CHANGELOG diff matches M3-A44 D3 verbatim, section ordering included. Typecheck is clean. All 12 listed test files (including the new `uninstall-reinit.red` 4/4) reproduce their TPV-expected counts exactly against an unchanged 425-file baseline hash. A live restore-path smoke through 4 real CLI invocations in a fresh clean-room confirms the actual defect is fixed: a full uninstall now removes `.claude/settings.json` entirely instead of leaving a `{}` residue, and a subsequent `cleargate init` (run non-interactively per M3-A52, since the `.uninstalled` marker triggers a restore prompt regardless of `--yes`) restores the byte-identical canonical 7-hook file. No regression found.
+
+flashcards_flagged: []
+
 STATUS=done
