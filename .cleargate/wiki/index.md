@@ -74,6 +74,7 @@
 - [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
 - [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
 - [[BUG-094]] (bug) — Draft — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
+- [[BUG-095]] (bug) — Draft — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
 
 ## Archive
 

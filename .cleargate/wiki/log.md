@@ -1870,3 +1870,8 @@
   action: "create"
   target: "BUG-094"
   path: ".cleargate/delivery/pending-sync/BUG-094_state_validate_sprint_id_treated_as_path.md"
+- timestamp: "2026-09-26T04:49:13.860Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-095"
+  path: ".cleargate/delivery/pending-sync/BUG-095_upgrade_never_refreshes_mcp_json_pin_or_claude_md_block.md"
