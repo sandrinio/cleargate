@@ -1,3 +1,8 @@
+2026-09-26 · #test-harness #clean-room #danger · New GATING_CHECKS ids need the live driver to emit the rows; helpers alone make decideRun FAIL 'missing gating row'.
+2026-09-26 · #plan #boundary · A precondition grep must hit the driver that wires a helper, not the module defining it, or it passes unwired.
+2026-09-26 · #codex #test-harness · Drive Codex sessions under enforce: warn lets a blocked edit complete, so edit-allow and edit-targets fail open unseen.
+2026-09-26 · #hooks #perf · Moving a whitelist exit into a per-target loop makes whitelisted Claude edits pay CLI resolve + node + grep first.
+2026-09-26 · #codex #hooks · An absolute apply_patch header via a symlinked path misses the physical REPO_ROOT strip; realpath its existing ancestor.
 2026-09-26 · #codex #app-server · turn/start takes input:[UserInput], not prompt; turn/completed has params.turn.id — a params.turnId wait never resolves.
 2026-09-26 · #codex #app-server · config/batchWrite edits are {keyPath,value,mergeStrategy}; JSON-quote keyPath segments that hold paths or hook keys.
 2026-09-26 · #codex #test-harness · Untrusted workspaces list no project hooks; take the all-untrusted hooks/list after workspace trust, before hash trust.
