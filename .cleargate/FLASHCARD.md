@@ -1,3 +1,6 @@
+2026-09-26 · #shell #zsh #test-harness · zsh never word-splits an unquoted $LIST; a file list reaches the runner as one arg. Use bash -c.
+2026-09-26 · #test-harness #baseline · dogfood-install.integration is red at C1 base (doctor prints 'Run cleargate upgrade to review.').
+2026-09-26 · #test-harness #worktree · token-ledger-delta.integration runs LIVE <cli>/../../.claude token-ledger.sh; canonical edits can't move it.
 2026-09-26 · #devops #build · Piping npm run build into head SIGPIPEs tsup mid-rebuild and leaves dist deleted; log BD output to a file.
 2026-09-26 · #sdr #waves · Fail-safe trailing waves live only in waves[]; integrationReady reads upstream only, so encode the order as edges.
 2026-09-26 · #skill #codex · Codex render swaps SKILL A2 (C.0 to C.1) for R2; a pointer from outside A2 into §C.0.x dangles in the Codex copy.
