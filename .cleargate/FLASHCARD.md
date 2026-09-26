@@ -1,3 +1,10 @@
+2026-09-26 · #test-harness #hooks #tpv · 11 hook tests regex-patch REPO_ROOT= into tmp copies; a hook that sources lib/ needs lib/ copied beside it.
+2026-09-26 · #tpv #regex · JS regex has no \Z: without /u it is a literal Z. End of input is (?![\s\S]).
+2026-09-26 · #codex #skill · codex debug prompt-input is JSON; skills show a '- `rN` = `<root>`' table plus '(file: rN/<name>/SKILL.md)' entries.
+2026-09-26 · #test-harness #tpv · A test that runs a copied script from os.tmpdir (no node_modules) forbids npm imports in that script.
+2026-09-26 · #scaffold #host #tpv · A core shared root (.agents/**) rides in the flat Claude view; assert Rule 2 on the install, not the view.
+2026-09-26 · #qa-red #tpv · A QA-Red report can claim a hunk the commit lacks (sentinel refusal); grep the sealed tree, not the report.
+2026-09-26 · #codex #skill · Codex parses SKILL.md frontmatter as YAML: flashcard's description is cut at ' #' in the listing.
 2026-09-26 · #test-harness #concurrency · Concurrent heavy test:file batches can flake a green test; re-run solo before calling it a regression.
 2026-09-26 · #test-harness #baseline · M2 baseline hash lines embed absolute paths: run find on the absolute baseline dir, never cd + find .
 2026-09-26 · #locator #test-harness · dist bundles frontmatter-locator (no dist/lib file); run node --import tsx on src/lib/frontmatter-locator.ts.
