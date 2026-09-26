@@ -1,3 +1,4 @@
+2026-09-26 · #test-harness #two-repo · A cli worktree on a later contract (C4) legitimately diffs an outer worktree cut pre-merge — name it, don't chase it.
 2026-09-26 · #test-harness #hooks #tpv · 11 hook tests regex-patch REPO_ROOT= into tmp copies; a hook that sources lib/ needs lib/ copied beside it.
 2026-09-26 · #tpv #regex · JS regex has no \Z: without /u it is a literal Z. End of input is (?![\s\S]).
 2026-09-26 · #codex #skill · codex debug prompt-input is JSON; skills show a '- `rN` = `<root>`' table plus '(file: rN/<name>/SKILL.md)' entries.
