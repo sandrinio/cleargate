@@ -1,3 +1,6 @@
+2026-09-26 · #qa-red #tpv · A patch's exact sha256 + `git apply --check` clean + staged-file-list equality is a fast 3-point re-seal integrity gate.
+2026-09-26 · #qa-red #test-harness · Sum the solo per-file fail counts; an exact match with the full-suite fail total proves no cross-file regression.
+2026-09-26 · #qa-red #test-harness #danger · A test's intentional stderr Error (graceful-skip cases) pollutes a stack-trace grep; check pass/fail, not presence.
 2026-09-26 · #test-harness #tpv · A verdict fn fed one flat stream can't tell C3's blocked run from C4's completed one; key inputs by session.
 2026-09-26 · #test-harness #tpv #danger · A mock HTTP handler that throws leaves a fetch-awaiting test hanging forever (no timeout).
 2026-09-26 · #codex #app-server · codex app-server generate-ts --out <dir> emits the exact protocol types offline; read them, don't guess.
