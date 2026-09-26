@@ -20,6 +20,7 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 | §12 | protocol §27 | Gate 4 — Sprint Close Acknowledgement (CR-019) |
 | §15 | — | Operator Emergency Levers (STORY-070-01) |
 | §16 | — | Host Enforcement Deltas — Codex (STORY-058-11) |
+| §17 | protocol §23.5 | Host Dispatch Modes (STORY-058-12) |
 
 ---
 
@@ -600,4 +601,15 @@ When set to the exact string `'1'`, it downgrades gate failures at exactly two t
 7. **Metering is unavailable.** Codex dispatches write no token-ledger rows; `token-ledger.sh` logs a `codex-identity … metering=unavailable` line instead. Usage is never synthesized as zero.
 8. **Not registered on Codex.** The AskUserQuestion autonomy guard (Codex's equivalent tool is `request_user_input`), the git pre-commit hooks (not installed by `--host codex`), and `.codex/rules/**` command rules (deferred under EPIC-058).
 9. **Generated hook copies.** The Codex hook files (`.codex/hooks/*.sh`, `.codex/hooks/lib/harness.sh`) are byte-identical copies of the canonical Claude hooks, enforced by `build-codex-payload.mjs --check` in prebuild, pending EPIC-058's normalized `cleargate hook` CLI handlers.
-10. **`sprint-execution` is not installed for Codex.** Its SKILL.md mandates Claude's Workflow tool; the Codex rendering lands in STORY-058-12. Only the portable skills (`flashcard`, `sprint-dashboard`) are installed to `.agents/skills/`.
+10. **`sprint-execution` is installed for Codex as a generated serial rendering.** `.agents/skills/sprint-execution/` holds the canonical playbook rendered for `dispatchMode: serial` plus `dispatch-serial.md`; the Workflow-tool mandate is replaced by the serial dispatch contract (STORY-058-12, §17).
+
+## 17. Host Dispatch Modes (source: STORY-058-12)
+
+Each host adapter declares `dispatchMode` (`cleargate-cli/src/hosts/types.ts`): Claude Code `wave-parallel`, Codex `serial`. It is static and read at install time: `.agents/skills/sprint-execution/` — the generated serial rendering of the playbook plus `dispatch-serial.md` — is installed only for a selected host that declares the `.agents` shared root and `dispatchMode: serial`.
+
+Under `dispatchMode: serial`:
+
+1. **Flashcard gate.** `dispatch_serial.mjs next` refuses the next story while any `flashcards_flagged` card lacks its `.processed-<hash>` marker or any report's `flashcards_flagged` block is unparseable (the §4.6 scan, ported to `.cleargate/scripts/lib/flashcard-gate.mjs` and pinned to the hook by a parity test). The host dispatch hook still enforces §4.6 at every role dispatch. `SKIP_FLASHCARD_GATE` is never set in a serial run.
+2. **Verdicts.** `dispatch_serial.mjs record` validates with `validateVerdicts(…, { mode: 'serial' })` and exits 3 on a non-GREEN verdict; the orchestrator halts in that turn.
+3. **Worktrees.** The same command the wave path builds (`worktreeAddCommand`), one story at a time.
+4. **Usage.** No usage-ledger row for `metering: unavailable`; `dispatch_serial.mjs` never writes `token-ledger.jsonl`.

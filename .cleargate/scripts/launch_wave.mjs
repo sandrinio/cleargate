@@ -37,6 +37,15 @@
  *     blocker?: { type, message }   // REQUIRED iff verdict !== 'GREEN'
  *   }
  *   blocker.type ∈ the five §22 true-blocker kinds.
+ *
+ * Serial mode (STORY-058-12, protocol §23.5): `validateVerdicts(verdicts, { mode: 'serial' })`,
+ * called by `dispatch_serial.mjs` on hosts that declare `dispatchMode: serial`. It differs from
+ * the default mode (`{ mode: 'wave' }`, or no options) in exactly two places:
+ *   - `tokens` may be exactly `{ metering: 'unavailable' }` (its only own key); any other
+ *     `metering` value, or any extra key beside it (a synthesized `input: 0`), is rejected;
+ *   - a non-GREEN verdict may carry `devSha: null` / `qaSha: null` when that commit does not
+ *     exist; an absent key is still rejected, and GREEN still requires both SHAs.
+ *   The default mode accepts and rejects exactly as it did before serial mode existed.
  */
 
 import crypto from 'node:crypto';
@@ -142,15 +151,22 @@ export function integrationReady(plan, storyId, mergedIds) {
 // Barrier verdict validator (EXPORTED — STORY-033-04 §1.2 / §4.1).
 // ---------------------------------------------------------------------------
 
+/** The validation modes `validateVerdicts` accepts (STORY-058-12). 'wave' is the default. */
+const VALIDATION_MODES = Object.freeze(['wave', 'serial']);
+
+/** The SHA fields a non-GREEN serial verdict may set to null (no such commit exists). */
+const SERIAL_NULLABLE_SHA_FIELDS = Object.freeze(['devSha', 'qaSha']);
+
 /**
  * Internal: validate a single verdict, returning a human-readable reason string when it
  * is malformed, or null when it is well-formed. Never throws — the array-level
  * `validateVerdicts` owns the throw so it can name the offending storyId.
  *
  * @param {unknown} v
+ * @param {'wave'|'serial'} [mode]  'serial' adds the two serial-mode deltas (header block)
  * @returns {string|null}  malformation reason, or null if valid
  */
-function verdictMalformationReason(v) {
+function verdictMalformationReason(v, mode = 'wave') {
   if (v === null || typeof v !== 'object') {
     return 'verdict is not an object';
   }
@@ -161,8 +177,16 @@ function verdictMalformationReason(v) {
     return `'verdict' must be one of ${VERDICT_KINDS.join(', ')} (got ${JSON.stringify(verdict.verdict)})`;
   }
 
-  // Required scalar fields.
+  // Required scalar fields. Serial mode: a non-GREEN verdict may carry a null SHA.
+  const nullableShas = mode === 'serial' && verdict.verdict !== 'GREEN';
   for (const field of REQUIRED_SCALAR_FIELDS) {
+    if (nullableShas && SERIAL_NULLABLE_SHA_FIELDS.includes(field)) {
+      if (verdict[field] === null) continue;
+      if (typeof verdict[field] !== 'string' || verdict[field] === '') {
+        return `'${field}' must be a non-empty string, or null on a non-GREEN serial verdict`;
+      }
+      continue;
+    }
     if (typeof verdict[field] !== 'string' || verdict[field] === '') {
       return `missing or empty required field '${field}'`;
     }
@@ -189,12 +213,20 @@ function verdictMalformationReason(v) {
   if (tokens === null || typeof tokens !== 'object') {
     return `missing required 'tokens' object`;
   }
-  for (const field of REQUIRED_TOKEN_FIELDS) {
-    const val = (/** @type {Record<string, unknown>} */ (tokens))[field];
-    if (field === 'model') {
-      if (typeof val !== 'string' || val === '') return `'tokens.model' must be a non-empty string`;
-    } else if (typeof val !== 'number') {
-      return `'tokens.${field}' must be a number`;
+  if (mode === 'serial' && Object.prototype.hasOwnProperty.call(tokens, 'metering')) {
+    // Serial mode: explicit unavailable metering, never a synthesized (zero) usage object.
+    const t = /** @type {Record<string, unknown>} */ (tokens);
+    if (Reflect.ownKeys(t).length !== 1 || t.metering !== 'unavailable') {
+      return `'tokens' must be the measured object or exactly { metering: 'unavailable' }`;
+    }
+  } else {
+    for (const field of REQUIRED_TOKEN_FIELDS) {
+      const val = (/** @type {Record<string, unknown>} */ (tokens))[field];
+      if (field === 'model') {
+        if (typeof val !== 'string' || val === '') return `'tokens.model' must be a non-empty string`;
+      } else if (typeof val !== 'number') {
+        return `'tokens.${field}' must be a number`;
+      }
     }
   }
 
@@ -222,11 +254,21 @@ function verdictMalformationReason(v) {
  * discriminant, or non-GREEN without a valid `blocker`). The named segment is the one the
  * Orchestrator marks ESCALATED (no ledger row); sibling GREEN verdicts consolidate.
  *
+ * `options.mode` selects the contract: 'wave' (the default, also when `options` or its
+ * `mode` is absent) or 'serial' (STORY-058-12 — see the header's serial-mode block).
+ *
  * @param {unknown[]} verdicts
+ * @param {{ mode?: 'wave'|'serial' }} [options]
  * @returns {void}
+ * @throws {TypeError} on an unknown `options.mode`, before any verdict is inspected.
  * @throws {Error} when any verdict is malformed — message contains the offending storyId.
  */
-export function validateVerdicts(verdicts) {
+export function validateVerdicts(verdicts, options) {
+  const mode = options == null || options.mode === undefined ? 'wave' : options.mode;
+  if (!VALIDATION_MODES.includes(mode)) {
+    throw new TypeError(`validateVerdicts: unknown mode '${String(mode)}'`);
+  }
+
   if (!Array.isArray(verdicts)) {
     throw new Error(
       `validateVerdicts: expected an array of segment verdicts, got ${typeof verdicts}.`,
@@ -234,7 +276,7 @@ export function validateVerdicts(verdicts) {
   }
 
   for (const v of verdicts) {
-    const reason = verdictMalformationReason(v);
+    const reason = verdictMalformationReason(v, mode);
     if (reason !== null) {
       // Name the offending storyId so the Orchestrator can mark exactly that segment
       // ESCALATED. Fall back to a placeholder when the verdict has no usable storyId.
@@ -342,7 +384,7 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
 if (import.meta.url === `file://${process.argv[1]}`) {
   process.stdout.write(
     'launch_wave.mjs — wave launcher (EPIC-033). ' +
-      'Exports validateVerdicts, mintRunId, worktreeAddCommand, launchWave. ' +
+      'Exports validateVerdicts, mintRunId, worktreeAddCommand, storyBases, integrationReady, launchWave. ' +
       'Every wave runs through this launcher via the Workflow tool (/workflows).\n',
   );
 }

@@ -852,6 +852,9 @@ per-story **segments** that return a schema-typed verdict, consolidated at a ser
 true-blocker rule, the autonomy contract, and the five true-blocker kinds carry over
 unchanged; §23 adds the wave-execution-specific invariants. There is no alternate dispatch
 path: if the Workflow tool is unavailable, the Orchestrator halts rather than degrading.
+A host whose adapter declares `dispatchMode: serial` (no Workflow primitive) is installed
+with the serial contract of §23.5 instead; it is that host's only dispatch path, not a
+fallback a wave-parallel host may choose.
 
 ### 23.1 Segment verdict schema (discriminated union)
 
@@ -917,6 +920,16 @@ report — it issues **no `AskUserQuestion`**. The Orchestrator halts the wave l
 `resumeFromRunId` after resolution. Fully autonomous up to that halt (§22 autonomy contract,
 §6 Q3): once Gate 2 is signed off, every wave auto-launches with no per-wave "go"; only a
 non-GREEN verdict interrupts.
+
+### 23.5 Serial dispatch contract (`dispatchMode: serial`)
+
+Hosts without a Workflow primitive run every wave one story at a time through `.cleargate/scripts/dispatch_serial.mjs`, their generated rendering of the sprint-execution playbook, and its `dispatch-serial.md`. §22 applies unchanged. Differences from §23.1–§23.4:
+
+- **Verdict (§23.1).** Same envelope, validated by `validateVerdicts(verdicts, { mode: 'serial' })`. `tokens` is either the measured object or exactly `{ "metering": "unavailable" }`; a non-GREEN verdict may carry `devSha: null` / `qaSha: null` when no commit exists. GREEN still requires both SHAs. The default mode is unchanged.
+- **Attribution (§23.2).** There is no RUN_ID-keyed barrier row. The host's own dispatch hook chain attributes each role dispatch; when the host exposes no verifiable usage, nothing is written to the usage ledger — never a zero row.
+- **Flashcards (§23.3).** The gate runs between every pair of consecutive stories (`cleargate-enforcement.md` §4.3) and is never suppressed.
+- **Merge (§23.3).** DevOps merges each GREEN story as soon as it passes — one worktree at a time.
+- **Blockers (§23.4).** A non-GREEN verdict halts the loop synchronously in the orchestrator's own turn; `dispatch_serial.mjs next --resume` re-dispatches only the blocked story after the human resolves it.
 
 ## Guidance Surface Reach
 
