@@ -1,3 +1,9 @@
+2026-09-26 · #frontmatter #locator #danger · A locator THROW is malformed framing, not 'no frontmatter': a !span writer fallback still plants a phantom.
+2026-09-26 · #two-repo #scripts #esm · A live twin importing a contract export won't link in an outer wt cut pre-contract-merge; copy twins at integration.
+2026-09-26 · #tpv #test-harness · A tail-of-length-N 'bytes after closer' check misses inserted bytes; compare raw.slice(span.end) on both sides.
+2026-09-26 · #tpv #test-harness · A whole-file-scan mutant is more permissive: only an expect-false case (key only in <instructions>) kills it.
+2026-09-26 · #test-harness #gate · CR-030 γ fixtures' 'No TBDs here.' contains TBD, so no-tbds always fails there; exit code is no pass signal.
+2026-09-26 · #test-harness #init #merge · Cut an item's delta rows by its '// ── ID' header to its last '},'; prefix/suffix diffs shift at shared '},'.
 2026-09-26 · #frontmatter #close-gate · BUG-090 merged: close_sprint 2.6c/2.9, assert_story_files, doctor find fences past <instructions>; offset-0 cards stale.
 2026-09-26 · #devops #shell #stdin · `cat > file` with no heredoc or </dev/null blocks forever on stdin in an agent Bash call; use : > file.
 2026-09-26 · #shell #zsh #test-harness · zsh never word-splits an unquoted $LIST; a file list reaches the runner as one arg. Use bash -c.
