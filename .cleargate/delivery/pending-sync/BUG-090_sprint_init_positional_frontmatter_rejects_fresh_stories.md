@@ -186,7 +186,7 @@ Feature: Position-independent frontmatter in sprint scripts
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 38 | default tier, per plans/M5-fixwave.md BUG-090 test list |
+| Unit tests | 48 | default tier, per plans/M5-fixwave.md BUG-090 test list as amended by FW-A16 (TPV re-seal: 40 red + 8 anchors) |
 | Integration tests | 2 | fresh-install `sprint init` plus the two M2 parity files |
 | E2E / acceptance tests | 1 | the -09 harness `sprint-init` row, once at QA-Verify and again at RS-4 (no `--known-fail`) |
 
