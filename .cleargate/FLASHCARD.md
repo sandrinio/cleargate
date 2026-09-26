@@ -1,3 +1,7 @@
+2026-09-26 · #close-gate #frontmatter · Step 2.6c 'no-op' silently skips archiving an <instructions>-led Completed parent; no warning, unlike auto-flip.
+2026-09-26 · #test-harness #scaffold-roots · canonicalPath('.') resolves to scaffold/core, not CLI_ROOT; import CLI_ROOT from scaffold-roots.js.
+2026-09-26 · #test-harness #qa-red · Pin a literal currentHash, not a refuse-baseline fn, when the delta's post-fix bytes are fully specified.
+2026-09-26 · #push #frontmatter · push.ts's approved:false refusal reads the same for an absent key and any non-true value; misleading pre-BUG-090.
 2026-09-26 · #qa-red #vocab #test-harness · Bare INCLUDE_PATTERN false-positives on enforcement.md/launch_wave.mjs; use findExecModeVocabHits instead.
 2026-09-26 · #qa-red #test-harness #shell · cr078_init.test.sh REPO_ROOT assumes depth-3 .cleargate/scripts/test/; run outer twin, not nested scaffold/core copy.
 2026-09-26 · #qa #worktree #danger · "Built CLI not found" in a worktree means run npm run build there first; check dist/cli.js before calling a regression.
