@@ -1,3 +1,4 @@
+2026-09-26 · #shell #zsh · Agent shell is zsh: ${PIPESTATUS[0]} is empty; redirect to a log and read $? instead of piping.
 2026-09-26 · #qa-red #init · copyPayload picks created/skipped by real dest-exists + byte diff, not overwrite_policy tiers; derive stdout from code.
 2026-09-26 · #qa-red #test-harness · A frozen-vs-canonical parity lock is a real anchor while both are identical: it becomes the regression detector.
 2026-09-26 · #close-gate #frontmatter · Step 2.6c 'no-op' silently skips archiving an <instructions>-led Completed parent; no warning, unlike auto-flip.
