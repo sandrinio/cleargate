@@ -131,4 +131,112 @@ None. Every command in this dispatch was a direct `npm run typecheck` / `npx tsx
 flashcards_flagged:
   - "2026-09-26 · #verify-install #test-harness · A worktree lacks any gitignored sibling repo (cleargate-cli/); META_ROOT tests expecting one (close-sprint-assume-ack-guard) ENOENT there, unrelated to the story under test."
 
+## Round 2 (M4-A14)
+
+role: developer
+
+QA-Verify and the Architect post-flight both FAILED `9ac0fa3` on two `verify-install.ts` defects (H17/M4-A5 fail-closed violation; a snapshot-shape crash), plus a DoD doc-fold-back gap. QA-Red re-sealed first (`4285391`, U9c/U11e/U11f). This round implements M4-A14 R-A, R-B and R-C.
+
+### Commits
+
+**Cli.** `story/STORY-058-08` @ `fc0184d` (one commit on top of the round-2 QA-Red `4285391`, on `9ac0fa3`):
+
+```
+fix(EPIC-058): STORY-058-08 round 2 — no-verifier guard + snapshot shape guard (M4-A14)
+```
+
+**Outer.** worktree `.worktrees/STORY-058-08` @ `31f266f2` (one commit on top of `adde0a23`):
+
+```
+docs(SPRINT-41): STORY-058-08 round 2 — clean-room doc fold-back (M4-A14)
+```
+
+### Diff stats
+
+| Repo | File | Stat |
+|---|---|---|
+| cli | `src/commands/verify-install.ts` | 1 file changed, 36 insertions(+), 3 deletions(-) |
+| outer | `.cleargate/knowledge/clean-room-verification.md` | 1 file changed, 37 insertions(+), 11 deletions(-) |
+
+No other file changed in either repo (§3.1 unchanged, as M4-A14 requires).
+
+### R-A — no-verifier guard
+
+The `<h>.no-verifier` push now requires `installed.includes(host)` in addition to the existing `registeredNames.includes(host as HostName)` check, in the same `if` condition, in `runVerifyInstall`'s host loop. `installed` was already computed (`installedHosts(snapshot)` or `[]`), so this is a one-condition addition — no new variable, no change to the `verified`/host-resolution formula (M4-A5 untouched).
+
+### R-B — snapshot shape guard
+
+Added `isInstallSnapshotShape(value): value is ManifestFile` (a type-guard function, module-private) and routed the snapshot read through it: `JSON.parse` result is checked for shape (non-null non-array object, string `cleargate_version`, `files` an array of objects each with a string `path`, `hosts` absent or a string array) before being assigned to `snapshot`; a shape failure produces the same pinned `unparseable: .cleargate/.install-manifest.json` detail as a JSON-parse failure, and `snapshot` stays `null`. No change to the skip rule, the M4-A5 fallback, or any downstream check — they already branch on `snapshot`/`snapshotOk`, which now can never hold a malformed value.
+
+### R-C — doc fold-back
+
+Five edits to `.cleargate/knowledge/clean-room-verification.md`, all within §2, §4 and §5 (no §1/§3/§6/`## Other hosts`/`## Purpose`/the three "Why not" sections touched):
+- §5 S1: now directs authoring the item with `cleargate new epic <slug>` plus the five F7 edits before the `Edit`, and states that an unauthored fresh scaffold logs `gate=1` by design (F7) — `stamp=0`/`ingest=0` are the real pass criteria otherwise.
+- §4: corrected the `scaffold-lint` target from `cleargate-cli/scaffold/` to `<cwd>/cleargate-planning/` (`scaffold-lint.ts:57`).
+- §2: widened the scrub list from three named `CLAUDE*` variables to every `CLAUDE*`-prefixed name, every `CLEARGATE_*`, every `SKIP_*`, and `ORCHESTRATOR_PROJECT_DIR`.
+- §2: added the measured `/bin/sh -c` hook-invocation fact (the identity gate carries into the hooks).
+- §5 `claude.live.mcp-connect`: added the record-only caveat (published `cleargate@<pin>`, outside the artifact) and the `claude.ai` account-connector caveat (filter by name).
+
+Verified after editing: all 12 pinned H2 headings present, exactly one `npm publish` line (still guarded by `No`), and the lowercase `recreated per run` phrase unchanged (`command grep` checks, shown below).
+
+### Counts
+
+| Check | Expected | Measured |
+|---|---|---|
+| `npm run typecheck` | exit 0 | exit 0 |
+| Unit `verify-install.red.node.test.ts`, SOLO | 41/41 | 41/41 (two runs, identical) |
+| Integration `verify-install-cli.red.integration.node.test.ts`, SOLO | 5/5 | 5/5 |
+| Doc `clean-room-verification-doc.red.node.test.ts`, SOLO, `CLEARGATE_META_ROOT`=worktree, after the outer commit | 9/9 | 9/9 |
+| Sealed -03..-07 + BUG-085 (17 files) + parity (2 files) | unchanged | re-ran all 19, all match the round-1 counts exactly (19/19, 11/11, 17/17, 6/6, 18/18, 10/10, 13/13, 10/10, 6/6, 16/16, 4/4, 4/4, 3/3, 3/3, 24/24, 13/13, 13/13; parity 5/5, 15/15) |
+| Baseline hash (`/private/tmp/cg-s41-m2-init-baseline`, 425 files) | `bdc4bb1a…62b2` unchanged | `bdc4bb1a6be55f938dd87ce1a281231972bec12c7a850009fcbec8cf354a62b2` — unchanged |
+| Red-without-R-A/R-B (mandatory verification) | U9c+U11e+U11f fail, nothing else | Reverted only `src/commands/verify-install.ts`'s round-2 diff (saved via `git diff`, restored via `git checkout --`/`git apply`; no `git stash`) → unit 38 pass / 3 fail, and the 3 failing test names were exactly "a parseable non-snapshot body never crashes…" (U9c), "manifest-hosts still reports \"fake not installed\"; fake.no-verifier never appears" (U11e), and "fake.no-verifier never appears when the snapshot is absent…" (U11f). Restored, re-verified 41/41 and typecheck clean. |
+
+### Doc phrase checks (after R-C edits)
+
+```
+$ command grep -n "npm publish" clean-room-verification.md
+91:No `npm publish`, no push. Precedent:
+$ command grep -n "recreated per run" clean-room-verification.md
+65:It is disposable and recreated per run: the container must not exist before
+$ command grep -n "command -v cleargate" clean-room-verification.md
+101:**Identity gate (F1).** `command -v cleargate` must print
+$ command grep -c "^## " clean-room-verification.md
+12
+```
+
+### Smoke (one literal tmp call)
+
+```
+(cd /private/tmp/cg-s41-058-08-r2-smoke && \
+  git init -q && \
+  npx --prefix <CLI> tsx <CLI>/src/cli.ts init --yes --from-source <CLI>/scaffold --pin 0.0.0-m4 && \
+  npx --prefix <CLI> tsx <CLI>/src/cli.ts verify-install; echo "exit=$?" && \
+  printf 'null' > .cleargate/.install-manifest.json && \
+  npx --prefix <CLI> tsx <CLI>/src/cli.ts verify-install --json; echo "exit=$?")
+```
+
+Result:
+- Fresh install → `verify-install` exit 0, all 12 checks `PASS`, `Result: PASS`.
+- After overwriting the snapshot with the literal `null`: `verify-install --json` printed parseable JSON — `"snapshot": { "status": "fail", "details": ["unparseable: .cleargate/.install-manifest.json"] }`, `version-match`/`manifest-hosts`/`payload-files`/`pin-substituted`/the five `claude.*` checks all `"skip"`, `"installed": []`, `"ok": false` — and exited 1. No crash, no stack trace, no empty stdout.
+
+### Outer status
+
+**Start** (outer main checkout):
+```
+ M .cleargate/sprint-runs/SPRINT-41/.session-totals.json
+ M .cleargate/sprint-runs/SPRINT-41/events.jsonl
+ M .cleargate/sprint-runs/SPRINT-41/state.json
+ M .cleargate/sprint-runs/SPRINT-41/token-ledger.jsonl
+```
+
+**End** (outer main checkout): identical — this dispatch made no writes to the outer main checkout; both round-2 writes landed in `.worktrees/STORY-058-08` and are committed there.
+
+### Deviations
+
+None. R-A, R-B and R-C were implemented exactly as M4-A14 specifies (verbatim guard condition, verbatim shape rule and pinned detail string, and all five named doc fold-backs) — no reinterpretation, no additional scope. Touched only `src/commands/verify-install.ts` and the outer doc, per the dispatch's "The Dev touches only..." line.
+
+### Flashcards
+
+flashcards_flagged: []
+
 STATUS=done
