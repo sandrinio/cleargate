@@ -1,3 +1,5 @@
+2026-09-26 · #worktree #danger · Main checkout and worktrees share relative paths; edit by the worktree's absolute path, then diff-verify.
+2026-09-26 · #clean-room #hooks · Sentinel + token-ledger hooks write to _off-sprint/ with no .active; dispatch proof needs no sprint init.
 2026-09-26 · #test-harness #tpv #clean-room · A test that runs hooks in a room it later byte-compares can never pass; probes need their own room.
 2026-09-26 · #test-harness #tpv · A boolean verdict input (ledgerHasQaRow) moves the check into untested code; pass raw rows to the pure function.
 2026-09-26 · #test-harness #tpv · Positive-only verdict fixtures let 18 of 22 weakened PASS conditions survive; write one negative case per condition.
