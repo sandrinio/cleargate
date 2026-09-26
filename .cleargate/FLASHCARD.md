@@ -1,3 +1,5 @@
+2026-09-26 · #qa-red #init · copyPayload picks created/skipped by real dest-exists + byte diff, not overwrite_policy tiers; derive stdout from code.
+2026-09-26 · #qa-red #test-harness · A frozen-vs-canonical parity lock is a real anchor while both are identical: it becomes the regression detector.
 2026-09-26 · #close-gate #frontmatter · Step 2.6c 'no-op' silently skips archiving an <instructions>-led Completed parent; no warning, unlike auto-flip.
 2026-09-26 · #test-harness #scaffold-roots · canonicalPath('.') resolves to scaffold/core, not CLI_ROOT; import CLI_ROOT from scaffold-roots.js.
 2026-09-26 · #test-harness #qa-red · Pin a literal currentHash, not a refuse-baseline fn, when the delta's post-fix bytes are fully specified.
