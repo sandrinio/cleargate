@@ -1,3 +1,4 @@
+2026-09-27 · #qa-red #test-harness #tmp · A $TMPDIR leak check needs a before/after delta on YOUR run — concurrent lanes leave same-prefix orphans.
 2026-09-27 · #codex #app-server · A finished child thread ends {type:'notLoaded'}, never idle; an 'every thread idle' settle never fires.
 2026-09-27 · #codex #hooks · Codex SubagentStop runs on the child thread with a suffix-less run id; join a dispatch by threadId.
 2026-09-27 · #test-harness #node · node>=22 --test treats a dir arg as a module path (exit 1); pass a quoted glob 'test/**/*.test.mjs'.
