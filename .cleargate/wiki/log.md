@@ -1885,3 +1885,8 @@
   action: "create"
   target: "BUG-097"
   path: ".cleargate/delivery/pending-sync/BUG-097_fresh_journey_cli_output_papercuts.md"
+- timestamp: "2026-09-26T09:59:24.726Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-098"
+  path: ".cleargate/delivery/pending-sync/BUG-098_remaining_positional_frontmatter_sites.md"

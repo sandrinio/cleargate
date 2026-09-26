@@ -103,12 +103,13 @@ scaffold-lint: clean
 - `cleargate-cli/src/commands/stamp.ts` (`buildDiffPreview` only)
 - `cleargate-cli/src/commands/wiki-query.ts` (the result-line rendering only)
 - `cleargate-cli/src/commands/scaffold-lint.ts` (print "clean" in exactly one place)
-- the matching existing test files under `cleargate-cli/test/commands/`; the new red tests go beside them.
+- the reds are appended to `test/commands/gate-unit.node.test.ts`, `test/commands/stamp.node.test.ts`, `test/wiki/query.node.test.ts` and `test/commands/scaffold-lint.node.test.ts`; no new test files.
 Do not touch `scaffold/**`, `stamp-tokens.ts`, or the protocol. There are no payload changes.
 
 ## Task Breakdown
 - [ ] QA-Red: one failing test per defect, plus the preserved edge behaviours from §2
 - [ ] `gate.ts`: emit the per-criterion lines under `-v` on a pass too
+- [ ] Export buildDiffPreview from stamp.ts for unit tests
 - [ ] `stamp.ts`: render objects and arrays as compact JSON; compare them by serialized value
 - [ ] `wiki-query.ts`: drop a leading `- [[ID]]` (and its separator) from the excerpt before prefixing
 - [ ] `scaffold-lint.ts`: print "clean" once on every clean path

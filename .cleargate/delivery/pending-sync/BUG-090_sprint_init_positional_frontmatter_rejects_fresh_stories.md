@@ -63,7 +63,7 @@ last_synced_body_sha: null
 
 Second trigger: in the same scratch dir, remove the story's `<instructions>` block, fill it in, and record approval as `approved_by` + `approved_at`. No `approved:` key exists, because the template writes none. `gate check` passes; `sprint init` still reports `UNAPPROVED (1)`. Add `approved: true` and it exits 0.
 
-Edge conditions: CRLF files (`\r?\n`); an item with no frontmatter at all (must still report `has_heading: false`); a demoted phantom `---\nstamp_error: x\n---` before `<instructions>` (the locator must pick the real fence, as BUG-067's locator does).
+Edge conditions: CRLF files (`\r?\n`); an item with no frontmatter at all (must still report `has_heading: false`); a demoted phantom `---\nstamp_error: x\n---` before `<instructions>` (a phantom block *inside* `<instructions>` is opaque and the real fence is read; a phantom block *before* `<instructions>`, the BUG-067 corruption signature, is the first fence, so the item reads UNAPPROVED — parity with BUG-067's locator, measured 2026-09-26).
 
 ## 3. Evidence & Context
 ```
@@ -94,19 +94,26 @@ Measured by the SPRINT-41 M4 Architect probe (`plans/M4.md` "Measured facts" F5)
 - `cleargate-cli/scaffold/core/.cleargate/scripts/assert_story_files.mjs` (canonical) and the live `.cleargate/scripts/assert_story_files.mjs` mirror
 - `cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs` (canonical) and the live mirror, lines ~1035 and ~1053
 - `cleargate-cli/scaffold/core/.cleargate/templates/epic.md` and `story.md` (canonical) plus the live `.cleargate/templates/` mirrors: scaffold `approved: false`, matching `Bug.md`/`CR.md`. These are installed files, so the M2 init-parity baseline needs `SANCTIONED_BASELINE_DELTAS` rows.
-- `cleargate-cli/src/commands/push.ts:271-274`: the refusal message must say whether the key is `false` or absent. This is the only `src/` change; BUG-067's locator is already there.
-- Grep the other `.cleargate/scripts/*.mjs` for `match(/^---` and list any further sites in this item before fixing.
+- `cleargate-cli/src/commands/push.ts:271-274`: the refusal message must say whether the key is `false` or absent. `src/` changes: `push.ts` (wording) and `doctor.ts` (two sniff deletions); BUG-067's locator is already there.
+- `cleargate-cli/scaffold/core/.cleargate/templates/hotfix.md` and its live mirror: `approved: false` after `status:`.
+- `close_sprint.mjs:250` (`readFmStatus`) and `:587` (`setFrontmatterStatusAtomic`): the same locator (Step 2.6c).
+- `cleargate-cli/src/commands/doctor.ts:738,1022`: delete the positional sniffs (the approval readers for `--session-start` and `--can-edit`).
+- `cleargate-cli/scripts/clean-room/probe-items.mjs` `approveProbeStory`: flip the scaffolded key in place (prevents a duplicate YAML key).
+- `cleargate-cli/test/helpers/init-fixture.ts`: 5 sanctioned-delta rows.
+- Site census for the other scripts (plans/M5-fixwave.md): `dedupe_frontmatter.mjs:60` leave (→ BUG-098); `prefill_report.mjs:41` leave (agent reports only); `prep_qa_context.mjs:125` leave (dead code); `prep_reporter_context.mjs:84` leave (→ BUG-098); `close_sprint.mjs:711` leave (already position-independent).
 
 ## Task Breakdown
-- [ ] QA-Red: an `<instructions>`-led approved story passes `assert_story_files`; Step 2.9 reads `deferred_verification` from an `<instructions>`-led item; CRLF and phantom-fence fixtures
-- [ ] Add a script-local fence locator with BUG-067's contract; use it at `assert_story_files.mjs:162` and `close_sprint.mjs:1035,1053`
-- [ ] Grep the remaining `.cleargate/scripts/*.mjs` for anchored `^---` sites; fix or list each
-- [ ] Scaffold `approved: false` in `epic.md` and `story.md`; add the init-parity sanctioned-delta rows
-- [ ] `push.ts`: separate refusal wording for an absent `approved` key and for `approved: false`
-- [ ] Mirror canonical → live; typecheck and targeted tests
+- [ ] QA-Red: fence-parity table (script vs TS locator), assert_story_files fence spawns, close_sprint Step 2.9 + 2.6c spawns, template approved-key + approveProbeStory flip, push wording, doctor can-edit/session-start, fresh-install sprint-init integration, 5 M2 sanctioned-delta rows
+- [ ] Export locateFrontmatterFence (JS port of frontmatter-locator.ts) and assertWorkItemApproved from assert_story_files.mjs; use them at :162
+- [ ] close_sprint.mjs imports locateFrontmatterFence; fix :250, :587 (span splice), :1035, :1053 (null or throw → skip)
+- [ ] Scaffold approved: false directly after status: in epic.md, story.md and hotfix.md
+- [ ] approveProbeStory flips the scaffolded approved key in place; throws on two approved lines
+- [ ] push.ts: absent-key wording; a present non-true value is rendered with JSON.stringify
+- [ ] doctor.ts: delete the positional sniffs in runSessionStart and runCanEdit
+- [ ] Byte-copy the 5 canonical files to the live mirror in one outer commit; typecheck and targeted tests
 
 ## 5. Verification Protocol (The Failing Test)
-**Command:** `bash .cleargate/scripts/test/test_assert_story_files.sh` (extend with the new fixtures) plus `cd cleargate-cli && npm run test:file -- test/scripts/test_assert_work_item_files.node.test.ts`, each run solo.
+**Command:** `cd cleargate-cli`, then solo via `npm run test:file --`: `test/scripts/frontmatter-fence-parity.red.node.test.ts`, `test/scripts/assert-story-files-fence.red.node.test.ts`, `test/scripts/close-sprint-fence.red.node.test.ts`, `test/scripts/template-approved-key.red.node.test.ts`, `test/commands/push.node.test.ts`, `test/commands/doctor.node.test.ts`, `test/commands/doctor-session-start.node.test.ts`, `test/e2e/sprint-init-fresh-install.red.integration.node.test.ts`; plus `bash .cleargate/scripts/test/test_assert_story_files.sh` (unchanged regression anchor).
 
 | Axis | Cover | Reason |
 |---|---|---|
@@ -138,7 +145,7 @@ Feature: Position-independent frontmatter in sprint scripts
     Examples:
       | variant |
       | CRLF line endings |
-      | a demoted phantom fence before <instructions> |
+      | a phantom fence block inside the <instructions> block |
 
   @paths
   Scenario: A template-scaffolded story carries an approved key to flip
@@ -157,13 +164,31 @@ Feature: Position-independent frontmatter in sprint scripts
     Given an <instructions>-led story with approved: false
     When sprint init runs
     Then it reports UNAPPROVED and exits 1
+
+  @rules
+  Scenario: A BUG-067-corrupted item is read from its first fence
+    Given an approved story whose file carries a phantom `---` block before its <instructions> block
+    When assert_story_files reads it
+    Then it reports UNAPPROVED and exits 1, reading the same block `gate check` reads
+
+  @interfaces
+  Scenario: doctor reads approval behind an instructions block
+    Given an approved <instructions>-led story in pending-sync and no active sprint
+    When `doctor --can-edit src/x.ts` and `doctor --session-start` run
+    Then can-edit allows the edit and the planning-first reminder is not printed
+
+  @interfaces
+  Scenario: Step 2.6c flips an instructions-led epic
+    Given the lifecycle reconciler returns auto-flip for an <instructions>-led epic
+    When close_sprint.mjs Step 2.6c runs
+    Then the epic's status becomes Completed, its <instructions> block is byte-identical, and it is archived
 ```
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 6 | one per Gherkin scenario (the outline counts once per example) |
-| Integration tests | 1 | `sprint init` over a real scaffolded fresh install |
-| E2E / acceptance tests | 0 | covered by the -09 clean-room harness `sprint-init` check once fixed (it records FAIL-KNOWN until then) |
+| Unit tests | 38 | default tier, per plans/M5-fixwave.md BUG-090 test list |
+| Integration tests | 2 | fresh-install `sprint init` plus the two M2 parity files |
+| E2E / acceptance tests | 1 | the -09 harness `sprint-init` row, once at QA-Verify and again at RS-4 (no `--known-fail`) |
 
 ---
 

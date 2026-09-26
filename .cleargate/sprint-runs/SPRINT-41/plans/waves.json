@@ -4,13 +4,13 @@
   "generated_by": "architect-synth",
   "role": "architect-synth",
   "supersedes": "2026-09-24T22:06:10Z halt (waves: [], launchable: false) — cleared by owner rulings R1-R4 of 2026-09-24T22:30:23Z",
-  "story_count_in_milestone": 17,
-  "story_count_planned": 17,
+  "story_count_in_milestone": 21,
+  "story_count_planned": 21,
   "complete": true,
   "execution": {
     "mode": "by-hand-serial",
     "launch_wave_compatible": false,
-    "note": "All 17 items touch cleargate-cli/. R1 runs every cli half on a story branch in the single cleargate-cli main checkout, so only one item can be in flight at any time, whatever the predicate says. launch_wave.mjs only cuts outer-repo worktrees (it has no cli main-checkout substrate), so the orchestrator walks this file by hand, one wave at a time: QA-Red -> (TPV/Architect only on a flagged pre-gate scan) -> Developer -> QA-Verify -> DevOps.",
+    "note": "All 21 items touch cleargate-cli/. R1 runs every cli half on a story branch in the single cleargate-cli main checkout, so only one item can be in flight at any time, whatever the predicate says. launch_wave.mjs only cuts outer-repo worktrees (it has no cli main-checkout substrate), so the orchestrator walks this file by hand, one wave at a time: QA-Red -> (TPV/Architect only on a flagged pre-gate scan) -> Developer -> QA-Verify -> DevOps.",
     "owner_rulings": {
       "R1": "cleargate-cli/** is reachable: cli half on a story branch in the cli main checkout (not a worktree); DevOps merges to cli main locally; no push or publish. Extends the 2026-09-11 bootstrap exception.",
       "R2": "Outer tracked .cleargate/** and canonical cleargate-planning/** edits land in the outer repo on sprint/S-41. Live gitignored /.claude/** is never in a story surface; it is re-synced at boundaries only.",
@@ -137,9 +137,41 @@
       "boundary_after": ["BD"]
     },
     {
+      "wave": "wave14-fw1", "milestone": "M5-fixwave", "stories": ["BUG-096"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli",  "dist-rebuild"], "lane": "standard",
+      "after": ["STORY-058-10",  "RS-4a"],
+      "rationale": "Owner fresh-folder directive 2026-09-26 (Mid-Sprint Amendment 09:30Z). Test helper only (test/helpers/init-fixture.ts mkShortTmpDir region + one new red file). First so every later run in the wave stops leaking /tmp. Shares init-fixture.ts with -10 (rows), BUG-090 (rows) and -11; serial by R1. Plan: plans/M5-fixwave.md.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave14-fw2", "milestone": "M5-fixwave", "stories": ["BUG-097"], "parallel": false,
+      "repo": "cli", "repo_order": ["cli",  "dist-rebuild"], "lane": "standard",
+      "after": ["BUG-096"],
+      "rationale": "Four src output fixes (gate.ts verbose, stamp.ts buildDiffPreview, wiki-query.ts prefix, scaffold-lint.ts double print). No payload, no scaffold, no hook. Not declared by -10 or -11. Plan: plans/M5-fixwave.md.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave14-fw3", "milestone": "M5-fixwave", "stories": ["BUG-090"], "parallel": false,
+      "repo": "both", "repo_order": ["outer",  "cli",  "dist-rebuild"], "lane": "standard",
+      "after": ["BUG-097"],
+      "rationale": "Goal-serving: position-independent fences in assert_story_files.mjs + close_sprint.mjs (2.6c, 2.9), approved: false in epic/story/hotfix templates, doctor sniff deletions, push wording, approveProbeStory flip. Two-repo: outer live-mirror commit (5 files, one commit, ESM import pair) merges first, cli second (Rule 15, overrides execution.repo_field). Full loop incl. live TPV + post-flight. Before -11 and RS-4 so both run without --known-fail. Plan: plans/M5-fixwave.md.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
+    },
+    {
+      "wave": "wave14-fw4", "milestone": "M5-fixwave", "stories": ["BUG-098"], "parallel": false,
+      "repo": "both", "repo_order": ["outer",  "cli",  "dist-rebuild"], "lane": "standard",
+      "after": ["BUG-090"],
+      "rationale": "Goal-serving ('stop corrupting'): remaining positional frontmatter sites — sprint.ts parseFileFrontmatter (--allow-drift phantom write-back), lifecycle-reconcile setFrontmatterFieldAtomic, readiness-predicates readFrontmatterFromFile, other TS readers, 3 scripts via BUG-090's locateFrontmatterFence. Depends on BUG-090's export. Registered 2026-09-26 (apply-approved-scope-2026-09-26b.mjs). Plan: plans/M5-fixwave.md BUG-098 section.",
+      "dispatch_blockers": [],
+      "boundary_after": ["BD"]
+    },
+    {
       "wave": "wave15", "milestone": "M5", "stories": ["STORY-058-11"], "parallel": false,
       "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["STORY-058-10"],
+      "after": ["BUG-098"],
       "fail_safe": true,
       "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the `cleargate-planning/.claude/hooks/*.sh` **modify** line (all nine hooks adopt the shim) and the prebuild wiring. Clause 5: 10 -> 11, 01 -> 11 (scaffold/core/**), CR-123 -> 11 (qa.md codegen source), 09 -> 11 (the baseline must exist to catch a shim regression, per -11 section 1).",
       "dispatch_blockers": ["D3", "D4"],
@@ -180,12 +212,16 @@
     {"id": "RS-1", "after": "wave2", "action": "Second targeted live re-sync: .claude/hooks/stamp-and-gate.sh from BUG-067's canonical edit (same pin-substitution rule as B0)."},
     {"id": "RS-2", "after": "wave3", "action": "CR-123 condition 2: re-sync live .claude/agents/qa.md and .claude/skills/sprint-execution/SKILL.md."},
     {"id": "RS-3", "after": "wave5", "action": "M1 close: the re-sync source switches to cleargate-cli/scaffold/hosts/claude/**. Run a no-op re-sync diff; per -01's acceptance it must be byte-identical."},
-    {"id": "RS-4a", "after": "wave14", "action": "Targeted live re-sync of the 4 hooks STORY-058-10 changes (pre-edit-gate, stamp-and-gate, pending-task-sentinel, token-ledger) from cli main scaffold/hosts/claude/.claude/hooks with live-pin substitution, backup first, mode 0755; doctor shows no drift for them; no settings change, no restart. Procedure: plans/M5.md Boundary steps RS-4a."}, {"id": "RS-4", "after": "wave15", "action": "Procedure: plans/M5.md Boundary steps RS-4 (supersedes the earlier text). (1) targeted live re-sync of all 9 hooks + lib/harness.sh with pin substitution; (2) claude-baseline.mjs run --label \"RS-4 after STORY-058-11\" --known-fail sprint-init=BUG-090 -> PASS (Goal checks 2-3); (3) -09 e2e on cli main + M2 parity 5/5 15/15; (4) codex-hooks.mjs run --provider scripted -> PASS (Goal check 4); (5) --provider live (needs owner OD1 Codex login) -> PASS; (6) both check commands exit 0; (7) commit evidence + §4."},
-    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches. Recommended (M4 open decision 3): re-run the -09 clean-room harness with --label \"RS-5 after STORY-058-12\"."}, {"id": "RS-CLOSE", "after": "wave17", "action": "Before close_sprint.mjs: node cleargate-cli/scripts/clean-room/claude-baseline.mjs run --evidence .cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md --label close --known-fail sprint-init=BUG-090, then the harness check --write-result command from plans/M4.md B1 (M4 open decision 3). -09 evidence is invalidated by any cli source/build change after it, so the close run is what satisfies deferred_verification. Then (M5): codex-hooks.mjs run --codex-bin <PINNED_CODEX> --provider scripted --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --label close; codex-hooks.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --write-result .cleargate/sprint-runs/SPRINT-41/deferred-verify/STORY-058-10.json (requires >=1 live PASS run on record)."}
+    {"id": "RS-4a", "after": "wave14", "action": "Targeted live re-sync of the 4 hooks STORY-058-10 changes (pre-edit-gate, stamp-and-gate, pending-task-sentinel, token-ledger) from cli main scaffold/hosts/claude/.claude/hooks with live-pin substitution, backup first, mode 0755; doctor shows no drift for them; no settings change, no restart. Procedure: plans/M5.md Boundary steps RS-4a."}, {"id": "RS-4", "after": "wave15", "action": "Procedure: plans/M5.md Boundary steps RS-4 (supersedes the earlier text). (1) targeted live re-sync of all 9 hooks + lib/harness.sh with pin substitution; (2) claude-baseline.mjs run --label \"RS-4 after STORY-058-11\" -> PASS (Goal checks 2-3); sprint-init PASS x2 (BUG-090 fixed in wave14-fw3; a FAIL reopens BUG-090, never re-declare known-fail); (3) -09 e2e on cli main + M2 parity 5/5 15/15; (4) codex-hooks.mjs run --provider scripted -> PASS (Goal check 4); (5) --provider live (needs owner OD1 Codex login) -> PASS; (6) both check commands exit 0; (7) commit evidence + §4."},
+    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches. Recommended (M4 open decision 3): re-run the -09 clean-room harness with --label \"RS-5 after STORY-058-12\"."}, {"id": "RS-CLOSE", "after": "wave17", "action": "Before close_sprint.mjs: node cleargate-cli/scripts/clean-room/claude-baseline.mjs run --evidence .cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md --label close, then the harness check --write-result command from plans/M4.md B1 (M4 open decision 3). -09 evidence is invalidated by any cli source/build change after it, so the close run is what satisfies deferred_verification. Then (M5): codex-hooks.mjs run --codex-bin <PINNED_CODEX> --provider scripted --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --label close; codex-hooks.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --write-result .cleargate/sprint-runs/SPRINT-41/deferred-verify/STORY-058-10.json (requires >=1 live PASS run on record)."}
   ],
   "refused": [],
   "blocked": [],
   "lane_assignments": {
+    "BUG-096": "standard",
+    "BUG-097": "standard",
+    "BUG-090": "standard",
+    "BUG-098": "standard",
     "BUG-089": "standard",
     "BUG-067": "standard",
     "CR-123": "standard",
@@ -209,6 +245,7 @@
     {"storyId": "BUG-085", "from": "fast", "to": "standard", "failing_checks": [1, 2, 7], "note": "doctor.ts + session-start.sh + CLAUDE.md + red test; re-syncs gate-enforcement hooks; spans live, canonical and cli. state.json still says fast."}
   ],
   "rulings": {
+    "fix_wave_placement": "wave14-fw1..fw4 (BUG-096, BUG-097, BUG-090, BUG-098) run after wave14 → BD → RS-4a and before wave15; registered by the 2026-09-26T09:30Z amendment (BUG-098 by apply-approved-scope-2026-09-26b.mjs); plan plans/M5-fixwave.md.",
     "BUG-085_placement": "Carried: one state.json item, one wave (wave11, M3, after 058-07). The M0 half is barrier step B0 and causes no state transition.",
     "CR-123_placement": "Carried: wave3, after M0, before 058-01, cli half -> dist rebuild -> outer half. Conditions 1 and 2 as recorded in wave3.",
     "STORY-058-05_reorder": "New: -05 moves from M2 to M3, directly after -06 (clause-5 edge 06 -> 05 stated in both items). Nothing else in the halt order changes.",

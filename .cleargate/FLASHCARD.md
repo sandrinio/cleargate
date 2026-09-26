@@ -1,3 +1,14 @@
+2026-09-26 · #frontmatter #locator · BUG-067's locator returns the FIRST fence: a phantom block before <instructions> wins, not the real one.
+2026-09-26 · #clean-room #frontmatter #danger · approveProbeStory inserted approved: true; once templates scaffold approved: false it must flip or YAML dup-keys.
+2026-09-26 · #frontmatter #doctor · doctor runCanEdit/runSessionStart skip <instructions>-led items via trimStart().startsWith('---').
+2026-09-26 · #scripts #esm #danger · close_sprint.mjs static-imports assert_story_files.mjs: sync the live pair in ONE commit or close won't link.
+2026-09-26 · #test-harness #init · SANCTIONED_BASELINE_DELTAS can't express an added payload file (one-sided entry throws); keep fixes in-file.
+2026-09-26 · #test-harness #scripts · Spawning scaffold/core close_sprint.mjs: stub <fx>/node_modules/cleargate/dist/lib for Step 2.6c.
+2026-09-26 · #clean-room #harness · --known-fail relabels only FAIL; a fixed check PASSes silently with the flag still set — drop it.
+2026-09-26 · #test-harness #init · A child importing init-fixture needs cwd=CLI_ROOT and a marker line: initHandler prints a banner to stdout.
+2026-09-26 · #scripts #frontmatter · close_sprint Step 2.9 compares raw values: quoted sprint_cleargate_id "SPRINT-41" is skipped (fail-open).
+2026-09-26 · #surface-gate #scripts · file_surface_diff.sh strips only STORY- from the active id; a BUG-* active item resolves no file, gate skips.
+2026-09-26 · #frontmatter #sprint-init #danger · sprint.ts parseFileFrontmatter --allow-drift write-back plants a phantom block on instructions-led plans.
 2026-09-26 · #qa-red #test-harness · An unregistered CLI subcommand exits 1 via commander, not your parser; assert stderr lacks 'unknown command'.
 2026-09-26 · #qa-red #codex #hooks · Raw Codex apply_patch/spawn payloads make today's Claude-only hooks fail open (0 vs 1/2): real reds, no fixture.
 2026-09-26 · #qa-red #test-harness · compareInstallTrees rule (c) flags noflag top-level names; put symlink fixtures under .claude/, not at root.

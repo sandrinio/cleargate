@@ -59,6 +59,8 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 > **Amendment 2026-09-24T21:53:44Z:** the owner directed [[CR-123]] (SPIDR scenario coverage, approved the same day) into this sprint, followed by a re-plan. The set is now **17 items: 13 stories, 3 bugs, 1 CR**. CR-123 was registered by one append-only genesis event (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-25.mjs`); the 16 existing records and the event prefix are unchanged.
 >
 > **Amendment 2026-09-26T09:30:00Z:** the owner asked for a cheap fresh-folder test, from init through a few epics and stories, with the direction "log every issue you find and fix them". The journey (`sprint-runs/SPRINT-41/reports/fresh-journey-smoke.md`) found one more trigger for [[BUG-090]]: the epic and story templates scaffold no `approved:` key. The orchestrator also found [[BUG-096]], the test-fixture temp-dir leak. Four output defects became [[BUG-097]]. FJ-6 is by-design (protocol §495). BUG-090 moves from known-fail to in-sprint fix. The set is now **20 items: 13 stories, 6 bugs, 1 CR**. The three bugs were registered by append-only genesis events (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-26.mjs`); the 17 existing records and the event prefix are unchanged. They run as a fix wave after STORY-058-10 → BD → RS-4a and before STORY-058-11.
+>
+> **Amendment 2026-09-26T10:45:00Z:** the fix-wave plan (`plans/M5-fixwave.md`) was accepted. FW-A1: BUG-090's phantom-fence case follows BUG-067's first-fence parity, so it now reads UNAPPROVED (fail closed). FW-A2 widens BUG-090 to cover hotfix.md, the close_sprint 2.6c sites, the doctor sniffs and the approveProbeStory flip. The Architect's census found [[BUG-098]]: the remaining positional readers, including a `sprint init --allow-drift` write-back that plants a phantom block. That is goal-critical ("stop corrupting"), so BUG-098 was registered by `apply-approved-scope-2026-09-26b.mjs`. The set is now **21 items: 13 stories, 7 bugs, 1 CR**. Wave order: wave14 (-10) → BD → RS-4a → fw1 BUG-096 → fw2 BUG-097 → fw3 BUG-090 → fw4 BUG-098 → wave15 (-11). `--known-fail sprint-init=BUG-090` is retired from -11 QA, RS-4, RS-5 and RS-CLOSE.
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
@@ -82,6 +84,7 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `BUG-090` | `sprint init` rejects fresh stories: positional frontmatter in two scripts + no `approved:` key in epic/story templates | standard | M5 | n | med |
 | `BUG-096` | Init-parity test fixture leaks a temp dir per scenario (~17k dirs / 19 GB) | standard | M5 | n | low |
 | `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | n | low |
+| `BUG-098` | Remaining positional frontmatter readers (BUG-067/-090 carry-forward); `--allow-drift` plants a phantom block | standard | M5 | n | med |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.
 

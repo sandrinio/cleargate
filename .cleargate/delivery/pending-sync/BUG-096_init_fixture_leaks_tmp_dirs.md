@@ -76,16 +76,17 @@ test/helpers/init-fixture.ts:283  const dir = mkShortTmpDir(`cg-s41-fix-${id}-`)
 ## 4. Execution Sandbox (Suspected Blast Radius)
 **Investigate / Modify:**
 - `cleargate-cli/test/helpers/init-fixture.ts` only: a module-level tracked-dir set plus one exit handler.
-- New test `cleargate-cli/test/helpers/init-fixture-cleanup.node.test.ts`.
+- New test `cleargate-cli/test/helpers/init-fixture-cleanup.red.node.test.ts`.
 - Do not edit the 15 caller files. Do not touch `src/`.
 
 ## Task Breakdown
 - [ ] QA-Red: a child-process test proves the scenario dir and payload dir are gone after the child exits, both for a passing child and a throwing child
 - [ ] Track every `mkShortTmpDir` result; remove all tracked dirs in one `process.on('exit')` handler
+- [ ] Export trackedTmpDirs() from init-fixture.ts (test-only snapshot of the cleanup set)
 - [ ] Prove capture mode still writes a baseline that survives the process
 
 ## 5. Verification Protocol (The Failing Test)
-**Command:** `cd cleargate-cli && npm run test:file -- test/helpers/init-fixture-cleanup.node.test.ts` (solo).
+**Command:** `cd cleargate-cli && npm run test:file -- test/helpers/init-fixture-cleanup.red.node.test.ts` (solo).
 
 | Axis | Cover | Reason |
 |---|---|---|

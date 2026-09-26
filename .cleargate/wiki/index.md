@@ -77,6 +77,7 @@
 - [[BUG-095]] (bug) — Draft — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
 - [[BUG-096]] (bug) — Triaged — The init-parity test fixture leaks a temp directory on every scenario run
 - [[BUG-097]] (bug) — Triaged — Four CLI output defects a new user hits in the first session (gate -v, stamp --dry-run, wiki query, scaffold-lint)
+- [[BUG-098]] (bug) — Triaged — The remaining positional frontmatter readers misread or corrupt `<instructions>`-led work items (BUG-067 / BUG-090 carry-forward)
 
 ## Archive
 
