@@ -42,10 +42,16 @@
 # via ORCHESTRATOR_PROJECT_DIR (all three hooks resolve REPO_ROOT as
 # "${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"). Nothing under the
 # real .cleargate/sprint-runs/ or .cleargate/hook-log/ is ever touched.
-# Hook-under-test is the in-worktree CANONICAL copy at
-# cleargate-planning/.claude/hooks/ (never the live gitignored .claude/).
+# Hook-under-test defaults to the CANONICAL copy at
+# cleargate-cli/scaffold/hosts/claude/.claude/hooks/ (BUG-085: canonical
+# relocated out of the frozen, deprecated cleargate-planning/ snapshot). A
+# live mode (BUG068_HOOKS_DIR) is also supported — see Usage below.
 #
 # Usage: bash .cleargate/scripts/test/bug068_dispatch_tool_name.red.sh
+#   Canonical mode (default): resolves cleargate-cli relative to this repo's
+#     root, or via CLEARGATE_CLI_ROOT=<path> when cleargate-cli/ is not a
+#     sibling (e.g. run from an outer worktree).
+#   Live mode: BUG068_HOOKS_DIR="$PWD/.claude/hooks" bash .cleargate/scripts/test/bug068_dispatch_tool_name.red.sh
 # Expected at RED baseline: scenarios 1, 2, 3, 4 all FAIL.
 # Expected after implementation: all 4 PASS.
 # macOS bash 3.2 portable.
@@ -58,14 +64,20 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
-HOOKS_DIR="${REPO_ROOT}/cleargate-planning/.claude/hooks"
+# BUG-085: canonical relocated to the standalone cleargate-cli repo
+# (scaffold/hosts/claude/.claude/hooks/). CLEARGATE_CLI_ROOT overrides the
+# default sibling location (needed from an outer worktree, where
+# cleargate-cli/ is not checked out beside .cleargate/). BUG068_HOOKS_DIR
+# overrides HOOKS_DIR entirely — live mode, e.g. "$PWD/.claude/hooks".
+CLI_ROOT="${CLEARGATE_CLI_ROOT:-${REPO_ROOT}/cleargate-cli}"
+HOOKS_DIR="${BUG068_HOOKS_DIR:-${CLI_ROOT}/scaffold/hosts/claude/.claude/hooks}"
 PRE_TOOL_USE_TASK_HOOK="${HOOKS_DIR}/pre-tool-use-task.sh"
 PENDING_TASK_SENTINEL_HOOK="${HOOKS_DIR}/pending-task-sentinel.sh"
 TOKEN_LEDGER_HOOK="${HOOKS_DIR}/token-ledger.sh"
 
 for h in "${PRE_TOOL_USE_TASK_HOOK}" "${PENDING_TASK_SENTINEL_HOOK}" "${TOKEN_LEDGER_HOOK}"; do
   if [[ ! -f "${h}" ]]; then
-    printf 'ERROR: canonical hook not found at %s\n' "${h}" >&2
+    printf 'ERROR: hook not found at %s (resolved HOOKS_DIR=%s)\n' "${h}" "${HOOKS_DIR}" >&2
     exit 2
   fi
 done
