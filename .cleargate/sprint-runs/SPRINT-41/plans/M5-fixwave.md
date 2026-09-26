@@ -1180,3 +1180,29 @@ STATUS=done
 - DevOps counts are the previous merge's total plus the item's own delta.
 - The payload-identity baseline copy is taken immediately before each merge.
 - Harness runs pass `--container`.
+
+## FW-A16 — BUG-090 TPV re-seal (2026-09-26, role: architect; append-only)
+
+Source: `reports/BUG-090-tpv.md` (verdict REJECTED → re-seal). The patch is `reports/BUG-090-tpv-reseal.patch`, sha256 `28d4f07c6da5e2fe84332bb3fd14076c55ab3a33f0e0c2970652d1af22f51b27`. It applies cleanly on cli `dbdcfc8` and changes 3 test files. No src, scaffold, script or template file changes.
+
+- **QA-Red test list, amended.**
+  - `frontmatter-fence-parity.red.node.test.ts`: 13 tests become 21. Add F14–F21, one fixture per framing rule that (a) pins and F1–F13 leave unexercised. Each covers a port mutant that survived:
+    - exact-line `<instructions>` opener and closer;
+    - the fence closer's char and its length;
+    - opener and closer indentation of 0–3 spaces;
+    - a `--- ` closer with trailing space;
+    - an instructions-before-fence precedence case;
+    - a BOM that is stripped on line 0 only.
+  - `assert-story-files-fence.red.node.test.ts`: 9 tests become 11.
+    - A10 [red]: a `----`-closed malformed block with `approved: true` reads as UNAPPROVED, exit 1, with no crash. Base exits 0, because the offset-0 regex reads `----` as the closer. This pins "on null or a throw, approved = false".
+    - A11 [red]: `assertWorkItemApproved` is a named export (C4) and returns `{approved, has_heading}`.
+  - `close-sprint-fence.red.node.test.ts`: still 4 tests. The preambles of C1, C3 and C4 each gain one column-0 example line inside `<instructions>`: C1 gets `deferred_verification: []`; C3 and C4 get `status: "Draft"`. This kills whole-file scans at the 2.9 list parse, the 2.6c flip and the 2.6c no-op read. The expected bytes are unchanged.
+- **Totals (supersedes "Default tier +38").** Default tier +48: 40 red at the red commit and 8 anchors (A2, A4, A6, A7, A8, C2, T4, T7). Integration +2, both red. Both parity files flip, 20 runs.
+- **Counts that follow.**
+  - DevOps D4 is the previous total **+48**; replan §9 BUG-090 "+38" is void.
+  - BUG-090 §5's test-count table Unit tests: 38 becomes 48. The orchestrator amends the item on `sprint/S-41` before the Developer is dispatched, then re-gates it.
+- **Developer K-gates added.** They are post-flight inspection items for the accepted residual survivors A04, C09 and D03:
+  1. `git diff --numstat -- src/commands/doctor.ts` is exactly `0 2`, and `runPricing`'s sniff remains, so the count of `trimStart().startsWith('---')` in doctor.ts is 1. That site is BUG-098's.
+  2. The `approved` regex line in `assert_story_files.mjs` is byte-identical to base `:168`.
+  3. Every close_sprint parse site reads `fenceYaml(raw).yaml`, never `raw`.
+- **Pre-existing, not BUG-090's.** `test/scripts/template-sync-fields.integration.node.test.ts` has 4 failures, "live template X — parseFrontmatter returns all 6 new keys". The test bug is at `:78`: `field in (fm, msg)` uses the comma operator, so it throws on every template, including the untouched `CR.md` and `Bug.md`, at any commit. Name it in QA-Verify and DevOps D7-4. Follow-up.

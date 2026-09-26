@@ -21,9 +21,9 @@ deferred_verification:
     command: node cleargate-cli/scripts/clean-room/codex-hooks.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --write-result .cleargate/sprint-runs/SPRINT-41/deferred-verify/STORY-058-10.json
     blocks: close
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-25T22:38:16Z
+updated_at: 2026-09-26T14:51:20Z
 created_at_version: cleargate@0.26.1
-updated_at_version: e432871f-dirty
+updated_at_version: d7c3f422-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -148,9 +148,9 @@ Feature: Codex payload surfaces
 ```
 
 ### 2.2 Verification Steps (Manual)
-- [ ] `node cleargate-cli/scripts/clean-room/codex-hooks.mjs run --codex-bin <pinned> --provider scripted` into a fresh sibling container: every gating verdict PASS (discovery, session-start, post-tool-use, edit-deny, edit-allow, dispatch-deny, dispatch-identity, shared-hooks, claude.control.edit-deny, verify-install).
+- [x] `node cleargate-cli/scripts/clean-room/codex-hooks.mjs run --codex-bin <pinned> --provider scripted` into a fresh sibling container: every gating verdict PASS (discovery, session-start, post-tool-use, edit-deny, edit-allow, dispatch-deny, dispatch-identity, shared-hooks, claude.control.edit-deny, verify-install).
 - [ ] The same with `--provider live --codex-home <dedicated, logged-in>` once (RS-4 at the latest).
-- [ ] At QA-Verify, the Claude clean-room harness re-runs live on the story branch without `--evidence`: `claude-baseline.mjs run --ref story/STORY-058-10 --label "QA STORY-058-10" --known-fail sprint-init=BUG-090` exits 0. Every Run 1 row reproduces; `claude.live.agents-md-exposure` (all room), `host-set` and `claude.live.agents-skills-parity` read PASS (M5-A6).
+- [x] At QA-Verify, the Claude clean-room harness re-runs live on the story branch without `--evidence`: `claude-baseline.mjs run --ref story/STORY-058-10 --label "QA STORY-058-10" --known-fail sprint-init=BUG-090` exits 0. Every Run 1 row reproduces; `claude.live.agents-md-exposure` (all room), `host-set` and `claude.live.agents-skills-parity` read PASS (M5-A6).
 - [ ] Pre-seed `.codex/config.toml` with user MCP servers and comments and re-run: bytes outside the managed spans unchanged; a malformed file is refused before any write.
 
 ## 3. The Implementation Guide
@@ -199,16 +199,16 @@ Mirrors the `.mcp.json` entry the Claude adapter writes today. Existing files ar
 
 ## Task Breakdown
 
-- [ ] QA-Red: codex adapter, TOML surgery, edit-target normalization, codex hook-signal, codex payload/codegen, install view, codex init/lifecycle, codex hook-script branches, verify-install codex and harness reds; scripted e2e; hook snapshots; 3 M2 parity rows
-- [ ] Register codexAdapter after claude (owned .codex, shared .agents, surgery AGENTS.md/.codex/hooks.json/.codex/config.toml, displayName, sessionLoadedPaths, mergeSurgeryTarget, preflight); isClearGateCommand recognizes .codex/hooks commands
-- [ ] openInstallView for init (default and --from-source), host add, upgrade and doctor --check-scaffold; buildInstallView skips each root's MANIFEST.json; host add runs preflight before any write
-- [ ] payloadFilter admits root-level surgery targets only for a selected declarer; never-wholesale copy; AGENTS.md untracked; .codex TIER_RULES after re-verifying FU-1
-- [ ] Codex payload: AGENTS.md block (Codex-correct, <=10 KiB) and .codex/hooks.json; generate .codex/hooks/*.sh with build-codex-payload.mjs, --check in prebuild
-- [ ] TOML-preserving .codex/config.toml registration with malformed/ambiguous refusal before any write (toml-eslint-parser ^1.0.3)
-- [ ] Codex hook-signal mapping, .codex/hooks.json session-load delta, the install output lines on the features flag and trust, HOST_VERIFIERS.codex with codex.features-hooks
-- [ ] cleargate hook edit-targets; codex branches in pre-edit-gate, stamp-and-gate, pending-task-sentinel (Agent|.*spawn_agent, agent_type) and token-ledger (identity line, no ledger row); regenerate the codex copies
-- [ ] Extend the Claude clean-room harness for coexistence: S3 AGENTS.md canary, host-set and agents/skills parity rows, evidence cell sanitiser, hermetic npm cache (M5-A1..A9)
-- [ ] Clean-room Codex harness (app-server capture, scripted Responses endpoint, live provider) and the scripted e2e
+- [x] QA-Red: codex adapter, TOML surgery, edit-target normalization, codex hook-signal, codex payload/codegen, install view, codex init/lifecycle, codex hook-script branches, verify-install codex and harness reds; scripted e2e; hook snapshots; 3 M2 parity rows
+- [x] Register codexAdapter after claude (owned .codex, shared .agents, surgery AGENTS.md/.codex/hooks.json/.codex/config.toml, displayName, sessionLoadedPaths, mergeSurgeryTarget, preflight); isClearGateCommand recognizes .codex/hooks commands
+- [x] openInstallView for init (default and --from-source), host add, upgrade and doctor --check-scaffold; buildInstallView skips each root's MANIFEST.json; host add runs preflight before any write
+- [x] payloadFilter admits root-level surgery targets only for a selected declarer; never-wholesale copy; AGENTS.md untracked; .codex TIER_RULES after re-verifying FU-1
+- [x] Codex payload: AGENTS.md block (Codex-correct, <=10 KiB) and .codex/hooks.json; generate .codex/hooks/*.sh with build-codex-payload.mjs, --check in prebuild
+- [x] TOML-preserving .codex/config.toml registration with malformed/ambiguous refusal before any write (toml-eslint-parser ^1.0.3)
+- [x] Codex hook-signal mapping, .codex/hooks.json session-load delta, the install output lines on the features flag and trust, HOST_VERIFIERS.codex with codex.features-hooks
+- [x] cleargate hook edit-targets; codex branches in pre-edit-gate, stamp-and-gate, pending-task-sentinel (Agent|.*spawn_agent, agent_type) and token-ledger (identity line, no ledger row); regenerate the codex copies
+- [x] Extend the Claude clean-room harness for coexistence: S3 AGENTS.md canary, host-set and agents/skills parity rows, evidence cell sanitiser, hermetic npm cache (M5-A1..A9)
+- [x] Clean-room Codex harness (app-server capture, scripted Responses endpoint, live provider) and the scripted e2e
 - [ ] Verify in a real Codex session that hooks fire, an edit is blocked and a dispatch is blocked, with positive controls (scripted at QA-Verify; scripted + live at RS-4)
 - [x] Record `.codex/rules/**` as explicitly deferred from SPRINT-41, retained under EPIC-058 for later decomposition.
 
@@ -223,14 +223,14 @@ Mirrors the `.mcp.json` entry the Claude adapter writes today. Existing files ar
 | E2E / acceptance tests | 3 | Real clean-room hook firing; edit denial with positive control; dispatch denial and allowed-dispatch attribution |
 
 ### 4.2 Definition of Done (The Gate)
-- [ ] Minimum test expectations (§4.1) met.
-- [ ] All Gherkin scenarios from §2.1 covered.
-- [ ] Peer/Architect Review passed.
+- [x] Minimum test expectations (§4.1) met.
+- [x] All Gherkin scenarios from §2.1 covered.
+- [x] Peer/Architect Review passed.
 - [ ] Verified against a real Codex CLI session, not only against fixtures.
 - [ ] Subagent lifecycle firing is verified on the pinned runtime; token metering limits are disclosed separately from mandatory dispatch identity.
 - [ ] Actual dispatch denial and allowed-dispatch attribution are proved without a concurrent-hook ordering assumption.
 - [ ] A PreToolUse gate (`pre-edit-gate.sh`) is verified to actually **block** an edit in a real Codex session, using the host-correct signal — not merely installed and silent.
-- [ ] `[features] hooks = true` is asserted by an automated check (doctor or the clean-room driver), not only announced as install-time text.
+- [x] `[features] hooks = true` is asserted by an automated check (doctor or the clean-room driver), not only announced as install-time text.
 - [ ] codex-hooks-evidence.md gates sprint close through this story's deferred_verification (last scripted run PASS on the final artifact inputs; at least one live PASS).
 
 ## Existing Surfaces

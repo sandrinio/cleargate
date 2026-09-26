@@ -571,12 +571,13 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
   - **Next:** M5 (-10 codex adapter, then -11, then RS-4a/RS-4). OD1 codex login is needed at RS-4 step 5.
 
 - 2026-09-26T14:00:00Z · CR-124 re-plan · plans/replan-contract-first.md accepted: remainder runs contract-first — contracts C1 contract/S-41-codex (=STORY-058-10 d0f0d95), C4 contract/S-41-fence (BUG-090 Dev), C2 contract/S-41-dispatch (STORY-058-11 + CR-124 Dev), C3 contract/S-41-loop (STORY-058-12 Dev); nested worktrees OUTER/.worktrees/<ID>/cleargate-cli; 4 build lanes, 1 merge lane, 1 harness lane; waves.json schema_version 2; rules 9 and 11 superseded, 19–21 added; the cli main checkout stays on main; RS-4's live run becomes RS-4L (owner OD1, before RS-CLOSE); RS-CR added after CR-124.
-- 2026-09-26T14:10:00Z · STORY-058-10 · Re-plan step 0 ran AFTER pass C, not before: pass C was dispatched in the cli main checkout before the re-plan landed. Pass C committed `393c286` (test 46 scripted codex session 1/1, 10 gating verdicts PASS, ~18 min). The cli main checkout was then switched to `main` (`35580b0`), and -10 moved to `.worktrees/STORY-058-10` (detached outer host plus nested cli worktree). C1 `contract/S-41-codex` = `d0f0d95`; pass C touched only non-frozen harness internals. QA-Verify ∥ post-flight dispatched there.
+- 2026-09-26T14:10:00Z · STORY-058-10 · Re-plan step 0 ran AFTER pass C, not before: pass C was dispatched in the cli main checkout before the re-plan landed. Pass C committed `393c286` (test 46 scripted codex session 1/1, 10 gating verdicts PASS, ~18 min). The cli main checkout was then switched to `main` (`35580b0`), and -10 moved to `.worktrees/STORY-058-10` (detached outer host plus nested cli worktree). C1 `contract/S-41-codex` = `d0f0d95`; pass C touched only non-frozen harness internals. QA-Verify ∥ post-flight dispatched there. Post-flight FAIL (claude-baseline.mjs unwired, M5-A47) → pass D `b12240b` → QA2 PASS-PENDING-SMOKE + post-flight PASS → DevOps merged `fcb1491` 2026-09-26T15:10Z (arch_bounces=2, qa_bounces=1); BD; RS-4a live re-sync of 4 hooks (pin 0.20.0) — canonical-live-parity 11/11.
 
 **Contract-first ledger (CR-124 dogfood):**
 
 | Item | Base (sha) | Contract | Build start | Dev sha | Integrated on cli main | Re-syncs | QA-Red re-scopes | Merge (outer / cli) |
 |---|---|---|---|---|---|---|---|---|
+| STORY-058-10 | `35580b0` | owner of C1 `contract/S-41-codex` = `d0f0d95` | 2026-09-25 (serial, pre-re-plan); passes C/D in `.worktrees/STORY-058-10` 2026-09-26 | `560a4f1` A, `d0f0d95` B, `393c286` C, `b12240b` D | yes, no-op (main unchanged at `35580b0`) | 0 | 0 (TPV re-seal before Dev) | — (cli-only) / `fcb1491`; full suite 3309/3307/0/2; BD; RS-4a 11/11 |
 
 ---
 
