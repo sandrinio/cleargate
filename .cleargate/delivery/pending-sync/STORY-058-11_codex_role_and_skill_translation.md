@@ -35,15 +35,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-058-11
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-25T09:53:02Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-26T13:52:50Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-26T13:48:29Z
 ---
 
 # STORY-058-11: Codex role and skill translation with a harness-neutral repo-root shim
@@ -78,6 +84,7 @@ As a developer using Codex, I want the five ClearGate execution roles and the sh
 - **The shim touches 8 of the 9 shared hooks (`pre-commit.sh` has no repo-root resolution), which Claude Code runs today.** A regression here breaks the working host to serve the new one. This is exactly the case [[STORY-058-09]]'s baseline exists to catch, and this story should land after it.
 - Losing the `tools:` allowlist is a real enforcement regression under Codex, not a cosmetic one: 11 agent definitions pin a tool set, and `qa` deliberately omits `Write`.
 - Generated TOML that is hand-edited becomes a second source of truth. Mark the files generated and assert regeneration is byte-stable.
+- "The `cleargate-enforcement.md` M2 parity row is shared with CR-124 and STORY-058-12 (one row per rel); this story's QA-Red writes the byte-identical block pinned in `plans/replan-contract-first.md` §7.5, and the second of this story and CR-124 to merge deletes its identical copy."
 
 ## 2. The Truth (Executable Tests)
 
@@ -149,6 +156,8 @@ TOML codegen is mechanical except for `tools:`, which has no Codex counterpart. 
 
 Codex's `.codex/hooks.json` commands already export `CLAUDE_PROJECT_DIR` from `git rev-parse --show-toplevel` (STORY-058-10, AD-2), overriding a leaked value; the shim's stdin-cwd branch serves direct and future-host invocations. The codegen omits `model` (measured: forwarded verbatim to the provider) as well as `tools`.
 
+"Contract-first execution (CR-124; SPRINT-41 re-plan `plans/replan-contract-first.md`): built in `OUTER/.worktrees/STORY-058-11/cleargate-cli` on `story/STORY-058-11`, cut from `contract/S-41-codex` (STORY-058-10 Developer commit `d0f0d95`); integrates after STORY-058-10 merges. CR-124 edits `architect.md`, `architect-synth.md` and `architect-reader.md`; whichever of this story and CR-124 merges second runs `npm run gen:codex` after merging cli `main` and commits the regenerated `.codex/agents/architect*.toml`. The frozen pre-shim hooks (`test/fixtures/hooks-pre-058-11/`) are the canonical hooks at `contract/S-41-codex`; if STORY-058-10 later changes a hook, QA-Red re-freezes them at integration."
+
 ### 3.3 API Contract (if applicable)
 Generated agent file shape:
 ```toml
@@ -168,6 +177,7 @@ developer_instructions = """
 - [ ] Prove the shim is a no-op under Claude across all 9 hooks (frozen pre-shim copies vs current, identical Claude payloads)
 - [ ] Record the Codex enforcement deltas in cleargate-enforcement.md §16 (canonical and outer twin)
 - [ ] Real Codex session: roles listed and delegable, portable skills discovered (harness scripted on the branch; RS-4 scripted + live)
+- [ ] Integrate: merge cli main after STORY-058-10 merges; regenerate codex copies; re-verify; QA-Verify (scripted harness, --container) and post-flight on the integrated tree
 
 ## 4. Quality Gates
 
@@ -209,7 +219,7 @@ developer_instructions = """
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🔴 High Ambiguity** — reset 2026-09-26 by [[CR-124]] (contract-first sprint DAG changes the architect-synth/reader and sprint-execution texts this story translates for Codex); restored when the SPRINT-41 remainder re-plan amends this story.
+**Current Status: 🟢 Low** — restored 2026-09-26 by the SPRINT-41 contract-first re-plan (RP-A15): CR-124's agent-text change is handled by the regenerate-on-second-merge rule; sprint-execution stays out of this story's scope.
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

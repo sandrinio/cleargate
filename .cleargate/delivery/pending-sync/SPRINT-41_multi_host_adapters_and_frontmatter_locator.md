@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-25T15:30:39Z
+  last_stamp: 2026-09-26T13:58:17Z
   sessions: []
 ---
 
@@ -77,19 +77,21 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M3 | n | low |
 | `STORY-058-08` | Clean-room verification procedure + `cleargate verify-install` driver | standard | M4 | y | low |
 | `STORY-058-09` | Clean-room Claude regression baseline (no-flag and `--host all`) | standard | M4 | y | low |
-| `STORY-058-10` | Codex payload surfaces: hooks.json, config.toml MCP, `AGENTS.md` injection | standard | M5 | n | med |
+| `STORY-058-10` | Codex payload surfaces: hooks.json, config.toml MCP, `AGENTS.md` injection | standard | M5 | y | med |
 | `STORY-058-11` | Codex role/skill translation + harness-neutral repo-root shim | standard | M5 | y | med |
-| `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | n | med |
-| `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | n | low |
+| `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | y | med |
+| `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | y | low |
 | `BUG-089` | PreToolUse gates exit 1, which Claude Code does not treat as blocking — both gates fail open | standard | M0 | n | low |
 | `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M1 | n | med |
-| `BUG-090` | `sprint init` rejects fresh stories: positional frontmatter in two scripts + no `approved:` key in epic/story templates | standard | M5 | n | med |
-| `BUG-096` | Init-parity test fixture leaks a temp dir per scenario (~17k dirs / 19 GB) | standard | M5 | n | low |
-| `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | n | low |
-| `BUG-098` | Remaining positional frontmatter readers (BUG-067/-090 carry-forward); `--allow-drift` plants a phantom block | standard | M5 | n | med |
-| `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | n | med |
+| `BUG-090` | `sprint init` rejects fresh stories: positional frontmatter in two scripts + no `approved:` key in epic/story templates | standard | M5 | y | med |
+| `BUG-096` | Init-parity test fixture leaks a temp dir per scenario (~17k dirs / 19 GB) | standard | M5 | y | low |
+| `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | y | low |
+| `BUG-098` | Remaining positional frontmatter readers (BUG-067/-090 carry-forward); `--allow-drift` plants a phantom block | standard | M5 | y | med |
+| `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | y | med |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.
+
+> **Amendment 2026-09-26T14:00Z (contract-first re-plan):** for unmerged items, Parallel? reads "builds in a parallel lane" (CR-124). Milestone values are unchanged: the dashboard groups by this table's Milestone column and never reads waves.json.
 
 **Decomposition notes.** L3 stories include `STORY-058-07`, `-10`, `-12`, and `-13`; `-07`'s §3.2 carries an explicit split
 signal for the Architect (split into two L2s if `doctor`+`drift` and `upgrade`+`uninstall`+`prune`
@@ -107,6 +109,13 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 *(Architect Sprint Design Review 2026-09-24, re-run under owner rulings R1–R4 — see §4 Execution Log 2026-09-24T22:30:23Z. The first run halted on BUG-046 reachability: `sprint-runs/SPRINT-41/plans/sdr-halt-2026-09-24.md`. Wave plan: `sprint-runs/SPRINT-41/plans/waves.json`.)*
 
 ### 2.1 Phase Plan
+
+> **Contract-first re-plan (2026-09-26, owner: "that's how i want cleargate to be planning sprints" / "the sprint also runs the same way from now on") — authoritative over the wave list below for every unmerged item.** Plan: `sprint-runs/SPRINT-41/plans/replan-contract-first.md`; machine plan: `plans/waves.json` (`schema_version: 2`).
+> - **Contracts (cli):** C1 `contract/S-41-codex` = STORY-058-10 Developer commit `d0f0d95`; C4 `contract/S-41-fence` = BUG-090's Developer commit; C2 `contract/S-41-dispatch` = C1 + STORY-058-11 and CR-124 Developer commits; C3 `contract/S-41-loop` = STORY-058-12's pass-B commit. Frozen exports per the plan §2.
+> - **Build now (4 lanes):** STORY-058-10 pass C, CR-124, STORY-058-11 (C1), BUG-090 (C1); then BUG-096, BUG-097; BUG-098 on C4; STORY-058-12 on C2; STORY-058-13 on C3.
+> - **Integration edges:** BUG-090 and STORY-058-11 after STORY-058-10; BUG-098 after BUG-090; STORY-058-12 after STORY-058-10, STORY-058-11 and CR-124; STORY-058-13 after STORY-058-12 and BUG-090. BUG-096, BUG-097, CR-124 and STORY-058-10 have none.
+> - **Merges** one at a time in the cli main checkout (now permanently on `main`) and on `sprint/S-41`; re-integrate if either moved. QA-Verify and post-flight run on the integrated tree; over-constrained reds are re-scoped by QA-Red.
+> - **Boundaries:** BD after every cli merge; RS-4a after STORY-058-10; RS-4 after STORY-058-11 (live run → RS-4L, needs owner OD1, before RS-CLOSE); RS-CR after CR-124; RS-5 after STORY-058-12; step L (owner) before STORY-058-13's merge; RS-CLOSE last.
 
 **Execution model (R1–R4):** strictly serial, by hand, one item at a time — QA-Red → TPV/Architect only on a pre-gate flag → Developer → QA-Verify → DevOps. Every item touches `cleargate-cli/`, and R1 gives that repo one main checkout with one story branch at a time, so no two items can be in flight. The five-clause predicate agrees independently: no pair is compatible. `launch_wave.mjs` cannot drive this (it only cuts outer-repo worktrees), so `waves.json` is walked by hand.
 
@@ -170,6 +179,13 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 | `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` | BUG-089, BUG-085 | 089 → 085 | — |
 | `.cleargate/knowledge/cleargate-enforcement.md` | BUG-089, 058-12 | 089 → 12 | — |
 | `.cleargate/knowledge/clean-room-verification.md` | 058-08 (create), -09 | 08 → 09 | Forward reference (R4), not a refusal |
+| `cleargate-cli/test/helpers/init-fixture.ts` | all remaining cli items except BUG-097 | tail order = merge order | One row per rel; shared enforcement row byte-identical (plan §7.5) |
+| `…/.cleargate/knowledge/cleargate-enforcement.md` (+ twin) | STORY-058-11, CR-124, STORY-058-12 | 11 ∥ CR-124 → 12 | disjoint regions; 12 rewrites §16 b10 and appends §17 |
+| `…/skills/sprint-execution/SKILL.md` | CR-124, STORY-058-12 | CR-124 → 12 | 12's renderer anchors and banned tokens; CR-124 edits only inside A2 plus §A.4 |
+| `…/.cleargate/scripts/launch_wave.mjs` (+ twin) | CR-124, STORY-058-12 | CR-124 → 12 | disjoint regions (CR-124 new exports + launchWave; 12 header + validator) |
+| `…/.codex/agents/*.toml` (generated) | STORY-058-11, CR-124 | second merger regenerates | prebuild `--check` |
+| `…/scripts/clean-room/{codex-hooks,evidence}.mjs` | STORY-058-10, -11, -12, -13 | 10 → 11 → 12 → 13 | chained extensions |
+| live `assert_story_files.mjs` ↔ `prep_reporter_context.mjs` / `dedupe_frontmatter.mjs` | BUG-090, BUG-098 | BUG-090 → BUG-098 (both repos) | ESM import link |
 
 \* The item's own §3.1 names this path, but its parsed surface does not (defect D3).
 
@@ -184,6 +200,10 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 - **-11 rewrites all nine hooks** Claude runs today. -09's baseline exists to catch exactly this, so re-run it at RS-4 before -12.
 - **B0 breaks the ledger's continuity.** The Reporter treats rows before B0 as unattributable. BUG-089's own segment runs under fail-open gates.
 - `init.ts` is touched by 03/04/06, not the seed's 01/03/04/10; `manifest.ts` by 06/05. The table above supersedes the seed.
+- Parallel outer commits and the surface gate: rule 17 note (RP-A5).
+- Harness runs are serialized, and from a worktree they need an explicit `--container` (rule 20).
+- -12 renderer anchors and banned tokens constrain CR-124's SKILL.md text (plan §7.1).
+- `check-no-exec-mode-vocab` bans "under v2", "v2 only" and similar in agent and skill text.
 
 ### 2.4 Lane Audit
 
@@ -227,6 +247,16 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 | wave15 | M5 | STORY-058-11 | cli | After 10, 01, CR-123, 09; §3.1 still prose (D3) |
 | wave16 | M6 | STORY-058-12 | both | After 03, CR-123, 10, 11 |
 | wave17 | M6 | STORY-058-13 | both | After 12, 08 |
+
+**Remainder (contract-first, derived integration layers — `waves.json` `schema_version: 2`):**
+
+| Layer | Items | Base | Integrates after |
+|---|---|---|---|
+| wave14 | STORY-058-10 | 35580b0 (pass C in its worktree) | — |
+| cf-L0 | BUG-096, BUG-097, CR-124 | cli main | — |
+| cf-L1 | BUG-090, STORY-058-11 | C1 | STORY-058-10 |
+| cf-L2 | BUG-098, STORY-058-12 | C4, C2 | BUG-090; STORY-058-10 + STORY-058-11 + CR-124 |
+| cf-L3 | STORY-058-13 | C3 | STORY-058-12, BUG-090 |
 
 ### 2.7 Pre-dispatch defects
 
@@ -539,6 +569,14 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
     - The same dashboard observations stand: `UNATTRIBUTED` 23.9B of 30.9B, the Execution timeline panel is empty, and `/data` 404s come from the static server.
   - **Kept until RS-4:** the Run 1 container and its two session dirs. Kept until RS-CLOSE: `/private/tmp/cg-s41-m2-init-baseline`.
   - **Next:** M5 (-10 codex adapter, then -11, then RS-4a/RS-4). OD1 codex login is needed at RS-4 step 5.
+
+- 2026-09-26T14:00:00Z · CR-124 re-plan · plans/replan-contract-first.md accepted: remainder runs contract-first — contracts C1 contract/S-41-codex (=STORY-058-10 d0f0d95), C4 contract/S-41-fence (BUG-090 Dev), C2 contract/S-41-dispatch (STORY-058-11 + CR-124 Dev), C3 contract/S-41-loop (STORY-058-12 Dev); nested worktrees OUTER/.worktrees/<ID>/cleargate-cli; 4 build lanes, 1 merge lane, 1 harness lane; waves.json schema_version 2; rules 9 and 11 superseded, 19–21 added; the cli main checkout stays on main; RS-4's live run becomes RS-4L (owner OD1, before RS-CLOSE); RS-CR added after CR-124.
+- 2026-09-26T14:10:00Z · STORY-058-10 · Re-plan step 0 ran AFTER pass C, not before: pass C was dispatched in the cli main checkout before the re-plan landed. Pass C committed `393c286` (test 46 scripted codex session 1/1, 10 gating verdicts PASS, ~18 min). The cli main checkout was then switched to `main` (`35580b0`), and -10 moved to `.worktrees/STORY-058-10` (detached outer host plus nested cli worktree). C1 `contract/S-41-codex` = `d0f0d95`; pass C touched only non-frozen harness internals. QA-Verify ∥ post-flight dispatched there.
+
+**Contract-first ledger (CR-124 dogfood):**
+
+| Item | Base (sha) | Contract | Build start | Dev sha | Integrated on cli main | Re-syncs | QA-Red re-scopes | Merge (outer / cli) |
+|---|---|---|---|---|---|---|---|---|
 
 ---
 

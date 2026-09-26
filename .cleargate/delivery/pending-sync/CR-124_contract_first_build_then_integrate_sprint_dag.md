@@ -28,15 +28,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id CR-124
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-26T13:03:07Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-26T13:54:55Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-26T13:05:19Z
 ---
 
 # CR-124: Contract-first build-then-integrate — sprints are planned and run as a dependency DAG, not collision waves
@@ -105,27 +111,33 @@ draft_tokens:
 ## 3. Execution Sandbox
 
 **Modify:**
-- `cleargate-cli/scaffold/hosts/claude/.claude/agents/architect-synth.md` — the real-collision predicate, contract formation, and v2 `waves.json` emission.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs` — adds `storyBases(plan)` and `integrationReady(plan, storyId, mergedIds)` after `worktreeAddCommand` (`:112-115`); `launchWave` gains a `bases` parameter. Does not touch `:1-41` or `:129-224`.
 - `cleargate-cli/scaffold/hosts/claude/.claude/agents/architect-reader.md` — the digest gains `exports_provided` and `exports_consumed`.
-- `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` — §A.4 (SDR output), §C.0 (contract step, parallel build, integration protocol, serial merge and re-sync, QA-Red re-scope rule).
-- `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` — the wave-predicate text.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs` and `init_sprint.mjs` — accept `schema_version: 2`, with the `waves`/`lane_assignments` behaviour unchanged.
-- `cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md` — §2.1 becomes a DAG plus contracts.
-- The tests covering the above (the existing shell and node tests for `init_sprint`, `launch_wave` and the file surface), plus the live mirrors via the boundary re-sync.
+- `cleargate-cli/scaffold/hosts/claude/.claude/agents/architect-synth.md` — the real-collision predicate, contract formation, and v2 `waves.json` emission.
+- `cleargate-cli/scaffold/hosts/claude/.claude/agents/architect.md` — §2.1 Phase Plan gains one sentence naming the contract-first DAG.
+- `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` — §A.4 (SDR output), new `#### C.0.2 Contract-first build and integration (CR-124)`.
+- `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md` `:103` — the wave-predicate text.
+- `cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md` — §2.1 becomes a DAG plus contracts example.
+- `cleargate-cli/test/helpers/init-fixture.ts` — the 7 sanctioned baseline-hash rows (plan §7.5).
+- `cleargate-cli/CHANGELOG.md` — `### Added` entry for contract-first sprint planning.
+- **Add (new test files):** `cleargate-cli/test/scripts/waves-json-v2.red.node.test.ts`, `cleargate-cli/test/docs/contract-first-dag-text.red.node.test.ts`, `cleargate-cli/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts`.
+- **Conditional:** `cleargate-cli/scaffold/hosts/codex/.codex/agents/architect{,-synth,-reader}.toml` — regenerated via `npm run gen:codex`, only if [[STORY-058-11]] merged first.
+- **Removed:** `init_sprint.mjs` — it reads only `lane_assignments` (`:195-211`, measured); a `schema_version: 2` file already works, so it needs no change.
+- **Outer twins (byte copies, one commit):** `.cleargate/knowledge/cleargate-enforcement.md`, `.cleargate/scripts/launch_wave.mjs`, `.cleargate/templates/Sprint Plan Template.md`.
 The exact file list, contract text and test shapes are pinned by the SPRINT-41 remainder re-plan (`plans/replan-contract-first.md`).
 
 ## Task Breakdown
-- [ ] QA-Red: a v2 `waves.json` fixture is accepted by `init_sprint.mjs` and `launch_wave.mjs` with unchanged lane/wave behaviour, and a v1 fixture still works; content assertions on the synth, reader and skill texts for the new rules
-- [ ] architect-reader digest: `exports_provided` / `exports_consumed`
-- [ ] architect-synth: the real-collision predicate, contract formation, and v2 emission (`contracts[]`, per-story `base` / `upstream`, derived `waves`)
-- [ ] sprint-execution skill §A.4 and §C.0: the contract step, parallel build, integration protocol, serial merge and re-sync, and the QA-Red re-scope rule
-- [ ] Enforcement text and the Sprint Plan Template §2.1
-- [ ] `init_sprint.mjs` / `launch_wave.mjs`: v2 tolerance
-- [ ] Live re-sync at the next boundary; dogfood evidence that SPRINT-41's remainder ran under the protocol
+- [ ] QA-Red: waves-json-v2 (init_sprint v1/v2, storyBases, launchWave bases, integrationReady, export guard), contract-first-dag-text (reader, synth, SKILL §A.4/§C.0.2 + -12 anchors, enforcement, template, architect.md, vocab), init-sprint-waves-v2 integration, 7 M2 rows incl. the shared enforcement row
+- [ ] launch_wave.mjs: storyBases, integrationReady, launchWave bases (no header/validator change)
+- [ ] architect-reader digest exports_provided / exports_consumed; architect-synth real-collision predicate, contract formation, schema_version 2 shape; architect.md §2.1 sentence
+- [ ] SKILL.md §A.4 + §C.0 intro sentence + §C.0.2 (inside A2; -12 anchors byte-identical; no banned tokens outside A2)
+- [ ] enforcement :103 wording; Sprint Plan Template §2.1 body; byte-copy the 3 twins
+- [ ] Integrate: merge cli main; regenerate codex agent TOMLs if STORY-058-11 merged first; re-verify; QA-Verify + post-flight on the integrated tree
+- [ ] RS-CR live re-sync of 3 agents + SKILL.md; dogfood ledger rows through close
 
 ## 4. Verification Protocol
 
-**Command/Test:** the targeted red files pinned by the re-plan, each run solo via `cd cleargate-cli && npm run test:file -- <file>`, plus the existing `init_sprint` / `launch_wave` shell tests.
+**Command/Test:** the command list = the 3 new files (`cleargate-cli/test/scripts/waves-json-v2.red.node.test.ts`, `cleargate-cli/test/docs/contract-first-dag-text.red.node.test.ts`, `cleargate-cli/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts`) plus the plan §7.4 anchors, each run solo via `cd cleargate-cli && npm run test:file -- <file>`, plus the existing `init_sprint` / `launch_wave` shell tests.
 
 | Axis | Cover | Reason |
 |---|---|---|
@@ -173,9 +185,9 @@ Feature: Contract-first build-then-integrate sprint DAG
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 6 | one per scenario; the outline counts once per example (final counts pinned by the re-plan) |
+| Unit tests | 17 | 10 red, 7 anchors |
 | Integration tests | 1 | `init_sprint.mjs` over a real v2 `waves.json` in a scaffolded install |
-| E2E / acceptance tests | 1 | dogfood: SPRINT-41's remainder executed under the protocol, recorded in the sprint §4 log |
+| E2E / acceptance tests | 1 | the §4 Contract-first ledger |
 
 ---
 

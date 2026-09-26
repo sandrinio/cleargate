@@ -1172,3 +1172,11 @@ None. Every probe ran in the scratch clone `/private/tmp/cg-s41-fixwave-plan`:
 Nothing ran against the meta repo's sprint state, and no `run_script.sh`-wrapped script was invoked. Version check skipped: no dependency is added or changed in this wave.
 
 STATUS=done
+
+## Superseded by plans/replan-contract-first.md (2026-09-26)
+
+- Order items 1–5 ("strictly serial") and the bases "cut from cli main after the BUG-097 merge" and "after BUG-090 merges" are replaced: BUG-096 at `35580b0`, BUG-097 at `main`, BUG-090 at C1, BUG-098 at C4.
+- The entry-gate greps run at integration.
+- DevOps counts are the previous merge's total plus the item's own delta.
+- The payload-identity baseline copy is taken immediately before each merge.
+- Harness runs pass `--container`.
