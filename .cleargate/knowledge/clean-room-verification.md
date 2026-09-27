@@ -249,6 +249,71 @@ artifact inputs.
 
 ## Other hosts
 
-Codex's own clean-room steps are STORY-058-13's — it extends
-`HOST_VERIFIERS` with a `codex` entry and appends this document's Codex
-section rather than starting a second procedure.
+### Codex (STORY-058-13)
+
+The machine-checkable half is `cleargate verify-install --host codex` (`## 4`):
+`HOST_VERIFIERS.codex` checks `[features] hooks = true`, the `.codex/hooks.json`
+wiring and executable bits, foreign-host hook commands, the `AGENTS.md`
+block, the Codex MCP registration, the roles and the skills against the
+packed split view. The live half — one real story driven through the loop —
+is `cleargate-cli/scripts/clean-room/codex-loop.mjs`, pinned to the standalone
+`codex-cli 0.154.0-alpha.6.2` (its SHA-256 is recorded in every run). The
+container rules of `## Location` apply unchanged; from a nested worktree
+always pass `--container` (the default sits inside the repository and is
+refused).
+
+**Prepare → owner trust → run.**
+1. `node cleargate-cli/scripts/clean-room/codex-loop.mjs prepare --codex-bin <pinned codex> --provider live --codex-home <dedicated CODEX_HOME> --ref <ref> --container <C>`
+   packs and installs the artifact (`## 1`–`## 2`), then authors a synthetic
+   project in `<C>/repo-loop`: a seeded git repository, `cleargate init --yes
+   --host codex`, an epic, one story (`STORY-001-01`, `src/slugify.mjs`) with
+   its `<instructions>` block stripped as a drafting agent does, and a sprint.
+   For `--provider live` it checks `codex login status` first and prints the
+   owner command.
+2. The owner runs the printed command (`cd <C>/repo-loop && env -i PATH=… HOME=<C>/home CODEX_HOME=… <pinned codex>`),
+   trusts the workspace, chooses **Review hooks**, trusts each of the five
+   ClearGate hooks, and quits without sending a prompt — no model call.
+3. `codex-loop.mjs run --container <C> --trust human --evidence .cleargate/sprint-runs/<sprint>/codex-loop-evidence.md --label <text>`
+   refuses (exit 2) unless every project hook is trusted at its current hash,
+   makes no `config/batchWrite` of its own, and fails the run if the
+   `hooks.state` or `projects."<room>"` trust subtrees change.
+
+The run drives six sessions over `codex app-server`: edit deny (enforce mode,
+no active sprint, story unapproved), edit allow, a delivery-item ingest,
+dispatch deny (a pending flashcard), dispatch allow with identity, and the
+loop — Architect, QA-Red, Developer and QA-Verify dispatches and a
+DevOps-executed merge under the installed playbook and `dispatch-serial.md`.
+The controls are graded exactly as STORY-058-10's Codex hooks check grades
+them; `loop_transport` and `enforcement_parity` are separate gating halves,
+and a run with a missing required hook, denial or identity line is never a
+PASS. Metering is recorded as `unavailable`, with the per-dispatch host
+telemetry probe beside it.
+
+**`CODEX_HOME`, `HOME` and PATH (X9).** Every Codex process gets a scrubbed
+environment, a dedicated `CODEX_HOME` (never `~/.codex`) and `HOME=<C>/home`.
+Role shells run through zsh, whose login `path_helper` puts `/opt/homebrew/bin`
+ahead of the launcher PATH, so `<C>/home/.zprofile` (and `.zshrc`,
+`.bash_profile`) re-prepends `<C>/tools/bin`; the run asserts that the hooks
+and the role shells both resolve the artifact `cleargate`.
+
+**Sandbox posture (X8).** Codex's `workspace-write` sandbox makes `.git`
+read-only, so `git worktree add` fails. Every session starts with
+`config.sandbox_workspace_write.writable_roots = ["<room>/.git"]` on
+`thread/start`; child agents inherit it and nothing is persisted. The
+evidence records the posture verbatim.
+
+**Scripted, live, and human trust.** `--provider scripted` drives the same
+pinned binary with a content-routed Responses endpoint, a scratch
+`CODEX_HOME` and harness-granted exact-hash trust (`harness-exact-hash`): a
+deterministic, $0 regression witness, labelled as such. `--provider live`
+uses the dedicated logged-in `CODEX_HOME` and a real model, and is primary
+evidence only under `--trust human`. A harness-granted or bypassed trust is
+never recorded as a human one. `run --container <C>` with no `prepare.json`
+in an absent `<C>` prepares a scripted room first.
+
+**Check.** `codex-loop.mjs check --evidence <file> [--cli <dir>] [--ref main] [--write-result <path>]`
+passes only when the LAST scripted run and the LAST live human-trust run on
+the pinned codex are both PASS on the current artifact inputs; it names the
+reason otherwise (`no scripted run`, `last scripted run FAIL`, `stale`, or
+`needs a live human-trust PASS run on the final artifact inputs`).
+`--write-result` writes the `deferred_verification` result close reads.
