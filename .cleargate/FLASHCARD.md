@@ -1,3 +1,4 @@
+2026-09-27 · #qa-red #tpv #test-harness · A TPV's own reported reseal sha256 can be wrong; recompute after apply, don't trust the report hash.
 2026-09-27 · #orchestrator #timestamps · Take ISO times from `date -u`; never type them. Hand-typed times ran 1-2 h ahead of the clock.
 2026-09-27 · #git #test-harness · A pre-commit hook in a linked worktree exports GIT_DIR; git children a CLI spawns must drop it.
 2026-09-27 · #tpv #preflight · A preflight that plans with a placeholder input refuses what the real write accepts; use the real one.
