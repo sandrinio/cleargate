@@ -1,3 +1,5 @@
+2026-09-27 · #qa #codex #clean-room · An independently reproduced inputs.json is a stronger B1 fix witness than re-grading the dev's own dataset.
+2026-09-27 · #qa #verify-install · verify-install --json 'checks' vs 'live' arrays both need a codex-row count; a plain install must show 0 in both.
 2026-09-27 · #merge #integrate · A clean 'git merge --no-ff -m' commits at once; use --no-commit to hold it staged until tests pass.
 2026-09-27 · #integrate #orchestration · A post-flight commit can move sprint/S-41 mid-INTEGRATE; re-check is-ancestor at the end.
 2026-09-27 · #codex #clean-room #post-flight · Codex SKILL.md:448 has the orchestrator set QA Passed; forbid only root Done, never all update_state.
