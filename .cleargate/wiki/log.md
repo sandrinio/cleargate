@@ -2005,3 +2005,8 @@
   action: "create"
   target: "BUG-105"
   path: ".cleargate/delivery/pending-sync/BUG-105_codex_install_papercuts.md"
+- timestamp: "2026-09-27T08:28:36.193Z"
+  actor: "cleargate wiki ingest"
+  action: "create"
+  target: "BUG-106"
+  path: ".cleargate/delivery/pending-sync/BUG-106_clean_room_live_controls_plaintext_work_item.md"

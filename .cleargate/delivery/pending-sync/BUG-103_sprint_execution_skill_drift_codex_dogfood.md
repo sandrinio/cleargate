@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T08:10:00Z
 context_source: "Codex dogfood runs r2 and r3 (live codex-cli 0.154.0) final reports and script incidents; verified codebase grounding at cli main f0c33f7: scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:129,153,158,312-317,352,422,455,481,638; scaffold/core/.cleargate/scripts/init_sprint.mjs:5,130-137; src/commands/sprint.ts (sprint init --stories required); scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs:100"
 created_at: 2026-09-27T08:10:00Z
-updated_at: 2026-09-27T08:10:00Z
+updated_at: 2026-09-27T08:29:08Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -108,9 +108,12 @@ SKILL.md (claude canonical, cli main f0c33f7): :129 "Six checks, all must pass:"
 **Coordination:** BUG-102 edits SKILL.md §A.4. The Architect orders the two bugs or folds §A.4 into this bug's edit. After merge, the meta-repo live `/.claude/skills/sprint-execution/SKILL.md` needs a re-sync.
 
 ## Task Breakdown
-- [ ] QA-Red: anchor tests for the five corrected passages (text present in both the Claude canonical and the Codex render); validate_bounce_readiness ignores a dirty `.cleargate/wiki/**` but still refuses other dirty paths
-- [ ] Edit SKILL.md (5 passages) and validate_bounce_readiness.mjs; regenerate the Codex payload
-- [ ] Typecheck, targeted and anchor tests, `build-codex-payload.mjs --check`, M2 parity pair
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-103 (errata §1 E7, E8, E9; folds BUG-102 §A.4 text, dispatch-serial.md step 3, architect.md:108, I16 §C.9 lead (OD-M7-3/-5)). The plan wins where it differs from this file.
+
+- [ ] QA-Red: sprint-execution-skill-drift red (7); init-fixture new validate_bounce_readiness row + CR-124 refusal hashes
+- [ ] SKILL.md passages per M7 §3 (incl. §A.4 one-wave waves.json, §C.9 lead); dispatch-serial.md step 3; architect.md:108; validate_bounce_readiness wiki filter + twin; gen:codex
+- [ ] Typecheck, targeted, render/anchor tests, M2 pair, rule-16 set, --check
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scaffold/sprint-execution-skill-drift.red.node.test.ts` (solo), plus the existing sprint-execution anchor/mirror tests green.

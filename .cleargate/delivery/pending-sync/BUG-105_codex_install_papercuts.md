@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T08:20:00Z
 context_source: "Codex dogfood install output and runs r1/r2 (gate-check.log, Codex friction sections); verified codebase grounding at cli main f0c33f7: src/commands/init.ts:784 + src/lib/session-load-delta (extractSessionLoadDelta '.mcp.json' branch) + src/lib/banners.ts:15-22; scaffold/hosts/codex/.codex/hooks/stamp-and-gate.sh:50-110; src/commands/new.ts:214"
 created_at: 2026-09-27T08:20:00Z
-updated_at: 2026-09-27T08:20:00Z
+updated_at: 2026-09-27T08:29:09Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -102,9 +102,12 @@ $ cleargate new sprint "tiny node todo cli"
 **Do NOT modify:** `scaffold/hosts/claude/**` (the Claude hook stays byte-identical); `hotfix.ts` slug handling; `banners.ts` text.
 
 ## Task Breakdown
-- [ ] QA-Red: extractSessionLoadDelta('.mcp.json','','') → false and non-empty invalid JSON → true; codex stamp-and-gate on a deleted delivery path → no stamp/gate lines for it; `new` with a prose slug → slugified file plus a `slug:` line; empty-after-slugify → the existing error
-- [ ] Implement the three fixes; regenerate the Codex payload
-- [ ] Typecheck, targeted tests, M2 parity pair (Claude install unchanged)
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-105 (errata §1 E2, E14 (OD-M7-8: HOST=codex only)). The plan wins where it differs from this file.
+
+- [ ] QA-Red: codex-install-papercuts red (6); init.node snapshot convention; stamp-and-gate refusal hash
+- [ ] session-load-delta empty→empty; codex-gated missing-target skip + gen:codex + lock capture; new.ts slugify
+- [ ] Typecheck, targeted, M2 pair, hooks-claude-parity, test 46
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/commands/codex-install-papercuts.red.node.test.ts` (solo).

@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "QA-Verify PASS-PENDING-SMOKE on cli f33cc4a (B1 fixed, re-check PASS); step L1 verified; waiting on owner OD1 → RS-4L → step L (owner trust) → DevOps",
+      "state": "QA Passed on cli f33cc4a (B1 fixed, re-check PASS); DevOps merge now per M7 OD-M7-1 (step L → RS-L after M7, gated at close by deferred_verification)",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
@@ -359,6 +359,116 @@
       "repo": "cli",
       "loop": "QA-Red -> Developer -> QA-Verify -> DevOps",
       "plan": "BUG-099 item file §4/§5 + plans/M6.md F12 OD-F1",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-101": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-101",
+      "boundary_after": [
+        "BD",
+        "RS-M7a"
+      ]
+    },
+    "BUG-100": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-100",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-047": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-047",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-103": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-103",
+      "boundary_after": [
+        "BD",
+        "RS-M7b"
+      ]
+    },
+    "BUG-102": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-102",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-105": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-105",
+      "boundary_after": [
+        "BD",
+        "RS-M7c"
+      ]
+    },
+    "BUG-104": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-104",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-106": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "STORY-058-13",
+        "BUG-101"
+      ],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-106",
       "boundary_after": [
         "BD"
       ]
@@ -547,6 +657,25 @@
         "cf-L2"
       ],
       "rationale": "Derived layer 3. Builds from C3 and integrates after STORY-058-12 and BUG-090. Owner step L comes before its merge."
+    },
+    {
+      "wave": "cf-M7",
+      "stories": [
+        "BUG-101",
+        "BUG-100",
+        "BUG-047",
+        "BUG-103",
+        "BUG-102",
+        "BUG-105",
+        "BUG-104"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M7",
+      "after": [
+        "cf-L3"
+      ],
+      "rationale": "No contracts and no build-ordering collisions (plans/M7.md §2.2). At most 4 build lanes; merges serial in lane_priority_m7 order; each merge is followed by BD and its RS step."
     }
   ],
   "merge_queue": {
@@ -620,6 +749,31 @@
       "id": "RS-CLOSE",
       "after": "STORY-058-13 BD",
       "action": "Run the v1 RS-CLOSE text without --known-fail, plus the M6 codex-loop close run and check, then the owner walkthrough, the Reporter, and close_sprint.mjs (Gate 4). The claude-baseline, codex-hooks and codex-loop runs are serial in the harness lane."
+    },
+    {
+      "id": "RS-M7a",
+      "status": "pending",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7b",
+      "status": "pending",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7c",
+      "status": "pending",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "DT",
+      "status": "pending",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-L",
+      "status": "pending",
+      "plan": "plans/M7.md §5/§6/§4.2"
     }
   ],
   "owner_actions": [
@@ -704,5 +858,15 @@
   "predicate_notes": {
     "v1": "See waves.json v1 at c8a42afe. The five-clause predicate governed waves 1-14.",
     "remainder": "Real-collision predicate (CR-124): ordered journals, single-writer generated artifacts, and shared files needing ordered edits. See plans/replan-contract-first.md §1 for the per-item analysis."
-  }
+  },
+  "lane_priority_m7": [
+    "BUG-101",
+    "BUG-100",
+    "BUG-047",
+    "BUG-103",
+    "BUG-102",
+    "BUG-105",
+    "BUG-104",
+    "BUG-106"
+  ]
 }

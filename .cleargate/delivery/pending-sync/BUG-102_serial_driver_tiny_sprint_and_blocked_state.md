@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T08:05:00Z
 context_source: "Codex dogfood run r3 (live codex-cli 0.154.0) final report and events; verified codebase grounding at cli main f0c33f7: scaffold/core/.cleargate/scripts/dispatch_serial.mjs:393-410 (waves load), :455-500 (record), scaffold/core/.cleargate/scripts/constants.mjs:35-46 (VALID_STATES), SKILL.md §A.4 tiny-sprint floor (claude :177-185, codex render :187-195), dispatch-serial.md §5-§6"
 created_at: 2026-09-27T08:05:00Z
-updated_at: 2026-09-27T08:05:00Z
+updated_at: 2026-09-27T08:29:07Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -100,9 +100,12 @@ constants.mjs VALID_STATES: Ready to Bounce, Bouncing, QA Passed, Architect Pass
 **Coordination:** BUG-103 also edits SKILL.md, in §A.1, §A.3 and the script rule. The Architect orders the two or folds this bug's one §A.4 paragraph into BUG-103's edit.
 
 ## Task Breakdown
-- [ ] QA-Red: dispatch_serial tests — missing waves.json names the §A.4 fix; `next` moves Ready to Bounce → Bouncing; record BLOCKED leaves Bouncing and prints the blocker; record ESCALATED → Escalated; GREEN leaves state untouched; resume still names the blocked story
-- [ ] Implement the driver changes and the §A.4 paragraph; regenerate the Codex payload
-- [ ] Typecheck, targeted tests, -12 contract tests green, `build-codex-payload.mjs --check`
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-102 (errata §1 E5, E6 (OD-M7-4: record drives state; next writes nothing), E7; all prose moves to BUG-103 (OD-M7-5)). The plan wins where it differs from this file.
+
+- [ ] QA-Red: dispatch-serial-state red (5)
+- [ ] ENOENT message; record-driven state sync via update_state.mjs (BLOCKED→Bouncing from Ready to Bounce, ESCALATED→Escalated, GREEN none); twin
+- [ ] Typecheck, targeted, -12 dispatch tests, rule-16 set, scripted codex-loop
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/dispatch-serial-state.red.node.test.ts` (solo), plus `dispatch-serial` and `dispatch-serial-cli` green.

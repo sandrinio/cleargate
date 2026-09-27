@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T08:15:00Z
 context_source: "Codex dogfood run r1 events and gate-check.log; verified codebase grounding at cli main f0c33f7: src/lib/readiness-predicates.ts:43-70 (parsePredicate throws 'unsupported predicate shape'), src/commands/doctor.ts:568-615 (emitResolverStatusLine), hook resolver blocks in scaffold/hosts/{claude,codex}/…/hooks/*.sh (CR-009 three-branch)"
 created_at: 2026-09-27T08:15:00Z
-updated_at: 2026-09-27T08:15:00Z
+updated_at: 2026-09-27T08:29:08Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -100,9 +100,12 @@ readiness-predicates.ts:44 "Throws with "unsupported predicate shape: <src>" on 
 **Do NOT modify:** the hook resolver blocks in `scaffold/hosts/**` (branch order stays; no hook byte changes, so no live re-sync); predicate semantics; gate-checks config.
 
 ## Task Breakdown
-- [ ] QA-Red: doctor resolver-line tests (PATH version = pin → no warning; PATH version ≠ pin → warning naming both; codex-only install reads the codex hook pin; npx line names `cleargate@<pin>`); parsePredicate unknown bare token → the new message; malformed shape → the old message
-- [ ] Implement doctor.ts and readiness-predicates.ts changes
-- [ ] Typecheck, targeted tests, doctor session-start tests green
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-104 (errata §1 E10). The plan wins where it differs from this file.
+
+- [ ] QA-Red: doctor-version-skew red (6)
+- [ ] Resolver line version probe + pin sources + npx name; unknown bare-token predicate message
+- [ ] Typecheck, targeted, doctor-session-start + readiness-predicates green
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/commands/doctor-version-skew.red.node.test.ts` (solo), plus the readiness-predicates tests green.

@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-27T07:55:09Z
+updated_at: 2026-09-27T08:29:28Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 553d81ba-dirty
+updated_at_version: 94da1ca3-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -95,6 +95,7 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `BUG-103` | sprint-execution skill drift: init needs `--stories`, 5 vs 6 preflight checks, bookkeeping-commit contradiction, ambiguous run_script `<cmd>`, relative report paths | standard | M7 | y | low |
 | `BUG-104` | Older PATH `cleargate` silently grades a newer scaffold; unknown predicate reads as "unsupported predicate shape"; resolver line blind to Codex pin | standard | M7 | y | low |
 | `BUG-105` | Codex install papercuts: Claude restart banner on Codex-only install, hook noise on deleted files, prose slugs rejected | standard | M7 | y | low |
+| `BUG-106` | Clean-room live dispatch controls (S4, C6) carry the work-item id only in the encrypted message; harness kickoff left uncommitted | standard | M7 | y | low |
 | `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | y | med |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.

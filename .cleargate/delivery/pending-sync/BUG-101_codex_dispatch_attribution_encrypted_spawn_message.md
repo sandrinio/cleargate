@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T08:00:00Z
 context_source: "Codex dogfood run r3 (live codex-cli 0.154.0, ChatGPT login) rollout rollout-2026-09-27T11-31-58-01a0e1c7…jsonl; hook logs pending-task-sentinel.log / token-ledger.log; verified codebase grounding at cli main f0c33f7: scaffold/hosts/codex/.codex/hooks/pending-task-sentinel.sh:321-332, token-ledger.sh:140-167, scripts/build-codex-payload.mjs R5"
 created_at: 2026-09-27T08:00:00Z
-updated_at: 2026-09-27T08:00:00Z
+updated_at: 2026-09-27T08:29:06Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -113,9 +113,12 @@ build-codex-payload.mjs R5 row: "`write_dispatch.sh` fallback blocks … | skip 
 - `token-ledger.sh`'s claim logic (it already reads `work_item_id` from the claimed sentinel).
 
 ## Task Breakdown
-- [ ] QA-Red: hook tests with a live-shaped codex spawn payload (encrypted message) — id from `task_name`; id from a matching marker (consumed); plaintext message still works; no source → empty, no crash; Claude hook unchanged
-- [ ] Implement the codex-branch work-item resolution in pending-task-sentinel.sh and the R5 row text; regenerate the Codex payload
-- [ ] Typecheck, targeted tests, `build-codex-payload.mjs --check`, codex-hooks-harness green
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-101 (errata §1 E1, E3, E4, E15; I16 R4 row (OD-M7-3)). The plan wins where it differs from this file.
+
+- [ ] QA-Red: codex-dispatch-attribution red (6); Test 31 R4/R5 re-pin; sentinel refusal-chain hash
+- [ ] Codex-branch source order task_name → marker (newest, 10 min, agent_type) → message; source= log field; R4 + R5 texts; gen:codex
+- [ ] Typecheck, targeted, codex-hooks-harness 91, --check, hooks-claude-parity, test 46 + scripted codex-loop (harness lane)
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/hooks/codex-dispatch-attribution.red.node.test.ts` (solo), plus `codex-hooks-harness` green.

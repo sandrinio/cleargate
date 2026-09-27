@@ -1,3 +1,12 @@
+2026-09-27 · #codex #hooks · .codex/hooks/*.sh are generated copies of the Claude hooks; a codex-only fix edits the Claude file's codex branch.
+2026-09-27 · #codex #dispatch · Live spawn_agent message is ciphertext; hooks see only task_name/agent_type in plaintext — carry the id in task_name.
+2026-09-27 · #codex #clean-room · -13 S4 and RS-4L C6 carry STORY=001-01 only in message; live dispatch-identity fails without a plaintext id.
+2026-09-27 · #serial #state · dispatch_serial next runs before §C.1 validate_bounce_readiness; a next-side Bouncing flip fails §C.1.
+2026-09-27 · #codex #sandbox · Project writable_roots works only as an absolute path in a trusted workspace; a relative '.git' is ignored.
+2026-09-27 · #waves #schema · A schema_version 2 waves.json needs stories.<id> entries; integrationReady throws on an unknown story.
+2026-09-27 · #codex #upgrade · cleargate upgrade never calls the codex adapter install; .codex/config.toml changes land via init/host add only.
+2026-09-27 · #dispatch #markers · write_dispatch.sh session_id on Codex is a Claude transcript UUID or fallback; never match markers on it.
+2026-09-27 · #gate #preflight · preflight Step 0 refreshes only §1 child items; a stale sprint plan cache is never refreshed there.
 2026-09-27 · #qa #codex #clean-room · An independently reproduced inputs.json is a stronger B1 fix witness than re-grading the dev's own dataset.
 2026-09-27 · #qa #verify-install · verify-install --json 'checks' vs 'live' arrays both need a codex-row count; a plain install must show 0 in both.
 2026-09-27 · #merge #integrate · A clean 'git merge --no-ff -m' commits at once; use --no-commit to hold it staged until tests pass.

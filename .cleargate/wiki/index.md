@@ -86,6 +86,7 @@
 - [[BUG-103]] (bug) — Triaged — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
 - [[BUG-104]] (bug) — Triaged — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
 - [[BUG-105]] (bug) — Triaged — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
+- [[BUG-106]] (bug) — Triaged — The clean-room harness's live dispatch controls carry the work-item id only in the encrypted message, so live dispatch-identity cannot pass
 
 ## Archive
 

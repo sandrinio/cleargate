@@ -11,9 +11,9 @@ reporter: sandrinio
 approved: true
 context_source: verified empirically during SPRINT-39 preflight 2026-08-25 — gate check confirmed not to advance last_gate_check on an unchanged verdict; restoreIfOnlyTimestampMoved (sprint.ts:1719-1732) documented as the deliberate guard; no --force flag exists on gate check
 created_at: 2026-08-25T21:32:29Z
-updated_at: 2026-09-27T07:37:39Z
+updated_at: 2026-09-27T08:29:05Z
 created_at_version: cleargate@0.24.2
-updated_at_version: 553d81ba-dirty
+updated_at_version: 94da1ca3-dirty
 server_pushed_at_version: null
 draft_tokens:
   input: null
@@ -129,6 +129,14 @@ Second guard found in the grounding: `writeCachedGate` (`src/lib/frontmatter-cac
 **Do NOT modify:** `stamp-frontmatter.ts` (its behaviour is correct), the readiness predicates, or the criteria definitions.
 
 **Blast radius:** Check 5 gates every sprint kickoff. A fix that advances `last_gate_check` too eagerly reintroduces the CR-038 thrash that dirties `main` and fails Check 4 — the two checks must be satisfied simultaneously.
+
+## Task Breakdown
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-047 (errata §1 E13). The plan wins where it differs from this file.
+
+- [ ] QA-Red: gate-cache-staleness red (5): stamp-then-gate advances; Check 5 passes; no-edit rerun byte-identical; fresh verdict flip writes; Step 0 guard keeps stale advance / restores fresh
+- [ ] Add isGateCacheFresh; gate writeCachedGate early return and restoreIfOnlyTimestampMoved on it; Check 5 sites call it
+- [ ] Typecheck, targeted tests, sprint-preflight + frontmatter-cache green
 
 ## 5. Verification Protocol (The Failing Test)
 
