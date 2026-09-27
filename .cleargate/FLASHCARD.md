@@ -1,3 +1,8 @@
+2026-09-27 · #tpv #gate #cache · Gate freshness is >=: stamp-and-gate writes updated_at and last_gate_check in one second; pin equality.
+2026-09-27 · #tpv #preflight · Check 5's sprint-plan stale branch had no test: deleting it passed all 27 sprint-preflight tests.
+2026-09-27 · #test-harness #gate · loadGateBlocks unwraps [0] per yaml fence; a 2nd gate in the same fence is silently dropped.
+2026-09-27 · #tpv #test-harness · A same-inputs writeCachedGate rerun is byte-identical even if it writes; vary now to see churn.
+2026-09-27 · #tpv #danger · The session scratchpad is shared by parallel agents; a peer overwrote mutants.py. Namespace by item id.
 2026-09-27 · #worktree #task-breakdown · cli-only item, detached outer host: Dev can't tick bug-file rows; orchestrator ticks at merge.
 2026-09-27 · #tpv #test-harness · One-source-per-case reds leave source ORDER unpinned; add a case where every source names a different id.
 2026-09-27 · #tpv #test-harness · A 'marker consumed' check filtered on *.json misses one parked as x.json.claimed.N; match the prefix.

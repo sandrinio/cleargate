@@ -1,0 +1,286 @@
+diff --git a/test/lib/gate-cache-staleness.red.node.test.ts b/test/lib/gate-cache-staleness.red.node.test.ts
+index aaee055..3b43af2 100644
+--- a/test/lib/gate-cache-staleness.red.node.test.ts
++++ b/test/lib/gate-cache-staleness.red.node.test.ts
+@@ -82,7 +82,7 @@ const FAKE_VERSION: CodebaseVersion = {
+   version_string: 'cleargate@0.0.0-test',
+ };
+ 
+-/** Minimal single-block gates doc: epic ready-for-decomposition. */
++/** Minimal gates doc: epic ready-for-decomposition, plus sprint ready-for-execution for T2's plan (one block per fence). */
+ const GATES_DOC = `
+ # Readiness Gates
+ 
+@@ -96,6 +96,15 @@ const GATES_DOC = `
+     - id: scope-populated
+       check: "section(2) has ≥1 listed-item"
+ \`\`\`
++
++\`\`\`yaml
++- work_item_type: sprint
++  transition: ready-for-execution
++  severity: enforcing
++  criteria:
++    - id: no-tbds
++      check: "body does not contain 'TBD'"
++\`\`\`
+ `;
+ 
+ /** A minimal Epic body that passes the gate above. */
+@@ -135,6 +144,15 @@ function commitAll(dir: string, message: string): void {
+   execSync(`git commit -m "${message}"`, { cwd: dir, stdio: 'pipe' });
+ }
+ 
++/** Run `gate check`; a failing enforcing verdict exits 1, which is expected here. */
++async function gateCheckMayFail(absPath: string, dir: string, gatesDocPath: string, now: () => Date): Promise<void> {
++  try {
++    await gateCheckHandler(absPath, {}, { cwd: dir, now, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++  } catch (err) {
++    assert.match(String((err as Error).message), /^exit\(1\)$/);
++  }
++}
++
+ function makeCapture(): {
+   stdout: (s: string) => void;
+   stderr: (s: string) => void;
+@@ -210,6 +228,28 @@ describe('T1 (BUG-047): gate check -> stamp -> gate check advances a stale cache
+       cached.last_gate_check >= updatedAt,
+       `BUG-047: expected last_gate_check (${cached.last_gate_check}) >= updated_at (${updatedAt}) after the second gate check`,
+     );
++
++    // Same repro on a FAILING verdict. M7 §3: the early return needs an equal
++    // verdict AND a fresh cache; `pass` is not part of the freshness rule, so a
++    // stale failing item advances too (wiki lint's gate-stale reads this stamp).
++    const failPath = path.join(dir, 'EPIC-047-11_Test.md');
++    writeFile(
++      failPath,
++      epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-11').replace('Intro text.', 'Intro text. TBD.'),
++    );
++    await gateCheckMayFail(failPath, dir, gatesDocPath, T1);
++    await stampHandler(failPath, {}, { cwd: dir, now: T2, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    await gateCheckMayFail(failPath, dir, gatesDocPath, T3);
++
++    const failFm = readFm(failPath);
++    const failCached = failFm['cached_gate_result'] as { pass: boolean; last_gate_check: string };
++    const failUpdatedAt = String(failFm['updated_at']);
++    assert.strictEqual(failUpdatedAt, '2026-01-01T02:00:00Z', 'fixture guard: stamp advanced updated_at');
++    assert.strictEqual(failCached.pass, false, 'the failing verdict never changed across this repro');
++    assert.ok(
++      failCached.last_gate_check >= failUpdatedAt,
++      `BUG-047: a stale FAILING item must advance too: last_gate_check (${failCached.last_gate_check}) >= updated_at (${failUpdatedAt})`,
++    );
+   });
+ });
+ 
+@@ -223,11 +263,13 @@ async function buildStampedThenRegatedItem(dir: string): Promise<{ itemPath: str
+ 
+   const T1 = () => new Date('2026-01-01T01:00:00.000Z');
+   const T2 = () => new Date('2026-01-01T02:00:00.000Z');
+-  const T3 = () => new Date('2026-01-01T03:00:00.000Z');
+ 
++  // The re-gate runs in the SAME second as the stamp — what the stamp-and-gate
++  // hook does on every edit — so the fixed item ends exactly at the freshness
++  // boundary (last_gate_check == updated_at), which M7 §3 defines as fresh (>=).
+   await gateCheckHandler(itemPath, {}, { cwd: dir, now: T1, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
+   await stampHandler(itemPath, {}, { cwd: dir, now: T2, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
+-  await gateCheckHandler(itemPath, {}, { cwd: dir, now: T3, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++  await gateCheckHandler(itemPath, {}, { cwd: dir, now: T2, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
+ 
+   return { itemPath };
+ }
+@@ -237,9 +279,11 @@ describe('T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-ga
+     const dir = makeTmpDir('cg-gcs-t2-');
+     initGitRepo(dir);
+ 
+-    await buildStampedThenRegatedItem(dir);
++    const { itemPath } = await buildStampedThenRegatedItem(dir);
+ 
+     writeFile(path.join(dir, 'README.md'), '# fixture\n');
++    // The sprint plan also sits exactly at the boundary, so Check 5's plan
++    // self-check is held to the same >= rule as its item check.
+     writeFile(
+       path.join(dir, '.cleargate', 'delivery', 'pending-sync', 'SPRINT-01_Test_Sprint.md'),
+       [
+@@ -250,7 +294,8 @@ describe('T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-ga
+         'cached_gate_result:',
+         '  pass: true',
+         '  failing_criteria: []',
+-        '  last_gate_check: "2026-06-01T00:00:00Z"',
++        '  last_gate_check: "2026-01-01T00:00:00Z"',
++        '  transition: "ready-for-execution"',
+         '---',
+         '',
+         '# SPRINT-01',
+@@ -288,6 +333,39 @@ describe('T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-ga
+       !cap.getErr().includes('EPIC-047-02'),
+       `EPIC-047-02 must not appear in the failing punch list; stderr:\n${cap.getErr()}`,
+     );
++    const fm = readFm(itemPath);
++    const cached = fm['cached_gate_result'] as { last_gate_check: string };
++    assert.strictEqual(
++      cached.last_gate_check,
++      String(fm['updated_at']),
++      'fixture guard: the re-gated item must sit exactly at the freshness boundary',
++    );
++
++    // Phase 2 — the sprint PLAN itself (BUG-047 Codex recurrence 2; M7 E13).
++    // After an edit (stamp) Check 5 names the plan stale; the punch list's own
++    // remedy, `gate check <plan>`, must then clear it. Step 0 does not refresh
++    // the plan (OD-M7-11 / FU-5), so the remedy is run by hand, as a user would.
++    const planPath = path.join(dir, '.cleargate', 'delivery', 'pending-sync', 'SPRINT-01_Test_Sprint.md');
++    const gatesDocPath = path.join(dir, '.cleargate', 'knowledge', 'readiness-gates.md');
++    const T5 = () => new Date('2026-01-01T05:00:00.000Z');
++    await stampHandler(planPath, {}, { cwd: dir, now: T5, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    commitAll(dir, 'fixture: T2 plan edited');
++    const capStale = makeCapture();
++    assert.strictEqual(
++      runPreflight('SPRINT-01', dir, capStale, execFn),
++      1,
++      `a stamped sprint plan must be reported stale; stderr:\n${capStale.getErr()}`,
++    );
++    assert.match(capStale.getErr(), /- SPRINT-01 \(stale\)/);
++
++    await gateCheckHandler(planPath, {}, { cwd: dir, now: T5, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++    commitAll(dir, 'fixture: T2 plan re-gated');
++    const capFixed = makeCapture();
++    assert.strictEqual(
++      runPreflight('SPRINT-01', dir, capFixed, execFn),
++      0,
++      `BUG-047: gate check <plan> must clear the plan's staleness; stderr:\n${capFixed.getErr()}`,
++    );
+   });
+ });
+ 
+@@ -296,26 +374,40 @@ describe('T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-ga
+ describe('T3 (CR-038 regression): two gate checks with no edit leave a fresh item byte-identical', () => {
+   test('a second, unedited gate check on an already-fresh item changes nothing', async () => {
+     const dir = makeTmpDir('cg-gcs-t3-');
+-    const absPath = path.join(dir, 'EPIC-047-03_Test.md');
+     const gatesDocPath = path.join(dir, 'readiness-gates.md');
+     writeFile(gatesDocPath, GATES_DOC);
+-    writeFile(absPath, epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-03'));
+ 
+     const T1 = () => new Date('2026-01-01T01:00:00.000Z');
+     const T2 = () => new Date('2026-01-01T02:00:00.000Z');
+ 
+-    await gateCheckHandler(absPath, {}, { cwd: dir, now: T1, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
+-    const afterFirst = fs.readFileSync(absPath, 'utf8');
+-
+-    // No stamp, no body edit: updated_at (T0) stays behind last_gate_check (T1) — fresh.
+-    await gateCheckHandler(absPath, {}, { cwd: dir, now: T2, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
+-    const afterSecond = fs.readFileSync(absPath, 'utf8');
+-
+-    assert.strictEqual(
+-      afterSecond,
+-      afterFirst,
+-      'CR-038: an unedited, already-fresh item must not thrash last_gate_check on a repeat gate check',
+-    );
++    // (a) strictly fresh: updated_at (T0) < last_gate_check (T1).
++    // (b) boundary-fresh: updated_at == last_gate_check (T1); M7 §3 pins >=.
++    // (c) fresh but FAILING: the CR-038 case (cached gate failures at kickoff).
++    const shapes = [
++      { id: 'EPIC-047-03', updatedAt: '2026-01-01T00:00:00Z', failing: false },
++      { id: 'EPIC-047-13', updatedAt: '2026-01-01T01:00:00Z', failing: false },
++      { id: 'EPIC-047-23', updatedAt: '2026-01-01T00:00:00Z', failing: true },
++    ];
++    for (const shape of shapes) {
++      const absPath = path.join(dir, `${shape.id}_Test.md`);
++      const body = epicBody('2026-01-01T00:00:00Z', shape.updatedAt, shape.id);
++      writeFile(absPath, shape.failing ? body.replace('Intro text.', 'Intro text. TBD.') : body);
++
++      await gateCheckMayFail(absPath, dir, gatesDocPath, T1);
++      const afterFirst = fs.readFileSync(absPath, 'utf8');
++      const cached = readFm(absPath)['cached_gate_result'] as { pass: boolean };
++      assert.strictEqual(cached.pass, !shape.failing, `fixture guard (${shape.id}): first verdict`);
++
++      // No stamp, no body edit: the cache stays fresh.
++      await gateCheckMayFail(absPath, dir, gatesDocPath, T2);
++      const afterSecond = fs.readFileSync(absPath, 'utf8');
++
++      assert.strictEqual(
++        afterSecond,
++        afterFirst,
++        `CR-038 (${shape.id}): an unedited, already-fresh item must not thrash last_gate_check on a repeat gate check`,
++      );
++    }
+   });
+ });
+ 
+@@ -353,6 +445,23 @@ describe('T4 (CR-038 regression): a verdict flip on a fresh item writes both the
+       after.last_gate_check > before.last_gate_check,
+       `a genuine verdict change must also advance last_gate_check (before=${before.last_gate_check}, after=${after.last_gate_check})`,
+     );
++
++    // Flip back on a STALE item (the real edit -> stamp -> gate order): the
++    // new verdict itself must be written, not just a newer stamp on the old one.
++    const T3 = () => new Date('2026-01-01T03:00:00.000Z');
++    const T4 = () => new Date('2026-01-01T04:00:00.000Z');
++    fs.writeFileSync(absPath, fs.readFileSync(absPath, 'utf8').replace('Intro text. TBD.', 'Intro text.'), 'utf8');
++    await stampHandler(absPath, {}, { cwd: dir, now: T3, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    await gateCheckHandler(absPath, {}, { cwd: dir, now: T4, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++
++    const fm = readFm(absPath);
++    const back = fm['cached_gate_result'] as { pass: boolean; failing_criteria: unknown[]; last_gate_check: string };
++    assert.strictEqual(back.pass, true, 'the verdict flipped back to pass on a stale item must be written');
++    assert.deepStrictEqual(back.failing_criteria, [], 'the old failing criteria must be cleared');
++    assert.ok(
++      back.last_gate_check >= String(fm['updated_at']),
++      `the flipped-back verdict must be fresh (last_gate_check=${back.last_gate_check}, updated_at=${String(fm['updated_at'])})`,
++    );
+   });
+ });
+ 
+@@ -451,6 +560,11 @@ describe('T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance,
+       staleBefore,
+       'BUG-047: a stale item’s Step-0 stamp advance must survive the restore guard',
+     );
++    assert.strictEqual(
++      (readFm(staleItemPath)['cached_gate_result'] as { last_gate_check: string }).last_gate_check,
++      '2026-12-31T23:59:59Z',
++      'BUG-047: the surviving bytes carry the Step-0 stamp',
++    );
+ 
+     // Case B — already FRESH before Step 0: the SAME timestamp-only
+     // rewrite must still be reverted (CR-038 anti-thrash, unchanged by
+@@ -470,5 +584,41 @@ describe('T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance,
+       freshBefore,
+       'CR-038: an already-fresh item’s timestamp-only rewrite must still be reverted',
+     );
++
++    // Case C — FRESH exactly at the boundary (last_gate_check == updated_at,
++    // fresh per M7 §3's >=): still restored.
++    const edgeDir = makeTmpDir('cg-gcs-t5c-');
++    initGitRepo(edgeDir);
++    const { itemPath: edgeItemPath, before: edgeBefore } = buildSingleItemStep0Fixture(edgeDir, 'SPRINT-01', {
++      id: 'EPIC-047-07',
++      pass: true,
++      lastGateCheck: '2026-05-01T00:00:00Z',
++      updatedAt: '2026-05-01T00:00:00Z',
++    });
++    const cap3 = makeCapture();
++    runPreflight('SPRINT-01', edgeDir, cap3, makeStampMockExecFn('EPIC-047-07', edgeItemPath));
++    assert.strictEqual(
++      fs.readFileSync(edgeItemPath, 'utf8'),
++      edgeBefore,
++      'CR-038: a boundary-fresh item (last_gate_check == updated_at) must still be restored',
++    );
++
++    // Case D — STALE and FAILING: M7 §3's rule reads freshness only, not pass,
++    // so the Step-0 stamp survives here too.
++    const failDir = makeTmpDir('cg-gcs-t5d-');
++    initGitRepo(failDir);
++    const { itemPath: failItemPath } = buildSingleItemStep0Fixture(failDir, 'SPRINT-01', {
++      id: 'EPIC-047-08',
++      pass: false,
++      lastGateCheck: '2026-01-01T00:00:00Z',
++      updatedAt: '2026-05-01T00:00:00Z',
++    });
++    const cap4 = makeCapture();
++    runPreflight('SPRINT-01', failDir, cap4, makeStampMockExecFn('EPIC-047-08', failItemPath));
++    assert.strictEqual(
++      (readFm(failItemPath)['cached_gate_result'] as { last_gate_check: string }).last_gate_check,
++      '2026-12-31T23:59:59Z',
++      'BUG-047: a stale failing item keeps its Step-0 stamp too',
++    );
+   });
+ });
