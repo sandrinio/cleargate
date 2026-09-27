@@ -1,3 +1,6 @@
+2026-09-27 · #codex #clean-room #post-flight · Codex SKILL.md:448 has the orchestrator set QA Passed; forbid only root Done, never all update_state.
+2026-09-27 · #post-flight #clean-room · Re-grade a kept run's inputs.json with in-memory mutations: proves non-vacuity on real data, no harness.
+2026-09-27 · #verdicts #danger · A check scanning 'commands on rootThreadId' passes vacuously when the id is absent; FAIL on a missing root.
 2026-09-27 · #codex #app-server · Code-mode tools.exec_command takes {cmd, login, workdir, yield_time_ms}; workdir defaults to the turn cwd.
 2026-09-27 · #test-harness #tmp · codex-loop e2e Part B leaves its ~166MB container in $TMPDIR; remove it by exact path after a run.
 2026-09-27 · #qa-red #test-harness #tmp · A $TMPDIR leak check needs a before/after delta on YOUR run — concurrent lanes leave same-prefix orphans.
