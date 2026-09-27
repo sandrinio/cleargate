@@ -1,0 +1,187 @@
+diff --git a/test/hooks/codex-dispatch-attribution.red.node.test.ts b/test/hooks/codex-dispatch-attribution.red.node.test.ts
+index 518a8e4..4a76d9c 100644
+--- a/test/hooks/codex-dispatch-attribution.red.node.test.ts
++++ b/test/hooks/codex-dispatch-attribution.red.node.test.ts
+@@ -80,7 +80,10 @@ function writeMarker(
+   sprintDir: string,
+   opts: { workItemId: string; agentType: string; ageMinutesAgo?: number; sessionId?: string },
+ ): string {
+-  const epoch = Math.floor(Date.now() / 1000);
++  // TPV (BUG-101): the filename epoch is the marker's own (aged) write time, as
++  // write_dispatch.sh stamps it, so newest-by-mtime and newest-by-filename agree
++  // and a multi-marker test is deterministic under either ordering.
++  const epoch = Math.floor((Date.now() - (opts.ageMinutesAgo ?? 0) * 60_000) / 1000);
+   const rand = Math.floor(Math.random() * 100000);
+   const p = path.join(sprintDir, `.dispatch-${epoch}-${process.pid}-${rand}.json`);
+   const body = {
+@@ -100,6 +103,11 @@ function dispatchMarkers(sprintDir: string): string[] {
+   return fs.readdirSync(sprintDir).filter((n) => n.startsWith('.dispatch-') && n.endsWith('.json'));
+ }
+ 
++/** Every `.dispatch-*` entry, whatever its suffix: a consumed marker is deleted (plan: mv to a claim name, read, rm), never parked. */
++function dispatchEntries(sprintDir: string): string[] {
++  return fs.readdirSync(sprintDir).filter((n) => n.startsWith('.dispatch-')).sort();
++}
++
+ function codexSentinels(sprintDir: string): string[] {
+   return fs.readdirSync(sprintDir).filter((n) => n.startsWith('.pending-codex-task-'));
+ }
+@@ -159,7 +167,7 @@ function codexPayload(taskName: string, agentType: string, message: string): unk
+ 
+ // ── T1: the work item comes from task_name, even with an encrypted message ──
+ 
+-test('T1: task_name "story_001_01_qa" plus a ciphertext message -> STORY-001-01, source=task_name', () => {
++test('T1: task_name "story_001_01_qa" plus a ciphertext message -> STORY-001-01, source=task_name; task_name outranks markers and the message, consumes its own marker only; SPRINT_01_REPORTER -> SPRINT-01', () => {
+   const { root, sprintDir } = mkRoom();
+   try {
+     const r = invoke(root, 'codex', codexPayload('story_001_01_qa', 'qa', CIPHERTEXT));
+@@ -173,11 +181,55 @@ test('T1: task_name "story_001_01_qa" plus a ciphertext message -> STORY-001-01,
+   } finally {
+     fs.rmSync(root, { recursive: true, force: true });
+   }
++  // TPV sub-case B (plan "Source order" 1): task_name is the first source — it beats a
++  // newer same-type marker and a plaintext message naming other ids — and a task_name hit
++  // consumes exactly one fresh marker with the SAME work_item_id AND agent_type.
++  {
++    const { root, sprintDir } = mkRoom('SPRINT-BUG101T1B');
++    try {
++      const otherId = writeMarker(sprintDir, { workItemId: 'STORY-999-99', agentType: 'qa', ageMinutesAgo: 1 });
++      const otherType = writeMarker(sprintDir, { workItemId: 'STORY-001-01', agentType: 'architect', ageMinutesAgo: 2 });
++      const own = writeMarker(sprintDir, { workItemId: 'STORY-001-01', agentType: 'qa', ageMinutesAgo: 3 });
++      const r = invoke(root, 'codex', codexPayload('story_001_01_qa', 'qa', 'STORY=002-02 plaintext brief'));
++      assert.equal(r.status, 0, `stdout: ${r.stdout}\nstderr: ${r.stderr}`);
++      const sentinels = codexSentinels(sprintDir);
++      assert.equal(sentinels.length, 1);
++      const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
++      assert.equal(sentinel.work_item_id, 'STORY-001-01', 'task_name outranks a newer same-type marker (STORY-999-99) and the message (STORY-002-02)');
++      const line = wroteSentinelLine(root, 'SPRINT-BUG101T1B');
++      assert.equal(sourceField(line), 'task_name', `expected source=task_name, got: ${JSON.stringify(line)}`);
++      assert.deepEqual(
++        dispatchEntries(sprintDir),
++        [path.basename(otherId), path.basename(otherType)].sort(),
++        'a task_name hit consumes its own {STORY-001-01, qa} marker (no orphan pile-up) and leaves the other-id and other-type markers untouched',
++      );
++      assert.ok(!fs.existsSync(own), 'the matching marker must be deleted');
++    } finally {
++      fs.rmSync(root, { recursive: true, force: true });
++    }
++  }
++  // TPV sub-case C (plan "Source order" 1): the match is case-insensitive and covers a
++  // sprint-level dispatch (R5: `sprint_01_reporter` -> SPRINT-01).
++  {
++    const { root, sprintDir } = mkRoom('SPRINT-BUG101T1C');
++    try {
++      const r = invoke(root, 'codex', codexPayload('SPRINT_01_REPORTER', 'reporter', CIPHERTEXT));
++      assert.equal(r.status, 0, `stdout: ${r.stdout}\nstderr: ${r.stderr}`);
++      const sentinels = codexSentinels(sprintDir);
++      assert.equal(sentinels.length, 1);
++      const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
++      assert.equal(sentinel.work_item_id, 'SPRINT-01', 'an upper-case sprint-level task_name normalises to SPRINT-01');
++      const line = wroteSentinelLine(root, 'SPRINT-BUG101T1C');
++      assert.equal(sourceField(line), 'task_name', `expected source=task_name, got: ${JSON.stringify(line)}`);
++    } finally {
++      fs.rmSync(root, { recursive: true, force: true });
++    }
++  }
+ });
+ 
+ // ── T2: the work item comes from a fresh, agent_type-matching dispatch marker ─
+ 
+-test('T2: a fresh {STORY-001-01, qa} marker plus task_name "qa_verify" -> id from the marker, marker consumed, source=marker', () => {
++test('T2: a fresh {STORY-001-01, qa} marker plus task_name "qa_verify" -> id from the marker, marker consumed, source=marker; the newest same-type fresh marker wins, never by session_id, and beats the message', () => {
+   const { root, sprintDir } = mkRoom();
+   try {
+     writeMarker(sprintDir, { workItemId: 'STORY-001-01', agentType: 'qa' });
+@@ -187,12 +239,41 @@ test('T2: a fresh {STORY-001-01, qa} marker plus task_name "qa_verify" -> id fro
+     assert.equal(sentinels.length, 1, `expected exactly one codex sentinel; got: ${JSON.stringify(sentinels)}`);
+     const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
+     assert.equal(sentinel.work_item_id, 'STORY-001-01', 'the id must come from the marker (task_name has none, message is ciphertext)');
+-    assert.deepEqual(dispatchMarkers(sprintDir), [], 'the claimed marker must be consumed (deleted), not left to pile up');
++    assert.deepEqual(dispatchEntries(sprintDir), [], 'the claimed marker must be consumed (deleted, under no other name), not left to pile up');
+     const line = wroteSentinelLine(root, 'SPRINT-BUG101');
+     assert.equal(sourceField(line), 'marker', `expected source=marker on the log line, got: ${JSON.stringify(line)}`);
+   } finally {
+     fs.rmSync(root, { recursive: true, force: true });
+   }
++  // TPV sub-case B (E4 ruling): newest mtime first among fresh markers whose agent_type
++  // equals the spawn's — a newer other-type marker is skipped, not a stop — and session_id
++  // is never compared: the older same-type marker carries the spawn's own session_id and
++  // still loses. A claimable marker also outranks a plaintext message (source 2 before 3).
++  {
++    const { root, sprintDir } = mkRoom('SPRINT-BUG101T2B');
++    try {
++      const payload = codexPayload('qa_verify', 'qa', 'STORY=003-03 plaintext brief') as { session_id: string };
++      const newestOtherType = writeMarker(sprintDir, { workItemId: 'STORY-777-77', agentType: 'architect', ageMinutesAgo: 1 });
++      const newestSameType = writeMarker(sprintDir, { workItemId: 'STORY-002-02', agentType: 'qa', ageMinutesAgo: 2 });
++      const olderSameSession = writeMarker(sprintDir, { workItemId: 'STORY-001-01', agentType: 'qa', ageMinutesAgo: 4, sessionId: payload.session_id });
++      const r = invoke(root, 'codex', payload);
++      assert.equal(r.status, 0, `stdout: ${r.stdout}\nstderr: ${r.stderr}`);
++      const sentinels = codexSentinels(sprintDir);
++      assert.equal(sentinels.length, 1);
++      const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
++      assert.equal(sentinel.work_item_id, 'STORY-002-02', 'the newest fresh qa marker wins: not the older session-matching one, not the newer architect one, not the message');
++      const line = wroteSentinelLine(root, 'SPRINT-BUG101T2B');
++      assert.equal(sourceField(line), 'marker', `expected source=marker, got: ${JSON.stringify(line)}`);
++      assert.ok(!fs.existsSync(newestSameType), 'the claimed marker must be deleted');
++      assert.deepEqual(
++        dispatchEntries(sprintDir),
++        [path.basename(newestOtherType), path.basename(olderSameSession)].sort(),
++        'exactly one marker is consumed per dispatch; the others stay for later dispatches',
++      );
++    } finally {
++      fs.rmSync(root, { recursive: true, force: true });
++    }
++  }
+ });
+ 
+ // ── T3: a stale or wrong-agent_type marker is never claimed; falls through ──
+@@ -256,7 +337,7 @@ test('T4: a plaintext message ("STORY=001-01 …") still attributes, with no mar
+ 
+ // ── T5: no source at all -> empty work_item_id, no crash, exit 0 ────────────
+ 
+-test('T5: no task_name id, no marker, no message id -> work_item_id "", sentinel still written, exit 0, source=none', () => {
++test('T5: no task_name id, no marker, no message id -> work_item_id "", sentinel still written, exit 0, source=none; a prefix inside a word is not an id', () => {
+   const { root, sprintDir } = mkRoom();
+   try {
+     const r = invoke(root, 'codex', codexPayload('noop_task', 'qa', 'no identifiable reference here'));
+@@ -270,6 +351,23 @@ test('T5: no task_name id, no marker, no message id -> work_item_id "", sentinel
+   } finally {
+     fs.rmSync(root, { recursive: true, force: true });
+   }
++  // TPV sub-case B (plan regex `(^|[_/-])(story|…|bug|…)`): "history_12" and "debug_3" hold
++  // `story_12` and `bug_3` only inside words, so they carry no id.
++  {
++    const { root, sprintDir } = mkRoom('SPRINT-BUG101T5B');
++    try {
++      const r = invoke(root, 'codex', codexPayload('history_12_debug_3', 'qa', 'no identifiable reference here'));
++      assert.equal(r.status, 0, `stdout: ${r.stdout}\nstderr: ${r.stderr}`);
++      const sentinels = codexSentinels(sprintDir);
++      assert.equal(sentinels.length, 1);
++      const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
++      assert.equal(sentinel.work_item_id, '', 'a prefix inside a word (history_12, debug_3) is not a work-item id');
++      const line = wroteSentinelLine(root, 'SPRINT-BUG101T5B');
++      assert.equal(sourceField(line), 'none', `expected source=none, got: ${JSON.stringify(line)}`);
++    } finally {
++      fs.rmSync(root, { recursive: true, force: true });
++    }
++  }
+ });
+ 
+ // ── T6 [ALREADY-GREEN ANCHOR]: the Claude path is unchanged ─────────────────
+@@ -284,14 +382,14 @@ test('[ALREADY-GREEN ANCHOR] T6: Claude path — the prompt id is used, a fresh
+       cwd: root,
+       hook_event_name: 'PreToolUse',
+       tool_name: 'Agent',
+-      tool_input: { subagent_type: 'qa', prompt: 'STORY=001-01 do the thing' },
++      tool_input: { subagent_type: 'qa', prompt: 'STORY=001-01 do the thing', task_name: 'story_555_55_qa' },
+     };
+     const r = invoke(root, 'claude', payload);
+     assert.equal(r.status, 0, `stdout: ${r.stdout}\nstderr: ${r.stderr}`);
+     const sentinels = claudeSentinels(sprintDir);
+     assert.equal(sentinels.length, 1, `expected exactly one claude sentinel; got: ${JSON.stringify(sentinels)}`);
+     const sentinel = JSON.parse(fs.readFileSync(path.join(sprintDir, sentinels[0]!), 'utf8')) as Record<string, unknown>;
+-    assert.equal(sentinel.work_item_id, 'STORY-001-01', 'the Claude path reads the prompt, never a marker');
++    assert.equal(sentinel.work_item_id, 'STORY-001-01', 'the Claude path reads the prompt, never a marker or a task_name');
+     assert.ok(fs.existsSync(markerPath), 'the Claude path must never consume a dispatch marker');
+     const line = wroteSentinelLine(root, 'SPRINT-BUG101');
+     assert.equal(sourceField(line), null, `the Claude printf must carry no source= field at all, got: ${JSON.stringify(line)}`);

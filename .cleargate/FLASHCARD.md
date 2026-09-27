@@ -1,3 +1,7 @@
+2026-09-27 · #tpv #test-harness · One-source-per-case reds leave source ORDER unpinned; add a case where every source names a different id.
+2026-09-27 · #tpv #test-harness · A 'marker consumed' check filtered on *.json misses one parked as x.json.claimed.N; match the prefix.
+2026-09-27 · #bash #hooks · ls -t with an empty operand list lists the cwd; collect find hits in an array and guard the count first.
+2026-09-27 · #tpv #markers · Multi-marker fixtures: stamp the filename epoch with the aged time so mtime and name order agree.
 2026-09-27 · #tpv #skill #test-harness · skill-md-serial-pointers Test 20 froze all of SKILL.md; any later SKILL edit reds it. Re-scope it.
 2026-09-27 · #skill #test-harness · skill-md-serial-pointers Test 21 counts fenced '# ' lines as headings; add no SKILL.md line starting '#'.
 2026-09-27 · #tpv #bounce · Wiki-pass + src-block cases let "ignore all .cleargate/" survive; add non-wiki .cleargate dirt and a rename.
