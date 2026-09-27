@@ -1,3 +1,7 @@
+2026-09-27 · #shell #zsh · zsh expands a word starting with = as a command path: echo ==== aborts the chain; quote it.
+2026-09-27 · #devops #payload · precopy templates/scaffold too, not just cleargate-planning, for step 6 diff.
+2026-09-27 · #test-harness #tpv · A mutant driver must re-read each mutated file after its run; a concurrent writer fakes kills and survivals.
+2026-09-27 · #toml #codex · Append to a TOML array at the last element's range end: comments, layout and a trailing comma survive.
 2026-09-27 · #gate #cache · Once BUG-047 merges, gate check rewrites a stale cache; stop hand-bumping last_gate_check (card 2026-09-25 #stale).
 2026-09-27 · #test-harness #gate · A real-item gate/stamp probe needs only a git repo plus a copy of readiness-gates.md.
 2026-09-27 · #git · 'checkout <sha> -- p' stages p, so 'checkout -- .' restores the stale copy; use 'checkout HEAD -- .'

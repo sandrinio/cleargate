@@ -116,9 +116,9 @@ build-codex-payload.mjs R5 row: "`write_dispatch.sh` fallback blocks … | skip 
 
 > **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-101 (errata §1 E1, E3, E4, E15; I16 R4 row (OD-M7-3)). The plan wins where it differs from this file.
 
-- [ ] QA-Red: codex-dispatch-attribution red (6); Test 31 R4/R5 re-pin; sentinel refusal-chain hash
-- [ ] Codex-branch source order task_name → marker (newest, 10 min, agent_type) → message; source= log field; R4 + R5 texts; gen:codex
-- [ ] Typecheck, targeted, codex-hooks-harness 91, --check, hooks-claude-parity, test 46 + scripted codex-loop (harness lane)
+- [x] QA-Red: codex-dispatch-attribution red (6); Test 31 R4/R5 re-pin; sentinel refusal-chain hash
+- [x] Codex-branch source order task_name → marker (newest, 10 min, agent_type) → message; source= log field; R4 + R5 texts; gen:codex
+- [x] Typecheck, targeted, codex-hooks-harness 91, --check, hooks-claude-parity, test 46 + scripted codex-loop (harness lane)
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/hooks/codex-dispatch-attribution.red.node.test.ts` (solo), plus `codex-hooks-harness` green.

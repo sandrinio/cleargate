@@ -364,7 +364,7 @@
       ]
     },
     "BUG-101": {
-      "state": "Ready to Bounce",
+      "state": "Done — merged cli 8c98177 (2026-09-27); full suite 3659/3657/0/2; BD; RS-M7a",
       "base": "main",
       "upstream": [],
       "repo": "cli",
@@ -377,7 +377,7 @@
       ]
     },
     "BUG-100": {
-      "state": "Ready to Bounce",
+      "state": "PAUSED at INTEGRATE d9e69e1 (onto 8c98177) — next: QA-Verify",
       "base": "main",
       "upstream": [],
       "repo": "cli",
@@ -389,7 +389,7 @@
       ]
     },
     "BUG-047": {
-      "state": "Ready to Bounce",
+      "state": "PAUSED at INTEGRATE f036700 (onto 8c98177) — next: QA-Verify",
       "base": "main",
       "upstream": [],
       "repo": "cli",
@@ -401,7 +401,7 @@
       ]
     },
     "BUG-103": {
-      "state": "Ready to Bounce",
+      "state": "PAUSED at INTEGRATE cli c2f56ab / outer 0f542bc0 (onto 8c98177) — next: QA-Verify",
       "base": "main",
       "upstream": [],
       "repo": "both",
@@ -995,7 +995,7 @@
     },
     {
       "id": "RS-M7a",
-      "status": "pending",
+      "status": "done",
       "plan": "plans/M7.md §5/§6/§4.2"
     },
     {
