@@ -1,3 +1,6 @@
+2026-09-27 · #pre-gate #meta-repo · Run pre_gate_runner.sh arch on the OUTER worktree; its typecheck is npm --prefix cleargate-cli (254 on cw).
+2026-09-27 · #codex #clean-room · codex-loop never collects pending-task-sentinel.log; read source= from <C>/repo-loop hook-log before rm.
+2026-09-27 · #codex #dispatch · Scripted loop task_names are bare roles (cg_probe, qa_red…): scripted runs attribute only via source=message.
 2026-09-27 · #tpv #gate #cache · Gate freshness is >=: stamp-and-gate writes updated_at and last_gate_check in one second; pin equality.
 2026-09-27 · #tpv #preflight · Check 5's sprint-plan stale branch had no test: deleting it passed all 27 sprint-preflight tests.
 2026-09-27 · #test-harness #gate · loadGateBlocks unwraps [0] per yaml fence; a 2nd gate in the same fence is silently dropped.
