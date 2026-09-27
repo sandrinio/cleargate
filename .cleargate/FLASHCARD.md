@@ -1,3 +1,5 @@
+2026-09-27 · #merge #integrate · A clean 'git merge --no-ff -m' commits at once; use --no-commit to hold it staged until tests pass.
+2026-09-27 · #integrate #orchestration · A post-flight commit can move sprint/S-41 mid-INTEGRATE; re-check is-ancestor at the end.
 2026-09-27 · #codex #clean-room #post-flight · Codex SKILL.md:448 has the orchestrator set QA Passed; forbid only root Done, never all update_state.
 2026-09-27 · #post-flight #clean-room · Re-grade a kept run's inputs.json with in-memory mutations: proves non-vacuity on real data, no harness.
 2026-09-27 · #verdicts #danger · A check scanning 'commands on rootThreadId' passes vacuously when the id is absent; FAIL on a missing root.
