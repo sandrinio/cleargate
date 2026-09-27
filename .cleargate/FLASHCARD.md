@@ -1,3 +1,8 @@
+2026-09-27 · #gate #cache · Once BUG-047 merges, gate check rewrites a stale cache; stop hand-bumping last_gate_check (card 2026-09-25 #stale).
+2026-09-27 · #test-harness #gate · A real-item gate/stamp probe needs only a git repo plus a copy of readiness-gates.md.
+2026-09-27 · #git · 'checkout <sha> -- p' stages p, so 'checkout -- .' restores the stale copy; use 'checkout HEAD -- .'
+2026-09-27 · #test-harness · find order varies run to run on APFS; fingerprint a tree with find | stat | sort | shasum.
+2026-09-27 · #gate · gate-v2.integration is red at f0c33f7: expects argv[0] pre_gate_runner.sh, gate.ts spawns bash.
 2026-09-27 · #pre-gate #meta-repo · Run pre_gate_runner.sh arch on the OUTER worktree; its typecheck is npm --prefix cleargate-cli (254 on cw).
 2026-09-27 · #codex #clean-room · codex-loop never collects pending-task-sentinel.log; read source= from <C>/repo-loop hook-log before rm.
 2026-09-27 · #codex #dispatch · Scripted loop task_names are bare roles (cg_probe, qa_red…): scripted runs attribute only via source=message.
