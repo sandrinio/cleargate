@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "integrated (cli 5594a41, outer d6c5264e; Run 2 scripted PASS); post-flight FAIL B1 (plan-origin, arch bounce 2) → Developer B1 fix (loop-evidence.mjs only) → QA-Verify → post-flight delta re-check → RS-4L → step L (owner) → DevOps",
+      "state": "QA-Verify PASS-PENDING-SMOKE on cli f33cc4a (B1 fixed, re-check PASS); step L1 verified; waiting on owner OD1 → RS-4L → step L (owner trust) → DevOps",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",
