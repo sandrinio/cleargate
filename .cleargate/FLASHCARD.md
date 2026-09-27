@@ -1,3 +1,7 @@
+2026-09-27 · #tpv #skill #test-harness · skill-md-serial-pointers Test 20 froze all of SKILL.md; any later SKILL edit reds it. Re-scope it.
+2026-09-27 · #skill #test-harness · skill-md-serial-pointers Test 21 counts fenced '# ' lines as headings; add no SKILL.md line starting '#'.
+2026-09-27 · #tpv #bounce · Wiki-pass + src-block cases let "ignore all .cleargate/" survive; add non-wiki .cleargate dirt and a rename.
+2026-09-27 · #tpv #test-harness · Porcelain line 1 can start with a space (' M x'); trimming all output before slice(3) corrupts path 1.
 2026-09-27 · #qa-red #tpv #test-harness · A TPV's own reported reseal sha256 can be wrong; recompute after apply, don't trust the report hash.
 2026-09-27 · #orchestrator #timestamps · Take ISO times from `date -u`; never type them. Hand-typed times ran 1-2 h ahead of the clock.
 2026-09-27 · #git #test-harness · A pre-commit hook in a linked worktree exports GIT_DIR; git children a CLI spawns must drop it.
