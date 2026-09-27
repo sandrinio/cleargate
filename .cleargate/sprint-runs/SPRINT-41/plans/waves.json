@@ -329,7 +329,7 @@
       ]
     },
     "STORY-058-13": {
-      "state": "QA Passed on cli f33cc4a (B1 fixed, re-check PASS); DevOps merge now per M7 OD-M7-1 (step L → RS-L after M7, gated at close by deferred_verification)",
+      "state": "Done — merged outer a3b77505 / cli 0e5b0ac (2026-09-27); full suite 3653/3651/0/2; BD; step L → RS-L after M7 (deferred_verification at close)",
       "base": "contract/S-41-loop",
       "upstream": [
         "STORY-058-12",

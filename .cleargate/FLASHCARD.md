@@ -1,3 +1,11 @@
+2026-09-27 · #test-harness #scripts · A .cleargate/scripts .mjs takes REPO_ROOT from its own path; copy it and its deps into a temp repo to test.
+2026-09-27 · #test-harness #scaffold · Items sharing a SANCTIONED_BASELINE_DELTAS row chain currentHash refusals: append, never replace.
+2026-09-27 · #test-harness #npm-scripts · npm run test:file also runs *.integration.node.test.ts solo; only npm test's glob skips them.
+2026-09-27 · #qa-red #test-harness · A red can hinge on a new log field when id resolution is already right; pin the field, not only the id.
+2026-09-27 · #qa-red #gate · A bug's verify steps can mix must-fail steps with CR-038 witnesses that pass before and after the fix.
+2026-09-27 · #gate #stamp · restoreIfOnlyTimestampMoved is unconditional: a Step-0 stamp on a STALE item is reverted too (BUG-047).
+2026-09-27 · #qa-red #process · A plan's cited .ts line ranges tempt a direct Read; QA-Red must review the plan's prose only, not open the cited path.
+2026-09-27 · #devops #rule-14 · After a full cli suite, rule-14 may list ~38 delivery files from back-sync; revert exactly that list.
 2026-09-27 · #codex #hooks · .codex/hooks/*.sh are generated copies of the Claude hooks; a codex-only fix edits the Claude file's codex branch.
 2026-09-27 · #codex #dispatch · Live spawn_agent message is ciphertext; hooks see only task_name/agent_type in plaintext — carry the id in task_name.
 2026-09-27 · #codex #clean-room · -13 S4 and RS-4L C6 carry STORY=001-01 only in message; live dispatch-identity fails without a plaintext id.
