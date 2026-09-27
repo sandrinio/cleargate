@@ -10,10 +10,10 @@ severity: P3-Low
 reporter: orchestrator (SPRINT-41 Codex dogfood run r5, issue I17)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood r5 (issues.md I17); verified codebase grounding at cli main 0e5b0ac: scaffold/core/.cleargate/templates/{story,Bug,CR}.md '| Test Type | Minimum Count | Notes |' tables; SKILL.md §C.3 QA-Red return block (:361-367) and TPV check list (:402)"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

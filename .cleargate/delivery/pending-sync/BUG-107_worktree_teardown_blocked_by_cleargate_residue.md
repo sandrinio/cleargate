@@ -10,10 +10,10 @@ severity: P2-Medium
 reporter: orchestrator (SPRINT-41 Codex dogfood runs r6/r7, issue I19)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood r6/r7 (issues.md I19); verified codebase grounding at cli main 0e5b0ac: scaffold/core/.cleargate/scripts/run_script.sh:63-91 (_resolve_project_root → git --show-toplevel = the worktree), scaffold/core/.cleargate/scripts/pre_gate_runner.sh:69 (REPORT_DIR=${WORKTREE}/.cleargate/reports), scaffold/hosts/claude/.claude/hooks/stamp-and-gate.sh (stamps any edited delivery file, incl. a linked worktree's copy)"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

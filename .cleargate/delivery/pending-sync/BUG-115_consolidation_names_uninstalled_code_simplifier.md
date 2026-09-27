@@ -10,10 +10,10 @@ severity: P3-Low
 reporter: orchestrator (SPRINT-41 Codex dogfood run r8, issue I26)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood r8 (issues.md I26); verified codebase grounding at cli main 0e5b0ac: scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:679-690 (§D.5.1 'Invoke the code-simplifier agent (/simplify)'); scaffold/hosts/claude/.claude/agents/ has no code-simplifier role (it is a separate Claude Code plugin)"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

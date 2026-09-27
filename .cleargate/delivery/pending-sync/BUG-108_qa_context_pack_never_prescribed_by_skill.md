@@ -10,10 +10,10 @@ severity: P2-Medium
 reporter: orchestrator (SPRINT-41 Codex dogfood runs r6/r7, issues I21 + I24)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood r6/r7 (issues.md I21, I24); verified codebase grounding at cli main 0e5b0ac: scaffold/hosts/claude/.claude/agents/qa.md:23-27,89-91 (pack required on spawn; pack-absent fallback = FAIL), scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md (no prep_qa_context invocation anywhere), scaffold/core/.cleargate/scripts/prep_qa_context.mjs usage '<story-id> <worktree-path>'"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

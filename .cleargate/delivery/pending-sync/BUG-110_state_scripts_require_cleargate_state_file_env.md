@@ -10,10 +10,10 @@ severity: P2-Medium
 reporter: orchestrator (SPRINT-41 Codex dogfood runs r2-r6, issue I18)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood (issues.md I18); verified codebase grounding at cli main 0e5b0ac: scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs:36-45, scaffold/core/.cleargate/scripts/update_state.mjs:209-215 (resolveStateFile throws when CLEARGATE_STATE_FILE is unset); SKILL.md examples call both with no env"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

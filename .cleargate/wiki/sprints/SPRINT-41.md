@@ -6,8 +6,8 @@ children: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
-last_ingest: "2026-09-27T09:02:10.146Z"
-last_ingest_commit: "ebecc8829b5b1d0f493993f24b4a36d19f06a09f"
+last_ingest: "2026-09-27T09:04:52.780Z"
+last_ingest_commit: "982b4a87e10af5bf9e1d641e30495a0ff51bff05"
 repo: "planning"
 ---
 

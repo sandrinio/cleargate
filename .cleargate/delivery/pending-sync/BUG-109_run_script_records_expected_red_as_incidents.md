@@ -10,10 +10,10 @@ severity: P3-Low
 reporter: orchestrator (SPRINT-41 Codex dogfood runs r6/r7, issue I20)
 approved: true
 approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix them'; 2026-09-27 'you watch and file all issues, then fix and then use codex to test again'; 'you respond as an owner'); filed by the orchestrator per plans/M7.md §8.4"
-approved_at: 2026-09-27T10:05:00Z
+approved_at: 2026-09-27T08:58:00Z
 context_source: "Codex dogfood r6/r7 (issues.md I20); verified codebase grounding at cli main 0e5b0ac: scaffold/core/.cleargate/scripts/run_script.sh:16-26 (incident path, AGENT_TYPE/WORK_ITEM_ID env), :197-238 (incident JSON), SKILL.md §C.3 :352 (QA-Red scripts MUST go through run_script.sh)"
-created_at: 2026-09-27T10:05:00Z
-updated_at: 2026-09-27T10:05:00Z
+created_at: 2026-09-27T08:58:00Z
+updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
