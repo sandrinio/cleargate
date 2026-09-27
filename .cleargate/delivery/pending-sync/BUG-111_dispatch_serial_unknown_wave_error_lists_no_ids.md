@@ -75,9 +75,12 @@ dispatch_serial.mjs:407  if (!wave) throw new UsageError(`${wavesFile}: no wave 
 **Do NOT modify:** wave naming in architect-synth; `nextAction` semantics.
 
 ## Task Breakdown
-- [ ] QA-Red: the unknown-wave error lists the ids; zero-wave message; dispatch-serial.md example
-- [ ] Implement the message and the example line
-- [ ] Typecheck, targeted tests, dispatch_serial tests green
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-B): dispatch-serial-wave-ids red (3)
+- [ ] dispatch_serial.mjs unknown-wave message with ids / none (+ twin); dispatch-serial.md wave1 example; gen:codex
+- [ ] Typecheck, targeted, dispatch-serial suites
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/dispatch-serial-wave-ids.red.node.test.ts` (solo).

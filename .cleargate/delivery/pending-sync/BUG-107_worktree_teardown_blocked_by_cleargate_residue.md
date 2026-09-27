@@ -94,9 +94,13 @@ pre_gate_runner.sh:69  REPORT_DIR="${WORKTREE}/.cleargate/reports"
 **Do NOT modify:** DevOps teardown semantics (no `--force`); `pre_gate_runner.sh` report location (per-worktree by design, only ignored); the stamp hook's behavior on main-checkout files.
 
 ## Task Breakdown
-- [ ] QA-Red: run_script incident lands in the main checkout from a linked worktree; `.cleargate/reports/` ignored by an installed repo; stamp hook skips a linked-worktree delivery file and still stamps the main copy; real dirt still blocks `git worktree remove`
-- [ ] Implement run_script root resolution, the gitignore entry, the hook linked-worktree skip (+ gen:codex), and the skill/role sentence
-- [ ] Typecheck, targeted tests, hooks-claude-parity, M2 pair, build-codex-payload --check
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-B): worktree-teardown-residue red (6) — incident from a worktree lands in the main checkout; .cleargate/reports ignored after init+commit; stamp hook skips a linked-worktree delivery copy on both hosts and still stamps the main copy; real dirt blocks plain remove; ORCHESTRATOR_PROJECT_DIR precedence; main-checkout sentence in SKILL §C.2 / render / developer.md
+- [ ] QA-Red at integration (after BUG-105): init.node bug-105 lock → exists, bug-107 byte-equal lock (+1); init-fixture .cleargate/.gitignore row (7db1a3bc… → ac247026…) and appends (stamp-and-gate, SKILL, run_script, developer)
+- [ ] run_script.sh main-checkout root via --git-common-dir (+ twin); init.ts /reports/ line; stamp-and-gate.sh cg_in_linked_worktree skip after BUG-105's line; SKILL §C.2 paragraph; developer.md Worktree Contract item 4; gen:codex; capture stamp-and-gate.bug-107.sh
+- [ ] Typecheck, targeted, rule-16 set, hooks-claude-parity, M2 pair, --check, test 46 (harness lane), teardown smoke
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/worktree-teardown-residue.red.node.test.ts` (solo).

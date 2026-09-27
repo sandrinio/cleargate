@@ -74,9 +74,12 @@ SKILL.md:681  Invoke the `code-simplifier` agent (`/simplify`) against the full 
 **Do NOT modify:** §D.5.2 QA Consolidation mode.
 
 ## Task Breakdown
-- [ ] QA-Red: §D.5.1 names the Developer Consolidation-mode fallback; developer.md defines it; the Codex renders match
-- [ ] Edit SKILL.md and developer.md, then gen:codex
-- [ ] Typecheck, targeted tests
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-A): consolidation-fallback red (2); developer.md init-fixture row
+- [ ] SKILL §D.5.1 fallback sentence; developer.md Mode: CONSOLIDATION section; gen:codex
+- [ ] Typecheck, targeted, skill-md-consolidation-d5, qa-content S7
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scaffold/consolidation-fallback.red.node.test.ts` (solo).

@@ -85,9 +85,12 @@ close_sprint.mjs:235  function resolveCliBin(repoRoot, rel = 'cli.js') { const c
 **Do NOT modify:** the fail-closed assertion itself; step order; `CLEARGATE_SKIP_LIFECYCLE_CHECK`.
 
 ## Task Breakdown
-- [ ] QA-Red: global-symlink PATH resolves the dist (CLI and lib); precedence of the two existing candidates; a wrapper script on PATH is not used; the message lists three places
-- [ ] Implement the PATH candidate and the message; apply it to any sibling copy
-- [ ] Typecheck, targeted tests, close_sprint suites, M2 pair (payload script: sanctioned delta)
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-C): close-sprint-cli-resolution red (4); re-scope close-sprint-hardening S1a–S1d and bug076_077_close_path.red.sh #5 (both copies) to a hermetic PATH; BUG-090 close_sprint row append 0f837a9a…
+- [ ] close_sprint.mjs pathCliDist (first PATH cleargate, realpath → <pkg>/dist, name check) as resolveCliBin's third candidate; three-place message; PATH-dist stdout line; :771 text; twin
+- [ ] Typecheck, targeted, every close_sprint spawner with the ambient PATH, M2 pair
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/close-sprint-cli-resolution.red.node.test.ts` (solo).

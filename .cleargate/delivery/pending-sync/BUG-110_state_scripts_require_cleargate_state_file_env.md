@@ -78,9 +78,12 @@ update_state.mjs:209  function resolveStateFile() { … throw new Error('CLEARGA
 **Do NOT modify:** the env-first precedence; state.json schema; the `.active` writer (`init_sprint.mjs`).
 
 ## Task Breakdown
-- [ ] QA-Red: no-env fallback from the main checkout and from a linked worktree; env precedence; no-.active error
-- [ ] Implement the shared fallback in both scripts
-- [ ] Typecheck, targeted tests, M2 pair (the scripts are payload files: sanctioned deltas)
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-B): state-file-fallback red (4); update_state.mjs row + state-file.mjs addition; validate_bounce_readiness append at integration
+- [ ] lib/state-file.mjs (mainCheckoutRoot, resolveStateFile); update_state.mjs + validate_bounce_readiness.mjs delegate with Error: output; twins (update_state + lib in one outer commit)
+- [ ] Typecheck, targeted, test_update_state.integration, state/story suites, BUG-102/103 script tests, verify-pack (+1 declared), M2 pair
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/state-file-fallback.red.node.test.ts` (solo).

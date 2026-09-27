@@ -1,3 +1,15 @@
+2026-09-27 · #orchestrator #timestamps · Take ISO times from `date -u`; never type them. Hand-typed times ran 1-2 h ahead of the clock.
+2026-09-27 · #git #test-harness · A pre-commit hook in a linked worktree exports GIT_DIR; git children a CLI spawns must drop it.
+2026-09-27 · #tpv #preflight · A preflight that plans with a placeholder input refuses what the real write accepts; use the real one.
+2026-09-27 · #tpv #toml · Merge-rule reds need negatives: other entry kept, re-plan no-op, table without key, file without table.
+2026-09-27 · #tpv #test-harness · A standalone cli clone fails ~394 tests on meta-repo paths; diff failing sets vs a same-layout base.
+2026-09-27 · #codex #gen-codex · .agents/skills and .codex/agents are generated from Claude sources; codex-only wording = a codegen transform.
+2026-09-27 · #close #test-harness · Once close_sprint consults PATH, ambient-env spawns find the global cleargate; pin PATH=/usr/bin:/bin.
+2026-09-27 · #init #scripts · .cleargate/.gitignore is generated in init.ts Step 5c (npm strips shipped .gitignore files); edit that body.
+2026-09-27 · #skill #tpv · TPV is scan-gated; a check that must always run belongs at QA-RED: WRITTEN, not in the TPV list.
+2026-09-27 · #worktree #scripts · Main checkout = parent of --git-common-dir only if its basename is .git; else --show-toplevel.
+2026-09-27 · #init-fixture #merge · Two lanes first-touching one M2 file: keep one row per rel; the later lane appends its base hash.
+2026-09-27 · #hooks #worktree · Developers tick Task Breakdown rows in the worktree copy (developer.md:48); worktree-skip rules must allow it.
 2026-09-27 · #test-harness #scripts · A .cleargate/scripts .mjs takes REPO_ROOT from its own path; copy it and its deps into a temp repo to test.
 2026-09-27 · #test-harness #scaffold · Items sharing a SANCTIONED_BASELINE_DELTAS row chain currentHash refusals: append, never replace.
 2026-09-27 · #test-harness #npm-scripts · npm run test:file also runs *.integration.node.test.ts solo; only npm test's glob skips them.

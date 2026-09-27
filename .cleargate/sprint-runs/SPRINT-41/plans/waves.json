@@ -472,6 +472,227 @@
       "boundary_after": [
         "BD"
       ]
+    },
+    "BUG-114": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-C",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md addendum BUG-114",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-108": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-108",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-109": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-109",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-113": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-113",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-115": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-115",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-116": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-116",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-110": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46 for BUG-107) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-110",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-111": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46 for BUG-107) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-111",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-107": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-107",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-112": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-101"
+      ],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "build_lane": "M7-D",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md addendum BUG-112",
+      "boundary_after": [
+        "BD"
+      ]
     }
   },
   "waves": [
@@ -676,6 +897,28 @@
         "cf-L3"
       ],
       "rationale": "No contracts and no build-ordering collisions (plans/M7.md §2.2). At most 4 build lanes; merges serial in lane_priority_m7 order; each merge is followed by BD and its RS step."
+    },
+    {
+      "wave": "cf-M7-add",
+      "stories": [
+        "BUG-114",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116",
+        "BUG-110",
+        "BUG-111",
+        "BUG-107",
+        "BUG-112"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M7",
+      "after": [
+        "cf-L3"
+      ],
+      "rationale": "M7 addendum (plans/M7.md A2): no contracts; four build lanes by file ownership (M7-A text bundle, M7-B script bundle, M7-C BUG-114, M7-D BUG-112); bundles merge once; upstream edges carry the order; each merge is followed by BD and its RS step."
     }
   ],
   "merge_queue": {
@@ -774,6 +1017,20 @@
       "id": "RS-L",
       "status": "pending",
       "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7d",
+      "status": "pending",
+      "after": "M7-A BD",
+      "blocks": "the next cli merge",
+      "plan": "plans/M7.md addendum A6.1 (list: agents/architect.md, agents/developer.md, agents/devops.md, agents/qa.md, skills/sprint-execution/SKILL.md)"
+    },
+    {
+      "id": "RS-M7e",
+      "status": "pending",
+      "after": "M7-B BD",
+      "blocks": "the next cli merge",
+      "plan": "plans/M7.md addendum A6.1 (list: agents/developer.md, hooks/stamp-and-gate.sh, skills/sprint-execution/SKILL.md, skills/sprint-execution/dispatch-serial.md)"
     }
   ],
   "owner_actions": [
@@ -866,7 +1123,71 @@
     "BUG-103",
     "BUG-102",
     "BUG-105",
+    "BUG-114",
+    "BUG-108",
+    "BUG-109",
+    "BUG-113",
+    "BUG-115",
+    "BUG-116",
+    "BUG-110",
+    "BUG-111",
+    "BUG-107",
     "BUG-104",
-    "BUG-106"
-  ]
+    "BUG-106",
+    "BUG-112"
+  ],
+  "build_lanes_m7": {
+    "M7-A": {
+      "lead": "BUG-108",
+      "members": [
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-108 on story/BUG-108 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-108/cleargate-cli on story/BUG-108 from main",
+      "dispatch": "one per role per lane; brief line 1: BUG-108 (M7-A bundle: BUG-108 BUG-109 BUG-113 BUG-115 BUG-116)",
+      "merge": "one DevOps merge (outer then cli), full suite, BD, RS-M7d; update_state Done per member",
+      "plan": "plans/M7.md addendum A2/A4"
+    },
+    "M7-B": {
+      "lead": "BUG-110",
+      "members": [
+        "BUG-110",
+        "BUG-111",
+        "BUG-107"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-110 on story/BUG-110 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-110/cleargate-cli on story/BUG-110 from main",
+      "dispatch": "one per role per lane; brief line 1: BUG-110 (M7-B bundle: BUG-110 BUG-111 BUG-107)",
+      "merge": "one DevOps merge (outer then cli), full suite, BD, RS-M7e; update_state Done per member",
+      "plan": "plans/M7.md addendum A2/A4"
+    },
+    "M7-C": {
+      "lead": "BUG-114",
+      "members": [
+        "BUG-114"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-114 on story/BUG-114 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-114/cleargate-cli on story/BUG-114 from main",
+      "merge": "DevOps merge (outer then cli), full suite, BD",
+      "plan": "plans/M7.md addendum A4"
+    },
+    "M7-D": {
+      "lead": "BUG-112",
+      "members": [
+        "BUG-112"
+      ],
+      "repo": "cli",
+      "outer_worktree": "OUTER/.worktrees/BUG-112 detached at sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-112/cleargate-cli on story/BUG-112 from main",
+      "merge": "DevOps merge (cli), full suite, BD",
+      "plan": "plans/M7.md addendum A4"
+    }
+  }
 }

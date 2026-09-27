@@ -78,9 +78,12 @@ story.md:209  | Test Type | Minimum Count | Notes |
 **Do NOT modify:** the §5 table format in templates; `qa_red_lint.mjs`.
 
 ## Task Breakdown
-- [ ] QA-Red: the return block names LAYER_COUNTS; the TPV list rejects sealed < minimum; the Codex renders match
-- [ ] Edit SKILL.md and qa.md, then gen:codex
-- [ ] Typecheck, targeted tests, mirror test (red until the RS step)
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-A): qa-red-layer-counts red (3); CR-124 SKILL/architect appends at integration
+- [ ] SKILL §C.3 LAYER_COUNTS return lines + orchestrator check at QA-RED: WRITTEN + §C.3.5 TPV (6); qa.md steps 4/6 + output shape; architect.md Mode TPV item 6; gen:codex
+- [ ] Typecheck, targeted, skill-md-conditional-architect, render set, rule-16 set
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scaffold/qa-red-layer-counts.red.node.test.ts` (solo).

@@ -84,9 +84,12 @@ SKILL.md: 0 matches for prep_qa_context
 **Do NOT modify:** `prep_qa_context.mjs` (M2-frozen, `schema_version: 1`); pack structure.
 
 ## Task Breakdown
-- [ ] QA-Red: skill names `prep_qa_context.mjs <STORY-ID> <worktree>` before QA-Verify; qa.md requires the pack in Verify mode only; the Codex renders match
-- [ ] Edit SKILL.md and qa.md, then gen:codex
-- [ ] Typecheck, targeted tests, sprint-execution-mirror (red until the RS step), codex render tests
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-A): qa-context-pack-prescribed red (2); shared qa.md init-fixture row
+- [ ] SKILL §C.5 prep_qa_context step with both arguments; qa.md Default input / RED inputs / VERIFY-only pack lines; gen:codex
+- [ ] Typecheck, targeted, qa-content (S6 named-red until RS-M7d), render set, rule-16 set
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scaffold/qa-context-pack-prescribed.red.node.test.ts` (solo).

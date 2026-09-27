@@ -79,9 +79,12 @@ run_script.sh:25  AGENT_TYPE — populates incident JSON agent_type field (null 
 **Do NOT modify:** the incident JSON schema; the no-marker behavior.
 
 ## Task Breakdown
-- [ ] QA-Red: expected-fail writes no incident and passes the exit through; unexpected pass is recorded; no-marker unchanged
-- [ ] Implement the marker branch and the §C.3 / qa.md example lines
-- [ ] Typecheck, targeted tests, codex render check
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-A): run-script-expect-fail red (4); run_script.sh init-fixture row
+- [ ] run_script.sh RUN_SCRIPT_EXPECT_FAIL branch + stderr prefix (+ twin); SKILL §C.3 bullet; qa.md step 3; gen:codex
+- [ ] Typecheck, targeted, run-script-* tests (outer twin), cr080_wrapper.test.sh
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/run-script-expect-fail.red.node.test.ts` (solo).

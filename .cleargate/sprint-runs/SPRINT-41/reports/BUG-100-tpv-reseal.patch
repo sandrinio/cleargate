@@ -1,0 +1,286 @@
+diff --git a/test/init/inject-codex-config-sandbox.red.node.test.ts b/test/init/inject-codex-config-sandbox.red.node.test.ts
+index ec6b30e..1e4f4dc 100644
+--- a/test/init/inject-codex-config-sandbox.red.node.test.ts
++++ b/test/init/inject-codex-config-sandbox.red.node.test.ts
+@@ -20,7 +20,15 @@
+  * holds today (the feature does not exist, so nothing about the guarded
+  * path has changed yet) and MUST continue to hold after the fix — see E12
+  * (non-git byte-identity) and the "Claude install is unchanged" Gherkin.
+- * Tests 1, 3, 4, 5 and 6 fail today for the reason noted in each block.
++ * Tests 1, 3, 4, 5, 6 and 8 fail today for the reason noted in each block.
++ *
++ * TPV re-seal (BUG-100-tpv.md, 2026-09-27): Test 2 adds the ambient-GIT_DIR
++ * and no-notice checks (plan Gotchas + rule 4); Test 3 adds the no-op
++ * re-plan, the table-without-key insert and the file-without-table append
++ * (rule 2); Test 4 adds an existing other .git root that must survive
++ * (rule 2); Test 6 adds a missing other .git root, a table that keeps other
++ * keys, the no-op removal (rule 5) and a linked-worktree remove(); Test 8 is
++ * new (rule 3 + the preflight scan, M7 amendment TPV100-A1).
+  *
+  * Payloads come from `composeCanonicalView` (M5-A18) — never the
+  * gitignored `templates/scaffold/**` prebuild output.
+@@ -85,6 +93,7 @@ interface PlanCodexConfigResult {
+ }
+ 
+ interface InjectCodexConfigSandboxModule {
++  CodexConfigError: new (message: string, file: string) => Error & { file: string };
+   planCodexConfig: (
+     existing: string | null,
+     pinVersion: string,
+@@ -110,6 +119,13 @@ async function loadInjectModule(): Promise<InjectCodexConfigSandboxModule> {
+ interface CodexAdapterLike {
+   install: (ctx: unknown) => Promise<void>;
+   remove: (ctx: unknown) => Promise<{ removed: readonly string[] }>;
++  preflight: (cwd: string) => void;
++}
++
++/** A CodexConfigError naming `file` (checked by name + file, not module identity). */
++function isCodexConfigErrorFor(file: string): (e: unknown) => boolean {
++  return (e: unknown) =>
++    e instanceof Error && e.name === 'CodexConfigError' && (e as Error & { file?: string }).file === file;
+ }
+ 
+ async function loadCodexAdapter(): Promise<{ createCodexAdapter: (deps?: Record<string, unknown>) => CodexAdapterLike }> {
+@@ -219,7 +235,7 @@ describe('Test 1 — a fresh Codex install writes the git common dir as a writab
+ // git-detection logic leaks a key into a non-git install.
+ 
+ describe('[ANCHOR] Test 2 — a non-git cwd is byte-identical to today\'s greenfield literal', () => {
+-  test('injectCodexConfig on a plain (non-git) tmp dir writes exactly the pre-BUG-100 literal', async () => {
++  test('injectCodexConfig on a plain (non-git) tmp dir writes exactly the pre-BUG-100 literal, even under an ambient GIT_DIR, and install() prints no notice', async () => {
+     const { injectCodexConfig } = await loadInjectModule();
+     const cwd = mkTmp('cg-s41-100-nongit-');
+     const result = injectCodexConfig(cwd, FIXED_PIN);
+@@ -231,6 +247,42 @@ describe('[ANCHOR] Test 2 — a non-git cwd is byte-identical to today\'s greenf
+       greenfieldTomlNoRoot(FIXED_PIN),
+       'a non-git cwd must never gain a [sandbox_workspace_write] table (E12)',
+     );
++
++    // Plan §3 BUG-100 Gotchas: the resolver runs with GIT_DIR / GIT_WORK_TREE
++    // removed from its env. A pre-commit hook in a linked worktree exports
++    // GIT_DIR (measured by TPV), so an ambient value pointing at another repo
++    // must never turn a non-git cwd into a key.
++    const otherRepo = mkTmp('cg-s41-100-nongit-ambient-repo-');
++    initGitRepo(otherRepo);
++    commitAllowEmpty(otherRepo, 'init');
++    const cwd2 = mkTmp('cg-s41-100-nongit-ambient-');
++    const prevGitDir = process.env.GIT_DIR;
++    const prevWorkTree = process.env.GIT_WORK_TREE;
++    process.env.GIT_DIR = path.join(otherRepo, '.git');
++    process.env.GIT_WORK_TREE = otherRepo;
++    try {
++      injectCodexConfig(cwd2, FIXED_PIN);
++    } finally {
++      if (prevGitDir === undefined) delete process.env.GIT_DIR;
++      else process.env.GIT_DIR = prevGitDir;
++      if (prevWorkTree === undefined) delete process.env.GIT_WORK_TREE;
++      else process.env.GIT_WORK_TREE = prevWorkTree;
++    }
++    assert.equal(
++      fs.readFileSync(path.join(cwd2, '.codex', 'config.toml'), 'utf8'),
++      greenfieldTomlNoRoot(FIXED_PIN),
++      'an ambient GIT_DIR / GIT_WORK_TREE must not reach the git common-dir resolver',
++    );
++
++    // Rule 4: a non-git install prints no extra line either.
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const payloadDir = await getCodexPayloadDir();
++    const cwd3 = mkTmp('cg-s41-100-nongit-adapter-');
++    const stdoutLines: string[] = [];
++    await createCodexAdapter().install(makeCtx(cwd3, payloadDir, { stdout: (s: string) => stdoutLines.push(s) }));
++    const joined = stdoutLines.join('');
++    assert.ok(!joined.includes('writable_roots'), `a non-git install must print no writable-root notice; got:\n${joined}`);
++    assert.equal(fs.readFileSync(path.join(cwd3, '.codex', 'config.toml'), 'utf8'), greenfieldTomlNoRoot(FIXED_PIN));
+   });
+ });
+ 
+@@ -240,7 +292,7 @@ describe('[ANCHOR] Test 2 — a non-git cwd is byte-identical to today\'s greenf
+ // root is never added and result.writableRoot is undefined, not 'added'.
+ 
+ describe('Test 3 — merging into an existing [sandbox_workspace_write] table keeps a user-added root', () => {
+-  test('a user root "/opt/cache" survives when the ClearGate root is added', async () => {
++  test('a user root "/opt/cache" survives when the ClearGate root is added; a re-plan is a no-op; a table without the key, or a file without the table, gains it', async () => {
+     const { planCodexConfig } = await loadInjectModule();
+     const existing =
+       '[sandbox_workspace_write]\n' + 'writable_roots = ["/opt/cache"]\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
+@@ -253,6 +305,31 @@ describe('Test 3 — merging into an existing [sandbox_workspace_write] table ke
+     assert.ok(roots!.includes('/opt/cache'), `the user root must survive; got ${JSON.stringify(roots)}`);
+     assert.ok(roots!.includes(newRoot), `the ClearGate root must be added; got ${JSON.stringify(roots)}`);
+     assert.equal(result.writableRoot, 'added');
++
++    // Rule 2 "append <root> if absent": re-planning over the result with the
++    // same root changes nothing (no duplicate root on re-init).
++    const again = planCodexConfig(result.next, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    assert.equal(again.next, result.next, 're-planning with the same root must not change a byte');
++    assert.equal(again.action, 'unchanged');
++    assert.equal(again.writableRoot, 'unchanged');
++
++    // Rule 2 "a standard table without the key -> insert the key": the
++    // table's other keys survive and no second table is appended.
++    const noKey = '[sandbox_workspace_write]\n' + 'network_access = true\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const inserted = planCodexConfig(noKey, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    const parsedInserted = await parsedToml(inserted.next);
++    assert.deepEqual(parsedInserted.sandbox_workspace_write, { network_access: true, writable_roots: [newRoot] });
++    assert.equal(inserted.writableRoot, 'added');
++
++    // Rule 2 "no [sandbox_workspace_write] -> append the table": an existing
++    // file without it (host add codex onto a user's config) keeps its bytes as
++    // a prefix and gains the table.
++    const withoutTable = greenfieldTomlNoRoot(FIXED_PIN);
++    const appended = planCodexConfig(withoutTable, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    assert.ok(appended.next.startsWith(withoutTable), `the existing bytes must stay a prefix; got:\n${appended.next}`);
++    assert.deepEqual(await readWritableRoots(appended.next), [newRoot]);
++    assert.equal(appended.action, 'updated');
++    assert.equal(appended.writableRoot, 'added');
+   });
+ });
+ 
+@@ -272,9 +349,15 @@ describe('Test 4 — re-init after the repository moved replaces only the stale
+     const staleRoot = path.join(staleParent, 'gone-repo', '.git'); // deliberately never created
+     assert.equal(fs.existsSync(staleRoot), false, 'the stale fixture path must not exist on disk');
+ 
++    // Rule 2: "Existing other .git paths are kept" — only a MISSING one is stale.
++    const otherRepo = mkTmp('cg-s41-100-moved-otherrepo-');
++    initGitRepo(otherRepo);
++    const otherGit = gitCommonDirRealpath(otherRepo);
++    assert.equal(fs.existsSync(otherGit), true, 'the other .git fixture must exist on disk');
++
+     const existing =
+       '[sandbox_workspace_write]\n' +
+-      `writable_roots = ["${staleRoot}", "/opt/cache"]\n` +
++      `writable_roots = ["${staleRoot}", "${otherGit}", "/opt/cache"]\n` +
+       '\n' +
+       greenfieldTomlNoRoot(FIXED_PIN);
+     const result = planCodexConfig(existing, FIXED_PIN, '/tmp/fake/.codex/config.toml', {
+@@ -285,6 +368,7 @@ describe('Test 4 — re-init after the repository moved replaces only the stale
+     assert.ok(!roots!.includes(staleRoot), `the stale root must be dropped; got ${JSON.stringify(roots)}`);
+     assert.ok(roots!.includes(newRoot), `the new git common dir must be present; got ${JSON.stringify(roots)}`);
+     assert.ok(roots!.includes('/opt/cache'), `the user root must survive; got ${JSON.stringify(roots)}`);
++    assert.ok(roots!.includes(otherGit), `an existing other .git root must survive; got ${JSON.stringify(roots)}`);
+     assert.equal(result.writableRoot, 'replaced');
+   });
+ });
+@@ -331,21 +415,44 @@ describe("Test 5 — a linked worktree writes the MAIN repository's .git as the
+ // second sub-test's deepEqual fails — the ClearGate root is still present).
+ 
+ describe('Test 6 — uninstall / host remove drops only the ClearGate-owned root', () => {
+-  test('removeCodexWritableRoot removes only the named root, keeps a user root, and empties the table when nothing is left', async () => {
++  test('removeCodexWritableRoot removes only the named root, keeps user roots and other keys, and empties the table when nothing is left', async () => {
+     const { removeCodexWritableRoot } = await loadInjectModule();
+     const clearGateRoot = '/repo/real/.git';
+     const file = '/tmp/fake/.codex/config.toml';
++    // Another .git root that does not exist on disk: uninstall removes ONLY <root> (rule 5),
++    // never another .git path and never a "stale" one.
++    const otherGit = '/cg-s41-100-nonexistent/other-repo/.git';
+ 
+     const withUserRoot =
+       '[sandbox_workspace_write]\n' +
+-      `writable_roots = ["${clearGateRoot}", "/opt/cache"]\n` +
++      `writable_roots = ["${clearGateRoot}", "${otherGit}", "/opt/cache"]\n` +
+       '\n' +
+       '[features]\n' +
+       'hooks = true\n';
+     const r1 = removeCodexWritableRoot(withUserRoot, clearGateRoot, file);
+     assert.equal(r1.removed, true);
+     const roots1 = await readWritableRoots(r1.next);
+-    assert.deepEqual(roots1, ['/opt/cache']);
++    assert.deepEqual([...(roots1 ?? [])].sort(), [otherGit, '/opt/cache'].sort());
++
++    // Rule 5: the key goes when its array empties; the table stays while it holds other keys.
++    const withOtherKey =
++      '[sandbox_workspace_write]\n' +
++      `writable_roots = ["${clearGateRoot}"]\n` +
++      'network_access = true\n' +
++      '\n' +
++      '[features]\n' +
++      'hooks = true\n';
++    const r3 = removeCodexWritableRoot(withOtherKey, clearGateRoot, file);
++    assert.equal(r3.removed, true);
++    const parsed3 = await parsedToml(r3.next);
++    assert.deepEqual(parsed3.sandbox_workspace_write, { network_access: true });
++    assert.deepEqual(parsed3.features, { hooks: true });
++
++    // Nothing to remove -> removed: false, bytes unchanged.
++    const noTable = '[features]\nhooks = true\n';
++    const r0 = removeCodexWritableRoot(noTable, clearGateRoot, file);
++    assert.equal(r0.removed, false);
++    assert.equal(r0.next, noTable);
+ 
+     const onlyClearGateRoot =
+       '[sandbox_workspace_write]\n' + `writable_roots = ["${clearGateRoot}"]\n` + '\n' + '[features]\nhooks = true\n';
+@@ -376,6 +483,76 @@ describe('Test 6 — uninstall / host remove drops only the ClearGate-owned root
+     const after = fs.readFileSync(configPath, 'utf8');
+     const roots = await readWritableRoots(after);
+     assert.deepEqual(roots, ['/opt/cache'], `expected only the user root to remain; got:\n${after}`);
++
++    // remove() from a linked worktree resolves the same common dir (plan: realpath of the
++    // git common dir first; realpath(cwd)/.git is only the non-git fallback).
++    const wtParent = mkTmp('cg-s41-100-remove-wt-parent-');
++    const wt = path.join(wtParent, 'linked');
++    git(cwd, ['worktree', 'add', wt, '-b', 'cg-s41-100-remove-wt-branch']);
++    fs.mkdirSync(path.join(wt, '.codex'), { recursive: true });
++    const wtConfig = path.join(wt, '.codex', 'config.toml');
++    fs.writeFileSync(
++      wtConfig,
++      '[sandbox_workspace_write]\n' + `writable_roots = ["${clearGateRoot}", "/opt/cache"]\n` + '\n' + greenfieldTomlNoRoot(FIXED_PIN),
++    );
++    await createCodexAdapter().remove({ cwd: wt, stdout: () => {}, stderr: () => {} });
++    const wtAfter = fs.readFileSync(wtConfig, 'utf8');
++    assert.deepEqual(await readWritableRoots(wtAfter), ['/opt/cache'], `linked-worktree remove(); got:\n${wtAfter}`);
++  });
++});
++
++// ── Test 8: rule 3 fail-closed shapes, in the planner and in preflight ──────
++// FAILS TODAY: the planner ignores [sandbox_workspace_write] entirely (no
++// throw on an inline table, no `writableRoot` field), and preflight never
++// scans the sandbox key. M7 amendment TPV100-A1: preflight resolves the real
++// root the same way the write does (no placeholder), so it refuses exactly
++// what the write refuses and never scans in a non-git cwd.
++
++describe('Test 8 — an inline-table or dotted-key sandbox definition fails closed unless it already holds the root', () => {
++  test('planCodexConfig throws CodexConfigError naming the file; a definition that holds the root is left alone; no root means no scan', async () => {
++    const { planCodexConfig } = await loadInjectModule();
++    const file = '/tmp/fake/.codex/config.toml';
++    const root = '/repo/real/.git';
++    const inline = 'sandbox_workspace_write = { writable_roots = ["/opt/cache"] }\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const dotted = 'sandbox_workspace_write.writable_roots = ["/opt/cache"]\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    for (const text of [inline, dotted]) {
++      assert.throws(() => planCodexConfig(text, FIXED_PIN, file, { writableRoot: root }), isCodexConfigErrorFor(file));
++    }
++
++    const holds = `sandbox_workspace_write = { writable_roots = ["${root}"] }\n` + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const ok = planCodexConfig(holds, FIXED_PIN, file, { writableRoot: root });
++    assert.equal(ok.next, holds);
++    assert.equal(ok.writableRoot, 'unchanged');
++
++    // Rule 4: without a root (non-git) the sandbox key is never scanned.
++    const noRoot = planCodexConfig(inline, FIXED_PIN, file);
++    assert.equal(noRoot.next, inline);
++    assert.equal(noRoot.writableRoot, 'none');
++  });
++
++  test('the adapter preflight refuses the same shape before any write in a git repo, and passes when the root is held or the cwd is not a repo', async () => {
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const adapter = createCodexAdapter();
++    const lacking = 'sandbox_workspace_write = { writable_roots = ["/opt/cache"] }\n';
++
++    const repo = mkTmp('cg-s41-100-preflight-git-');
++    initGitRepo(repo);
++    commitAllowEmpty(repo, 'init');
++    const root = gitCommonDirRealpath(repo);
++    const file = path.join(repo, '.codex', 'config.toml');
++    fs.mkdirSync(path.dirname(file), { recursive: true });
++    fs.writeFileSync(file, lacking);
++    assert.throws(() => adapter.preflight(repo), isCodexConfigErrorFor(file));
++    assert.equal(fs.readFileSync(file, 'utf8'), lacking, 'preflight must not write');
++
++    const holding = `sandbox_workspace_write = { writable_roots = ["${root}"] }\n`;
++    fs.writeFileSync(file, holding);
++    assert.doesNotThrow(() => adapter.preflight(repo), 'a definition that already holds this clone\'s root passes, as the write does');
++
++    const plain = mkTmp('cg-s41-100-preflight-nongit-');
++    fs.mkdirSync(path.join(plain, '.codex'), { recursive: true });
++    fs.writeFileSync(path.join(plain, '.codex', 'config.toml'), lacking);
++    assert.doesNotThrow(() => adapter.preflight(plain), 'a non-git cwd never scans the sandbox key (rule 4)');
+   });
+ });
+ 

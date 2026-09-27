@@ -83,9 +83,12 @@ flashcard/SKILL.md:81  - **`Skill(flashcard, "check")`** — open `.cleargate/FL
 **Do NOT modify:** `scaffold/hosts/claude/**`.
 
 ## Task Breakdown
-- [ ] QA-Red: no `Skill(` in any Codex TOML or the portable flashcard skill; the Claude agents unchanged
-- [ ] Portable skill wording, codegen replacement, gen:codex
-- [ ] Typecheck, codex payload/portable-skills tests, --check
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-D): codex-no-skill-calls red (2); re-scope codex-agents-codegen Test 2 and portable-skills Test 6 to codexSkillCalls
+- [ ] build-codex-payload.mjs codexSkillCalls (two replacers + Skill( guard) in renderAgentToml and the portable-skill copy; header (c); gen:codex
+- [ ] Typecheck, targeted, codex payload/portable-skills/init-codex tests, --check, --host codex smoke
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/codex-no-skill-calls.red.node.test.ts` (solo).

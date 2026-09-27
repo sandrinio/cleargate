@@ -77,9 +77,12 @@ Codex r8: ls …/reports/STORY-001-02-arch.md → No such file or directory (Dev
 **Do NOT modify:** SKILL.md §C.6 (it is the reference).
 
 ## Task Breakdown
-- [ ] QA-Red: devops.md scopes the arch report to a flagged scan in both places; the Codex devops.toml matches
-- [ ] Edit devops.md, then gen:codex
-- [ ] Typecheck, targeted tests
+
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+
+- [ ] QA-Red (lane M7-A): devops-arch-report-scan-gated red (2); devops.md init-fixture row
+- [ ] devops.md Post-flight input + :48/:51/Step 1 scan-gated wording; SKILL §C.7 brief Post-flight line; gen:codex
+- [ ] Typecheck, targeted, skill-md-conditional-architect
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scaffold/devops-arch-report-scan-gated.red.node.test.ts` (solo).
