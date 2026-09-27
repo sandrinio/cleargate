@@ -2,8 +2,8 @@
 bug_id: BUG-047
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
-carry_over: false
+sprint_cleargate_id: SPRINT-41
+carry_over: true
 area: planning-layer
 status: Triaged
 severity: P1-High
@@ -11,9 +11,9 @@ reporter: sandrinio
 approved: true
 context_source: verified empirically during SPRINT-39 preflight 2026-08-25 — gate check confirmed not to advance last_gate_check on an unchanged verdict; restoreIfOnlyTimestampMoved (sprint.ts:1719-1732) documented as the deliberate guard; no --force flag exists on gate check
 created_at: 2026-08-25T21:32:29Z
-updated_at: 2026-08-25T21:32:29Z
+updated_at: 2026-09-27T07:37:39Z
 created_at_version: cleargate@0.24.2
-updated_at_version: cleargate@0.24.2
+updated_at_version: 553d81ba-dirty
 server_pushed_at_version: null
 draft_tokens:
   input: null
@@ -43,7 +43,7 @@ last_synced_body_sha: null
 
 - **Question:** Advance `last_gate_check` always, or add `gate check --force`?
 - **Recommended:** Compare on **verdict identity plus input mtime**, not on rendered-text equality. The restore guard exists to stop `last_gate_check` thrash from dirtying `main` (a real problem, CR-038). Advancing the stamp only when the item's own `updated_at` has moved past it fixes the deadlock without reintroducing thrash.
-- **Human decision:** Unresolved — replace this entire line with the human's decision.
+- **Human decision:** Recommended option taken by the orchestrator on 2026-09-27 under the owner's SPRINT-41 directives ("log every issue you find and fix them"; "watch and file all issues, then fix and then use codex to test again"). Advance `last_gate_check` only when the item is stale (`last_gate_check < updated_at`); an unchanged verdict on a fresh item still writes nothing. Pulled into SPRINT-41 because the Codex dogfood run hit it three times (below). The owner may overrule at the next check-in.
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -108,11 +108,22 @@ function restoreIfOnlyTimestampMoved(absPath: string, original: string): void {
 
 **Workaround applied to unblock SPRINT-39:** `updated_at` was realigned to each item's `last_gate_check` across 38 files. That is a hand-write of a machine field — the class of edit [[CR-108]] and [[CR-109]] exist to eliminate.
 
+### SPRINT-41 Codex dogfood recurrence (2026-09-27)
+
+A fresh `cleargate init --host codex` repo driven by a real Codex session (`codex exec`, codex-cli 0.154.0) hit the deadlock three ways on the sprint build (cli `5594a41`):
+
+1. **wiki lint:** `gate-stale: …EPIC-001… last_gate_check=07:23:45Z < updated_at=07:25:23Z`, after a stamp; re-running the passing `gate check` leaves it stale.
+2. **preflight:** `Per-item readiness gates: SPRINT-01 (stale)` right after `✅ sprint.ready-for-execution passed`.
+3. **preflight Step 0 makes its own items stale:** `Step 0: refreshed 2 items` followed by Check 5 `SPRINT-01 (stale)`.
+
+Second guard found in the grounding: `writeCachedGate` (`src/lib/frontmatter-cache.ts` ~line 93, "Idempotency check") returns early when `pass`/`transition`/`failing_criteria` are unchanged, so `gate check` itself never writes a new `last_gate_check` for an unchanged verdict. The fix must cover both `writeCachedGate`'s early return and `restoreIfOnlyTimestampMoved` (`sprint.ts:1786` on cli main `f0c33f7`): skip or restore only when the ORIGINAL cache was fresh (`last_gate_check >= updated_at`).
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / modify:**
 - `cleargate-cli/src/commands/sprint.ts` — `restoreIfOnlyTimestampMoved`, `checkPerItemReadinessGates` staleness comparison.
 - `cleargate-cli/src/commands/gate.ts` — cache-write path (the same non-advance is observable outside preflight).
+- `cleargate-cli/src/lib/frontmatter-cache.ts` — `writeCachedGate` idempotency early return (the non-advance's first cause).
 - `cleargate-cli/test/` — regression test.
 
 **Do NOT modify:** `stamp-frontmatter.ts` (its behaviour is correct), the readiness predicates, or the criteria definitions.
@@ -143,7 +154,7 @@ function restoreIfOnlyTimestampMoved(absPath: string, original: string): void {
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 Requirements to pass to Green (Ready for Fix):
 - [x] Reproduction steps are 100% deterministic.
@@ -152,4 +163,4 @@ Requirements to pass to Green (Ready for Fix):
 - [x] Verification command (failing test) is provided.
 - [x] `approved: true` is set in the YAML frontmatter.
 
-> 🟡: the §Open Questions fix-shape decision is unresolved. Reproduction and evidence are complete; only the remedy is open.
+> 🟢: fix shape resolved 2026-09-27 (Open Questions → recommended option, orchestrator under the owner's SPRINT-41 directives).

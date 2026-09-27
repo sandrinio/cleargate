@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-26T05:17:56Z
+updated_at: 2026-09-27T07:55:09Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cb283bab-dirty
+updated_at_version: 553d81ba-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -88,6 +88,13 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | y | low |
 | `BUG-098` | Remaining positional frontmatter readers (BUG-067/-090 carry-forward); `--allow-drift` plants a phantom block | standard | M5 | y | med |
 | `BUG-099` | `codex-hooks.mjs check --write-result` writes no `status`/`exit_code`, so close Step 2.9 fails STORY-058-10's deferred verification | fast | M6 | y | low |
+| `BUG-047` | Gate cache stamp deadlock: `gate check` never refreshes `last_gate_check` after a stamp, so preflight/wiki lint report passing items stale (carried; hit 3× by the Codex dogfood) | standard | M7 | y | med |
+| `BUG-100` | Codex default `workspace-write` sandbox makes `.git` read-only; `init --host codex` never configures `writable_roots`, so the sprint loop cannot commit | standard | M7 | y | med |
+| `BUG-101` | Codex dispatches never attributed: live `spawn_agent` message is encrypted and the dispatch hook reads only the message | standard | M7 | y | med |
+| `BUG-102` | Serial driver needs a waves.json the tiny-sprint rule omits; verdicts never move state.json | standard | M7 | y | low |
+| `BUG-103` | sprint-execution skill drift: init needs `--stories`, 5 vs 6 preflight checks, bookkeeping-commit contradiction, ambiguous run_script `<cmd>`, relative report paths | standard | M7 | y | low |
+| `BUG-104` | Older PATH `cleargate` silently grades a newer scaffold; unknown predicate reads as "unsupported predicate shape"; resolver line blind to Codex pin | standard | M7 | y | low |
+| `BUG-105` | Codex install papercuts: Claude restart banner on Codex-only install, hook noise on deleted files, prose slugs rejected | standard | M7 | y | low |
 | `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | y | med |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.

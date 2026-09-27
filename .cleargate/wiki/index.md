@@ -80,6 +80,12 @@
 - [[BUG-097]] (bug) — Triaged — Four CLI output defects a new user hits in the first session (gate -v, stamp --dry-run, wiki query, scaffold-lint)
 - [[BUG-098]] (bug) — Triaged — The remaining positional frontmatter readers misread or corrupt `<instructions>`-led work items (BUG-067 / BUG-090 carry-forward)
 - [[BUG-099]] (bug) — Triaged — `codex-hooks.mjs check --write-result` writes no status or exit code, so sprint close always fails STORY-058-10's deferred verification
+- [[BUG-100]] (bug) — Triaged — A Codex install cannot run the sprint loop: Codex's default sandbox makes `.git` read-only and ClearGate never configures it
+- [[BUG-101]] (bug) — Triaged — Codex dispatches are never attributed to a work item: live `spawn_agent` messages are encrypted, and the hook reads only the message
+- [[BUG-102]] (bug) — Triaged — The serial driver needs a waves.json that the tiny-sprint rule omits, and its verdicts never move state.json
+- [[BUG-103]] (bug) — Triaged — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
+- [[BUG-104]] (bug) — Triaged — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
+- [[BUG-105]] (bug) — Triaged — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
 
 ## Archive
 
