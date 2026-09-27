@@ -39,3 +39,5 @@
 - PF13-FU-8 prepare's printed run hint: full F10 L4 form (--meta-repo, --evidence)
 - PF13-FU-9 allow multi-turn children when identity lines agree (R4; F8 15d re-scope)
 - Process: -13 arch_bounces=2 (TPV reject + post-flight B1, both plan-origin) — one more escalates; Reporter should note plan-origin bounce pattern (M6 copied SKILL.md:536 list, missed :448)
+- Process (M7): QA-Red seals are consistently mutant-weak — BUG-100 18/31, BUG-103 11/33, BUG-101 22/37 killed at seal; all three TPVs REJECTED with test-only re-seals (earlier: -11, -12, -13 re-seals too). Candidate CR: QA-Red brief requires one negative case per pinned plan rule plus a source-order case where every source disagrees; or QA-Red runs a cheap self-mutant pass before WRITTEN. TPV's live mutant pass is what caught them (cost ~1 h each).
+- Process (M7): orchestrator hand-typed ISO timestamps ran 1–2 h ahead of the clock (corrected in a7b9f354); take every written time from `date -u`.
