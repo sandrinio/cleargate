@@ -96,6 +96,16 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 | `BUG-104` | Older PATH `cleargate` silently grades a newer scaffold; unknown predicate reads as "unsupported predicate shape"; resolver line blind to Codex pin | standard | M7 | y | low |
 | `BUG-105` | Codex install papercuts: Claude restart banner on Codex-only install, hook noise on deleted files, prose slugs rejected | standard | M7 | y | low |
 | `BUG-106` | Clean-room live dispatch controls (S4, C6) carry the work-item id only in the encrypted message; harness kickoff left uncommitted | standard | M7 | y | low |
+| `BUG-107` | Story worktrees are never clean at teardown: run_script incidents, pre-gate reports and hook stamps land inside the worktree, so DevOps needs `--force` | standard | M7 | y | low |
+| `BUG-108` | qa.md requires a QA context pack that the sprint-execution skill never tells the orchestrator to build (`prep_qa_context.mjs <id> <worktree>`) | standard | M7 | y | low |
+| `BUG-109` | run_script.sh records QA-Red's intended red runs as unattributed script incidents | standard | M7 | y | low |
+| `BUG-110` | validate_bounce_readiness / update_state exit 1 unless CLEARGATE_STATE_FILE is set; no `.active` fallback | standard | M7 | y | low |
+| `BUG-111` | dispatch_serial unknown `--wave` error names no valid wave ids | standard | M7 | y | low |
+| `BUG-112` | Codex agent TOMLs and the portable flashcard skill say `Skill(flashcard, …)`, a Claude-only call | standard | M7 | y | low |
+| `BUG-113` | No check that QA-Red's sealed tests meet the item's declared Test Layers minimums before the Developer starts | standard | M7 | y | low |
+| `BUG-114` | close_sprint.mjs cannot find a globally installed CLI, so Gate 4 is unreachable for global/npx users | standard | M7 | y | med |
+| `BUG-115` | §D.5.1 consolidation requires a `code-simplifier` agent ClearGate does not install; no fallback | standard | M7 | y | low |
+| `BUG-116` | devops.md requires an Architect report on every standard-lane story; the skill's post-flight is scan-gated | standard | M7 | y | low |
 | `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | y | med |
 
 **Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.

@@ -87,6 +87,16 @@
 - [[BUG-104]] (bug) — Triaged — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
 - [[BUG-105]] (bug) — Triaged — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
 - [[BUG-106]] (bug) — Triaged — The clean-room harness's live dispatch controls carry the work-item id only in the encrypted message, so live dispatch-identity cannot pass
+- [[BUG-107]] (bug) — Triaged — ClearGate's own runtime output makes every story worktree unclean, so DevOps teardown needs `git worktree remove --force`
+- [[BUG-108]] (bug) — Triaged — The QA role requires a context pack that the sprint-execution skill never tells the orchestrator to build
+- [[BUG-109]] (bug) — Triaged — `run_script.sh` records QA-Red's intended red test runs as script incidents, unattributed
+- [[BUG-110]] (bug) — Triaged — The state scripts the skill prescribes exit 1 unless `CLEARGATE_STATE_FILE` is set, and no example sets it
+- [[BUG-111]] (bug) — Triaged — `dispatch_serial.mjs` rejects an unknown wave id without naming the valid ones
+- [[BUG-112]] (bug) — Triaged — Codex agents are told to call `Skill(flashcard, "check")`, a Claude tool call, so Codex invents a `cleargate flashcard` command
+- [[BUG-113]] (bug) — Triaged — Nothing checks QA-Red's sealed tests against the item's declared Test Layers minimums before the Developer starts
+- [[BUG-114]] (bug) — Triaged — `close_sprint.mjs` cannot find a globally installed CLI, so Gate 4 is unreachable for global and npx users
+- [[BUG-115]] (bug) — Triaged — Consolidation (§D.5.1) requires a `code-simplifier` agent that ClearGate does not install
+- [[BUG-116]] (bug) — Triaged — DevOps halts on a missing Architect report that the skill says a clean-scan story never has
 
 ## Archive
 
