@@ -1,3 +1,4 @@
+2026-09-27 · #worktree #task-breakdown · cli-only item, detached outer host: Dev can't tick bug-file rows; orchestrator ticks at merge.
 2026-09-27 · #tpv #test-harness · One-source-per-case reds leave source ORDER unpinned; add a case where every source names a different id.
 2026-09-27 · #tpv #test-harness · A 'marker consumed' check filtered on *.json misses one parked as x.json.claimed.N; match the prefix.
 2026-09-27 · #bash #hooks · ls -t with an empty operand list lists the cwd; collect find hits in an array and guard the count first.
