@@ -1,3 +1,4 @@
+2026-09-30 · #tools #test-harness · Yielded exec output is not completion; retain session_id and poll to final exit. Save long-suite logs durably.
 2026-09-30 · #test-harness #baseline · Frozen /tmp acceptance fixtures can vanish across a pause; preserve a durable checksum-backed archive.
 2026-09-27 · #shell #zsh · zsh expands a word starting with = as a command path: echo ==== aborts the chain; quote it.
 2026-09-27 · #devops #payload · precopy templates/scaffold too, not just cleargate-planning, for step 6 diff.

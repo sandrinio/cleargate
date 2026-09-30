@@ -74,6 +74,8 @@ Harness thread/start writable_roots injection remains and masks product sandbox 
 
 Test 46 also completes: 1/1 pass, exit 0, 0 skips, 73.2 seconds. No NOT RUN or missing-Claude diagnostic. All gating assertions pass. A runtime warning reports inability to create PATH helper aliases under temporary scratch; it does not affect verdicts. The test's own finally cleanup removes its separate temporary container. Log retained at scratch/hooks-test.log.
 
+**Durable provenance copy (2026-09-30):** [qa-BUG-100-20260930 checksum manifest](/Users/ssuladze/Documents/Dev/CG_TEST/sprint-41-D2QMC1/qa-BUG-100-20260930/checksum-manifest.json) preserves loop evidence, inputs/summary JSON, four hook logs and both scripted e2e logs: 10 files including manifest, 2,191,867 bytes. Manifest SHA256 `e2ba8435d300030bff61e38b5b44ba1ce9e75a65c12ccf247537942ff2ae812a`; loop-evidence SHA256 `9f4244e265f2ac6f6eba65754abb49e7045bdc107e111ed8dde45e636f44a8dc`. Every copied file was byte-compared with its source; per-file sizes, source paths and SHA256 hashes are in the manifest. Destination was newly created with overwrite refused. Source scratch remains intact; no credentials, auth files, state homes, node_modules or full container copied. No tests repeated.
+
 ## Plan deviations and Script Incidents
 
 Planner append inserts at last element end rather than replacing whole array. Independent empty/comment/trailing-comma cases pass; preserves comments and satisfies contract. Empty key/table deletion includes leading blanks, same-line comments, CRLF; CRLF with a kept other key passes. No product deviation found.

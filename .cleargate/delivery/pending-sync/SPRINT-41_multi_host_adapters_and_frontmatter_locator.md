@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-30T15:04:38Z
+updated_at: 2026-09-30T15:34:45Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 99dea622-dirty
+updated_at_version: 06042f17-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -607,6 +607,8 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-27T11:00:00Z · **SPRINT PAUSED (owner: "you need to pause the sprint" / "choose the right point")** · Paused at a clean boundary: every in-flight agent was allowed to finish its git operation; nothing new dispatched. State at pause: M7 BUG-101 **Done** (cli main `8c98177`); BUG-100 integrated `d9e69e1`, BUG-047 integrated `f036700`, BUG-103 integrated cli `c2f56ab` / outer `0f542bc0` — each awaits QA-Verify → post-flight scan → DevOps; BUG-102/105/104/106 and addendum lanes M7-A/B/C/D (BUG-107..116) not started; DT (Codex re-test), RS-L, RS-4L (owner O2 login pending), RS-CLOSE, walkthrough, Reporter, close not started. Worktrees kept: `.worktrees/BUG-{100,047,103}` (clean). **Resume point:** QA-Verify for BUG-100, BUG-047, BUG-103 on their INTEGRATE tips (merge order 100 → 047 → 103 per ready order; each later merge re-integrates onto the moved main).
 
 - 2026-09-30T15:03:27Z · **SPRINT RESUMED** · Owner "alright. go ahead" confirms continuation from the September 27 checkpoint with GPT-6 Astra medium orchestration and GPT-6.1 Sol code/testing. State validated (schema 3); CLI main remains `8c98177`, BUG-100 integrated `d9e69e1`; structured QA pack prepared and independent QA-Verify dispatched. The existing bounded-bootstrap and contract-first amendments govern; manual checks are recorded separately from host-fired enforcement, and unavailable usage is not synthesized. Remaining M7 order and live-evidence/close gates are unchanged. Local-only work; no push, publish, or close authorization.
+
+- 2026-09-30T15:34:21Z · BUG-100 · QA PASS (323 tests plus 12 probes), clean post-flight scan (4/4), merged locally to CLI main `79fc180`. The lost M2 fixture was reconstructed from historical QA-Red `11fe514`, authenticated against both recorded hashes and all 420 file/mode rows, and durably archived (reports/m2-baseline-recovery-2026-09-30.md). DevOps initially discarded a running full-suite session handle and ran BD concurrently; its claimed completion was rejected. A fresh GPT-6.1 Sol DevOps recovered the gate with one justified logged rerun: **3669 tests / 3667 pass / 0 fail / 2 skip, exit 0**; unchanged dist, payload differences only four generated timestamps, M2 20/20 and post-BD Codex smoke pass. Exact Rule-14 writes restored; state Done and both worktrees removed, branches retained. All DevOps test execution now explicitly uses the owner's GPT-6.1 Sol override. The full procedural record is in reports/BUG-100-devops.md; delayed manual recovery marker is not host-fired attribution. Actual DT/RS-L and close gates remain outstanding; usage unavailable.
 
 **Contract-first ledger (CR-124 dogfood):**
 

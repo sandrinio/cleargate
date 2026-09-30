@@ -13,9 +13,9 @@ approved_by: "sandrinio (SPRINT-41 directives: 'log every issue you find and fix
 approved_at: 2026-09-27T07:45:00Z
 context_source: "Codex dogfood run r2 (codex-cli 0.154.0, codex exec, sandbox workspace-write) in a fresh `cleargate init --host codex` repo; probe repo measurements of project-scope sandbox_workspace_write.writable_roots; verified codebase grounding at cli main f0c33f7: src/init/inject-codex-config.ts, src/hosts/codex.ts; -13 harness scripts/clean-room/codex-loop.mjs:536 (story/STORY-058-13 f33cc4a)"
 created_at: 2026-09-27T07:45:00Z
-updated_at: 2026-09-27T08:29:06Z
+updated_at: 2026-09-30T15:34:45Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: 94da1ca3-dirty
+updated_at_version: 06042f17-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -106,9 +106,9 @@ Installed .codex/config.toml today (cli main f0c33f7 install):
 
 > **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` §3 BUG-100 (errata §1 E11, E12). The plan wins where it differs from this file.
 
-- [ ] QA-Red: inject-codex-config-sandbox red (7) incl. non-git byte-identity and uninstall
-- [ ] planCodexConfig/injectCodexConfig writable root (git-only), removeCodexWritableRoot, preflight scan, codex.ts notice + remove
-- [ ] Typecheck, targeted + codex-adapter/init-codex/lifecycle-codex green, M2 pair, git-repo smoke shows the key
+- [x] QA-Red: inject-codex-config-sandbox red (10 after TPV100-A4) incl. non-git byte-identity and uninstall
+- [x] planCodexConfig/injectCodexConfig writable root (git-only), removeCodexWritableRoot, preflight scan, codex.ts notice + remove
+- [x] Typecheck, targeted + codex-adapter/init-codex/lifecycle-codex green, M2 pair, git-repo smoke shows the key
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/init/inject-codex-config-sandbox.red.node.test.ts` (solo), plus the existing inject-codex-config, codex-adapter and init-codex tests green.
