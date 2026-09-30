@@ -1,0 +1,103 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/codex-install-papercuts.red.node.test.ts
+
+✖ T1 — absent MCP has no delta and Codex-only init has no Claude restart advice (62.9215ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✖ T2 — nonempty invalid MCP stays conservative and plain Claude init prints restart advice (33.341167ms)
+✖ T3 — Codex ignores deletion but stamps the added sibling; Claude missing-target behavior is preserved (2707.952209ms)
+✖ T4 — prose slug scaffolds underscore filename and reports normalized slug (87.48625ms)
+✔ T5 — valid slug keeps filename convention and emits no slug notice (59.960625ms)
+✔ T6 — punctuation-only slug remains rejected without creating a draft (62.174125ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 2
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3490.528875
+
+✖ failing tests:
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:1:871
+✖ T1 — absent MCP has no delta and Codex-only init has no Claude restart advice (62.9215ms)
+  Error: ENOENT: no such file or directory, open '/tmp/cg-s41-payload-gb5Plk/.codex/hooks.json'
+      at Module.readFileSync (node:fs:436:20)
+      at Object.install (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/src/hosts/codex.ts:100:32)
+      at initHandler (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/src/commands/init.ts:452:49)
+      at invokeInit (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/helpers/init-fixture.ts:231:11)
+      at runInitScenario (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/helpers/init-fixture.ts:329:38)
+      at async TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:23:18)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/tmp/cg-s41-payload-gb5Plk/.codex/hooks.json'
+  }
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:1:1261
+✖ T2 — nonempty invalid MCP stays conservative and plain Claude init prints restart advice (33.341167ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Restart Claude Code/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:34:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /Restart Claude Code/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:1:2894
+✖ T3 — Codex ignores deletion but stamps the added sibling; Claude missing-target behavior is preserved (2707.952209ms)
+  AssertionError [ERR_ASSERTION]: [2026-09-30T16:12:51Z] stamp=0 gate=0 ingest=0 file=/private/var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-bug105-red-xT2odK/room-2l1cC9/.cleargate/delivery/pending-sync/BUG-901_deleted.md
+  [2026-09-30T16:12:51Z] stamp=0 gate=0 ingest=0 file=/private/var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-bug105-red-xT2odK/room-2l1cC9/.cleargate/delivery/pending-sync/BUG-902_added.md
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:74:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:9:1454
+✖ T4 — prose slug scaffolds underscore filename and reports normalized slug (87.48625ms)
+  AssertionError [ERR_ASSERTION]: [cleargate new] slug must match ^[a-z0-9-]+$ (got: "tiny node todo cli")
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:98:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

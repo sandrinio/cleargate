@@ -1,0 +1,18 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/codex-dispatch-attribution.red.node.test.ts
+
+✔ T1: task_name "story_001_01_qa" plus a ciphertext message -> STORY-001-01, source=task_name; task_name outranks markers and the message, consumes its own marker only; SPRINT_01_REPORTER -> SPRINT-01 (1592.465917ms)
+✔ T2: a fresh {STORY-001-01, qa} marker plus task_name "qa_verify" -> id from the marker, marker consumed, source=marker; the newest same-type fresh marker wins, never by session_id, and beats the message (1079.665417ms)
+✔ T3: a marker older than 10 minutes, or one for a different agent_type, is not claimed and falls through to the message (1006.806ms)
+✔ T4: a plaintext message ("STORY=001-01 …") still attributes, with no marker present -> STORY-001-01, source=message (482.01775ms)
+✔ T5: no task_name id, no marker, no message id -> work_item_id "", sentinel still written, exit 0, source=none; a prefix inside a word is not an id (965.736667ms)
+✔ [ALREADY-GREEN ANCHOR] T6: Claude path — the prompt id is used, a fresh matching marker is NOT consumed, and the log line carries no source= (356.967917ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5730.399458

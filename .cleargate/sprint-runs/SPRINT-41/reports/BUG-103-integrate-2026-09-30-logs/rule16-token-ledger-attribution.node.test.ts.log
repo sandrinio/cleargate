@@ -1,0 +1,23 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/token-ledger-attribution.node.test.ts
+
+▶ token-ledger.sh: dispatch-marker attribution (CR-016)
+  ✔ scenario 1: dispatch file present → work_item_id and agent_type used verbatim (1570.306375ms)
+  ✔ scenario 2: dispatch file absent → no transcript attribution, no exception (2108.089083ms)
+  ✔ scenario 3: dispatch file malformed JSON → fallback + warning logged, no crash (2390.383791ms)
+  ✔ scenario 4: dispatch wins over transcript pollution (1186.873167ms)
+  ✔ scenario 5: dispatch file is consumed and deleted after successful row write (1127.454958ms)
+  ✔ STORY-* dispatch: story_id derived from work_item_id (1255.414333ms)
+  ✔ dispatch JSON valid but missing agent_type field → fallback + no crash (2955.295ms)
+  ✔ CR-026-A: dispatch with non-session-id filename → newest-file lookup attributes correctly (1281.934209ms)
+  ✔ CR-026-B: SessionStart-poisoned transcript remains unattributed (1044.759292ms)
+✔ token-ledger.sh: dispatch-marker attribution (CR-016) (14921.603834ms)
+ℹ tests 9
+ℹ suites 1
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15166.031791

@@ -1,0 +1,7 @@
+18	0	CHANGELOG.md
+20	5	src/commands/sprint.ts
+74	9	src/hosts/codex.ts
+402	19	src/init/inject-codex-config.ts
+38	10	src/lib/frontmatter-cache.ts
+575	0	test/init/inject-codex-config-sandbox.red.node.test.ts
+624	0	test/lib/gate-cache-staleness.red.node.test.ts

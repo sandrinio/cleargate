@@ -1,0 +1,52 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/enforcement-doc-coherence.node.test.ts
+
+▶ EPIC-051 STORY-051-09: doc coherence — gate-token/phantom-ref/orphan/hook cleanup
+  ▶ Cluster 1 — three-gate tokens absent repo-wide
+    ✔ root CLAUDE.md (CLAUDE.md) has zero three-gate token hits (1.472875ms)
+    ✔ canonical CLAUDE.md (cleargate-planning/CLAUDE.md) has zero three-gate token hits (0.15575ms)
+    ✔ canonical protocol (cleargate-planning/.cleargate/knowledge/cleargate-protocol.md) has zero three-gate token hits (0.277042ms)
+    ✔ live-outer protocol (.cleargate/knowledge/cleargate-protocol.md) has zero three-gate token hits (0.836084ms)
+  ✔ Cluster 1 — three-gate tokens absent repo-wide (3.176042ms)
+  ▶ Cluster 2 — phantom paths / module / §<N> placeholder
+    ✔ canonical protocol has zero ".cleargate/plans" references (0.314459ms)
+    ✔ live-outer protocol has zero ".cleargate/plans" references (0.241791ms)
+    ✔ canonical rubric has zero "triage-classifier" references (0.122458ms)
+    ✔ live-outer rubric has zero "triage-classifier" references (0.372625ms)
+    ✔ canonical protocol has zero literal "§<N>" placeholder tokens (0.368833ms)
+    ✔ live-outer protocol has zero literal "§<N>" placeholder tokens (0.235625ms)
+    ✔ protocol §4 Gate-3 paragraph cites cleargate-enforcement.md §13 (AD#4) (0.210541ms)
+  ✔ Cluster 2 — phantom paths / module / §<N> placeholder (2.09475ms)
+  ▶ Cluster 3 — Bug.md Brief anchors resolve to real headings (canonical + live-outer)
+    ✔ canonical Bug.md: every non-whitelisted Brief anchor resolves to a verbatim body heading (0.713208ms)
+    ✔ canonical Bug.md: anchor list contains neither "§0.5" nor "§2 Impact" (0.098084ms)
+    ✔ live-outer Bug.md: every non-whitelisted Brief anchor resolves to a verbatim body heading (0.13775ms)
+    ✔ live-outer Bug.md: anchor list contains neither "§0.5" nor "§2 Impact" (0.064708ms)
+  ✔ Cluster 3 — Bug.md Brief anchors resolve to real headings (canonical + live-outer) (1.092416ms)
+  ▶ Cluster 4 — orphan RED test removed (canonical + live-outer; payload omitted, G9-1)
+    ✔ canonical close_sprint.deferred-verify.red.node.test.ts is absent (0.065292ms)
+    ✔ live-outer close_sprint.deferred-verify.red.node.test.ts is absent (0.032833ms)
+  ✔ Cluster 4 — orphan RED test removed (canonical + live-outer; payload omitted, G9-1) (0.13775ms)
+  ▶ Cluster 5 — autonomy hook attributes the real dispatch agent_type (the one behavioral leg)
+    ✔ logs the dispatch agent_type ("developer"), not the constant "unknown" (321.281ms)
+  ✔ Cluster 5 — autonomy hook attributes the real dispatch agent_type (the one behavioral leg) (322.53275ms)
+  ▶ Cluster 6 — enforcement-doc coherence (AD#2 legs, both tiers)
+    ✔ canonical enforcement.md: zero "Under v1" / "Under v2" hits (§6.2 file-surface hook) (0.386458ms)
+    ✔ canonical enforcement.md: zero "Gate 3.5" / "Gate-3-class" hits (whole file) (0.207292ms)
+    ✔ canonical enforcement.md: §-index row for §12 no longer names "Gate 3.5" (0.137625ms)
+    ✔ canonical enforcement.md: zero "Gate-3 breach" hits (0.654333ms)
+    ✔ live-outer enforcement.md: zero "Under v1" / "Under v2" hits (§6.2 file-surface hook) (0.19225ms)
+    ✔ live-outer enforcement.md: zero "Gate 3.5" / "Gate-3-class" hits (whole file) (0.154834ms)
+    ✔ live-outer enforcement.md: §-index row for §12 no longer names "Gate 3.5" (0.107667ms)
+    ✔ live-outer enforcement.md: zero "Gate-3 breach" hits (0.113625ms)
+  ✔ Cluster 6 — enforcement-doc coherence (AD#2 legs, both tiers) (2.061375ms)
+✔ EPIC-051 STORY-051-09: doc coherence — gate-token/phantom-ref/orphan/hook cleanup (331.521375ms)
+ℹ tests 26
+ℹ suites 7
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 562.142958

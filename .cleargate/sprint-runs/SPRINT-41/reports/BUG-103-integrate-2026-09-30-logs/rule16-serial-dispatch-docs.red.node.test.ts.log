@@ -1,0 +1,14 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/serial-dispatch-docs.red.node.test.ts
+
+✔ Test 26 — canonical/live protocol are byte-identical, and §23.5 (serial dispatch contract) is present with its required tokens (2.866625ms)
+✔ Test 27 — canonical/live enforcement are byte-identical, §17 exists exactly once with its tokens, §16 bullet 10 names STORY-058-12/§17, and the Index has a §17 row (0.73475ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 214.794917

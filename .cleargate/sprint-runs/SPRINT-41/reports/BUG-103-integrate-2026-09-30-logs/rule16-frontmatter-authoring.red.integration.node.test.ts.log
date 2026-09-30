@@ -1,0 +1,25 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/e2e/frontmatter-authoring.red.integration.node.test.ts
+
+▶ BUG-067 fresh authoring chain
+  ✔ bug: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (39.46175ms)
+  ✔ cr: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (11.7565ms)
+  ✔ story: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (13.095709ms)
+  ✔ epic: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (10.477791ms)
+  ✔ initiative: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (11.492833ms)
+  ✔ hotfix: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (10.295625ms)
+  ✔ spike: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (10.121916ms)
+  ✔ sprint: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact (9.983708ms)
+✔ BUG-067 fresh authoring chain (117.7395ms)
+▶ BUG-067 rendered hook process smoke (not a live-host witness)
+  ✔ the pin-rendered stamp-and-gate hook records stamp=0 gate=0 and preserves the exact authored suffix (1812.518458ms)
+✔ BUG-067 rendered hook process smoke (not a live-host witness) (1812.629042ms)
+ℹ tests 9
+ℹ suites 2
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2186.34625

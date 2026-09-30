@@ -1,0 +1,15 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/hook-signal.red.integration.node.test.ts
+
+✔ I1: both real blocking PreToolUse registrations select Claude explicitly (1.023542ms)
+✔ I2: Edit|Write registered command exits exactly 2 on an uncovered enforce-mode edit (1482.218291ms)
+✔ I3: Task|Agent registered command exits exactly 2 on an unprocessed flashcard (1074.787ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2791.8535

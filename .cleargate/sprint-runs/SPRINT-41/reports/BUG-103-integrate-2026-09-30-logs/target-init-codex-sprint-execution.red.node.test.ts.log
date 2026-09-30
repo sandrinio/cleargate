@@ -1,0 +1,33 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/init-codex-sprint-execution.red.node.test.ts
+
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 34 — hosts:['codex']: .agents/skills/sprint-execution/{SKILL.md,dispatch-serial.md} exist, no banned token, no .claude/, entryOwner core (142.152ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution/dispatch-serial.md exists and equals canonical (51.781833ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 36 — hosts:['claude','codex']: both dispatch-serial.md files are byte-identical, and the Claude SKILL.md equals canonical (with its pointers) (120.298333ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 614.001042

@@ -1,0 +1,37 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/scaffold-relocation.red.node.test.ts
+
+▶ STORY-058-01 scenario 1 — source resolution reads only CLI_ROOT
+  ✔ copy-planning-payload.mjs carries no sibling-read pattern (1.860458ms)
+  ✔ build-manifest.ts defaults carry no sibling-read pattern (0.459583ms)
+  ✔ tsup.config.ts manifest source carries no sibling-read pattern (0.27975ms)
+  ✔ composePayload builds a payload from two roots with no sibling relationship (5.767791ms)
+  ✔ composePayload rejects a colliding relative path between roots (2.62425ms)
+✔ STORY-058-01 scenario 1 — source resolution reads only CLI_ROOT (11.633167ms)
+▶ STORY-058-01 scenario 2 — pin placeholder passthrough
+  ✔ all four pin-bearing hooks keep __CLEARGATE_VERSION__ unsubstituted after composition (4.403792ms)
+✔ STORY-058-01 scenario 2 — pin placeholder passthrough (4.48425ms)
+▶ STORY-058-01 scenario 3 — payload hygiene (exclude + unconditional empty dirs)
+  ✔ exports the expected EXCLUDE_DIRS / EXCLUDE_FILES / REQUIRED_EMPTY_DIRS (0.930625ms)
+  ✔ drops excluded files and empties excluded directories, keeping siblings intact (4.676166ms)
+  ✔ creates REQUIRED_EMPTY_DIRS unconditionally when absent from the source (gitignored, so absent from a fresh clone — FLASHCARD 2026-09-25 #scaffold #relocation) (2.609042ms)
+✔ STORY-058-01 scenario 3 — payload hygiene (exclude + unconditional empty dirs) (8.371875ms)
+▶ STORY-058-01 scenario 4 — hook executable-bit preservation
+  ✔ every file under scaffold/hosts/claude/.claude/hooks/ is 0755 (>= 9, not == 9) (0.330667ms)
+  ✔ the payload twin of every hook is also 0755 after composition (27.828458ms)
+  ✔ the executable set under scaffold/ equals the tracked 100755 set in the pre-relocation snapshot (187.04025ms)
+✔ STORY-058-01 scenario 4 — hook executable-bit preservation (215.328917ms)
+▶ STORY-058-01 scenario 5 — CLAUDE.md doc truth + DEPRECATED.md
+  ✔ CLAUDE.md Dogfood split section names both new scaffold roots as canonical (0.221084ms)
+  ✔ CLAUDE.md keeps the literal "NPM payload (generated, gitignored)" label (0.111541ms)
+  ✔ cleargate-planning/DEPRECATED.md exists and names both new roots (0.988667ms)
+✔ STORY-058-01 scenario 5 — CLAUDE.md doc truth + DEPRECATED.md (1.4015ms)
+ℹ tests 15
+ℹ suites 5
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 484.927042

@@ -1,0 +1,24 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/contract-first-dag-text.red.node.test.ts
+
+▶ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab
+  ✔ T1 (red): architect-reader digest gains exports_provided / exports_consumed (0.78925ms)
+  ✔ T2 (red): architect-synth — Real-collision predicate, Contract formation, schema_version 2 shape (0.470625ms)
+  ✔ T3a (red): SKILL.md — new §C.0.2 Contract-first build and integration, correctly placed and worded (0.364042ms)
+  ✔ T3b (anchor): every -12 anchor line occurs exactly once; §A.4 stays free of the 9 -12 banned tokens (0.491833ms)
+  ✔ T3c (red): SKILL §A.4 names the real-collision predicate and the digest/schema fields (0.246542ms)
+  ✔ T4 (red): canonical/live cleargate-enforcement.md byte-identical; names the real-collision predicate (1.078625ms)
+  ✔ T5 (red): canonical/live Sprint Plan Template byte-identical; §2.1 is a contract-first DAG example (0.394875ms)
+  ✔ T5b (anchor): the three declareProbeSprint template anchors survive (0.147084ms)
+  ✔ T6 (anchor): none of the 7 CR-124 files trips the dead execution-mode vocabulary gate (3.127ms)
+  ✔ T7 (red): architect.md §2.1 names the contract-first DAG and per-story upstream (0.312292ms)
+✔ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab (8.146916ms)
+ℹ tests 10
+ℹ suites 1
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 238.344041

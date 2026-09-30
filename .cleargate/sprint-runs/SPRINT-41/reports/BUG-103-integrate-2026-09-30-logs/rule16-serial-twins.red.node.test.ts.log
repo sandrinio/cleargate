@@ -1,0 +1,13 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/serial-twins.red.node.test.ts
+
+✔ Test 28 — the three scaffold scripts are byte-identical between canonical and the live outer mirror (3.621416ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.888209

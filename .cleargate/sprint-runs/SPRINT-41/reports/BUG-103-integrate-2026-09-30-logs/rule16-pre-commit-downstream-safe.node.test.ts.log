@@ -1,0 +1,34 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/pre-commit-downstream-safe.node.test.ts
+
+▶ CR-087 §4 assertion 1: a downstream repo (no mcp/, cleargate-cli/, admin/) commits cleanly
+  ✔ 1a. plain commit exits 0 and HEAD advances (LOAD-BEARING — red today: exit 1, zero bytes) (1165.917ms)
+  ✔ 1b. CHAIN-LIVENESS CONTROL: file_surface_diff.sh present, no .active — exits 0 via its documented warning (1057.835333ms)
+✔ CR-087 §4 assertion 1: a downstream repo (no mcp/, cleargate-cli/, admin/) commits cleanly (2224.29775ms)
+▶ CR-087 §4 assertion 2: a genuinely failing check:no-vitest is diagnosable
+  ✔ 2. stderr is non-empty and names the failing check (red today: -s + 2>/dev/null -> 0 bytes) (1336.384959ms)
+✔ CR-087 §4 assertion 2: a genuinely failing check:no-vitest is diagnosable (1336.486208ms)
+▶ CR-087 §4 assertion 3: meta-repo enforcement stays live when a prefix genuinely fails
+  ✔ 3a. THE REQUIRED TEETH: all three dirs seeded, cleargate-cli genuinely fails -> still blocked, named (1620.088667ms)
+  ✔ 3b. same META shape, all three passing -> loop-pass path is live, not skipped-by-accident (green today — regression guard) (1836.402125ms)
+  ✔ 3c. order preserved: a genuinely clean §3.1 surface scaffold still gets blocked by the earlier package check (1583.810417ms)
+  ✔ 3d. a linked worktree of the meta-repo (none of the three dirs present there) commits cleanly (red today: 254, blocked) (1141.122125ms)
+✔ CR-087 §4 assertion 3: meta-repo enforcement stays live when a prefix genuinely fails (6181.712584ms)
+▶ CR-087 §4 assertion 4: partial shapes are skipped, not failed
+  ✔ 4a. mcp/ exists but has no package.json -> skipped (red today: measured 254) (952.735333ms)
+  ✔ 4b. mcp/package.json exists but does not define check:no-vitest -> skipped (red today: measured 1) (1030.416292ms)
+  ✔ 4c. REGEX-PRECISION LOCK: a script that only REFERENCES check:no-vitest (not defines it) -> skipped (red today: 254) (1039.064666ms)
+✔ CR-087 §4 assertion 4: partial shapes are skipped, not failed (3022.41275ms)
+▶ CR-087 §4 assertion 5: no new SKIP_-style bypass token
+  ✔ 5a. STRUCTURAL: canonical surface-gate wrapper reads exactly one SKIP_ token (green today — regression guard) (1.192ms)
+  ✔ 5b. BEHAVIOUR PRESERVED: SKIP_SURFACE_GATE=1 does not bypass the check:no-vitest guard, before or after the fix (1582.094333ms)
+✔ CR-087 §4 assertion 5: no new SKIP_-style bypass token (1583.373583ms)
+ℹ tests 12
+ℹ suites 5
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14653.199958

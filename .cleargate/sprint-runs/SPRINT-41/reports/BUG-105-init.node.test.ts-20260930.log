@@ -1,0 +1,208 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/init.node.test.ts
+
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ cleargate init
+  ✔ scenario 1: greenfield — creates full scaffold on empty dir (346.987792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 2: re-run idempotent — no duplicate block in CLAUDE.md, no duplicate hook (575.473542ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 3: existing CLAUDE.md without markers — CR-105: block leads, user content follows (375.087917ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 4: existing CLAUDE.md with markers — replaces block body, preserves surrounding content (398.347334ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 5: existing settings.json with SubagentStop — merges PostToolUse, preserves SubagentStop (345.054333ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 6: existing PostToolUse with different matcher — appends Edit|Write entry, preserves Bash entry (318.04875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 1: fresh init writes .install-manifest.json with correct fields (317.466042ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 2: init detects .uninstalled marker and prompts; Y preserves + removes marker (309.712375ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 3: N choice proceeds normally, preserved files untouched, marker removed (320.850042ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 4: atomic snapshot write — if rename throws, final file does not exist (306.6265ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 5: missing preserved path logs warning but init does NOT fail (294.758333ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 1: stamp-and-gate.sh has no __CLEARGATE_VERSION__ placeholder after init (91.582666ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 2: session-start.sh has no __CLEARGATE_VERSION__ placeholder after init (77.834458ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 3: --pin 0.6.0-beta stamps the custom version in both hooks (77.479875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 4: probe success (status=0) — init prints green status line (81.032167ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 5 (post-BUG-015): probe failure prints yellow warning and continues init (no exit) (126.292ms)
+  ✔ CR-093 snapshot file exists (historical baseline — superseded by STORY-058-10) (0.542708ms)
+  ✔ STORY-058-10 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.327875ms)
+  ✔ STORY-058-11 snapshot file exists (historical baseline — superseded by BUG-105) (0.368083ms)
+  ✖ BUG-105 snapshot: rendered stamp-and-gate.sh byte-equals the bug-105 snapshot lock (3.553375ms)
+  ✔ CR-008 snapshot file exists (historical baseline — superseded by BUG-036) (0.294458ms)
+  ✔ BUG-036 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.225541ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-058-11 snapshot: rendered session-start.sh byte-equals the story-058-11 snapshot lock (112.491125ms)
+  ✔ CR-008 collision-check: session-start.cr-008.sh differs from cr-009 by exactly one line (line 18) (1.07125ms)
+  ✔ CR-008 pre-edit-gate lock exists (historical baseline — superseded by BUG-038) (0.390875ms)
+  ✔ BUG-038 snapshot file exists (historical baseline — superseded by BUG-089) (0.529167ms)
+  ✔ BUG-089 snapshot file exists (historical baseline — superseded by STORY-058-10) (0.393458ms)
+  ✔ STORY-058-10 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.30275ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+wiki build: OK (1 pages written)
+  ✔ STORY-058-11 snapshot: rendered pre-edit-gate.sh byte-equals the story-058-11 snapshot lock (113.730583ms)
+  ✔ CR-008 snapshot: stamp-and-gate.cr-008.sh is byte-identical to cr-009 lock (CR-008 does not touch it) (0.867584ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 7: bootstrap pass — wiki build runs on pre-seeded delivery items (725.863875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 5: idempotent re-init suppresses restart warning (327.533209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 6: real hooks change emits restart warning (352.763333ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 7: malformed settings.json triggers conservative restart warning (360.951209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ BUG-023: init writes pin_version into install snapshot (327.663917ms)
+✖ cleargate init (6694.911833ms)
+ℹ tests 35
+ℹ suites 1
+ℹ pass 34
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7109.973708
+
+✖ failing tests:
+
+test at test/commands/init.node.test.ts:11:17447
+✖ BUG-105 snapshot: rendered stamp-and-gate.sh byte-equals the bug-105 snapshot lock (3.553375ms)
+  AssertionError [ERR_ASSERTION]: missing /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/snapshots/hooks/stamp-and-gate.bug-105.sh (Developer captures the rendered lock after BUG-105 implementation)
+  
+  false !== true
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/init.node.test.ts:853:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

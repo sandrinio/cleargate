@@ -1,0 +1,18 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/codex-install-papercuts.red.node.test.ts
+
+✔ T1 — absent MCP has no delta and Codex-only init has no Claude restart advice (175.569292ms)
+✔ T2 — nonempty invalid MCP stays conservative and plain Claude init prints restart advice (115.165ms)
+✔ T3 — Codex ignores deletion but stamps the added sibling; Claude missing-target behavior is preserved (2346.18075ms)
+✔ T4 — prose slug scaffolds underscore filename and reports normalized slug (69.010333ms)
+✔ T5 — valid slug keeps filename convention and emits no slug notice (64.637458ms)
+✔ T6 — punctuation-only slug remains rejected without creating a draft (96.306208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3189.881375

@@ -1,0 +1,15 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec --test-name-pattern Slug validation test/commands/hotfix-new.integration.node.test.ts
+
+▶ Slug validation
+  ✔ exits 1 with clear error on invalid slug (4.162125ms)
+✔ Slug validation (5.325709ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 200.398375

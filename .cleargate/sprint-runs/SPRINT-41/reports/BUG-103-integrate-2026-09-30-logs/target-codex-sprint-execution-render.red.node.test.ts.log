@@ -1,0 +1,15 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/codex-sprint-execution-render.red.node.test.ts
+
+✔ Test 31 — renderCodexSprintExecution(canonical) is deterministic, contains R1-R5, drops every banned token, keeps the frontmatter and every non-A1-A4 line in order (9.076958ms)
+✔ Test 32 — deleting an anchor line throws "anchor not found"; duplicating A3 throws "anchor not unique"; a banned token surviving throws "banned token survived" (4.9575ms)
+✔ Test 33 — planCodexPayload plans both sprint-execution entries; the generated files match; --check exits 0/1 (229.540208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 526.630709

@@ -1,0 +1,179 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/sprint-execution-mirror.integration.node.test.ts
+
+▶ Scenario 7: canonical skill mirror matches live skill (STORY-026-01)
+  ✔ cleargate-planning/.claude/skills/sprint-execution/SKILL.md exists (0.557166ms)
+  ✔ diff against cleargate-cli/templates canonical copy produces zero output (1.183458ms)
+  ✔ MANIFEST.json contains a valid entry for .claude/skills/sprint-execution/SKILL.md (0.386792ms)
+  ✖ diff command on live vs canonical returns empty output (byte-for-byte match) (87.602542ms)
+✖ Scenario 7: canonical skill mirror matches live skill (STORY-026-01) (128.310167ms)
+ℹ tests 4
+ℹ suites 1
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 363.630333
+
+✖ failing tests:
+
+test at test/scaffold/sprint-execution-mirror.integration.node.test.ts:1:5970
+✖ diff command on live vs canonical returns empty output (byte-for-byte match) (87.602542ms)
+  AssertionError [ERR_ASSERTION]: Live skill and canonical skill differ:
+  129c129
+  < Six checks, all must pass:
+  ---
+  > Five automated checks (`cleargate sprint preflight` reports `N/5`) plus one manual check (6), all must pass:
+  145c145
+  < - Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.
+  ---
+  > - Devops unreachable → restart Claude Code session; re-run the preflight and the manual check 6.
+  153c153
+  < Sprint branch is **never committed to directly**. All work lands via story-branch merges.
+  ---
+  > No story code is committed to the sprint branch directly — story work lands only via story-branch merges. Orchestrator bookkeeping is: commit the sprint plan, `.cleargate/sprint-runs/<sprint-id>/**` (state, plans, reports, events) and delivery-item updates on `sprint/S-NN` as `chore(SPRINT-NN): <what>` — after §A.3, after §A.5, and before each story's §C.1 readiness check. Never commit bookkeeping to `main`. If the pre-commit surface gate refuses a bookkeeping-only commit on the sprint branch, set `SKIP_SURFACE_GATE=1` for that one commit and log it in sprint §4 — never on a story branch.
+  158c158
+  < node .cleargate/scripts/init_sprint.mjs SPRINT-NN
+  ---
+  > cleargate sprint init SPRINT-NN --stories <comma-separated §1 work-item ids>
+  161c161
+  < This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
+  ---
+  > `cleargate sprint init` runs the decomposition gate, then `init_sprint.mjs`. This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
+  182a183
+  > Also write <sprintDir>/plans/waves.json: schema_version 2, one serial wave (wave1, parallel: false) in §2.2 order, a stories entry per story, contracts [], lane_assignments.
+  185c186
+  < With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.
+  ---
+  > With ≤ 2 stories the plan is one serial wave, and it is still written: `plans/waves.json` with `"schema_version": 2`, `"contracts": []`, a `"stories"` entry per story (`"base": "sprint/S-NN"`; the second story's `"upstream"` names the first), one wave `wave1` (`"parallel": false`) listing the stories in §2.2 Merge Ordering order, and `"lane_assignments"`. A serial-dispatch host's driver refuses to run without it.
+  213c214
+  < > **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.
+  ---
+  > > **Verify before leaving A.4 (any N).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch the SDR Architect (N ≤ 2) or `architect-synth` (N > 2) rather than proceeding.
+  317c318
+  < `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean. Fail → halt.
+  ---
+  > `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean — `.cleargate/wiki/**` excluded (the ingest hook rewrites it on every delivery edit); commit other bookkeeping first (§A.2). Fail → halt.
+  344a346,347
+  > Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+  > 
+  352c355
+  < **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
+  ---
+  > **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+  357a361
+  > - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+  422c426
+  < **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
+  ---
+  > **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+  432a437
+  > - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+  455c460
+  < **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
+  ---
+  > **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+  459a465
+  > - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+  479a486
+  > - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+  481c488
+  < **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
+  ---
+  > **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+  581c588
+  < After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
+  ---
+  > After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string). On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch (see that host's rendering of the dispatch-hook paragraph below):
+  640a648,649
+  > For example: `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/dispatch_serial.mjs next --sprint SPRINT-NN --wave wave1`. `<command>` is the full command line — interpreter and script path — never a bare script name (`run_script.sh dispatch_serial.mjs …` exits 127).
+  > 
+  
+  + actual - expected
+  
+  + '129c129\n' +
+  +   '< Six checks, all must pass:\n' +
+  +   '---\n' +
+  +   '> Five automated checks (`cleargate sprint preflight` reports `N/5`) plus one manual check (6), all must pass:\n' +
+  +   '145c145\n' +
+  +   '< - Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.\n' +
+  +   '---\n' +
+  +   '> - Devops unreachable → restart Claude Code session; re-run the preflight and the manual check 6.\n' +
+  +   '153c153\n' +
+  +   '< Sprint branch is **never committed to directly**. All work lands via story-branch merges.\n' +
+  +   '---\n' +
+  +   "> No story code is committed to the sprint branch directly — story work lands only via story-branch merges. Orchestrator bookkeeping is: commit the sprint plan, `.cleargate/sprint-runs/<sprint-id>/**` (state, plans, reports, events) and delivery-item updates on `sprint/S-NN` as `chore(SPRINT-NN): <what>` — after §A.3, after §A.5, and before each story's §C.1 readiness check. Never commit bookkeeping to `main`. If the pre-commit surface gate refuses a bookkeeping-only commit on the sprint branch, set `SKIP_SURFACE_GATE=1` for that one commit and log it in sprint §4 — never on a story branch.\n" +
+  +   '158c158\n' +
+  +   '< node .cleargate/scripts/init_sprint.mjs SPRINT-NN\n' +
+  +   '---\n' +
+  +   '> cleargate sprint init SPRINT-NN --stories <comma-separated §1 work-item ids>\n' +
+  +   '161c161\n' +
+  +   '< This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.\n' +
+  +   '---\n' +
+  +   '> `cleargate sprint init` runs the decomposition gate, then `init_sprint.mjs`. This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.\n' +
+  +   '182a183\n' +
+  +   '> Also write <sprintDir>/plans/waves.json: schema_version 2, one serial wave (wave1, parallel: false) in §2.2 order, a stories entry per story, contracts [], lane_assignments.\n' +
+  +   '185c186\n' +
+  +   '< With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.\n' +
+  +   '---\n' +
+  +   '> With ≤ 2 stories the plan is one serial wave, and it is still written: `plans/waves.json` with `"schema_version": 2`, `"contracts": []`, a `"stories"` entry per story (`"base": "sprint/S-NN"`; the second story\'s `"upstream"` names the first), one wave `wave1` (`"parallel": false`) listing the stories in §2.2 Merge Ordering order, and `"lane_assignments"`. A serial-dispatch host\'s driver refuses to run without it.\n' +
+  +   '213c214\n' +
+  +   '< > **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.\n' +
+  +   '---\n' +
+  +   '> > **Verify before leaving A.4 (any N).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch the SDR Architect (N ≤ 2) or `architect-synth` (N > 2) rather than proceeding.\n' +
+  +   '317c318\n' +
+  +   '< `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean. Fail → halt.\n' +
+  +   '---\n' +
+  +   '> `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean — `.cleargate/wiki/**` excluded (the ingest hook rewrites it on every delivery edit); commit other bookkeeping first (§A.2). Fail → halt.\n' +
+  +   '344a346,347\n' +
+  +   "> Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.\n" +
+  +   '> \n' +
+  +   '352c355\n' +
+  +   '< **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n' +
+  +   '---\n' +
+  +   '> **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n' +
+  +   '357a361\n' +
+  +   "> - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.\n" +
+  +   '422c426\n' +
+  +   '< **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n' +
+  +   '---\n' +
+  +   '> **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n' +
+  +   '432a437\n' +
+  +   "> - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.\n" +
+  +   '455c460\n' +
+  +   '< **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n' +
+  +   '---\n' +
+  +   '> **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n' +
+  +   '459a465\n' +
+  +   "> - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.\n" +
+  +   '479a486\n' +
+  +   "> - Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.\n" +
+  +   '481c488\n' +
+  +   '< **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n' +
+  +   '---\n' +
+  +   '> **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n' +
+  +   '581c588\n' +
+  +   "< After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):\n" +
+  +   '---\n' +
+  +   "> After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string). On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch (see that host's rendering of the dispatch-hook paragraph below):\n" +
+  +   '640a648,649\n' +
+  +   '> For example: `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/dispatch_serial.mjs next --sprint SPRINT-NN --wave wave1`. `<command>` is the full command line — interpreter and script path — never a bare script name (`run_script.sh dispatch_serial.mjs …` exits 127).\n' +
+  +   '> \n'
+  - ''
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-103/cleargate-cli/test/scaffold/sprint-execution-mirror.integration.node.test.ts:244:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '129c129\n< Six checks, all must pass:\n---\n> Five automated checks (`cleargate sprint preflight` reports `N/5`) plus one manual check (6), all must pass:\n145c145\n< - Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.\n---\n> - Devops unreachable → restart Claude Code session; re-run the preflight and the manual check 6.\n153c153\n< Sprint branch is **never committed to directly**. All work lands via story-branch merges.\n---\n> No story code is committed to the sprint branch directly — story work lands only via story-branch merges. Orchestrator bookkeeping is: commit the sprint plan, `.cleargate/sprint-runs/<sprint-id>/**` (state, plans, reports, events) and delivery-item updates on `sprint/S-NN` as `chore(SPRINT-NN): <what>` — after §A.3, after §A.5, and before each story\'s §C.1 readiness check. Never commit bookkeeping to `main`. If the pre-commit surface gate refuses a bookkeeping-only commit on the sprint branch, set `SKIP_SURFACE_GATE=1` for that one commit and log it in sprint §4 — never on a story branch.\n158c158\n< node .cleargate/scripts/init_sprint.mjs SPRINT-NN\n---\n> cleargate sprint init SPRINT-NN --stories <comma-separated §1 work-item ids>\n161c161\n< This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.\n---\n> `cleargate sprint init` runs the decomposition gate, then `init_sprint.mjs`. This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.\n182a183\n> Also write <sprintDir>/plans/waves.json: schema_version 2, one serial wave (wave1, parallel: false) in §2.2 order, a stories entry per story, contracts [], lane_assignments.\n185c186\n< With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.\n---\n> With ≤ 2 stories the plan is one serial wave, and it is still written: `plans/waves.json` with `"schema_version": 2`, `"contracts": []`, a `"stories"` entry per story (`"base": "sprint/S-NN"`; the second story\'s `"upstream"` names the first), one wave `wave1` (`"parallel": false`) listing the stories in §2.2 Merge Ordering order, and `"lane_assignments"`. A serial-dispatch host\'s driver refuses to run without it.\n213c214\n< > **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.\n---\n> > **Verify before leaving A.4 (any N).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch the SDR Architect (N ≤ 2) or `architect-synth` (N > 2) rather than proceeding.\n317c318\n< `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean. Fail → halt.\n---\n> `validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean — `.cleargate/wiki/**` excluded (the ingest hook rewrites it on every delivery edit); commit other bookkeeping first (§A.2). Fail → halt.\n344a346,347\n> Reports: every role writes its report to the main checkout\'s absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree\'s copy.\n> \n352c355\n< **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n---\n> **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n357a361\n> - Reports: every role writes its report to the main checkout\'s absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree\'s copy.\n422c426\n< **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n---\n> **Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n432a437\n> - Reports: every role writes its report to the main checkout\'s absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree\'s copy.\n455c460\n< **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n---\n> **Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n459a465\n> - Reports: every role writes its report to the main checkout\'s absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree\'s copy.\n479a486\n> - Reports: every role writes its report to the main checkout\'s absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree\'s copy.\n481c488\n< **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.\n---\n> **Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.\n581c588\n< After every story merge — **before creating story N+1\'s worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):\n---\n> After every story merge — **before creating story N+1\'s worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string). On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch (see that host\'s rendering of the dispatch-hook paragraph below):\n640a648,649\n> For example: `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/dispatch_serial.mjs next --sprint SPRINT-NN --wave wave1`. `<command>` is the full command line — interpreter and script path — never a bare script name (`run_script.sh dispatch_serial.mjs …` exits 127).\n> \n',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

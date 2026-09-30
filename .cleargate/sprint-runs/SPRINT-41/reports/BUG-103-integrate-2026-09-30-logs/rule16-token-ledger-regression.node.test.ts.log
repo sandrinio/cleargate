@@ -1,0 +1,34 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/token-ledger-regression.node.test.ts
+
+▶ token-ledger.sh: transcript does not create attribution
+  ✔ does not infer STORY identity from a transcript (1362.015291ms)
+  ✔ does not infer PROPOSAL identity from a transcript (1227.698125ms)
+  ✔ does not infer EPIC identity from a transcript (1077.873333ms)
+  ✔ does not infer CR identity from a transcript (1038.139791ms)
+  ✔ does not infer BUG identity from a transcript (1097.019291ms)
+✔ token-ledger.sh: transcript does not create attribution (5803.489208ms)
+▶ token-ledger.sh: sprint routing
+  ✔ routes via .active sentinel (Gherkin: Active-sprint routing) (1049.584209ms)
+  ✔ falls back to _off-sprint when no sentinel (Gherkin: No active sprint fallback) (932.41125ms)
+  ✔ regression fixture: SPRINT-04 transcript routes to SPRINT-04 not SPRINT-03 (FLASHCARD 2026-04-19) (1046.141417ms)
+✔ token-ledger.sh: sprint routing (3028.373209ms)
+▶ token-ledger.sh: transcript ordering does not create attribution
+  ✔ turn ordering cannot infer an identity (1205.011208ms)
+✔ token-ledger.sh: transcript ordering does not create attribution (1205.093041ms)
+▶ token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix)
+  ✔ sentinel drives agent_type and work_item_id (overrides transcript grep) (1193.344958ms)
+  ✔ delta model: turn_index=1 skips first assistant turn, sums from index 1 onward (1171.717625ms)
+  ✔ two consecutive fires on same transcript produce non-overlapping token counts (2408.205666ms)
+  ✔ sentinel is deleted after successful row write (1181.2565ms)
+  ✔ missing sentinel writes an explicitly unattributed row (1050.699125ms)
+✔ token-ledger.sh: per-task sentinel attribution (CHORE=ledger-fix) (7005.413459ms)
+ℹ tests 14
+ℹ suites 4
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17254.975583

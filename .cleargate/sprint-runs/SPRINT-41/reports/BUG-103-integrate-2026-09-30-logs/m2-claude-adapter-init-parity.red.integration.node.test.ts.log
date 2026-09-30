@@ -1,0 +1,47 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hosts/claude-adapter-init-parity.red.integration.node.test.ts
+
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ scenario 12: "fresh" matches the captured baseline byte-for-byte (tree, modes, stdout, stderr) (72.225208ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ scenario 12: "user-content" matches the captured baseline byte-for-byte (tree, modes, stdout, stderr) (26.295834ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ scenario 12: "reinit" matches the captured baseline byte-for-byte (tree, modes, stdout, stderr) (30.118084ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ scenario 12: "malformed" matches the captured baseline byte-for-byte (tree, modes, stdout, stderr) (25.133958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ scenario 12: "force" matches the captured baseline byte-for-byte (tree, modes, stdout, stderr) (25.542042ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 468.189583

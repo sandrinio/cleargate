@@ -1,0 +1,25 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/clean-room-verification-doc.red.node.test.ts
+
+▶ D1: the procedure doc exists and carries its pinned sections (Gherkin 5)
+  ✔ the doc file exists at .cleargate/knowledge/clean-room-verification.md (0.607333ms)
+  ✔ every pinned H2 heading is present (2.49375ms)
+  ✔ ## Location names ~/Documents/Dev/, disposable, and recreated per run (0.237208ms)
+  ✔ ## Why not /tmp or inside the repository names /private/tmp (0.190125ms)
+  ✔ ## Why not the in-repo dogfood instance names it as gitignored (0.153375ms)
+  ✔ ## 2. Install the artifact names the identity gate `command -v cleargate` (0.135166ms)
+  ✔ ## 1. Build the packed artifact names `npm pack` (0.651792ms)
+  ✔ ## 4. Machine checks (cleargate verify-install) names the driver (0.201958ms)
+✔ D1: the procedure doc exists and carries its pinned sections (Gherkin 5) (5.358209ms)
+▶ D2: no bare npm publish outside the forbidding sentence
+  ✔ every "npm publish" occurrence sits on a line that also says No or never (0.254416ms)
+✔ D2: no bare npm publish outside the forbidding sentence (0.330292ms)
+ℹ tests 9
+ℹ suites 2
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234.483042

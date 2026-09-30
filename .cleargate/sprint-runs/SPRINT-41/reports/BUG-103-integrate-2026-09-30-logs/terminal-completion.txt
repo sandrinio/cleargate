@@ -1,0 +1,6 @@
+Terminal session: 86845
+Actual terminal exit: 0
+All 43 subprocess exits are recorded in exits.tsv (six build/check commands, 37 test runs).
+Final output: mirror exit=1
+Final output: mirror expected_exit=1 actual_exit=1
+Complete per-command stdout/stderr is preserved in each corresponding .log file.

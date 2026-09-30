@@ -1,0 +1,86 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/codex-install-papercuts.red.node.test.ts
+
+✖ T1 — absent MCP has no delta and Codex-only init has no Claude restart advice (263.070917ms)
+✔ T2 — nonempty invalid MCP stays conservative and plain Claude init prints restart advice (205.090416ms)
+✖ T3 — Codex ignores deletion but stamps the added sibling; Claude missing-target behavior is preserved (1948.445708ms)
+✖ T4 — prose slug scaffolds underscore filename and reports normalized slug (68.274375ms)
+✔ T5 — valid slug keeps filename convention and emits no slug notice (59.333917ms)
+✔ T6 — punctuation-only slug remains rejected without creating a draft (54.108208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 3
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2912.085917
+
+✖ failing tests:
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:1:1432
+✖ T1 — absent MCP has no delta and Codex-only init has no Claude restart advice (263.070917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   banner: true,
+  +   delta: true
+  -   banner: false,
+  -   delta: false
+    }
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:44:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { delta: true, banner: true },
+    expected: { delta: false, banner: false },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:1:3424
+✖ T3 — Codex ignores deletion but stamps the added sibling; Claude missing-target behavior is preserved (1948.445708ms)
+  AssertionError [ERR_ASSERTION]: [2026-09-30T16:13:51Z] stamp=0 gate=0 ingest=0 file=/private/var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-bug105-red-05GkT8/room-l9YocV/.cleargate/delivery/pending-sync/BUG-901_deleted.md
+  [2026-09-30T16:13:51Z] stamp=0 gate=0 ingest=0 file=/private/var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-bug105-red-05GkT8/room-l9YocV/.cleargate/delivery/pending-sync/BUG-902_added.md
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:92:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/commands/codex-install-papercuts.red.node.test.ts:9:1454
+✖ T4 — prose slug scaffolds underscore filename and reports normalized slug (68.274375ms)
+  AssertionError [ERR_ASSERTION]: [cleargate new] slug must match ^[a-z0-9-]+$ (got: "tiny node todo cli")
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/codex-install-papercuts.red.node.test.ts:116:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

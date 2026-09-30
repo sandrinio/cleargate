@@ -1,0 +1,18 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/claude-md-block-leads-relocation.red.node.test.ts
+
+▶ CR-105 — outer-half doc-truth: the block leads root CLAUDE.md
+  ✔ 1 (RED today): root CLAUDE.md's first non-empty line is the CLEARGATE:START marker — measured today: "# ClearGate Meta-Repo" (block starts at line 129 of 186) (0.66325ms)
+  ✔ 2 (RED today): canonical CLAUDE.md's line 3 no longer describes the evicted append contract — measured today: it reads "...init **appends** the bounded block below..." (0.180625ms)
+  ✔ 3 (GREEN today, MUST STAY GREEN): the two trees' bounded-block BODIES hash-match — relocation moves the block, it must never edit it (drift-check.ts:118-128 blocks `cleargate doctor` on a mismatch) (0.405875ms)
+  ✔ 4 (GREEN today, MUST STAY GREEN): relocation is a PURE MOVE — every line of the repo's own prose outside the block survives, in order (0.220125ms)
+✔ CR-105 — outer-half doc-truth: the block leads root CLAUDE.md (2.0185ms)
+ℹ tests 4
+ℹ suites 1
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 231.683167

@@ -1,0 +1,17 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/skill-md-serial-pointers.red.node.test.ts
+
+✔ Test 20 — canonical SKILL.md keeps P1 after its anchor and P2 after "A single-story wave..." (re-scoped by BUG-103) (2.682709ms)
+✔ Test 21 (anchor) — the sequence of heading lines is unchanged by the two plain-paragraph insertions (1.467375ms)
+▶ Test 22 — prebuild output matches canonical
+  ✔ templates/cleargate-planning/.claude/skills/sprint-execution/{SKILL.md,dispatch-serial.md} equal canonical (skip if templates are absent) (0.35375ms)
+✔ Test 22 — prebuild output matches canonical (0.48175ms)
+ℹ tests 3
+ℹ suites 1
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 249.815916

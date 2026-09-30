@@ -1,0 +1,36 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/codex-hook-scripts.red.node.test.ts
+
+✔ Test 35 — every command in scaffold/hosts/codex/.codex/hooks.json exports the toplevel and passes stdin/stderr/exit through (2478.362666ms)
+▶ Test 36 — pre-edit-gate.sh --host codex
+  ✔ enforce mode, uncovered edit: exit 2 with non-empty stderr containing "planning-first gate" (1885.095208ms)
+  ✔ warn mode: exit 0, one would_block log line per target (1501.72625ms)
+  ✔ an edit-targets resolver that exits 1: enforce -> exit 2 "could not resolve"; warn -> exit 0 (2070.845083ms)
+  ✔ [TPV R-H2] a whitelisted first target does not short-circuit: the later uncovered target still blocks (enforce) (1626.677083ms)
+  ✔ [ALREADY-GREEN ANCHOR] [TPV R-H2] only whitelisted targets (incl. the codex .codex/ and AGENTS.md whitelist) pass in enforce mode (1154.856958ms)
+✔ Test 36 — pre-edit-gate.sh --host codex (8239.748542ms)
+✔ Test 37 — stamp-and-gate.sh --host codex logs 2 lines for a mixed apply_patch (2 delivery .md, 1 non-delivery) (1490.478834ms)
+▶ Test 38 — pending-task-sentinel.sh --host codex
+  ✔ an unprocessed flashcard blocks: exit 2, stderr FLASHCARD GATE BLOCKED, no sentinel (933.597958ms)
+  ✔ after the card is processed: exit 0, exactly one .pending-codex-task-*.json with {agent_type:"qa", work_item_id:"STORY-058-10", host:"codex"} (626.2795ms)
+  ✔ the untyped spawn fixture -> agent_type: "default" (512.4645ms)
+✔ Test 38 — pending-task-sentinel.sh --host codex (2072.695708ms)
+✔ Test 39 — token-ledger.sh --host codex writes one codex-identity line, claims the qa sentinel, deletes it, exits 0 (357.344833ms)
+✔ [TPV R-H3] token-ledger.sh --host codex falls back to the oldest sentinel when no agent_type matches (332.954667ms)
+✔ [TPV R-H6] token-ledger.sh --host codex claims the OLDEST sentinel of the matching agent_type, not the newest (335.934041ms)
+▶ [ALREADY-GREEN ANCHOR] Test 40 — Claude-shaped fixtures behave identically before and after -10
+  ✔ pre-edit-gate.sh: a whitelisted path exits 0 identically (670.283042ms)
+  ✔ stamp-and-gate.sh: a non-delivery file exits 0 identically (287.954542ms)
+  ✔ pending-task-sentinel.sh: an Agent dispatch with no subagent_type writes an "unknown" sentinel identically (766.098417ms)
+  ✔ token-ledger.sh: a SubagentStop with a non-existent transcript_path early-exits identically (381.34675ms)
+  ✔ [TPV R-H4] all four scripts: identical exit, stdout, stderr and written files for Claude-shaped payloads (9302.528917ms)
+✔ [ALREADY-GREEN ANCHOR] Test 40 — Claude-shaped fixtures behave identically before and after -10 (11408.459333ms)
+ℹ tests 18
+ℹ suites 3
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 27087.4285

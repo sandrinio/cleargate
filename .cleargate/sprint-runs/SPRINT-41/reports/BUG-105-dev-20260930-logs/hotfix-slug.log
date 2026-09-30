@@ -1,0 +1,41 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec --test-name-pattern Slug validation test/commands/hotfix-new.integration.node.test.ts
+
+▶ Slug validation
+  ✖ exits 1 with clear error on invalid slug (8.631792ms)
+✖ Slug validation (9.454833ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.311334
+
+✖ failing tests:
+
+test at test/commands/hotfix-new.integration.node.test.ts:1:10646
+✖ exits 1 with clear error on invalid slug (8.631792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at Object.toBe (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/hotfix-new.integration.node.test.ts:32:38)
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/test/commands/hotfix-new.integration.node.test.ts:445:23)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.start (node:internal/test_runner/test:1096:17)
+      at node:internal/test_runner/test:1617:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9 {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

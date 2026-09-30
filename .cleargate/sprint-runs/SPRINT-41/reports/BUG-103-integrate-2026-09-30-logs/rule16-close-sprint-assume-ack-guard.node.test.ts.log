@@ -1,0 +1,42 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/close-sprint-assume-ack-guard.node.test.ts
+
+▶ STORY-051-08: close_sprint.mjs --assume-ack CI-token guard
+  ✔ Case 1 (RED): refuses --assume-ack when CLEARGATE_CI_ACK is unset — exit 2, stderr names CLEARGATE_CI_ACK, sprint_status untouched (123.514083ms)
+  ✔ Case 2 (regression — must stay green): --assume-ack proceeds and closes when CLEARGATE_CI_ACK=1 (1702.998833ms)
+  ✔ Case 3 (regression — must stay green): the no-flag close path is unaffected by the guard (token irrelevant) (286.803833ms)
+  ✔ Case 4 (RED): non-'1' CLEARGATE_CI_ACK="0" is refused (exit 2) (95.322542ms)
+  ✔ Case 4 (RED): non-'1' CLEARGATE_CI_ACK="true" is refused (exit 2) (92.592292ms)
+  ✔ Case 4 (RED): non-'1' CLEARGATE_CI_ACK="" is refused (exit 2) (102.487583ms)
+✔ STORY-051-08: close_sprint.mjs --assume-ack CI-token guard (2404.5295ms)
+▶ STORY-051-08 doc legs: enforcement §15 advisory-scope narrowing (both tiers)
+  ✔ canonical: the "all gate failures in the CLI" overclaim no longer appears (0.3295ms)
+  ✔ canonical: §15 names the sprint-init story-file assertion as a true honor site (not just "preflight, etc.") (0.330458ms)
+  ✔ canonical: §15 explicitly disclaims softening file-surface / decomposition / lifecycle-init / sprint-close gates (0.233083ms)
+  ✔ live-outer: the "all gate failures in the CLI" overclaim no longer appears (0.214459ms)
+  ✔ live-outer: §15 names the sprint-init story-file assertion as a true honor site (not just "preflight, etc.") (0.1485ms)
+  ✔ live-outer: §15 explicitly disclaims softening file-surface / decomposition / lifecycle-init / sprint-close gates (0.143375ms)
+✔ STORY-051-08 doc legs: enforcement §15 advisory-scope narrowing (both tiers) (1.566542ms)
+▶ STORY-051-08 doc legs: enforcement §12.3 + CLAUDE.md document the CLEARGATE_CI_ACK guard
+  ✔ canonical: §12.3 Flag Reservation documents the CLEARGATE_CI_ACK guard (0.161916ms)
+  ✔ live-outer: §12.3 Flag Reservation documents the CLEARGATE_CI_ACK guard (0.13175ms)
+  ✔ root CLAUDE.md: sprint-close guardrail mentions CLEARGATE_CI_ACK (1.366166ms)
+  ✔ canonical CLAUDE.md: sprint-close guardrail mentions CLEARGATE_CI_ACK (0.109209ms)
+✔ STORY-051-08 doc legs: enforcement §12.3 + CLAUDE.md document the CLEARGATE_CI_ACK guard (1.858584ms)
+▶ STORY-051-08 doc legs (AD#2): enforcement §14 drops the false Advisory(v1)/Enforcement(v2) bullets
+  ✔ canonical: §14 region contains zero "Advisory (v1)" / "Enforcement (v2)" / "advisory in v1" tokens (0.242709ms)
+  ✔ live-outer: §14 region contains zero "Advisory (v1)" / "Enforcement (v2)" / "advisory in v1" tokens (0.203417ms)
+✔ STORY-051-08 doc legs (AD#2): enforcement §14 drops the false Advisory(v1)/Enforcement(v2) bullets (0.496209ms)
+▶ STORY-051-08 doc legs (AD#3): cli.ts + sprint.ts strings mention CLEARGATE_CI_ACK
+  ✔ cli.ts --assume-ack option help string mentions CLEARGATE_CI_ACK (1.20025ms)
+  ✔ sprint.ts "sprint not closed" message mentions CLEARGATE_CI_ACK (prefix untouched — G8-8) (1.044083ms)
+✔ STORY-051-08 doc legs (AD#3): cli.ts + sprint.ts strings mention CLEARGATE_CI_ACK (2.335375ms)
+ℹ tests 20
+ℹ suites 5
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2639.874125

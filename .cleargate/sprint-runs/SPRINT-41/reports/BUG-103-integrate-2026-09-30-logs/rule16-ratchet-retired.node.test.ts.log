@@ -1,0 +1,22 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/ratchet-retired.node.test.ts
+
+▶ EPIC-051 STORY-051-02: test-ratchet gate retired from canonical + live scaffold
+  ✔ cleargate-planning/.claude/hooks/pre-commit-test-ratchet.sh no longer exists (0.654ms)
+  ✔ cleargate-planning/.cleargate/scripts/test_ratchet.mjs no longer exists (0.092708ms)
+  ✔ cleargate-planning/.cleargate/scripts/test/test_test_ratchet.sh no longer exists (0.058792ms)
+  ✔ .cleargate/scripts/test_ratchet.mjs no longer exists (0.049583ms)
+  ✔ .cleargate/scripts/test/test_test_ratchet.sh no longer exists (0.047625ms)
+  ✔ grep of canonical scaffold/ for ratchet references yields zero hits outside the retirement note and the deferred MANIFEST.json regen (63.031ms)
+  ✔ cleargate-enforcement.md documents the Q6=RETIRE decision and names the surface gate as the sole survivor (1.145625ms)
+  ✔ cleargate-enforcement.md retirement note is identical in canonical and live-outer tracked copies (0.317334ms)
+✔ EPIC-051 STORY-051-02: test-ratchet gate retired from canonical + live scaffold (66.087625ms)
+ℹ tests 8
+ℹ suites 1
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 296.840833
