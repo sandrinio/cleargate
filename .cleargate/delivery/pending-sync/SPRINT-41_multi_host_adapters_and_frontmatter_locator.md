@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-27T08:29:28Z
+updated_at: 2026-09-30T15:04:38Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 94da1ca3-dirty
+updated_at_version: 99dea622-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -605,6 +605,8 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-27T08:35:00Z · STORY-058-13 · owner redirect replaced the OD1-blocked RS-4L/step-L path (M7 OD-M7-1: merge now; step L → RS-L after M7, gated at close by deferred_verification) → DevOps merged outer `a3b77505` (evidence commit `72c457c2`) / cli `0e5b0ac`, both trees matching their merge-tree previews; full suite 3653/3651/0/2 = D4 exact; rule-14 revert of the 38 listed delivery paths; BD; verify-pack 232/88; `build-codex-payload.mjs --check` 0; payload identity MANIFEST.json only; doctor 0 drift; post-BD `codex-loop.mjs check` exit 1 with only "needs a live human-trust PASS run" (expected, RS-L); smokes --host codex/all pass; M2 pair 5/5 + 15/15; Done; worktrees removed, branches kept. Adjacent Implementations row added (M6 F11.8). **M6 3/3 done.** M7 (Codex dogfood fix batch) in flight: QA-Red done for BUG-100/101/047/103, TPVs running; Codex r7 drove STORY-001-02 through the full loop (merge `1c8e1ee`, 18/18); r8 resumed after the owner-role approval of the residue force-remove (I19).
 - 2026-09-27T10:58:00Z · BUG-101 · QA-Red `59da770` → TPV REJECTED (22/37 mutants; source order unpinned) → re-seal `d07d4a0` (count 6) → Dev `26bdf84` → INTEGRATE `94fa6e6` onto `0e5b0ac` (test 46 1/1; scripted codex-loop 2/2; every dispatch `source=message` as expected before BUG-106) → QA-Verify PASS → post-flight scan clean (4/4, run on the OUTER worktree) → DevOps merged cli `8c98177`; full suite 3659/3657/0/2 = D4 exact; rule-14 revert 48 paths; BD; verify-pack 232/88; `--check` 0; M2 pair 5/5 + 15/15; **RS-M7a** live `hooks/pending-task-sentinel.sh` re-synced (backup `b0/claude-live-backup-2026-09-27T10-57-23-795Z.tgz`), doctor 0 drift, canonical-live-parity 11/11; Done; worktrees removed, branches kept. M7 TPVs: 4/4 REJECTED for mutant-weak seals (BUG-100 18/31, BUG-103 11/33, BUG-101 22/37, BUG-047 12/24), all re-sealed test-only; one shared-scratchpad incident (BUG-047 TPV ran BUG-100's mutant script; no loss, verified).
 - 2026-09-27T11:00:00Z · **SPRINT PAUSED (owner: "you need to pause the sprint" / "choose the right point")** · Paused at a clean boundary: every in-flight agent was allowed to finish its git operation; nothing new dispatched. State at pause: M7 BUG-101 **Done** (cli main `8c98177`); BUG-100 integrated `d9e69e1`, BUG-047 integrated `f036700`, BUG-103 integrated cli `c2f56ab` / outer `0f542bc0` — each awaits QA-Verify → post-flight scan → DevOps; BUG-102/105/104/106 and addendum lanes M7-A/B/C/D (BUG-107..116) not started; DT (Codex re-test), RS-L, RS-4L (owner O2 login pending), RS-CLOSE, walkthrough, Reporter, close not started. Worktrees kept: `.worktrees/BUG-{100,047,103}` (clean). **Resume point:** QA-Verify for BUG-100, BUG-047, BUG-103 on their INTEGRATE tips (merge order 100 → 047 → 103 per ready order; each later merge re-integrates onto the moved main).
+
+- 2026-09-30T15:03:27Z · **SPRINT RESUMED** · Owner "alright. go ahead" confirms continuation from the September 27 checkpoint with GPT-6 Astra medium orchestration and GPT-6.1 Sol code/testing. State validated (schema 3); CLI main remains `8c98177`, BUG-100 integrated `d9e69e1`; structured QA pack prepared and independent QA-Verify dispatched. The existing bounded-bootstrap and contract-first amendments govern; manual checks are recorded separately from host-fired enforcement, and unavailable usage is not synthesized. Remaining M7 order and live-evidence/close gates are unchanged. Local-only work; no push, publish, or close authorization.
 
 **Contract-first ledger (CR-124 dogfood):**
 
