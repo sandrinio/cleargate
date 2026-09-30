@@ -1,0 +1,27 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/lib/frontmatter-cache.node.test.ts
+
+▶ readCachedGate
+  ✔ returns null when cached_gate_result absent (6.540583ms)
+  ✔ returns null when file does not exist (0.487375ms)
+  ✔ returns null when frontmatter parse fails (0.930208ms)
+  ✔ reads back a cached_gate_result written by writeCachedGate (2.883125ms)
+  ✔ reads back failing_criteria correctly (1.923209ms)
+✔ readCachedGate (13.409833ms)
+▶ writeCachedGate
+  ✔ byte-identical rerun: write twice with same inputs → file bytes unchanged (3.379958ms)
+  ✔ preserves existing frontmatter keys in original order (1.076208ms)
+  ✔ updates cached_gate_result in-place when key already exists (1.389542ms)
+  ✔ body is preserved verbatim after write (0.885541ms)
+  ✔ throws when file has no valid frontmatter (1.006875ms)
+  ✔ uses injected now for last_gate_check when not provided in result (1.196583ms)
+✔ writeCachedGate (9.189125ms)
+ℹ tests 11
+ℹ suites 2
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 258.578875

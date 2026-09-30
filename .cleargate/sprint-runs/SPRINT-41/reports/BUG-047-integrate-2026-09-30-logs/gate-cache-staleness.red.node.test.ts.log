@@ -1,0 +1,27 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/lib/gate-cache-staleness.red.node.test.ts
+
+▶ T1 (BUG-047): gate check -> stamp -> gate check advances a stale cache
+  ✔ a same-verdict re-check ends with last_gate_check >= updated_at (16.964958ms)
+✔ T1 (BUG-047): gate check -> stamp -> gate check advances a stale cache (17.466875ms)
+▶ T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-gated item
+  ✔ exit code 0 — the item is no longer reported (stale) (1552.355541ms)
+✔ T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-gated item (1552.515084ms)
+▶ T3 (CR-038 regression): two gate checks with no edit leave a fresh item byte-identical
+  ✔ a second, unedited gate check on an already-fresh item changes nothing (5.781042ms)
+✔ T3 (CR-038 regression): two gate checks with no edit leave a fresh item byte-identical (5.906833ms)
+▶ T4 (CR-038 regression): a verdict flip on a fresh item writes both the verdict and a new stamp
+  ✔ introducing a TBD flips pass:true -> pass:false and advances last_gate_check (4.808542ms)
+✔ T4 (CR-038 regression): a verdict flip on a fresh item writes both the verdict and a new stamp (4.9215ms)
+▶ T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance, restore a fresh one
+  ✔ a stale item keeps its Step-0 stamp advance; an already-fresh item is still restored (2857.1595ms)
+✔ T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance, restore a fresh one (2857.26675ms)
+ℹ tests 5
+ℹ suites 5
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4790.109834

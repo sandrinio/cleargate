@@ -280,11 +280,11 @@
       "lane_demotion_reason": null
     },
     "BUG-047": {
-      "state": "Bouncing",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-09-27T10:21:50.596Z",
+      "updated_at": "2026-09-30T16:06:14.307Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -316,11 +316,11 @@
       "lane_demotion_reason": null
     },
     "BUG-102": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T07:54:45.421Z",
+      "updated_at": "2026-09-30T15:37:53.757Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -496,6 +496,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-100 → Done",
-  "updated_at": "2026-09-30T15:33:14.728Z"
+  "last_action": "transition BUG-047 → Done",
+  "updated_at": "2026-09-30T16:06:14.307Z"
 }

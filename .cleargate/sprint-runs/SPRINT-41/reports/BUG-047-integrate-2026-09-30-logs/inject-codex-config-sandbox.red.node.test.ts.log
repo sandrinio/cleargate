@@ -1,0 +1,46 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/init/inject-codex-config-sandbox.red.node.test.ts
+
+Preparing worktree (new branch 'cg-s41-100-wt-branch')
+Preparing worktree (new branch 'cg-s41-100-remove-wt-branch')
+▶ Test 1 — a fresh Codex install writes the git common dir as a writable root
+  ✔ the key equals the realpath of `git rev-parse --git-common-dir`, and stdout carries the notice (402.577291ms)
+✔ Test 1 — a fresh Codex install writes the git common dir as a writable root (403.094959ms)
+▶ [ANCHOR] Test 2 — a non-git cwd is byte-identical to today's greenfield literal
+  ✔ injectCodexConfig on a plain (non-git) tmp dir writes exactly the pre-BUG-100 literal, even under an ambient GIT_DIR, and install() prints no notice (358.124167ms)
+✔ [ANCHOR] Test 2 — a non-git cwd is byte-identical to today's greenfield literal (358.214166ms)
+▶ Test 3 — merging into an existing [sandbox_workspace_write] table keeps a user-added root
+  ✔ a user root "/opt/cache" survives when the ClearGate root is added; a re-plan is a no-op; a table without the key, or a file without the table, gains it (2.086917ms)
+✔ Test 3 — merging into an existing [sandbox_workspace_write] table keeps a user-added root (2.177333ms)
+▶ Test 4 — re-init after the repository moved replaces only the stale ClearGate root
+  ✔ a writable root ending in .git that no longer exists on disk is replaced; "/opt/cache" is kept (456.883084ms)
+✔ Test 4 — re-init after the repository moved replaces only the stale ClearGate root (456.963541ms)
+▶ Test 5 — a linked worktree writes the MAIN repository's .git as the writable root
+  ✔ injectCodexConfig from inside a `git worktree add` checkout resolves to the shared common dir (465.325875ms)
+✔ Test 5 — a linked worktree writes the MAIN repository's .git as the writable root (465.443ms)
+▶ Test 6 — uninstall / host remove drops only the ClearGate-owned root
+  ✔ removeCodexWritableRoot removes only the named root, keeps user roots and other keys, and empties the table when nothing is left (0.807167ms)
+  ✔ the Codex adapter's remove() strips only the ClearGate root from a real git cwd (468.920333ms)
+✔ Test 6 — uninstall / host remove drops only the ClearGate-owned root (469.833917ms)
+▶ Test 8 — an inline-table or dotted-key sandbox definition fails closed unless it already holds the root
+  ✔ planCodexConfig throws CodexConfigError naming the file; a definition that holds the root is left alone; no root means no scan (0.881917ms)
+  ✔ the adapter preflight refuses the same shape before any write in a git repo, and passes when the root is held or the cwd is not a repo (403.244292ms)
+✔ Test 8 — an inline-table or dotted-key sandbox definition fails closed unless it already holds the root (404.24575ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ [ANCHOR] Test 7 — a plain Claude-only install never writes .codex/config.toml
+  ✔ cleargate init --yes (default host) leaves no .codex/ directory at all (60.234958ms)
+✔ [ANCHOR] Test 7 — a plain Claude-only install never writes .codex/config.toml (60.326166ms)
+ℹ tests 10
+ℹ suites 8
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2948.610959

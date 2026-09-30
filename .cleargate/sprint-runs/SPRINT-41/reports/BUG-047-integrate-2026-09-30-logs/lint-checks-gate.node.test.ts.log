@@ -1,0 +1,28 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/wiki/lint-checks-gate.node.test.ts
+
+▶ Scenario: Enforcing fail — Epic with status:Ready + pass:false
+  ✔ checkGateFailure emits gate-failure finding with criterion id (3.99525ms)
+✔ Scenario: Enforcing fail — Epic with status:Ready + pass:false (4.480583ms)
+▶ Scenario: Advisory tolerated — Proposal with pass:false is not enforcing
+  ✔ checkGateFailure returns null for Proposal type (advisory only) (1.624958ms)
+✔ Scenario: Advisory tolerated — Proposal with pass:false is not enforcing (1.685833ms)
+▶ Scenario: Null pass ignored — Epic with pass:null returns null
+  ✔ checkGateFailure returns null when cached_gate_result.pass is null (1.52525ms)
+✔ Scenario: Null pass ignored — Epic with pass:null returns null (1.602083ms)
+▶ Scenario: Staleness — last_gate_check < updated_at emits gate-stale
+  ✔ checkGateStaleness emits gate-stale when last_gate_check is before updated_at (1.767541ms)
+✔ Scenario: Staleness — last_gate_check < updated_at emits gate-stale (1.83125ms)
+▶ Scenario: Fresh — last_gate_check >= updated_at returns null
+  ✔ checkGateStaleness returns null when last_gate_check is equal to updated_at (1.782041ms)
+  ✔ checkGateStaleness returns null when last_gate_check is after updated_at (1.328625ms)
+✔ Scenario: Fresh — last_gate_check >= updated_at returns null (3.256709ms)
+ℹ tests 6
+ℹ suites 5
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 245.438125

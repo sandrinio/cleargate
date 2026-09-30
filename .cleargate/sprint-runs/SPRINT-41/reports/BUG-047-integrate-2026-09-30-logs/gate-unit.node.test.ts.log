@@ -1,0 +1,72 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/gate-unit.node.test.ts
+
+▶ Scenario: Check passing Epic
+  ✔ exit 0 and cached_gate_result.pass = true (11.864625ms)
+✔ Scenario: Check passing Epic (12.37525ms)
+▶ Scenario: Check failing Story (enforcing)
+  ✔ exit non-zero, stdout lists failing criteria, cached_gate_result.pass = false (3.705542ms)
+✔ Scenario: Check failing Story (enforcing) (3.786125ms)
+▶ Scenario: Check failing Proposal (advisory)
+  ✔ exit 0, stdout prefixes ⚠, cached_gate_result.pass = false (1.962083ms)
+✔ Scenario: Check failing Proposal (advisory) (2.035708ms)
+▶ Scenario: Verbose output
+  ✔ stdout contains full predicate evaluation per failing criterion (1.812041ms)
+✔ Scenario: Verbose output (1.878083ms)
+▶ Scenario: Explain is read-only and cheap
+  ✔ output ≤50 LLM-tokens and no predicate re-evaluation (frontmatter unchanged) (1.531541ms)
+✔ Scenario: Explain is read-only and cheap (1.621542ms)
+▶ Scenario: Explicit transition override
+  ✔ evaluation runs against the specified transition even when already passed (1.835ms)
+✔ Scenario: Explicit transition override (1.926917ms)
+▶ explain with no cached result
+  ✔ prints hint and exits 0 (0.990042ms)
+✔ explain with no cached result (1.050041ms)
+▶ check on file with no ID frontmatter
+  ✔ errors with "unable to detect work-item type" (0.673625ms)
+✔ check on file with no ID frontmatter (0.702125ms)
+▶ type-detection unit test
+  ✔ detects proposal from proposal_id key (0.1035ms)
+  ✔ detects epic from epic_id key (0.075041ms)
+  ✔ detects story from story_id key (0.047666ms)
+  ✔ detects cr from cr_id key (0.044209ms)
+  ✔ detects bug from bug_id key (0.038209ms)
+  ✔ returns null when no known ID key present (0.048292ms)
+  ✔ detectWorkItemType from string prefix (0.081375ms)
+✔ type-detection unit test (0.512917ms)
+▶ transition-inference
+  ✔ Epic with no cached gate → picks ready-for-decomposition (first) (2.723583ms)
+  ✔ Epic already passed decomposition → picks ready-for-coding (1.367791ms)
+✔ transition-inference (4.176709ms)
+▶ BUG-008 smoke: readiness-gates.md after fix parses cleanly
+  ✔ readiness-gates.md parses all gate blocks with no errors (CR-027 adds sprint=7th, CR-030 adds initiative=8th, STORY-043-04 adds hotfix=9th, STORY-054-02 adds spike=10th+11th) (1.214958ms)
+  ✔ all criterion check strings in readiness-gates.md parse via parsePredicate without throwing (1.001625ms)
+  ✔ EPIC-021-style fixture: parent_ref unset with approved_by + approved_at passes parent-approved (2.072583ms)
+  ✔ CR-010-style fixture: prose "TBD resolution" in body passes no-tbds marker predicate (3.040375ms)
+  ✔ CR-011-style fixture: §2 Blast Radius with items passes blast-radius-populated (2.074041ms)
+✔ BUG-008 smoke: readiness-gates.md after fix parses cleanly (9.553917ms)
+▶ CR-030 γ: OR-group evaluator — parent-approved
+  ✔ Epic with Proposal parent (approved: true, no status) → gate passes for parent-approved concern (2.590167ms)
+  ✔ Epic with Initiative parent (status: Triaged, no approved) → gate passes for parent-approved concern (1.534708ms)
+  ✔ Epic with no valid parent (file missing) → gate fails with OR-group-failed error (1.300792ms)
+  ✔ R1 [red] (BUG-098): instructions-led Proposal parent (approved: true) → gate passes for parent-approved concern (1.573542ms)
+  ✔ R2 [red] (BUG-098): instructions-led Initiative parent (status: Triaged) → gate passes for parent-approved concern (1.767708ms)
+✔ CR-030 γ: OR-group evaluator — parent-approved (8.912459ms)
+▶ BUG-097: gate check -v on a pass
+  ✔ G1: prints per-criterion [pass] lines after the summary, in order (1.479458ms)
+✔ BUG-097: gate check -v on a pass (1.525333ms)
+▶ BUG-097: gate check -v on a failure (anchor)
+  ✔ G2: failure lines still come before the per-criterion detail lines (1.53375ms)
+✔ BUG-097: gate check -v on a failure (anchor) (1.5755ms)
+▶ BUG-097: gate check -v on an advisory gate (anchor)
+  ✔ G3: warning lines still come before the per-criterion detail lines (2.749541ms)
+✔ BUG-097: gate check -v on an advisory gate (anchor) (2.811709ms)
+ℹ tests 30
+ℹ suites 15
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 325.554292

@@ -1,0 +1,30 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/stamp.node.test.ts
+
+▶ stampHandler
+  ✔ stamp on fresh file stamps all 4 fields (9.379709ms)
+  ✔ stamp on already-stamped file advances updated_at only (1.75125ms)
+  ✔ stamp --dry-run prints diff and leaves file untouched (1.898959ms)
+[cleargate stamp] error: file not found: /var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-stamp-cmd-test-G77ty4/does-not-exist.md
+  ✔ stamp on archive path is noop-archive (1.284708ms)
+  ✔ stamp with non-existent file exits 1 with stderr message (1.443834ms)
+[cleargate stamp] error: file not found: /var/folders/wf/b825zb5d63vcyjtkq69pdsp40000gn/T/cg-stamp-cmd-test-XjJg2Q/missing.md
+  ✔ stamp exit code is 0 on success and 1 on read failure (1.460584ms)
+✔ stampHandler (17.902958ms)
+▶ BUG-097: dry-run preview never prints [object Object]
+  ✔ S1: an unchanged nested object renders as one JSON line (1.697667ms)
+  ✔ S4 (anchor): a real scalar change still shows as -/+ lines (1.455917ms)
+✔ BUG-097: dry-run preview never prints [object Object] (3.28675ms)
+▶ BUG-097: buildDiffPreview export (unit)
+  ✔ S2: a changed nested object renders compact JSON on both sides (0.240625ms)
+  ✔ S3: two separately built equal nested objects render as one unchanged line (0.178875ms)
+✔ BUG-097: buildDiffPreview export (unit) (0.472208ms)
+ℹ tests 10
+ℹ suites 3
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 266.115583

@@ -1,0 +1,44 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/lib/frontmatter-writers.red.node.test.ts
+
+▶ BUG-067 bounded frontmatter writers
+  ✔ stampFrontmatter retains BOM, CRLF, instructions, Unicode body, and no-final-newline boundaries (14.180833ms)
+  ✔ stampFrontmatter first stamp, refresh, no-op, and archive freeze preserve existing document identity (3.203083ms)
+  ✔ stamp --dry-run leaves the original document untouched and never reports existing ID/status as additions (2.368875ms)
+  ✔ stampTokens uses only injected sprintRunsRoot, removes a stale error, preserves bytes, and is a repeat no-op (3.884166ms)
+  ✔ stampTokens retains absent-ledger null/error semantics, dry-run identity, and archive freeze without corrupting the preamble (2.969333ms)
+  ✔ stampFrontmatter preserves a mixed-EOL body suffix and untouched metadata (1.940291ms)
+  ✔ stampTokens preserves a mixed-EOL body suffix and untouched metadata (1.89275ms)
+  ✔ writeCachedGate preserves a mixed-EOL body suffix and untouched metadata (3.4565ms)
+  ✔ stampFrontmatter fails closed and leaves unterminated instructions byte-identical (1.372ms)
+  ✔ stampTokens exits nonzero and leaves unterminated instructions byte-identical (1.930625ms)
+  ✔ writeCachedGate fails closed and leaves unterminated instructions byte-identical (1.405875ms)
+  ✔ stampFrontmatter fails closed and leaves missing closing fence byte-identical (1.210541ms)
+  ✔ stampTokens exits nonzero and leaves missing closing fence byte-identical (1.029084ms)
+  ✔ writeCachedGate fails closed and leaves missing closing fence byte-identical (1.124084ms)
+  ✔ stampFrontmatter fails closed and leaves invalid YAML byte-identical (1.5215ms)
+  ✔ stampTokens exits nonzero and leaves invalid YAML byte-identical (1.227375ms)
+  ✔ writeCachedGate fails closed and leaves invalid YAML byte-identical (1.53025ms)
+  ✔ stampFrontmatter fails closed and leaves duplicate YAML key byte-identical (1.230584ms)
+  ✔ stampTokens exits nonzero and leaves duplicate YAML key byte-identical (1.01875ms)
+  ✔ writeCachedGate fails closed and leaves duplicate YAML key byte-identical (1.215917ms)
+  ✔ stampFrontmatter fails closed and leaves scalar YAML byte-identical (1.1755ms)
+  ✔ stampTokens exits nonzero and leaves scalar YAML byte-identical (1.029917ms)
+  ✔ writeCachedGate fails closed and leaves scalar YAML byte-identical (1.189167ms)
+  ✔ stampFrontmatter fails closed and leaves sequence YAML byte-identical (1.128417ms)
+  ✔ stampTokens exits nonzero and leaves sequence YAML byte-identical (1.048ms)
+  ✔ writeCachedGate fails closed and leaves sequence YAML byte-identical (1.20075ms)
+  ✔ stampFrontmatter fails closed and leaves malformed first header before valid YAML byte-identical (1.225042ms)
+  ✔ stampTokens exits nonzero and leaves malformed first header before valid YAML byte-identical (1.008708ms)
+  ✔ writeCachedGate fails closed and leaves malformed first header before valid YAML byte-identical (1.234667ms)
+  ✔ writeCachedGate independently changes criteria and transition, then ignores a later timestamp-only result (3.8335ms)
+✔ BUG-067 bounded frontmatter writers (64.98975ms)
+ℹ tests 30
+ℹ suites 1
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 312.112042
