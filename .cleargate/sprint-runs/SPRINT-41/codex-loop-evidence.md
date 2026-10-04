@@ -202,3 +202,103 @@ Procedure: `.cleargate/knowledge/clean-room-verification.md` § Other hosts → 
 ### Findings
 
 - removed src/cg-probe.ts after S2a (recorded)
+
+## Run 3 — 2026-10-04T06:37:31.628Z — RS-CLOSE final build c6d6656
+
+- result: PASS
+- provider: scripted
+- trust_posture: harness-exact-hash
+- codex_sha256: 1d8b80de0a27f69b152bfb9b7b3b4fd3b8c589e4e76213db27219eab9ae53afa
+- artifact_inputs: 016a29676e60c7003378f0e34c3dfa24311913df5b2e17de922624614a3f36ad
+- loop_transport: PASS
+- enforcement_parity: PASS
+- metering: unavailable
+- cli_sha c6d665656d886810faf31b8feb11f8ce2600ae79 · artifact tgz sha256 47766dd6657dd073961f997b39691c57dfc84d9096a75dc46edc8690e3ca99ff · container /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose · codex_home /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/codex-home · home /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/home
+- codex: /Users/ssuladze/Documents/Dev/CG_TEST/sprint-41-D2QMC1/codex-runtime-X33IWV/bin/codex · codex-cli 0.154.0-alpha.6.2 · origin https://releases.openai.com/codex/releases/0.154.0-alpha.6.2/codex-package-aarch64-apple-darwin.tar.gz (archive sha256 9dbf155219c70542cf352661ffe7a7d86b96e378990904bc09e8b31a9a247adf)
+- model gpt-5.6-terra · sandbox_posture thread/start { cwd: <room>, model: <slug>, approvalPolicy: 'never', sandbox: 'workspace-write', config: { sandbox_workspace_write: { writable_roots: ['<roomRealpath>/.git'] } } } · approvals: never
+- cleargate resolved: hooks /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/tools/bin/cleargate · role shells /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/tools/bin/cleargate
+- merge_sha: c5a957c6dd6eed6a76b2f4d8d3e9455bf1aae50b
+- embedded codex (not run): /Applications/ChatGPT.app/Contents/Resources/codex · absent · sha256 n/a
+
+### Controls
+
+| Check | Attempts | Result | Evidence |
+|---|---|---|---|
+| codex.live.discovery | n/a | PASS | hooks/list before/after trust (inputs.json controls.hooksListBefore/After) |
+| codex.live.session-start | 1 | PASS | S2b (inputs.json controls.turns.C2) |
+| codex.live.post-tool-use | 1 | PASS | S2b (inputs.json controls.turns.C2, c2.gateCheckLine) |
+| codex.live.edit-deny | 1 | PASS | S1 (inputs.json controls.turns.C3, c3) |
+| codex.live.edit-allow | 1 | PASS | S2a (inputs.json controls.turns.C4, c4) |
+| codex.live.dispatch-deny | 1 | PASS | S3 (inputs.json controls.turns.C5, c5) |
+| codex.live.dispatch-identity | 1 | PASS | S4 (inputs.json controls.turns.C6, c6) |
+
+### Loop checks
+
+| Check | Result | Detail |
+|---|---|---|
+| codex.loop.dispatches | PASS | 5 dispatches: architect, qa, developer, qa, devops |
+| codex.loop.worktree | PASS | created (git worktree add .worktrees/STORY-001-01 -b story/STORY-001-01 sprint/S-01), isolated, removed |
+| codex.loop.merge | PASS | merge_sha c5a957c6dd6eed6a76b2f4d8d3e9455bf1aae50b |
+| codex.loop.terminal-state | PASS | Done; transitions: STORY-001-01: ∅ → Ready to Bounce; STORY-001-01: Ready to Bounce → Done |
+| codex.loop.outcome | PASS | src/slugify.mjs present; slugify → hello-world; npm test 0 |
+| codex.loop.serial-verdict | PASS | GREEN; serial-mode valid; tokens { metering: unavailable }; record exit 0 |
+| codex.loop.hook-matrix | PASS | every trigger has its hook |
+| codex.loop.no-synthetic-usage | PASS | no token-ledger rows in the room |
+| codex.loop.path-identity | PASS | hooks and role shells resolve /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/tools/bin/cleargate |
+| codex.loop.meta-repo-untouched | PASS | no clean-room line appended to the meta-repo |
+| codex.loop.metering | INFO | unavailable — ClearGate does not consume it in SPRINT-41; host exposes per-dispatch usage (subagent rollout token_usage_record): 5/5 dispatches with records; provider match 5/5 |
+| codex.loop.trust-posture | INFO | harness-exact-hash: 5 hooks trusted by the harness, 5 listed, configWrites 2 |
+| codex.loop.wall-clock | INFO | #1 architect 7417ms, #2 qa 6004ms, #3 developer 5144ms, #4 qa 3335ms, #5 devops 4006ms, S1 11417ms, S2a 11363ms, S2b 12013ms, S3 10236ms, S4 11102ms, S5 47885ms |
+
+### Per-dispatch hooks
+
+| # | role | agent_id | SessionStart | PreToolUse edit | PostToolUse | dispatch gate | SubagentStop | codex-identity | wall-clock |
+|---|---|---|---|---|---|---|---|---|---|
+| 0 | orchestrator (root) | 01a105a2-afc2-7a93-8dbd-1a42bfc694be | completed ×1 | n/a (no edit by this role) | n/a (no edit by this role) | completed (call_s5_spawn_architect), completed (call_s5_spawn_qa_red), completed (call_s5_spawn_developer), completed (call_s5_spawn_qa_verify), completed (call_s5_spawn_devops) | n/a (root session) | n/a (root session) | n/a |
+| 1 | architect | 01a105a2-c3a0-7e50-9bc7-43a1937f0d3c | not fired (host: root session only, X6) | 2/2 | 2/2 | completed (call_s5_spawn_architect) | completed ×1 | agent_type=architect | n/a |
+| 2 | qa | 01a105a2-eb6c-7df1-b1c5-a434458aaf03 | not fired (host: root session only, X6) | 2/2 | 2/2 | completed (call_s5_spawn_qa_red) | completed ×1 | agent_type=qa | n/a |
+| 3 | developer | 01a105a3-0dcb-7491-b373-5c44a62492b4 | not fired (host: root session only, X6) | 2/2 | 2/2 | completed (call_s5_spawn_developer) | completed ×1 | agent_type=developer | n/a |
+| 4 | qa | 01a105a3-2ab7-77e3-8dc4-0010332f6c7d | not fired (host: root session only, X6) | 1/1 | 1/1 | completed (call_s5_spawn_qa_verify) | completed ×1 | agent_type=qa | n/a |
+| 5 | devops | 01a105a3-4009-7412-ab95-9fd119da5ce4 | not fired (host: root session only, X6) | 1/1 | 1/1 | completed (call_s5_spawn_devops) | completed ×1 | agent_type=devops | n/a |
+
+### Metering
+
+- metering: unavailable (ClearGate does not consume Codex per-subagent usage in SPRINT-41; no ledger rows are written)
+- architect 01a105a2-c3a0-7e50-9bc7-43a1937f0d3c: rollout found · records 3 · totals {"input_tokens":354,"cached_input_tokens":54,"output_tokens":84,"reasoning_output_tokens":0,"total_tokens":438} · provider match true
+- qa 01a105a2-eb6c-7df1-b1c5-a434458aaf03: rollout found · records 5 · totals {"input_tokens":620,"cached_input_tokens":120,"output_tokens":170,"reasoning_output_tokens":0,"total_tokens":790} · provider match true
+- developer 01a105a3-0dcb-7491-b373-5c44a62492b4: rollout found · records 5 · totals {"input_tokens":655,"cached_input_tokens":155,"output_tokens":205,"reasoning_output_tokens":0,"total_tokens":860} · provider match true
+- qa 01a105a3-2ab7-77e3-8dc4-0010332f6c7d: rollout found · records 4 · totals {"input_tokens":550,"cached_input_tokens":150,"output_tokens":190,"reasoning_output_tokens":0,"total_tokens":740} · provider match true
+- devops 01a105a3-4009-7412-ab95-9fd119da5ce4: rollout found · records 5 · totals {"input_tokens":720,"cached_input_tokens":220,"output_tokens":270,"reasoning_output_tokens":0,"total_tokens":990} · provider match true
+
+### Trust
+
+- posture: harness-exact-hash
+- detail: harness-exact-hash: 5 hooks trusted by the harness, 5 listed, configWrites 2
+- hook: preToolUse /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/repo-loop/.codex/hooks.json:pre_tool_use:0:0 trusted_hash sha256:12d0e6bd8faf4e826e103a27e3d21a86fa96d409811c54b7a9571116ac92adfe
+- hook: preToolUse /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/repo-loop/.codex/hooks.json:pre_tool_use:1:0 trusted_hash sha256:ca7130b0a7b06b357dd1df0d85b6448a34e20b60402b61a184e967adf5b58c7d
+- hook: postToolUse /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/repo-loop/.codex/hooks.json:post_tool_use:0:0 trusted_hash sha256:089ed472d677525784cfa867e12ceaad5f795ab3164bffa048e18cd18b8420e2
+- hook: sessionStart /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/repo-loop/.codex/hooks.json:session_start:0:0 trusted_hash sha256:e54f2f42c066ee560e4e011a473a219aed403aba0facf51d8b5107839bc00553
+- hook: subagentStop /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064500Z-rsclose/repo-loop/.codex/hooks.json:subagent_stop:0:0 trusted_hash sha256:828ce7a711a01412f0d1975e90df083923b433a4059ab8cfa3f7ae1d04e2948d
+- configWrites: 2
+
+### State transitions
+
+- STORY-001-01: ∅ → Ready to Bounce (migration)
+- STORY-001-01: Ready to Bounce → Done (system)
+
+### Gaps
+
+- Sandbox: .git is read-only under Codex workspace-write (X8); the loop runs with writable_roots=[<room>/.git] on thread/start — follow-up: to be filed at step L6 (CR: declare the .git writable root for the ClearGate loop, or document it)
+- Metering consumer: ClearGate does not read the SubagentStop agent_transcript_path token_usage_records (X7) — follow-up: to be filed at step L6 (CR)
+- Role TOMLs carry Claude-host paths (.claude/…) in developer_instructions (STORY-058-11 codegen) — follow-up: to be filed at step L6 (CR)
+- Autonomy guard: no request_user_input autonomy guard on Codex — follow-up: M5 follow-up
+- Git hooks: no git pre-commit hooks for codex-only repos — follow-up: M5 follow-up
+- INFO: SessionStart fires on the root session only (X6), by host design — follow-up: none (INFO)
+
+### Goal Acceptance Check mapping
+
+- Condition 5: loop_transport PASS + enforcement_parity PASS + metering: unavailable (explicit)
+
+### Findings
+
+- removed src/cg-probe.ts after S2a (recorded)

@@ -974,7 +974,8 @@
       "id": "RS-4L",
       "after": "RS-4 and owner action OD1",
       "blocks": "RS-CLOSE; run before STORY-058-13 step L (plans/M6.md F10 L0)",
-      "action": "codex-hooks.mjs run --provider live --codex-home <DEDICATED_CODEX_HOME> --label 'RS-4L live' -> PASS, then codex-hooks.mjs check exit 0. Run it in the harness lane, from the cli main checkout, at any point before RS-CLOSE."
+      "action": "codex-hooks.mjs run --provider live --codex-home <DEDICATED_CODEX_HOME> --label 'RS-4L live' -> PASS, then codex-hooks.mjs check exit 0. Run it in the harness lane, from the cli main checkout, at any point before RS-CLOSE.",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)"
     },
     {
       "id": "RS-CR",
@@ -991,7 +992,9 @@
     {
       "id": "RS-CLOSE",
       "after": "STORY-058-13 BD",
-      "action": "Run the v1 RS-CLOSE text without --known-fail, plus the M6 codex-loop close run and check, then the owner walkthrough, the Reporter, and close_sprint.mjs (Gate 4). The claude-baseline, codex-hooks and codex-loop runs are serial in the harness lane."
+      "action": "Run the v1 RS-CLOSE text without --known-fail, plus the M6 codex-loop close run and check, then the owner walkthrough, the Reporter, and close_sprint.mjs (Gate 4). The claude-baseline, codex-hooks and codex-loop runs are serial in the harness lane.",
+      "status": "done",
+      "result": "2026-10-04 final build c6d6656: Claude clean-room PASS (Run 4), scripted codex-hooks PASS (Run 3), scripted codex-loop PASS (Run 3); live checks moved to BUG-106"
     },
     {
       "id": "RS-M7a",
@@ -1000,34 +1003,34 @@
     },
     {
       "id": "RS-M7b",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "plan": "plans/M7.md §5/§6/§4.2"
     },
     {
       "id": "RS-M7c",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "plan": "plans/M7.md §5/§6/§4.2"
     },
     {
       "id": "DT",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "plan": "plans/M7.md §5/§6/§4.2"
     },
     {
       "id": "RS-L",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "plan": "plans/M7.md §5/§6/§4.2"
     },
     {
       "id": "RS-M7d",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "after": "M7-A BD",
       "blocks": "the next cli merge",
       "plan": "plans/M7.md addendum A6.1 (list: agents/architect.md, agents/developer.md, agents/devops.md, agents/qa.md, skills/sprint-execution/SKILL.md)"
     },
     {
       "id": "RS-M7e",
-      "status": "pending",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
       "after": "M7-B BD",
       "blocks": "the next cli merge",
       "plan": "plans/M7.md addendum A6.1 (list: agents/developer.md, hooks/stamp-and-gate.sh, skills/sprint-execution/SKILL.md, skills/sprint-execution/dispatch-serial.md)"

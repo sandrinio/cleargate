@@ -65,3 +65,34 @@ artifact inputs, and at least one `live` run must be PASS.
 
 ### Findings
 - none
+
+## Run 3 — 2026-10-04T06:37:06.898Z — RS-CLOSE final build c6d6656
+
+- result: PASS
+- provider: scripted
+- cli_sha: c6d665656d886810faf31b8feb11f8ce2600ae79
+- artifact_inputs: 016a29676e60c7003378f0e34c3dfa24311913df5b2e17de922624614a3f36ad
+- artifact: cleargate-0.26.1.tgz sha256 b1df68cdd0a64e0a631d4ca71055b9ec9cfa8aeacd7289a05f901688c17fffef
+- container: /Users/ssuladze/Documents/Dev/cg-cleanroom-20261004T064000Z-rsclose-hooks
+- codex: codex-cli 0.154.0-alpha.6.2 · sha256 1d8b80de0a27f69b152bfb9b7b3b4fd3b8c589e4e76213db27219eab9ae53afa · model gpt-5.6-terra
+- trust posture: harness-exact-hash
+
+| Check | Result | Detail |
+|---|---|---|
+| codex.live.discovery | PASS |  |
+| codex.live.session-start | PASS |  |
+| codex.live.post-tool-use | PASS |  |
+| codex.live.edit-deny | PASS |  |
+| codex.live.edit-allow | PASS |  |
+| codex.live.dispatch-deny | PASS |  |
+| codex.live.dispatch-identity | PASS |  |
+| codex.live.shared-hooks | PASS |  |
+| claude.control.edit-deny | PASS |  |
+| codex.verify-install | PASS |  |
+| codex.live.roles | PASS | 11 roles listed; qa spawned with its instructions |
+| codex.live.skills | PASS | flashcard, sprint-dashboard, sprint-execution room-local |
+| codex.live.metering | INFO | unavailable |
+| codex.live.trust-posture | INFO | harness-exact-hash: 5 hooks |
+
+### Findings
+- none
