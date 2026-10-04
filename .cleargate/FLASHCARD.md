@@ -1,3 +1,5 @@
+2026-10-04 · #close #carry-over · Until BUG-118 ships, close Step 2.6d archives Parking Lot/carry_over items as Completed; restore them after.
+2026-10-04 · #close #git · git mv after editing a file stages the old index copy; git add the new path again or the edit misses the commit.
 2026-09-30 · #tools #test-harness · Yielded exec output is not completion; retain session_id and poll to final exit. Save long-suite logs durably.
 2026-09-30 · #test-harness #baseline · Frozen /tmp acceptance fixtures can vanish across a pause; preserve a durable checksum-backed archive.
 2026-09-27 · #shell #zsh · zsh expands a word starting with = as a command path: echo ==== aborts the chain; quote it.
