@@ -60,7 +60,7 @@
 
 - [[SPRINT-40]] — status: Completed
 
-- [[SPRINT-41]] — status: Active
+- [[SPRINT-41]] — status: Completed
 
 - [[SPRINT-42]] — status: Draft
 

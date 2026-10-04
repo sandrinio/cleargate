@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
 carry_over: false
 area: planning,sprint-execution,sdr
-status: Approved
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-09-26T13:00:00Z

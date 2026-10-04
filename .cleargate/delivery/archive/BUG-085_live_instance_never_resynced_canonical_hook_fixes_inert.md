@@ -4,7 +4,7 @@ parent_ref: ""
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Ready
+status: "Completed"
 severity: P1-High
 reporter: sandrinio
 area: scaffold-hooks

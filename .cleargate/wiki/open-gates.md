@@ -31,10 +31,6 @@ _No items pending Gate 2 ambiguity clearance._
 Items with `status: Ready` that have not been pushed to the remote PM tool (`remote_id` is empty).
 
 
-- [[BUG-085]] — status: Ready
-
-- [[BUG-089]] — status: Ready
-
 - [[PROPOSAL-029]] — status: Ready
 
 

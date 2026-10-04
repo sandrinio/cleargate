@@ -3,7 +3,7 @@ epic_id: EPIC-058
 parent_ref: null
 parent_cleargate_id: null
 sprint_cleargate_id: null
-carry_over: false
+carry_over: true
 status: Draft
 approved: true
 approved_by: sandrinio

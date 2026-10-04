@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: cli,frontmatter,stamp
-status: Triaged
+status: "Completed"
 severity: P1-High
 reporter: orchestrator
 approved: true

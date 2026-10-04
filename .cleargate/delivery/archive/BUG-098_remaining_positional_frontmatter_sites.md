@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
 carry_over: false
 area: frontmatter,cli
-status: Triaged
+status: "Completed"
 severity: P1-High
 reporter: orchestrator (SPRINT-41 fix-wave Architect census, plans/M5-fixwave.md Follow-ups)
 approved: true

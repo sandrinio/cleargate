@@ -1,0 +1,8 @@
+{
+  "story": "STORY-058-09",
+  "command": "node scripts/clean-room/claude-baseline.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/clean-room-evidence.md --ref main",
+  "ran_at": "2026-10-04T07:03:33.926Z",
+  "exit_code": 0,
+  "status": "green",
+  "reason": null
+}

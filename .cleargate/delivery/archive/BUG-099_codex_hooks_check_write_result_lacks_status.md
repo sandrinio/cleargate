@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
 carry_over: false
 area: clean-room
-status: Triaged
+status: "Completed"
 severity: P1-High
 reporter: orchestrator (SPRINT-41, from the STORY-058-13 C3 entry re-derivation OD-F1, 2026-09-27)
 approved: true

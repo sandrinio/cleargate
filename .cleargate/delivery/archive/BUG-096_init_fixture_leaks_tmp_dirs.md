@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: "SPRINT-41"
 carry_over: false
 area: test-harness
-status: Triaged
+status: "Completed"
 severity: P2-Medium
 reporter: orchestrator (SPRINT-41 fresh-folder journey, 2026-09-26)
 approved: true
