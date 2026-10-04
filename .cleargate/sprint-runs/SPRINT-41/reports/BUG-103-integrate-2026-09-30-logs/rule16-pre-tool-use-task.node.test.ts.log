@@ -1,0 +1,27 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/pre-tool-use-task.node.test.ts
+
+▶ pre-tool-use-task.sh: dispatch marker auto-write (CR-026)
+  ✔ scenario 1: STORY marker parse → dispatch written with STORY-026-01 + developer (458.019334ms)
+  ✔ scenario 2: BUG marker parse → dispatch written with BUG-025 + developer (470.449792ms)
+  ✔ scenario 3: CR marker parse → dispatch written with CR-026 + architect (543.901834ms)
+  ✔ scenario 4: EPIC marker parse → dispatch written with EPIC-026 + architect (474.284208ms)
+  ✔ scenario 5: no-marker fallback → no dispatch written, exit 0, log "no marker: regex miss" (327.877833ms)
+  ✔ scenario 6: parallel-spawn collision → both markers written with distinct filenames (1970.74675ms)
+  ✔ Agent tool_name is a dispatch tool and writes a ground-truth marker (649.555ms)
+  ✔ Edit with no subagent_type is not a dispatch tool and writes no marker (204.071875ms)
+  ✔ unknown tool_name with a subagent-shaped payload still writes a dispatch marker (562.71ms)
+  ✔ invalid agent_type → hook exits 0 without writing dispatch, log "no marker: agent_type" (212.661416ms)
+  ✔ no active sprint sentinel → hook exits 0 without writing dispatch (133.931542ms)
+  ✔ writer field contains pre-tool-use-task.sh identifier (452.095541ms)
+  ✔ HOTFIX marker parse → dispatch written with HOTFIX-001 (429.6565ms)
+✔ pre-tool-use-task.sh: dispatch marker auto-write (CR-026) (6891.182459ms)
+ℹ tests 13
+ℹ suites 1
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7147.123125

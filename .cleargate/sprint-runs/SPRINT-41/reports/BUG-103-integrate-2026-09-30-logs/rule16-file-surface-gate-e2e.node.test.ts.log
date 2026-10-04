@@ -1,0 +1,41 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/file-surface-gate-e2e.node.test.ts
+
+▶ CR-086: file-surface pre-commit gate fires end-to-end
+  ✔ 1. BLOCKS a commit staging an off-surface file — stderr names the path (POSITIVE CONTROL) (2245.951708ms)
+  ✔ 2. ALLOWS a commit staging only an on-surface file (GREEN-BY-ACCIDENT today — see leg 1) (2081.741208ms)
+  ✔ 3a. FIRES inside a linked worktree whose .active exists only in the main checkout — blocks off-surface (2160.919708ms)
+  ✔ 3b. same linked worktree ALLOWS an on-surface commit (GREEN-BY-ACCIDENT today — see leg 1) (2164.891291ms)
+  ✔ 4a. a prose-bearing §3.1 row resolves to its backticked path and is NOT flagged off-surface (2117.862ms)
+  ✔ 4b. a multi-path §3.1 row with trailing prose declares BOTH paths, not just the first (2172.7735ms)
+  ✔ 5a. SKIP_SURFACE_GATE=1 still bypasses the gate (GREEN-BY-ACCIDENT today — see leg 1) (1938.227167ms)
+  ✔ 5b. sole-bypass control: SKIP_RED_GATE=1 alone must NOT bypass the surface gate (2055.603ms)
+  ✔ 5c. structural guard: the canonical surface-diff script reads exactly one SKIP_ token (1.416791ms)
+✔ CR-086: file-surface pre-commit gate fires end-to-end (16940.553333ms)
+▶ CR-086 extra leg 6: dispatcher unit — isolates L1 (symlink resolution) from the surface gate entirely
+  ✔ 6a. RELATIVE symlink: dispatcher finds and runs its sibling probe hook (139.40075ms)
+  ✔ 6b. ABSOLUTE symlink: dispatcher finds and runs its sibling probe hook (this repo's actual installed form) (139.366792ms)
+✔ CR-086 extra leg 6: dispatcher unit — isolates L1 (symlink resolution) from the surface gate entirely (278.90225ms)
+▶ CR-086 extra leg 7: canonical == live-root parity (green today; must go red on a one-tier-only edit)
+  ✔ file_surface_diff.sh is byte-identical between canonical and live-root (1.288375ms)
+  ✔ cleargate-enforcement.md is byte-identical between canonical and live-root (0.14525ms)
+✔ CR-086 extra leg 7: canonical == live-root parity (green today; must go red on a one-tier-only edit) (1.516833ms)
+▶ CR-086 extra leg 8: doc-truth — cleargate-enforcement.md describes the real mechanism (canonical + live-root)
+  ✔ 8a. [canonical] no longer claims 'cleargate init' installs the hook symlink (0.204958ms)
+  ✔ 8b. [canonical] §6.5 Install region negates the false claim and still carries the ln -sf recipe (0.222333ms)
+  ✔ 8c. [canonical] §6.3 parser contract states paths must be backtick-quoted (0.164125ms)
+  ✔ 8d. [canonical] a new §6.6 exit-0 ledger section exists (0.141709ms)
+  ✔ 8a. [live-root] no longer claims 'cleargate init' installs the hook symlink (0.258333ms)
+  ✔ 8b. [live-root] §6.5 Install region negates the false claim and still carries the ln -sf recipe (0.139958ms)
+  ✔ 8c. [live-root] §6.3 parser contract states paths must be backtick-quoted (0.120917ms)
+  ✔ 8d. [live-root] a new §6.6 exit-0 ledger section exists (0.099708ms)
+✔ CR-086 extra leg 8: doc-truth — cleargate-enforcement.md describes the real mechanism (canonical + live-root) (1.446333ms)
+ℹ tests 21
+ℹ suites 4
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17534.040958

@@ -1,0 +1,46 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/sprint-execution-skill-drift.red.node.test.ts
+
+▶ BUG-103 T1 — both renders carry the corrected kickoff commands
+  ✔ Claude canonical SKILL.md names "cleargate sprint init SPRINT-NN --stories" (1.188417ms)
+  ✔ Claude canonical SKILL.md says "Five automated checks" (0.353917ms)
+  ✔ Claude canonical SKILL.md gives a concrete run_script.sh node example (0.436625ms)
+  ✔ Codex render SKILL.md names "cleargate sprint init SPRINT-NN --stories" (0.285ms)
+  ✔ Codex render SKILL.md says "Five automated checks" (0.2385ms)
+  ✔ Codex render SKILL.md gives a concrete run_script.sh node example (0.349958ms)
+✔ BUG-103 T1 — both renders carry the corrected kickoff commands (3.444208ms)
+▶ BUG-103 T2 — both renders carry the §A.2 bookkeeping rule
+  ✔ Claude canonical SKILL.md names orchestrator bookkeeping commits on sprint/S-NN (0.452916ms)
+  ✔ Codex render SKILL.md names orchestrator bookkeeping commits on sprint/S-NN (0.358208ms)
+✔ BUG-103 T2 — both renders carry the §A.2 bookkeeping rule (0.917792ms)
+▶ BUG-103 T3 — both renders plus both dispatch-serial.md copies name the absolute reports path
+  ✔ Claude canonical SKILL.md names the main checkout's absolute reports path (0.793958ms)
+  ✔ Codex render SKILL.md names the main checkout's absolute reports path (1.041167ms)
+  ✔ Claude canonical dispatch-serial.md names the main checkout's absolute reports path (0.22325ms)
+  ✔ Codex render dispatch-serial.md names the main checkout's absolute reports path (0.0825ms)
+✔ BUG-103 T3 — both renders plus both dispatch-serial.md copies name the absolute reports path (2.248834ms)
+▶ BUG-103 T4 — the canonical §C.9 lead carries the serial-host sentence (I16)
+  ✔ Claude canonical SKILL.md §C.9 lead names the serial-dispatch-host carve-out (0.220375ms)
+  ✔ Codex render SKILL.md §C.9 lead carries the same pass-through sentence once regenerated (0.150458ms)
+✔ BUG-103 T4 — the canonical §C.9 lead carries the serial-host sentence (I16) (0.407875ms)
+▶ BUG-103 T5 — both renders' §A.4 plus architect.md/architect.toml name the one-wave waves.json
+  ✔ Claude canonical SKILL.md §A.4 says the ≤2-story plan is still one serial wave, always written (0.277541ms)
+  ✔ Codex render SKILL.md §A.4 says the ≤2-story plan is still one serial wave, always written (0.206709ms)
+  ✔ architect.md names the tiny-sprint one-wave plans/waves.json output (architect.md:108, E9) (0.096167ms)
+  ✔ architect.toml names the tiny-sprint one-wave plans/waves.json output (architect.md:108, E9) (0.087625ms)
+✔ BUG-103 T5 — both renders' §A.4 plus architect.md/architect.toml name the one-wave waves.json (0.72175ms)
+▶ BUG-103 T6/T7 — validate_bounce_readiness.mjs dirty-tree scope
+  ✔ T6: wiki-only dirt (modified + untracked .cleargate/wiki/*) passes (796.034209ms)
+  ✔ T7 (regression guard, already green): an uncommitted change under src/ still blocks (804.791791ms)
+  ✔ T7b (regression guard, already green): bookkeeping dirt outside .cleargate/wiki/ blocks even next to wiki churn (813.607709ms)
+  ✔ T7c (regression guard, already green): a page renamed out of .cleargate/wiki/ blocks (the -> new side decides) (800.392917ms)
+✔ BUG-103 T6/T7 — validate_bounce_readiness.mjs dirty-tree scope (3214.969084ms)
+ℹ tests 22
+ℹ suites 6
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3442.436416

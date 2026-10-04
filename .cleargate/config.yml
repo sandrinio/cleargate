@@ -1,5 +1,5 @@
 # ClearGate per-repo configuration.
-# See cleargate-planning/.cleargate/config.example.yml for the full schema.
+# See .cleargate/config.example.yml for the full schema (canonical: cleargate-cli/scaffold/core/.cleargate/).
 
 wiki:
   index_token_ceiling: 8000

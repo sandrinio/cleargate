@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T22:01:56Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: 5bda3b15-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -69,7 +69,7 @@ As a ClearGate maintainer, I want a repeatable clean-room verification procedure
 ### 1.4 Open Questions
 - **Question:** should `verify-install` be a public command or hidden like `stamp`?
 - **Recommended:** public. Users hitting a broken install benefit from it, and it is the natural thing to ask for in a bug report.
-- **Human decision:** {pending Gate 1}
+- **Resolved 2026-09-25 (Architect, under the owner's autonomy directive):** public, reachable in pre-member state (not in GATED_COMMANDS).
 
 ### 1.5 Risks
 - A driver that only checks file presence gives false confidence: the 2026-09-04 clean-room run found a defect where every file was present and correct, and the failure was behavioral. The checklist must include behavioral probes (hooks actually firing), even where they stay manual.
@@ -121,30 +121,38 @@ Feature: Clean-room verification driver
 
 | Item | Value |
 |---|---|
-| Primary File | `cleargate-cli/src/cli.ts` |
-| Related Files | `cleargate-cli/scripts/verify-pack.mjs` |
-| New Files Needed | `cleargate-cli/src/commands/verify-install.ts`, `.cleargate/knowledge/clean-room-verification.md` |
+| Primary File (new) | `cleargate-cli/src/commands/verify-install.ts` |
+| Related Files | `cleargate-cli/src/cli.ts`, `cleargate-cli/src/commands/init.ts`, `cleargate-cli/CHANGELOG.md`, `cleargate-cli/scripts/verify-pack.mjs` — reference, unchanged |
+| New Files Needed | `.cleargate/knowledge/clean-room-verification.md`, `cleargate-cli/src/lib/cli-package-root.ts`, `cleargate-cli/test/commands/verify-install.red.node.test.ts`, `cleargate-cli/test/commands/verify-install-cli.red.integration.node.test.ts`, `cleargate-cli/test/docs/clean-room-verification-doc.red.node.test.ts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-08-devops.md` |
 
-- `.cleargate/knowledge/clean-room-verification.md` — **create**. The procedure.
-- `cleargate-cli/src/commands/verify-install.ts` — **create**. The driver.
-- `cleargate-cli/src/cli.ts` — **modify**. Register the command.
-- `cleargate-cli/scripts/verify-pack.mjs` — **reference**. Existing packed-artifact verification; the driver reuses its assertions where they overlap.
+- `.cleargate/knowledge/clean-room-verification.md` — **create** (outer, meta-repo only; no `scaffold/core` twin). It verifies ClearGate's own packed artifact, and shipping it would change every install's bytes.
+- `cleargate-cli/src/commands/verify-install.ts` — **create**. The driver: 12 pinned checks, a per-host `HOST_VERIFIERS` table, and the live-check list.
+- `cleargate-cli/src/lib/cli-package-root.ts` — **create**. `findCleargatePackageRoot`, the one package-root walk (bundled and tsx).
+- `cleargate-cli/src/cli.ts` — **modify**. Register the public `verify-install` command before `upgrade`.
+- `cleargate-cli/src/commands/init.ts` — **modify**. Route `readRunningCliVersion` through `findCleargatePackageRoot`; nothing else.
+- `cleargate-cli/CHANGELOG.md` — **modify**. `### Added` under `## Unreleased`.
+- `cleargate-cli/scripts/verify-pack.mjs` — **reference, unchanged**. Overlapping assertions are re-expressed over the installed tree with `src/lib` accessors; `src/` never imports `scripts/`.
 
 ### 3.2 Technical Logic
 The driver checks what a machine can check about an installed tree; the document carries what only a human with a running host can check. Keeping both in one story is deliberate — a driver without the document gives false confidence, and a document without the driver is not run.
 
 Ground the check list in what the 2026-09-04 run actually exercised: payload tree, hook mode bits, pin-placeholder absence, bounded block byte-size, MCP registration, `settings.json` event set, `doctor`, `scaffold-lint`. That run is the reference implementation of the procedure this story writes down.
 
+`scaffold-lint` from the 2026-09-04 run lints the scaffold *source* (`cleargate-planning/`), not an install, so it is not a clean-room check. The 2026-09-04 run installed the published 0.26.1 via the global binary, and that was correct for a published release. A sprint artifact must be packed and put first on PATH (M4 plan F1).
+
 ### 3.3 API Contract (if applicable)
-`cleargate verify-install [--host <name>]` → exit 0 all checks pass; non-zero listing failures; always prints the un-checkable set.
+`cleargate verify-install [--host <name>] [--json] [--cwd <dir>]` → exit 0 when every machine check passes; exit 1 listing every failed check (with the offending files); exit 2 on usage errors (unregistered `--host`, missing `--cwd`). It always prints the live-session checks it cannot make. It is read-only, it never creates or falls back to a temp directory, and its check ids are stable (M4 plan catalogue).
 
 ## Task Breakdown
 
-- [ ] Write `.cleargate/knowledge/clean-room-verification.md`, including the rationale for excluding the dogfood instance and `/tmp`.
-- [ ] Implement the machine-checkable assertions in `verify-install.ts`.
-- [ ] Register the command in `cli.ts`.
-- [ ] Make the driver report the checks it cannot make, not just the ones it made.
-- [ ] Validate the driver against a deliberately broken install for each failure mode.
+- [ ] Write .cleargate/knowledge/clean-room-verification.md with the pinned H2 sections, including why the dogfood instance, a local-dist install and /tmp cannot witness payload defects
+- [ ] Add src/lib/cli-package-root.ts (findCleargatePackageRoot) and route init's readRunningCliVersion through it
+- [ ] Implement src/commands/verify-install.ts: the 12 pinned checks, HOST_VERIFIERS.claude, the live-check list, text and --json output, exit 0/1/2, read-only
+- [ ] Register the public verify-install command before upgrade in cli.ts
+- [ ] Add the CHANGELOG ### Added entry under ## Unreleased
+- [ ] Prove every failure mode against a deliberately broken fixture install (U2-U16)
+- [ ] QA-Verify follows the procedure end to end in a sibling clean room; every gap found is folded back into the doc
 
 ## 4. Quality Gates
 

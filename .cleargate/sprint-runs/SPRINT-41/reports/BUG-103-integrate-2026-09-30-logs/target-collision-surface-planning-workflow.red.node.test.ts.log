@@ -1,0 +1,35 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/collision-surface-planning-workflow.red.node.test.ts
+
+▶ STORY-033-03 Bash Unit tests (collision_surface.sh parser)
+  ✔ Bash Unit 1: collision_surface.sh emits a column-1 path (the multi-column bug fix) (443.459083ms)
+  ✔ Bash Unit 2: collision_surface.sh emits a column-2 path (no regression vs forked parser) (406.974125ms)
+  ✔ Bash Unit 3: non-path cells (Yes, No, Yes/No, N/A) are NOT emitted (162.522292ms)
+  ✔ Bash Unit 4: comma-separated multi-path cell emits each path separately (635.956ms)
+✔ STORY-033-03 Bash Unit tests (collision_surface.sh parser) (1649.58ms)
+▶ STORY-033-03 Predicate tests (wave-compatibility predicate via waves.json)
+  ✔ Predicate 1: disjoint stories produce a wave entry with parallel: true (2.259708ms)
+  ✔ Predicate 2: shared-surface pair is serialized into different waves with collision cited in rationale (0.813792ms)
+  ✔ Predicate 3: dependency-predecessor is placed in an earlier wave than its dependent (0.913666ms)
+✔ STORY-033-03 Predicate tests (wave-compatibility predicate via waves.json) (4.131416ms)
+▶ STORY-033-03 Edge tests (tiny-sprint floor + fail-safe-serialize)
+  ✔ Edge 1: N≤2 stories → waves.json emitted with single serial wave (parallel: false) (0.624208ms)
+  ✔ Edge 2: unknown/missing collision metadata → trailing serial wave with fail-safe rationale (0.724834ms)
+✔ STORY-033-03 Edge tests (tiny-sprint floor + fail-safe-serialize) (1.444834ms)
+▶ STORY-033-03 Acceptance tests (§2.1 Gherkin scenarios)
+  ✔ Acceptance 1 (Sc1): fan-out plans collision-free waves — 3 disjoint parallel + 1 DB serial (0.785458ms)
+  ✔ Acceptance 2 (Sc2): collision_surface.sh emits column-1 path that old cols[2] parser misses (440.235042ms)
+  ✔ Acceptance 3 (Sc3): shared-surface predicate serializes A and B, rationale cites collision (0.934792ms)
+  ✔ Acceptance 4 (Sc4): N=2 stories → single serial wave in waves.json (parallel: false) (0.67575ms)
+  ✔ Acceptance 5 (Sc5): unknown metadata → own trailing serial wave, rationale = exact fail-safe phrase (1.100166ms)
+  ✔ Acceptance bonus: architect-reader.md and architect-synth.md exist in live and canonical paths (0.253667ms)
+✔ STORY-033-03 Acceptance tests (§2.1 Gherkin scenarios) (444.145834ms)
+ℹ tests 15
+ℹ suites 4
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2324.648416

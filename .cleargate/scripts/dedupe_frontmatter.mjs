@@ -21,6 +21,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as url from 'node:url';
+import { locateFrontmatterFence } from './assert_story_files.mjs';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -48,25 +49,31 @@ function collectMd(dir) {
 }
 
 /**
- * Parse a raw markdown string into:
- *   fmLines  — the lines between the opening and closing `---` delimiters
- *   closeIdx — index of the closing `---` line (in the full `lines` array)
- *   lines    — all lines of the file
+ * Locate a raw markdown string's frontmatter and split its YAML into lines.
+ * BUG-098: the block is found with assert_story_files.mjs's position-independent
+ * locateFrontmatterFence, so a leading `<instructions>` preamble is skipped.
+ *   span        — the located fence span ({start, end, yamlStart, yamlEnd, eol})
+ *   fmLines     — the lines between the opening and closing `---` delimiters
+ *                 (a CRLF line keeps its trailing \r)
+ *   hadFinalEol — the YAML text ended with the EOL before the closing fence;
+ *                 that final empty element is popped from fmLines
  *
- * Returns null if the file has no valid frontmatter.
+ * Returns null if the file has no frontmatter, or its framing is malformed
+ * (the locator throws).
  */
 function parseFmLines(raw) {
-  const lines = raw.split('\n');
-  if (lines[0] !== '---') return null;
-  let closeIdx = -1;
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i] === '---') {
-      closeIdx = i;
-      break;
-    }
+  let span = null;
+  try {
+    span = locateFrontmatterFence(raw);
+  } catch {
+    return null;
   }
-  if (closeIdx === -1) return null;
-  return { lines, closeIdx, fmLines: lines.slice(1, closeIdx) };
+  if (!span) return null;
+  const yaml = raw.slice(span.yamlStart, span.yamlEnd);
+  const fmLines = yaml.split('\n');
+  const hadFinalEol = yaml.endsWith('\n');
+  if (hadFinalEol) fmLines.pop();
+  return { span, fmLines, hadFinalEol };
 }
 
 /**
@@ -173,7 +180,7 @@ for (const filePath of files) {
     continue;
   }
 
-  const { lines, closeIdx, fmLines } = parsed;
+  const { span, fmLines, hadFinalEol } = parsed;
   const dupes = findDuplicateKeys(fmLines);
 
   if (dupes.size === 0) {
@@ -190,15 +197,14 @@ for (const filePath of files) {
     continue;
   }
 
-  // Build the new file content: deduplicated frontmatter + rest unchanged
+  // Build the new file content: deduplicated frontmatter spliced between the
+  // located fences; every byte outside the YAML (preamble, fences, body) is kept.
   const cleanedFmLines = dedupeLines(fmLines, dupes);
-  const newLines = [
-    lines[0],            // opening ---
-    ...cleanedFmLines,
-    lines[closeIdx],     // closing ---
-    ...lines.slice(closeIdx + 1),
-  ];
-  const newContent = newLines.join('\n');
+  const newContent =
+    raw.slice(0, span.yamlStart) +
+    cleanedFmLines.join('\n') +
+    (hadFinalEol ? '\n' : '') +
+    raw.slice(span.yamlEnd);
 
   // Verify the result is actually different (guard against no-op edge cases)
   if (newContent === raw) {

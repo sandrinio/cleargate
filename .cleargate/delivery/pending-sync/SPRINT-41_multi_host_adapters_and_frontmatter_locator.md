@@ -14,9 +14,9 @@ start_date: 2026-09-08
 end_date: 2026-10-09
 synced_at: null
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-11T22:25:54Z
+updated_at: 2026-09-30T15:34:45Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 11c29fd3-dirty
+updated_at_version: 06042f17-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -33,7 +33,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-04T19:08:53Z
+  last_stamp: 2026-09-26T13:58:17Z
   sessions: []
 ---
 
@@ -57,26 +57,60 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 > Readiness checks are specification checks, not evidence that the harness works. The Architect's cross-milestone review and M0's live enforcement proofs remain pending. No re-initialization or direct state-cache editing is authorized.
 >
 > **Amendment 2026-09-24T21:53:44Z:** the owner directed [[CR-123]] (SPIDR scenario coverage, approved the same day) into this sprint, followed by a re-plan. The set is now **17 items: 13 stories, 3 bugs, 1 CR**. CR-123 was registered by one append-only genesis event (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-25.mjs`); the 16 existing records and the event prefix are unchanged.
+>
+> **Amendment 2026-09-26T09:30:00Z:** the owner asked for a cheap fresh-folder test, from init through a few epics and stories, with the direction "log every issue you find and fix them". The journey (`sprint-runs/SPRINT-41/reports/fresh-journey-smoke.md`) found one more trigger for [[BUG-090]]: the epic and story templates scaffold no `approved:` key. The orchestrator also found [[BUG-096]], the test-fixture temp-dir leak. Four output defects became [[BUG-097]]. FJ-6 is by-design (protocol §495). BUG-090 moves from known-fail to in-sprint fix. The set is now **20 items: 13 stories, 6 bugs, 1 CR**. The three bugs were registered by append-only genesis events (`sprint-runs/SPRINT-41/apply-approved-scope-2026-09-26.mjs`); the 17 existing records and the event prefix are unchanged. They run as a fix wave after STORY-058-10 → BD → RS-4a and before STORY-058-11.
+>
+> **Amendment 2026-09-26T10:45:00Z:** the fix-wave plan (`plans/M5-fixwave.md`) was accepted. FW-A1: BUG-090's phantom-fence case follows BUG-067's first-fence parity, so it now reads UNAPPROVED (fail closed). FW-A2 widens BUG-090 to cover hotfix.md, the close_sprint 2.6c sites, the doctor sniffs and the approveProbeStory flip. The Architect's census found [[BUG-098]]: the remaining positional readers, including a `sprint init --allow-drift` write-back that plants a phantom block. That is goal-critical ("stop corrupting"), so BUG-098 was registered by `apply-approved-scope-2026-09-26b.mjs`. The set is now **21 items: 13 stories, 7 bugs, 1 CR**. Wave order: wave14 (-10) → BD → RS-4a → fw1 BUG-096 → fw2 BUG-097 → fw3 BUG-090 → fw4 BUG-098 → wave15 (-11). `--known-fail sprint-init=BUG-090` is retired from -11 QA, RS-4, RS-5 and RS-CLOSE.
+>
+> **Amendment 2026-09-26T13:00:00Z (owner):** after reviewing the mediafi SPRINT-03 replan, the owner said: "that's how i want cleargate to be planning sprints" and "i want this delivered in the sprint. so the sprint also runs the same way from now on". [[CR-124]] (contract-first build-then-integrate sprint DAG, amending [[EPIC-055]]) is added as scope and registered by `apply-approved-scope-2026-09-26c.mjs`. The set is now **22 items: 13 stories, 7 bugs, 2 CRs**. The sprint's remaining work is being re-planned contract-first: real collisions only, contract branches, parallel builds in cli worktrees, integration in dependency order, and merges one at a time. R1 (serial single-checkout execution) is lifted as far as parallel builds need. The re-plan lives in `plans/replan-contract-first.md` and supersedes the wave order above once applied. STORY-058-11, STORY-058-12 and EPIC-055 are reset to 🔴 by CR-124 until amended.
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
 |---|---|---|---|---|---|
-| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M0 step B0 + M3 wave11 | n | low |
 | `BUG-067` | Frontmatter locator: find the fence, don't require offset 0 (3 call sites) | standard | M0 | n | med |
 | `STORY-058-01` | Tracked `scaffold/core` + `scaffold/hosts/claude` payload layout | standard | M1 | n | high |
 | `STORY-058-02` | Repoint scaffold-source validation + manifest builder; drop the sibling dependency | standard | M1 | n | med |
 | `STORY-058-03` | `HostAdapter` contract, registry, behavior-preserving Claude adapter | standard | M2 | n | med |
 | `STORY-058-04` | `cleargate init --host` selector parsing and profile expansion | standard | M2 | y | med |
-| `STORY-058-05` | `cleargate host list \| add \| remove` lifecycle commands | standard | M3 (after -06; SDR 2026-09-24) | y | med |
+| `STORY-058-05` | `cleargate host` list/add/remove lifecycle commands | standard | M3 | y | med |
 | `STORY-058-06` | Install-manifest host ownership fields with legacy snapshot migration | standard | M3 | y | med |
 | `STORY-058-07` | Per-host scoping of doctor, upgrade, uninstall, prune | standard | M3 | n | med |
+| `BUG-085` | Live `/.claude/` re-sync, then durable meta-repo drift detection | standard | M3 | n | low |
 | `STORY-058-08` | Clean-room verification procedure + `cleargate verify-install` driver | standard | M4 | y | low |
 | `STORY-058-09` | Clean-room Claude regression baseline (no-flag and `--host all`) | standard | M4 | y | low |
-| `STORY-058-10` | Codex payload surfaces: hooks.json, config.toml MCP, `AGENTS.md` injection | standard | M5 | n | med |
+| `STORY-058-10` | Codex payload surfaces: hooks.json, config.toml MCP, `AGENTS.md` injection | standard | M5 | y | med |
 | `STORY-058-11` | Codex role/skill translation + harness-neutral repo-root shim | standard | M5 | y | med |
-| `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | n | med |
-| `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | n | low |
+| `STORY-058-12` | Host dispatch-mode split: Task-based parallel dispatch (Claude) vs serial fallback (Codex) | standard | M6 | y | med |
+| `STORY-058-13` | Codex end-to-end loop evidence: one real story through Architect→QA-Red→Developer→QA-Verify | standard | M6 | y | low |
 | `BUG-089` | PreToolUse gates exit 1, which Claude Code does not treat as blocking — both gates fail open | standard | M0 | n | low |
-| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M0→M1 wave3 (SDR confirmed) | n | med |
+| `CR-123` | SPIDR coverage for Story/CR/Bug, `spidr-coverage` predicate, Gherkin pointer + error-path fixes | standard | M1 | n | med |
+| `BUG-090` | `sprint init` rejects fresh stories: positional frontmatter in two scripts + no `approved:` key in epic/story templates | standard | M5 | y | med |
+| `BUG-096` | Init-parity test fixture leaks a temp dir per scenario (~17k dirs / 19 GB) | standard | M5 | y | low |
+| `BUG-097` | New-user CLI output defects: `gate -v` on pass, `stamp --dry-run`, `wiki query`, `scaffold-lint` | standard | M5 | y | low |
+| `BUG-098` | Remaining positional frontmatter readers (BUG-067/-090 carry-forward); `--allow-drift` plants a phantom block | standard | M5 | y | med |
+| `BUG-099` | `codex-hooks.mjs check --write-result` writes no `status`/`exit_code`, so close Step 2.9 fails STORY-058-10's deferred verification | fast | M6 | y | low |
+| `BUG-047` | Gate cache stamp deadlock: `gate check` never refreshes `last_gate_check` after a stamp, so preflight/wiki lint report passing items stale (carried; hit 3× by the Codex dogfood) | standard | M7 | y | med |
+| `BUG-100` | Codex default `workspace-write` sandbox makes `.git` read-only; `init --host codex` never configures `writable_roots`, so the sprint loop cannot commit | standard | M7 | y | med |
+| `BUG-101` | Codex dispatches never attributed: live `spawn_agent` message is encrypted and the dispatch hook reads only the message | standard | M7 | y | med |
+| `BUG-102` | Serial driver needs a waves.json the tiny-sprint rule omits; verdicts never move state.json | standard | M7 | y | low |
+| `BUG-103` | sprint-execution skill drift: init needs `--stories`, 5 vs 6 preflight checks, bookkeeping-commit contradiction, ambiguous run_script `<cmd>`, relative report paths | standard | M7 | y | low |
+| `BUG-104` | Older PATH `cleargate` silently grades a newer scaffold; unknown predicate reads as "unsupported predicate shape"; resolver line blind to Codex pin | standard | M7 | y | low |
+| `BUG-105` | Codex install papercuts: Claude restart banner on Codex-only install, hook noise on deleted files, prose slugs rejected | standard | M7 | y | low |
+| `BUG-106` | Clean-room live dispatch controls (S4, C6) carry the work-item id only in the encrypted message; harness kickoff left uncommitted | standard | M7 | y | low |
+| `BUG-107` | Story worktrees are never clean at teardown: run_script incidents, pre-gate reports and hook stamps land inside the worktree, so DevOps needs `--force` | standard | M7 | y | low |
+| `BUG-108` | qa.md requires a QA context pack that the sprint-execution skill never tells the orchestrator to build (`prep_qa_context.mjs <id> <worktree>`) | standard | M7 | y | low |
+| `BUG-109` | run_script.sh records QA-Red's intended red runs as unattributed script incidents | standard | M7 | y | low |
+| `BUG-110` | validate_bounce_readiness / update_state exit 1 unless CLEARGATE_STATE_FILE is set; no `.active` fallback | standard | M7 | y | low |
+| `BUG-111` | dispatch_serial unknown `--wave` error names no valid wave ids | standard | M7 | y | low |
+| `BUG-112` | Codex agent TOMLs and the portable flashcard skill say `Skill(flashcard, …)`, a Claude-only call | standard | M7 | y | low |
+| `BUG-113` | No check that QA-Red's sealed tests meet the item's declared Test Layers minimums before the Developer starts | standard | M7 | y | low |
+| `BUG-114` | close_sprint.mjs cannot find a globally installed CLI, so Gate 4 is unreachable for global/npx users | standard | M7 | y | med |
+| `BUG-115` | §D.5.1 consolidation requires a `code-simplifier` agent ClearGate does not install; no fallback | standard | M7 | y | low |
+| `BUG-116` | devops.md requires an Architect report on every standard-lane story; the skill's post-flight is scan-gated | standard | M7 | y | low |
+| `CR-124` | Contract-first build-then-integrate: sprints planned and run as a dependency DAG, not collision waves | standard | M5 | y | med |
+
+**Milestone column (plain values, so the dashboard groups correctly):** BUG-085 also runs the M0 barrier step B0 (§2.1) before its M3 wave; STORY-058-05 sits in M3 after -06 (SDR 2026-09-24); CR-123 runs as wave3, after M0 and before STORY-058-01.
+
+> **Amendment 2026-09-26T14:00Z (contract-first re-plan):** for unmerged items, Parallel? reads "builds in a parallel lane" (CR-124). Milestone values are unchanged: the dashboard groups by this table's Milestone column and never reads waves.json.
 
 **Decomposition notes.** L3 stories include `STORY-058-07`, `-10`, `-12`, and `-13`; `-07`'s §3.2 carries an explicit split
 signal for the Architect (split into two L2s if `doctor`+`drift` and `upgrade`+`uninstall`+`prune`
@@ -94,6 +128,13 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 *(Architect Sprint Design Review 2026-09-24, re-run under owner rulings R1–R4 — see §4 Execution Log 2026-09-24T22:30:23Z. The first run halted on BUG-046 reachability: `sprint-runs/SPRINT-41/plans/sdr-halt-2026-09-24.md`. Wave plan: `sprint-runs/SPRINT-41/plans/waves.json`.)*
 
 ### 2.1 Phase Plan
+
+> **Contract-first re-plan (2026-09-26, owner: "that's how i want cleargate to be planning sprints" / "the sprint also runs the same way from now on") — authoritative over the wave list below for every unmerged item.** Plan: `sprint-runs/SPRINT-41/plans/replan-contract-first.md`; machine plan: `plans/waves.json` (`schema_version: 2`).
+> - **Contracts (cli):** C1 `contract/S-41-codex` = STORY-058-10 Developer commit `d0f0d95`; C4 `contract/S-41-fence` = BUG-090's Developer commit; C2 `contract/S-41-dispatch` = C1 + STORY-058-11 and CR-124 Developer commits; C3 `contract/S-41-loop` = STORY-058-12's pass-B commit. Frozen exports per the plan §2.
+> - **Build now (4 lanes):** STORY-058-10 pass C, CR-124, STORY-058-11 (C1), BUG-090 (C1); then BUG-096, BUG-097; BUG-098 on C4; STORY-058-12 on C2; STORY-058-13 on C3.
+> - **Integration edges:** BUG-090 and STORY-058-11 after STORY-058-10; BUG-098 after BUG-090; STORY-058-12 after STORY-058-10, STORY-058-11 and CR-124; STORY-058-13 after STORY-058-12 and BUG-090. BUG-096, BUG-097, CR-124 and STORY-058-10 have none.
+> - **Merges** one at a time in the cli main checkout (now permanently on `main`) and on `sprint/S-41`; re-integrate if either moved. QA-Verify and post-flight run on the integrated tree; over-constrained reds are re-scoped by QA-Red.
+> - **Boundaries:** BD after every cli merge; RS-4a after STORY-058-10; RS-4 after STORY-058-11 (live run → RS-4L, needs owner OD1, before RS-CLOSE); RS-CR after CR-124; RS-5 after STORY-058-12; step L (owner) before STORY-058-13's merge; RS-CLOSE last.
 
 **Execution model (R1–R4):** strictly serial, by hand, one item at a time — QA-Red → TPV/Architect only on a pre-gate flag → Developer → QA-Verify → DevOps. Every item touches `cleargate-cli/`, and R1 gives that repo one main checkout with one story branch at a time, so no two items can be in flight. The five-clause predicate agrees independently: no pair is compatible. `launch_wave.mjs` cannot drive this (it only cuts outer-repo worktrees), so `waves.json` is walked by hand.
 
@@ -157,6 +198,13 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 | `.cleargate/scripts/test/bug068_dispatch_tool_name.red.sh` | BUG-089, BUG-085 | 089 → 085 | — |
 | `.cleargate/knowledge/cleargate-enforcement.md` | BUG-089, 058-12 | 089 → 12 | — |
 | `.cleargate/knowledge/clean-room-verification.md` | 058-08 (create), -09 | 08 → 09 | Forward reference (R4), not a refusal |
+| `cleargate-cli/test/helpers/init-fixture.ts` | all remaining cli items except BUG-097 | tail order = merge order | One row per rel; shared enforcement row byte-identical (plan §7.5) |
+| `…/.cleargate/knowledge/cleargate-enforcement.md` (+ twin) | STORY-058-11, CR-124, STORY-058-12 | 11 ∥ CR-124 → 12 | disjoint regions; 12 rewrites §16 b10 and appends §17 |
+| `…/skills/sprint-execution/SKILL.md` | CR-124, STORY-058-12 | CR-124 → 12 | 12's renderer anchors and banned tokens; CR-124 edits only inside A2 plus §A.4 |
+| `…/.cleargate/scripts/launch_wave.mjs` (+ twin) | CR-124, STORY-058-12 | CR-124 → 12 | disjoint regions (CR-124 new exports + launchWave; 12 header + validator) |
+| `…/.codex/agents/*.toml` (generated) | STORY-058-11, CR-124 | second merger regenerates | prebuild `--check` |
+| `…/scripts/clean-room/{codex-hooks,evidence}.mjs` | STORY-058-10, -11, -12, -13 | 10 → 11 → 12 → 13 | chained extensions |
+| live `assert_story_files.mjs` ↔ `prep_reporter_context.mjs` / `dedupe_frontmatter.mjs` | BUG-090, BUG-098 | BUG-090 → BUG-098 (both repos) | ESM import link |
 
 \* The item's own §3.1 names this path, but its parsed surface does not (defect D3).
 
@@ -171,6 +219,10 @@ than one sprint; this sprint takes the foundation slice plus the Codex adapter.
 - **-11 rewrites all nine hooks** Claude runs today. -09's baseline exists to catch exactly this, so re-run it at RS-4 before -12.
 - **B0 breaks the ledger's continuity.** The Reporter treats rows before B0 as unattributable. BUG-089's own segment runs under fail-open gates.
 - `init.ts` is touched by 03/04/06, not the seed's 01/03/04/10; `manifest.ts` by 06/05. The table above supersedes the seed.
+- Parallel outer commits and the surface gate: rule 17 note (RP-A5).
+- Harness runs are serialized, and from a worktree they need an explicit `--container` (rule 20).
+- -12 renderer anchors and banned tokens constrain CR-124's SKILL.md text (plan §7.1).
+- `check-no-exec-mode-vocab` bans "under v2", "v2 only" and similar in agent and skill text.
 
 ### 2.4 Lane Audit
 
@@ -214,6 +266,16 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 | wave15 | M5 | STORY-058-11 | cli | After 10, 01, CR-123, 09; §3.1 still prose (D3) |
 | wave16 | M6 | STORY-058-12 | both | After 03, CR-123, 10, 11 |
 | wave17 | M6 | STORY-058-13 | both | After 12, 08 |
+
+**Remainder (contract-first, derived integration layers — `waves.json` `schema_version: 2`):**
+
+| Layer | Items | Base | Integrates after |
+|---|---|---|---|
+| wave14 | STORY-058-10 | 35580b0 (pass C in its worktree) | — |
+| cf-L0 | BUG-096, BUG-097, CR-124 | cli main | — |
+| cf-L1 | BUG-090, STORY-058-11 | C1 | STORY-058-10 |
+| cf-L2 | BUG-098, STORY-058-12 | C4, C2 | BUG-090; STORY-058-10 + STORY-058-11 + CR-124 |
+| cf-L3 | STORY-058-13 | C3 | STORY-058-12, BUG-090 |
 
 ### 2.7 Pre-dispatch defects
 
@@ -285,6 +347,291 @@ Repo `both` = cli half first, `dist` rebuilt, then the outer half on `sprint/S-4
 - 2026-09-24T22:30:23Z · CR:approach-change · Owner rulings on the SDR halt: (1) **cli work** runs on a story branch in the `cleargate-cli` main checkout (not a worktree), orchestrated by hand one item at a time — QA-Red → TPV/Architect only when the pre-gate scan flags → Developer → QA-Verify → DevOps — without `/workflows`; this extends the 2026-09-11 bootstrap exception. DevOps merges to cli `main` locally only; no push or publish. Outer tracked `.cleargate/**` edits land in the outer repo on `sprint/S-41`; canonical `.claude/**` edits only, live re-sync at boundaries. (2) **BUG-085's M0 step** runs against this repo's real live `.claude/`: back up, re-sync from canonical, restart Claude Code, prove real denials and dispatch identity. This supersedes the bootstrap decision's ban on writing the original live files, for this step only. (3) **All `.cleargate/` changes committed to main** in one chore commit so worktrees and the preflight see them; `.agents/`, `.codex/`, `AGENTS.md` left untouched. Next: fix the item-surface defects the synth listed, then re-dispatch readers and synth with these rulings.
 - 2026-09-24T23:20:00Z · SDR · Re-run under rulings R1–R4: all 17 items placed as 17 serial single-item waves, zero refusals; `waves.json` overwritten. STORY-058-05 moved M2→M3 after -06 (its `host remove` needs -06's manifest `owner` field). BUG-067 and BUG-085 demoted fast→standard. Pre-dispatch defects D1–D4 listed in §2.7. §2 replaced; awaiting the owner's plan confirmation.
 - 2026-09-24T23:34:00Z · Plan confirmed · Owner goal directive: "get sprint ready for execution and you have my permission to start the sprint. during the sprint, make decisions on your own and deliver the sprint goal." This confirms the §2 plan (17 serial waves, STORY-058-05 at M3, BUG-067/BUG-085 standard) and authorises kickoff. The orchestrator set `end_date` 2026-09-26 → 2026-10-09: 17 serial items cannot fit the original window. D2 lane demotions for BUG-067 and BUG-085 were run by the orchestrator through `run_script.sh update_state.mjs --lane-demote` — a §C.7-listed script invoked outside DevOps, recorded here as an edge case (planning action, not a merge). Ambiguity Gate flipped to 🟢.
+- 2026-09-24T23:58:00Z · Kickoff · Preflight 5/5 pass; `devops` agent reachable (check 6, listed in this session's agent registry). `sprint/S-41` cut from main. Cli main baseline at 3364802: 2683 tests, 0 fail, 3 skipped.
+- 2026-09-25T00:10:00Z · CR:spec-clarification · [[STORY-058-10]] §3.2 resolver renamed `resolveBlockSignal(host, outcome)` → `resolveHookSignal({ host, decision })` to match what [[BUG-089]] ships (TPV note A2). No scope change.
+- 2026-09-25T00:10:00Z · BUG-089 · TPV BLOCKED-WIRING-GAP (fake `cleargate` stub answered `doctor --can-edit`; shell suite read the main checkout's hook). arch_bounces=1; QA-Red re-dispatched. Pre-gate `typecheck: exit 254` is structural under R1 (`gate-checks.json` runs `npm --prefix cleargate-cli` in an outer worktree, which never contains the nested repo), so every item will dispatch a live TPV/post-flight Architect per the non-removable safeguard.
+- 2026-09-25T02:20:00Z · BUG-089 · **Done.** QA-Red (1 TPV wiring bounce) → Dev → QA PASS 11/11 → Architect post-flight PASS (first post-flight dispatch stalled >2h with no process running; stopped and re-dispatched) → DevOps. Post-merge full suite found 1 regression invisible pre-merge (`pin-placeholder-coverage`: sentinel gained `__CLEARGATE_VERSION__` without a pin-aware manifest rule) → qa_bounces=1, rework c400d07 → full suite 2698/0 fail. Merges: outer ebd70b09 + a568864b, cli 19a8a0f + a2694e4; MANIFEST cb711e54; `dist` rebuilt from cli a2694e4 (`hook signal` block→2, allow→0).
+- 2026-09-25T02:20:00Z · Carry-forwards from BUG-089 post-flight: (1) `HOOK_ADDITION` exact-string coupling needs a guard test → [[STORY-058-09]] baseline; (2) re-running non-`--force` `cleargate init` on a pre-BUG-089 install adds a second `pre-edit-gate.sh` entry (upgrade/`--force` stay clean) → [[STORY-058-06]]/[[STORY-058-07]] ownership work; (3) pre-existing: `pending-task-sentinel.sh:102` exits 1 under bash 3.2 when no report files exist, skipping dispatch recording → [[BUG-085]] attribution scope at M3; (4) a Codex host needing a non-exit-2 block signal must change both shell tails → [[STORY-058-10]].
+- 2026-09-25T02:20:00Z · Flashcard gate (BUG-089): 9 approved. FLASHCARD-REJECT 2026-09-25 — "A sealed cross-session red test may mix unit + integration assertions…" — reason: one-off adoption detail, not a recurring hazard. FLASHCARD-REJECT 2026-09-25 — "test_pre_edit_gate.sh roots at BASH_SOURCE/../../.. → outer MAIN hook, never the worktree; no override." — reason: fixed in a23c655 (`PRE_EDIT_GATE_HOOK` override). FLASHCARD-REJECT 2026-09-25 — "2026-09-12 · #test-harness #tsx · CG_TEST-backed TMPDIR rejects tsx IPC sockets…" — reason: superseded by the existing 2026-09-12 short-TMPDIR recipe card.
+- 2026-09-25T03:50:00Z · Barrier B0 · **Passed.** Live `.claude/` re-synced from the `sprint/S-41` tip with backup (6 files; pin kept at 0.20.0; live-only files preserved). Fresh headless Claude sessions in fixture repos: E1 enforce-mode uncovered Write refused, E2 warn-mode Write permitted, D1 Agent spawn refused by the flashcard gate, D2 permitted after processing with ledger `agent_type: qa` and a populated sentinel. The same harness before the re-sync reproduced all three defects (Write landed; gate never fired on `Agent`; row attributed to `architect`). Evidence: `reports/BUG-085-b0-proof.md`. The orchestrating session keeps its pre-B0 hook snapshot until a human restart, so its ledger rows stay unattributable until then; this does not block the loop.
+- 2026-09-25T04:45:00Z · BUG-085 M0 follow-up · After B0, 11 cli tests (`test/hooks/{pre-tool-use-task,token-ledger-attribution,token-ledger-regression}`) went red: they read the per-machine LIVE `.claude/hooks/*` and pinned pre-BUG-068/069 contracts. Repointed to canonical (`CLEARGATE_META_ROOT`-aware) and updated to the current contracts; QA PASS; merged cli 515dd3e (2700/0 fail); BUG-085 §4 amended. BUG-085 itself stays open for wave11.
+- 2026-09-25T05:40:00Z · BUG-067 · **Done.** QA-Red (adopted CG_TEST seal, re-rooted; hook-chain input frozen to a fixture after TPV) → TPV APPROVED (temp-build recipe `tsup --out-dir .bug067-build --onSuccess true` + absolute `CLEARGATE_BUILT_CLI`, so `dist` is never built on a story branch) → Dev (shared `src/lib/frontmatter-locator.ts`; 5 positional sites, not 3) → QA PASS 9/9 → Architect PASS → DevOps: outer e031682b, cli 8931b91, suite 2741/0 fail/2 skipped, `dist` rebuilt; live `stamp` on an `<instructions>`-led file keeps `bug_id`, one block, instructions byte-identical. RS-1 is a no-op (`stamp-and-gate.sh` unchanged). **M0 complete.**
+- 2026-09-25T05:40:00Z · Carry-forwards from BUG-067: (1) push/pull/sync write-backs (`push.ts:341`, `pull.ts:172`, `sync.ts:575/665`, `sync/work-items.ts:327`) used to throw on `<instructions>`-led items and now succeed while dropping the preamble — member-only paths, unreachable in this pre-member repo; needs a follow-up bug filed at close; (2) remaining positional sites (`frontmatter-merge.ts`, `sprint.ts:745` second parser, `doctor.ts runCanEdit`; `backfill_hierarchy.mjs` keeps failing closed) → follow-up; (3) `stampHandler` lacks try/catch on malformed input (manual CLI only); (4) locator API cleanup (shared EOL-mapping helper, typed errors).
+- 2026-09-25T05:40:00Z · Flashcard gate (BUG-085 M0 + BUG-067 + M1 plan): 16 approved. FLASHCARD-REJECT — "writeCachedGate already fails closed on malformed frontmatter…7/30 passing on baseline" — reason: item-specific detail. FLASHCARD-REJECT — "BUG-067 hook-chain e2e reads the live pending-sync BUG-067 item…" — reason: fixed in dbca7e4 (frozen fixture). FLASHCARD-REJECT — "cli story/BUG-067 full suite has 11 pre-existing fails in test/hooks/…" — reason: fixed by cli 515dd3e. FLASHCARD-REJECT — "To prove a full-suite failure predates your diff: tagged git stash…" — reason: stash in the shared cli checkout risks others' work; re-run at the merge-base instead. FLASHCARD-REJECT — "2026-08-29 card is fixed by BUG-067 once dist is rebuilt…" — reason: superseded by the orchestrator's correction card (dist rebuilt at 8931b91).
+- 2026-09-25T05:40:00Z · Attribution · This orchestrating session keeps its pre-B0 hook snapshot (no restart yet), so `pre-tool-use-task.sh` never fires for its `Agent` calls. Since BUG-067 the orchestrator writes each dispatch marker by hand with `write_dispatch.sh` (skill §1 fallback, `CLAUDE_SESSION_ID` set), so rows from then on attribute correctly; rows between B0 and that point read `unattributed`.
+- 2026-09-25T07:25:00Z · CR-123 · **Done.** QA-Red → TPV BLOCKED (epic gate-block lookup) → QA-Red fix + e2e added → TPV APPROVED → Dev → QA PASS 10/10 → Architect PASS → DevOps in the reversed order (cli 45bde09 → BD1 → outer eef96600 → BD2 + MANIFEST 5808e869). Post-merge suite caught a Brief-anchor regression in `Bug.md`/`CR.md` invisible pre-merge → qa_bounces=1, rework 7602348c, QA PASS → outer ffc7a6c7, MANIFEST db57ece0, suite 2773/0 fail. Live `gate check`: EPIC-052/053 (ready-for-coding) pass; STORY-058-01, CR-122, BUG-088 pass with `spidr-coverage` not-applicable; CR-123's stale `predicate error` cache replaced (24bb4ec4). **RS-2 done:** live `qa.md` + `SKILL.md` re-synced with backup; parity holds.
+- 2026-09-25T07:25:00Z · Process · New sprint-context rule 16: two-repo items that edit outer docs run every `CLEARGATE_META_ROOT`-honouring cli test against the worktree pre-merge. Carry-forward: `enforcement-doc-coherence` `resolves()` can never resolve decimal `§N.M` Brief anchors (story.md §1.1/§1.4/§1.5/§2.1) — pre-existing test weakness, follow-up at close.
+- 2026-09-25T07:25:00Z · Flashcard gate (CR-123): 8 approved. FLASHCARD-REJECT — "Full npm test with no CLEARGATE_META_ROOT override reads the outer MAIN checkout's canonical docs…" — reason: duplicates the 2026-08-27 cross-branch-dependency card.
+- 2026-09-25T07:35:00Z · Surface gate · Standing bypass (sprint-context rule 17): orchestrator/DevOps chore and conflict-merge commits on `sprint/S-41` may set `SKIP_SURFACE_GATE=1`. The gate resolves the "active" item by recency and whitelists no orchestration artifacts, so once a STORY is the latest-updated item it would block every sprint-plan, flashcard, events and report commit on the sprint branch. Story-branch commits stay fully gated; STORY §3.1 tables gain literal orchestration rows (first: STORY-058-01).
+- 2026-09-25T07:54:00Z · STORY-058-01 · QA-Red wrote 19 reds (cli `744cb5e`). TPV R1 returned BLOCKED-WIRING-GAP: 7c asserted whole-file `.gitignore` equality, but init Step 5d appends a managed block. There were 4 more fixes: stub the resolver probe, add the missing init-level equivalence test, key the 4c census on the snapshot's own files, and scope scenario 5 to its section. The Architect measured all 5 fixes green against a scratch plan-conformant implementation. Applied by QA-Red R2 (cli `83dbc68`: 20 tests, 16 red, 3 baseline-gated skips). TPV R2 was waived because R1 had already measured the exact fixes; the orchestrator re-ran the counts and diffed the edits against the spec. M1.md scenarios 4 and 7 were amended. Developer dispatched. The worktree surface gate skips (the story state is not `In Progress` in frontmatter), so the story-branch commits are gated only by §3.1 review at QA-Verify.
+- 2026-09-25T09:55:00Z · STORY-058-01 · **Done.** Dev (cli `66ed73a`, outer `b478dfd4`) → QA PASS 10/10. QA confirmed that the Dev's 32 fail / 21 cancelled rule-16 sweep is pre-existing, by running solo files at both commits; batch diffs proved noisy under load. Architect post-flight PASS (stopped at budget after its scratch proofs had finished): the scratch build next to a poisoned sibling is byte-identical, and verify-pack is OK. DevOps followed rule 15: outer `9837329c`, then cli `464e1e4b`, then the full suite at 2788/2786/0 fail/2 skip (baseline +15), then BD. The payload is byte- and mode-identical to the CR-123 baseline, `dist/MANIFEST.json` comes from the composed payload, and nothing writes `cleargate-planning/` any more. No live re-sync was needed.
+- 2026-09-25T09:55:00Z · STORY-058-01 follow-ups · Rule 10 was amended (canonical is now `cleargate-cli/scaffold/{core,hosts/claude}/**`) and *Adjacent Implementations* populated. The D4 re-declarations were committed (`a37948f7`: BUG-085, STORY-058-11/12/13 → scaffold paths; BUG-085 also gains the three stale CLAUDE.md sentences from post-flight §3). Five -01 carry-forwards were added to the M1 plan's -02 blueprint (a `composePayload` empty-dir opt-out, descriptive collision/symlink errors, a third stale-MANIFEST reader, fixture `DEPRECATED.md` leakage, and the guard allowlist). Flashcard gate: 1 approved (QA batch-noise); the Architect added 2 cards, 1 of them folded into -02's plan instead of becoming a card. **M1 is 2/3 done.**
+- 2026-09-25T10:45:00Z · STORY-058-02 · QA-Red R1 (cli `43c4556`) → TPV R1 BLOCKED. The sibling-read guard flagged itself and the sealed files, its regex had 5 false negatives, scenario 11 compared a volatile `generated_at`, scenario 12 omitted `.mcp.json`, and scenario 13's victim depended on readdir order. The Architect named the exports and the four-path allowlist in the M1 plan (`bb97b72f`). QA-Red R2 applied F1–F9 (cli `20a40ff`); TPV R2 was waived under the same rule as -01. The M2 plan was drafted in parallel (`b96a4526`), and A1–A7 were applied to STORY-058-03 (`d311771e`).
+- 2026-09-25T12:30:00Z · STORY-058-02 · Dev → cli `477b942`. The full suite was 2806/2804/0 fail/2 skip (baseline +18), all 70 repointed test files were verified, and 7 `.integration.` files carry failures the Dev calls pre-existing; QA re-checks that claim at base `464e1e4`. **Ran long:** 105 min against a 30 min budget (70-file repoint plus solo re-runs). The Dev made three unilateral calls, which QA-Verify checks: identifier renames in two tests to clear the sealed guard's proximity match; a dynamic import of `scripts/build-manifest.ts` in the `--from-source` bridge, to keep its `isMain` entry out of the bundle; and a `composeCanonicalPayload` helper that also writes a MANIFEST. QA-Verify dispatched.
+- 2026-09-25T14:10:00Z · STORY-058-02 · **Done.**
+  - **QA round 1 FAIL** (qa_bounces=1): `--from-source` crashed with `ERR_MODULE_NOT_FOUND` under the bundled `dist/cli.js`. The import path was two `'..'` too deep; the 2026-08-24 card on exactly this was missed. Every test ran in-process under tsx, so none saw it.
+  - **Rework** (cli `358ae35`): `resolveCliPackageRoot` walks up by structure. An installed package without `scripts/` now gets a clean exit 2. A clone-built integration test runs the real bundle (red → green).
+  - QA round 2 PASS. QA also confirmed the 7 "pre-existing" `.integration` fails at base `464e1e4`; `test_close_sprint_v21` is flaky and `gate-run` S7 is pre-existing. The guard rename is a legitimate false-positive fix.
+  - **Architect post-flight PASS**, run in parallel with QA round 2. All four Dev calls accepted, 12 follow-ups routed:
+    - FU-1..4 → STORY-058-06. FU-1 (the compat manifest takes every host's files) is a pre-dispatch requirement.
+    - FU-5/6 → STORY-058-10.
+    - FU-7..12 → close.
+  - The Architect also wrote M2's as-built amendments (V1–V7 re-measured at `358ae35`, M2-A1..A13). STORY-058-03's anchors were re-pointed (`6791a8f2`).
+  - **DevOps:** cli `a821d40` → suite 2810/2808/0 fail/2 skip (baseline +22, the new V7) → BD. The flat payload is byte- and mode-identical to the -01 baseline; verify-pack OK (196 files, payload 80); dist-spawning tests pass post-BD, with 7 pre-existing `.integration` fails, all untouched by the diff.
+  - Flashcard gate: 7 approved. Rejected: 2 duplicates, and 2 merged into one. **The gate cannot see these cards:** `pending-task-sentinel.sh` parses only `- "card"` lists, and the -02 reports used fenced JSON arrays → carry-forward to [[BUG-085]] (it owns that hook).
+- 2026-09-25T14:25:00Z · RS-3 · **M1 complete.**
+  - `b0-live-resync.mjs` dry-run on cli `main`: 0 changes. Live `.claude/` equals `scaffold/hosts/claude/.claude` after pin substitution; doctor's two hook drifts are pin-only, verified. No apply and no fresh-session proof needed.
+  - CLAUDE.md block byte-identical. `.cleargate/templates` and `knowledge` match `scaffold/core`, apart from live-only files.
+  - Fixed live-behind drift: `.cleargate/config.example.yml` ← canonical (CR-079 worktree and `ingest_buckets` doc blocks, CR-107 wording), and the stale `cleargate-planning/` schema pointer in live `config.yml`.
+  - Canonical-behind drift, pre-existing: `scaffold/core/.cleargate/scripts/validate_state.mjs` lacks CR-117 (positional state-file path; landed live-only at `d8ab60b3`). This is the `canonical-live-parity` red → carry-forward to [[BUG-085]] (M3 durable drift check): port CR-117 to canonical. `gate-checks.json` differs by design (meta-repo `npm --prefix` commands).
+- 2026-09-25T14:45:00Z · STORY-058-03 · **M2 started.**
+  - **QA-Red** (cli `11fe514`, 15 min):
+    - `test/helpers/init-fixture.ts` (frozen clock and pin, probe stub).
+    - 19 contract unit reds, all `ERR_MODULE_NOT_FOUND` on `src/hosts/*`.
+    - A 5-scenario parity integration, green by design.
+    - Baseline `/private/tmp/cg-s41-m2-init-baseline` (425 files, sha `bdc4bb1a…`), deterministic over 3 re-runs.
+  - **TPV APPROVED** with no test fix, measured in scratch: a conformant implementation takes the unit file from 0/19 to 19/19, and parity stays 5/5. It found two constraints:
+    - **D1:** a strictly verbatim move reds scenario 11, because the `init.ts:497` fallback holds `CLEARGATE:START`; move it as the constants (M2-A14).
+    - **Q1:** parity plus the injected-seam spy cannot kill "route only when the seam is set". -03 QA-Verify closes this with a static grep; -04's reds add a default-path witness (M2-A15).
+  - Developer dispatched. The M3 Architect plan is running in parallel.
+- 2026-09-25T15:30:00Z · STORY-058-03 · **Done**, with 0 bounces. Dev (cli `0fb61b1`, 20 min, no deviations) → QA PASS → Architect post-flight PASS → DevOps.
+  - **QA:** the static grep was empty, the verbatim move matched hunk for hunk, and a bundled-dist double init placed each hook exactly once.
+  - **Post-flight follow-ups:** FU-5 → -04; FU-1/2/7 → -05 (sink convention, `remove()` never rejects); FU-3 → -07 doc, plus a close CR on `init --force` overwriting `settings.json` wholesale; FU-4 → -10 (`AGENTS.md` would be copied wholesale); FU-6 → close.
+  - **DevOps:** merged cli `55f5d95`. The suite ran 2829/2827/0 fail/2 skip. BD: flat payload byte-identical, and the adapter is bundled. Post-BD parity 5/5 against the M2 baseline.
+  - **Plans:** the M3 plan landed (`plans/M3.md`: -06 → -05 → -07 → BUG-085; 11 `[verify after …]` tags, of which T1–T5 are now resolved). Mid-Sprint Amendment: shared portable assets go in `scaffold/core` under a sharedRoot an adapter declares. STORY-058-04 received amendments B1–B8, with anchors re-measured as M2-A16.
+- 2026-09-25T16:20:00Z · STORY-058-04 · **wave7 started.**
+  - **QA-Red** (cli `a178d38`, 14 min): 4 files. 19 reds; 18 green by design (scenario 13 ×2, the M2-A15 default-path witness, 15 parity compares).
+  - **TPV REJECTED** (28 min, `arch_bounces=1`), with exact re-seal edits E1–E8 (M2-A17/A18):
+    - **W1:** sealed 12c could never fail. `runInitScenario` always passes `payloadDir`, which init reads before `fromSource`, so the `--from-source` mkdtemp was unreachable.
+    - **W2:** 7b's whole-payload census reds for a correct -11 (`.agents/**` in core).
+    - The sealed set let 8 of 23 plausible mutants survive; the amended set kills all 23.
+    - Binding Dev constraints D1–D8 (M2-A19); M2-A20 is a forward note for -10.
+  - **Re-seal** (cli `4785032`, 5 min): E1–E8 applied verbatim. The orchestrator reproduced the red-commit counts (0/11, 3/10, 0/4, 15/15), so Dev proceeds without a second TPV round.
+  - **M3 prep:** STORY-058-06 received amendments C1–C6 (the M2-A13 FU-1 pre-dispatch gate) and was re-gated green. The M2 baseline hash was re-confirmed.
+- 2026-09-25T17:45:00Z · STORY-058-04 · **Done**, with 0 QA bounces and 1 Architect bounce (the TPV re-seal). **M2 complete.**
+  - **Dev** (cli `128bad6`, 18 min): followed D1–D8 verbatim; no deviations. All six files reproduced TPV's conformant counts: 11/11, 10/10, 4/4, 15/15, plus -03's 19/19 and 5/5. 25 witnesses were clean.
+  - **QA PASS** (4 min): sealed tests untouched. The static greps matched, D1–D8 were verified from the diff, and the tsx CLI smokes passed (`--help`, `--host cursor` → 2, `--host ""` → 2).
+  - **Post-flight PASS** (15 min):
+    - FU-1..8 routed. The binding -06 amendments are M3-A1 (one hoisted `include` predicate) and M3-A2 (snapshot `hosts` = the installed set via `mergeInstalledHosts`, plus new scenario 21).
+    - The -10 dispatch text gets M3-A3 (root-level surgery targets are admitted only for a selected declarer) and M3-A4 (a composed payload per selection).
+    - M3 tags T6–T10 are resolved, with anchors re-derived; T11 opens after -07.
+  - **DevOps:** merged cli `2e566b5`. The suite ran 2850/2848/0 fail/2 skip.
+    - BD: the flat payload is byte-identical, and verify-pack reported 196 files, payload 80.
+    - Real-dist smokes: `--help` lists `--host`. `--host cursor` exits 2 and leaves the target empty. No-flag re-init places each hook exactly once. `--host CLAUDE,claude` produces the same file set as no flag. `--from-source --host cursor` exits 2 and leaks no tempdir.
+    - Post-BD: parity 5/5 and 15/15; the baseline is intact.
+    - Attempt 1 stalled for 40 min on an `rm -rf "$(…)"` smoke-cleanup call. The orchestrator stopped it, and attempt 2 finished from smoke (c) (flashcard added).
+  - **M3 prep:** M3-A1/A2 were applied to STORY-058-06's §3.1 bullet and Step 7 Task Breakdown row, and the story was re-gated green.
+- 2026-09-25T18:00:00Z · M2 close · Browser check of the dashboard (`.playwright-mcp/s41-m2-close-*.png`): 7/17 done (41%); M2 2/2 Done; -04 shows QA 0 · Arch 1 with 6 reports. The `/data` 404s come from the static preview server, not the dashboard.
+- 2026-09-25T19:10:00Z · STORY-058-06 · **M3 started (wave8).**
+  - **QA-Red** (cli `3871857`, 29 min): 4 new red files, 3 amended sealed files, the 0.10.0 legacy fixture (sha `fa0c79ac…`), and `SANCTIONED_BASELINE_DELTAS` + `primeExtra` in `init-fixture.ts`. 26 reds.
+  - **TPV REJECTED** (32 min, `arch_bounces=1`):
+    - **Q1:** the sanctioned delta must be strict. QA-Red's dual-accept, caused by an orchestrator dispatch wording error, let a build that never writes `hosts` pass parity (measured).
+    - **M3-A7:** the M3-A2 carry-forward dropped shared-root core entries.
+    - Plan defects M3-A9..A12.
+    - 6 surviving mutants.
+    - E1–E9 re-seal diff (`git apply --check` clean). D1–D13 bind the Dev. C7 story text was applied, and the story re-gated green.
+  - **M4 plan** (parallel, 37 min; `plans/M4.md`): -08 `verify-install` + procedure doc, -09 clean-room harness + packed-tarball e2e.
+    - Probe findings F1–F10: PATH control is required, or hooks run the global `cleargate`; headless `claude -p --include-hook-events` works as live evidence.
+    - `waves.json` gained a concrete RS-4 and a new `RS-CLOSE`.
+    - Drafted **[[BUG-090]]** (F5, P1: `sprint init` + `close_sprint` Step 2.9 anchor frontmatter at offset 0; the sixth BUG-067-class site) and **[[BUG-091]]** (F8, P3: `doctor --check-scaffold` false positive on the post-processed `gate-checks.json`). Both are Draft and outside the sprint, pending owner approval. SPRINT-41's own items all start with `---`, so this sprint's close gate is unaffected.
+- 2026-09-25T19:55:00Z · STORY-058-06 · **Done**, with 0 QA bounces and 1 Architect bounce (the TPV re-seal).
+  - **Re-seal** (cli `e990607`): TPV's E1–E9 diff was applied verbatim. The orchestrator reproduced the counts; parity went 0/5 and 0/15 by design under the strict delta.
+  - **Dev** (cli `10176ea`, 23 min): D1–D13 followed; the one deviation (a try/catch around verify-pack 3c) was accepted by QA and Arch (M3-A22). Every red went green, including strict parity 5/5 and 15/15.
+  - **QA PASS** (7 min): 13 files solo, exact. QA proved the pre-existing `test_version_bump_alignment` failure on main.
+  - **Post-flight PASS** (15 min): FU-1..16 routed as M3-A14..A23.
+    - Binding before -05 QA-Red: A14 (fixture owners), A15 (one payload per registry), A17 (mechanics), A18 (D4 anchors).
+    - -10: A19 `buildInstallView` must skip each split root's `MANIFEST.json` (a measured collision); FU-6/7.
+    - -09: A23, B5 compares the claude-visible subset from RS-4.
+    - M4 V1–V3 are resolved.
+  - **DevOps:** merged cli `6b5ee5c`. The suite ran 2885/2883/0/2, reconciled exactly (2850 + 38 − 3).
+    - BD: the payload is byte-identical (NUL-safe digest), and MANIFEST's only delta is `owner`; verify-pack 3c is live and green.
+    - Real-dist smokes: no-flag and `--from-source` snapshots end with `hosts: ["claude"]`, and every entry is owner-stamped. Doctor leaves the legacy 0.10.0 snapshot byte-unchanged.
+    - Post-BD parity 5/5 and 15/15; the baseline is intact.
+  - **-05 prep:** amendments D1–D5 (D4 per M3-A18) were applied and the story re-gated green.
+- 2026-09-25T20:40:00Z · M5 plan · `plans/M5.md` (parallel, 56 min):
+  - Measured Codex 0.154 contract, offline, with a scripted Responses endpoint ($0):
+    - the `spawn_agent` matcher is `.*spawn_agent`;
+    - a hook blocks only on exit 2 plus stderr;
+    - `apply_patch` payloads carry no `file_path`;
+    - trust-gated `.codex/` loading;
+    - hook events come from app-server, not `exec --json`.
+  - Decisions:
+    - generated byte-identical Codex hook copies (AD-1, amends -10 Gherkin 4; reversal path OD2);
+    - `openInstallView` for upgrade/doctor;
+    - -10 runs in two Developer passes.
+  - `waves.json`: wave15 becomes a both-repos wave; RS-4a added; RS-4 procedure written; RS-CLOSE gains the Codex steps. Mid-Sprint Amendment recorded.
+  - **Owner action OD1** (surfaced): a one-time `codex login` into the dedicated `CODEX_HOME`, before RS-4 step 5.
+- 2026-09-26T00:40:00Z · M6 plan · `plans/M6.md` (parallel, 43 min):
+  - -12: Claude stays wave-parallel, Codex runs serial; `dispatch_serial.mjs`; generated Codex `SKILL.md`.
+  - -13: a live loop on a throwaway `slugify` project under owner-granted trust, with a scripted run as secondary evidence. Token metering is explicitly unavailable, with a CR to follow.
+  - **Owner action at step L:** grant Codex TUI trust (~2 min) and accept live-model quota.
+- 2026-09-26T00:50:00Z · STORY-058-05 · **wave9.**
+  - **QA-Red** (cli `764f063`, 15 min): 16 reds.
+  - **TPV REJECTED** (28 min, `arch_bounces=1`):
+    - The fixture's stub `readInstallManifest` (`files: []`) made 4 of 13 reds unsatisfiable and 2 vacuous.
+    - 14 of 39 mutants survived, including delete-by-owner vs by-path, the story's safety property.
+    - Re-seal R1–R10 (M3-A24..A30); D1–D12 are binding.
+    - The harness blocked the architect's report Write ("Subagents should return findings as text"); the orchestrator saved the report from its final message.
+  - **Re-seal** (cli `156c864`, 3 min): sha256 matches TPV. The orchestrator reproduced 0/17 and 0/3. Developer dispatched.
+  - **Dev** (cli `3617c67`, 16 min): D1–D12 followed with no deviations. Both new files 17/17 and 3/3 on the first attempt; the 50 witnesses are clean.
+  - **QA PASS** (9 min) and **post-flight PASS** (16 min):
+    - FU-1..10 routed.
+    - Binding for -07: M3-A31 (sink adapter), M3-A32 (partial-path gates), M3-A33 (doctor owner plumbing).
+    - Binding for -10: M3-A35.
+    - T12 and M4 V4 resolved.
+  - **INCIDENT (2026-09-26 01:02, local time):** a QA-Verify tsx smoke ran `init --yes --pin 0.0.0-qa` before its `cd`, so a non-force init wrote into the meta-repo. Damage:
+    - `.cleargate/.install-manifest.json`, `gate-checks.json`, `.gitignore` and `.mcp.json` rewritten; `.mcp.json` was pinned to `cleargate@0.0.0-qa`, which would break the MCP server on the next session.
+    - A new `.cleargate/.gitignore`, and a full wiki build (~300 files, plus 12 new pages).
+    - Live `settings.json` was rewritten but stayed canonical-equal. No hook, agent or skill was touched.
+    - The orchestrator restored every path to HEAD, verified by the snapshot sha `fa0c79ac…`.
+    - New rule (Mid-Sprint Amendment 01:20Z): writing smokes run as `(cd <literal tmp> && node …)`, and the orchestrator checks the outer `git status` after each QA and DevOps dispatch.
+  - **DevOps:** merged cli `170ac4c`. Suite 2902/2900/0/2, exact.
+    - BD: payload and manifest unchanged.
+    - Six real-dist `host` smokes are green. A read-only `host list` in OUTER reports `installed: claude`, 3 retired paths missing, exit 1.
+    - The outer repo was untouched (verified).
+  - **-07 prep:** E1–E7, including the post-flight corrections, applied; re-gated green.
+- 2026-09-26T04:15:00Z · STORY-058-07 · **wave10.**
+  - **QA-Red** (cli `23e8280`, 29 min): 41 of 47 red, 5 ambiguities. The orchestrator confirmed #3–#5.
+  - **TPV REJECTED** (32 min, `arch_bounces=1`):
+    - 4 of 30 reds were unsatisfiable on a conformant build (scenarios 6, 10, 15a, 18).
+    - One sealed -03 test goes red by design (Scenario 7, the BUG-089 supersede).
+    - 3 binding plan tests were missing (M3-A31/A32 11b–d); 19 mutants survived.
+    - Re-seal R1–R10 (patch `7d6a5f6b`); rulings #1 (`--host` narrows at emit only) and #2; M3-A36..A43; E1–E13 binding.
+  - **Re-seal** (cli `fe11c1d`, 3 min): hashes match. The orchestrator reproduced 4 files.
+  - **Dev** (cli `b146faf`, 25 min): 30/30 new, contract 19/19, parity 5/5 and 15/15 (`user-content` settings hash `123d7bc7…` = T2), 20 witnesses clean. One sanctioned deviation (`confirmTypedName`).
+  - **Flashcard gate held:** it blocked the QA and post-flight dispatch until the 2 Dev cards were processed (working as designed).
+  - **QA PASS** (8 min).
+  - **Post-flight FAIL** (19 min, `arch_bounces=2`, a plan gap):
+    - Blueprint (b) left `.claude/settings.json` as `{}` after a full uninstall, so the uninstall's own restore path (re-init) wired 2 of 7 hooks. Main wires 7.
+    - Remediation M3-A44: `claude.remove()` unlinks an emptied file; CHANGELOG entries; a whitespace revert.
+    - Also: M3-A45 (smokes never `--cwd OUTER`), T11 and M4 V5/V6 resolved, M3-A46..A51 (BUG-085, -10).
+    - Two pre-existing defects filed as Drafts: **BUG-092** (P1: init into an existing settings.json wires 2 of 7 hooks) and **BUG-093** (P2: upgrade take-theirs drops user hooks under ClearGate events).
+  - **R11 QA-Red** (cli `4394c9b`, 10 min): 4/4 red.
+  - **TPV-R11 APPROVED** (16 min): 12 of 13 mutants killed. Survivor l is bound as a Dev constraint. M3-A52: `init --yes` still prompts "Restore preserved items?" after an uninstall, so the smoke uses `</dev/null`.
+  - **Dev fix** (cli `384a628`, 5 min): 3 files, D2 numstat 55/0.
+  - **QA round 2 PASS** and **post-flight round 2 PASS** (6 min each): re-init restores 7/7 hooks.
+  - **Sentinel gap found (M3-A53, binding for BUG-085 and M6):** `pending-task-sentinel.sh` scans only the FIRST `flashcards_flagged` block per report (3 `break`s). Interim: the orchestrator swept every dev/qa report and marked 5 later-block cards; all were already in FLASHCARD.md or were added.
+  - **DevOps:** merged cli `b100ea8`. Suite 2944/2942/0/2, exact.
+    - BD: payload and manifest unchanged; verify-pack OK (196 files).
+    - Smokes green: the legacy-snapshot doctor in a scratch copy, the clean-room matrix, and uninstall → re-init `SMOKE3-OK`.
+    - The outer repo was untouched.
+  - **Close follow-ups:**
+    - FU-5/6/7/12/13
+    - `init --yes` prompting after an uninstall (M3-A52)
+    - the M3 story Task Breakdown wording "shared by … uninstall" overstates it (FU-6)
+  - **Prep done in parallel:** BUG-085 F1–F5; -08 A1–A5; -09 B1–B9 (+FU-16, BUG-090 as the known-fail); -10 E1–E10; -11 F1–F7; -12 H1–H11 (the H7 `build-codex-payload.mjs` surface is deferred until -10 creates it); -13 G1–G10. The stale -12 reports were relocated. Forward pointers were added to M4/M5/M6.
+
+- 2026-09-26T06:55:00Z · BUG-085 · **wave11 — M3 complete.**
+  - **QA-Red** (cli `ec29f45`, 32 min): drift-check 20/22 red, doctor-drift-guard 9/12, sentinel cards 10/12, parity Scenario 2 red. It flagged a `captureOrCompare` helper change.
+  - **TPV REJECTED** (47 min, `arch_bounces=1`):
+    - The two delta rows read `currentHash` from canonical, so parity passed at the red commit (violates M3-A8).
+    - 5 mutants survived: session-start exit code, allowed-count drift line, unparseable not blocking, unanchored pin, `README.md` include dropped.
+    - Re-seal R1–R7 (patch `7adc1598`); rulings #2 (tree-gated skip) and #3 (the M3-A53 A1 table is corrected); M3-A54..A60; G1–G16.
+  - **Re-seal** (cli `8425816`, 4 min): counts match. The orchestrator reproduced 2 files.
+  - **Dev** (cli `12ae157` + outer `68fd9426`, 24 min):
+    - All counts green; the 3 dist cases were checked on a scratch build (rule 11).
+    - Rule-16 files clean; the CLAUDE.md block is unchanged.
+    - No deviations.
+  - **QA PASS** (8 min). **Post-flight PASS** (24 min): M3-A61 (RS-BUG085 as built, via `b0-live-resync.mjs`), M3-A62 (CLAUDE.md reader-list chore), M4 V7/V8 + M4-A1..A4, M5/M6 pointers (FU-6/7).
+  - **FU-1 filed as Draft BUG-094** (P2): `cleargate state validate <id>` always fails after the CR-117 port. The wrapper passes the id positionally. No in-sprint impact; it must be fixed before the next publish.
+  - **Orchestrator prep:**
+    - Pre-marked the 6 -02 JSON cards and the 5 later-block cards.
+    - Stopped a subagent-orphaned test run (`uninstall-reinit` via tsx) that had hung 88 min on the `Restore preserved items?` prompt.
+  - **DevOps:** merged outer `ccdeb4b3` and cli `b244551`.
+    - Suite 2987/2983/2 fail/2 skip. The 2 fails are the dist-lag cases, green post-BD (13/13).
+    - BD: payload delta of exactly 2 files (sentinel, `validate_state.mjs`). New payload baseline `/private/tmp/claude-501/cg5801/payload-baseline-post-085` (identity `e44154af…`).
+    - **RS-BUG085 R1–R10 green:** exactly 1 pre-sync drift line; dry-parse 0 unmarked (control blocks); `b0-live-resync.mjs` applied exactly 1 file (sha `444becd2…`, mode 755, pin 0.20.0); post-sync `doctor` is drift-clean (exit 0); SessionStart has no drift line; `validate_state.mjs` is unchanged; bug068 10/10 in canonical and live mode.
+    - Worktree and branches removed.
+  - **M3-A62 CLAUDE.md chore** applied by the orchestrator. The block hash is unchanged and `doctor` still reports 0 drift.
+  - **M3 close — browser check** (`.playwright-mcp/s41-m3-close-dashboard.png`): M3 4/4, 11/17 (65%), 0 in flight, no worktrees.
+    - Dashboard observations for the Reporter: `UNATTRIBUTED` holds 15.7B of 22.7B tokens; the "Execution timeline" panel says "No execution log yet" despite a populated §4; `/data` 404s come from the static `http.server`.
+  - **Next:** M4 (-08, -09). The live witness for the re-synced sentinel (R10) is the next Agent dispatch.
+
+- 2026-09-26T05:25:00Z · STORY-058-08 · **wave12.**
+  - **Live witness R10 (RS-BUG085):** the first dispatch after the re-sync wrote `.pending-task` with `agent_type: qa`; no flashcard-gate block.
+  - **QA-Red** (cli `81c05e9`, 21 min): 36/36 red.
+  - **TPV REJECTED** (39 min, `arch_bounces=1`): 22 mutants survived; ruling #2 required a direct `findCleargatePackageRoot` test (U17). Re-seal R1–R17 (patch `30e6ff85`); M4-A5..A13; H1–H24.
+  - **Re-seal** (cli `549fdaa`): 38/5/9 red; the orchestrator reproduced the unit file.
+  - **Dev** (cli `9ac0fa3` + outer `adde0a23`, 23 min): 38/38, 5/5, 9/9; tsx smoke 12/12 PASS.
+  - **QA FAIL** (`qa_bounces=1`): `<h>.no-verifier` fired for a registered-but-not-installed `--host` (H17). The clean-room DoD run (the doc followed verbatim, packed artifact, a real haiku S1 session) PASSED with 0 structural doc gaps and 1 fold-back.
+  - **Post-flight FAIL** (`arch_bounces=2`): the same H17 defect, plus an R-B crash on a snapshot that parses to `null`, `{}`, `[]` or a string, plus doc inaccuracies. Remediation M4-A14 R-A/R-B/R-C; V9/V12 resolved; M4-A15..A23 for -09.
+  - **Round 2:** reds U9c/U11e/U11f (cli `4285391`); Dev fix (cli `fc0184d` + outer `31f266f2`). QA-R2 PASS (R-B re-probed in a new clean-room container built from `fc0184d`). ARCH-R2 PASS, requiring the U9d regression guard (cli `6251f06`, 42/42 green on arrival).
+  - **Filed as Draft: BUG-095 (P2).** Upgrade never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block (FU-4).
+  - **DevOps:** merged outer `cb283bab` and cli `1b742b3`.
+    - Suite 3038/3036/0/2, exact.
+    - BD: payload identical to the post-085 baseline (`e44154af`); verify-pack OK (196).
+    - Real-dist smokes: 12/12 PASS; a deleted payload file is named; a `null` snapshot gives parseable JSON.
+    - Worktree and branches removed.
+  - **Clean-room containers left for evidence:** `~/Documents/Dev/cg-cleanroom-20260926T042955Z-qa08/` and `…T050106Z-qa08-r2/`.
+
+- 2026-09-26T05:18:26Z · STORY-058-09 · **wave13.**
+  - **QA-Red** (cli `eed511c`, 17 min): evidence unit all red, e2e 3 red + 9 anchors, 5 ambiguities.
+  - **TPV REJECTED** (38 min, `arch_bounces=1`): B4 room isolation, E5-5 epics line; 63/66 mutants killed after the re-seal. Rulings #1–#3; M4-A24..A32; J1–J13. Re-seal patch `8d43e853`.
+  - **Re-seal** (cli `6c5a4c5`): unit 60 red, e2e 3 red + 10; the orchestrator reproduced the unit count.
+  - **Dev** (cli `7ce56a2` + outer `22c1e557`, 31 min): unit 60/60, e2e 13/13; artifact inputs byte-neutral (`a7e231b9…0d12`); the 19 sealed files plus parity match exactly.
+    - **Run 1 (live, first attempt): PASS.** Claude Code 2.1.283, haiku; container `~/Documents/Dev/cg-cleanroom-20260926T064145Z-claude`. Every gating row is PASS in both the no-flag and `--host all` rooms; `sprint-init` reads `FAIL-KNOWN (BUG-090)` ×2. `check` ×2 exit 0.
+    - A doc edit that landed in the main checkout was self-caught and reverted before commit.
+  - **QA PASS-PENDING-SMOKE** (8 min). The deferred `check --write-result` belongs to RS-CLOSE. A read-only audit of the container confirmed Run 1 is not vacuous.
+  - **Post-flight PASS** (20 min), merge now:
+    - Rulings: D1 (`active-sprint` sentinel drive) accepted; D2 accepted; O1 (unsanitised evidence cells, a measured latent fail-open) → fixed before RS-4, Run 1 stays as written.
+    - F1 (missing S3 canary) and F2 (host line read from `registered`) are latent until codex registers.
+    - All of it routes to M5-A1..A14 in -10 pass B. The Step 2.9 contract is verified.
+  - **DevOps:** merged outer `3deb2bc2` and cli `35580b0`.
+    - Suite 3098/3096/0/2, exact.
+    - BD: payload identical (`e44154af`); verify-pack OK (196/80); post-BD 60/60, 13/13, parity 5/5 + 15/15; `check` from OUTER PASS.
+    - Smokes 12/12 ×2. Worktree and branches removed.
+  - **Orchestrator:**
+    - M5-A10 applied to the -10 story (gate green, 14 criteria).
+    - `waves.json` RS-CLOSE `<F5 BUG id>` → `BUG-090`.
+    - M6 carry pointer written; -09 Adjacent row added.
+  - **M4 close — browser check** (`.playwright-mcp/s41-m4-close-dashboard.png`): M4 2/2, 13/17 (76%), 0 in flight, no worktrees.
+    - The same dashboard observations stand: `UNATTRIBUTED` 23.9B of 30.9B, the Execution timeline panel is empty, and `/data` 404s come from the static server.
+  - **Kept until RS-4:** the Run 1 container and its two session dirs. Kept until RS-CLOSE: `/private/tmp/cg-s41-m2-init-baseline`.
+  - **Next:** M5 (-10 codex adapter, then -11, then RS-4a/RS-4). OD1 codex login is needed at RS-4 step 5.
+
+- 2026-09-26T14:00:00Z · CR-124 re-plan · plans/replan-contract-first.md accepted: remainder runs contract-first — contracts C1 contract/S-41-codex (=STORY-058-10 d0f0d95), C4 contract/S-41-fence (BUG-090 Dev), C2 contract/S-41-dispatch (STORY-058-11 + CR-124 Dev), C3 contract/S-41-loop (STORY-058-12 Dev); nested worktrees OUTER/.worktrees/<ID>/cleargate-cli; 4 build lanes, 1 merge lane, 1 harness lane; waves.json schema_version 2; rules 9 and 11 superseded, 19–21 added; the cli main checkout stays on main; RS-4's live run becomes RS-4L (owner OD1, before RS-CLOSE); RS-CR added after CR-124.
+- 2026-09-26T14:10:00Z · STORY-058-10 · Re-plan step 0 ran AFTER pass C, not before: pass C was dispatched in the cli main checkout before the re-plan landed. Pass C committed `393c286` (test 46 scripted codex session 1/1, 10 gating verdicts PASS, ~18 min). The cli main checkout was then switched to `main` (`35580b0`), and -10 moved to `.worktrees/STORY-058-10` (detached outer host plus nested cli worktree). C1 `contract/S-41-codex` = `d0f0d95`; pass C touched only non-frozen harness internals. QA-Verify ∥ post-flight dispatched there. Post-flight FAIL (claude-baseline.mjs unwired, M5-A47) → pass D `b12240b` → QA2 PASS-PENDING-SMOKE + post-flight PASS → DevOps merged `fcb1491` 2026-09-26T15:10Z (arch_bounces=2, qa_bounces=1); BD; RS-4a live re-sync of 4 hooks (pin 0.20.0) — canonical-live-parity 11/11.
+- 2026-09-26T16:40:00Z · merge-lane order · BUG-096 merged `c5a311e`, BUG-097 merged `d4d6d93`. BUG-090 and CR-124 both passed QA-Verify + post-flight on their integrated trees. **Deviation from lane priority (CR-124 > BUG-090):** BUG-090 merges first. The second merger re-integrates with an init-fixture tail conflict and must re-run QA-Verify (rule 21). For CR-124 that re-run is cheap (no harness); for BUG-090 it would repeat a live clean-room harness run in the single harness lane. BUG-090 is also the goal's first half and unblocks BUG-098 integration. C2 is built from Dev commits, not main, so -12 is not delayed. Also: -11 TPV REJECTED → re-seal `635816c`; F9 story-text amendment applied after the re-seal dispatch (the cli repo has no surface gate, so the order is documentary); -11 Developer dispatched on the re-seal.
+- 2026-09-26T17:35:00Z · BUG-090 · merged outer `61d1cdca` / cli `984e8d5` (Rule 15 order); full suite 3373/3371/0/2; BD; D6 payload identity = 5 files + MANIFEST; D7 witnesses green (doctor no drift, census 558 files 0 throws, deferred set exact). Goal first half landed: QA's live clean-room harness showed sprint-init PASS in both rooms (was FAIL-KNOWN). -11 INTEGRATE dispatched onto `984e8d5`; CR-124 re-integrates once after -11 merges (lane priority -11 > CR-124; avoids a second harness-bearing QA re-run for -11). C2 build dispatched (C1 + -11 Dev `44ba381` + CR-124 Dev `e22a408`).
+- 2026-09-26T17:55:00Z · contracts · C4 `contract/S-41-fence` = `f31c684` (BUG-090 Dev; frozen, confirmed unchanged by integrate). C2 `contract/S-41-dispatch` = `8c8c5ff`: `5d690d5` merge -11 Dev `44ba381` (clean) + `421cb6b` merge CR-124 Dev `e22a408` (init-fixture tail, row-level: -10 x3, -11 x4, CR-124 x6, shared row x1) + `8c8c5ff` gen:codex (3 architect TOMLs). Make-green 190/193 with 3 named reds from the cli-only host (no outer twins); M2 pair 5/5 15/15; verify-pack 222/83. BUG-098 TPV REJECTED → re-seal + FW-A17 (locator throw = framingError, no write). -12 cut next from C2.
+- 2026-09-26T17:50:00Z · STORY-058-11 / CR-124 · -11 INTEGRATE (`2941d83` merge main `984e8d5` + `1e7f0e6` M5-A52 collection) blocked at test 46: `codex.live.roles` check (a) regex-matches `JSON.stringify(schema)`, and real codex lists roles one per line (a literal `\n` precedes each name) → arch_bounces 2; targeted Architect ruling + re-seal dispatched. **Order re-decided:** CR-124 merges before -11 after all. -11 has had no QA-Verify yet, so its fix dispatch re-integrates onto a main that already carries CR-124 with no extra QA cost, and the idle merge lane is used now. CR-124 re-integrates onto `984e8d5` (init-fixture tail, row-level), then QA-Verify re-run (rule 21: conflicted re-sync) → DevOps → RS-CR. -12 started on C2 (worktrees cut; Architect M6 entry re-derivation running).
+- 2026-09-26T18:05:00Z · CR-124 · merged outer `01fd3bbc` / cli `6fc13d2`; full suite 3390/3388/0/2 (one transient pre-BD payload-parity red from status-vocab-phase-b's mid-suite prebuild, solo 18/18); BD; RS-CR applied (3 architect agents + sprint-execution SKILL.md; backup `b0/claude-live-backup-2026-09-26T18-14-56-232Z.tgz`); doctor 0 drift; canonical-live-parity 11/11; sprint-execution-mirror 4/4. The live loop now carries §C.0.2 contract-first. BUG-098 QA + post-flight PASS (awaits one re-integrate after -11 merges + RS-4). -11: roles fix `76dee8c`, test 46 PASS; re-integrates onto `6fc13d2` next.
+- 2026-09-26T19:25:00Z · STORY-058-11 · merged outer `6015037c` (twin `26b00d24`) / cli `0399beb`; full suite 3486/3484/0/2 (first pass 1 red: init-from-source S1 from a concurrent lane's stray `cg-hook-test-*` temp dir, solo 11/11); BD; payload identity exact; verify-pack 222/83. **RS-4** (M5 steps 1–4 + claude half of 6 + 7): live re-sync of 8 hooks + `lib/harness.sh` (lib first; backup `b0/claude-live-backup-2026-09-26T19-12-32-253Z.tgz`), doctor 0 drift, canonical-live-parity 11/11; Claude clean-room PASS, sprint-init PASS x2, no `--known-fail` (Run 2 in `clean-room-evidence.md`); clean-room e2e 13/13; M2 pair 5/5 + 15/15; scripted codex harness PASS 12/12 gating incl. `codex.live.roles` + `codex.live.skills` (Run 1 in `codex-hooks-evidence.md`); `claude-baseline check` exit 0. Live codex run + `codex-hooks check` pending owner OD1 — RS-4L carries them (ticks -11 row 180). Timestamps of the two preceding lines corrected to commit times (were 19:10Z/21:30Z).
+- 2026-09-26T20:30:00Z · BUG-098 · re-integrated `ff29236` onto cli main `0399beb` (1 init-fixture tail conflict, row-level) → QA re-run PASS (live fresh-folder smoke: `--allow-drift` waiver inside the real span, unterminated `<instructions>` file sha256-identical) → merged outer `3898c05e` (twin commit `28cd64d6`) / cli `e720592`; full suite 3513/3511/0/2 (1 transient init-from-source S1 temp-dir red, solo 11/11); BD; verify-pack 222/83; doctor 0 drift. DevOps first halted at the surface gate: a same-state `update_state` was a no-op, so the gate resolved STORY-058-11's §3.1; fixed by real transitions QA Passed → Architect Passed (follow-up recorded). **Goal half 1 (stop corrupting / start gating) is fully merged.**
+- 2026-09-26T20:38:00Z · STORY-058-12 / STORY-058-13 · -12 TPV REJECTED (6 unsatisfiable sealed assertions) → test-only re-seal `03cbb33` → Dev pass A `53028ea` + pass B `2695eea` (C3 cut) → INTEGRATE `9a94ff2` onto `0399beb` (verify-pack 232/88). C3 `contract/S-41-loop` 2695eea → 9a94ff2 (fast-forward to STORY-058-12's integrated commit; frozen exports unchanged; plans/M6.md F6.1): pass B of -13 needs -10's pass-C/D harness and BUG-090's approval flip, which 2695eea lacks. -13 entry re-derivation (M6 F0–F12): controls reuse `codexHookVerdicts` unchanged (probe names EPIC-001_cleanroom_probe.md, src/cg-probe.ts, STORY=001-01); human-trust discovery overlay; RS-4L precedes step L; merge lane frozen from step L to the -13 merge. OD-F1: `codex-hooks.mjs check --write-result` omits status/exit_code, so close Step 2.9 would fail -10's deferred verification — registered as a fast-lane bug per the owner's "log every issue you find and fix them" directive, merged after -13 and before RS-CLOSE.
+- 2026-09-26T21:40:00Z · STORY-058-12 · post-flight PASS (D1–D4 accepted; PF12-A1..A4) → re-integrated `31a8a18` onto `e720592` (1 tail conflict) → QA-Verify PASS (scripted codex 12/12 gating incl. skills = sprint-execution room-local; -10 codex e2e 1/1, -09 e2e 13/13; test 37 HALT on Claude / SERIAL on Codex; Claude SKILL.md +4/−0) → merged outer `5733260b` (twin commit `0fe9f88d`) / cli `5f25a20`; full suite 3565/3563/0/2 (2 named transient pre-BD reds, solo green post-BD); BD; verify-pack 232/88; payload identity = E9 list. **RS-5:** live re-sync of `skills/sprint-execution/{SKILL.md,dispatch-serial.md}` (exact 2-item drift; backup `b0/claude-live-backup-2026-09-26T21-32-48-789Z.tgz`), doctor 0 drift, canonical-live-parity 11/11, sprint-execution-mirror 4/4; Claude clean-room PASS, sprint-init PASS x2, no `--known-fail` (Run 3 in `clean-room-evidence.md`); scripted codex harness PASS 12/12 gating (Run 2 in `codex-hooks-evidence.md`). BUG-099 (close blocker) QA-Verify PASS; merges next. -13 QA-Red sealed `1111659` (87 red, +84 default / +4 integration); TPV running.
+- 2026-09-26T21:58:00Z · BUG-099 · merged cli `f0c33f7` (cli-only; no outer half); full suite 3569/3567/0/2 clean first pass; BD; verify-pack 232/88, payload unchanged. Real-data witness: `codex-hooks.mjs check --write-result` on the sprint evidence now writes `status: red`, `exit_code: 1`, `reason: needs a live PASS run` — close Step 2.9 will report the real gap (RS-4L) instead of `status=unknown`. Dashboard checked in the browser: M6 1/3 done, cards correct; token metrics implausible (ledger delta over-count) and static dashboard.html polls /data (404s) — both recorded for the Reporter.
+- 2026-09-27T06:20:00Z · STORY-058-13 · dev pass A `608e45c` / pass B `7a7bfa6`, Run 1 scripted PASS → INTEGRATE cli `5594a41` / outer `d6c5264e` (conflict-free; F6.9 stale via BUG-098 → Run 2 scripted PASS) ∥ post-flight **FAIL B1** (plan-origin, M6:794: terminal-state failed any root `update_state`, but the installed Codex SKILL.md:448 prescribes `QA Passed` to the orchestrator; arch bounce 2) → Developer fix cli `f33cc4a` (loop-evidence.mjs only; M6 PF13-A1..A5) → post-flight delta re-check PASS → QA-Verify PASS-PENDING-SMOKE (reproduction 23/23 = Run 2; e2e 2/2; claude-baseline 13/13; test-46 1/1; smoke --host all 5+8 pass). QA-Verify ran long (~5.9 h in the harness lane vs 15 min budget). Step L1 identity verified (sha `1d8b80de…`, `codex-cli 0.154.0-alpha.6.2`). Remaining: owner OD1 login → RS-4L → step L (owner trust) → DevOps → RS-CLOSE.
+- 2026-09-27T08:35:00Z · STORY-058-13 · owner redirect replaced the OD1-blocked RS-4L/step-L path (M7 OD-M7-1: merge now; step L → RS-L after M7, gated at close by deferred_verification) → DevOps merged outer `a3b77505` (evidence commit `72c457c2`) / cli `0e5b0ac`, both trees matching their merge-tree previews; full suite 3653/3651/0/2 = D4 exact; rule-14 revert of the 38 listed delivery paths; BD; verify-pack 232/88; `build-codex-payload.mjs --check` 0; payload identity MANIFEST.json only; doctor 0 drift; post-BD `codex-loop.mjs check` exit 1 with only "needs a live human-trust PASS run" (expected, RS-L); smokes --host codex/all pass; M2 pair 5/5 + 15/15; Done; worktrees removed, branches kept. Adjacent Implementations row added (M6 F11.8). **M6 3/3 done.** M7 (Codex dogfood fix batch) in flight: QA-Red done for BUG-100/101/047/103, TPVs running; Codex r7 drove STORY-001-02 through the full loop (merge `1c8e1ee`, 18/18); r8 resumed after the owner-role approval of the residue force-remove (I19).
+- 2026-09-27T10:58:00Z · BUG-101 · QA-Red `59da770` → TPV REJECTED (22/37 mutants; source order unpinned) → re-seal `d07d4a0` (count 6) → Dev `26bdf84` → INTEGRATE `94fa6e6` onto `0e5b0ac` (test 46 1/1; scripted codex-loop 2/2; every dispatch `source=message` as expected before BUG-106) → QA-Verify PASS → post-flight scan clean (4/4, run on the OUTER worktree) → DevOps merged cli `8c98177`; full suite 3659/3657/0/2 = D4 exact; rule-14 revert 48 paths; BD; verify-pack 232/88; `--check` 0; M2 pair 5/5 + 15/15; **RS-M7a** live `hooks/pending-task-sentinel.sh` re-synced (backup `b0/claude-live-backup-2026-09-27T10-57-23-795Z.tgz`), doctor 0 drift, canonical-live-parity 11/11; Done; worktrees removed, branches kept. M7 TPVs: 4/4 REJECTED for mutant-weak seals (BUG-100 18/31, BUG-103 11/33, BUG-101 22/37, BUG-047 12/24), all re-sealed test-only; one shared-scratchpad incident (BUG-047 TPV ran BUG-100's mutant script; no loss, verified).
+- 2026-09-27T11:00:00Z · **SPRINT PAUSED (owner: "you need to pause the sprint" / "choose the right point")** · Paused at a clean boundary: every in-flight agent was allowed to finish its git operation; nothing new dispatched. State at pause: M7 BUG-101 **Done** (cli main `8c98177`); BUG-100 integrated `d9e69e1`, BUG-047 integrated `f036700`, BUG-103 integrated cli `c2f56ab` / outer `0f542bc0` — each awaits QA-Verify → post-flight scan → DevOps; BUG-102/105/104/106 and addendum lanes M7-A/B/C/D (BUG-107..116) not started; DT (Codex re-test), RS-L, RS-4L (owner O2 login pending), RS-CLOSE, walkthrough, Reporter, close not started. Worktrees kept: `.worktrees/BUG-{100,047,103}` (clean). **Resume point:** QA-Verify for BUG-100, BUG-047, BUG-103 on their INTEGRATE tips (merge order 100 → 047 → 103 per ready order; each later merge re-integrates onto the moved main).
+
+- 2026-09-30T15:03:27Z · **SPRINT RESUMED** · Owner "alright. go ahead" confirms continuation from the September 27 checkpoint with GPT-6 Astra medium orchestration and GPT-6.1 Sol code/testing. State validated (schema 3); CLI main remains `8c98177`, BUG-100 integrated `d9e69e1`; structured QA pack prepared and independent QA-Verify dispatched. The existing bounded-bootstrap and contract-first amendments govern; manual checks are recorded separately from host-fired enforcement, and unavailable usage is not synthesized. Remaining M7 order and live-evidence/close gates are unchanged. Local-only work; no push, publish, or close authorization.
+
+- 2026-09-30T15:34:21Z · BUG-100 · QA PASS (323 tests plus 12 probes), clean post-flight scan (4/4), merged locally to CLI main `79fc180`. The lost M2 fixture was reconstructed from historical QA-Red `11fe514`, authenticated against both recorded hashes and all 420 file/mode rows, and durably archived (reports/m2-baseline-recovery-2026-09-30.md). DevOps initially discarded a running full-suite session handle and ran BD concurrently; its claimed completion was rejected. A fresh GPT-6.1 Sol DevOps recovered the gate with one justified logged rerun: **3669 tests / 3667 pass / 0 fail / 2 skip, exit 0**; unchanged dist, payload differences only four generated timestamps, M2 20/20 and post-BD Codex smoke pass. Exact Rule-14 writes restored; state Done and both worktrees removed, branches retained. All DevOps test execution now explicitly uses the owner's GPT-6.1 Sol override. The full procedural record is in reports/BUG-100-devops.md; delayed manual recovery marker is not host-fired attribution. Actual DT/RS-L and close gates remain outstanding; usage unavailable.
+
+- 2026-09-30T16:06:14Z · BUG-047 · Independent QA PASS (119 tests and eight probes), clean post-flight scan (4/4), merged locally to CLI main `c6d6656`. Initial suite inherited `RUN_SCRIPT_ACTIVE=1` and failed wrapper incident tests; all three files passed after clearing the guard and root variables. One justified corrected suite completed **3674 tests / 3672 pass / 0 fail / 2 skip, actual exit 0**. The dispatch recipe now explicitly sanitizes all four variables before npm. Exact 48 fixture writes restored; BD/typecheck/pack/payload checks passed, with only four MANIFEST generated timestamps changing. State Done and both clean worktrees removed; branches retained. Reports preserve the initial environment failure and corrected state-validator invocation. BUG-102 build is complete at `33d0627`, awaiting its ordered integration after BUG-103. Manual checks are not live hook proof; usage unavailable; no push, install or close.
+
+- 2026-09-30T16:23:58Z · **SPRINT PAUSED (owner: "please pause the sprint and write where you paused so another agent can pick up and conitnue")** · All active workers finished only their current operation and stopped. 26/41 Done; CLI main `c6d6656` (BUG-047), outer pre-checkpoint `967cea95`. BUG-103 integrated CLI `08c42134` / outer `cb691448`, but independent QA **FAIL**: a modified source filename containing ` -> .cleargate/wiki/` is falsely exempted as wiki churn; qa_bounces=1 recorded, no fix dispatched. BUG-105 QA seal `23a8e86` and live TPV approved; implementation remains six uncommitted files because required hotfix slug guard fails (142 pass/1 fail, M2 unstarted). BUG-102 build `33d0627` waits for ordered integration; BUG-114 worktrees prepared, still Ready to Bounce. No new stages, merge, install, push or close. **Exact handoff:** `sprint-runs/SPRINT-41/PAUSED-2026-09-30.md`; complete evidence and patch backups in the documented CG_TEST pause directory. Resume only on explicit owner go. This bookkeeping commit advances outer main, so BUG-103 must re-integrate its outer half on resume. Formal live evidence and close gates remain pending.
+- 2026-10-04T06:32:12Z · **CLOSE DECISION (owner, 2026-10-04: "can we [stop] exactly where we stopped … sprint report and close it? most of things are already fixed … only codex related things won't work properly"; chose "Move them out")** · SPRINT-41 closes at the 2026-09-30 pause point: 26/41 Done (cli main `c6d6656`, suite 3674/3672/0/2). The 15 open M7 items (BUG-102..116) → Parking Lot + `carry_over: true`; BUG-105 build preserved as WIP `a926ee8` on cli `story/BUG-105` (scoped hotfix slug regression OPEN), BUG-102 outer twin as WIP `5eac6ddc`; BUG-103 (real R7 QA failure), BUG-102, BUG-114 branches kept; worktrees BUG-102/103/105/114 removed cleanly. STORY-058-10 and STORY-058-13 `deferred_verification` re-targeted `blocks: close` → `blocks: BUG-106` (live Codex runs need the owner's O2 login; never ran). Goal verdict expected **partial**: goal checks 1–3 proven; 4–5 scripted-only (live Codex dogfood r0–r8 observed hooks firing and a real 2-story loop, with workarounds, but no formal live evidence). Remaining before Gate 4: RS-CLOSE harness re-runs on the final build, Reporter, sprint→main merge, `close_sprint.mjs` without flags.
+- 2026-10-04T06:40:45Z · RS-CLOSE · final build cli `c6d6656` (dist built after it): Claude clean-room baseline **PASS** (Run 4 in `clean-room-evidence.md`; sprint-init PASS ×2 no-flag + `--host all`; goal-check-1 `new epic` + stamp-and-gate → `stamp=0 gate=0`); scripted codex-hooks **PASS** (Run 3), `check` → "needs a live PASS run" (moved to BUG-106); scripted codex-loop **PASS** (Run 3; loop_transport + enforcement_parity, 5 dispatches + merge; metering unavailable), `check` → "needs a live human-trust PASS run" (moved to BUG-106); doctor 0 drift. Pinned codex sha `1d8b80de…` re-measured. Containers removed.
+- 2026-10-04T06:40:45Z · Phase D walkthrough · The owner reviewed the state and directed close (2026-10-04); no `UR:bug` raised. Orchestrator browser check of the SPRINT-41 dashboard: 26 Done, M0–M6 complete, M7 partial; carried items render as "Blocked 15" (cosmetic, logged in close-followups). Phase D.5 consolidation skipped: SPRINT-41's code landed in the separate cli repo through per-story merges, each with a full suite; the outer sprint diff is planning artifacts; close-now owner decision.
+
+**Contract-first ledger (CR-124 dogfood):**
+
+| Item | Base (sha) | Contract | Build start | Dev sha | Integrated on cli main | Re-syncs | QA-Red re-scopes | Merge (outer / cli) |
+|---|---|---|---|---|---|---|---|---|
+| STORY-058-10 | `35580b0` | owner of C1 `contract/S-41-codex` = `d0f0d95` | 2026-09-25 (serial, pre-re-plan); passes C/D in `.worktrees/STORY-058-10` 2026-09-26 | `560a4f1` A, `d0f0d95` B, `393c286` C, `b12240b` D | yes, no-op (main unchanged at `35580b0`) | 0 | 0 (TPV re-seal before Dev) | — (cli-only) / `fcb1491`; full suite 3309/3307/0/2; BD; RS-4a 11/11 |
+| BUG-096 | `35580b0` | none (lane-local; no upstream) | 2026-09-26 (parallel with CR-124/BUG-090/BUG-097) | `266c1ba` | yes — `9a3a0c0` merged main `fcb1491` (no conflicts) | 0 | 0 | — (cli-only) / `c5a311e`; full suite 3312/3310/0/2; BD; M2 baseline hash exact; hygiene 361 stale dirs removed |
+| BUG-097 | `35580b0` | none (lane-local; no upstream) | 2026-09-26 (parallel with CR-124/BUG-090/BUG-096) | `7993d37` | yes — `a3720ea` merged main `c5a311e` (no conflicts) | 1 (main moved -10 → BUG-096 before merge) | 0 | — (cli-only) / `d4d6d93`; full suite 3325/3323/0/2; BD; M2 baseline exact; hygiene 511 stale dirs removed |
+| BUG-090 | `d0f0d95` (C1) | owner of C4 `contract/S-41-fence` = `f31c684` | 2026-09-26 (parallel with CR-124/-11/BUG-096/BUG-097) | `f31c684` | yes — `2e63854` merged main `c5a311e` (0 conflicts); re-sync `e9e3d46` onto `d4d6d93` | 1 | 0 (TPV re-seal `93e48dc` before Dev) | `61d1cdca` (twin commit `04fbdccc`) / `984e8d5`; full suite 3373/3371/0/2; BD; harness sprint-init PASS x2 at QA; census 558/0 throws |
+| CR-124 | `35580b0` | none (lane-local); its Dev commit `e22a408` is half of C2 | 2026-09-26 (parallel with -10 pass C/BUG-090/-11) | `e22a408` | yes — `430424a` merged `c5a311e` (1 tail conflict); re-sync `687e288` onto `984e8d5` (1 tail conflict) | 2 | 0 (TPV re-seal `ac491a6` before Dev) | `01fd3bbc` (twin commit `f45be142`) / `6fc13d2`; full suite 3390/3388/0/2; BD; RS-CR 4 files, doctor 0 drift |
+| STORY-058-11 | `d0f0d95` (C1) | its Dev commit `44ba381` is half of C2 `contract/S-41-dispatch` = `8c8c5ff` | 2026-09-26 (parallel with CR-124/BUG-090/-10 pass C) | `44ba381`; integrate `1e7f0e6` (M5-A52 collection); fix `76dee8c` (M5-A55) | yes — `2941d83` merged `984e8d5` (blocked at test 46 → TPV2); re-sync `53f90a2` onto `6fc13d2` (1 tail conflict) + `55fc4cb` gen:codex | 2 | 2 (TPV re-seal `635816c` before Dev; TPV2 re-seal `6cdce4e` before fix) | `6015037c` (twin commit `26b00d24`) / `0399beb`; full suite 3486/3484/0/2; BD; RS-4 (scripted codex 12/12, Claude clean-room PASS, live pending OD1) |
+| BUG-098 | `f31c684` (C4) | none (consumer of C4) | 2026-09-26 (parallel with -11/-12 QA-Red) | `9970c10` | yes — `9b2abf0` merged `984e8d5` (0 conflicts); re-sync `ff29236` onto `0399beb` (1 tail conflict) | 1 | 1 (TPV re-seal `ca18c73` before Dev) | `3898c05e` (twin commit `28cd64d6`) / `e720592`; full suite 3513/3511/0/2; BD; verify-pack 222/83; doctor 0 drift |
+| STORY-058-12 | `8c8c5ff` (C2) | owner of C3 `contract/S-41-loop` = `2695eea`, fast-forwarded to `9a94ff2` (F6.1) | 2026-09-26 (parallel with BUG-098 re-sync/-13 re-derivation) | `53028ea` A, `2695eea` B | yes — `9a94ff2` merged `0399beb` (1 tail conflict); re-sync `31a8a18` onto `e720592` (1 tail conflict) | 1 | 1 (TPV re-seal `03cbb33` before Dev) | `5733260b` (twin commit `0fe9f88d`) / `5f25a20`; full suite 3565/3563/0/2; BD; verify-pack 232/88; RS-5 (Claude clean-room PASS, scripted codex 12/12) |
+| BUG-099 | `e720592` (cli main) | none (fast lane; close blocker) | 2026-09-26 (parallel with -12 QA-Verify/-13 QA-Red) | `abd9afb` | n/a — merged directly (disjoint from -12; merge-tree clean) | 0 | 0 | — (cli-only) / `f0c33f7`; full suite 3569/3567/0/2; BD; verify-pack 232/88 |
+| STORY-058-13 | `9a94ff2` (C3, fast-forwarded per M6 F6.1) | consumer of C3 `contract/S-41-loop` | 2026-09-26 (after -12 INTEGRATE; harness lane) | `608e45c` A, `7a7bfa6` B, `f33cc4a` post-flight B1 fix | yes — `5594a41` merged `f0c33f7` (0 conflicts; outer `d6c5264e`) | 1 | 1 (TPV re-seal `b91c39d` before Dev) | `a3b77505` (evidence commit `72c457c2`) / `0e5b0ac`; full suite 3653/3651/0/2; BD; verify-pack 232/88; step L deferred → RS-L after M7 |
+| BUG-101 | `f0c33f7` (cli main) | none (lane-local; M7 cf-M7) | 2026-09-27 (parallel with BUG-100/047/103) | `26bdf84` | yes — `94fa6e6` merged `0e5b0ac` (0 conflicts) | 0 | 1 (TPV re-seal `d07d4a0` before Dev) | — (cli-only) / `8c98177`; full suite 3659/3657/0/2; BD; RS-M7a |
 
 ---
 

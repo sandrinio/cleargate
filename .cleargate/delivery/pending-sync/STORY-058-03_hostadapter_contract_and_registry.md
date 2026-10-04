@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T15:29:00Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: 567535f2-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -35,15 +35,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-058-03
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-09-24T23:05:29Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-09-25T10:23:37Z
+  sessions:
+    - session: 75d958ba-2473-408d-b4db-e15b774ad28f
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-09-25T10:20:51Z
 ---
 
 # STORY-058-03: HostAdapter contract, registry, and behavior-preserving Claude adapter
@@ -69,7 +75,7 @@ As a ClearGate maintainer, I want a typed `HostAdapter` contract with the existi
 ### 1.4 Open Questions
 - **Question:** does the adapter own its uninstall inverse, or does `uninstall.ts` keep its own per-host cleanup logic?
 - **Recommended:** the adapter owns it. An adapter that can install a surface but not remove it guarantees the two drift.
-- **Human decision:** {pending Gate 1}
+- **Resolved 2026-09-25 (Architect, under the owner's autonomy directive):** the adapter owns the inverse as `remove(ctx)`, implemented by delegating to the helpers `uninstall.ts` uses today (`removeBlock`, `removeClearGateHooks`). Wiring `uninstall.ts` to call it is [[STORY-058-07]].
 
 ### 1.5 Risks
 - The refactor is behavior-preserving by intent, but `injectClaudeMd` and `mergeSettings` carry accumulated bug-fix behavior ([[BUG-043]], [[CR-105]] on bounded-block placement). Wrapping rather than rewriting is mandatory.
@@ -85,7 +91,7 @@ Feature: Host adapter contract
   Scenario: No-flag init is byte-identical through the adapter
     Given a fresh target repository
     When `cleargate init` runs with no host flag
-    Then the installed tree is byte-identical to the pre-refactor Claude install
+    Then the installed tree, file modes, and init output are byte-identical to the pre-refactor Claude install
 
   Scenario: Registry rejects an unknown host
     Given a host name that is not registered
@@ -98,10 +104,10 @@ Feature: Host adapter contract
     Then it calls the existing injectClaudeMd, mergeSettings, and injectMcpJson helpers
 
   Scenario: Adapter declares its own payload roots and inverse
-    Given a registered adapter
+    Given the registered Claude adapter
     When it is asked which paths it owns
-    Then it returns those roots
-    And it exposes the inverse operation used at uninstall
+    Then it returns `.claude` as its owned root and CLAUDE.md, .claude/settings.json, and .mcp.json as surgery targets
+    And its remove operation strips the ClearGate block and hooks it installed while preserving user content
 ```
 
 ### 2.2 Verification Steps (Manual)
@@ -115,39 +121,66 @@ Feature: Host adapter contract
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/commands/init.ts` |
-| Related Files | `cleargate-cli/src/init/inject-claude-md.ts`, `cleargate-cli/src/init/merge-settings.ts`, `cleargate-cli/src/init/inject-mcp-json.ts` |
-| New Files Needed | `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/hosts/claude.ts` |
+| Related Files | `cleargate-cli/src/init/inject-claude-md.ts` — unchanged, `cleargate-cli/src/init/merge-settings.ts` — unchanged, `cleargate-cli/src/init/inject-mcp-json.ts` — unchanged, `cleargate-cli/src/lib/claude-md-surgery.ts` — unchanged, `cleargate-cli/src/lib/settings-json-surgery.ts` — unchanged |
+| New Files Needed | `cleargate-cli/src/hosts/types.ts`, `cleargate-cli/src/hosts/registry.ts`, `cleargate-cli/src/hosts/claude.ts`, `cleargate-cli/test/helpers/init-fixture.ts`, `cleargate-cli/test/hosts/host-adapter-contract.red.node.test.ts`, `cleargate-cli/test/hosts/claude-adapter-init-parity.red.integration.node.test.ts` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-03_hostadapter_contract_and_registry.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-03-devops.md` |
 
 - `cleargate-cli/src/hosts/types.ts` — **create**. The `HostAdapter` contract.
 - `cleargate-cli/src/hosts/registry.ts` — **create**. Name → adapter resolution.
 - `cleargate-cli/src/hosts/claude.ts` — **create**. Wraps existing helpers.
 - `cleargate-cli/src/commands/init.ts` — **modify**. Route the install through the resolved adapter.
-- `cleargate-cli/src/init/inject-claude-md.ts`, `merge-settings.ts`, `inject-mcp-json.ts` — **unchanged**, called by the adapter.
+- `cleargate-cli/src/init/inject-claude-md.ts`, `merge-settings.ts`, `inject-mcp-json.ts`, `src/lib/claude-md-surgery.ts`, `src/lib/settings-json-surgery.ts` — **unchanged**, called by the adapter (`remove` uses the last two, exactly as `uninstall.ts:434-456` does today).
+- `cleargate-cli/test/helpers/init-fixture.ts` — **create**. Frozen-clock init fixture and baseline capture/compare, reused by STORY-058-04.
 
 ### 3.2 Technical Logic
 Wrap, do not rewrite. The Claude adapter is a thin delegation layer over three helpers that already encode fixed defects; reimplementing their logic inside the adapter would silently drop those fixes.
 
-The contract needs three operation groups: **install** (copy owned roots, then run surgery), **surgery** (instruction-file bounded block, hook config merge, MCP registration — each host does all three but in different file formats), and **remove** (the inverse, for uninstall and `host remove`). Designing remove now, rather than when uninstall is touched in [[STORY-058-07]], is what keeps the two in sync.
+The contract needs three operation groups: **install** (the shared copier copies core plus the adapter's declared `ownedRoots()`/`sharedRoots()`; then `install()` runs the adapter's surgery), **surgery** (instruction-file bounded block, hook config merge, MCP registration — each host does all three but in different file formats), and **remove** (the inverse, for uninstall and `host remove`). Designing remove now, rather than when uninstall is touched in [[STORY-058-07]], is what keeps the two in sync.
 
 ### 3.3 API Contract (if applicable)
 ```ts
-interface HostAdapter {
-  readonly name: 'claude' | 'codex' | 'copilot';
-  ownedRoots(): string[];
+export type HostName = 'claude' | 'codex' | 'copilot';
+
+export interface InstallCtx {
+  readonly cwd: string;          // target repo root
+  readonly payloadDir: string;   // flat composed payload (core + claude): InitOptions.payloadDir | --from-source temp view | npm default
+  readonly pinVersion: string;   // init passes `pinVersion ?? 'latest'`, exactly as Step 5b does today (init.ts:542)
+  readonly force: boolean;
+  readonly stdout: (s: string) => void;
+  readonly stderr: (s: string) => void;
+}
+export interface RemoveCtx {
+  readonly cwd: string;
+  readonly stdout: (s: string) => void;
+  readonly stderr: (s: string) => void;
+}
+export interface RemoveReport { readonly removed: readonly string[]; }
+
+export interface HostAdapter {
+  readonly name: HostName;
+  /** Install-relative POSIX roots copied verbatim from the payload and owned exclusively by this host.
+   *  No leading '/', no '..' segment, no trailing '/', non-empty. */
+  ownedRoots(): readonly string[];
+  /** Roots copied only when a declaring host is selected; owned by core in the manifest (e.g. Codex/Copilot `.agents`). Claude: []. */
+  sharedRoots(): readonly string[];
+  /** Files this host edits surgically (bounded block / merge / registration). No lifecycle command deletes one wholesale. */
+  surgeryTargets(): readonly string[];
+  /** Post-copy surgery: instruction bounded block, hook-config merge, MCP registration. */
   install(ctx: InstallCtx): Promise<void>;
-  remove(ctx: RemoveCtx): Promise<void>;
+  /** Inverse of install's surgery (uninstall, `host remove`): strips ClearGate-owned content only. */
+  remove(ctx: RemoveCtx): Promise<RemoveReport>;
 }
 ```
-Exact shape to be finalized against [[STORY-058-10]]'s Codex needs before merge.
+Finalized 2026-09-25 against [[STORY-058-10]]/[[STORY-058-11]] needs (AGENTS.md, `.codex/hooks.json`, `.codex/config.toml` as surgery targets; `.codex` owned; `.agents` shared). [[STORY-058-12]] adds `dispatchMode`.
 
 ## Task Breakdown
 
-- [ ] Sketch the Codex adapter's required operations from EPIC-058 §4 so the contract is designed against two hosts, not one.
-- [ ] Define `HostAdapter` in `types.ts`.
-- [ ] Implement `registry.ts` with unknown-name rejection.
-- [ ] Implement `claude.ts` as delegation over the three existing helpers.
-- [ ] Route `init.ts`'s no-flag path through the resolved adapter.
-- [ ] Prove byte-identity against a pre-refactor install.
+- [x] QA-Red: add `test/helpers/init-fixture.ts`, the contract unit reds (scenarios 1-11) and the parity integration (12); capture the pre-refactor baseline at the red commit
+- [x] Create `src/hosts/types.ts` (`HostName`, `InstallCtx`, `RemoveCtx`, `RemoveReport`, `HostAdapter` with owned/shared roots and surgery targets)
+- [x] Create `src/hosts/registry.ts` (`createHostRegistry` with name/root invariants, `defaultHostRegistry`, `UnknownHostError`, `pathUnderRoots`; Map-based lookup)
+- [x] Create `src/hosts/claude.ts`: move `HOOK_ADDITION` verbatim; `install` = init Steps 4/5/5b verbatim; `remove` = `uninstall.ts:434-456` surgery; injectable deps
+- [x] Route `init.ts` through `registry.resolve('claude').install(ctx)`; add the `hostRegistry` seam; keep -02's hoisted `.mcp.json` `let`s and assign pre/post around the adapter loop inside the Steps 3–7 `try` (M2-A1/A2); drop unused imports
+- [x] Typecheck, the targeted reds, parity compare against the baseline, and the regression witnesses solo
 
 ## 4. Quality Gates
 
@@ -167,10 +200,10 @@ Exact shape to be finalized against [[STORY-058-10]]'s Codex needs before merge.
 
 ## Existing Surfaces
 
-- **Surface:** `cleargate-cli/src/commands/init.ts:188` — the scaffold installer, hook merge, CLAUDE.md injection, and `.mcp.json` registration; the primary extension point.
-- **Surface:** `cleargate-cli/src/init/inject-claude-md.ts:25` — bounded-block extraction/injection.
+- **Surface:** `cleargate-cli/src/commands/init.ts:251` (`initHandler`; Steps 4–5b at `:461-557`, inside the Steps 3–7 `try` at `:366`) — the scaffold installer, hook merge, CLAUDE.md injection, and `.mcp.json` registration; the primary extension point.
+- **Surface:** `cleargate-cli/src/init/inject-claude-md.ts:30` / `:45` (`extractBlock` / `injectClaudeMd`) — bounded-block extraction/injection.
 - **Surface:** `cleargate-cli/src/init/merge-settings.ts:48` — non-destructive Claude hook merge.
-- **Surface:** `cleargate-cli/src/init/inject-mcp-json.ts:37` — `.mcp.json` merge, `McpJsonShape`.
+- **Surface:** `cleargate-cli/src/init/inject-mcp-json.ts:77` (`injectMcpJson`; `:37` is `mergeMcpJson`) — `.mcp.json` merge, `McpJsonShape`.
 
 ## Why not simpler?
 

@@ -1,0 +1,23 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/wiki/bucket-registry-parity.red.node.test.ts
+
+✔ P1 - DELIVERY_BUCKETS (extracted from PREFIX_MAP) includes spikes (0.645042ms)
+✔ P2 - every bucket in DELIVERY_BUCKETS appears in every follower site, except KNOWN_BUCKET_GAPS (2.549583ms)
+✔ P3 - KNOWN_BUCKET_GAPS has exactly 5 rows, each with a reason citing BUG-051 (0.115041ms)
+✔ P4 - spikes has zero rows in KNOWN_BUCKET_GAPS (0.066417ms)
+✔ P5 - every one of the ten follower-site extractors returns a non-empty list (0.639625ms)
+✔ P6a - outer .cleargate/config.yml wiki.ingest_buckets includes spikes (2.169208ms)
+✔ P6b - canonical cleargate-planning/.cleargate/config.yml wiki.ingest_buckets includes spikes (0.334667ms)
+✔ Scenario 3 negative - checkBucketParity names the specific site missing a bucket (0.099042ms)
+✔ Scenario 3 negative (multi) - checkBucketParity collects every finding, never stops at the first (0.099667ms)
+✔ P7 Scenario 1 - a spike charter ingests into .cleargate/wiki/spikes and index.md lists it (7.89725ms)
+✔ P7 Scenario 2 - after cleargate wiki build, product-state.md counts spikes alongside the other buckets (5.729208ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 277.497625

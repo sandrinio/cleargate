@@ -31,7 +31,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T23:02:45Z
+  last_stamp: 2026-09-25T04:37:50Z
   sessions: []
 ---
 
@@ -249,6 +249,35 @@ same discipline [[BUG-041]] applied to id grammars. A `<instructions>`-aware sni
 precedent in `backfill_hierarchy.mjs`'s `parseFm`, which bails on the same condition (see FLASHCARD
 2026-08-27 `#frontmatter #backfill`); that one fails *closed* (skips the file) where this one fails
 *open* (corrupts it). Failing closed is the acceptable interim behaviour if a full fix is deferred.
+
+**AMENDMENT (Developer, 2026-09-25) — self-amended per the M0 blueprint's shared-locator design,
+files touched beyond the original list above:**
+
+- `cleargate-cli/src/lib/frontmatter-locator.ts` — **new module**, the shared `locateFrontmatter` /
+  `replaceFrontmatter` primitives the M0 plan specifies (`plans/M0.md` §"BUG-067 — shared locator
+  and bounded replacement"). This is the actual fix; the three call sites above wire into it rather
+  than each carrying its own positional sniff.
+- `cleargate-cli/src/lib/frontmatter-cache.ts` (`writeCachedGate`) — a **fourth call site** the
+  original filing did not name: it reconstructed the whole document from parsed `body` exactly like
+  the two write-path sniffs, so an instruction-prefixed item would lose its preamble on the very
+  first `cached_gate_result` write even after `stamp-frontmatter.ts`/`stamp-tokens.ts` were fixed.
+  The M0 plan names this explicitly as an "adjacent cache writer" required in the same change.
+- `cleargate-cli/src/commands/stamp.ts` (`stampHandler` dry-run) — removed a **fifth, independent**
+  copy of the same positional sniff (`raw.trimStart().startsWith('---')`) used only to build the
+  dry-run diff's before-side. Left alone, `--dry-run` would report a real, instruction-prefixed
+  header as though every field were a new addition. Replaced with `result.frontmatterBefore` from
+  the already-bounded stamp call, per the M0 plan's explicit instruction.
+- `cleargate-cli/test/commands/new-command.node.test.ts` — reactivated and retitled N6b (was
+  `{ skip: ... }`, EXPECTED RED tracked by this bug per CR-108 TPV RULING 1). The M0 plan requires
+  this reactivation by name; it is a regression witness once the fix lands, not new scope.
+- `cleargate-cli/CHANGELOG.md` — `## Unreleased` entry. The M0 plan requires "a CLI changelog entry"
+  in BUG-067's committed surface.
+
+No file was added beyond what `plans/M0.md`'s "BUG-067 — shared locator and bounded replacement"
+table and "Cross-story risks and execution handoff" bullet ("Add the locator, adjacent cache writer,
+dry-run correction, new tests and a CLI changelog entry ... in one implementation change") already
+specify; this amendment documents that those five names belong on this section's list too, since §4
+above predates the Architect's M0 blueprint.
 
 ## 5. Verification Protocol (The Failing Test)
 

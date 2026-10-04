@@ -1,0 +1,23 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/test-layers-declared-doctrine.red.node.test.ts
+
+✔ T4: test-layers-declared is registered in the story ready-for-execution gate block (0.977208ms)
+✔ T4: test-layers-declared is registered in the cr ready-to-apply gate block (0.192ms)
+✔ T4: test-layers-declared is registered in the bug ready-for-fix gate block (0.144833ms)
+✔ T4 (A6, NEW): canonical readiness-gates.md parses as valid YAML across every fenced block — zero throws, 11 blocks (6.192792ms)
+✔ T7: developer.md documents both *.integration.node.test.ts and *.red.integration.node.test.ts, in real prose (A7c) (0.286917ms)
+✔ T7: qa.md documents both *.integration.node.test.ts and *.red.integration.node.test.ts, in real prose (A7c) (0.14975ms)
+✔ T7: SKILL.md §C.3 documents both naming forms (scoped to the C.3 section, not the whole file) (0.242875ms)
+✔ T7 (A7a, NEW): SKILL.md §C.3 own "File-naming:" sentence itself qualifies the *.red.node.test.ts claim (0.241959ms)
+✔ T10: cr-026-integration.node.test.ts (the hyphen form) is documented — regardless of whether the file still exists (A7b) (0.345041ms)
+✔ T11: readiness-gates.md Predicate Vocabulary says "exactly 11 predicate shapes" and lists #11 (0.185166ms)
+✔ T11 (A5, NEW): readiness-predicates.ts:3's own docstring count moves from 11 to 12 — the SECOND, independent count site (0.181292ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 255.514292

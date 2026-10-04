@@ -2,7 +2,7 @@
 story_id: STORY-058-13
 parent_epic_ref: EPIC-058
 parent_cleargate_id: null
-sprint_cleargate_id: null
+sprint_cleargate_id: SPRINT-41
 carry_over: false
 status: Ready
 approved: true
@@ -16,16 +16,20 @@ parallel_eligible: n
 expected_bounce_exposure: med
 lane: standard
 db_write_set: []
-deferred_verification: []
+deferred_verification:
+  - description: "Goal check 5: codex-loop-evidence.md has a PASS scripted run and a PASS live human-trust run, both on the final cli artifact inputs and the pinned standalone codex"
+    command: node cleargate-cli/scripts/clean-room/codex-loop.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md --write-result .cleargate/sprint-runs/SPRINT-41/deferred-verify/STORY-058-13.json
+    blocks: BUG-106
+    note: "Owner decision 2026-10-04 (SPRINT-41 close): this live check moves out of SPRINT-41 and is carried with BUG-106; it no longer blocks SPRINT-41 close."
 created_at: 2026-09-11T00:00:00Z
-updated_at: 2026-09-11T22:25:54Z
+updated_at: 2026-09-25T22:39:50Z
 created_at_version: cleargate@0.26.1
-updated_at_version: 11c29fd3-dirty
+updated_at_version: 31969ea3-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-11T22:29:14Z
+  last_gate_check: 2026-10-04T06:31:53Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -42,7 +46,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-24T22:39:10Z
+  last_stamp: 2026-09-25T09:53:38Z
   sessions: []
 ---
 
@@ -59,13 +63,16 @@ As a ClearGate maintainer verifying a release, I want one real story driven thro
 
 ### 1.2 Detailed Requirements
 - Mirror [[STORY-058-09]]'s structure exactly: a clean-room directory outside this repository, installed from the packed artifact, exercised by a real host session, producing a written evidence artifact that gates sprint close.
-- Pin the primary artifact to a dedicated standalone Codex `0.154.0-alpha.6.2` install, recording its absolute path, release origin, version output, and SHA-256 before execution. The inspected embedded binary is `/Applications/ChatGPT.app/Contents/Resources/codex`, also `0.154.0-alpha.6.2` (SHA-256 `ecad78dbf98adb89ec475edac86630406cbe59d9f3070b17d88065f136b94bcb`). It is a same-version secondary smoke target, not a substitute for primary standalone evidence. No standalone install has yet been made. A different version requires an explicit approach amendment.
+- Pin the primary artifact to a dedicated standalone Codex `0.154.0-alpha.6.2` install, recording its absolute path, release origin, version output, and SHA-256 before execution. The inspected embedded binary is `/Applications/ChatGPT.app/Contents/Resources/codex`, also `0.154.0-alpha.6.2` (SHA-256 `ecad78dbf98adb89ec475edac86630406cbe59d9f3070b17d88065f136b94bcb`). It is a same-version secondary smoke target, not a substitute for primary standalone evidence. The standalone install is pinned at `/Users/ssuladze/Documents/Dev/CG_TEST/sprint-41-D2QMC1/codex-runtime-X33IWV/bin/codex` (SHA-256 `1d8b80de0a27f69b152bfb9b7b3b4fd3b8c589e4e76213db27219eab9ae53afa`, re-measured 2026-09-27; release origin and archive SHA-256 in the SPRINT-41 report `codex-standalone-release.md`). A different version requires an explicit approach amendment. Measured 2026-09-26: the ChatGPT.app embedded binary has auto-updated to `codex-cli 0.155.0-alpha.16.3` (SHA-256 `c67698d0990aae05211d9c43ab343ad9517e406824dea77eca103a2806232b3a`), so no same-version embedded target exists; no embedded smoke is run and the evidence records the drift. The deterministic secondary data point is the pinned standalone binary driven by a scripted Responses endpoint (`provider: scripted`), labelled as such.
 - Isolate host state: every clean-room run sets a dedicated `CODEX_HOME` so the run never reads or writes this user's personal Codex configuration, sessions, or MCP registrations.
+- The real story is authored inside the clean room, never taken from this repository: `repo-loop/` is a fresh git repository seeded with a minimal Node package and installed with `cleargate init --yes --host codex` from the packed artifact; its epic, story (STORY-001-01, `src/slugify.mjs`, one Gherkin scenario) and sprint (SPRINT-01) are created with the artifact's `cleargate new`, authored as a drafting agent authors them (the `<instructions>` block stripped, per protocol Guidance Surface Reach), approved, and started with `cleargate sprint init`. The run asserts that nothing is written to this repository's sprint state or hook logs.
+- Sandbox posture is disclosed: Codex's `workspace-write` sandbox makes `.git` read-only (measured: `git worktree add` fails), so every session starts with `config.sandbox_workspace_write.writable_roots = [<room>/.git]` on `thread/start` (child agents inherit it; nothing is persisted).
+- Role shells run `/bin/zsh -lc`, and macOS `path_helper` puts `/opt/homebrew/bin` ahead of the launcher PATH; the clean room's `HOME` carries a `.zprofile` that re-prepends the artifact's bin directory, and the run asserts that hooks and role shells both resolve the artifact `cleargate`.
 - Drive one real story through four dispatches — Architect, QA-Red, Developer, QA-Verify — and a DevOps-executed merge. The orchestrator must not perform the merge itself; SKILL.md's forbidden-orchestrator-patterns rule means a merge the orchestrator ran proves nothing about the loop.
 - Separate `loop_transport` from `enforcement_parity` in the evidence. Both must pass for this story and the sprint's Codex-port goal to pass. Four role dispatches plus a DevOps merge prove transport only. Prove planning-first denial using an enforce-mode fixture with no active-sprint bypass, and flashcard/dispatch denial using a pending-flashcard fixture with no advisory/skip override; verify the forbidden edit/spawn did not occur, then remove the fixture condition and prove the permitted action proceeds. Missing required hooks, denials, or dispatch identity make enforcement parity fail or inconclusive, never green. A filed follow-up does not waive this condition.
 - Record, per dispatch, which hooks fired and which did not: `SessionStart`, `PreToolUse` on file edits, `PostToolUse` ingest, the subagent-dispatch gate, and `SubagentStop`. A hook that did not fire is recorded as a gap, never omitted.
 - Record the worktree lifecycle (creation from the sprint branch, isolation during the run, teardown at merge), the state transitions, and the merge commit SHA.
-- Record token telemetry honestly: if Codex exposes no verifiable per-subagent usage, the artifact states `metering: unavailable`. Synthesizing zero-token rows is forbidden by [[EPIC-058]].
+- Record token telemetry honestly: if Codex exposes no verifiable per-subagent usage, the artifact states `metering: unavailable`. Synthesizing zero-token rows is forbidden by [[EPIC-058]]. Measured: each Codex subagent's rollout (`agent_transcript_path` in the SubagentStop payload) holds one `token_usage_record` per model response carrying the provider's exact usage. ClearGate does not consume it in SPRINT-41, so the ClearGate verdict is `metering: unavailable`; the artifact records the telemetry probe (per dispatch: found, record count, totals, and — for scripted runs — an exact cross-check against the provider-reported usage) and a follow-up CR carries the consumer.
 - Disclose the trust posture used. Codex gates hooks behind both workspace trust and a hook-trust prompt, and offers `--dangerously-bypass-hook-trust` for scripted runs. A human-granted trust and a bypassed one are not equivalent claims and must not be recorded as if they were.
 - Extend [[STORY-058-08]]'s `cleargate verify-install` driver with the machine-checkable half for Codex — payload presence and shape, manifest host set, hook wiring, `[features] hooks = true`, doctor exit code — and leave only the irreducibly live half to the session.
 - Do not restate [[STORY-058-10]]'s or [[STORY-058-11]]'s own acceptance criteria; consume them as prerequisites.
@@ -136,10 +143,11 @@ Feature: Codex loop-completion evidence
     And positive controls prove permitted actions proceed
     And missing mandatory enforcement prevents a passing story or Codex-port goal
 
-  Scenario: Unavailable telemetry is stated, never synthesized
-    Given Codex exposes no verifiable per-subagent token usage
+  Scenario: Unavailable metering is stated, never synthesized
+    Given ClearGate does not consume Codex per-subagent usage in SPRINT-41
     When the evidence artifact records cost
     Then it states metering unavailable
+    And it records whether the host exposed per-dispatch usage telemetry, and where
     And no zero-token ledger rows are written for the run
 
   Scenario: Trust posture is disclosed
@@ -156,20 +164,23 @@ Feature: Codex loop-completion evidence
 ```
 
 ### 2.2 Verification Steps (Manual)
-- [ ] Create the clean room outside this repository, install from the packed artifact with `--host codex`, and record the Codex version string.
-- [ ] Start a real Codex session with the dedicated `CODEX_HOME`, grant workspace and hook trust, and record the posture.
-- [ ] Drive the four dispatches and the DevOps merge; capture the per-dispatch hook-firing record as you go, not afterwards from memory.
-- [ ] Write `codex-loop-evidence.md` and confirm sprint close reads it as a gating input.
+- [ ] Pass B: `codex-loop.mjs run --provider scripted --trust harness` into a sibling container appends Run 1 (PASS).
+- [ ] QA-Verify: the same run into a fresh container reproduces Run 1's verdicts.
+- [ ] Step L: `prepare --provider live`, owner trust in the Codex TUI, `run --trust human` appends Run 2 (PASS); both runs record the pinned path, origin, version and SHA-256.
+- [ ] `codex-loop.mjs check` exits 0 after the merge and again at RS-CLOSE.
 
 ## 3. The Implementation Guide
+
+*Re-declared 2026-09-25 after STORY-058-01 (M1.md §D4 + STORY-058-01-arch.md §5): canonical paths → `cleargate-cli/scaffold/{core,hosts/claude}/**`. Starts only after STORY-058-02 merges, since it reads canonical through `cleargate-cli/test/helpers/scaffold-roots.ts` (created by -02). The evidence file itself stays outer.*
 
 ### 3.1 Context & Files
 
 | Item | Value |
 |---|---|
 | Primary File (new) | `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md` |
-| Related Files | `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md`, `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md`, `cleargate-planning/.claude/settings.json`, `cleargate-cli/src/commands/verify-install.ts` |
-| New Files Needed | Yes — see Primary File |
+| Related Files | `cleargate-cli/src/commands/verify-install.ts`, `.cleargate/knowledge/clean-room-verification.md`, `cleargate-cli/scripts/clean-room/mock-responses.mjs`, `cleargate-cli/scripts/clean-room/codex-appserver.mjs`, `cleargate-cli/scripts/clean-room/codex-hooks.mjs`, `cleargate-cli/test/commands/verify-install-codex.red.node.test.ts`, `cleargate-cli/CHANGELOG.md`, `cleargate-cli/scripts/clean-room/evidence.mjs` — reference, unchanged, `cleargate-cli/scripts/clean-room/artifact.mjs` — reference, unchanged, `cleargate-cli/scripts/clean-room/probe-items.mjs` — reference, unchanged, `cleargate-cli/scaffold/core/.cleargate/scripts/assert_story_files.mjs` — reference, unchanged, `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs` — reference, unchanged, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs` — reference, unchanged, `cleargate-cli/scaffold/core/.cleargate/scripts/lib/flashcard-gate.mjs` — reference, unchanged, `cleargate-cli/scaffold/hosts/codex/.codex/hooks.json` — reference, unchanged, `cleargate-cli/scaffold/hosts/claude/.claude/settings.json` — reference, unchanged |
+| New Files Needed | `cleargate-cli/scripts/clean-room/codex-loop.mjs`, `cleargate-cli/scripts/clean-room/loop-evidence.mjs`, `cleargate-cli/scripts/clean-room/loop-script.mjs`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/seed/package.json`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/seed/README.md`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/story-body.md`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/red-test.mjs`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/impl.mjs`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/plan-M1.md`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/waves.json`, `cleargate-cli/scripts/clean-room/fixtures/codex-loop/reports/`, `cleargate-cli/test/commands/verify-install-codex-shape.red.node.test.ts`, `cleargate-cli/test/commands/verify-install-codex-cli.red.integration.node.test.ts`, `cleargate-cli/test/scripts/codex-loop-evidence.red.node.test.ts`, `cleargate-cli/test/scripts/codex-loop-harness.red.node.test.ts`, `cleargate-cli/test/e2e/codex-loop.red.integration.node.test.ts`, `.cleargate/sprint-runs/SPRINT-41/codex-loop-evidence.md` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-13_codex_end_to_end_loop_evidence.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-13-devops.md` |
 
 ### 3.2 Technical Logic
 
@@ -181,16 +192,20 @@ Second, evidence versus remediation. The run will surface gaps; those become the
 
 Sequencing is forced by dependency, not preference: [[STORY-058-10]] supplies the payload, [[STORY-058-11]] the roles, [[STORY-058-12]] the dispatch mode, and [[STORY-058-09]] the Claude baseline this run must not regress.
 
+Harness (M6 plan): `scripts/clean-room/codex-loop.mjs prepare` builds the container, installs the packed artifact, and authors the clean-room project; for the primary run the owner then trusts the workspace and the exact hooks in the Codex TUI; `run --trust human` refuses unless every project hook is trusted at its current hash and makes no trust write itself. Six sessions: edit deny (enforce mode, no active sprint, story unapproved), edit allow, a delivery-item ingest, dispatch deny (a pending flashcard, no skip or advisory override), dispatch allow with identity, and the loop (a real model orchestrator following the installed playbook and `dispatch-serial.md`). Evidence is the `codex app-server` notification stream (child threads, hook runs keyed by call id), the `codex-identity` log, child rollouts, git and `state.json`. Gating ids split into `loop_transport` and `enforcement_parity`; `check` requires a PASS scripted run and a PASS live human-trust run on the final artifact inputs.
+
+Contract-first execution (CR-124; SPRINT-41 re-plan and the M6 plan's C3 entry re-derivation): built in `OUTER/.worktrees/STORY-058-13/cleargate-cli` on `story/STORY-058-13`, cut from `contract/S-41-loop` after that ref is fast-forwarded from STORY-058-12's pass-B commit to STORY-058-12's integrated commit (pass B merged with cli `main`, which carries STORY-058-10's scripted-session harness and BUG-090's probe-story approval flip); integrates after STORY-058-12 merges (BUG-090 is already merged). The four controls are graded by STORY-058-10's `codexHookVerdicts` unchanged, so they reuse its probe names: the epic `EPIC-001_cleanroom_probe.md`, the edit target `src/cg-probe.ts`, and the probe dispatch message `STORY=001-01 Reply with exactly OK.`. `authorLoopStory` lives in `loop-script.mjs` and composes `stripInstructionsBlock` (`codex-hooks.mjs`) with `locateFrontmatterFence` (`assert_story_files.mjs`); `probe-items.mjs` is not edited.
+
 ## Task Breakdown
 
-- [ ] Install the pinned standalone Codex CLI in a dedicated path; record release origin, absolute path, version, and checksum.
-- [ ] Extend `cleargate verify-install` with the Codex machine-checkable branch, including the `[features] hooks = true` assertion.
-- [ ] Stand up the clean room with a dedicated `CODEX_HOME` and install with `--host codex`.
-- [ ] Grant trust, record the posture, and confirm hooks are live before dispatching anything.
-- [ ] Drive Architect, QA-Red, Developer, QA-Verify, then the DevOps merge, capturing hook firing per dispatch.
-- [ ] Write `codex-loop-evidence.md` with every mandatory field, including gaps and unavailable telemetry.
-- [ ] Wire the artifact into sprint close as a gating input, matching [[STORY-058-09]]'s treatment.
-- [ ] File a follow-up Bug or CR for each gap the run exposes.
+- [ ] QA-Red: verify-install codex shape checks (8 ids, mutations, unavailable split view, null snapshot), CLI integration, loop verdicts and evidence check (one negative per condition), mock routes / loop script / authorLoopStory / runLoopTurn / codex-hooks helper exports, e2e (install shape; scripted loop gated on CLEARGATE_CODEX_BIN); amend the STORY-058-10 verify-install test (null snapshot = 8 skips; split view pinned to the canonical scaffold)
+- [ ] Pass A: extend HOST_VERIFIERS.codex (hooks wiring, executable bits, foreign hooks, AGENTS.md block, MCP registration, roles, skills) reading the packed split view (`VerifyInstallOptions.splitViewRoot`; an unavailable split view fails, never passes); live ids for loop transport and enforcement parity
+- [ ] Pass B: codex-loop.mjs prepare/run/check, loop-evidence.mjs, loop-script.mjs (incl. authorLoopStory), fixtures; mock routes, runLoopTurn and codex-hooks.mjs helper exports; clean-room-verification.md Codex section; Run 1 (scripted) appended to codex-loop-evidence.md
+- [ ] Integrate: merge cli main after STORY-058-12 merges; re-verify; re-run the scripted loop if `codex-loop.mjs check` reports the scripted run stale
+- [ ] QA-Verify: reproduce the scripted run in a fresh container on the integrated tree; verdicts identical to the last scripted run
+- [ ] Step L (orchestrator + owner): prepare the live room, owner grants workspace + exact-hook trust in the Codex TUI, run the primary live human-trust loop (Run 2), commit the evidence
+- [ ] File a Draft follow-up item for every recorded gap and cite its id in the evidence
+- [x] Evidence gates close through deferred_verification (close_sprint.mjs Step 2.9) — frontmatter applied by the orchestrator (M6 amendment G1)
 
 ## 4. Quality Gates
 
@@ -212,13 +227,19 @@ Sequencing is forced by dependency, not preference: [[STORY-058-10]] supplies th
 - [ ] Telemetry is either recorded from real usage or explicitly marked unavailable; no synthesized zero rows exist.
 - [ ] The primary standalone path, release origin, version, SHA-256, and human trust of the exact hook hashes are recorded.
 - [ ] Every gap the run exposed has a filed follow-up item.
+- [ ] codex-loop-evidence.md gates sprint close through this story's deferred_verification (last scripted PASS and last live human-trust PASS, both on the final artifact inputs and the pinned codex SHA-256).
+- [ ] The run proves it wrote nothing to this repository's sprint state (codex.loop.meta-repo-untouched).
 
 ## Existing Surfaces
 
 - **Surface:** `.cleargate/delivery/pending-sync/STORY-058-08_clean_room_verification_procedure_and_driver.md` — the clean-room procedure and `verify-install` driver this story extends rather than re-derives.
 - **Surface:** `.cleargate/delivery/pending-sync/STORY-058-09_clean_room_claude_regression_baseline.md` — the Claude baseline whose structure, evidence artifact, and sprint-close gating this story mirrors for Codex.
-- **Surface:** `cleargate-planning/.claude/settings.json` — the authoritative list of hook events whose Codex firing this run must record.
-- **Surface:** `cleargate-planning/.claude/hooks/pre-edit-gate.sh` — one of the two gates whose real blocking behavior, not mere invocation, the run must observe.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/settings.json` — the authoritative list of hook events whose Codex firing this run must record.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-edit-gate.sh` — one of the two gates whose real blocking behavior, not mere invocation, the run must observe.
+- **Surface:** `cleargate-cli/src/commands/verify-install.ts` — `HOST_VERIFIERS.codex` (STORY-058-10: `codex.features-hooks` plus six live ids), which this story extends with seven shape checks and two live ids.
+- **Surface:** `cleargate-cli/scripts/clean-room/codex-hooks.mjs` and `cleargate-cli/scripts/clean-room/evidence.mjs` — the STORY-058-10 Codex harness: `codexHookVerdicts` grades this story's four controls unchanged, and `stripInstructionsBlock`, the scripted item builders and the hook-log readers are reused, not copied.
+- **Surface:** `cleargate-cli/scripts/clean-room/codex-appserver.mjs` and `cleargate-cli/scripts/clean-room/mock-responses.mjs` — `runTurn`, `trustRoom`, `flattenHooksList` and the content-routed mock responder, extended additively.
+- **Surface:** STORY-058-12's serial driver and verdict mode (`dispatch_serial.mjs`, `validateVerdicts` with `mode: 'serial'`, `cardHash`) on contract branch `contract/S-41-loop` — the dispatch path the loop exercises; cited by name because it reaches cli `main` only when STORY-058-12 merges.
 - **Coverage of this requirement:** none — no existing story drives a real story through the loop on any host other than Claude.
 
 ## Prior work

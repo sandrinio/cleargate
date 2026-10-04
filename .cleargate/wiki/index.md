@@ -14,7 +14,7 @@
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
-- [[EPIC-058]] (epic) — Draft — Additive Multi-Host Execution Adapters
+- [[EPIC-058]] (epic) — Draft ⚠︎ drift — Additive Multi-Host Execution Adapters
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
@@ -38,7 +38,8 @@
 - [[CR-120]] (cr) — Draft — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs`
 - [[CR-121]] (cr) — Draft — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
 - [[CR-122]] (cr) — Draft — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
-- [[CR-123]] (cr) — Approved — Tested work items declare SPIDR coverage, and their scenarios must match it
+- [[CR-123]] (cr) — Approved ⚠︎ drift — Tested work items declare SPIDR coverage, and their scenarios must match it
+- [[CR-124]] (cr) — Approved — Contract-first build-then-integrate — sprints are planned and run as a dependency DAG, not collision waves
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
 - [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
@@ -59,16 +60,43 @@
 - [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
-- [[BUG-067]] (bug) — Triaged — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
+- [[BUG-067]] (bug) — Triaged ⚠︎ drift — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 - [[BUG-070]] (bug) — Triaged — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
 - [[BUG-072]] (bug) — Triaged — `listed-item` counts only `- ` bullets, so an ordered list scores zero
 - [[BUG-074]] (bug) — Triaged — A state transition dirties the tree and fails the next story's bounce-readiness check
 - [[BUG-075]] (bug) — Triaged — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing — a story can reach `Done` without QA
-- [[BUG-085]] (bug) — Ready — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
+- [[BUG-085]] (bug) — Ready ⚠︎ drift — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
 - [[BUG-086]] (bug) — Draft — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
-- [[BUG-089]] (bug) — Ready — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
+- [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
+- [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs, and no `approved:` key in the epic/story templates
+- [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
+- [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
+- [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
+- [[BUG-094]] (bug) — Draft — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
+- [[BUG-095]] (bug) — Draft — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
+- [[BUG-096]] (bug) — Triaged — The init-parity test fixture leaks a temp directory on every scenario run
+- [[BUG-097]] (bug) — Triaged — Four CLI output defects a new user hits in the first session (gate -v, stamp --dry-run, wiki query, scaffold-lint)
+- [[BUG-098]] (bug) — Triaged — The remaining positional frontmatter readers misread or corrupt `<instructions>`-led work items (BUG-067 / BUG-090 carry-forward)
+- [[BUG-099]] (bug) — Triaged — `codex-hooks.mjs check --write-result` writes no status or exit code, so sprint close always fails STORY-058-10's deferred verification
+- [[BUG-100]] (bug) — Triaged — A Codex install cannot run the sprint loop: Codex's default sandbox makes `.git` read-only and ClearGate never configures it
+- [[BUG-101]] (bug) — Triaged — Codex dispatches are never attributed to a work item: live `spawn_agent` messages are encrypted, and the hook reads only the message
+- [[BUG-102]] (bug) — Triaged — The serial driver needs a waves.json that the tiny-sprint rule omits, and its verdicts never move state.json
+- [[BUG-103]] (bug) — Triaged — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
+- [[BUG-104]] (bug) — Triaged — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
+- [[BUG-105]] (bug) — Triaged — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
+- [[BUG-106]] (bug) — Triaged — The clean-room harness's live dispatch controls carry the work-item id only in the encrypted message, so live dispatch-identity cannot pass
+- [[BUG-107]] (bug) — Triaged — ClearGate's own runtime output makes every story worktree unclean, so DevOps teardown needs `git worktree remove --force`
+- [[BUG-108]] (bug) — Triaged — The QA role requires a context pack that the sprint-execution skill never tells the orchestrator to build
+- [[BUG-109]] (bug) — Triaged — `run_script.sh` records QA-Red's intended red test runs as script incidents, unattributed
+- [[BUG-110]] (bug) — Triaged — The state scripts the skill prescribes exit 1 unless `CLEARGATE_STATE_FILE` is set, and no example sets it
+- [[BUG-111]] (bug) — Triaged — `dispatch_serial.mjs` rejects an unknown wave id without naming the valid ones
+- [[BUG-112]] (bug) — Triaged — Codex agents are told to call `Skill(flashcard, "check")`, a Claude tool call, so Codex invents a `cleargate flashcard` command
+- [[BUG-113]] (bug) — Triaged — Nothing checks QA-Red's sealed tests against the item's declared Test Layers minimums before the Developer starts
+- [[BUG-114]] (bug) — Triaged — `close_sprint.mjs` cannot find a globally installed CLI, so Gate 4 is unreachable for global and npx users
+- [[BUG-115]] (bug) — Triaged — Consolidation (§D.5.1) requires a `code-simplifier` agent that ClearGate does not install
+- [[BUG-116]] (bug) — Triaged — DevOps halts on a missing Architect report that the skill says a clean-scan story never has
 
 ## Archive
 

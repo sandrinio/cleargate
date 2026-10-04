@@ -1,0 +1,21 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/stamp-and-gate.node.test.ts
+
+▶ stamp-and-gate.sh hook
+  ✔ logs stamp=0 gate=0 ingest=0 for a valid .cleargate/delivery path (870.516375ms)
+  ✔ exits 0 and writes no log line when path is NOT under .cleargate/delivery/ (428.266958ms)
+  ✔ exits 0 even when gate check returns non-zero, and logs gate=<nonzero> (877.511083ms)
+  ✔ CR-093: skips a non-markdown artifact under .cleargate/delivery/ (220.377ms)
+  ✔ CR-093: still processes a normal .md work item (645.950084ms)
+  ✔ CR-093: surfaces a failed wiki ingest on hook stdout (919.995333ms)
+  ✔ CR-093: stays quiet on hook stdout when ingest succeeds (766.004166ms)
+✔ stamp-and-gate.sh hook (4729.717083ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4921.487583

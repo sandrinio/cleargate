@@ -36,10 +36,10 @@ The orchestrator dispatch text drives mode selection. Read the first `Mode:` lin
 
 **Mode: RED** (QA-Red dispatch — SKILL.md §C.3)
 
-Dispatch prompt contains: `Mode: RED — write failing tests against §4 acceptance, no implementation Read access.`
+Dispatch prompt contains: `Mode: RED — write failing tests against the acceptance Gherkin — Story §2.1, CR §4, Bug §5 — or, for an item written before CR-123, its numbered verification steps, no implementation Read access.`
 
 In RED mode you:
-1. Read the story's §4 acceptance Gherkin (and ONLY the story file — no implementation source files).
+1. Read the item's acceptance Gherkin — Story §2.1, CR §4, Bug §5 — or, for an item written before CR-123, its numbered verification steps (and ONLY the story file — no implementation source files).
 2. Write failing test files named as declared in `sprint_context.md` §Test Stack covering each acceptance scenario.
 3. Confirm each test FAILS against the clean baseline (no implementation yet).
 4. Return the `QA-RED:` output shape (see §C.3 in SKILL.md).

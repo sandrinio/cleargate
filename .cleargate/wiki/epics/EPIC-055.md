@@ -6,9 +6,10 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md"
-last_ingest: "2026-08-30T22:18:10.906Z"
-last_ingest_commit: "116e576293d208b0c8e84a515c884aeed38569b1"
+last_ingest: "2026-09-26T13:54:38.877Z"
+last_ingest_commit: "bc999833c2f93447876496246c89787064a8b954"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-39"
 ---
 
 # EPIC-055: Parallel wave scheduling — waves become a DAG, not a chain
@@ -21,7 +22,7 @@ repo: "planning"
 <agent_context>
   <objective>Replace the serial wave loop with a dependency-DAG scheduler that admits any wave whose predecessors have merged, bounded by a global segment budget, with a single-consumer merge queue.</objective>
   <architecture_rules>
-    <rule>Must use the existing five-clause wave-compatibility predicate (architect-synth.md) for intra-wave packing — do NOT redesign collision detection</rule>
+    <rule>Must use the real-collision predicate and contract model from CR-124 (architect-synth.md) — do NOT redesign collision detection</rule>
     <rule>Must preserve the serial merge invariant: sprint/S-NN is a single-writer axis, one story merged at a time (SKILL.md:445)</rule>
     <rule>Must preserve the per-story segment body (SKILL.md C.1-C.9) unchanged — this is a scheduler above launchWave, not a rewrite of it</rule>
     <rule>No changes to the verdict schema, validateVerdicts, or mintRunId</rule>
@@ -30,7 +31,7 @@ repo: "planning"
   <target_files>
     <file
 
-[+12,858 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md]
+[+13,112 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

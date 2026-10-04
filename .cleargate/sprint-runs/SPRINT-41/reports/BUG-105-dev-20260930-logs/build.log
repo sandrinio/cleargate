@@ -1,0 +1,64 @@
+
+> cleargate@0.26.1 prebuild
+> node scripts/build-codex-payload.mjs --check && node scripts/copy-planning-payload.mjs && tsx scripts/build-manifest.ts
+
+[prebuild] cleargate-planning payload composed: 88 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/templates/cleargate-planning
+[prebuild] scaffold split view composed: 107 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/templates/scaffold
+[build-manifest] 82 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/templates/cleargate-planning/MANIFEST.json
+
+> cleargate@0.26.1 build
+> rm -rf dist && tsup
+
+CLI Building entry: src/cli.ts, src/admin-api/index.ts, src/auth/factory.ts, src/auth/require-token.ts, src/auth/token-store.ts, src/lib/ledger.ts, src/lib/lifecycle-reconcile.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.5.1
+CLI Using tsup config: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-105/cleargate-cli/tsup.config.ts
+CLI Target: node24
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+ESM dist/admin-api/index.js           11.03 KB
+ESM dist/auth/factory.js              223.00 B
+ESM dist/compile-page-SZWCP2CG.js     6.19 KB
+ESM dist/extract-skeleton-CSGV23ZL.js 11.34 KB
+ESM dist/chunk-JHJS3K2Z.js            2.46 KB
+ESM dist/page-schema-L3ZOLGWR.js      364.00 B
+ESM dist/whoami-FHTS663I.js           2.04 KB
+ESM dist/auth/require-token.js        447.00 B
+ESM dist/chunk-JSU37ADA.js            549.00 B
+ESM dist/auth/token-store.js          133.00 B
+ESM dist/bootstrap-root-7FPKQMHC.js   3.91 KB
+ESM dist/chunk-YSKEIUF3.js            10.87 KB
+ESM dist/lib/ledger.js                3.33 KB
+ESM dist/chunk-UQIOLU6T.js            4.51 KB
+ESM dist/lib/lifecycle-reconcile.js   677.00 B
+ESM dist/chunk-4XFVVNI7.js            33.60 KB
+ESM dist/scan-source-W37REPEM.js      252.00 B
+ESM dist/chunk-UYTWMHRS.js            3.83 KB
+ESM dist/cli.js                       649.20 KB
+ESM ⚡️ Build success in 101ms
+CJS dist/lib/ledger.cjs              4.21 KB
+CJS dist/lib/lifecycle-reconcile.cjs 35.29 KB
+CJS dist/cli.cjs                     736.23 KB
+CJS dist/auth/factory.cjs            6.15 KB
+CJS dist/auth/require-token.cjs      1.34 KB
+CJS dist/auth/token-store.cjs        801.00 B
+CJS dist/admin-api/index.cjs         14.71 KB
+CJS ⚡️ Build success in 102ms
+tsup onSuccess: MANIFEST.json copied to dist/MANIFEST.json
+DTS Build start
+DTS ⚡️ Build success in 2545ms
+DTS dist/cli.d.ts                      13.00 B
+DTS dist/auth/factory.d.ts             374.00 B
+DTS dist/auth/require-token.d.ts       368.00 B
+DTS dist/auth/token-store.d.ts         1.17 KB
+DTS dist/lib/ledger.d.ts               2.30 KB
+DTS dist/lib/lifecycle-reconcile.d.ts  10.99 KB
+DTS dist/admin-api/index.d.ts          9.17 KB
+DTS dist/cli.d.cts                     13.00 B
+DTS dist/auth/factory.d.cts            375.00 B
+DTS dist/auth/require-token.d.cts      369.00 B
+DTS dist/auth/token-store.d.cts        1.17 KB
+DTS dist/lib/ledger.d.cts              2.30 KB
+DTS dist/lib/lifecycle-reconcile.d.cts 10.99 KB
+DTS dist/admin-api/index.d.cts         9.17 KB

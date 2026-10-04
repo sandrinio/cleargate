@@ -1,0 +1,44 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/init/inject-codex-config.red.node.test.ts
+
+✔ Test 7 — greenfield injectCodexConfig writes the exact TOML block (76.428ms)
+▶ Test 8 — preservation fixture
+  ✔ bytes before the first edit are identical, and the suffix is untouched (4.255208ms)
+  ✔ the second run is "unchanged" with no write (56.405ms)
+✔ Test 8 — preservation fixture (60.890125ms)
+✔ Test 9 — a stale [mcp_servers.cleargate] (pin 0.1.0) gets only its range replaced (0.806083ms)
+▶ Test 10 — [features] hooks handling
+  ✔ [features] with web_search = true gains hooks = true at the table end (0.287791ms)
+  ✔ hooks = false flips to true with flippedHooksFlag (0.21725ms)
+✔ Test 10 — [features] hooks handling (0.583916ms)
+▶ Test 11 — refusals throw CodexConfigError, bytes and mtime unchanged
+  ✔ malformed table header (53.454833ms)
+  ✔ a reopened table (51.290625ms)
+  ✔ inline table (49.582125ms)
+  ✔ dotted key collision (48.223542ms)
+  ✔ a [mcp_servers.cleargate.env] sub-table (47.19975ms)
+  ✔ features as an inline table with hooks != true (46.596666ms)
+✔ Test 11 — refusals throw CodexConfigError, bytes and mtime unchanged (296.634333ms)
+✔ Test 12 — a fake [features]\nhooks = false inside """…""" is left as a string; a real [features] is appended (0.57375ms)
+✔ Test 13 — a file with no trailing newline keeps its prefix bytes (0.177667ms)
+▶ Test 14 — readCodexFeaturesHooks
+  ✔ true / false / absent (0.169333ms)
+  ✔ a parse failure throws (0.150125ms)
+✔ Test 14 — readCodexFeaturesHooks (0.362333ms)
+✔ [TPV R-T7] features = { hooks = true } is not refused; only the MCP table is appended (0.175292ms)
+▶ [TPV R-T8] removeCodexMcpServer, assertCodexConfigParsable and the preserved mode
+  ✔ removeCodexMcpServer removes only the cleargate table and keeps [features] and other servers (0.289459ms)
+  ✔ removeCodexMcpServer with no cleargate table returns the input unchanged (0.099084ms)
+  ✔ removeCodexMcpServer refuses an inline cleargate definition with CodexConfigError (0.138458ms)
+  ✔ assertCodexConfigParsable: absent file is fine; malformed and ambiguous files throw CodexConfigError naming the file (93.045208ms)
+  ✔ an updating write keeps the existing file mode (47.59325ms)
+✔ [TPV R-T8] removeCodexMcpServer, assertCodexConfigParsable and the preserved mode (141.289166ms)
+ℹ tests 22
+ℹ suites 5
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 822.4645

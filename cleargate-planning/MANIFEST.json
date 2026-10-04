@@ -1,6 +1,6 @@
 {
   "cleargate_version": "0.26.1",
-  "generated_at": "2026-09-02T15:35:57.117Z",
+  "generated_at": "2026-09-25T07:10:42.703Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -67,7 +67,7 @@
     },
     {
       "path": ".claude/agents/qa.md",
-      "sha256": "ab1ed368190923e3b6533ff41d4cbcd9dfbff571e3ebc0d90129bb9da28c4598",
+      "sha256": "4715e9dba1b2389dd21d82e788e51462091c8bf4cbbd29f8a98ff34e787b8a4d",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -81,9 +81,9 @@
     },
     {
       "path": ".claude/hooks/pending-task-sentinel.sh",
-      "sha256": "2449e3bbcad670ffa453c53c1fe303d73e5280b76bfb2e29dc7bf062fce0fa26",
+      "sha256": "ee0296721db0a931f31391142417ae2ac970e3c945207deb5d459b56e1df7d83",
       "tier": "hook",
-      "overwrite_policy": "always",
+      "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
     },
     {
@@ -102,7 +102,7 @@
     },
     {
       "path": ".claude/hooks/pre-edit-gate.sh",
-      "sha256": "e48564fedcf617601b404288350a286db4e25cf704e308e9ed0d88ae95b462e6",
+      "sha256": "a7f5b0e7622c1fb4971eff285c37b37246a4db25c693c70b31d3f203490364f2",
       "tier": "hook",
       "overwrite_policy": "pin-aware",
       "preserve_on_uninstall": false
@@ -144,7 +144,7 @@
     },
     {
       "path": ".claude/settings.json",
-      "sha256": "84d7d7ca7efc5ca36de66d22b631e5fa7d14895de11ae19f973102d72429ec56",
+      "sha256": "c36adcfd0aaa353dd489b20cfb393191e4d5e69157410eba307a60d362276ba0",
       "tier": "cli-config",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -165,7 +165,7 @@
     },
     {
       "path": ".claude/skills/sprint-execution/SKILL.md",
-      "sha256": "cf90b4bf399f7a416d4148e803f632f31395ce820ecb14d3da4dc38636c30147",
+      "sha256": "c5affd1b4b8fc5f78942fbc9b71455ca516164eb14d1472289518a43ed6f2bd1",
       "tier": "skill",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false
@@ -179,7 +179,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-enforcement.md",
-      "sha256": "bfd78a55625bbca2ca2be268a565ec1cc0dedfbcc0f10c49d9c2357f9e3ac6df",
+      "sha256": "4c3e8083c9ae4d3adcf968a75b454135c1d51cc0b0f0bf412e3d7ea71f9a4fdb",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -200,7 +200,7 @@
     },
     {
       "path": ".cleargate/knowledge/readiness-gates.md",
-      "sha256": "92bdb34870409f4002ae1e8ffff31fa86f163fd76e3b54b115ed24535b5383fe",
+      "sha256": "bb13e07353c889f0b8d9fe5abb018bde3be2246dadae1a66384622f3364ddb65",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -452,21 +452,21 @@
     },
     {
       "path": ".cleargate/templates/Bug.md",
-      "sha256": "934a5ed70b2a17797b3e2f506a2c035b7e5a2eba28f0df69feea23af6a187f13",
+      "sha256": "b791c44b498d8a00762bfd636c30885f5c2de4350efaf8b863208a8b17c30210",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/CR.md",
-      "sha256": "19616502a98abc632d4bab7738d2308990e70f26d645efb19467d4eef65aebde",
+      "sha256": "314e765d690fbce7d3f28835ee63b9f59f8bf0fe0f832ac130c2df6f6d0c2112",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
     },
     {
       "path": ".cleargate/templates/epic.md",
-      "sha256": "5d576c4c77ae7f9b0b83b4892168ae87df9567bc83cd4d91e4527b43b599a6d1",
+      "sha256": "bb33870663319bad4e4cd45bc84701b516f2abd782206523417daec9005257ac",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false
@@ -515,7 +515,7 @@
     },
     {
       "path": ".cleargate/templates/story.md",
-      "sha256": "6bb0c1860c0ada3795165c9d79cb3ec99be274d145812b96bcc585335c389005",
+      "sha256": "862099f8bce51664a0fe66c9f33a2a623cfeec6e4fe4eafaf3ec59212ecc9f21",
       "tier": "template",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false

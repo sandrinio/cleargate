@@ -3,8 +3,9 @@ FOLLOW THIS EXACT STRUCTURE. Output sections in order 1-4.
 YAML Frontmatter: Story ID, Parent Epic, Status, Ambiguity, Context Source, Actor, Complexity Label.
 §1 The Spec: User Story + Detailed Requirements + Out of Scope.
 §2 The Truth: Gherkin acceptance criteria + manual verification steps.
+§2.1 also carries a SPIDR coverage table (axes: Paths, Interfaces, Data, Rules) directly above the Gherkin block. Paths = more than one *successful* way through (the baseline error scenario is not a path). Interfaces = more than one surface exposes the behaviour (CLI / API / UI / hook). Data = behaviour differs by data type, shape or volume — usually a Scenario Outline with Examples. Rules = a business rule constrains the outcome — one scenario per rule, including breaking it. Tag each covered scenario with the matching `@paths` / `@interfaces` / `@data` / `@rules` marker directly above `Scenario:` / `Scenario Outline:`. There is no Spike row: open discovery is chartered as a SPIKE item before this Story is written.
 §3 Implementation Guide: Files to modify, technical logic, API contract. Sourced from the approved Epic and verified codebase grounding.
-Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails. Task Breakdown rows implement the Gherkin scenarios in §2.1; no row is written for an axis marked F.
 §4 Quality Gates: Minimum test expectations + Definition of Done checklist.
 Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
@@ -27,6 +28,7 @@ A candidate story is too big — emit two stories instead, with consecutive IDs 
   • §3.1 Files-to-touch span unrelated subsystems (e.g. API + UI + migration in one story).
   • Complexity would land at L4 (>2 days). L4 is a planning smell — split, or carve out a SPIKE to bound the discovery first.
   • `complexity_label: L3` AND `expected_bounce_exposure: high`. L3+high consistently hits developer-agent wall-time limits (observed in SPRINT-09 on STORY-013-02/03/04, all Sonnet 4.6 stream-timeouts). Split into two L2 stories OR escalate the single L3 to Opus at dispatch — the decomposition default is to split.
+When a too-big signal trips, split along one SPIDR axis: Paths → one story per path, happy path first; Interfaces → one story per interface, cheapest first; Data → simplest data subset first; Rules → ship with the rule relaxed, add it in the follow-up.
 Also split the inverse: two candidate stories that each touch the same 1-2 files with overlapping scenarios should merge into one L1/L2.
 At epic-decomposition time there are no remote IDs yet — splits and merges are free. Prefer two focused L1/L2 stories over one L3. Prefer L3 over L4.
 When the rubric is ambiguous, surface the decision to the human as a one-liner ("candidate covers A+B — split into X and Y?") rather than guessing.
@@ -53,6 +55,7 @@ mechanically extracted from the document's own structure:
   - Summary        ← §1.1 User Story
   - Open Questions ← §1.4 Open Questions
   - Edge Cases     ← §2.1 Gherkin error scenarios
+  - SPIDR          ← §2.1 SPIDR coverage table
   - Risks          ← §1.5 Risks
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 
@@ -139,6 +142,18 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 
 ### 2.1 Acceptance Criteria (Gherkin)
 
+**SPIDR coverage.** One row per axis. `T` = at least one scenario below carries the axis tag
+(`@paths`, `@interfaces`, `@data`, `@rules`). `F` = no scenario carries it, and the row states
+why. There is no Spike row: open discovery is chartered as a SPIKE item (`templates/spike.md`)
+before this item is written.
+
+| Axis | Cover | Reason |
+|---|---|---|
+| Paths | {T or F} | {…} |
+| Interfaces | {T or F} | {…} |
+| Data | {T or F} | {…} |
+| Rules | {T or F} | {…} |
+
 ```gherkin
 Feature: {Story Name}
 
@@ -147,7 +162,7 @@ Feature: {Story Name}
     When {user action}
     Then {system response}
 
-  Scenario: {Edge Case / Error}
+  Scenario: {Error — invalid action is rejected}
     Given {precondition}
     When {invalid action}
     Then {error message}

@@ -1,0 +1,36 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scaffold/codex-payload.red.node.test.ts
+
+▶ Test 18 — scaffold/hosts/codex/.codex/hooks.json (AD-3)
+  ✔ exactly 5 groups, one hook each; every command matches the AD-2 template; no ${CLAUDE_PROJECT_DIR} (0.896292ms)
+  ✔ [TPV R-P1] the file is exactly AD-3: events, matchers, scripts, --host codex, group order, 2-space JSON + newline (1.074084ms)
+  ✔ census: every command in the payload .codex/hooks.json satisfies isClearGateCommand (0.367333ms)
+✔ Test 18 — scaffold/hosts/codex/.codex/hooks.json (AD-3) (2.920208ms)
+▶ Test 19 — generated copies are byte-identical to canonical Claude scripts
+  ✔ planCodexPayload(CLI_ROOT) equals on-disk scaffold/hosts/codex/.codex/hooks/**, byte for byte and at 0755 (8.812209ms)
+  ✔ each generated copy equals canonicalPath(".claude/hooks/<name>") (3.009625ms)
+  ✔ node scripts/build-codex-payload.mjs --check exits 0 (89.513875ms)
+  ✔ after one byte is flipped in a temp copy of the tree, --check exits 1 naming the file (250.805666ms)
+  ✔ [TPV R-P3] an extra file under scaffold/hosts/codex/.codex/hooks fails --check naming it (130.491542ms)
+✔ Test 19 — generated copies are byte-identical to canonical Claude scripts (482.88125ms)
+✔ [TPV R-P5] every scaffold/hosts/codex file is classified or INTENTIONALLY_UNTRACKED (AGENTS.md) (20.950375ms)
+▶ Test 19b — every __CLEARGATE_VERSION__ file in a codex-only view is pin-aware
+  ✔ composeCanonicalView(tmp, ["codex"]) MANIFEST.json marks every substituted file overwrite_policy: pin-aware (29.565875ms)
+✔ Test 19b — every __CLEARGATE_VERSION__ file in a codex-only view is pin-aware (29.653125ms)
+▶ Test 20 — scaffold/hosts/codex/AGENTS.md
+  ✔ anchored markers once each, no bytes outside them, <= 10240 bytes, no banned tokens (0.33675ms)
+✔ Test 20 — scaffold/hosts/codex/AGENTS.md (0.382334ms)
+▶ Test 21 — planCodexPayload determinism and prebuild wiring
+  ✔ two calls deep-equal (5.756375ms)
+  ✔ package.json prebuild starts with "node scripts/build-codex-payload.mjs --check" (0.134042ms)
+  ✔ [TPV R-P4] gen:codex writes the copies and toml-eslint-parser is a runtime dependency (^1.0.3) (0.091ms)
+✔ Test 21 — planCodexPayload determinism and prebuild wiring (6.051167ms)
+ℹ tests 14
+ℹ suites 5
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 765.747166

@@ -1,0 +1,35 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/hooks-claude-parity.red.integration.node.test.ts
+
+▶ Test 12 — all 9 hooks, CLAUDE_PROJECT_DIR only
+  ✔ the frozen fixture directory exists and holds all 9 hooks (0.802583ms)
+  ✔ session-start.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (692.565375ms)
+  ✔ stamp-and-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (883.105417ms)
+  ✔ pre-edit-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (1444.759125ms)
+  ✔ pending-task-sentinel.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (459.836542ms)
+  ✔ pre-tool-use-task.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (425.185334ms)
+  ✔ pre-tool-use-autonomy.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (162.902625ms)
+  ✔ pre-commit-surface-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (1257.837ms)
+  ✔ pre-commit.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (1482.102791ms)
+  ✔ token-ledger.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (490.557458ms)
+✔ Test 12 — all 9 hooks, CLAUDE_PROJECT_DIR only (7300.972875ms)
+▶ Test 13 — all 9 hooks, ORCHESTRATOR_PROJECT_DIR also set
+  ✔ session-start.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (641.99325ms)
+  ✔ stamp-and-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (562.379458ms)
+  ✔ pre-edit-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (1721.226792ms)
+  ✔ pending-task-sentinel.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (463.679625ms)
+  ✔ pre-tool-use-task.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (356.029083ms)
+  ✔ pre-tool-use-autonomy.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (204.900625ms)
+  ✔ pre-commit-surface-gate.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (2188.140042ms)
+  ✔ pre-commit.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (2919.753291ms)
+  ✔ token-ledger.sh: frozen (pre-058-11) vs canonical — identical exit/stdout/stderr/census (ORCHESTRATOR_PROJECT_DIR also set) (475.024125ms)
+✔ Test 13 — all 9 hooks, ORCHESTRATOR_PROJECT_DIR also set (9533.546208ms)
+ℹ tests 19
+ℹ suites 2
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17021.626334

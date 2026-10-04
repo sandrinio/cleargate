@@ -1,0 +1,47 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/lib/readiness-predicates-test-layers-declared.red.node.test.ts
+
+▶ T1' (A1 — replaces T1's unsatisfiable throw-pin): a `**Test layers.**` declaration whose table omits the Integration row FAILS
+  ✔ CR-shaped body: label present, table has Unit + E2E only, no Integration row at all (1.21825ms)
+✔ T1' (A1 — replaces T1's unsatisfiable throw-pin): a `**Test layers.**` declaration whose table omits the Integration row FAILS (1.674167ms)
+▶ T2: `Integration tests | 0 | pure function, no I/O` passes
+  ✔ zero count, non-empty reason cell (0.401458ms)
+✔ T2: `Integration tests | 0 | pure function, no I/O` passes (0.477458ms)
+▶ T3: `Integration tests | 0 | ` with an EMPTY reason cell fails
+  ✔ zero count, empty reason cell — kills the copy-evalTaskBreakdownComplete-wholesale mutant (0.087667ms)
+✔ T3: `Integration tests | 0 | ` with an EMPTY reason cell fails (0.145625ms)
+▶ T4 (behavioural half): a CR-shaped and a Bug-shaped body with the same malformed table both fail
+  ✔ CR.md §4-shaped body: `**Test layers.**` block, zero count, empty reason (0.084875ms)
+  ✔ Bug.md §5-shaped body: `**Test layers.**` block, zero count, empty reason (0.076209ms)
+✔ T4 (behavioural half): a CR-shaped and a Bug-shaped body with the same malformed table both fail (0.232375ms)
+▶ T5: an item with no `**Test layers.**` block and no Integration row anywhere passes
+  ✔ story-shaped body authored before this criterion existed (0.135542ms)
+  ✔ CR-shaped body with the existing Command/Test line but no **Test layers.** block (0.0655ms)
+  ✔ story-shaped body with the PRE-CR-111 §4.1 table (Unit + E2E + Performance rows, NO Integration row, no label) passes — the grandfathering TRIGGER (A3) (0.069709ms)
+✔ T5: an item with no `**Test layers.**` block and no Integration row anywhere passes (0.378625ms)
+▶ T8b (A2 — pins the actual CR-111 deliverable): canonical templates carry the new row/block, byte-verifiable independent of any predicate
+  ✔ canonical story.md §4.1 gains an `| Integration tests |` row, positioned between Unit tests and E2E / acceptance tests (0.369458ms)
+  ✔ canonical CR.md §4 gains the literal `**Test layers.**` lead-in AND an `| Integration tests |` row (0.193375ms)
+  ✔ canonical Bug.md §5 gains the literal `**Test layers.**` lead-in AND an `| Integration tests |` row (0.098959ms)
+✔ T8b (A2 — pins the actual CR-111 deliverable): canonical templates carry the new row/block, byte-verifiable independent of any predicate (0.720958ms)
+▶ T8: non-vacuity — the canonical shipped story.md, CR.md and Bug.md must each fail this criterion
+  ✔ canonical cleargate-planning/.cleargate/templates/story.md (0.202084ms)
+  ✔ canonical cleargate-planning/.cleargate/templates/CR.md (0.112709ms)
+  ✔ canonical cleargate-planning/.cleargate/templates/Bug.md (0.092667ms)
+✔ T8: non-vacuity — the canonical shipped story.md, CR.md and Bug.md must each fail this criterion (0.451958ms)
+▶ T9: evalSection (readiness-predicates.ts) is frozen — content-hash pinned to its OWN closing brace, not to the next function
+  ✔ evalSection body is byte-identical to the frozen baseline (matched-brace extraction to its OWN closing brace, blind to insertions after it) (0.825667ms)
+  ✔ evalSection is never exported, anywhere in the file (0.348292ms)
+✔ T9: evalSection (readiness-predicates.ts) is frozen — content-hash pinned to its OWN closing brace, not to the next function (1.215417ms)
+▶ A8: test-layers-declared reads doc.body ONLY — must not consult doc.fm or doc.absPath
+  ✔ identical body, three different fm shapes (story-typed, cr-typed, empty) — identical result (0.893417ms)
+✔ A8: test-layers-declared reads doc.body ONLY — must not consult doc.fm or doc.absPath (0.926958ms)
+ℹ tests 17
+ℹ suites 9
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 236.875041

@@ -1,0 +1,243 @@
+diff --git a/test/docs/contract-first-dag-text.red.node.test.ts b/test/docs/contract-first-dag-text.red.node.test.ts
+index 224f1d6..f58bb55 100644
+--- a/test/docs/contract-first-dag-text.red.node.test.ts
++++ b/test/docs/contract-first-dag-text.red.node.test.ts
+@@ -31,6 +31,12 @@
+  * clean of banned vocabulary). T1, T2, T3a, T3c, T4, T5, T7 FAIL on a plain string/section
+  * assertion against the UNEDITED canonical text — never a wiring error.
+  *
++ * TPV RE-SEAL (CR-124 TPV, reports/CR-124-tpv.md): T1 pins the fields inside the Digest shape block and
++ *   the canonical faithful-empty text; T2 pins the predicate's three kinds, the integration-edge rule,
++ *   the layer rule and the kept BUG-033/BUG-046/tiny-sprint sections; T3a pins C.0.2 after the
++ *   Idempotent segments paragraph; T6 adds a bare-pattern check for the two checker-excluded files.
++ *   Test count unchanged (10).
++ *
+  * IMMUTABILITY: sealed post-Red per CR-043 naming contract. Do NOT edit after QA-Red returns this file.
+  * Runner: tsx --test (node:test). No vitest.
+  */
+@@ -39,7 +45,7 @@ import assert from 'node:assert/strict';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import { canonicalPath, CLI_ROOT } from '../helpers/scaffold-roots.js';
+-import { findExecModeVocabHits } from '../../scripts/check-no-exec-mode-vocab.mjs';
++import { findExecModeVocabHits, INCLUDE_PATTERN } from '../../scripts/check-no-exec-mode-vocab.mjs';
+ 
+ const META_ROOT = process.env.CLEARGATE_META_ROOT ?? path.resolve(CLI_ROOT, '..');
+ 
+@@ -54,6 +60,14 @@ const ENFORCEMENT_LIVE = path.join(META_ROOT, '.cleargate', 'knowledge', 'clearg
+ const TEMPLATE_CANONICAL = canonicalPath('.cleargate/templates/Sprint Plan Template.md');
+ const TEMPLATE_LIVE = path.join(META_ROOT, '.cleargate', 'templates', 'Sprint Plan Template.md');
+ 
++/** The text from the first `start` up to the next `end` after it ('' when `start` is absent). */
++function sliceFrom(text: string, start: string, end: string): string {
++  const i = text.indexOf(start);
++  if (i === -1) return '';
++  const j = text.indexOf(end, i + start.length);
++  return j === -1 ? text.slice(i) : text.slice(i, j);
++}
++
+ const CR124_FILES = [
+   canonicalPath('.claude/agents/architect.md'),
+   canonicalPath('.claude/agents/architect-synth.md'),
+@@ -71,6 +85,14 @@ describe('contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/templ
+     assert.ok(text.includes('"exports_consumed"'), 'digest JSON shape is missing "exports_consumed"');
+     assert.ok(text.includes('`exports_provided`'), 'Field sources is missing an `exports_provided` entry');
+     assert.ok(text.includes('`exports_consumed`'), 'Field sources is missing an `exports_consumed` entry');
++    // TPV re-seal: the fields sit inside the pinned Digest shape block itself, not only elsewhere in the file.
++    const digestShape = sliceFrom(text, '## Digest shape', 'Field sources:');
++    assert.ok(
++      digestShape.includes('"exports_provided"') && digestShape.includes('"exports_consumed"'),
++      'the "## Digest shape" JSON block must carry "exports_provided" and "exports_consumed"',
++    );
++    // TPV re-seal: the canonical copy keeps the BUG-033 faithful-empty instruction (bug-033 reads only live).
++    assert.ok(text.includes('file_surface: []'), 'canonical architect-reader.md must keep `file_surface: []`');
+   });
+ 
+   it('T2 (red): architect-synth — Real-collision predicate, Contract formation, schema_version 2 shape', () => {
+@@ -98,6 +120,32 @@ describe('contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/templ
+     );
+     assert.match(text, /Reachability refusal/, 'must still contain the BUG-046 Reachability refusal section');
+     assert.ok(!/five-clause/i.test(text), 'no "five-clause" wording may remain anywhere in architect-synth.md');
++    // TPV re-seal: the predicate names the three serializing kinds and the integration-edge rule.
++    const predicate = sliceFrom(text, '## Real-collision predicate', '\n## ').toLowerCase();
++    for (const token of [
++      'ordered schema or migration journals',
++      'lockfiles',
++      'single-writer generated artifacts',
++      'shared files whose edits must be applied in order',
++      'dep_predecessors',
++      'upstream',
++      'build separator',
++    ]) {
++      assert.ok(predicate.includes(token), `"## Real-collision predicate" must contain "${token}"`);
++    }
++    // TPV re-seal: the layer rule (layer = 1 + the max over upstream) and the kept sections, verbatim headings.
++    assert.match(text, /1 \+ the max/i, 'the integration-layer rule must read "1 + the max" over upstream');
++    assert.ok(text.includes('## Reachability refusal (BUG-046)'), 'the BUG-046 Reachability refusal heading must survive');
++    assert.ok(text.includes('## Tiny-sprint floor (N ≤ 2)'), 'the tiny-sprint floor heading must survive');
++    const failSafe = sliceFrom(text, '## Fail-safe-serialize rule', '\n## ');
++    assert.ok(
++      failSafe.includes('"unknown collision metadata — fail-safe-serialized"'),
++      'the fail-safe rule keeps its exact unknown-metadata rationale string',
++    );
++    assert.ok(
++      failSafe.includes('"DB-touching story serialized: db_write_set non-empty (coarse DB collision axis)"'),
++      'the fail-safe rule keeps its exact DB-touching rationale string',
++    );
+   });
+ 
+   it('T3a (red): SKILL.md — new §C.0.2 Contract-first build and integration, correctly placed and worded', () => {
+@@ -114,6 +162,9 @@ describe('contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/templ
+     );
+     assert.ok(idxC01 < idxC02, '#### C.0.2 must come after #### C.0.1');
+     assert.ok(idxC02 < idxC1, '#### C.0.2 must come before ### C.1 Pre-execution check');
++    // TPV re-seal: C.0.2 follows C.0.1's "Idempotent segments" paragraph (it never splits C.0.1).
++    const idxIdem = text.indexOf('**Idempotent segments.**');
++    assert.ok(idxIdem !== -1 && idxIdem > idxC01 && idxIdem < idxC02, '#### C.0.2 must come after the Idempotent segments paragraph');
+ 
+     const section = text.slice(idxC02, idxC1);
+     const required = [
+@@ -265,6 +316,19 @@ describe('contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/templ
+       [],
+       `dead execution-mode vocabulary detected in a CR-124 file (check-no-exec-mode-vocab): ${hits.join('; ')}`,
+     );
++    // TPV re-seal: the checker exempts launch_wave.mjs and cleargate-enforcement.md by name, so check the
++    // bare pattern there: launch_wave.mjs has no hit at all (none at the base either), and no
++    // enforcement line naming the real-collision predicate matches it.
++    const lwHits = fs
++      .readFileSync(canonicalPath('.cleargate/scripts/launch_wave.mjs'), 'utf8')
++      .split('\n')
++      .filter((line) => INCLUDE_PATTERN.test(line));
++    assert.deepStrictEqual(lwHits, [], `launch_wave.mjs carries dead execution-mode vocabulary: ${lwHits.join('; ')}`);
++    const enfHits = fs
++      .readFileSync(ENFORCEMENT_CANONICAL, 'utf8')
++      .split('\n')
++      .filter((line) => line.includes('real-collision predicate') && INCLUDE_PATTERN.test(line));
++    assert.deepStrictEqual(enfHits, [], `the enforcement real-collision line carries dead vocabulary: ${enfHits.join('; ')}`);
+   });
+ 
+   it('T7 (red): architect.md §2.1 names the contract-first DAG and per-story upstream', () => {
+diff --git a/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts b/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts
+index 3ee4eb7..ca56e8f 100644
+--- a/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts
++++ b/test/scripts/init-sprint-waves-v2.red.integration.node.test.ts
+@@ -15,6 +15,9 @@
+  * behaviour — schema_version is an additive top-level field it never reads). The test
+  * then fails cleanly on `typeof mod.storyBases === 'function'` — never a wiring error.
+  *
++ * TPV RE-SEAL (CR-124 TPV): the spawn pins CLEARGATE_REPO_ROOT to the room, so an ambient value can
++ *   never redirect init_sprint.mjs's state.json / .active writes out of the room.
++ *
+  * IMMUTABILITY: sealed post-Red per CR-043 naming contract. Do NOT edit after QA-Red returns this file.
+  * Runner: tsx --test (node:test). No vitest.
+  */
+@@ -100,6 +103,7 @@ describe('init-sprint-waves-v2 (CR-124, integration): a real schema_version 2 pl
+ 
+     const env = { ...process.env };
+     delete env['NODE_TEST_CONTEXT'];
++    env['CLEARGATE_REPO_ROOT'] = room;
+     const result = spawnSync(
+       process.execPath,
+       [initSprintScript, SPRINT_ID, '--stories', `${STORY_A},${STORY_B}`],
+diff --git a/test/scripts/waves-json-v2.red.node.test.ts b/test/scripts/waves-json-v2.red.node.test.ts
+index 5a3916b..c6ae607 100644
+--- a/test/scripts/waves-json-v2.red.node.test.ts
++++ b/test/scripts/waves-json-v2.red.node.test.ts
+@@ -26,6 +26,10 @@
+  *   W4 FAILS on the `endsWith('contract/S-99-api')` assertion: `launchWave`'s plan-only branch today
+  *     ignores a `bases` argument entirely and always ends every worktree command with `sprintBranch`.
+  *
++ * TPV RE-SEAL (CR-124 TPV, reports/CR-124-tpv.md): W3 adds shell-metacharacter bases, an unsupported
++ *   schema_version and base-less entries; W4 adds an empty-string base; W5 adds a multi-upstream plan
++ *   and a root story. Test count unchanged (7).
++ *
+  * IMMUTABILITY: sealed post-Red per CR-043 naming contract. Do NOT edit after QA-Red returns this file.
+  * Runner: tsx --test (node:test). No vitest.
+  */
+@@ -220,6 +224,37 @@ describe('waves-json-v2 (CR-124): schema_version 2 waves.json + storyBases/integ
+       (err: unknown) => err instanceof TypeError && /STORY-99-04/.test((err as Error).message),
+       'a base containing a space must throw TypeError naming the offending story',
+     );
++
++    // TPV re-seal: the base lands in a bash command, so shell metacharacters are unsafe even without a space.
++    for (const [sid, base] of [
++      ['STORY-99-05', 'sprint/S-99;id'],
++      ['STORY-99-06', 'contract/$(id)'],
++      ['STORY-99-07', 'sprint/S-99`id`'],
++    ] as const) {
++      assert.throws(
++        () => mod.storyBases!({ schema_version: 2, contracts: [], stories: { [sid]: { base, upstream: [] } } }),
++        (err: unknown) => err instanceof TypeError && (err as Error).message.includes(sid),
++        `a base with shell metacharacters (${base}) must throw TypeError naming ${sid}`,
++      );
++    }
++
++    // TPV re-seal: an unsupported schema_version is refused, never read as schema_version 2.
++    assert.throws(
++      () => mod.storyBases!({ schema_version: 3, contracts: [], stories: {} }),
++      TypeError,
++      'schema_version 3 must throw TypeError',
++    );
++
++    // TPV re-seal: an entry without a non-empty string base is skipped (the story falls back to the sprint branch).
++    assert.deepStrictEqual(
++      mod.storyBases!({
++        schema_version: 2,
++        contracts: [],
++        stories: { 'STORY-99-08': { upstream: [] }, 'STORY-99-09': { base: '', upstream: [] } },
++      }),
++      {},
++      'entries with no base or an empty base must be absent from the result',
++    );
+   });
+ 
+   it('W4 (red): launchWave(plan-only, bases) threads the per-story base into the worktree command', async () => {
+@@ -241,6 +276,24 @@ describe('waves-json-v2 (CR-124): schema_version 2 waves.json + storyBases/integ
+       s02 && s02.worktreeCommand.endsWith('contract/S-99-api'),
+       `STORY-99-02 must end with its declared contract base; got: ${s02?.worktreeCommand}`,
+     );
++
++    // TPV re-seal: an empty-string base falls back to the sprint branch (never a base-less command).
++    const plan2 = await mod.launchWave!({
++      sprintId: 'SPRINT-99',
++      sprintBranch: 'sprint/S-99',
++      wave: { stories: ['STORY-99-01', 'STORY-99-02'], parallel: false },
++      bases: { 'STORY-99-01': '', 'STORY-99-02': 'contract/S-99-api' },
++    });
++    const e01 = plan2.find((p) => p.storyId === 'STORY-99-01');
++    const e02 = plan2.find((p) => p.storyId === 'STORY-99-02');
++    assert.ok(
++      e01 && e01.worktreeCommand.endsWith('sprint/S-99'),
++      `an empty-string base must fall back to the sprint branch; got: ${e01?.worktreeCommand}`,
++    );
++    assert.ok(
++      e02 && e02.worktreeCommand.endsWith('contract/S-99-api'),
++      `STORY-99-02 must still end with its contract base; got: ${e02?.worktreeCommand}`,
++    );
+   });
+ 
+   it('W4b (anchor): launchWave(plan-only, no bases) — every worktree command ends with the sprint branch', async () => {
+@@ -288,6 +341,23 @@ describe('waves-json-v2 (CR-124): schema_version 2 waves.json + storyBases/integ
+       /unknown story C/,
+       'an unknown story id must throw, naming the story',
+     );
++
++    // TPV re-seal: EVERY upstream must be merged; a root story (no upstream, or no upstream key) is ready.
++    const multiPlan = {
++      schema_version: 2,
++      stories: {
++        A: { base: 'sprint/S-99', upstream: [] },
++        B: { base: 'sprint/S-99', upstream: [] },
++        M: { base: 'sprint/S-99', upstream: ['A', 'B'] },
++        R: { base: 'sprint/S-99' },
++      },
++    };
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'M', []), false, 'M with no upstream merged');
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'M', ['A']), false, 'M with only A merged');
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'M', ['B']), false, 'M with only B merged');
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'M', ['B', 'A']), true, 'M with A and B merged');
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'A', []), true, 'a story with upstream [] is ready');
++    assert.strictEqual(mod.integrationReady!(multiPlan, 'R', []), true, 'a story with no upstream key is ready');
+   });
+ 
+   it('W6 (anchor): the -12 collision guard — VERDICT_KINDS/BLOCKER_TYPES/validateVerdicts/mintRunId/worktreeAddCommand/launchWave stay exported', async () => {

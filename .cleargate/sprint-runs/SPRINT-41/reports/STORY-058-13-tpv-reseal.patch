@@ -1,0 +1,662 @@
+diff --git a/test/commands/verify-install-codex-shape.red.node.test.ts b/test/commands/verify-install-codex-shape.red.node.test.ts
+index 907def6..daa1fcc 100644
+--- a/test/commands/verify-install-codex-shape.red.node.test.ts
++++ b/test/commands/verify-install-codex-shape.red.node.test.ts
+@@ -41,14 +41,14 @@
+  *
+  * Naming: *.red.node.test.ts — immutable post-QA-Red.
+  */
+-import { describe, test, before } from 'node:test';
++import { describe, test, before, after } from 'node:test';
+ import assert from 'node:assert/strict';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import * as os from 'node:os';
+ import * as toml from 'toml-eslint-parser';
+ 
+-import { HOST_VERIFIERS, runVerifyInstall, type VerifyCtx, type VerifyInstallOptions } from '../../src/commands/verify-install.js';
++import { HOST_VERIFIERS, runVerifyInstall, verifyInstallHandler, type VerifyCtx, type VerifyInstallOptions } from '../../src/commands/verify-install.js';
+ import { createHostRegistry, defaultHostRegistry } from '../../src/hosts/registry.js';
+ import { claudeAdapter } from '../../src/hosts/claude.js';
+ import { codexAdapter } from '../../src/hosts/codex.js';
+@@ -101,14 +101,32 @@ function ctxWithSplitView(base: VerifyCtx, splitViewRoot: string | undefined): V
+   return { ...base, splitViewRoot } as unknown as VerifyCtx;
+ }
+ 
++// TPV re-seal: every temp dir this file makes is removed at exit (the sealed file leaked four per run).
++const TMP_DIRS: string[] = [];
++after(() => {
++  for (const d of TMP_DIRS) fs.rmSync(d, { recursive: true, force: true });
++});
++
+ function mkTmp(prefix: string): string {
+-  return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
++  const d = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
++  TMP_DIRS.push(d);
++  return d;
++}
++
++/** TPV re-seal: the install's own snapshot when one exists (it carries `pin_version`, which
++ * `codex.mcp-registration` compares against — F6.2 `snapshot.pin_version ?? version`); the fixture
++ * install pins `0.0.0-m2`, so a pin-less synthetic snapshot made every correct install fail. */
++function readInstallSnapshot(cwd: string): unknown {
++  const p = path.join(cwd, '.cleargate', '.install-manifest.json');
++  return fs.existsSync(p)
++    ? JSON.parse(fs.readFileSync(p, 'utf8'))
++    : { cleargate_version: VERSION, generated_at: '2026-01-01T00:00:00.000Z', files: [] };
+ }
+ 
+ function makeCtx(cwd: string, extra: Record<string, unknown> = {}): VerifyCtx {
+   return {
+     cwd,
+-    snapshot: { cleargate_version: VERSION, generated_at: '2026-01-01T00:00:00.000Z', files: [] } as never,
++    snapshot: readInstallSnapshot(cwd) as never,
+     registry: defaultHostRegistry,
+     payloadDir: cwd,
+     version: VERSION,
+@@ -239,6 +257,20 @@ describe('Test 2/2b — codex.hooks-wiring', () => {
+       check!.details.some((d) => d === 'missing: SubagentStop  .codex/hooks/token-ledger.sh'),
+       `details=${JSON.stringify(check!.details)}`,
+     );
++    // TPV re-seal: F6.2 — `skip` when !versionMatches.
++    const skipped = HOST_VERIFIERS.codex!.checks(makeCtx(dir, { versionMatches: false, version: '0.0.1-other' })).find((r) => r.id === 'codex.hooks-wiring');
++    assert.equal(skipped?.status, 'skip', JSON.stringify(skipped));
++    // TPV re-seal: a triple is (event, matcher, command) — a changed matcher is a missing triple.
++    const dir2 = await freshCodexInstall();
++    const hooks2 = readHooksJson(dir2);
++    hooks2.hooks.PreToolUse[0]!.matcher = 'Edit|Write';
++    writeHooksJson(dir2, hooks2);
++    const check2 = HOST_VERIFIERS.codex!.checks(makeCtx(dir2, { versionMatches: true, version: VERSION })).find((r) => r.id === 'codex.hooks-wiring');
++    assert.equal(check2?.status, 'fail', JSON.stringify(check2));
++    assert.ok(
++      check2!.details.includes('missing: PreToolUse Edit|Write|apply_patch .codex/hooks/pre-edit-gate.sh'),
++      `details=${JSON.stringify(check2!.details)}`,
++    );
+   });
+ 
+   test('2b: deleting the installed script file fails naming "missing script: .codex/hooks/pre-edit-gate.sh"', async () => {
+@@ -269,6 +301,18 @@ test('Test 3: chmod 0o644 pre-edit-gate.sh — only codex.hooks-executable fails
+     check.details.some((d) => d.includes('.codex/hooks/pre-edit-gate.sh')),
+     `details=${JSON.stringify(check.details)}`,
+   );
++  // TPV re-seal: F6.2 candidates = snapshot `.codex/hooks/**.sh` entries PLUS every referenced script.
++  const dirLib = await freshCodexInstall();
++  fs.chmodSync(path.join(dirLib, '.codex', 'hooks', 'lib', 'harness.sh'), 0o644);
++  const libCheck = HOST_VERIFIERS.codex!.checks(makeCtx(dirLib, { versionMatches: true, version: VERSION })).find((r) => r.id === 'codex.hooks-executable');
++  assert.deepEqual(libCheck?.details, ['.codex/hooks/lib/harness.sh'], JSON.stringify(libCheck));
++  const dirRef = await freshCodexInstall();
++  fs.writeFileSync(path.join(dirRef, '.codex', 'hooks', 'extra.sh'), '#!/usr/bin/env bash\nexit 0\n', { mode: 0o644 });
++  const hooksRef = readHooksJson(dirRef);
++  hooksRef.hooks.PostToolUse[0]!.hooks.push({ type: 'command', command: 'R="$(git rev-parse --show-toplevel)" && exec "$R/.codex/hooks/extra.sh"' });
++  writeHooksJson(dirRef, hooksRef);
++  const refCheck = HOST_VERIFIERS.codex!.checks(makeCtx(dirRef, { versionMatches: true, version: VERSION })).find((r) => r.id === 'codex.hooks-executable');
++  assert.deepEqual(refCheck?.details, ['.codex/hooks/extra.sh'], JSON.stringify(refCheck));
+ });
+ 
+ // ── Test 4a-c — no-foreign-hooks ─────────────────────────────────────────────
+@@ -347,6 +391,9 @@ describe('Test 5 — codex.instruction-block', () => {
+       check!.details.some((d) => d.includes('bounded block content differs from the payload')),
+       `details=${JSON.stringify(check!.details)}`,
+     );
++    // TPV re-seal: F6.2 — the content compare runs only when versionMatches.
++    const other = HOST_VERIFIERS.codex!.checks(makeCtx(dir, { versionMatches: false, version: '0.0.1-other' })).find((r) => r.id === 'codex.instruction-block');
++    assert.equal(other?.status, 'pass', JSON.stringify(other));
+   });
+ });
+ 
+@@ -405,6 +452,17 @@ describe('Test 7 — codex.roles', () => {
+     const ctx = makeCtx(dir, { versionMatches: true, version: VERSION });
+     const check = HOST_VERIFIERS.codex!.checks(ctx).find((r) => r.id === 'codex.roles');
+     assert.equal(check?.status, 'fail', JSON.stringify(check));
++    // TPV re-seal: the key-set rule holds even when versionMatches is false.
++    const keysOnly = HOST_VERIFIERS.codex!.checks(makeCtx(dir, { versionMatches: false, version: '0.0.1-other' })).find((r) => r.id === 'codex.roles');
++    assert.deepEqual(keysOnly?.details, ['.codex/agents/qa.toml: keys description,developer_instructions,model,name'], JSON.stringify(keysOnly));
++    // TPV re-seal: same keys, different bytes -> differs (versionMatches) / passes (!versionMatches).
++    const dirB = await freshCodexInstall();
++    const pB = path.join(dirB, '.codex', 'agents', 'qa.toml');
++    fs.writeFileSync(pB, fs.readFileSync(pB, 'utf8').replace(/^description = "/m, 'description = "EDITED '));
++    const bytes = HOST_VERIFIERS.codex!.checks(makeCtx(dirB, { versionMatches: true, version: VERSION })).find((r) => r.id === 'codex.roles');
++    assert.deepEqual(bytes?.details, ['.codex/agents/qa.toml: differs from the payload'], JSON.stringify(bytes));
++    const bytesOther = HOST_VERIFIERS.codex!.checks(makeCtx(dirB, { versionMatches: false, version: '0.0.1-other' })).find((r) => r.id === 'codex.roles');
++    assert.equal(bytesOther?.status, 'pass', JSON.stringify(bytesOther));
+   });
+ });
+ 
+@@ -432,6 +490,12 @@ test('Test 8: deleting sprint-execution/dispatch-serial.md fails codex.skills AN
+   );
+   const payloadFiles = report.checks.find((c) => c.id === 'payload-files');
+   assert.equal(payloadFiles?.status, 'fail', JSON.stringify(payloadFiles));
++  // TPV re-seal: an edited skill file differs from the payload when versionMatches.
++  const dirE = await freshCodexInstall();
++  const skillPath = path.join(dirE, '.agents', 'skills', 'flashcard', 'SKILL.md');
++  fs.appendFileSync(skillPath, '\nEDITED\n');
++  const edited = HOST_VERIFIERS.codex!.checks(makeCtx(dirE, { versionMatches: true, version: VERSION })).find((r) => r.id === 'codex.skills');
++  assert.deepEqual(edited?.details, ['.agents/skills/flashcard/SKILL.md: differs from the payload'], JSON.stringify(edited));
+ });
+ 
+ // ── Test 9 — features-hooks absent, other ids unaffected ────────────────────
+@@ -529,8 +593,9 @@ test('Test 11b: a nonexistent splitViewRoot, and also undefined, fail hooks-wiri
+     for (const id of splitDependent) {
+       const check = results!.find((r) => r.id === id);
+       assert.equal(check?.status, 'fail', `splitViewRoot=${String(splitViewRoot)} ${id}: ${JSON.stringify(check)}`);
+-      assert.ok(
+-        check!.details.some((d) => d.startsWith('split view unavailable: ')),
++      assert.deepEqual(
++        check!.details,
++        [`split view unavailable: ${String(splitViewRoot)}`],
+         `splitViewRoot=${String(splitViewRoot)} ${id} details=${JSON.stringify(check!.details)}`,
+       );
+     }
+@@ -539,6 +604,33 @@ test('Test 11b: a nonexistent splitViewRoot, and also undefined, fail hooks-wiri
+       assert.equal(check?.status, 'pass', `splitViewRoot=${String(splitViewRoot)} ${id} regressed: ${JSON.stringify(check)}`);
+     }
+   }
++  // TPV re-seal: verifyInstallHandler forwards `splitViewRoot` (F6.2's explicit forward list).
++  const out: string[] = [];
++  let code: number | undefined;
++  class Exit extends Error {}
++  try {
++    await verifyInstallHandler(
++      { cwd: dir, host: 'codex', json: true },
++      {
++        registry: REGISTRY,
++        payloadDir: PAYLOAD_DIR,
++        version: VERSION,
++        runDoctor: stubDoctor0,
++        splitViewRoot: missing,
++        stdout: (s: string) => out.push(s),
++        stderr: () => {},
++        exit: ((c: number) => {
++          code = c;
++          throw new Exit();
++        }) as (c: number) => never,
++      } as unknown as Parameters<typeof verifyInstallHandler>[1],
++    );
++  } catch (e) {
++    if (!(e instanceof Exit)) throw e;
++  }
++  assert.equal(code, 1);
++  const handlerReport = JSON.parse(out.join('\n')) as { checks: Array<{ id: string; details: string[] }> };
++  assert.deepEqual(handlerReport.checks.find((c) => c.id === 'codex.roles')?.details, [`split view unavailable: ${missing}`]);
+ });
+ 
+ // ── Test 11c — null snapshot skips all 8, in pinned order ────────────────────
+diff --git a/test/scripts/codex-loop-evidence.red.node.test.ts b/test/scripts/codex-loop-evidence.red.node.test.ts
+index 1bf3389..b76e276 100644
+--- a/test/scripts/codex-loop-evidence.red.node.test.ts
++++ b/test/scripts/codex-loop-evidence.red.node.test.ts
+@@ -38,6 +38,18 @@
+  * implementation is the tie-breaker, and the TPV should rule if this
+  * shape is unusable.
+  *
++ * TPV RE-SEAL (reports/STORY-058-13-tpv.md, plans/M6.md TPV13-A1..A3): the S5 loop stream below
++ * is rebuilt on the shapes measured with the pinned binary (scripted provider, 2026-09-27):
++ *   - hook runs are keyed by the THREAD they ran on (`params.threadId`); tool-hook run ids end with
++ *     `:<call id>` and a code-mode `apply_patch` fileChange item id is that call id (`exec-<uuid>`);
++ *   - a spawn is a root-thread `subAgentActivity` kind `started` item whose id is the spawn call id,
++ *     gated by a root-thread preToolUse run ending `:<that id>`; its terminal item is a separate
++ *     `subAgentActivity` kind `completed` (id `subagent-completed-<child turn>`);
++ *   - SubagentStop runs on the CHILD thread with a suffix-less id; the Codex install registers no
++ *     SubagentStart; SessionStart fires once on the root thread only;
++ *   - nested `exec_command` items record `/bin/zsh -c '<cmd>'`.
++ * The -10 `controls` copy stays verbatim (graded by `codexHookVerdicts`, not by the hook matrix).
++ *
+  * Naming: *.red.node.test.ts — immutable post-QA-Red.
+  */
+ import { describe, test } from 'node:test';
+@@ -59,6 +71,21 @@ const WAVE_ID = 'wave1';
+ const STORY_ID = 'STORY-001-01';
+ const ROOM = '/ROOM';
+ const PINNED_CODEX_SHA256 = '1d8b80de0a27f69b152bfb9b7b3b4fd3b8c589e4e76213db27219eab9ae53afa';
++// TPV re-seal: pinned by value (M6:736-737), never read back from the module under test.
++const PINNED_LOOP_TRANSPORT_IDS = ['codex.loop.dispatches', 'codex.loop.worktree', 'codex.loop.merge', 'codex.loop.terminal-state', 'codex.loop.outcome', 'codex.loop.serial-verdict'];
++const PINNED_ENFORCEMENT_IDS = [
++  'codex.live.discovery',
++  'codex.live.session-start',
++  'codex.live.post-tool-use',
++  'codex.live.edit-deny',
++  'codex.live.edit-allow',
++  'codex.live.dispatch-deny',
++  'codex.live.dispatch-identity',
++  'codex.loop.hook-matrix',
++  'codex.loop.no-synthetic-usage',
++  'codex.loop.path-identity',
++  'codex.loop.meta-repo-untouched',
++];
+ 
+ // ── -10's measured codexHookVerdicts input builders, copied verbatim from
+ //    codex-hooks-harness.red.node.test.ts (F6.5: -13 reuses -10's own probe
+@@ -86,6 +113,15 @@ const hc = (id: string, eventName: string, status: string, entries: Array<{ kind
+ const it = (method: string, item: Record<string, unknown>, threadId = 'thr'): Notification => ({ method, params: { threadId, turnId: 'trn', item } });
+ const fileChange = (id: string, p: string, status: string) => ({ type: 'fileChange', id, changes: [{ path: p, kind: { type: 'update', move_path: null }, diff: '' }], status });
+ const subAgent = (kind: string, thread: string) => ({ type: 'subAgentActivity', id: `sa-${thread}`, kind, agentThreadId: thread, agentPath: '/CODEX_HOME/x' });
++/** TPV re-seal: a hook run on an explicit thread (measured: runs carry the thread they ran on). */
++const hr = (id: string, eventName: string, status: string, threadId: string, entries: Array<{ kind: string; text: string }> = []): Notification => ({
++  method: 'hook/completed',
++  params: { threadId, turnId: `turn-${threadId}`, run: { id, eventName, status, entries } },
++});
++const HOOKS_JSON = '/ROOM/.codex/hooks.json';
++const saItem = (id: string, kind: string, thread: string) => ({ type: 'subAgentActivity', id, kind, agentThreadId: thread, agentPath: `/root/${thread}` });
++/** Measured nested exec_command rendering: `/bin/zsh -c '<cmd>'`. */
++const zsh = (cmd: string): string => `/bin/zsh -c '${cmd.replace(/'/g, `'\\''`)}'`;
+ 
+ function listedRegistrations(trustStatus: string): Array<Record<string, unknown>> {
+   return REGISTRATIONS.map((r, i) => ({
+@@ -188,12 +224,14 @@ const DISPATCHES = [
+ ] as const;
+ 
+ function dispatchNotifications(): Notification[] {
+-  const out: Notification[] = [];
++  const out: Notification[] = [
++    hr(`session-start:3:${HOOKS_JSON}`, 'sessionStart', 'completed', 'root', [{ kind: 'context', text: 'ClearGate state: pre-member — local planning enabled, sync requires join.' }]),
++  ];
+   DISPATCHES.forEach((d, i) => {
+-    out.push(it('item/started', subAgent('started', d.threadId), 'root'));
+-    out.push(hc(`hs-${i}:${d.threadId}`, 'subagentStart', 'completed'));
+-    out.push(hc(`hp-${i}:${d.threadId}`, 'subagentStop', 'completed'));
+-    out.push(it('item/completed', subAgent('completed', d.threadId), 'root'));
++    out.push(hr(`pre-tool-use:1:${HOOKS_JSON}:call_sp_${i}`, 'preToolUse', 'completed', 'root'));
++    out.push(it('item/started', saItem(`call_sp_${i}`, 'started', d.threadId), 'root'));
++    out.push(hr(`subagent-stop:4:${HOOKS_JSON}`, 'subagentStop', 'completed', d.threadId));
++    out.push(it('item/completed', saItem(`subagent-completed-${i}`, 'completed', d.threadId), 'root'));
+   });
+   return out;
+ }
+@@ -225,19 +263,24 @@ const MERGE_SHA = 'c'.repeat(40);
+ 
+ function baseCommands(): Array<{ threadId: string; command: string; exitCode: number }> {
+   return [
+-    { threadId: 'root', command: WORKTREE_ADD_COMMAND, exitCode: 0 },
+-    { threadId: 'thread-devops', command: MERGE_COMMAND, exitCode: 0 },
+-    { threadId: 'thread-devops', command: 'git worktree remove .worktrees/STORY-001-01 && git branch -d story/STORY-001-01', exitCode: 0 },
+-    { threadId: 'thread-devops', command: UPDATE_STATE_COMMAND, exitCode: 0 },
+-    { threadId: 'thread-dev', command: "git -C .worktrees/STORY-001-01 commit -qm 'feat(EPIC-001): STORY-001-01 slugify'", exitCode: 0 },
+-    { threadId: 'root', command: 'command -v cleargate', exitCode: 0 },
++    { threadId: 'root', command: zsh(WORKTREE_ADD_COMMAND), exitCode: 0 },
++    { threadId: 'thread-devops', command: zsh(MERGE_COMMAND), exitCode: 0 },
++    { threadId: 'thread-devops', command: zsh('git worktree remove .worktrees/STORY-001-01 && git branch -d story/STORY-001-01'), exitCode: 0 },
++    { threadId: 'thread-devops', command: zsh(UPDATE_STATE_COMMAND), exitCode: 0 },
++    { threadId: 'thread-dev', command: zsh("git -C .worktrees/STORY-001-01 commit -qm 'feat(EPIC-001): STORY-001-01 slugify'"), exitCode: 0 },
++    { threadId: 'root', command: zsh('command -v cleargate'), exitCode: 0 },
+   ];
+ }
+ 
+ function baseFileChanges(): Notification[] {
++  const edit = (id: string, p: string, thread: string): Notification[] => [
++    hr(`pre-tool-use:0:${HOOKS_JSON}:${id}`, 'preToolUse', 'completed', thread),
++    it('item/completed', fileChange(id, p, 'completed'), thread),
++    hr(`post-tool-use:2:${HOOKS_JSON}:${id}`, 'postToolUse', 'completed', thread),
++  ];
+   return [
+-    it('item/completed', fileChange('call_qared_1', `${ROOM}/.worktrees/${STORY_ID}/test/slugify.test.mjs`, 'completed'), 'thread-qared'),
+-    it('item/completed', fileChange('call_dev_1', `${ROOM}/.worktrees/${STORY_ID}/src/slugify.mjs`, 'completed'), 'thread-dev'),
++    ...edit('exec-qared-1', `${ROOM}/.worktrees/${STORY_ID}/test/slugify.test.mjs`, 'thread-qared'),
++    ...edit('exec-dev-1', `${ROOM}/.worktrees/${STORY_ID}/src/slugify.mjs`, 'thread-dev'),
+   ];
+ }
+ 
+@@ -304,25 +347,51 @@ function buildAllPassLoopInputs(overrides: AllPassOverrides = {}): any {
+ 
+ describe('Test 14/14b — codexLoopVerdicts over the complete inputs', () => {
+   test('14: harness-exact-hash posture — all PASS; loop_transport PASS; enforcement_parity PASS', async () => {
+-    const { codexLoopVerdicts, LOOP_TRANSPORT_IDS, ENFORCEMENT_IDS } = await loadLoopEvidence();
++    const mod = await loadLoopEvidence();
++    const { codexLoopVerdicts } = mod;
++    assert.equal(mod.PINNED_CODEX_SHA256, PINNED_CODEX_SHA256);
++    assert.deepEqual([...mod.LOOP_TRANSPORT_IDS], PINNED_LOOP_TRANSPORT_IDS);
++    assert.deepEqual([...mod.ENFORCEMENT_IDS], PINNED_ENFORCEMENT_IDS);
+     const inputs = buildAllPassLoopInputs({ trustPosture: 'harness-exact-hash' });
+     const verdicts = codexLoopVerdicts(inputs);
+-    for (const id of [...LOOP_TRANSPORT_IDS, ...ENFORCEMENT_IDS]) {
++    for (const id of [...PINNED_LOOP_TRANSPORT_IDS, ...PINNED_ENFORCEMENT_IDS]) {
+       assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
+     }
+     assert.equal(verdicts.loop_transport, 'PASS', JSON.stringify(verdicts));
+     assert.equal(verdicts.enforcement_parity, 'PASS', JSON.stringify(verdicts));
+     assert.equal(verdicts.result, 'PASS', JSON.stringify(verdicts));
++    // TPV re-seal: metering is stated, never claimed (M6:803, EPIC-058 rule 6).
++    assert.equal(verdicts['codex.loop.metering']?.status, 'INFO', JSON.stringify(verdicts['codex.loop.metering']));
++    assert.match(String(verdicts['codex.loop.metering']?.detail), /^unavailable\b/);
++    // TPV re-seal: the two hook-matrix rules with no row of their own (F6.6).
++    const noGate = buildAllPassLoopInputs({ trustPosture: 'harness-exact-hash' });
++    noGate.loop.notifications = (noGate.loop.notifications as Notification[]).filter((n) => n.params.run?.id !== `pre-tool-use:1:${HOOKS_JSON}:call_sp_4`);
++    assert.equal(codexLoopVerdicts(noGate)['codex.loop.hook-matrix']?.status, 'FAIL', 'a spawn with no dispatch-gate preToolUse must fail the hook matrix');
++    const blockedWithPost = buildAllPassLoopInputs({ trustPosture: 'harness-exact-hash' });
++    blockedWithPost.loop.notifications = [
++      ...blockedWithPost.loop.notifications,
++      hr(`pre-tool-use:0:${HOOKS_JSON}:exec-blocked`, 'preToolUse', 'blocked', 'thread-dev'),
++      hr(`post-tool-use:2:${HOOKS_JSON}:exec-blocked`, 'postToolUse', 'completed', 'thread-dev'),
++    ];
++    assert.equal(codexLoopVerdicts(blockedWithPost)['codex.loop.hook-matrix']?.status, 'FAIL', 'a blocked edit followed by a PostToolUse must fail the hook matrix');
+   });
+ 
+   test('14b: human posture — all PASS (configWrites:0, config unchanged)', async () => {
+-    const { codexLoopVerdicts, LOOP_TRANSPORT_IDS, ENFORCEMENT_IDS } = await loadLoopEvidence();
++    const { codexLoopVerdicts } = await loadLoopEvidence();
+     const inputs = buildAllPassLoopInputs({ trustPosture: 'human' });
+     const verdicts = codexLoopVerdicts(inputs);
+-    for (const id of [...LOOP_TRANSPORT_IDS, ...ENFORCEMENT_IDS]) {
++    for (const id of [...PINNED_LOOP_TRANSPORT_IDS, ...PINNED_ENFORCEMENT_IDS]) {
+       assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
+     }
+     assert.equal(verdicts.result, 'PASS', JSON.stringify(verdicts));
++    // TPV re-seal: F6.6 — under human posture the trust subtrees must be unchanged by the run.
++    for (const key of ['hooks.state', `projects["${ROOM}"]`]) {
++      const changed = buildAllPassLoopInputs({ trustPosture: 'human' });
++      changed.trust.configAfter = { ...changed.trust.configAfter, [key]: { changed: true } };
++      const v = codexLoopVerdicts(changed);
++      assert.equal(v.result, 'FAIL', `a changed ${key} subtree must fail the human-posture result: ${JSON.stringify(v)}`);
++      for (const id of [...PINNED_LOOP_TRANSPORT_IDS, ...PINNED_ENFORCEMENT_IDS]) assert.equal(v[id]?.status, 'PASS', `${key}: ${id}`);
++    }
+   });
+ });
+ 
+@@ -356,7 +425,7 @@ const MUTATIONS: Mutation[] = [
+     i.loop.rollouts['thread-dev'] = i.loop.rollouts['thread-dev'].replace('"agent_role":"developer"', '"agent_role":"qa"');
+   }],
+   ['the worktree command uses an absolute path', 'codex.loop.worktree', (i) => {
+-    const c = (i.loop.commands as Array<{ command: string }>).find((x) => x.command === WORKTREE_ADD_COMMAND)!;
++    const c = (i.loop.commands as Array<{ command: string }>).find((x) => x.command.includes(WORKTREE_ADD_COMMAND))!;
+     c.command = c.command.replace('.worktrees/', '/ROOM/.worktrees/');
+   }],
+   ['a developer fileChange lands at <room>/src/x.mjs (outside the worktree)', 'codex.loop.worktree', (i) => {
+@@ -368,7 +437,7 @@ const MUTATIONS: Mutation[] = [
+     i.loop.gitBranches = [...i.loop.gitBranches, `story/${STORY_ID}`];
+   }],
+   ['the root thread ran git merge', 'codex.loop.merge', (i) => {
+-    i.loop.commands = [...i.loop.commands, { threadId: 'root', command: MERGE_COMMAND, exitCode: 0 }];
++    i.loop.commands = [...i.loop.commands, { threadId: 'root', command: zsh(MERGE_COMMAND), exitCode: 0 }];
+   }],
+   ['the merge commit\'s second parent is not the story head', 'codex.loop.merge', (i) => {
+     i.loop.mergeCommit.parents = ['prevmain', 'd'.repeat(40)];
+@@ -377,7 +446,7 @@ const MUTATIONS: Mutation[] = [
+     i.loop.stateJson[STORY_ID].state = 'Sprint Review';
+   }],
+   ['update_state ... Done ran on the root thread, not devops', 'codex.loop.terminal-state', (i) => {
+-    const c = (i.loop.commands as Array<{ threadId: string; command: string }>).find((x) => x.command === UPDATE_STATE_COMMAND)!;
++    const c = (i.loop.commands as Array<{ threadId: string; command: string }>).find((x) => x.command.includes(UPDATE_STATE_COMMAND))!;
+     c.threadId = 'root';
+   }],
+   ['the import probe returns hello-world- (trailing dash)', 'codex.loop.outcome', (i) => {
+@@ -387,25 +456,34 @@ const MUTATIONS: Mutation[] = [
+     i.loop.npmTestExit = 1;
+   }],
+   ['the recorded verdict tokens are {input:0,...} instead of {metering:"unavailable"}', 'codex.loop.serial-verdict', (i) => {
+-    i.loop.serialLog[0].tokens = { input: 0, output: 0 };
++    // TPV re-seal: a complete measured object passes validateVerdicts; only the
++    // {metering:'unavailable'} deep-equal can reject synthesized zero usage (EPIC-058 rule 6).
++    i.loop.serialLog[0].tokens = { input: 0, output: 0, cache_creation: 0, cache_read: 0, model: 'gpt-5.6-terra' };
+   }],
+   ['recordExitCode is 1', 'codex.loop.serial-verdict', (i) => {
+     i.loop.recordExitCode = 1;
+   }],
+   ['an apply_patch fileChange has no PreToolUse run', 'codex.loop.hook-matrix', (i) => {
+-    i.loop.notifications = [...i.loop.notifications, it('item/completed', fileChange('call_orphan', `${ROOM}/.worktrees/${STORY_ID}/src/orphan.mjs`, 'completed'), 'thread-dev')];
++    // TPV re-seal: the orphan keeps its PostToolUse, so only a missing PreToolUse can fail it.
++    i.loop.notifications = [
++      ...i.loop.notifications,
++      it('item/completed', fileChange('exec-orphan', `${ROOM}/.worktrees/${STORY_ID}/src/orphan.mjs`, 'completed'), 'thread-dev'),
++      hr(`post-tool-use:2:${HOOKS_JSON}:exec-orphan`, 'postToolUse', 'completed', 'thread-dev'),
++    ];
+   }],
+   ['a completed apply_patch has no PostToolUse run', 'codex.loop.hook-matrix', (i) => {
+-    // Same shape as the previous mutation: a fileChange item with neither a
+-    // preToolUse nor a postToolUse run is, structurally, a missing-PostToolUse
+-    // gap either way; modeled with its own orphan item for clarity.
+-    i.loop.notifications = [...i.loop.notifications, it('item/completed', fileChange('call_orphan2', `${ROOM}/.worktrees/${STORY_ID}/src/orphan2.mjs`, 'completed'), 'thread-qared')];
++    // TPV re-seal: the orphan keeps its PreToolUse, so only a missing PostToolUse can fail it.
++    i.loop.notifications = [
++      ...i.loop.notifications,
++      hr(`pre-tool-use:0:${HOOKS_JSON}:exec-orphan2`, 'preToolUse', 'completed', 'thread-qared'),
++      it('item/completed', fileChange('exec-orphan2', `${ROOM}/.worktrees/${STORY_ID}/src/orphan2.mjs`, 'completed'), 'thread-qared'),
++    ];
+   }],
+   ['a dispatch has no SubagentStop hook run', 'codex.loop.hook-matrix', (i) => {
+-    i.loop.notifications = (i.loop.notifications as Notification[]).filter((n) => !(n.method === 'hook/completed' && n.params.run?.eventName === 'subagentStop' && n.params.run?.id?.includes('thread-devops')));
++    i.loop.notifications = (i.loop.notifications as Notification[]).filter((n) => !(n.method === 'hook/completed' && n.params.run?.eventName === 'subagentStop' && n.params.threadId === 'thread-devops'));
+   }],
+   ['SessionStart ran twice in one root session', 'codex.loop.hook-matrix', (i) => {
+-    i.loop.notifications = [...i.loop.notifications, hc('h-extra-session-start', 'sessionStart', 'completed')];
++    i.loop.notifications = [...i.loop.notifications, hr(`session-start:3:${HOOKS_JSON}`, 'sessionStart', 'completed', 'root')];
+   }],
+   ['a room ledger line exists (synthetic usage)', 'codex.loop.no-synthetic-usage', (i) => {
+     i.roomLedgers['token-ledger.jsonl'] = '{"tokens":{"input":1}}\n';
+@@ -461,10 +539,13 @@ describe('Test 15 — single-fault mutations', () => {
+         // Composite-only row (see the MUTATIONS comment above): every named
+         // verdict must still be PASS; only the composed `result` flips.
+         assert.equal(verdicts.result, 'FAIL', `expected result=FAIL with every per-id verdict PASS: ${JSON.stringify(verdicts)}`);
+-        for (const [otherId, v] of Object.entries<{ status: string }>(verdicts as unknown as Record<string, { status: string }>)) {
+-          if (otherId === 'result' || otherId === 'loop_transport' || otherId === 'enforcement_parity') continue;
+-          assert.equal(v.status, 'PASS', `expected ${otherId}=PASS (composite-only row): ${JSON.stringify(verdicts)}`);
++        // TPV re-seal: the INFO rows (metering, trust-posture, wall-clock) are part of the record
++        // (M6:738) and are never PASS; only the pinned gating ids must stay PASS.
++        for (const otherId of [...PINNED_LOOP_TRANSPORT_IDS, ...PINNED_ENFORCEMENT_IDS]) {
++          assert.equal(verdicts[otherId]?.status, 'PASS', `expected ${otherId}=PASS (composite-only row): ${JSON.stringify(verdicts)}`);
+         }
++        assert.equal(verdicts.loop_transport, 'PASS', JSON.stringify(verdicts));
++        assert.equal(verdicts.enforcement_parity, 'PASS', JSON.stringify(verdicts));
+         return;
+       }
+       assert.equal(verdicts[id]?.status, want, `expected ${id}=${want}; got ${JSON.stringify(verdicts[id])}`);
+@@ -478,13 +559,28 @@ describe('Test 15 — single-fault mutations', () => {
+ // ── Test 16a-c — childUsage ───────────────────────────────────────────────────
+ 
+ describe('Test 16 — childUsage', () => {
++  // TPV re-seal: measured shapes (pinned binary + scripted provider, X7). The rollout record carries
++  // Codex's own field names; `served` carries the provider's Responses usage block; the join maps
++  // cached_input_tokens <- input_tokens_details.cached_tokens and
++  // reasoning_output_tokens <- output_tokens_details.reasoning_tokens.
++  const rec = (id: string, i: number) =>
++    JSON.stringify({
++      type: 'token_usage_record',
++      payload: {
++        response_id: id,
++        usage: { input_tokens: 100 + i, cached_input_tokens: i, cache_write_input_tokens: 0, output_tokens: 10 + i, reasoning_output_tokens: 0, total_tokens: 110 + 2 * i },
++      },
++    });
++  const prov = (i: number) => ({ input_tokens: 100 + i, input_tokens_details: { cached_tokens: i }, output_tokens: 10 + i, output_tokens_details: { reasoning_tokens: 0 }, total_tokens: 110 + 2 * i });
+   const rolloutWithTwoRecords = [
+-    JSON.stringify({ type: 'token_usage_record', payload: { response_id: 'resp_1', usage: { total_tokens: 110 } } }),
+-    JSON.stringify({ type: 'token_usage_record', payload: { response_id: 'resp_2', usage: { total_tokens: 112 } } }),
++    JSON.stringify({ type: 'session_meta', payload: { agent_role: 'qa' } }),
++    rec('resp_1', 0),
++    JSON.stringify({ type: 'event_msg', payload: { type: 'token_count', info: { total_token_usage: { total_tokens: 110 } } } }),
++    rec('resp_2', 1),
+   ].join('\n') + '\n';
+   const served = [
+-    { i: 0, responseId: 'resp_1', usage: { total_tokens: 110 } },
+-    { i: 1, responseId: 'resp_2', usage: { total_tokens: 112 } },
++    { i: 0, marker: 'ROLE=qa-red', step: 0, responseId: 'resp_1', usage: prov(0) },
++    { i: 1, marker: 'ROLE=qa-red', step: 1, responseId: 'resp_2', usage: prov(1) },
+   ];
+ 
+   test('16a: 2 token_usage_records with a matching served -> matchesProvider: true', async () => {
+@@ -496,7 +592,7 @@ describe('Test 16 — childUsage', () => {
+ 
+   test('16b: one usage value altered -> matchesProvider: false', async () => {
+     const { childUsage } = await loadLoopEvidence();
+-    const altered = [served[0], { ...served[1], usage: { total_tokens: 999 } }];
++    const altered = [served[0], { ...served[1], usage: { ...prov(1), input_tokens_details: { cached_tokens: 99 } } }];
+     const result = childUsage(rolloutWithTwoRecords, altered);
+     assert.equal(result.matchesProvider, false, JSON.stringify(result));
+   });
+@@ -624,6 +720,8 @@ describe('Test 18 — parser anchors', () => {
+     assert.match(section, /^- trust_posture: harness-exact-hash$/m);
+     assert.match(section, new RegExp(`^- codex_sha256: ${PINNED_CODEX_SHA256}$`, 'm'));
+     assert.match(section, /^- artifact_inputs: [0-9a-f]{64}$/m);
++    // TPV re-seal: the evidence states metering, never claims it (M6:838).
++    assert.match(section, /^- metering: unavailable$/m);
+   });
+ 
+   test('18b: an agent-controlled string containing a fake "## Run" / "- result:" line forges nothing', async () => {
+diff --git a/test/scripts/codex-loop-harness.red.node.test.ts b/test/scripts/codex-loop-harness.red.node.test.ts
+index 57222cb..d3a6682 100644
+--- a/test/scripts/codex-loop-harness.red.node.test.ts
++++ b/test/scripts/codex-loop-harness.red.node.test.ts
+@@ -36,7 +36,7 @@
+  *
+  * Naming: *.red.node.test.ts — immutable post-QA-Red.
+  */
+-import { describe, test } from 'node:test';
++import { describe, test, after } from 'node:test';
+ import assert from 'node:assert/strict';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+@@ -47,6 +47,17 @@ import { CLI_ROOT, canonicalPath } from '../helpers/scaffold-roots.js';
+ 
+ const HARNESS_DIR = path.join(CLI_ROOT, 'scripts', 'clean-room');
+ 
++// TPV re-seal: temp dirs made by this file are removed at exit (the sealed file leaked two per run).
++const TMP_DIRS: string[] = [];
++after(() => {
++  for (const d of TMP_DIRS) fs.rmSync(d, { recursive: true, force: true });
++});
++function mkTmp(prefix: string): string {
++  const d = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
++  TMP_DIRS.push(d);
++  return d;
++}
++
+ async function loadMockResponses(): Promise<Record<string, unknown>> {
+   return (await import(pathToFileURL(path.join(HARNESS_DIR, 'mock-responses.mjs')).href)) as unknown as Record<string, unknown>;
+ }
+@@ -132,6 +143,11 @@ describe('Test 19 — startMockResponses({ routes })', () => {
+       });
+       const item1 = parseSse(r1.text).find((i) => i.type === 'response.output_item.done') as { item?: { content?: Array<{ text?: string }> } };
+       assert.equal(item1?.item?.content?.[0]?.text, 'STEP-1', `body=${r1.text}`);
++
++      // TPV re-seal: the step follows the *_output count, never the request count.
++      const r2 = await httpPostJson(server.url, { input: [{ type: 'message', role: 'user', content: 'MARKER-STEP again' }] });
++      const item2 = parseSse(r2.text).find((i) => i.type === 'response.output_item.done') as { item?: { content?: Array<{ text?: string }> } };
++      assert.equal(item2?.item?.content?.[0]?.text, 'STEP-0', `body=${r2.text}`);
+     } finally {
+       await server.close();
+     }
+@@ -282,21 +298,32 @@ describe('Test 20 — buildLoopRoutes', () => {
+   });
+ 
+   test('20c: every spawn carries fork_turns:"none" and a unique ROLE= marker; root spawn order is architect, qa, developer, qa, devops', async () => {
++    // TPV re-seal: route steps hold raw Responses output items, and F6.5 builds spawns with
++    // STORY-058-10's `spawnAgentItem` (JSON-string `arguments`, never an `input` object); F3 reads a
++    // spawn's fields by `JSON.parse(function_call.arguments)`.
+     const { buildLoopRoutes } = (await loadLoopScript()) as {
+-      buildLoopRoutes: (opts: unknown) => Array<{ marker: string; steps: Array<Array<{ name?: string; input?: Record<string, unknown> }>> }>;
++      buildLoopRoutes: (opts: unknown) => Array<{ marker: string; steps: Array<Array<{ type?: string; name?: string; namespace?: string; arguments?: string }>> }>;
+     };
+     const routes = buildLoopRoutes({ roomRealpath: '/ROOM', sprintId: SPRINT_ID, storyId: STORY_ID, fixtures: loopFixtures() });
+     const orchestrator = routes.find((r) => r.marker === 'CG-LOOP-ORCHESTRATOR');
+     assert.ok(orchestrator, `expected a CG-LOOP-ORCHESTRATOR route among ${JSON.stringify(routes.map((r) => r.marker))}`);
+     const spawnCalls = orchestrator!.steps.flatMap((step) => step.filter((item) => item.name === 'spawn_agent'));
+     assert.ok(spawnCalls.length >= 5, `expected >=5 spawns; got ${spawnCalls.length}`);
+-    for (const call of spawnCalls) {
+-      assert.equal(call.input?.fork_turns, 'none', JSON.stringify(call));
+-      const msg = String((call.input as { message?: string })?.message ?? '');
++    const args = spawnCalls.map((call) => {
++      assert.equal(call.type, 'function_call', JSON.stringify(call));
++      assert.equal(call.namespace, 'collaboration', JSON.stringify(call));
++      assert.equal(typeof call.arguments, 'string', JSON.stringify(call));
++      return JSON.parse(call.arguments!) as { fork_turns?: string; message?: string; agent_type?: string };
++    });
++    for (const a of args) {
++      assert.equal(a.fork_turns, 'none', JSON.stringify(a));
++      const msg = String(a.message ?? '');
++      assert.ok(msg.startsWith('STORY=001-01 '), `spawn message must start "STORY=001-01 ": ${msg}`);
+       assert.match(msg, /ROLE=\S+/, `spawn message must carry a ROLE= marker: ${msg}`);
+     }
+-    const roles = spawnCalls.map((c) => /ROLE=(\S+)/.exec(String((c.input as { message?: string }).message))?.[1]);
++    const roles = args.map((a) => /ROLE=(\S+)/.exec(String(a.message))?.[1]);
+     assert.deepEqual(roles, ['architect', 'qa-red', 'developer', 'qa-verify', 'devops'], JSON.stringify(roles));
++    assert.deepEqual(args.map((a) => a.agent_type), ['architect', 'qa', 'developer', 'qa', 'devops'], JSON.stringify(args));
+   });
+ 
+   test('20d: buildLoopRoutes\' own record-pipeline JSON (SHAs substituted) validates in serial mode, and its storyId is in the fixture wave1', async () => {
+@@ -386,7 +413,7 @@ describe('Test 21 — authorLoopStory', () => {
+     const approvedLines = approved.match(/^approved:.*$/gm) ?? [];
+     assert.deepEqual(approvedLines, ['approved: true'], JSON.stringify(approvedLines));
+ 
+-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-13-harness-approve-'));
++    const tmp = mkTmp('cg-s41-13-harness-approve-');
+     const tmpFile = path.join(tmp, 'STORY-001-01.md');
+     fs.writeFileSync(tmpFile, approved);
+     assert.deepEqual(assertWorkItemApproved(tmpFile), { approved: true, has_heading: true });
+@@ -404,13 +431,17 @@ describe('Test 21 — authorLoopStory', () => {
+ // ── Test 21e-j — codex-appserver.mjs additive exports, codex-hooks.mjs exports ─
+ 
+ test('Test 21e: runLoopTurn resolves after idle and passes {model, config} into thread/start', async () => {
++  // TPV re-seal: F6.3 spreads `threadParams` into the thread/start params after the three existing
++  // keys (turn/start is unchanged); the stub carries `serverRequests` (runTurn returns a copy of it)
++  // and the measured `ThreadStatus` shapes (`{ type: 'idle' }`, `{ type: 'notLoaded' }`; app-server
++  // generate-ts and a scripted loop run on the pinned binary). Settled = no thread is `active`.
+   const { runLoopTurn } = (await loadCodexAppserver()) as {
+     runLoopTurn: (client: unknown, opts: Record<string, unknown>) => Promise<{ threadId?: string; timedOut?: boolean }>;
+   };
+   const requests: Array<{ method: string; params: unknown }> = [];
+-  let notifyIdleAfter: (() => void) | undefined;
+   const stub = {
+     notifications: [] as Array<{ method: string; params: Record<string, unknown> }>,
++    serverRequests: [] as unknown[],
+     exited: null,
+     _stderrHint: () => '',
+     request: (method: string, params: unknown) => {
+@@ -418,21 +449,29 @@ test('Test 21e: runLoopTurn resolves after idle and passes {model, config} into
+       if (method === 'thread/start') return Promise.resolve({ thread: { id: 'thr-1' } });
+       if (method === 'turn/start') {
+         setTimeout(() => {
+-          stub.notifications.push({ method: 'turn/completed', params: { turn: { id: 'turn-1' } } });
+-          stub.notifications.push({ method: 'thread/status/changed', params: { threadId: 'thr-1', status: 'idle' } });
+-          if (notifyIdleAfter) notifyIdleAfter();
++          stub.notifications.push({ method: 'turn/completed', params: { threadId: 'thr-1', turn: { id: 'turn-1' } } });
++          stub.notifications.push({ method: 'thread/status/changed', params: { threadId: 'thr-1', status: { type: 'idle' } } });
++          // Measured: a finished child thread's last status is `notLoaded`, never `idle`.
++          stub.notifications.push({ method: 'thread/status/changed', params: { threadId: 'thr-child', status: { type: 'notLoaded' } } });
+         }, 5);
+         return Promise.resolve({ turn: { id: 'turn-1' } });
+       }
+       return Promise.resolve({});
+     },
+   };
+-  const result = await runLoopTurn(stub, { cwd: '/ROOM', prompt: 'hi', model: 'gpt-5.6-terra', config: { x: 1 }, idleMs: 20, timeoutMs: 2000 });
++  const t0 = Date.now();
++  const result = await runLoopTurn(stub, { cwd: '/ROOM', prompt: 'hi', model: 'gpt-5.6-terra', config: { x: 1 }, idleMs: 200, timeoutMs: 5000 });
+   assert.equal(result.threadId, 'thr-1', JSON.stringify(result));
++  assert.ok(Date.now() - t0 >= 200, 'runLoopTurn must wait idleMs of quiet before it settles');
++  const threadStart = requests.find((r) => r.method === 'thread/start');
++  assert.ok(threadStart, JSON.stringify(requests));
++  assert.deepEqual(
++    threadStart!.params,
++    { cwd: '/ROOM', sandbox: 'workspace-write', approvalPolicy: 'never', model: 'gpt-5.6-terra', config: { x: 1 } },
++    JSON.stringify(threadStart!.params),
++  );
+   const turnStart = requests.find((r) => r.method === 'turn/start');
+-  assert.ok(turnStart, JSON.stringify(requests));
+-  const params = turnStart!.params as { threadParams?: { model?: string; config?: unknown } };
+-  assert.deepEqual(params.threadParams, { model: 'gpt-5.6-terra', config: { x: 1 } }, JSON.stringify(params));
++  assert.ok(turnStart && !('threadParams' in (turnStart.params as Record<string, unknown>)), JSON.stringify(turnStart));
+ });
+ 
+ test('Test 21f: runLoopTurn resolves { timedOut: true } on a stub timeout, and never rejects', async () => {
+@@ -461,8 +500,14 @@ test('Test 21g: client.configWrites counts config/batchWrite requests', async ()
+   const client = new CodexAppServer(child);
+   try {
+     assert.equal(client.configWrites, 0);
+-    await client.request('config/batchWrite', { edits: [{ keyPath: 'a.b', value: 1, mergeStrategy: 'upsert' }] });
++    // TPV re-seal: the -10 fake answers `initialize` and rejects every unknown method ("unhandled"),
++    // so the batchWrite request rejects; F6.3 counts inside request(), i.e. on send.
++    await client.request('initialize', {});
++    assert.equal(client.configWrites, 0, 'a non-batchWrite request must not count');
++    await assert.rejects(client.request('config/batchWrite', { edits: [{ keyPath: 'a.b', value: 1, mergeStrategy: 'upsert' }] }), /unhandled/);
+     assert.equal(client.configWrites, 1, 'configWrites must increment on config/batchWrite');
++    await assert.rejects(client.request('hooks/list', { cwds: ['/ROOM'] }), /unhandled/);
++    assert.equal(client.configWrites, 1, 'only config/batchWrite counts');
+   } finally {
+     child.kill();
+   }
+@@ -483,7 +528,7 @@ test('Test 21h: listProjectHooks(client, room) equals flattenHooksList(hooks/lis
+ test('Test 21i: readCodexRegistrations on a room with the canonical .codex/hooks.json returns the 5 camelized registrations', async () => {
+   const { readCodexRegistrations } = (await loadCodexHooks()) as { readCodexRegistrations?: (room: string) => Array<{ eventName: string; matcher: string | null; command: string }> };
+   assert.equal(typeof readCodexRegistrations, 'function', 'readCodexRegistrations must be exported by codex-hooks.mjs');
+-  const room = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-13-harness-registrations-'));
++  const room = mkTmp('cg-s41-13-harness-registrations-');
+   fs.mkdirSync(path.join(room, '.codex'), { recursive: true });
+   fs.copyFileSync(path.join(CLI_ROOT, 'scaffold', 'hosts', 'codex', '.codex', 'hooks.json'), path.join(room, '.codex', 'hooks.json'));
+   const regs = readCodexRegistrations!(room);

@@ -25,13 +25,40 @@
 # Output: writes .cleargate/sprint-runs/<sprint-id>/.pending-task-<turn_index>.json
 #         with { agent_type, work_item_id, turn_index, started_at }
 #
-# Robustness: exits non-zero to block a subagent spawn when unprocessed flashcards exist.
+# Robustness: exits 2 (BUG-089: host-honored, via the shared `cleargate hook
+# signal` handler — Claude Code treats the historical bare `exit 1` as
+# non-blocking) to block a subagent spawn when unprocessed flashcards exist.
 # Set SKIP_FLASHCARD_GATE=1 to bypass the flashcard gate entirely.
 # Set CLEARGATE_ADVISORY=1 to downgrade the block to a warning (exit 0).
 
 set -u
 
 REPO_ROOT="${ORCHESTRATOR_PROJECT_DIR:-${CLAUDE_PROJECT_DIR}}"
+
+# ── BUG-089: explicit host selection for the shared hook-signal handler ──────
+# settings.json passes `--host claude` explicitly at this hook's boundary.
+# Defaults to claude when no --host flag is present (e.g. direct invocation).
+HOST="claude"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      if [ $# -ge 2 ]; then
+        HOST="$2"
+        shift 2
+      else
+        shift 1
+      fi
+      ;;
+    --host=*)
+      HOST="${1#--host=}"
+      shift 1
+      ;;
+    *)
+      shift 1
+      ;;
+  esac
+done
+
 LOG_DIR="${REPO_ROOT}/.cleargate/hook-log"
 mkdir -p "${LOG_DIR}"
 HOOK_LOG="${LOG_DIR}/pending-task-sentinel.log"
@@ -148,7 +175,7 @@ if [[ "${IS_AGENT_SPAWN}" == "1" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPR
         printf '  mark processed: touch %s/.processed-%s\n' "${SPRINT_DIR}" "${HASH}" >&2
       done
     else
-      # Default: block Task spawn — exit 1 with diagnostic on stderr (real stderr, not log)
+      # Default: block Task spawn — diagnostic on stderr (real stderr, not log)
       printf 'FLASHCARD GATE BLOCKED: %d unprocessed flashcard(s) must be processed before spawning next Task.\n' \
         "${#UNPROCESSED_CARDS[@]}" >&2
       for i in "${!UNPROCESSED_CARDS[@]}"; do
@@ -157,7 +184,41 @@ if [[ "${IS_AGENT_SPAWN}" == "1" && "${SKIP_FLASHCARD_GATE:-0}" != "1" && "${SPR
         printf '  card: %s\n' "${CARD}" >&2
         printf '  mark processed: touch %s/.processed-%s\n' "${SPRINT_DIR}" "${HASH}" >&2
       done
-      exit 1
+
+      # BUG-089: resolve the host-honored blocking exit code through the
+      # shared hook-signal handler instead of a bare `exit 1` — Claude Code
+      # treats a PreToolUse hook's exit 1 (no JSON decision) as non-blocking,
+      # so the subagent spawn proceeded anyway. This is a blocking branch:
+      # any resolver outcome other than the expected 2 (missing CLI, resolver
+      # crash, unexpected status) still fails closed as exit 2 here, never
+      # falls through as 0/1/127.
+      if [ -f "${REPO_ROOT}/cleargate-cli/dist/cli.js" ]; then
+        CG=(node "${REPO_ROOT}/cleargate-cli/dist/cli.js")
+      elif command -v cleargate >/dev/null 2>&1; then
+        CG=(cleargate)
+      else
+        # Read pinned version from stamp-and-gate.sh (same convention as
+        # pre-edit-gate.sh's three-branch resolver — CR-009).
+        HOOK_PIN=""
+        HOOK_SH="${REPO_ROOT}/.claude/hooks/stamp-and-gate.sh"
+        if [ -f "${HOOK_SH}" ]; then
+          HOOK_PIN=$(sed -n 's/^# cleargate-pin: *//p' "${HOOK_SH}" 2>/dev/null | head -1)
+          if [ -z "${HOOK_PIN}" ]; then
+            HOOK_PIN=$(grep -oE 'cleargate@[^"]+' "${HOOK_SH}" 2>/dev/null | head -1 | sed 's/.*@//')
+          fi
+        fi
+        if [ -z "${HOOK_PIN}" ]; then
+          HOOK_PIN="__CLEARGATE_VERSION__"
+        fi
+        CG=(npx -y "cleargate@${HOOK_PIN}")
+      fi
+      "${CG[@]}" hook signal block --host "${HOST}" > /dev/null 2>&1
+      SIGNAL_EXIT=$?
+      if [ "${SIGNAL_EXIT}" -ne 2 ]; then
+        printf '[%s] flashcard-gate: hook-signal-non-2 exit=%s host=%s — failing closed as exit 2\n' \
+          "$(date -u +%FT%TZ)" "${SIGNAL_EXIT}" "${HOST}" >> "${HOOK_LOG}"
+      fi
+      exit 2
     fi
   fi
 fi

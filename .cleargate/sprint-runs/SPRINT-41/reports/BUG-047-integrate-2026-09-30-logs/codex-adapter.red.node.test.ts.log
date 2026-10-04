@@ -1,0 +1,40 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hosts/codex-adapter.red.node.test.ts
+
+▶ Test 1 — codex adapter declarations
+  ✔ [ALREADY-GREEN ANCHOR] claudeAdapter.ownedRoots() is still [".claude"] (1.231709ms)
+  ✔ codexAdapter has name/displayName/root declarations and sessionLoadedPaths (0.393708ms)
+  ✔ defaultHostRegistry.names() includes "codex" and "claude", claude first (0.111208ms)
+  ✔ rootLevelSurgeryTargets(defaultHostRegistry) ⊇ {CLAUDE.md, AGENTS.md} (0.260292ms)
+✔ Test 1 — codex adapter declarations (2.62375ms)
+▶ Test 2 — install() on an empty dir
+  ✔ writes .codex/hooks.json, .codex/config.toml, AGENTS.md and prints the pinned lines in order (99.475291ms)
+  ✔ [TPV R-A2] ctx.logPrefix replaces the default prefix on every stdout line (79.672875ms)
+  ✔ [TPV R-A3] a pre-seeded [features] hooks = false is flipped and warned about on stderr (72.801083ms)
+✔ Test 2 — install() on an empty dir (252.136417ms)
+▶ Test 3 — second install is a no-op
+  ✔ all three files byte-identical, "unchanged" stdout, no write (mtime/ino unchanged) (106.7155ms)
+✔ Test 3 — second install is a no-op (106.815ms)
+▶ Test 4 — existing user files are preserved
+  ✔ a user .codex/hooks.json PreToolUse entry stays at index 0; no dup on re-run (95.747833ms)
+  ✔ a user AGENTS.md keeps its prose after the block (CR-105 prepend) (51.333166ms)
+✔ Test 4 — existing user files are preserved (147.218625ms)
+▶ Test 5 — remove() strips ClearGate content and preserves the rest
+  ✔ strips block/hooks/mcp entry; keeps user hooks, prose, [features], [mcp_servers.other] and comments (94.728042ms)
+  ✔ an unparsable .codex/hooks.json warns on stderr and still resolves (0.619042ms)
+  ✔ [TPV R-A5] a per-target error does not skip later targets: config.toml still loses [mcp_servers.cleargate] (47.12525ms)
+  ✔ [5b] stripping every ClearGate hook from a ClearGate-only .codex/hooks.json deletes the file (95.145625ms)
+✔ Test 5 — remove() strips ClearGate content and preserves the rest (237.775041ms)
+▶ Test 6 — mergeSurgeryTarget for .codex/hooks.json
+  ✔ a stale ClearGate command plus a user hook → new ClearGate commands once, user hook kept (0.464ms)
+  ✔ an unparsable "ours" returns null and logs a [skip] stderr line (0.155709ms)
+✔ Test 6 — mergeSurgeryTarget for .codex/hooks.json (0.68525ms)
+ℹ tests 16
+ℹ suites 6
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 994.515

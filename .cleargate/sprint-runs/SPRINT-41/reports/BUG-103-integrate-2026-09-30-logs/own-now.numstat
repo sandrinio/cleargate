@@ -1,0 +1,11 @@
+10	0	CHANGELOG.md
+22	13	scaffold/core/.agents/skills/sprint-execution/SKILL.md
+1	1	scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md
+27	3	scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs
+1	1	scaffold/hosts/claude/.claude/agents/architect.md
+22	13	scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
+1	1	scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md
+1	1	scaffold/hosts/codex/.codex/agents/architect.toml
+37	6	test/helpers/init-fixture.ts
+22	25	test/scaffold/skill-md-serial-pointers.red.node.test.ts
+500	0	test/scaffold/sprint-execution-skill-drift.red.node.test.ts

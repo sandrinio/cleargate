@@ -1,0 +1,85 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/sprint-preflight.node.test.ts
+
+▶ Scenario: all five checks pass in clean state
+  ✔ exit code is 0 and stdout contains "all five checks pass" (950.752917ms)
+✔ Scenario: all five checks pass in clean state (951.251916ms)
+▶ Scenario: previous sprint not Completed
+  ✔ exit code is 1, stderr names prev sprint and includes close hint (895.310291ms)
+✔ Scenario: previous sprint not Completed (895.386958ms)
+▶ Scenario: leftover worktree
+  ✔ exit code is 1, stderr names worktree path and includes "git worktree remove" hint (1095.511667ms)
+✔ Scenario: leftover worktree (1095.641291ms)
+▶ Scenario: sprint branch ref already exists
+  ✔ exit code is 1, stderr contains "Sprint branch ref already exists: refs/heads/sprint/S-19" (1128.768625ms)
+✔ Scenario: sprint branch ref already exists (1128.8475ms)
+▶ Scenario: main is dirty
+  ✔ exit code is 1, stderr contains "main is dirty" and the dirty filename (1288.978583ms)
+✔ Scenario: main is dirty (1289.083333ms)
+▶ Scenario: multiple checks fail simultaneously
+  ✔ exit code is 1, stderr contains both failures and shows all 4 checks ran (1289.233541ms)
+✔ Scenario: multiple checks fail simultaneously (1289.32025ms)
+▶ Scenario: usage error on missing / malformed sprint-id arg
+  ✔ exit code is 2 with usage hint for empty sprint-id (247.012292ms)
+  ✔ exit code is 2 for malformed sprint-id like "SPRINT-X" (245.801292ms)
+✔ Scenario: usage error on missing / malformed sprint-id arg (492.941334ms)
+▶ Scenario: skip prev-sprint check for SPRINT-01
+  ✔ exit code is 0 in clean state (check 1 skipped, other four pass) (1040.753125ms)
+  ✔ when dirty, check 1 shows as skipped in the punch list (888.062917ms)
+✔ Scenario: skip prev-sprint check for SPRINT-01 (1928.909333ms)
+▶ Scenario (STORY-026-01): preflight success emits skill load directive
+  ✔ stdout last line is "→ Load skill: sprint-execution" when all five checks pass (917.064417ms)
+✔ Scenario (STORY-026-01): preflight success emits skill load directive (917.139375ms)
+▶ Scenario (STORY-026-01): preflight failure stays quiet on skill directive
+  ✔ stdout does NOT contain "Load skill: sprint-execution" when a check fails (894.641791ms)
+✔ Scenario (STORY-026-01): preflight failure stays quiet on skill directive (894.709833ms)
+▶ Scenario 9 (CR-027): v2 happy path — all items pass=true
+  ✔ exit code is 0, "all five checks pass", no Per-item readiness gates failure (676.290834ms)
+✔ Scenario 9 (CR-027): v2 happy path — all items pass=true (676.350625ms)
+▶ Scenario 10 (CR-027): v2 hard-block — one EPIC pass=false
+  ✔ exit code is 1, stderr names EPIC-099 and failing criterion no-tbds (792.968291ms)
+✔ Scenario 10 (CR-027): v2 hard-block — one EPIC pass=false (793.026625ms)
+▶ Scenario 11 (CR-027): staleness — last_gate_check older than updated_at
+  ✔ exit code is 1, stderr contains EPIC-099 and stale reason (696.637042ms)
+✔ Scenario 11 (CR-027): staleness — last_gate_check older than updated_at (696.694708ms)
+▶ Scenario 12 (CR-027): always-enforced mode — check #5 runs regardless of execution_mode field
+  ✔ exit code is 1 when an item has pass=false (check #5 always runs — STORY-070-01) (726.601625ms)
+✔ Scenario 12 (CR-027): always-enforced mode — check #5 runs regardless of execution_mode field (726.654959ms)
+▶ Scenario 13 (CR-027): Done items skipped from failure list
+  ✔ exit code is 0 when only Done item has pass=false (terminal status skipped) (668.606041ms)
+✔ Scenario 13 (CR-027): Done items skipped from failure list (668.661084ms)
+▶ Scenario 14 (CR-027): sprint plan itself fails when cached_gate_result is null
+  ✔ exit code is 1, stderr names SPRINT-99 as failing item with no cached_gate_result (668.460042ms)
+✔ Scenario 14 (CR-027): sprint plan itself fails when cached_gate_result is null (668.516333ms)
+▶ Scenario 15 (CR-038): Step 0 — all items refreshed, 0 errors
+  ✔ stdout contains "Step 0: refreshed N items, 0 errors." and exit code 0 (669.83225ms)
+✔ Scenario 15 (CR-038): Step 0 — all items refreshed, 0 errors (669.8955ms)
+▶ Scenario 16 (CR-038): Step 0 — stale items get gate check invoked
+  ✔ Step 0 reports 2 refreshed items and execFn receives 2 gate-check calls (751.9025ms)
+✔ Scenario 16 (CR-038): Step 0 — stale items get gate check invoked (751.966875ms)
+▶ Scenario 17 (CR-038): Step 0 — per-item gate check error, other items still refreshed
+  ✔ Step 0 reports N-1 refreshed + 1 error; preflight continues (exit driven by Check 5) (692.666041ms)
+✔ Scenario 17 (CR-038): Step 0 — per-item gate check error, other items still refreshed (692.74275ms)
+▶ Scenario 18 (CR-038): Step 0 — archive/terminal item skipped (no gate check)
+  ✔ Step 0 skips Done item in archive; gate check not called for it (699.001416ms)
+✔ Scenario 18 (CR-038): Step 0 — archive/terminal item skipped (no gate check) (699.069083ms)
+▶ Scenario 19 (CR-038): Step 0 — all items error, Step 0 never calls exitFn(1)
+  ✔ exit code is 0 when all gate checks error (Step 5 still runs and passes) (678.619833ms)
+✔ Scenario 19 (CR-038): Step 0 — all items error, Step 0 never calls exitFn(1) (678.678833ms)
+▶ Scenario 20: Step 0 — a verdict-identical re-check leaves the file byte-unchanged
+  ✔ timestamp-only rewrite is reverted, so Check 4 "main is dirty" cannot self-trigger (691.675166ms)
+  ✔ a genuine verdict change is NOT reverted (683.451959ms)
+✔ Scenario 20: Step 0 — a verdict-identical re-check leaves the file byte-unchanged (1375.234417ms)
+▶ Scenario 21: a re-check evaluates the SAME transition, not the next one
+  ✔ four consecutive gate checks on a multi-transition type report one gate (240.734834ms)
+  ✔ a legacy cache with no recorded transition keeps the historical guess (237.424917ms)
+✔ Scenario 21: a re-check evaluates the SAME transition, not the next one (478.257291ms)
+ℹ tests 27
+ℹ suites 23
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20763.767958

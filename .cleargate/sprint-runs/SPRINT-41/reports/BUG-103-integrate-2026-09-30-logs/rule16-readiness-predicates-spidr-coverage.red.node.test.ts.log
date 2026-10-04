@@ -1,0 +1,60 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/lib/readiness-predicates-spidr-coverage.red.node.test.ts
+
+▶ S1 (§4 item 1): unedited canonical story.md, CR.md and Bug.md each fail spidr-coverage
+  ✔ canonical cleargate-planning/.cleargate/templates/story.md (1.581042ms)
+  ✔ canonical cleargate-planning/.cleargate/templates/CR.md (0.362542ms)
+  ✔ canonical cleargate-planning/.cleargate/templates/Bug.md (0.157166ms)
+✔ S1 (§4 item 1): unedited canonical story.md, CR.md and Bug.md each fail spidr-coverage (2.587708ms)
+▶ S2 (§4 item 2): grandfathering — absence, inline quoting, and a fenced example all pass not-applicable
+  ✔ a body with no **SPIDR coverage.** lead-in anywhere passes not-applicable (0.126583ms)
+  ✔ the lead-in quoted INLINE (mid-sentence, not at column 0) does not trigger (0.221458ms)
+  ✔ the lead-in indented inside a fenced example, with a blank {T or F} table, does not trigger (the CR-123 self-fire case) (0.166958ms)
+✔ S2 (§4 item 2): grandfathering — absence, inline quoting, and a fenced example all pass not-applicable (0.65625ms)
+▶ S3 (§4 item 3): per-axis T-needs-a-tag / F-forbids-a-tag
+  ✔ Paths = T with no scenario carrying @paths anywhere fails, naming Paths (0.311625ms)
+  ✔ Paths = F with a scenario carrying @paths fails, naming Paths (0.179166ms)
+  ✔ Interfaces = T with no scenario carrying @interfaces anywhere fails, naming Interfaces (0.107542ms)
+  ✔ Interfaces = F with a scenario carrying @interfaces fails, naming Interfaces (0.150292ms)
+  ✔ Data = T with no scenario carrying @data anywhere fails, naming Data (0.08825ms)
+  ✔ Data = F with a scenario carrying @data fails, naming Data (0.086084ms)
+  ✔ Rules = T with no scenario carrying @rules anywhere fails, naming Rules (0.052417ms)
+  ✔ Rules = F with a scenario carrying @rules fails, naming Rules (0.056375ms)
+  ✔ a complete, valid mixed T/F body with correctly tagged scenarios passes (0.073042ms)
+✔ S3 (§4 item 3): per-axis T-needs-a-tag / F-forbids-a-tag (1.282ms)
+▶ S4 (§4 item 4): F rows need a reason, T rows do not
+  ✔ an F row with an empty Reason cell fails (0.108334ms)
+  ✔ a T row with an empty Reason cell passes (once its tag requirement is also met) (0.057875ms)
+✔ S4 (§4 item 4): F rows need a reason, T rows do not (0.211917ms)
+▶ S5 (§4 item 5): a tag counts only inside a ```gherkin fence, directly above a Scenario
+  ✔ @paths mentioned in prose OUTSIDE the gherkin fence does not satisfy Paths = T (0.067375ms)
+  ✔ the same @paths tag directly above a Scenario INSIDE the gherkin fence satisfies Paths = T (0.045417ms)
+✔ S5 (§4 item 5): a tag counts only inside a ```gherkin fence, directly above a Scenario (0.14475ms)
+▶ S6: missing axis row and malformed Cover cells
+  ✔ a table missing the Rules row entirely fails, naming Rules (0.098458ms)
+  ✔ an unfilled `{T or F}` Cover cell (the shipped template placeholder) fails — BUG-054 (0.072583ms)
+  ✔ a Cover cell holding any other non-T/F value (e.g. "Yes") fails (0.071875ms)
+✔ S6: missing axis row and malformed Cover cells (0.280583ms)
+▶ S7 (§4 item 7): epic's gherkin-error-path check string tightens to "body contains 'Scenario: Error'"
+  ✔ canonical readiness-gates.md registers the tightened check string for gherkin-error-path (0.284542ms)
+  ✔ a body whose only "Error" is prose fails against the LIVE registered check (red until the doc is tightened) (0.292583ms)
+  ✔ a body carrying "Scenario: Error — x" passes the tightened check (0.063625ms)
+  ✔ the unedited canonical epic.md fails the tightened check (0.082458ms)
+✔ S7 (§4 item 7): epic's gherkin-error-path check string tightens to "body contains 'Scenario: Error'" (0.767083ms)
+▶ S8 (§4 item 6): spidr-coverage is registered identically on story/cr/bug, absent from epic
+  ✔ registered in the story ready-for-execution gate block (0.162209ms)
+  ✔ registered in the cr ready-to-apply gate block (0.102834ms)
+  ✔ registered in the bug ready-for-fix gate block (0.094208ms)
+  ✔ NOT registered in either epic gate block (ready-for-decomposition or ready-for-coding) (0.148334ms)
+  ✔ the Predicate Vocabulary carries a numbered "**12. `spidr-coverage`**" entry (0.104292ms)
+  ✔ evaluate() gives an identical result for one body regardless of doc.fm (never branches on type) (0.836458ms)
+✔ S8 (§4 item 6): spidr-coverage is registered identically on story/cr/bug, absent from epic (1.510917ms)
+ℹ tests 32
+ℹ suites 8
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 268.935292

@@ -1,0 +1,192 @@
+diff --git a/test/scripts/codex-hooks-harness.red.node.test.ts b/test/scripts/codex-hooks-harness.red.node.test.ts
+index 217b478d3d10ce59132beac568351ea6092f4b36..3cc2bfd23a74206904c108d501e6c366a29c53bc 100644
+--- a/test/scripts/codex-hooks-harness.red.node.test.ts
++++ b/test/scripts/codex-hooks-harness.red.node.test.ts
+@@ -24,6 +24,7 @@ import assert from 'node:assert/strict';
+ import * as path from 'node:path';
+ import * as fs from 'node:fs';
+ import * as os from 'node:os';
++import { createHash } from 'node:crypto';
+ import { CLI_ROOT, SCAFFOLD_ROOT } from '../helpers/scaffold-roots.js';
+ 
+ const FAKE_APP_SERVER = path.join(CLI_ROOT, 'test', 'fixtures', 'codex-hooks', 'fake-app-server.mjs');
+@@ -556,6 +557,16 @@ describe('[TPV R-X5] C4 edit-allow probe: strip the story <instructions> block b
+ // ClearGate registers no SubagentStart hook, and subAgentActivity carries no
+ // agent type, so the role identity is the SubagentStop payload's agent_type as
+ // token-ledger.sh logs it (the `codex-identity … agent_type=qa` line).
++//
++// TPV2 re-seal (plans/M5.md M5-A55, INTEGRATE finding). Check (a) reads the
++// PARSED string values of the `properties.agent_type` schema value (object keys
++// never count), removes every role-entry body (` {` newline … newline `}`), and
++// matches each role as a whole token. It never tokenizes JSON.stringify output:
++// stringify writes a newline as backslash + `n`, so a role that starts a line
++// reads as `n<role>` and the lookbehind rejects it (test 46: 2/11). The pinned
++// codex lists roles one per line (`<name>: {`, its description, `}`), and a role's
++// description can name another role (architect-synth's names architect-reader),
++// which is why bodies are removed before matching.
+ 
+ const ALL_11_ROLES = [
+   'architect',
+@@ -572,7 +583,7 @@ const ALL_11_ROLES = [
+ ];
+ const QA_FIRST_LINE = 'You are the **QA** agent for ClearGate sprint execution.';
+ const turnMeta = (agentName: string) => ({ 'x-codex-turn-metadata': JSON.stringify({ agent_name: agentName }) });
+-const spawnSchemaTools = (roles: string[]) => [
++const spawnSchemaTools = (roles: string[], agentType?: Record<string, unknown>) => [
+   {
+     type: 'namespace',
+     name: 'collaboration',
+@@ -583,7 +594,7 @@ const spawnSchemaTools = (roles: string[]) => [
+         parameters: {
+           type: 'object',
+           properties: {
+-            agent_type: { type: 'string', description: `Optional role for the new agent. Available roles: ${roles.join(', ')}.` },
++            agent_type: agentType ?? { type: 'string', description: `Optional role for the new agent. Available roles: ${roles.join(', ')}.` },
+             message: { type: 'string' },
+             task_name: { type: 'string' },
+           },
+@@ -592,18 +603,18 @@ const spawnSchemaTools = (roles: string[]) => [
+     ],
+   },
+ ];
+-function c6Requests(opts: { roles?: string[]; schemaIn?: 'additional_tools' | 'body.tools'; spawnAgentType?: string; childText?: string; parentText?: string } = {}) {
++function c6Requests(opts: { roles?: string[]; agentType?: Record<string, unknown>; schemaIn?: 'additional_tools' | 'body.tools'; spawnAgentType?: string; childText?: string; parentText?: string } = {}) {
+   const roles = opts.roles ?? ALL_11_ROLES;
+   const schemaIn = opts.schemaIn ?? 'additional_tools';
+   const parentFirst: Record<string, unknown> = {
+     model: 'gpt-5.6-terra',
+     input: [
+-      ...(schemaIn === 'additional_tools' ? [{ type: 'additional_tools', role: 'developer', tools: spawnSchemaTools(roles) }] : []),
++      ...(schemaIn === 'additional_tools' ? [{ type: 'additional_tools', role: 'developer', tools: spawnSchemaTools(roles, opts.agentType) }] : []),
+       { type: 'message', role: 'user', content: [{ type: 'input_text', text: opts.parentText ?? 'Spawn an agent (spawn_agent) with the exact task, then reply DONE.' }] },
+     ],
+     client_metadata: turnMeta('/root'),
+   };
+-  if (schemaIn === 'body.tools') parentFirst.tools = spawnSchemaTools(roles);
++  if (schemaIn === 'body.tools') parentFirst.tools = spawnSchemaTools(roles, opts.agentType);
+   const parentFollowUp = {
+     model: 'gpt-5.6-terra',
+     input: [
+@@ -628,6 +639,86 @@ function c6Requests(opts: { roles?: string[]; schemaIn?: 'additional_tools' | 'b
+   };
+   return [parentFirst, child, parentFollowUp];
+ }
++
++// The `spawn_agent` `properties.agent_type` schema value exactly as the pinned
++// codex 0.154.0-alpha.6.2 sent it: test 46 on cli 1e7f0e6, scripted provider,
++// byte-identical in all three C6 requests and in the INTEGRATE pre-commit driver
++// run. The schema value is `{ type, description }`. The description is 6029 chars,
++// sha256 f14f7bbbfd4112449244bf14f39d2a7d8c801897df762ebdd2a8c9637916accb.
++// It lists the 11 ClearGate roles one per line (`<name>: {`, the agent's description,
++// `}`), then codex's built-in default/explorer/worker.
++const MEASURED_AGENT_TYPE_DESCRIPTION_SHA256 = 'f14f7bbbfd4112449244bf14f39d2a7d8c801897df762ebdd2a8c9637916accb';
++const MEASURED_AGENT_TYPE_DESCRIPTION = [
++  "Agent type override for the new agent. Omit unless explicitly asked. The selected role applies regardless of how much parent history is inherited.",
++  "Available roles:",
++  "architect: {",
++  "Use BEFORE development starts on a ClearGate sprint milestone. Reads the story file + relevant existing code, produces a tight implementation sketch (files to touch, schema deltas, test shape, risks) for Developer agents to execute against. Runs once per milestone, not per story. Does NOT write production code — only the plan file.",
++  "}",
++  "architect-reader: {",
++  "Use DURING Sprint Design Review fan-out (STORY-033-03 / EPIC-033). One instance spawned per story by the Orchestrator. Reads a single story file and returns a structured digest for architect-synth to consume. Do NOT schedule, plan waves, or emit waves.json — that is architect-synth's job.",
++  "}",
++  "architect-synth: {",
++  "Use DURING Sprint Design Review fan-out (STORY-033-03 / EPIC-033) AFTER all architect-reader agents have returned digests. Consumes N reader digests, evaluates the five-clause wave-compatibility predicate, and emits the §2.1–2.5 SDR block, Wave Assignment table, and waves.json artifact.",
++  "}",
++  "cleargate-wiki-contradict: {",
++  "Use during ingest Phase 4 to perform a neighborhood-scoped contradiction check on a draft or in-review wiki page. Advisory only — always exits 0. Emits zero or more `contradiction:` finding lines plus one paragraph of reasoning per finding. Read-only; never writes, edits, or commits anything.",
++  "}",
++  "cleargate-wiki-ingest: {",
++  "Use AFTER any Write or Edit on a raw work item under .cleargate/delivery/**. Reads the just-written file, creates or updates one wiki page at .cleargate/wiki/{epics|stories|sprints|proposals|crs|bugs}/<id>.md, appends one YAML event to wiki/log.md, and recompiles affected synthesis pages. Idempotent — no-op when content + git SHA are unchanged. Auto-invoked by the PostToolUse hook; also callable directly via `cleargate wiki ingest <file>`.",
++  "}",
++  "cleargate-wiki-lint: {",
++  "Use BEFORE Gate 1 (Proposal approval) and Gate 3 (Push) to enforce wiki-vs-raw consistency. Default mode (enforcement) exits non-zero on any drift, naming the offending page; halts gate transitions. `--suggest` mode (advisory) exits 0 and prints candidate cross-refs the ingest pass missed (Karpathy discovery). Performance: O(n), one pass per page plus one index cross-check; no all-pairs comparison.",
++  "}",
++  "cleargate-wiki-query: {",
++  "Use AT TRIAGE before drafting any new Proposal, Epic, or Story — surfaces prior work that may already cover the topic. Read-only by default. Reads .cleargate/wiki/index.md first, then targeted per-item pages, returns synthesized answer with [[ID]] citations. Append `--persist` (via the `cleargate wiki query` CLI wrapper) to file the answer back to wiki/topics/<slug>.md as a topic page (Karpathy compounding loop).",
++  "}",
++  "developer: {",
++  "Use to implement one ClearGate Story end-to-end. Reads the story file + the Architect's plan, writes production code + unit tests in the designated worktree, runs typecheck and tests locally, commits on pass. One invocation = one story. Never crosses story boundaries.",
++  "}",
++  "devops: {",
++  "Use AFTER QA-Verify pass + Architect post-flight pass on a Story. Owns mechanical merge, worktree teardown, state transition to Done, mirror parity diff post-merge. Never authors code. Halts on conflict.",
++  "}",
++  "qa: {",
++  "Use AFTER a Developer agent reports STATUS=done on a Story. Independent verification gate. Re-runs typecheck + tests in a fresh shell, diffs the commit against the Story's acceptance Gherkin, flags missing scenarios, checks DoD items. Approves or kicks back. Never commits. Never edits code.",
++  "}",
++  "reporter: {",
++  "Use ONCE at the end of a ClearGate sprint, after all stories have passed QA. Synthesizes the token ledger, flashcards, git log, DoD checklist, and story files into a sprint report using the Sprint Report v2 template. Produces .cleargate/sprint-runs/<sprint-id>/SPRINT-<#>_REPORT.md. Does not modify any other artifact.",
++  "}",
++  "default: {",
++  "Default agent.",
++  "}",
++  "explorer: {",
++  "Use `explorer` for specific codebase questions.",
++  "Explorers are fast and authoritative.",
++  "They must be used to ask specific, well-scoped questions on the codebase.",
++  "Rules:",
++  "- In order to avoid redundant work, you should avoid exploring the same problem that explorers have already covered. Typically, you should trust the explorer results without additional verification. You are still allowed to inspect the code yourself to gain the needed context!",
++  "- You are encouraged to spawn up multiple explorers in parallel when you have multiple distinct questions to ask about the codebase that can be answered independently. This allows you to get more information faster without waiting for one question to finish before asking the next. While waiting for the explorer results, you can continue working on other local tasks that do not depend on those results. This parallelism is a key advantage of delegation, so use it whenever you have multiple questions to ask.",
++  "- Reuse existing explorers for related questions.",
++  "}",
++  "worker: {",
++  "Use for execution and production work.",
++  "Typical tasks:",
++  "- Implement part of a feature",
++  "- Fix tests or bugs",
++  "- Split large refactors into independent chunks",
++  "Rules:",
++  "- Explicitly assign **ownership** of the task (files / responsibility). When the subtask involves code changes, you should clearly specify which files or modules the worker is responsible for. This helps avoid merge conflicts and ensures accountability. For example, you can say \"Worker 1 is responsible for updating the authentication module, while Worker 2 will handle the database layer.\" By defining clear ownership, you can delegate more effectively and reduce coordination overhead.",
++  "- Always tell workers they are **not alone in the codebase**, and they should not revert the edits made by others, and they should adjust their implementation to accommodate the changes made by others. This is important because there may be multiple workers making changes in parallel, and they need to be aware of each other's work to avoid conflicts and ensure a cohesive final product.",
++  "}",
++].join('\n');
++/** The measured agent_type schema value, minus the whole `<name>: {` … `}` entry of each role in `drop`. */
++function measuredAgentType(opts: { drop?: string[] } = {}): Record<string, unknown> {
++  const lines = MEASURED_AGENT_TYPE_DESCRIPTION.split('\n');
++  for (const name of opts.drop ?? []) {
++    const start = lines.indexOf(`${name}: {`);
++    assert.ok(start >= 0, `the measured layout has no ${name} entry`);
++    const end = lines.indexOf('}', start);
++    assert.ok(end > start, `the measured ${name} entry has no closing line`);
++    lines.splice(start, end - start + 1);
++  }
++  return { type: 'string', description: lines.join('\n') };
++}
+ function promptInput(entries: Array<[name: string, root: 'r0' | 'r1']>): string {
+   const lines = [
+     '<skills_instructions>',
+@@ -662,6 +753,11 @@ type RSMutation = [label: string, id: 'codex.live.roles' | 'codex.live.skills',
+ const RS_MUTATIONS: RSMutation[] = [
+   ['one role missing from the agent_type schema description', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ roles: ALL_11_ROLES.filter((r) => r !== 'reporter') }); }],
+   ['"architect" missing while "architect-reader"/"-synth" stay (whole-token match)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ roles: ALL_11_ROLES.filter((r) => r !== 'architect') }); }],
++  // M5-A55: single faults in the measured one-per-line layout (pinned codex 0.154.0-alpha.6.2).
++  ['measured layout: the architect entry missing (architect-reader/-synth entries and "Architect\'s plan" stay)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ agentType: measuredAgentType({ drop: ['architect'] }) }); }],
++  ['measured layout: the architect-reader entry missing (architect-synth\'s description still names it)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ agentType: measuredAgentType({ drop: ['architect-reader'] }) }); }],
++  ['measured layout: the developer entry missing (the additional_tools item still carries role "developer")', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ agentType: measuredAgentType({ drop: ['developer'] }) }); }],
++  ['a role listed only in another case ("Architect")', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ roles: ALL_11_ROLES.map((r) => (r === 'architect' ? 'Architect' : r)) }); }],
+   ['the schema only in body.tools, not the additional_tools item', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ schemaIn: 'body.tools' }); }],
+   ['C6 spawned agent_type "developer", not "qa"', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ spawnAgentType: 'developer' }); }],
+   ['the child request lacks qa.md\'s first body line (it is only in a parent request)', 'codex.live.roles', (i) => { i.c6.requests = c6Requests({ childText: 'You are a generic agent.', parentText: QA_FIRST_LINE }); }],
+@@ -687,6 +783,23 @@ describe('Test 15 — codexHookVerdicts roles/skills (STORY-058-11)', () => {
+     for (const id of GATING) assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
+   });
+ 
++  test('M5-A55: the measured one-per-line agent_type layout (pinned codex 0.154.0-alpha.6.2) verdicts codex.live.roles PASS', async () => {
++    const { codexHookVerdicts } = await loadEvidenceCodex();
++    assert.equal(createHash('sha256').update(MEASURED_AGENT_TYPE_DESCRIPTION).digest('hex'), MEASURED_AGENT_TYPE_DESCRIPTION_SHA256, 'the fixture drifted from the test-46 capture');
++    const inputs = rolesSkillsAllPassInputs();
++    inputs.c6.requests = c6Requests({ agentType: measuredAgentType() });
++    const verdicts = codexHookVerdicts(inputs);
++    assert.equal(verdicts['codex.live.roles']?.status, 'PASS', JSON.stringify(verdicts['codex.live.roles']));
++    for (const id of GATING) assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
++  });
++
++  test('M5-A55: roles listed only as string values deeper in the schema (an enum array) count, because the walk is deep', async () => {
++    const { codexHookVerdicts } = await loadEvidenceCodex();
++    const inputs = rolesSkillsAllPassInputs();
++    inputs.c6.requests = c6Requests({ agentType: { type: 'string', enum: [...ALL_11_ROLES], description: 'Agent type override for the new agent.' } });
++    assert.equal(codexHookVerdicts(inputs)['codex.live.roles']?.status, 'PASS', JSON.stringify(codexHookVerdicts(inputs)['codex.live.roles']));
++  });
++
+   test('inputs.roles/inputs.skills absent (no roles/skills in the room) verdicts N/A, never PASS or FAIL', async () => {
+     const { codexHookVerdicts } = await loadEvidenceCodex();
+     const inputs = rolesSkillsAllPassInputs();

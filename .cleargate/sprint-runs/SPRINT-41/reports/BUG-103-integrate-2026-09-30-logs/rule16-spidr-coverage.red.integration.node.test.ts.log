@@ -1,0 +1,15 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/e2e/spidr-coverage.red.integration.node.test.ts
+
+▶ CR-123 E2E (M1 plan scenario 10): a freshly scaffolded story fails spidr-coverage end to end
+  ✔ newHandler -> gateCheckHandler: cached_gate_result.failing_criteria contains spidr-coverage (20.823917ms)
+✔ CR-123 E2E (M1 plan scenario 10): a freshly scaffolded story fails spidr-coverage end to end (21.38725ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 269.72025

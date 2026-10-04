@@ -1,0 +1,20 @@
+{
+  "format": "structured",
+  "status": "done",
+  "commit": "7079954f3e20e4f8e3cce864ee76077e6558fdad",
+  "typecheck": "pass",
+  "tests": "167 passed, 0 failed, 0 skipped; 10 files solo; BUG-047 anchors 119/119",
+  "files_changed": ["CHANGELOG.md", "src/hosts/codex.ts", "src/init/inject-codex-config.ts", "test/init/inject-codex-config-sandbox.red.node.test.ts"],
+  "notes": "Mechanical integration of CLI main 79fc180 into BUG-047; no conflicts or authored code/test changes. Source unchanged from 8b7daf3, sealed BUG-047 test unchanged from 9a44e4b. Detached outer host 6a9cbcc7. Worktrees clean; ready for independent QA. No full suite or harness; metering unavailable.",
+  "r_coverage": [
+    {"r_id": "R1", "covered": true, "deferred": false, "clarified": false},
+    {"r_id": "R2", "covered": true, "deferred": false, "clarified": false},
+    {"r_id": "R3", "covered": true, "deferred": false, "clarified": false},
+    {"r_id": "R4", "covered": true, "deferred": false, "clarified": false},
+    {"r_id": "R5", "covered": true, "deferred": false, "clarified": false},
+    {"r_id": "R6", "covered": true, "deferred": false, "clarified": false}
+  ],
+  "plan_deviations": [],
+  "adjacent_files": ["src/commands/gate.ts", "src/lib/stamp-frontmatter.ts", "src/wiki/lint-checks.ts", "src/hosts/codex.ts", "src/init/inject-codex-config.ts"],
+  "flashcards_flagged": []
+}

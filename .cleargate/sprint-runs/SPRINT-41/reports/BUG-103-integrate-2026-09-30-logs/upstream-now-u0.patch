@@ -1,0 +1,1817 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
++- **A Codex install could not run the sprint loop: Codex's default `workspace-write` sandbox kept
++  `.git` read-only, so the first commit failed (BUG-100).** Inside a git repository,
++  `cleargate init --host codex` and `cleargate host add codex` now add the realpath of
++  `git rev-parse --git-common-dir` (the main `.git`, which also covers every linked worktree) to
++  `[sandbox_workspace_write] writable_roots` in `.codex/config.toml`, and print one line naming that
++  absolute path. Other roots are kept; on re-init an absolute `.git` root that no longer exists is
++  replaced. `cleargate uninstall` and `cleargate host remove codex` remove only ClearGate's root. A
++  non-git install writes no key, and an inline-table or dotted-key definition is refused before any
++  write unless it already holds the root. `cleargate upgrade` does not refresh the key yet.
++- **An item edited after its last gate check stayed `stale` forever (BUG-047).** `cleargate stamp`
++  moves `updated_at` past `last_gate_check`, but `gate check` skipped the write whenever the verdict
++  was unchanged, and `sprint preflight` Step 0 reverted any timestamp-only rewrite, so preflight
++  Check 5 and `wiki lint` kept reporting the item stale and the suggested `gate check` could not
++  clear it. A single freshness rule (`isGateCacheFresh`: `last_gate_check >= updated_at`) now
++  decides both: `gate check` rewrites a stale cache even for an unchanged verdict, Step 0 keeps a
++  stale item's advanced stamp, and an already-fresh item is still left byte-identical (CR-038).
++  Check 5 uses the same rule for items and the sprint plan; a cache with no `last_gate_check` now
++  counts as stale.
+diff --git a/src/commands/sprint.ts b/src/commands/sprint.ts
+--- a/src/commands/sprint.ts
++++ b/src/commands/sprint.ts
++import { isGateCacheFresh } from '../lib/frontmatter-cache.js';
+-    } else if (cachedGate.last_gate_check !== '' && updatedAt !== '' && cachedGate.last_gate_check < updatedAt) {
++    } else if (!isGateCacheFresh(cachedGate, updatedAt)) {
+-  } else if (sprintGate.last_gate_check !== '' && sprintUpdatedAt !== '' && sprintGate.last_gate_check < sprintUpdatedAt) {
++  } else if (!isGateCacheFresh(sprintGate, sprintUpdatedAt)) {
+- * last_gate_check stamp. A genuine verdict change is left on disk.
++ * last_gate_check stamp AND the original cache was already fresh
++ * (isGateCacheFresh on the ORIGINAL bytes). A genuine verdict change is left
++ * on disk, and so is the advanced stamp of an item that was stale before the
++ * gate check (BUG-047): reverting that would leave it stale forever.
++ * Freshness is judged independently of `pass`.
+-    if (withoutGateTimestamp(after) === withoutGateTimestamp(original)) {
++    if (withoutGateTimestamp(after) !== withoutGateTimestamp(original)) return;
++    const { fm } = parseFrontmatter(original);
++    const cgr = fm['cached_gate_result'];
++    const cached =
++      typeof cgr === 'object' && cgr !== null && !Array.isArray(cgr)
++        ? { last_gate_check: String((cgr as Record<string, unknown>)['last_gate_check'] ?? '') }
++        : null;
++    if (isGateCacheFresh(cached, String(fm['updated_at'] ?? ''))) {
+-    // thing that moved is the timestamp, put the original bytes back.
++    // thing that moved is the timestamp AND the original cache was already
++    // fresh, put the original bytes back. An item that was stale before the
++    // check keeps its advanced stamp (BUG-047): that dirties the file once, so
++    // Check 4 fails in this run; commit, then re-run.
+diff --git a/src/hosts/codex.ts b/src/hosts/codex.ts
+--- a/src/hosts/codex.ts
++++ b/src/hosts/codex.ts
++  removeCodexWritableRoot,
++  resolveGitCommonDir,
++  type CodexWritableRootOutcome,
++  removeCodexWritableRoot: typeof removeCodexWritableRoot;
++  removeCodexWritableRoot,
++/** `fs.realpathSync(p)`, or `p` itself when it cannot be resolved. */
++function realpathOr(p: string): string {
++  try {
++    return fs.realpathSync(p);
++  } catch {
++    return p;
++  }
++}
++
+-    const { action: tomlAction, flippedHooksFlag } = d.injectCodexConfig(cwd, ctx.pinVersion);
++    // `writableRoot`/`root` are read defensively: an injected stub that
++    // returns only `{ action, flippedHooksFlag }` means "no root" (BUG-100).
++    const injected: {
++      action: 'created' | 'updated' | 'unchanged';
++      flippedHooksFlag: boolean;
++      writableRoot?: CodexWritableRootOutcome;
++      root?: string | null;
++    } = d.injectCodexConfig(cwd, ctx.pinVersion);
++    const { action: tomlAction, flippedHooksFlag } = injected;
++    const writableRoot = injected.writableRoot ?? 'none';
++    const writableRootPath = injected.root ?? null;
++    // BUG-100 / M7 TPV100-A3: inside a git repository (a non-null root), say
++    // which absolute path was written and when to re-run init. Never in a
++    // non-git cwd.
++    if (writableRootPath !== null && writableRoot !== 'none') {
++      stdout(
++        `${p}Codex: .codex/config.toml [sandbox_workspace_write] writable_roots includes ${writableRootPath} (this clone's absolute git dir) so sprint git steps can write; after moving or re-cloning the repo, re-run cleargate init --host codex.\n`,
++      );
++    }
+-    // .codex/config.toml — AD-4: remove ONLY [mcp_servers.cleargate]; keep
+-    // [features] (and everything else) — the file itself is never deleted.
++    // .codex/config.toml — AD-4: remove ONLY [mcp_servers.cleargate] and
++    // ClearGate's own [sandbox_workspace_write] writable root (BUG-100); keep
++    // [features], user roots and everything else — the file itself is never
++    // deleted. Each removal fails on its own, so one never loses the other.
++      let raw: string | null = null;
+-        const raw = fs.readFileSync(configTomlPath, 'utf8');
+-        const result = d.removeCodexMcpServer(raw, configTomlPath);
+-        if (result.removed) {
+-          writeAtomic(configTomlPath, result.next);
+-          removed.push('.codex/config.toml (cleargate MCP server)');
+-        }
++        raw = fs.readFileSync(configTomlPath, 'utf8');
++      }
++      if (raw !== null) {
++        let next = raw;
++        let mcpRemoved = false;
++        let rootRemoved = false;
++        try {
++          const result = d.removeCodexMcpServer(next, configTomlPath);
++          if (result.removed) {
++            next = result.next;
++            mcpRemoved = true;
++          }
++        } catch (err) {
++          stderr(`Warning: could not update .codex/config.toml: ${(err as Error).message}`);
++        }
++        try {
++          const root = resolveGitCommonDir(cwd) ?? path.join(realpathOr(cwd), '.git');
++          const result = d.removeCodexWritableRoot(next, root, configTomlPath);
++          if (result.removed) {
++            next = result.next;
++            rootRemoved = true;
++          }
++        } catch (err) {
++          stderr(
++            `Warning: could not remove the ClearGate writable root from .codex/config.toml: ${(err as Error).message}`,
++          );
++        }
++        if (mcpRemoved || rootRemoved) {
++          try {
++            writeAtomic(configTomlPath, next);
++            if (mcpRemoved) removed.push('.codex/config.toml (cleargate MCP server)');
++            if (rootRemoved) removed.push('.codex/config.toml (ClearGate writable root)');
++          } catch (err) {
++            stderr(`Warning: could not update .codex/config.toml: ${(err as Error).message}`);
++          }
++        }
+diff --git a/src/init/inject-codex-config.ts b/src/init/inject-codex-config.ts
+--- a/src/init/inject-codex-config.ts
++++ b/src/init/inject-codex-config.ts
+- * Writes/merges exactly two managed spans:
++ * Writes/merges two managed spans, plus a third inside a git repository:
++ *   [sandbox_workspace_write]\nwritable_roots = ["<realpath of git rev-parse --git-common-dir>"]
++ *
++ * The third span (BUG-100) makes git metadata writable under Codex's default
++ * `workspace-write` sandbox, so the sprint loop can commit, branch, cut
++ * worktrees and merge. It is written only when the cwd is inside a git
++ * repository; a non-git install stays byte-identical to the two-span output.
++ * ClearGate owns exactly one element of `writable_roots` — this clone's
++ * common dir — and preserves every other element. On re-init an absolute
++ * `.git` element that no longer exists on disk is treated as a stale
++ * ClearGate root and replaced (M7 TPV100-A2).
++import { spawnSync } from 'node:child_process';
++/**
++ * What the planner did with ClearGate's `[sandbox_workspace_write]`
++ * `writable_roots` element (M7 TPV100-A2): `'added'` appended it (new table,
++ * inserted key or appended element); `'replaced'` replaced or dropped a stale
++ * ClearGate root; `'unchanged'` found it already present with nothing stale
++ * (or an inline/dotted definition already holding it); `'none'` had no root
++ * to manage (non-git cwd).
++ */
++export type CodexWritableRootOutcome = 'added' | 'replaced' | 'unchanged' | 'none';
++
++  writableRoot: CodexWritableRootOutcome;
++}
++
++export interface PlanCodexConfigOptions {
++  /** Absolute realpath of the git common dir; `null`/absent → the sandbox key is never scanned or written. */
++  writableRoot?: string | null;
++}
++
++export interface CodexConfigRootOptions {
++  /** Seam for the git common-dir resolver; defaults to {@link resolveGitCommonDir}. */
++  resolveGitCommonDir?: (cwd: string) => string | null;
++}
++
++export interface InjectCodexConfigResult {
++  action: 'created' | 'updated' | 'unchanged';
++  flippedHooksFlag: boolean;
++  writableRoot: CodexWritableRootOutcome;
++  /** The resolved root (realpath of the git common dir), or `null` outside a git repository. */
++  root: string | null;
++}
++
++const SANDBOX_TABLE = 'sandbox_workspace_write';
++const WRITABLE_ROOTS_KEY = 'writable_roots';
++
++/**
++ * Realpath of `git rev-parse --git-common-dir` for `cwd` — the main
++ * repository's `.git`, also for a linked worktree (whose index and refs live
++ * under it). `null` when `cwd` is not inside a git repository, git is
++ * unavailable, or the path cannot be resolved.
++ *
++ * `GIT_DIR`, `GIT_WORK_TREE` and `GIT_COMMON_DIR` are removed from the child
++ * env (M7 TPV100-A5): a pre-commit hook in a linked worktree exports
++ * `GIT_DIR`, which would otherwise turn any cwd into that repository.
++ */
++export function resolveGitCommonDir(cwd: string): string | null {
++  const env: NodeJS.ProcessEnv = { ...process.env };
++  delete env.GIT_DIR;
++  delete env.GIT_WORK_TREE;
++  delete env.GIT_COMMON_DIR;
++  let result;
++  try {
++    result = spawnSync('git', ['-C', cwd, 'rev-parse', '--git-common-dir'], {
++      env,
++      encoding: 'utf8',
++      stdio: ['ignore', 'pipe', 'ignore'],
++    });
++  } catch {
++    return null;
++  }
++  if (result.error || result.status !== 0) return null;
++  const out = (result.stdout ?? '').replace(/\r?\n$/, '');
++  if (out === '') return null;
++  try {
++    return fs.realpathSync(path.resolve(cwd, out));
++  } catch {
++    return null;
++  }
++/** A TOML basic string for `value` (a JSON string literal is a valid TOML basic string for a path). */
++function tomlString(value: string): string {
++  return JSON.stringify(value);
++}
++
++function sandboxBlock(root: string): string {
++  return `[${SANDBOX_TABLE}]\n` + `${WRITABLE_ROOTS_KEY} = [${tomlString(root)}]\n`;
++}
++
++interface SandboxScan {
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  table: any | undefined;
++  /** An inline table, dotted keys, a sub-table or an array-of-tables defines (part of) the key. */
++  ambiguous: boolean;
++}
++
++/** Walk the top-level body once, collecting every `sandbox_workspace_write`-shaped node. */
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++function scanSandbox(topBody: any[]): SandboxScan {
++  let table;
++  let ambiguous = false;
++  for (const node of topBody) {
++    if (node.type === 'TOMLKeyValue') {
++      if (keyName(node.key.keys[0]) === SANDBOX_TABLE) {
++        ambiguous = true;
++      }
++    } else if (node.type === 'TOMLTable') {
++      const rk = node.resolvedKey as Array<string | number>;
++      if (rk[0] === SANDBOX_TABLE) {
++        if (rk.length === 1 && node.kind === 'standard') {
++          table = node;
++        } else {
++          ambiguous = true;
++        }
++      }
++    }
++  }
++  return { table, ambiguous };
++}
++
++/** `true` iff the document's static `sandbox_workspace_write.writable_roots` is an array holding `root`. */
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++function staticRootsHold(ast: any, root: string): boolean {
++  const staticRoot = getStaticTOMLValue(ast) as unknown as Record<string, unknown>;
++  const sandbox = staticRoot[SANDBOX_TABLE];
++  if (sandbox === null || typeof sandbox !== 'object' || Array.isArray(sandbox)) return false;
++  const roots = (sandbox as Record<string, unknown>)[WRITABLE_ROOTS_KEY];
++  return Array.isArray(roots) && roots.includes(root);
++}
++
++/**
++ * A stale ClearGate root (M7 TPV100-A2): an absolute path whose last segment
++ * is `.git`, that is not `root`, and that does not exist on disk (the
++ * repository moved or was re-cloned). Relative elements are never stale —
++ * Codex ignores them, and their existence depends on the process cwd.
++ */
++function isStaleRoot(element: string, root: string): boolean {
++  return (
++    path.isAbsolute(element) &&
++    path.basename(element) === '.git' &&
++    element !== root &&
++    !fs.existsSync(element)
++  );
++}
++
++interface TextEdit {
++  start: number;
++  end: number;
++  text: string;
++}
++
++interface SandboxPlan {
++  edits: TextEdit[];
++  needsAppend: boolean;
++  outcome: Exclude<CodexWritableRootOutcome, 'none'>;
++}
++
++/** Plans the ClearGate `writable_roots` element inside an already-parsed, non-greenfield file. */
++function planSandbox(
++  existing: string,
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  ast: any,
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  topBody: any[],
++  root: string,
++  file: string,
++): SandboxPlan {
++  const { table, ambiguous } = scanSandbox(topBody);
++  if (ambiguous) {
++    // Rule 3: a shape this module cannot safely edit fails closed, unless it
++    // already holds this clone's root — then there is nothing to do.
++    if (staticRootsHold(ast, root)) {
++      return { edits: [], needsAppend: false, outcome: 'unchanged' };
++    }
++    throw new CodexConfigError(
++      `${file}: ${SANDBOX_TABLE} is defined by an inline table, dotted keys, a sub-table, or an array-of-tables, and its ${WRITABLE_ROOTS_KEY} does not include ${root}`,
++      file,
++    );
++  }
++
++  if (!table) {
++    return { edits: [], needsAppend: true, outcome: 'added' };
++  }
++
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const kv = (table.body as any[]).find((node) => keyName(node.key.keys[0]) === WRITABLE_ROOTS_KEY);
++  if (!kv) {
++    // `.range` excludes the trailing newline, so the insert carries its own separator.
++    return {
++      edits: [
++        { start: table.range[1], end: table.range[1], text: `\n${WRITABLE_ROOTS_KEY} = [${tomlString(root)}]` },
++      ],
++      needsAppend: false,
++      outcome: 'added',
++    };
++  }
++
++  const isStringArray =
++    kv.key.keys.length === 1 &&
++    kv.value.type === 'TOMLArray' &&
++    // eslint-disable-next-line @typescript-eslint/no-explicit-any
++    (kv.value.elements as any[]).every((el) => el.type === 'TOMLValue' && el.kind === 'string');
++  if (!isStringArray) {
++    throw new CodexConfigError(
++      `${file}: [${SANDBOX_TABLE}] ${WRITABLE_ROOTS_KEY} is not an array of strings`,
++      file,
++    );
++  }
++
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const elements: any[] = kv.value.elements;
++  const values = elements.map((el) => el.value as string);
++  const rootPresent = values.includes(root);
++  const stale = new Set(values.flatMap((v, i) => (isStaleRoot(v, root) ? [i] : [])));
++
++  if (stale.size === 0) {
++    if (rootPresent) {
++      return { edits: [], needsAppend: false, outcome: 'unchanged' };
++    }
++    // Append after the last element (keeps comments, layout and a trailing comma), or inside `[]`.
++    const at = elements.length > 0 ? elements[elements.length - 1].range[1] : kv.value.range[0] + 1;
++    const text = elements.length > 0 ? `, ${tomlString(root)}` : tomlString(root);
++    return { edits: [{ start: at, end: at, text }], needsAppend: false, outcome: 'added' };
++  }
++
++  if (stale.size === 1 && !rootPresent) {
++    const el = elements[[...stale][0]];
++    return {
++      edits: [{ start: el.range[0], end: el.range[1], text: tomlString(root) }],
++      needsAppend: false,
++      outcome: 'replaced',
++    };
++  }
++
++  // More than one stale element, or a stale element beside the root: the
++  // first stale element becomes the root (when absent), the rest are dropped.
++  const pieces: string[] = [];
++  let placed = rootPresent;
++  elements.forEach((el, i) => {
++    if (stale.has(i)) {
++      if (!placed) {
++        pieces.push(tomlString(root));
++        placed = true;
++      }
++    } else {
++      pieces.push(existing.slice(el.range[0], el.range[1]));
++    }
++  });
++  return {
++    edits: [{ start: kv.value.range[0], end: kv.value.range[1], text: `[${pieces.join(', ')}]` }],
++    needsAppend: false,
++    outcome: 'replaced',
++  };
++}
++
+- * compute the next bytes without touching disk. `existing === null` always
+- * returns the exact greenfield literal.
++ * compute the next bytes without touching disk. `existing === null` with no
++ * root returns the exact greenfield literal; with a root, the literal plus a
++ * blank line and the `[sandbox_workspace_write]` table.
++ *
++ * `opts.writableRoot` null/absent (a non-git cwd) never scans or writes the
++ * sandbox key, so the output is byte-identical to the two-span planner (E12).
++  opts: PlanCodexConfigOptions = {},
++  const root = typeof opts.writableRoot === 'string' && opts.writableRoot !== '' ? opts.writableRoot : null;
++
+-    return { next: greenfieldToml(pinVersion), action: 'created', flippedHooksFlag: false };
++    if (root === null) {
++      return { next: greenfieldToml(pinVersion), action: 'created', flippedHooksFlag: false, writableRoot: 'none' };
++    }
++    return {
++      next: `${greenfieldToml(pinVersion)}\n${sandboxBlock(root)}`,
++      action: 'created',
++      flippedHooksFlag: false,
++      writableRoot: 'added',
++    };
+-  const edits: Array<{ start: number; end: number; text: string }> = [];
++  const edits: TextEdit[] = [];
++  let writableRoot: CodexWritableRootOutcome = 'none';
++  let needsSandboxAppend = false;
++  if (root !== null) {
++    const sandbox = planSandbox(existing, ast, topBody, root, file);
++    edits.push(...sandbox.edits);
++    needsSandboxAppend = sandbox.needsAppend;
++    writableRoot = sandbox.outcome;
++  }
++
+-  if (needsFeaturesAppend || needsMcpAppend) {
+-    let appendChunk = '';
+-    if (needsFeaturesAppend) appendChunk += '[features]\nhooks = true\n';
+-    if (needsFeaturesAppend && needsMcpAppend) appendChunk += '\n';
+-    if (needsMcpAppend) appendChunk += `${mcpText}\n`;
++  // Appended pieces, each ending in a newline, blank-line separated; the
++  // existing bytes always stay a prefix.
++  const appendPieces: string[] = [];
++  if (needsFeaturesAppend) appendPieces.push('[features]\nhooks = true\n');
++  if (needsMcpAppend) appendPieces.push(`${mcpText}\n`);
++  if (needsSandboxAppend && root !== null) appendPieces.push(sandboxBlock(root));
++  if (appendPieces.length > 0) {
+-    next = next + sep + appendChunk;
++    next = next + sep + appendPieces.join('\n');
+-  return { next, action, flippedHooksFlag };
++  return { next, action, flippedHooksFlag, writableRoot };
+-/** Filesystem entry point: reads/writes `<cwd>/.codex/config.toml`, preserving mode on an update. */
++/**
++ * Filesystem entry point: reads/writes `<cwd>/.codex/config.toml`, preserving
++ * mode on an update. The writable root is the realpath of `cwd`'s git common
++ * dir (`opts.resolveGitCommonDir`, default {@link resolveGitCommonDir});
++ * outside a git repository no sandbox key is written.
++ */
+-): { action: 'created' | 'updated' | 'unchanged'; flippedHooksFlag: boolean } {
++  opts: CodexConfigRootOptions = {},
++): InjectCodexConfigResult {
+-  const { next, action, flippedHooksFlag } = planCodexConfig(existing, pinVersion, file);
++  const root = (opts.resolveGitCommonDir ?? resolveGitCommonDir)(cwd);
++  const { next, action, flippedHooksFlag, writableRoot } = planCodexConfig(existing, pinVersion, file, {
++    writableRoot: root,
++  });
+-  return { action, flippedHooksFlag };
++  return { action, flippedHooksFlag, writableRoot, root: root ?? null };
+-/** Throws `CodexConfigError` when `<cwd>/.codex/config.toml` exists and is malformed or ambiguous. Absent → OK. */
+-export function assertCodexConfigParsable(cwd: string): void {
++/**
++ * Throws `CodexConfigError` when `<cwd>/.codex/config.toml` exists and is
++ * malformed or ambiguous. Absent → OK. Resolves the writable root exactly as
++ * {@link injectCodexConfig} does (M7 TPV100-A1), so it refuses exactly what
++ * the write refuses and never scans the sandbox key outside a git repository.
++ */
++export function assertCodexConfigParsable(cwd: string, opts: CodexConfigRootOptions = {}): void {
++  const root = (opts.resolveGitCommonDir ?? resolveGitCommonDir)(cwd);
+-  planCodexConfig(existing, '0.0.0', file);
++  planCodexConfig(existing, '0.0.0', file, { writableRoot: root });
++/** End of the same-line tail after `pos`: trailing blanks and a `#` comment (never the newline). */
++function lineTailEnd(text: string, pos: number): number {
++  let i = pos;
++  while (text[i] === ' ' || text[i] === '\t') i++;
++  if (text[i] === '#') {
++    while (i < text.length && text[i] !== '\n' && text[i] !== '\r') i++;
++  }
++  return i;
++}
++
++/** Position after one newline (`\n` or `\r\n`) at `pos`, or `pos` when there is none. */
++function afterNewline(text: string, pos: number): number {
++  if (text.startsWith('\r\n', pos)) return pos + 2;
++  if (text[pos] === '\n') return pos + 1;
++  return pos;
++}
++
++/** Start of `pos`'s line when only blanks precede it on that line, else `pos`. */
++function lineStartBefore(text: string, pos: number): number {
++  let i = pos;
++  while (i > 0 && (text[i - 1] === ' ' || text[i - 1] === '\t')) i--;
++  return i === 0 || text[i - 1] === '\n' ? i : pos;
++}
++
++/**
++ * Removes only `root` from `[sandbox_workspace_write] writable_roots`
++ * (uninstall / `host remove codex`). Every other element stays. The key goes
++ * when its array empties; the table goes when that was its only key-value.
++ * No table, no key, or `root` absent → `{ next: existing, removed: false }`.
++ * An inline-table / dotted-key definition holding `root` throws
++ * `CodexConfigError` (this module never edits that shape); one without it is
++ * left alone.
++ */
++export function removeCodexWritableRoot(
++  existing: string,
++  root: string,
++  file: string,
++): { next: string; removed: boolean } {
++  const ast = parseOrThrow(existing, file);
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const topBody: any[] = ast.body[0].body;
++  const { table, ambiguous } = scanSandbox(topBody);
++  if (ambiguous) {
++    if (staticRootsHold(ast, root)) {
++      throw new CodexConfigError(
++        `${file}: ${SANDBOX_TABLE} is defined by an inline table, dotted keys, a sub-table, or an array-of-tables; remove ${root} from its ${WRITABLE_ROOTS_KEY} by hand`,
++        file,
++      );
++    }
++    return { next: existing, removed: false };
++  }
++  if (!table) {
++    return { next: existing, removed: false };
++  }
++
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const kv = (table.body as any[]).find(
++    (node) => node.key.keys.length === 1 && keyName(node.key.keys[0]) === WRITABLE_ROOTS_KEY,
++  );
++  if (!kv || kv.value.type !== 'TOMLArray') {
++    return { next: existing, removed: false };
++  }
++
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const elements: any[] = kv.value.elements;
++  const kept = elements.filter((el) => !(el.type === 'TOMLValue' && el.kind === 'string' && el.value === root));
++  if (kept.length === elements.length) {
++    return { next: existing, removed: false };
++  }
++
++  let next: string;
++  if (kept.length > 0) {
++    const text = `[${kept.map((el) => existing.slice(el.range[0], el.range[1])).join(', ')}]`;
++    next = existing.slice(0, kv.value.range[0]) + text + existing.slice(kv.value.range[1]);
++  } else if ((table.body as unknown[]).length > 1) {
++    const start = lineStartBefore(existing, kv.range[0]);
++    const end = afterNewline(existing, lineTailEnd(existing, kv.range[1]));
++    next = existing.slice(0, start) + existing.slice(end);
++  } else {
++    const start = lineStartBefore(existing, table.range[0]);
++    let end = lineTailEnd(existing, table.range[1]);
++    for (let i = 0; i < 2; i++) end = afterNewline(existing, end);
++    next = existing.slice(0, start) + existing.slice(end);
++  }
++
++  parseOrThrow(next, file);
++  return { next, removed: true };
++}
++
+diff --git a/src/lib/frontmatter-cache.ts b/src/lib/frontmatter-cache.ts
+--- a/src/lib/frontmatter-cache.ts
++++ b/src/lib/frontmatter-cache.ts
++/**
++ * BUG-047: the single freshness rule for a cached gate result.
++ *
++ * A cache is fresh when it has a `last_gate_check` and that stamp is at or
++ * after the item's `updated_at` (lexical compare of ISO-second strings). The
++ * boundary is inclusive: the stamp-and-gate hook writes both fields in the
++ * same second, and that item is fresh. An absent `updated_at` counts as fresh.
++ * The verdict (`pass`) plays no part in freshness.
++ *
++ * Used by writeCachedGate's idempotency skip, by `sprint preflight` Check 5
++ * (items and the sprint plan) and by the Step 0 restore guard.
++ */
++export function isGateCacheFresh(
++  cached: { last_gate_check: string } | null,
++  updatedAt: string
++): boolean {
++  return (
++    cached !== null &&
++    cached.last_gate_check !== '' &&
++    (updatedAt === '' || cached.last_gate_check >= updatedAt)
++  );
++}
++
+- * Idempotent: if the result deep-equals the existing cached value AND the same
+- * now() is supplied, the file bytes are left untouched.
++ * Idempotent: if the verdict equals the existing cached verdict and that cache
++ * is fresh (isGateCacheFresh), the file bytes are left untouched. A stale cache
++ * is rewritten even when the verdict is unchanged (BUG-047).
+-  // Idempotency check: compare STRUCTURAL content (pass + failing_criteria)
+-  // only. Excluding `last_gate_check` is deliberate — the timestamp is freshly
+-  // stamped on every invocation (line 60), so including it in the comparison
+-  // means the check never triggers, dirtying the file on every gate-check call
+-  // even when the structural result is unchanged. That stamp-thrash then trips
+-  // `sprint preflight` Check 4 (main-clean) in a perpetual loop on any sprint
+-  // kickoff where a non-archived in-scope item has gate failures cached.
++  // Idempotency check: skip the write only when the verdict is unchanged
++  // (pass + transition + failing_criteria) AND the existing cache is already
++  // fresh for this file (last_gate_check >= updated_at, see isGateCacheFresh).
++  // `last_gate_check` is excluded from the verdict comparison because it is
++  // freshly stamped on every invocation; comparing it would dirty the file on
++  // every gate-check call and trip `sprint preflight` Check 4 (main-clean) in a
++  // perpetual loop at kickoff (CR-038). A STALE cache is always rewritten with
++  // the full new result — otherwise an item edited after its last check
++  // (`cleargate stamp` moves updated_at) could never become fresh again
++  // (BUG-047). Freshness does not depend on `pass`.
+-      JSON.stringify(newResult.failing_criteria)
++      JSON.stringify(newResult.failing_criteria) &&
++    isGateCacheFresh(existing, String(fm['updated_at'] ?? ''))
+diff --git a/test/init/inject-codex-config-sandbox.red.node.test.ts b/test/init/inject-codex-config-sandbox.red.node.test.ts
+new file mode 100644
+--- /dev/null
++++ b/test/init/inject-codex-config-sandbox.red.node.test.ts
++/**
++ * inject-codex-config-sandbox.red.node.test.ts — BUG-100 QA-Red.
++ *
++ * SPRINT-41 M7 plan §3 "BUG-100 — Codex sandbox writable root" (bug text
++ * amended by plan errata E11/E12). The `[sandbox_workspace_write]
++ * writable_roots` planning/injection/removal surface does not exist yet on
++ * `src/init/inject-codex-config.ts` / `src/hosts/codex.ts` at the red
++ * commit — every test that exercises a not-yet-existing export dynamically
++ * imports the module INSIDE its own body (never a top-level static import
++ * of a symbol that does not exist yet), so a missing export fails that one
++ * test countably instead of collapsing the whole file (flashcard
++ * 2026-08-29 #qa-red, 2026-09-26 #qa-red #esm).
++ *
++ * Real temp git repos only (`git init` / `git worktree add`) — no mocks of
++ * git itself; the expected writable root is computed independently in each
++ * test via the real `git` binary (the same oracle the Gherkin names), never
++ * by re-deriving the value the way the implementation is expected to.
++ *
++ * Test 2 and Test 7 are ANCHORS, not failing reds: their assertion already
++ * holds today (the feature does not exist, so nothing about the guarded
++ * path has changed yet) and MUST continue to hold after the fix — see E12
++ * (non-git byte-identity) and the "Claude install is unchanged" Gherkin.
++ * Tests 1, 3, 4, 5, 6 and 8 fail today for the reason noted in each block.
++ *
++ * TPV re-seal (BUG-100-tpv.md, 2026-09-27): Test 2 adds the ambient-GIT_DIR
++ * and no-notice checks (plan Gotchas + rule 4); Test 3 adds the no-op
++ * re-plan, the table-without-key insert and the file-without-table append
++ * (rule 2); Test 4 adds an existing other .git root that must survive
++ * (rule 2); Test 6 adds a missing other .git root, a table that keeps other
++ * keys, the no-op removal (rule 5) and a linked-worktree remove(); Test 8 is
++ * new (rule 3 + the preflight scan, M7 amendment TPV100-A1).
++ *
++ * Payloads come from `composeCanonicalView` (M5-A18) — never the
++ * gitignored `templates/scaffold/**` prebuild output.
++ */
++import { describe, test } from 'node:test';
++import assert from 'node:assert/strict';
++import * as fs from 'node:fs';
++import * as path from 'node:path';
++import * as os from 'node:os';
++import { execFileSync } from 'node:child_process';
++import { composeCanonicalView } from '../helpers/scaffold-roots.js';
++import { runInitScenario } from '../helpers/init-fixture.js';
++
++const FIXED_PIN = '0.0.0-bug100';
++
++function mkTmp(prefix: string): string {
++  return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
++}
++
++/**
++ * A clean git child-process env: strip GIT_DIR / GIT_WORK_TREE / GIT_CEILING_DIRECTORIES
++ * so an ambient value never points a `git -C <dir>` oracle call at the wrong repo.
++ */
++function gitEnv(): NodeJS.ProcessEnv {
++  const env = { ...process.env };
++  delete env.GIT_DIR;
++  delete env.GIT_WORK_TREE;
++  delete env.GIT_CEILING_DIRECTORIES;
++  return env;
++}
++
++function git(cwd: string, args: string[]): string {
++  return execFileSync('git', args, { cwd, env: gitEnv(), encoding: 'utf8' }).trim();
++}
++
++function initGitRepo(dir: string): void {
++  git(dir, ['init', '-q']);
++  git(dir, ['config', 'user.email', 'qa-red@example.invalid']);
++  git(dir, ['config', 'user.name', 'QA Red']);
++}
++
++function commitAllowEmpty(dir: string, message: string): void {
++  git(dir, ['commit', '-q', '-m', message, '--allow-empty']);
++}
++
++/**
++ * Independent oracle for "the repository's git common dir": run the real git
++ * binary the way the Gherkin defines it, then resolve exactly as the plan's
++ * default resolver is specified to (`path.resolve(cwd, out)` then
++ * `fs.realpathSync`) — never a re-implementation guess.
++ */
++function gitCommonDirRealpath(dir: string): string {
++  const out = git(dir, ['rev-parse', '--git-common-dir']);
++  return fs.realpathSync(path.resolve(dir, out));
++}
++
++interface PlanCodexConfigResult {
++  next: string;
++  action: 'created' | 'updated' | 'unchanged';
++  flippedHooksFlag: boolean;
++  writableRoot: 'added' | 'replaced' | 'unchanged' | 'none';
++}
++
++interface InjectCodexConfigSandboxModule {
++  CodexConfigError: new (message: string, file: string) => Error & { file: string };
++  planCodexConfig: (
++    existing: string | null,
++    pinVersion: string,
++    file: string,
++    opts?: { writableRoot?: string | null },
++  ) => PlanCodexConfigResult;
++  injectCodexConfig: (
++    cwd: string,
++    pinVersion: string,
++    opts?: { resolveGitCommonDir?: (cwd: string) => string | null },
++  ) => { action: 'created' | 'updated' | 'unchanged'; flippedHooksFlag: boolean };
++  removeCodexWritableRoot: (
++    existing: string,
++    root: string,
++    file: string,
++  ) => { next: string; removed: boolean };
++}
++
++async function loadInjectModule(): Promise<InjectCodexConfigSandboxModule> {
++  return (await import('../../src/init/inject-codex-config.js')) as unknown as InjectCodexConfigSandboxModule;
++}
++
++interface CodexAdapterLike {
++  install: (ctx: unknown) => Promise<void>;
++  remove: (ctx: unknown) => Promise<{ removed: readonly string[] }>;
++  preflight: (cwd: string) => void;
++}
++
++/** A CodexConfigError naming `file` (checked by name + file, not module identity). */
++function isCodexConfigErrorFor(file: string): (e: unknown) => boolean {
++  return (e: unknown) =>
++    e instanceof Error && e.name === 'CodexConfigError' && (e as Error & { file?: string }).file === file;
++}
++
++async function loadCodexAdapter(): Promise<{ createCodexAdapter: (deps?: Record<string, unknown>) => CodexAdapterLike }> {
++  return (await import('../../src/hosts/codex.js')) as unknown as {
++    createCodexAdapter: (deps?: Record<string, unknown>) => CodexAdapterLike;
++  };
++}
++
++function makeCtx(cwd: string, payloadDir: string, extra: Record<string, unknown> = {}) {
++  return {
++    cwd,
++    payloadDir,
++    pinVersion: FIXED_PIN,
++    force: false,
++    stdout: () => {},
++    stderr: () => {},
++    ...extra,
++  };
++}
++
++async function readWritableRoots(text: string): Promise<string[] | undefined> {
++  const { parseTOML, getStaticTOMLValue } = (await import('toml-eslint-parser')) as unknown as {
++    parseTOML: (t: string) => unknown;
++    getStaticTOMLValue: (ast: unknown) => unknown;
++  };
++  const root = JSON.parse(JSON.stringify(getStaticTOMLValue(parseTOML(text)))) as Record<string, unknown>;
++  const table = root.sandbox_workspace_write as Record<string, unknown> | undefined;
++  const arr = table?.writable_roots;
++  return Array.isArray(arr) ? (arr as string[]) : undefined;
++}
++
++async function parsedToml(text: string): Promise<Record<string, unknown>> {
++  const { parseTOML, getStaticTOMLValue } = (await import('toml-eslint-parser')) as unknown as {
++    parseTOML: (t: string) => unknown;
++    getStaticTOMLValue: (ast: unknown) => unknown;
++  };
++  return JSON.parse(JSON.stringify(getStaticTOMLValue(parseTOML(text)))) as Record<string, unknown>;
++}
++
++let sharedCodexPayloadPromise: Promise<string> | undefined;
++async function getCodexPayloadDir(): Promise<string> {
++  if (!sharedCodexPayloadPromise) {
++    sharedCodexPayloadPromise = (async () => {
++      const dst = mkTmp('cg-s41-100-codex-payload-');
++      await composeCanonicalView(dst, ['codex']);
++      return dst;
++    })();
++  }
++  return sharedCodexPayloadPromise;
++}
++
++function greenfieldTomlNoRoot(pin: string): string {
++  return (
++    '[features]\n' +
++    'hooks = true\n' +
++    '\n' +
++    '[mcp_servers.cleargate]\n' +
++    'command = "npx"\n' +
++    `args = ["-y", "cleargate@${pin}", "mcp", "serve"]\n`
++  );
++}
++
++// ── Test 1: greenfield install in a git repo ────────────────────────────────
++// FAILS TODAY: injectCodexConfig writes no [sandbox_workspace_write] table at
++// all, and codex.ts's install() prints only the existing four "Codex:" lines
++// — there is no fifth notice line naming the writable root.
++
++describe('Test 1 — a fresh Codex install writes the git common dir as a writable root', () => {
++  test('the key equals the realpath of `git rev-parse --git-common-dir`, and stdout carries the notice', async () => {
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const payloadDir = await getCodexPayloadDir();
++    const cwd = mkTmp('cg-s41-100-greenfield-git-');
++    initGitRepo(cwd);
++    commitAllowEmpty(cwd, 'init');
++    const expectedRoot = gitCommonDirRealpath(cwd);
++
++    const stdoutLines: string[] = [];
++    const adapter = createCodexAdapter();
++    await adapter.install(makeCtx(cwd, payloadDir, { stdout: (s: string) => stdoutLines.push(s) }));
++
++    const toml = fs.readFileSync(path.join(cwd, '.codex', 'config.toml'), 'utf8');
++    const roots = await readWritableRoots(toml);
++    assert.ok(roots, `expected a [sandbox_workspace_write] table; got:\n${toml}`);
++    assert.deepEqual(roots, [expectedRoot], `expected exactly [${expectedRoot}]; got ${JSON.stringify(roots)}`);
++
++    const parsed = await parsedToml(toml);
++    assert.deepEqual(parsed.features, { hooks: true }, '[features] must still be written');
++    assert.equal(
++      (parsed.mcp_servers as { cleargate?: { command?: string } } | undefined)?.cleargate?.command,
++      'npx',
++      'the MCP server entry must still be written',
++    );
++
++    const joined = stdoutLines.join('');
++    const expectedNotice =
++      `Codex: .codex/config.toml [sandbox_workspace_write] writable_roots includes ${expectedRoot} ` +
++      `(this clone's absolute git dir) so sprint git steps can write; after moving or re-cloning the repo, ` +
++      `re-run cleargate init --host codex.`;
++    assert.ok(joined.includes(expectedNotice), `expected stdout to contain the pinned notice; got:\n${joined}`);
++  });
++});
++
++// ── Test 2 [ANCHOR]: non-git cwd stays byte-identical ───────────────────────
++// PASSES TODAY (and must keep passing): a non-git cwd has no git common dir
++// to write, so injectCodexConfig's output is unaffected by BUG-100 either
++// side of the fix (E12). This guards against a regression where the new
++// git-detection logic leaks a key into a non-git install.
++
++describe('[ANCHOR] Test 2 — a non-git cwd is byte-identical to today\'s greenfield literal', () => {
++  test('injectCodexConfig on a plain (non-git) tmp dir writes exactly the pre-BUG-100 literal, even under an ambient GIT_DIR, and install() prints no notice', async () => {
++    const { injectCodexConfig } = await loadInjectModule();
++    const cwd = mkTmp('cg-s41-100-nongit-');
++    const result = injectCodexConfig(cwd, FIXED_PIN);
++    assert.equal(result.action, 'created');
++    assert.equal(result.flippedHooksFlag, false);
++    const written = fs.readFileSync(path.join(cwd, '.codex', 'config.toml'), 'utf8');
++    assert.equal(
++      written,
++      greenfieldTomlNoRoot(FIXED_PIN),
++      'a non-git cwd must never gain a [sandbox_workspace_write] table (E12)',
++    );
++
++    // Plan §3 BUG-100 Gotchas: the resolver runs with GIT_DIR / GIT_WORK_TREE
++    // removed from its env. A pre-commit hook in a linked worktree exports
++    // GIT_DIR (measured by TPV), so an ambient value pointing at another repo
++    // must never turn a non-git cwd into a key.
++    const otherRepo = mkTmp('cg-s41-100-nongit-ambient-repo-');
++    initGitRepo(otherRepo);
++    commitAllowEmpty(otherRepo, 'init');
++    const cwd2 = mkTmp('cg-s41-100-nongit-ambient-');
++    const prevGitDir = process.env.GIT_DIR;
++    const prevWorkTree = process.env.GIT_WORK_TREE;
++    process.env.GIT_DIR = path.join(otherRepo, '.git');
++    process.env.GIT_WORK_TREE = otherRepo;
++    try {
++      injectCodexConfig(cwd2, FIXED_PIN);
++    } finally {
++      if (prevGitDir === undefined) delete process.env.GIT_DIR;
++      else process.env.GIT_DIR = prevGitDir;
++      if (prevWorkTree === undefined) delete process.env.GIT_WORK_TREE;
++      else process.env.GIT_WORK_TREE = prevWorkTree;
++    }
++    assert.equal(
++      fs.readFileSync(path.join(cwd2, '.codex', 'config.toml'), 'utf8'),
++      greenfieldTomlNoRoot(FIXED_PIN),
++      'an ambient GIT_DIR / GIT_WORK_TREE must not reach the git common-dir resolver',
++    );
++
++    // Rule 4: a non-git install prints no extra line either.
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const payloadDir = await getCodexPayloadDir();
++    const cwd3 = mkTmp('cg-s41-100-nongit-adapter-');
++    const stdoutLines: string[] = [];
++    await createCodexAdapter().install(makeCtx(cwd3, payloadDir, { stdout: (s: string) => stdoutLines.push(s) }));
++    const joined = stdoutLines.join('');
++    assert.ok(!joined.includes('writable_roots'), `a non-git install must print no writable-root notice; got:\n${joined}`);
++    assert.equal(fs.readFileSync(path.join(cwd3, '.codex', 'config.toml'), 'utf8'), greenfieldTomlNoRoot(FIXED_PIN));
++  });
++});
++
++// ── Test 3: merge preserves a user-added root ───────────────────────────────
++// FAILS TODAY: planCodexConfig's 4th (opts) parameter does not exist yet and
++// is silently ignored by the current 3-arg implementation, so the ClearGate
++// root is never added and result.writableRoot is undefined, not 'added'.
++
++describe('Test 3 — merging into an existing [sandbox_workspace_write] table keeps a user-added root', () => {
++  test('a user root "/opt/cache" survives when the ClearGate root is added; a re-plan is a no-op; a table without the key, or a file without the table, gains it', async () => {
++    const { planCodexConfig } = await loadInjectModule();
++    const existing =
++      '[sandbox_workspace_write]\n' + 'writable_roots = ["/opt/cache"]\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const newRoot = '/repo/real/.git';
++    const result = planCodexConfig(existing, FIXED_PIN, '/tmp/fake/.codex/config.toml', {
++      writableRoot: newRoot,
++    });
++    const roots = await readWritableRoots(result.next);
++    assert.ok(roots, `expected a [sandbox_workspace_write] table in the result; got:\n${result.next}`);
++    assert.ok(roots!.includes('/opt/cache'), `the user root must survive; got ${JSON.stringify(roots)}`);
++    assert.ok(roots!.includes(newRoot), `the ClearGate root must be added; got ${JSON.stringify(roots)}`);
++    assert.equal(result.writableRoot, 'added');
++
++    // Rule 2 "append <root> if absent": re-planning over the result with the
++    // same root changes nothing (no duplicate root on re-init).
++    const again = planCodexConfig(result.next, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    assert.equal(again.next, result.next, 're-planning with the same root must not change a byte');
++    assert.equal(again.action, 'unchanged');
++    assert.equal(again.writableRoot, 'unchanged');
++
++    // Rule 2 "a standard table without the key -> insert the key": the
++    // table's other keys survive and no second table is appended.
++    const noKey = '[sandbox_workspace_write]\n' + 'network_access = true\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const inserted = planCodexConfig(noKey, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    const parsedInserted = await parsedToml(inserted.next);
++    assert.deepEqual(parsedInserted.sandbox_workspace_write, { network_access: true, writable_roots: [newRoot] });
++    assert.equal(inserted.writableRoot, 'added');
++
++    // Rule 2 "no [sandbox_workspace_write] -> append the table": an existing
++    // file without it (host add codex onto a user's config) keeps its bytes as
++    // a prefix and gains the table.
++    const withoutTable = greenfieldTomlNoRoot(FIXED_PIN);
++    const appended = planCodexConfig(withoutTable, FIXED_PIN, '/tmp/fake/.codex/config.toml', { writableRoot: newRoot });
++    assert.ok(appended.next.startsWith(withoutTable), `the existing bytes must stay a prefix; got:\n${appended.next}`);
++    assert.deepEqual(await readWritableRoots(appended.next), [newRoot]);
++    assert.equal(appended.action, 'updated');
++    assert.equal(appended.writableRoot, 'added');
++  });
++});
++
++// ── Test 4: re-init after a move replaces only the stale root ──────────────
++// FAILS TODAY: same 4th-parameter gap as Test 3 — the stale entry is never
++// inspected or replaced, and result.writableRoot is undefined, not 'replaced'.
++
++describe('Test 4 — re-init after the repository moved replaces only the stale ClearGate root', () => {
++  test('a writable root ending in .git that no longer exists on disk is replaced; "/opt/cache" is kept', async () => {
++    const { planCodexConfig } = await loadInjectModule();
++    const newRepo = mkTmp('cg-s41-100-moved-newrepo-');
++    initGitRepo(newRepo);
++    commitAllowEmpty(newRepo, 'init');
++    const newRoot = gitCommonDirRealpath(newRepo);
++
++    const staleParent = mkTmp('cg-s41-100-moved-staleparent-');
++    const staleRoot = path.join(staleParent, 'gone-repo', '.git'); // deliberately never created
++    assert.equal(fs.existsSync(staleRoot), false, 'the stale fixture path must not exist on disk');
++
++    // Rule 2: "Existing other .git paths are kept" — only a MISSING one is stale.
++    const otherRepo = mkTmp('cg-s41-100-moved-otherrepo-');
++    initGitRepo(otherRepo);
++    const otherGit = gitCommonDirRealpath(otherRepo);
++    assert.equal(fs.existsSync(otherGit), true, 'the other .git fixture must exist on disk');
++
++    const existing =
++      '[sandbox_workspace_write]\n' +
++      `writable_roots = ["${staleRoot}", "${otherGit}", "/opt/cache"]\n` +
++      '\n' +
++      greenfieldTomlNoRoot(FIXED_PIN);
++    const result = planCodexConfig(existing, FIXED_PIN, '/tmp/fake/.codex/config.toml', {
++      writableRoot: newRoot,
++    });
++    const roots = await readWritableRoots(result.next);
++    assert.ok(roots, `expected a [sandbox_workspace_write] table; got:\n${result.next}`);
++    assert.ok(!roots!.includes(staleRoot), `the stale root must be dropped; got ${JSON.stringify(roots)}`);
++    assert.ok(roots!.includes(newRoot), `the new git common dir must be present; got ${JSON.stringify(roots)}`);
++    assert.ok(roots!.includes('/opt/cache'), `the user root must survive; got ${JSON.stringify(roots)}`);
++    assert.ok(roots!.includes(otherGit), `an existing other .git root must survive; got ${JSON.stringify(roots)}`);
++    assert.equal(result.writableRoot, 'replaced');
++  });
++});
++
++// ── Test 5: a linked worktree uses the main repo's common dir ──────────────
++// FAILS TODAY: injectCodexConfig writes no sandbox table from any cwd,
++// linked worktree or not — readWritableRoots(toml) is undefined.
++
++describe("Test 5 — a linked worktree writes the MAIN repository's .git as the writable root", () => {
++  test('injectCodexConfig from inside a `git worktree add` checkout resolves to the shared common dir', async () => {
++    const { injectCodexConfig } = await loadInjectModule();
++    const main = mkTmp('cg-s41-100-wt-main-');
++    initGitRepo(main);
++    commitAllowEmpty(main, 'init');
++    const expectedRoot = gitCommonDirRealpath(main);
++
++    const parent = mkTmp('cg-s41-100-wt-parent-');
++    const worktreePath = path.join(parent, 'linked');
++    git(main, ['worktree', 'add', worktreePath, '-b', 'cg-s41-100-wt-branch']);
++
++    // Sanity on the fixture itself: a linked worktree's own .git is a FILE
++    // (a gitdir pointer), never a directory, and its own common-dir
++    // resolution must already agree with the main repo's.
++    assert.equal(fs.statSync(path.join(worktreePath, '.git')).isFile(), true, '.git must be a file in a linked worktree');
++    assert.equal(
++      gitCommonDirRealpath(worktreePath),
++      expectedRoot,
++      "the worktree's own common-dir resolution must equal the main repo's .git",
++    );
++
++    injectCodexConfig(worktreePath, FIXED_PIN);
++    const toml = fs.readFileSync(path.join(worktreePath, '.codex', 'config.toml'), 'utf8');
++    const roots = await readWritableRoots(toml);
++    assert.ok(roots, `expected a [sandbox_workspace_write] table; got:\n${toml}`);
++    assert.deepEqual(roots, [expectedRoot]);
++    assert.ok(!roots!.includes(worktreePath), `the root must be the MAIN repo's .git, not the worktree's own path: ${JSON.stringify(roots)}`);
++  });
++});
++
++// ── Test 6: uninstall / host remove drops only the ClearGate root ──────────
++// FAILS TODAY: `removeCodexWritableRoot` does not exist as an export (the
++// first sub-test throws "removeCodexWritableRoot is not a function"), and
++// the adapter's remove() never touches [sandbox_workspace_write] at all (the
++// second sub-test's deepEqual fails — the ClearGate root is still present).
++
++describe('Test 6 — uninstall / host remove drops only the ClearGate-owned root', () => {
++  test('removeCodexWritableRoot removes only the named root, keeps user roots and other keys, and empties the table when nothing is left', async () => {
++    const { removeCodexWritableRoot } = await loadInjectModule();
++    const clearGateRoot = '/repo/real/.git';
++    const file = '/tmp/fake/.codex/config.toml';
++    // Another .git root that does not exist on disk: uninstall removes ONLY <root> (rule 5),
++    // never another .git path and never a "stale" one.
++    const otherGit = '/cg-s41-100-nonexistent/other-repo/.git';
++
++    const withUserRoot =
++      '[sandbox_workspace_write]\n' +
++      `writable_roots = ["${clearGateRoot}", "${otherGit}", "/opt/cache"]\n` +
++      '\n' +
++      '[features]\n' +
++      'hooks = true\n';
++    const r1 = removeCodexWritableRoot(withUserRoot, clearGateRoot, file);
++    assert.equal(r1.removed, true);
++    const roots1 = await readWritableRoots(r1.next);
++    assert.deepEqual([...(roots1 ?? [])].sort(), [otherGit, '/opt/cache'].sort());
++
++    // Rule 5: the key goes when its array empties; the table stays while it holds other keys.
++    const withOtherKey =
++      '[sandbox_workspace_write]\n' +
++      `writable_roots = ["${clearGateRoot}"]\n` +
++      'network_access = true\n' +
++      '\n' +
++      '[features]\n' +
++      'hooks = true\n';
++    const r3 = removeCodexWritableRoot(withOtherKey, clearGateRoot, file);
++    assert.equal(r3.removed, true);
++    const parsed3 = await parsedToml(r3.next);
++    assert.deepEqual(parsed3.sandbox_workspace_write, { network_access: true });
++    assert.deepEqual(parsed3.features, { hooks: true });
++
++    // Nothing to remove -> removed: false, bytes unchanged.
++    const noTable = '[features]\nhooks = true\n';
++    const r0 = removeCodexWritableRoot(noTable, clearGateRoot, file);
++    assert.equal(r0.removed, false);
++    assert.equal(r0.next, noTable);
++
++    const onlyClearGateRoot =
++      '[sandbox_workspace_write]\n' + `writable_roots = ["${clearGateRoot}"]\n` + '\n' + '[features]\nhooks = true\n';
++    const r2 = removeCodexWritableRoot(onlyClearGateRoot, clearGateRoot, file);
++    assert.equal(r2.removed, true);
++    const parsed2 = await parsedToml(r2.next);
++    assert.equal(parsed2.sandbox_workspace_write, undefined, 'the emptied table must be removed entirely');
++    assert.deepEqual(parsed2.features, { hooks: true }, '[features] (AD-4) must survive');
++  });
++
++  test("the Codex adapter's remove() strips only the ClearGate root from a real git cwd", async () => {
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const cwd = mkTmp('cg-s41-100-remove-wiring-');
++    initGitRepo(cwd);
++    commitAllowEmpty(cwd, 'init');
++    const clearGateRoot = gitCommonDirRealpath(cwd);
++    fs.mkdirSync(path.join(cwd, '.codex'), { recursive: true });
++    const configPath = path.join(cwd, '.codex', 'config.toml');
++    fs.writeFileSync(
++      configPath,
++      '[sandbox_workspace_write]\n' +
++        `writable_roots = ["${clearGateRoot}", "/opt/cache"]\n` +
++        '\n' +
++        greenfieldTomlNoRoot(FIXED_PIN),
++    );
++    const adapter = createCodexAdapter();
++    await adapter.remove({ cwd, stdout: () => {}, stderr: () => {} });
++    const after = fs.readFileSync(configPath, 'utf8');
++    const roots = await readWritableRoots(after);
++    assert.deepEqual(roots, ['/opt/cache'], `expected only the user root to remain; got:\n${after}`);
++
++    // remove() from a linked worktree resolves the same common dir (plan: realpath of the
++    // git common dir first; realpath(cwd)/.git is only the non-git fallback).
++    const wtParent = mkTmp('cg-s41-100-remove-wt-parent-');
++    const wt = path.join(wtParent, 'linked');
++    git(cwd, ['worktree', 'add', wt, '-b', 'cg-s41-100-remove-wt-branch']);
++    fs.mkdirSync(path.join(wt, '.codex'), { recursive: true });
++    const wtConfig = path.join(wt, '.codex', 'config.toml');
++    fs.writeFileSync(
++      wtConfig,
++      '[sandbox_workspace_write]\n' + `writable_roots = ["${clearGateRoot}", "/opt/cache"]\n` + '\n' + greenfieldTomlNoRoot(FIXED_PIN),
++    );
++    await createCodexAdapter().remove({ cwd: wt, stdout: () => {}, stderr: () => {} });
++    const wtAfter = fs.readFileSync(wtConfig, 'utf8');
++    assert.deepEqual(await readWritableRoots(wtAfter), ['/opt/cache'], `linked-worktree remove(); got:\n${wtAfter}`);
++  });
++});
++
++// ── Test 8: rule 3 fail-closed shapes, in the planner and in preflight ──────
++// FAILS TODAY: the planner ignores [sandbox_workspace_write] entirely (no
++// throw on an inline table, no `writableRoot` field), and preflight never
++// scans the sandbox key. M7 amendment TPV100-A1: preflight resolves the real
++// root the same way the write does (no placeholder), so it refuses exactly
++// what the write refuses and never scans in a non-git cwd.
++
++describe('Test 8 — an inline-table or dotted-key sandbox definition fails closed unless it already holds the root', () => {
++  test('planCodexConfig throws CodexConfigError naming the file; a definition that holds the root is left alone; no root means no scan', async () => {
++    const { planCodexConfig } = await loadInjectModule();
++    const file = '/tmp/fake/.codex/config.toml';
++    const root = '/repo/real/.git';
++    const inline = 'sandbox_workspace_write = { writable_roots = ["/opt/cache"] }\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const dotted = 'sandbox_workspace_write.writable_roots = ["/opt/cache"]\n' + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    for (const text of [inline, dotted]) {
++      assert.throws(() => planCodexConfig(text, FIXED_PIN, file, { writableRoot: root }), isCodexConfigErrorFor(file));
++    }
++
++    const holds = `sandbox_workspace_write = { writable_roots = ["${root}"] }\n` + '\n' + greenfieldTomlNoRoot(FIXED_PIN);
++    const ok = planCodexConfig(holds, FIXED_PIN, file, { writableRoot: root });
++    assert.equal(ok.next, holds);
++    assert.equal(ok.writableRoot, 'unchanged');
++
++    // Rule 4: without a root (non-git) the sandbox key is never scanned.
++    const noRoot = planCodexConfig(inline, FIXED_PIN, file);
++    assert.equal(noRoot.next, inline);
++    assert.equal(noRoot.writableRoot, 'none');
++  });
++
++  test('the adapter preflight refuses the same shape before any write in a git repo, and passes when the root is held or the cwd is not a repo', async () => {
++    const { createCodexAdapter } = await loadCodexAdapter();
++    const adapter = createCodexAdapter();
++    const lacking = 'sandbox_workspace_write = { writable_roots = ["/opt/cache"] }\n';
++
++    const repo = mkTmp('cg-s41-100-preflight-git-');
++    initGitRepo(repo);
++    commitAllowEmpty(repo, 'init');
++    const root = gitCommonDirRealpath(repo);
++    const file = path.join(repo, '.codex', 'config.toml');
++    fs.mkdirSync(path.dirname(file), { recursive: true });
++    fs.writeFileSync(file, lacking);
++    assert.throws(() => adapter.preflight(repo), isCodexConfigErrorFor(file));
++    assert.equal(fs.readFileSync(file, 'utf8'), lacking, 'preflight must not write');
++
++    const holding = `sandbox_workspace_write = { writable_roots = ["${root}"] }\n`;
++    fs.writeFileSync(file, holding);
++    assert.doesNotThrow(() => adapter.preflight(repo), 'a definition that already holds this clone\'s root passes, as the write does');
++
++    const plain = mkTmp('cg-s41-100-preflight-nongit-');
++    fs.mkdirSync(path.join(plain, '.codex'), { recursive: true });
++    fs.writeFileSync(path.join(plain, '.codex', 'config.toml'), lacking);
++    assert.doesNotThrow(() => adapter.preflight(plain), 'a non-git cwd never scans the sandbox key (rule 4)');
++  });
++});
++
++// ── Test 7 [ANCHOR]: the Claude install is unaffected ───────────────────────
++// PASSES TODAY (and must keep passing): a Claude-only install never touches
++// .codex/** at all — this is a regression guard against the new Codex-only
++// writable-root logic leaking into the Claude adapter path.
++
++describe('[ANCHOR] Test 7 — a plain Claude-only install never writes .codex/config.toml', () => {
++  test('cleargate init --yes (default host) leaves no .codex/ directory at all', async () => {
++    const payloadDir = mkTmp('cg-s41-100-claude-payload-');
++    await composeCanonicalView(payloadDir, ['claude']);
++    const record = await runInitScenario('fresh', { payloadDir });
++    assert.equal(fs.existsSync(path.join(record.dir, '.codex')), false, '.codex/ must not exist for a Claude-only install');
++    assert.ok(
++      fs.existsSync(path.join(record.dir, '.claude', 'settings.json')),
++      'the Claude install itself must still land normally',
++    );
++  });
++});
+diff --git a/test/lib/gate-cache-staleness.red.node.test.ts b/test/lib/gate-cache-staleness.red.node.test.ts
+new file mode 100644
+--- /dev/null
++++ b/test/lib/gate-cache-staleness.red.node.test.ts
++import { describe, test, afterEach } from 'node:test';
++import assert from 'node:assert/strict';
++
++/**
++ * BUG-047 QA-RED — gate cache freshness ("`gate check` advances a stale
++ * `last_gate_check`").
++ *
++ * `writeCachedGate`'s idempotency early-return (frontmatter-cache.ts ~93-106)
++ * compares only pass/failing_criteria/transition, never `last_gate_check`
++ * against `updated_at`. Once `cleargate stamp` moves `updated_at` past a
++ * verdict-unchanged item's cached `last_gate_check`, no supported command can
++ * close the gap: `gate check` keeps reporting the SAME (still-passing)
++ * verdict, which is exactly the condition that makes the early return fire
++ * and skip the write. `sprint preflight` Check 5 then reports the item
++ * `(stale)` forever (BUG-047 §1).
++ *
++ * The fix (plans/M7.md §3 BUG-047) adds `isGateCacheFresh` and gates both
++ * `writeCachedGate`'s early return and `restoreIfOnlyTimestampMoved`
++ * (sprint.ts ~1786-1796) on it. These tests exercise the *externally
++ * observable* behaviour through the unchanged `gateCheckHandler` /
++ * `stampHandler` / `sprintPreflightHandler` entry points — no not-yet-existing
++ * export (`isGateCacheFresh`) is imported here, so nothing in this file
++ * breaks at module-load before the fix lands (flashcard 2026-09-26 ·
++ * #qa-red #esm: a static import of a missing named export is a SyntaxError
++ * that crashes the whole file).
++ *
++ * Per the qa-red report: T1 and T5's first assertion (Case A) are RED against
++ * cli main f0c33f7. T2 is RED via the Check-5 integration path. T3, T4 and
++ * T5's second assertion (Case B) are CR-038 anti-thrash regression witnesses
++ * — they already pass today and must keep passing after the fix.
++ */
++
++import * as fs from 'node:fs';
++import * as os from 'node:os';
++import * as path from 'node:path';
++import { execSync } from 'node:child_process';
++
++import { gateCheckHandler } from '../../src/commands/gate.js';
++import { stampHandler } from '../../src/commands/stamp.js';
++import { sprintPreflightHandler } from '../../src/commands/sprint.js';
++import { parseFrontmatter } from '../../src/wiki/parse-frontmatter.js';
++import type { CodebaseVersion } from '../../src/lib/codebase-version.js';
++
++// ─── Fixture helpers ────────────────────────────────────────────────────────
++
++const tmpDirs: string[] = [];
++
++function makeTmpDir(prefix: string): string {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
++  tmpDirs.push(dir);
++  return dir;
++}
++
++afterEach(() => {
++  for (const dir of tmpDirs.splice(0)) {
++    fs.rmSync(dir, { recursive: true, force: true });
++  }
++});
++
++function writeFile(filePath: string, content: string): void {
++  fs.mkdirSync(path.dirname(filePath), { recursive: true });
++  fs.writeFileSync(filePath, content, 'utf8');
++}
++
++function readFm(filePath: string): Record<string, unknown> {
++  return parseFrontmatter(fs.readFileSync(filePath, 'utf8')).fm;
++}
++
++const noop = (_s: string): void => {
++  void _s;
++};
++
++function throwingExit(code: number): never {
++  throw new Error(`exit(${code})`);
++}
++
++const FAKE_VERSION: CodebaseVersion = {
++  sha: 'deadbeef',
++  dirty: false,
++  tag: null,
++  package_version: null,
++  version_string: 'cleargate@0.0.0-test',
++};
++
++/** Minimal gates doc: epic ready-for-decomposition, plus sprint ready-for-execution for T2's plan (one block per fence). */
++const GATES_DOC = `
++# Readiness Gates
++
++\`\`\`yaml
++- work_item_type: epic
++  transition: ready-for-decomposition
++  severity: enforcing
++  criteria:
++    - id: no-tbds
++      check: "body does not contain 'TBD'"
++    - id: scope-populated
++      check: "section(2) has ≥1 listed-item"
++\`\`\`
++
++\`\`\`yaml
++- work_item_type: sprint
++  transition: ready-for-execution
++  severity: enforcing
++  criteria:
++    - id: no-tbds
++      check: "body does not contain 'TBD'"
++\`\`\`
++`;
++
++/** A minimal Epic body that passes the gate above. */
++function epicBody(createdAt: string, updatedAt: string, epicId: string): string {
++  return [
++    '---',
++    `epic_id: "${epicId}"`,
++    'status: "Active"',
++    `created_at: "${createdAt}"`,
++    `updated_at: "${updatedAt}"`,
++    'created_at_version: "cleargate@0.0.0-test"',
++    'updated_at_version: "cleargate@0.0.0-test"',
++    '---',
++    '',
++    `# ${epicId}`,
++    '',
++    '## Section 1',
++    '',
++    'Intro text.',
++    '',
++    '## Section 2',
++    '',
++    '- Scope item 1',
++    '- Scope item 2',
++    '',
++  ].join('\n');
++}
++
++function initGitRepo(dir: string): void {
++  execSync('git init -b main', { cwd: dir, stdio: 'pipe' });
++  execSync('git config user.email "qa-red@test.com"', { cwd: dir, stdio: 'pipe' });
++  execSync('git config user.name "QA Red"', { cwd: dir, stdio: 'pipe' });
++}
++
++function commitAll(dir: string, message: string): void {
++  execSync('git add .', { cwd: dir, stdio: 'pipe' });
++  execSync(`git commit -m "${message}"`, { cwd: dir, stdio: 'pipe' });
++}
++
++/** Run `gate check`; a failing enforcing verdict exits 1, which is expected here. */
++async function gateCheckMayFail(absPath: string, dir: string, gatesDocPath: string, now: () => Date): Promise<void> {
++  try {
++    await gateCheckHandler(absPath, {}, { cwd: dir, now, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++  } catch (err) {
++    assert.match(String((err as Error).message), /^exit\(1\)$/);
++  }
++}
++
++function makeCapture(): {
++  stdout: (s: string) => void;
++  stderr: (s: string) => void;
++  getOut: () => string;
++  getErr: () => string;
++} {
++  const out: string[] = [];
++  const err: string[] = [];
++  return {
++    stdout: (s: string) => { out.push(s); },
++    stderr: (s: string) => { err.push(s); },
++    getOut: () => out.join('\n'),
++    getErr: () => err.join('\n'),
++  };
++}
++
++function runPreflight(
++  sprintId: string,
++  cwd: string,
++  cap: ReturnType<typeof makeCapture>,
++  execFn: (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string,
++): number {
++  let code: number | null = null;
++  try {
++    sprintPreflightHandler(
++      { sprintId },
++      {
++        cwd,
++        stdout: cap.stdout,
++        stderr: cap.stderr,
++        exit: (c: number): never => { code = c; throw new Error(`exit(${c})`); },
++        execFn,
++      },
++    );
++  } catch {
++    // expected exit throw
++  }
++  return code ?? -1;
++}
++
++// ─── T1 (BUG-047): gate check -> stamp -> gate check must advance a stale cache
++
++describe('T1 (BUG-047): gate check -> stamp -> gate check advances a stale cache', () => {
++  test('a same-verdict re-check ends with last_gate_check >= updated_at', async () => {
++    const dir = makeTmpDir('cg-gcs-t1-');
++    const absPath = path.join(dir, 'EPIC-047-01_Test.md');
++    const gatesDocPath = path.join(dir, 'readiness-gates.md');
++    writeFile(gatesDocPath, GATES_DOC);
++    writeFile(absPath, epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-01'));
++
++    const T1 = () => new Date('2026-01-01T01:00:00.000Z'); // initial gate check
++    const T2 = () => new Date('2026-01-01T02:00:00.000Z'); // stamp
++    const T3 = () => new Date('2026-01-01T03:00:00.000Z'); // re-gate, same verdict
++
++    // Reproduction protocol (bug §2, steps 2-4): gate check -> stamp -> gate check.
++    await gateCheckHandler(absPath, {}, { cwd: dir, now: T1, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++    await stampHandler(absPath, {}, { cwd: dir, now: T2, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++
++    const afterStamp = readFm(absPath);
++    assert.strictEqual(
++      afterStamp['updated_at'],
++      '2026-01-01T02:00:00Z',
++      'stamp must advance updated_at past the first gate check',
++    );
++
++    await gateCheckHandler(absPath, {}, { cwd: dir, now: T3, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++
++    const fm = readFm(absPath);
++    const cached = fm['cached_gate_result'] as { pass: boolean; last_gate_check: string };
++    const updatedAt = String(fm['updated_at']);
++    assert.strictEqual(cached.pass, true, 'the verdict itself never changed across this repro');
++    assert.ok(
++      cached.last_gate_check >= updatedAt,
++      `BUG-047: expected last_gate_check (${cached.last_gate_check}) >= updated_at (${updatedAt}) after the second gate check`,
++    );
++
++    // Same repro on a FAILING verdict. M7 §3: the early return needs an equal
++    // verdict AND a fresh cache; `pass` is not part of the freshness rule, so a
++    // stale failing item advances too (wiki lint's gate-stale reads this stamp).
++    const failPath = path.join(dir, 'EPIC-047-11_Test.md');
++    writeFile(
++      failPath,
++      epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-11').replace('Intro text.', 'Intro text. TBD.'),
++    );
++    await gateCheckMayFail(failPath, dir, gatesDocPath, T1);
++    await stampHandler(failPath, {}, { cwd: dir, now: T2, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    await gateCheckMayFail(failPath, dir, gatesDocPath, T3);
++
++    const failFm = readFm(failPath);
++    const failCached = failFm['cached_gate_result'] as { pass: boolean; last_gate_check: string };
++    const failUpdatedAt = String(failFm['updated_at']);
++    assert.strictEqual(failUpdatedAt, '2026-01-01T02:00:00Z', 'fixture guard: stamp advanced updated_at');
++    assert.strictEqual(failCached.pass, false, 'the failing verdict never changed across this repro');
++    assert.ok(
++      failCached.last_gate_check >= failUpdatedAt,
++      `BUG-047: a stale FAILING item must advance too: last_gate_check (${failCached.last_gate_check}) >= updated_at (${failUpdatedAt})`,
++    );
++  });
++});
++
++// ─── T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-gated item
++
++async function buildStampedThenRegatedItem(dir: string): Promise<{ itemPath: string }> {
++  const itemPath = path.join(dir, '.cleargate', 'delivery', 'pending-sync', 'EPIC-047-02_Test_Item.md');
++  const gatesDocPath = path.join(dir, '.cleargate', 'knowledge', 'readiness-gates.md');
++  writeFile(gatesDocPath, GATES_DOC);
++  writeFile(itemPath, epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-02'));
++
++  const T1 = () => new Date('2026-01-01T01:00:00.000Z');
++  const T2 = () => new Date('2026-01-01T02:00:00.000Z');
++
++  // The re-gate runs in the SAME second as the stamp — what the stamp-and-gate
++  // hook does on every edit — so the fixed item ends exactly at the freshness
++  // boundary (last_gate_check == updated_at), which M7 §3 defines as fresh (>=).
++  await gateCheckHandler(itemPath, {}, { cwd: dir, now: T1, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++  await stampHandler(itemPath, {}, { cwd: dir, now: T2, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++  await gateCheckHandler(itemPath, {}, { cwd: dir, now: T2, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++
++  return { itemPath };
++}
++
++describe('T2 (BUG-047): sprint preflight Check 5 passes for a stamped-then-re-gated item', () => {
++  test('exit code 0 — the item is no longer reported (stale)', async () => {
++    const dir = makeTmpDir('cg-gcs-t2-');
++    initGitRepo(dir);
++
++    const { itemPath } = await buildStampedThenRegatedItem(dir);
++
++    writeFile(path.join(dir, 'README.md'), '# fixture\n');
++    // The sprint plan also sits exactly at the boundary, so Check 5's plan
++    // self-check is held to the same >= rule as its item check.
++    writeFile(
++      path.join(dir, '.cleargate', 'delivery', 'pending-sync', 'SPRINT-01_Test_Sprint.md'),
++      [
++        '---',
++        'sprint_id: "SPRINT-01"',
++        'execution_mode: "v2"',
++        'updated_at: "2026-01-01T00:00:00Z"',
++        'cached_gate_result:',
++        '  pass: true',
++        '  failing_criteria: []',
++        '  last_gate_check: "2026-01-01T00:00:00Z"',
++        '  transition: "ready-for-execution"',
++        '---',
++        '',
++        '# SPRINT-01',
++        '',
++        '## 1. Consolidated Deliverables',
++        '',
++        '- EPIC-047-02',
++        '',
++      ].join('\n'),
++    );
++
++    commitAll(dir, 'fixture: T2 stamped-then-re-gated item');
++
++    // Step 0's gate check must not disturb the state already established
++    // above — this test is about Check 5's read, not about Step 0's write.
++    const execFn = (cmd: string, opts: { cwd: string; encoding: 'utf8' }): string => {
++      if (cmd.includes('--emit-json')) {
++        return JSON.stringify({ workItemIds: ['EPIC-047-02'] });
++      }
++      if (cmd.includes('gate check')) {
++        return '';
++      }
++      return execSync(cmd, { ...opts, stdio: 'pipe' }) as unknown as string;
++    };
++
++    const cap = makeCapture();
++    const code = runPreflight('SPRINT-01', dir, cap, execFn);
++
++    assert.strictEqual(
++      code,
++      0,
++      `BUG-047: expected Check 5 to pass for a stamped-then-re-gated item; stderr:\n${cap.getErr()}`,
++    );
++    assert.ok(
++      !cap.getErr().includes('EPIC-047-02'),
++      `EPIC-047-02 must not appear in the failing punch list; stderr:\n${cap.getErr()}`,
++    );
++    const fm = readFm(itemPath);
++    const cached = fm['cached_gate_result'] as { last_gate_check: string };
++    assert.strictEqual(
++      cached.last_gate_check,
++      String(fm['updated_at']),
++      'fixture guard: the re-gated item must sit exactly at the freshness boundary',
++    );
++
++    // Phase 2 — the sprint PLAN itself (BUG-047 Codex recurrence 2; M7 E13).
++    // After an edit (stamp) Check 5 names the plan stale; the punch list's own
++    // remedy, `gate check <plan>`, must then clear it. Step 0 does not refresh
++    // the plan (OD-M7-11 / FU-5), so the remedy is run by hand, as a user would.
++    const planPath = path.join(dir, '.cleargate', 'delivery', 'pending-sync', 'SPRINT-01_Test_Sprint.md');
++    const gatesDocPath = path.join(dir, '.cleargate', 'knowledge', 'readiness-gates.md');
++    const T5 = () => new Date('2026-01-01T05:00:00.000Z');
++    await stampHandler(planPath, {}, { cwd: dir, now: T5, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    commitAll(dir, 'fixture: T2 plan edited');
++    const capStale = makeCapture();
++    assert.strictEqual(
++      runPreflight('SPRINT-01', dir, capStale, execFn),
++      1,
++      `a stamped sprint plan must be reported stale; stderr:\n${capStale.getErr()}`,
++    );
++    assert.match(capStale.getErr(), /- SPRINT-01 \(stale\)/);
++
++    await gateCheckHandler(planPath, {}, { cwd: dir, now: T5, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++    commitAll(dir, 'fixture: T2 plan re-gated');
++    const capFixed = makeCapture();
++    assert.strictEqual(
++      runPreflight('SPRINT-01', dir, capFixed, execFn),
++      0,
++      `BUG-047: gate check <plan> must clear the plan's staleness; stderr:\n${capFixed.getErr()}`,
++    );
++  });
++});
++
++// ─── T3 (CR-038 regression): two gate checks with no edit leave a fresh item byte-identical
++
++describe('T3 (CR-038 regression): two gate checks with no edit leave a fresh item byte-identical', () => {
++  test('a second, unedited gate check on an already-fresh item changes nothing', async () => {
++    const dir = makeTmpDir('cg-gcs-t3-');
++    const gatesDocPath = path.join(dir, 'readiness-gates.md');
++    writeFile(gatesDocPath, GATES_DOC);
++
++    const T1 = () => new Date('2026-01-01T01:00:00.000Z');
++    const T2 = () => new Date('2026-01-01T02:00:00.000Z');
++
++    // (a) strictly fresh: updated_at (T0) < last_gate_check (T1).
++    // (b) boundary-fresh: updated_at == last_gate_check (T1); M7 §3 pins >=.
++    // (c) fresh but FAILING: the CR-038 case (cached gate failures at kickoff).
++    const shapes = [
++      { id: 'EPIC-047-03', updatedAt: '2026-01-01T00:00:00Z', failing: false },
++      { id: 'EPIC-047-13', updatedAt: '2026-01-01T01:00:00Z', failing: false },
++      { id: 'EPIC-047-23', updatedAt: '2026-01-01T00:00:00Z', failing: true },
++    ];
++    for (const shape of shapes) {
++      const absPath = path.join(dir, `${shape.id}_Test.md`);
++      const body = epicBody('2026-01-01T00:00:00Z', shape.updatedAt, shape.id);
++      writeFile(absPath, shape.failing ? body.replace('Intro text.', 'Intro text. TBD.') : body);
++
++      await gateCheckMayFail(absPath, dir, gatesDocPath, T1);
++      const afterFirst = fs.readFileSync(absPath, 'utf8');
++      const cached = readFm(absPath)['cached_gate_result'] as { pass: boolean };
++      assert.strictEqual(cached.pass, !shape.failing, `fixture guard (${shape.id}): first verdict`);
++
++      // No stamp, no body edit: the cache stays fresh.
++      await gateCheckMayFail(absPath, dir, gatesDocPath, T2);
++      const afterSecond = fs.readFileSync(absPath, 'utf8');
++
++      assert.strictEqual(
++        afterSecond,
++        afterFirst,
++        `CR-038 (${shape.id}): an unedited, already-fresh item must not thrash last_gate_check on a repeat gate check`,
++      );
++    }
++  });
++});
++
++// ─── T4 (CR-038 regression): a verdict flip on a fresh item writes both the verdict and a new stamp
++
++describe('T4 (CR-038 regression): a verdict flip on a fresh item writes both the verdict and a new stamp', () => {
++  test('introducing a TBD flips pass:true -> pass:false and advances last_gate_check', async () => {
++    const dir = makeTmpDir('cg-gcs-t4-');
++    const absPath = path.join(dir, 'EPIC-047-04_Test.md');
++    const gatesDocPath = path.join(dir, 'readiness-gates.md');
++    writeFile(gatesDocPath, GATES_DOC);
++    writeFile(absPath, epicBody('2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z', 'EPIC-047-04'));
++
++    const T1 = () => new Date('2026-01-01T01:00:00.000Z');
++    const T2 = () => new Date('2026-01-01T02:00:00.000Z');
++
++    await gateCheckHandler(absPath, {}, { cwd: dir, now: T1, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++    const before = readFm(absPath)['cached_gate_result'] as { pass: boolean; last_gate_check: string };
++    assert.strictEqual(before.pass, true);
++
++    // A genuine content edit (not a stamp): the gate now fails.
++    const body = fs.readFileSync(absPath, 'utf8').replace('Intro text.', 'Intro text. TBD.');
++    fs.writeFileSync(absPath, body, 'utf8');
++
++    try {
++      await gateCheckHandler(absPath, {}, { cwd: dir, now: T2, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++      assert.fail('expected the enforcing gate to exit non-zero on the flipped verdict');
++    } catch (err) {
++      assert.match(String((err as Error).message), /exit\(1\)/);
++    }
++
++    const after = readFm(absPath)['cached_gate_result'] as { pass: boolean; last_gate_check: string };
++    assert.strictEqual(after.pass, false, 'the flipped verdict must be written');
++    assert.ok(
++      after.last_gate_check > before.last_gate_check,
++      `a genuine verdict change must also advance last_gate_check (before=${before.last_gate_check}, after=${after.last_gate_check})`,
++    );
++
++    // Flip back on a STALE item (the real edit -> stamp -> gate order): the
++    // new verdict itself must be written, not just a newer stamp on the old one.
++    const T3 = () => new Date('2026-01-01T03:00:00.000Z');
++    const T4 = () => new Date('2026-01-01T04:00:00.000Z');
++    fs.writeFileSync(absPath, fs.readFileSync(absPath, 'utf8').replace('Intro text. TBD.', 'Intro text.'), 'utf8');
++    await stampHandler(absPath, {}, { cwd: dir, now: T3, stdout: noop, exit: throwingExit, getVersion: () => FAKE_VERSION });
++    await gateCheckHandler(absPath, {}, { cwd: dir, now: T4, gatesDocPath, stdout: noop, stderr: noop, exit: throwingExit });
++
++    const fm = readFm(absPath);
++    const back = fm['cached_gate_result'] as { pass: boolean; failing_criteria: unknown[]; last_gate_check: string };
++    assert.strictEqual(back.pass, true, 'the verdict flipped back to pass on a stale item must be written');
++    assert.deepStrictEqual(back.failing_criteria, [], 'the old failing criteria must be cleared');
++    assert.ok(
++      back.last_gate_check >= String(fm['updated_at']),
++      `the flipped-back verdict must be fresh (last_gate_check=${back.last_gate_check}, updated_at=${String(fm['updated_at'])})`,
++    );
++  });
++});
++
++// ─── T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance, restore a fresh one
++
++function buildSingleItemStep0Fixture(
++  dir: string,
++  sprintId: string,
++  item: { id: string; pass: boolean; lastGateCheck: string; updatedAt: string },
++): { itemPath: string; before: string } {
++  writeFile(path.join(dir, 'README.md'), '# fixture\n');
++  writeFile(
++    path.join(dir, '.cleargate', 'delivery', 'pending-sync', `${sprintId}_Test_Sprint.md`),
++    [
++      '---',
++      `sprint_id: "${sprintId}"`,
++      'execution_mode: "v2"',
++      'updated_at: "2026-01-01T00:00:00Z"',
++      'cached_gate_result:',
++      '  pass: true',
++      '  failing_criteria: []',
++      '  last_gate_check: "2026-06-01T00:00:00Z"',
++      '---',
++      '',
++      `# ${sprintId}`,
++      '',
++      '## 1. Consolidated Deliverables',
++      '',
++      `- ${item.id}`,
++      '',
++    ].join('\n'),
++  );
++  const itemPath = path.join(dir, '.cleargate', 'delivery', 'pending-sync', `${item.id}_Test_Item.md`);
++  writeFile(
++    itemPath,
++    [
++      '---',
++      'status: "Ready"',
++      `updated_at: "${item.updatedAt}"`,
++      'cached_gate_result:',
++      `  pass: ${item.pass}`,
++      '  failing_criteria: []',
++      `  last_gate_check: "${item.lastGateCheck}"`,
++      '---',
++      '',
++      `# ${item.id}`,
++      '',
++      '## 1. Summary',
++      '- test item',
++      '',
++    ].join('\n'),
++  );
++  commitAll(dir, `fixture: T5 step0 ${sprintId} ${item.id}`);
++  const before = fs.readFileSync(itemPath, 'utf8');
++  return { itemPath, before };
++}
++
++/**
++ * execFn whose `gate check` branch mimics a real `writeCachedGate` write
++ * that reaffirms the SAME verdict but stamps a fresh `last_gate_check` —
++ * the exact shape a real gate check produces (Scenario 20's 'stamp'
++ * behaviour in sprint-preflight.node.test.ts).
++ */
++function makeStampMockExecFn(itemId: string, itemPath: string): (cmd: string, opts: { cwd: string; encoding: 'utf8' }) => string {
++  return (cmd, opts) => {
++    if (cmd.includes('--emit-json')) return JSON.stringify({ workItemIds: [itemId] });
++    if (cmd.includes('gate check')) {
++      let body = fs.readFileSync(itemPath, 'utf8');
++      body = body.replace(/^(\s*last_gate_check:).*$/m, '$1 "2026-12-31T23:59:59Z"');
++      fs.writeFileSync(itemPath, body, 'utf8');
++      return '';
++    }
++    return execSync(cmd, { ...opts, stdio: 'pipe' }) as unknown as string;
++  };
++}
++
++describe('T5 (CR-038 + BUG-047): Step 0 restore guard — keep a stale advance, restore a fresh one', () => {
++  test('a stale item keeps its Step-0 stamp advance; an already-fresh item is still restored', () => {
++    // Case A — STALE before Step 0 (last_gate_check < updated_at): a
++    // same-verdict gate check that stamps a fresh last_gate_check must
++    // SURVIVE restoreIfOnlyTimestampMoved — that survival is the whole
++    // point of the fix. Today the guard is unconditional and reverts it,
++    // re-creating the BUG-047 deadlock.
++    const staleDir = makeTmpDir('cg-gcs-t5a-');
++    initGitRepo(staleDir);
++    const { itemPath: staleItemPath, before: staleBefore } = buildSingleItemStep0Fixture(staleDir, 'SPRINT-01', {
++      id: 'EPIC-047-05',
++      pass: true,
++      lastGateCheck: '2026-01-01T00:00:00Z',
++      updatedAt: '2026-05-01T00:00:00Z',
++    });
++    const cap1 = makeCapture();
++    runPreflight('SPRINT-01', staleDir, cap1, makeStampMockExecFn('EPIC-047-05', staleItemPath));
++    assert.notStrictEqual(
++      fs.readFileSync(staleItemPath, 'utf8'),
++      staleBefore,
++      'BUG-047: a stale item’s Step-0 stamp advance must survive the restore guard',
++    );
++    assert.strictEqual(
++      (readFm(staleItemPath)['cached_gate_result'] as { last_gate_check: string }).last_gate_check,
++      '2026-12-31T23:59:59Z',
++      'BUG-047: the surviving bytes carry the Step-0 stamp',
++    );
++
++    // Case B — already FRESH before Step 0: the SAME timestamp-only
++    // rewrite must still be reverted (CR-038 anti-thrash, unchanged by
++    // the fix).
++    const freshDir = makeTmpDir('cg-gcs-t5b-');
++    initGitRepo(freshDir);
++    const { itemPath: freshItemPath, before: freshBefore } = buildSingleItemStep0Fixture(freshDir, 'SPRINT-01', {
++      id: 'EPIC-047-06',
++      pass: true,
++      lastGateCheck: '2026-06-01T00:00:00Z',
++      updatedAt: '2026-01-01T00:00:00Z',
++    });
++    const cap2 = makeCapture();
++    runPreflight('SPRINT-01', freshDir, cap2, makeStampMockExecFn('EPIC-047-06', freshItemPath));
++    assert.strictEqual(
++      fs.readFileSync(freshItemPath, 'utf8'),
++      freshBefore,
++      'CR-038: an already-fresh item’s timestamp-only rewrite must still be reverted',
++    );
++
++    // Case C — FRESH exactly at the boundary (last_gate_check == updated_at,
++    // fresh per M7 §3's >=): still restored.
++    const edgeDir = makeTmpDir('cg-gcs-t5c-');
++    initGitRepo(edgeDir);
++    const { itemPath: edgeItemPath, before: edgeBefore } = buildSingleItemStep0Fixture(edgeDir, 'SPRINT-01', {
++      id: 'EPIC-047-07',
++      pass: true,
++      lastGateCheck: '2026-05-01T00:00:00Z',
++      updatedAt: '2026-05-01T00:00:00Z',
++    });
++    const cap3 = makeCapture();
++    runPreflight('SPRINT-01', edgeDir, cap3, makeStampMockExecFn('EPIC-047-07', edgeItemPath));
++    assert.strictEqual(
++      fs.readFileSync(edgeItemPath, 'utf8'),
++      edgeBefore,
++      'CR-038: a boundary-fresh item (last_gate_check == updated_at) must still be restored',
++    );
++
++    // Case D — STALE and FAILING: M7 §3's rule reads freshness only, not pass,
++    // so the Step-0 stamp survives here too.
++    const failDir = makeTmpDir('cg-gcs-t5d-');
++    initGitRepo(failDir);
++    const { itemPath: failItemPath } = buildSingleItemStep0Fixture(failDir, 'SPRINT-01', {
++      id: 'EPIC-047-08',
++      pass: false,
++      lastGateCheck: '2026-01-01T00:00:00Z',
++      updatedAt: '2026-05-01T00:00:00Z',
++    });
++    const cap4 = makeCapture();
++    runPreflight('SPRINT-01', failDir, cap4, makeStampMockExecFn('EPIC-047-08', failItemPath));
++    assert.strictEqual(
++      (readFm(failItemPath)['cached_gate_result'] as { last_gate_check: string }).last_gate_check,
++      '2026-12-31T23:59:59Z',
++      'BUG-047: a stale failing item keeps its Step-0 stamp too',
++    );
++  });
++});

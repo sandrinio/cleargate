@@ -18,9 +18,9 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-09-04T00:00:00Z
-updated_at: 2026-09-04T00:00:00Z
+updated_at: 2026-09-25T18:50:36Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: e6059145-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
@@ -69,7 +69,7 @@ As a ClearGate maintainer, I want the install manifest to record which host owns
 ### 1.4 Open Questions
 - **Question:** does `owner` belong on the manifest entry, or is a path-prefix rule (`.codex/** ⇒ codex`) sufficient?
 - **Recommended:** an explicit field. Shared assets break any prefix rule — `AGENTS.md` sits at the repo root and is read by two hosts while owned by `core`.
-- **Human decision:** {pending Gate 1}
+- **Resolved 2026-09-25 (Architect, under the owner's autonomy directive):** explicit field, derived from the payload root key at build time (`scaffold/core` ⇒ core, `scaffold/hosts/<h>` ⇒ h); a legacy entry without `owner` reads as claude for `.claude/**` and core otherwise — exact for every pre-058-06 payload, which was core+claude only.
 
 ### 1.5 Risks
 - A wrong `owner` value is not a cosmetic defect: [[STORY-058-05]]'s `host remove` deletes on it. Derivation from the payload root, plus a test that every payload file resolves to exactly one owner, is the guard.
@@ -117,17 +117,22 @@ Feature: Manifest host ownership
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/lib/manifest.ts` |
-| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/src/commands/init.ts` |
-| New Files Needed | No |
+| Related Files | `cleargate-cli/scripts/build-manifest.ts`, `cleargate-cli/src/commands/init.ts`, `cleargate-cli/scripts/verify-pack.mjs`, `cleargate-cli/test/helpers/scaffold-roots.ts`, `cleargate-cli/test/helpers/init-fixture.ts`, `cleargate-cli/test/scripts/scaffold-layout.red.node.test.ts`, `cleargate-cli/test/commands/init-from-source.node.test.ts`, `cleargate-cli/test/commands/init-from-source-dist.integration.node.test.ts` |
+| New Files Needed | `cleargate-cli/src/lib/manifest-builder.ts`, `cleargate-cli/scripts/verify-pack-checks.mjs`, `cleargate-cli/test/lib/manifest-host-ownership.red.node.test.ts`, `cleargate-cli/test/commands/init-host-snapshot.red.node.test.ts`, `cleargate-cli/test/scripts/verify-pack-compat.red.node.test.ts`, `cleargate-cli/test/lib/manifest-legacy-snapshot.red.integration.node.test.ts`, `cleargate-cli/test/fixtures/manifest/legacy-install-manifest-0.10.0.json` |
+| Orchestration Files | `.cleargate/delivery/pending-sync/STORY-058-06_manifest_host_ownership_fields.md`, `.cleargate/wiki/log.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-qa-red.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-tpv.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-dev.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-qa.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-arch.md`, `.cleargate/sprint-runs/SPRINT-41/reports/STORY-058-06-devops.md` |
 
-- `cleargate-cli/src/lib/manifest.ts` — **modify**. Entry model gains `owner`; snapshot gains `hosts`; legacy default applied on load.
-- `cleargate-cli/scripts/build-manifest.ts` — **modify**. Derive `owner` from the payload root.
-- `cleargate-cli/src/commands/init.ts` — **modify**. Write `hosts` into the snapshot (Step 7 writes the snapshot today).
+- `cleargate-cli/src/lib/manifest.ts` — **modify**. Entry gains optional `owner`; snapshot gains optional `hosts`; `entryOwner`/`installedHosts` apply the legacy default at read time; `loadInstallSnapshot` unchanged, never writes.
+- `cleargate-cli/src/lib/manifest-builder.ts` — **create**. The bundled manifest core moved from `scripts/build-manifest.ts` (FU-2), plus `buildViewManifest`/`buildInstallView`.
+- `cleargate-cli/scripts/build-manifest.ts` — **modify**. A thin re-exporting entry; compat restricted to core + hosts/claude (FU-1); tracked-scaffold write refused (FU-4); compat written from the flat-view manifest with a build-time equality tripwire.
+- `cleargate-cli/src/commands/init.ts` — **modify**. The `--from-source` bridge uses `buildInstallView` (`resolveCliPackageRoot` and the dynamic `.ts` import retired); one hoisted `payloadFilter` predicate serves copy and Step 7 (M3-A1); Step 7 writes `hosts` as the installed set via `mergeInstalledHosts` and carries forward installed-but-unselected hosts' entries (M3-A2).
+- `cleargate-cli/scripts/verify-pack.mjs` — **modify**. Check 3c through `scripts/verify-pack-checks.mjs` (FU-3).
 
 ### 3.2 Technical Logic
 Derive, don't declare. `owner` comes from which payload root the file was copied from — `scaffold/core/**` ⇒ `core`, `scaffold/hosts/<name>/**` ⇒ `<name>`. A hand-maintained mapping is a second source of truth that will drift from the payload; BUG-038's two-lists-one-truth failure in `copy-payload.ts` is the precedent worth not repeating.
 
 Legacy migration is a read-time default, not a rewrite: absent `hosts` ⇒ `["claude"]`. Do not write the field back on read, or a user who never re-installs gets their snapshot mutated by a `doctor` run.
+
+**Precondition (FU-1, STORY-058-02 post-flight).** `buildManifest({ scaffoldRoot })` currently builds `compat` from core **and every** `hosts/*` root (`scripts/build-manifest.ts:501-537` at cli `a821d40`). This story restricts `compat` to `core` + `hosts/claude`, keeps the all-roots collision check, and reconciles the doc comments **before** any `TIER_RULES` entry classifies a non-Claude path (`.codex/**`, `AGENTS.md`, `.agents/**`). Otherwise the first such rule leaks into `templates/cleargate-planning/MANIFEST.json` → `dist/MANIFEST.json`, and every no-flag Claude install's snapshot lists files it never copied — a Rule-2 release blocker. Shared assets live physically in `scaffold/core` under a path some registered adapter declares in `sharedRoots()`; their derived owner is therefore `core`, and install-time copy/snapshot gating is `payloadFilter` (STORY-058-04).
 
 ### 3.3 API Contract (if applicable)
 ```jsonc
@@ -144,11 +149,14 @@ Legacy migration is a read-time default, not a rewrite: absent `hosts` ⇒ `["cl
 
 ## Task Breakdown
 
-- [ ] Add `owner` to the manifest entry model and `hosts` to the snapshot model.
-- [ ] Derive `owner` in `build-manifest.ts` from the payload root.
-- [ ] Apply the absent-`hosts` ⇒ `["claude"]` default at load, without writing back.
-- [ ] Write `hosts` from the resolved set in init's snapshot step.
-- [ ] Assert every payload file resolves to exactly one owner.
+- [ ] QA-Red: ownership, snapshot, verify-pack-compat unit reds and the legacy-snapshot integration (scenarios 1-17). Amend scaffold-layout scenario 6, init-from-source and init-from-source-dist (18-20). Add the real 0.10.0 snapshot fixture and the init-fixture sanctioned-delta row
+- [ ] FU-1: restrict `buildManifest({scaffoldRoot})` compat to `core` + `hosts/claude` (all-roots collision check kept; doc comments reconciled) **before** any non-Claude `TIER_RULES` entry exists
+- [ ] FU-2: move the manifest core into bundled `src/lib/manifest-builder.ts`. Add `buildViewManifest`/`buildInstallView` as the one flat-view builder for prebuild, `--from-source` and `composeCanonicalPayload`. Retire `resolveCliPackageRoot` and the dynamic `.ts` import
+- [ ] Stamp `owner` from the payload root key (`ownerForRootKey`); add `ManifestOwner`, `entryOwner`, `installedHosts`, `LEGACY_INSTALLED_HOSTS` (read-time default, never written back)
+- [ ] Init Step 7: one hoisted payloadFilter predicate for copy and snapshot; hosts = the installed set (mergeInstalledHosts of the prior snapshot's hosts and the selection, registry order) as the last key; prior entries that the installed set admits but this run's selection does not (installed-but-unselected hosts' own entries and the core entries under their sharedRoots) carry forward
+- [ ] FU-3: `verify-pack` check 3c (`checkCompatPayload`): compat entries present in the flat view, owners ∈ {core, claude}, `owner: 'claude'` ⇔ under `.claude`
+- [ ] FU-4: `scaffoldRoot` mode refuses to write per-root manifests into the tracked `scaffold/`
+- [ ] Typecheck, targeted reds and witnesses solo, M2 parity compare with the -06 delta row
 
 ## 4. Quality Gates
 
@@ -169,9 +177,10 @@ Legacy migration is a read-time default, not a rewrite: absent `hosts` ⇒ `["cl
 ## Existing Surfaces
 
 - **Surface:** `cleargate-cli/src/lib/manifest.ts:36` — the entry model and drift engine being extended.
-- **Surface:** `cleargate-planning/MANIFEST.json` — the live shape: `cleargate_version`, `generated_at`, and `files[]` with `path`/`sha256`/`tier`/`overwrite_policy`/`preserve_on_uninstall`.
+- **Surface:** `cleargate-cli/templates/cleargate-planning/MANIFEST.json` (the composed compat manifest, generated by prebuild) — the live shape: `cleargate_version`, `generated_at`, and `files[]` with `path`/`sha256`/`tier`/`overwrite_policy`/`preserve_on_uninstall`.
 - **Surface:** `cleargate-cli/src/commands/init.ts` — Step 7 writes the install snapshot to `.cleargate/.install-manifest.json`.
 - **Surface:** `cleargate-cli/src/init/copy-payload.ts` — BUG-038's two-lists-one-truth note, the argument for deriving rather than declaring ownership.
+- **Surface:** `cleargate-cli/scripts/build-manifest.ts:461-559` — `buildMultiRootManifest`, the per-root provenance -06 stamps.
 
 ## Why not simpler?
 

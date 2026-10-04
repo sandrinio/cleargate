@@ -1,0 +1,18 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/commands/no-exec-mode-vocab.node.test.ts
+
+▶ EPIC-051 STORY-051-05: dead execution_mode/v1/v2 vocabulary swept from shipping surfaces
+  ✔ grep gate returns zero hits across root CLAUDE.md + canonical scaffold/** + cli src/** (28.753833ms)
+  ✔ preserved vocabulary: state-schema v1/v2/v3 migrators still exist (6.039833ms)
+  ✔ preserved vocabulary: "Sprint Report v2" template naming still exists (5.274792ms)
+  ✔ preserved vocabulary: "execution_mode retired" annotation still exists (5.776083ms)
+✔ EPIC-051 STORY-051-05: dead execution_mode/v1/v2 vocabulary swept from shipping surfaces (46.451375ms)
+ℹ tests 4
+ℹ suites 1
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 269.937208

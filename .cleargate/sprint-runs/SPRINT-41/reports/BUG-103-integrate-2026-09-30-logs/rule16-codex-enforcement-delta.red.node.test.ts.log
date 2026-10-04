@@ -1,0 +1,29 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/docs/codex-enforcement-delta.red.node.test.ts
+
+▶ Test 14 — cleargate-enforcement.md §16 Host Enforcement Deltas — Codex
+  ✔ the outer live copy has the "## 16. Host Enforcement Deltas — Codex (source: STORY-058-11)" heading (0.959334ms)
+  ✔ [TPV re-seal] the Index table lists §16 after the §15 row (0.27075ms)
+  ✔ the canonical twin (scaffold/core) is byte-identical to the outer live copy (0.1885ms)
+  ✔ §16 is not renumbered over an existing section (max today is §15) (0.257416ms)
+  ✔ §16 contains the required term "tools:" (0.854917ms)
+  ✔ §16 contains the required term "agent_type" (0.230375ms)
+  ✔ §16 contains the required term "collaborationspawn_agent" (0.316625ms)
+  ✔ §16 contains the required term "non-empty stderr" (0.226125ms)
+  ✔ §16 contains the required term "edit-targets" (0.174292ms)
+  ✔ §16 contains the required term "trusted_hash" (0.218ms)
+  ✔ §16 contains the required term "metering" (0.164917ms)
+  ✔ §16 contains the required term "request_user_input" (0.179333ms)
+  ✔ §16 contains the required term ".codex/rules" (0.152125ms)
+  ✔ §16 contains the required term "build-codex-payload.mjs" (0.17375ms)
+  ✔ §16 contains the required term "STORY-058-12" (0.154334ms)
+✔ Test 14 — cleargate-enforcement.md §16 Host Enforcement Deltas — Codex (5.335792ms)
+ℹ tests 15
+ℹ suites 1
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 223.609209

@@ -5,8 +5,8 @@ Use this template when CHANGING an existing feature. For net-new functionality, 
 §1 The Context Override: What to remove/forget + the new truth. AI agents hallucinate when old context conflicts with new requests.
 §2 Blast Radius & Invalidation: Which downstream items does this CR break? A CR acts as a "Gate Reset" on affected items.
 §3 Execution Sandbox: Exact file paths to modify.
-Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails.
-§4 Verification Protocol: How to confirm new logic works and old logic is fully evicted.
+Task Breakdown: one `- [ ] <action>` row per executable step, in execution order. REQUIRED at L3 and above, optional at L2, omit the section entirely at L1. An absent section passes the gate; a present-but-empty one fails. Task Breakdown rows implement the Gherkin scenarios in §4; no row is written for an axis marked F.
+§4 Verification Protocol: How to confirm new logic works and old logic is fully evicted. §4 also carries a SPIDR coverage table (axes: Paths, Interfaces, Data, Rules) above a Gherkin block. Paths = more than one *successful* way through (the baseline error scenario is not a path). Interfaces = more than one surface exposes the behaviour (CLI / API / UI / hook). Data = behaviour differs by data type, shape or volume — usually a Scenario Outline with Examples. Rules = a business rule constrains the outcome — one scenario per rule, including breaking it. Tag each covered scenario with the matching `@paths` / `@interfaces` / `@data` / `@rules` marker directly above `Scenario:` / `Scenario Outline:`. There is no Spike row: open discovery is chartered as a SPIKE item before this CR is written.
 Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 POST-WRITE BRIEF
@@ -17,6 +17,7 @@ mechanically extracted from the document's own structure:
   - Summary        ← §1 The Context Override
   - Open Questions ← §0.5 Open Questions
   - Edge Cases     ← §2 Blast Radius & Invalidation
+  - SPIDR          ← §4 Verification Protocol (SPIDR coverage table)
   - Risks          ← §2 Blast Radius (downstream invalidation = risk)
   - Ambiguity      ← bottom-of-doc ambiguity gate block
 
@@ -123,6 +124,32 @@ last_synced_body_sha: null # sha256 of body at last sync
 *(How do we confirm new logic works and old logic is completely removed?)*
 
 **Command/Test:** `npm test ...`
+
+**SPIDR coverage.** One row per axis. `T` = at least one scenario below carries the axis tag
+(`@paths`, `@interfaces`, `@data`, `@rules`). `F` = no scenario carries it, and the row states
+why. There is no Spike row: open discovery is chartered as a SPIKE item (`templates/spike.md`)
+before this item is written.
+
+| Axis | Cover | Reason |
+|---|---|---|
+| Paths | {T or F} | {…} |
+| Interfaces | {T or F} | {…} |
+| Data | {T or F} | {…} |
+| Rules | {T or F} | {…} |
+
+```gherkin
+Feature: {Change Request Name}
+
+  Scenario: {New logic holds}
+    Given {precondition}
+    When {action under new logic}
+    Then {expected new behavior}
+
+  Scenario: {Obsolete logic is gone}
+    Given {precondition}
+    When {action that used to trigger old logic}
+    Then {old behavior no longer occurs}
+```
 
 **Test layers.** Declare all three below. `0` is a valid, explicit answer and must carry a reason in the Notes column; an absent row is not a decision.
 

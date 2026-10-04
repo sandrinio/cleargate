@@ -1,0 +1,28 @@
+
+> cleargate@0.26.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/hooks/hook-signal.red.node.test.ts
+
+✔ U1-U2: Claude resolver maps block to host-honored 2 and allow to 0 (4.159209ms)
+✔ U3-U4: resolver rejects unknown host and unknown decision instead of allowing either (0.371625ms)
+▶ U5-U12: direct script invocation fails closed on every blocking branch
+  ✔ pre-edit-gate.sh: uncovered enforce-mode edit -> exact exit 2 (resolver allow-fixture CLI) (946.441625ms)
+  ✔ pre-edit-gate.sh: uncovered enforce-mode edit: missing resolver CLI outcome -> exact exit 2 (fail closed) (1099.793333ms)
+  ✔ pre-edit-gate.sh: uncovered enforce-mode edit: failed resolver CLI outcome -> exact exit 2 (fail closed) (1096.85ms)
+  ✔ pre-edit-gate.sh: uncovered enforce-mode edit: unexpected resolver CLI outcome -> exact exit 2 (fail closed) (1063.930125ms)
+  ✔ pending-task-sentinel.sh: unprocessed flashcard -> exact exit 2 (resolver allow-fixture CLI) (604.763583ms)
+  ✔ pending-task-sentinel.sh: unprocessed flashcard: missing resolver CLI outcome -> exact exit 2 (fail closed) (804.697375ms)
+  ✔ pending-task-sentinel.sh: unprocessed flashcard: failed resolver CLI outcome -> exact exit 2 (fail closed) (652.918166ms)
+  ✔ pending-task-sentinel.sh: unprocessed flashcard: unexpected resolver CLI outcome -> exact exit 2 (fail closed) (637.167416ms)
+✔ U5-U12: direct script invocation fails closed on every blocking branch (6907.297833ms)
+✔ U13: warn mode (default) stays allowed for an uncovered edit (888.635708ms)
+✔ U14: active-sprint bypass remains allowed (261.681792ms)
+✔ U15: CLEARGATE_ADVISORY=1 degrades the flashcard gate to a warning (420.790125ms)
+✔ U16: SKIP_FLASHCARD_GATE=1 remains an allowed Task control (343.259667ms)
+ℹ tests 14
+ℹ suites 1
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9083.697709

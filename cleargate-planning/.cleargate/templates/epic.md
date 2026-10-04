@@ -162,6 +162,11 @@ Feature: {Epic Name}
     Given {precondition}
     When {action}
     Then {outcome}
+
+  Scenario: {Error — invalid action is rejected}
+    Given {precondition}
+    When {invalid action}
+    Then {error message}
 ```
 
 ## 6. AI Interrogation Loop (Human Input Required)

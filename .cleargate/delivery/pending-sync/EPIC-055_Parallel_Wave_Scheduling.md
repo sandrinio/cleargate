@@ -2,7 +2,7 @@
 epic_id: EPIC-055
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -19,13 +19,6 @@ updated_at: 2026-08-25T21:01:24Z
 created_at_version: cleargate@0.24.2
 updated_at_version: cleargate@0.24.2
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -39,6 +32,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id EPIC-055
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-09-26T13:54:38Z
+  sessions: []
 ---
 
 # EPIC-055: Parallel wave scheduling — waves become a DAG, not a chain
@@ -51,7 +53,7 @@ last_synced_body_sha: null
 <agent_context>
   <objective>Replace the serial wave loop with a dependency-DAG scheduler that admits any wave whose predecessors have merged, bounded by a global segment budget, with a single-consumer merge queue.</objective>
   <architecture_rules>
-    <rule>Must use the existing five-clause wave-compatibility predicate (architect-synth.md) for intra-wave packing — do NOT redesign collision detection</rule>
+    <rule>Must use the real-collision predicate and contract model from CR-124 (architect-synth.md) — do NOT redesign collision detection</rule>
     <rule>Must preserve the serial merge invariant: sprint/S-NN is a single-writer axis, one story merged at a time (SKILL.md:445)</rule>
     <rule>Must preserve the per-story segment body (SKILL.md C.1-C.9) unchanged — this is a scheduler above launchWave, not a rewrite of it</rule>
     <rule>No changes to the verdict schema, validateVerdicts, or mintRunId</rule>
@@ -81,7 +83,7 @@ Sprint plans already declare cross-milestone concurrency that the execution mach
 ## 2. Scope Boundaries
 
 **✅ IN-SCOPE (Build This)**
-- [ ] `waves.json` v2: each wave gains `depends_on: [<wave-id>]`, derived by `architect-synth` from `dep_predecessors` ∪ the §2.2 Merge Ordering table it already produces.
+- [ ] The ready-set scheduler consumes CR-124's per-story `upstream` edges and `contracts[]` from `waves.json` `schema_version: 2`.
 - [ ] A ready-set scheduler admitting waves whose `depends_on` have all reached **merged**, under a global concurrent-segment budget.
 - [ ] Refcounted `SKIP_FLASHCARD_GATE` ownership hoisted from `launchWave` to the scheduler.
 - [ ] A global mutex around `git worktree add` (concurrent adds race the repo index).
@@ -89,8 +91,7 @@ Sprint plans already declare cross-milestone concurrency that the execution mach
 - [ ] Per-subtree halt: a BLOCKED verdict stops that wave's dependents; in-flight siblings run to their own barrier and merge.
 
 **❌ OUT-OF-SCOPE (Do NOT Build This)**
-- Full per-story DAG scheduling (dropping waves entirely). Waves are what makes a run legible; keep them.
-- Any change to the five-clause compatibility predicate or to `collision_surface.sh`.
+- *(Moved to [[CR-124]], delivered in SPRINT-41: the per-story contract-first DAG, `waves.json` `schema_version: 2` with per-story `upstream`, and the real-collision predicate. Derived `waves` remain the legible view.)*
 - Any change to the per-story segment body, verdict schema, or DevOps merge mechanics.
 - Concurrent merges. The single-writer axis is preserved, not optimized.
 - A dedicated sprint worktree (`.worktrees/_sprint`). Related and discussed, but an orchestrator-ergonomics change, not a parallelism prerequisite — file separately.
@@ -194,7 +195,7 @@ Feature: Parallel wave scheduling
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Ready for Decomposition**
+**Current Status: 🟢 Ready for Decomposition** — re-scoped 2026-09-26 after [[CR-124]] (DAG + predicate moved to CR-124; this epic keeps scheduler automation: ready-set admission, segment budget, refcounted flashcard gate, worktree-add mutex, merge queue). Still sequenced behind [[CR-106]] and the SPIKE charter.
 
 Requirements to pass to Green (Ready for Coding Agent):
 - [x] `approved: true` is set in the YAML frontmatter.

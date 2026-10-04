@@ -1,194 +1,1070 @@
 {
+  "schema_version": 2,
   "sprint": "SPRINT-41",
-  "generated_at": "2026-09-24T22:53:37Z",
-  "generated_by": "architect-synth",
-  "role": "architect-synth",
-  "supersedes": "2026-09-24T22:06:10Z halt (waves: [], launchable: false) — cleared by owner rulings R1-R4 of 2026-09-24T22:30:23Z",
-  "story_count_in_milestone": 17,
-  "story_count_planned": 17,
+  "generated_at": "2026-09-26T14:00:00Z",
+  "generated_by": "architect",
+  "role": "architect",
+  "supersedes": "waves.json v1 (architect-synth 2026-09-24T22:53:37Z, fix-wave inserts at c8a42afe). The 13 merged items keep their v1 waves; every unmerged item is re-planned contract-first (CR-124; plans/replan-contract-first.md).",
+  "story_count_in_milestone": 22,
+  "story_count_planned": 22,
   "complete": true,
   "execution": {
-    "mode": "by-hand-serial",
+    "mode": "contract-first-dag",
     "launch_wave_compatible": false,
-    "note": "All 17 items touch cleargate-cli/. R1 runs every cli half on a story branch in the single cleargate-cli main checkout, so only one item can be in flight at any time, whatever the predicate says. launch_wave.mjs only cuts outer-repo worktrees (it has no cli main-checkout substrate), so the orchestrator walks this file by hand, one wave at a time: QA-Red -> (TPV/Architect only on a flagged pre-gate scan) -> Developer -> QA-Verify -> DevOps.",
-    "owner_rulings": {
-      "R1": "cleargate-cli/** is reachable: cli half on a story branch in the cli main checkout (not a worktree); DevOps merges to cli main locally; no push or publish. Extends the 2026-09-11 bootstrap exception.",
-      "R2": "Outer tracked .cleargate/** and canonical cleargate-planning/** edits land in the outer repo on sprint/S-41. Live gitignored /.claude/** is never in a story surface; it is re-synced at boundaries only.",
-      "R3": "BUG-085's M0 step runs against this repo's real live .claude/ (backup -> re-sync from canonical -> restart Claude Code -> prove real denials and dispatch identity). Operational barrier step, not a wave.",
-      "R4": "All item files committed on main (a6e6d2b7, 363f2011; verified 17/17 tracked). Untracked outer paths that an earlier item creates are ordering edges, not refusals."
+    "note": "Built in parallel lanes, integrated in upstream order, merged one at a time. The orchestrator runs the protocol by hand (CR-124 §0.5) until EPIC-055's scheduler lands. launch_wave.mjs is not used for SPRINT-41: it cuts only outer-repo worktrees. Contract and story bases are cli refs, because the cli half is the one that builds; each outer story branch is cut from sprint/S-41.",
+    "build_lanes": 4,
+    "merge_lane": "One item at a time: integration check, outer half onto sprint/S-41, cli half onto cli main, full suite, BD, then the boundary step. Runs in the two main checkouts; the cli main checkout stays on main once STORY-058-10 merges.",
+    "harness_lanes": 1,
+    "lane_priority": [
+      "STORY-058-13",
+      "STORY-058-12",
+      "STORY-058-10",
+      "STORY-058-11",
+      "CR-124",
+      "BUG-090",
+      "BUG-098",
+      "BUG-096",
+      "BUG-097"
+    ],
+    "worktree_layout": {
+      "outer": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>. Two-repo items: story/<ID> from sprint/S-41. Cli-only items: a detached host at sprint/S-41.",
+      "cli": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>/cleargate-cli, story/<ID> from stories.<ID>.base. <cli>/.. resolves to the item's own outer worktree.",
+      "node_modules": "Symlink to /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/node_modules. Never npm install or npm ci in a worktree.",
+      "live_claude": "Symlink <outer wt>/.claude to /Users/ssuladze/Documents/Dev/ClearGate/.claude, with '/.claude' in OUTER/.git/info/exclude.",
+      "prebuild": "Run (cd <cli wt> && npm run prebuild) once after the cut and again after every integration merge."
     },
-    "repo_field": "cli = cleargate-cli main checkout only; outer = outer repo on sprint/S-41 only; both = cli half first (merge to cli main, rebuild dist from cli main), then outer half onto sprint/S-41"
+    "owner_rulings": {
+      "R1": "LIFTED 2026-09-26. Owner: 'i want this delivered in the sprint. so the sprint also runs the same way from now on'. Cli items build in nested worktrees (sprint-context rules 19-21). Merges stay local to cli main: no push, no publish.",
+      "R2": "Carried. Live gitignored /.claude/** is re-synced only at boundary steps.",
+      "R3": "Done (barrier B0).",
+      "R4": "Carried."
+    },
+    "repo_field": "cli = cli worktree, then the cli main checkout at merge. outer = outer worktree, then sprint/S-41 at merge. both = outer half merges first, then the cli half (rule 15), then BD."
+  },
+  "contracts": [
+    {
+      "id": "C1",
+      "branch": "contract/S-41-codex",
+      "repo": "cli",
+      "base": "d0f0d95",
+      "owner_story": "STORY-058-10",
+      "skeleton_commit": "None. The branch points at the owner's Developer commit.",
+      "created_by": "orchestrator: git -C /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli branch contract/S-41-codex d0f0d95",
+      "create_when": "now",
+      "frozen_exports": [
+        "src/hosts/codex.ts: codexAdapter, createCodexAdapter, CODEX_HOOKS_JSON, CODEX_CONFIG_TOML",
+        "src/hosts/types.ts: HostAdapter.preflight, rootLevelSurgeryTargets",
+        "src/lib/install-view.ts: openInstallView(opts: OpenInstallViewOpts): InstallView, InstallViewError",
+        "src/lib/scaffold-layout.mjs: composePayload(roots, dst, { ensureRequiredEmptyDirs, skipRootFiles })",
+        "src/init/inject-codex-config.ts: planCodexConfig, injectCodexConfig, assertCodexConfigParsable, removeCodexMcpServer, readCodexFeaturesHooks, CodexConfigError",
+        "src/hooks/normalized-event.ts: editTargets, applyPatchTargets, plus the 'cleargate hook edit-targets' verb",
+        "src/hooks/hook-signal.ts: HOST_SIGNAL_MAP.codex",
+        "src/commands/verify-install.ts: HOST_VERIFIERS.codex",
+        "scripts/build-codex-payload.mjs: CODEX_HOOK_SCRIPTS, planCodexPayload (rel relative to <cliRoot>/scaffold), --write/--check",
+        "scripts/clean-room/*: the signatures pinned by M5-A36..A38: runCodexHooks(options) -> { exitCode, result, verdicts, summaryPath }; codexHookVerdicts(inputs); renderCodexRunSection(run); checkCodexEvidence; startMockResponses({ script }); CodexAppServer.start({ bin, cwd, env }); stripInstructionsBlock(raw); S3_PROMPT and plantAgentsMdCanary. NOT frozen: driveScriptedTurn/runTurn internals and the mock item shapes (-10 pass C owns them).",
+        "test/helpers/init-fixture.ts: the 3 STORY-058-10 rows and the BUG085_SENTINEL_POST refusal",
+        "scaffold/hosts/claude/.claude/hooks/{pre-edit-gate,stamp-and-gate,pending-task-sentinel,token-ledger}.sh: bytes at d0f0d95"
+      ],
+      "change_rule": "If the STORY-058-10 QA-Verify or post-flight bounce changes a frozen export or a hook byte, record the new SHA in sprint §4. Each consumer re-scopes at integration (QA-Red for tests). Never cherry-pick.",
+      "consumers": [
+        "STORY-058-11",
+        "BUG-090",
+        "C4",
+        "C2"
+      ],
+      "base_note": "story/STORY-058-10 after Developer passes A and B (pass-B report: outer 55ec1af8). Pass C changes only the clean-room scripted-session internals, which are not frozen."
+    },
+    {
+      "id": "C4",
+      "branch": "contract/S-41-fence",
+      "repo": "cli",
+      "base": "story/BUG-090",
+      "owner_story": "BUG-090",
+      "skeleton_commit": "None. The branch points at the owner's Developer commit.",
+      "created_by": "orchestrator: git -C .../cleargate-cli branch contract/S-41-fence <BUG-090 Dev SHA>",
+      "create_when": "BUG-090's Developer report is green on its make-green set",
+      "frozen_exports": [
+        "scaffold/core/.cleargate/scripts/assert_story_files.mjs: locateFrontmatterFence(raw) -> {start,end,yamlStart,yamlEnd,eol} | null. Throws 'locateFrontmatter: missing closing ---' | 'locateFrontmatter: unterminated <instructions> block' | 'locateFrontmatter: unterminated Markdown fence'.",
+        "scaffold/core/.cleargate/scripts/assert_story_files.mjs: assertWorkItemApproved(filePath)",
+        "test/helpers/init-fixture.ts: the 5 BUG-090 rows"
+      ],
+      "change_rule": "Same as C1.",
+      "consumers": [
+        "BUG-098"
+      ],
+      "base_at": "<BUG-090 Developer SHA, recorded in sprint §4>"
+    },
+    {
+      "id": "C2",
+      "branch": "contract/S-41-dispatch",
+      "repo": "cli",
+      "base": "contract/S-41-codex",
+      "owner_story": [
+        "STORY-058-11",
+        "CR-124"
+      ],
+      "skeleton_commit": "Two merge commits plus one 'npm run gen:codex' regeneration commit. Written by a DevOps dispatch in OUTER/.worktrees/contract-S-41-dispatch/cleargate-cli, which is torn down after the branch is pushed locally.",
+      "created_by": "DevOps dispatch (mechanical resolution only: CHANGELOG keeps both entries; init-fixture tail keeps both item row sets and drops one copy of the identical shared cleargate-enforcement.md row; regenerate the .codex/agents TOMLs; any other conflict halts)",
+      "create_when": "STORY-058-11 and CR-124 Developer reports are both green",
+      "frozen_exports": [
+        "STORY-058-11: PORTABLE_SKILLS and the core/.agents/skills planCodexPayload entries; the TIER_RULES .codex/agents/** and .agents/skills/** rows; cg_repo_root in scaffold/hosts/claude/.claude/hooks/lib/harness.sh; SanctionedAddition and SANCTIONED_BASELINE_ADDITIONS with the addition-aware captureOrCompare; the codex.live.roles and codex.live.skills verdicts; cleargate-enforcement.md §16 (10 bullets, M5 text)",
+        "CR-124: launch_wave.mjs storyBases(plan), integrationReady(plan, storyId, mergedIds), launchWave({ ..., bases }); SKILL.md §A.4 and §C.0.2 with the -12 anchors preserved; the 7 CR-124 init-fixture rows, including the shared cleargate-enforcement.md row"
+      ],
+      "check_before_handoff": "npm run typecheck; node scripts/build-codex-payload.mjs --check; each owner's make-green set, targeted",
+      "change_rule": "Same as C1.",
+      "consumers": [
+        "STORY-058-12"
+      ],
+      "merges": [
+        "story/STORY-058-11@<Dev SHA>",
+        "story/CR-124@<Dev SHA>"
+      ]
+    },
+    {
+      "id": "C3",
+      "branch": "contract/S-41-loop",
+      "repo": "cli",
+      "base": "9a94ff2",
+      "owner_story": "STORY-058-12",
+      "skeleton_commit": "None. The branch points at the owner's Developer commit.",
+      "created_by": "orchestrator: git -C .../cleargate-cli branch contract/S-41-loop <-12 pass-B SHA>",
+      "create_when": "created 2026-09-26: git -C cleargate-cli branch contract/S-41-loop 2695eea (STORY-058-12 pass B)",
+      "frozen_exports": [
+        "scaffold/core/.cleargate/scripts/dispatch_serial.mjs: SERIAL_EXIT, sprintBranchFor, serialLogPath, readVerdictLog, nextAction, dispatchSerial, plus the next/record CLI (M6 AD-M6-4)",
+        "scaffold/core/.cleargate/scripts/launch_wave.mjs: validateVerdicts(verdicts, { mode: 'wave' | 'serial' })",
+        "scripts/build-codex-payload.mjs: CODEX_SKILL_BANNED, CODEX_SKILL_REPLACEMENTS, renderCodexSprintExecution, CodexRenderError",
+        "scaffold/core/.cleargate/scripts/lib/flashcard-gate.mjs: cardHash, flaggedCards, reportFiles, pendingFlashcards",
+        "src/hosts/types.ts: DispatchMode and HostAdapter.dispatchMode; src/hosts/registry.ts: SERIAL_DISPATCH_SURFACE"
+      ],
+      "change_rule": "Same as C1.",
+      "consumers": [
+        "STORY-058-13"
+      ],
+      "base_at": "9a94ff2 = story/STORY-058-12 INTEGRATE (2695eea + cli main 0399beb), fast-forwarded 2026-09-27 per plans/M6.md F6.1"
+    }
+  ],
+  "stories": {
+    "BUG-089": {
+      "state": "merged",
+      "wave": "wave1"
+    },
+    "BUG-067": {
+      "state": "merged",
+      "wave": "wave2"
+    },
+    "CR-123": {
+      "state": "merged",
+      "wave": "wave3"
+    },
+    "STORY-058-01": {
+      "state": "merged",
+      "wave": "wave4"
+    },
+    "STORY-058-02": {
+      "state": "merged",
+      "wave": "wave5"
+    },
+    "STORY-058-03": {
+      "state": "merged",
+      "wave": "wave6"
+    },
+    "STORY-058-04": {
+      "state": "merged",
+      "wave": "wave7"
+    },
+    "STORY-058-06": {
+      "state": "merged",
+      "wave": "wave8"
+    },
+    "STORY-058-05": {
+      "state": "merged",
+      "wave": "wave9"
+    },
+    "STORY-058-07": {
+      "state": "merged",
+      "wave": "wave10"
+    },
+    "BUG-085": {
+      "state": "merged",
+      "wave": "wave11"
+    },
+    "STORY-058-08": {
+      "state": "merged",
+      "wave": "wave12"
+    },
+    "STORY-058-09": {
+      "state": "merged",
+      "wave": "wave13"
+    },
+    "STORY-058-10": {
+      "state": "merged",
+      "base": "35580b0",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "worktree": "Migrated before pass C: git -C cleargate-cli checkout main, then git -C cleargate-cli worktree add OUTER/.worktrees/STORY-058-10/cleargate-cli story/STORY-058-10 (existing branch, no -b)",
+      "loop": "Developer pass C (test 46 scripted session C2-C6) -> integrate -> QA-Verify (harness lane) in parallel with post-flight -> DevOps",
+      "plan": "plans/M5.md STORY-058-10",
+      "boundary_after": [
+        "BD",
+        "RS-4a"
+      ]
+    },
+    "BUG-096": {
+      "state": "merged",
+      "base": "35580b0",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> Developer -> QA-Verify -> DevOps (TPV and post-flight only on a pre-gate flag)",
+      "plan": "plans/M5-fixwave.md BUG-096",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-097": {
+      "state": "merged",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> Developer -> QA-Verify -> DevOps (TPV and post-flight only on a pre-gate flag)",
+      "plan": "plans/M5-fixwave.md BUG-097",
+      "boundary_after": [
+        "BD"
+      ],
+      "base_note": "cli main tip when its lane opens"
+    },
+    "CR-124": {
+      "state": "merged",
+      "base": "35580b0",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> live post-flight -> DevOps",
+      "plan": "plans/replan-contract-first.md §7",
+      "boundary_after": [
+        "BD",
+        "RS-CR"
+      ]
+    },
+    "BUG-090": {
+      "state": "merged",
+      "base": "contract/S-41-codex",
+      "upstream": [
+        "STORY-058-10"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (one harness run, harness lane) -> live post-flight -> DevOps",
+      "plan": "plans/M5-fixwave.md BUG-090",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "STORY-058-11": {
+      "state": "merged",
+      "base": "contract/S-41-codex",
+      "upstream": [
+        "STORY-058-10"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> TPV -> Developer -> QA-Verify (scripted harness, harness lane) -> post-flight -> DevOps",
+      "plan": "plans/M5.md STORY-058-11 + RP-A15",
+      "boundary_after": [
+        "BD",
+        "RS-4"
+      ]
+    },
+    "BUG-098": {
+      "state": "merged",
+      "base": "contract/S-41-fence",
+      "upstream": [
+        "BUG-090"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> live post-flight -> DevOps",
+      "plan": "plans/M5-fixwave.md BUG-098",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "STORY-058-12": {
+      "state": "merged",
+      "base": "contract/S-41-dispatch",
+      "upstream": [
+        "STORY-058-10",
+        "STORY-058-11",
+        "CR-124"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> TPV -> Developer pass A -> Developer pass B -> QA-Verify (scripted harness, harness lane) -> post-flight -> DevOps",
+      "plan": "plans/M6.md STORY-058-12 + RP-A16 + RP-A21",
+      "boundary_after": [
+        "BD",
+        "RS-5"
+      ]
+    },
+    "STORY-058-13": {
+      "state": "Done — merged outer a3b77505 / cli 0e5b0ac (2026-09-27); full suite 3653/3651/0/2; BD; step L → RS-L after M7 (deferred_verification at close)",
+      "base": "contract/S-41-loop",
+      "upstream": [
+        "STORY-058-12",
+        "BUG-090"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> TPV -> Developer pass A -> Developer pass B -> QA-Verify (harness lane) -> post-flight -> step L (owner) -> DevOps",
+      "plan": "plans/M6.md STORY-058-13 + RP-A21",
+      "owner_actions": [
+        "STEP-L"
+      ],
+      "boundary_after": [
+        "BD",
+        "RS-CLOSE"
+      ],
+      "steps_note": "RS-4L, then step L (plans/M6.md F10), between post-flight and DevOps; merge lane frozen from step L to this merge"
+    },
+    "BUG-099": {
+      "state": "merged",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "loop": "QA-Red -> Developer -> QA-Verify -> DevOps",
+      "plan": "BUG-099 item file §4/§5 + plans/M6.md F12 OD-F1",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-101": {
+      "state": "Done — merged cli 8c98177 (2026-09-27); full suite 3659/3657/0/2; BD; RS-M7a",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-101",
+      "boundary_after": [
+        "BD",
+        "RS-M7a"
+      ]
+    },
+    "BUG-100": {
+      "state": "PAUSED at INTEGRATE d9e69e1 (onto 8c98177) — next: QA-Verify",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-100",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-047": {
+      "state": "PAUSED at INTEGRATE f036700 (onto 8c98177) — next: QA-Verify",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-047",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-103": {
+      "state": "PAUSED at INTEGRATE cli c2f56ab / outer 0f542bc0 (onto 8c98177) — next: QA-Verify",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-103",
+      "boundary_after": [
+        "BD",
+        "RS-M7b"
+      ]
+    },
+    "BUG-102": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-102",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-105": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-105",
+      "boundary_after": [
+        "BD",
+        "RS-M7c"
+      ]
+    },
+    "BUG-104": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-104",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-106": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "STORY-058-13",
+        "BUG-101"
+      ],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane) -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md BUG-106",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-114": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-C",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md addendum BUG-114",
+      "boundary_after": [
+        "BD"
+      ]
+    },
+    "BUG-108": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-108",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-109": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-109",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-113": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-113",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-115": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-115",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-116": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-103"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-A",
+      "bundle_lead": "BUG-108",
+      "loop": "QA-Red -> TPV (scan-gated) -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-A",
+      "plan": "plans/M7.md addendum BUG-116",
+      "boundary_after": [
+        "BD",
+        "RS-M7d"
+      ]
+    },
+    "BUG-110": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46 for BUG-107) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-110",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-111": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46 for BUG-107) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-111",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-107": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-102",
+        "BUG-103",
+        "BUG-105",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "repo_order": [
+        "outer",
+        "cli",
+        "dist-rebuild"
+      ],
+      "build_lane": "M7-B",
+      "bundle_lead": "BUG-110",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify (harness lane: test 46) -> post-flight (scan-gated) -> DevOps; one dispatch per role for lane M7-B",
+      "plan": "plans/M7.md addendum BUG-107",
+      "boundary_after": [
+        "BD",
+        "RS-M7e"
+      ]
+    },
+    "BUG-112": {
+      "state": "Ready to Bounce",
+      "base": "main",
+      "upstream": [
+        "BUG-101"
+      ],
+      "repo": "cli",
+      "outer_worktree": "detached host",
+      "build_lane": "M7-D",
+      "loop": "QA-Red -> live TPV -> Developer -> QA-Verify -> post-flight (scan-gated) -> DevOps",
+      "plan": "plans/M7.md addendum BUG-112",
+      "boundary_after": [
+        "BD"
+      ]
+    }
   },
   "waves": [
     {
-      "wave": "wave1", "milestone": "M0", "stories": ["BUG-089"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
+      "wave": "wave1",
+      "stories": [
+        "BUG-089"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M0"
+    },
+    {
+      "wave": "wave2",
+      "stories": [
+        "BUG-067"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M0"
+    },
+    {
+      "wave": "wave3",
+      "stories": [
+        "CR-123"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M0->M1"
+    },
+    {
+      "wave": "wave4",
+      "stories": [
+        "STORY-058-01"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M1"
+    },
+    {
+      "wave": "wave5",
+      "stories": [
+        "STORY-058-02"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M1"
+    },
+    {
+      "wave": "wave6",
+      "stories": [
+        "STORY-058-03"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M2"
+    },
+    {
+      "wave": "wave7",
+      "stories": [
+        "STORY-058-04"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M2"
+    },
+    {
+      "wave": "wave8",
+      "stories": [
+        "STORY-058-06"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M3"
+    },
+    {
+      "wave": "wave9",
+      "stories": [
+        "STORY-058-05"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M3"
+    },
+    {
+      "wave": "wave10",
+      "stories": [
+        "STORY-058-07"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M3"
+    },
+    {
+      "wave": "wave11",
+      "stories": [
+        "BUG-085"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M3"
+    },
+    {
+      "wave": "wave12",
+      "stories": [
+        "STORY-058-08"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M4"
+    },
+    {
+      "wave": "wave13",
+      "stories": [
+        "STORY-058-09"
+      ],
+      "parallel": false,
+      "status": "merged",
+      "rationale": "v1 M4"
+    },
+    {
+      "wave": "wave14",
+      "stories": [
+        "STORY-058-10"
+      ],
+      "parallel": false,
+      "status": "building",
+      "milestone": "M5",
+      "rationale": "v1 wave14. Developer passes A and B are at d0f0d95 (contract C1). Pass C (test 46) runs in its nested worktree. It has no upstream, so it merges when ready."
+    },
+    {
+      "wave": "cf-L0",
+      "stories": [
+        "BUG-096",
+        "BUG-097",
+        "CR-124"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M5",
       "after": [],
-      "rationale": "M0 sequential and blocking (owner): BUG-089 -> B0 -> BUG-067. Clause 1: plan section 1 says parallel=n (digest says y; resolved toward the plan). Clause 2 vs BUG-085: .cleargate/scripts/test/bug068_dispatch_tool_name.red.sh. Creates cleargate-cli/src/hooks/hook-signal.ts, which STORY-058-10 extends. Runs under pre-repair, fail-open live gates: treat its enforcement and ledger rows as untrusted.",
-      "dispatch_blockers": ["D1"],
-      "boundary_after": ["BD", "B0"]
+      "rationale": "Derived integration layer 0: no unmerged upstream. All three build now (BUG-097 when a lane frees). Merges are serial, in ready order."
     },
     {
-      "wave": "wave2", "milestone": "M0", "stories": ["BUG-067"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["BUG-089", "B0"],
-      "rationale": "M0 sequential (owner): after the B0 barrier. Clause 1: plan parallel=n. Versus BUG-089, clauses 2-4 pass literally, but clause 5 fails on the owner's M0 chain. Clause 2 vs STORY-058-09: the cleargate-cli/test/e2e/ directory token contains -09's e2e test.",
-      "dispatch_blockers": ["D1", "D2"],
-      "boundary_after": ["BD", "RS-1"]
+      "wave": "cf-L1",
+      "stories": [
+        "BUG-090",
+        "STORY-058-11"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M5",
+      "after": [
+        "wave14"
+      ],
+      "rationale": "Derived layer 1: upstream STORY-058-10. Both build now from C1 and integrate after STORY-058-10 merges."
     },
     {
-      "wave": "wave3", "milestone": "M0->M1", "stories": ["CR-123"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["M0"],
-      "rationale": "After M0 fully merges and before STORY-058-01; off the critical path (owner). Clause 1: plan parallel=n. Clause 5: CR-123 -> 058-01 (-01 copies the canonical templates and readiness-gates.md CR-123 edits), CR-123 -> 058-11 (qa.md codegen source), CR-123 -> 058-12 (SKILL.md). Clause 2: the bare `.cleargate/` token overlaps every outer .cleargate path. Condition 1: the cli half merges and dist is rebuilt from cli main BEFORE the outer half registers spidr-coverage in the live readiness-gates.md (stamp-and-gate.sh:12-13 runs cleargate-cli/dist/cli.js first). Condition 2: live .claude/ qa.md and SKILL.md are re-synced at RS-2 and never edited inside the segment.",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD", "RS-2"]
+      "wave": "cf-L2",
+      "stories": [
+        "BUG-098",
+        "STORY-058-12"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M5/M6",
+      "after": [
+        "cf-L0",
+        "cf-L1"
+      ],
+      "rationale": "Derived layer 2. BUG-098 builds from C4 and integrates after BUG-090. STORY-058-12 builds from C2 and integrates after STORY-058-11 and CR-124."
     },
     {
-      "wave": "wave4", "milestone": "M1", "stories": ["STORY-058-01"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["CR-123"],
-      "fail_safe": true,
-      "rationale": "unknown collision metadata — fail-safe-serialized. collision_surface.sh emits zero paths (section 3.1 is a bullet list, not a table). The digest's two creates were recovered by the reader, which dropped the **modify** lines cleargate-cli/scripts/copy-planning-payload.mjs and CLAUDE.md. Also clause 1 (parallel=n). Clause 5: 01 -> 02, 01 -> 11 (scaffold/core/**). Highest-bounce item; runs alone. After this merges, cleargate-planning/ is a deprecated read-only mirror, and the canonical source for every later item is cleargate-cli/scaffold/{core,hosts/claude}/**.",
-      "dispatch_blockers": ["D3"],
-      "boundary_after": ["BD"]
+      "wave": "cf-L3",
+      "stories": [
+        "STORY-058-13"
+      ],
+      "parallel": false,
+      "derived": true,
+      "milestone": "M6",
+      "after": [
+        "cf-L1",
+        "cf-L2"
+      ],
+      "rationale": "Derived layer 3. Builds from C3 and integrates after STORY-058-12 and BUG-090. Owner step L comes before its merge."
     },
     {
-      "wave": "wave5", "milestone": "M1", "stories": ["STORY-058-02"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["STORY-058-01"],
-      "rationale": "Clause 1 (parallel=n). Clause 5: 01 -> 02 (repoints the validator and manifest builder at -01's layout). Clause 2 vs 058-06: scripts/build-manifest.ts. Clause 2 vs 058-11: package.json prebuild wiring.",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD", "RS-3"]
+      "wave": "cf-M7",
+      "stories": [
+        "BUG-101",
+        "BUG-100",
+        "BUG-047",
+        "BUG-103",
+        "BUG-102",
+        "BUG-105",
+        "BUG-104"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M7",
+      "after": [
+        "cf-L3"
+      ],
+      "rationale": "No contracts and no build-ordering collisions (plans/M7.md §2.2). At most 4 build lanes; merges serial in lane_priority_m7 order; each merge is followed by BD and its RS step."
     },
     {
-      "wave": "wave6", "milestone": "M2", "stories": ["STORY-058-03"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["M1"],
-      "fail_safe": true,
-      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the cleargate-cli/src/commands/init.ts **modify** line. Clause 1 (parallel=n). Clause 5: 03 -> 04 and 03 -> 05 (registry.ts), 03 -> 12 (types.ts).",
-      "dispatch_blockers": ["D3"],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave7", "milestone": "M2", "stories": ["STORY-058-04"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["STORY-058-03"],
-      "rationale": "Clause 2 vs 058-05: src/cli.ts and src/hosts/registry.ts, so the owner-permitted -04||-05 co-wave is NOT available. Clause 2 vs 058-03 and 058-06: src/commands/init.ts. Clause 5: 03 -> 04 (registry.ts is a forward reference to -03's create).",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave8", "milestone": "M3", "stories": ["STORY-058-06"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["M2"],
-      "rationale": "Clause 2: src/lib/manifest.ts vs 058-05, scripts/build-manifest.ts vs 058-02, src/commands/init.ts vs 058-04. Clause 5: 06 -> 05, 06 -> 07, 06 -> BUG-085 (its baseline resolves from -06's ownership data). Clause 1 vs 058-07 (parallel=n).",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave9", "milestone": "M3", "stories": ["STORY-058-05"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["STORY-058-04", "STORY-058-06"],
-      "moved_from": "M2 (halt slot c9, before 058-06)",
-      "rationale": "Clause 5: 06 -> 05. -05 section 1 says 'Manifest schema for ownership — STORY-058-06; this story consumes it'; -06 section 1 says 'Consuming them in `host remove` — STORY-058-05'. The halt order ran -05 in M2, ahead of the owner field its safety gate depends on (remove only when manifest `owner` == host). Moved to directly after -06; this is the only change from the halt order. Clause 2 vs 058-04: cli.ts and registry.ts. Clause 2 vs 058-06: manifest.ts.",
-      "dispatch_blockers": ["D5"],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave10", "milestone": "M3", "stories": ["STORY-058-07"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["STORY-058-06"],
-      "rationale": "Clause 1 (parallel=n). Clause 5: 06 -> 07 (consumes the ownership fields). Clause 2 vs BUG-085: src/commands/doctor.ts. The section 3.2 split signal is still open for the M3 plan.",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave11", "milestone": "M3", "stories": ["BUG-085"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["STORY-058-07"],
-      "rationale": "BUG-085's only wave: durable detect-and-warn. It cannot reach Completed until this merges. Clause 1: plan parallel=n. Clause 2: doctor.ts vs 058-07, CLAUDE.md vs 058-01, bug068 red.sh vs BUG-089. Clause 5: 07 -> 085, and 06 -> 085 (the baseline resolves from manifest/payload data, never a hardcoded cleargate-planning/ path).",
-      "dispatch_blockers": ["D2", "D4"],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave12", "milestone": "M4", "stories": ["STORY-058-08"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["M3"],
-      "fail_safe": true,
-      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the cleargate-cli/src/cli.ts **modify** line (command registration). Clause 2 vs 058-09: .cleargate/knowledge/clean-room-verification.md. Clause 2 vs 058-13: verify-install.ts. Clause 5: 08 -> 09 (the baseline consumes the driver), 08 -> 13.",
-      "dispatch_blockers": ["D3"],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave13", "milestone": "M4", "stories": ["STORY-058-09"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "outer"], "lane": "standard",
-      "after": ["STORY-058-08"],
-      "rationale": "Clause 2 vs 058-08: .cleargate/knowledge/clean-room-verification.md. This is the digest's only non-cli unreachable path; it is a forward reference to -08's create, so an ordering edge (R4), not a refusal. Clause 5: 08 -> 09. The halt's one clause-1-4 pair (08/09) now fails clause 2 as well.",
-      "dispatch_blockers": [],
-      "boundary_after": []
-    },
-    {
-      "wave": "wave14", "milestone": "M5", "stories": ["STORY-058-10"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["M4"],
-      "rationale": "Clause 1 (parallel=n). Clause 5: BUG-089 -> 10 (extends hook-signal.ts rather than creating a second handler), 10 -> 11. Clause 2 vs 058-11: scaffold/hosts/codex/** contains -11's .codex/agents/**.",
-      "dispatch_blockers": [],
-      "boundary_after": ["BD"]
-    },
-    {
-      "wave": "wave15", "milestone": "M5", "stories": ["STORY-058-11"], "parallel": false,
-      "repo": "cli", "repo_order": ["cli", "dist-rebuild"], "lane": "standard",
-      "after": ["STORY-058-10"],
-      "fail_safe": true,
-      "rationale": "unknown collision metadata — fail-safe-serialized. The bullet-form section 3.1 parses to zero paths, and the digest drops the `cleargate-planning/.claude/hooks/*.sh` **modify** line (all nine hooks adopt the shim) and the prebuild wiring. Clause 5: 10 -> 11, 01 -> 11 (scaffold/core/**), CR-123 -> 11 (qa.md codegen source), 09 -> 11 (the baseline must exist to catch a shim regression, per -11 section 1).",
-      "dispatch_blockers": ["D3", "D4"],
-      "boundary_after": ["BD", "RS-4"]
-    },
-    {
-      "wave": "wave16", "milestone": "M6", "stories": ["STORY-058-12"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["M5"],
-      "rationale": "Clause 1 (parallel=n). Clause 5: 03 -> 12 (HostAdapter types.ts gains dispatchMode), CR-123 -> 12 (SKILL.md), 10 and 11 -> 12 (owner), 12 -> 13. Clause 2 vs BUG-089: .cleargate/knowledge/cleargate-enforcement.md.",
-      "dispatch_blockers": ["D4"],
-      "boundary_after": ["BD", "RS-5"]
-    },
-    {
-      "wave": "wave17", "milestone": "M6", "stories": ["STORY-058-13"], "parallel": false,
-      "repo": "both", "repo_order": ["cli", "dist-rebuild", "outer"], "lane": "standard",
-      "after": ["STORY-058-12"],
-      "rationale": "Clause 1 (parallel=n). Clause 5: 12 -> 13, 08 -> 13 (extends verify-install.ts), and 09, 10, 11 -> 13 (its section 3.2). Clause 2 vs BUG-089: settings.json.",
-      "dispatch_blockers": ["D4"],
-      "boundary_after": ["BD"]
+      "wave": "cf-M7-add",
+      "stories": [
+        "BUG-114",
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116",
+        "BUG-110",
+        "BUG-111",
+        "BUG-107",
+        "BUG-112"
+      ],
+      "parallel": true,
+      "derived": true,
+      "milestone": "M7",
+      "after": [
+        "cf-L3"
+      ],
+      "rationale": "M7 addendum (plans/M7.md A2): no contracts; four build lanes by file ownership (M7-A text bundle, M7-B script bundle, M7-C BUG-114, M7-D BUG-112); bundles merge once; upstream edges carry the order; each merge is followed by BD and its RS step."
     }
   ],
+  "merge_queue": {
+    "rule": "One merge at a time. An item enters the queue once integrationReady holds (all upstream merged) and its QA-Verify and post-flight have passed on the integrated tree. Ties go to lane_priority order. Every cli merge is followed by BD, then by the item's boundary step, before the next merge.",
+    "expected_order": [
+      "CR-124 | BUG-096 | STORY-058-10 (ready order; none has an upstream)",
+      "STORY-058-11 | BUG-090 (after STORY-058-10)",
+      "BUG-097",
+      "BUG-098 (after BUG-090)",
+      "STORY-058-12 (after STORY-058-11 and CR-124)",
+      "STORY-058-13 (after STORY-058-12 and BUG-090)"
+    ]
+  },
   "barrier_steps": [
     {
-      "id": "B0", "item": "BUG-085", "kind": "operational-step", "after": ["wave1"], "before": ["wave2"],
-      "runs_in": "outer main checkout, outside any segment; no state transition",
-      "steps": [
-        "Pre-req: BUG-089's cli half merged to cli main, dist rebuilt from cli main, and BUG-089's outer half merged to sprint/S-41",
-        "Take the canonical source from the sprint/S-41 tip, NOT main: BUG-089's canonical hook and settings edits are only on sprint/S-41",
-        "Back up each exact live target; re-sync with install-time pin substitution, not a blanket copy (FLASHCARD 2026-08-28 #dogfood-split: canonical `__CLEARGATE_VERSION__` vs live `0.20.0` is substitution, not drift); preserve the live-only entries scheduled_tasks.lock, settings.local.json, worktrees/",
-        "Restart Claude Code; prove real edit and dispatch denials, permitted-action controls, and correct dispatch identity",
-        "Ledger rows before this point are unattributable (plan 2.3)"
-      ]
+      "id": "B0",
+      "item": "BUG-085",
+      "kind": "operational-step",
+      "status": "done"
     }
   ],
   "boundary_steps": [
-    {"id": "BD", "when": "after every cli merge", "action": "Rebuild cleargate-cli/dist from cli main (npm run build). The live stamp-and-gate.sh:12, pre-edit-gate.sh:94 and session-start.sh:10 hooks run ${REPO_ROOT}/cleargate-cli/dist/cli.js first, and dist is gitignored, so it survives branch switches. If a segment builds on a story branch (e.g. for e2e), rebuild from cli main before the next outer write. `build` is `rm -rf dist && tsup`, so during a build the hooks fall back to the global cleargate binary. FLASHCARD 2026-08-29 #dogfood-split: an unrebuilt dist silently runs the old contract."},
-    {"id": "RS-1", "after": "wave2", "action": "Second targeted live re-sync: .claude/hooks/stamp-and-gate.sh from BUG-067's canonical edit (same pin-substitution rule as B0)."},
-    {"id": "RS-2", "after": "wave3", "action": "CR-123 condition 2: re-sync live .claude/agents/qa.md and .claude/skills/sprint-execution/SKILL.md."},
-    {"id": "RS-3", "after": "wave5", "action": "M1 close: the re-sync source switches to cleargate-cli/scaffold/hosts/claude/**. Run a no-op re-sync diff; per -01's acceptance it must be byte-identical."},
-    {"id": "RS-4", "after": "wave15", "action": "All nine hooks adopt the harness shim: re-sync live hooks, restart, and re-run STORY-058-09's clean-room Claude baseline before wave16."},
-    {"id": "RS-5", "after": "wave16", "action": "Re-sync live SKILL.md and the new dispatch-serial.md before wave17 dispatches."}
+    {
+      "id": "BD",
+      "when": "after every cli merge, in the merge lane",
+      "action": "npm run build from cli main in the cli main checkout (OUTER/cleargate-cli). Live hooks run OUTER/cleargate-cli/dist/cli.js. Worktree builds never touch it."
+    },
+    {
+      "id": "RS-1",
+      "status": "done"
+    },
+    {
+      "id": "RS-2",
+      "status": "done"
+    },
+    {
+      "id": "RS-3",
+      "status": "done"
+    },
+    {
+      "id": "RS-4a",
+      "after": "STORY-058-10 BD",
+      "blocks": "the next cli merge",
+      "action": "Procedure: plans/M5.md RS-4a, plus step 3b (canonical-live-parity 5d PASS)."
+    },
+    {
+      "id": "RS-4",
+      "after": "STORY-058-11 BD",
+      "blocks": "the next cli merge",
+      "action": "plans/M5.md RS-4 steps 1-4, then the scripted half of step 6 (claude-baseline check), then step 7. FW-A8 applies: no --known-fail; sprint-init PASS x2. The live codex run (step 5) moves to RS-4L."
+    },
+    {
+      "id": "RS-4L",
+      "after": "RS-4 and owner action OD1",
+      "blocks": "RS-CLOSE; run before STORY-058-13 step L (plans/M6.md F10 L0)",
+      "action": "codex-hooks.mjs run --provider live --codex-home <DEDICATED_CODEX_HOME> --label 'RS-4L live' -> PASS, then codex-hooks.mjs check exit 0. Run it in the harness lane, from the cli main checkout, at any point before RS-CLOSE.",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)"
+    },
+    {
+      "id": "RS-CR",
+      "after": "CR-124 BD",
+      "blocks": "RS-5",
+      "action": "Run node OUTER/.cleargate/sprint-runs/SPRINT-41/b0-live-resync.mjs (dry run). The drift list must be exactly agents/architect.md, agents/architect-synth.md, agents/architect-reader.md and skills/sprint-execution/SKILL.md. Then run it with --apply, check shasum live == canonical, and check that node OUTER/cleargate-cli/dist/cli.js doctor shows no drift. No restart: agents take effect at the next session start, the skill at its next load."
+    },
+    {
+      "id": "RS-5",
+      "after": "STORY-058-12 BD",
+      "blocks": "the next cli merge",
+      "action": "Procedure: plans/M6.md RS-5 with FW-A10 applied (no --known-fail). The dry-run list must be exactly skills/sprint-execution/SKILL.md (changed) and skills/sprint-execution/dispatch-serial.md (new)."
+    },
+    {
+      "id": "RS-CLOSE",
+      "after": "STORY-058-13 BD",
+      "action": "Run the v1 RS-CLOSE text without --known-fail, plus the M6 codex-loop close run and check, then the owner walkthrough, the Reporter, and close_sprint.mjs (Gate 4). The claude-baseline, codex-hooks and codex-loop runs are serial in the harness lane.",
+      "status": "done",
+      "result": "2026-10-04 final build c6d6656: Claude clean-room PASS (Run 4), scripted codex-hooks PASS (Run 3), scripted codex-loop PASS (Run 3); live checks moved to BUG-106"
+    },
+    {
+      "id": "RS-M7a",
+      "status": "done",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7b",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7c",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "DT",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-L",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "plan": "plans/M7.md §5/§6/§4.2"
+    },
+    {
+      "id": "RS-M7d",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "after": "M7-A BD",
+      "blocks": "the next cli merge",
+      "plan": "plans/M7.md addendum A6.1 (list: agents/architect.md, agents/developer.md, agents/devops.md, agents/qa.md, skills/sprint-execution/SKILL.md)"
+    },
+    {
+      "id": "RS-M7e",
+      "status": "carried (SPRINT-41 closed 2026-10-04; owner decision)",
+      "after": "M7-B BD",
+      "blocks": "the next cli merge",
+      "plan": "plans/M7.md addendum A6.1 (list: agents/developer.md, hooks/stamp-and-gate.sh, skills/sprint-execution/SKILL.md, skills/sprint-execution/dispatch-serial.md)"
+    }
+  ],
+  "owner_actions": [
+    {
+      "id": "OD1",
+      "what": "Log in DEDICATED_CODEX_HOME (plans/M5.md OD1 command). No agent reads, copies or writes credential material.",
+      "ask": "now, non-blocking",
+      "needed_by": "RS-4L or STORY-058-13 step L, whichever comes first"
+    },
+    {
+      "id": "STEP-L",
+      "what": "Trust the workspace and exact hooks in the Codex TUI for STORY-058-13's prepared room (plans/M6.md step L)",
+      "needed_by": "STORY-058-13 DevOps"
+    },
+    {
+      "id": "GATE-4",
+      "what": "Explicit close authorization",
+      "needed_by": "close_sprint.mjs --assume-ack"
+    }
   ],
   "refused": [],
   "blocked": [],
   "lane_assignments": {
+    "BUG-096": "standard",
+    "BUG-097": "standard",
+    "BUG-090": "standard",
+    "BUG-098": "standard",
     "BUG-089": "standard",
     "BUG-067": "standard",
     "CR-123": "standard",
+    "CR-124": "standard",
     "STORY-058-01": "standard",
     "STORY-058-02": "standard",
     "STORY-058-03": "standard",
@@ -205,41 +1081,116 @@
     "STORY-058-13": "standard"
   },
   "lane_changes": [
-    {"storyId": "BUG-067", "from": "fast", "to": "standard", "failing_checks": [1, 2, 6], "note": "5+ impl files; stamp-and-gate gate-enforcement surface; bounce exposure med. state.json still says fast; init_sprint.mjs reads lane_assignments only at init, so apply with update_state.mjs --lane-demote."},
-    {"storyId": "BUG-085", "from": "fast", "to": "standard", "failing_checks": [1, 2, 7], "note": "doctor.ts + session-start.sh + CLAUDE.md + red test; re-syncs gate-enforcement hooks; spans live, canonical and cli. state.json still says fast."}
+    {
+      "storyId": "BUG-067",
+      "from": "fast",
+      "to": "standard",
+      "failing_checks": [
+        1,
+        2,
+        6
+      ],
+      "note": "applied (D2)"
+    },
+    {
+      "storyId": "BUG-085",
+      "from": "fast",
+      "to": "standard",
+      "failing_checks": [
+        1,
+        2,
+        7
+      ],
+      "note": "applied (D2)"
+    }
   ],
   "rulings": {
-    "BUG-085_placement": "Carried: one state.json item, one wave (wave11, M3, after 058-07). The M0 half is barrier step B0 and causes no state transition.",
-    "CR-123_placement": "Carried: wave3, after M0, before 058-01, cli half -> dist rebuild -> outer half. Conditions 1 and 2 as recorded in wave3.",
-    "STORY-058-05_reorder": "New: -05 moves from M2 to M3, directly after -06 (clause-5 edge 06 -> 05 stated in both items). Nothing else in the halt order changes.",
-    "STORY-058-04_05_cowave": "Not available: clause 2 fails on src/cli.ts and src/hosts/registry.ts.",
-    "available_but_unused": "None. Only two pairs pass clauses 2-4: BUG-089/BUG-067 (M0) and 058-05/BUG-085 (M3). Both fail clause 1 on the plan's parallel=n for the bugs and clause 5 on owner order. Under R1 every item shares the one cli checkout, so none could run concurrently anyway."
+    "real_collisions_only": "parallel_eligible and db_write_set are hints (CR-124). The only serializing surfaces in the remainder are the ordered artifacts in plans/replan-contract-first.md §1.",
+    "shared_sanctioned_rows": "One SANCTIONED_BASELINE_DELTAS row per rel. The shared cleargate-enforcement.md row is byte-identical in STORY-058-11 and CR-124 (RP-A15, §7). SKILL.md and launch_wave.mjs rows belong to CR-124; STORY-058-12 reuses them.",
+    "codex_agent_regen": "Whichever of STORY-058-11 and CR-124 merges second runs npm run gen:codex after merging main.",
+    "fix_wave_placement": "Superseded. BUG-096/BUG-097 are in cf-L0, BUG-090 in cf-L1, BUG-098 in cf-L2.",
+    "BUG-085_placement": "carried (merged)",
+    "CR-123_placement": "carried (merged)",
+    "STORY-058-05_reorder": "carried (merged)"
   },
-  "dispatch_blockers": [
-    {"id": "D1", "items": ["BUG-089", "BUG-067"], "defect": "Live-only edits to files whose canonical twins are byte-identical today: BUG-089 .cleargate/knowledge/cleargate-enforcement.md, BUG-067 .cleargate/scripts/prep_doc_refresh.mjs. STORY-058-01 copies the canonical tree into scaffold/core, so a live-only fix never ships and re-creates drift.", "fix": "Add cleargate-planning/.cleargate/knowledge/cleargate-enforcement.md and cleargate-planning/.cleargate/scripts/prep_doc_refresh.mjs to the respective section 3.1 tables."},
-    {"id": "D2", "items": ["BUG-067", "BUG-085"], "defect": "state.json lane is still fast, and fast lane skips QA-Red.", "fix": "bash .cleargate/scripts/run_script.sh node .cleargate/scripts/update_state.mjs <ID> --lane-demote \"<reason>\" for both, before wave2; update plan section 1 and 2.4."},
-    {"id": "D3", "items": ["STORY-058-01", "STORY-058-03", "STORY-058-08", "STORY-058-11"], "defect": "Section 3.1 is a bullet list; collision_surface.sh parses zero paths (re-run 2026-09-24) and file_surface_diff.sh exits 0 when section 3.1 declares nothing, so the surface gate is fail-open for their outer halves. Modify targets missing from the digests: -01 cleargate-cli/scripts/copy-planning-payload.mjs and CLAUDE.md; -03 cleargate-cli/src/commands/init.ts; -08 cleargate-cli/src/cli.ts; -11 the nine hooks and cleargate-cli/package.json (prebuild wiring).", "fix": "Convert each to a backtick-quoted table listing every modify and create target. These 4 plus 058-12 were the 5 items not touched by 363f2011."},
-    {"id": "D4", "items": ["BUG-085", "STORY-058-11", "STORY-058-12", "STORY-058-13"], "defect": "After 058-01 repoints copy-planning-payload.mjs, cleargate-planning/ feeds neither the payload nor the live re-sync. These items still write there: BUG-085 (cleargate-planning/.claude/** and hooks/session-start.sh, and its task text still compares against cleargate-planning/.claude/**), -11 (hooks/*.sh), -12 (SKILL.md, plus a create of dispatch-serial.md in the dead tree; its live-only .cleargate/scripts/launch_wave.mjs, dispatch_serial.mjs and knowledge docs have no scaffold/core twin), -13 (settings.json).", "fix": "After wave4 merges and before each item's own dispatch, re-declare against cleargate-cli/scaffold/{core,hosts/claude}/**, then commit the amendment on sprint/S-41 before cutting any outer worktree (FLASHCARD 2026-08-27 #worktree #planning)."},
-    {"id": "D5", "items": ["STORY-058-05"], "defect": "Ordering inversion with 058-06 (see rulings.STORY-058-05_reorder). Already applied here.", "fix": "Orchestrator acknowledges and moves -05's plan section 1 Milestone cell from M2 to M3."}
-  ],
-  "preconditions": [
-    "Outer branch sprint/S-41 does not exist yet (outer sprint branches stop at sprint/S-38). R2 requires it before wave1's outer half.",
-    "The cli main checkout is on main, clean apart from an untracked cleargate-0.25.0.tgz. The existing dist/cli.js (2026-09-02 19:35) postdates cli HEAD 3364802 (19:29)."
-  ],
-  "hygiene_non_blocking": [
-    "CR-123: the bare `.cleargate/` token, parsed from the heading 'copy to the live `.cleargate/` tree', declares the whole outer tree. Its red test readiness-predicates-spidr-coverage.red.node.test.ts is absent and not labelled as a create.",
-    "BUG-085: `cleargate-planning/.claude/**` is the read-only comparison baseline, but it is declared as write surface.",
-    "BUG-067: `cleargate-cli/test/e2e/` is a directory token; name the test file.",
-    "BUG-089: hook-signal.ts, hook.ts and hook-signal.node.test.ts (and src/hooks/) do not exist yet; they are creates labelled as modify.",
-    "Plan section 2.2 is stale against the item surfaces: init.ts is 03 -> 04 -> 06 (not 01 -> 03 -> 04 -> 10), and manifest.ts is 06 -> 05 (not 02 -> 06 -> 07).",
-    "058-03 section 1: sketch 058-10's Codex needs before freezing HostAdapter. The M2 plan should read -10 section 3.2."
-  ],
+  "dispatch_blockers": [],
+  "dispatch_blockers_v1": "D1-D5 resolved. See waves.json v1 at outer commit c8a42afe.",
   "predicate_notes": {
-    "reachability_BUG_046": "Zero refusals. Every unreachable_surface path is under cleargate-cli/ (satisfied by R1) except 058-09's .cleargate/knowledge/clean-room-verification.md, which is a forward reference to 058-08's create (R4 ordering edge).",
-    "empty_surface_guard_BUG_033": "The digest union is non-empty for all 17. Checked against the parser: collision_surface.sh returns zero paths for 058-01, -03, -08 and -11. Their digest creates were recovered by the reader and drop every **modify** line. Treated as fail-safe-serialized. Each keeps its own singleton wave in dependency order rather than a trailing wave, because trailing placement would break clause-5 edges (e.g. 01 -> everything).",
-    "db_axis_clause_4": "Vacuous: db_write_set is empty in all 17 digests.",
-    "dep_predecessors": "Empty in all 17 digests. Clause-5 edges come from owner constraints, forward references between surfaces (R4), and body-stated consumption (058-05/-06).",
-    "parallel_eligible_divergence": "The digest says y where plan section 1 says n for BUG-067, BUG-085, BUG-089 and CR-123. Resolved toward the plan (serial). No effect on the schedule.",
-    "glob_semantics": "Glob and directory tokens are treated as containing every path beneath them (e.g. scaffold/hosts/codex/** contains .codex/agents/**; test/e2e/ contains the -09 test)."
+    "v1": "See waves.json v1 at c8a42afe. The five-clause predicate governed waves 1-14.",
+    "remainder": "Real-collision predicate (CR-124): ordered journals, single-writer generated artifacts, and shared files needing ordered edits. See plans/replan-contract-first.md §1 for the per-item analysis."
+  },
+  "lane_priority_m7": [
+    "BUG-101",
+    "BUG-100",
+    "BUG-047",
+    "BUG-103",
+    "BUG-102",
+    "BUG-105",
+    "BUG-114",
+    "BUG-108",
+    "BUG-109",
+    "BUG-113",
+    "BUG-115",
+    "BUG-116",
+    "BUG-110",
+    "BUG-111",
+    "BUG-107",
+    "BUG-104",
+    "BUG-106",
+    "BUG-112"
+  ],
+  "build_lanes_m7": {
+    "M7-A": {
+      "lead": "BUG-108",
+      "members": [
+        "BUG-108",
+        "BUG-109",
+        "BUG-113",
+        "BUG-115",
+        "BUG-116"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-108 on story/BUG-108 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-108/cleargate-cli on story/BUG-108 from main",
+      "dispatch": "one per role per lane; brief line 1: BUG-108 (M7-A bundle: BUG-108 BUG-109 BUG-113 BUG-115 BUG-116)",
+      "merge": "one DevOps merge (outer then cli), full suite, BD, RS-M7d; update_state Done per member",
+      "plan": "plans/M7.md addendum A2/A4"
+    },
+    "M7-B": {
+      "lead": "BUG-110",
+      "members": [
+        "BUG-110",
+        "BUG-111",
+        "BUG-107"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-110 on story/BUG-110 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-110/cleargate-cli on story/BUG-110 from main",
+      "dispatch": "one per role per lane; brief line 1: BUG-110 (M7-B bundle: BUG-110 BUG-111 BUG-107)",
+      "merge": "one DevOps merge (outer then cli), full suite, BD, RS-M7e; update_state Done per member",
+      "plan": "plans/M7.md addendum A2/A4"
+    },
+    "M7-C": {
+      "lead": "BUG-114",
+      "members": [
+        "BUG-114"
+      ],
+      "repo": "both",
+      "outer_worktree": "OUTER/.worktrees/BUG-114 on story/BUG-114 from sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-114/cleargate-cli on story/BUG-114 from main",
+      "merge": "DevOps merge (outer then cli), full suite, BD",
+      "plan": "plans/M7.md addendum A4"
+    },
+    "M7-D": {
+      "lead": "BUG-112",
+      "members": [
+        "BUG-112"
+      ],
+      "repo": "cli",
+      "outer_worktree": "OUTER/.worktrees/BUG-112 detached at sprint/S-41",
+      "cli_worktree": "OUTER/.worktrees/BUG-112/cleargate-cli on story/BUG-112 from main",
+      "merge": "DevOps merge (cli), full suite, BD",
+      "plan": "plans/M7.md addendum A4"
+    }
   }
 }

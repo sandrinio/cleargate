@@ -19,6 +19,8 @@ Hook-enforced rules surfaced by CLI errors. AI agents read this file when a hook
 | §11 | protocol §26 | Decomposition Gate (CR-017) |
 | §12 | protocol §27 | Gate 4 — Sprint Close Acknowledgement (CR-019) |
 | §15 | — | Operator Emergency Levers (STORY-070-01) |
+| §16 | — | Host Enforcement Deltas — Codex (STORY-058-11) |
+| §17 | protocol §23.5 | Host Dispatch Modes (STORY-058-12) |
 
 ---
 
@@ -100,7 +102,7 @@ During a story's execution, `state.json` at `.cleargate/sprint-runs/<sprint-id>/
 
 A wave runs multiple per-story segments concurrently, each in its OWN ClearGate-managed `.worktrees/STORY-X` (created via `git worktree add .worktrees/STORY-X -b story/STORY-X sprint/S-NN` — **not** the Workflow tool's `isolation:'worktree'`, which cuts off the wrong base; spike decision 2). Two file-surface axes:
 
-- **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (STORY-033-03's five-clause predicate), not a runtime lock.
+- **Per-worktree `.git` index (no race).** Each segment commits inside its own worktree with an isolated `.git` index, so the pre-commit surface gate (`file_surface_diff.sh`) runs per-worktree and parallel in-segment commits do **not** race each other. File-disjointness between co-waved stories is the Architect's `waves.json` guarantee (the real-collision predicate, CR-124 — only ordered journals, single-writer generated artifacts and shared files needing ordered edits serialize), not a runtime lock.
 - **Shared sprint-branch axis (serial barrier merge).** `sprint/S-NN` is a single-writer axis. The barrier therefore merges each GREEN `story/STORY-X` to `sprint/S-NN` **serially — one worktree at a time, never two concurrently** (protocol §23.3). Concurrent `git worktree add` at wave launch is avoided by pre-creating all wave worktrees serially before any segment runs.
 
 ---
@@ -242,7 +244,7 @@ The marker files are gitignored via the existing `.cleargate/sprint-runs/` gitig
 2. For each report file, it parses the `flashcards_flagged:` YAML list (inline `[]` and block `- "text"` forms both supported).
 3. For each card, it computes the 12-char SHA-1 hash and checks for the `.processed-<hash>` marker in `SPRINT_DIR`.
 4. If any card is unprocessed:
-   - exits non-zero (blocks Task spawn) with stderr listing each unprocessed card and the `touch` command hint.
+   - exits 2 (BUG-089: resolved via the shared `cleargate hook signal` handler, host-honored — blocks the Task spawn) with stderr listing each unprocessed card and the `touch` command hint. Before BUG-089 this was a bare `exit 1`, which Claude Code treats as a non-blocking error (only `exit 2`, or a JSON `permissionDecision: "deny"`, actually blocks a PreToolUse hook) — the gate logged and printed a refusal but the dispatch proceeded anyway.
 5. If `flashcards_flagged: []` or no report files exist, the gate passes immediately.
 
 **Bypass:**
@@ -571,7 +573,7 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 
 ### `CLEARGATE_ADVISORY=1`
 
-When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:129` hook honor-site that reads the same lever for the flashcard gate.
+When set to the exact string `'1'`, it downgrades gate failures at exactly two true honor sites: the `cleargate sprint preflight` gate (`sprint.ts` `isAdvisory()`, `gate-mode.ts:14`) and the `cleargate sprint init` story-file assertion (`init_sprint.mjs:180`) — each from a hard exit to a stderr warning prefixed with `[advisory]`, and the command exits 0. There is also a `pending-task-sentinel.sh:167` hook honor-site that reads the same lever for the flashcard gate — it downgrades what is (as of BUG-089) a real host-honored `exit 2` block to a warning that still exits 0, not (as before BUG-089) a bare `exit 1` that Claude Code already treated as non-blocking.
 
 **`CLEARGATE_ADVISORY=1` does NOT soften the file-surface, decomposition, lifecycle-init/reconciliation, or sprint-close gates, and is NOT a universal enforcement-strength knob.** No other CLI command or hook honors it; adding a new honor site anywhere else is out of scope by design (STORY-051-08 §1.3).
 
@@ -583,3 +585,31 @@ When set to the exact string `'1'`, it downgrades gate failures at exactly two t
 **When to use:** CI environments bootstrapping a new ClearGate install, or during a sprint where a transient gate failure (e.g., stale state.json) would otherwise block a human-confirmed safe operation.
 
 **Log advisory use:** Record any use of `CLEARGATE_ADVISORY=1` in the sprint §4 Execution Log.
+
+---
+
+## 16. Host Enforcement Deltas — Codex (source: STORY-058-11)
+
+**What a `--host codex` install enforces differently from Claude Code.** Each delta below is a recorded limitation, not a parity claim. Where Codex enforcement is weaker, the rule is prompt-enforced: the role's instructions still state it, but no harness mechanism stops a violation.
+
+1. **No per-agent `tools:` allowlist.** Codex roles (`.codex/agents/<name>.toml`) have no tools field, so the canonical agents' `tools:` frontmatter is dropped by codegen and every role tool boundary is prompt-enforced under Codex — including QA's "never edits code" (`qa.md` omits `Write`). Neither `sandbox_mode` nor per-agent `mcp_servers` is presented as a substitute.
+2. **The role model tier is not translated.** Codex forwards a role `model` verbatim to the provider, and Claude's aliases (`haiku`/`sonnet`/`opus`) are not provider models, so codegen emits no `model` and Codex roles inherit the session model.
+3. **Dispatch identity.** The dispatch gate's matcher is `Agent|.*spawn_agent` (Codex reports tool_name `collaborationspawn_agent`), and the role identity comes from `tool_input.agent_type` at PreToolUse and the SubagentStop payload's `agent_type`. Claude's dispatch-marker chain is not used.
+4. **Block signal.** Codex blocks a tool call only on exit 2 **with a non-empty stderr reason**; a silent exit 2 and an exit 1 both fail open. The two blocking hooks (`pre-edit-gate.sh`, `pending-task-sentinel.sh`) write their reason to stderr and take their exit code from `cleargate hook signal`.
+5. **Edit targets.** Codex edits arrive as `apply_patch` calls with no `tool_input.file_path`; the planning gate and the stamp-and-gate hook take their targets from the patch headers via `cleargate hook edit-targets`.
+6. **Trust.** Workspace trust gates the project `.codex/` directory (config, hooks, roles), and per-hook hash trust (`trusted_hash`) gates each hook's execution — a hook whose current hash is not trusted does not run. `AGENTS.md` and `.agents/skills` load regardless of trust.
+7. **Metering is unavailable.** Codex dispatches write no token-ledger rows; `token-ledger.sh` logs a `codex-identity … metering=unavailable` line instead. Usage is never synthesized as zero.
+8. **Not registered on Codex.** The AskUserQuestion autonomy guard (Codex's equivalent tool is `request_user_input`), the git pre-commit hooks (not installed by `--host codex`), and `.codex/rules/**` command rules (deferred under EPIC-058).
+9. **Generated hook copies.** The Codex hook files (`.codex/hooks/*.sh`, `.codex/hooks/lib/harness.sh`) are byte-identical copies of the canonical Claude hooks, enforced by `build-codex-payload.mjs --check` in prebuild, pending EPIC-058's normalized `cleargate hook` CLI handlers.
+10. **`sprint-execution` is installed for Codex as a generated serial rendering.** `.agents/skills/sprint-execution/` holds the canonical playbook rendered for `dispatchMode: serial` plus `dispatch-serial.md`; the Workflow-tool mandate is replaced by the serial dispatch contract (STORY-058-12, §17).
+
+## 17. Host Dispatch Modes (source: STORY-058-12)
+
+Each host adapter declares `dispatchMode` (`cleargate-cli/src/hosts/types.ts`): Claude Code `wave-parallel`, Codex `serial`. It is static and read at install time: `.agents/skills/sprint-execution/` — the generated serial rendering of the playbook plus `dispatch-serial.md` — is installed only for a selected host that declares the `.agents` shared root and `dispatchMode: serial`.
+
+Under `dispatchMode: serial`:
+
+1. **Flashcard gate.** `dispatch_serial.mjs next` refuses the next story while any `flashcards_flagged` card lacks its `.processed-<hash>` marker or any report's `flashcards_flagged` block is unparseable (the §4.6 scan, ported to `.cleargate/scripts/lib/flashcard-gate.mjs` and pinned to the hook by a parity test). The host dispatch hook still enforces §4.6 at every role dispatch. `SKIP_FLASHCARD_GATE` is never set in a serial run.
+2. **Verdicts.** `dispatch_serial.mjs record` validates with `validateVerdicts(…, { mode: 'serial' })` and exits 3 on a non-GREEN verdict; the orchestrator halts in that turn.
+3. **Worktrees.** The same command the wave path builds (`worktreeAddCommand`), one story at a time.
+4. **Usage.** No usage-ledger row for `metering: unavailable`; `dispatch_serial.mjs` never writes `token-ledger.jsonl`.

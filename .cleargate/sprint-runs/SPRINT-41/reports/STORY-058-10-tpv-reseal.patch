@@ -1,0 +1,2105 @@
+diff --git a/test/commands/init-codex.red.node.test.ts b/test/commands/init-codex.red.node.test.ts
+index ba89885..58eb79e 100644
+--- a/test/commands/init-codex.red.node.test.ts
++++ b/test/commands/init-codex.red.node.test.ts
+@@ -12,8 +12,8 @@ import assert from 'node:assert/strict';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import * as os from 'node:os';
+-import { composeCanonicalView } from '../helpers/scaffold-roots.js';
+-import { createHostRegistry } from '../../src/hosts/registry.js';
++import { composeCanonicalView, SCAFFOLD_ROOT } from '../helpers/scaffold-roots.js';
++import { createHostRegistry, defaultHostRegistry } from '../../src/hosts/registry.js';
+ import { claudeAdapter } from '../../src/hosts/claude.js';
+ import { runInitScenario, FIXED_PIN, ExitSignal } from '../helpers/init-fixture.js';
+ import { initHandler } from '../../src/commands/init.js';
+@@ -41,7 +41,12 @@ describe('Test 26 — Gherkin 1: hosts:["codex"] install shape', () => {
+     const registry = await makeCodexRegistry();
+     const payloadDir = mkTmp('cg-s41-10-codex-payload-');
+     await composeCanonicalView(payloadDir, ['codex']);
+-    const record = await runInitScenario('fresh', { payloadDir, extra: { hostRegistry: registry, hosts: ['codex'] } });
++    // TPV R-I1: runInitScenario stubs readInstallManifest to files: [] (flashcard #104) — pass
++    // undefined so Step 7 reads the composed view's owner-stamped MANIFEST.json.
++    const record = await runInitScenario('fresh', {
++      payloadDir,
++      extra: { hostRegistry: registry, hosts: ['codex'], readInstallManifest: undefined },
++    });
+ 
+     assert.ok(fs.existsSync(path.join(record.dir, '.codex', 'hooks.json')));
+     const toml = fs.readFileSync(path.join(record.dir, '.codex', 'config.toml'), 'utf8');
+@@ -111,10 +116,19 @@ test('Test 28 — a malformed .codex/config.toml refuses before any write (prefl
+   const stderrChunks: string[] = [];
+   let exitCode: number | undefined;
+ 
++  // TPV R-I2 (M5-A27): no payloadDir — Step 2 would open a cleargate-from-source-* view if
++  // preflight ran late; the target census inside the exit seam catches a preflight after any write.
++  let targetCensus: string[] | undefined;
++  const walk = (dir: string, rel = ''): string[] =>
++    fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
++      e.isDirectory() ? walk(path.join(dir, e.name), `${rel}${e.name}/`) : [`${rel}${e.name}`],
++    );
++  void payloadDir;
+   try {
+     await initHandler({
+       cwd,
+-      payloadDir,
++      payloadDir: undefined,
++      fromSource: SCAFFOLD_ROOT,
+       now: () => '2026-01-01T00:00:00.000Z',
+       pin: FIXED_PIN,
+       yes: true,
+@@ -129,6 +143,7 @@ test('Test 28 — a malformed .codex/config.toml refuses before any write (prefl
+         // Census inside the exit seam (flashcard #test-harness #node-exit #tpv):
+         const leftover = fs.readdirSync(isolatedTmp).filter((n) => n.startsWith('cleargate-view-') || n.startsWith('cleargate-from-source-'));
+         assert.deepEqual(leftover, [], `no temp view directory may leak into TMPDIR: ${JSON.stringify(leftover)}`);
++        targetCensus = walk(cwd).sort();
+         throw new ExitSignal(code);
+       },
+     } as never);
+@@ -140,6 +155,7 @@ test('Test 28 — a malformed .codex/config.toml refuses before any write (prefl
+   }
+ 
+   assert.equal(exitCode, 2);
++  assert.deepEqual(targetCensus, ['.codex/config.toml'], 'preflight must refuse before any write to the target');
+   const stderr = stderrChunks.join('');
+   assert.ok(stderr.startsWith('[cleargate init] ERROR: '), `stderr must start with the error prefix; got: ${stderr}`);
+   assert.ok(stderr.includes('config.toml'), `stderr must name the file; got: ${stderr}`);
+@@ -147,6 +163,51 @@ test('Test 28 — a malformed .codex/config.toml refuses before any write (prefl
+   assert.equal(fs.existsSync(path.join(cwd, '.cleargate', '.install-manifest.json')), false, 'no install snapshot may be written on a preflight refusal');
+ });
+ 
++// ── TPV R-I5: --from-source composes a cleargate-from-source-* view and removes it ──
++
++test('[TPV R-I5] --from-source (no host flag) installs from a cleargate-from-source-* view of the scaffold and removes it', async () => {
++  const registry = await makeCodexRegistry();
++  const isolatedTmp = mkTmp('cg-s41-10-isotmp-fs-');
++  const prevTmpdir = process.env.TMPDIR;
++  process.env.TMPDIR = isolatedTmp;
++  const cwd = mkTmp('cg-s41-10-fromsource-target-');
++  // Seed an .uninstalled marker: Step 3.5 then calls promptYesNo AFTER Step 2 has opened the view.
++  fs.mkdirSync(path.join(cwd, '.cleargate'), { recursive: true });
++  fs.writeFileSync(path.join(cwd, '.cleargate', '.uninstalled'), JSON.stringify({ uninstalled_at: '2026-01-01T00:00:00Z', prior_version: '0.0.0', preserved: [] }));
++  let during: string[] | undefined;
++  try {
++    await initHandler({
++      cwd,
++      payloadDir: undefined,
++      fromSource: SCAFFOLD_ROOT,
++      now: () => '2026-01-01T00:00:00.000Z',
++      pin: FIXED_PIN,
++      yes: true,
++      stdinIsTTY: false,
++      hostRegistry: registry,
++      identityOpts: { gitEmail: () => 'm5@example.test' } as never,
++      spawnSyncFn: (() => ({ status: 0, stdout: '', stderr: '', pid: 0, output: [null, '', ''], signal: null })) as never,
++      runWikiBuild: async () => {},
++      promptYesNo: async () => {
++        during = fs.readdirSync(isolatedTmp).filter((n) => n.startsWith('cleargate-'));
++        return false;
++      },
++      stdout: () => {},
++      stderr: () => {},
++      exit: (code: number): never => {
++        throw new ExitSignal(code);
++      },
++    } as never);
++  } finally {
++    if (prevTmpdir === undefined) delete process.env.TMPDIR;
++    else process.env.TMPDIR = prevTmpdir;
++  }
++  assert.equal(during?.length, 1, `exactly one temp view must exist while init runs: ${JSON.stringify(during)}`);
++  assert.ok(during![0]!.startsWith('cleargate-from-source-'), `the --from-source view keeps its prefix (M5-A17): ${during![0]}`);
++  assert.deepEqual(fs.readdirSync(isolatedTmp).filter((n) => n.startsWith('cleargate-')), [], 'init removes the view it opened');
++  assert.ok(fs.existsSync(path.join(cwd, '.claude', 'settings.json')), 'the claude install came from the scaffold view');
++});
++
+ // ── Test 29 ──────────────────────────────────────────────────────────────────
+ 
+ test('Test 29 — hosts:["all"] vs no flag: every no-flag file byte-identical except the two volatile snapshots', async () => {
+@@ -168,6 +229,17 @@ test('Test 29 — hosts:["all"] vs no flag: every no-flag file byte-identical ex
+   const settingsJson = fs.readFileSync(path.join(all.dir, '.claude', 'settings.json'), 'utf8');
+   assert.ok(!settingsJson.includes('.codex/'), 'settings.json must not reference .codex/');
+   assert.ok(!settingsJson.includes('--host codex'), 'settings.json must not reference --host codex');
++  // TPV R-I3 (M5-A27): the equality alone is green when "all" installs claude only.
++  assert.ok(fs.existsSync(path.join(all.dir, '.codex', 'hooks.json')), 'the all room must hold .codex/hooks.json');
++  const allAgents = fs.readFileSync(path.join(all.dir, 'AGENTS.md'), 'utf8');
++  assert.equal((allAgents.match(/^<!-- CLEARGATE:START -->$/gm) ?? []).length, 1);
++  const allSnap = JSON.parse(fs.readFileSync(path.join(all.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as { hosts?: string[] };
++  assert.deepEqual(allSnap.hosts, [...registry.names()]);
++  assert.ok(allSnap.hosts?.includes('codex'));
++  assert.ok(defaultHostRegistry.names().includes('codex'), 'codex is registered in the production registry');
++  const noflagSnap = JSON.parse(fs.readFileSync(path.join(noflag.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as { hosts?: string[] };
++  assert.deepEqual(noflagSnap.hosts, ['claude']);
++  assert.equal(fs.existsSync(path.join(noflag.dir, 'AGENTS.md')), false, 'the no-flag room has no AGENTS.md');
+ });
+ 
+ // ── Test 30 ──────────────────────────────────────────────────────────────────
+@@ -177,14 +249,20 @@ test('Test 30 — additive: --host codex over a claude install leaves claude byt
+   const allPayload = mkTmp('cg-s41-10-additive-payload-');
+   await composeCanonicalView(allPayload, ['claude', 'codex']);
+ 
++  // TPV R-I4: the plan's second pass is `--host codex` (additive over claude), and "claude
++  // byte-unchanged" is compared against a claude-only install from the same payload.
+   const record = await runInitScenario('reinit', {
+     payloadDir: allPayload,
+     primeExtra: { hostRegistry: registry },
+-    extra: { hostRegistry: registry, hosts: ['claude', 'codex'] },
++    extra: { hostRegistry: registry, hosts: ['codex'] },
+   });
++  const claudeOnly = await runInitScenario('fresh', { payloadDir: allPayload, extra: { hostRegistry: registry } });
+ 
+-  const claudeFiles = record.files.filter((f) => f.rel.startsWith('.claude/') || f.rel === 'CLAUDE.md' || f.rel === '.mcp.json');
++  const isClaudeFile = (rel: string): boolean => rel.startsWith('.claude/') || rel === 'CLAUDE.md' || rel === '.mcp.json';
++  const claudeFiles = record.files.filter((f) => isClaudeFile(f.rel));
+   assert.ok(claudeFiles.length > 0, 'expected at least one claude-owned file in the record');
++  assert.deepEqual(claudeFiles, claudeOnly.files.filter((f) => isClaudeFile(f.rel)), 'claude files must be byte- and mode-identical to a claude-only install');
++  assert.ok(fs.existsSync(path.join(record.dir, '.codex', 'hooks.json')), 'the codex pass installed .codex/hooks.json');
+ 
+   const snapshot = JSON.parse(
+     fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8'),
+diff --git a/test/commands/lifecycle-codex.red.node.test.ts b/test/commands/lifecycle-codex.red.node.test.ts
+index 83d9328..dc89996 100644
+--- a/test/commands/lifecycle-codex.red.node.test.ts
++++ b/test/commands/lifecycle-codex.red.node.test.ts
+@@ -19,6 +19,8 @@ import { describe, test, mock } from 'node:test';
+ import assert from 'node:assert/strict';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
++import * as os from 'node:os';
++import { createHash } from 'node:crypto';
+ import { createHostRegistry } from '../../src/hosts/registry.js';
+ import { claudeAdapter } from '../../src/hosts/claude.js';
+ import { upgradeHandler } from '../../src/commands/upgrade.js';
+@@ -47,6 +49,34 @@ function makeExit(): { exit: (code: number) => never } {
+   };
+ }
+ 
++function claudeFileHashes(dir: string): Array<{ rel: string; sha: string }> {
++  const out: Array<{ rel: string; sha: string }> = [];
++  const walk = (abs: string, rel: string): void => {
++    for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
++      const r = rel ? `${rel}/${e.name}` : e.name;
++      if (e.isDirectory()) walk(path.join(abs, e.name), r);
++      else out.push({ rel: r, sha: createHash('sha256').update(fs.readFileSync(path.join(abs, e.name))).digest('hex') });
++    }
++  };
++  if (fs.existsSync(path.join(dir, '.claude'))) walk(path.join(dir, '.claude'), '.claude');
++  for (const f of ['CLAUDE.md', '.mcp.json']) {
++    if (fs.existsSync(path.join(dir, f))) out.push({ rel: f, sha: createHash('sha256').update(fs.readFileSync(path.join(dir, f))).digest('hex') });
++  }
++  return out.sort((a, b) => a.rel.localeCompare(b.rel));
++}
++
++async function seedRealClaudeCodexInstall() {
++  const { codexAdapter } = (await import('../../src/hosts/codex.js')) as unknown as { codexAdapter: never };
++  const registry = createHostRegistry([claudeAdapter, codexAdapter]);
++  const payloadDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-10-lifecycle-real-payload-'));
++  await composeCanonicalView(payloadDir, ['claude', 'codex']);
++  const record = await runInitScenario('fresh', {
++    payloadDir,
++    extra: { hostRegistry: registry, hosts: ['claude', 'codex'], readInstallManifest: undefined },
++  });
++  return { registry, record };
++}
++
+ async function seedClaudeCodexInstall() {
+   const { adapter: fakeCodex } = makeFakeCodex();
+   const quietCodex = { ...fakeCodex, install: async () => {} };
+@@ -71,7 +101,7 @@ test('Test 31 — upgrade no-prune: with claude+codex installed, upgrade --yes d
+ 
+   const stdoutLines: string[] = [];
+   const { exit } = makeExit();
+-  await runCatchingExit(() =>
++  const upgradeExit = await runCatchingExit(() =>
+     upgradeHandler(
+       { yes: true },
+       {
+@@ -88,6 +118,8 @@ test('Test 31 — upgrade no-prune: with claude+codex installed, upgrade --yes d
+   );
+ 
+   const joined = stdoutLines.join('\n');
++  // TPV R-L1: an upgrade that exits before its prune step (e.g. no package manifest found) proves nothing.
++  assert.ok(upgradeExit === undefined || upgradeExit === 0, `upgrade must complete, got exit ${upgradeExit}:\n${joined}`);
+   assert.ok(!joined.includes('[prune] removed: .codex/'), `expected no codex prune line; got:\n${joined}`);
+   for (const f of codexFilesBefore) {
+     const abs = path.join(record.dir, f.rel);
+@@ -146,6 +178,8 @@ describe('Test 33 — host add/remove codex', () => {
+       extra: { hostRegistry: registry, readInstallManifest: undefined },
+     });
+     const settingsBefore = fs.readFileSync(path.join(record.dir, '.claude', 'settings.json'), 'utf8');
++    const claudeBefore = claudeFileHashes(record.dir);
++    assert.equal(fs.existsSync(path.join(record.dir, '.agents')), false, '.agents is absent before');
+ 
+     const codexPayload = (await import('node:fs')).mkdtempSync(
+       path.join((await import('node:os')).tmpdir(), 'cg-s41-10-hostadd-codex-'),
+@@ -153,7 +187,7 @@ describe('Test 33 — host add/remove codex', () => {
+     await composeCanonicalView(codexPayload, ['codex']);
+ 
+     const { exit } = makeExit();
+-    await runCatchingExit(() =>
++    const addExit = await runCatchingExit(() =>
+       hostAddHandler('codex', {
+         cwd: record.dir,
+         hostRegistry: registry,
+@@ -166,12 +200,52 @@ describe('Test 33 — host add/remove codex', () => {
+ 
+     assert.ok(fs.existsSync(path.join(record.dir, '.codex', 'hooks.json')), 'expected .codex/hooks.json after host add codex');
+     assert.equal(fs.readFileSync(path.join(record.dir, '.claude', 'settings.json'), 'utf8'), settingsBefore, 'claude settings.json must be byte-unchanged');
++    // TPV R-L2: .codex/hooks.json is copied by copyPayload; only install() writes these two.
++    assert.equal(addExit, undefined, 'host add must not exit');
++    assert.ok(fs.readFileSync(path.join(record.dir, '.codex', 'config.toml'), 'utf8').includes('[mcp_servers.cleargate]'));
++    assert.equal((fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8').match(/^<!-- CLEARGATE:START -->$/gm) ?? []).length, 1);
++    assert.deepEqual(claudeFileHashes(record.dir), claudeBefore, 'every claude file must be byte-unchanged');
++    assert.equal(fs.existsSync(path.join(record.dir, '.agents')), false, '.agents is absent after (the -10 payload ships none)');
++    const snap = JSON.parse(fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as { hosts?: string[] };
++    assert.deepEqual(snap.hosts, ['claude', 'codex']);
+   });
+ 
+-  test('host remove codex on claude+codex → .codex/** gone, claude byte-unchanged, AGENTS.md keeps user prose with zero marker lines', async () => {
+-    const { registry, record } = await seedClaudeCodexInstall();
+-    fs.writeFileSync(path.join(record.dir, 'AGENTS.md'), (fs.existsSync(path.join(record.dir, 'AGENTS.md')) ? fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8') : '') + '\nUser addition after install.\n');
++  test('[TPV R-L3] host add codex refuses a malformed .codex/config.toml before any write (preflight → exit 2)', async () => {
++    const { codexAdapter } = (await import('../../src/hosts/codex.js')) as unknown as { codexAdapter: never };
++    const registry = createHostRegistry([claudeAdapter, codexAdapter]);
++    const claudeOnlyPayload = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-10-hostadd-pf-claude-'));
++    await composeCanonicalView(claudeOnlyPayload, ['claude']);
++    const record = await runInitScenario('fresh', {
++      payloadDir: claudeOnlyPayload,
++      extra: { hostRegistry: registry, readInstallManifest: undefined },
++    });
++    fs.mkdirSync(path.join(record.dir, '.codex'), { recursive: true });
++    const malformed = '[mcp_servers.cleargate\n';
++    fs.writeFileSync(path.join(record.dir, '.codex', 'config.toml'), malformed);
++    const snapshotBefore = fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8');
++    const codexPayload = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-10-hostadd-pf-codex-'));
++    await composeCanonicalView(codexPayload, ['codex']);
++    const stderrChunks: string[] = [];
++    const { exit } = makeExit();
++    const code = await runCatchingExit(() =>
++      hostAddHandler('codex', { cwd: record.dir, hostRegistry: registry, payloadDir: codexPayload, stdout: () => {}, stderr: (s: string) => stderrChunks.push(s), exit }),
++    );
++    assert.equal(code, 2);
++    assert.ok(stderrChunks.join('').includes('config.toml'), stderrChunks.join(''));
++    assert.deepEqual(fs.readdirSync(path.join(record.dir, '.codex')), ['config.toml'], 'nothing may be copied before preflight');
++    assert.equal(fs.readFileSync(path.join(record.dir, '.codex', 'config.toml'), 'utf8'), malformed);
++    assert.equal(fs.existsSync(path.join(record.dir, 'AGENTS.md')), false);
++    assert.equal(fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8'), snapshotBefore);
++  });
++
++  test('host remove codex on claude+codex → codex-owned files gone, claude byte-unchanged, AGENTS.md keeps user prose with zero marker lines', async () => {
++    // TPV R-L4 (M5-A19/M5-A33): the real codex adapter (a fake never writes or strips AGENTS.md),
++    // and AD-4's config.toml rule: the cleargate table goes, [features] stays, so .codex/ itself remains.
++    const { registry, record } = await seedRealClaudeCodexInstall();
++    assert.ok(fs.existsSync(path.join(record.dir, 'AGENTS.md')), 'the real adapter installs AGENTS.md');
++    fs.writeFileSync(path.join(record.dir, 'AGENTS.md'), fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8') + '\nUser addition after install.\n');
+     const settingsBefore = fs.readFileSync(path.join(record.dir, '.claude', 'settings.json'), 'utf8');
++    const claudeBefore = claudeFileHashes(record.dir);
+ 
+     const { exit } = makeExit();
+     await runCatchingExit(() =>
+@@ -184,14 +258,20 @@ describe('Test 33 — host add/remove codex', () => {
+       }),
+     );
+ 
+-    assert.equal(fs.existsSync(path.join(record.dir, '.codex')), false, '.codex/ must be gone');
++    assert.equal(fs.existsSync(path.join(record.dir, '.codex', 'hooks.json')), false, '.codex/hooks.json must be gone');
++    assert.equal(fs.existsSync(path.join(record.dir, '.codex', 'hooks')), false, '.codex/hooks/ must be gone');
++    const toml = fs.readFileSync(path.join(record.dir, '.codex', 'config.toml'), 'utf8');
++    assert.ok(!toml.includes('mcp_servers.cleargate'), toml);
++    assert.ok(/^\[features\]$/m.test(toml), 'AD-4: [features] is kept');
+     assert.equal(fs.readFileSync(path.join(record.dir, '.claude', 'settings.json'), 'utf8'), settingsBefore);
+-    if (fs.existsSync(path.join(record.dir, 'AGENTS.md'))) {
+-      const agentsMd = fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8');
+-      assert.ok(!agentsMd.includes('CLEARGATE:START'), 'no marker lines must remain');
+-      assert.ok(!agentsMd.includes('CLEARGATE:END'), 'no marker lines must remain');
+-      assert.ok(agentsMd.includes('User addition after install.'));
+-    }
++    assert.deepEqual(claudeFileHashes(record.dir), claudeBefore, 'every claude file must be byte-unchanged');
++    const agentsMd = fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8');
++    assert.ok(!agentsMd.includes('CLEARGATE:START'), 'no marker lines must remain');
++    assert.ok(!agentsMd.includes('CLEARGATE:END'), 'no marker lines must remain');
++    assert.ok(agentsMd.includes('User addition after install.'));
++    const snap = JSON.parse(fs.readFileSync(path.join(record.dir, '.cleargate', '.install-manifest.json'), 'utf8')) as { hosts?: string[]; files: Array<{ path: string }> };
++    assert.deepEqual(snap.hosts, ['claude']);
++    assert.ok(!snap.files.some((f) => f.path.startsWith('.codex/')), 'no codex entry may remain in the snapshot');
+   });
+ });
+ 
+diff --git a/test/commands/verify-install-codex.red.node.test.ts b/test/commands/verify-install-codex.red.node.test.ts
+index 6b5918a..03cb29f 100644
+--- a/test/commands/verify-install-codex.red.node.test.ts
++++ b/test/commands/verify-install-codex.red.node.test.ts
+@@ -53,7 +53,7 @@ describe('Test 41 — codex.features-hooks: PASS / FAIL(absent) / FAIL(false) /
+     const results = HOST_VERIFIERS.codex!.checks(makeCtx(cwd));
+     const check = results.find((r) => r.id === 'codex.features-hooks');
+     assert.equal(check?.status, 'fail');
+-    assert.ok(check?.details.some((d) => d.includes('features.hooks is absent')), JSON.stringify(check?.details));
++    assert.deepEqual(check?.details, ['features.hooks is absent']);
+   });
+ 
+   test('FAIL(false) when features.hooks is false', () => {
+@@ -63,7 +63,7 @@ describe('Test 41 — codex.features-hooks: PASS / FAIL(absent) / FAIL(false) /
+     const results = HOST_VERIFIERS.codex!.checks(makeCtx(cwd));
+     const check = results.find((r) => r.id === 'codex.features-hooks');
+     assert.equal(check?.status, 'fail');
+-    assert.ok(check?.details.some((d) => d.includes('features.hooks is false')), JSON.stringify(check?.details));
++    assert.deepEqual(check?.details, ['features.hooks is false']);
+   });
+ 
+   test('FAIL(unparsable) when .codex/config.toml does not parse', () => {
+@@ -73,7 +73,8 @@ describe('Test 41 — codex.features-hooks: PASS / FAIL(absent) / FAIL(false) /
+     const results = HOST_VERIFIERS.codex!.checks(makeCtx(cwd));
+     const check = results.find((r) => r.id === 'codex.features-hooks');
+     assert.equal(check?.status, 'fail');
+-    assert.ok(check?.details.some((d) => d.includes('does not parse')), JSON.stringify(check?.details));
++    assert.equal(check?.details.length, 1);
++    assert.ok(check!.details[0]!.startsWith('.codex/config.toml does not parse: '), JSON.stringify(check?.details));
+   });
+ 
+   test('FAIL(missing file) when .codex/config.toml is absent', () => {
+@@ -81,7 +82,13 @@ describe('Test 41 — codex.features-hooks: PASS / FAIL(absent) / FAIL(false) /
+     const results = HOST_VERIFIERS.codex!.checks(makeCtx(cwd));
+     const check = results.find((r) => r.id === 'codex.features-hooks');
+     assert.equal(check?.status, 'fail');
+-    assert.ok(check?.details.some((d) => d.includes('missing: .codex/config.toml')), JSON.stringify(check?.details));
++    assert.deepEqual(check?.details, ['missing: .codex/config.toml']);
++  });
++
++  test('[TPV R-VI2] a null snapshot skips codex.features-hooks (M5-A29)', () => {
++    const cwd = mkTmp('cg-s41-10-verify-nullsnap-');
++    const results = HOST_VERIFIERS.codex!.checks({ ...makeCtx(cwd), snapshot: null });
++    assert.deepEqual(results.map((r) => [r.id, r.status]), [['codex.features-hooks', 'skip']]);
+   });
+ });
+ 
+diff --git a/test/e2e/codex-hooks.red.integration.node.test.ts b/test/e2e/codex-hooks.red.integration.node.test.ts
+index cb9b487..d0fa81f 100644
+--- a/test/e2e/codex-hooks.red.integration.node.test.ts
++++ b/test/e2e/codex-hooks.red.integration.node.test.ts
+@@ -1,26 +1,25 @@
+ // @cleargate-tier: integration
+ /**
+- * codex-hooks.red.integration.node.test.ts — STORY-058-10 QA-Red (pass B)
++ * codex-hooks.red.integration.node.test.ts — STORY-058-10 QA-Red (pass B), TPV re-seal R-E1.
+  *
+  * M5 plan §"STORY-058-10 — Test scenarios", test 46. Skips with
+  * `t.diagnostic('NOT RUN: set CLEARGATE_CODEX_BIN to the pinned codex-cli
+  * 0.154.0-alpha.6.2')` unless `CLEARGATE_CODEX_BIN` is set and its
+- * `--version` matches — matching M5 plan `PINNED_CODEX` (`codex-cli
+- * 0.154.0-alpha.6.2`).
++ * `--version` matches.
+  *
+- * This is a unit fixture against a `git clone` of the COMMITTED HEAD (never
+- * uncommitted edits — M2-A7 "commit before running it"), never the real
+- * clean-room procedure and never `--dangerously-bypass-hook-trust` or a
+- * dedicated `CODEX_HOME`/login (credential rule). It drives
+- * `scripts/clean-room/codex-hooks.mjs run` as the documented CLI
+- * (`--codex-bin`, `--provider scripted`, `--container`, `--ref`), never an
+- * invented in-process function shape.
++ * This is a unit fixture, never the real clean-room procedure: it clones the
++ * COMMITTED HEAD into os.tmpdir() (M2-A7 — commit before running it) and runs
++ * the scripted harness logic IN-PROCESS (plan test 46), by importing the
++ * clone's `scripts/clean-room/codex-hooks.mjs` and calling its exported
++ * `runCodexHooks(options)` (TPV ruling #3, plan M5-A36). The in-process call is
++ * what lets the container sit under os.tmpdir(): the harness CLI validates its
++ * container with -09's `validateContainer`, which refuses every tmp root, so
++ * the test passes `containerProbes` with no tmp roots — the documented DI seam
++ * of `validateContainer(dir, probes)`. It never uses a dedicated CODEX_HOME,
++ * a login, a live provider or `--dangerously-bypass-hook-trust`.
+  *
+- * At the red commit `scripts/clean-room/codex-hooks.mjs` does not exist in
+- * the cloned HEAD (nor does `.codex/hooks.json` scaffold to install), so the
+- * spawned script exits non-zero with a "Cannot find module" style failure —
+- * a genuine, countable red confirmed against the real pinned binary, per the
+- * QA-Red dispatch's explicit instruction.
++ * Every gating verdict must PASS except `claude.control.edit-deny`, which is
++ * asserted only when `claude` runs on PATH and is a diagnostic otherwise.
+  */
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
+@@ -28,13 +27,14 @@ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import * as os from 'node:os';
+ import { execFileSync, spawnSync } from 'node:child_process';
++import { pathToFileURL } from 'node:url';
+ import { CLI_ROOT } from '../helpers/scaffold-roots.js';
+ 
+ const EXPECTED_VERSION = 'codex-cli 0.154.0-alpha.6.2';
+ const TIMEOUT_MS = 900_000;
+ 
+ test(
+-  'codex-hooks.mjs run --provider scripted: every gating verdict PASS except claude.control.edit-deny (diagnostic-only)',
++  'runCodexHooks({ provider: "scripted" }) in-process: every gating verdict PASS except claude.control.edit-deny (asserted only when claude runs)',
+   { timeout: TIMEOUT_MS },
+   async (t) => {
+     const codexBin = process.env.CLEARGATE_CODEX_BIN;
+@@ -55,41 +55,53 @@ test(
+     }
+ 
+     const mainStatusBefore = execFileSync('git', ['status', '--porcelain'], { cwd: CLI_ROOT, encoding: 'utf8' });
+-
+     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-10-codexhooks-e2e-'));
+-    const clonePath = path.join(tmpRoot, 'src');
+-    // Clone the COMMITTED HEAD — uncommitted edits are invisible by design (M2-A7).
+-    execFileSync('git', ['clone', '--no-hardlinks', CLI_ROOT, clonePath], { stdio: 'pipe' });
+-
+-    const harnessPath = path.join(clonePath, 'scripts', 'clean-room', 'codex-hooks.mjs');
+-    const container = path.join(tmpRoot, 'cg-cleanroom-codex-e2e');
+-    const evidencePath = path.join(tmpRoot, 'codex-hooks-evidence.md');
+-
+-    const result = spawnSync(
+-      process.execPath,
+-      [
+-        harnessPath,
+-        'run',
+-        '--codex-bin', codexBin,
+-        '--expect-version', EXPECTED_VERSION,
+-        '--provider', 'scripted',
+-        '--container', container,
+-        '--ref', 'HEAD',
+-        '--evidence', evidencePath,
+-        '--label', 'QA-Red STORY-058-10 test 46',
+-      ],
+-      { cwd: clonePath, encoding: 'utf8' },
+-    );
+-
+-    fs.rmSync(tmpRoot, { recursive: true, force: true });
+-    const mainStatusAfter = execFileSync('git', ['status', '--porcelain'], { cwd: CLI_ROOT, encoding: 'utf8' });
+-    assert.strictEqual(mainStatusAfter, mainStatusBefore, 'this test must never alter the main CLI_ROOT checkout');
++    try {
++      const clonePath = path.join(tmpRoot, 'src');
++      execFileSync('git', ['clone', '--no-hardlinks', CLI_ROOT, clonePath], { stdio: 'pipe' });
++      const harness = (await import(pathToFileURL(path.join(clonePath, 'scripts', 'clean-room', 'codex-hooks.mjs')).href)) as {
++        runCodexHooks: (opts: Record<string, unknown>) => Promise<{
++          exitCode: number;
++          result: string | null;
++          verdicts: Record<string, { status: string; detail: string }>;
++        }>;
++      };
++      const evidence = (await import(pathToFileURL(path.join(clonePath, 'scripts', 'clean-room', 'evidence.mjs')).href)) as {
++        CODEX_GATING_IDS: readonly string[];
++        defaultContainerProbes: () => Record<string, unknown>;
++      };
++      const evidencePath = path.join(tmpRoot, 'codex-hooks-evidence.md');
++      const out = await harness.runCodexHooks({
++        codexBin,
++        expectVersion: '0.154.0-alpha.6.2',
++        provider: 'scripted',
++        container: path.join(tmpRoot, 'cg-cleanroom-codex-e2e'),
++        ref: 'HEAD',
++        cliRoot: clonePath,
++        evidence: evidencePath,
++        label: 'STORY-058-10 test 46',
++        containerProbes: { ...evidence.defaultContainerProbes(), tmpRoots: () => [] },
++        stdout: () => {},
++        stderr: () => {},
++      });
+ 
+-    assert.equal(
+-      result.status,
+-      0,
+-      `expected "run" to exit 0 with every gating verdict PASS (except claude.control.edit-deny, diagnostic-only); ` +
+-        `got exit ${result.status}\nstdout: ${result.stdout}\nstderr: ${result.stderr}`,
+-    );
++      const claudeRuns = spawnSync('claude', ['--version'], { encoding: 'utf8' }).status === 0;
++      for (const id of evidence.CODEX_GATING_IDS) {
++        if (id === 'claude.control.edit-deny' && !claudeRuns) {
++          t.diagnostic(`claude not on PATH — ${id} = ${JSON.stringify(out.verdicts[id])} (diagnostic only)`);
++          continue;
++        }
++        assert.equal(out.verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(out.verdicts[id])}`);
++      }
++      assert.deepEqual(out.verdicts['codex.live.metering'], { status: 'INFO', detail: 'unavailable' });
++      const md = fs.readFileSync(evidencePath, 'utf8');
++      assert.equal((md.match(/^## Run \d+ — /gm) ?? []).length, 1, 'the run appends exactly one section');
++      assert.ok(/^- provider: scripted$/m.test(md), md);
++      if (claudeRuns) assert.equal(out.exitCode, 0, JSON.stringify(out.verdicts));
++    } finally {
++      fs.rmSync(tmpRoot, { recursive: true, force: true });
++      const mainStatusAfter = execFileSync('git', ['status', '--porcelain'], { cwd: CLI_ROOT, encoding: 'utf8' });
++      assert.strictEqual(mainStatusAfter, mainStatusBefore, 'this test must never alter the main CLI_ROOT checkout');
++    }
+   },
+ );
+diff --git a/test/helpers/init-fixture.ts b/test/helpers/init-fixture.ts
+index 5561ee3..687a773 100644
+--- a/test/helpers/init-fixture.ts
++++ b/test/helpers/init-fixture.ts
+@@ -467,9 +467,16 @@ const BUG085_SENTINEL_BASELINE = 'b1ab7702066788282302efa160c7b5075adec971ec1318
+  * current side is derived from canonical — but it never accepts the baseline.
+  * A canonical hook still equal to the M2 bytes means the delta has not landed.
+  */
++/** STORY-058-10 (G16 / FU-6): the post-BUG-085 bytes, which -10's codex branch must change. */
++const BUG085_SENTINEL_POST = '1572281d14fb4cabf3857594c96ae3658424e21b1f217af0f002dd29cfd5ba2c';
++
+ function bug085SentinelCurrentHash(): string {
+   const h = currentPinSubstitutedHash('.claude/hooks/pending-task-sentinel.sh');
+-  return h === BUG085_SENTINEL_BASELINE ? `<BUG-085 sentinel delta not landed: canonical still ${h}>` : h;
++  if (h === BUG085_SENTINEL_BASELINE) return `<BUG-085 sentinel delta not landed: canonical still ${h}>`;
++  // TPV R-F1 (G16): refuse the post-BUG-085 hash too — red until -10 pass B edits the sentinel.
++  // -11 adds the post-(-10) hash here; never add a second row for this rel.
++  if (h === BUG085_SENTINEL_POST) return `<STORY-058-10 sentinel delta not landed: canonical still ${h}>`;
++  return h;
+ }
+ 
+ export const SANCTIONED_BASELINE_DELTAS: readonly SanctionedDelta[] = Object.freeze([
+diff --git a/test/hooks/codex-hook-scripts.red.node.test.ts b/test/hooks/codex-hook-scripts.red.node.test.ts
+index b223c52..c495c44 100644
+--- a/test/hooks/codex-hook-scripts.red.node.test.ts
++++ b/test/hooks/codex-hook-scripts.red.node.test.ts
+@@ -124,7 +124,9 @@ test('Test 35 — every command in scaffold/hosts/codex/.codex/hooks.json export
+       env: { ...process.env, CLAUDE_PROJECT_DIR: '/wrong' },
+     });
+     assert.equal(result.status, 2, `${scriptName}: expected exit 2; stderr: ${result.stderr}`);
+-    assert.ok(result.stdout.includes(`TOPLEVEL=${room}`), `${scriptName}: expected the real toplevel to be exported; got: ${result.stdout}`);
++    // TPV R-H1: the exported toplevel is physical (git), so compare against realpath(room).
++    assert.ok(result.stdout.includes(`TOPLEVEL=${fs.realpathSync(room)}\n`), `${scriptName}: expected the real toplevel to be exported; got: ${result.stdout}`);
++    assert.ok(!result.stdout.includes('TOPLEVEL=/wrong'), `${scriptName}: a leaked CLAUDE_PROJECT_DIR must be overridden`);
+     assert.ok(result.stderr.includes('a stderr reason'), `${scriptName}: expected stderr to be passed through`);
+   }
+ });
+@@ -182,6 +184,47 @@ describe('Test 36 — pre-edit-gate.sh --host codex', () => {
+     });
+     assert.equal(warnResult.status, 0);
+   });
++
++  function mixedPayload(room: string, files: string[]): string {
++    const patch = '*** Begin Patch\n' + files.map((f) => `*** Add File: ${f}\n+x\n`).join('') + '*** End Patch\n';
++    return JSON.stringify({
++      session_id: 's', transcript_path: '/CODEX_HOME/x.jsonl', cwd: room, hook_event_name: 'PreToolUse',
++      tool_name: 'apply_patch', tool_input: { command: patch }, tool_use_id: 'call_mixed',
++    });
++  }
++
++  test('[TPV R-H2] a whitelisted first target does not short-circuit: the later uncovered target still blocks (enforce)', () => {
++    const room = mkRoom();
++    const real = fs.realpathSync(room);
++    const bin = makeCleargateStub(room, { canEdit: 'blocked' });
++    const result = runScript(scriptPath(), ['--host', 'codex'], mixedPayload(room, ['.cleargate/notes.md', 'src/cg.ts']), {
++      PATH: `${bin}:${process.env.PATH}`,
++      CLAUDE_PROJECT_DIR: real,
++      CLEARGATE_PLANNING_GATE_MODE: 'enforce',
++    });
++    assert.equal(result.status, 2, `stdout: ${result.stdout}\nstderr: ${result.stderr}`);
++    assert.ok(result.stderr.includes('src/cg.ts'), `stderr must name the first blocked file: ${result.stderr}`);
++    assert.ok(!result.stderr.includes('.cleargate/notes.md'), result.stderr);
++    const log = fs.readFileSync(path.join(real, '.cleargate', 'hook-log', 'pre-edit-gate-warn.log'), 'utf8');
++    const blocked = log.split('\n').filter((l) => l.includes('would_block'));
++    assert.equal(blocked.length, 1, JSON.stringify(blocked));
++    assert.ok(blocked[0]!.includes(`file=${real}/src/cg.ts `), blocked[0]);
++  });
++
++  test('[ALREADY-GREEN ANCHOR] [TPV R-H2] only whitelisted targets (incl. the codex .codex/ and AGENTS.md whitelist) pass in enforce mode', () => {
++    const room = mkRoom();
++    const real = fs.realpathSync(room);
++    const bin = makeCleargateStub(room, { canEdit: 'blocked' });
++    const result = runScript(scriptPath(), ['--host', 'codex'], mixedPayload(room, ['.cleargate/notes.md', 'AGENTS.md', '.codex/hooks.json', '.agents/skills/x/SKILL.md']), {
++      PATH: `${bin}:${process.env.PATH}`,
++      CLAUDE_PROJECT_DIR: real,
++      CLEARGATE_PLANNING_GATE_MODE: 'enforce',
++    });
++    assert.equal(result.status, 0, `stdout: ${result.stdout}\nstderr: ${result.stderr}`);
++    const logPath = path.join(real, '.cleargate', 'hook-log', 'pre-edit-gate-warn.log');
++    const log = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
++    assert.equal(log.split('\n').filter((l) => l.includes('would_block')).length, 0, log);
++  });
+ });
+ 
+ // ── Test 37: stamp-and-gate.sh --host codex ─────────────────────────────────
+@@ -197,6 +240,11 @@ test('Test 37 — stamp-and-gate.sh --host codex logs 2 lines for a mixed apply_
+     '+---\nstory_id: STORY-058-11\n---\n' +
+     '*** Add File: src/other.ts\n' +
+     '+export const x = 1;\n' +
++    // TPV R-H5: a non-delivery .md and a delivery non-.md are never stamped (both filters bind).
++    '*** Add File: docs/notes.md\n' +
++    '+# notes\n' +
++    '*** Add File: .cleargate/delivery/pending-sync/SPRINT-01_waves.json\n' +
++    '+{}\n' +
+     '*** End Patch\n';
+   const payload = JSON.stringify({
+     session_id: 's',
+@@ -218,6 +266,7 @@ test('Test 37 — stamp-and-gate.sh --host codex logs 2 lines for a mixed apply_
+   const logContent = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
+   const rows = logContent.split('\n').filter((l) => /^\[.*\] stamp=.* gate=.* ingest=.* file=/.test(l));
+   assert.equal(rows.length, 2, `expected exactly 2 stamp/gate/ingest log lines; got: ${JSON.stringify(rows)}`);
++  assert.ok(rows.every((r) => /file=\S*\.cleargate\/delivery\/pending-sync\/STORY-058-1[01]\.md$/.test(r)), JSON.stringify(rows));
+ });
+ 
+ // ── Test 38: pending-task-sentinel.sh --host codex ──────────────────────────
+@@ -323,12 +372,108 @@ test('Test 39 — token-ledger.sh --host codex writes one codex-identity line, c
+   assert.equal(identityLines.length, 1, `expected exactly one codex-identity line; got: ${JSON.stringify(identityLines)}`);
+   assert.ok(identityLines[0]!.includes('agent_type=qa'), identityLines[0]);
+   assert.ok(identityLines[0]!.includes('metering=unavailable'), identityLines[0]);
++  // TPV R-H3 (AD-6): every field the harness's dispatch-identity verdict reads.
++  for (const field of ['sprint=_off-sprint', 'agent_id=01a0d9f9-0000-7000-8000-000000000005', 'work_item=STORY-058-10', '.pending-codex-task-2-200-2.json']) {
++    assert.ok(identityLines[0]!.includes(field), `identity line must carry ${field}: ${identityLines[0]}`);
++  }
++  assert.equal(fs.existsSync(path.join(sprintDir, 'token-ledger.jsonl')), false, 'Codex writes no ledger row (metering unavailable)');
+   const remaining = fs.readdirSync(sprintDir).filter((n) => n.startsWith('.pending-codex-task-'));
+   assert.deepEqual(remaining, ['.pending-codex-task-1-100-1.json'], 'the qa sentinel must be claimed and deleted; the developer one must survive');
+ });
+ 
++test('[TPV R-H3] token-ledger.sh --host codex falls back to the oldest sentinel when no agent_type matches', () => {
++  const room = mkRoom();
++  const sprintDir = path.join(room, '.cleargate', 'sprint-runs', '_off-sprint');
++  fs.mkdirSync(sprintDir, { recursive: true });
++  fs.writeFileSync(
++    path.join(sprintDir, '.pending-codex-task-1-100-1.json'),
++    JSON.stringify({ agent_type: 'developer', work_item_id: 'STORY-058-10', turn_index: 1, started_at: '2026-01-01T00:00:00Z', host: 'codex' }),
++  );
++  const payload = readFixture('subagent-stop.json').replace('"agent_type": "qa"', '"agent_type": "reporter"');
++  assert.ok(payload.includes('"agent_type": "reporter"'));
++  const result = runScript(canonicalPath('.claude/hooks/token-ledger.sh'), ['--host', 'codex'], payload, {
++    ORCHESTRATOR_PROJECT_DIR: room,
++    CLAUDE_PROJECT_DIR: room,
++  });
++  assert.equal(result.status, 0);
++  const log = fs.readFileSync(path.join(room, '.cleargate', 'hook-log', 'token-ledger.log'), 'utf8');
++  const lines = log.split('\n').filter((l) => l.includes('codex-identity'));
++  assert.equal(lines.length, 1, JSON.stringify(lines));
++  assert.ok(lines[0]!.includes('agent_type=reporter') && lines[0]!.includes('work_item=STORY-058-10'), lines[0]);
++  assert.deepEqual(fs.readdirSync(sprintDir).filter((n) => n.startsWith('.pending-codex-task-')), []);
++});
++
++test('[TPV R-H6] token-ledger.sh --host codex claims the OLDEST sentinel of the matching agent_type, not the newest', () => {
++  const room = mkRoom();
++  const sprintDir = path.join(room, '.cleargate', 'sprint-runs', '_off-sprint');
++  fs.mkdirSync(sprintDir, { recursive: true });
++  // Age agrees on every axis (mtime, started_at, turn index, filename) so no reading of "oldest" is favoured.
++  const seed = (name: string, agent: string, work: string, turn: number, day: number) => {
++    const p = path.join(sprintDir, name);
++    fs.writeFileSync(p, JSON.stringify({ agent_type: agent, work_item_id: work, turn_index: turn, started_at: `2026-01-0${day}T00:00:00Z`, host: 'codex' }));
++    const t = new Date(`2026-01-0${day}T00:00:00Z`);
++    fs.utimesSync(p, t, t);
++  };
++  seed('.pending-codex-task-1-100-1.json', 'qa', 'STORY-000-0A', 1, 1);
++  seed('.pending-codex-task-2-200-2.json', 'developer', 'STORY-000-0B', 2, 2);
++  seed('.pending-codex-task-3-300-3.json', 'qa', 'STORY-000-0C', 3, 3);
++  const result = runScript(canonicalPath('.claude/hooks/token-ledger.sh'), ['--host', 'codex'], readFixture('subagent-stop.json'), {
++    ORCHESTRATOR_PROJECT_DIR: room,
++    CLAUDE_PROJECT_DIR: room,
++  });
++  assert.equal(result.status, 0);
++  const log = fs.readFileSync(path.join(room, '.cleargate', 'hook-log', 'token-ledger.log'), 'utf8');
++  const lines = log.split('\n').filter((l) => l.includes('codex-identity'));
++  assert.equal(lines.length, 1);
++  assert.ok(lines[0]!.includes('work_item=STORY-000-0A'), lines[0]);
++  assert.deepEqual(
++    fs.readdirSync(sprintDir).filter((n) => n.startsWith('.pending-codex-task-')).sort(),
++    ['.pending-codex-task-2-200-2.json', '.pending-codex-task-3-300-3.json'],
++  );
++});
++
+ // ── Test 40: Claude-path neutrality (already-green anchor) ──────────────────
+ 
++/** TPV R-H4: the written-file census, content normalized for timestamps and pid/random suffixes. */
++function writtenCensus(room: string): Array<{ rel: string; body: string }> {
++  const out: Array<{ rel: string; body: string }> = [];
++  const norm = (s: string) =>
++    s
++      .split(room).join('<ROOM>')
++      .replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ/g, '<TS>');
++  const walk = (abs: string, rel: string): void => {
++    for (const e of fs.readdirSync(abs, { withFileTypes: true })) {
++      if (e.name === '.git') continue;
++      const r = rel ? `${rel}/${e.name}` : e.name;
++      if (e.isDirectory()) walk(path.join(abs, e.name), r);
++      else out.push({ rel: r.replace(/-\d+-\d+\.json$/, '-<PID>-<RAND>.json'), body: norm(fs.readFileSync(path.join(abs, e.name), 'utf8')) });
++    }
++  };
++  walk(room, '');
++  return out.sort((a, b) => a.rel.localeCompare(b.rel));
++}
++
++let neutralBin: string | undefined;
++function neutralPath(): string {
++  // One shared PATH stub outside both rooms (never the global cleargate): doctor --can-edit answers blocked.
++  if (!neutralBin) neutralBin = makeCleargateStub(fs.mkdtempSync(path.join(FIXTURE_PARENT, 'neutral-')), { canEdit: 'blocked' });
++  return `${neutralBin}:${process.env.PATH}`;
++}
++
++function assertNeutral(script: string, payload: string, extraEnv: Record<string, string> = {}): void {
++  const roomBefore = mkRoom();
++  const roomAfter = mkRoom();
++  extraEnv = { PATH: neutralPath(), ...extraEnv };
++  const before = runScript(path.join(PRE_058_10, script), [], payload.split('/ROOM').join(roomBefore), { CLAUDE_PROJECT_DIR: roomBefore, ...extraEnv });
++  const after = runScript(canonicalPath(`.claude/hooks/${script}`), [], payload.split('/ROOM').join(roomAfter), { CLAUDE_PROJECT_DIR: roomAfter, ...extraEnv });
++  const n = (s: string, room: string) => s.split(room).join('<ROOM>');
++  assert.deepEqual(
++    { status: after.status, stdout: n(after.stdout, roomAfter), stderr: n(after.stderr, roomAfter) },
++    { status: before.status, stdout: n(before.stdout, roomBefore), stderr: n(before.stderr, roomBefore) },
++  );
++  assert.deepEqual(writtenCensus(roomAfter), writtenCensus(roomBefore), `${script}: the written files must be identical`);
++}
++
+ describe('[ALREADY-GREEN ANCHOR] Test 40 — Claude-shaped fixtures behave identically before and after -10', () => {
+   test('pre-edit-gate.sh: a whitelisted path exits 0 identically', () => {
+     const room = mkRoom();
+@@ -380,4 +525,20 @@ describe('[ALREADY-GREEN ANCHOR] Test 40 — Claude-shaped fixtures behave ident
+     assert.equal(after.status, before.status);
+     assert.equal(after.status, 0);
+   });
++
++  test('[TPV R-H4] all four scripts: identical exit, stdout, stderr and written files for Claude-shaped payloads', () => {
++    const editDelivery = JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: '/ROOM/src/x.ts' } });
++    const writeWhitelisted = JSON.stringify({ tool_name: 'Write', tool_input: { file_path: '/ROOM/.claude/foo.md' } });
++    const noFilePath = JSON.stringify({ tool_name: 'Edit', tool_input: {} });
++    const editRealDelivery = JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: '/ROOM/.cleargate/delivery/pending-sync/STORY-001-01_x.md' } });
++    for (const p of [editDelivery, writeWhitelisted, noFilePath, editRealDelivery]) {
++      assertNeutral('pre-edit-gate.sh', p, { CLEARGATE_PLANNING_GATE_MODE: 'warn' });
++      assertNeutral('stamp-and-gate.sh', p);
++    }
++    // The Claude blocking path (enforce) and the Claude stamp chain on a delivery item stay identical.
++    assertNeutral('pre-edit-gate.sh', editDelivery, { CLEARGATE_PLANNING_GATE_MODE: 'enforce' });
++    assertNeutral('pending-task-sentinel.sh', fs.readFileSync(path.join(PRE_058_10, 'claude-agent-untyped.json'), 'utf8'));
++    assertNeutral('pending-task-sentinel.sh', JSON.stringify({ tool_name: 'Agent', tool_input: { subagent_type: 'qa', prompt: 'STORY=058-10 go' } }));
++    assertNeutral('token-ledger.sh', fs.readFileSync(path.join(PRE_058_10, 'claude-subagentstop-no-transcript.json'), 'utf8'));
++  });
+ });
+diff --git a/test/hooks/normalized-event.red.node.test.ts b/test/hooks/normalized-event.red.node.test.ts
+index d7a68f3..9d7611d 100644
+--- a/test/hooks/normalized-event.red.node.test.ts
++++ b/test/hooks/normalized-event.red.node.test.ts
+@@ -93,6 +93,18 @@ describe('Test 15 — editTargets', () => {
+     assert.deepEqual(targets, ['/ROOM/dup.txt']);
+   });
+ 
++  test('[TPV R-N1] an absolute header path is kept verbatim (never re-rooted under cwd)', async () => {
++    const { editTargets } = await loadModule();
++    const patch = '*** Begin Patch\n*** Update File: /abs/elsewhere/x.txt\n@@\n-a\n+b\n*** End Patch\n';
++    assert.deepEqual(editTargets({ cwd: '/ROOM', tool_name: 'apply_patch', tool_input: { command: patch } }), ['/abs/elsewhere/x.txt']);
++  });
++
++  test('[TPV R-N2] an apply_patch payload without a string tool_input.command returns null (the CLI exits 1)', async () => {
++    const { editTargets } = await loadModule();
++    assert.equal(editTargets({ cwd: '/ROOM', tool_name: 'apply_patch', tool_input: {} }), null);
++    assert.equal(editTargets({ cwd: '/ROOM', tool_name: 'apply_patch', tool_input: { command: 42 } }), null);
++  });
++
+   test('a non-JSON payload returns null', async () => {
+     const { editTargets } = await loadModule();
+     assert.equal(editTargets(undefined), null);
+@@ -118,6 +130,13 @@ describe('Test 16 — cleargate hook edit-targets (spawned CLI)', () => {
+     assert.deepEqual(lines, ['/ROOM/hello.txt', '/ROOM/README.md']);
+   });
+ 
++  test('[TPV R-N2] exits 1 for an apply_patch payload with no command', async () => {
++    const { code, stdout, stderr } = await spawnCli(['hook', 'edit-targets'], JSON.stringify({ cwd: '/ROOM', tool_name: 'apply_patch', tool_input: {} }));
++    assert.equal(code, 1);
++    assert.equal(stdout, '');
++    assert.ok(!stderr.includes('unknown command'), `edit-targets must be a registered subcommand; got: ${stderr}`);
++  });
++
+   test('exits 1 for a non-JSON payload (not a commander "unknown command" failure)', async () => {
+     const { code, stderr } = await spawnCli(['hook', 'edit-targets'], 'not json');
+     assert.equal(code, 1);
+diff --git a/test/hosts/codex-adapter.red.node.test.ts b/test/hosts/codex-adapter.red.node.test.ts
+index 7ebbafa..852f0fa 100644
+--- a/test/hosts/codex-adapter.red.node.test.ts
++++ b/test/hosts/codex-adapter.red.node.test.ts
+@@ -162,8 +162,10 @@ describe('Test 2 — install() on an empty dir', () => {
+     assert.equal(endCount, 1, 'exactly one anchored END line');
+ 
+     const joined = stdoutLines.join('');
++    // TPV R-A1 (M5-A33): the plan pins exactly two .codex/hooks.json lines; an
++    // empty dir merges into null, which is the "changed" line, never a "Created" one.
+     const expectedOrder = [
+-      'Created .codex/hooks.json',
++      'Updated .codex/hooks.json: merged ClearGate hooks — restart Codex if already open.',
+       'Created .codex/config.toml',
+       'Created AGENTS.md (with bounded block)',
+       'Codex: .codex/config.toml pins [features] hooks = true',
+@@ -178,6 +180,42 @@ describe('Test 2 — install() on an empty dir', () => {
+       assert.ok(idx > cursor, `expected "${fragment}" to appear after the previous line`);
+       cursor = idx;
+     }
++    // TPV R-A2: every stdout chunk carries the default prefix (InstallCtx sinks are raw; the callee writes '\n').
++    for (const chunk of stdoutLines) {
++      assert.ok(chunk.startsWith('[cleargate init] '), `stdout chunk must carry the default prefix: ${JSON.stringify(chunk)}`);
++      assert.ok(chunk.endsWith('\n'), `stdout chunk must end with a newline: ${JSON.stringify(chunk)}`);
++    }
++  });
++
++  test('[TPV R-A2] ctx.logPrefix replaces the default prefix on every stdout line', async () => {
++    const { createCodexAdapter } = await loadCodex();
++    const payloadDir = await getCodexPayloadDir();
++    const cwd = mkTmp('cg-s41-10-install-prefix-');
++    const stdoutLines: string[] = [];
++    const adapter = createCodexAdapter() as { install: (ctx: unknown) => Promise<void> };
++    await adapter.install(makeCtx(cwd, payloadDir, { logPrefix: '[cleargate host] ', stdout: (s: string) => stdoutLines.push(s) }));
++    assert.ok(stdoutLines.length >= 7, JSON.stringify(stdoutLines));
++    for (const chunk of stdoutLines) {
++      assert.ok(chunk.startsWith('[cleargate host] '), `expected the host prefix: ${JSON.stringify(chunk)}`);
++    }
++  });
++
++  test('[TPV R-A3] a pre-seeded [features] hooks = false is flipped and warned about on stderr', async () => {
++    const { createCodexAdapter } = await loadCodex();
++    const payloadDir = await getCodexPayloadDir();
++    const cwd = mkTmp('cg-s41-10-install-flip-');
++    fs.mkdirSync(path.join(cwd, '.codex'), { recursive: true });
++    fs.writeFileSync(path.join(cwd, '.codex', 'config.toml'), '[features]\nhooks = false\n');
++    const stderrLines: string[] = [];
++    const stdoutLines: string[] = [];
++    const adapter = createCodexAdapter() as { install: (ctx: unknown) => Promise<void> };
++    await adapter.install(makeCtx(cwd, payloadDir, { stdout: (s: string) => stdoutLines.push(s), stderr: (s: string) => stderrLines.push(s) }));
++    assert.ok(
++      stderrLines.join('').includes('[cleargate init] WARNING: .codex/config.toml had [features] hooks = false; set to true (ClearGate hooks require it).'),
++      JSON.stringify(stderrLines),
++    );
++    assert.ok(stdoutLines.join('').includes('[cleargate init] Updated .codex/config.toml (cleargate MCP server entry merged).'), JSON.stringify(stdoutLines));
++    assert.ok(/^hooks = true$/m.test(fs.readFileSync(path.join(cwd, '.codex', 'config.toml'), 'utf8')));
+   });
+ });
+ 
+@@ -239,6 +277,13 @@ describe('Test 4 — existing user files are preserved', () => {
+     for (const [command, count] of commandCounts) {
+       assert.equal(count, 1, `command "${command}" must appear exactly once after two installs`);
+     }
++    // TPV R-A4: the ClearGate groups are appended — every payload command is present, once.
++    const payloadHooks = readJson<HooksJson>(path.join(payloadDir, '.codex', 'hooks.json'));
++    const payloadCommands = Object.values(payloadHooks.hooks ?? {}).flat().flatMap((e) => e.hooks.map((h) => h.command));
++    assert.ok(payloadCommands.length > 0);
++    for (const c of payloadCommands) {
++      assert.equal(commandCounts.get(c), 1, `payload command must be merged exactly once: ${c}`);
++    }
+   });
+ 
+   test('a user AGENTS.md keeps its prose after the block (CR-105 prepend)', async () => {
+@@ -321,6 +366,23 @@ describe('Test 5 — remove() strips ClearGate content and preserves the rest',
+     assert.ok(stderrLines.join('').length > 0, 'expected a stderr warning for the unparsable file');
+   });
+ 
++  test('[TPV R-A5] a per-target error does not skip later targets: config.toml still loses [mcp_servers.cleargate]', async () => {
++    const { createCodexAdapter } = await loadCodex();
++    const cwd = mkTmp('cg-s41-10-remove-continue-');
++    fs.mkdirSync(path.join(cwd, '.codex'), { recursive: true });
++    fs.writeFileSync(path.join(cwd, '.codex', 'hooks.json'), '{not json');
++    fs.writeFileSync(
++      path.join(cwd, '.codex', 'config.toml'),
++      '[features]\nhooks = true\n\n[mcp_servers.cleargate]\ncommand = "npx"\nargs = ["-y", "cleargate@0.0.0-m5", "mcp", "serve"]\n',
++    );
++    const adapter = createCodexAdapter() as { remove: (ctx: unknown) => Promise<{ removed: readonly string[] }> };
++    const report = await adapter.remove({ cwd, stdout: () => {}, stderr: () => {} });
++    const toml = fs.readFileSync(path.join(cwd, '.codex', 'config.toml'), 'utf8');
++    assert.ok(!toml.includes('mcp_servers.cleargate'), toml);
++    assert.ok(toml.includes('[features]'), toml);
++    assert.ok(report.removed.includes('.codex/config.toml (cleargate MCP server)'), JSON.stringify(report.removed));
++  });
++
+   test('[5b] stripping every ClearGate hook from a ClearGate-only .codex/hooks.json deletes the file', async () => {
+     const { createCodexAdapter } = await loadCodex();
+     const payloadDir = await getCodexPayloadDir();
+diff --git a/test/hosts/install-view.red.node.test.ts b/test/hosts/install-view.red.node.test.ts
+index 0cbb4d8..b70d832 100644
+--- a/test/hosts/install-view.red.node.test.ts
++++ b/test/hosts/install-view.red.node.test.ts
+@@ -37,6 +37,7 @@ interface InstallViewModule {
+     splitViewRoot?: string;
+     flatPayloadDir?: string;
+     cleargateVersion: string;
++    tempPrefix?: string;
+   }) => InstallView;
+ }
+ 
+@@ -107,6 +108,33 @@ describe('Test 22 — openInstallView per host set', () => {
+     view.dispose();
+     assert.equal(fs.existsSync(view.payloadDir), false, 'dispose() must remove the temp view directory');
+   });
++
++  test('[TPV R-V5] hosts ["claude"] WITH a scaffoldRoot composes a temporary view from it (AD-5: the fast path needs no scaffoldRoot)', async () => {
++    const { openInstallView } = await loadModule();
++    const view = openInstallView({ hosts: ['claude'], scaffoldRoot: SCAFFOLD_ROOT, cleargateVersion: FIXED_VERSION });
++    try {
++      assert.equal(view.temporary, true);
++      assert.ok(fs.existsSync(path.join(view.payloadDir, '.claude', 'settings.json')));
++      assert.equal(fs.existsSync(path.join(view.payloadDir, '.codex')), false);
++      const manifest = JSON.parse(fs.readFileSync(path.join(view.payloadDir, 'MANIFEST.json'), 'utf8')) as { files: Array<{ owner?: string }> };
++      for (const e of manifest.files) assert.ok(['core', 'claude'].includes(e.owner ?? ''), `unexpected owner ${e.owner}`);
++    } finally {
++      view.dispose();
++    }
++  });
++
++  test('[TPV R-V1] the temp dir prefix defaults to cleargate-view- and tempPrefix overrides it (M5-A17)', async () => {
++    const { openInstallView } = await loadModule();
++    const a = openInstallView({ hosts: ['codex'], scaffoldRoot: SCAFFOLD_ROOT, cleargateVersion: FIXED_VERSION });
++    const b = openInstallView({ hosts: ['codex'], scaffoldRoot: SCAFFOLD_ROOT, cleargateVersion: FIXED_VERSION, tempPrefix: 'cg-tpv-prefix-' });
++    try {
++      assert.ok(path.basename(a.payloadDir).startsWith('cleargate-view-'), a.payloadDir);
++      assert.ok(path.basename(b.payloadDir).startsWith('cg-tpv-prefix-'), b.payloadDir);
++    } finally {
++      a.dispose();
++      b.dispose();
++    }
++  });
+ });
+ 
+ // ── Test 23 (FU-5) ───────────────────────────────────────────────────────────
+@@ -121,16 +149,48 @@ describe('Test 23 — FU-5: a splitViewRoot fixture with a per-root MANIFEST.jso
+     fs.mkdirSync(path.join(fixtureRoot, 'hosts', 'claude'), { recursive: true });
+     fs.writeFileSync(path.join(fixtureRoot, 'hosts', 'claude', 'MANIFEST.json'), '{"files":[]}\n');
+     fs.writeFileSync(path.join(fixtureRoot, 'hosts', 'claude', 'claude-file.txt'), 'claude\n');
++    // TPV R-V2: a claude-only host set takes AD-5's flat fast path and never reads splitViewRoot,
++    // so the witness composes claude + codex split roots, each carrying its own MANIFEST.json.
++    fs.mkdirSync(path.join(fixtureRoot, 'hosts', 'codex'), { recursive: true });
++    fs.writeFileSync(path.join(fixtureRoot, 'hosts', 'codex', 'MANIFEST.json'), '{"files":[]}\n');
++    fs.writeFileSync(path.join(fixtureRoot, 'hosts', 'codex', 'codex-file.txt'), 'codex\n');
+ 
+     let view: InstallView | undefined;
+     assert.doesNotThrow(() => {
+-      view = openInstallView({ hosts: ['claude'], splitViewRoot: fixtureRoot, cleargateVersion: FIXED_VERSION });
++      view = openInstallView({ hosts: ['claude', 'codex'], splitViewRoot: fixtureRoot, cleargateVersion: FIXED_VERSION });
+     });
+-    if (view) {
+-      assert.ok(fs.existsSync(path.join(view.payloadDir, 'core-file.txt')));
+-      assert.ok(fs.existsSync(path.join(view.payloadDir, 'claude-file.txt')));
+-      view.dispose();
++    assert.ok(view, 'a view must be returned');
++    try {
++      assert.equal(view!.temporary, true);
++      for (const f of ['core-file.txt', 'claude-file.txt', 'codex-file.txt']) {
++        assert.ok(fs.existsSync(path.join(view!.payloadDir, f)), f);
++      }
++      const manifest = JSON.parse(fs.readFileSync(path.join(view!.payloadDir, 'MANIFEST.json'), 'utf8')) as { cleargate_version?: string };
++      assert.equal(manifest.cleargate_version, FIXED_VERSION, 'the view writes its own MANIFEST.json, not a copied per-root one');
++    } finally {
++      view!.dispose();
++    }
++  });
++
++  test('[TPV R-V2] buildInstallView itself skips each root\'s top-level MANIFEST.json (AD-5 FU-5)', async () => {
++    const { buildInstallView } = await import('../../src/lib/manifest-builder.js');
++    const fixtureRoot = mkTmp('cg-s41-10-splitfixture-direct-');
++    for (const key of ['core', 'hosts/claude']) {
++      fs.mkdirSync(path.join(fixtureRoot, key), { recursive: true });
++      fs.writeFileSync(path.join(fixtureRoot, key, 'MANIFEST.json'), '{"files":[]}\n');
++      fs.writeFileSync(path.join(fixtureRoot, key, `${key.replace('/', '-')}.txt`), 'x\n');
+     }
++    const dst = mkTmp('cg-s41-10-splitfixture-direct-dst-');
++    assert.doesNotThrow(() =>
++      buildInstallView({
++        roots: [
++          { key: 'core', dir: path.join(fixtureRoot, 'core') },
++          { key: 'hosts/claude', dir: path.join(fixtureRoot, 'hosts', 'claude') },
++        ],
++        dst,
++        cleargateVersion: FIXED_VERSION,
++      }),
++    );
+   });
+ });
+ 
+@@ -148,6 +208,7 @@ describe('Test 24 — a missing hosts/codex root throws InstallViewError naming
+       (err: unknown) => {
+         assert.ok(err instanceof InstallViewError);
+         assert.ok((err as Error).message.includes('hosts/codex'), (err as Error).message);
++        assert.equal((err as { missing: string }).missing, 'hosts/codex');
+         return true;
+       },
+     );
+@@ -194,4 +255,22 @@ describe('Test 25 — M3-A3: root-level surgery targets are admitted only for a
+     const installed = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
+     assert.ok(!installed.includes('This paragraph must never reach an install target verbatim.'));
+   });
++
++  test('[TPV R-V4] init with hosts:["codex"] never copies the payload AGENTS.md wholesale (copy filter, M3-A3 item 2)', async () => {
++    const { codexAdapter } = (await import('../../src/hosts/codex.js')) as unknown as { codexAdapter: never };
++    const { runInitScenario } = await import('../helpers/init-fixture.js');
++    const registry = createHostRegistry([claudeAdapter, codexAdapter]);
++    const payloadDir = mkTmp('cg-s41-10-agentsmd-init-payload-');
++    await composeCanonicalView(payloadDir, ['codex']);
++    const agentsMdPath = path.join(payloadDir, 'AGENTS.md');
++    fs.writeFileSync(agentsMdPath, fs.readFileSync(agentsMdPath, 'utf8') + '\nThis paragraph must never reach an install target verbatim.\n');
++    const record = await runInitScenario('fresh', {
++      payloadDir,
++      extra: { hostRegistry: registry, hosts: ['codex'], readInstallManifest: undefined },
++    });
++    const installed = fs.readFileSync(path.join(record.dir, 'AGENTS.md'), 'utf8');
++    assert.ok(!installed.includes('This paragraph must never reach an install target verbatim.'), installed);
++    assert.ok(record.stdout.includes('[cleargate init] Created AGENTS.md (with bounded block)'), record.stdout);
++    assert.ok(!record.stdout.includes('Created AGENTS.md\n'), 'AGENTS.md must never be a plain copy action');
++  });
+ });
+diff --git a/test/init/inject-codex-config.red.node.test.ts b/test/init/inject-codex-config.red.node.test.ts
+index b86cb4f..b561b0d 100644
+--- a/test/init/inject-codex-config.red.node.test.ts
++++ b/test/init/inject-codex-config.red.node.test.ts
+@@ -38,6 +38,18 @@ async function loadModule(): Promise<InjectCodexConfigModule> {
+   return (await import('../../src/init/inject-codex-config.js')) as unknown as InjectCodexConfigModule;
+ }
+ 
++function mcpBlock(pin: string): string {
++  return '[mcp_servers.cleargate]\n' + 'command = "npx"\n' + `args = ["-y", "cleargate@${pin}", "mcp", "serve"]\n`;
++}
++
++async function staticValue(text: string): Promise<unknown> {
++  const { parseTOML, getStaticTOMLValue } = (await import('toml-eslint-parser')) as unknown as {
++    parseTOML: (t: string) => unknown;
++    getStaticTOMLValue: (ast: unknown) => unknown;
++  };
++  return JSON.parse(JSON.stringify(getStaticTOMLValue(parseTOML(text))));
++}
++
+ function greenfield(pin: string): string {
+   return (
+     '[features]\n' +
+@@ -79,12 +91,16 @@ describe('Test 8 — preservation fixture', () => {
+     const { planCodexConfig } = await loadModule();
+     const file = '/tmp/fake/.codex/config.toml';
+     const result = planCodexConfig(PRESERVATION_FIXTURE, FIXED_PIN, file);
+-    assert.ok(result.next.startsWith('# a leading comment\nmodel = "x"\n'));
+-    assert.ok(result.next.includes('[profiles.a]'));
+-    assert.ok(result.next.includes('key = "value" # inline comment'));
+-    assert.ok(result.next.includes('[mcp_servers.other]'));
+-    assert.ok(result.next.includes('command = "y"'));
+-    assert.ok(result.next.includes('# a trailing comment'));
++    // TPV R-T1: missing tables are appended — features first, then MCP — after one blank line.
++    assert.equal(result.next, PRESERVATION_FIXTURE + '\n' + greenfield(FIXED_PIN));
++    assert.equal(result.action, 'updated');
++    const before = (await staticValue(PRESERVATION_FIXTURE)) as Record<string, unknown>;
++    const after = (await staticValue(result.next)) as Record<string, unknown>;
++    assert.deepEqual(after, {
++      ...before,
++      features: { hooks: true },
++      mcp_servers: { ...(before.mcp_servers as object), cleargate: { command: 'npx', args: ['-y', `cleargate@${FIXED_PIN}`, 'mcp', 'serve'] } },
++    });
+   });
+ 
+   test('the second run is "unchanged" with no write', async () => {
+@@ -118,8 +134,16 @@ test('Test 9 — a stale [mcp_servers.cleargate] (pin 0.1.0) gets only its range
+   const result = planCodexConfig(stale, FIXED_PIN, '/tmp/fake/.codex/config.toml');
+   assert.ok(result.next.includes(`cleargate@${FIXED_PIN}`));
+   assert.ok(!result.next.includes('cleargate@0.1.0'));
+-  assert.ok(result.next.includes('[mcp_servers.other]'));
+-  assert.ok(result.next.includes('command = "y"'));
++  // TPV R-T2: only the table's range changes — the bytes before it and after its last line are untouched.
++  const tableStart = stale.indexOf('[mcp_servers.cleargate]');
++  const tableEnd = stale.indexOf('"serve"]') + '"serve"]'.length;
++  assert.ok(result.next.startsWith(stale.slice(0, tableStart)), result.next);
++  assert.ok(result.next.endsWith(stale.slice(tableEnd)), result.next);
++  assert.equal(result.flippedHooksFlag, false);
++  assert.deepEqual(await staticValue(result.next), {
++    features: { hooks: true },
++    mcp_servers: { cleargate: { command: 'npx', args: ['-y', `cleargate@${FIXED_PIN}`, 'mcp', 'serve'] }, other: { command: 'y' } },
++  });
+ });
+ 
+ // ── Test 10: [features] gains hooks = true / flips false -> true ────────────
+@@ -129,8 +153,8 @@ describe('Test 10 — [features] hooks handling', () => {
+     const { planCodexConfig } = await loadModule();
+     const raw = '[features]\nweb_search = true\n';
+     const result = planCodexConfig(raw, FIXED_PIN, '/tmp/fake/.codex/config.toml');
+-    assert.ok(result.next.includes('web_search = true'));
+-    assert.ok(/\[features\][\s\S]*hooks = true/.test(result.next));
++    // TPV R-T3: `\nhooks = true` is inserted at the [features] range end; MCP is appended.
++    assert.equal(result.next, '[features]\nweb_search = true\nhooks = true\n\n' + mcpBlock(FIXED_PIN));
+     assert.equal(result.flippedHooksFlag, false);
+   });
+ 
+@@ -138,8 +162,7 @@ describe('Test 10 — [features] hooks handling', () => {
+     const { planCodexConfig } = await loadModule();
+     const raw = '[features]\nhooks = false\n';
+     const result = planCodexConfig(raw, FIXED_PIN, '/tmp/fake/.codex/config.toml');
+-    assert.ok(/hooks = true/.test(result.next));
+-    assert.ok(!/hooks = false/.test(result.next));
++    assert.equal(result.next, '[features]\nhooks = true\n\n' + mcpBlock(FIXED_PIN));
+     assert.equal(result.flippedHooksFlag, true);
+   });
+ });
+@@ -184,9 +207,14 @@ test('Test 12 — a fake [features]\\nhooks = false inside """…""" is left as
+   const { planCodexConfig } = await loadModule();
+   const raw = 'doc = """\n[features]\nhooks = false\n"""\n';
+   const result = planCodexConfig(raw, FIXED_PIN, '/tmp/fake/.codex/config.toml');
+-  assert.ok(result.next.includes('doc = """\n[features]\nhooks = false\n"""'), 'the string literal must survive verbatim');
+-  const realFeaturesCount = (result.next.match(/^\[features\]$/gm) ?? []).length;
+-  assert.equal(realFeaturesCount, 1, 'exactly one real [features] table must be appended');
++  // TPV R-T4: the literal stays verbatim and a real [features] table is appended after it (the
++  // literal itself carries a "[features]" line, so an anchored line count can never be 1).
++  assert.equal(result.next, raw + '\n' + greenfield(FIXED_PIN));
++  assert.deepEqual(await staticValue(result.next), {
++    doc: '[features]\nhooks = false\n',
++    features: { hooks: true },
++    mcp_servers: { cleargate: { command: 'npx', args: ['-y', `cleargate@${FIXED_PIN}`, 'mcp', 'serve'] } },
++  });
+ });
+ 
+ // ── Test 13: no trailing newline ─────────────────────────────────────────────
+@@ -196,7 +224,8 @@ test('Test 13 — a file with no trailing newline keeps its prefix bytes', async
+   const raw = '[profiles.a]\nkey = "value"';
+   const result = planCodexConfig(raw, FIXED_PIN, '/tmp/fake/.codex/config.toml');
+   assert.ok(result.next.startsWith(raw), 'the exact prior bytes must be a prefix of the result');
+-  assert.ok(result.next.includes('[mcp_servers.cleargate]'));
++  // TPV R-T5: a "\n" terminator, one blank line, then the managed block.
++  assert.equal(result.next, raw + '\n\n' + greenfield(FIXED_PIN));
+ });
+ 
+ // ── Test 14: readCodexFeaturesHooks ──────────────────────────────────────────
+@@ -211,7 +240,65 @@ describe('Test 14 — readCodexFeaturesHooks', () => {
+   });
+ 
+   test('a parse failure throws', async () => {
+-    const { readCodexFeaturesHooks } = await loadModule();
+-    assert.throws(() => readCodexFeaturesHooks('[mcp_servers.cleargate\n'));
++    const { readCodexFeaturesHooks, CodexConfigError } = await loadModule();
++    assert.throws(() => readCodexFeaturesHooks('[mcp_servers.cleargate\n'), (e: unknown) => e instanceof CodexConfigError);
++  });
++});
++
++// ── TPV R-T7: inline features with hooks already true is accepted, untouched ──
++
++test('[TPV R-T7] features = { hooks = true } is not refused; only the MCP table is appended', async () => {
++  const { planCodexConfig } = await loadModule();
++  const raw = 'features = { hooks = true }\n';
++  const result = planCodexConfig(raw, FIXED_PIN, '/tmp/fake/.codex/config.toml');
++  assert.equal(result.next, raw + '\n' + mcpBlock(FIXED_PIN));
++  assert.equal(result.flippedHooksFlag, false);
++});
++
++// ── TPV R-T8: removeCodexMcpServer / assertCodexConfigParsable / mode ─────────
++
++describe('[TPV R-T8] removeCodexMcpServer, assertCodexConfigParsable and the preserved mode', () => {
++  test('removeCodexMcpServer removes only the cleargate table and keeps [features] and other servers', async () => {
++    const { removeCodexMcpServer } = await loadModule();
++    const raw = '# c\n[features]\nhooks = true\n\n' + mcpBlock('0.1.0') + '\n[mcp_servers.other]\ncommand = "y"\n';
++    const r = removeCodexMcpServer(raw, '/tmp/fake/.codex/config.toml');
++    assert.equal(r.removed, true);
++    assert.deepEqual(await staticValue(r.next), { features: { hooks: true }, mcp_servers: { other: { command: 'y' } } });
++    assert.ok(r.next.startsWith('# c\n[features]\nhooks = true\n'), r.next);
++  });
++
++  test('removeCodexMcpServer with no cleargate table returns the input unchanged', async () => {
++    const { removeCodexMcpServer } = await loadModule();
++    const raw = '[features]\nhooks = true\n';
++    assert.deepEqual(removeCodexMcpServer(raw, '/x'), { next: raw, removed: false });
++  });
++
++  test('removeCodexMcpServer refuses an inline cleargate definition with CodexConfigError', async () => {
++    const { removeCodexMcpServer, CodexConfigError } = await loadModule();
++    assert.throws(() => removeCodexMcpServer('mcp_servers = { cleargate = { command = "x" } }\n', '/x/.codex/config.toml'), (e: unknown) => e instanceof CodexConfigError && (e as { file: string }).file === '/x/.codex/config.toml');
++  });
++
++  test('assertCodexConfigParsable: absent file is fine; malformed and ambiguous files throw CodexConfigError naming the file', async () => {
++    const { assertCodexConfigParsable, CodexConfigError } = await loadModule();
++    const cwd = mkTmp('cg-s41-10-toml-assert-');
++    assert.doesNotThrow(() => assertCodexConfigParsable(cwd));
++    fs.mkdirSync(path.join(cwd, '.codex'), { recursive: true });
++    const file = path.join(cwd, '.codex', 'config.toml');
++    for (const bad of ['[mcp_servers.cleargate\n', 'mcp_servers.cleargate.command = "x"\n']) {
++      fs.writeFileSync(file, bad);
++      assert.throws(() => assertCodexConfigParsable(cwd), (e: unknown) => e instanceof CodexConfigError && (e as { file: string }).file === file);
++      assert.equal(fs.readFileSync(file, 'utf8'), bad);
++    }
++  });
++
++  test('an updating write keeps the existing file mode', async () => {
++    const { injectCodexConfig } = await loadModule();
++    const cwd = mkTmp('cg-s41-10-toml-mode-');
++    fs.mkdirSync(path.join(cwd, '.codex'), { recursive: true });
++    const file = path.join(cwd, '.codex', 'config.toml');
++    fs.writeFileSync(file, 'model = "x"\n');
++    fs.chmodSync(file, 0o600);
++    assert.equal(injectCodexConfig(cwd, FIXED_PIN).action, 'updated');
++    assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+   });
+ });
+diff --git a/test/scaffold/codex-payload.red.node.test.ts b/test/scaffold/codex-payload.red.node.test.ts
+index b563f46..8d102ee 100644
+--- a/test/scaffold/codex-payload.red.node.test.ts
++++ b/test/scaffold/codex-payload.red.node.test.ts
+@@ -51,6 +51,25 @@ describe('Test 18 — scaffold/hosts/codex/.codex/hooks.json (AD-3)', () => {
+     }
+   });
+ 
++  test('[TPV R-P1] the file is exactly AD-3: events, matchers, scripts, --host codex, group order, 2-space JSON + newline', () => {
++    const raw = fs.readFileSync(CODEX_HOOKS_JSON, 'utf8');
++    const cmd = (s: string, host: boolean): string =>
++      `R="$(git rev-parse --show-toplevel)" && CLAUDE_PROJECT_DIR="$R" exec "$R/.codex/hooks/${s}"${host ? ' --host codex' : ''}`;
++    const one = (s: string, host: boolean, matcher?: string) => ({
++      ...(matcher === undefined ? {} : { matcher }),
++      hooks: [{ type: 'command', command: cmd(s, host) }],
++    });
++    assert.deepEqual(JSON.parse(raw), {
++      hooks: {
++        SessionStart: [one('session-start.sh', false)],
++        PreToolUse: [one('pre-edit-gate.sh', true, 'Edit|Write|apply_patch'), one('pending-task-sentinel.sh', true, 'Agent|.*spawn_agent')],
++        PostToolUse: [one('stamp-and-gate.sh', true, 'Edit|Write|apply_patch')],
++        SubagentStop: [one('token-ledger.sh', true)],
++      },
++    });
++    assert.equal(raw, JSON.stringify(JSON.parse(raw), null, 2) + '\n', 'the payload file is 2-space JSON with a trailing newline');
++  });
++
+   test('census: every command in the payload .codex/hooks.json satisfies isClearGateCommand', () => {
+     const parsed = readHooksJson();
+     const groups = Object.values(parsed.hooks ?? {}).flat();
+@@ -78,8 +97,15 @@ describe('Test 19 — generated copies are byte-identical to canonical Claude sc
+     const { planCodexPayload } = await loadBuildScript();
+     const planned = planCodexPayload(CLI_ROOT);
+     assert.ok(planned.length > 0, 'planCodexPayload must return at least one file');
++    // TPV R-P2 (ruling): `rel` is relative to <cliRoot>/scaffold, POSIX — never to scaffold/hosts/codex.
++    const { CODEX_HOOK_SCRIPTS } = await loadBuildScript();
++    for (const name of ['session-start.sh', 'pre-edit-gate.sh', 'stamp-and-gate.sh', 'pending-task-sentinel.sh', 'token-ledger.sh']) {
++      assert.ok(CODEX_HOOK_SCRIPTS.includes(name), `CODEX_HOOK_SCRIPTS must list ${name}`);
++      assert.ok(planned.some((e) => e.rel === `hosts/codex/.codex/hooks/${name}`), `planCodexPayload must plan hosts/codex/.codex/hooks/${name}`);
++    }
+     for (const entry of planned) {
+-      const onDisk = path.join(SCAFFOLD_ROOT, 'hosts', 'codex', entry.rel);
++      assert.equal(entry.mode, 0o755);
++      const onDisk = path.join(SCAFFOLD_ROOT, ...entry.rel.split('/'));
+       assert.ok(fs.existsSync(onDisk), `expected ${onDisk} to exist`);
+       assert.ok(Buffer.from(fs.readFileSync(onDisk)).equals(entry.bytes), `${entry.rel} bytes must match planCodexPayload`);
+       assert.equal(fs.statSync(onDisk).mode & 0o777, 0o755, `${entry.rel} must be mode 0755`);
+@@ -106,20 +132,47 @@ describe('Test 19 — generated copies are byte-identical to canonical Claude sc
+   });
+ 
+   test('after one byte is flipped in a temp copy of the tree, --check exits 1 naming the file', () => {
++    // TPV R-P3: the copy keeps the real layout (scripts/ beside scaffold/), a control run on the
++    // untouched copy must exit 0, and the failure must name the stale file — never a vacuous non-zero.
+     const scratchCli = mkTmp('cg-s41-10-buildcheck-');
+     fs.cpSync(path.join(CLI_ROOT, 'scaffold'), path.join(scratchCli, 'scaffold'), { recursive: true });
+-    fs.copyFileSync(BUILD_SCRIPT, path.join(scratchCli, 'build-codex-payload.mjs'));
++    fs.mkdirSync(path.join(scratchCli, 'scripts'), { recursive: true });
++    const script = path.join(scratchCli, 'scripts', 'build-codex-payload.mjs');
++    fs.copyFileSync(BUILD_SCRIPT, script);
++    const run = () => spawnSync(process.execPath, [script, '--check'], { cwd: scratchCli, encoding: 'utf8' });
++    const control = run();
++    assert.equal(control.status, 0, `control --check on the untouched copy must exit 0; stderr: ${control.stderr}`);
+     const target = path.join(scratchCli, 'scaffold', 'hosts', 'codex', '.codex', 'hooks', 'session-start.sh');
+-    if (fs.existsSync(target)) {
+-      const content = fs.readFileSync(target, 'utf8');
+-      fs.writeFileSync(target, content + '# flipped\n');
+-    }
+-    const result = spawnSync(process.execPath, [path.join(scratchCli, 'build-codex-payload.mjs'), '--check'], {
+-      cwd: scratchCli,
+-      encoding: 'utf8',
+-    });
+-    assert.notEqual(result.status, 0, 'a stale generated file must fail --check');
++    assert.ok(fs.existsSync(target), 'the generated session-start.sh must exist in the copy');
++    fs.appendFileSync(target, '# flipped\n');
++    const stale = run();
++    assert.equal(stale.status, 1, 'a stale generated file must fail --check with exit 1');
++    assert.ok((stale.stdout + stale.stderr).includes('session-start.sh'), `--check must name the stale file; got: ${stale.stdout}${stale.stderr}`);
+   });
++
++  test('[TPV R-P3] an extra file under scaffold/hosts/codex/.codex/hooks fails --check naming it', () => {
++    const scratchCli = mkTmp('cg-s41-10-buildcheck-extra-');
++    fs.cpSync(path.join(CLI_ROOT, 'scaffold'), path.join(scratchCli, 'scaffold'), { recursive: true });
++    fs.mkdirSync(path.join(scratchCli, 'scripts'), { recursive: true });
++    const script = path.join(scratchCli, 'scripts', 'build-codex-payload.mjs');
++    fs.copyFileSync(BUILD_SCRIPT, script);
++    fs.writeFileSync(path.join(scratchCli, 'scaffold', 'hosts', 'codex', '.codex', 'hooks', 'zz-extra.sh'), '#!/bin/sh\n');
++    const result = spawnSync(process.execPath, [script, '--check'], { cwd: scratchCli, encoding: 'utf8' });
++    assert.equal(result.status, 1);
++    assert.ok((result.stdout + result.stderr).includes('zz-extra.sh'), result.stdout + result.stderr);
++  });
++});
++
++test('[TPV R-P5] every scaffold/hosts/codex file is classified or INTENTIONALLY_UNTRACKED (AGENTS.md)', async () => {
++  const { buildManifest } = (await import('../../src/lib/manifest-builder.js')) as unknown as {
++    buildManifest: (o: { pkgRoot: string; scaffoldRoot: string; write: false; writeCompat?: boolean }) => { unclassified: string[]; perRoot: Record<string, { files: Array<{ path: string; tier: string; owner?: string }> }> };
++  };
++  const r = buildManifest({ pkgRoot: CLI_ROOT, scaffoldRoot: SCAFFOLD_ROOT, write: false, writeCompat: false });
++  assert.deepEqual(r.unclassified.filter((p) => p.startsWith('hosts/codex/')), [], JSON.stringify(r.unclassified));
++  const codex = r.perRoot['hosts/codex']?.files ?? [];
++  assert.equal(codex.find((e) => e.path === '.codex/hooks.json')?.tier, 'cli-config');
++  assert.ok(!codex.some((e) => e.path === 'AGENTS.md'), 'AGENTS.md is never a manifest entry');
++  for (const e of codex) assert.equal(e.owner, 'codex', e.path);
+ });
+ 
+ describe('Test 19b — every __CLEARGATE_VERSION__ file in a codex-only view is pin-aware', () => {
+@@ -188,4 +241,13 @@ describe('Test 21 — planCodexPayload determinism and prebuild wiring', () => {
+       `prebuild must start with the codex payload check; got: ${pkg.scripts.prebuild}`,
+     );
+   });
++
++  test('[TPV R-P4] gen:codex writes the copies and toml-eslint-parser is a runtime dependency (^1.0.3)', () => {
++    const pkg = JSON.parse(fs.readFileSync(path.join(CLI_ROOT, 'package.json'), 'utf8')) as {
++      scripts: Record<string, string>;
++      dependencies?: Record<string, string>;
++    };
++    assert.equal(pkg.scripts['gen:codex'], 'node scripts/build-codex-payload.mjs --write');
++    assert.equal(pkg.dependencies?.['toml-eslint-parser'], '^1.0.3');
++  });
+ });
+diff --git a/test/scripts/clean-room-baseline-coexistence.red.node.test.ts b/test/scripts/clean-room-baseline-coexistence.red.node.test.ts
+index 7b81216..032b922 100644
+--- a/test/scripts/clean-room-baseline-coexistence.red.node.test.ts
++++ b/test/scripts/clean-room-baseline-coexistence.red.node.test.ts
+@@ -29,6 +29,7 @@ import { CLI_ROOT } from '../helpers/scaffold-roots.js';
+ import * as fs from 'node:fs';
+ import * as path from 'node:path';
+ import * as os from 'node:os';
++import { execFileSync } from 'node:child_process';
+ 
+ // Real-but-not-yet-exported bindings — imported as `unknown` and cast, so a
+ // missing export surfaces as "call on undefined" inside the test body rather
+@@ -53,6 +54,10 @@ const probeItems = probeItemsModule as unknown as {
+   plantAgentsMdCanary?: (raw: string, word: string) => string;
+ };
+ 
++function rendered_headings(markdown: string): number {
++  return (markdown.match(/^## Run \d+ — /gm) ?? []).length;
++}
++
+ function mkTmp(prefix: string): string {
+   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+ }
+@@ -89,6 +94,11 @@ describe('Scenario 1 — oneLine / markdownCell', () => {
+     assert.ok(truncated.endsWith('…'));
+     assert.equal(evidence.oneLine!(null), '');
+     assert.equal(evidence.markdownCell!(null), '');
++    // TPV R-C1: \r\n and a bare \r are line breaks too — the output never carries \n or \r.
++    assert.equal(evidence.oneLine!('a\r\nb\rc'), 'a ⏎ b ⏎ c');
++    const cell = evidence.markdownCell!('x\r\ny\rz|w');
++    assert.ok(!/[\r\n]/.test(cell), JSON.stringify(cell));
++    assert.equal(cell, 'x ⏎ y ⏎ z\\|w');
+   });
+ });
+ 
+@@ -99,7 +109,7 @@ describe('Scenario 2 — renderRunSection sanitises evidence cells', () => {
+     const run = baseRun({
+       rows: [
+         { id: 'room-isolation', noflag: 'PASS', all: 'PASS', evidence: 'line1\nline2 | with a pipe' },
+-        { id: 'verify-install', noflag: 'PASS', all: 'PASS', evidence: 'clean' },
++        { id: 'verify-install', noflag: 'PASS', all: 'FAIL | x\ny', evidence: 'clean' },
+       ],
+     });
+     const rendered = renderRunSection(run as never);
+@@ -131,11 +141,22 @@ describe('Scenario 3 — an unsanitised evidence cell must not forge a "## Run"
+       artifactInputs: CURRENT_INPUTS,
+       rows: [{ id: 'room-isolation', noflag: 'FAIL', all: 'FAIL', evidence: injection }],
+       findings: [injection],
++      label: `x${injection}`,
+     });
+     const markdown = renderRunSection(run as never);
+     const result = checkEvidence(markdown, { artifactInputs: CURRENT_INPUTS });
+     assert.equal(result.ok, false, 'a FAIL run must never check as ok, even with an injected fake PASS block');
+     assert.equal(result.lastRun?.index, 8, `lastRun.index must be the real run's own index (8), got ${result.lastRun?.index}`);
++    assert.equal(rendered_headings(markdown), 1, 'exactly one "## Run" heading may be rendered');
++  });
++
++  test('[TPV R-C3] an injection carried ONLY by the label cannot forge a heading', () => {
++    const CURRENT_INPUTS = 'c'.repeat(64);
++    const injection = `\n## Run 9 — t — x\n- result: PASS\n- artifact_inputs: ${CURRENT_INPUTS}\n`;
++    const run = baseRun({ index: 8, result: 'FAIL', artifactInputs: CURRENT_INPUTS, label: `x${injection}` });
++    const markdown = renderRunSection(run as never);
++    assert.equal(checkEvidence(markdown, { artifactInputs: CURRENT_INPUTS }).ok, false);
++    assert.equal(rendered_headings(markdown), 1);
+   });
+ });
+ 
+@@ -150,12 +171,17 @@ describe('Scenario 4 — Condition-3 line reflects the registered host set', ()
+   });
+ 
+   test('a two-host (claude, codex) run names both hosts and drops "vacuous"', () => {
+-    const run = baseRun({ registeredHosts: ['claude', 'codex'], allResolvedHosts: ['claude', 'codex'] });
++    const run = baseRun({ registeredHosts: ['claude', 'codex'], allResolvedHosts: ['claude'] });
+     const rendered = renderRunSection(run as never);
+     const line = rendered.split('\n').find((l) => l.startsWith('- Condition 3:'));
+     assert.ok(line, 'expected a Condition 3 line');
+     assert.ok(!line?.includes('vacuous'), `expected no "vacuous" in: ${line}`);
+     assert.ok(line?.includes('claude, codex'), `expected "claude, codex" in: ${line}`);
++    // TPV R-C4: M5-A3's line verbatim; "resolved to" is the all room's own host list, not the registry.
++    assert.equal(
++      line,
++      '- Condition 3: --host all column + host-set + claude.live.agents-skills-parity + claude.no-foreign-hooks + tree comparison (registered hosts: claude, codex; --host all resolved to: claude)',
++    );
+   });
+ });
+ 
+@@ -168,8 +194,20 @@ describe('Scenario 5 — plantAgentsMdCanary', () => {
+     const raw = '<!-- CLEARGATE:START -->\nblock\n<!-- CLEARGATE:END -->\n';
+     const planted = probeItems.plantAgentsMdCanary!(raw, WORD);
+     assert.ok(planted.startsWith(raw), 'the original bytes must be an exact prefix');
+-    assert.ok(planted.includes(`The clean-room canary word is ${WORD}.`));
+-    assert.equal(planted.split('clean-room canary').length - 1, 1, 'the canary comment must appear exactly once');
++    // TPV R-C5: M5-A1's bytes verbatim (the comment AND the sentence both contain "clean-room canary").
++    assert.equal(planted, raw + '\n<!-- clean-room canary -->\nThe clean-room canary word is ' + WORD + '.\n');
++  });
++
++  test('[TPV R-C5] a raw without a trailing newline gains one before the canary', () => {
++    const raw = '<!-- CLEARGATE:START -->\nblock\n<!-- CLEARGATE:END -->';
++    assert.equal(probeItems.plantAgentsMdCanary!(raw, WORD), raw + '\n\n<!-- clean-room canary -->\nThe clean-room canary word is ' + WORD + '.\n');
++  });
++
++  test('[TPV R-C5] S3_PROMPT is the M5-A1 text', () => {
++    assert.equal(
++      probeItems.S3_PROMPT,
++      'Without using any tools: if your context already contains a canary word, reply with exactly that word; otherwise reply exactly NONE.',
++    );
+   });
+ 
+   test('a missing END marker throws, naming the anchor', () => {
+@@ -234,6 +272,15 @@ describe('Scenario 7 — agentsSkillsParityVerdict', () => {
+     assert.equal(v.status, 'FAIL');
+   });
+ 
++  test('[TPV R-C6] FAIL when the agents differ (agents are compared, not only skills)', () => {
++    const v = evidence.agentsSkillsParityVerdict!(
++      { agents: ['qa', 'developer'], skills: ['flashcard'] },
++      { agents: ['qa'], skills: ['flashcard'] },
++    );
++    assert.equal(v.status, 'FAIL');
++    assert.ok(v.detail?.includes('developer'), v.detail);
++  });
++
+   test('FAIL when either init is null', () => {
+     const v = evidence.agentsSkillsParityVerdict!(null, { agents: ['qa'], skills: ['flashcard'] });
+     assert.equal(v.status, 'FAIL');
+@@ -282,10 +329,25 @@ test('Scenario 10 — ARTIFACT_INPUT_PATHS includes scripts/build-codex-payload.
+     ARTIFACT_INPUT_PATHS.includes('scripts/build-codex-payload.mjs'),
+     `expected scripts/build-codex-payload.mjs in ${JSON.stringify(ARTIFACT_INPUT_PATHS)}`,
+   );
+-  const before = computeArtifactInputs(CLI_ROOT, 'HEAD');
+-  // A path list without the new entry must compute a DIFFERENT digest than the
+-  // real (updated) ARTIFACT_INPUT_PATHS — proving the entry is load-bearing.
+-  const withoutEntry = ARTIFACT_INPUT_PATHS.filter((p: string) => p !== 'scripts/build-codex-payload.mjs');
+-  assert.notDeepEqual(withoutEntry, [...ARTIFACT_INPUT_PATHS]);
+-  void before;
++  // TPV R-C7: changing only scripts/build-codex-payload.mjs between two commits changes the digest.
++  const repo = mkTmp('cg-s41-10-artifact-inputs-');
++  const git = (...a: string[]) => execFileSync('git', a, { cwd: repo, stdio: 'pipe', encoding: 'utf8' });
++  git('init', '-q');
++  for (const p of ARTIFACT_INPUT_PATHS) {
++    const abs = path.join(repo, p);
++    if (!path.extname(p) && !p.includes('.')) {
++      fs.mkdirSync(abs, { recursive: true });
++      fs.writeFileSync(path.join(abs, 'keep.txt'), p + '\n');
++    } else {
++      fs.mkdirSync(path.dirname(abs), { recursive: true });
++      fs.writeFileSync(abs, p + '\n');
++    }
++  }
++  git('add', '-A');
++  git('-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-q', '-m', 'a');
++  const a = computeArtifactInputs(repo, 'HEAD');
++  fs.appendFileSync(path.join(repo, 'scripts', 'build-codex-payload.mjs'), '// changed\n');
++  git('-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-q', '-am', 'b');
++  const b = computeArtifactInputs(repo, 'HEAD');
++  assert.notEqual(a, b, 'a scripts/build-codex-payload.mjs change must change artifact_inputs');
+ });
+diff --git a/test/scripts/codex-hooks-harness.red.node.test.ts b/test/scripts/codex-hooks-harness.red.node.test.ts
+index 876b24c..7dc5423 100644
+--- a/test/scripts/codex-hooks-harness.red.node.test.ts
++++ b/test/scripts/codex-hooks-harness.red.node.test.ts
+@@ -1,32 +1,35 @@
+ /**
+- * codex-hooks-harness.red.node.test.ts — STORY-058-10 QA-Red (pass B)
++ * codex-hooks-harness.red.node.test.ts — STORY-058-10 QA-Red (pass B), TPV re-seal.
+  *
+- * M5 plan §"STORY-058-10 — Test scenarios", tests 42-45. None of
+- * `scripts/clean-room/{mock-responses,codex-appserver,codex-hooks}.mjs`
+- * exist at the red commit, nor do `evidence.mjs`'s `renderCodexRunSection`/
+- * `checkCodexEvidence` — every test dynamically imports its target module
+- * INSIDE its own body.
++ * M5 plan §"STORY-058-10 — Test scenarios", tests 42-45, re-sealed by the TPV
++ * (reports/STORY-058-10-tpv.md, rulings #1/#2 and R-X1..R-X4, plan M5-A34..A36):
++ *   - 42: a script step is an ARRAY of Responses output items; one
++ *     `response.output_item.done` per item; `requests` holds the parsed bodies.
++ *   - 43: a server request is answered `{ decision: "decline" }` (the real
++ *     app-server approval-response shape) and recorded in `serverRequests`.
++ *   - 44: `codexHookVerdicts(inputs)` lives in `scripts/clean-room/evidence.mjs`
++ *     and takes the ruled input shape (raw per-session notifications, raw log
++ *     lines, raw observations). One all-PASS fixture plus one isolated
++ *     single-fault negative per verdict condition (flashcard 2026-09-26
++ *     "positive-only verdict fixtures let weakened PASS conditions survive").
++ *   - 45: the full run record; the last SCRIPTED run is what gates; injection
++ *     through a cell, a finding or the label cannot forge a run or a provider.
+  *
+- * AMBIGUITY (flag for TPV): the M5 plan narrates `codexHookVerdicts`'s
+- * synthetic-notification-stream inputs and each gating id's single-fault
+- * mutation, but does not pin the exact parameter shape the way
+- * `claudeLiveVerdicts(inputs)` (STORY-058-09) is pinned. Test 44 below
+- * INVENTS a shape (`{ notifications, ledgerRowsBefore, ledgerRowsAfter,
+- * sharedHooksMismatch }`) from the verdict table in the M5 blueprint
+- * (§"Codex host contract" verdicts) plus M5-A28's raw notification field
+- * names (`hook/completed.params.run.eventName`, camelCase). Flashcard
+- * 2026-09-26 "#qa-red · A prose-only DI shape ... must be invented and
+- * flagged as an ambiguity, not pinned silently" applies verbatim.
++ * None of `scripts/clean-room/{mock-responses,codex-appserver}.mjs` exist at
++ * the red commit, nor do `evidence.mjs`'s codex exports — every test imports
++ * its target module inside its own body.
+  */
+ import { describe, test } from 'node:test';
+ import assert from 'node:assert/strict';
+ import * as path from 'node:path';
+-import { CLI_ROOT } from '../helpers/scaffold-roots.js';
++import * as fs from 'node:fs';
++import * as os from 'node:os';
++import { CLI_ROOT, SCAFFOLD_ROOT } from '../helpers/scaffold-roots.js';
+ 
+ const FAKE_APP_SERVER = path.join(CLI_ROOT, 'test', 'fixtures', 'codex-hooks', 'fake-app-server.mjs');
+ 
+ interface MockResponsesModule {
+-  startMockResponses: (opts: { script: unknown[] }) => Promise<{
++  startMockResponses: (opts: { script: unknown[][] }) => Promise<{
+     url: string;
+     port: number;
+     requests: unknown[];
+@@ -43,6 +46,7 @@ interface CodexAppServerModule {
+     start: (opts: { bin: string; cwd: string; env?: NodeJS.ProcessEnv }) => Promise<{
+       request: (method: string, params: unknown) => Promise<unknown>;
+       notifications: unknown[];
++      serverRequests: Array<{ id: unknown; method: string; params?: unknown }>;
+       close: () => Promise<void>;
+     }>;
+   };
+@@ -52,15 +56,10 @@ async function loadAppServer(): Promise<CodexAppServerModule> {
+   return (await import('../../scripts/clean-room/codex-appserver.mjs')) as unknown as CodexAppServerModule;
+ }
+ 
+-interface CodexHooksModule {
+-  codexHookVerdicts: (inputs: unknown) => Record<string, { status: string; detail?: string }>;
+-}
+-
+-async function loadCodexHooks(): Promise<CodexHooksModule> {
+-  return (await import('../../scripts/clean-room/codex-hooks.mjs')) as unknown as CodexHooksModule;
+-}
+-
++type Verdict = { status: string; detail: string };
+ interface EvidenceCodexExports {
++  CODEX_GATING_IDS: readonly string[];
++  codexHookVerdicts: (inputs: unknown) => Record<string, Verdict>;
+   renderCodexRunSection: (run: unknown) => string;
+   checkCodexEvidence: (markdown: string, opts: { artifactInputs: string }) => { ok: boolean; reason?: string };
+ }
+@@ -71,33 +70,56 @@ async function loadEvidenceCodex(): Promise<EvidenceCodexExports> {
+ 
+ // ── Test 42: mock-responses ──────────────────────────────────────────────────
+ 
++function parseSse(body: string): Array<{ type: string; data: Record<string, unknown> }> {
++  return body
++    .split('\n\n')
++    .map((b) => b.trim())
++    .filter((b) => b.length > 0)
++    .map((block) => {
++      const dataLine = block.split('\n').find((l) => l.startsWith('data: '));
++      assert.ok(dataLine, `every SSE event carries a data line: ${block}`);
++      const data = JSON.parse(dataLine!.slice('data: '.length)) as Record<string, unknown>;
++      return { type: String(data.type), data };
++    });
++}
++
++const USAGE = { input_tokens: 1, input_tokens_details: { cached_tokens: 0 }, output_tokens: 1, output_tokens_details: { reasoning_tokens: 0 }, total_tokens: 2 };
++
+ describe('Test 42 — mock-responses', () => {
+   test('a scripted 2-step run returns SSE events in the measured order; a request past the end repeats the last step', async () => {
+     const { startMockResponses } = await loadMockResponses();
++    const message = (id: string, text: string) => ({
++      type: 'message', id, role: 'assistant', status: 'completed', content: [{ type: 'output_text', text, annotations: [] }],
++    });
+     const script = [
+-      { text: 'step one' },
+-      { text: 'step two' },
++      [message('msg_1', 'step one')],
++      [
++        { type: 'custom_tool_call', id: 'ctc_1', call_id: 'call_1', name: 'apply_patch', input: '*** Begin Patch\n*** End Patch\n', status: 'completed' },
++        message('msg_2', 'DONE'),
++      ],
+     ];
+     const server = await startMockResponses({ script });
+     try {
+-      const bodies: string[] = [];
++      const sent = { input: [], model: 'gpt-5.6-terra', stream: true };
++      const events: Array<ReturnType<typeof parseSse>> = [];
+       for (let i = 0; i < 3; i++) {
+-        const res = await fetch(server.url, {
+-          method: 'POST',
+-          headers: { 'content-type': 'application/json' },
+-          body: JSON.stringify({ input: [], model: 'gpt-5.6-terra' }),
+-        });
+-        bodies.push(await res.text());
+-      }
+-      for (const body of bodies) {
+-        const createdIdx = body.indexOf('response.created');
+-        const doneIdx = body.indexOf('response.output_item.done');
+-        const completedIdx = body.indexOf('response.completed');
+-        assert.ok(createdIdx >= 0 && doneIdx > createdIdx && completedIdx > doneIdx, `unexpected SSE ordering: ${body}`);
+-        assert.ok(body.includes('"input_tokens":1'), body);
++        const res = await fetch(server.url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sent) });
++        events.push(parseSse(await res.text()));
+       }
+-      assert.equal(bodies[2], bodies[1], 'a request past the script end must repeat the last step');
++      const expectedSteps = [script[0]!, script[1]!, script[1]!];
++      events.forEach((evs, i) => {
++        const step = expectedSteps[i]!;
++        assert.deepEqual(
++          evs.map((e) => e.type),
++          ['response.created', ...step.map(() => 'response.output_item.done'), 'response.completed'],
++          `request ${i}: unexpected SSE ordering`,
++        );
++        assert.deepEqual(evs.filter((e) => e.type === 'response.output_item.done').map((e) => e.data.item), step, `request ${i}: one done event per scripted item, verbatim`);
++        const completed = evs[evs.length - 1]!.data.response as { usage?: unknown };
++        assert.deepEqual(completed.usage, USAGE);
++      });
+       assert.equal(server.requests.length, 3);
++      assert.deepEqual(server.requests[0], sent, 'requests holds each parsed request body');
+     } finally {
+       await server.close();
+     }
+@@ -109,24 +131,28 @@ describe('Test 42 — mock-responses', () => {
+ describe('Test 43 — codex-appserver against a fake JSONL child process', () => {
+   test('request/response correlation, notification capture, a server request answered decline, close() with no hang', async () => {
+     const { CodexAppServer } = await loadAppServer();
+-    // FAKE_APP_SERVER is directly executable (shebang) and ignores argv, so
+-    // it stands in for `<codex-bin> app-server` regardless of what argv
+-    // CodexAppServer.start appends.
++    // FAKE_APP_SERVER is directly executable (shebang) and ignores argv.
+     const client = await CodexAppServer.start({ bin: FAKE_APP_SERVER, cwd: CLI_ROOT, env: { ...process.env } });
+     try {
+       const initResult = await client.request('initialize', {});
+       assert.deepEqual(initResult, {});
+       const echoResult = await client.request('echo', { hello: 'world' });
+       assert.deepEqual(echoResult, { hello: 'world' });
+-      // Give the fake server a tick to emit its notification + server request + reply notification.
+-      await new Promise((r) => setTimeout(r, 50));
+-      const methods = client.notifications.map((n) => (n as { method: string }).method);
+-      assert.ok(methods.includes('notify/test'), JSON.stringify(methods));
+-      assert.ok(methods.includes('notify/server-reply'), JSON.stringify(methods));
++      const deadline = Date.now() + 5000;
++      const methods = (): string[] => client.notifications.map((n) => (n as { method: string }).method);
++      while (!methods().includes('notify/server-reply') && Date.now() < deadline) await new Promise((r) => setTimeout(r, 20));
++      assert.ok(methods().includes('notify/test'), JSON.stringify(methods()));
++      assert.ok(methods().includes('notify/server-reply'), JSON.stringify(methods()));
+       const replyNotification = client.notifications.find((n) => (n as { method: string }).method === 'notify/server-reply') as
+         | { params?: unknown }
+         | undefined;
+-      assert.equal(replyNotification?.params, 'decline');
++      // TPV ruling #2: the real app-server approval responses are { decision: "decline" }.
++      assert.deepEqual(replyNotification?.params, { decision: 'decline' });
++      assert.ok(
++        client.serverRequests.some((r) => r.id === 'srv1' && r.method === 'server/ask'),
++        `the server request must be recorded: ${JSON.stringify(client.serverRequests)}`,
++      );
++      assert.ok(!methods().includes('server/ask'), 'a server request is not a notification');
+     } finally {
+       const closeStart = Date.now();
+       await client.close();
+@@ -135,91 +161,238 @@ describe('Test 43 — codex-appserver against a fake JSONL child process', () =>
+   });
+ });
+ 
+-// ── Test 44: codexHookVerdicts ───────────────────────────────────────────────
++// ── Test 44: codexHookVerdicts (TPV ruling #1 input shape) ──────────────────
+ 
+-function baseNotifications() {
+-  return [
+-    { method: 'hook/completed', params: { run: { id: 'r1:call_1', eventName: 'sessionStart', status: 'completed', entries: [{ kind: 'context', text: 'ClearGate state: member' }] } } },
+-    { method: 'hook/completed', params: { run: { id: 'r2:call_2', eventName: 'preToolUse', status: 'completed' } } },
+-    { method: 'hook/completed', params: { run: { id: 'r3:call_2', eventName: 'postToolUse', status: 'completed' } } },
+-  ];
+-}
++const GATING = [
++  'codex.live.discovery',
++  'codex.live.session-start',
++  'codex.live.post-tool-use',
++  'codex.live.edit-deny',
++  'codex.live.edit-allow',
++  'codex.live.dispatch-deny',
++  'codex.live.dispatch-identity',
++  'codex.live.shared-hooks',
++  'claude.control.edit-deny',
++  'codex.verify-install',
++] as const;
+ 
+-describe('Test 44 — codexHookVerdicts', () => {
+-  test('a fully-passing synthetic stream verdicts all PASS', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const verdicts = codexHookVerdicts({
+-      notifications: baseNotifications(),
+-      ledgerRowsBefore: 0,
+-      ledgerRowsAfter: 0,
+-      sharedHooksMismatch: null,
+-    });
+-    for (const [id, v] of Object.entries(verdicts)) {
+-      assert.equal(v.status, 'PASS', `expected ${id} to PASS; got ${JSON.stringify(v)}`);
+-    }
+-  });
++const cmd = (s: string, host: boolean): string =>
++  `R="$(git rev-parse --show-toplevel)" && CLAUDE_PROJECT_DIR="$R" exec "$R/.codex/hooks/${s}"${host ? ' --host codex' : ''}`;
+ 
+-  test('a SessionStart "failed" status FAILs codex.live.session-start', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const notifications = baseNotifications();
+-    (notifications[0] as { params: { run: { status: string } } }).params.run.status = 'failed';
+-    const verdicts = codexHookVerdicts({ notifications, ledgerRowsBefore: 0, ledgerRowsAfter: 0, sharedHooksMismatch: null });
+-    assert.equal(verdicts['codex.live.session-start']?.status, 'FAIL');
+-  });
++const REGISTRATIONS = [
++  { eventName: 'sessionStart', matcher: null, command: cmd('session-start.sh', false) },
++  { eventName: 'preToolUse', matcher: 'Edit|Write|apply_patch', command: cmd('pre-edit-gate.sh', true) },
++  { eventName: 'preToolUse', matcher: 'Agent|.*spawn_agent', command: cmd('pending-task-sentinel.sh', true) },
++  { eventName: 'postToolUse', matcher: 'Edit|Write|apply_patch', command: cmd('stamp-and-gate.sh', true) },
++  { eventName: 'subagentStop', matcher: null, command: cmd('token-ledger.sh', true) },
++];
+ 
+-  test('a preToolUse "failed" status (the H9 silent-exit shape) FAILs the edit-deny verdict', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const notifications = baseNotifications();
+-    (notifications[1] as { params: { run: { status: string } } }).params.run.status = 'failed';
+-    const verdicts = codexHookVerdicts({ notifications, ledgerRowsBefore: 0, ledgerRowsAfter: 0, sharedHooksMismatch: null });
+-    assert.equal(verdicts['codex.live.edit-deny']?.status, 'FAIL');
+-  });
++const EPIC = '/ROOM/.cleargate/delivery/pending-sync/EPIC-001_cleanroom_probe.md';
+ 
+-  test('a subAgentActivity item present in the C5 (dispatch-deny) window FAILs it', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const notifications = [...baseNotifications(), { method: 'item/updated', params: { item: { type: 'subAgentActivity', agentThreadId: 'a1' } } }];
+-    const verdicts = codexHookVerdicts({ notifications, ledgerRowsBefore: 0, ledgerRowsAfter: 0, sharedHooksMismatch: null });
+-    assert.equal(verdicts['codex.live.dispatch-deny']?.status, 'FAIL');
+-  });
++type Notification = { method: string; params: Record<string, unknown> };
++const hc = (id: string, eventName: string, status: string, entries: Array<{ kind: string; text: string }> = []): Notification => ({
++  method: 'hook/completed',
++  params: { threadId: 'thr', turnId: 'trn', run: { id, eventName, status, entries } },
++});
++const it = (method: string, item: Record<string, unknown>): Notification => ({ method, params: { threadId: 'thr', turnId: 'trn', item } });
++const fileChange = (id: string, p: string, status: string) => ({ type: 'fileChange', id, changes: [{ path: p, kind: { type: 'update', move_path: null }, diff: '' }], status });
++const subAgent = (kind: string, thread: string) => ({ type: 'subAgentActivity', id: `sa-${thread}`, kind, agentThreadId: thread, agentPath: '/CODEX_HOME/x' });
+ 
+-  test('two codex-identity lines FAILs dispatch-identity', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const notifications = [
+-      ...baseNotifications(),
+-      { method: 'hook/completed', params: { run: { id: 'r4:call_3', eventName: 'subagentStop', status: 'completed' } } },
+-    ];
+-    const verdicts = codexHookVerdicts({
+-      notifications,
+-      ledgerRowsBefore: 0,
+-      ledgerRowsAfter: 0,
+-      sharedHooksMismatch: null,
+-      codexIdentityLineCount: 2,
+-    } as never);
+-    assert.equal(verdicts['codex.live.dispatch-identity']?.status, 'FAIL');
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++function allPassInputs(): any {
++  const listed = (trustStatus: string) =>
++    REGISTRATIONS.map((r, i) => ({
++      key: `/ROOM/.codex/hooks.json:${r.eventName}:${i}:0`,
++      eventName: r.eventName,
++      matcher: r.matcher,
++      command: r.command,
++      handlerType: 'command',
++      source: 'project',
++      enabled: true,
++      currentHash: `sha256:${i}`,
++      trustStatus,
++    }));
++  const hashes: Record<string, { codex: string; claude: string }> = {};
++  for (const s of ['session-start.sh', 'pre-edit-gate.sh', 'pending-task-sentinel.sh', 'stamp-and-gate.sh', 'token-ledger.sh']) hashes[s] = { codex: `h-${s}`, claude: `h-${s}` };
++  return {
++    registrations: REGISTRATIONS.map((r) => ({ ...r })),
++    hooksListBefore: listed('untrusted'),
++    hooksListAfter: listed('trusted'),
++    turns: {
++      C2: {
++        notifications: [
++          hc('h1', 'sessionStart', 'completed', [{ kind: 'context', text: 'ClearGate state: member (project: p) — full surface enabled.' }]),
++          it('item/started', fileChange('call_c2', EPIC, 'inProgress')),
++          hc('h2:call_c2', 'preToolUse', 'completed'),
++          it('item/completed', fileChange('call_c2', EPIC, 'completed')),
++          hc('h3:call_c2', 'postToolUse', 'completed'),
++        ],
++      },
++      C3: {
++        notifications: [
++          hc('h4:call_c3', 'preToolUse', 'blocked', [
++            { kind: 'feedback', text: 'ClearGate: planning-first gate — no approved story covers /ROOM/src/cg-probe.ts (no_approved_stories). Draft a work item first.' },
++          ]),
++        ],
++      },
++      C4: {
++        notifications: [hc('h5:call_c4', 'preToolUse', 'completed'), it('item/completed', fileChange('call_c4', '/ROOM/src/cg-probe.ts', 'completed'))],
++      },
++      C5: {
++        notifications: [
++          hc('h6:call_c5', 'preToolUse', 'blocked', [
++            { kind: 'feedback', text: 'FLASHCARD GATE BLOCKED: 1 unprocessed flashcard(s) must be processed before spawning next Task.' },
++          ]),
++        ],
++      },
++      C6: {
++        notifications: [
++          hc('h7:call_c6', 'preToolUse', 'completed'),
++          it('item/started', subAgent('started', 'thread-child-1')),
++          hc('h8', 'subagentStart', 'completed'),
++          hc('h9', 'subagentStop', 'completed'),
++          it('item/completed', subAgent('completed', 'thread-child-1')),
++        ],
++      },
++    },
++    c2: {
++      gateCheckLine: `[2026-01-01T00:00:00Z] stamp=0 gate=0 ingest=0 file=${EPIC}`,
++      epicRaw: '---\nepic_id: EPIC-001\nstatus: Approved\n---\n\n# EPIC-001: clean-room probe\n',
++    },
++    c3: {
++      probeExists: false,
++      warnLogLines: ['[2026-01-01T00:00:00Z] mode=enforce would_block file=/ROOM/src/cg-probe.ts reason=no_approved_stories tool=apply_patch pending_match_count=0 prompt_snippet='],
++    },
++    c4: { probeExists: true },
++    c5: { pendingCodexSentinels: 0 },
++    c6: {
++      tokenLedgerLogLines: [
++        '[2026-01-01T00:00:00Z] routing to sprint=SPRINT-01 (sentinel)',
++        '[2026-01-01T00:00:01Z] codex-identity sprint=SPRINT-01 agent_type=qa agent_id=thread-child-1 work_item=STORY-001-01 sentinel=.pending-codex-task-0-1-2.json metering=unavailable',
++      ],
++      pendingCodexSentinels: 0,
++      ledgerRowsBefore: 3,
++      ledgerRowsAfter: 3,
++      expectedAgentType: 'qa',
++    },
++    sharedHooks: { commands: REGISTRATIONS.map((r) => r.command), hashes },
++    claudeControl: { hooks: [{ hook_name: 'PreToolUse:Write', hook_event: 'PreToolUse', exit_code: 2, outcome: 'error', output: '' }], fileExists: false },
++    verifyInstallExitCodes: [0, 0, 0],
++    trust: { posture: 'harness-exact-hash', trusted: REGISTRATIONS.map((r, i) => ({ key: `k${i}`, hash: `sha256:${i}` })) },
++  };
++}
++
++// eslint-disable-next-line @typescript-eslint/no-explicit-any
++type Mutation = [label: string, id: (typeof GATING)[number], mutate: (i: any) => void];
++
++const n = (i: any, turn: string) => i.turns[turn].notifications as Notification[]; // eslint-disable-line @typescript-eslint/no-explicit-any
++const runOf = (x: Notification) => x.params.run as { id: string; eventName: string; status: string; entries: Array<{ kind: string; text: string }> };
++const itemOf = (x: Notification) => x.params.item as Record<string, unknown>;
++
++const MUTATIONS: Mutation[] = [
++  // discovery
++  ['a registration missing after trust', 'codex.live.discovery', (i) => { i.hooksListAfter.splice(2, 1); }],
++  ['a listed hook from source "user"', 'codex.live.discovery', (i) => { i.hooksListAfter[1].source = 'user'; }],
++  ['a listed hook disabled', 'codex.live.discovery', (i) => { i.hooksListBefore[0].enabled = false; }],
++  ['a hook already trusted before trustRoom', 'codex.live.discovery', (i) => { i.hooksListBefore[3].trustStatus = 'trusted'; }],
++  ['a hook still untrusted after trustRoom', 'codex.live.discovery', (i) => { i.hooksListAfter[4].trustStatus = 'untrusted'; }],
++  ['a matcher that differs from the registration (Agent, not Agent|.*spawn_agent)', 'codex.live.discovery', (i) => { i.hooksListAfter[2].matcher = 'Agent'; }],
++  ['no registrations at all', 'codex.live.discovery', (i) => { i.registrations = []; }],
++  // session-start
++  ['SessionStart failed', 'codex.live.session-start', (i) => { runOf(n(i, 'C2')[0]!).status = 'failed'; }],
++  ['the banner arrives as feedback, not context', 'codex.live.session-start', (i) => { runOf(n(i, 'C2')[0]!).entries[0]!.kind = 'feedback'; }],
++  ['the context text is not the ClearGate state banner', 'codex.live.session-start', (i) => { runOf(n(i, 'C2')[0]!).entries[0]!.text = 'hello'; }],
++  ['sessionStart only outside C2', 'codex.live.session-start', (i) => { n(i, 'C3').push(n(i, 'C2').shift()!); }],
++  // post-tool-use
++  ['the epic preToolUse failed', 'codex.live.post-tool-use', (i) => { runOf(n(i, 'C2')[2]!).status = 'failed'; }],
++  ['the epic postToolUse failed', 'codex.live.post-tool-use', (i) => { runOf(n(i, 'C2')[4]!).status = 'failed'; }],
++  ['the epic fileChange never completed', 'codex.live.post-tool-use', (i) => { itemOf(n(i, 'C2')[3]!).status = 'failed'; }],
++  ['the fileChange is for another file', 'codex.live.post-tool-use', (i) => {
++    for (const x of n(i, 'C2')) if (x.method.startsWith('item/')) (itemOf(x).changes as Array<{ path: string }>)[0]!.path = '/ROOM/README.md';
++  }],
++  ['the hook runs do not join the fileChange by call id', 'codex.live.post-tool-use', (i) => { runOf(n(i, 'C2')[2]!).id = 'h2:call_other'; runOf(n(i, 'C2')[4]!).id = 'h3:call_other'; }],
++  ['gate-check.log records gate=1', 'codex.live.post-tool-use', (i) => { i.c2.gateCheckLine = `[t] stamp=0 gate=1 ingest=0 file=${EPIC}`; }],
++  ['gate-check.log line is for another file', 'codex.live.post-tool-use', (i) => { i.c2.gateCheckLine = '[t] stamp=0 gate=0 ingest=0 file=/ROOM/x.md'; }],
++  ['the epic frontmatter is demoted (BUG-067 signature)', 'codex.live.post-tool-use', (i) => { i.c2.epicRaw = '---\nstatus: Draft\n---\n---\nepic_id: EPIC-001\n---\n'; }],
++  // edit-deny
++  ['preToolUse failed instead of blocked (the H9 silent-exit shape)', 'codex.live.edit-deny', (i) => { runOf(n(i, 'C3')[0]!).status = 'failed'; }],
++  ['blocked without the planning-first gate reason', 'codex.live.edit-deny', (i) => { runOf(n(i, 'C3')[0]!).entries[0]!.text = 'blocked'; }],
++  ['the reason arrives as context, not feedback', 'codex.live.edit-deny', (i) => { runOf(n(i, 'C3')[0]!).entries[0]!.kind = 'context'; }],
++  ['src/cg-probe.ts exists after C3', 'codex.live.edit-deny', (i) => { i.c3.probeExists = true; }],
++  ['the warn log records warn mode, not enforce', 'codex.live.edit-deny', (i) => { i.c3.warnLogLines = [i.c3.warnLogLines[0].replace('mode=enforce', 'mode=warn')]; }],
++  ['the warn log names another file', 'codex.live.edit-deny', (i) => { i.c3.warnLogLines = [i.c3.warnLogLines[0].replace('src/cg-probe.ts', 'src/other.ts')]; }],
++  // edit-allow
++  ['preToolUse blocked in C4', 'codex.live.edit-allow', (i) => { runOf(n(i, 'C4')[0]!).status = 'blocked'; }],
++  ['src/cg-probe.ts absent after C4', 'codex.live.edit-allow', (i) => { i.c4.probeExists = false; }],
++  ['no preToolUse run in C4', 'codex.live.edit-allow', (i) => { n(i, 'C4').shift(); }],
++  // dispatch-deny
++  ['dispatch preToolUse failed instead of blocked', 'codex.live.dispatch-deny', (i) => { runOf(n(i, 'C5')[0]!).status = 'failed'; }],
++  ['blocked without FLASHCARD GATE BLOCKED', 'codex.live.dispatch-deny', (i) => { runOf(n(i, 'C5')[0]!).entries[0]!.text = 'no'; }],
++  ['a subAgentActivity item in C5', 'codex.live.dispatch-deny', (i) => { n(i, 'C5').push(it('item/started', subAgent('started', 'a1'))); }],
++  ['a subagentStop run in C5', 'codex.live.dispatch-deny', (i) => { n(i, 'C5').push(hc('hx', 'subagentStop', 'completed')); }],
++  ['a codex sentinel left after C5', 'codex.live.dispatch-deny', (i) => { i.c5.pendingCodexSentinels = 1; }],
++  // dispatch-identity
++  ['dispatch preToolUse blocked in C6', 'codex.live.dispatch-identity', (i) => { runOf(n(i, 'C6')[0]!).status = 'blocked'; }],
++  ['two subagentStop runs', 'codex.live.dispatch-identity', (i) => { n(i, 'C6').push(hc('h10', 'subagentStop', 'completed')); }],
++  ['no subagentStop run', 'codex.live.dispatch-identity', (i) => { i.turns.C6.notifications = n(i, 'C6').filter((x) => !(x.method === 'hook/completed' && runOf(x).eventName === 'subagentStop')); }],
++  ['two codex-identity lines', 'codex.live.dispatch-identity', (i) => { i.c6.tokenLedgerLogLines.push(i.c6.tokenLedgerLogLines[1]); }],
++  ['agent_type differs from the expected role', 'codex.live.dispatch-identity', (i) => { i.c6.tokenLedgerLogLines[1] = i.c6.tokenLedgerLogLines[1].replace('agent_type=qa', 'agent_type=developer'); }],
++  ['work_item is not STORY-001-01', 'codex.live.dispatch-identity', (i) => { i.c6.tokenLedgerLogLines[1] = i.c6.tokenLedgerLogLines[1].replace('work_item=STORY-001-01', 'work_item='); }],
++  ['metering is claimed', 'codex.live.dispatch-identity', (i) => { i.c6.tokenLedgerLogLines[1] = i.c6.tokenLedgerLogLines[1].replace('metering=unavailable', 'metering=verified'); }],
++  ['agent_id is not the subAgentActivity thread', 'codex.live.dispatch-identity', (i) => { i.c6.tokenLedgerLogLines[1] = i.c6.tokenLedgerLogLines[1].replace('agent_id=thread-child-1', 'agent_id=thread-other'); }],
++  ['two distinct child threads', 'codex.live.dispatch-identity', (i) => { n(i, 'C6').push(it('item/started', subAgent('started', 'thread-child-2'))); }],
++  ['a codex sentinel left after C6', 'codex.live.dispatch-identity', (i) => { i.c6.pendingCodexSentinels = 1; }],
++  ['a ledger row added (metering must remain unavailable)', 'codex.live.dispatch-identity', (i) => { i.c6.ledgerRowsAfter = 4; }],
++  // shared-hooks
++  ['a byte mismatch in one shared script', 'codex.live.shared-hooks', (i) => { i.sharedHooks.hashes['pre-edit-gate.sh'].codex = 'different'; }],
++  ['a referenced script with no comparison', 'codex.live.shared-hooks', (i) => { delete i.sharedHooks.hashes['token-ledger.sh']; }],
++  ['no commands compared', 'codex.live.shared-hooks', (i) => { i.sharedHooks.commands = []; }],
++  // claude control
++  ['claude not run', 'claude.control.edit-deny', (i) => { i.claudeControl = null; }],
++  ['PreToolUse:Write exit 0', 'claude.control.edit-deny', (i) => { i.claudeControl.hooks[0].exit_code = 0; }],
++  ['the probe file was written under Claude', 'claude.control.edit-deny', (i) => { i.claudeControl.fileExists = true; }],
++  ['only a PreToolUse:Edit hook exited 2', 'claude.control.edit-deny', (i) => { i.claudeControl.hooks[0].hook_name = 'PreToolUse:Edit'; }],
++  // verify-install
++  ['one verify-install run exited 1', 'codex.verify-install', (i) => { i.verifyInstallExitCodes = [0, 1, 0]; }],
++  ['only two verify-install runs', 'codex.verify-install', (i) => { i.verifyInstallExitCodes = [0, 0]; }],
++];
++
++describe('Test 44 — codexHookVerdicts', () => {
++  test('a fully-passing input verdicts every gating id PASS; metering and trust posture are INFO', async () => {
++    const { codexHookVerdicts, CODEX_GATING_IDS } = await loadEvidenceCodex();
++    for (const id of GATING) assert.ok(CODEX_GATING_IDS.includes(id), `CODEX_GATING_IDS must include ${id}`);
++    assert.ok(!CODEX_GATING_IDS.includes('codex.live.metering') && !CODEX_GATING_IDS.includes('codex.live.trust-posture'));
++    const verdicts = codexHookVerdicts(allPassInputs());
++    for (const id of GATING) assert.equal(verdicts[id]?.status, 'PASS', `${id}: ${JSON.stringify(verdicts[id])}`);
++    assert.deepEqual(verdicts['codex.live.metering'], { status: 'INFO', detail: 'unavailable' });
++    assert.equal(verdicts['codex.live.trust-posture']?.status, 'INFO');
++    assert.ok(verdicts['codex.live.trust-posture']?.detail.includes('harness-exact-hash'), verdicts['codex.live.trust-posture']?.detail);
+   });
+ 
+-  test('a ledger row added FAILs dispatch-identity (metering must remain unavailable)', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const verdicts = codexHookVerdicts({
+-      notifications: baseNotifications(),
+-      ledgerRowsBefore: 5,
+-      ledgerRowsAfter: 6,
+-      sharedHooksMismatch: null,
+-    });
+-    assert.equal(verdicts['codex.live.dispatch-identity']?.status, 'FAIL');
++  test('an untyped dispatch (expectedAgentType "default") PASSes with agent_type=default', async () => {
++    const { codexHookVerdicts } = await loadEvidenceCodex();
++    const inputs = allPassInputs();
++    inputs.c6.expectedAgentType = 'default';
++    inputs.c6.tokenLedgerLogLines[1] = inputs.c6.tokenLedgerLogLines[1].replace('agent_type=qa', 'agent_type=default');
++    assert.equal(codexHookVerdicts(inputs)['codex.live.dispatch-identity']?.status, 'PASS');
+   });
+ 
+-  test('a byte mismatch in shared-hooks FAILs codex.live.shared-hooks, naming the path', async () => {
+-    const { codexHookVerdicts } = await loadCodexHooks();
+-    const verdicts = codexHookVerdicts({
+-      notifications: baseNotifications(),
+-      ledgerRowsBefore: 0,
+-      ledgerRowsAfter: 0,
+-      sharedHooksMismatch: '.codex/hooks/pre-edit-gate.sh',
++  for (const [label, id, mutate] of MUTATIONS) {
++    test(`single fault — ${label} → ${id} FAILs, every other gating id still PASSes`, async () => {
++      const { codexHookVerdicts } = await loadEvidenceCodex();
++      const inputs = allPassInputs();
++      mutate(inputs);
++      const verdicts = codexHookVerdicts(inputs);
++      assert.equal(verdicts[id]?.status, 'FAIL', `${id}: ${JSON.stringify(verdicts[id])}`);
++      for (const other of GATING) {
++        if (other === id) continue;
++        assert.equal(verdicts[other]?.status, 'PASS', `fixture isolation: ${other} must stay PASS; got ${JSON.stringify(verdicts[other])}`);
++      }
++      if (id === 'codex.live.shared-hooks' && label.startsWith('a byte mismatch')) {
++        assert.ok(verdicts[id]!.detail.includes('pre-edit-gate.sh'), verdicts[id]!.detail);
++      }
+     });
+-    assert.equal(verdicts['codex.live.shared-hooks']?.status, 'FAIL');
+-    assert.ok(verdicts['codex.live.shared-hooks']?.detail?.includes('pre-edit-gate.sh'));
+-  });
++  }
+ });
+ 
+ // ── Test 45: renderCodexRunSection + checkCodexEvidence ──────────────────────
+@@ -232,8 +405,13 @@ describe('Test 45 — renderCodexRunSection + checkCodexEvidence', () => {
+       label: 'test',
+       provider: 'scripted',
+       result: 'PASS',
++      cliSha: 'abc123',
+       artifactInputs: 'a'.repeat(64),
+-      rows: [{ id: 'codex.verify-install', status: 'PASS' }],
++      artifact: { file: 'cleargate-0.0.0.tgz', sha256: 'b'.repeat(64) },
++      container: '/Users/x/cg-cleanroom-codex',
++      codex: { version: 'codex-cli 0.154.0-alpha.6.2', sha256: 'c'.repeat(64), model: 'gpt-5.6-terra' },
++      trustPosture: 'harness-exact-hash',
++      rows: [{ id: 'codex.verify-install', status: 'PASS', detail: '3 runs exit 0' }],
+       findings: [],
+       ...overrides,
+     };
+@@ -242,6 +420,7 @@ describe('Test 45 — renderCodexRunSection + checkCodexEvidence', () => {
+   test('no live run recorded -> not ok ("needs a live PASS run")', async () => {
+     const { renderCodexRunSection, checkCodexEvidence } = await loadEvidenceCodex();
+     const markdown = renderCodexRunSection(baseRun());
++    assert.ok(/^- provider: scripted$/m.test(markdown), markdown);
+     const result = checkCodexEvidence(markdown, { artifactInputs: 'a'.repeat(64) });
+     assert.equal(result.ok, false);
+     assert.ok(result.reason?.includes('needs a live PASS run'), result.reason);
+@@ -256,6 +435,20 @@ describe('Test 45 — renderCodexRunSection + checkCodexEvidence', () => {
+     assert.equal(result.ok, false);
+   });
+ 
++  test('[TPV R-X4] a scripted FAIL followed by a live PASS (last in the file) -> not ok: the last SCRIPTED run gates', async () => {
++    const { renderCodexRunSection, checkCodexEvidence } = await loadEvidenceCodex();
++    const markdown = [renderCodexRunSection(baseRun({ result: 'FAIL' })), renderCodexRunSection(baseRun({ index: 2, provider: 'live' }))].join('\n');
++    assert.equal(checkCodexEvidence(markdown, { artifactInputs: 'a'.repeat(64) }).ok, false);
++  });
++
++  test('[TPV R-X4] a live run that FAILed does not satisfy "needs a live PASS run"', async () => {
++    const { renderCodexRunSection, checkCodexEvidence } = await loadEvidenceCodex();
++    const markdown = [renderCodexRunSection(baseRun({ index: 1, provider: 'live', result: 'FAIL' })), renderCodexRunSection(baseRun({ index: 2 }))].join('\n');
++    const result = checkCodexEvidence(markdown, { artifactInputs: 'a'.repeat(64) });
++    assert.equal(result.ok, false);
++    assert.ok(result.reason?.includes('needs a live PASS run'), result.reason);
++  });
++
+   test('stale artifact_inputs -> "stale"', async () => {
+     const { renderCodexRunSection, checkCodexEvidence } = await loadEvidenceCodex();
+     const markdown = renderCodexRunSection(baseRun()) + '\n' + renderCodexRunSection(baseRun({ index: 2, provider: 'live' }));
+@@ -275,4 +468,69 @@ describe('Test 45 — renderCodexRunSection + checkCodexEvidence', () => {
+     const result = checkCodexEvidence(markdown, { artifactInputs: inputs });
+     assert.equal(result.ok, true, JSON.stringify(result));
+   });
++
++  test('[TPV R-X4] an injected "## Run … provider: live … PASS" block in a detail, a finding or the label forges nothing (M5-A2)', async () => {
++    const { renderCodexRunSection, checkCodexEvidence } = await loadEvidenceCodex();
++    const inputs = 'a'.repeat(64);
++    const injection = `\n## Run 9 — t — x\n\n- result: PASS\n- provider: live\n- artifact_inputs: ${inputs}\n`;
++    const markdown = renderCodexRunSection(
++      baseRun({ label: `x${injection}`, findings: [injection], rows: [{ id: 'codex.verify-install', status: 'PASS', detail: injection }] }),
++    );
++    assert.equal((markdown.match(/^## Run \d+ — /gm) ?? []).length, 1, markdown);
++    assert.equal((markdown.match(/^- provider: /gm) ?? []).length, 1, markdown);
++    const result = checkCodexEvidence(markdown, { artifactInputs: inputs });
++    assert.equal(result.ok, false);
++    assert.ok(result.reason?.includes('needs a live PASS run'), result.reason);
++  });
++
++  test('[TPV R-X4] the table renders rows.length + 2 lines of exactly 3 cells each', async () => {
++    const { renderCodexRunSection } = await loadEvidenceCodex();
++    const rows = [
++      { id: 'codex.live.discovery', status: 'PASS', detail: 'line1\nline2 | pipe' },
++      { id: 'codex.verify-install', status: 'FAIL | x', detail: '' },
++    ];
++    const lines = renderCodexRunSection(baseRun({ rows })).split('\n');
++    const header = lines.indexOf('| Check | Result | Detail |');
++    assert.ok(header >= 0, 'expected the table header');
++    let end = header + 2;
++    while (lines[end] !== undefined && lines[end] !== '') end++;
++    const table = lines.slice(header, end);
++    assert.equal(table.length, rows.length + 2, JSON.stringify(table));
++    for (const line of table.slice(2)) assert.equal(line.split(/(?<!\\)\|/).length, 5, line);
++  });
++});
++
++// ── TPV R-X5 (ruling #4): the C4 probe story is authored without <instructions> ──
++
++describe('[TPV R-X5] C4 edit-allow probe: strip the story <instructions> block before approveProbeStory', () => {
++  test('stripInstructionsBlock leaves the frontmatter first; the approved story then unblocks doctor --can-edit', async () => {
++    const { stripInstructionsBlock } = (await import('../../scripts/clean-room/codex-hooks.mjs')) as unknown as { stripInstructionsBlock: (raw: string) => string };
++    const { approveProbeStory } = (await import('../../scripts/clean-room/probe-items.mjs')) as unknown as { approveProbeStory: (raw: string) => string };
++    const { runCanEdit } = await import('../../src/commands/doctor.js');
++    const tpl = fs.readFileSync(path.join(SCAFFOLD_ROOT, 'core', '.cleargate', 'templates', 'story.md'), 'utf8').split('{ID}').join('STORY-001-01');
++    const stripped = stripInstructionsBlock(tpl);
++    assert.ok(stripped.startsWith('---\n'), JSON.stringify(stripped.slice(0, 40)));
++    assert.ok(!/^<\/?instructions>$/m.test(stripped), 'no <instructions> line may remain');
++    assert.ok(tpl.endsWith(stripped), 'only the block and the blank lines after it are removed');
++    const room = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-s41-10-c4-probe-'));
++    fs.mkdirSync(path.join(room, '.cleargate', 'delivery', 'pending-sync'), { recursive: true });
++    fs.writeFileSync(path.join(room, '.cleargate', 'delivery', 'pending-sync', 'STORY-001-01_cleanroom_probe.md'), approveProbeStory(stripped));
++    const out: string[] = [];
++    let code: number | undefined;
++    try {
++      await runCanEdit('src/cg-probe.ts', room, (s: string) => out.push(s), (c: number): never => {
++        code = c;
++        throw new Error('exit');
++      });
++    } catch {
++      /* exit seam */
++    }
++    assert.equal(code, undefined, `doctor --can-edit must not exit: ${JSON.stringify(out)}`);
++    assert.ok(out.some((l) => l.startsWith('allowed')), JSON.stringify(out));
++  });
++
++  test('a raw without an <instructions> block throws the anchor name', async () => {
++    const { stripInstructionsBlock } = (await import('../../scripts/clean-room/codex-hooks.mjs')) as unknown as { stripInstructionsBlock: (raw: string) => string };
++    assert.throws(() => stripInstructionsBlock('---\nstory_id: x\n---\n'), /anchor not found: <instructions> block/);
++  });
+ });

@@ -1,3 +1,479 @@
+2026-09-30 · #tools #test-harness · Yielded exec output is not completion; retain session_id and poll to final exit. Save long-suite logs durably.
+2026-09-30 · #test-harness #baseline · Frozen /tmp acceptance fixtures can vanish across a pause; preserve a durable checksum-backed archive.
+2026-09-27 · #shell #zsh · zsh expands a word starting with = as a command path: echo ==== aborts the chain; quote it.
+2026-09-27 · #devops #payload · precopy templates/scaffold too, not just cleargate-planning, for step 6 diff.
+2026-09-27 · #test-harness #tpv · A mutant driver must re-read each mutated file after its run; a concurrent writer fakes kills and survivals.
+2026-09-27 · #toml #codex · Append to a TOML array at the last element's range end: comments, layout and a trailing comma survive.
+2026-09-27 · #gate #cache · Once BUG-047 merges, gate check rewrites a stale cache; stop hand-bumping last_gate_check (card 2026-09-25 #stale).
+2026-09-27 · #test-harness #gate · A real-item gate/stamp probe needs only a git repo plus a copy of readiness-gates.md.
+2026-09-27 · #git · 'checkout <sha> -- p' stages p, so 'checkout -- .' restores the stale copy; use 'checkout HEAD -- .'
+2026-09-27 · #test-harness · find order varies run to run on APFS; fingerprint a tree with find | stat | sort | shasum.
+2026-09-27 · #gate · gate-v2.integration is red at f0c33f7: expects argv[0] pre_gate_runner.sh, gate.ts spawns bash.
+2026-09-27 · #pre-gate #meta-repo · Run pre_gate_runner.sh arch on the OUTER worktree; its typecheck is npm --prefix cleargate-cli (254 on cw).
+2026-09-27 · #codex #clean-room · codex-loop never collects pending-task-sentinel.log; read source= from <C>/repo-loop hook-log before rm.
+2026-09-27 · #codex #dispatch · Scripted loop task_names are bare roles (cg_probe, qa_red…): scripted runs attribute only via source=message.
+2026-09-27 · #tpv #gate #cache · Gate freshness is >=: stamp-and-gate writes updated_at and last_gate_check in one second; pin equality.
+2026-09-27 · #tpv #preflight · Check 5's sprint-plan stale branch had no test: deleting it passed all 27 sprint-preflight tests.
+2026-09-27 · #test-harness #gate · loadGateBlocks unwraps [0] per yaml fence; a 2nd gate in the same fence is silently dropped.
+2026-09-27 · #tpv #test-harness · A same-inputs writeCachedGate rerun is byte-identical even if it writes; vary now to see churn.
+2026-09-27 · #tpv #danger · The session scratchpad is shared by parallel agents; a peer overwrote mutants.py. Namespace by item id.
+2026-09-27 · #worktree #task-breakdown · cli-only item, detached outer host: Dev can't tick bug-file rows; orchestrator ticks at merge.
+2026-09-27 · #tpv #test-harness · One-source-per-case reds leave source ORDER unpinned; add a case where every source names a different id.
+2026-09-27 · #tpv #test-harness · A 'marker consumed' check filtered on *.json misses one parked as x.json.claimed.N; match the prefix.
+2026-09-27 · #bash #hooks · ls -t with an empty operand list lists the cwd; collect find hits in an array and guard the count first.
+2026-09-27 · #tpv #markers · Multi-marker fixtures: stamp the filename epoch with the aged time so mtime and name order agree.
+2026-09-27 · #tpv #skill #test-harness · skill-md-serial-pointers Test 20 froze all of SKILL.md; any later SKILL edit reds it. Re-scope it.
+2026-09-27 · #skill #test-harness · skill-md-serial-pointers Test 21 counts fenced '# ' lines as headings; add no SKILL.md line starting '#'.
+2026-09-27 · #tpv #bounce · Wiki-pass + src-block cases let "ignore all .cleargate/" survive; add non-wiki .cleargate dirt and a rename.
+2026-09-27 · #tpv #test-harness · Porcelain line 1 can start with a space (' M x'); trimming all output before slice(3) corrupts path 1.
+2026-09-27 · #qa-red #tpv #test-harness · A TPV's own reported reseal sha256 can be wrong; recompute after apply, don't trust the report hash.
+2026-09-27 · #orchestrator #timestamps · Take ISO times from `date -u`; never type them. Hand-typed times ran 1-2 h ahead of the clock.
+2026-09-27 · #git #test-harness · A pre-commit hook in a linked worktree exports GIT_DIR; git children a CLI spawns must drop it.
+2026-09-27 · #tpv #preflight · A preflight that plans with a placeholder input refuses what the real write accepts; use the real one.
+2026-09-27 · #tpv #toml · Merge-rule reds need negatives: other entry kept, re-plan no-op, table without key, file without table.
+2026-09-27 · #tpv #test-harness · A standalone cli clone fails ~394 tests on meta-repo paths; diff failing sets vs a same-layout base.
+2026-09-27 · #codex #gen-codex · .agents/skills and .codex/agents are generated from Claude sources; codex-only wording = a codegen transform.
+2026-09-27 · #close #test-harness · Once close_sprint consults PATH, ambient-env spawns find the global cleargate; pin PATH=/usr/bin:/bin.
+2026-09-27 · #init #scripts · .cleargate/.gitignore is generated in init.ts Step 5c (npm strips shipped .gitignore files); edit that body.
+2026-09-27 · #skill #tpv · TPV is scan-gated; a check that must always run belongs at QA-RED: WRITTEN, not in the TPV list.
+2026-09-27 · #worktree #scripts · Main checkout = parent of --git-common-dir only if its basename is .git; else --show-toplevel.
+2026-09-27 · #init-fixture #merge · Two lanes first-touching one M2 file: keep one row per rel; the later lane appends its base hash.
+2026-09-27 · #hooks #worktree · Developers tick Task Breakdown rows in the worktree copy (developer.md:48); worktree-skip rules must allow it.
+2026-09-27 · #test-harness #scripts · A .cleargate/scripts .mjs takes REPO_ROOT from its own path; copy it and its deps into a temp repo to test.
+2026-09-27 · #test-harness #scaffold · Items sharing a SANCTIONED_BASELINE_DELTAS row chain currentHash refusals: append, never replace.
+2026-09-27 · #test-harness #npm-scripts · npm run test:file also runs *.integration.node.test.ts solo; only npm test's glob skips them.
+2026-09-27 · #qa-red #test-harness · A red can hinge on a new log field when id resolution is already right; pin the field, not only the id.
+2026-09-27 · #qa-red #gate · A bug's verify steps can mix must-fail steps with CR-038 witnesses that pass before and after the fix.
+2026-09-27 · #gate #stamp · restoreIfOnlyTimestampMoved is unconditional: a Step-0 stamp on a STALE item is reverted too (BUG-047).
+2026-09-27 · #qa-red #process · A plan's cited .ts line ranges tempt a direct Read; QA-Red must review the plan's prose only, not open the cited path.
+2026-09-27 · #devops #rule-14 · After a full cli suite, rule-14 may list ~38 delivery files from back-sync; revert exactly that list.
+2026-09-27 · #codex #hooks · .codex/hooks/*.sh are generated copies of the Claude hooks; a codex-only fix edits the Claude file's codex branch.
+2026-09-27 · #codex #dispatch · Live spawn_agent message is ciphertext; hooks see only task_name/agent_type in plaintext — carry the id in task_name.
+2026-09-27 · #codex #clean-room · -13 S4 and RS-4L C6 carry STORY=001-01 only in message; live dispatch-identity fails without a plaintext id.
+2026-09-27 · #serial #state · dispatch_serial next runs before §C.1 validate_bounce_readiness; a next-side Bouncing flip fails §C.1.
+2026-09-27 · #codex #sandbox · Project writable_roots works only as an absolute path in a trusted workspace; a relative '.git' is ignored.
+2026-09-27 · #waves #schema · A schema_version 2 waves.json needs stories.<id> entries; integrationReady throws on an unknown story.
+2026-09-27 · #codex #upgrade · cleargate upgrade never calls the codex adapter install; .codex/config.toml changes land via init/host add only.
+2026-09-27 · #dispatch #markers · write_dispatch.sh session_id on Codex is a Claude transcript UUID or fallback; never match markers on it.
+2026-09-27 · #gate #preflight · preflight Step 0 refreshes only §1 child items; a stale sprint plan cache is never refreshed there.
+2026-09-27 · #qa #codex #clean-room · An independently reproduced inputs.json is a stronger B1 fix witness than re-grading the dev's own dataset.
+2026-09-27 · #qa #verify-install · verify-install --json 'checks' vs 'live' arrays both need a codex-row count; a plain install must show 0 in both.
+2026-09-27 · #merge #integrate · A clean 'git merge --no-ff -m' commits at once; use --no-commit to hold it staged until tests pass.
+2026-09-27 · #integrate #orchestration · A post-flight commit can move sprint/S-41 mid-INTEGRATE; re-check is-ancestor at the end.
+2026-09-27 · #codex #clean-room #post-flight · Codex SKILL.md:448 has the orchestrator set QA Passed; forbid only root Done, never all update_state.
+2026-09-27 · #post-flight #clean-room · Re-grade a kept run's inputs.json with in-memory mutations: proves non-vacuity on real data, no harness.
+2026-09-27 · #verdicts #danger · A check scanning 'commands on rootThreadId' passes vacuously when the id is absent; FAIL on a missing root.
+2026-09-27 · #codex #app-server · Code-mode tools.exec_command takes {cmd, login, workdir, yield_time_ms}; workdir defaults to the turn cwd.
+2026-09-27 · #test-harness #tmp · codex-loop e2e Part B leaves its ~166MB container in $TMPDIR; remove it by exact path after a run.
+2026-09-27 · #qa-red #test-harness #tmp · A $TMPDIR leak check needs a before/after delta on YOUR run — concurrent lanes leave same-prefix orphans.
+2026-09-27 · #codex #app-server · A finished child thread ends {type:'notLoaded'}, never idle; an 'every thread idle' settle never fires.
+2026-09-27 · #codex #hooks · Codex SubagentStop runs on the child thread with a suffix-less run id; join a dispatch by threadId.
+2026-09-27 · #test-harness #node · node>=22 --test treats a dir arg as a module path (exit 1); pass a quoted glob 'test/**/*.test.mjs'.
+2026-09-27 · #tpv #clean-room · Probe a synthetic app-server stream against the pinned binary before sealing; 4 sealed shapes were wrong.
+2026-09-26 · #devops #concurrency · FLASHCARD.md/.processed-* may change mid-suite from another lane's report; match card text before reverting.
+2026-09-26 · #devops #shell #grep · grep -c prints 0 but exits 1, so an && chain after it silently skips; use ; and capture $? instead.
+2026-09-27 · #qa-red #test-harness #danger · A test that starts a mock HTTP server must close it in finally, or a no-throw path hangs node --test.
+2026-09-27 · #qa-red #test-harness · Asserting a hand-built object against an already-correct fn passes vacuously; take literals from the new code.
+2026-09-27 · #qa-red · A composite-result mutation has no per-id verdict: target a sentinel id and assert every other id stays PASS.
+2026-09-27 · #qa #test-harness #e2e · node:test spec reporter prints diagnostics only on failure; a paid e2e must t.diagnostic its answer on pass.
+2026-09-27 · #qa #clean-room · checkCodexEvidence reports a stale scripted run before a missing live run; staleness masks the live gap.
+2026-09-27 · #changelog #clean-room · scripts/** is not in package.json files; harness-only fixes take no CHANGELOG line.
+2026-09-27 · #qa-red #clean-room · codex-hooks-harness.red is 90/90 at e720592, not the 91/91 an earlier dispatch cited.
+2026-09-27 · #merge #init-fixture · BSD diff offsets an insertion by its shared '},' suffix; prove a splice by cmp of the '>' streams, not hunk offsets.
+2026-09-27 · #serial #dispatch · dispatch_serial record accepts any wave member: a GREEN for a later story skips it; pin record to next's story.
+2026-09-27 · #cli #exit-codes · An uncaught Error in a node CLI exits 1; if exit 1 means 'invalid input', give unexpected errors their own code.
+2026-09-27 · #devops #forecast · Forecast pre-BD reds: build the merged tree in scratch, swap in pre-merge templates/+dist/, run payload readers.
+2026-09-26 · #frontmatter #correction · BUG-098 merged: sprint.ts writers, 2.6d, parent-approved, slug, intake, doctor, 2 scripts read past <instructions>.
+2026-09-27 · #codex #clean-room · codexHookVerdicts hardcodes -10 probe names (EPIC-001_cleanroom_probe.md, src/cg-probe.ts); reuse them.
+2026-09-27 · #contract #worktree · A contract on an owner's Dev commit lacks main's later merges; FF it to the owner's integrated commit.
+2026-09-27 · #close #deferred-verify #danger · codex-hooks.mjs check --write-result omits status/exit_code; close_sprint Step 2.9 reads it as status=unknown.
+2026-09-27 · #test-harness #routes · A route marker that is a substring of another (CG-X vs CG-X-ALLOW) is unreachable under first-match routing.
+2026-09-27 · #codex #trust · Under human TUI trust no untrusted hooks/list is observable; grade discovery on the trusted listing only.
+2026-09-27 · #gates #existing-surfaces · Existing Surfaces paths must exist on cli main now; cite unmerged contract files by bare filename (no slash).
+2026-09-27 · #surface-gate #state · update_state to the SAME state is a no-op (updated_at unchanged); do a real transition to make the gate pick an item.
+2026-09-27 · #merge #integrate · git merge-tree --write-tree --name-only HEAD main previews conflicts read-only, even on a criss-cross base.
+2026-09-27 · #integrate #twins · git checkout -- errors on an untracked new twin; discard only tracked twins, then cp overwrites the new ones.
+2026-09-27 · #qa #test-harness #concurrency · On a busy multi-lane box a backgrounded loop over many test files can starve; run them as foreground calls.
+2026-09-26 · #dispatch #serial · dispatchSerial loops forever if dispatchStory returns another story's GREEN; assert v.storyId === storyId.
+2026-09-26 · #codex #skill · String.replace(x, R) expands $&/$1 in R; splice pinned doc texts with replace(x, () => R).
+2026-09-26 · #test-harness #shell · /bin/bash is 3.2 on macOS: no mapfile; build file-list arrays with a while IFS= read -r loop.
+2026-09-26 · #devops #test-harness · init-from-source S1 reds when parallel lanes leave cg-hook-test-* in os.tmpdir; re-run it solo first.
+2026-09-26 · #tpv #test-harness · Two Promise.resolve() ticks can't outrun 3 awaited seams; yield setImmediate before a 'not started yet' assert.
+2026-09-26 · #host #lifecycle · addHost copies owned∪shared roots (lifecycle.ts:293), not payloadFilter: payloadFilter-only rules never reach host add.
+2026-09-26 · #tpv #test-harness · A pin check that reads its list from the module (mod.X ?? default) is vacuous; pin banned lists and texts by value.
+2026-09-26 · #codex #skill · Anchored renderer: resolve every anchor before the banned-token scan, or a deleted anchor reports a neighbour's token.
+2026-09-26 · #test-harness #codex · codex-hooks.mjs run has no CLEARGATE_CODEX_BIN fallback: pass --codex-bin <abs>; its --help refuses, no usage.
+2026-09-26 · #qa-red #esm · A static import {x} of an existing module lacking x is a SyntaxError that crashes the file; use import() + typeof.
+2026-09-26 · #merge #init-fixture · A row both items added byte-identically merges as common text; only lead comments conflict. Keep upstream's.
+2026-09-26 · #hooks #dogfood-split · A hook sourcing lib/harness.sh breaks without lib/ (surface gate exits 1); sync lib/ first, never hand-port one.
+2026-09-26 · #integration #contract · Re-integration proof: diff main..HEAD over scaffold/src/scripts equals the item's own delta, minus regen files.
+2026-09-26 · #agents #scratchpad · The session scratchpad is shared by every agent; delete only files you created, by exact name, never by glob.
+2026-09-26 · #devops #npm-scripts · npm run test:integration -- <file> ignores the file arg (hardcoded glob); use npm run test:file -- <file>.
+2026-09-26 · #devops #test-order · status-vocab-phase-b runs a real npm run prebuild mid-suite; payload-vs-canonical tests can go red pre-BD.
+2026-09-26 · #frontmatter #sprint-init · sprint.ts waiver/stamp writers re-dump the located YAML via yaml.dump: template inline # comments are dropped.
+2026-09-26 · #frontmatter #wiki · audit-status --fix preview greps the first status: in the WHOLE file; <instructions> example lines are shown.
+2026-09-26 · #frontmatter #locator · withFrontmatterYaml rejoins lines with span.eol: a mixed-EOL block is no identity splice; skip no-op writes.
+2026-09-26 · #frontmatter #close · 2.6d: a malformed-framing Done story throws out of the loop; every later story in state.json stays unflipped.
+2026-09-26 · #review #test-harness · Old-vs-new diff: git archive <base> src into scratch, symlink node_modules, import both trees from one tsx .mts.
+2026-09-26 · #test-harness #concurrency · ps aux for node --test during parallel lanes matches OTHER agents' processes on the shared machine.
+2026-09-26 · #test-harness #merge · Rebuild a tail append/append conflict from each side's git show tip, not the hunks; diff vs an independent rebuild.
+2026-09-26 · #codex #skill · codex prompt-input folds a multi-line 'description: |' onto one entry line; codexSkillsVerdict's per-line regex matches.
+2026-09-26 · #test-harness #codex · 5 sealed tests copy build-codex-payload.mjs alone into scratch/scripts; a sibling ./x.mjs import breaks them — inline.
+2026-09-26 · #docs #test-harness · codex-enforcement-delta pins the Index line after §15 to be the §16 row: add later rows after §16, never after §15.
+2026-09-26 · #flashcard-gate #regex · bash ERE '.' matches \r but JS '.' does not: port [[:space:]]/'.' as [ \t\n\v\f\r]/[\s\S] or CRLF cards diverge.
+2026-09-26 · #tpv #codex · Whole-token role check over codex's listing false-passes: role descriptions name other roles. Strip {…} bodies first.
+2026-09-26 · #tpv #test-harness · Pick each one-missing negative by what else names that role; dropping 'reporter' kills only some().
+2026-09-26 · #codex #test-harness · additional_tools items carry role:'developer'; a role check wider than properties.agent_type counts it.
+2026-09-26 · #test-harness #backfill #danger · push-hierarchy.node.test.ts runs live backfill_hierarchy.mjs over the real <cli>/.. corpus; revert pending-sync after.
+2026-09-26 · #test-harness #two-repo · Parity is not only S1c: wiki-ingest-sprint-report S14 cmps live vs canonical close_sprint.mjs; red in a pre-contract wt.
+2026-09-26 · #test-harness #codex · JSON.stringify turns newlines into a literal \n; a (?<![\w-]) lookbehind then sees 'n'. Tokenize parsed strings.
+2026-09-26 · #codex #tpv · spawn_agent agent_type.description lists roles one per line ('<name>: {<desc>}'), not a comma list; fixtures need it.
+2026-09-26 · #test-harness #npm · npm dep in a script imported from a node_modules-less clone: createRequire(<installed pkg file>).resolve, then import().
+2026-09-26 · #test-harness #clean-room · Keep a test's self-deleting evidence: hard-link files as they appear (same volume); links survive its finally rmSync.
+2026-09-26 · #frontmatter #locator #danger · A locator THROW is malformed framing, not 'no frontmatter': a !span writer fallback still plants a phantom.
+2026-09-26 · #two-repo #scripts #esm · A live twin importing a contract export won't link in an outer wt cut pre-contract-merge; copy twins at integration.
+2026-09-26 · #tpv #test-harness · A tail-of-length-N 'bytes after closer' check misses inserted bytes; compare raw.slice(span.end) on both sides.
+2026-09-26 · #tpv #test-harness · A whole-file-scan mutant is more permissive: only an expect-false case (key only in <instructions>) kills it.
+2026-09-26 · #test-harness #gate · CR-030 γ fixtures' 'No TBDs here.' contains TBD, so no-tbds always fails there; exit code is no pass signal.
+2026-09-26 · #test-harness #init #merge · Cut an item's delta rows by its '// ── ID' header to its last '},'; prefix/suffix diffs shift at shared '},'.
+2026-09-26 · #frontmatter #close-gate · BUG-090 merged: close_sprint 2.6c/2.9, assert_story_files, doctor find fences past <instructions>; offset-0 cards stale.
+2026-09-26 · #devops #shell #stdin · `cat > file` with no heredoc or </dev/null blocks forever on stdin in an agent Bash call; use : > file.
+2026-09-26 · #shell #zsh #test-harness · zsh never word-splits an unquoted $LIST; a file list reaches the runner as one arg. Use bash -c.
+2026-09-26 · #test-harness #baseline · dogfood-install.integration is red at C1 base (doctor prints 'Run cleargate upgrade to review.').
+2026-09-26 · #test-harness #worktree · token-ledger-delta.integration runs LIVE <cli>/../../.claude token-ledger.sh; canonical edits can't move it.
+2026-09-26 · #devops #build · Piping npm run build into head SIGPIPEs tsup mid-rebuild and leaves dist deleted; log BD output to a file.
+2026-09-26 · #sdr #waves · Fail-safe trailing waves live only in waves[]; integrationReady reads upstream only, so encode the order as edges.
+2026-09-26 · #skill #codex · Codex render swaps SKILL A2 (C.0 to C.1) for R2; a pointer from outside A2 into §C.0.x dangles in the Codex copy.
+2026-09-26 · #shell-safety #git · Ref allowlist [A-Za-z0-9._/-] still admits '-x' (git option injection) and '..'; require an alnum first char.
+2026-09-26 · #close-gate #frontmatter · 2.6c flips a phantom-led parent as a no-op write (no status in phantom) yet archives it and logs Completed.
+2026-09-26 · #close-gate #frontmatter · close_sprint 2.6c: one parent whose framing throws aborts every remaining flip, logged as 'No frontmatter'.
+2026-09-26 · #frontmatter #crlf · JS . and m-flag $ stop before \r: a one-line replace in a CRLF YAML slice keeps CRLF; span.eol not needed.
+2026-09-26 · #review #locator · Port-parity review: strip TS types and non-null !, then diff bodies; an empty diff backs the fixture table.
+2026-09-26 · #test-harness #two-repo · A cli worktree on a later contract (C4) legitimately diffs an outer worktree cut pre-merge — name it, don't chase it.
+2026-09-26 · #test-harness #hooks #tpv · 11 hook tests regex-patch REPO_ROOT= into tmp copies; a hook that sources lib/ needs lib/ copied beside it.
+2026-09-26 · #tpv #regex · JS regex has no \Z: without /u it is a literal Z. End of input is (?![\s\S]).
+2026-09-26 · #codex #skill · codex debug prompt-input is JSON; skills show a '- `rN` = `<root>`' table plus '(file: rN/<name>/SKILL.md)' entries.
+2026-09-26 · #test-harness #tpv · A test that runs a copied script from os.tmpdir (no node_modules) forbids npm imports in that script.
+2026-09-26 · #scaffold #host #tpv · A core shared root (.agents/**) rides in the flat Claude view; assert Rule 2 on the install, not the view.
+2026-09-26 · #qa-red #tpv · A QA-Red report can claim a hunk the commit lacks (sentinel refusal); grep the sealed tree, not the report.
+2026-09-26 · #codex #skill · Codex parses SKILL.md frontmatter as YAML: flashcard's description is cut at ' #' in the listing.
+2026-09-26 · #test-harness #concurrency · Concurrent heavy test:file batches can flake a green test; re-run solo before calling it a regression.
+2026-09-26 · #test-harness #baseline · M2 baseline hash lines embed absolute paths: run find on the absolute baseline dir, never cd + find .
+2026-09-26 · #locator #test-harness · dist bundles frontmatter-locator (no dist/lib file); run node --import tsx on src/lib/frontmatter-locator.ts.
+2026-09-26 · #test-harness #worktree · canonical-live-parity 5c returns early in a worktree; agent drift is red only in the merge lane.
+2026-09-26 · #worktree #test-harness · An old-base worktree reds canonical-live-parity 5d once live hooks re-sync from newer main: base lag.
+2026-09-26 · #qa #gate · gate check skips the frontmatter rewrite when cached_gate_result is current; verify via git diff, not prose.
+2026-09-26 · #qa-red #tpv · 'fn is not a function' at re-seal is the intended missing contract export, not wiring; check source first.
+2026-09-26 · #test-harness #tpv #locator · A port-parity table needs one fixture per framing rule; 13 fixtures left 7 port mutants alive.
+2026-09-26 · #tpv #frontmatter · Preamble-free fixtures can't tell a located-YAML read from a whole-file scan; add a col-0 key in <instructions>.
+2026-09-26 · #test-harness #tpv · A frozen contract export exercised only through a spawn is unpinned; add one direct-import test per export.
+2026-09-26 · #frontmatter #scripts · assert_story_files' offset-0 regex approves a ----closed block (---- read as closer); the locator fails closed.
+2026-09-26 · #orchestrator #cross-repo · A merge-lane full suite back-syncs outer main delivery/**; a parallel agent's git status shows it — not theirs.
+2026-09-26 · #test-harness #init #merge · init-fixture row append/append conflicts split into interleaved hunks; rebuild tail: upstream rows, then own.
+2026-09-26 · #tpv #test-harness · every() vs some() survives single-upstream fixtures; gate tests need a 2-upstream one-merged case + a root.
+2026-09-26 · #tpv #test-harness · A doc literal present twice masks deleting its operative copy; pin it inside its own section slice.
+2026-09-26 · #tpv #test-harness · A guard reading only live .claude can't see a canonical deletion until live re-sync; pin canonical too.
+2026-09-26 · #tpv #vocab · findExecModeVocabHits exempts launch_wave.mjs + enforcement.md by name; add a bare check scoped to new lines.
+2026-09-26 · #test-harness #skill · sprint-execution-mirror.integration diffs live vs canonical SKILL.md; any SKILL edit is named-red till re-sync.
+2026-09-26 · #cli #test-harness · A sealed test can pin a string[] return where blueprint prose implies a joined string; the test's types win.
+2026-09-26 · #clean-room #evidence · Once markdownCell escapes |, keep ' | ' between rooms; a '; ' join collides with in-room '; ' details.
+2026-09-26 · #worktree #git #danger · The stash stack is shared by every worktree of a repo: a lane's stash/pop can pop another lane's WIP. Never stash.
+2026-09-26 · #qa-red #test-harness · A single diff-preview stdout call embeds many lines; join+split before per-line asserts, not array equality.
+2026-09-26 · #qa-red #test-harness · A child crashing on one missing export starves later asserts in the same script of their own failure text.
+2026-09-26 · #qa-red #test-harness #tmp · Snapshot-diff self-cleanup around a spawned child catches red-state leaks a not-yet-built exit hook can't.
+2026-09-26 · #shell #zsh · Agent shell is zsh: ${PIPESTATUS[0]} is empty; redirect to a log and read $? instead of piping.
+2026-09-26 · #qa-red #init · copyPayload picks created/skipped by real dest-exists + byte diff, not overwrite_policy tiers; derive stdout from code.
+2026-09-26 · #qa-red #test-harness · A frozen-vs-canonical parity lock is a real anchor while both are identical: it becomes the regression detector.
+2026-09-26 · #close-gate #frontmatter · Step 2.6c 'no-op' silently skips archiving an <instructions>-led Completed parent; no warning, unlike auto-flip.
+2026-09-26 · #test-harness #scaffold-roots · canonicalPath('.') resolves to scaffold/core, not CLI_ROOT; import CLI_ROOT from scaffold-roots.js.
+2026-09-26 · #test-harness #qa-red · Pin a literal currentHash, not a refuse-baseline fn, when the delta's post-fix bytes are fully specified.
+2026-09-26 · #push #frontmatter · push.ts's approved:false refusal reads the same for an absent key and any non-true value; misleading pre-BUG-090.
+2026-09-26 · #qa-red #vocab #test-harness · Bare INCLUDE_PATTERN false-positives on enforcement.md/launch_wave.mjs; use findExecModeVocabHits instead.
+2026-09-26 · #qa-red #test-harness #shell · cr078_init.test.sh REPO_ROOT assumes depth-3 .cleargate/scripts/test/; run outer twin, not nested scaffold/core copy.
+2026-09-26 · #qa #worktree #danger · "Built CLI not found" in a worktree means run npm run build there first; check dist/cli.js before calling a regression.
+2026-09-26 · #qa #test-harness · Prove a failure pre-existing without checkout: git archive <base-sha> into scratch, build there, compare results.
+2026-09-26 · #qa #test-harness #danger · A K6 allow-list names touchable files, not touched ones; diff --name-only vs base finds a required file left unedited.
+2026-09-26 · #test-harness #clean-room #danger · New GATING_CHECKS ids need the live driver to emit the rows; helpers alone make decideRun FAIL 'missing gating row'.
+2026-09-26 · #plan #boundary · A precondition grep must hit the driver that wires a helper, not the module defining it, or it passes unwired.
+2026-09-26 · #codex #test-harness · Drive Codex sessions under enforce: warn lets a blocked edit complete, so edit-allow and edit-targets fail open unseen.
+2026-09-26 · #hooks #perf · Moving a whitelist exit into a per-target loop makes whitelisted Claude edits pay CLI resolve + node + grep first.
+2026-09-26 · #codex #hooks · An absolute apply_patch header via a symlinked path misses the physical REPO_ROOT strip; realpath its existing ancestor.
+2026-09-26 · #codex #app-server · turn/start takes input:[UserInput], not prompt; turn/completed has params.turn.id — a params.turnId wait never resolves.
+2026-09-26 · #codex #app-server · config/batchWrite edits are {keyPath,value,mergeStrategy}; JSON-quote keyPath segments that hold paths or hook keys.
+2026-09-26 · #codex #test-harness · Untrusted workspaces list no project hooks; take the all-untrusted hooks/list after workspace trust, before hash trust.
+2026-09-26 · #codex #test-harness · A spawn turn ends before the child runs SubagentStart/Stop; settle on the final subAgentActivity item + subagentStop.
+2026-09-26 · #codex #test-harness · Route a scripted Responses mock by content (*_output→DONE, child agent_message→OK); a request-index script desyncs.
+2026-09-26 · #codex #app-server · Codex sends tools as input item {type:additional_tools} (namespaces), not body.tools; apply_patch unlisted but honored.
+2026-09-26 · #worktree #cross-repo #test-harness · Nest the cli worktree at .worktrees/<ID>/cleargate-cli: every <cli>/.. META_ROOT read hits the item's own outer tree.
+2026-09-26 · #worktree #test-harness · Outer worktrees lack gitignored /.claude; symlink it to live and add '/.claude' to .git/info/exclude.
+2026-09-26 · #worktree #npm · cli package-lock.json is gitignored and ~/.npm lacks toml-eslint-parser: npm ci --offline fails; symlink node_modules.
+2026-09-26 · #worktree #build · prebuild+build inside a cli worktree take ~4s and write only its templates/ and dist/; safe there, never in CLI main.
+2026-09-26 · #clean-room #worktree · Harness default container is CLI_ROOT/../..; from a nested worktree that is inside OUTER — refused. Pass --container.
+2026-09-26 · #test-harness #tmp · host-adapter-contract.red.node.test.ts:91 leaks cg-s41-contract-payload-* dirs; BUG-096 covers init-fixture only.
+2026-09-26 · #surface-gate #worktree · Commit a STORY outer half right after its own update_state: the gate judges MAIN state.json's max updated_at.
+2026-09-26 · #scripts #vocab · check-no-exec-mode-vocab bans 'under v2', 'v2 only', 'v2-only', 'v2 block'; write 'schema_version: 2'.
+2026-09-26 · #test-harness #init · One SANCTIONED_BASELINE_DELTAS row per rel: a second row fails its baseline assert. Share a byte-identical row.
+2026-09-26 · #codex #skill · -12's renderer throws on banned tokens outside its anchored ranges; new SKILL.md text outside §C.0 must avoid them.
+2026-09-26 · #dashboard · The dashboard groups by the sprint plan's first Story ID+Title table (Milestone column); it never reads waves.json.
+2026-09-26 · #test-harness #ports · cr097/cr101 dashboard tests bind fixed ports (4731, 43811-3): never run two full suites at once.
+2026-09-26 · #scripts #env · Agent Bash has no CLAUDE_PROJECT_DIR: run_script.sh falls to git toplevel; set ORCHESTRATOR_PROJECT_DIR explicitly.
+2026-09-26 · #scripts #init-sprint · init_sprint.mjs reads only waves.json lane_assignments (:195-211); additive schema fields need no code change.
+2026-09-26 · #git #worktree · git clone of a linked-worktree path works; a plain clone checks out that worktree's branch, so pass --branch.
+2026-09-26 · #codex #test-harness #git · `git clone --branch HEAD <local-path>` fails; resolve the ref to a sha, clone plain, then checkout it.
+2026-09-26 · #codex #test-harness · An e2e whose cliRoot is a fresh clone has no node_modules to symlink; fall back to a scratch-cached npm install.
+2026-09-26 · #test-harness #danger · node:test per-test timeout flags a hung test but never aborts in-flight subprocesses; give poll loops their own.
+2026-09-26 · #evidence #sanitizer · Sanitise a heading's own embedded label too, not just cells/findings, or a multi-line label forges a second heading.
+2026-09-26 · #codex #test-harness #danger · macOS /tmp→/private/tmp breaks a raw import.meta.url vs argv[1] entry-point check; realpath both sides.
+2026-09-26 · #toml #codex · toml-eslint-parser throws ParseError on a reopened [table] (dupe keys); no separate ambiguity check needed.
+2026-09-26 · #toml #codex · TOMLTable/TOMLKeyValue .range excludes the trailing newline; range-replace edits must add separators.
+2026-09-26 · #qa-red #tpv · A patch's exact sha256 + `git apply --check` clean + staged-file-list equality is a fast 3-point re-seal integrity gate.
+2026-09-26 · #qa-red #test-harness · Sum the solo per-file fail counts; an exact match with the full-suite fail total proves no cross-file regression.
+2026-09-26 · #qa-red #test-harness #danger · A test's intentional stderr Error (graceful-skip cases) pollutes a stack-trace grep; check pass/fail, not presence.
+2026-09-26 · #test-harness #tpv · A verdict fn fed one flat stream can't tell C3's blocked run from C4's completed one; key inputs by session.
+2026-09-26 · #test-harness #tpv #danger · A mock HTTP handler that throws leaves a fetch-awaiting test hanging forever (no timeout).
+2026-09-26 · #codex #app-server · codex app-server generate-ts --out <dir> emits the exact protocol types offline; read them, don't guess.
+2026-09-26 · #codex #app-server · Approval replies are {decision:'decline'}; there is no item/updated (only item/started, item/completed).
+2026-09-26 · #test-harness #tpv · A kept literal that itself holds the anchored line (a TOML [features] string) makes a ^…$ count unsatisfiable.
+2026-09-26 · #hooks #doctor #danger · doctor --can-edit/--session-start skip non-'---'-led files; strip <instructions> before approving.
+2026-09-26 · #test-harness #tpv · Put the whitelisted target first in a multi-target gate test, or 'exit 0 on first whitelisted' fails open unseen.
+2026-09-26 · #test-harness #upgrade · Sealed -07 fixtures use a non-hooks .codex/hooks.json; a hooks-only session-load delta drops its warning.
+2026-09-26 · #test-harness #tpv · A 'claims the matching sentinel' test where the match is also the newest can't kill newest-wins; age it oldest.
+2026-09-26 · #frontmatter #sprint-init #danger · --allow-drift phantom then hides epics: the decomposition gate reads the phantom ("no epics").
+2026-09-26 · #frontmatter #close · reconcileCurrentSprintStories throws "No frontmatter" on an instructions-led Done story; close stops at 2.6d.
+2026-09-26 · #frontmatter #intake · intake hasAnyRemoteAuthored scans up to the first \n--- — the <instructions> preamble, not frontmatter.
+2026-09-26 · #frontmatter #locator · The span's YAML slice ends with the EOL before the closing fence; strip it before an append or the fence glues on.
+2026-09-26 · #test-harness #init · dedupe_frontmatter.mjs ships mode 755; delta rows assert mode on both sides — never drop the exec bit.
+2026-09-26 · #frontmatter #backfill · backfill_hierarchy.mjs is live-only; its fail-closed skip is what shields fresh items from BUG-048 re-ownership.
+2026-09-26 · #frontmatter #locator · BUG-067's locator returns the FIRST fence: a phantom block before <instructions> wins, not the real one.
+2026-09-26 · #clean-room #frontmatter #danger · approveProbeStory inserted approved: true; once templates scaffold approved: false it must flip or YAML dup-keys.
+2026-09-26 · #frontmatter #doctor · doctor runCanEdit/runSessionStart skip <instructions>-led items via trimStart().startsWith('---').
+2026-09-26 · #scripts #esm #danger · close_sprint.mjs static-imports assert_story_files.mjs: sync the live pair in ONE commit or close won't link.
+2026-09-26 · #test-harness #init · SANCTIONED_BASELINE_DELTAS can't express an added payload file (one-sided entry throws); keep fixes in-file.
+2026-09-26 · #test-harness #scripts · Spawning scaffold/core close_sprint.mjs: stub <fx>/node_modules/cleargate/dist/lib for Step 2.6c.
+2026-09-26 · #clean-room #harness · --known-fail relabels only FAIL; a fixed check PASSes silently with the flag still set — drop it.
+2026-09-26 · #test-harness #init · A child importing init-fixture needs cwd=CLI_ROOT and a marker line: initHandler prints a banner to stdout.
+2026-09-26 · #scripts #frontmatter · close_sprint Step 2.9 compares raw values: quoted sprint_cleargate_id "SPRINT-41" is skipped (fail-open).
+2026-09-26 · #surface-gate #scripts · file_surface_diff.sh strips only STORY- from the active id; a BUG-* active item resolves no file, gate skips.
+2026-09-26 · #frontmatter #sprint-init #danger · sprint.ts parseFileFrontmatter --allow-drift write-back plants a phantom block on instructions-led plans.
+2026-09-26 · #qa-red #test-harness · An unregistered CLI subcommand exits 1 via commander, not your parser; assert stderr lacks 'unknown command'.
+2026-09-26 · #qa-red #codex #hooks · Raw Codex apply_patch/spawn payloads make today's Claude-only hooks fail open (0 vs 1/2): real reds, no fixture.
+2026-09-26 · #qa-red #test-harness · compareInstallTrees rule (c) flags noflag top-level names; put symlink fixtures under .claude/, not at root.
+2026-09-26 · #test-harness #snapshots · init.node.test.ts holds rendered hook locks (pre-edit-gate, stamp-and-gate, session-start).
+2026-09-26 · #hooks #token-ledger · token-ledger.sh exits 0 on a missing transcript_path (:88); a host branch goes before it.
+2026-09-26 · #hooks #stamp · stamp-and-gate.sh reads stdin with jq at :20; capture INPUT first or a 2nd reader gets nothing.
+2026-09-26 · #test-harness #upgrade #tpv · A codex prune red needs codex REGISTERED at the red commit; use a fixture adapter.
+2026-09-26 · #upgrade #changelog · Never derive pkgRoot from a temp view's ../.. (BUG-041 class); keep CHANGELOG on the flat root.
+2026-09-26 · #test-harness #init · Temp-dir leak tests filter by mkdtemp prefix; renaming the prefix makes them silently vacuous.
+2026-09-26 · #codex #hooks · git rev-parse --show-toplevel is physical; resolve apply_patch paths against realpath(cwd).
+2026-09-26 · #test-harness #scaffold · canonicalPath() maps .codex/** and AGENTS.md to scaffold/core; join hosts/codex yourself.
+2026-09-26 · #clean-room #evidence #danger · Unsanitised evidence cells can inject '## Run'/'- result: PASS' lines; a FAIL run then checks green.
+2026-09-26 · #clean-room #claude-p · Claude Code 2.1.283 backgrounds a headless Agent dispatch: S2 emits two result events; parse the last.
+2026-09-26 · #clean-room #harness · claude-baseline.mjs runs main()+process.exit on import; never import it — reuse evidence.mjs/probe-items.mjs.
+2026-09-26 · #clean-room #host · A witness line copied from 'registered' is vacuous; record --host all from the room's snapshot hosts.
+2026-09-26 · #close #deferred-verify · Step 2.9 reads only status+exit_code of deferred-verify/<ID>.json; it cannot see a stale green.
+2026-09-26 · #qa #audit · A 'every spawn has cwd+scrubbed env' claim needs a per-call audit; QA passed it while 9 spawns lacked one.
+2026-09-26 · #qa #tpv #clean-room · When binding notes gloss one row differently (M4-A2 vs TPV J5), the specific grounded one wins; flag it.
+2026-09-26 · #worktree #danger · Main checkout and worktrees share relative paths; edit by the worktree's absolute path, then diff-verify.
+2026-09-26 · #clean-room #hooks · Sentinel + token-ledger hooks write to _off-sprint/ with no .active; dispatch proof needs no sprint init.
+2026-09-26 · #test-harness #tpv #clean-room · A test that runs hooks in a room it later byte-compares can never pass; probes need their own room.
+2026-09-26 · #test-harness #tpv · A boolean verdict input (ledgerHasQaRow) moves the check into untested code; pass raw rows to the pure function.
+2026-09-26 · #test-harness #tpv · Positive-only verdict fixtures let 18 of 22 weakened PASS conditions survive; write one negative case per condition.
+2026-09-26 · #test-harness #tpv · Fixture rows built from a plan-list constant hide an equality pin; build them from the module's own exported list.
+2026-09-26 · #typecheck #test-harness · cleargate-cli npm run typecheck covers src/** only; TS errors in test files never surface there.
+2026-09-26 · #frontmatter #clean-room · cleargate new epic writes epic_id with double quotes; stamp re-serializes it bare. Id matchers must accept both.
+2026-09-26 · #test-harness #tpv · In a scratch clone without dist/, tests that spawn dist/cli.js report cancelled, not failed. Build dist there first.
+2026-09-26 · #orchestrator #tpv · Extract a report-embedded patch with the report's own awk recipe; a hand-picked line range can be off by one.
+2026-09-26 · #qa-red #clean-room #test-harness · A byte-neutral story's e2e reds must mark already-green anchor cases, not force them red.
+2026-09-26 · #qa-red #test-harness · A prose-only DI shape (claudeLiveVerdicts inputs) must be invented and flagged as an ambiguity, not pinned silently.
+2026-09-26 · #test-harness #tpv · A multi-body shape-guard red where every body fails the first clause leaves the later clauses untested.
+2026-09-26 · #verify-install #manifest · Every pre-058-06 snapshot lacks hosts; a guard requiring hosts rejects every field install.
+2026-09-26 · #clean-room #claude-p #hooks · Claude Code 2.1.283 runs hooks as /bin/sh -c with the launcher's PATH; a PATH shim reaches hooks.
+2026-09-26 · #upgrade #mcp #danger · upgrade re-pins hooks and pin_version but never .mcp.json; the MCP server keeps running the old CLI.
+2026-09-26 · #verify-install · A snapshot parsing to null/{}/[] crashed verify-install (TypeError); validate the shape, not just the JSON.
+2026-09-26 · #clean-room #env · An agent Bash exports 12 CLAUDE* vars (CLAUDE_CODE_CHILD_SESSION…); scrub every CLAUDE* before claude -p.
+2026-09-26 · #clean-room #claude-p · --setting-sources project,local still loads claude.ai MCP connectors (source claudeai); filter by name.
+2026-09-26 · #scaffold-lint #docs · scaffold-lint lints <cwd>/cleargate-planning (the frozen snapshot), not cleargate-cli/scaffold.
+2026-09-26 · #verify-install #qa #fail-closed · <h>.no-verifier must gate on installed too; --host h registered-not-installed fired it.
+2026-09-26 · #clean-room #claude-p · An S1 canary Edit target must be a real `cleargate new` item; an arbitrary file fails stamp+gate+ingest.
+2026-09-26 · #test-harness #worktree · An outer worktree has no gitignored cleargate-cli/; META_ROOT tests needing it ENOENT there.
+2026-09-26 · #cli #help · cli.ts configureHelp.visibleCommands ignores hidden:true — stamp still shows in top-level help; hidden is inert.
+2026-09-26 · #test-harness #tpv · A section() slice that keeps its heading line makes 'body names X' vacuous when the heading names X.
+2026-09-26 · #test-harness #doctor #tpv · A read-only test with runDoctor stubbed can't see doctor writes; one case must use the real default.
+2026-09-26 · #verify-install #tpv · verified = installed∩registered leaves no host checks to skip without a snapshot; fall back to verifier hosts.
+2026-09-26 · #docs #test-harness · /\bNo\b|\bnever\b/ is case-sensitive: 'Never run npm publish' fails D2; lowercase 'no' fails too.
+2026-09-26 · #qa-red #test-harness · An unregistered subcommand's --help falls through to top-level help: no subcommand flags listed.
+2026-09-26 · #hooks #flashcard-gate #danger · Post-BUG-085 a dev/qa line starting `flashcards_flagged: [` (even fenced) is gated; quoted fixtures block.
+2026-09-26 · #clean-room #hooks · No .cleargate/sprint-runs/.active → the flashcard gate is skipped; such a dispatch cannot witness it.
+2026-09-26 · #state #danger · Post-CR-117 validate_state.mjs reads a positional as a PATH; `cleargate state validate <id>` now always fails.
+2026-09-26 · #hooks #test-harness #danger · 16 outer .cleargate/scripts/test/*.sh read frozen cleargate-planning/; flashcard-gate ones test a dead hook.
+2026-09-26 · #doctor #drift · drift-check reads the cli checkout's WORKING tree: on an R1 story branch OUTER reports drift for unmerged canonical.
+2026-09-26 · #doctor #regex · A regex backreference followed by a literal digit parses as an octal escape in non-u mode; wrap it as (?:\1).
+2026-09-26 · #dogfood #hooks · Re-sync live with b0-live-resync.mjs: dry-run, then --apply (branch guards, .claude backup, live pin, mode).
+2026-09-26 · #qa #test-harness #danger · Extract the CLAUDE.md block with anchored ^<!-- CLEARGATE:START -->$; prose names it too.
+2026-09-26 · #test-harness #tpv · Delta-row currentHash read from canonical passes at the red commit; refuse the baseline hash or pin a literal.
+2026-09-26 · #test-harness #tpv · 'Same exit with and without X' needs a twin run without X; two runs that both have X prove nothing.
+2026-09-26 · #hooks #flashcard-gate #tpv · Fail-closed test: mark the block's cards first, else an unmarked card blocks anyway and masks it.
+2026-09-26 · #doctor #drift · A pin regex without ^…$ lets a live hook with extra lines pass as pin-equal; anchor it, test appended text.
+2026-09-26 · #test-harness #host · Skip a both-absent delta row only for synthetic baselines (no tree/); a mis-keyed row must throw on real ones.
+2026-09-26 · #test-harness #host · A scenarios:'all' delta row breaks synthetic captureOrCompare fixtures lacking that rel.
+2026-09-26 · #test-harness #recipe · A recorded tree hash from find|shasum includes ABSOLUTE paths; relative paths give another digest.
+2026-09-26 · #hooks #flashcard-gate · Sentinel multi-block bug needs a PROSE line between blocks; adjacent headers re-arm state.
+2026-09-26 · #test-harness #git · Tests can't see a whitespace slip in an insertion; check git diff <base> --numstat reads N/0.
+2026-09-26 · #tpv #test-harness · An already-green anchor can be a mutant's SOLE killer (R11c half 2); measure before calling it dead weight.
+2026-09-26 · #init #test-harness #danger · init asks 'Restore preserved items?' when .uninstalled exists, even with --yes; seam promptYesNo.
+2026-09-26 · #uninstall #init #settings-json #danger · An emptied .claude/settings.json left by uninstall makes re-init merge only 2 of 7 hooks.
+2026-09-26 · #init #settings-json #danger · init into an existing .claude/settings.json wires only CLAUDE_HOOK_ADDITION (2 of 7 hooks).
+2026-09-26 · #upgrade #settings-json #danger · upgrade take-theirs spreads theirs.hooks per event: user hooks under a ClearGate event are dropped.
+2026-09-26 · #codex #settings-json · isClearGateCommand matches /.claude/hooks/ only; codex hook commands never match it.
+2026-09-26 · #doctor #smoke #danger · doctor --check-scaffold writes .cleargate/.drift-state.json (not ignored here); never smoke it on OUTER.
+2026-09-26 · #hooks #flashcard-gate · A fail-closed parser under 'while read -r' misses an unterminated last line; add '|| [[ -n $line ]]'.
+2026-09-26 · #doctor #session-start · runSessionStart line 2 is the resolver line (6 tests pin out[1]); add new lines after it.
+2026-09-26 · #manifest #host · selectEntriesForHosts needs payloadFilter AND an owner check; payloadFilter alone admits unregistered owners.
+2026-09-26 · #manifest #doctor #upgrade · Make DriftMapEntry.owner required: a missed construction site then fails typecheck, not silently at runtime.
+2026-09-26 · #test-harness #upgrade #tpv · upgrade never creates CLAUDE.md (untracked); a snapshot-less dir is claude-only — seed hosts for multi-host reds.
+2026-09-26 · #settings-json #test-harness · supersedeHookCommands only drops; the new command comes from mergeSettings. A cross-matcher seed must share token 1.
+2026-09-26 · #doctor #host · doctor --host narrows at emit only; a narrowed .drift-state.json makes the next cache replay report one host.
+2026-09-26 · #test-harness #tpv #qa-red · -07 QA-Red omitted 3 binding plan tests (M3-A31/A32 11b-d); TPV diffs the plan's named tests, not just the scenarios.
+2026-09-26 · #host #tpv · Code moved into claude.ts must not carry a CLEARGATE:START literal (sealed -03 grep); build it from CLEARGATE_START.
+2026-09-26 · #upgrade #test-harness · upgrade.ts resolves its payload root differently from manifest.ts; spawn upgrade from src with an explicit packageRoot.
+2026-09-26 · #test-harness #qa-red #recipe · import() of a module missing a named export yields undefined, not a throw — one red test per export.
+2026-09-26 · #doctor #grep · doctor.ts holds raw NUL bytes (globMatch :887/:889); plain grep says 'Binary file matches' — use grep -a.
+2026-09-26 · #host #uninstall #contract · executeHostRemoval's ctx sinks are RAW; uninstall's are LINE sinks — strip the trailing \n first.
+2026-09-26 · #doctor #drift · check-scaffold --session-start-mode replays an old .drift-state.json; new DriftMapEntry fields may be absent.
+2026-09-26 · #host #uninstall #danger · host remove has no dry-run or dirty-tree gate (uninstall has both); edited files at ClearGate paths go.
+2026-09-26 · #zsh #git · zsh reads `git show $C:src/x` as a :s modifier ('bad substitution'); write \"${C}:src/x\".
+2026-09-26 · #qa #danger #init · A QA smoke ran init before its cd, so it wrote into the meta-repo; run (cd /literal/tmp && node cli init) in one call.
+2026-09-26 · #qa #test-harness #tsx · resolveDefaultPayloadDir() assumes bundled dist/; a tsx src smoke of bare init/host add needs a scratch dist build.
+2026-09-26 · #codex #dispatch · spawn_agent is async; serial dispatch = spawn_agent then wait_agent until the FINAL_ANSWER arrives.
+2026-09-26 · #codex #dispatch · spawn_agent fork_turns defaults to all (child inherits parent history); pass fork_turns none.
+2026-09-26 · #codex #sandbox #danger · workspace-write makes .git read-only: worktree add/commit/merge fail; add <room>/.git root.
+2026-09-26 · #codex #sandbox · thread/start config sandbox_workspace_write.writable_roots is per thread; child agents inherit it.
+2026-09-26 · #codex #clean-room #danger · exec_command runs zsh -lc; path_helper puts /opt/homebrew/bin first → global cleargate.
+2026-09-26 · #codex #token-ledger · SubagentStop agent_transcript_path rollout: token_usage_record per response_id = exact usage.
+2026-09-26 · #codex #hooks · Child-agent tool hooks carry agent_id+agent_type; SessionStart fires per root session, never per child.
+2026-09-26 · #codex #hooks · Code-mode exec nesting: tools.apply_patch fires PreToolUse as apply_patch; exec_command as Bash.
+2026-09-26 · #codex #test-harness · hook/completed run.id ends with :<call_id>; join hook runs to spawn/apply_patch items by it.
+2026-09-26 · #codex #clean-room · ChatGPT.app's embedded codex auto-updated to 0.155.0-alpha.16.3; not a same-version target.
+2026-09-26 · #codex #trust · TUI shows 'N hooks need review' → Review hooks / Trust all; app-server runs never prompt.
+2026-09-26 · #sprint-execution #verdict · Serial verdicts: tokens {metering:'unavailable'}, null SHAs on non-GREEN; never zero/fake.
+2026-09-26 · #hooks #flashcard-gate · pending-task-sentinel's bash read skips a final line with no newline; a JS port must too.
+2026-09-26 · #clean-room #frontmatter · Authored items strip <instructions> (Guidance Surface Reach); sprint init then passes.
+2026-09-26 · #test-harness #init #tpv · init-fixture's stub readInstallManifest records files: []; lifecycle reds must pass readInstallManifest: undefined.
+2026-09-26 · #test-harness #tpv #qa · QA-Red reds never ran on a conformant build: 4/13 -05 reds were unsatisfiable, 2 vacuous. TPV must simulate first.
+2026-09-26 · #test-harness #cli #tpv · A spawned-CLI test that drops empty lines can't see a line-sink default sink; assert stdout has no '\n\n'.
+2026-09-26 · #test-harness #host #manifest · A fixture where owner == path can't test delete-by-owner; add a pure planHostRemoval case with owner != path.
+2026-09-25 · #codex #hooks · Codex 0.154 PreToolUse sees spawn_agent as collaborationspawn_agent; matchers full-match, so use .*spawn_agent.
+2026-09-25 · #codex #hooks #danger · Codex PreToolUse blocks only on exit 2 WITH non-empty stderr (or JSON deny); silent exit 2 and exit 1 fail open.
+2026-09-25 · #codex #hooks · Codex apply_patch hook: tool_input.command is patch text with no file_path; parse its *** Add/Update/Delete File lines.
+2026-09-25 · #codex #trust · Project .codex/ hooks+config load only in a trusted workspace; a hook runs once hooks.state.<key>.trusted_hash matches.
+2026-09-25 · #codex #agents-md · AGENTS.md and .agents/skills load without workspace trust; .codex/agents roles and .codex/config.toml need it.
+2026-09-25 · #codex #test-harness · A scripted Responses SSE endpoint (model_providers, wire_api=responses) drives real Codex hooks at $0, no login.
+2026-09-25 · #codex #test-harness · codex exec --json emits no hook events; capture hook/started|completed from codex app-server stdio instead.
+2026-09-25 · #codex #agents · Codex role TOML model= is forwarded verbatim to the provider; Claude aliases (sonnet/opus) break real spawns — omit it.
+2026-09-25 · #codex #hooks #env · Codex hooks inherit the launcher env; a leaked CLAUDE_PROJECT_DIR misroutes them — export the git toplevel per command.
+2026-09-25 · #codex #clean-room · Isolate Codex with CODEX_HOME AND HOME: ~/.agents/skills leaks into the skill roots otherwise.
+2026-09-25 · #scaffold #manifest · buildInstallView over templates/scaffold/* split roots collides on each root's MANIFEST.json; skip it at compose.
+2026-09-25 · #codex #upgrade #danger · Upgrading a codex install against the core+claude compat manifest prunes every codex-owned file.
+2026-09-25 · #npm #cli · ~/.npm/_cacache holds root-owned files here (EACCES); run npm view/install with --cache <scratch dir>.
+2026-09-25 · #codex #hooks · Codex SessionStart fires on the first turn/start, and its plain stdout reaches the model as a context message.
+2026-09-25 · #devops #grep · grep here is a gitignore-aware shim: plain grep -c on gitignored dist/cli.js prints nothing; use command grep.
+2026-09-25 · #manifest #cli · TIER_RULES/INTENTIONALLY_UNTRACKED now live in src/lib/manifest-builder.ts; scripts/build-manifest.ts only re-exports.
+2026-09-25 · #manifest #test-harness #danger · A fixture manifest entry without owner reads by the legacy rule (.codex/** => core); always stamp owner explicitly.
+2026-09-25 · #manifest #host · Legacy and carried snapshot entries lack owner; call entryOwner(e) and installedHosts(s), never e.owner or s.hosts.
+2026-09-25 · #tooling #danger · A moved '\ufeff' escape became a raw invisible U+FEFF (manifest-builder.ts:289); grep for EF BB BF after code moves.
+2026-09-25 · #clean-room #manifest · From RS-4, core-owned .agents/** is only in the --host all snapshot; compare claude-visible entries, not core+claude.
+2026-09-25 · #qa #test-harness #cross-repo · A main-proof worktree must be named cleargate-cli with a sibling mcp/: version_bump_alignment finds REPO_ROOT by name.
+2026-09-25 · #test-harness #tpv #danger · A banned string (e.g. import.meta.url) in a doc COMMENT still trips a raw-substring static grep; reword it.
+2026-09-25 · #test-harness #tpv #host · Sanctioned-delta rows assert currentHash strictly; dual-accept let a build that never wrote hosts pass parity.
+2026-09-25 · #manifest #host #danger · Carrying only owner!=='core' drops .agents/** of a still-installed host; carry via payloadFilter(installed).
+2026-09-25 · #manifest #scaffold · realpathSync(<pkgRoot>/scaffold) throws ENOENT in installed pkgs and tmp fixtures; wrap the equality in try/catch.
+2026-09-25 · #test-harness #tpv · find|sort|xargs shasum splits 'Sprint Plan Template.md'; hash payload trees with -print0 | sort -z | xargs -0.
+2026-09-25 · #manifest #tpv · walkDir pushes every stray into global unclassifiedPaths per walk; a two-walk build warns twice unless deduped.
+2026-09-25 · #clean-room #hooks #danger · A clean room without PATH control runs the GLOBAL cleargate from hooks — you test the published release.
+2026-09-25 · #clean-room #claude-p · claude -p stream-json --verbose --include-hook-events emits hook_response (hook_name, exit_code, output).
+2026-09-25 · #clean-room #claude-p · --setting-sources project,local drops user plugins, hooks and skills from a headless session.
+2026-09-25 · #claude #agents-md · Claude Code 2.1.282 loads AGENTS.md via builtin agents-md when no CLAUDE.md exists; not when both do.
+2026-09-25 · #frontmatter #sprint-init #danger · assert_story_files.mjs:162 anchors ^--- at offset 0: sprint init rejects fresh stories.
+2026-09-25 · #doctor #drift · Fresh install: doctor --check-scaffold flags gate-checks.json upstream-changed (post-applyTestStack sha).
+2026-09-25 · #gate #clean-room · Fresh `cleargate new epic` gates exit 1 by design; gate=0 needs approved_by/at, answer, real path, none found.
+2026-09-25 · #close #deferred-verify · Step 2.9 sees an item only if sprint_cleargate_id equals the sprint id, unquoted; null is skipped.
+2026-09-25 · #npm #clean-room · A local-dist install copies the payload root .gitignore that npm strips; only an extracted tarball matches users.
+2026-09-25 · #devops #agents · An agent Bash call like rm -rf "$(cat <<< path)" stalled DevOps 40 min; clean up with literal paths, one per call.
+2026-09-25 · #host #copy #test-harness · Sealed E1 needs payloadFilter to admit claude's own CLAUDE.md; exclude only UNSELECTED hosts' root surgery targets.
+2026-09-25 · #manifest #host · Snapshot hosts = installed set, not this run's --host selection; init --host codex on a Claude install keeps claude.
+2026-09-25 · #manifest #host #danger · installedHosts(null) returns the legacy ['claude']; a prior-hosts merge must use prior ? installedHosts(prior) : [].
+2026-09-25 · #test-harness #init #tpv · runInitScenario always sets payloadDir, checked before fromSource; pass payloadDir: undefined or fromSource is dead.
+2026-09-25 · #test-harness #node-exit #tpv · A throwing exit seam runs pending finally blocks; process.exit does not. Snapshot leak state inside the exit seam.
+2026-09-25 · #host #registry #tpv · Registry-derived-profile tests need a fake host no hard-coded list names; known names can't kill hardcoded∩registry.
+2026-09-25 · #test-harness #cli #tpv · A CLI red with the bad --host value in the LAST occurrence passes last-wins parsing; put it FIRST to prove repeatable.
+2026-09-25 · #test-harness #scaffold #host · 'Filter admits every flat-payload path' reds at -11 (.agents in core, codex shared); skip paths other hosts declare.
+2026-09-25 · #test-harness #tpv · Files-only tree records miss empty dirs: an include filter applied after mkdir leaks empty host roots; existsSync it.
+2026-09-25 · #test-harness #init · runInitScenario's extra spreads after default seams — override extra.exit to capture ExitSignal's code, no helper edit.
+2026-09-25 · #host #contract · InstallCtx sinks are raw (callee writes \n); RemoveCtx sinks are line sinks (uninstall appends \n). Wrap when crossing.
+2026-09-25 · #init #settings-json #danger · init --force overwrites .claude/settings.json wholesale; user hooks lost despite the surgeryTargets doc.
+2026-09-25 · #test-harness #init · runInitScenario('reinit') primes with NO extra seams (init-fixture.ts:273); a seamed reinit tests only pass 2.
+2026-09-25 · #host #copy · copy-payload SKIP_FILES hardcodes CLAUDE.md; a new host's root block source (AGENTS.md) is copied wholesale.
+2026-09-25 · #settings-json #init · Never reassign existingSettings before the merge: the restart-banner delta base must stay the on-disk parse.
+2026-09-25 · #qa #test-harness · grep -c CLEARGATE:START over-counts (CLAUDE.md prose repeats the token); count ^<!-- CLEARGATE:START -->$ instead.
+2026-09-25 · #uninstall #settings-json #danger · isClearGateCommand (settings-json-surgery.ts:32) matches 3 of 7 shipped hooks; uninstall leaves 4 dead ones.
+2026-09-25 · #uninstall #danger · uninstall deletes .claude/settings.json wholesale (cli-config tier) BEFORE its hook surgery runs — user hooks are lost.
+2026-09-25 · #manifest #host · Legacy owner default (.claude/** ⇒ claude, else core) is exact: every pre-058-06 payload was core+claude only.
+2026-09-25 · #test-harness #host · M2 init parity: a deliberate byte change is a SANCTIONED_BASELINE_DELTAS row hash-anchored on BOTH sides.
+2026-09-25 · #hooks #gate · pending-task-sentinel scans only *-dev.md/*-qa.md; arch/tpv/qa-red flashcards_flagged are never gated.
+2026-09-25 · #doctor #drift · checkCanonicalDrift diffed live vs frozen cleargate-planning/ and never tolerated pin substitution until BUG-085.
+2026-09-25 · #reports #gate #danger · flashcards_flagged must be a `- "card"` block list; an inline/fenced JSON array ["…"] is invisible to the flashcard gate.
+2026-09-25 · #npm #tsup #danger · Never static-import a scripts/*.ts CLI into src/: bundled, its isMain check fires on every cleargate command.
+2026-09-25 · #host #manifest #danger · buildManifest({scaffoldRoot}) compat takes EVERY host's classified files; the first .codex TIER_RULE leaks into Claude installs.
+2026-09-25 · #scaffold #host #manifest · Each templates/scaffold/<key>/ root has a MANIFEST.json; composePayload over 2+ split roots collides on it. Exclude it and merge.
+2026-09-25 · #test-harness #tpv · Sibling-read guard flags META_ROOT near a planning literal (120-char window); rename the local, never edit the sealed guard.
+2026-09-25 · #qa #test-harness · cli .integration files carry ~8 known pre-existing fails (STORY-058-02-qa.md §5); close_sprint_v21 is flaky run-to-run.
+2026-09-25 · #test-harness #qa · Base-commit scratch clone: tests hardcoding REPO_ROOT via import.meta.url need cleargate-planning + .cleargate symlinked beside it.
+2026-09-25 · #test-harness #tpv · A source-grep guard scans its own file too: its prose names the banned join. Allowlist the guard by exact path.
+2026-09-25 · #test-harness #manifest · Hash-comparing build output that holds MANIFEST.json compares wall-clock generated_at; strip it first.
+2026-09-25 · #npm #test-harness · npm pack never ships .gitignore; a negative control deleting 'first file under' a root can pick one.
+2026-09-25 · #init #test-harness · initHandler always writes .mcp.json (init.ts:423); an exact top-level install census must include it.
+2026-09-25 · #host #registry #test-harness · Never pin the production host registry's membership in a sealed test (-10 adds codex); use fixture registries.
+2026-09-25 · #host #scaffold #danger · Undeclared scaffold/core paths ship on EVERY install; .agents/** may sit in core only once an adapter declares it sharedRoot.
+2026-09-25 · #cross-repo #test-harness · Rule-15 runs the suite BEFORE BD: dist-spawning tests grade the old binary — re-run them after BD.
+2026-09-25 · #test-harness #cli · cli.ts parses argv at import: spawn tsx with cwd=CLI_ROOT, chdir to the fixture in -e, then import src/cli.ts.
+2026-09-25 · #qa #test-harness · Batch/parallel node:test runs here add spurious fails/cancels; diff fail NAMES one file at a time, solo.
+2026-09-25 · #cli #manifest · After 058-01 nothing regenerates cleargate-planning/MANIFEST.json; its readers go stale at the next version bump until -02.
+2026-09-25 · #test-harness #tpv #init · initHandler post-processes the root .gitignore (Step 5d appends a managed block): assert FIRST_INSTALL_ONLY survival on the user region, never whole-file equality.
+2026-09-25 · #test-harness #tpv #scaffold · A census over a whole growing tree (scaffold/**) compared to a frozen snapshot reds on the next story's first new file; key the census on the snapshot's own file set.
+2026-09-25 · #cross-repo #test-harness #danger · A two-repo item that edits outer docs/templates must run EVERY cli test honouring CLEARGATE_META_ROOT against its worktree before merge (targeted, never the full suite). BUG-089 and CR-123 each shipped a post-merge-only regression because only their own reds were pointed at the worktree. [SPRINT-41 rule 16]
+2026-09-25 · #gate #worktree #cross-repo #danger · stamp-and-gate runs MAIN's dist but gate.ts reads the edited file's OWN tree's readiness-gates.md (resolveProjectRootForFile) — a predicate registered in a worktree poisons every delivery edit there until merge+BD.
+2026-09-25 · #gate #transition · gate check re-evaluates the CACHED transition (gate.ts:134); proving a later-transition criterion (epic ready-for-coding) needs --transition, which rewrites the cache — revert after.
+2026-09-25 · #test-harness #gate · gate.ts catches predicate throws as failing criteria; an e2e asserting only the id passes with the predicate unimplemented
+2026-09-25 · #test-harness #readiness-gates · readiness-gates.md has TWO epic yaml blocks; a work_item_type-only regex hits ready-for-decomposition — key on transition too
+2026-09-25 · #test-harness #readiness-gates · A §N Brief anchor's title part must textually overlap the real heading N title (resolves() in enforcement-doc-coherence.node.test.ts); inventing new anchor prose that names a subsection, not the heading, reads as unresolved.
+2026-09-25 · #test-harness #danger · resolves()'s §N.M numbered-heading regex needs a literal SECOND dot after the decimal digit, which no real heading ever has — every decimal-numbered Brief anchor (story.md's §1.1/§1.4/§1.5/§2.1) fails resolves() unconditionally regardless of title text; only whole-number anchors (Bug.md/CR.md) are structurally resolvable.
+2026-09-25 · #test-harness #danger · Command substitution `$(...)` inside a `bash -c "..."` string is evaluated by the OUTER shell's cwd immediately, not deferred to the inner `cd` — compute file lists in a separate step first.
+2026-09-25 · #frontmatter #correction · The 2026-08-29 card (stamp corrupts <instructions>-prefixed items) is FIXED by BUG-067: live hooks run it since dist was rebuilt from cli 8931b91. The shared locator is src/lib/frontmatter-locator.ts — adopt it, never re-sniff offset 0. [SPRINT-41 BUG-067]
+2026-09-25 · #frontmatter #parser #danger · parseFrontmatter now finds fences behind <instructions>; push/pull/sync write-backs (serializeFrontmatter+'\n\n'+body) that used to throw now succeed and drop the preamble.
+2026-09-25 · #frontmatter #locator · replaceFrontmatter span.end excludes the closing fence's EOL; pass a block with no trailing \n, LF mapped to span.eol, or every stamp adds a blank line.
+2026-09-25 · #frontmatter · BUG-067's positional '---' sniff had 5 call sites, not the 3 originally filed — frontmatter-cache.ts writeCachedGate and stamp.ts dry-run were undocumented 4th/5th copies.
+2026-09-25 · #build #dogfood-split #danger · tsup onSuccess writes <cli>/dist/MANIFEST.json even with --out-dir; temp builds need --onSuccess true or mutate live dist
+2026-09-25 · #build #test-harness · temp CLI build must sit one dir under cleargate-cli/: deps external + import.meta.url/.. paths; elsewhere ERR_MODULE_NOT_FOUND
+2026-09-25 · #test-harness #cross-repo · CLEARGATE_BUILT_CLI must be absolute: existsSync passes from CLI_ROOT, hook shim runs in fixture cwd → stamp=1 gate=1 fake red
+2026-09-25 · #build #dogfood · `npm run build` auto-runs the npm `prebuild` lifecycle — every BD regenerates the payload from the outer MAIN canonical and rewrites cleargate-planning/MANIFEST.json; two-repo items need a second BD after the outer merge.
+2026-09-25 · #gate #cross-repo #danger · gate.ts:236-243 catches parsePredicate throws: a gates-doc predicate the running dist lacks becomes a failing 'predicate error', exit 1, and is CACHED as pass:false into every re-gated item.
+2026-09-25 · #gate #readiness-gates #danger · A body.includes lead-in trigger self-fires on the work item that specifies it (CR-123 quotes the lead-in + a blank table); anchor lead-in triggers at column 0 outside fences.
+2026-09-25 · #surface-gate #danger · file_surface_diff.sh matches staged paths to §3.1 by EXACT string (no glob) and resolves only STORY-* ids — a `dir/**` row admits nothing; CR/BUG items are never surface-checked.
+2026-09-25 · #scaffold #relocation · .cleargate/sprint-runs + hook-log are gitignored, so absent from any fresh clone; the copier recreates them only if it walks past them — scaffold composition must mkdir them unconditionally.
+2026-09-25 · #test-harness #danger · A cli test reading a live outer work-item file (via META_ROOT) inherits that item's lifecycle — status flips or archive moves break it for reasons unrelated to the code under test. Freeze such inputs into a committed test/fixtures/ copy.
+2026-09-25 · #test-harness #cross-repo · A sealed QA-Red file's FIXTURE_ROOT/META_ROOT constants are session-specific (isolated CG_TEST clone paths); re-verify and re-root them for the target repo before trusting 'adopt what is sound' — don't just copy the file.
+2026-09-25 · #qa #reports · Write an empty flashcard list as `flashcards_flagged: []` at column 0, never `- []` under a `## flashcards_flagged` heading — the sentinel parses `[]` there as a card and blocks the next dispatch. [SPRINT-41 BUG-067]
+2026-09-25 · #test-harness #hooks #live-vs-canonical · A cli test resolving `<cli>/../../../.claude/hooks/*.sh` reads the per-machine gitignored LIVE install, not canonical — passes silently until B0 re-syncs live from canonical, then breaks on old pinned contracts. Always use the CLI_ROOT/META_ROOT/CLEARGATE_META_ROOT idiom.
+2026-09-25 · #cli #settings-json #danger · mergeSettings dedups PreToolUse hooks by EXACT command string; a HOOK_ADDITION literal in src/commands/init.ts must byte-match the canonical settings.json string or a fresh install double-registers the hook.
+2026-09-25 · #cli #manifest #pin-aware · A new __CLEARGATE_VERSION__ literal in any canonical hook needs its OWN pin-aware TIER_RULES entry in scripts/build-manifest.ts — copying an existing resolver block (as pending-task-sentinel.sh did from pre-edit-gate.sh) copies the placeholder but not its manifest registration; test/docs/pin-placeholder-coverage.node.test.ts only catches this post-merge, reading the outer MAIN checkout.
+2026-09-25 · #test-harness #hooks #tpv · A PATH `cleargate` stub answers EVERY subcommand, incl. pre-edit-gate's doctor --can-edit — stub by subcommand.
+2026-09-25 · #hooks #advisory · CLEARGATE_ADVISORY has ONE hook honor site (pending-task-sentinel); an edit-gate advisory test pins a §15-forbidden site.
+2026-09-25 · #test-harness #cross-repo · A per-suite hook override is honour-system until the item's §5 command names it — pass it in every dispatch.
+2026-09-25 · #merge #wiki · .cleargate/wiki/log.md is ingest-appended at EOF on every branch; story→sprint merges conflict there — keep both blocks, never pick a side.
+2026-09-25 · #hooks #gate #dogfood · B0 re-sync arms the live flashcard gate (Task→Agent + exit 2) at once: touch .processed-<hash> for every flagged card before first post-restart dispatch.
+2026-09-25 · #bash #macos · bash 3.2 + set -u: "${arr[@]}" on an empty array is fatal (exit 1); use ${arr[@]+"${arr[@]}"} (pending-task-sentinel.sh:102).
+2026-09-25 · #hooks #codex · BUG-089 shell tails hardcode exit 2 and discard resolver stdout; a host needing JSON/other code must change the tail, not just hook-signal.ts.
+2026-09-25 · #dashboard #sprint-plan · The sprint dashboard splits §1 table rows on every `|`, ignoring markdown's `\|` escape, and groups by the raw Milestone cell. A title with `\|` or an annotated cell ("M3 (after -06)") spawns bogus milestone groups. Keep §1 Milestone cells bare (`M3`); put notes below the table. [SPRINT-41 kickoff]
 2026-09-25 · #gate #preflight #stale · `writeCachedGate` skips the write when pass+criteria are unchanged, so it never refreshes `last_gate_check`; an item edited after its last check stays "stale" in `sprint preflight` Check 5 forever. After a fresh pass, bump `last_gate_check` by hand. [SPRINT-41 kickoff]
 2026-09-24 · #sdr #collision-surface #danger · architect-reader carries UNREACHABLE only from file_surface, never file_creates — creates inside nested cleargate-cli/ look reachable (collision_surface.sh:226 checks nesting before :236 exempts creates). 5 of 11 SPRINT-41 refusals were found only by the synth. [SPRINT-41 SDR]
 2026-09-12 · #hooks #test-harness #correction · BUG-068 accepts Task/Agent OR subagent_type payloads; a negative Edit fixture must omit dispatch fields. Preserve a separate shape-fallback positive.
@@ -247,7 +723,7 @@
 2026-06-04 · #qa #cross-repo · Cross-repo sprint (code in a separate gitignored repo): QA/Dev context packs assume meta-repo paths and are absent — the orchestrator MUST pass the code-repo root + branch + commit SHA + path-prefix mapping explicitly in every dispatch prompt. [SPRINT-35]
 2026-06-04 · #test #glob #node25 · tsx + Node 25: `!`-negation glob patterns passed as CLI args to `node --test` are silently IGNORED (integration files still run). Use a tinyglobby-based wrapper script (run-default-tests.mjs) to do real exclusion; keep the negation in the npm-script text only for literal/contract greps. [SPRINT-34 CR-075]
 2026-06-04 · #qa-red #grep · A red test that greps for "zero hits" of a token will SELF-HIT its own assertion-message string literals — always `grep --exclude=<the-red-test-file>` (or scope the grep away from the test file) or it never goes green. [SPRINT-34 CR-075]
-2026-06-04 · #test #run_script #isolation · Running `npm test` via `bash run_script.sh npm test` leaks `RUN_SCRIPT_ACTIVE=1` into the test child env → CR-046/052/054 self-exemption tests false-fail (find 0 incident files). Invoke `npm test` DIRECTLY when measuring the suite or testing run_script.sh behavior. [SPRINT-34 CR-075]
+2026-06-04 · #test #run_script #isolation · Running `npm test` via `bash run_script.sh npm test` leaks `RUN_SCRIPT_ACTIVE=1` into the test child env → CR-046/052/054 self-exemption tests false-fail (find 0 incident files). Invoke `npm test` DIRECTLY when measuring the suite or testing run_script.sh behavior. [SPRINT-34 CR-075] (reconfirmed 2026-09-30; SPRINT-41 plans/test-runner-environment.md)
 2026-06-04 · #npm-publish #payload #init · cleargate init reads ROOT templates/cleargate-planning (resolveDefaultPayloadDir init.ts:140-145 = dist/../templates). dist/templates/ is the DROPPABLE dup, NOT root templates. CR-076 hypothesis was inverted. [SPRINT-34]
 2026-06-04 · #test #monorepo #ratchet · cleargate-cli test_ratchet.mjs lives ONLY in OUTER .cleargate/scripts/, still spawns vitest (removed EPIC-028), expects test-baseline.json that does NOT exist. Ratchet is stale/dead vs node:test. [SPRINT-34 CR-075]
 2026-06-04 · #test #workspace · TWO files shell 'npm pack --workspace=cleargate-cli': test/changelog-format.node.test.ts AND test/lib/license-contract.node.test.ts. CR-075 named only the first. [SPRINT-34]

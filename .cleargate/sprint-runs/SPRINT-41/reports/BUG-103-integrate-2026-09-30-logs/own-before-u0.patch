@@ -1,0 +1,742 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
++- **The sprint-execution playbook gave commands that failed and rules that contradicted each other
++  when followed literally (BUG-103).** Kickoff now reads `cleargate sprint init SPRINT-NN --stories
++  <ids>`, preflight is five automated checks plus the manual devops check, orchestrator bookkeeping
++  is committed on `sprint/S-NN` as `chore(SPRINT-NN): …` (never on `main`), the `run_script.sh`
++  wrapper examples name the interpreter and script path, every role report goes to the main
++  checkout's absolute reports path, the §C.9 flashcard gate notes the earlier per-dispatch hook on
++  serial hosts, and a 1–2 story sprint still writes a one-wave `plans/waves.json` (SKILL.md §A.4,
++  `architect.md`). `validate_bounce_readiness.mjs` no longer counts `.cleargate/wiki/**` ingest
++  churn as a dirty tree; every other uncommitted change still blocks. The Codex render is
++  regenerated.
+diff --git a/scaffold/core/.agents/skills/sprint-execution/SKILL.md b/scaffold/core/.agents/skills/sprint-execution/SKILL.md
+--- a/scaffold/core/.agents/skills/sprint-execution/SKILL.md
++++ b/scaffold/core/.agents/skills/sprint-execution/SKILL.md
+-Six checks, all must pass:
++Five automated checks (`cleargate sprint preflight` reports `N/5`) plus one manual check (6), all must pass:
+-- Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.
++- Devops unreachable → restart Claude Code session; re-run the preflight and the manual check 6.
+-Sprint branch is **never committed to directly**. All work lands via story-branch merges.
++No story code is committed to the sprint branch directly — story work lands only via story-branch merges. Orchestrator bookkeeping is: commit the sprint plan, `.cleargate/sprint-runs/<sprint-id>/**` (state, plans, reports, events) and delivery-item updates on `sprint/S-NN` as `chore(SPRINT-NN): <what>` — after §A.3, after §A.5, and before each story's §C.1 readiness check. Never commit bookkeeping to `main`. If the pre-commit surface gate refuses a bookkeeping-only commit on the sprint branch, set `SKIP_SURFACE_GATE=1` for that one commit and log it in sprint §4 — never on a story branch.
+-node .cleargate/scripts/init_sprint.mjs SPRINT-NN
++cleargate sprint init SPRINT-NN --stories <comma-separated §1 work-item ids>
+-This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
++`cleargate sprint init` runs the decomposition gate, then `init_sprint.mjs`. This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
++Also write <sprintDir>/plans/waves.json: schema_version 2, one serial wave (wave1, parallel: false) in §2.2 order, a stories entry per story, contracts [], lane_assignments.
+-With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.
++With ≤ 2 stories the plan is one serial wave, and it is still written: `plans/waves.json` with `"schema_version": 2`, `"contracts": []`, a `"stories"` entry per story (`"base": "sprint/S-NN"`; the second story's `"upstream"` names the first), one wave `wave1` (`"parallel": false`) listing the stories in §2.2 Merge Ordering order, and `"lane_assignments"`. A serial-dispatch host's driver refuses to run without it.
+-> **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.
++> **Verify before leaving A.4 (any N).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch the SDR Architect (N ≤ 2) or `architect-synth` (N > 2) rather than proceeding.
+-`validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean. Fail → halt.
++`validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean — `.cleargate/wiki/**` excluded (the ingest hook rewrites it on every delivery edit); commit other bookkeeping first (§A.2). Fail → halt.
++Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
++
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+-After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
++After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string). On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch (see that host's rendering of the dispatch-hook paragraph below):
++For example: `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/dispatch_serial.mjs next --sprint SPRINT-NN --wave wave1`. `<command>` is the full command line — interpreter and script path — never a bare script name (`run_script.sh dispatch_serial.mjs …` exits 127).
++
+diff --git a/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md b/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md
+--- a/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md
++++ b/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md
+-3. Run the story through §C.1–§C.7. Each role works only inside `.worktrees/STORY-X`, plus its report under `.cleargate/sprint-runs/<sprint-id>/reports/`. Dispatch one role, wait for its final report, then decide the next dispatch. Never start a second role while one is still running.
++3. Run the story through §C.1–§C.7. Each role works only inside `.worktrees/STORY-X`, plus its report under the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` (pass that absolute path in every dispatch brief). Dispatch one role, wait for its final report, then decide the next dispatch. Never start a second role while one is still running.
+diff --git a/scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs b/scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs
+--- a/scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs
++++ b/scaffold/core/.cleargate/scripts/validate_bounce_readiness.mjs
+- *   (d) git working tree is clean (git status --porcelain returns empty)
++ *   (d) git working tree is clean: git status --porcelain lists nothing outside
++ *       .cleargate/wiki/** (the ingest hook rewrites the wiki on every delivery
++ *       edit; any other dirt, other .cleargate/ bookkeeping included, blocks)
++/** Compiled wiki pages, rewritten by the PostToolUse ingest hook on every delivery edit. */
++const WIKI_PREFIX = '.cleargate/wiki/';
++
++/**
++ * True when a `git status --porcelain` line only reports wiki churn. The path
++ * starts at column 3; for a rename or copy (`R  old -> new`) the new side
++ * decides, so a move out of `.cleargate/wiki/` stays dirty.
++ */
++function isWikiChurn(line) {
++  let file = line.slice(3);
++  const arrow = file.indexOf(' -> ');
++  if (arrow !== -1) file = file.slice(arrow + 4);
++  if (file.startsWith('"')) file = file.slice(1);
++  return file.startsWith(WIKI_PREFIX);
++}
++
+-  if (gitOutput.trim().length > 0) {
++  // Split before any trim: the first porcelain line can start with a space
++  // (" M path"), and the path always begins at column 3.
++  const dirtyLines = gitOutput
++    .split('\n')
++    .filter((line) => line.length > 0 && !isWikiChurn(line));
++
++  if (dirtyLines.length > 0) {
+-      `Error: git working tree is dirty. Uncommitted changes:\n${gitOutput}`
++      `Error: git working tree is dirty. Uncommitted changes:\n${dirtyLines.join('\n')}\n`
+diff --git a/scaffold/hosts/claude/.claude/agents/architect.md b/scaffold/hosts/claude/.claude/agents/architect.md
+--- a/scaffold/hosts/claude/.claude/agents/architect.md
++++ b/scaffold/hosts/claude/.claude/agents/architect.md
+-**Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
++**Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file — except at N ≤ 2 (the tiny-sprint single dispatch, sprint-execution SKILL.md §A.4), where you also write the one-wave `plans/waves.json`. The orchestrator writes the block into the plan.
+diff --git a/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md b/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
+--- a/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
++++ b/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
+-Six checks, all must pass:
++Five automated checks (`cleargate sprint preflight` reports `N/5`) plus one manual check (6), all must pass:
+-- Devops unreachable → restart Claude Code session; re-run all 6 preflight checks.
++- Devops unreachable → restart Claude Code session; re-run the preflight and the manual check 6.
+-Sprint branch is **never committed to directly**. All work lands via story-branch merges.
++No story code is committed to the sprint branch directly — story work lands only via story-branch merges. Orchestrator bookkeeping is: commit the sprint plan, `.cleargate/sprint-runs/<sprint-id>/**` (state, plans, reports, events) and delivery-item updates on `sprint/S-NN` as `chore(SPRINT-NN): <what>` — after §A.3, after §A.5, and before each story's §C.1 readiness check. Never commit bookkeeping to `main`. If the pre-commit surface gate refuses a bookkeeping-only commit on the sprint branch, set `SKIP_SURFACE_GATE=1` for that one commit and log it in sprint §4 — never on a story branch.
+-node .cleargate/scripts/init_sprint.mjs SPRINT-NN
++cleargate sprint init SPRINT-NN --stories <comma-separated §1 work-item ids>
+-This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
++`cleargate sprint init` runs the decomposition gate, then `init_sprint.mjs`. This writes `.cleargate/sprint-runs/SPRINT-NN/state.json`, flips `.cleargate/sprint-runs/.active` to `SPRINT-NN` (atomic tmp+rename), and ingests SDR lane assignments so fast-lane stories are stamped correctly without manual reclassification. Without `state.json` the lane router, dispatch hook, and close pipeline all fail.
++Also write <sprintDir>/plans/waves.json: schema_version 2, one serial wave (wave1, parallel: false) in §2.2 order, a stories entry per story, contracts [], lane_assignments.
+-With ≤ 2 stories a wave plan is degenerate; run them in the order §2.2 Merge Ordering gives.
++With ≤ 2 stories the plan is one serial wave, and it is still written: `plans/waves.json` with `"schema_version": 2`, `"contracts": []`, a `"stories"` entry per story (`"base": "sprint/S-NN"`; the second story's `"upstream"` names the first), one wave `wave1` (`"parallel": false`) listing the stories in §2.2 Merge Ordering order, and `"lane_assignments"`. A serial-dispatch host's driver refuses to run without it.
+-> **Verify before leaving A.4 (N > 2).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch `architect-synth` rather than proceeding.
++> **Verify before leaving A.4 (any N).** `test -f <sprintDir>/plans/waves.json` must succeed. If it does not, §C.0 has no wave plan to run and `init_sprint.mjs` silently falls back to parsing the §2.4 Lane Audit table for lanes only — you get lane assignments with no wave composition, i.e. serial execution with none of the parallelism the sprint was planned for. Re-dispatch the SDR Architect (N ≤ 2) or `architect-synth` (N > 2) rather than proceeding.
+-`validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean. Fail → halt.
++`validate_bounce_readiness.mjs` checks: story is "Ready to Bounce", §§1/2/3 present, working tree clean — `.cleargate/wiki/**` excluded (the ingest hook rewrites it on every delivery edit); commit other bookkeeping first (§A.2). Fail → halt.
++Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
++
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Red dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the Developer dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the QA-Verify dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
++- Reports: every role writes its report to the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` — pass that absolute path in the dispatch; a role working in `.worktrees/STORY-*` never writes the worktree's copy.
+-**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper: `bash .cleargate/scripts/run_script.sh <cmd> [args...]`. Direct invocation without the wrapper is forbidden.
++**Script invocation rule (CR-046):** Any bash/node script invoked within the Architect Pass dispatch MUST go through the wrapper (§C.11 Script Invocation Contract): `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/<script>.mjs [args...]` (or `bash .cleargate/scripts/run_script.sh bash .cleargate/scripts/<script>.sh [args...]` for a shell script). Direct invocation without the wrapper is forbidden.
+-After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string):
++After every story merge — **before creating story N+1's worktree** — process the merged `flashcards_flagged` list (union of dev + QA, dedupe by exact-string). On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch (see that host's rendering of the dispatch-hook paragraph below):
++For example: `bash .cleargate/scripts/run_script.sh node .cleargate/scripts/dispatch_serial.mjs next --sprint SPRINT-NN --wave wave1`. `<command>` is the full command line — interpreter and script path — never a bare script name (`run_script.sh dispatch_serial.mjs …` exits 127).
++
+diff --git a/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md b/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md
+--- a/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md
++++ b/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md
+-3. Run the story through §C.1–§C.7. Each role works only inside `.worktrees/STORY-X`, plus its report under `.cleargate/sprint-runs/<sprint-id>/reports/`. Dispatch one role, wait for its final report, then decide the next dispatch. Never start a second role while one is still running.
++3. Run the story through §C.1–§C.7. Each role works only inside `.worktrees/STORY-X`, plus its report under the main checkout's absolute `<repo>/.cleargate/sprint-runs/<sprint-id>/reports/` (pass that absolute path in every dispatch brief). Dispatch one role, wait for its final report, then decide the next dispatch. Never start a second role while one is still running.
+diff --git a/scaffold/hosts/codex/.codex/agents/architect.toml b/scaffold/hosts/codex/.codex/agents/architect.toml
+--- a/scaffold/hosts/codex/.codex/agents/architect.toml
++++ b/scaffold/hosts/codex/.codex/agents/architect.toml
+-**Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file. The orchestrator writes it into the plan.
++**Output:** A single markdown block (§§2.1–2.5 as shown above) ready for insertion into the sprint plan. Not a separate file — except at N ≤ 2 (the tiny-sprint single dispatch, sprint-execution SKILL.md §A.4), where you also write the one-wave `plans/waves.json`. The orchestrator writes the block into the plan.
+diff --git a/test/helpers/init-fixture.ts b/test/helpers/init-fixture.ts
+--- a/test/helpers/init-fixture.ts
++++ b/test/helpers/init-fixture.ts
++  // BUG-103 (M7.md §3): the dirty-tree check must ignore .cleargate/wiki/** (the ingest hook
++  // rewrites it on every delivery edit) while still refusing real dirt. Measured equal to
++  // canonical at cli main f0c33f7 -- the M2-era bytes, unchanged since STORY-058-01/-02.
++  {
++    item: 'BUG-103',
++    rel: '.cleargate/scripts/validate_bounce_readiness.mjs',
++    scenarios: 'all',
++    baselineHash: () => 'e4c6bead578a75a4f62fddbc1bccd40e92cc64f6136b3f893bb7cf50bacbd6ff',
++    currentHash: () => {
++      const h = currentPinSubstitutedHash('.cleargate/scripts/validate_bounce_readiness.mjs');
++      return h === 'e4c6bead578a75a4f62fddbc1bccd40e92cc64f6136b3f893bb7cf50bacbd6ff'
++        ? '<BUG-103 validate_bounce_readiness.mjs delta not landed: canonical still ' + h + '>'
++        : h;
++    },
++  },
+-      return h === '17c2c14afeec3e6706e26b5104d63d4513394323d0a9b70ae2fbf6da81dc7299'
+-        ? '<CR-124 architect.md delta not landed: canonical still ' + h + '>'
+-        : h;
++      if (h === '17c2c14afeec3e6706e26b5104d63d4513394323d0a9b70ae2fbf6da81dc7299') {
++        return '<CR-124 architect.md delta not landed: canonical still ' + h + '>';
++      }
++      // BUG-103 (M7.md §3, architect.md:108 / errata E9): also edits this file (the tiny-sprint
++      // N <= 2 carve-out on the "Not a separate file" output sentence) before CR-124's own DAG
++      // rewrite lands. Refuse BUG-103's pre-fix bytes too (M3-A54 convention) so this row stays
++      // red at BUG-103's QA-Red commit and green once its Developer commit lands.
++      if (h === '51f30ec4dcb23a39f1d75f326f6be741f8d975bbd7c7d854aa1b24aa66d1eb03') {
++        return '<CR-124 architect.md delta not landed: canonical still ' + h + '>';
++      }
++      return h;
+-      return h === 'c5affd1b4b8fc5f78942fbc9b71455ca516164eb14d1472289518a43ed6f2bd1'
+-        ? '<CR-124 SKILL.md delta not landed: canonical still ' + h + '>'
+-        : h;
++      if (h === 'c5affd1b4b8fc5f78942fbc9b71455ca516164eb14d1472289518a43ed6f2bd1') {
++        return '<CR-124 SKILL.md delta not landed: canonical still ' + h + '>';
++      }
++      // BUG-103 (M7.md §3): also edits this file (§A.1/§A.2/§A.3/§A.4/§C.1/§C.2/§C.9/§C.11 —
++      // five Codex-dogfood-discovered defects plus the I16 §C.9 lead fold) before CR-124's own
++      // DAG rewrite lands. Refuse BUG-103's pre-fix bytes too (M3-A54 convention) so this row
++      // stays red at BUG-103's QA-Red commit and green once its Developer commit lands.
++      if (h === 'cecf1700864c631e18bb8efbd31ccc751e200dbf2fd52a2684b87c8782cf3bc0') {
++        return '<CR-124 SKILL.md delta not landed: canonical still ' + h + '>';
++      }
++      return h;
+diff --git a/test/scaffold/skill-md-serial-pointers.red.node.test.ts b/test/scaffold/skill-md-serial-pointers.red.node.test.ts
+--- a/test/scaffold/skill-md-serial-pointers.red.node.test.ts
++++ b/test/scaffold/skill-md-serial-pointers.red.node.test.ts
+-// ── Test 20 — exactly the two pinned insertions, nothing else ───────────────
++// ── Test 20 — P1 and P2 stay pinned in place ─────────────────────────────────
++//
++// Re-scoped by BUG-103 (SPRINT-41 M7, TPV): the original "canonical = fixture + exactly P1 + P2"
++// byte check froze the whole playbook, so every later sanctioned SKILL.md edit turned it red.
++// STORY-058-12's Gherkin 1 guard is kept where it still means something: the fixture stays the
++// pinned pre-story bytes, and P1/P2 each appear exactly once, verbatim, one blank line after
++// their anchor line. Test 21 keeps guarding the heading sequence against the fixture.
+-test('Test 20 — canonical SKILL.md differs from the frozen pre-story fixture by exactly P1 after line 104 and P2 after "A single-story wave..."', () => {
+-  const fixture = fs.readFileSync(FIXTURE_PATH, 'utf8');
++test('Test 20 — canonical SKILL.md keeps P1 after its anchor and P2 after "A single-story wave..." (re-scoped by BUG-103)', () => {
+-  const canonical = fs.readFileSync(CANONICAL_PATH, 'utf8');
+-  const fixtureLines = fixture.split('\n');
+-  const canonicalLines = canonical.split('\n');
++  const fixtureLines = fs.readFileSync(FIXTURE_PATH, 'utf8').split('\n');
++  const canonicalLines = fs.readFileSync(CANONICAL_PATH, 'utf8').split('\n');
+-  assert.equal(canonicalLines.length, fixtureLines.length + 4, `expected exactly 4 more lines (2 blank + P1 + P2), got a delta of ${canonicalLines.length - fixtureLines.length}`);
+-
+-  const p1AnchorIdx = fixtureLines.findIndex((l) => l.startsWith(P1_AFTER_PREFIX));
+-  const p2AnchorIdx = fixtureLines.findIndex((l) => l.startsWith(P2_AFTER_PREFIX));
+-  assert.ok(p1AnchorIdx >= 0, 'fixture must contain the P1 anchor line');
+-  assert.ok(p2AnchorIdx >= 0, 'fixture must contain the P2 anchor line');
+-
+-  assert.equal(canonicalLines[p1AnchorIdx + 1], '', 'expected a blank line directly after the P1 anchor');
+-  assert.equal(canonicalLines[p1AnchorIdx + 2], P1, 'expected P1 verbatim directly after its blank line');
+-  // P2's anchor shifts by 2 lines (P1's insertion): canonical anchor at +2, blank at +3, P2 at +4.
+-  assert.ok(canonicalLines[p2AnchorIdx + 2]!.startsWith(P2_AFTER_PREFIX), 'expected the P2 anchor 2 lines lower in canonical');
+-  assert.equal(canonicalLines[p2AnchorIdx + 3], '', 'expected a blank line directly after the P2 anchor');
+-  assert.equal(canonicalLines[p2AnchorIdx + 4], P2, 'expected P2 verbatim directly after its blank line');
+-
+-  // Removing the 4 inserted lines must reproduce the fixture byte-for-byte.
+-  const withoutInsertions = canonicalLines
+-    .filter((_, i) => i !== p1AnchorIdx + 1 && i !== p1AnchorIdx + 2 && i !== p2AnchorIdx + 3 && i !== p2AnchorIdx + 4)
+-    .join('\n');
+-  assert.equal(withoutInsertions, fixture, 'removing exactly the 4 inserted lines must reproduce the fixture byte-for-byte');
++  for (const [label, prefix, paragraph] of [
++    ['P1', P1_AFTER_PREFIX, P1],
++    ['P2', P2_AFTER_PREFIX, P2],
++  ] as const) {
++    assert.equal(fixtureLines.filter((l) => l.startsWith(prefix)).length, 1, `fixture must contain the ${label} anchor line once`);
++    assert.equal(fixtureLines.filter((l) => l === paragraph).length, 0, `the pre-story fixture must not contain ${label}`);
++    const anchors = canonicalLines.flatMap((l, i) => (l.startsWith(prefix) ? [i] : []));
++    assert.equal(anchors.length, 1, `canonical must contain the ${label} anchor line exactly once`);
++    assert.equal(canonicalLines[anchors[0]! + 1], '', `expected a blank line directly after the ${label} anchor`);
++    assert.equal(canonicalLines[anchors[0]! + 2], paragraph, `expected ${label} verbatim directly after its blank line`);
++    assert.equal(canonicalLines.filter((l) => l === paragraph).length, 1, `${label} must appear exactly once in canonical`);
++  }
+diff --git a/test/scaffold/sprint-execution-skill-drift.red.node.test.ts b/test/scaffold/sprint-execution-skill-drift.red.node.test.ts
+new file mode 100644
+--- /dev/null
++++ b/test/scaffold/sprint-execution-skill-drift.red.node.test.ts
++/**
++ * sprint-execution-skill-drift.red.node.test.ts — BUG-103 QA-Red
++ *
++ * Binding plan: .cleargate/sprint-runs/SPRINT-41/plans/M7.md §3 "BUG-103 — sprint-execution
++ * skill drift (both), plus I16 canonical half, plus BUG-102's §A.4 text" (errata E7/E8/E9).
++ * The plan wins over the bug file's own text (BUG-103 Task Breakdown binding note).
++ *
++ * Covers the pinned-replacement table in M7.md §3: five Codex-dogfood-discovered defects in
++ * the sprint-execution playbook (init command usage, preflight check count, the bookkeeping
++ * vs. clean-tree contradiction, the run_script.sh `<cmd>` ambiguity, relative report paths)
++ * plus the I16 §C.9 lead fold and the BUG-102 §A.4 one-wave-waves.json text fold (OD-M7-5).
++ *
++ * TEST INVENTORY (7 scenarios, M7.md §3 "Tests"; 22 node:test leaves):
++ *   T1 — both renders carry "cleargate sprint init SPRINT-NN --stories" (§A.3), "Five automated
++ *        checks" (§A.1) and a run_script.sh example naming node + the script path (every CR-046
++ *        line and §C.11; no `run_script.sh <cmd>` left).
++ *   T2 — both renders carry the §A.2 bookkeeping rule (orchestrator bookkeeping commits vs.
++ *        no story code on the sprint branch directly; the old contradicting rule is gone) and
++ *        §C.1 names the `.cleargate/wiki/**` exclusion.
++ *   T3 — both renders (§C.2 plus each §C.3-§C.6 dispatch list) plus both dispatch-serial.md
++ *        copies (§2 step 3) name the main checkout's absolute reports path.
++ *   T4 — the canonical §C.9 lead carries the serial-host sentence. SCOPE NOTE: the Codex
++ *        render's "Per-dispatch gate" text is a DIFFERENT passage (R4 in
++ *        CODEX_SKILL_REPLACEMENTS, build-codex-payload.mjs:284) owned by BUG-101 (collision
++ *        matrix "sole owner by fold", OD-M7-3) and pinned by that item's own Test 31 — it is
++ *        NOT re-asserted here. This test instead checks that BUG-103's own lead-sentence edit
++ *        (not an R-anchor) survives verbatim into the regenerated Codex copy once `gen:codex`
++ *        re-runs, which is within BUG-103's own scope.
++ *   T5 — both renders' §A.4 plus architect.md/architect.toml name the one-wave
++ *        `plans/waves.json` (BUG-102 §A.4 text fold, OD-M7-5, plus architect.md:108 / E9); §A.4
++ *        also carries the `stories` entry (E7), the tiny-sprint Task line and "(any N)".
++ *   T6 — validate_bounce_readiness.mjs: wiki-only dirt (modified + untracked
++ *        `.cleargate/wiki/*`) passes.
++ *   T7 — validate_bounce_readiness.mjs: real uncommitted work under `src/` still blocks; so do
++ *        bookkeeping dirt outside the wiki next to wiki churn (T7b) and a page renamed out of
++ *        `.cleargate/wiki/` (T7c: the `-> new` side decides; `.cleargate/wiki-archive/` is not
++ *        the wiki).
++ *
++ * BASELINE FAIL CONTRACT (QA-Red commit, cli main f0c33f7): T1-T6 FAIL today on a plain
++ * string/behavior assertion against the UNEDITED canonical text and the UNEDITED script —
++ * never a wiring error. T7, T7b and T7c are REGRESSION GUARDS for behavior that already works today
++ * (flashcard 2026-09-26 "a byte-neutral story's e2e reds must mark already-green anchor
++ * cases, not force them red") — it PASSES at the QA-Red commit and must keep passing after
++ * the Developer's fix narrows the dirty-tree check to ignore only `.cleargate/wiki/**`.
++ *
++ * Naming: *.red.node.test.ts — immutable post-QA-Red (CR-043).
++ */
++import { describe, test } from 'node:test';
++import assert from 'node:assert/strict';
++import * as fs from 'node:fs';
++import * as path from 'node:path';
++import * as os from 'node:os';
++import { execSync, spawnSync } from 'node:child_process';
++import { canonicalPath, SCAFFOLD_ROOT } from '../helpers/scaffold-roots.js';
++
++// ── Canonical targets ────────────────────────────────────────────────────────
++
++const CLAUDE_SKILL = canonicalPath('.claude/skills/sprint-execution/SKILL.md');
++const CODEX_SKILL = canonicalPath('.agents/skills/sprint-execution/SKILL.md');
++const CLAUDE_DISPATCH_SERIAL = canonicalPath('.claude/skills/sprint-execution/dispatch-serial.md');
++const CODEX_DISPATCH_SERIAL = canonicalPath('.agents/skills/sprint-execution/dispatch-serial.md');
++const ARCHITECT_MD = canonicalPath('.claude/agents/architect.md');
++// canonicalPath() only special-cases `.claude/**` -> hosts/claude; every other rel maps to
++// scaffold/core (flashcard 2026-09-25 "canonicalPath() maps .codex/** ... to scaffold/core;
++// join hosts/codex yourself"). architect.toml is a Codex HOST asset, not core.
++const ARCHITECT_TOML = path.join(SCAFFOLD_ROOT, 'hosts', 'codex', '.codex', 'agents', 'architect.toml');
++
++const VALIDATE_SCRIPT_REL = '.cleargate/scripts/validate_bounce_readiness.mjs';
++const VALIDATE_STATE_REL = '.cleargate/scripts/validate_state.mjs';
++const CONSTANTS_REL = '.cleargate/scripts/constants.mjs';
++const STATE_EVENTS_REL = '.cleargate/scripts/state-events.mjs';
++
++function read(p: string): string {
++  return fs.readFileSync(p, 'utf8');
++}
++
++/**
++ * The body of the unique heading starting with `headingPrefix`: the lines after the heading up
++ * to the next `##`/`###` heading. The heading line itself is excluded (flashcard 2026-09-26: a
++ * slice that keeps its heading makes 'body names X' vacuous), and a phrase is pinned inside its
++ * own section so a copy elsewhere cannot mask a missing operative copy (flashcard 2026-09-26).
++ */
++function section(text: string, headingPrefix: string): string {
++  const lines = text.split('\n');
++  const hits = lines.flatMap((l, i) => (l.startsWith(headingPrefix) ? [i] : []));
++  assert.equal(hits.length, 1, `expected exactly one heading starting with "${headingPrefix}", found ${hits.length}`);
++  const start = hits[0]!;
++  let end = lines.length;
++  for (let i = start + 1; i < lines.length; i++) {
++    if (/^#{2,3} /.test(lines[i]!)) {
++      end = i;
++      break;
++    }
++  }
++  return lines.slice(start + 1, end).join('\n');
++}
++
++// ── T1/T2/T3/T5: text-drift assertions on the two renders ───────────────────
++
++describe('BUG-103 T1 — both renders carry the corrected kickoff commands', () => {
++  for (const [label, file] of [
++    ['Claude canonical', CLAUDE_SKILL],
++    ['Codex render', CODEX_SKILL],
++  ] as const) {
++    test(`${label} SKILL.md names "cleargate sprint init SPRINT-NN --stories"`, () => {
++      const text = read(file);
++      assert.ok(
++        section(text, '### A.3 ').includes('cleargate sprint init SPRINT-NN --stories'),
++        `${label} SKILL.md (${file}) §A.3 does not yet name the --stories invocation`,
++      );
++      assert.ok(
++        !/init_sprint\.mjs SPRINT-NN(?! --stories)/.test(text),
++        `${label} SKILL.md (${file}) still gives the usage-failing "init_sprint.mjs SPRINT-NN" invocation (BUG-103 defect 1)`,
++      );
++    });
++
++    test(`${label} SKILL.md says "Five automated checks"`, () => {
++      const a1 = section(read(file), '### A.1 ');
++      assert.ok(
++        a1.includes('Five automated checks'),
++        `${label} SKILL.md (${file}) §A.1 still says "Six checks" (M7.md §3 §A.1 row)`,
++      );
++      assert.ok(
++        !a1.includes('Six checks') && !a1.includes('all 6 preflight checks'),
++        `${label} SKILL.md (${file}) §A.1 still counts six preflight checks (the check line or the resolution list)`,
++      );
++    });
++
++    test(`${label} SKILL.md gives a concrete run_script.sh node example`, () => {
++      const text = read(file);
++      assert.ok(
++        !text.includes('run_script.sh <cmd>'),
++        `${label} SKILL.md (${file}) still has a "run_script.sh <cmd>" placeholder (the ambiguity Codex misread)`,
++      );
++      const cr046 = text.split('\n').filter((l) => l.startsWith('**Script invocation rule (CR-046):**'));
++      assert.ok(cr046.length >= 4, `${label} SKILL.md (${file}) has ${cr046.length} CR-046 rule lines, expected the four dispatch ones`);
++      for (const line of cr046) {
++        assert.ok(
++          line.includes('run_script.sh node .cleargate/scripts/'),
++          `${label} SKILL.md (${file}) CR-046 line has no concrete "run_script.sh node .cleargate/scripts/<x>" form: ${line}`,
++        );
++      }
++      const c11 = section(text, '### C.11 Script Invocation Contract');
++      assert.ok(
++        c11.includes('run_script.sh node .cleargate/scripts/') && c11.includes('never a bare script name'),
++        `${label} SKILL.md (${file}) §C.11 Script Invocation Contract has no concrete node example and no ` +
++          '"never a bare script name" rule (M7.md §3 §C.11 row)',
++      );
++    });
++  }
++});
++
++describe('BUG-103 T2 — both renders carry the §A.2 bookkeeping rule', () => {
++  for (const [label, file] of [
++    ['Claude canonical', CLAUDE_SKILL],
++    ['Codex render', CODEX_SKILL],
++  ] as const) {
++    test(`${label} SKILL.md names orchestrator bookkeeping commits on sprint/S-NN`, () => {
++      const text = read(file);
++      const a2 = section(text, '### A.2 ');
++      assert.ok(
++        a2.includes('Orchestrator bookkeeping is:'),
++        `${label} SKILL.md (${file}) §A.2 does not yet distinguish orchestrator bookkeeping from story code`,
++      );
++      assert.ok(
++        a2.includes('chore(SPRINT-NN):'),
++        `${label} SKILL.md (${file}) §A.2 does not yet name the chore(SPRINT-NN) bookkeeping commit convention`,
++      );
++      assert.ok(
++        a2.includes('Never commit bookkeeping to `main`'),
++        `${label} SKILL.md (${file}) §A.2 does not forbid bookkeeping commits on main (Codex committed there)`,
++      );
++      assert.ok(
++        !a2.includes('never committed to directly'),
++        `${label} SKILL.md (${file}) §A.2 still carries the contradicting "never committed to directly" rule`,
++      );
++      assert.ok(
++        section(text, '### C.1 ').includes('`.cleargate/wiki/**` excluded'),
++        `${label} SKILL.md (${file}) §C.1 does not name the .cleargate/wiki/** exclusion of the clean-tree check`,
++      );
++    });
++  }
++});
++
++describe('BUG-103 T3 — both renders plus both dispatch-serial.md copies name the absolute reports path', () => {
++  const PHRASE = "main checkout's absolute";
++
++  for (const [label, file] of [
++    ['Claude canonical SKILL.md', CLAUDE_SKILL],
++    ['Codex render SKILL.md', CODEX_SKILL],
++  ] as const) {
++    test(`${label} names the main checkout's absolute reports path`, () => {
++      const text = read(file);
++      // §C.2 carries the paragraph; each of the four role dispatch input lists carries the bullet.
++      for (const heading of ['### C.2 ', '### C.3 ', '### C.4 ', '### C.5 ', '### C.6 ']) {
++        assert.ok(
++          section(text, heading).includes(PHRASE),
++          `${label} (${file}) ${heading.trim()} does not yet tell the orchestrator to pass the main checkout's ` +
++            'absolute reports path (M7.md §3 §C.2 row; BUG-103 evidence #5)',
++        );
++      }
++    });
++  }
++
++  for (const [label, file] of [
++    ['Claude canonical dispatch-serial.md', CLAUDE_DISPATCH_SERIAL],
++    ['Codex render dispatch-serial.md', CODEX_DISPATCH_SERIAL],
++  ] as const) {
++    test(`${label} names the main checkout's absolute reports path`, () => {
++      const step3 = read(file).split('\n').filter((l) => l.startsWith('3. Run the story through'));
++      assert.equal(step3.length, 1, `${label} (${file}) must keep exactly one §2 step 3 line`);
++      assert.ok(
++        step3[0]!.includes(PHRASE),
++        `${label} (${file}) §2 step 3 does not yet name the main checkout's absolute reports path ` +
++          '(M7.md §3 dispatch-serial.md row; errata E8)',
++      );
++    });
++  }
++});
++
++describe('BUG-103 T4 — the canonical §C.9 lead carries the serial-host sentence (I16)', () => {
++  const SENTENCE =
++    'On a serial-dispatch host the dispatch hook enforces this earlier, at every role dispatch';
++
++  test('Claude canonical SKILL.md §C.9 lead names the serial-dispatch-host carve-out', () => {
++    const text = read(CLAUDE_SKILL);
++    assert.ok(
++      text.includes(SENTENCE),
++      `Claude canonical SKILL.md (${CLAUDE_SKILL}) §C.9 lead does not yet carry the ` +
++        'serial-host sentence (M7.md §3 "§C.9 lead :581 (I16)" row)',
++    );
++  });
++
++  // The lead sentence is plain prose, not one of build-codex-payload.mjs's CODEX_SKILL_REPLACEMENTS
++  // anchors (R4 is a DIFFERENT, later §C.9 passage — the "pending-task-sentinel.sh blocks the next
++  // Task spawn" one — owned by BUG-101, collision matrix "sole owner by fold", OD-M7-3). Plain prose
++  // passes through the renderer unmodified, so the fix should reach the regenerated Codex copy too
++  // once BUG-103's own `gen:codex` re-run lands — this is within BUG-103's scope and does NOT assert
++  // the "**Per-dispatch gate.**" text, which is BUG-101's Test 31 (I16 split).
++  test('Codex render SKILL.md §C.9 lead carries the same pass-through sentence once regenerated', () => {
++    const text = read(CODEX_SKILL);
++    assert.ok(
++      text.includes(SENTENCE),
++      `Codex render SKILL.md (${CODEX_SKILL}) §C.9 lead does not yet carry the serial-host ` +
++        'sentence — expected once BUG-103 regenerates via `npm run gen:codex` (plain prose, not an R-anchor)',
++    );
++  });
++});
++
++describe('BUG-103 T5 — both renders\' §A.4 plus architect.md/architect.toml name the one-wave waves.json', () => {
++  const SKILL_SENTENCE = 'the plan is one serial wave, and it is still written';
++
++  for (const [label, file] of [
++    ['Claude canonical', CLAUDE_SKILL],
++    ['Codex render', CODEX_SKILL],
++  ] as const) {
++    test(`${label} SKILL.md §A.4 says the ≤2-story plan is still one serial wave, always written`, () => {
++      const a4 = section(read(file), '### A.4 ');
++      assert.ok(
++        a4.includes(SKILL_SENTENCE),
++        `${label} SKILL.md (${file}) §A.4 does not yet say the tiny-sprint floor still writes ` +
++          'plans/waves.json (M7.md §3 "§A.4 :185" row; E7/E9)',
++      );
++      assert.ok(
++        a4.includes('a `"stories"` entry per story'),
++        `${label} SKILL.md (${file}) §A.4 one-wave shape has no "stories" entry per story — a schema_version 2 ` +
++          'plan without it makes integrationReady throw "unknown story" (errata E7)',
++      );
++      assert.ok(
++        a4.includes('Also write <sprintDir>/plans/waves.json'),
++        `${label} SKILL.md (${file}) §A.4 tiny-sprint Task instruction does not tell the SDR Architect to write waves.json`,
++      );
++      assert.ok(
++        a4.includes('Verify before leaving A.4 (any N)'),
++        `${label} SKILL.md (${file}) §A.4 still verifies waves.json only for N > 2`,
++      );
++    });
++  }
++
++  const ARCHITECT_SENTENCE = 'where you also write the one-wave';
++
++  for (const [label, file] of [
++    ['architect.md', ARCHITECT_MD],
++    ['architect.toml', ARCHITECT_TOML],
++  ] as const) {
++    test(`${label} names the tiny-sprint one-wave plans/waves.json output (architect.md:108, E9)`, () => {
++      const text = read(file);
++      assert.ok(
++        text.includes(ARCHITECT_SENTENCE) && text.includes('plans/waves.json'),
++        `${label} (${file}) still says the SDR output is "Not a separate file" with no N ≤ 2 ` +
++          'carve-out, contradicting architect-synth.md\'s tiny-sprint floor (M7.md errata E9)',
++      );
++    });
++  }
++});
++
++// ── T6/T7: validate_bounce_readiness.mjs behavior ────────────────────────────
++//
++// The script derives REPO_ROOT from its OWN file location
++// (`path.resolve(__dirname, '..', '..')`), not from `process.cwd()` — so it must be copied
++// (with its two transitive `.cleargate/scripts/` deps, validate_state.mjs + constants.mjs +
++// state-events.mjs) into a real temp git repo rather than spawned in place against this cli
++// repo's own working tree.
++
++const SCRIPT_DEP_RELS = [CONSTANTS_REL, STATE_EVENTS_REL, VALIDATE_STATE_REL, VALIDATE_SCRIPT_REL];
++
++/** Copies the canonical script + its transitive deps into `<repoDir>/.cleargate/scripts/`. */
++function seedScripts(repoDir: string): void {
++  const dst = path.join(repoDir, '.cleargate', 'scripts');
++  fs.mkdirSync(dst, { recursive: true });
++  for (const rel of SCRIPT_DEP_RELS) {
++    const base = path.basename(rel);
++    fs.copyFileSync(canonicalPath(rel), path.join(dst, base));
++  }
++}
++
++function initRepo(): string {
++  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug103-vbr-'));
++  seedScripts(dir);
++  fs.mkdirSync(path.join(dir, '.cleargate', 'wiki'), { recursive: true });
++  fs.writeFileSync(path.join(dir, '.cleargate', 'wiki', 'foo.md'), 'wiki content v1\n');
++  execSync('git init -q -b main', { cwd: dir, stdio: 'pipe' });
++  execSync('git config user.email "qa-red@bug-103.test"', { cwd: dir, stdio: 'pipe' });
++  execSync('git config user.name "BUG-103 QA-Red"', { cwd: dir, stdio: 'pipe' });
++  execSync('git add -A', { cwd: dir, stdio: 'pipe' });
++  execSync('git commit -q -m "seed"', { cwd: dir, stdio: 'pipe' });
++  return dir;
++}
++
++/** A minimal v3 state.json with one "Ready to Bounce" story — schema per constants.mjs. */
++function writeState(stateDir: string, storyId: string): string {
++  fs.mkdirSync(stateDir, { recursive: true });
++  const stateFile = path.join(stateDir, 'state.json');
++  fs.writeFileSync(
++    stateFile,
++    JSON.stringify(
++      {
++        schema_version: 3,
++        sprint_id: 'SPRINT-TEST',
++        sprint_status: 'Active',
++        stories: {
++          [storyId]: {
++            state: 'Ready to Bounce',
++            qa_bounces: 0,
++            arch_bounces: 0,
++            worktree: null,
++            updated_at: '2026-01-01T00:00:00.000Z',
++            notes: '',
++            lane: 'standard',
++          },
++        },
++        last_action: 'test-seed',
++        updated_at: '2026-01-01T00:00:00.000Z',
++      },
++      null,
++      2,
++    ) + '\n',
++  );
++  return stateFile;
++}
++
++function runValidateBounceReadiness(
++  repoDir: string,
++  stateFile: string,
++  storyId: string,
++): { status: number | null; stdout: string; stderr: string } {
++  const scriptPath = path.join(repoDir, '.cleargate', 'scripts', 'validate_bounce_readiness.mjs');
++  const result = spawnSync(process.execPath, [scriptPath, storyId], {
++    cwd: repoDir,
++    encoding: 'utf8',
++    env: { ...process.env, CLEARGATE_STATE_FILE: stateFile },
++  });
++  return { status: result.status, stdout: result.stdout ?? '', stderr: result.stderr ?? '' };
++}
++
++describe('BUG-103 T6/T7 — validate_bounce_readiness.mjs dirty-tree scope', () => {
++  test('T6: wiki-only dirt (modified + untracked .cleargate/wiki/*) passes', () => {
++    const repoDir = initRepo();
++    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug103-vbr-state-'));
++    try {
++      // Modify the already-tracked wiki file, and add a brand-new untracked one — both under
++      // .cleargate/wiki/, which the ingest hook rewrites on every delivery edit (BUG-103 §1
++      // Open Questions recommendation).
++      fs.writeFileSync(path.join(repoDir, '.cleargate', 'wiki', 'foo.md'), 'wiki content v1\nmore\n');
++      fs.writeFileSync(path.join(repoDir, '.cleargate', 'wiki', 'bar.md'), 'new wiki page\n');
++
++      const porcelain = execSync('git status --porcelain', { cwd: repoDir, encoding: 'utf8' });
++      assert.ok(
++        porcelain.trim().length > 0,
++        'fixture setup error: expected non-empty git status --porcelain before invoking the script',
++      );
++
++      const stateFile = writeState(stateDir, 'STORY-001-01');
++      const result = runValidateBounceReadiness(repoDir, stateFile, 'STORY-001-01');
++
++      assert.equal(
++        result.status,
++        0,
++        `expected exit 0 for wiki-only dirt, got ${result.status}\nstderr: ${result.stderr}`,
++      );
++      assert.ok(
++        result.stdout.includes('Bounce readiness check passed'),
++        `stdout does not confirm bounce readiness: ${result.stdout}`,
++      );
++    } finally {
++      fs.rmSync(repoDir, { recursive: true, force: true });
++      fs.rmSync(stateDir, { recursive: true, force: true });
++    }
++  });
++
++  test('T7 (regression guard, already green): an uncommitted change under src/ still blocks', () => {
++    const repoDir = initRepo();
++    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug103-vbr-state-'));
++    try {
++      fs.mkdirSync(path.join(repoDir, 'src'), { recursive: true });
++      fs.writeFileSync(path.join(repoDir, 'src', 'x.ts'), 'export const x = 1;\n');
++
++      const stateFile = writeState(stateDir, 'STORY-001-01');
++      const result = runValidateBounceReadiness(repoDir, stateFile, 'STORY-001-01');
++
++      assert.equal(
++        result.status,
++        1,
++        `expected exit 1 for real uncommitted work, got ${result.status}\nstdout: ${result.stdout}`,
++      );
++      assert.ok(
++        result.stderr.includes('git working tree is dirty'),
++        `stderr does not name the dirty tree: ${result.stderr}`,
++      );
++    } finally {
++      fs.rmSync(repoDir, { recursive: true, force: true });
++      fs.rmSync(stateDir, { recursive: true, force: true });
++    }
++  });
++
++  test('T7b (regression guard, already green): bookkeeping dirt outside .cleargate/wiki/ blocks even next to wiki churn', () => {
++    const repoDir = initRepo();
++    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug103-vbr-state-'));
++    try {
++      // The BUG-103 evidence's own non-wiki line: an uncommitted sprint-plan edit. Only
++      // .cleargate/wiki/** is excluded; other bookkeeping is committed first (§A.2, §C.1).
++      const deliveryRel = '.cleargate/delivery/pending-sync/SPRINT-01_tiny_node_todo_cli.md';
++      fs.mkdirSync(path.dirname(path.join(repoDir, deliveryRel)), { recursive: true });
++      fs.writeFileSync(path.join(repoDir, deliveryRel), 'plan v1\n');
++      execSync('git add -A && git commit -q -m "plan"', { cwd: repoDir, stdio: 'pipe' });
++      fs.writeFileSync(path.join(repoDir, deliveryRel), 'plan v1\nstatus: Active\n');
++      fs.writeFileSync(path.join(repoDir, '.cleargate', 'wiki', 'foo.md'), 'wiki content v1\nmore\n');
++
++      const stateFile = writeState(stateDir, 'STORY-001-01');
++      const result = runValidateBounceReadiness(repoDir, stateFile, 'STORY-001-01');
++
++      assert.equal(
++        result.status,
++        1,
++        `expected exit 1 for non-wiki bookkeeping dirt, got ${result.status}\nstdout: ${result.stdout}`,
++      );
++      assert.ok(
++        result.stderr.includes('git working tree is dirty') && result.stderr.includes(deliveryRel),
++        `stderr does not name the dirty tree and the offending path: ${result.stderr}`,
++      );
++    } finally {
++      fs.rmSync(repoDir, { recursive: true, force: true });
++      fs.rmSync(stateDir, { recursive: true, force: true });
++    }
++  });
++
++  test('T7c (regression guard, already green): a page renamed out of .cleargate/wiki/ blocks (the -> new side decides)', () => {
++    const repoDir = initRepo();
++    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg-bug103-vbr-state-'));
++    try {
++      // `.cleargate/wiki-archive/` shares the `.cleargate/wiki` prefix but is not the wiki.
++      fs.mkdirSync(path.join(repoDir, '.cleargate', 'wiki-archive'), { recursive: true });
++      execSync('git mv .cleargate/wiki/foo.md .cleargate/wiki-archive/foo.md', { cwd: repoDir, stdio: 'pipe' });
++      // Rename detection forced for this sanity read only; with status.renames=false the script
++      // sees D + A lines instead, and the A line (outside the wiki) still blocks.
++      const porcelain = execSync('git -c status.renames=true status --porcelain', { cwd: repoDir, encoding: 'utf8' });
++      assert.ok(
++        porcelain.startsWith('R  .cleargate/wiki/foo.md -> .cleargate/wiki-archive/foo.md'),
++        `fixture setup error: expected a staged rename line, got: ${porcelain}`,
++      );
++
++      const stateFile = writeState(stateDir, 'STORY-001-01');
++      const result = runValidateBounceReadiness(repoDir, stateFile, 'STORY-001-01');
++
++      assert.equal(
++        result.status,
++        1,
++        `expected exit 1 for a rename whose destination is outside .cleargate/wiki/, got ${result.status}\nstdout: ${result.stdout}`,
++      );
++      assert.ok(
++        result.stderr.includes('git working tree is dirty'),
++        `stderr does not name the dirty tree: ${result.stderr}`,
++      );
++    } finally {
++      fs.rmSync(repoDir, { recursive: true, force: true });
++      fs.rmSync(stateDir, { recursive: true, force: true });
++    }
++  });
++});
++
