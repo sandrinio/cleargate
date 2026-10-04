@@ -3,7 +3,7 @@ bug_id: BUG-105
 parent_ref: EPIC-058
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: codex-adapter
 status: Triaged
 severity: P3-Low

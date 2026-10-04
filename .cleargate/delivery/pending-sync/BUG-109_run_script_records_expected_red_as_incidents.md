@@ -3,7 +3,7 @@ bug_id: BUG-109
 parent_ref: CR-046
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: scripts
 status: Triaged
 severity: P3-Low

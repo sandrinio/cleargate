@@ -19,7 +19,8 @@ db_write_set: []
 deferred_verification:
   - description: "Goal check 4: codex-hooks-evidence.md has a PASS scripted run against the final cli artifact inputs and at least one PASS live-model run"
     command: node cleargate-cli/scripts/clean-room/codex-hooks.mjs check --evidence .cleargate/sprint-runs/SPRINT-41/codex-hooks-evidence.md --write-result .cleargate/sprint-runs/SPRINT-41/deferred-verify/STORY-058-10.json
-    blocks: close
+    blocks: BUG-106
+    note: "Owner decision 2026-10-04 (SPRINT-41 close): this live check moves out of SPRINT-41 and is carried with BUG-106; it no longer blocks SPRINT-41 close."
 created_at: 2026-09-04T00:00:00Z
 updated_at: 2026-09-26T14:51:20Z
 created_at_version: cleargate@0.26.1
@@ -28,7 +29,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-11T22:29:13Z
+  last_gate_check: 2026-10-04T06:31:53Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null

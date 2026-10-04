@@ -3,7 +3,7 @@ bug_id: BUG-106
 parent_ref: STORY-058-13
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: clean-room
 status: Triaged
 severity: P1-High
@@ -20,7 +20,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-27T08:28:35Z
+  last_gate_check: 2026-10-04T06:31:53Z
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
@@ -134,6 +134,13 @@ Feature: Live dispatch controls carry a plaintext work-item id
 | E2E / acceptance tests | 0 | the formal live run (RS-L / RS-4L) is the real proof |
 
 ---
+
+## Carried from SPRINT-41 close (owner decision 2026-10-04)
+
+The owner closed SPRINT-41 without the formal live Codex runs. The two close-blocking live checks moved here and now block on this item, not on SPRINT-41's close:
+- STORY-058-10 (goal check 4): `codex-hooks-evidence.md` needs at least one PASS live-model run on the final cli artifact inputs (`codex-hooks.mjs check … --write-result deferred-verify/STORY-058-10.json`).
+- STORY-058-13 (goal check 5): `codex-loop-evidence.md` needs a PASS live human-trust run on the final cli artifact inputs and the pinned standalone codex (`codex-loop.mjs check … --write-result deferred-verify/STORY-058-13.json`).
+Both need the owner's dedicated Codex login (plans/M7.md §7, option O2) and BUG-106's plaintext-id fix first.
 
 ## Prior work
 

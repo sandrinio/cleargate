@@ -3,7 +3,7 @@ bug_id: BUG-114
 parent_ref: EPIC-058
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: sprint-close
 status: Triaged
 severity: P1-High

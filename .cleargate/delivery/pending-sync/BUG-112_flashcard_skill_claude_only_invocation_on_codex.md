@@ -3,7 +3,7 @@ bug_id: BUG-112
 parent_ref: STORY-058-11
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: codex-adapter
 status: Triaged
 severity: P3-Low

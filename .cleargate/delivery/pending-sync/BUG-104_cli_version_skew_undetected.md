@@ -3,7 +3,7 @@ bug_id: BUG-104
 parent_ref: CR-009
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: cli-resolver
 status: Triaged
 severity: P2-Medium

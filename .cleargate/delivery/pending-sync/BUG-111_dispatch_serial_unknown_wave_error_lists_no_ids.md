@@ -3,7 +3,7 @@ bug_id: BUG-111
 parent_ref: STORY-058-12
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: serial-dispatch
 status: Triaged
 severity: P3-Low

@@ -3,7 +3,7 @@ bug_id: BUG-107
 parent_ref: CR-079
 parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
-carry_over: false
+carry_over: true
 area: worktree-lifecycle
 status: Triaged
 severity: P2-Medium
