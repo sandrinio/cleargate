@@ -1,29 +1,115 @@
-![ClearGate — Architecting the Future of AI-Driven Team Orchestration](./assets/github-banner.svg)
+![ClearGate — the gated software factory for AI coding agents](./assets/github-banner.svg)
 
 # ClearGate
 
-**Bridging the gap between vibe coding and disciplined engineering.**
+**The gated software factory for AI coding agents.**
+*Agents build. Humans hold the gates.*
 
-ClearGate is an open-source planning scaffold that turns AI coding agents into a disciplined engineering team. It installs a five-role agent team (Architect, Developer, QA, DevOps, Reporter), a template-driven work-item protocol (proposals → epics → stories → sprints), and a compiled awareness wiki — so your AI agents stop drifting between disconnected tasks and start shipping coherent software.
+ClearGate installs into your repo and turns Claude Code into a software factory with a real production line. Requests come in and get triaged. They are specified until nothing is ambiguous, then planned into a sprint. Parallel agents build them in isolated git worktrees, and the result is verified, merged and reported on. You sign off at the gates that matter: before a work item is approved, before a sprint starts, and before it closes. Every step leaves a record in your repo.
 
-> ClearGate is not an AI code generator. **It is an AI Engineering Manager.**
+```bash
+npx cleargate init      # install the factory into this repo
+npx cleargate doctor    # check it's healthy
+```
 
 ---
 
-## Quick install
+## Why "gated"
+
+A *dark* software factory ships code that no human reads. ClearGate sits at the other end: a *light* factory. Agents write the drafts, the tests, the code, the review passes and the merges. They don't get to decide what to build, start a sprint whose plan isn't ready, or close a sprint without you.
+
+The gates aren't just prompts. Where it counts, hooks and scripts enforce them:
+
+- **Red tests are locked.** QA writes failing tests before any code exists. A pre-commit hook rejects any Developer commit that edits them.
+- **Each story has a declared file surface.** A pre-commit hook rejects commits that touch files outside it.
+- **Readiness is checked, not assumed.** `cleargate gate check` stamps every work item, and `cleargate sprint preflight` hard-blocks a sprint if any item fails.
+- **Close needs you.** The close script halts for your explicit acknowledgement and refuses the bypass flag outside CI.
+- **Lessons are processed, not dropped.** The next agent dispatch is blocked until every flagged lesson is approved or rejected.
+
+ClearGate's own overrides are explicit, named environment variables, so overriding a gate is always a visible decision.
+
+---
+
+## The line
+
+```mermaid
+flowchart TD
+    R["Request · bug report · stakeholder initiative"] --> T["Triage<br/>epic · story · CR · bug · spike · hotfix"]
+    T --> B["Brief<br/>open questions resolved until ambiguity is 🟢"]
+    B --> G1{{"Gate 1 · Brief<br/>you approve the work item"}}
+    G1 --> P["Sprint plan + Architect Sprint Design Review<br/>contract-first build plan (waves.json)"]
+    P --> G2{{"Gate 2 · Sprint Ready<br/>you approve the plan"}}
+    G2 --> G3{{"Gate 3 · Sprint Execution<br/>cleargate sprint preflight"}}
+    G3 --> W["Build in waves · one git worktree per story<br/>QA-Red → Developer → QA-Verify → DevOps merge"]
+    W --> O["Walkthrough on the sprint branch<br/>you try it; bugs fixed before it reaches main"]
+    O --> REP["Reporter writes SPRINT-NN_REPORT.md"]
+    REP --> G4{{"Gate 4 · Close-Ack<br/>you approve the close"}}
+    G4 --> L["Lessons in FLASHCARD.md · improvement suggestions for the next sprint"]
+```
+
+### The four gates
+
+| Gate | When | What must be true | How it holds |
+|---|---|---|---|
+| **1 · Brief** | Each work item | The agent presents a Brief (summary, open questions, edge cases, risks). Every question is resolved and ambiguity is 🟢. | The agent halts for your approval. The MCP server rejects any push without `approved: true`. |
+| **2 · Sprint Ready** | Each sprint | Every item is decomposed and 🟢, the sprint Brief is resolved, and the Architect's Sprint Design Review is written. | The agent halts for your approval. |
+| **3 · Sprint Execution** | Before the first story | `cleargate sprint preflight` passes five checks: previous sprint closed, no leftover worktrees, sprint branch free, `main` clean, every item's readiness gate green. | The CLI exits non-zero, so the sprint doesn't start. |
+| **4 · Close-Ack** | End of sprint | Reconcilers pass: commits match ticket state, no orphaned items, no leftover worktrees, sprint branch merged to `main`. | `close_sprint.mjs` halts for your explicit go. |
+
+### The stations
+
+| Agent | What it does | What it never does |
+|---|---|---|
+| **Architect** | Runs the Sprint Design Review. One reader per story maps its file surface and its contracts with other stories, and a synthesizer turns that into a build-then-integrate plan (`waves.json`). Writes each milestone plan. Also checks test wiring and reviews merges after QA, when a scan flags a risk. | Write production code. |
+| **QA** | **Red:** turns each story's Gherkin scenarios into failing tests before any code exists. **Verify:** read-only check that every scenario maps to a passing test and the Definition of Done is met. | Edit code. It approves or kicks back. |
+| **Developer** | Implements one story in its own git worktree, inside the story's declared file surface, and commits once. | Touch the red tests or files outside its surface. |
+| **DevOps** | Merges with `--no-ff` into the sprint branch, tears down the worktree and moves the story to Done. | Author code. It halts on a merge conflict. |
+| **Reporter** | Runs once per sprint. Writes the sprint report from the token ledger, git log, lessons and DoD. | Change any other file. |
+
+**Lanes.** Standard-lane stories run the full line. Small, low-risk stories run on the **fast lane**, which skips QA-Red and the Architect passes. A story qualifies only by passing a seven-check rubric. Examples: at most 2 files and 50 lines, a single scenario, no new dependency, and existing tests already cover it. A fast-lane story that turns out harder is demoted back to standard. Urgent off-sprint fixes use `cleargate hotfix new` (≤ 2 files, ≤ 30 lines, with verification and rollback steps).
+
+**Parallelism.** In Claude Code, each wave of stories runs in parallel. Hosts without a parallel workflow primitive run the same plan one story at a time.
+
+---
+
+## What the factory leaves behind
+
+Everything is plain files in your repo, versioned with your code:
+
+- **Work items:** epics, stories, CRs, bugs, spikes, hotfixes and sprint plans as markdown in `.cleargate/delivery/`.
+- **Sprint runs:** `.cleargate/sprint-runs/<sprint>/` holds the Architect plans, `waves.json`, story state, an event log, a per-agent token ledger (written by a hook) and the sprint report.
+- **Sprint report:** first-pass success rate, QA and Architect bounce counts, Bug-Fix Tax, fast-lane demotion rate, a hotfix audit and token spend per agent. `suggest_improvements.mjs` turns its self-assessment into tracked improvement suggestions for the next sprint.
+- **`FLASHCARD.md`:** an append-only log of one-line lessons, tagged by topic. Agents read it before non-trivial work.
+- **Awareness wiki:** `cleargate wiki build` compiles your work items into a compact `.cleargate/wiki/index.md` that the agent reads at session start, so it knows what exists before it greps anything. A hook keeps the wiki current as work items change.
+- **Dashboard:** `cleargate sprint dashboard` renders a visual view of story states, waves, worktrees and token spend.
+
+---
+
+## What ClearGate is not
+
+- **Not a deploy pipeline.** The line ends at verified code merged to your `main`. Shipping to production is your CI/CD's job.
+- **Not lights-out.** The factory runs inside an agent session that you start. Within a sprint it works through the waves on its own, but it doesn't pick up new work by itself, and it stops at every gate.
+- **Not a toolchain.** Agents run *your* tests, typecheck and lint through the commands you configure.
+- **Not a hosted service.** It runs entirely from files in your repo, with no account or server needed. The [MCP server](#optional-the-cleargate-mcp-server) is optional.
+
+---
+
+## Install
+
+Requires Node ≥ 24 and `git`.
 
 ```bash
 npx cleargate init
 npx cleargate doctor
 ```
 
-Requires Node ≥ 24 LTS. `init` writes a bounded ClearGate block into `CLAUDE.md`, installs the five-role agent definitions, and scaffolds `.cleargate/`. To pin the version per-project, add it as a dev dependency: `npm i -D cleargate`. Full walkthrough in [Install](#install) and [Getting started in 10 minutes](#getting-started-in-10-minutes) below.
+`init` writes a bounded `<!-- CLEARGATE:START -->…<!-- CLEARGATE:END -->` block into `CLAUDE.md` (your prose outside it is kept). It installs the agents, skills and hooks under `.claude/`, scaffolds `.cleargate/`, and adds `.worktrees/` to your `.gitignore`. Re-running it is idempotent. `doctor` reports scaffold drift, hook health and work items that are blocked on a readiness gate.
 
----
+To pin a version for every contributor, run `npm i -D cleargate`.
 
-## Give it to your agent
+### Give it to your agent
 
-Already running an AI coding agent? Paste this prompt into Claude Code (or Cursor / Aider / any agent with shell + file-read access on this repo) and let it install and verify ClearGate for you:
+Already in Claude Code? Paste this:
 
 ```text
 Install ClearGate (npm package: cleargate) in this project.
@@ -41,152 +127,37 @@ Do not write any production code yet. This is install + verification
 only. If any step errors, stop and report the exact error.
 ```
 
-If `init` lands cleanly, your next message can be: *"File a ClearGate story for [your feature]."* The agent will classify the request, draft a work item under `.cleargate/delivery/pending-sync/`, and halt at Gate 1 for your approval — no rogue code generation.
+### Hosts
+
+| Host | Status | Install |
+|---|---|---|
+| **Claude Code** | Primary. Every ClearGate sprint to date has run here. | `npx cleargate init` (default) |
+| **OpenAI Codex** | **Preview.** It installs, but no full live sprint has been run on Codex yet, and known issues are open. Waves run one story at a time. | `npx cleargate init --host codex` (or `--host all`) |
 
 ---
 
-## The problem
+## Your first sprint
 
-Standard AI coding tools live entirely inside the developer's terminal. The business is locked out, sessions start blind, and agents re-grep raw files, hallucinate duplicate work, and overwrite cross-cutting decisions without warning.
+1. **Ask for something.** *"I want to add [feature]."* The agent classifies it (epic, story, CR, bug or spike), drafts it under `.cleargate/delivery/pending-sync/` and presents a Brief. Answer its open questions until ambiguity is 🟢, then approve. **That's Gate 1.**
+2. **Decompose.** Epics split into stories. Each story gets Gherkin acceptance scenarios and a declared file surface.
+3. **Plan the sprint.** Ask the agent to plan a sprint. It drafts the sprint plan, and the Architect runs the Sprint Design Review. Review the plan and approve it. **That's Gate 2.**
+4. **Start it.** Ask the agent to start the sprint. `cleargate sprint preflight` checks the environment (**Gate 3**). Then the agents work through the waves: QA-Red → Developer → QA-Verify → DevOps for each story.
+5. **Walk through it.** Try the result on the sprint branch. Anything you report is triaged, and bugs are fixed before the branch reaches `main`.
+6. **Close it.** The Reporter writes `SPRINT-NN_REPORT.md`. `cleargate sprint close <id>` halts for your explicit acknowledgement. **That's Gate 4.**
 
-|            | Standard AI                              | ClearGate                                                       |
-| ---------- | ---------------------------------------- | --------------------------------------------------------------- |
-| Context    | Session blindness, blind grep            | Compiled wiki (~3k-token `index.md` read at session start)      |
-| Planning   | Flat task lists                          | Phase plans + shared-surface merge ordering                     |
-| Execution  | Single terminal thread                   | Concurrent git worktrees + five-role agent team                 |
-| Visibility | Dev-only (zero stakeholder visibility)   | MCP push to PM tool of record                                   |
-| Memory     | Forgets between sessions                 | Append-only `FLASHCARD.md` lessons + sprint reports             |
+### Configure your toolchain
 
----
+Agents call your project's own commands through `cleargate gate <name>`. Copy `.cleargate/config.example.yml` to `.cleargate/config.yml`, then set:
 
-## How it works
+```yaml
+gates:
+  precommit: "npm run typecheck && npm test"
+  test: "npm test"
+  typecheck: "npm run typecheck"
+  lint: "npm run lint"
+```
 
-![The ClearGate Lifecycle — five-role pipeline with Ambiguity Gate, parallel worktrees, and MCP push to PM tool of record](./assets/lifecycle-diagram.svg)
-
-> Stakeholder input enters through Triage. The Architect drafts a phase plan, which **halts at the Ambiguity Gate** until human sign-off. Once approved, parallel Developer/QA pairs execute in isolated git worktrees. DevOps handles mechanical merge and state transitions. The Reporter synthesizes the sprint, lessons compound into the Wiki, and the MCP adapter pushes everything natively into your PM tool.
-
----
-
-## What ClearGate does
-
-### 1. Compiled awareness — the Karpathy-style wiki
-
-Raw work-item state (epics, stories, sprints, bugs, CRs, proposals, flashcard lessons) is continuously compiled into a lightweight `.cleargate/wiki/index.md`. The orchestrator reads this ~3,000-token summary at the **start of every session** — instant grasp of project topology, active sprint goals, and architectural constraints, *before a single file is grepped*.
-
-### 2. Triage → Planning → Execution → Quality & Delivery
-
-Every change starts as a classified work item. Drafted Epics and Phase Plans **halt at the Ambiguity Gate** until an Orchestrator + PO + Sponsor sign-off unlocks them. The AI cannot skip levels or "go rogue" past Draft. The result: absolute business control over AI compute and repository changes.
-
-### 3. The Five-Role Agent Loop
-
-Sub-agents never converse. They communicate via structured, file-based artifacts routed by the orchestrator. Five roles execute in a strict 7-step per-story sequence:
-
-**The 7-step per-story loop:**
-1. **Architect (M1 mode)** — reads the Sprint file and writes a milestone plan with file-surface analysis, merge ordering, and per-story blueprints.
-2. **QA (Red mode)** — before any implementation, writes failing `*.red.node.test.ts` tests covering each story's acceptance Gherkin. Tests must be RED against the clean baseline.
-3. **Architect (TPV mode — Test Pattern Validation)** — validates that QA-Red tests are wiring-sound (imports resolve, constructors match, mocked methods exist). Blocks wiring-gap tests from reaching the Developer.
-4. **Developer** — implements exactly one story in an isolated git worktree, runs typecheck + tests, commits one commit.
-5. **QA (Verify mode)** — read-only acceptance trace: re-runs gates, maps each Gherkin scenario to a passing test, checks the DoD clause.
-6. **Architect (post-flight mode)** — brief architectural review after QA-Verify pass; confirms no cross-story regressions or ADR conflicts were introduced.
-7. **DevOps** — mechanical merge (no-ff), mirror parity audit, worktree teardown, state transition to `Done`.
-
-**Reporter** — once at sprint close, after all stories have merged, synthesizes the token ledger, flashcards, git log, and DoD into `SPRINT-<#>_REPORT.md`.
-
-**The five roles in detail:**
-
-- **Architect** — four dispatch modes: Sprint Design Review (SDR, pre-sprint structure), M1 milestone plan (file-surface analysis + merge ordering), TPV (Test Pattern Validation between QA-Red and Developer), and post-flight architectural review. Writes plans, never code.
-- **Developer** — one per story, inside an isolated git worktree. Implements code + tests, runs typecheck, commits exactly one story. Follows the Architect's blueprint; returns `STATUS=done` or `BLOCKED`.
-- **QA** — two dispatch modes: Red (writes failing tests before any implementation — tests are immutable once written) and Verify (read-only acceptance trace after Developer commits). Never edits code; only approves or kicks back.
-- **DevOps** — post-QA mechanical pipeline: no-ff merge to sprint branch, prebuild if canonical scaffold was touched, mirror parity diff (live ↔ canonical), worktree remove, branch delete, state transition to `Done` via `update_state.mjs`.
-- **Reporter** — once per sprint at close. Synthesizes token ledger, flashcards, git log, DoD checklist, and story outcomes into a structured retrospective. Feeds the self-improving engine.
-
-### 4. Shared-surface merge ordering
-
-Before any code is written, the Architect lists the files each story will touch and computes the collision graph. Colliding stories enter a strict sequential queue; non-overlapping stories run concurrently in isolated git worktrees. No merge-conflict thrash, no file-lock contention, clean per-story commits.
-
-### 5. Quality assurance & hotfix tracking
-
-Final human sign-off is required before a sprint can close. Bugs found post-QA are **never** silently patched — they are filed as hotfixes with originating signal and files touched, giving full traceability. A strict lifecycle reconciler (`close_sprint.mjs`) blocks sprint close on any drift between shipped commits and ticket state. The cross-sprint orphan reconciler (Step 2.6b) detects and archives work items that drifted across sprint boundaries without resolution.
-
-### 6. Total visibility for the business — the MCP adapter
-
-ClearGate runs an MCP server that exposes `cleargate_push_item`, `cleargate_pull_initiative`, and friends. Approved epics, stories, and sprint reports are pushed natively into the customer's tool of record — no middleman DB, no proprietary dashboard. MCP server ships with a provider-agnostic adapter framework (`PmAdapter` interface); the **Linear** adapter is implemented and deployed today. **Jira** and **GitHub Projects** are on the roadmap — the framework supports them, but adapter implementations have not yet been written. See [docs/INTERNALS.md](./docs/INTERNALS.md) for current adapter status. The Sponsor and PO audit AI-generated contracts, dependencies, and token ledgers in real time, in their own tool.
-
-### 7. The self-improving engine
-
-Every sprint feeds three input metrics into the next: first-pass success rate, Architect/QA bounce count, and the Bug-Fix Tax (% of sprint capacity spent on bugs). **Test Pattern Validation (TPV)** catches test wiring gaps before the Developer touches them — the TPV catch-rate across sprints is a leading indicator of spec quality. The **Hotfix Audit** asks *"could this hotfix have been a sprint story? why was it missed at planning?"* — and the lessons land in append-only `.cleargate/FLASHCARD.md`, tagged (`#schema`, `#auth`, `#worktree`, …) and read by every agent at the start of non-trivial work. The framework structurally forces the AI to learn from its mistakes — and from the human engineer's feedback.
-
----
-
-## What's New (SPRINT-22 through SPRINT-26)
-
-The SDLC Hardening arc spans SPRINT-22 → SPRINT-23 → SPRINT-24 (eight major framework capabilities), then wraps up in SPRINT-25 with carry-over fixes + docs alignment, and rolls into SPRINT-26 (currently active) addressing issues surfaced by live dogfood use.
-
-**SPRINT-22 — TDD discipline + role refinement**
-- **CR-042** Reporter prompt accuracy fix — fresh-session dispatch contract documented in `reporter.md`.
-- **CR-043** TDD Red/Green discipline — `*.red.node.test.ts` files are immutable after QA-Red writes them; Developer cannot edit them.
-- **CR-044** DevOps role agent — 5th agent added, owns mechanical merge + state transitions, decoupled from orchestrator.
-
-**SPRINT-23 — Cross-cutting tooling**
-- **CR-045** Sprint Context File — per-sprint `sprint-context.md` anchors every agent dispatch to the same baseline.
-- **CR-046** `run_script.sh` structured incident wrapper — all script invocations go through the wrapper; failures produce incident JSON for Reporter §Risks.
-- **CR-047** Mid-Sprint Triage Rubric + Test Pattern Validation gate — TPV added as Architect mode between QA-Red and Developer; triage rubric governs mid-sprint CR scope changes.
-- **CR-048** Cross-sprint orphan reconciler hardening — Step 2.6b detects work items that drifted across sprints without resolution.
-
-**SPRINT-24 — Carry-over cleanup**
-- **CR-049** Canonical-vs-live parity CI guard — drift between `cleargate-planning/` and the npm payload now fails CI.
-- **CR-050** `run_script.sh` shim retirement — 8 callers migrated to the structured wrapper.
-- **CR-051** DevOps subagent registration findings + escape hatch — `devops` registration edge case documented; escape hatch in SKILL.md §C.7.
-- **CR-052** `wrapScript` shared test helper — canonical caller-test pattern for `run_script.sh`-invoking tests.
-
-**SPRINT-25 — SDLC Hardening Wrap-Up + Docs Aligned**
-- **CR-053** `cleargate init` MANIFEST.json root-path bug fix — `init` no longer writes a stray `MANIFEST.json` to the user-repo root.
-- **CR-054** `run_script.sh` UTF-8 byte-correct truncation — incident-log truncation no longer splits multi-byte characters.
-- **CR-055** `wrapScript` helper adoption in caller tests — completes the CR-052 migration across remaining caller-tests.
-- **CR-056** Skill candidate heuristic — investigation + fix for skill auto-load mis-suggestions.
-- **CR-057** `run_script.sh` self-repair — incident-corpus-driven hardening; the wrapper learns from its own incident log.
-- **CR-058** README refresh + lifecycle-diagram prompt — this README, plus the diagram-regen prompt at `.cleargate/sprint-runs/SPRINT-25/lifecycle-diagram-prompt.md`.
-
-**SPRINT-26 — Dogfood Hardening (active)**
-
-Triggered by a 2026-05-04 → 2026-05-05 dogfood test where ClearGate scaffolded and shipped a real downstream product sprint. Three CLI bugs were hot-patched in flight (v0.11.1 / v0.11.2 / v0.11.3); five additional items were filed as standard work for this sprint:
-- **BUG-027** token-ledger fallback grep regression (~25% of ledger rows mis-attributed).
-- **BUG-028** `upgrade --dry-run` vs real-run state mismatch in the merge prompt.
-- **BUG-029** parallel-eligible dispatches silently serialize.
-- **CR-059** smarter session-load restart warning.
-- **CR-060** doc clarity — `cleargate-planning/` is not shipped to target repos.
-
-See sprint files for the complete commit history.
-
----
-
-## Install
-
-Requires Node ≥ 24 LTS.
-
-1. Bootstrap the scaffold in your repo:
-
-   ```bash
-   npx cleargate init
-   ```
-
-   `npx` fetches and runs the published package on demand — no prior install needed. The command writes a bounded `<!-- CLEARGATE:START -->...<!-- CLEARGATE:END -->` block into your `CLAUDE.md` (creating the file if it does not exist), installs agent role definitions under `.claude/agents/`, wires the token-ledger hook in `.claude/settings.json`, and creates `.cleargate/` with protocol rules, work-item templates, draft/archive folders, and a flashcard lesson log. Re-running `init` is idempotent — it updates the bounded block in place and preserves your customizations.
-
-2. Verify the scaffold is healthy:
-
-   ```bash
-   npx cleargate doctor
-   ```
-
-   `doctor` checks for scaffold drift, missing hooks, blocked items, and configuration validity. Fix any issues it reports before starting your first sprint.
-
-3. *(Optional)* Pin the version per-project so every contributor gets the same one:
-
-   ```bash
-   npm i -D cleargate
-   ```
-
-   Records `cleargate` under `devDependencies` in your `package.json`. Skip this step if you're happy letting `npx` always grab the latest published version.
+A gate you haven't configured prints a "not configured" message and exits 0. Pass `--strict` to make it exit 1.
 
 ---
 
@@ -194,90 +165,73 @@ Requires Node ≥ 24 LTS.
 
 ```text
 your-repo/
-├── CLAUDE.md                       ← bounded ClearGate block injected (idempotent)
-├── .claude/                        ← Claude Code session config
-│   ├── agents/                     ← the five-role agent team:
-│   │                                  architect · developer · qa · devops · reporter
-│   │                                  (+ cleargate-wiki-contradict · wiki-ingest ·
-│   │                                     wiki-query · wiki-lint)
-│   ├── skills/                     ← sprint-execution · flashcard
-│   ├── hooks/                      ← session-start, token-ledger,
-│   │                                  pre-commit & pre-edit gates
-│   └── settings.json               ← hook wiring (PostToolUse, SubagentStop, …)
-└── .cleargate/                     ← planning artifacts + protocol (checked into git)
-    ├── FLASHCARD.md                ← append-only lesson log (every agent reads it)
-    ├── config.example.yml          ← gate command template (copy to config.yml)
-    ├── knowledge/                  ← protocol, enforcement rules, readiness gates,
-    │                                  sprint-closeout checklist, mid-sprint-triage-rubric.md
-    ├── scripts/                    ← run_script.sh structured incident wrapper +
-    │                                  close_sprint.mjs · update_state.mjs · suggest_improvements.mjs
-    ├── templates/                  ← blueprints: epic · story · CR · Bug ·
-    │                                  initiative · Sprint Plan
+├── CLAUDE.md                ← bounded ClearGate block
+├── .claude/
+│   ├── agents/              ← architect · architect-reader · architect-synth · developer
+│   │                           · qa · devops · reporter · 4 wiki agents
+│   ├── skills/              ← sprint-execution · flashcard · sprint-dashboard
+│   ├── hooks/               ← session-start · token-ledger · pre-commit surface & red-test
+│   │                           gates · pre-edit gate · lesson sentinel · …
+│   └── settings.json        ← hook wiring
+└── .cleargate/
+    ├── FLASHCARD.md         ← lesson log
+    ├── config.example.yml   ← your gate commands (copy to config.yml)
+    ├── knowledge/           ← protocol · enforcement rules · readiness gates
+    │                           · mid-sprint triage rubric · close-out checklist
+    ├── templates/           ← epic · story · CR · bug · spike · hotfix · initiative
+    │                           · sprint plan · sprint context · sprint report
+    ├── scripts/             ← close_sprint.mjs · launch_wave.mjs · suggest_improvements.mjs · …
     └── delivery/
-        ├── pending-sync/           ← drafts + in-flight work items
-        └── archive/                ← items pushed to PM tool of record / completed
+        ├── pending-sync/    ← drafts and in-flight work items
+        └── archive/         ← approved and completed work items
 ```
 
-**`.claude/`** is what Claude Code reads at session start — agent role definitions, skills, and hooks that fire on tool use. **`.cleargate/`** is where your planning artifacts live — work items as markdown files, edited by both humans and agents, versioned alongside your code. The compiled `.cleargate/wiki/` (the ~3k-token awareness layer) is generated on demand by `cleargate wiki build` and grows as your project does.
+`.cleargate/.gitignore` keeps per-machine state out of your commits: your identity file, sync markers, hook logs and dashboard snapshots.
 
 ---
 
-## Quickstart
+## Commands
 
-New to ClearGate? Four steps to your first shipped work item:
-
-1. **Install.** Run `npx cleargate init` in your repo root, then `npx cleargate doctor` to verify the scaffold.
-2. **File a Story.** Ask Claude Code: *"I want to add [feature]."* The agent classifies the request, drafts an Epic/Story under `.cleargate/delivery/pending-sync/`, and halts at **Gate 1** for your review.
-3. **Approve it (Gate 1).** Read the draft. Set `approved: true` in the frontmatter and tell Claude Code to proceed. Gate 1 closes.
-4. **Push it.** Run `cleargate push` (or ask Claude Code to push). The work item lands in your PM tool and in the MCP Postgres store.
-
-That's all you need to get started. Sprints, the five-agent execution loop, and Gates 2-4 are the next step — they govern *how* the work gets implemented once you have a populated backlog. See [Getting started in 10 minutes](#getting-started-in-10-minutes) below for the full loop, or [docs/INTERNALS.md](./docs/INTERNALS.md) for the complete architecture.
-
----
-
-## Getting started in 10 minutes
-
-After `cleargate init` completes, ask Claude Code to begin. The session will read the ClearGate block in `CLAUDE.md` automatically. Walk through these steps:
-
-1. **File the work.** Ask Claude Code: *"I want to add [feature]."* Claude will classify the request as an Epic/Story, draft the work item under `.cleargate/delivery/pending-sync/`, and halt at **Gate 1** for your review. There is no separate Proposal step — the agent goes straight to scoped Epic or Story.
-
-2. **Approve it.** Read the draft. Set `approved: true` in the frontmatter and tell Claude Code to proceed. Gate 1 closes.
-
-3. **Decompose into Stories.** Claude Code will decompose the Epic or request into Stories (individual implementable units). Each Story gets a Gherkin acceptance scenario and an ambiguity gate. If anything is unclear, the agent halts and asks — it cannot skip levels. When all open questions are resolved, **Gate 2** (Ambiguity) closes.
-
-4. **Schedule a Sprint.** Group the Stories into a Sprint file. Run `cleargate sprint preflight` (**Gate 3**) to verify the sprint is ready for execution — no orphaned work items, no unresolved ambiguities, no drift in the scaffold.
-
-5. **Invoke the Architect subagent.** Ask Claude Code to spawn the Architect agent for Milestone 1 (Sprint Design Review). The Architect reads the Sprint file, produces a milestone plan, and assigns files to each Story. No production code is written at this step.
-
-6. **Run the five-role per-story loop** for each Story in sequence:
-   - **Architect (M1)** writes the blueprint for the milestone.
-   - **QA (Red)** writes failing tests before any code.
-   - **Architect (TPV)** validates test wiring.
-   - **Developer** implements the Story in an isolated git worktree and commits.
-   - **QA (Verify)** accepts or kicks back.
-   - **Architect (post-flight)** confirms no architectural drift.
-   - **DevOps** merges, tears down the worktree, and flips the Story state to `Done`.
-
-7. **Close the sprint.** After all Stories are `Done`, the Reporter writes the retrospective. Run `close_sprint.mjs` with **no flags** (**Gate 4**). The script surfaces a confirmation prompt verbatim — confirm it to flip the sprint to `Completed`, archive artifacts, and print the 6-item handoff summary. The agent must not bypass the human confirmation step.
-
-For gates configuration (what command `cleargate gate test` runs in your project), create `.cleargate/config.yml` at your repo root. `cleargate init` installs a documented example template at `.cleargate/config.example.yml` alongside — copy it and edit, or start from the skeleton below:
-
-```yaml
-# .cleargate/config.yml — adjust commands to your stack
-gates:
-  precommit: "npm run typecheck && npm test"   # Node example
-  test: "npm test"
-  typecheck: "npm run typecheck"
-  lint: "npm run lint"
+```bash
+cleargate init [--host claude|codex|all]      # install the factory
+cleargate doctor                              # scaffold health: drift, hooks, blocked items
+cleargate new <type> "<slug>"                 # epic · story (--epic EPIC-NNN) · cr · bug · spike
+                                              #   · hotfix · initiative · sprint
+cleargate gate check <file>                   # evaluate and stamp a work item's readiness
+cleargate gate explain <file>                 # why a work item is or isn't ready
+cleargate gate test|typecheck|lint|precommit  # run your configured command
+cleargate sprint init|preflight|close <id>    # sprint lifecycle (preflight = Gate 3, close = Gate 4)
+cleargate sprint dashboard                    # visual sprint progress
+cleargate story start|complete <id>           # story worktree and state transitions
+cleargate hotfix new <slug>                   # off-sprint hotfix
+cleargate wiki build|query|lint               # awareness wiki
+cleargate host list|add|remove                # manage installed hosts
+cleargate upgrade [--dry-run]                 # three-way merge of scaffold updates
+cleargate uninstall                           # remove the scaffold, keep your work items
 ```
 
-If a gate key is absent, `cleargate gate <name>` prints a friendly "not configured" message and exits 0 (non-blocking). Pass `--strict` to flip that to exit 1.
-
-ClearGate is not a build tool, test runner, or CI system. The Developer agent calls *your project's* toolchain — `cleargate gate test`, `cleargate gate typecheck`, etc. — via the commands you configure in `.cleargate/config.yml`. Your toolchain stays yours; ClearGate orchestrates when and why agents invoke it.
+To upgrade, run `npx cleargate@latest upgrade`. That uses the new binary, not an older global install. Your work items, `FLASHCARD.md`, `config.yml` and any prose outside the `CLAUDE.md` block are never touched. Full CLI reference: the [`cleargate` package on npm](https://www.npmjs.com/package/cleargate).
 
 ---
 
-## Want to know more?
+## Optional: the ClearGate MCP server
 
-- Architecture, repo layout, and how ClearGate is built with itself: [docs/INTERNALS.md](./docs/INTERNALS.md)
-- License: [LICENSE](./LICENSE) (MIT)
+Everything above runs locally. The MCP server is an optional, **invite-only** service for teams that want a shared record outside the repo:
+
+- Members join with `cleargate join <invite-url>`, then `cleargate push` approved work items and sprint reports into its versioned store. It keeps the last 10 versions of each item and rejects any push without `approved: true`.
+- An admin console shows projects, members, tokens, items and audit history.
+- A read-only **Linear** adapter can pull issues, comments and updates in.
+
+What it does **not** do today: push never writes out to Linear, Jira or GitHub, and only the Linear adapter exists. Writing out to PM tools is on the roadmap. The server isn't open for self-hosting yet. Without a join token, `push`, `pull` and `sync` exit with a pointer to `cleargate join`, and everything else works.
+
+---
+
+## Built with itself
+
+ClearGate is built with ClearGate. This repo is its own factory floor: 36 sprints of work items, Architect plans, token ledgers and sprint reports live under [`.cleargate/`](./.cleargate/). Read any report, e.g. [`SPRINT-41_REPORT.md`](./.cleargate/sprint-runs/SPRINT-41/SPRINT-41_REPORT.md), to see what the line produces, including the parts that didn't go to plan.
+
+How the pieces fit together (CLI, scaffold, MCP server, admin console): [docs/INTERNALS.md](./docs/INTERNALS.md).
+
+## License
+
+MIT. See [LICENSE](./LICENSE).

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="ClearGate GitHub banner">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="ClearGate — the gated software factory for AI coding agents">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#2a2f37"></stop>
@@ -24,9 +24,9 @@
   </svg>
   <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" fill="#ffffff">
     <text x="540" y="305" font-weight="700" font-size="96" letter-spacing="-2">ClearGate</text>
-    <text x="540" y="345" font-weight="400" font-size="22" fill="#9aa3b2">The planning scaffold that turns AI agents</text>
-    <text x="540" y="375" font-weight="400" font-size="22" fill="#9aa3b2">into a disciplined engineering team</text>
+    <text x="540" y="345" font-weight="400" font-size="22" fill="#9aa3b2">The gated software factory</text>
+    <text x="540" y="375" font-weight="400" font-size="22" fill="#9aa3b2">for AI coding agents</text>
     <line x1="540" y1="400" x2="620" y2="400" stroke="#f97316" stroke-width="3" stroke-linecap="round"></line>
-    <text x="540" y="438" font-weight="500" font-size="18" letter-spacing="2" fill="#f97316">OPEN SOURCE · MIT LICENSED</text>
+    <text x="540" y="438" font-weight="500" font-size="18" letter-spacing="2" fill="#f97316">AGENTS BUILD · HUMANS HOLD THE GATES</text>
   </g>
 </svg>
