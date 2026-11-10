@@ -19,14 +19,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-10T00:00:00Z
-updated_at: 2026-11-10T00:00:00Z
+updated_at: 2026-11-10T06:56:37Z
 created_at_version: 0.27.0
-updated_at_version: 0.27.0
+updated_at_version: 7f42e33a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-10T05:53:27Z
+  last_gate_check: 2026-11-10T06:56:37Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -187,7 +187,7 @@ Feature: cleargate sprint add|remove
 |---|---|
 | Primary File | `cleargate-cli/src/commands/sprint-scope.ts` |
 | Related Files | `cleargate-cli/src/cli.ts` |
-| Test Files | `cleargate-cli/test/commands/sprint-scope.node.test.ts` |
+| Test Files | `cleargate-cli/test/commands/sprint-scope.node.test.ts`, `cleargate-cli/test/commands/sprint-scope.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/commands/sprint-scope.ts`, `cleargate-cli/test/commands/sprint-scope.node.test.ts` |
 
 ### 3.2 Technical Logic

@@ -19,14 +19,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-10T00:00:00Z
-updated_at: 2026-11-10T00:00:00Z
+updated_at: 2026-11-10T06:56:35Z
 created_at_version: 0.27.0
-updated_at_version: 0.27.0
+updated_at_version: 7f42e33a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-10T05:51:57Z
+  last_gate_check: 2026-11-10T06:56:35Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -159,7 +159,7 @@ Feature: Dashboard runs without a sprint, with a tab shell
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/daemon.ts` |
 | Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/src/commands/sprint.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/scaffold/core/.gitignore`, `cleargate-cli/src/commands/init.ts` |
-| Test Files | `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/cr101.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
+| Test Files | `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/cr101.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/dashboard-lifecycle.red.node.test.ts`, `cleargate-cli/test/dashboard/tab-shell.red.node.test.ts` |
 | Outer repo | `.gitignore` (meta-repo; committed to the outer repo, not cleargate-cli) |
 | New Files Needed | No |
 

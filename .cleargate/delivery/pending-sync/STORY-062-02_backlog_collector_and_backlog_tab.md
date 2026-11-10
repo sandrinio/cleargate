@@ -19,14 +19,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-10T00:00:00Z
-updated_at: 2026-11-10T00:00:00Z
+updated_at: 2026-11-10T06:56:36Z
 created_at_version: 0.27.0
-updated_at_version: 0.27.0
+updated_at_version: 7f42e33a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-10T05:52:38Z
+  last_gate_check: 2026-11-10T06:56:36Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -155,7 +155,7 @@ Feature: Backlog collector and Backlog tab
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/backlog.ts` |
 | Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts` |
-| Test Files | `cleargate-cli/test/dashboard/backlog.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
+| Test Files | `cleargate-cli/test/dashboard/backlog.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/backlog.red.node.test.ts`, `cleargate-cli/test/dashboard/backlog-tab.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/dashboard/backlog.ts`, `cleargate-cli/test/dashboard/backlog.node.test.ts` |
 
 ### 3.2 Technical Logic

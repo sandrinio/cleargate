@@ -1,3 +1,4 @@
+2026-11-10 · #qa #worktree · wikiIngestHandler needs src/wiki/templates/synthesis/*.md; absent in fresh worktrees, so ingest warns
 2026-11-10 · #qa #test-harness · vm.runInContext objects fail assert.deepEqual by prototype; JSON round-trip before comparing
 2026-11-10 · #qa #zsh · `echo == x` in zsh Bash tool errors '= not found' and aborts the rest of the command
 2026-11-10 · #dashboard #serve · serve({port:0}) leaves boundPort and handle.port at 0; port-dependent checks must read server.address().port.
