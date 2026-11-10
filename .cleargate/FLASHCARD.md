@@ -1,3 +1,4 @@
+2026-11-10 · #sdr #collision-surface · A §3.1 "New Files Needed | Yes — <one path>" cell leaks "Yes — <path>" as a surface token; list new files in Related Files instead.
 2026-11-07 · #qa #test-harness · Single test files need run-default-tests flags (--experimental-test-module-mocks); bare tsx --test fails mock.module files at load.
 2026-11-07 · #ci #gitleaks · gitleaks auto-reads repo-root .gitleaks.toml; prove an allowlist works by scanning with an explicit default-only config.
 2026-11-07 · #qa #docker · macOS jq is not a Linux binary; fetch jq-linux-amd64 and mount it at /usr/bin/jq for amd64 container runs.

@@ -1,0 +1,179 @@
+{
+  "schema_version": 2,
+  "sprint": "SPRINT-44",
+  "generated_at": "2026-11-10T06:07:05Z",
+  "updated_at": "2026-11-10T06:20:00Z",
+  "generated_by": "architect-synth",
+  "role": "architect-synth",
+  "story_count_in_milestone": 4,
+  "story_count_planned": 4,
+  "complete": true,
+  "launchable": true,
+  "ruling": {
+    "decided_by": "owner (sandrinio), relayed by the orchestrator",
+    "decided_at": "2026-11-10",
+    "gate": "Gate 2",
+    "verbatim": "1. agree",
+    "decision": "Option (a): build in nested cli worktrees per the SDR §2.1 plan (SPRINT-41 rule-19 layout, contracts C1–C4, build set, merge order 01 → 03 → 02 → 04).",
+    "resolves": "The BUG-046 generation-time refusal of STORY-062-01..04 (all paths inside the nested cleargate-cli repo). The ruling sets the execution mechanism for this sprint only; collision_surface.sh's classification itself is unchanged."
+  },
+  "execution": {
+    "mode": "contract-first-dag",
+    "launch_wave_compatible": false,
+    "note": "launch_wave.mjs cuts only outer-repo worktrees. The orchestrator cuts every cli worktree by hand, one at a time, as in SPRINT-41.",
+    "sprint_lines": { "cli": "main (local; tip 5cbad8d at plan time)", "outer": "sprint/S-44" },
+    "build_lanes": 4,
+    "merge_lane": "One item at a time in the main checkouts. Steps: integration check, merge (outer half first for STORY-062-01), full npm test in cleargate-cli, then BD (dist rebuild on cli main). No push, no publish.",
+    "merge_order": ["STORY-062-01", "STORY-062-03", "STORY-062-02", "STORY-062-04"],
+    "worktree_layout": {
+      "cli": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>/cleargate-cli. Create with: git -C /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli worktree add <that path> -b story/<ID> <stories.<ID>.base>",
+      "outer": "STORY-062-01 only: outer worktree /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-062-01, branch story/STORY-062-01 from sprint/S-44, for its one .gitignore line. Other stories need only the host directory.",
+      "node_modules": "Symlink to /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli/node_modules. Never npm install or npm ci in a worktree.",
+      "prebuild": "Run (cd <cli wt> && npm run prebuild) after the cut and after every integration merge. Never build or prebuild in the cli main checkout except BD on main.",
+      "teardown": "After merge, with both git status --porcelain empty: remove the cli worktree first, then the outer worktree if one exists."
+    },
+    "tests": "Build lanes run targeted test files only. The full npm test runs only in the merge lane. cr097/cr101 bind fixed ports (flashcard 2026-09-26 #test-harness #ports).",
+    "integration": "A story integrates once all its upstream stories have merged. In its cli worktree: git merge --no-ff main. On a conflict, the owner's file wins and the story re-applies its insertions. If two blocks were appended at the end of a test file, keep both, upstream first. A conflict inside an existing test goes to QA-Red. Then re-run prebuild, typecheck and the targeted tests, and run QA-Verify and post-flight on the integrated tree. If main moves before the merge, integrate again."
+  },
+  "contracts": [
+    {
+      "id": "C1",
+      "branch": "contract/S-44-shell",
+      "repo": "cli",
+      "base": "main",
+      "owner_story": "STORY-062-01",
+      "created_by": "Developer contract dispatch C0, commit 1 of 3, in a throwaway cli worktree. Subject: chore(EPIC-062): contract C1 skeleton (STORY-062-01 tab shell)",
+      "create_when": "now (after the sprint is initialised and the SDR is committed)",
+      "frozen_exports": [
+        "src/dashboard/render.ts: render(data: SprintDashboardData): string. Signature unchanged. Output = tab bar (#backlog, #plan, #sprint) + <section data-tab=\"sprint\"> wrapping today's body + <section data-tab=\"backlog\">${renderBacklogPanel(data)}</section> + <section data-tab=\"plan\">${renderPlanPanel(data)}</section>",
+        "src/dashboard/render.ts: renderBacklogPanel(data: SprintDashboardData): string. Stub returns the labelled empty panel 'Backlog — STORY-062-02'.",
+        "src/dashboard/render.ts: renderPlanPanel(data: SprintDashboardData): string. Stub returns the labelled empty panel 'Plan — STORY-062-04'.",
+        "src/dashboard/render.ts (client script): cgRenderBacklog(d) and cgRenderPlan(d). No-op stubs, called once with DATA on load and by the /data poller after cgRenderApp(fresh) (render.ts:757).",
+        "src/dashboard/render.ts (client script): a minimal hash toggle over the three data-tab sections. STORY-062-01 owns its final body."
+      ],
+      "freeze_rules": "STORY-062-01 replaces the shell and toggle bodies only. It never edits the bodies of the four panel stubs and never changes render's signature.",
+      "consumers": ["STORY-062-02", "STORY-062-04", "C2"],
+      "check_before_handoff": "npm run typecheck clean; existing test/dashboard/*.node.test.ts green (on a red, halt and report; never edit tests)"
+    },
+    {
+      "id": "C2",
+      "branch": "contract/S-44-backlog",
+      "repo": "cli",
+      "base": "contract/S-44-shell",
+      "owner_story": "STORY-062-02",
+      "created_by": "Developer contract dispatch C0, commit 2 of 3, on top of C1. Subject: chore(EPIC-062): contract C2 skeleton (STORY-062-02 backlog)",
+      "create_when": "immediately after C1",
+      "frozen_exports": [
+        "src/dashboard/backlog.ts: interface BacklogItem { id: string; type: WorkItemType; title: string; status: string; approved: boolean; ambiguity: string; gate: { pass: boolean | null; failing: string[] }; area: string[]; sprint: string | null; carryOver: boolean; parent: string | null; file: string }. Missing strings are ''; a missing gate is { pass: null, failing: [] }; WorkItemType comes from src/lib/work-item-type.ts:8.",
+        "src/dashboard/backlog.ts: interface BacklogData { items: BacklogItem[]; children: Record<string, string[]>; diagnostics: string[] }",
+        "src/dashboard/backlog.ts: collectBacklog(cwd: string): BacklogData. Stub returns { items: [], children: {}, diagnostics: [] }.",
+        "src/dashboard/serve.ts: ServeOptions.collectBacklogFn?: (cwd: string) => BacklogData, inserted directly after collectFn (serve.ts:58).",
+        "src/dashboard/serve.ts: GET / renders renderFn({ ...collectFn({ cwd }), backlog: collectBacklogFn(cwd) }). GET /data returns SprintDashboardData & { backlog: BacklogData } (the renderDataBodies output plus backlog).",
+        "src/dashboard/serve.ts + render.ts: ServeOptions.renderFn and render(data: SprintDashboardData & { backlog?: BacklogData }): string. SprintDashboardData itself is unchanged."
+      ],
+      "freeze_rules": "STORY-062-02 keeps C2's serve.ts lines byte-identical. In render.ts it edits only renderBacklogPanel and cgRenderBacklog.",
+      "consumers": ["STORY-062-04", "C4"],
+      "check_before_handoff": "npm run typecheck clean; existing test/dashboard/*.node.test.ts green"
+    },
+    {
+      "id": "C3",
+      "branch": "contract/S-44-scope",
+      "repo": "cli",
+      "base": "main",
+      "owner_story": "STORY-062-03",
+      "created_by": "Developer contract dispatch C0, commit 3 of 3, on cli main. Subject: chore(EPIC-062): contract C3 skeleton (STORY-062-03 sprint-scope)",
+      "create_when": "now, alongside C1",
+      "frozen_exports": [
+        "src/commands/sprint-scope.ts: interface SprintScopeOptions { op: 'add' | 'remove'; sprintId: string; ids: string[]; expectSha?: string; json?: boolean }",
+        "src/commands/sprint-scope.ts: interface SprintScopeCli { cwd?: string; stdout?: (s: string) => void; stderr?: (s: string) => void }. STORY-062-03 may add optional seam fields.",
+        "src/commands/sprint-scope.ts: interface SprintScopeResult { ok: boolean; code: 0 | 1 | 3; sprintId: string; op: 'add' | 'remove'; changed: string[]; unchanged: string[]; warnings: string[]; errors: string[]; sha: string }",
+        "src/commands/sprint-scope.ts: sprintScopeHandler(opts: SprintScopeOptions, cli?: SprintScopeCli): Promise<SprintScopeResult>. It returns and never calls process.exit; the cli.ts action exits with result.code. Stub returns { ok: false, code: 1, sprintId: opts.sprintId, op: opts.op, changed: [], unchanged: [], warnings: [], errors: ['contract C3 stub — STORY-062-03 not integrated'], sha: '' }."
+      ],
+      "freeze_rules": "STORY-062-03 replaces the handler body and owns the cli.ts registration. C3 adds no cli.ts registration.",
+      "consumers": ["STORY-062-04", "C4"],
+      "check_before_handoff": "npm run typecheck clean"
+    },
+    {
+      "id": "C4",
+      "branch": "contract/S-44-plan",
+      "repo": "cli",
+      "base": "contract/S-44-backlog",
+      "merges": ["contract/S-44-scope"],
+      "owner_story": ["STORY-062-02", "STORY-062-03"],
+      "created_by": "Developer contract dispatch C0, final step: branch contract/S-44-plan from contract/S-44-backlog, then git merge --no-ff contract/S-44-scope. The files don't overlap; any conflict halts.",
+      "create_when": "after C2 and C3",
+      "frozen_exports": [
+        "Everything frozen in C2 and C3. C4 adds nothing."
+      ],
+      "consumers": ["STORY-062-04"],
+      "check_before_handoff": "npm run typecheck clean"
+    }
+  ],
+  "contract_change_rule": "If a QA-Verify or post-flight bounce changes a frozen export, record the new SHA in sprint §6. Each consumer adjusts at integration (QA-Red handles tests). Never cherry-pick.",
+  "stories": {
+    "STORY-062-01": {
+      "base": "contract/S-44-shell",
+      "upstream": [],
+      "repo": "both",
+      "repo_order": ["outer", "cli", "dist-rebuild"],
+      "outer_change": ".gitignore: add .cleargate/.dashboard.json (inert config; merges to sprint/S-44 before the cli half, in the same turn)",
+      "note": "Owner of C1; builds from its own contract so the skeleton is a shared ancestor for later merges. Rewritten cr101 server tests use port 0."
+    },
+    "STORY-062-03": {
+      "base": "contract/S-44-scope",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owner of C3. Registers sprint add/remove in cli.ts after the sprint close block (ends cli.ts:411). Its cli.ts overlap with STORY-062-01 is insert-only."
+    },
+    "STORY-062-02": {
+      "base": "contract/S-44-backlog",
+      "upstream": ["STORY-062-01"],
+      "repo": "cli",
+      "note": "Owner of C2. Real collision with STORY-062-01 in render.ts (kind 3: fills the backlog panel 01 owns)."
+    },
+    "STORY-062-04": {
+      "base": "contract/S-44-plan",
+      "upstream": ["STORY-062-01", "STORY-062-02", "STORY-062-03"],
+      "repo": "cli",
+      "note": "Real collisions: render.ts kind 3 vs 01 (plan panel); serve.ts kind 3 vs 02 (adds plan and the token to C2's / and /data lines). Consumes C2 and C3. Expected red before integration: 'Committing a selection updates sprint membership' cannot pass against the C3 stub. Before integration, test the 200/403/409/422 mapping through 04's own ServeOptions seam for the handler. The real round trip goes green only on the integrated tree."
+    }
+  },
+  "waves": [
+    {
+      "wave": "wave1",
+      "stories": ["STORY-062-01", "STORY-062-03"],
+      "parallel": true,
+      "rationale": "Integration layer 0: no upstream. The cli.ts overlap is insert-only (no real collision). Merge 01 first."
+    },
+    {
+      "wave": "wave2",
+      "stories": ["STORY-062-02"],
+      "parallel": false,
+      "rationale": "Integration layer 1: waits on STORY-062-01 (render.ts kind 3, backlog panel). Builds now from contract C2."
+    },
+    {
+      "wave": "wave3",
+      "stories": ["STORY-062-04"],
+      "parallel": false,
+      "rationale": "Integration layer 2: waits on STORY-062-01, -02, -03 (render.ts kind 3, serve.ts kind 3, contracts C2 and C3). parallel_eligible=n, so it gets its own trailing wave. Builds now from contract C4."
+    }
+  ],
+  "lane_assignments": {
+    "STORY-062-01": "standard",
+    "STORY-062-02": "standard",
+    "STORY-062-03": "standard",
+    "STORY-062-04": "standard"
+  },
+  "predicate_notes": {
+    "reachability_BUG_046": "All four stories were refused at generation on 2026-11-10T06:07:05Z. The owner's Gate 2 ruling (see ruling) cleared that refusal for this sprint, so refused is now empty.",
+    "empty_surface_guard_BUG_033": "did not fire: all four digests have a non-empty (file_surface ∪ file_creates)",
+    "db_axis": "vacuous: db_write_set is empty for all four",
+    "digest_corrections": [
+      "STORY-062-03 file_surface token 'Yes — cleargate-cli/src/commands/sprint-scope.ts' is a §3.1 'New Files Needed' cell leak (flashcard 2026-11-10 #sdr). Ignored; the real path is already listed.",
+      "STORY-062-04 exports_consumed '<path not declared>: BacklogData' resolves to cleargate-cli/src/dashboard/backlog.ts (STORY-062-02), per the orchestrator.",
+      "STORY-062-04 dep_predecessors is [] in the digest, but its body depends on 02 and 03. Both are in its upstream through contract ownership.",
+      "STORY-062-01's outer .gitignore line is a tracked outer path, so it is reachable. It is absent from the digest and carried in stories.STORY-062-01.outer_change."
+    ]
+  },
+  "refused": []
+}
