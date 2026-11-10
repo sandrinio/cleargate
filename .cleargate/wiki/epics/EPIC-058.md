@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md"
-last_ingest: "2026-10-04T07:05:55.092Z"
-last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
+last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest_commit: "eac91c203dc0dc96a8db12fbb5cd29c53d069690"
 repo: "planning"
 ---
 

@@ -6,10 +6,9 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md"
-last_ingest: "2026-09-26T13:54:38.877Z"
-last_ingest_commit: "bc999833c2f93447876496246c89787064a8b954"
+last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest_commit: "0b97950dd8b43e5071fd0da173af49cfd2297628"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-39"
 ---
 
 # EPIC-055: Parallel wave scheduling — waves become a DAG, not a chain

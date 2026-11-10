@@ -14,12 +14,17 @@
 - [[EPIC-055]] (epic) — Draft — Parallel wave scheduling — waves become a DAG, not a chain
 - [[EPIC-056]] (epic) — Draft — CI verification layer — environment-independent proof that tests pass
 - [[EPIC-057]] (epic) — Draft — Multi-repo story execution — routing, not just detection
-- [[EPIC-058]] (epic) — Draft ⚠︎ drift — Additive Multi-Host Execution Adapters
+- [[EPIC-058]] (epic) — Draft — Additive Multi-Host Execution Adapters
+- [[EPIC-059]] (epic) — Draft — Planning Catches What Execution Stopped For
+- [[EPIC-060]] (epic) — Draft — Fresh-Context Review Before Approval
+- [[EPIC-061]] (epic) — Draft — cleargate-cli Hygiene, Layout & Public Release
+- [[EPIC-062]] (epic) — Draft — Dashboard Backlog Board and Sprint Planner
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
-- [[SPRINT-41]] (sprint) — Active — Multi-Host Adapters & Frontmatter Locator
-- [[SPRINT-42]] (sprint) — Draft — Execution-Loop Efficiency + Developer Context
+- [[SPRINT-42]] (sprint) — Draft — Planning Catches What Execution Stopped For
+- [[SPRINT-43]] (sprint) — Draft — Execution-Loop Efficiency + Developer Context
+- [[SPRINT-44]] (sprint) — Draft — Dashboard Backlog Board and Sprint Planner
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -38,14 +43,12 @@
 - [[CR-120]] (cr) — Draft — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs`
 - [[CR-121]] (cr) — Draft — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
 - [[CR-122]] (cr) — Draft — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
-- [[CR-123]] (cr) — Approved ⚠︎ drift — Tested work items declare SPIDR coverage, and their scenarios must match it
-- [[CR-124]] (cr) — Approved — Contract-first build-then-integrate — sprints are planned and run as a dependency DAG, not collision waves
+- [[CR-125]] (cr) — Draft — `existing-surfaces-verified` Checks Cited Symbols
 - [[BUG-030]] (bug) — Triaged — `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items
-- [[BUG-047]] (bug) — Triaged — `cleargate stamp` permanently wedges an item's preflight readiness
 - [[BUG-048]] (bug) — Triaged — An ID prefix written in prose mints a phantom work item that blocks preflight
 - [[BUG-050]] (bug) — Draft — `countDeclaredItems` scores a bare `**Label:**` line as a declared item, so every `≥1` section criterion is fail-open
 - [[BUG-051]] (bug) — Draft — Work-item type and wiki bucket registries have silently drifted apart
-- [[BUG-052]] (bug) — Draft — The file-surface gate picks the active story with a filter that can never match
+- [[BUG-052]] (bug) — Triaged — The file-surface gate picks the active story with a filter that can never match
 - [[BUG-053]] (bug) — Draft — Commits made inside cleargate-cli are completely ungated
 - [[BUG-054]] (bug) — Draft — Nine of twelve gate criteria pass on their own unedited template
 - [[BUG-055]] (bug) — Draft — A spike charter pushes successfully under the literal cleargate_id "unknown"
@@ -53,35 +56,24 @@
 - [[BUG-057]] (bug) — Draft — CLAUDE.md teaches a draft filename shape that deriveBucket cannot key
 - [[BUG-058]] (bug) — Draft — Predicate Vocabulary omits `marker-absence` — 11 union members, 10 documented shapes, and entry 2's worked example describes the wrong matcher
 - [[BUG-059]] (bug) — Draft — The Task Breakdown loop cannot execute as written — two defects
-- [[BUG-060]] (bug) — Draft — Four cleargate-cli test files hardcode this machine's absolute repo path
 - [[BUG-061]] (bug) — Draft — The greedy block match still eats user prose, and the reason it is greedy is no longer true
 - [[BUG-062]] (bug) — Draft — The collision extractor derives no dependency edges and reads prose as file surface
 - [[BUG-063]] (bug) — Draft — The inline-id-regex gate cannot see a capture group, which is the form it exists to catch
 - [[BUG-064]] (bug) — Draft — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
 - [[BUG-065]] (bug) — Draft — `proposal` is a registered, actively-used work-item type with no authoring template
 - [[BUG-066]] (bug) — Draft — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
-- [[BUG-067]] (bug) — Triaged ⚠︎ drift — `cleargate stamp` corrupts frontmatter when an `<instructions>` block precedes it
 - [[BUG-070]] (bug) — Triaged — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
 - [[BUG-072]] (bug) — Triaged — `listed-item` counts only `- ` bullets, so an ordered list scores zero
 - [[BUG-074]] (bug) — Triaged — A state transition dirties the tree and fails the next story's bounce-readiness check
 - [[BUG-075]] (bug) — Triaged — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing — a story can reach `Done` without QA
-- [[BUG-085]] (bug) — Ready ⚠︎ drift — Canonical `.claude/` fixes never reach the live instance, and nothing detects it — BUG-068's own fix is inert in the repo that filed it
 - [[BUG-086]] (bug) — Draft — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
 - [[BUG-087]] (bug) — Draft — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
 - [[BUG-088]] (bug) — Draft — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
-- [[BUG-089]] (bug) — Ready ⚠︎ drift — Both blocking PreToolUse gates exit 1, which Claude Code treats as non-blocking — the planning-first gate and the flashcard write-gate are fail-open
-- [[BUG-090]] (bug) — Draft — `sprint init` rejects every freshly scaffolded story — positional frontmatter in assert_story_files.mjs and close_sprint.mjs, and no `approved:` key in the epic/story templates
 - [[BUG-091]] (bug) — Draft — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
 - [[BUG-092]] (bug) — Draft — `cleargate init` into an existing `.claude/settings.json` wires only 2 of the 7 ClearGate hooks
 - [[BUG-093]] (bug) — Draft — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
 - [[BUG-094]] (bug) — Draft — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
 - [[BUG-095]] (bug) — Draft — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
-- [[BUG-096]] (bug) — Triaged — The init-parity test fixture leaks a temp directory on every scenario run
-- [[BUG-097]] (bug) — Triaged — Four CLI output defects a new user hits in the first session (gate -v, stamp --dry-run, wiki query, scaffold-lint)
-- [[BUG-098]] (bug) — Triaged — The remaining positional frontmatter readers misread or corrupt `<instructions>`-led work items (BUG-067 / BUG-090 carry-forward)
-- [[BUG-099]] (bug) — Triaged — `codex-hooks.mjs check --write-result` writes no status or exit code, so sprint close always fails STORY-058-10's deferred verification
-- [[BUG-100]] (bug) — Triaged — A Codex install cannot run the sprint loop: Codex's default sandbox makes `.git` read-only and ClearGate never configures it
-- [[BUG-101]] (bug) — Triaged — Codex dispatches are never attributed to a work item: live `spawn_agent` messages are encrypted, and the hook reads only the message
 - [[BUG-102]] (bug) — Triaged — The serial driver needs a waves.json that the tiny-sprint rule omits, and its verdicts never move state.json
 - [[BUG-103]] (bug) — Triaged — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
 - [[BUG-104]] (bug) — Triaged — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
@@ -97,14 +89,17 @@
 - [[BUG-114]] (bug) — Triaged — `close_sprint.mjs` cannot find a globally installed CLI, so Gate 4 is unreachable for global and npx users
 - [[BUG-115]] (bug) — Triaged — Consolidation (§D.5.1) requires a `code-simplifier` agent that ClearGate does not install
 - [[BUG-116]] (bug) — Triaged — DevOps halts on a missing Architect report that the skill says a clean-scan story never has
+- [[BUG-117]] (bug) — Draft — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know
+- [[BUG-118]] (bug) — Triaged — Sprint close marks carried-over (Parking Lot) items Completed and archives them
+- [[BUG-119]] (bug) — Triaged — Sprint close halts on incomplete parents that have nothing to do with the closing sprint
 
 ## Archive
 
 - Epics: 33 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 34 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Sprints: 35 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 105 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 45 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- CRs: 107 Completed · 1 Abandoned · [expand](archive/crs.md)
+- Bugs: 57 Completed · 1 Abandoned · [expand](archive/bugs.md)
 
 ## Contradictions
 

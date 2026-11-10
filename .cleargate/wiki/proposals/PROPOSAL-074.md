@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md"
-last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest: "2026-10-08T13:22:57.536Z"
 last_ingest_commit: "9c391f2be41469898f0ee5620fffbf8042a5ba28"
 repo: "planning"
 ---

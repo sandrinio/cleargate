@@ -5,9 +5,9 @@ parent: ""
 children: []
 status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md"
-last_ingest: "2026-08-30T22:18:10.906Z"
-last_ingest_commit: "8a306a5d6eff6e90b64b5bf128a81d682aec481f"
+raw_path: ".cleargate/delivery/archive/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md"
+last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
 repo: "planning"
 ---
 
@@ -28,7 +28,7 @@ repo: "planning"
     <file path=".claude/skills/sprint-execution/SKILL.md" action="modify" />
     <file
 
-[+7,652 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md]
+[+7,652 bytes not shown — read .cleargate/delivery/archive/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

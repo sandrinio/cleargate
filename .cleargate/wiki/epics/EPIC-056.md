@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-056_CI_Verification_Layer.md"
-last_ingest: "2026-08-30T22:18:10.906Z"
+last_ingest: "2026-11-07T17:40:26.160Z"
 last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 ---
@@ -37,7 +37,7 @@ repo: "planning"
 
 **Why are we doing this?**
 
-[+7,215 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-056_CI_Verification_Layer.md]
+[+7,416 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-056_CI_Verification_Layer.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter
