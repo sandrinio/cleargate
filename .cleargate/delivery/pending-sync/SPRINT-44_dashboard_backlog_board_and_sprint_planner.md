@@ -29,6 +29,7 @@ stories:
   - STORY-062-02
   - STORY-062-03
   - STORY-062-04
+  - STORY-062-05
 bugs: []
 crs: []
 sprint_goal: |
@@ -83,6 +84,7 @@ Ship `cleargate dashboard`: one local page where the owner sees every open work 
 | `STORY-062-02` | Backlog collector and Backlog tab | standard | M1 | y | low |
 | `STORY-062-03` | `cleargate sprint add` and `remove` command | standard | M1 | y | med |
 | `STORY-062-04` | Plan tab and guarded write endpoint | standard | M2 | n | med |
+| `STORY-062-05` | Backlog ticket view and host guard (mid-sprint scope add, owner-approved at the walkthrough) | standard | M3 | n | low |
 
 ## 2. Execution Strategy
 *(Written by Architect during Sprint Design Review, architect-reader ×4 → architect-synth, 2026-11-10.)*
@@ -323,3 +325,11 @@ Ruling (a) recorded 2026-11-10. These are the integration layers; all four stori
 - 2026-11-10T13:45Z · STORY-062-04 · MERGED into cli main 8f71c87 (--no-ff, local). Full suite 3778 tests: 3776 pass, 0 fail, 2 skipped. SKILL.md copies byte-identical; prebuild codex check passes. Worktrees and branch removed; state Done. All four stories Done → Phase D.
 - 2026-11-10T13:45Z · FLASHCARD 2026-11-10 — approved: "`npm run gen:codex -- --check` ignores --check and rewrites files…" (#codegen #gen-codex).
 - 2026-11-10T13:05 local · Phase D · dist rebuilt from cli main 8f71c87 for the walkthrough (live /.claude re-sync still deferred to Gate 4). Orchestrator pre-check of the Goal Acceptance Check on a scratch git copy of `.cleargate/` (no `.active`): (1) `dashboard --serve` → Backlog/Plan/Sprint tabs, "No sprint is active", 135 backlog items all with gate badges, 0 diagnostics; (2) `sprint add SPRINT-43 BUG-037 --json` + `sprint remove` → diff is stamps only (updated_at/version, last_gate_check); a stale claim (CR-083, claimed by Completed SPRINT-36) is reassigned with the warning and the Plan tab shows the same "will be reassigned" warning; (3) POST /plan without token → 403; with token → 200, same frontmatter change as the CLI add; (4) full suite green at 8f71c87 (3776/0 fail). (5) pending Gate 4. Real dashboard started for the walkthrough: http://localhost:4714 (4713 belongs to another repo's dashboard).
+- 2026-11-10T13:20 local · Phase D walkthrough · UR feedback from owner: "need to be able to read those tickets just like in sprint dashboard" (Backlog rows). Classified CR:scope-change (not in EPIC-062 spec, so not UR:bug); goal-relevant (assembling the next sprint needs reading items). Owner chose "This sprint" + "Yes, all routes" (Host guard on every route, closing the 04 post-flight DNS-rebinding finding). Filed STORY-062-05 (gate 14/14 pass), added to frontmatter + §1 as M3, registered in state via a scope-add event (run_id scope-add:SPRINT-44:STORY-062-05). Loop: Architect M3 → QA-Red → TPV → Dev → QA → post-flight → DevOps; walkthrough resumes after merge.
+- 2026-11-10T13:35 local · STORY-062-05 · Architect M3 plan written (no existing test edits; blast radius clean — every existing server test sends a loopback Host on the live port). Four non-blocking spec clarifications logged in sprint-context and R4. FLASHCARD approved ×3 (#dashboard #client listeners; #dashboard #test-harness doc-btn CSS; #dashboard #security readDeliveryDoc prefix match). QA-Red dispatched.
+- 2026-11-10T13:50 local · STORY-062-05 · QA-Red committed 7299d64 (ticket-view.red 24 tests: 22 red / 2 unchanged-behaviour green; host-guard.red 27: 9 red / 18 green; 5/5 scenarios; no existing test edited; neighbours green). FLASHCARD approved ×2 (#qa #test-harness vm parent pointer; fetch-count-first). Pre-gate flags only BUG-087 (direct typecheck exit 0) → TPV dispatched.
+- 2026-11-10T13:55 local · STORY-062-05 · TPV APPROVED (51 tests: 20 pass / 31 assertion-only fails; teardown clean; BUG-087 confirmed). FLASHCARD approved (#test-harness #dashboard stale sentinelIntervalMs). Developer dispatched.
+- 2026-11-10T14:05 local · STORY-062-05 · Developer done a4ddda5 (collect.ts/serve.ts/render.ts only; no M3 deviations): both reds green (24 + 27) and 18 neighbour files green; typecheck clean. QA-Verify dispatched.
+- 2026-11-10T14:15 local · STORY-062-05 · QA-Verify PASS (5/5 scenarios; 20 files green; R1–R5 literal; manual temp copy: /doc BUG-106 200, SPRINT-44 / ../../etc/passwd / empty 404, foreign Host 403 on /, /data, /healthz, 404 path; loopback 200; delivery tree untouched).
+- 2026-11-10T14:30 local · STORY-062-05 · Architect post-flight PASS (BUG-087 confirmed; merge-tree clean = a4ddda5's tree; Host matrix probed live incl. [::1], bare host, HTTP/1.0 no-Host; real two-repo port-walk probe OK; refused requests don't keep the daemon alive). New follow-ups: backlog 2 s whole-list redraw can drop a view click mid-rewrite (raises the queued redraw item), --port 80 vs Host allowlist, doc tidy (serve.ts header, SKILL.md:110), aria-label on view buttons, collect.node.test.ts temp-dir leak. FLASHCARD approved ×2. Task Breakdown ticked. DevOps merge dispatched.
+- 2026-11-10T15:00 local · STORY-062-05 · MERGED into cli main 4200799 (--no-ff, local). Full suite 3829 tests: 3827 pass, 0 fail, 2 skipped. Worktrees and branch removed; state Done. dist rebuilt from 4200799; walkthrough dashboard restarted on :4714 (smoke: foreign Host /data 403; /doc STORY-062-05 200; archived CR-084 404). Walkthrough resumes.

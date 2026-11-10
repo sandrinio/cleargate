@@ -1,3 +1,11 @@
+2026-11-10 · #dashboard #security · Host allowlist is host:port; browsers omit :80, so a dashboard on port 80 would 403 every page — refuse 80 or allow bare host.
+2026-11-10 · #dashboard #client · cgRenderBacklogList rewrites #backlog-list every 2 s poll; row buttons lose focus/clicks — key the redraw like Plan's lkey.
+2026-11-10 · #test-harness #dashboard · red serve() opts still pass stale sentinelIntervalMs (as any); never re-add — dashboard-lifecycle.red bans the string
+2026-11-10 · #qa #test-harness · A red that throws TypeError on an undefined fetch record is a harness bug; assert the fetch count first.
+2026-11-10 · #qa #test-harness · vm El stubs need a parent pointer so closest() can model a click inside a toggling ancestor.
+2026-11-10 · #dashboard #security · readDeliveryDoc matches by id PREFIX across pending-sync AND archive; never use it to serve a requested id.
+2026-11-10 · #dashboard #test-harness · backlog-tab.red bans doc-btn inside the SSR backlog section; .doc-btn CSS belongs in the global STYLE only.
+2026-11-10 · #dashboard #client · Separate document click listeners all fire; a return in one never stops another — guard each (.doc-btn early return).
 2026-11-10 · #codegen #gen-codex · `npm run gen:codex -- --check` ignores --check and rewrites files; the real check is prebuild's build-codex-payload.mjs --check.
 2026-11-10 · #dashboard #security · Host-check every dashboard route, not only POST: GET / and /data are DNS-rebinding readable; the POST Host check is what protects the token.
 2026-11-10 · #dashboard #sprint-scope · Plan-tab claim rules mirror sprint add's claim branch; change both or neither (parity red E4).
