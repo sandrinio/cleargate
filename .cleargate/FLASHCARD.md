@@ -1,3 +1,4 @@
+2026-10-28 · #frontmatter #stamp · Stamp hook unquotes frontmatter scalars; a later edit adding ": " to one breaks the YAML parse. Avoid colons.
 2026-10-04 · #close #carry-over · Until BUG-118 ships, close Step 2.6d archives Parking Lot/carry_over items as Completed; restore them after.
 2026-10-04 · #close #git · git mv after editing a file stages the old index copy; git add the new path again or the edit misses the commit.
 2026-09-30 · #tools #test-harness · Yielded exec output is not completion; retain session_id and poll to final exit. Save long-suite logs durably.
