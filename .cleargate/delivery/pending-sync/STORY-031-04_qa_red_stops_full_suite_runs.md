@@ -2,7 +2,7 @@
 story_id: STORY-031-04
 parent_epic_ref: EPIC-031
 parent_cleargate_id: null
-sprint_cleargate_id: SPRINT-42
+sprint_cleargate_id: SPRINT-43
 carry_over: false
 status: Draft
 ambiguity: 🟢 Low

@@ -1,17 +1,19 @@
 ---
 bug_id: BUG-052
 parent_ref: EPIC-043
-parent_cleargate_id: "EPIC-043"
-sprint_cleargate_id: null
+parent_cleargate_id: EPIC-043
+sprint_cleargate_id: SPRINT-42
 carry_over: false
-status: Draft
+status: Triaged
 severity: P2-Medium
 reporter: orchestrator
-approved: false
+approved: true
+approved_by: sandrinio
+approved_at: 2026-10-08T00:00:00Z
 area: planning-layer
-context_source: verified codebase grounding — direct reading of file_surface_diff.sh and constants.mjs during EPIC-054 M1 planning; surfaced by the M1 Architect and independently confirmed
+context_source: verified codebase grounding — direct reading of file_surface_diff.sh and constants.mjs during EPIC-054 M1 planning; surfaced by the M1 Architect and independently confirmed. AMENDED 2026-10-04 — independently reproduced downstream by Kurnera (its BUG-006, cleargate 0.26.1, a full sprint worked around with SKIP_SURFACE_GATE=1) and fixed there locally by resolving the work item from the branch name (Kurnera commit 2d0bd2f); owner folded this bug into SPRINT-42 alongside EPIC-059. Canonical path re-pointed to cleargate-cli/scaffold (STORY-058-01).
 created_at: 2026-08-27T00:00:00Z
-updated_at: 2026-08-27T00:00:00Z
+updated_at: 2026-10-08T00:00:00Z
 created_at_version: cleargate@0.24.2
 updated_at_version: cleargate@0.24.2
 server_pushed_at_version: null
@@ -25,7 +27,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-08-27T14:13:21Z
+  last_gate_check: 2026-10-08T13:22:51Z
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
@@ -42,12 +44,12 @@ last_synced_body_sha: null
 ### Open Questions
 
 - **Question:** Once the filter is repaired, does the gate become *more* obstructive than it is today?
-- **Recommended:** Yes, and that is the point — but it should land with the orchestrator-lane question below, not before it. Repairing the filter alone converts a wrong-but-lenient gate into a right-and-strict one, which will start blocking orchestrator commits that touch planning artifacts for items other than the in-flight story.
-- **Human decision:** {populated during Brief review}
+- **Recommended:** Yes, and that is the point — but it should land with the orchestrator-lane question below, not before it. Repairing the filter alone converts a wrong-but-lenient gate into a right-and-strict one, which will start blocking orchestrator commits that touch planning artifacts for items other than the in-flight story. **Update 2026-10-04:** resolve the item from the branch name first (`story/<ID>` → `<ID>`), as Kurnera's local fix does — on a story branch that is exact, ends the "which in-flight story?" ambiguity for parallel waves, and makes the `state.json` lookup a fallback for branches that carry no id. The state filter is still corrected to `VALID_STATES` for that fallback.
+- **Human decision:** Accepted 2026-10-08 (owner): resolve the item from the branch name first (`story/<ID>` → `<ID>`); the `state.json` lookup is the fallback for branches with no id, and its filter is corrected to `VALID_STATES`.
 
 - **Question:** Should the gate exempt `.cleargate/delivery/**` and `.cleargate/sprint-runs/**` when the committing branch is the sprint branch rather than a story branch?
-- **Recommended:** Yes. There is currently no orchestrator lane at all — `SKIP_SURFACE_GATE=1` is the only escape, and it disables the gate wholly rather than scoping it. This was raised during wave 2 as an unfiled framework gap; this bug is its home.
-- **Human decision:** {populated during Brief review}
+- **Recommended:** Yes. There is currently no orchestrator lane at all — `SKIP_SURFACE_GATE=1` is the only escape, and it disables the gate wholly rather than scoping it. This was raised during wave 2 as an unfiled framework gap; this bug is its home. With branch-name resolution, "a branch with no story id" is exactly the orchestrator lane: on such a branch, `.cleargate/delivery/**` and `.cleargate/sprint-runs/**` pass without any story lookup.
+- **Human decision:** Accepted 2026-10-08 (owner): yes. A branch with no story id is the orchestrator lane; on it, `.cleargate/delivery/**` and `.cleargate/sprint-runs/**` pass without a story lookup. No new bypass variable.
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -145,13 +147,37 @@ if a human prefers to keep hand-authored sprint docs gated. That alone removes t
 block and most of the pressure to reach for `SKIP_SURFACE_GATE=1`. Then (a) and the dead filter, which are
 the deeper correctness problem but need the orchestrator-lane decision in Open Questions settled first.
 
+### 3.2 Downstream confirmation — Kurnera, 2026-10-04
+
+A downstream install (Kurnera, cleargate 0.26.1) hit the same defect independently and filed it as its own
+BUG-006. With two stories `Ready to Bounce` and the rest `Done`, every story commit was checked against the last
+story DevOps marked `Done` — corollary (a) above, in the ordinary case:
+
+```
+$ git commit   (in .worktrees/STORY-007-03, staging apps/web/src/patients/register/registerForm.test.ts)
+[surface-gate] BLOCKED: staged files outside declared §3.1 surface:
+  off-surface: apps/web/src/patients/register/registerForm.test.ts
+
+$ bash .cleargate/scripts/file_surface_diff.sh --story-file .cleargate/delivery/pending-sync/STORY-007-03_register_a_patient.md
+exit=0
+```
+
+Its wave runner told every agent to self-check with `--story-file` and then commit with `SKIP_SURFACE_GATE=1`
+for the whole sprint — the gate reduced to a voluntary check. Kurnera fixed it locally (its commit `2d0bd2f`) by
+resolving the work item from the branch name: `story/(STORY-NNN-NN|CR-NNN|BUG-NNN)` names the item and wins
+over `state.json`; the `state.json` lookup only serves branches with no id. `file_surface_diff.sh` installs with
+overwrite policy `always`, so `cleargate upgrade` will erase that local fix until this bug ships upstream.
+
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
 **Investigate / Modify:**
 - `.cleargate/scripts/file_surface_diff.sh` (:123-132 and the fallback immediately below it)
 - `.cleargate/scripts/constants.mjs` — `VALID_STATES` / `TERMINAL_STATES` are the vocabulary to filter against
-- `cleargate-planning/.cleargate/scripts/file_surface_diff.sh` — the canonical mirror; Cross-Cutting Rule 1
-  applies, both trees in the same commit
+- `cleargate-cli/scaffold/core/.cleargate/scripts/file_surface_diff.sh` — the canonical source since STORY-058-01
+  (the `cleargate-planning/` copy is frozen; do not edit it); live and canonical in the same story
+- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/pre-commit-surface-gate.sh` and its live mirror — read only,
+  to confirm how the hook invokes the script; change it only if passing `--story-file` from the branch is simpler
+  than resolving inside the script
 
 **Explicitly NOT in scope:** widening `SKIP_SURFACE_GATE`, or adding new bypass environment variables. The
 fix is to make the gate correct, not easier to switch off.
@@ -164,7 +190,9 @@ The test does not exist yet. It must assert against a `state.json` fixture that 
 story in the state that actually means in-flight (`Bouncing`), and — critically — that **every string the
 resolver filters on is a member of `VALID_STATES`**. That second assertion is the one that would have caught
 this, and it generalises: any future edit that invents a state name fails immediately instead of silently
-disabling the branch.
+disabling the branch. With the branch-name fix it additionally asserts: on `story/STORY-A` with `STORY-B` updated
+more recently, a file on STORY-A's §3.1 passes and a file off it fails (Kurnera's two-case test); on a branch with
+no story id, `.cleargate/delivery/**` and `.cleargate/sprint-runs/**` pass.
 
 A test that merely checks "the gate blocks an off-surface file" passes today, against the fallback.
 
@@ -181,6 +209,8 @@ A test that merely checks "the gate blocks an off-surface file" passes today, ag
 - [[BUG-053]] — filed the same day. Related in effect, not in cause: that one is enforcement that never
   runs, this one is enforcement that runs against the wrong target.
 - [[BUG-051]] — same-day sibling; another invariant assumed enforced that nothing enforces.
+- [[EPIC-059]] — carries the downstream lessons that surfaced this bug's re-discovery; its Rule 4 ("file the
+  defect the same day you work around it") exists because Kurnera worked around this one for a full sprint.
 
 ## Context Source
 
@@ -194,7 +224,7 @@ containing no story code. No prior epic approval; filed for triage.
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text.*
 
@@ -202,6 +232,6 @@ Requirements to pass to Green (Ready for Fix):
 - [x] Reproduction steps are 100% deterministic.
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached.
-- [ ] Verification command (failing test) is provided. — named, but the test does not exist, and its shape
-      depends on the orchestrator-lane decision in Open Questions.
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] Verification command (failing test) is provided. — named, with assertions specified in §5, including the
+      orchestrator-lane case (Open Questions decided 2026-10-08).
+- [x] `approved: true` is set in the YAML frontmatter.
