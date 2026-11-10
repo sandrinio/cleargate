@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "STORY-062-06": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-10T17:44:30.036Z",
+      "updated_at": "2026-11-10T18:12:26.933Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "orchestrator-scope-add",
@@ -76,6 +76,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-062-06 → Ready to Bounce",
-  "updated_at": "2026-11-10T17:44:30.036Z"
+  "last_action": "transition STORY-062-06 → Done",
+  "updated_at": "2026-11-10T18:12:26.933Z"
 }

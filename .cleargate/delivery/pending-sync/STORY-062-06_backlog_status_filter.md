@@ -167,9 +167,9 @@ Feature: Backlog status filter
 
 ## Task Breakdown
 
-- [ ] `render.ts`: status select in the bar, `status: 'open'` default, option rebuild -> R1, R4
-- [ ] `render.ts`: status clause in `cgBacklogMatches` with the done set; child rows and expand button follow it -> R2, R3
-- [ ] `render.ts`: skip the list rewrite when the HTML is unchanged -> R4
+- [x] `render.ts`: status select in the bar, `status: 'open'` default, option rebuild -> R1, R4
+- [x] `render.ts`: status clause in `cgBacklogMatches` with the done set; child rows and expand button follow it -> R2, R3
+- [x] `render.ts`: skip the list rewrite when the HTML is unchanged -> R4
 
 ## 4. Quality Gates
 

@@ -1,5 +1,6 @@
+2026-11-10 · #dashboard #client · Backlog redraw-skip: compare the stored last-written HTML, never el.innerHTML (browser read-back normalises &#39;/&quot;).
 2026-11-10 · #dashboard #security · Host allowlist is host:port; browsers omit :80, so a dashboard on port 80 would 403 every page — refuse 80 or allow bare host.
-2026-11-10 · #dashboard #client · cgRenderBacklogList rewrites #backlog-list every 2 s poll; row buttons lose focus/clicks — key the redraw like Plan's lkey.
+2026-11-10 · #dashboard #client · cgRenderBacklogList rewrites #backlog-list every 2 s poll; row buttons lose focus/clicks — key the redraw like Plan's lkey (fixed STORY-062-06).
 2026-11-10 · #test-harness #dashboard · red serve() opts still pass stale sentinelIntervalMs (as any); never re-add — dashboard-lifecycle.red bans the string
 2026-11-10 · #qa #test-harness · A red that throws TypeError on an undefined fetch record is a harness bug; assert the fetch count first.
 2026-11-10 · #qa #test-harness · vm El stubs need a parent pointer so closest() can model a click inside a toggling ancestor.
