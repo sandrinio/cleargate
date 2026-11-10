@@ -1,3 +1,5 @@
+2026-11-10 · #merge #dashboard · Client-script stub/fill conflict: drop BOTH stubs; a kept later 'function cgX' redeclaration silently wins.
+2026-11-10 · #dashboard #daemon · One long-lived .dashboard.json + pid-only isAlive in stopDaemon can SIGTERM a recycled pid after reboot.
 2026-11-10 · #zsh #git · "$T:src/x" in zsh reads :s as a modifier (bad substitution); write "${T}:src/x" for git show <tree>:<path>.
 2026-11-10 · #merge #contract · Swapping two no-upstream items' merge order makes the later one re-integrate main + re-QA (rule 13); preview with merge-tree.
 2026-11-10 · #surface-gate #worktree · §3.1 root files need a ./ prefix (`./.gitignore`); a bare `.gitignore` is dropped, so the outer commit is blocked.
