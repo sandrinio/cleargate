@@ -1,7 +1,7 @@
 {
   "schema_version": 3,
   "sprint_id": "SPRINT-41",
-  "sprint_status": "Active",
+  "sprint_status": "Completed",
   "stories": {
     "BUG-067": {
       "state": "Done",
@@ -316,11 +316,11 @@
       "lane_demotion_reason": null
     },
     "BUG-102": {
-      "state": "Bouncing",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-30T15:37:53.757Z",
+      "updated_at": "2026-10-04T06:31:39.132Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -328,11 +328,11 @@
       "lane_demotion_reason": null
     },
     "BUG-103": {
-      "state": "Bouncing",
+      "state": "Parking Lot",
       "qa_bounces": 1,
       "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-09-30T16:26:44.015Z",
+      "updated_at": "2026-10-04T06:31:39.234Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -340,11 +340,11 @@
       "lane_demotion_reason": null
     },
     "BUG-104": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T07:54:45.421Z",
+      "updated_at": "2026-10-04T06:31:39.391Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -352,11 +352,11 @@
       "lane_demotion_reason": null
     },
     "BUG-105": {
-      "state": "Bouncing",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-30T16:09:03.652Z",
+      "updated_at": "2026-10-04T06:31:39.514Z",
       "notes": "Codex dogfood fix batch (M7); lane per plans/M7.md.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -364,11 +364,11 @@
       "lane_demotion_reason": null
     },
     "BUG-106": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T08:29:10.511Z",
+      "updated_at": "2026-10-04T06:31:39.618Z",
       "notes": "Codex dogfood fix batch (M7, OD-M7-2); upstream STORY-058-13 + BUG-101.",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -376,11 +376,11 @@
       "lane_demotion_reason": null
     },
     "BUG-107": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.493Z",
+      "updated_at": "2026-10-04T06:31:39.718Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -388,11 +388,11 @@
       "lane_demotion_reason": null
     },
     "BUG-108": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.495Z",
+      "updated_at": "2026-10-04T06:31:39.828Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -400,11 +400,11 @@
       "lane_demotion_reason": null
     },
     "BUG-109": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.495Z",
+      "updated_at": "2026-10-04T06:31:39.931Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -412,11 +412,11 @@
       "lane_demotion_reason": null
     },
     "BUG-110": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.031Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -424,11 +424,11 @@
       "lane_demotion_reason": null
     },
     "BUG-111": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.130Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -436,11 +436,11 @@
       "lane_demotion_reason": null
     },
     "BUG-112": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.230Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -448,11 +448,11 @@
       "lane_demotion_reason": null
     },
     "BUG-113": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.329Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -460,11 +460,11 @@
       "lane_demotion_reason": null
     },
     "BUG-114": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.428Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -472,11 +472,11 @@
       "lane_demotion_reason": null
     },
     "BUG-115": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.545Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -484,11 +484,11 @@
       "lane_demotion_reason": null
     },
     "BUG-116": {
-      "state": "Ready to Bounce",
+      "state": "Parking Lot",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-09-27T09:01:32.496Z",
+      "updated_at": "2026-10-04T06:31:40.643Z",
       "notes": "Codex dogfood fix batch, M7 addendum (issues I17-I27).",
       "lane": "standard",
       "lane_assigned_by": "orchestrator",
@@ -496,6 +496,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "qa-bounce BUG-103: qa_bounces=1",
-  "updated_at": "2026-09-30T16:26:44.015Z"
+  "last_action": "close_sprint: sprint SPRINT-41 completed",
+  "updated_at": "2026-10-04T07:03:41.820Z"
 }
