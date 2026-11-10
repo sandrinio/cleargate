@@ -30,6 +30,7 @@ stories:
   - STORY-062-03
   - STORY-062-04
   - STORY-062-05
+  - STORY-062-06
 bugs: []
 crs: []
 sprint_goal: |
@@ -85,6 +86,7 @@ Ship `cleargate dashboard`: one local page where the owner sees every open work 
 | `STORY-062-03` | `cleargate sprint add` and `remove` command | standard | M1 | y | med |
 | `STORY-062-04` | Plan tab and guarded write endpoint | standard | M2 | n | med |
 | `STORY-062-05` | Backlog ticket view and host guard (mid-sprint scope add, owner-approved at the walkthrough) | standard | M3 | n | low |
+| `STORY-062-06` | Backlog status filter (mid-sprint scope add, owner request at the walkthrough) | standard | M4 | n | low |
 
 ## 2. Execution Strategy
 *(Written by Architect during Sprint Design Review, architect-reader ×4 → architect-synth, 2026-11-10.)*
@@ -333,3 +335,5 @@ Ruling (a) recorded 2026-11-10. These are the integration layers; all four stori
 - 2026-11-10T14:15 local · STORY-062-05 · QA-Verify PASS (5/5 scenarios; 20 files green; R1–R5 literal; manual temp copy: /doc BUG-106 200, SPRINT-44 / ../../etc/passwd / empty 404, foreign Host 403 on /, /data, /healthz, 404 path; loopback 200; delivery tree untouched).
 - 2026-11-10T14:30 local · STORY-062-05 · Architect post-flight PASS (BUG-087 confirmed; merge-tree clean = a4ddda5's tree; Host matrix probed live incl. [::1], bare host, HTTP/1.0 no-Host; real two-repo port-walk probe OK; refused requests don't keep the daemon alive). New follow-ups: backlog 2 s whole-list redraw can drop a view click mid-rewrite (raises the queued redraw item), --port 80 vs Host allowlist, doc tidy (serve.ts header, SKILL.md:110), aria-label on view buttons, collect.node.test.ts temp-dir leak. FLASHCARD approved ×2. Task Breakdown ticked. DevOps merge dispatched.
 - 2026-11-10T15:00 local · STORY-062-05 · MERGED into cli main 4200799 (--no-ff, local). Full suite 3829 tests: 3827 pass, 0 fail, 2 skipped. Worktrees and branch removed; state Done. dist rebuilt from 4200799; walkthrough dashboard restarted on :4714 (smoke: foreign Host /data 403; /doc STORY-062-05 200; archived CR-084 404). Walkthrough resumes.
+- 2026-11-10T21:37 local · orchestrator · Owner flagged stale agents: found one ~10 h orphaned test-wait loop (polling /tmp/cg44m1/full.log, from an early merge) and killed it; no other SPRINT-44 process running. Phase D.5.1 started in parallel with the walkthrough: cli worktree .worktrees/S-44-consolidate (branch chore/S-44-consolidate from main 4200799, base 5cbad8d), code-simplifier dispatched.
+- 2026-11-10T21:45 local · Phase D walkthrough · UR feedback from owner (Backlog screenshot): "filter by statuses please? by default it shouldn't show done items". Classified CR:scope-change on the owner's direct request; added as STORY-062-06 (M4, standard, gate 14/14), based on chore/S-44-consolidate 09a69d2. Done = Completed + Abandoned (to confirm at walkthrough). R4 folds in the queued 062-05 follow-up (2 s whole-list redraw drops clicks), same function. Registered in state via scope-add event; state refolded and validated. D.5.1 consolidation committed 09a69d2 (7 src files, +89/-111, no red files; targeted 380/380); D.5.2 QA full suite running.
