@@ -1,3 +1,5 @@
+2026-11-10 · #qa #test-harness · vm.runInContext objects fail assert.deepEqual by prototype; JSON round-trip before comparing
+2026-11-10 · #qa #zsh · `echo == x` in zsh Bash tool errors '= not found' and aborts the rest of the command
 2026-11-10 · #dashboard #serve · serve({port:0}) leaves boundPort and handle.port at 0; port-dependent checks must read server.address().port.
 2026-11-10 · #sha #sprint-scope · lib/sha256.ts hashNormalized strips BOM/CRLF and adds \n; a raw-bytes --expect/expectSha must hash readFileSync bytes.
 2026-11-10 · #codex #skill · Editing a PORTABLE_SKILLS SKILL.md needs npm run gen:codex; codex-payload.red Test 19 runs --check on the real tree.

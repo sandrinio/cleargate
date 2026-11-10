@@ -40,11 +40,11 @@
       "lane_demotion_reason": null
     },
     "STORY-062-04": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-10T06:22:14.265Z",
+      "updated_at": "2026-11-10T06:45:51.329Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -52,6 +52,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-062-04 → Ready to Bounce",
-  "updated_at": "2026-11-10T06:22:14.265Z"
+  "last_action": "transition STORY-062-04 → Bouncing",
+  "updated_at": "2026-11-10T06:45:51.329Z"
 }

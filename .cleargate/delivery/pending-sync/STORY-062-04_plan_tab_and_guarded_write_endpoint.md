@@ -67,7 +67,7 @@ As a ClearGate owner, I want to tick items into a draft sprint on the Plan tab a
   - not approved
   - gate failing, naming the criteria
   - an epic in the sprint with none of its stories in the sprint
-  - in another sprint, shown disabled with that sprint's id
+  - in another sprint, shown disabled with that sprint's id. *(Clarified 2026-11-10, M1 plan decision 1: only a claim by an open sprint (Draft, Ready, Active) disables the row. A claim by a Completed, archived or missing sprint is stale: the row is enabled, with the warning "claimed by <OTHER> (<reason>) — will be reassigned", matching `sprint add`.)*
 - R3: `/data` gains a top-level `plan` key. Existing keys are unchanged.
 - R4: The Plan tab offers a sprint picker, then a list of candidates with checkboxes (current members pre-ticked) and their warnings. A pending-change summary reads "+3 −1". Commit is enabled only when the summary is non-empty. Ticking an epic offers to tick its children; nothing is auto-ticked.
 - R5: Commit sends `POST /plan` with `{ sprintId, add: string[], remove: string[], expectSha }`. The server calls STORY-062-03's `sprintScopeHandler` in-process: first `remove`, then `add`, the second call with the sha the first returned. It responds `{ ok, changed, warnings, sha }`, and the page shows the warnings and refreshes on the next poll. *(Clarified 2026-11-10, M2 plan decision 3: the two calls are not atomic together. If `remove` wrote and `add` is then refused, the 409/422 body carries `partial: { removed, sha }` and the page shows "Removed before the refusal: …". Each handler call alone still writes nothing on refusal.)*

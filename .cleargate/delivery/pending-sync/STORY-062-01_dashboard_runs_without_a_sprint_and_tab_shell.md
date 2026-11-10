@@ -36,15 +36,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-062-01
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-10T05:56:02Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-10T06:49:48Z
+  sessions:
+    - session: 11d4cf54-bf8f-48fe-b10c-fadb7867e924
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-10T05:57:01Z
 ---
 
 # STORY-062-01: Dashboard Runs Without a Sprint, With a Tab Shell
@@ -58,7 +64,7 @@ As a ClearGate owner, I want `cleargate dashboard --open` to work whether or not
 ### 1.2 Detailed Requirements
 - R1: New top-level `cleargate dashboard [--open|--serve|--stop|--port <n>]`, registered in `src/cli.ts`, calling `sprintDashboardHandler`. `cleargate sprint dashboard` stays as an alias with identical behaviour.
 - R2: `--open`, `--serve` and `--stop` no longer require an active sprint. `ensureDaemon` stops returning null for "no active sprint", and `stopDaemon` drops its `no-active-sprint` reason.
-- R3: The daemon record moves from `.cleargate/sprint-runs/<id>/.dashboard.json` to `.cleargate/.dashboard.json`. That path is gitignored in the outer repo's `.gitignore` and in `cleargate-cli/scaffold/core/.gitignore`.
+- R3: The daemon record moves from `.cleargate/sprint-runs/<id>/.dashboard.json` to `.cleargate/.dashboard.json`. That path is gitignored in the outer repo's `.gitignore` and in `cleargate-cli/scaffold/core/.gitignore`. *(Clarified 2026-11-10, M1 plan decision 2: installed repos get their `.cleargate/.gitignore` from `cleargate init` (`src/commands/init.ts:480–497`), so that generated list also gains `/.dashboard.json`, keeping the legacy `/sprint-runs/*/.dashboard.json` line.)*
 - R4: Upgrade compatibility. `ensureDaemon` and `stopDaemon` also read a legacy per-sprint record for the currently active sprint. A live, matching legacy daemon (`isOurs`) is adopted or stopped, never duplicated, and the legacy record is removed once handled.
 - R5: The CR-101 sentinel exit valve in `serve.ts` is removed. The server keeps running when `.active` changes or disappears, and the Sprint view re-resolves the active sprint on every collect. The idle exit valve is unchanged.
 - R6: `/healthz` keeps its keys (`service`, `root`, `sprintId`, `pid`). `sprintId` is `''` when no sprint is active.
@@ -152,7 +158,7 @@ Feature: Dashboard runs without a sprint, with a tab shell
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/daemon.ts` |
-| Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/src/commands/sprint.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/scaffold/core/.gitignore` |
+| Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/src/commands/sprint.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/scaffold/core/.gitignore`, `cleargate-cli/src/commands/init.ts` |
 | Test Files | `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/cr101.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
 | Outer repo | `.gitignore` (meta-repo; committed to the outer repo, not cleargate-cli) |
 | New Files Needed | No |

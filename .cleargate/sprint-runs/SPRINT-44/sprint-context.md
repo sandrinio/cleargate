@@ -90,3 +90,7 @@ Execution (owner ruling (a), Gate 2 2026-11-10; same layout as SPRINT-41 rule 19
 
 _(append only: '<ISO-ts> · <ID> · <one-line note>')_
 - 2026-11-10T07:05Z · STORY-062-04 · CR:spec-clarification from M2 plan: bodyOutOfDate excludes epics (stories ∪ bugs ∪ crs ∪ proposals vs §1 ids minus EPIC-*); remove→add commit not atomic, refusal after a write returns `partial`; §3.1 adds the gen:codex SKILL.md copy and four red test files.
+- 2026-11-10T07:35Z · STORY-062-03 · CR:spec-clarification (M1 decision 1): a claim by a Completed/archived/missing sprint is stale — `add` reassigns with a warning; only an open sprint's claim refuses. New @rules scenario. R9 clarified per M2 risks: sha = raw bytes after stamp/gate/ingest; paths from cli.cwd; exit seams; no import of commands/sprint.ts.
+- 2026-11-10T07:35Z · STORY-062-04 · R2 clarified to match: stale claims are enabled rows with a "will be reassigned" warning.
+- 2026-11-10T07:35Z · STORY-062-01 · CR:spec-clarification (M1 decision 2): `src/commands/init.ts` joins §3.1 for one generated-gitignore line `/.dashboard.json`.
+- 2026-11-10T07:35Z · orchestrator · M1 decision 3: `sprint close` keeps stopping the dashboard. Decision 4: Goal Check 2's demo uses yaml fixed-point files; whole-block re-dumps by stamp/gate on non-normalized files count as stamp changes; follow-up CR for line-level stamp/gate writers at close. Decision 5: new red files use `*.red.node.test.ts`; QA-Red edits existing test files only where an existing assertion must change; §3.1 amended with the red file names once written.
