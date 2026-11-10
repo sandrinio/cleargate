@@ -29,6 +29,8 @@ Thumbs.db
 
 # CR-084: regenerated sprint-dashboard snapshot — per-machine, not team-shared
 .cleargate/sprint-runs/*/dashboard.html
+# EPIC-062: background dashboard record — pid/port, per-machine, not team-shared
+.cleargate/.dashboard.json
 
 # Canonical scaffold ships an EMPTY skeleton — runtime sprint-runs ledger/state
 # must never land under it. A misrouted token-ledger write (wrong root) created
