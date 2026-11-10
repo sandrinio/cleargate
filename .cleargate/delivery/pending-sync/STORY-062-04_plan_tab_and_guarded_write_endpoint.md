@@ -62,7 +62,7 @@ draft_tokens:
 As a ClearGate owner, I want to tick items into a draft sprint on the Plan tab and commit them, so that I assemble the next sprint without editing YAML and see readiness problems before preflight does.
 
 ### 1.2 Detailed Requirements
-- R1: New `collectPlan(cwd, backlog): PlanData` in `src/dashboard/plan.ts`. It returns the sprints in pending-sync that are not Active or Completed, each with `id`, `title`, `status`, its `epics`/`stories`/`bugs`/`crs`/`proposals` lists, `sha` (sha256 of file bytes) and `bodyOutOfDate`. `bodyOutOfDate` is true when the set of ids in the frontmatter lists differs from the ids in the §1 Consolidated Deliverables table. *(Clarified 2026-11-10, M2 plan decision 2: epics are excluded from both sides, because real sprint plans list epics only in frontmatter. The comparison is `stories ∪ bugs ∪ crs ∪ proposals` vs the §1 table ids minus `EPIC-*`.)*
+- R1: New `collectPlan(cwd, backlog): PlanData` in `src/dashboard/plan.ts`. It returns the sprints in pending-sync that are not Active, Completed or Abandoned *(Abandoned added 2026-11-10, orchestrator decision after the 02 post-flight: a terminal status is never a planning target)*, each with `id`, `title`, `status`, its `epics`/`stories`/`bugs`/`crs`/`proposals` lists, `sha` (sha256 of file bytes) and `bodyOutOfDate`. `bodyOutOfDate` is true when the set of ids in the frontmatter lists differs from the ids in the §1 Consolidated Deliverables table. *(Clarified 2026-11-10, M2 plan decision 2: epics are excluded from both sides, because real sprint plans list epics only in frontmatter. The comparison is `stories ∪ bugs ∪ crs ∪ proposals` vs the §1 table ids minus `EPIC-*`.)*
 - R2: Candidates are backlog items (from STORY-062-02's `BacklogData`) whose `sprint` is null or the selected sprint, plus items with `carryOver: true`. Each candidate carries warnings:
   - not approved
   - gate failing, naming the criteria
@@ -177,7 +177,7 @@ Feature: Plan tab and guarded write endpoint
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/plan.ts` |
 | Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-dashboard/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-dashboard/SKILL.md` |
-| Test Files | `cleargate-cli/test/dashboard/plan.node.test.ts`, `cleargate-cli/test/dashboard/plan.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-endpoint.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-roundtrip.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-tab.red.node.test.ts`, `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
+| Test Files | `cleargate-cli/test/dashboard/plan.node.test.ts`, `cleargate-cli/test/dashboard/plan.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-endpoint.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-roundtrip.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-tab.red.node.test.ts`, `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/plan-stale-claims.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/dashboard/plan.ts`, `cleargate-cli/test/dashboard/plan.node.test.ts` |
 
 ### 3.2 Technical Logic
@@ -195,8 +195,8 @@ Feature: Plan tab and guarded write endpoint
 
 ## Task Breakdown
 
-- [ ] `plan.ts`: `collectPlan` sprint listing and exclusions, raw-byte sha, `splitTableRow`, `deliverablesTableIds`, epic-free §1 comparison -> R1
-- [ ] `plan.ts`: candidate pool (incl. members), fixed warning strings, disabled other-sprint rows, diagnostics -> R2
+- [ ] `plan.ts`: `collectPlan` sprint listing and exclusions (Active, Completed, Abandoned, sentinel, state.json), raw-byte sha, `splitTableRow`, `deliverablesTableIds`, epic-free §1 comparison -> R1
+- [ ] `plan.ts`: candidate pool (incl. members and stale claims), fixed warning strings, stale-claim "will be reassigned" warning, disabled rows for open other-sprint claims only, diagnostics -> R2
 - [ ] `serve.ts`: `collectPlanFn`/`scopeHandlerFn` seams; `plan` on `/` and `/data` -> R3
 - [ ] `serve.ts`: per-launch token, `planGuard` (Host/Origin on the live port, JSON, token, 64 KiB), remove→add chain, 200/403/409/422 mapping with `partial` -> R5, R6, R7
 - [ ] `render.ts`: `render(data, opts)`, token via `cgPlanToken`, `renderPlanPanel`, client plan block, out-of-date banner -> R4, R8

@@ -1,3 +1,6 @@
+2026-11-10 · #dashboard #sprint-scope · Plan-tab claim rules mirror sprint add's claim branch; change both or neither (parity red E4).
+2026-11-10 · #planning #amendments · A story R-clarification logged after its M-plan was cut never reached the Dev; amend the M-plan row too.
+2026-11-10 · #dashboard #cache · collectBacklog returns cached BacklogItem objects by reference; consumers must not mutate them.
 2026-11-10 · #merge #dashboard · Client-script stub/fill conflict: drop BOTH stubs; a kept later 'function cgX' redeclaration silently wins.
 2026-11-10 · #dashboard #daemon · One long-lived .dashboard.json + pid-only isAlive in stopDaemon can SIGTERM a recycled pid after reboot.
 2026-11-10 · #zsh #git · "$T:src/x" in zsh reads :s as a modifier (bad substitution); write "${T}:src/x" for git show <tree>:<path>.

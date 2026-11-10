@@ -171,11 +171,11 @@ Feature: Backlog collector and Backlog tab
 
 ## Task Breakdown
 
-- [ ] `collectBacklog` with id/type/title/gate/parent extraction and an mtime cache -> R1, R2
-- [ ] Epic→children map and diagnostics for unparseable files -> R3
-- [ ] Add `backlog` to `/data` and the embedded page data -> R4
-- [ ] Backlog tab: status groups, gate badges, epic expansion -> R5
-- [ ] Client-side type/area/epic filters and search; diagnostics strip -> R6, R7
+- [x] `collectBacklog` with id/type/title/gate/parent extraction and an mtime cache -> R1, R2
+- [x] Epic→children map and diagnostics for unparseable files -> R3
+- [x] Add `backlog` to `/data` and the embedded page data -> R4
+- [x] Backlog tab: status groups, gate badges, epic expansion -> R5
+- [x] Client-side type/area/epic filters and search; diagnostics strip -> R6, R7
 
 ## 4. Quality Gates
 

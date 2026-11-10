@@ -10,3 +10,12 @@ Files (cleargate-cli/test/dashboard/, in worktree .worktrees/STORY-062-04/clearg
 
 Baseline: 49 failing, 0 passing. Typecheck clean (test files are outside tsc).
 Notes: plan.ts imported dynamically per test; unit sandbox uses vm with JSON-normalised comparisons (cross-realm). Run with TMPDIR=/tmp/cg44q4.
+
+## Re-dispatch 1
+
+role: qa
+
+- Written: `test/dashboard/plan-stale-claims.red.node.test.ts` (E1 Abandoned excluded; E2 stale/open claim rows, exact warnings and order; E3 re-read per call; E4 parity with the real `sprintScopeHandler`).
+- Re-scoped: `test/dashboard/plan.red.node.test.ts` test A4 — added `sprintFile(d, 'SPRINT-42');` after the SPRINT-43 fixture line so BUG-052/BUG-060 are claimed by an open sprint. No assertion changed (M2 §A4.1, CR-124 step 6).
+- Baseline at 39a513c: plan-stale-claims.red 0 pass / 4 fail (behavioural; E4 additionally red on the C3 stub until integration); plan.red 9/9 pass; `tsc --noEmit` exit 0.
+- Not committed; orchestrator commits.

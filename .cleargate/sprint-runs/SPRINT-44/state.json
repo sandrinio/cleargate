@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "STORY-062-01": {
-      "state": "QA Passed",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-11-10T07:30:55.921Z",
+      "updated_at": "2026-11-10T07:54:54.555Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -16,11 +16,11 @@
       "lane_demotion_reason": null
     },
     "STORY-062-02": {
-      "state": "Bouncing",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-10T06:51:18.958Z",
+      "updated_at": "2026-11-10T08:20:22.469Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -41,10 +41,10 @@
     },
     "STORY-062-04": {
       "state": "Bouncing",
-      "qa_bounces": 0,
+      "qa_bounces": 1,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-10T06:45:51.329Z",
+      "updated_at": "2026-11-10T08:17:05.507Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -52,6 +52,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-062-01 → QA Passed",
-  "updated_at": "2026-11-10T07:30:55.921Z"
+  "last_action": "transition STORY-062-02 → Done",
+  "updated_at": "2026-11-10T08:20:22.469Z"
 }
