@@ -1,3 +1,7 @@
+2026-11-10 · #dashboard #serve · serve({port:0}) leaves boundPort and handle.port at 0; port-dependent checks must read server.address().port.
+2026-11-10 · #sha #sprint-scope · lib/sha256.ts hashNormalized strips BOM/CRLF and adds \n; a raw-bytes --expect/expectSha must hash readFileSync bytes.
+2026-11-10 · #codex #skill · Editing a PORTABLE_SKILLS SKILL.md needs npm run gen:codex; codex-payload.red Test 19 runs --check on the real tree.
+2026-11-10 · #dashboard #test-harness · cr102 class-parity reads the FIRST <script>; never add a <script> element before the client script.
 2026-11-10 · #sdr #collision-surface · A §3.1 "New Files Needed | Yes — <one path>" cell leaks "Yes — <path>" as a surface token; list new files in Related Files instead.
 2026-11-07 · #qa #test-harness · Single test files need run-default-tests flags (--experimental-test-module-mocks); bare tsx --test fails mock.module files at load.
 2026-11-07 · #ci #gitleaks · gitleaks auto-reads repo-root .gitleaks.toml; prove an allowlist works by scanning with an explicit default-only config.

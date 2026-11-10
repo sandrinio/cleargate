@@ -89,3 +89,4 @@ Execution (owner ruling (a), Gate 2 2026-11-10; same layout as SPRINT-41 rule 19
 ## Mid-Sprint Amendments
 
 _(append only: '<ISO-ts> · <ID> · <one-line note>')_
+- 2026-11-10T07:05Z · STORY-062-04 · CR:spec-clarification from M2 plan: bodyOutOfDate excludes epics (stories ∪ bugs ∪ crs ∪ proposals vs §1 ids minus EPIC-*); remove→add commit not atomic, refusal after a write returns `partial`; §3.1 adds the gen:codex SKILL.md copy and four red test files.
