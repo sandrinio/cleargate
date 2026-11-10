@@ -6,7 +6,7 @@ children: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-001_Document_Metadata.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "c5daa2e17d44c5de50c683745851916812069428"
 repo: "planning"
 ---

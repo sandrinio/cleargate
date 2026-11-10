@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-031_Test_Suite_Wall_Time_Reduction.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
 repo: "planning"
 ---

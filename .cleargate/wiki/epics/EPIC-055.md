@@ -6,7 +6,7 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "0b97950dd8b43e5071fd0da173af49cfd2297628"
 repo: "planning"
 ---

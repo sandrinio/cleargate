@@ -66,7 +66,7 @@
 
 - [[SPRINT-43]] — status: Draft
 
-- [[SPRINT-44]] — status: Draft
+- [[SPRINT-44]] — status: Completed
 
 
 

@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-19_Gate_4_Close_QA_Context_Initiative.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "be268872b9164ccc7b6d2dfc2fef032663546e5d"
 repo: "planning"
 ---

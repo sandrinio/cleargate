@@ -10,7 +10,7 @@ children:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-023_MCP_Native_Source_Of_Truth.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "5f8134f8b1ea5ad975d5687114fbf0f84ca1f53e"
 repo: "planning"
 ---

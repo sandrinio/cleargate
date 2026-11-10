@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-056_CI_Verification_Layer.md"
-last_ingest: "2026-11-07T17:40:26.160Z"
-last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
+last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest_commit: "9ae2ffa2d5a85d507afe06acaf6c745f6e895d35"
 repo: "planning"
 ---
 

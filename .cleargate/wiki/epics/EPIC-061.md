@@ -6,8 +6,8 @@ children: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-061_cli_repo_hygiene_and_layout.md"
-last_ingest: "2026-11-07T17:40:27.412Z"
-last_ingest_commit: ""
+last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest_commit: "bde3df00c4e5fa7a80394a55aca94c02660df348"
 repo: "planning"
 ---
 

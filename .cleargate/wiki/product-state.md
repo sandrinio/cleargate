@@ -6,8 +6,8 @@
 
 | Type | Total | Active | Shipped |
 |------|-------|--------|---------|
-| Epics | 51 | 0 | 35 |
-| Sprints | 44 | 0 | 36 |
+| Epics | 51 | 0 | 36 |
+| Sprints | 44 | 0 | 37 |
 | Proposals | 16 | 0 | 14 |
 | CRs | 120 | 0 | 93 |
 | Bugs | 106 | 0 | 46 |
@@ -371,6 +371,8 @@ _No active epics._
 
 - [[EPIC-054]] (epics) — Completed
 
+- [[EPIC-062]] (epics) — Completed
+
 - [[PROPOSAL-001]] (proposals) — Abandoned
 
 - [[PROPOSAL-002]] (proposals) — Abandoned
@@ -470,5 +472,7 @@ _No active epics._
 - [[SPRINT-40]] (sprints) — Completed
 
 - [[SPRINT-41]] (sprints) — Completed
+
+- [[SPRINT-44]] (sprints) — Completed
 
 

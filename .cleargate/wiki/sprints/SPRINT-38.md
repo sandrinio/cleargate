@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-38_Enforcement_Integrity_Restoration.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "7e88816746b8ec8d0bc9de8ae06915ce3fcaff0c"
 repo: "planning"
 ---

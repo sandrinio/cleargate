@@ -3,13 +3,12 @@ type: epic
 id: "EPIC-062"
 parent: ""
 children: []
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-062_dashboard_backlog_board_and_sprint_planner.md"
-last_ingest: "2026-11-10T05:56:00.505Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-062_dashboard_backlog_board_and_sprint_planner.md"
+last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest_commit: "9d2bc8c9597007f7d12cf32c477364a29752960b"
 repo: "planning"
-sprint_cleargate_id: "SPRINT-44"
 ---
 
 # EPIC-062: Dashboard Backlog Board and Sprint Planner
@@ -25,7 +24,7 @@ sprint_cleargate_id: "SPRINT-44"
     <rule>The Sprint tab renders today's `collect()` output unchanged; `SprintDashboardData` stays backward-compatible (it is also the `/data` contract and the snapshot input).</rule>
     <rule>The page never writes a file itself.
 
-[+20,520 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-062_dashboard_backlog_board_and_sprint_planner.md]
+[+20,520 bytes not shown — read .cleargate/delivery/archive/EPIC-062_dashboard_backlog_board_and_sprint_planner.md]
 
 ## Blast radius
 Affects: no parent/child refs declared in frontmatter

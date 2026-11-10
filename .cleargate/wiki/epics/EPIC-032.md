@@ -6,7 +6,7 @@ children: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-032_Code_Map_Awareness_Layer.md"
-last_ingest: "2026-10-08T13:22:57.536Z"
+last_ingest: "2026-11-10T18:20:47.120Z"
 last_ingest_commit: "eb44e22d41c078a7f8efd139e15a6dfee49f91c2"
 repo: "planning"
 ---

@@ -70,7 +70,7 @@ Sprints not yet started (`activated_at` not set).
 
 - [[SPRINT-43]] — status: Draft
 
-- [[SPRINT-44]] — status: Draft
+- [[SPRINT-44]] — status: Completed
 
 
 
@@ -147,8 +147,6 @@ _No active epics._
 
 - [[EPIC-061]] — status: Draft
 
-- [[EPIC-062]] — status: Draft
-
 
 
 ## Shipped Epics
@@ -219,5 +217,7 @@ _No active epics._
 - [[EPIC-051]] — status: Completed
 
 - [[EPIC-054]] — status: Completed
+
+- [[EPIC-062]] — status: Completed
 
 

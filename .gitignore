@@ -86,3 +86,12 @@ node_modules/
 # Ephemeral dispatch markers (write_dispatch.sh / pre-tool-use-task.sh) — consumed by hook
 .cleargate/sprint-runs/**/.dispatch-*.json
 .cleargate/sprint-runs/_off-sprint/.dispatch-*.json
+
+# >>> cleargate >>>
+# Managed by `cleargate init`. Edits inside this block are overwritten;
+# everything outside it is yours and is never touched.
+
+# Per-story git worktrees created by the sprint execution loop. Ephemeral:
+# `git add -A` would otherwise stage one as an embedded git repository.
+.worktrees/
+# <<< cleargate <<<

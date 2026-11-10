@@ -18,13 +18,11 @@
 - [[EPIC-059]] (epic) — Draft — Planning Catches What Execution Stopped For
 - [[EPIC-060]] (epic) — Draft — Fresh-Context Review Before Approval
 - [[EPIC-061]] (epic) — Draft — cleargate-cli Hygiene, Layout & Public Release
-- [[EPIC-062]] (epic) — Draft — Dashboard Backlog Board and Sprint Planner
 - [[SPRINT-18]] (sprint) — Approved — Sprint 2 — Prepare / Close / Observe Mechanics
 - [[SPRINT-31]] (sprint) — Draft — Test Speed — Runner Split + Scoped QA
 - [[SPRINT-37]] (sprint) — Draft — Connector M2 — Daemon Hardening (Production Posture)
 - [[SPRINT-42]] (sprint) — Draft — Planning Catches What Execution Stopped For
 - [[SPRINT-43]] (sprint) — Draft — Execution-Loop Efficiency + Developer Context
-- [[SPRINT-44]] (sprint) — Draft — Dashboard Backlog Board and Sprint Planner
 - [[PROPOSAL-008]] (proposal) — Draft — Project Config as MCP-Authoritative, UI-Editable, Pulled to Local
 - [[PROPOSAL-009]] (proposal) — Draft — Planning Visibility UX — Sprints, Epic Hierarchy, Activity
 - [[PROPOSAL-012]] (proposal) — Approved — Wiki Contradiction Detection
@@ -95,8 +93,8 @@
 
 ## Archive
 
-- Epics: 33 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 35 Completed · 3 Abandoned · [expand](archive/sprints.md)
+- Epics: 34 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Sprints: 36 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
 - CRs: 107 Completed · 1 Abandoned · [expand](archive/crs.md)
 - Bugs: 57 Completed · 1 Abandoned · [expand](archive/bugs.md)
