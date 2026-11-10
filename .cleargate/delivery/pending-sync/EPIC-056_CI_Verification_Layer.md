@@ -15,9 +15,9 @@ context_source: verified codebase grounding (no .github/workflows in any of the 
 owner: sandrinio
 target_date: 2026-10-31
 created_at: 2026-08-26T00:00:00Z
-updated_at: 2026-08-25T21:19:00Z
+updated_at: 2026-11-07T17:40:24Z
 created_at_version: cleargate@0.24.2
-updated_at_version: cleargate@0.24.2
+updated_at_version: dbad31f8-dirty
 server_pushed_at_version: null
 draft_tokens:
   input: null
@@ -31,7 +31,7 @@ cached_gate_result:
   failing_criteria:
     - id: interrogation-resolved
       detail: 1 occurrence at §11
-  last_gate_check: 2026-08-25T21:19:00Z
+  last_gate_check: 2026-11-07T17:40:24Z
   transition: ready-for-decomposition
 pushed_by: null
 pushed_at: null
@@ -83,7 +83,7 @@ Second gap: `qa.md:98` lets `fast`-lane stories skip typecheck and the test re-r
 ## 2. Scope Boundaries
 
 **✅ IN-SCOPE (Build This)**
-- [ ] `ci.yml` for `cleargate-cli`: typecheck + full `node:test` suite.
+- [x] `ci.yml` for `cleargate-cli`: typecheck + full `node:test` suite. *(Delivered 2026-11-07 by [[STORY-061-03]] under [[EPIC-061]] S7, cli merge `5cbad8d`. It also runs `verify-pack` and a digest-pinned gitleaks scan. Its first GitHub run follows the owner's push go.)*
 - [ ] `ci.yml` for `cleargate-mcp`: typecheck + tests against docker-compose Postgres 18 + Redis 8 services.
 - [ ] `ci.yml` for `cleargate-admin`: typecheck + tests with `node --conditions browser`.
 - [ ] Branch protection with the CI check required on `main` for each repo.

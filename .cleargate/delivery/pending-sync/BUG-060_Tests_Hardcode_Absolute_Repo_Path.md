@@ -4,7 +4,7 @@ parent_ref: EPIC-054
 parent_cleargate_id: EPIC-054
 sprint_cleargate_id: SPRINT-39
 carry_over: false
-status: Draft
+status: Completed
 severity: P2-Medium
 reporter: architect (M3 milestone planning)
 area: planning-layer
@@ -12,9 +12,9 @@ approved: false
 ambiguity: 🟡 Medium
 context_source: verified codebase grounding — measured 2026-08-28 during M3 milestone planning (SPRINT-39) with `command grep -rn "/Users/ssuladze" cleargate-cli/{src,test,scripts}`, cross-referenced against `cleargate-cli/scripts/run-default-tests.mjs:23-29`'s glob to separate default-tier from integration-tier hits. Surfaced while auditing BUG-043's amended §4, which named ONE of these sites; the census found four live ones. Filed as a separate item because the fix is a root-resolution idiom change, not a marker-regex change, and because scoping it into BUG-043 would have repaired 1 of 4.
 created_at: 2026-08-28T00:00:00Z
-updated_at: 2026-08-28T00:00:00Z
+updated_at: 2026-11-07T15:46:15Z
 created_at_version: 9e46ce5
-updated_at_version: 9e46ce5
+updated_at_version: bf828460-dirty
 server_pushed_at_version: null
 draft_tokens:
   input: null
@@ -26,7 +26,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-08-28T10:38:16Z
+  last_gate_check: 2026-11-07T15:46:15Z
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
@@ -146,6 +146,15 @@ The locking test must fail before the fix:
 - A grep guard over `cleargate-cli/test/**/*.node.test.ts`, excluding `_archive/`, asserting zero executable lines containing `/Users/`. It fails today with four hits and passes after the fix.
 - The four repaired files, run from a relocated clone, must report `pass N` **and** `fail 0` **and** `skipped 0`. A run reporting `fail 0` with a non-zero skip count is a failed fix, not a passing one.
 - The default-tier suite run from this machine must be unchanged: same test count, same pass count.
+
+## Resolution
+
+Closed by reference on 2026-11-07. It was folded into [[EPIC-061]] S12, and the fix shipped in two stories:
+
+- [[STORY-061-01]]: cli merge `f8320ca`.
+- [[STORY-061-02]]: cli merge `02c1d8b`. It fixed the remaining sites and added a guard in `test/cr075-standalone-contract.node.test.ts`. The guard fails whenever any test file under `test/`, in either tier, matches `/(Users|home)/[^/'"]+/.*ClearGate`.
+
+QA verified it by grepping `test/` and getting no output.
 
 ## Prior work
 

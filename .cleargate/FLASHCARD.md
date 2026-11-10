@@ -1,3 +1,24 @@
+2026-11-07 · #qa #test-harness · Single test files need run-default-tests flags (--experimental-test-module-mocks); bare tsx --test fails mock.module files at load.
+2026-11-07 · #ci #gitleaks · gitleaks auto-reads repo-root .gitleaks.toml; prove an allowlist works by scanning with an explicit default-only config.
+2026-11-07 · #qa #docker · macOS jq is not a Linux binary; fetch jq-linux-amd64 and mount it at /usr/bin/jq for amd64 container runs.
+2026-11-07 · #ci #docker · Full suite in linux/amd64 node:24 on Apple silicon takes ~10 min (emulated); run it in the background.
+2026-11-07 · #test-harness #mock · await mock.module above a static import never intercepts (ESM hoist); import the subject dynamically after it.
+2026-11-07 · #test-harness #doctor · --session-start tests need <cwd>/cleargate-cli/dist/cli.js stub; else no global cleargate → 🔴 → exit 2.
+2026-11-07 · #gitignore · Root-anchor /.cleargate/ and /cleargate-cli/ in cli; scaffold/core/.cleargate and fixtures are tracked.
+2026-11-07 · #ci #gitleaks · Use --log-opts=HEAD; default --all scans every local ref, so local and CI results diverge.
+2026-11-07 · #tools · actionlint -color is boolean; use -no-color (-color=never is a parse error).
+2026-11-07 · #test-harness #backfill #correction · SUPERSEDES the 2026-09-26 push-hierarchy #danger card: since STORY-061-02 (cli 02c1d8b) its backfill runs on a fixture; nested npm test writes nothing.
+2026-11-07 · #qa #test-harness · init-from-source diffs os.tmpdir(); foreign tmp dirs flake it. Run full suites with a private TMPDIR subdir.
+2026-11-07 · #qa #macos · tsx IPC socket path caps near 104 chars; a deep scratch TMPDIR gives EINVAL listen. Use a short private TMPDIR.
+2026-11-07 · #test-harness #assert · assert.strictEqual(a, 'message', b) passes the message as expected, so the test fails whenever the file exists. Check arg order.
+2026-11-07 · #test-harness #refactor · Cutting a test block at an end marker like '});\n' must assert the marker matches once; an ambiguous marker cuts the wrong block.
+2026-11-07 · #test-harness #backfill · backfill_hierarchy.mjs <dir> walk is NON-recursive; pass the fixture's own pending-sync dir, not its root.
+2026-11-07 · #test-harness #standalone · A literal meta-repo guard also flags skip-when-absent tests; grep the whole default tier, not failing files.
+2026-11-07 · #test-harness #macos · BSD sed -i needs a backup-suffix arg; `sed -i 's/x/y/' file` made a stray empty file. Use python or `-i ''`.
+2026-11-07 · #test-harness #standalone · Top-level node:test before/after hooks work per file under tsx --test; stage canonical scripts there.
+2026-11-07 · #test-harness #scaffold-roots · close_sprint finds the reconciler via SCRIPTS_DIR/../../cleargate-cli/dist; run canonical from a tmp copy + dist link.
+2026-11-07 · #test-harness #standalone · scaffold-layout.red Sc9 allowlists files joining a ROOT with 'cleargate-planning'; moving such reads needs a new row.
+2026-11-07 · #test-harness #baseline · Build standalone fail lists from every 'test at' line incl. :1:1 load errors; report-filename.node.test was missed.
 2026-10-28 · #frontmatter #stamp · Stamp hook unquotes frontmatter scalars; a later edit adding ": " to one breaks the YAML parse. Avoid colons.
 2026-10-04 · #close #carry-over · Until BUG-118 ships, close Step 2.6d archives Parking Lot/carry_over items as Completed; restore them after.
 2026-10-04 · #close #git · git mv after editing a file stages the old index copy; git add the new path again or the edit misses the commit.
