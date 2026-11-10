@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-062
 parent_cleargate_id: EPIC-062
 sprint_cleargate_id: SPRINT-44
 carry_over: false
-status: Draft
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-10T00:00:00Z
@@ -19,14 +19,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-10T00:00:00Z
-updated_at: 2026-11-10T00:00:00Z
+updated_at: 2026-11-10T06:56:36Z
 created_at_version: 0.27.0
-updated_at_version: 0.27.0
+updated_at_version: 7f42e33a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-10T05:52:38Z
+  last_gate_check: 2026-11-10T06:56:36Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -155,7 +155,7 @@ Feature: Backlog collector and Backlog tab
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/backlog.ts` |
 | Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts` |
-| Test Files | `cleargate-cli/test/dashboard/backlog.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
+| Test Files | `cleargate-cli/test/dashboard/backlog.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/backlog.red.node.test.ts`, `cleargate-cli/test/dashboard/backlog-tab.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/dashboard/backlog.ts`, `cleargate-cli/test/dashboard/backlog.node.test.ts` |
 
 ### 3.2 Technical Logic
@@ -171,11 +171,11 @@ Feature: Backlog collector and Backlog tab
 
 ## Task Breakdown
 
-- [ ] `collectBacklog` with id/type/title/gate/parent extraction and an mtime cache -> R1, R2
-- [ ] Epic→children map and diagnostics for unparseable files -> R3
-- [ ] Add `backlog` to `/data` and the embedded page data -> R4
-- [ ] Backlog tab: status groups, gate badges, epic expansion -> R5
-- [ ] Client-side type/area/epic filters and search; diagnostics strip -> R6, R7
+- [x] `collectBacklog` with id/type/title/gate/parent extraction and an mtime cache -> R1, R2
+- [x] Epic→children map and diagnostics for unparseable files -> R3
+- [x] Add `backlog` to `/data` and the embedded page data -> R4
+- [x] Backlog tab: status groups, gate badges, epic expansion -> R5
+- [x] Client-side type/area/epic filters and search; diagnostics strip -> R6, R7
 
 ## 4. Quality Gates
 

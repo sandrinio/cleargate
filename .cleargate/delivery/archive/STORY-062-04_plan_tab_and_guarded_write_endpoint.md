@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-062
 parent_cleargate_id: EPIC-062
 sprint_cleargate_id: SPRINT-44
 carry_over: false
-status: Draft
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-10T00:00:00Z
@@ -36,15 +36,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-062-04
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-10T05:56:08Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-10T06:45:14Z
+  sessions:
+    - session: 11d4cf54-bf8f-48fe-b10c-fadb7867e924
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-10T05:56:43Z
 ---
 
 # STORY-062-04: Plan Tab and Guarded Write Endpoint
@@ -56,15 +62,15 @@ draft_tokens:
 As a ClearGate owner, I want to tick items into a draft sprint on the Plan tab and commit them, so that I assemble the next sprint without editing YAML and see readiness problems before preflight does.
 
 ### 1.2 Detailed Requirements
-- R1: New `collectPlan(cwd, backlog): PlanData` in `src/dashboard/plan.ts`. It returns the sprints in pending-sync that are not Active or Completed, each with `id`, `title`, `status`, its `epics`/`stories`/`bugs`/`crs`/`proposals` lists, `sha` (sha256 of file bytes) and `bodyOutOfDate`. `bodyOutOfDate` is true when the set of ids in the frontmatter lists differs from the ids in the §1 Consolidated Deliverables table.
+- R1: New `collectPlan(cwd, backlog): PlanData` in `src/dashboard/plan.ts`. It returns the sprints in pending-sync that are not Active, Completed or Abandoned *(Abandoned added 2026-11-10, orchestrator decision after the 02 post-flight: a terminal status is never a planning target)*, each with `id`, `title`, `status`, its `epics`/`stories`/`bugs`/`crs`/`proposals` lists, `sha` (sha256 of file bytes) and `bodyOutOfDate`. `bodyOutOfDate` is true when the set of ids in the frontmatter lists differs from the ids in the §1 Consolidated Deliverables table. *(Clarified 2026-11-10, M2 plan decision 2: epics are excluded from both sides, because real sprint plans list epics only in frontmatter. The comparison is `stories ∪ bugs ∪ crs ∪ proposals` vs the §1 table ids minus `EPIC-*`.)*
 - R2: Candidates are backlog items (from STORY-062-02's `BacklogData`) whose `sprint` is null or the selected sprint, plus items with `carryOver: true`. Each candidate carries warnings:
   - not approved
   - gate failing, naming the criteria
   - an epic in the sprint with none of its stories in the sprint
-  - in another sprint, shown disabled with that sprint's id
+  - in another sprint, shown disabled with that sprint's id. *(Clarified 2026-11-10, M1 plan decision 1: only a claim by an open sprint (Draft, Ready, Active) disables the row. A claim by a Completed, archived or missing sprint is stale: the row is enabled, with the warning "claimed by <OTHER> (<reason>) — will be reassigned", matching `sprint add`.)*
 - R3: `/data` gains a top-level `plan` key. Existing keys are unchanged.
 - R4: The Plan tab offers a sprint picker, then a list of candidates with checkboxes (current members pre-ticked) and their warnings. A pending-change summary reads "+3 −1". Commit is enabled only when the summary is non-empty. Ticking an epic offers to tick its children; nothing is auto-ticked.
-- R5: Commit sends `POST /plan` with `{ sprintId, add: string[], remove: string[], expectSha }`. The server calls STORY-062-03's `sprintScopeHandler` in-process: first `remove`, then `add`, the second call with the sha the first returned. It responds `{ ok, changed, warnings, sha }`, and the page shows the warnings and refreshes on the next poll.
+- R5: Commit sends `POST /plan` with `{ sprintId, add: string[], remove: string[], expectSha }`. The server calls STORY-062-03's `sprintScopeHandler` in-process: first `remove`, then `add`, the second call with the sha the first returned. It responds `{ ok, changed, warnings, sha }`, and the page shows the warnings and refreshes on the next poll. *(Clarified 2026-11-10, M2 plan decision 3: the two calls are not atomic together. If `remove` wrote and `add` is then refused, the 409/422 body carries `partial: { removed, sha }` and the page shows "Removed before the refusal: …". Each handler call alone still writes nothing on refusal.)*
 - R6: CSRF guard. At startup the server creates a random 32-byte hex token and embeds it in the served HTML (never in `/data`). `POST /plan` returns 403 and writes nothing unless:
   - header `X-ClearGate-Token` equals the token
   - `Origin` (when present) and `Host` match `http://127.0.0.1:<port>` or `http://localhost:<port>`
@@ -170,8 +176,8 @@ Feature: Plan tab and guarded write endpoint
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/src/dashboard/plan.ts` |
-| Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-dashboard/SKILL.md` |
-| Test Files | `cleargate-cli/test/dashboard/plan.node.test.ts`, `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts` |
+| Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-dashboard/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-dashboard/SKILL.md` |
+| Test Files | `cleargate-cli/test/dashboard/plan.node.test.ts`, `cleargate-cli/test/dashboard/plan.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-endpoint.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-roundtrip.red.node.test.ts`, `cleargate-cli/test/dashboard/plan-tab.red.node.test.ts`, `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/plan-stale-claims.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/dashboard/plan.ts`, `cleargate-cli/test/dashboard/plan.node.test.ts` |
 
 ### 3.2 Technical Logic
@@ -189,12 +195,13 @@ Feature: Plan tab and guarded write endpoint
 
 ## Task Breakdown
 
-- [ ] `collectPlan`: non-active sprints, lists, sha, §1-vs-frontmatter comparison -> R1
-- [ ] Candidate pool and per-candidate warnings from `BacklogData` -> R2
-- [ ] Add `plan` to `/data` -> R3
-- [ ] Per-launch token, `POST /plan` guard and handler call with 200/403/409/422 mapping -> R5, R6, R7
-- [ ] Plan tab UI: picker, checkboxes, diff summary, Commit, warnings, out-of-date banner -> R4, R8
-- [ ] Update canonical sprint-dashboard SKILL.md for the whole epic -> R9
+- [x] `plan.ts`: `collectPlan` sprint listing and exclusions (Active, Completed, Abandoned, sentinel, state.json), raw-byte sha, `splitTableRow`, `deliverablesTableIds`, epic-free §1 comparison -> R1
+- [x] `plan.ts`: candidate pool (incl. members and stale claims), fixed warning strings, stale-claim "will be reassigned" warning, disabled rows for open other-sprint claims only, diagnostics -> R2
+- [x] `serve.ts`: `collectPlanFn`/`scopeHandlerFn` seams; `plan` on `/` and `/data` -> R3
+- [x] `serve.ts`: per-launch token, `planGuard` (Host/Origin on the live port, JSON, token, 64 KiB), remove→add chain, 200/403/409/422 mapping with `partial` -> R5, R6, R7
+- [x] `render.ts`: `render(data, opts)`, token via `cgPlanToken`, `renderPlanPanel`, client plan block, out-of-date banner -> R4, R8
+- [x] `plan.node.test.ts`: helper unit tests -> R1
+- [x] Canonical sprint-dashboard `SKILL.md` for the whole epic, then `npm run gen:codex` for the Codex copy -> R9
 
 ## 4. Quality Gates
 

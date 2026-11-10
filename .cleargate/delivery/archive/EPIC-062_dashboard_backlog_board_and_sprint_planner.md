@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-44
 carry_over: false
 area: cleargate-cli,dashboard,sprint-planning
-status: Draft
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-10T00:00:00Z

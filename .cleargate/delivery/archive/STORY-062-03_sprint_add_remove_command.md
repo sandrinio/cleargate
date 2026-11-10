@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-062
 parent_cleargate_id: EPIC-062
 sprint_cleargate_id: SPRINT-44
 carry_over: false
-status: Draft
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-10T00:00:00Z
@@ -19,14 +19,14 @@ lane: standard
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-10T00:00:00Z
-updated_at: 2026-11-10T00:00:00Z
+updated_at: 2026-11-10T06:56:37Z
 created_at_version: 0.27.0
-updated_at_version: 0.27.0
+updated_at_version: 7f42e33a-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-10T05:53:27Z
+  last_gate_check: 2026-11-10T06:56:37Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -36,15 +36,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-062-03
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-10T05:56:06Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-10T06:49:35Z
+  sessions:
+    - session: 11d4cf54-bf8f-48fe-b10c-fadb7867e924
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-10T05:56:46Z
 ---
 
 # STORY-062-03: `cleargate sprint add|remove` Command
@@ -63,12 +69,13 @@ As a ClearGate owner or orchestrator agent, I want `cleargate sprint add|remove 
   - the sprint file is missing
   - the sprint is Active (named by `resolveActiveSprint`, or `.cleargate/sprint-runs/<id>/state.json` exists) or `status: Completed`
   - an id has no file in pending-sync
-  - an `add` id has a `sprint_cleargate_id` naming a different sprint. The message names that sprint and suggests `cleargate sprint remove <other> <id>`.
+  - an `add` id has a `sprint_cleargate_id` naming a different sprint **that is still open (Draft, Ready or Active)**. The message names that sprint and suggests `cleargate sprint remove <other> <id>`.
+  - *(Clarified 2026-11-10, M1 plan decision 1.)* A claim by a sprint that is Completed, archived, or has no sprint file is **stale**: `add` overwrites it and warns `<ID> was claimed by <OTHER> (<completed|archived|no sprint file>) — reassigned`. Otherwise carried items such as BUG-102..116 (claimed by the Completed SPRINT-41) could never be scheduled without hand-editing YAML.
 - R5: `--expect <sha256>` precondition: when given and it differs from the sprint file's current sha256, exit 3 with "sprint file changed — reload", touching nothing.
 - R6: All-or-nothing writes. Every new file content is computed and validated before the first write. Writes go through `withFrontmatterYaml`, so each body below the frontmatter is byte-identical, using atomic tmp+rename per file.
 - R7: After writing, run `stampFrontmatter`, then `gateCheckHandler`, then `wikiIngestHandler` on every touched file. A failure in these steps is reported as a warning and does not undo the write (exit 0 with warnings).
 - R8: Unready items are accepted (Q2: warn, don't block). `add` of an unapproved or gate-failing item succeeds and prints one warning per item naming the failing criteria.
-- R9: `--json` prints `{ sprintId, op, changed: string[], unchanged: string[], warnings: string[], sha: string /* sprint file sha after write */ }`. Without `--json` it prints one human line per id.
+- R9: `--json` prints `{ sprintId, op, changed: string[], unchanged: string[], warnings: string[], sha: string /* sprint file sha after write */ }`. Without `--json` it prints one human line per id. *(Clarified 2026-11-10, M2 plan cross-story risks; STORY-062-04 calls this handler twice in a row inside the dashboard server.)* `sha` is sha256 of the sprint file's **raw bytes** (`readFileSync`, not `hashNormalized`), computed **after** the stamp, gate-check and ingest steps of R7, so a second call with `expectSha = sha` succeeds. Every path resolves from `cli.cwd`. Gate and ingest run through exit/stdout seams, so a failure can never call `process.exit` in the server process. `sprint-scope.ts` must not import `commands/sprint.ts` (that would create an import cycle through `serve.ts`).
 - R10: The sprint body (§1 Deliverables table, Sprint Design Review) is never edited (Q1).
 
 ### 1.3 Out of Scope
@@ -153,6 +160,14 @@ Feature: cleargate sprint add|remove
     Then the command exits 0
     And it warns "BUG-106 is not approved" and "BUG-106 fails repro-steps-deterministic"
 
+  @rules
+  Scenario: A stale claim by a completed sprint is reassigned
+    Given BUG-106 has sprint_cleargate_id SPRINT-41 and SPRINT-41 has status Completed
+    When the user runs `cleargate sprint add SPRINT-43 BUG-106`
+    Then the command exits 0
+    And BUG-106's sprint_cleargate_id is SPRINT-43
+    And it warns "BUG-106 was claimed by SPRINT-41 (completed) — reassigned"
+
   @interfaces
   Scenario: JSON output reports the change and the new sha
     When the user runs `cleargate sprint add SPRINT-43 BUG-086 CR-120 --json`
@@ -172,7 +187,7 @@ Feature: cleargate sprint add|remove
 |---|---|
 | Primary File | `cleargate-cli/src/commands/sprint-scope.ts` |
 | Related Files | `cleargate-cli/src/cli.ts` |
-| Test Files | `cleargate-cli/test/commands/sprint-scope.node.test.ts` |
+| Test Files | `cleargate-cli/test/commands/sprint-scope.node.test.ts`, `cleargate-cli/test/commands/sprint-scope.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/src/commands/sprint-scope.ts`, `cleargate-cli/test/commands/sprint-scope.node.test.ts` |
 
 ### 3.2 Technical Logic
@@ -191,11 +206,11 @@ Feature: cleargate sprint add|remove
 
 ## Task Breakdown
 
-- [ ] Id routing and sprint/item resolution with all R4 refusals -> R2, R4
-- [ ] Compute-then-write with `--expect` precondition and atomic writes -> R5, R6
-- [ ] add/remove list and `sprint_cleargate_id` edits -> R3
-- [ ] Post-write stamp, gate check and wiki ingest with warning capture; unready-item warnings -> R7, R8
-- [ ] `--json` and human output; register both subcommands in `cli.ts` -> R1, R9
+- [x] Id routing and sprint/item resolution with all R4 refusals -> R2, R4
+- [x] Compute-then-write with `--expect` precondition and atomic writes -> R5, R6
+- [x] add/remove list and `sprint_cleargate_id` edits -> R3
+- [x] Post-write stamp, gate check and wiki ingest with warning capture; unready-item warnings -> R7, R8
+- [x] `--json` and human output; register both subcommands in `cli.ts` -> R1, R9
 
 ## 4. Quality Gates
 

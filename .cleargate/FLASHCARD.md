@@ -1,3 +1,32 @@
+2026-11-10 · #dashboard #client · Backlog redraw-skip: compare the stored last-written HTML, never el.innerHTML (browser read-back normalises &#39;/&quot;).
+2026-11-10 · #dashboard #security · Host allowlist is host:port; browsers omit :80, so a dashboard on port 80 would 403 every page — refuse 80 or allow bare host.
+2026-11-10 · #dashboard #client · cgRenderBacklogList rewrites #backlog-list every 2 s poll; row buttons lose focus/clicks — key the redraw like Plan's lkey (fixed STORY-062-06).
+2026-11-10 · #test-harness #dashboard · red serve() opts still pass stale sentinelIntervalMs (as any); never re-add — dashboard-lifecycle.red bans the string
+2026-11-10 · #qa #test-harness · A red that throws TypeError on an undefined fetch record is a harness bug; assert the fetch count first.
+2026-11-10 · #qa #test-harness · vm El stubs need a parent pointer so closest() can model a click inside a toggling ancestor.
+2026-11-10 · #dashboard #security · readDeliveryDoc matches by id PREFIX across pending-sync AND archive; never use it to serve a requested id.
+2026-11-10 · #dashboard #test-harness · backlog-tab.red bans doc-btn inside the SSR backlog section; .doc-btn CSS belongs in the global STYLE only.
+2026-11-10 · #dashboard #client · Separate document click listeners all fire; a return in one never stops another — guard each (.doc-btn early return).
+2026-11-10 · #codegen #gen-codex · `npm run gen:codex -- --check` ignores --check and rewrites files; the real check is prebuild's build-codex-payload.mjs --check.
+2026-11-10 · #dashboard #security · Host-check every dashboard route, not only POST: GET / and /data are DNS-rebinding readable; the POST Host check is what protects the token.
+2026-11-10 · #dashboard #sprint-scope · Plan-tab claim rules mirror sprint add's claim branch; change both or neither (parity red E4).
+2026-11-10 · #planning #amendments · A story R-clarification logged after its M-plan was cut never reached the Dev; amend the M-plan row too.
+2026-11-10 · #dashboard #cache · collectBacklog returns cached BacklogItem objects by reference; consumers must not mutate them.
+2026-11-10 · #merge #dashboard · Client-script stub/fill conflict: drop BOTH stubs; a kept later 'function cgX' redeclaration silently wins.
+2026-11-10 · #dashboard #daemon · One long-lived .dashboard.json + pid-only isAlive in stopDaemon can SIGTERM a recycled pid after reboot.
+2026-11-10 · #zsh #git · "$T:src/x" in zsh reads :s as a modifier (bad substitution); write "${T}:src/x" for git show <tree>:<path>.
+2026-11-10 · #merge #contract · Swapping two no-upstream items' merge order makes the later one re-integrate main + re-QA (rule 13); preview with merge-tree.
+2026-11-10 · #surface-gate #worktree · §3.1 root files need a ./ prefix (`./.gitignore`); a bare `.gitignore` is dropped, so the outer commit is blocked.
+2026-11-10 · #frontmatter #yaml · A key line holding only a comment (`bugs: # c`) has no whitespace before `#`; value splitters must check body.startsWith('#')
+2026-11-10 · #qa #test-harness #ports · A port-0 test helper must await the server's 'listening' event before reading address().port, or it returns 0.
+2026-11-10 · #dashboard #test-harness · cr102 class-parity reads the FIRST <script>; never add a <script> element before the client script.
+2026-11-10 · #qa #worktree · wikiIngestHandler needs src/wiki/templates/synthesis/*.md; absent in fresh worktrees, so ingest warns
+2026-11-10 · #qa #test-harness · vm.runInContext objects fail assert.deepEqual by prototype; JSON round-trip before comparing
+2026-11-10 · #qa #zsh · `echo == x` in zsh Bash tool errors '= not found' and aborts the rest of the command
+2026-11-10 · #dashboard #serve · serve({port:0}) leaves boundPort and handle.port at 0; port-dependent checks must read server.address().port.
+2026-11-10 · #sha #sprint-scope · lib/sha256.ts hashNormalized strips BOM/CRLF and adds \n; a raw-bytes --expect/expectSha must hash readFileSync bytes.
+2026-11-10 · #codex #skill · Editing a PORTABLE_SKILLS SKILL.md needs npm run gen:codex; codex-payload.red Test 19 runs --check on the real tree.
+2026-11-10 · #dashboard #test-harness · cr102 class-parity reads the FIRST <script>; never add a <script> element before the client script.
 2026-11-10 · #sdr #collision-surface · A §3.1 "New Files Needed | Yes — <one path>" cell leaks "Yes — <path>" as a surface token; list new files in Related Files instead.
 2026-11-07 · #qa #test-harness · Single test files need run-default-tests flags (--experimental-test-module-mocks); bare tsx --test fails mock.module files at load.
 2026-11-07 · #ci #gitleaks · gitleaks auto-reads repo-root .gitleaks.toml; prove an allowlist works by scanning with an explicit default-only config.
