@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: cleargate-cli,framework/hygiene,distribution
-status: Completed
+status: Draft
 approved: true
 ambiguity: 🟢 Low
 context_source: |
