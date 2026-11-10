@@ -206,11 +206,11 @@ Feature: cleargate sprint add|remove
 
 ## Task Breakdown
 
-- [ ] Id routing and sprint/item resolution with all R4 refusals -> R2, R4
-- [ ] Compute-then-write with `--expect` precondition and atomic writes -> R5, R6
-- [ ] add/remove list and `sprint_cleargate_id` edits -> R3
-- [ ] Post-write stamp, gate check and wiki ingest with warning capture; unready-item warnings -> R7, R8
-- [ ] `--json` and human output; register both subcommands in `cli.ts` -> R1, R9
+- [x] Id routing and sprint/item resolution with all R4 refusals -> R2, R4
+- [x] Compute-then-write with `--expect` precondition and atomic writes -> R5, R6
+- [x] add/remove list and `sprint_cleargate_id` edits -> R3
+- [x] Post-write stamp, gate check and wiki ingest with warning capture; unready-item warnings -> R7, R8
+- [x] `--json` and human output; register both subcommands in `cli.ts` -> R1, R9
 
 ## 4. Quality Gates
 

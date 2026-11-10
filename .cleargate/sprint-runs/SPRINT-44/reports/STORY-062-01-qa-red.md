@@ -19,3 +19,13 @@ Worktree: .worktrees/STORY-062-01/cleargate-cli (not committed). Typecheck clean
 ## Notes
 - Lifecycle tests that pass at baseline: legacy-only stop, dead legacy pid, S5 snapshot exit 1, 127.0.0.1 bind, /healthz keys (R6 already true when sprintId resolves per request).
 - Outer .gitignore line is not tested (outside the cli repo); verify manually in QA-Verify.
+
+## Re-dispatch 1 (TPV wiring gap)
+
+- Fixed `startServer()` in `test/dashboard/cr101.node.test.ts`: now async, awaits the `listening` event, returns `(h.server.address() as net.AddressInfo).port`; three callers use `await startServer(root)`. No assertion changed.
+- Audited `dashboard-lifecycle.red.node.test.ts` and `tab-shell.red.node.test.ts`: no helper returns a port before `listening` (lifecycle reads `boundPort(h)` only after `waitFor(record exists | server.listening)`; tab-shell starts no server). No edit needed.
+- `npm run typecheck`: clean. Results (TMPDIR=/tmp/cg44q1b):
+  - cr101: 24 tests, 15 pass, 9 fail
+  - dashboard-lifecycle.red: 19 tests, 5 pass, 14 fail
+  - tab-shell.red: 13 tests, 8 pass, 5 fail
+- Remaining failures are behavioural: `recordPath(root)` still has the 2-arg sprint-scoped signature (ERR_INVALID_ARG_TYPE from `path.join` on the missing arg), `legacyRecordPath` not exported, record not at `.cleargate/.dashboard.json`, `--open` without a sprint, `sentinelIntervalMs` still in serve.ts, init gitignore line absent, tab shell markup absent.

@@ -1,3 +1,9 @@
+2026-11-10 · #zsh #git · "$T:src/x" in zsh reads :s as a modifier (bad substitution); write "${T}:src/x" for git show <tree>:<path>.
+2026-11-10 · #merge #contract · Swapping two no-upstream items' merge order makes the later one re-integrate main + re-QA (rule 13); preview with merge-tree.
+2026-11-10 · #surface-gate #worktree · §3.1 root files need a ./ prefix (`./.gitignore`); a bare `.gitignore` is dropped, so the outer commit is blocked.
+2026-11-10 · #frontmatter #yaml · A key line holding only a comment (`bugs: # c`) has no whitespace before `#`; value splitters must check body.startsWith('#')
+2026-11-10 · #qa #test-harness #ports · A port-0 test helper must await the server's 'listening' event before reading address().port, or it returns 0.
+2026-11-10 · #dashboard #test-harness · cr102 class-parity reads the FIRST <script>; never add a <script> element before the client script.
 2026-11-10 · #qa #worktree · wikiIngestHandler needs src/wiki/templates/synthesis/*.md; absent in fresh worktrees, so ingest warns
 2026-11-10 · #qa #test-harness · vm.runInContext objects fail assert.deepEqual by prototype; JSON round-trip before comparing
 2026-11-10 · #qa #zsh · `echo == x` in zsh Bash tool errors '= not found' and aborts the rest of the command

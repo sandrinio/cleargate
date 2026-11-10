@@ -160,7 +160,7 @@ Feature: Dashboard runs without a sprint, with a tab shell
 | Primary File | `cleargate-cli/src/dashboard/daemon.ts` |
 | Related Files | `cleargate-cli/src/dashboard/serve.ts`, `cleargate-cli/src/dashboard/render.ts`, `cleargate-cli/src/commands/sprint.ts`, `cleargate-cli/src/cli.ts`, `cleargate-cli/scaffold/core/.gitignore`, `cleargate-cli/src/commands/init.ts` |
 | Test Files | `cleargate-cli/test/dashboard/serve.node.test.ts`, `cleargate-cli/test/dashboard/cr101.node.test.ts`, `cleargate-cli/test/dashboard/render.node.test.ts`, `cleargate-cli/test/dashboard/dashboard-lifecycle.red.node.test.ts`, `cleargate-cli/test/dashboard/tab-shell.red.node.test.ts` |
-| Outer repo | `.gitignore` (meta-repo; committed to the outer repo, not cleargate-cli) |
+| Outer repo | `./.gitignore` (meta-repo; committed to the outer repo, not cleargate-cli) |
 | New Files Needed | No |
 
 ### 3.2 Technical Logic
@@ -178,12 +178,12 @@ Feature: Dashboard runs without a sprint, with a tab shell
 
 ## Task Breakdown
 
-- [ ] Move the daemon record to `.cleargate/.dashboard.json`, with legacy-record adoption and stop -> R3
-- [ ] Remove the sentinel exit valve from `serve.ts`, keeping the idle valve -> R5
-- [ ] Relax `ensureDaemon`/`stopDaemon`/`sprintDashboardHandler` so they work with no active sprint -> R2
-- [ ] Register top-level `cleargate dashboard` in `cli.ts`, keeping the alias -> R1
-- [ ] Tab shell and empty Backlog and Plan panels in `render.ts`; "No sprint is active" Sprint state -> R7, R8
-- [ ] Gitignore `.cleargate/.dashboard.json` in the outer `.gitignore` and `scaffold/core/.gitignore` -> R3
+- [x] Move the daemon record to `.cleargate/.dashboard.json`, with legacy-record adoption and stop -> R3
+- [x] Remove the sentinel exit valve from `serve.ts`, keeping the idle valve -> R5
+- [x] Relax `ensureDaemon`/`stopDaemon`/`sprintDashboardHandler` so they work with no active sprint -> R2
+- [x] Register top-level `cleargate dashboard` in `cli.ts`, keeping the alias -> R1
+- [x] Tab shell and empty Backlog and Plan panels in `render.ts`; "No sprint is active" Sprint state -> R7, R8
+- [x] Gitignore `.cleargate/.dashboard.json` in the outer `.gitignore` and `scaffold/core/.gitignore` -> R3
 
 ## 4. Quality Gates
 
