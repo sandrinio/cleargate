@@ -195,13 +195,13 @@ Feature: Plan tab and guarded write endpoint
 
 ## Task Breakdown
 
-- [ ] `plan.ts`: `collectPlan` sprint listing and exclusions (Active, Completed, Abandoned, sentinel, state.json), raw-byte sha, `splitTableRow`, `deliverablesTableIds`, epic-free §1 comparison -> R1
-- [ ] `plan.ts`: candidate pool (incl. members and stale claims), fixed warning strings, stale-claim "will be reassigned" warning, disabled rows for open other-sprint claims only, diagnostics -> R2
-- [ ] `serve.ts`: `collectPlanFn`/`scopeHandlerFn` seams; `plan` on `/` and `/data` -> R3
-- [ ] `serve.ts`: per-launch token, `planGuard` (Host/Origin on the live port, JSON, token, 64 KiB), remove→add chain, 200/403/409/422 mapping with `partial` -> R5, R6, R7
-- [ ] `render.ts`: `render(data, opts)`, token via `cgPlanToken`, `renderPlanPanel`, client plan block, out-of-date banner -> R4, R8
-- [ ] `plan.node.test.ts`: helper unit tests -> R1
-- [ ] Canonical sprint-dashboard `SKILL.md` for the whole epic, then `npm run gen:codex` for the Codex copy -> R9
+- [x] `plan.ts`: `collectPlan` sprint listing and exclusions (Active, Completed, Abandoned, sentinel, state.json), raw-byte sha, `splitTableRow`, `deliverablesTableIds`, epic-free §1 comparison -> R1
+- [x] `plan.ts`: candidate pool (incl. members and stale claims), fixed warning strings, stale-claim "will be reassigned" warning, disabled rows for open other-sprint claims only, diagnostics -> R2
+- [x] `serve.ts`: `collectPlanFn`/`scopeHandlerFn` seams; `plan` on `/` and `/data` -> R3
+- [x] `serve.ts`: per-launch token, `planGuard` (Host/Origin on the live port, JSON, token, 64 KiB), remove→add chain, 200/403/409/422 mapping with `partial` -> R5, R6, R7
+- [x] `render.ts`: `render(data, opts)`, token via `cgPlanToken`, `renderPlanPanel`, client plan block, out-of-date banner -> R4, R8
+- [x] `plan.node.test.ts`: helper unit tests -> R1
+- [x] Canonical sprint-dashboard `SKILL.md` for the whole epic, then `npm run gen:codex` for the Codex copy -> R9
 
 ## 4. Quality Gates
 

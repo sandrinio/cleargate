@@ -1,3 +1,5 @@
+2026-11-10 · #codegen #gen-codex · `npm run gen:codex -- --check` ignores --check and rewrites files; the real check is prebuild's build-codex-payload.mjs --check.
+2026-11-10 · #dashboard #security · Host-check every dashboard route, not only POST: GET / and /data are DNS-rebinding readable; the POST Host check is what protects the token.
 2026-11-10 · #dashboard #sprint-scope · Plan-tab claim rules mirror sprint add's claim branch; change both or neither (parity red E4).
 2026-11-10 · #planning #amendments · A story R-clarification logged after its M-plan was cut never reached the Dev; amend the M-plan row too.
 2026-11-10 · #dashboard #cache · collectBacklog returns cached BacklogItem objects by reference; consumers must not mutate them.
