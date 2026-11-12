@@ -17,6 +17,12 @@ wiki:
     - bugs
     - initiatives
     - spikes
+  # EPIC-063 M2: the session brief's Release line reports the latest tag of each repo
+  # (paths from the repo root; cleargate-cli and mcp are their own git repos here).
+  brief:
+    release_repos:
+      - cleargate-cli
+      - mcp
 
 gates:
   # Meta-repo gate commands run cleargate-cli's node:test suite via `npm --prefix`
