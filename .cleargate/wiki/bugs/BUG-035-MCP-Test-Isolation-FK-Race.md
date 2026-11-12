@@ -10,7 +10,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/BUG-035-MCP-Test-Isolation-FK-Race.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 parent_cleargate_id: "STORY-047-01"

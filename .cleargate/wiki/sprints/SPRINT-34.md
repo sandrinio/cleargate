@@ -21,7 +21,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-34"

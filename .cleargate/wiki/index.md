@@ -35,10 +35,6 @@
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
-- [[EPIC-063]] — Draft · no sprint — Wiki Pipeline Wired End to End and Orchestrator Awareness Layer — M1: make every wiki-ingest path the protocol promises actually run and tell
-  - [[CR-127]] — Draft · no sprint — Lint the Pushed Item's Own Wiki Page at Push
-  - [[CR-129]] — Draft · no sprint — Record the Sprint Goal Verdict as a Structured Field
-  - [[CR-130]] — Draft · no sprint — The Bug Template Gets a Root Cause Section
 
 ### Proposals and initiatives
 
@@ -110,6 +106,7 @@
 - area: sprint-close
   - [[BUG-118]] — Triaged · no sprint — Sprint close marks carried-over (Parking Lot) items Completed and archives them
   - [[BUG-119]] — Triaged · no sprint — Sprint close halts on incomplete parents that have nothing to do with the closing sprint
+  - [[CR-129]] — Draft · no sprint — Record the Sprint Goal Verdict as a Structured Field
 - area: sprint-execution
   - [[BUG-086]] — Draft · SPRINT-43 — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
   - [[BUG-087]] — Draft · SPRINT-43 — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
@@ -125,15 +122,18 @@
 - area: templates
   - [[CR-119]] — Triaged · no sprint — The story template's §3.1 cannot express a greenfield story
   - [[CR-128]] — Draft · no sprint — CRs and Bugs Declare What Proves It Works in the Real Host
+  - [[CR-130]] — Draft · no sprint — The Bug Template Gets a Root Cause Section
 - area: upgrade
   - [[BUG-093]] — Draft · no sprint — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
   - [[BUG-095]] — Draft · no sprint — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
+- area: wiki
+  - [[CR-127]] — Draft · no sprint — Lint the Pushed Item's Own Wiki Page at Push
 - area: worktree-lifecycle
   - [[BUG-107]] — Triaged · SPRINT-41 — ClearGate's own runtime output makes every story worktree unclean, so DevOps teardown needs `git worktree remove --force`
 
 ## Archive
 
-- Epics: 34 Completed · 3 Abandoned · [expand](archive/epics.md)
+- Epics: 35 Completed · 3 Abandoned · [expand](archive/epics.md)
 - Sprints: 37 Completed · 3 Abandoned · [expand](archive/sprints.md)
 - Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
 - CRs: 108 Completed · 1 Abandoned · [expand](archive/crs.md)

@@ -23,17 +23,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Protocol §10.8 says `cleargate wiki lint` blocks Gate 1 and push, but nothing outside `cleargate sprint archive` calls lint (sprint… ([[EPIC-063]]) → Recommended option. §10.8 is corrected to say where lint actually runs (STORY-063-02); a follow-up CR for per-item lint enforcement at push is filed separately.
 - Q: Recommended: run off-sprint as two milestones with two releases. M1 is 063-01..04, released as 0.29.0, which fixes the pipeline fast.… ([[EPIC-063]]) → Recommended option. Two milestones, off-sprint, 0.29.0 (STORY-063-01..07 + CR-126) then 0.30.0 (STORY-063-08..13), each gated on the §5 verification plan.
 - Q: Once the brief ships, should the hand-written "Active state" section of this repo's CLAUDE.md (outside the CLEARGATE block) be replaced… ([[EPIC-063]]) → Yes. Done in STORY-063-11 as a separate meta-repo commit at the 0.30.0 release.
-- Rule: Keep EPIC-020's Mode A: the contradiction LLM call is the `cleargate-wiki-contradict` subagent dispatched by the in-session agent. The CLI never calls a model API and never spawns `claude`/`codex`. This supersedes EPIC-020's "no changes to stamp-and-gate.sh in v1".
-- Rule: All wiki extraction is deterministic: frontmatter, fixed template headings, `.cleargate/sprint-runs/.active`, `state.json`, sprint reports. No LLM-written summaries.
-- Rule: Anything a hook means the agent to read goes through the channel the host actually delivers to the model. Claude Code: PostToolUse → JSON `hookSpecificOutput.additionalContext` (plain PostToolUse stdout is transcript-only); SessionStart → stdout (proven by the existing banner). Codex: its… ([[EPIC-063]])
-- Rule: Hooks never block: every hook keeps an unconditional `exit 0`.
-- Rule: The session brief is precomputed at ingest/build time and only read at SessionStart; SessionStart never runs a full scan.
-- Rule: Phase 4 stays advisory (calibration precondition in protocol §10.10 is unmet: 0 labelled findings).
-- Rule: Ingest drift detection stays git-SHA (locked 2026-04-19). Only the Phase 4 idempotency key changes.
-- Rule: Token counts use the repo heuristic `Math.round(bytes / 4)` (`cleargate-cli/src/wiki/lint-checks.ts:476`).
-- Rule: Canonical edits only: `cleargate-cli/src/**` + `cleargate-cli/scaffold/**` on `story/<ID>` branches of the cleargate-cli repo. Live `/.claude/` re-synced after each release; `cleargate doctor` drift-clean.
-- Rule: Tests: node:test only, `*.node.test.ts` via tsx. Live end-to-end runs reuse the clean-room harness (`cleargate-cli/scripts/clean-room/`).
-- Rule: Claude host gets the full change; the Codex host gets parity edits to its `stamp-and-gate.sh` and `session-start.sh`, with no live Codex run.
 - Supersedes: [[EPIC-020]]
 
 ### [[STORY-063-05]] — Active-Sprint Page Reads the Real Sentinel (2026-11-12)

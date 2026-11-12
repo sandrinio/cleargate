@@ -51,18 +51,18 @@ cited_by:
   - "[[STORY-063-11]]"
   - "[[STORY-063-12]]"
   - "[[STORY-063-13]]"
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
-last_ingest_commit: "5d42f1888a22a5baaeebdfc262e03b029b7eb22d"
+raw_path: ".cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md"
+last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest_commit: "61ca756c65394d2d560fe76753cbf93a3cd2dc71"
 repo: "planning"
 last_contradict_sha: "9b2bd8027fc7661744d38af20e103146cf01e9b5a1f435bde0c90a4c1c570755"
 ---
 
 # EPIC-063: Wiki Pipeline Wired End to End and Orchestrator Awareness Layer
 
-**Status:** Draft · **Sprint:** none · **Gate:** pass
+**Status:** Completed · **Sprint:** none · **Gate:** pass
 
 ## Objective
 M1: make every wiki-ingest path the protocol promises actually run and tell the truth (contradiction check reaches the agent and stamps; shell/CLI writes reach ingest; `wiki build` keeps sprint reports; the active-sprint page reads the real sentinel). M2: turn the wiki into the orchestrator's awareness layer — a ≤1,500-token session brief injected at SessionStart, a ≤4,000-token index built for duplicate checks, section-extracted item pages with computed relations, and a decisions page.
@@ -73,7 +73,7 @@ The wiki is meant to be what the orchestrator (the agent the owner talks to) rea
 
 *The pipeline does not run as documented.* EPIC-020 shipped the Phase 4 contradiction check assuming the PostToolUse hook would start the `cleargate-wiki-ingest` agent.
 
-[+3,040 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
+[+3,040 bytes not shown — read .cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
 
 ## Scope
 **In:**
@@ -82,18 +82,18 @@ The wiki is meant to be what the orchestrator (the agent the owner talks to) rea
 **Out:**
 - Making Phase 4 blocking, or a readiness predicate that requires it. The approval edit itself changes the content hash.
 
-[+5,890 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
+[+5,890 bytes not shown — read .cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
 
 ## Architecture rules
 - Keep EPIC-020's Mode A: the contradiction LLM call is the `cleargate-wiki-contradict` subagent dispatched by the in-session agent. The CLI never calls a model API and never spawns `claude`/`codex`. This supersedes EPIC-020's "no changes to stamp-and-gate.sh in v1".
 
-[+1,505 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
+[+1,505 bytes not shown — read .cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
 
 ## Decisions
 - Protocol §10.8 says `cleargate wiki lint` blocks Gate 1 and push, but nothing outside `cleargate sprint archive` calls lint (sprint… → Recommended option. §10.8 is corrected to say where lint actually runs (STORY-063-02); a follow-up CR for per-item lint enforcement at push is filed separately.
 - Recommended: run off-sprint as two milestones with two releases.
 
-[+457 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
+[+457 bytes not shown — read .cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md]
 
 <!-- BEGIN relations -->
 ## Relations

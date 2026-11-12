@@ -21,7 +21,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-056_CI_Verification_Layer.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "d3ca3bef420c543e8cc459e9333b736e15a556ba"
 repo: "planning"
 ---

@@ -6,7 +6,7 @@
 
 | Type | Total | Open | Shipped |
 |------|-------|--------|---------|
-| Epics | 52 | 15 | 36 |
+| Epics | 52 | 14 | 37 |
 | Sprints | 44 | 4 | 37 |
 | Proposals | 16 | 6 | 14 |
 | CRs | 126 | 17 | 94 |
@@ -43,8 +43,6 @@
 - [[EPIC-060]] — status: Draft
 
 - [[EPIC-061]] — status: Draft
-
-- [[EPIC-063]] — status: Draft
 
 
 
@@ -402,6 +400,8 @@
 - [[EPIC-054]] (epics) — Completed
 
 - [[EPIC-062]] (epics) — Completed
+
+- [[EPIC-063]] (epics) — Completed
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 

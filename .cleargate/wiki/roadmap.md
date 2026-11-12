@@ -143,8 +143,6 @@ _No active epics._
 
 - [[EPIC-061]] — status: Draft
 
-- [[EPIC-063]] — status: Draft
-
 
 
 ## Shipped Epics
@@ -217,5 +215,7 @@ _No active epics._
 - [[EPIC-054]] — status: Completed
 
 - [[EPIC-062]] — status: Completed
+
+- [[EPIC-063]] — status: Completed
 
 

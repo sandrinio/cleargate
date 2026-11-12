@@ -27,7 +27,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-074_Antigravity_2_Host_Port.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "9c391f2be41469898f0ee5620fffbf8042a5ba28"
 repo: "planning"
 ---

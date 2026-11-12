@@ -16,7 +16,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-028_Vitest_Elimination.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "a743603981ddb8788e7bde8cc42dc1fe5ef1a8f4"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-28"

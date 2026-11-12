@@ -13,7 +13,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-26_Dogfood_Hardening.md"
-last_ingest: "2026-11-12T20:33:09.611Z"
+last_ingest: "2026-11-12T21:25:29.802Z"
 last_ingest_commit: "bdd9a810444df5c7142c80d8b0a75634fc66d741"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-26"
