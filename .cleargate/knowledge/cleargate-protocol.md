@@ -245,7 +245,7 @@ The Knowledge Wiki is the compiled awareness layer at `.cleargate/wiki/`. Read i
 
 **ingest**
 
-Triggered automatically by a PostToolUse hook on Write or Edit operations under `.cleargate/delivery/**`. When the hook is unavailable, every agent that writes a raw delivery file must invoke the `cleargate-wiki-ingest` subagent directly (protocol-rule fallback — see §10.9). On each ingest: one per-item wiki page is created or updated, one YAML event is appended to `log.md`, and every synthesis page affected by the item is recompiled (`product-state.md`, `roadmap.md`, `active-sprint.md`, `open-gates.md`). Ingest is always safe to re-run.
+Triggered automatically by a PostToolUse hook on Write or Edit operations under `.cleargate/delivery/**`. When the hook is unavailable, every agent that writes a raw delivery file must either dispatch the `cleargate-wiki-ingest` subagent or run `cleargate wiki ingest <file>` directly before returning (agent-rule fallback — see §10.9). On each ingest: one per-item wiki page is created or updated, one YAML event is appended to `log.md`, and every synthesis page affected by the item is recompiled (`product-state.md`, `roadmap.md`, `active-sprint.md`, `open-gates.md`). Ingest is always safe to re-run.
 
 **query**
 
@@ -302,7 +302,7 @@ Field notes:
 
 - `last_ingest_commit` — the SHA returned by `git log -1 --format=%H -- <raw_path>` at ingest time. Used for idempotency (see §10.7).
 - `repo` — derived from `raw_path` prefix: `cleargate-cli/` → `cli`; `mcp/` → `mcp`; `.cleargate/` or `cleargate-planning/` → `planning`. Never manually set.
-- `last_contradict_sha` (optional) — populated by ingest Phase 4 (§10.10). Pages without this field MUST continue to pass lint. Value is the SHA returned by `git log -1 --format=%H -- <raw_path>` at the moment Phase 4 last ran.
+- `last_contradict_sha` (optional) — populated by ingest Phase 4 (§10.10). Pages without this field MUST continue to pass lint. Value is the content hash of the raw file's body (everything after the closing frontmatter `---`, SHA-256, lowercase hex, via `contradictContentHash` in `src/lib/wiki/contradict.ts`) at the moment Phase 4 last ran — not a git SHA, so it is stable across uncommitted edits.
 
 ---
 
@@ -345,10 +345,7 @@ Drift detection is commit-SHA comparison — not content hashing — eliminating
 
 ### §10.8 Gate Enforcement
 
-`cleargate wiki lint` exits non-zero and blocks execution at:
-
-- **Gate 1 (Brief):** lint must pass before the agent proceeds past the Brief halt.
-- **The Gate-1-green push:** lint must pass before `cleargate_push_item` is called.
+`cleargate wiki lint` runs in `cleargate sprint archive` (a lint failure rolls the archive back unless `--allow-wiki-lint-debt`) and on demand. `cleargate sprint close` (`close_sprint.mjs`) does not run it, and it is not run at Gate 1 (Brief) or at the push. A missed ingest is caught by the hooks and the agent rule in §10.9 first, and by lint at archive time or on demand.
 
 Lint checks performed:
 
@@ -364,24 +361,27 @@ The gate-check hook (§12.5) runs before ingest; staleness (§12.4) is a lint er
 
 ### §10.9 Fallback Chain
 
-Ingest reliability follows a three-level fallback:
+Ingest reliability follows a four-level chain:
 
-1. **PostToolUse hook (primary)** — fires automatically on every Write or Edit under `.cleargate/delivery/**`. No agent action required.
-2. **Protocol rule (secondary)** — when the hook is unavailable (e.g. non-Claude-Code environment), every agent that writes a raw delivery file must explicitly invoke the `cleargate-wiki-ingest` subagent before returning.
-3. **Lint gate (tertiary)** — `cleargate wiki lint` catches any missed ingest at Gate 1 (Brief) or the Gate-1-green push and refuses to proceed until the page is up to date.
+1. **PostToolUse Edit/Write hook (primary)** — `stamp-and-gate.sh` fires on every Write or Edit under `.cleargate/delivery/**`: stamp, gate, ingest. Its results (`✅ ingested as …`, `⚠️ gate failed: …`, `⚠️ wiki ingest failed: …`, `🔎 contradiction check pending for …`) reach the agent through `cleargate hook emit-context` (Claude: JSON `additionalContext`; Codex: plain stdout, where PostToolUse context delivery is unverified — only SessionStart stdout is verified).
+2. **Bash hook (STORY-063-03)** — `post-shell-ingest.sh` fires after every Bash call and ingests delivery files changed since its previous run (`git mv`, plain `mv`, `sed -i`, `cleargate new`, a script that commits), which the Edit/Write matcher never sees. When no delivery file differs from the hook's previous snapshot it starts no node process; the first Bash call after an Edit/Write of a delivery file runs one slow-path check, which prints nothing when the page is current. It skips while a merge, rebase or unresolved conflict is in progress; the next call after it ends catches up. The Codex shell matcher is `Bash`; the Codex shell tool name is unverified (no live Codex run).
+3. **Agent rule** — protocol §10.2: when a hook is unavailable, the agent that wrote a raw delivery file dispatches the `cleargate-wiki-ingest` subagent or runs `cleargate wiki ingest <file>` before returning. The CLAUDE.md / AGENTS.md rule covers only the contradiction check, run once before the Brief (§10.10).
+4. **wiki lint** — `cleargate wiki lint` catches any missed ingest in `cleargate sprint archive` or on demand (§10.8); `cleargate sprint close` does not run it.
 
 ---
 
 ### §10.10 Wiki Contradiction Detection
 
-After each ingest pass recompiles synthesis pages (Phase 3), the ingest subagent runs an optional Phase 4 contradiction check on any freshly ingested page whose `status` is `Draft` or `In Review`. Phase 4 is synchronous and advisory — it never blocks ingest, never causes a non-zero exit, and never modifies anything other than the wiki page's `last_contradict_sha` field and the append-only `wiki/contradictions.md` log.
+After each ingest pass recompiles synthesis pages (Phase 3), `cleargate wiki ingest` prepares an optional Phase 4 contradiction check for any freshly ingested page whose `status` is `Draft` or `In Review` and prints a `phase4:` signal; the check itself is run in-session at Brief time (see "Mode A as built" below). Phase 4 is advisory — it never blocks ingest, never causes a non-zero exit, and never modifies anything other than the wiki page's `last_contradict_sha` field and the append-only `wiki/contradictions.md` log.
 
 Rules:
 
 - **Trigger point.** Phase 4 fires after Phase 3 (synthesis recompile) completes, once per ingested page, only when the page status is `Draft` or `In Review`. All other statuses (`Approved`, `Done`, `Active`, etc.) are skipped silently.
 - **Neighborhood rule.** The neighborhood for a given draft page consists of: (1) all pages explicitly cited via `[[ID]]` in the raw draft body, (2) the draft's parent epic page, and (3) any sibling stories under the same parent epic. The neighborhood is capped at 12 pages; when more than 12 qualify, the closest-cited pages take priority and the finding record sets `truncated: true`.
-- **Idempotency rule.** Phase 4 is skipped when `last_contradict_sha` stored on the wiki page equals `git log -1 --format=%H -- <raw_path>` at the moment Phase 4 would run. A match means the draft has not changed since the last contradiction check; no re-check is needed.
+- **Idempotency rule.** Phase 4 is skipped when `last_contradict_sha` stored on the wiki page equals the content hash of the raw file body (`contradictContentHash`: SHA-256 of everything after the closing frontmatter `---`) at the moment Phase 4 would run. A match means the draft body has not changed since the last contradiction check; no re-check is needed. Frontmatter-only edits (stamps, gate results) do not change the hash.
 - **Status filter.** Only `Draft` and `In Review` raw-file statuses trigger Phase 4. The filter reads the raw frontmatter `status` field, not the wiki page's emoji status field.
+- **Approved filter.** An item with `approved: true` is skipped even when its status is `Draft` or `In Review` (`phase4SkipReason`).
+- **Mode A as built (hook directive → in-session dispatch → commit).** The ingest CLI only prepares Phase 4 and prints a `phase4:` JSON line. `stamp-and-gate.sh` turns that line into the `🔎 contradiction check pending for <ID>` directive and delivers it through `cleargate hook emit-context`. Directives raised while editing are not acted on one by one: before the Brief, the orchestrator runs `cleargate wiki contradict <raw>`, dispatches `cleargate-wiki-contradict` in-session with the printed prompt, and pipes the subagent's output to `cleargate wiki contradict-commit <raw>`, which appends findings to `wiki/contradictions.md` and stamps `last_contradict_sha`. This replaces EPIC-020's "no changes to stamp-and-gate.sh in v1": the hook now carries the directive.
 - **Advisory exit.** Phase 4 always exits 0. Contradiction findings are written to `wiki/contradictions.md` as an append-only YAML log (see §10.10 schema). No gate is blocked. A future enforcing-mode proposal must clear the calibration precondition (see below) before Phase 4 may exit non-zero.
 - **Subagent contract.** Phase 4 invokes the `cleargate-wiki-contradict` subagent with `{ draft_path, neighborhood: string[] }` inputs. The subagent emits zero or more `contradiction: <draft-id> vs <neighbor-id> · <claim-summary ≤80 chars>` lines plus one paragraph of reasoning per finding, then exits 0.
 - **Log schema.** Each finding appended to `wiki/contradictions.md` has the keys: `draft`, `neighbor`, `claim`, `ingest_sha`, `truncated`, `label`. The `label` field is `null` until a human applies `true-positive`, `false-positive`, or `nitpick`.
@@ -400,8 +400,8 @@ Every work item file managed by ClearGate carries timestamp and version fields t
 
 | Field | Type | Description |
 |---|---|---|
-| `created_at` | ISO 8601 UTC string | Timestamp set once on first `cleargate stamp` invocation. Never updated after creation. |
-| `updated_at` | ISO 8601 UTC string | Timestamp updated on every `cleargate stamp` invocation that changes the file. Equal to `created_at` at creation time. |
+| `created_at` | ISO 8601 UTC string | Set by `cleargate new` to the creation time; `cleargate stamp` sets it only on first stamp of an item that has none. Never updated after that. |
+| `updated_at` | ISO 8601 UTC string | Set by `cleargate new` to the creation time; advanced by every `cleargate stamp` that changes the file and by `cleargate sprint add\|remove`. Edit/Write hooks do not move it on their own. |
 | `created_at_version` | string | Codebase version string at time of first stamp. See §11.3 for format. Never updated after creation. |
 | `updated_at_version` | string | Codebase version string at time of most recent stamp. Equal to `created_at_version` at creation time. |
 | `server_pushed_at_version` | string \| null | Codebase version string at the time this file was last successfully pushed via `cleargate_push_item`. `null` until the first push succeeds. Present on write-template files (epic/story/bug/CR/proposal) only. |
@@ -512,7 +512,7 @@ Two-capability bundle: (1) `draft_tokens` frontmatter stamp populated by a PostT
 
 ### §12.6 Cross-references
 - §4 Phase Gates: "Gate 1 (Brief) is machine-checked via `cleargate gate check`; see §12."
-- §10.8 Wiki-lint enforcement: extended by the gate-check hook; staleness check added per §12.4.
+- §10.8 Wiki lint: runs in `cleargate sprint archive` and on demand (not in `cleargate sprint close`, not at Gate 1 or push); staleness check added per §12.4.
 
 ---
 

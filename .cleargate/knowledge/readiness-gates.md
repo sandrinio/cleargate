@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **12 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **13 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
@@ -99,6 +99,9 @@ as a SPIKE item before the gated item is written). Example: a table where `Paths
 scenario, passes for both axes; the same table with `Paths = T` and no `@paths` scenario anywhere
 fails, naming Paths.
 
+**13. `testing-strategy-complete`**
+Closed-set predicate (no parameters). CR-126: an epic must answer "how do we test this?" in a `## Testing Strategy` section (heading-anchored, so numeric prefixes are tolerated). Registered on the epic `ready-for-decomposition` gate only. **Exemption first:** an epic that already has at least one story file under `.cleargate/delivery/{pending-sync,archive}/` (parent epic derived from the story id) passes with the detail `decomposed before CR-126`, so epics decomposed before the rule are not disturbed. Otherwise fails, naming the defect, when: the section is absent; any of the seven labelled lines (`What "working" means`, `Oracle`, `Known-positive case`, `Known-negative case`, `Baseline`, `Release gate`, `Regression guard`) is missing, empty or still a whole-value `{…}` placeholder; any of the five level rows (`Unit`, `Contract`, `Integration`, `Real-host end-to-end`, `Eval`) is missing or has an empty or `{…}` cell in `What it proves`, `Where the tests live` or `Who runs them, when` (a row whose first answer cell is `n/a` + a dash + a reason passes, other cells ignored); the `### User journeys` subsection is absent or its table has no data row; or a journey row has an empty or `{…}` cell, naming the journey and the column (a table whose only row has a Journey cell of `n/a` + a dash + a reason passes). Reads `doc.body`, plus the delivery directories for the exemption. Fails on the unedited shipped epic template. Example: a section with all seven lines, five answered level rows and one fully answered journey passes with `all 7 lines, 5 levels and 1 journey(s) answered`; the same section with an empty `Walked by` cell fails, naming the journey and `Walked by`. Tests: `test/lib/readiness-predicates-testing-strategy.red.node.test.ts`.
+
 ---
 
 ## Severity Model
@@ -159,6 +162,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "prior-work-recorded"
     - id: ambiguity-gate-resolved
       check: "ambiguity-gate-resolved"
+    - id: testing-strategy-complete
+      check: "testing-strategy-complete"
 ```
 
 ```yaml

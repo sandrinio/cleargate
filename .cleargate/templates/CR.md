@@ -36,8 +36,8 @@ carry_over: false  # set true to skip lifecycle reconciliation at sprint close
 status: "Draft | In Review | Approved | Completed"
 approved: false
 context_source: "approved Epic / verified codebase grounding + recorded direct approval"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+created_at: "{ISO}"
+updated_at: "{ISO}"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 server_pushed_at_version: null

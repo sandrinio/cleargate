@@ -33,8 +33,8 @@ status: "{PM native status — e.g. Discovery, In Triage, Triaged, Completed}"
 synced_at: null
 triaged_at: null
 spawned_items: []
-created_at: "{ISO-8601 timestamp}"
-updated_at: "{ISO-8601 timestamp}"
+created_at: "{ISO}"
+updated_at: "{ISO}"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 server_pushed_at_version: null

@@ -47,6 +47,7 @@ draft_tokens:
       cache_read: 0
       cache_creation: 0
       ts: 2026-11-11T22:10:29Z
+last_contradict_sha: "9b2bd8027fc7661744d38af20e103146cf01e9b5a1f435bde0c90a4c1c570755"
 ---
 
 # EPIC-063: Wiki Pipeline Wired End to End and Orchestrator Awareness Layer

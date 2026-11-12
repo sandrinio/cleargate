@@ -7,10 +7,13 @@ YAML Frontmatter: Epic ID, Status, Ambiguity, Context Source, Owner, Target Date
 §3 The Reality Check (Context): Constraints table.
 §4 Technical Grounding: Verified files and data changes.
 §5 Acceptance Criteria: Gherkin scenarios (happy path + error cases).
+Testing Strategy: how do we test this — labelled lines, test levels, user journeys.
 §6 AI Interrogation Loop: Explicit questions the Planning AI needs the Human to answer.
 Output location: .cleargate/delivery/pending-sync/{ID}_{SLUG}.md
 
 Codebase research is mandatory. Do NOT guess at affected files.
+
+At decomposition, each story's Test layers table names the Testing Strategy level(s) it covers.
 
 POST-WRITE BRIEF
 After Writing this document, render a Brief in chat with the following sections,
@@ -20,6 +23,7 @@ mechanically extracted from the document's own structure:
   - Summary          ← §1 Problem & Value
   - Open Questions   ← §6 AI Interrogation Loop
   - Edge Cases       ← §2 OUT-OF-SCOPE list + §5 error scenarios
+  - Testing Strategy ← ## Testing Strategy
   - Risks            ← §3 The Reality Check
   - Existing Surfaces ← ## Existing Surfaces
   - Why not simpler? ← ## Why not simpler?
@@ -46,8 +50,8 @@ ambiguity: "🔴 High"
 context_source: "approved Epic / verified codebase grounding + recorded direct approval"
 owner: "{PM/PO name}"
 target_date: "{YYYY-MM-DD}"
-created_at: "2026-04-17T00:00:00Z"
-updated_at: "2026-04-17T00:00:00Z"
+created_at: "{ISO}"
+updated_at: "{ISO}"
 created_at_version: "strategy-phase-pre-init"
 updated_at_version: "strategy-phase-pre-init"
 server_pushed_at_version: null
@@ -170,6 +174,34 @@ Feature: {Epic Name}
     Then {error message}
 ```
 
+## Testing Strategy
+
+> How do we test this? Every labelled line and every level row needs an answer. `n/a — <reason>` is a valid answer; an empty cell or a `{…}` placeholder is not. Real-host proof means the change observed in the real host (a live Claude Code or Codex session, a real install), not unit tests passing.
+
+- **What "working" means:** {the observable outcome in the real host or user flow — never "tests pass"}
+- **Oracle:** {how correctness is judged independently of the code under test}
+- **Known-positive case:** {an input that must produce the behaviour}
+- **Known-negative case:** {an input that must not}
+- **Baseline:** {what is measured before work starts, for each success metric}
+- **Release gate:** {which levels must pass before release, and who runs any manual step}
+- **Regression guard:** {what catches it if this breaks again later}
+
+| Level | What it proves | Where the tests live | Who runs them, when |
+|---|---|---|---|
+| Unit | {…} | {…} | {…} |
+| Contract | {…} | {…} | {…} |
+| Integration | {…} | {…} | {…} |
+| Real-host end-to-end | {…} | {…} | {…} |
+| Eval | {…} | {…} | {…} |
+
+### User journeys
+
+> One row per journey an end-to-end test must walk. *Walked by* names the real-host test or eval that walks the whole path. A single row reading `n/a — <reason>` in the Journey cell is valid only for an epic that changes no user- or agent-facing flow.
+
+| Journey | Actor | Path (trigger → steps → end) | Observable end state | Walked by |
+|---|---|---|---|---|
+| {…} | {…} | {…} | {…} | {…} |
+
 ## 6. AI Interrogation Loop (Human Input Required)
 *(AI Planning Engine: List edge cases, contradictions, or missing details found while drafting. The Epic stays 🔴 until the Human answers all of these.)*
 
@@ -196,3 +228,4 @@ Requirements to pass to Green (Ready for Coding Agent):
 - [ ] 0 "TBDs" exist in the document.
 - [ ] Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
 - [ ] Why not simpler? has both sub-bullets answered.
+- [ ] Testing Strategy answers how we test this, including its user journeys and real-host proof or why it isn't needed.
