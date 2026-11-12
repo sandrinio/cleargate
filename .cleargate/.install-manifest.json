@@ -1,6 +1,6 @@
 {
-  "cleargate_version": "0.29.0",
-  "generated_at": "2026-11-12T10:55:20.488Z",
+  "cleargate_version": "0.30.0",
+  "generated_at": "2026-11-12T19:30:35.891Z",
   "files": [
     {
       "path": ".claude/agents/architect-reader.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": ".claude/agents/cleargate-wiki-ingest.md",
-      "sha256": "04f588f5f467c9f678b5d3d710e78d6c7c07fe5eab5e75d338d26f32953d2dbe",
+      "sha256": "3c16fd10162cab7eff99f8b3c3066a7b53d98d4ee6957c49013a96f105b09f8c",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false,
@@ -52,7 +52,7 @@
     },
     {
       "path": ".claude/agents/cleargate-wiki-query.md",
-      "sha256": "73706e80bd1ff0ef565c38bbbe12870d49fcc78f9294cab4f55c359caa24d70c",
+      "sha256": "7c1319fabf4703a352960051f4b4828cf3d409a66a057f9d1e11ca6b72d8e3c1",
       "tier": "agent",
       "overwrite_policy": "always",
       "preserve_on_uninstall": false,
@@ -236,7 +236,7 @@
     },
     {
       "path": ".cleargate/knowledge/cleargate-protocol.md",
-      "sha256": "1917538c277f33cbcad2d6fd9841b2fb376c345e7aeff49303217e18a26a47dc",
+      "sha256": "12a8321ca2dc9e14f9b607628648ec15beea515e33e181138f8d996e9978e8e0",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false,
@@ -268,7 +268,7 @@
     },
     {
       "path": ".cleargate/README.md",
-      "sha256": "d970d0424ad3ec640606ebc9b8031c2c7a13560249eadcc24c522180c9c8ebff",
+      "sha256": "8e4e2a8296c64e606b8f806f32de185ca5e0cf8857ae0d0e53c2956c77328115",
       "tier": "protocol",
       "overwrite_policy": "merge-3way",
       "preserve_on_uninstall": false,
@@ -635,8 +635,8 @@
       "owner": "core"
     }
   ],
-  "installed_at": "2026-11-12T10:56:24.809Z",
-  "pin_version": "0.29.0",
+  "installed_at": "2026-11-12T19:31:37.665Z",
+  "pin_version": "0.30.0",
   "hosts": [
     "claude"
   ]

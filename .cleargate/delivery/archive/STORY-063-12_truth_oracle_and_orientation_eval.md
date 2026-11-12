@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-063
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-12T00:00:00Z
@@ -26,7 +26,7 @@ server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-11T23:33:55Z
+  last_gate_check: 2026-11-12T18:01:34Z
   transition: ready-for-execution
 pushed_by: null
 pushed_at: null
@@ -36,15 +36,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-063-12
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-11T23:33:02Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-12T18:01:34Z
+  sessions:
+    - session: 72e522d7-caa6-4837-81f5-8fa60f84f8b5
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-12T17:30:34Z
 ---
 
 # STORY-063-12: Truth Oracle and Orientation Eval
@@ -181,7 +187,7 @@ Feature: Truth oracle and orientation eval
 ### 2.2 Verification Steps (Manual)
 - [ ] Before M2 work starts: run the baseline (R8) and commit its evidence file.
 - [ ] Before the 0.30.0 release: run the eval on the release candidate with `claude-opus-5-5`. It must PASS. Spot-check 3 answers in the evidence file against the corpus.
-- [ ] Dogfood after release: `cleargate-cli/scripts/brief-oracle.sh --compare .cleargate/wiki/brief.md .` in the meta-repo exits 0 on the real corpus.
+- [ ] Dogfood after release: `CLEARGATE_NO_UPDATE_CHECK=1 node cleargate-cli/dist/cli.js doctor --session-start | bash cleargate-cli/scripts/brief-oracle.sh --compare - .` in the meta-repo exits 0 on the real corpus. (G-M2-73: the raw `brief.md` holds live markers in place of the Active sprint and Release lines, so the oracle refuses it with exit 2.)
 
 ## 3. The Implementation Guide
 

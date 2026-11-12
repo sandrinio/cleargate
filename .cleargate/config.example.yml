@@ -3,6 +3,7 @@
 
 # wiki:
 #   index_token_ceiling: 8000   # chars budget for wiki/index.md (STORY-015-03)
+#   index_token_target: 4000    # `wiki build` compacts the index in tiers to fit; over it, lint warns (STORY-063-09)
 #   # Allowlist of bucket directories the wiki ingests/builds pages for.
 #   # Only these buckets get per-item pages, index rows, and synthesis listings;
 #   # every other bucket is skipped (build + ingest + synthesis). Omit the key
@@ -14,6 +15,11 @@
 #     - crs
 #     - bugs
 #     - initiatives
+#   # The session brief (`wiki/brief.md`, printed by `cleargate doctor --session-start`) ends with a
+#   # `Release:` line: the latest git tag and the commits since it, per repo listed here (STORY-063-11).
+#   # Paths resolve against the project root; each is labelled as written. Default: ["."].
+#   brief:
+#     release_repos: ["."]
 
 # gates:
 #   precommit: "<command run before every commit — typecheck + tests>"

@@ -1,3 +1,80 @@
+2026-11-12 · #test-harness #danger · Stubbing <repo>/cleargate-cli/dist/cli.js in a scratch repo whose cleargate-cli is a symlink writes the LIVE dist; lstat first.
+2026-11-12 · #eval #fixtures · Fixed updated_at on a Draft fixture trips the 1–7-day unchecked-draft alarm for a week; the eval banner becomes clock-dependent.
+2026-11-12 · #oracle #compare · Count-only or shrunk list lines pass --compare without the truncation line; silent compiler truncation is invisible.
+2026-11-12 · #clean-room #claude-p · Key "not run" on the result event (is_error/subtype), not on exit code + missing result string; else max-turns→INCOMPLETE, auth→FAIL.
+2026-11-12 · #qa #oracle · A token-containment gate that must pass a sealed red can silently drop the story's count-token mitigation; check reds before trusting §1.5.
+2026-11-12 · #oracle #jq · jq `capture` on a non-matching string yields EMPTY, not null: `try capture catch null` silently drops the check; use `[capture(..)] | .[0]`.
+2026-11-12 · #oracle #awk · BSD awk: `NR` is a builtin (an array named NR is a fatal error); no `{n}` intervals, `\s`, `\d` or `gensub`; ENVIRON beats `-v` for data.
+2026-11-12 · #clean-room #eval · Do not path.resolve a --container before validateContainer: a relative path becomes absolute and, with no git on PATH, passes the work-tree check.
+2026-11-12 · #perf #brief · Overlap a session-start git spawn with the rest of startup (async execFile started first, awaited last): +171 ms → +24 ms p95.
+2026-11-12 · #test-harness #perf · F2 reds that spawn real git can flake to 'unavailable' under load >8; rerun in isolation before suspecting code
+2026-11-12 · #qa-red #test-harness · prove 'spawned before X' by spin-waiting in the first stdout callback for a PATH-shim log line, not by timing
+2026-11-12 · #test-harness #shell · LANG=C.UTF-8 already sorts in C order, so a C-order red passes without LC_ALL=C; run it under en_US.UTF-8.
+2026-11-12 · #test-harness #perf · npm test runs files serially; a red file spawning bash ~150× adds minutes. Memoize repos, run spawns concurrently.
+2026-11-12 · #oracle #shell · Unquoted brief text globs (**Notes:** → cwd files) and word-splits double spaces; test compare in a glob-bait cwd.
+2026-11-12 · #eval #scoring · Substring scoring: SPRINT-9 matches SPRINT-99, v0.0.1 matches v0.0.10; a digit-final token needs a non-digit after it.
+2026-11-12 · #oracle #perf · Pin a shell oracle cost as spawn count, unchanged with 60 more files (logging PATH shim), never as wall time.
+2026-11-12 · #shell #macos · macOS bash is 3.2 (no declare -A, mapfile, ${v,,}); jq trim/pick/abs need 1.7+; BSD sed/find lack -i/-printf.
+2026-11-12 · #qa-red #test-harness · Import a .mjs driver in a CHILD process first: with no import.meta guard it runs main() and kills the test runner.
+2026-11-12 · #qa-red #oracle · A one-line synthetic brief makes every other prefixed line a mismatch; add the truncation line to excuse them.
+2026-11-12 · #brief #oracle · brief.md holds markers, not the live Active/Release lines: --compare on the file mismatches; pipe doctor --session-start.
+2026-11-12 · #wiki #brief · 43/44 sprint files set sprint_cleargate_id to their own id; a 'members of sprint X' count must skip sprint files.
+2026-11-12 · #oracle #wiki · Key oracle rows by file, not id: PROPOSAL-013 has an Approved and a Completed file; id-keyed awk arrays merge them.
+2026-11-12 · #wiki #test-harness · A story that adds a synthesis page breaks every exact map/SYNTHESIS_PAGES pin, incl. the prior story's sealed wiring file; grep 'SYNTHESIS' in test/wiki.
+2026-11-12 · #doctor #brief · doctor.ts holds raw NUL bytes: edit it with python bytes, and re-indent a wrapped tail only after tsc passes.
+2026-11-12 · #perf #test-harness · p95-of-20 timings with git execs false-fail ~1/3 at load 8–13 even calibrated; time the exec-free path, pin exec count.
+2026-11-12 · #wiki #brief · A 300 ms git timeout under load prints "no tags" for a tagged repo; map timeouts to "unavailable", allow 1 s.
+2026-11-12 · #wiki #brief · Planned/Decisions carry no count: shrinking them to 0 IDs prints a lie ("Planned: none"); count-less lists stop at 3.
+2026-11-12 · #wiki #brief · A "+N more" list that hides the live active sprint must print N-1 at render, or the oracle's +N mismatches.
+2026-11-12 · #qa-red #live · A live test's META_ROOT defaults to <cli>/.., so in a scratchpad worktree it SKIPs; run with CLEARGATE_META_ROOT set.
+2026-11-12 · #wiki #decisions · 'first ID after supersede in the sentence' is 1/8 precise on this corpus (tables, code spans, quoted spec text); require the ID directly after the verb.
+2026-11-12 · #wiki #decisions · Epic <rule>s sit inside ```xml fences; stripping fenced blocks before scanning rules or supersession sentences loses the real hits.
+2026-11-12 · #wiki #brief · 46/402 decision answers contain ';' in their first 12 words; a '; '-joined brief line must sanitize excerpts or the oracle mis-splits.
+2026-11-12 · #wiki #ingest · refreshRelationPages returns void; a plan that says 'reuse its scan' needs a signature change — grep return types before citing reuse.
+2026-11-12 · #qa-red #wiki · isSprintReportPath needs SPRINT-\d{2,}: a single-digit sprint dir never has a report; fixtures and the 12 oracle use 2-digit IDs.
+2026-11-12 · #qa-red #test-harness · cloneCorpus drops wiki/contradictions.md; a build-vs-ingest parity red on a page that reads it must copy it into the fresh clone.
+2026-11-12 · #qa-red #doctor · doctorHandler reads cli.now() itself; to prove a path never reads the clock, call runSessionStart directly.
+2026-11-12 · #qa-red #test-harness · Prove reds are self-consistent without touching src/: rsync the worktree (no .git) to scratchpad, write a throwaway implementation there, run the reds, delete it.
+2026-11-12 · #wiki #decisions · Epic `## 6` holds a nested `### Open Questions`; collecting both sections double-counts unless the contained one is dropped.
+2026-11-12 · #wiki #ingest · decisions.md is ~33k tokens on this repo (plan said 25k); decisions-size warns permanently, ingest +0.1-0.2 s.
+2026-11-12 · #test-harness #shell · A regex that bulk-edits pins across a test file also rewrites the map lookups and comments; diff the result before running.
+2026-11-12 · #qa-red #wiki · A decisions page must not de-duplicate identical Q/A pairs: CR-080 repeats one, and the corpus count equality needs both.
+2026-11-12 · #qa-red #test-harness · A stamp-only red needs an edit the page does not show: a rule or sprint answer edit changes the body; hide a same-length edit past the 2,400-char cut.
+2026-11-12 · #wiki #decisions · STORY-063-10's own question quotes `**Human decision:**` in backticks; a swallowed-answer check must strip code spans first.
+2026-11-12 · #qa-red #docs · Docs pins that quote a phrase (09's 'one line per open item') go stale when a later amendment rewords it; list them as shape-change reds.
+2026-11-12 · #wiki #ingest · Excluded-bucket ingests exit before recompileSynthesis; a page computed over all buckets (brief) goes stale on story edits.
+2026-11-12 · #wiki #sprint · partitionSprints().planned drops the .active sprint at compile time; a sentinel-free page lists non-terminal sprints itself.
+2026-11-12 · #wiki #index · Index tier is a pure function of corpus size; crossing the target re-renders every line one tier down: big diff, not churn.
+2026-11-12 · #qa #wiki · Scratch real-corpus `wiki lint` FAILs on 55 gate-stale findings regardless of the story; judge by index-budget lines only.
+2026-11-12 · #wiki #test-harness · Golden regen: run the fixture build through a throwaway test file, then diff against the plan's expected lines.
+2026-11-12 · #tpv #wiki #ingest · An approve-flip red that also changes cached_gate_result changes the page identity line; ingest is not stamp-only.
+2026-11-12 · #tpv #test-harness · A block slice running to the next heading keeps the blank line before it; drop blank lines before deepEqual.
+2026-11-12 · #wiki #test-harness · bucket-registry-parity slices product-state.ts from "// Totals" to "// Open counts"; renaming that comment empties it.
+2026-11-12 · #qa-red #test-harness · Tier ladders: ask for tier k+1 at tokens(tier k)-5 from the implementation's own output; no absolute byte pin.
+2026-11-12 · #qa-red #wiki · A row parser used by reds must not share code with the parseIndexRow under test; null-returning guards go vacuous, so assert rows.length first.
+2026-11-12 · #test-harness #macos · BSD sed -i needs an explicit '' backup suffix; without it the script is eaten as the suffix and the file is untouched.
+2026-11-12 · #test-harness #shell · `until ! pgrep -f "npm test"` never ends: pgrep -f matches the loop's own command line. Poll a pid or a log line.
+2026-11-12 · #wiki #digest · digestOf must strip "1." list markers too, else a numbered Actual list digests to "1".
+2026-11-12 · #wiki #digest · Proposal template label is `**Why are we doing this?**` (ends in ?, no colon); the label drop must accept ? or :.
+2026-11-12 · #qa-red #wiki · Fill-pass reds need ~150-char paragraphs; at ~80 chars the prefer pass is near max and the fill pass can't beat it (vacuous green).
+2026-11-12 · #qa-red #live · Corpus "inverted digest" oracles are vacuous pre-fix; pair them with a template-label regex that carries the red.
+2026-11-12 · #wiki #decisions · Raw answers come bullet, indented under the Q, or inline after it; plus ~10 legacy placeholder tokens. Template tokens alone: 198/553 false "resolved".
+2026-11-12 · #wiki #extract · Tag back-off must cut at the OUTERMOST element open across the cut; picking the last opener leaves <outer> dangling.
+2026-11-12 · #wiki #digest · Bug Anomaly opens with Expected Behavior, CR §1 with Obsolete Logic; a first-sentence digest states the opposite of the item.
+2026-11-12 · #wiki #extract · safeCut prefers a paragraph break at >=50% of budget; a long first paragraph hides the second, so allocateBudget needs a word-boundary fill pass.
+2026-11-12 · #qa-red #wiki · Page-level "part includes X" reds: 3 overflowing parts with ~119-char markers leave ~440 chars each; size X against the fair share.
+2026-11-12 · #qa-red #test-harness · A partLabels helper splitting on ^## must skip fenced lines, or a fenced-heading fixture fails at page level.
+2026-11-12 · #tpv #oracle #wiki · A "cut table row" oracle (starts with |, no closing |) flags verbatim raw lines (fenced shell pipes, TS unions); skip lines present in the raw.
+2026-11-12 · #wiki #extract · Epic <agent_context> sits inside a ```xml fence; dropping only the tag range leaves a dangling fence that swallows the page. Drop the fence too.
+2026-11-12 · #qa-red #test-harness · A `**Status:**` regex over a page matches a report's own line; pin the identity line by index (body line 2), not by search.
+2026-11-12 · #qa-red #fixtures #privacy · Corpus-copied fixtures naming /Users/<me>/…ClearGate trip cr075 Scenario 7; sanitise the path line and note provenance.
+2026-11-12 · #wiki #ingest · Deleting a raw item never refreshes relations: parent children/cited_by keep it until wiki build or that page's next rewrite.
+2026-11-12 · #wiki #page-schema · Page block markers found by indexOf hit inline quotes (CR-063 quotes the sprint-report markers); match full lines only.
+2026-11-12 · #wiki #contradict · parsePage's block-list fix made Phase 4's sibling step live; collectNeighborhood still reads parent_epic_ref only.
+2026-11-12 · #wiki #lint · loadWikiPages skips initiatives (BUG-051b): an epic parented by an initiative is a false broken-backlink.
+2026-11-12 · #wiki #lint · Lint missing-ingest reads the page FILE mtime; a neighbour rewrite that bumps it hides a stale page — restore it.
+2026-11-12 · #qa-red #test-harness · A "not rewritten" red asserting an absent list is empty passes vacuously; assert the build-time precondition first.
+2026-11-12 · #wiki #perf · Timing wiki ingest: a clean file no-ops; append a line to the scratch raw file to time the write path.
 2026-11-12 · #clean-room #evidence #danger · A run that refuses (exit 2) without appending evidence leaves the prior PASS as LAST run; check goes green.
 2026-11-12 · #clean-room #claude-p · claude -p may background an Agent (2 inits, 2 results) or not (sonnet: 1); keep first init, never reset, parse LAST result.
 2026-11-12 · #clean-room #alarm · A 1–7-day-old unchecked draft is named in every SessionStart banner; seed it after the model sessions.

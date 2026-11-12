@@ -224,12 +224,14 @@ The Knowledge Wiki is the compiled awareness layer at `.cleargate/wiki/`. Read i
 
 ```
 .cleargate/wiki/
-  index.md            ← master page registry (one row per page)
+  index.md            ← master registry: every open item once (status, sprint, title, digest; grouped by epic and area; compacted in tiers, §21.1), archive as counts
   log.md              ← append-only audit log of all ingest events
   product-state.md    ← synthesised product health snapshot
   roadmap.md          ← synthesised roadmap view
   active-sprint.md    ← synthesised current-sprint progress
   open-gates.md       ← synthesised blocked-item registry
+  decisions.md        ← decisions registry: every answered Q/A decision, newest first, open-epic rules, supersessions, unresolved conflicts
+  brief.md            ← session brief (≤ 1,500 tokens): what `cleargate doctor --session-start` prints; its Active sprint and Release lines are computed live at session start
   epics/              ← one page per Epic (EPIC-NNN.md)
   stories/            ← one page per Story (STORY-NNN-NN.md)
   bugs/               ← one page per Bug
@@ -245,7 +247,7 @@ The Knowledge Wiki is the compiled awareness layer at `.cleargate/wiki/`. Read i
 
 **ingest**
 
-Triggered automatically by a PostToolUse hook on Write or Edit operations under `.cleargate/delivery/**`. When the hook is unavailable, every agent that writes a raw delivery file must either dispatch the `cleargate-wiki-ingest` subagent or run `cleargate wiki ingest <file>` directly before returning (agent-rule fallback — see §10.9). On each ingest: one per-item wiki page is created or updated, one YAML event is appended to `log.md`, and every synthesis page affected by the item is recompiled (`product-state.md`, `roadmap.md`, `active-sprint.md`, `open-gates.md`). Ingest is always safe to re-run.
+Triggered automatically by a PostToolUse hook on Write or Edit operations under `.cleargate/delivery/**`. When the hook is unavailable, every agent that writes a raw delivery file must either dispatch the `cleargate-wiki-ingest` subagent or run `cleargate wiki ingest <file>` directly before returning (agent-rule fallback — see §10.9). On each ingest: one per-item wiki page (an identity line plus a per-type extract of the raw item, §10.4) is created or updated, one YAML event is appended to `log.md`, and every synthesis page affected by the item is recompiled (`product-state.md`, `roadmap.md`, `active-sprint.md`, `open-gates.md`, `decisions.md`, `brief.md`). Ingest is always safe to re-run.
 
 **query**
 
@@ -270,7 +272,7 @@ Ingest skips the following directories — they are static configuration or orch
 
 ### §10.4 Page Schema
 
-Every wiki page has a YAML frontmatter block followed by a short prose body.
+Every wiki page has a YAML frontmatter block followed by a body that is extracted from the raw item by section, never hand-written.
 
 ```markdown
 ---
@@ -278,7 +280,9 @@ type: story
 id: "STORY-042-01"
 parent: "[[EPIC-042]]"
 children: []
-status: "🟢"
+cites: []
+cited_by: []
+status: "Approved"
 remote_id: "LIN-1042"
 raw_path: ".cleargate/delivery/archive/STORY-042-01_name.md"
 last_ingest: "2026-04-19T10:00:00Z"
@@ -289,17 +293,26 @@ last_contradict_sha: ""  # optional — populated by ingest Phase 4 (§10.10)
 
 # STORY-042-01: Short title
 
-Summary in one or two sentences.
+**Status:** Approved · **Sprint:** SPRINT-12 · **Gate:** pass
 
-## Blast radius
-Affects: [[EPIC-042]], [[service-auth]]
+## The Spec (The Contract)
+Text of the raw item's section, cut on a sentence or paragraph boundary when it is long.
 
-## Open questions
-None.
+[+1,204 bytes not shown — read .cleargate/delivery/archive/STORY-042-01_name.md]
+
+<!-- BEGIN relations -->
+## Relations
+- Parent: [[EPIC-042]]
+- Cites (1): [[service-auth]]
+<!-- END relations -->
 ```
+
+A sprint page also carries a `<!-- BEGIN sprint-report -->` … `<!-- END sprint-report -->` block after the relations block (see the last field note).
 
 Field notes:
 
+- `parent`, `children`, `cites`, `cited_by` — computed from the whole raw corpus by `computeRelations` (`src/wiki/relations.ts`), never copied off a page. Stories are scanned even when `wiki.ingest_buckets` excludes them, so an epic lists its stories as children while no story page exists. `parent` is the first set value of `parent_ref`, `parent_epic_ref`, `parent` (a template placeholder means none; free text counts only when it starts with the ID). `cites` is every `[[ID]]` in the raw body that resolves to a raw item; `cited_by` is its reverse. The body renders the same relations between `<!-- BEGIN relations -->` / `<!-- END relations -->` markers, each list capped at 20 IDs followed by `, +N more`; the frontmatter lists are complete.
+- Body — `# <ID>: <title>`, then the identity line `**Status:** <status> · **Sprint:** <sprint | none> · **Gate:** <pass | fail: <criterion ids> | not run>` (bugs add ` · **Severity:** <severity | unset>`), then an extract of the raw item, then the relations block. The extract is deterministic: `cleargate wiki build` and `cleargate wiki ingest` write the same bytes from the same raw item. Its parts are located by section, per type: epic — Objective, Problem & Value, Scope, Architecture rules, Decisions, Open questions; bug — Anomaly, Reproduction, Evidence, Sandbox; CR — Context override, Blast radius, Open questions; sprint — Goal, Deliverables; any other type, or an item whose headings match none of these, takes its own `##` sections in order. The extract is at most 2,400 characters, and at least 2,000 when the raw item has more than that to extract (identity line and relations block excluded); a part that does not fit is cut on a paragraph, sentence or word boundary, never inside a table row or tag, and ends with `[+N bytes not shown — read <raw_path>]`. An item with nothing extractable reads `(no extractable content — read <raw_path>)`. A sprint page adds a report extract once its report exists: the report status, a pointer to the report file and to `improvement-suggestions.md` when present, and the report's Carried Over section (at most 1,200 characters); the full report stays in its file.
 - `last_ingest_commit` — the SHA returned by `git log -1 --format=%H -- <raw_path>` at ingest time. Used for idempotency (see §10.7).
 - `repo` — derived from `raw_path` prefix: `cleargate-cli/` → `cli`; `mcp/` → `mcp`; `.cleargate/` or `cleargate-planning/` → `planning`. Never manually set.
 - `last_contradict_sha` (optional) — populated by ingest Phase 4 (§10.10). Pages without this field MUST continue to pass lint. Value is the content hash of the raw file's body (everything after the closing frontmatter `---`, SHA-256, lowercase hex, via `contradictContentHash` in `src/lib/wiki/contradict.ts`) at the moment Phase 4 last ran — not a git SHA, so it is stable across uncommitted edits.
@@ -308,7 +321,7 @@ Field notes:
 
 ### §10.5 Backlink Syntax
 
-Use `[[WORK-ITEM-ID]]` (Obsidian-style double-bracket links) to express relationships between pages. Every parent/child pair declared in frontmatter must have a corresponding backlink in the body of each page. `cleargate wiki lint` verifies bidirectionality: a `parent:` entry without a matching `[[parent-id]]` reference in the parent's `children:` list is a lint violation.
+Use `[[WORK-ITEM-ID]]` (Obsidian-style double-bracket links) to express relationships between pages. Every parent/child pair declared in frontmatter must have a corresponding backlink in the body of each page. `cleargate wiki lint` verifies bidirectionality: a `parent:` entry without a matching `[[parent-id]]` reference in the parent's `children:` list is a lint violation. `children` is computed from the children's own parent keys, so a parent that exists in the raw corpus but has no readable page is accepted: its bucket is excluded by `wiki.ingest_buckets`, or lint never loads that bucket (initiatives, BUG-051(b)). A parent that exists nowhere in the raw corpus is still a violation, and the page renders it as `<ID> (not found)`. `wiki ingest` of one item also rewrites the neighbours whose relations changed (old and new parent, old and new cites, its children, its citers), touching only the relation fields and the relations block, so for edits and creations of items (every bucket, stories included) a single-file ingest ends byte-identical to a full `wiki build`; deletions are reflected at the next `wiki build` or the next ingest that rewrites the affected page.
 
 ---
 
@@ -644,6 +657,13 @@ wiki:
 ```
 
 Exceeding the ceiling fails `cleargate wiki lint` (enforcement mode). Under `--suggest`, the usage percentage is reported but the check does not fail. Reference: EPIC-015.
+
+The target `wiki.index_token_target` (default `4000`) is a separate, softer limit: `wiki build` and `wiki ingest` compact the index in tiers to stay within it; above the target `cleargate wiki lint` prints `warn: index-budget-target …`, which is never a finding and never fails lint. `wiki/decisions.md` has the same kind of soft limit: above 8,000 tokens `cleargate wiki lint` prints `warn: decisions-size …`, also never a finding.
+
+```yaml
+wiki:
+  index_token_target: 4000
+```
 
 ### §21.2 Ingest Bucket Allowlist
 

@@ -67,10 +67,11 @@ Everything is plain markdown in your repo. It diffs, it reviews, it merges.
 | `sprint-runs/<id>/` | Per-sprint artifacts: plans, token ledger, report. Generated. |
 | `hook-log/` | Raw hook output. Generated, gitignored. |
 
-**The wiki is a cache, not a source.** `wiki/index.md` is the ~3k-token
-orientation page an agent reads at session start to learn what already exists
-before grepping. Rebuild it any time with `cleargate wiki build`; it is derived
-entirely from `delivery/`. Stories are excluded by default — too granular for an
+**The wiki is a cache, not a source.** `wiki/brief.md` is the session brief
+(at most 1,500 tokens) that `cleargate doctor --session-start` prints at the start
+of every session; `wiki/index.md` is the registry of open work an agent reads when
+it needs more, kept within `wiki.index_token_target` (default 4,000 tokens).
+Rebuild either any time with `cleargate wiki build`; both are derived: the index from `delivery/`; the brief from `delivery/`, `sprint-runs/` and `wiki/contradictions.md`, with its Active sprint and Release lines computed live at session start. Stories are excluded by default — too granular for an
 awareness layer. Add `stories` to `wiki.ingest_buckets` in `config.yml` if you
 want per-story pages.
 
