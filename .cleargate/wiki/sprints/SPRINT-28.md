@@ -14,7 +14,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "77b6da7136ff086393fcd6ad3a9b57aa7a13de62"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-28"

@@ -11,7 +11,7 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/CR-085-Drive-Execution-Loop-States-Live.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 parent_cleargate_id: "EPIC-013"

@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-24_Loop_Tightening.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "7e6385bcbc4a018586e14c9a6555d28952dd8bbe"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-24"

@@ -41,7 +41,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-054_Spike_And_Task_Decomposition_Surfaces.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "3a8f523f763e2c95870b25af7fabfacafcc749fc"
 repo: "planning"
 ---

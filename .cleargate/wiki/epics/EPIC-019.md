@@ -24,7 +24,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-019_Pluggable_Identity_Bound_Invite_Auth.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "08bdacb0657f9a24021eb40ba9b31b7f5379b38a"
 repo: "planning"
 ---

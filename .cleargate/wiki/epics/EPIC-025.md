@@ -15,7 +15,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-025_Prepare_Close_Observe_Phase_Mechanics.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "7cbc665f6f3a6c98cfacf10f23c14b95ebf481a9"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-18"

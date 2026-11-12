@@ -26,7 +26,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "46d8e1d2bd30047a674f31bb09b263dbdfbe39de"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-27"

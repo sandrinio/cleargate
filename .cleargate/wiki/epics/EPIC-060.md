@@ -23,7 +23,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-060_fresh_context_review_before_approval.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "bb1a2f5a6006132248a8aab767d91be6d2fba9c1"
 repo: "planning"
 ---

@@ -18,7 +18,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-021_Solo_Onboarding_DX.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "5f8134f8b1ea5ad975d5687114fbf0f84ca1f53e"
 repo: "planning"
 ---

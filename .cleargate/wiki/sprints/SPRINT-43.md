@@ -11,7 +11,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-43_execution_loop_efficiency_and_dev_context.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "7ba61eb5110056cbc5302b31b3248bf5e2331090"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-43"

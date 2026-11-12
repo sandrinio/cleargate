@@ -8,7 +8,7 @@ cited_by: []
 status: "Ready"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/PROPOSAL-029_Delivery_Folder_Umbrella_Restructure.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-29"

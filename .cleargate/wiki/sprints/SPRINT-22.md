@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-22_SDLC_Hardening.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "92e11546669fc72e6d1524d91f6aee2ee2d0f6d1"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-22"

@@ -10,7 +10,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-40_field_defect_remediation.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-40"

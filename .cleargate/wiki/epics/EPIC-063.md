@@ -54,7 +54,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md"
-last_ingest: "2026-11-12T19:31:58.580Z"
+last_ingest: "2026-11-12T20:33:09.611Z"
 last_ingest_commit: "5d42f1888a22a5baaeebdfc262e03b029b7eb22d"
 repo: "planning"
 last_contradict_sha: "9b2bd8027fc7661744d38af20e103146cf01e9b5a1f435bde0c90a4c1c570755"
