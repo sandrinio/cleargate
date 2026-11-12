@@ -3,24 +3,43 @@ type: sprint
 id: "SPRINT-23"
 parent: ""
 children: []
+cites: []
+cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-23_SDLC_Hardening_Tooling.md"
-last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest: "2026-11-12T19:31:58.580Z"
 last_ingest_commit: "c7bd5c5cdaa03b33e2c2a7a317612a7da61a35a1"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-23"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-23/SPRINT-23_REPORT.md"
+last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 ---
 
 # SPRINT-23: SDLC Hardening — Cross-Cutting Tooling
 
-## 0. Stakeholder Brief
+**Status:** Completed · **Sprint:** SPRINT-23 · **Gate:** pass
 
-> Sponsor-readable summary.
+## Deliverables
+| Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Wave |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [`CR-045`](CR-045_Sprint_Context_File.md) | CR | Sprint Context File — orchestrator dispatches read this once | standard | M | y (W1 parallel) | low | W1 |
+| [`CR-046`](CR-046_Run_Script_Wrapper.md) | CR | run_script.sh wrapper + script-incidents reporting | standard | M | y (W1 parallel) | low | W1 |
+| [`CR-047`](CR-047_Mid_Sprint_Triage_And_Test_Pattern_Validation.md) | CR | Mid-sprint triage rubric + Test Pattern Validation gate | standard | M-L | y (W1 parallel) | med | W1 |
+| [`CR-048`](CR-048_Sprint_21_Orphan_Drift_Cleanup.md) | CR | SPRINT-21 orphan drift cleanup + reconciler hardening | standard | M | y (W1 parallel) | low | W1 |
 
-- **Sprint Goal:** Make the SPRINT-22 disciplined loop ergonomic by adopting 3 V-Bounce-inspired tooling patterns (Sprint Context File CR-045, run_script.sh wrapper CR-046, Mid-Sprint Triage rubric + TPV gate CR-047) plus a one-time orphan cleanup with reconciler hardening (CR-048). After this sprint, cross-cutting sprint rules propagate to every dispatch via a single file; script failures become structured incident reports instead of raw bash output; mid-sprint user input has deterministic Bug/Clarification/Scope/Approach routing; lifecycle reconciler catches cross-sprint orphan drift that SPRINT-21's close missed.
-- **Business Outcome:** Per-story dispatch boilerplate shrinks (cross-cutting rules move out of dispatch text); script-failure investigation moves from "manually re-run + capture context" to "read structured incident JSON in agent report"; mid-sprint feedback classification becomes auditable; sprint close pipeline catches the drift class that left 8 SPRINT-21 orphans in pending-sync.
+**Estimated totals:** 4 items, 1 wave. Complexity: 4×M(~M-L). Lane mix: 4 standard (CR-048 upgraded from preliminary fast at SDR §2.4). Parallelism: W1 = 4 parallel dispatches.
 
-[+26,319 bytes not shown — read .cleargate/delivery/archive/SPRINT-23_SDLC_Hardening_Tooling.md]
+**Dispatch unit estimate (post-SDR §2.4 lane re-audit):** 4 Architect M1 SDR/M-plan + 4 QA-Red dispatches (all standard lane) + 4 Dev dispatches + 4 QA-Verify dispatches + 4 Architect post-flights + 4 DevOps dispatches. Total **24 dispatches** in this sprint (was 22 pre-CR-048-upgrade) vs SPRINT-22's ~12. Step-up explained: TPV adds 3 dispatches (one per standard-lane CR via CR-047's own gate); DevOps adds 4 (one per CR per CR-044); CR-048 upgrade adds 2 (its own QA-Red + Architect post-flight). Cost discipline holds because each dispatch is bounded.
 
-## Blast radius
-Affects: no parent/child refs declared in frontmatter
+<!-- BEGIN relations -->
+## Relations
+- Parent: none
+<!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Shipped · **Report:** .cleargate/sprint-runs/SPRINT-23/SPRINT-23_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-23/improvement-suggestions.md
+
+### Carried Over
+None.
+<!-- END sprint-report -->

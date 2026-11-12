@@ -3,26 +3,62 @@ type: sprint
 id: "SPRINT-34"
 parent: ""
 children: []
+cites: []
+cited_by: 
+  - "[[EPIC-058]]"
+  - "[[SPRINT-41]]"
+  - "[[STORY-058-01]]"
+  - "[[STORY-058-02]]"
+  - "[[STORY-058-03]]"
+  - "[[STORY-058-04]]"
+  - "[[STORY-058-05]]"
+  - "[[STORY-058-06]]"
+  - "[[STORY-058-07]]"
+  - "[[STORY-058-08]]"
+  - "[[STORY-058-09]]"
+  - "[[STORY-058-10]]"
+  - "[[STORY-058-11]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest: "2026-11-12T19:31:58.580Z"
 last_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-34"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-34/SPRINT-34_REPORT.md"
+last_report_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
 ---
 
 # SPRINT-34: Polyglot Portability Hardening
 
-## 0. Stakeholder Brief
-*(Sponsor-readable summary. Pushed to PM tool. Pair with §3 Risks below.)*
+**Status:** Completed · **Sprint:** SPRINT-34 · **Gate:** pass
 
-- **Sprint Goal:** Harden ClearGate so a fresh install runs a sprint end-to-end on an arbitrary (non-node, worktree-isolated) target repo without orchestrator hand-fixes — fixing the 11 portability/loop defects the SPRINT-66 polyglot dogfood surfaced — and ship the two carried hygiene CRs.
-- **Business Outcome:** ClearGate becomes genuinely "ships-to-many-repos" portable. A first-time non-node adopter (pytest / vitest / go) can `cleargate init` and execute a sprint without an expert orchestrator patching the scaffold's hardcoded `cleargate-cli` / `node:test` assumptions. Removes the guaranteed false-FAILs that today block any non-node target out of the box.
-- **Risks (top 3):**
-  - Three shared agent files (`qa.md`, `architect.md`, `developer.md`) are edited by CR-077 + CR-081 + CR-082 — merge contention if landed concurrently (see §2.2/§2.3).
-  - Canonical edits under `cleargate-planning/**` do NOT auto-propagate to the live `/.claude/` instance — every CR needs a post-merge re-sync or the meta-repo keeps running the buggy scaffold (the BUG-024 trap).
+## Goal
+Harden ClearGate so a fresh install runs a sprint end-to-end on an arbitrary (non-node, worktree-isolated) target repo without orchestrator hand-fixes — fixing the 11 portability/loop defects the SPRINT-66 polyglot dogfood surfaced — and ship the two carried hygiene CRs.
 
-[+15,670 bytes not shown — read .cleargate/delivery/archive/SPRINT-34_Polyglot_Portability_Hardening.md]
+## Deliverables
+*(Eight CRs. CR-077…082 are EPIC-045 children (SPRINT-66 portability/loop findings F1–F11); CR-075/CR-076 are EPIC-043 hygiene CRs carried from SPRINT-33.)*
 
-## Blast radius
-Affects: no parent/child refs declared in frontmatter
+| Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
+|---|---|---|---|---|---|
+| `CR-077` | Repo-derived test conventions + gate commands (F3 + F6) | standard | M1 | y | high |
+| `CR-079` | Worktree config provisioning (F4 + F7) | standard | M1 | y | med |
+| `CR-080` | Script-wrapper path + env correctness (F5 + F8) | fast | M1 | y | low |
+| `CR-078` | init_sprint sets `.active` + applies lane audit (F1 + F2) | fast | M2 | y | med |
+| `CR-081` | QA-loop semantic-fixture lint + red-now-green (F9 + F10) | standard | M3 | n | high |
+| `CR-082` | Deferred-verification tracking + close gate (F11) | standard | M3 | n | med |
+| `CR-075` | cleargate-cli standalone test suite (carried, EPIC-043) | standard | M4 | y | med |
+| `CR-076` | Trim published npm package (carried, EPIC-043) | standard | M4 | y | low |
+
+<!-- BEGIN relations -->
+## Relations
+- Parent: none
+- Cited by (13): [[EPIC-058]], [[SPRINT-41]], [[STORY-058-01]], [[STORY-058-02]], [[STORY-058-03]], [[STORY-058-04]], [[STORY-058-05]], [[STORY-058-06]], [[STORY-058-07]], [[STORY-058-08]], [[STORY-058-09]], [[STORY-058-10]], [[STORY-058-11]]
+<!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Shipped · **Report:** .cleargate/sprint-runs/SPRINT-34/SPRINT-34_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-34/improvement-suggestions.md
+
+### Carried Over
+- None. All 8 stories reached Done.
+<!-- END sprint-report -->

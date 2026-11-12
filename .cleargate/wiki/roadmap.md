@@ -4,110 +4,106 @@
 
 ## In-Flight Sprints
 
-Sprints currently active (`activated_at` set, `completed_at` not set).
+The sprint `.cleargate/sprint-runs/.active` names, validated against its plan file.
 
 
-- [[SPRINT-14]] — activated: 2026-04-26T00:00:00Z
 
-- [[SPRINT-15]] — activated: 2026-04-30T00:00:00Z
-
-- [[SPRINT-28]] — activated: 2026-05-17T16:45:00Z
-
+_No sprints currently in flight._
 
 
 ## Planned Sprints
 
-Sprints not yet started (`activated_at` not set).
+Non-terminal sprints other than the active one.
 
-
-- [[SPRINT-07]] — status: Abandoned
-
-- [[SPRINT-10]] — status: Completed
-
-- [[SPRINT-11]] — status: Completed
-
-- [[SPRINT-12]] — status: Completed
-
-- [[SPRINT-16]] — status: Abandoned
-
-- [[SPRINT-18]] — status: Approved
-
-- [[SPRINT-20]] — status: Completed
-
-- [[SPRINT-23]] — status: Completed
-
-- [[SPRINT-24]] — status: Completed
-
-- [[SPRINT-25]] — status: Completed
-
-- [[SPRINT-26]] — status: Completed
-
-- [[SPRINT-29]] — status: Abandoned
-
-- [[SPRINT-30]] — status: Completed
 
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-33]] — status: Completed
-
-- [[SPRINT-34]] — status: Completed
-
-- [[SPRINT-35]] — status: Completed
-
-- [[SPRINT-36]] — status: Completed
-
 - [[SPRINT-37]] — status: Draft
-
-- [[SPRINT-38]] — status: Completed
-
-- [[SPRINT-39]] — status: Completed
-
-- [[SPRINT-40]] — status: Completed
-
-- [[SPRINT-41]] — status: Completed
 
 - [[SPRINT-42]] — status: Draft
 
 - [[SPRINT-43]] — status: Draft
 
-- [[SPRINT-44]] — status: Completed
-
 
 
 ## Shipped Sprints
 
-Sprints with `completed_at` set.
+Terminal sprints (not Abandoned), newest first.
 
 
-- [[SPRINT-01]] — completed: 2026-04-17T17:00:00Z
+- [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
-- [[SPRINT-02]] — completed: 2026-04-17T23:50:00Z
+- [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
 
-- [[SPRINT-03]] — completed: 2026-04-18T17:37:00Z
+- [[SPRINT-40]] — completed: 2026-09-02T02:30:00Z
 
-- [[SPRINT-04]] — completed: 2026-04-19T05:30:00Z
+- [[SPRINT-39]] — completed: 2026-08-31T00:00:00Z
 
-- [[SPRINT-05]] — completed: 2026-04-19T15:05:00Z
+- [[SPRINT-38]] — completed: 2026-07-28T00:05:00Z
 
-- [[SPRINT-06]] — completed: 2026-04-20T11:26:00Z
+- [[SPRINT-36]] — completed: 2026-06-05T05:10:00Z
 
-- [[SPRINT-08]] — completed: 2026-04-21T10:30:00Z
+- [[SPRINT-35]] — completed: 2026-06-04T16:00:00Z
 
-- [[SPRINT-09]] — completed: 2026-04-21T08:30:00Z
+- [[SPRINT-34]] — completed: 2026-06-04T09:00:00Z
+
+- [[SPRINT-33]] — completed: 2026-06-01T18:05:00Z
+
+- [[SPRINT-32]] — completed: 2026-05-29T16:05:00Z
+
+- [[SPRINT-30]] — completed: 2026-05-29T00:00:00.000Z
+
+- [[SPRINT-28]] — completed: 2026-05-18T17:00:00Z
+
+- [[SPRINT-27]] — completed: 2026-05-15T04:40:00Z
+
+- [[SPRINT-06]] — completed: 2026-05-06T00:00:00Z
+
+- [[SPRINT-26]] — completed: 2026-05-05T17:50:00Z
+
+- [[SPRINT-25]] — completed: 2026-05-04T21:40:00Z
+
+- [[SPRINT-24]] — completed: 2026-05-04T17:55:00Z
+
+- [[SPRINT-23]] — completed: 2026-05-04T13:00:00Z
+
+- [[SPRINT-22]] — completed: 2026-05-04T09:45:00Z
+
+- [[SPRINT-21]] — completed: 2026-05-04T07:30:00Z
+
+- [[SPRINT-20]] — completed: 2026-05-02T23:20:00Z
+
+- [[SPRINT-19]] — completed: 2026-05-02T13:15:00Z
+
+- [[SPRINT-18]] — completed: 2026-05-01T20:30:00Z
+
+- [[SPRINT-17]] — completed: 2026-05-01T13:30:00Z
+
+- [[SPRINT-15]] — completed: 2026-04-30T17:00:00Z
+
+- [[SPRINT-14]] — completed: 2026-04-27T00:00:00Z
 
 - [[SPRINT-13]] — completed: 2026-04-25T13:59:00Z
 
-- [[SPRINT-17]] — completed: 2026-05-01T09:47:36Z
+- [[SPRINT-12]] — completed: 2026-04-24T00:00:00Z
 
-- [[SPRINT-19]] — completed: 2026-05-02T09:21:19.999Z
+- [[SPRINT-11]] — completed: 2026-04-24T00:00:00Z
 
-- [[SPRINT-21]] — completed: 2026-05-04T07:32:36Z
+- [[SPRINT-10]] — completed: 2026-04-21T12:30:00Z
 
-- [[SPRINT-22]] — completed: 2026-05-04T09:40:00Z
+- [[SPRINT-09]] — completed: 2026-04-21T08:30:00Z
 
-- [[SPRINT-27]] — completed: 2026-05-15T05:04:05Z
+- [[SPRINT-08]] — completed: 2026-04-20T14:00:00Z
 
-- [[SPRINT-32]] — completed: 2026-05-29
+- [[SPRINT-05]] — completed: 2026-04-19T16:05:00Z
+
+- [[SPRINT-04]] — completed: 2026-04-19T00:00:00Z
+
+- [[SPRINT-03]] — completed: 2026-04-18T18:00:00Z
+
+- [[SPRINT-02]] — completed: 2026-04-17T00:00:00Z
+
+- [[SPRINT-01]] — completed: 2026-04-17T00:00:00Z
 
 
 
@@ -146,6 +142,8 @@ _No active epics._
 - [[EPIC-060]] — status: Draft
 
 - [[EPIC-061]] — status: Draft
+
+- [[EPIC-063]] — status: Draft
 
 
 

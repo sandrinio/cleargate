@@ -3,26 +3,58 @@ type: proposal
 id: "PROPOSAL-007"
 parent: ""
 children: []
+cites: []
+cited_by: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest: "2026-11-12T19:31:58.580Z"
 last_ingest_commit: "39f8f74ac7c91dafd7f370dd4b61ef5d2bf0361f"
 repo: "planning"
 ---
 
 # PROPOSAL-007: Multi-Participant MCP Sync
 
-## 1. Initiative & Context
+**Status:** Abandoned · **Sprint:** none · **Gate:** pass
 
+## Initiative & Context
 ### 1.1 Objective
-Define the bidirectional sync model between ClearGate's local markdown state (`.cleargate/delivery/**`) and the remote PM tool (Linear / Jira / GitHub Projects via MCP), so that multi-participant teams share a unified project knowledge and backlog across platforms. Stakeholders who never open Claude Code should still be able to draft proposals, review approvals, and update statuses from the PM tool's native UI, with those changes flowing back into every participant's local view. Developers sharing a git repo should see each other's pushed items without stepping on one another's drafts.
+Define the bidirectional sync model between ClearGate's local markdown state (`.cleargate/delivery/**`) and the remote PM tool (Linear / Jira / GitHub Projects via MCP), so that multi-participant teams share a unified project knowledge and backlog across platforms.
 
-Today, ClearGate push is one-way: a local `approved: true` proposal flows to the PM tool via `cleargate_push_item`, but any subsequent edit on the remote side (status change, comment, assignee update, stakeholder rewriting the description) is invisible locally until an explicit re-pull. There is no conflict resolution, no identity tracking, and no model for stakeholder-authored content flowing back. This proposal designs the minimum coherent sync contract that makes ClearGate usable for teams of more than one person.
+[+3,051 bytes not shown — read .cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md]
 
-### 1.2 The "Why"
+## Technical Architecture & Constraints
+### 2.1 Dependencies
 
-[+24,509 bytes not shown — read .cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md]
+- **PROP-003** (hard) — MCP adapter is the existing push/pull surface; this proposal extends it.
+- **PROP-001** (hard) — `created_at` / `updated_at` / `codebase_version` are the conflict-detection primitives.
+- **PROP-002** (soft) — wiki synthesis pages render remote comments / statuses pulled down.
 
-## Blast radius
-Affects: no parent/child refs declared in frontmatter
+[+12,791 bytes not shown — read .cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md]
+
+## Scope Impact (Touched Files & Data)
+### 3.1 Known Files — must be modified
+
+**MCP server:**
+- `mcp/src/endpoints/pull-item.ts` — new `cleargate_pull_item` handler.
+- `mcp/src/endpoints/list-remote-updates.ts` — new.
+- `mcp/src/endpoints/pull-comments.ts` — new.
+- `mcp/src/endpoints/detect-new-items.ts` — new.
+- `mcp/src/endpoints/push-item.ts` — extend with gate-check enforcement (PROP-005 Q10 deferred work) and `pushed_by` attribution.
+
+[+2,235 bytes not shown — read .cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md]
+
+## AI Interrogation Loop (Human Input Required)
+*(The AI's open questions on this Proposal. The Proposal stays at Draft until all are answered.)*
+
+1. **Q — Stakeholder-authored proposal flow: push or pull model for the initial "remote draft" state?** When a stakeholder creates a Linear issue intended as a ClearGate proposal, does (a) ClearGate periodically poll for such issues and pull them into `pending-sync/`, or (b) the stakeholder (or a PM
+
+[+5,571 bytes not shown — read .cleargate/delivery/archive/PROPOSAL-007_Multi_Participant_MCP_Sync.md]
+
+## Approval Gate
+(Vibe Coder: Review this proposal. This is the largest-surface Proposal in ClearGate to date. Recommended: answer Q10 first — the sequencing decision shapes whether the other answers matter now or in six months. If the architecture and context are correct, answer the questions in §4 and set `approved: true` in the YAML frontmatter. Only then is the AI authorized to decompose into Epics/Stories.)
+
+<!-- BEGIN relations -->
+## Relations
+- Parent: none
+<!-- END relations -->

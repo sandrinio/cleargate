@@ -4,16 +4,118 @@
 
 Items awaiting human action at one of the three ClearGate review gates.
 
-## Gate 1 — Pending Proposal Approval
+## Gate 1 — Pending Approval
 
-Proposals with `approved: false` or `status: Draft` that have not yet been blessed.
+Open items of every ingested type whose `approved` is not `true`, with their readiness gate result: the failing check ids, `pass`, or `gate not run`.
 
 
-- [[PROPOSAL-008]] — status: Draft
+- [[EPIC-030]] — epic · status: Draft — fail: parent-approved
 
-- [[PROPOSAL-009]] — status: Draft
+- [[EPIC-031]] — epic · status: Draft — pass
 
-- [[PROPOSAL-074]] — status: Draft
+- [[EPIC-047]] — epic · status: Draft — fail: parent-approved, existing-surfaces-verified
+
+- [[EPIC-048]] — epic · status: In Review — fail: existing-surfaces-verified
+
+- [[EPIC-050]] — epic · status: Draft — fail: parent-approved, existing-surfaces-verified
+
+- [[SPRINT-31]] — sprint · status: Draft — pass
+
+- [[SPRINT-37]] — sprint · status: Draft — fail: discovery-checked
+
+- [[SPRINT-42]] — sprint · status: Draft — pass
+
+- [[SPRINT-43]] — sprint · status: Draft — pass
+
+- [[PROPOSAL-009]] — proposal · status: Draft — pass
+
+- [[PROPOSAL-029]] — proposal · status: Ready — fail: parent-approved, reuse-audit-recorded, simplest-form-justified
+
+- [[PROPOSAL-074]] — proposal · status: Draft — fail: parent-approved, reuse-audit-recorded, simplest-form-justified
+
+- [[INITIATIVE-001]] — initiative · status: In Triage — fail: success-criteria-populated
+
+- [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] — cr · status: Draft — fail: existing-surfaces-verified
+
+- [[CR-085-Drive-Execution-Loop-States-Live]] — cr · status: Draft — pass
+
+- [[CR-112]] — cr · status: Draft — pass
+
+- [[CR-113]] — cr · status: Draft — pass
+
+- [[CR-114]] — cr · status: Draft — pass
+
+- [[CR-119]] — cr · status: Triaged — pass
+
+- [[CR-120]] — cr · status: Draft — pass
+
+- [[CR-121]] — cr · status: Draft — pass
+
+- [[CR-122]] — cr · status: Draft — pass
+
+- [[CR-127]] — cr · status: Draft — pass
+
+- [[CR-128]] — cr · status: Draft — pass
+
+- [[CR-129]] — cr · status: Draft — pass
+
+- [[CR-130]] — cr · status: Draft — pass
+
+- [[BUG-050]] — bug · status: Draft — pass
+
+- [[BUG-051]] — bug · status: Draft — pass
+
+- [[BUG-053]] — bug · status: Draft — pass
+
+- [[BUG-054]] — bug · status: Draft — pass
+
+- [[BUG-055]] — bug · status: Draft — gate not run
+
+- [[BUG-056]] — bug · status: Draft — gate not run
+
+- [[BUG-057]] — bug · status: Draft — fail: repro-steps-deterministic
+
+- [[BUG-058]] — bug · status: Draft — pass
+
+- [[BUG-059]] — bug · status: Draft — pass
+
+- [[BUG-061]] — bug · status: Draft — pass
+
+- [[BUG-062]] — bug · status: Draft — pass
+
+- [[BUG-063]] — bug · status: Draft — pass
+
+- [[BUG-064]] — bug · status: Draft — pass
+
+- [[BUG-065]] — bug · status: Draft — pass
+
+- [[BUG-066]] — bug · status: Draft — pass
+
+- [[BUG-070]] — bug · status: Triaged — pass
+
+- [[BUG-072]] — bug · status: Triaged — pass
+
+- [[BUG-074]] — bug · status: Triaged — pass
+
+- [[BUG-075]] — bug · status: Triaged — pass
+
+- [[BUG-086]] — bug · status: Draft — pass
+
+- [[BUG-087]] — bug · status: Draft — pass
+
+- [[BUG-088]] — bug · status: Draft — pass
+
+- [[BUG-091]] — bug · status: Draft — pass
+
+- [[BUG-092]] — bug · status: Draft — pass
+
+- [[BUG-093]] — bug · status: Draft — pass
+
+- [[BUG-094]] — bug · status: Draft — pass
+
+- [[BUG-095]] — bug · status: Draft — pass
+
+- [[BUG-117]] — bug · status: Draft — pass
 
 
 

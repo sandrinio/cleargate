@@ -4,20 +4,48 @@
 
 ## Summary
 
-| Type | Total | Active | Shipped |
+| Type | Total | Open | Shipped |
 |------|-------|--------|---------|
-| Epics | 51 | 0 | 36 |
-| Sprints | 44 | 0 | 37 |
-| Proposals | 16 | 0 | 14 |
-| CRs | 120 | 0 | 93 |
-| Bugs | 106 | 0 | 46 |
+| Epics | 52 | 15 | 36 |
+| Sprints | 44 | 4 | 37 |
+| Proposals | 16 | 6 | 14 |
+| CRs | 126 | 17 | 94 |
+| Bugs | 106 | 48 | 46 |
 | Spikes | 0 | 0 | 0 |
 
-## Active Epics
+## Open Epics
 
 
+- [[EPIC-030]] — status: Draft
 
-_No active epics._
+- [[EPIC-031]] — status: Draft
+
+- [[EPIC-047]] — status: Draft
+
+- [[EPIC-048]] — status: In Review
+
+- [[EPIC-050]] — status: Draft
+
+- [[EPIC-052]] — status: Draft
+
+- [[EPIC-053]] — status: Draft
+
+- [[EPIC-055]] — status: Draft
+
+- [[EPIC-056]] — status: Draft
+
+- [[EPIC-057]] — status: Draft
+
+- [[EPIC-058]] — status: Draft
+
+- [[EPIC-059]] — status: Draft
+
+- [[EPIC-060]] — status: Draft
+
+- [[EPIC-061]] — status: Draft
+
+- [[EPIC-063]] — status: Draft
+
 
 
 ## Shipped This Cycle
@@ -301,6 +329,8 @@ _No active epics._
 
 - [[CR-124]] (crs) — Completed
 
+- [[CR-126]] (crs) — Completed
+
 - [[EPIC-000]] (epics) — Completed
 
 - [[EPIC-001]] (epics) — Abandoned
@@ -431,7 +461,7 @@ _No active epics._
 
 - [[SPRINT-17]] (sprints) — Completed
 
-- [[SPRINT-18]] (sprints) — Approved
+- [[SPRINT-18]] (sprints) — Completed
 
 - [[SPRINT-19]] (sprints) — Completed
 

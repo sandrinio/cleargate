@@ -5,78 +5,31 @@
 ## Current Sprint
 
 
-- [[SPRINT-14]] — status: Completed
 
-- [[SPRINT-15]] — status: Completed
-
-- [[SPRINT-28]] — status: Completed
+_No active sprint found._
 
 
 
 ## Planned Sprints
 
 
-- [[SPRINT-07]] — status: Abandoned
-
-- [[SPRINT-10]] — status: Completed
-
-- [[SPRINT-11]] — status: Completed
-
-- [[SPRINT-12]] — status: Completed
-
-- [[SPRINT-16]] — status: Abandoned
-
-- [[SPRINT-18]] — status: Approved
-
-- [[SPRINT-20]] — status: Completed
-
-- [[SPRINT-23]] — status: Completed
-
-- [[SPRINT-24]] — status: Completed
-
-- [[SPRINT-25]] — status: Completed
-
-- [[SPRINT-26]] — status: Completed
-
-- [[SPRINT-29]] — status: Abandoned
-
-- [[SPRINT-30]] — status: Completed
-
 - [[SPRINT-31]] — status: Draft
 
-- [[SPRINT-33]] — status: Completed
-
-- [[SPRINT-34]] — status: Completed
-
-- [[SPRINT-35]] — status: Completed
-
-- [[SPRINT-36]] — status: Completed
-
 - [[SPRINT-37]] — status: Draft
-
-- [[SPRINT-38]] — status: Completed
-
-- [[SPRINT-39]] — status: Completed
-
-- [[SPRINT-40]] — status: Completed
-
-- [[SPRINT-41]] — status: Completed
 
 - [[SPRINT-42]] — status: Draft
 
 - [[SPRINT-43]] — status: Draft
-
-- [[SPRINT-44]] — status: Completed
 
 
 
 ## Recently Completed Sprints
 
 
-- [[SPRINT-01]] — completed: 2026-04-17T17:00:00Z
+- [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
-- [[SPRINT-02]] — completed: 2026-04-17T23:50:00Z
+- [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
 
-- [[SPRINT-03]] — completed: 2026-04-18T17:37:00Z
+- [[SPRINT-40]] — completed: 2026-09-02T02:30:00Z
 
 

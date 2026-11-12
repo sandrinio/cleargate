@@ -3,30 +3,62 @@ type: sprint
 id: "SPRINT-39"
 parent: ""
 children: []
+cites: 
+  - "[[BUG-044]]"
+  - "[[BUG-045]]"
+  - "[[BUG-046]]"
+  - "[[EPIC-055]]"
+cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-39_Decomposition_Surfaces.md"
-last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest: "2026-11-12T19:31:58.580Z"
 last_ingest_commit: "38796c323d8918794a944949470f9acdfb6cfa5f"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-39"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-39/SPRINT-39_REPORT.md"
+last_report_ingest_commit: "38796c323d8918794a944949470f9acdfb6cfa5f"
 ---
 
 # SPRINT-39: Decomposition Surfaces — Spike Before, Tasks Within
 
-## 0. Stakeholder Brief
+**Status:** Completed · **Sprint:** SPRINT-39 · **Gate:** pass
 
-- **Sprint Goal:** Give ClearGate the two decomposition surfaces it lacks — a pre-sprint SPIKE charter for bounded discovery, and a Task Breakdown section inside Story/CR/Bug — and repair the gate-index defect that blocks the second one.
-- **Business Outcome:** Discovery work becomes a first-class, gateable artifact whose findings survive instead of being hand-copied into knowledge files; L3 execution sequence stops dying with the sprint run; and three readiness criteria that silently check the wrong section start checking the right one.
-- **Risks (top 3):** four items contend on `readiness-gates.md`; every surface is a two-tree dogfood edit; EPIC-052 will touch the same six templates later. See §3 for the full table.
-- **Metrics:** cited SPIKE ids resolving to real files 0/2 → 2/2 · gated `section(N)` criteria resolving to their named heading 9/12 → 12/12 · execution-machine unit count unchanged (1).
-
-## Sprint Goal
-
+## Goal
 Ship the spike charter type end-to-end and the task-breakdown section end-to-end, with the gate-index correction that WS6 depends on landing first.
 
-## 1. Consolidated Deliverables
+## Deliverables
+| Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure |
+|---|---|---|---|---|---|
+| `BUG-042` | Correct the three drifted `section(N)` gate indices | standard | M0 | n | low |
+| `STORY-054-05` | WS5 — section-index pinning test | standard | M0 | n | med |
+| `STORY-054-01` | WS1 — spike.md charter template + mirror | standard | M1 | y | low |
+| `STORY-054-02` | WS2 — spike type registration, gate blocks, KNOWN_TYPES | standard | M1 | n | med |
+| `STORY-054-03` | WS3 — spike doctrine + Guidance Surface Reach | standard | M1 | n | med |
+| `STORY-054-04` | WS4 — spikes wiki bucket (config + 4 hardcoded lists) | standard | M1 | y | low |
+| `STORY-054-06` | WS6 — Task Breakdown section in Story/CR/Bug | standard | M2 | n | med |
+| `STORY-054-07` | WS7 — architect + developer + qa wiring | standard | M2 | y | med |
+| `BUG-043` | CLAUDE.md marker handling loses user prose (two defects) | standard | M3 | n | med |
+| `CR-105` | ClearGate block leads CLAUDE.md (prefix-cache ordering) | standard | M3 | n | med |
+| `BUG-044` | `update_state.mjs` concurrent writes silently lose transitions | standard | M4 | y | low |
+| `CR-106` | Execution state becomes an append-only event log + fold | standard | M4 | y | med |
+| `CR-107` | Sprint→main merge goes through a pull request | standard | M4 | y | low |
+| `BUG-045` | `hotfix new` ID scan ignores `archive/`, reuses live IDs | standard | M4 | y | low |
+| `BUG-046` | Collision surface blind to worktree reachability (fail-open) | standard | M4 | y | med |
+| `CR-108` | `cleargate new <type>` — one scaffolder for every work-item type | standard | M4 | n | med |
+| `CR-110` | Sprint goal gets an acceptance check; Orchestrator holds it | standard | M4 | y | low |
+| `CR-111` | Work items declare integration + E2E test layers at planning | standard | M4 | n | med |
 
-[+30,256 bytes not shown — read .cleargate/delivery/archive/SPRINT-39_Decomposition_Surfaces.md]
+<!-- BEGIN relations -->
+## Relations
+- Parent: none
+- Cites (4): [[BUG-044]], [[BUG-045]], [[BUG-046]], [[EPIC-055]]
+<!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Draft · **Report:** .cleargate/sprint-runs/SPRINT-39/SPRINT-39_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-39/improvement-suggestions.md
 
-## Blast radius
-Affects: no parent/child refs declared in frontmatter
+### Carried Over
+None. 18/18 items reached **Done**; zero escalations, zero Parking Lot placements, zero items
+still `Bouncing` at close.
+<!-- END sprint-report -->

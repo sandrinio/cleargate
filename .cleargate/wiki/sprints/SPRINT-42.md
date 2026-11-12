@@ -3,29 +3,41 @@ type: sprint
 id: "SPRINT-42"
 parent: ""
 children: []
+cites: 
+  - "[[BUG-118]]"
+  - "[[BUG-119]]"
+cited_by: 
+  - "[[SPRINT-31]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-42_planning_catches_what_execution_stopped_for.md"
-last_ingest: "2026-11-10T18:20:47.120Z"
+last_ingest: "2026-11-12T19:31:58.580Z"
 last_ingest_commit: "7ba61eb5110056cbc5302b31b3248bf5e2331090"
 repo: "planning"
+sprint_cleargate_id: "SPRINT-42"
 ---
 
 # SPRINT-42: Planning Catches What Execution Stopped For
 
-## 0. Stakeholder Brief
+**Status:** Draft · **Sprint:** SPRINT-42 · **Gate:** pass
 
-A downstream ClearGate install (Kurnera) stopped four of six UI stories mid-sprint for an owner decision. Every one of those conflicts was already visible in the story drafts. Its designer agent only read them once each story was already running.
-
-This sprint moves that review to the one place ClearGate already halts for the owner: plan confirmation. A repo lists its own reviewer agents (a designer, for a UI repo) under `sprint.draft_reviewers`. Each one reads every story draft at kickoff, and its findings arrive as a single batch of owner questions before anything executes. Three smaller rules close the other gaps that sprint exposed. The surface-gate fix stops story commits from being checked against the wrong story.
-
-Three of the four rules land on files `cleargate upgrade` overwrites, so only an upstream fix reaches every install.
-
-## Sprint Goal
-
+## Goal
 - **Sprint Goal:** Move to plan confirmation the owner decisions a downstream sprint paid for mid-execution, and make the surface gate check each story commit against that story's own surface.
 
-[+7,038 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-42_planning_catches_what_execution_stopped_for.md]
+- **Success measure:** (1) EPIC-059's four rules are in the canonical scaffold and the live mirror, pinned by tests. §A.4 names `sprint.draft_reviewers` and §§2.1–2.6, `config.example.yml` documents the key, and the Sprint Plan template carries §2.6. (2) With `sprint.draft_reviewers` empty, §A.4 behaves exactly as today. (3) After BUG-052 merges, a commit on `story/<ID>` is checked against `<ID>`'s §3.1 with no `SKIP_SURFACE_GATE=1`, and orchestrator commits to `.cleargate/delivery/**` and `.cleargate/sprint-runs/**` on a branch with no story id pass. (4) `doctor` reports no scaffold drift for any touched file after the dist rebuild.
 
-## Blast radius
-Affects: no parent/child refs declared in frontmatter
+## Deliverables
+| ID | Type | Lane | Milestone | Parallel? | Bounce exposure |
+|---|---|---|---|---|---|
+| BUG-052 | Bug | standard | M1 | y | med |
+| STORY-059-01 | Story | standard | M1 | y | low |
+| STORY-059-03 | Story | standard | M1 | y | med |
+| STORY-059-04 | Story | fast | M1 | y | low |
+| STORY-059-02 | Story | standard | M2 | n | med |
+
+<!-- BEGIN relations -->
+## Relations
+- Parent: none
+- Cites (2): [[BUG-118]], [[BUG-119]]
+- Cited by (1): [[SPRINT-31]]
+<!-- END relations -->
