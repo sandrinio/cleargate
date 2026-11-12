@@ -234,6 +234,83 @@ trust is skipped entirely in `-p` (headless) mode.
 Automated by `cleargate-cli/scripts/clean-room/claude-baseline.mjs run`
 (STORY-058-09); `check` verifies the recorded evidence.
 
+### 5.1 Ingest loop (STORY-063-07)
+
+`cleargate-cli/scripts/clean-room/ingest-loop.mjs` proves, in a real headless session against the
+packed artifact, that the wiki-ingest loop (EPIC-063) reaches the agent and runs: the PostToolUse
+contradiction directive, the `cleargate-wiki-contradict` dispatch, `contradict-commit`, the Brief's
+`Contradictions:` line and the Bash-path ingest. It is a manual release gate for 0.29.0, run once per
+release. It is never part of `npm test` or CI.
+
+```bash
+node cleargate-cli/scripts/clean-room/ingest-loop.mjs run --ref <ref> \
+  [--container <abs>] [--model <id>] [--label <text>] \
+  --evidence .cleargate/sprint-runs/_off-sprint/EPIC-063/evidence/ingest-loop-evidence.md
+node cleargate-cli/scripts/clean-room/ingest-loop.mjs check \
+  --evidence .cleargate/sprint-runs/_off-sprint/EPIC-063/evidence/ingest-loop-evidence.md
+```
+
+`run` exits 0 when all nine checks PASS and 1 on any FAIL (the evidence is still written). It exits 2 on a
+refusal: a required tool missing from PATH (`claude jq git npm tar`), a refused container, seed-template
+drift (a seed anchor that no longer occurs exactly once in the epic template), a non-unique edit text in a
+seed draft, or a seed that does not gate 0. A refusal still appends a run section with nine FAIL rows
+(`run refused (exit 2): <reason>`) when `--evidence` was given or the file already exists, so `check` never
+passes on an earlier run. Only an argv usage error with no evidence path exits 2 without writing. `check` reads the evidence file only
+(no room, no git, no network, no staleness gate): it exits 0 iff the LAST run has a PASS row for all
+nine ids, 1 otherwise, 2 on a usage error. The run metadata records `cli_sha`, `artifact_inputs`, the
+tarball sha256, the claude version and model, and per session the transcript path, each result's
+`subtype`/`num_turns` and the final `total_cost_usd`. Never run `npm run build` or `tsup` in the
+`cleargate-cli` checkout to prepare it: packing builds in `<container>/src` from the git ref.
+
+**Sequence.**
+
+1. Pack the ref and install it into `<container>/tools`. The identity gate must resolve `cleargate` to that install.
+2. Create `<container>/repo-ingest`, `git init`, `cleargate init --yes`.
+3. Seed three epics: a neighbour carrying the blunt rule "The cache MUST be Redis; an in-process cache is forbidden", a positive draft ("Replace the Redis cache with an in-process Map") and a negative draft (keeps Redis). Both drafts cite `[[<neighbour id>]]`. Every seed gates 0 and keeps `approved: false`. Then `cleargate wiki build`, `git commit`, and one run of `post-shell-ingest.sh` with stdin `{}` to record the shell-ingest baseline.
+4. Positive session, then (only if its finding check failed) a reset of `.cleargate/delivery` and `.cleargate/wiki` to the seed commit and a second positive attempt; then the negative session; then the shell session (`git mv` of the positive draft into `archive/`).
+5. J3 and J4, model-free, **after** the model sessions: a sprint plan plus `SPRINT-NN_REPORT.md` and `cleargate wiki build`; an unapproved Draft back-dated 48 h and never checked, then the room's `session-start.sh`. J4 must run last: a back-dated unchecked draft is named in every SessionStart banner, which would invite the agent to check it.
+6. Append one `## Run N` section to the evidence file.
+
+The prompts only ask for one Edit and the item's Brief; they never mention the contradiction check. The
+CLAUDE.md rule installed by `cleargate init` must do the rest.
+
+**Check ids** (`INGEST_LOOP_CHECKS` in `evidence.mjs`; the baseline's `GATING_CHECKS` is unchanged):
+
+| id | proves |
+|---|---|
+| `claude.live.contradiction-directive` | the PostToolUse:Edit `hook_response` carries the directive as `hookSpecificOutput.additionalContext` |
+| `claude.live.contradiction-dispatch` | an Agent `tool_use` with `subagent_type: cleargate-wiki-contradict`, SubagentStop exit 0, and a new token-ledger row for that agent |
+| `claude.live.contradiction-finding` | `wiki/contradictions.md` gained an entry whose `neighbor` is the seeded neighbour |
+| `claude.live.contradiction-stamp` | the page `last_contradict_sha` equals the raw file's content hash, for both drafts |
+| `claude.live.brief-contradictions-line` | the final result text has a `Contradictions:` line (bold and list markers tolerated), for both drafts |
+| `claude.live.contradiction-negative` | the negative draft is stamped and gained no finding |
+| `claude.live.shell-ingest` | a PostToolUse:Bash hook exited 0 and the page `raw_path` moved into `archive/` |
+| `claude.live.report-kept` | J3: the sprint page contains `<!-- BEGIN sprint-report -->` |
+| `claude.live.silent-drop-alarm` | J4: session-start output names the back-dated, never-checked Draft |
+
+**Flake rule.** Only `contradiction-finding` depends on the subagent's judgement, so it alone gets a
+second positive attempt (attempt 2 runs from a reset room, because the same edit would reproduce the
+same body hash and Phase 4 would skip). It passes if either attempt records the neighbour, and the
+pointer names both attempts. A directive, dispatch, stamp or Brief failure on attempt 1 is FAIL.
+
+**Async stream.** A session can emit two `system/init` and two `result` events when Claude Code runs the
+Agent dispatch in the background (as in the 2.1.322 haiku probe). In the live sonnet run, Agent ran in the
+foreground (`run_in_background: false`) and each session emitted one `result`. The driver handles either: it
+keeps the first init, never resets on a later one, and reads the Brief from the LAST `result`. A turn-cap or
+error result has no text and fails the Brief check; it never falls back to an interim result.
+
+**Cost and limits.** Each session is capped at `claude-sonnet-5-5`, `--max-turns 20`,
+`--max-budget-usd 3` and a 900 s timeout (`--model` overrides the model only). The $3 per session is a cap,
+not an estimate: the ceiling for a run is $9, or $12 if the finding check retries. Observed on the dry run
+of 2026-11-12 (sonnet, 115 s): $0.44 in total. The 2.1.322 probe suggested that `--max-turns` resets per
+async-subagent segment while cost accumulates; that is unproven, and 20 turns is the margin (a typical
+positive session used 6). J3 and J4 are model-free and spend nothing. A session that times out or errors
+becomes FAIL rows with a `session error` pointer, never a crash.
+
+The model-free test `test/e2e/clean-room-ingest-loop.red.integration.node.test.ts` covers the driver's
+parsing and verdict logic on recorded streams. It does not prove that a live model follows the rule;
+only `run` does.
+
 ## 6. Record the evidence
 
 Record one table per run: `id | room | PASS/FAIL | pointer`, one row per

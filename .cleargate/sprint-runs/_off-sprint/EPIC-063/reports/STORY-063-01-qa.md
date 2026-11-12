@@ -1,0 +1,11 @@
+# STORY-063-01 QA (role: qa) — PASS
+- typecheck: clean (exit 0)
+- full npm test (fresh shell, private TMPDIR): 3871 tests, 3869 pass, 0 fail, 2 skipped (baseline 3840/3838/2)
+- red integration file: 6/6 pass
+- red files byte-identical aa05d38..63c5018 (empty diff)
+- deviation (contradict-cli.node.test.ts): faithful supersession; assertion now compares against contradictContentHash(raw) (stricter than a FAKE_SHA literal), annotated "superseded by STORY-063-01 R4". Not a weakening.
+- Gherkin S1-S6 + G2 mapped to passing tests (contradict-commit.red.node.test.ts S1..S6, G2 SPIKE; CLI integration plan tests 10-12).
+- C1.1-C1.7 names/signatures match exactly. Ingest keeps getGitSha for drift (wiki-ingest.ts:191); only Phase 4 uses contradictContentHash (ingest + wiki contradict prepare + commit).
+- help text names contradict-commit, no "missing" wording (test 12 passes).
+- dist/cli.js mtime Nov 10 22:37 2026, unchanged.
+- Note: TMPDIR under scratchpad is too long for tsx IPC socket (EINVAL); used /tmp/qa1.*.

@@ -2,14 +2,14 @@
 epic_id: EPIC-053
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-36"
+sprint_cleargate_id: SPRINT-36
 carry_over: false
 status: Draft
 approved: true
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-06T00:00:00Z
-ambiguity: 🟢 Low
+ambiguity: 🔴 High
 context_source: "direct-human-ask 2026-08-06 — owner clarified the target: \"under db i mean that when cleargate runs in a user's repo, they will have db for their product. i thought that we need to be checking that dependency when planning the sprint.\" Proposal gate waived per ~/.claude memory feedback_proposal_gate_waiver.md: sharp intent, and the scope was narrowed live across two investigation rounds. Grounded against source read directly this session, not inferred: .cleargate/templates/story.md:70 (the fail-open default), cleargate-cli/src/wiki/code-map/extract-skeleton.ts:250,265 (extractDbWrites + the DRIZZLE_WRITE_METHODS false-positive set), and .cleargate/sprint-runs/SPRINT-36/plans/waves.json (wave2 co-waved STORY-047-02 at parallel:true despite a non-empty db_write_set). Two multi-agent verification workflows informed this epic; four of five finders in the second were disputed on adversarial review, so every load-bearing claim below was re-verified by hand and only hand-verified claims are stated as fact."
 owner: sandrinio
 target_date: 2026-10-15
@@ -39,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-08-06T10:27:47Z
+  last_stamp: 2026-11-11T23:12:18Z
   sessions: []
 ---
 
@@ -317,7 +317,9 @@ and they buy parallelism back rather than adding safety.
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Low Ambiguity — Ready for Decomposition**
+**Current Status: 🔴 High Ambiguity**
+> Reverted to 🔴 on 2026-11-12 by [[CR-126]]: this epic needs a `## Testing Strategy` section answering "how do we test this?" before it can be decomposed.
+
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

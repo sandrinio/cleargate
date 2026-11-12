@@ -2,7 +2,7 @@
 epic_id: EPIC-057
 parent_ref: null
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-39"
+sprint_cleargate_id: SPRINT-39
 carry_over: false
 area: planning-layer
 status: Draft
@@ -10,7 +10,7 @@ approved: true
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-26T00:00:00Z
-ambiguity: 🟡 Medium
+ambiguity: 🔴 High
 context_source: verified codebase grounding (git ls-files + check-ignore across mcp/ cleargate-cli/ admin/ = 0 tracked, all gitignored; 9 of 16 SPRINT-39 items reference cleargate-cli/src) + recorded direct approval 2026-08-26
 owner: sandrinio
 target_date: 2026-11-30
@@ -19,13 +19,6 @@ updated_at: 2026-08-25T21:20:00Z
 created_at_version: cleargate@0.24.2
 updated_at_version: cleargate@0.24.2
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: false
   failing_criteria:
@@ -41,6 +34,15 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+stamp_error: no ledger rows for work_item_id EPIC-057
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-11-11T23:12:49Z
+  sessions: []
 ---
 
 # EPIC-057: Multi-repo story execution — routing, not just detection
@@ -181,7 +183,8 @@ Feature: Multi-repo story execution
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🔴 High Ambiguity**
+> Reverted to 🔴 on 2026-11-12 by [[CR-126]]: this epic needs a `## Testing Strategy` section answering "how do we test this?" before it can be decomposed.
 
 Requirements to pass to Green (Ready for Coding Agent):
 - [x] `approved: true` is set in the YAML frontmatter.

@@ -1,3 +1,47 @@
+2026-11-12 · #clean-room #evidence #danger · A run that refuses (exit 2) without appending evidence leaves the prior PASS as LAST run; check goes green.
+2026-11-12 · #clean-room #claude-p · claude -p may background an Agent (2 inits, 2 results) or not (sonnet: 1); keep first init, never reset, parse LAST result.
+2026-11-12 · #clean-room #alarm · A 1–7-day-old unchecked draft is named in every SessionStart banner; seed it after the model sessions.
+2026-11-12 · #clean-room #contradict · Retrying a contradict session: reset raw AND page to seed; same edit → same hash → Phase 4 skips, no directive.
+2026-11-12 · #privacy #fixtures · Raw claude -p transcripts hold home paths, connectors, plugins, rate-limit info; seal a redacted cut + a guard test.
+2026-11-12 · #clean-room #brief · Models bold labels (**Contradictions:**), seen live; a bare ^Contradictions: check false-FAILs a real Brief.
+2026-11-12 · #qa-red #clean-room · claude-baseline.mjs has no main guard; importing it runs main() and exits 2 — test it by spawning.
+2026-11-12 · #hooks #claude · The contradiction directive names the draft ID (hook-lines.ts), not its path; pin checks from the source line.
+2026-11-12 · #frontmatter #wiki · updated_at moves only via cleargate new/stamp/sprint add|remove; no Edit/Write hook moves it (stamp-tokens doesn't).
+2026-11-12 · #gate #cache · stamp-and-gate writes last_gate_check only, never updated_at (supersedes the 2026-09-27 #tpv #gate #cache card).
+2026-11-12 · #templates #clean-room · CR/Bug templates ship status "Draft | In Review | …" verbatim; Phase 4 skips it. Seed probe drafts as epics.
+2026-11-12 · #perf #budget · EPIC-063's session-start ≤100 ms is cumulative over 0.28.0; 06 spent ~30 ms. Later stories baseline against 0.28.0.
+2026-11-12 · #doctor #test-harness · Subprocess doctor runs need CLEARGATE_NO_UPDATE_CHECK=1 (CLEARGATE_HOME is read by nothing) or they hit npm.
+2026-11-12 · #doctor #perf · doctor --session-start exits 1 on this repo (gate-failed drafts); perf harnesses compare exit across sides, never pin 0.
+2026-11-12 · #qa-red #test-harness · Dynamic-import a not-yet-existing module inside each test so every case reds on its own, not one file-load error.
+2026-11-12 · #git #hooks · stash pop / merge --squash / cherry-pick / revert conflicts set no MERGE_HEAD; guard on unmerged XY (UU/AA/DU…) in status.
+2026-11-12 · #git #hooks · rev-parse --git-path is relative to -C's dir; use --path-format=absolute (git ≥2.31); several --git-path args → one line each.
+2026-11-12 · #git #shell · porcelain v1 without -z quotes paths with spaces; bash must use -z + read -d '' (never $(...), which drops NULs).
+2026-11-12 · #hooks #perf · Under load every exec costs 50–200 ms here; a hook budget is an exec count — measure p95 on a quiet machine.
+2026-11-12 · #hooks #shell-ingest · Bash-hook snapshot lags Edit/Write: the first Bash call after a delivery Edit always runs the slow path.
+2026-11-12 · #tpv #hooks · Hook-contract reds that always spawn with cwd=REPO_ROOT hide cwd-relative bugs; add one foreign-cwd run.
+2026-11-12 · #test-harness #e2e · Clean-room packed-artifact tests pack HEAD: they fail until the story commit exists; run them after committing.
+2026-11-12 · #test-harness #hooks · tsx src/cli.ts wiki ingest/build ENOENTs on src/wiki/templates/synthesis (dist-only path); preload a read redirect.
+2026-11-12 · #qa-red #hooks · A PATH cleargate stub must not cd to the CLI root: ingest's getGitSha and project-root resolution use cwd.
+2026-11-12 · #init #dogfood #danger · plain `cleargate init` SKIPS live files that differ (copy-payload.ts:194); live re-sync needs --force + .claude/ backup.
+2026-11-12 · #hooks #cli · Hook resolver branch 2 (PATH cleargate) is unversioned; a new `hook <sub>` fails on an older global — keep a plain-text fallback.
+2026-11-12 · #wiki #lint · wiki lint runs only in `cleargate sprint archive` (sprintArchiveHandler); sprint close / close_sprint.mjs never runs it.
+2026-11-12 · #docs #tpv · Docs-match-code tests must assert the code fact (grep the real caller), not file existence; keep heading-anchor prefixes on rename.
+2026-11-12 · #hooks #claude · Claude PostToolUse plain stdout stays in the transcript; only JSON hookSpecificOutput.additionalContext reaches the model.
+2026-11-12 · #shell #test-harness · `until ! pgrep -f "X"` never exits: pgrep -f matches the waiting loop's own command line; wait on a PID or a file.
+2026-11-12 · #gate #templates · testing-strategy-complete reads each labelled value on its own line; '- **Label:**' + only sub-bullets = empty.
+2026-11-12 · #qa-red #fixture #danger · Seal a 'copied from the doc' fixture only after the doc reshape lands; Dev pasted the fixture over 🟢 spec text.
+2026-11-12 · #planning #journeys · A journey's 'Walked by' must be in that story's checks; naming a walker without amending its story is a false claim.
+2026-11-12 · #tpv #test-harness · raw.indexOf('## X') on a template hits the <instructions> Brief line first; anchor on '\n## X\n'.
+2026-11-12 · #qa #test-harness · readiness evaluate() 3rd arg is {projectRoot}, not a string; a wrong arg falls back to cwd and hides the exemption.
+2026-11-12 · #wiki #synthesis · roadmap.ts still partitions sprints by activated_at/completed_at; active-sprint reads .active — the pages can disagree (M2 fix).
+2026-11-12 · #wiki #contradict · Since 0.29.0 wiki build keeps last_contradict_sha (raw-file mirror first, then existing page); older builds wiped it.
+2026-11-12 · #wiki #sort · listSprintReports sorts sprintId lexically (SPRINT-100 < SPRINT-11); order by generated_at/numeric stem where order matters.
+2026-11-12 · #test-harness #qa-red · A red exit seam that throws on code 0 can't pass a handler ending exit(0); mirror the existing no-op tests' seam.
+2026-11-12 · #wiki #hash · contradictContentHash keys on locateFrontmatter (skips <instructions>/fences/BOM); a naive first-'---' re-impl mis-hashes drafts.
+2026-11-12 · #test-harness #qa · Redefining a stamped value (git SHA → content hash) breaks older tests asserting the old constant (FAKE_SHA); grep ALL tests.
+2026-11-12 · #hooks #dist #danger · npm run build in cleargate-cli hot-swaps the outer repo's live hooks (resolver branch 1); build to scratch.
+2026-11-12 · #wiki #ingest · ingest never no-ops a dirty file (currentSha '' or content≠HEAD): each re-ingest rewrites the page and log.md.
+2026-11-12 · #clean-room #gate · authorProbeEpic gates 0 only on today's epic.md; a new epic criterion breaks every story-less probe seed.
 2026-11-10 · #dashboard #client · Backlog redraw-skip: compare the stored last-written HTML, never el.innerHTML (browser read-back normalises &#39;/&quot;).
 2026-11-10 · #dashboard #security · Host allowlist is host:port; browsers omit :80, so a dashboard on port 80 would 403 every page — refuse 80 or allow bare host.
 2026-11-10 · #dashboard #client · cgRenderBacklogList rewrites #backlog-list every 2 s poll; row buttons lose focus/clicks — key the redraw like Plan's lkey (fixed STORY-062-06).
@@ -66,7 +110,6 @@
 2026-09-27 · #pre-gate #meta-repo · Run pre_gate_runner.sh arch on the OUTER worktree; its typecheck is npm --prefix cleargate-cli (254 on cw).
 2026-09-27 · #codex #clean-room · codex-loop never collects pending-task-sentinel.log; read source= from <C>/repo-loop hook-log before rm.
 2026-09-27 · #codex #dispatch · Scripted loop task_names are bare roles (cg_probe, qa_red…): scripted runs attribute only via source=message.
-2026-09-27 · #tpv #gate #cache · Gate freshness is >=: stamp-and-gate writes updated_at and last_gate_check in one second; pin equality.
 2026-09-27 · #tpv #preflight · Check 5's sprint-plan stale branch had no test: deleting it passed all 27 sprint-preflight tests.
 2026-09-27 · #test-harness #gate · loadGateBlocks unwraps [0] per yaml fence; a 2nd gate in the same fence is silently dropped.
 2026-09-27 · #tpv #test-harness · A same-inputs writeCachedGate rerun is byte-identical even if it writes; vary now to see churn.
@@ -321,7 +364,6 @@
 2026-09-26 · #codex #hooks · git rev-parse --show-toplevel is physical; resolve apply_patch paths against realpath(cwd).
 2026-09-26 · #test-harness #scaffold · canonicalPath() maps .codex/** and AGENTS.md to scaffold/core; join hosts/codex yourself.
 2026-09-26 · #clean-room #evidence #danger · Unsanitised evidence cells can inject '## Run'/'- result: PASS' lines; a FAIL run then checks green.
-2026-09-26 · #clean-room #claude-p · Claude Code 2.1.283 backgrounds a headless Agent dispatch: S2 emits two result events; parse the last.
 2026-09-26 · #clean-room #harness · claude-baseline.mjs runs main()+process.exit on import; never import it — reuse evidence.mjs/probe-items.mjs.
 2026-09-26 · #clean-room #host · A witness line copied from 'registered' is vacuous; record --host all from the room's snapshot hosts.
 2026-09-26 · #close #deferred-verify · Step 2.9 reads only status+exit_code of deferred-verify/<ID>.json; it cannot see a stale green.

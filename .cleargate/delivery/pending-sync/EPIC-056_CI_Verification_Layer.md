@@ -10,7 +10,7 @@ approved: true
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-26T00:00:00Z
-ambiguity: 🟡 Medium
+ambiguity: 🔴 High
 context_source: verified codebase grounding (no .github/workflows in any of the three repos, confirmed by ls; qa.md:98 fast-lane skip; qa.md:130,165 lane-aware re-run) + recorded direct approval 2026-08-26
 owner: sandrinio
 target_date: 2026-10-31
@@ -19,13 +19,6 @@ updated_at: 2026-11-07T17:40:24Z
 created_at_version: cleargate@0.24.2
 updated_at_version: dbad31f8-dirty
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 cached_gate_result:
   pass: false
   failing_criteria:
@@ -41,6 +34,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-11T23:12:22Z
+  sessions:
+    - session: 72e522d7-caa6-4837-81f5-8fa60f84f8b5
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-11T22:43:17Z
 ---
 
 # EPIC-056: CI verification layer — environment-independent proof that tests pass
@@ -165,7 +173,8 @@ Feature: CI verification layer
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🔴 High Ambiguity**
+> Reverted to 🔴 on 2026-11-12 by [[CR-126]]: this epic needs a `## Testing Strategy` section answering "how do we test this?" before it can be decomposed.
 
 Requirements to pass to Green (Ready for Coding Agent):
 - [x] `approved: true` is set in the YAML frontmatter.

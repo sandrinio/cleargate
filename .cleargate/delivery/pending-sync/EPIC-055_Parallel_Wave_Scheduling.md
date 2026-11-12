@@ -10,7 +10,7 @@ approved: true
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-26T00:00:00Z
-ambiguity: 🟢 Low
+ambiguity: 🔴 High
 context_source: verified codebase grounding (launch_wave.mjs:264-303; SKILL.md:236-252,445; architect-synth.md five-clause predicate; SPRINT-38 waves.json milestone_barrier) + design conversation 2026-08-26
 owner: sandrinio
 target_date: 2026-10-07
@@ -39,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-09-26T13:54:38Z
+  last_stamp: 2026-11-11T23:12:45Z
   sessions: []
 ---
 
@@ -195,7 +195,8 @@ Feature: Parallel wave scheduling
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Ready for Decomposition** — re-scoped 2026-09-26 after [[CR-124]] (DAG + predicate moved to CR-124; this epic keeps scheduler automation: ready-set admission, segment budget, refcounted flashcard gate, worktree-add mutex, merge queue). Still sequenced behind [[CR-106]] and the SPIKE charter.
+**Current Status: 🔴 High Ambiguity** (was: 🟢 Ready for Decomposition — re-scoped 2026-09-26 after [[CR-124]] (DAG + predicate moved to CR-124; this epic keeps scheduler automation: ready-set admission, segment budget, refcounted flashcard gate, worktree-add mutex, merge queue). Still sequenced behind [[CR-106]] and the SPIKE charter.)
+> Reverted to 🔴 on 2026-11-12 by [[CR-126]]: this epic needs a `## Testing Strategy` section answering "how do we test this?" before it can be decomposed.
 
 Requirements to pass to Green (Ready for Coding Agent):
 - [x] `approved: true` is set in the YAML frontmatter.

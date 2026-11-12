@@ -134,6 +134,13 @@ The red test builds a `mktemp -d` git fixture with a story branch and a sprint b
 - [[CR-079]] — adjacent, not overlapping. Established `worktree.provision_config` and the `stray_env_files` scan-exemption pattern (one configured list serving as both spec and exemption). This bug applies the same "derived output belongs on the whitelist" principle to the wiki.
 - [[STORY-051-01]] — Completed. Restored the file-surface gate that this bug's whitelist row is admitted through.
 
+## Scheduling note (2026-11-12, EPIC-063 M1 plan)
+
+STORY-063-03 (cleargate 0.29.0) adds a Bash PostToolUse ingest hook. Once it is live, every DevOps merge that brings in a delivery-file change is followed by an ingest that rewrites `wiki/index.md`, `log.md` and synthesis pages, so the main checkout is dirty after every story merge.
+- The stash/pop fix proposed above breaks under that hook: the merge's own Bash call re-dirties `index.md`/`log.md` before the pop, and `git stash pop` refuses.
+- Recommended design: **commit-before-merge.** Add `.cleargate/wiki/**` to `surface-whitelist.txt`. In DevOps step 2, when `git status --porcelain -- .cleargate/wiki/` is non-empty, run `git add .cleargate/wiki && git commit -m "chore(wiki): sync derived pages"`, then merge. On a `log.md` conflict, keep both blocks.
+- Schedule it in SPRINT-42, before any sprint runs on 0.29.0 hooks. Source: `.cleargate/sprint-runs/_off-sprint/EPIC-063/plans/M1.md` §BUG-086 check.
+
 ## Context Source
 
 **context_source:** SPRINT-39 DevOps blocker census performed 2026-09-06. 2 of 4 blockers (CR-108, CR-111) are orchestrator-authored dirt rather than code defects; CR-108 alone consumed three DevOps spawns. `surface-whitelist.txt` verified to lack `.cleargate/wiki/**` while carrying rows for every other hook-written derived surface.

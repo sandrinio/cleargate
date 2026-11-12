@@ -9,7 +9,7 @@ approved: true
 proposal_gate_waiver:
   approved_by: sandrinio
   approved_at: 2026-08-06T00:00:00Z
-ambiguity: 🟢 Low
+ambiguity: 🔴 High
 context_source: "direct-human-ask 2026-08-06 (\"draft epic 051\"). Proposal gate waived: sharp intent after a two-turn option-evaluation conversation in which the epic's scope was narrowed live — #4 (git status reconciliation) dropped on discovery that cleargate-cli/src/lib/lifecycle-reconcile.ts already ships it, and #5 (`cleargate research`) dissolved into a lint check rather than a new command. Inline references: cleargate-cli/src/lib/readiness-predicates.ts:124 (the prior-work-recorded pattern this epic mirrors), cleargate-cli/src/wiki/lint-checks.ts, cleargate-cli/src/commands/wiki-ingest.ts, .cleargate/config.yml:12-18. Waiver per ~/.claude memory feedback_proposal_gate_waiver.md. Originating evidence: a cross-repo field report where STORY-152-34's hand-written per-requirement SHIPPED/PARTIAL annotations were the only artifact that made 'is this done?' answerable — and existed by author diligence, not by contract."
 owner: sandrinio
 target_date: 2026-09-15
@@ -39,7 +39,7 @@ draft_tokens:
   cache_creation: null
   cache_read: null
   model: null
-  last_stamp: 2026-08-06T10:59:06Z
+  last_stamp: 2026-11-11T23:12:15Z
   sessions: []
 ---
 
@@ -359,7 +359,9 @@ exposes only `start` and `complete`, and no next-id or allocator surface exists 
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟢 Low Ambiguity — Ready for Decomposition**
+**Current Status: 🔴 High Ambiguity**
+> Reverted to 🔴 on 2026-11-12 by [[CR-126]]: this epic needs a `## Testing Strategy` section answering "how do we test this?" before it can be decomposed.
+
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
