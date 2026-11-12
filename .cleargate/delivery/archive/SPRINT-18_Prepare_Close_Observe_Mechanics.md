@@ -1,27 +1,29 @@
 ---
-sprint_id: "SPRINT-18"
+sprint_id: SPRINT-18
 parent_cleargate_id: null
-sprint_cleargate_id: "SPRINT-18"
+sprint_cleargate_id: SPRINT-18
 carry_over: false
-lifecycle_init_mode: "block"
+lifecycle_init_mode: block
 remote_id: null
-source_tool: "local"
-status: "Approved"
-execution_mode: "v2"
-start_date: "2026-05-02"
-end_date: "2026-05-15"
-created_at: "2026-05-01T20:45:00Z"
-updated_at: "2026-05-01T20:45:00Z"
-created_at_version: "cleargate@0.10.0"
-updated_at_version: "cleargate@0.10.0"
+source_tool: local
+status: Completed
+execution_mode: v2
+start_date: 2026-05-02
+end_date: 2026-05-15
+created_at: 2026-05-01T20:45:00Z
+updated_at: 2026-05-01T20:45:00Z
+created_at_version: cleargate@0.10.0
+updated_at_version: cleargate@0.10.0
 context_source: "Brainstorm charter at .cleargate/scratch/SDLC_brainstorm.md §2.4 — three-sprint sequential roadmap (revised 2026-05-01). SPRINT-18 maps to ordinal 'Sprint 2 — Prepare/Close/Observe mechanics' of the SDLC redesign. Anchor scope: EPIC-025 (Prepare/Close/Observe-Phase Mechanics — 6 child stories decomposed from CR-021) + CR-023 (SPRINT-17 cleanup, fast-lane). Sequential dependency to SPRINT-19 (CR-022 Gate 4 close pipeline hardening, undrafted): CR-021 + CR-022 both touch close_sprint.mjs in different sections, requiring sequential merge."
-epics: ["EPIC-025"]
-crs: ["CR-023"]
+epics:
+  - EPIC-025
+crs:
+  - CR-023
 bugs: []
 proposals: []
 approved: true
-approved_at: "2026-05-01T21:00:00Z"
-approved_by: "sandrinio"
+approved_at: 2026-05-01T21:00:00Z
+approved_by: sandrinio
 activated_at: null
 human_override: false
 draft_tokens:
@@ -32,9 +34,10 @@ draft_tokens:
   model: null
   sessions: []
 cached_gate_result:
-  pass: null
+  pass: true
   failing_criteria: []
-  last_gate_check: null
+  last_gate_check: 2026-11-12T18:23:32Z
+  transition: ready-for-execution
 ---
 
 # SPRINT-18: Sprint 2 — Prepare / Close / Observe Mechanics
