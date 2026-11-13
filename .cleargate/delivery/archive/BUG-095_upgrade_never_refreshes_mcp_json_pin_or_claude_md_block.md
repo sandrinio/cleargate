@@ -34,7 +34,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: upgrade,mcp,cli
-status: Triaged
+status: Completed
 severity: P1-High
 reporter: orchestrator (SPRINT-41 STORY-058-08 post-flight FU-4)
 approved: true

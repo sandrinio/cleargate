@@ -34,7 +34,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: upgrade,init,gate-checks
-status: Triaged
+status: Completed
 severity: P1-High
 reporter: orchestrator (field upgrade test 0.28.0 → 0.30.0 in a Go target repo, 2026-11-13)
 approved: true
