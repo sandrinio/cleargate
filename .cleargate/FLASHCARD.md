@@ -1,3 +1,14 @@
+2026-11-13 · #upgrade #hash · A hooks-only settings hash must reach MANIFEST, snapshot AND current-file sha, or every install reads both-changed.
+2026-11-13 · #upgrade #tty · promptMergeChoice heard data/error only: stdin EOF never settled, upgrade exited 0 halfway; one chunk ate later answers.
+2026-11-13 · #upgrade #drift · upgrade writes .drift-state.json with the PRE-run install sha: taken files read both-changed until doctor refreshes.
+2026-11-13 · #brief #oracle · A brief fact-shape change lands in 3 places in one commit: TS compiler, oracle awk/jq, FACTS_A/LINES_A fixtures.
+2026-11-13 · #init #test-harness · init --force never overwrites .cleargate/scripts/* (FIRST_INSTALL_ONLY): gate-checks.json is reported skipped.
+2026-11-13 · #upgrade #classify · classify() calls every user-artifact `untracked`; a silent take must also require currentSha === null (missing).
+2026-11-13 · #wiki #qa-red · Page frontmatter children are "[[ID]]" wikilinks, and terminal items have no index row: assert both in reds.
+2026-11-13 · #qa-red #upgrade · A red that fakes an install hash to force upgrade's take path goes vacuous when the hash space changes; diff CG side.
+2026-11-13 · #test-harness #shell · CLAUDE.md's "Project overrides" line quotes both CLEARGATE markers inline: block extractors must anchor ^…$.
+2026-11-13 · #wiki #contradict · The stamp hook's pending line and the unchecked-drafts alarm both skip excluded buckets: story drafts get no prompt.
+2026-11-13 · #wiki #drafting · Quoting another repo's [[ID]] output in a raw item makes false cites (fences count); write it as ⟦ID⟧ and say so.
 2026-11-12 · #test-harness #danger · Stubbing <repo>/cleargate-cli/dist/cli.js in a scratch repo whose cleargate-cli is a symlink writes the LIVE dist; lstat first.
 2026-11-12 · #eval #fixtures · Fixed updated_at on a Draft fixture trips the 1–7-day unchecked-draft alarm for a week; the eval banner becomes clock-dependent.
 2026-11-12 · #oracle #compare · Count-only or shrunk list lines pass --compare without the truncation line; silent compiler truncation is invisible.

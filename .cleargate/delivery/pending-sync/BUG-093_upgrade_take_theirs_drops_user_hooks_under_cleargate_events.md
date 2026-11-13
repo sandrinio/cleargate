@@ -34,13 +34,15 @@ parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
 area: upgrade,settings-json,hooks
-status: Draft
-severity: P2-Medium
+status: Triaged
+severity: P1-High
 reporter: orchestrator (SPRINT-41 STORY-058-07 post-flight FU-4)
-approved: false
+approved: true
+approved_by: "sandrinio (2026-11-13: 'i want you to fix them all and make a new release')"
+approved_at: 2026-11-13T00:00:00Z
 context_source: found by the STORY-058-07 Architect post-flight (reports/STORY-058-07-arch.md FU-4) and verified against cleargate-cli src/hosts/claude.ts mergeSurgeryTarget (the settings branch, moved verbatim from upgrade.ts take-theirs) on story/STORY-058-07 @ b146faf
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-09-25T23:27:56Z
+updated_at: 2026-11-13T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: 820a2f42-dirty
 server_pushed_at_version: null
@@ -54,7 +56,7 @@ draft_tokens:
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-25T23:27:56Z
+  last_gate_check: 2026-11-12T21:56:54Z
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
@@ -64,6 +66,7 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
+last_contradict_sha: "2abad746e0b09e9598c85f75561ef937ff694941a9030dfeda2a5bec171798c8"
 ---
 
 # BUG-093: `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
@@ -72,7 +75,7 @@ last_synced_body_sha: null
 
 - **Question:** Should the fix reuse `mergeSettings(removeClearGateHooks(ours), theirs)`, the form SPRINT-41 M5 AD-4 specifies for Codex, or merge per matcher inside the existing spread?
 - **Recommended:** Reuse `mergeSettings(removeClearGateHooks(ours), theirs)`. It already preserves user matchers and dedups by exact command, and the Codex adapter will use the same form, so both hosts share one merge rule.
-- **Human decision:** {pending Gate 1}
+- **Human decision:** Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
 
 ## 1. The Anomaly (Expected vs. Actual)
 **Expected Behavior:** When `cleargate upgrade` takes the upstream `.claude/settings.json`, whether through `upgrade --yes` or a merge-3way `t` choice, ClearGate's hooks are replaced by the new ones and every user-authored hook survives, including user hooks under `PreToolUse`, `PostToolUse`, `SessionStart` or `SubagentStop`.
@@ -104,6 +107,16 @@ cleargate-cli/src/hosts/claude.ts @ b146faf, mergeSurgeryTarget, settings branch
     merged.hooks = { ...(withoutOurCg.hooks ?? {}), ...cgHooks };   // per-event spread: user arrays replaced
   }
 ```
+
+### Field confirmation (2026-11-13) — severity raised to P1-High
+A field upgrade (0.28.0 → 0.30.0, a Go target repo, run by that repo's own agent) took this path. The repo's only user hook was under `Stop`, which ClearGate does not use, so it survived. Reproduced on a pristine copy of that repo with one user hook added under `PostToolUse`, using the published 0.30.0 binary and the README's documented command:
+```
+[dry-run] .claude/settings.json  action=merge-3way  state=both-changed → clean     # no warning that user hooks will go
+$ cleargate upgrade --yes   → exit 0
+user PostToolUse hook kept: 0
+user Stop hook kept: 1
+```
+Raised from P2 because this is the documented upgrade command and the only non-interactive one: without a terminal the interactive prompt stops the upgrade halfway ([[BUG-120]]), so agents and CI must pass `--yes`, which takes this path for every repo with a user hook under a ClearGate event. [[BUG-122]] covers the snapshot sha that hides user hooks from the dry run.
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 **Investigate / Modify:**
@@ -156,6 +169,7 @@ Feature: upgrade take-theirs preserves user hooks
 - [[STORY-009-05]] — the original three-way merge driver; it did not specify per-event hook preservation.
 - [[STORY-058-07]] — moved this surgery verbatim into `claude.ts` `mergeSurgeryTarget`; its post-flight filed this as FU-4.
 - [[BUG-089]] — adjacent: hook command byte-matching in the merge, not event-level preservation.
+- [[BUG-120]], [[BUG-122]] — found in the same 2026-11-13 field upgrade test: the no-terminal partial upgrade, and the snapshot sha that hides user hooks.
 
 ## Context Source
 
@@ -164,10 +178,10 @@ Feature: upgrade take-theirs preserves user hooks
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity** — the merge-form question is open; approval pending.
+**Current Status: 🟢 Low Ambiguity**
 
 - [x] Reproduction steps are 100% deterministic.
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached.
 - [x] Verification command (failing test) is provided.
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter.
