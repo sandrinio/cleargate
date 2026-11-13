@@ -2,13 +2,19 @@
 type: sprint
 id: "SPRINT-25"
 parent: ""
-children: []
+children: 
+  - "[[CR-053]]"
+  - "[[CR-054]]"
+  - "[[CR-055]]"
+  - "[[CR-056]]"
+  - "[[CR-057]]"
+  - "[[CR-058]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-25_SDLC_Wrap_Up_Plus_Docs.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "85153958fa2ebb41bfc85b3c7628d9791a051c79"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-25"
@@ -18,7 +24,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-25: SDLC Hardening Wrap-Up + Docs Aligned
 
-**Status:** Completed · **Sprint:** SPRINT-25 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-05 → 2026-05-16 · **Gate:** pass
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Wave |
@@ -37,6 +43,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (6): [[CR-053]], [[CR-054]], [[CR-055]], [[CR-056]], [[CR-057]], [[CR-058]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

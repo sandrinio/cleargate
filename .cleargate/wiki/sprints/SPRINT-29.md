@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-29"
 parent: ""
-children: []
+children: 
+  - "[[BUG-004]]"
 cites: []
 cited_by: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-29_Delivery_Folder_Umbrella.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "dfc4069ef78521b1fbdc15a7659a4aa91afa17a2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-29"
@@ -16,7 +17,7 @@ sprint_cleargate_id: "SPRINT-29"
 
 # SPRINT-29: Delivery Folder Umbrella Restructure
 
-**Status:** Abandoned · **Sprint:** SPRINT-29 · **Gate:** fail: discovery-checked
+**Status:** Abandoned · **Dates:** 2026-05-22 → 2026-06-05 · **Gate:** fail: discovery-checked
 
 ## Goal
 Ship EPIC-029 (umbrella folder restructure + sprint telemetry co-location + story Task Checklist + M-001 upgrade runbook) and BUG-004 (scaffold wiki lint YAML backtick fix). Set the foundation for SPRINT-30 (EPIC-012 + EPIC-021 — decomposed during this sprint's Prepare phase).
@@ -44,4 +45,5 @@ Ship EPIC-029 (umbrella folder restructure + sprint telemetry co-location + stor
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[BUG-004]]
 <!-- END relations -->

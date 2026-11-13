@@ -10,7 +10,7 @@
 | Sprints | 44 | 4 | 37 |
 | Proposals | 16 | 6 | 14 |
 | CRs | 126 | 17 | 94 |
-| Bugs | 106 | 48 | 46 |
+| Bugs | 113 | 46 | 55 |
 | Spikes | 0 | 0 | 0 |
 
 ## Open Epics
@@ -129,6 +129,10 @@
 
 - [[BUG-090]] (bugs) — Completed
 
+- [[BUG-093]] (bugs) — Completed
+
+- [[BUG-095]] (bugs) — Completed
+
 - [[BUG-096]] (bugs) — Completed
 
 - [[BUG-097]] (bugs) — Completed
@@ -140,6 +144,20 @@
 - [[BUG-100]] (bugs) — Completed
 
 - [[BUG-101]] (bugs) — Completed
+
+- [[BUG-120]] (bugs) — Completed
+
+- [[BUG-121]] (bugs) — Completed
+
+- [[BUG-122]] (bugs) — Completed
+
+- [[BUG-123]] (bugs) — Completed
+
+- [[BUG-124]] (bugs) — Completed
+
+- [[BUG-125]] (bugs) — Completed
+
+- [[BUG-126]] (bugs) — Completed
 
 - [[CR-001]] (crs) — Completed
 

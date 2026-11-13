@@ -17,12 +17,13 @@ cites:
   - "[[EPIC-030]]"
   - "[[PROPOSAL-009]]"
 cited_by: 
+  - "[[BUG-125]]"
   - "[[STORY-062-05]]"
   - "[[STORY-062-06]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-062_dashboard_backlog_board_and_sprint_planner.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "9d2bc8c9597007f7d12cf32c477364a29752960b"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-44"
@@ -69,5 +70,5 @@ All questions resolved 2026-11-10. Owner: "agree with your recommendations." Ans
 - Parent: none
 - Children (6): [[STORY-062-01]], [[STORY-062-02]], [[STORY-062-03]], [[STORY-062-04]], [[STORY-062-05]], [[STORY-062-06]]
 - Cites (6): [[CR-084-Sprint-Dashboard-In-CLI-Payload]], [[CR-097]], [[CR-101]], [[CR-102]], [[EPIC-030]], [[PROPOSAL-009]]
-- Cited by (2): [[STORY-062-05]], [[STORY-062-06]]
+- Cited by (3): [[BUG-125]], [[STORY-062-05]], [[STORY-062-06]]
 <!-- END relations -->

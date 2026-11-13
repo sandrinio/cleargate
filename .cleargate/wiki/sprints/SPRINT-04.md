@@ -9,7 +9,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-04_Knowledge_Wiki.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-04"
@@ -19,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-04: Knowledge Wiki Layer (Karpathy pattern)
 
-**Status:** Completed · **Sprint:** SPRINT-04 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-04-19 → 2026-04-19 · **Gate:** not run
 
 ## Goal
 Ship **EPIC-002 (Knowledge Wiki Layer)** end-to-end, adapted for our three-repo case (meta-planning · `cleargate-cli/` · `mcp/`). After this sprint, every new Claude Code session that opens against any of the three repos (or against a downstream user's repo that has run `cleargate init`) begins by reading `.cleargate/wiki/index.md` (~3k tokens) and has full situational awareness — what shipped, what's in flight, what's blocked, what's planned, what cross-invalidates — without scanning raw directories. Duplicate-proposal detection, blast-radius flagging, gate-enforcement on drift, and the Karpathy "file-back-to-topics" compounding loop all become automatic. The wiki bundles into the `cleargate` npm package so `cleargate init` scaffolds it alongside the existing `.claude/agents/` + `.cleargate/{knowledge,templates,delivery}/` payload from Phase 2a/b.

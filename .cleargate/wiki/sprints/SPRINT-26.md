@@ -13,7 +13,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-26_Dogfood_Hardening.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "bdd9a810444df5c7142c80d8b0a75634fc66d741"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-26"
@@ -23,7 +23,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-26: Dogfood Hardening — Issues Surfaced by Live Use
 
-**Status:** Completed · **Sprint:** SPRINT-26 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-06 → 2026-05-17 · **Gate:** pass
 
 ## Deliverables
 | ID | Type | Title | Severity / Priority |

@@ -109,11 +109,7 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[BUG-092]] — bug · status: Draft — pass
 
-- [[BUG-093]] — bug · status: Draft — pass
-
 - [[BUG-094]] — bug · status: Draft — pass
-
-- [[BUG-095]] — bug · status: Draft — pass
 
 - [[BUG-117]] — bug · status: Draft — pass
 

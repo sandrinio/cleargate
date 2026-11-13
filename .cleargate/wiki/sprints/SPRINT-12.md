@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-12"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-018]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-12_Framework_Universality.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-12"
@@ -18,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-12: Framework Universality — Public Ship
 
-**Status:** Completed · **Sprint:** SPRINT-12 · **Gate:** not run
+**Status:** Completed · **Dates:** not scheduled · **Gate:** not run
 
 ## Goal
 Ship **EPIC-018** — make ClearGate installable into any target repo. Remove the dogfood-specific assumptions that leak through the scaffold (`npm test` / `npm run typecheck` hard-codes, stack vocabulary, no LICENSE, dogfood-first README), and prove it works end-to-end via an automated foreign-repo integration test.
@@ -41,6 +42,7 @@ After this sprint: a stranger with no prior context can `npm i -D cleargate && n
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-018]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

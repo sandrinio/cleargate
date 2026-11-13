@@ -8,7 +8,7 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-050_Connector_Onboarding_And_Companion_Packaging.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "69d4814e7370023ba8352eea1f7de913e3acd8d9"
 repo: "planning"
 ---

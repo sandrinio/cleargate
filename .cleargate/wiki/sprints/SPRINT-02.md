@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-02_Admin_API.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-02"
@@ -16,7 +16,7 @@ sprint_cleargate_id: "SPRINT-02"
 
 # SPRINT-02: Admin API
 
-**Status:** Completed · **Sprint:** SPRINT-02 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-04-17 → 2026-04-17 · **Gate:** not run
 
 ## Goal
 Expose the admin-scoped REST surface on the MCP server — projects/members/tokens CRUD, audit log query, and stats — so that EPIC-005 (Admin CLI) and EPIC-006 (Admin UI) have a typed, OpenAPI-documented backend to build against.

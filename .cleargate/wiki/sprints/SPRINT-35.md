@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-35_Connector_M0_Walking_Skeleton.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-35"
@@ -18,7 +18,7 @@ last_report_ingest_commit: "cfac25cc3c549b737d84dedbb6153544113882bb"
 
 # SPRINT-35: Connector M0 — Walking Skeleton (Relay Loop E2E)
 
-**Status:** Completed · **Sprint:** SPRINT-35 · **Gate:** fail: discovery-checked
+**Status:** Completed · **Dates:** 2026-06-05 → 2026-06-19 · **Gate:** fail: discovery-checked
 
 ## Goal
 Stand up the minimum broker + connector daemon needed to relay a single live Claude Code turn end-to-end and cancel it cleanly — the walking skeleton that proves the architecture, not a production system.

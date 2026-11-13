@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-13"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-019]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-13_Identity_Bound_Invite_Auth.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-13"
@@ -18,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-13: Identity-Bound Invite Auth
 
-**Status:** Completed · **Sprint:** SPRINT-13 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-04-28 → 2026-05-09 · **Gate:** not run
 
 ## Goal
 Ship **EPIC-019** — replace bearer-only invite redemption with **identity-bound, pluggable-provider auth**. After this sprint, possessing an invite URL is no longer enough to redeem it: the invitee must additionally prove ownership of the email the admin invited (via GitHub OAuth or magic-link emailed via Resend). The provider abstraction is real — adding a third provider (Google, GitLab, SAML) becomes a single follow-up CR with no changes to `routes/join.ts` or schema.
@@ -40,6 +41,7 @@ Note: this sprint executes **CRs, not Stories** — at user direction (2026-04-2
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-019]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

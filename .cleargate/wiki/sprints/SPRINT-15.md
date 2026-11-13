@@ -3,6 +3,13 @@ type: sprint
 id: "SPRINT-15"
 parent: ""
 children: 
+  - "[[CR-002]]"
+  - "[[CR-011]]"
+  - "[[CR-012]]"
+  - "[[CR-016]]"
+  - "[[CR-017]]"
+  - "[[CR-018]]"
+  - "[[EPIC-020]]"
   - "[[STORY-015-05]]"
   - "[[STORY-015-06]]"
 cites: []
@@ -10,7 +17,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-15_Process_v3.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "89539e8bfcdb817b90712e9e148c6e392145214e"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-15"
@@ -20,7 +27,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-15: Process v3 — Awareness, Ledger, Hierarchy, Upgrade
 
-**Status:** Completed · **Sprint:** SPRINT-15 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-04-28 → 2026-04-30 · **Gate:** not run
 
 ## Goal
 Tighten ClearGate's *internal* process layer so the framework can describe its own state honestly to itself, its agents, and its operators. Five things land together:
@@ -46,7 +53,7 @@ Tighten ClearGate's *internal* process layer so the framework can describe its o
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (2): [[STORY-015-05]], [[STORY-015-06]]
+- Children (9): [[CR-002]], [[CR-011]], [[CR-012]], [[CR-016]], [[CR-017]], [[CR-018]], [[EPIC-020]], [[STORY-015-05]], [[STORY-015-06]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

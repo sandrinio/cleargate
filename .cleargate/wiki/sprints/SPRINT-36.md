@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-36_Connector_M1_Identity_And_Credentials.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-36"
@@ -18,7 +18,7 @@ last_report_ingest_commit: "77b6da7136ff086393fcd6ad3a9b57aa7a13de62"
 
 # SPRINT-36: Connector M1 — Connection Identity & Credentials (Real Auth)
 
-**Status:** Completed · **Sprint:** SPRINT-36 · **Gate:** fail: discovery-checked
+**Status:** Completed · **Dates:** 2026-06-20 → 2026-07-04 · **Gate:** fail: discovery-checked
 
 ## Goal
 Stand up real connection identity + credentials for the M0 loop: one authority (`mcp`) mints/verifies pairing codes, member tokens, and app tokens via an indexed (O(1)) verify; the broker verifies at connect, caches successful bindings, subscribes to a Redis revoke channel, and kills in-flight turns on revoke — retiring the shared-secret stub across all three register lanes.

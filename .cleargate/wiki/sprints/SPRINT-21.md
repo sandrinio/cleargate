@@ -2,13 +2,24 @@
 type: sprint
 id: "SPRINT-21"
 parent: ""
-children: []
+children: 
+  - "[[BUG-026]]"
+  - "[[CR-030]]"
+  - "[[CR-031]]"
+  - "[[CR-032]]"
+  - "[[CR-033]]"
+  - "[[CR-034]]"
+  - "[[CR-035]]"
+  - "[[CR-036]]"
+  - "[[CR-037]]"
+  - "[[CR-038]]"
+  - "[[CR-039]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-21_Framework_Hardening_Test_Surfaced.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "28642e312bd5eb624293c5f36e7225c80b0f1f58"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-21"
@@ -18,7 +29,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-21: Framework Hardening — Test-Surfaced Findings (Visibility + Cost + Initiative)
 
-**Status:** Completed · **Sprint:** SPRINT-21 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-30 → 2026-06-12 · **Gate:** pass
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Wave |
@@ -40,6 +51,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (11): [[BUG-026]], [[CR-030]], [[CR-031]], [[CR-032]], [[CR-033]], [[CR-034]], [[CR-035]], [[CR-036]], [[CR-037]], [[CR-038]], [[CR-039]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

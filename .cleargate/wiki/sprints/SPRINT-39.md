@@ -2,7 +2,8 @@
 type: sprint
 id: "SPRINT-39"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-054]]"
 cites: 
   - "[[BUG-044]]"
   - "[[BUG-045]]"
@@ -12,7 +13,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-39_Decomposition_Surfaces.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "38796c323d8918794a944949470f9acdfb6cfa5f"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-39"
@@ -22,7 +23,7 @@ last_report_ingest_commit: "38796c323d8918794a944949470f9acdfb6cfa5f"
 
 # SPRINT-39: Decomposition Surfaces — Spike Before, Tasks Within
 
-**Status:** Completed · **Sprint:** SPRINT-39 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-08-26 → 2026-09-09 · **Gate:** pass
 
 ## Goal
 Ship the spike charter type end-to-end and the task-breakdown section end-to-end, with the gate-index correction that WS6 depends on landing first.
@@ -52,6 +53,7 @@ Ship the spike charter type end-to-end and the task-breakdown section end-to-end
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-054]]
 - Cites (4): [[BUG-044]], [[BUG-045]], [[BUG-046]], [[EPIC-055]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->

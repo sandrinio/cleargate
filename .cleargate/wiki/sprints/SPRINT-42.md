@@ -2,7 +2,13 @@
 type: sprint
 id: "SPRINT-42"
 parent: ""
-children: []
+children: 
+  - "[[BUG-052]]"
+  - "[[EPIC-059]]"
+  - "[[STORY-059-01]]"
+  - "[[STORY-059-02]]"
+  - "[[STORY-059-03]]"
+  - "[[STORY-059-04]]"
 cites: 
   - "[[BUG-118]]"
   - "[[BUG-119]]"
@@ -11,7 +17,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-42_planning_catches_what_execution_stopped_for.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "7ba61eb5110056cbc5302b31b3248bf5e2331090"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-42"
@@ -19,7 +25,7 @@ sprint_cleargate_id: "SPRINT-42"
 
 # SPRINT-42: Planning Catches What Execution Stopped For
 
-**Status:** Draft · **Sprint:** SPRINT-42 · **Gate:** pass
+**Status:** Draft · **Dates:** 2026-10-08 → 2026-10-16 · **Gate:** pass
 
 ## Goal
 - **Sprint Goal:** Move to plan confirmation the owner decisions a downstream sprint paid for mid-execution, and make the surface gate check each story commit against that story's own surface.
@@ -38,6 +44,7 @@ sprint_cleargate_id: "SPRINT-42"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (6): [[BUG-052]], [[EPIC-059]], [[STORY-059-01]], [[STORY-059-02]], [[STORY-059-03]], [[STORY-059-04]]
 - Cites (2): [[BUG-118]], [[BUG-119]]
 - Cited by (1): [[SPRINT-31]]
 <!-- END relations -->

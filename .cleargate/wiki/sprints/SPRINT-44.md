@@ -2,7 +2,14 @@
 type: sprint
 id: "SPRINT-44"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-062]]"
+  - "[[STORY-062-01]]"
+  - "[[STORY-062-02]]"
+  - "[[STORY-062-03]]"
+  - "[[STORY-062-04]]"
+  - "[[STORY-062-05]]"
+  - "[[STORY-062-06]]"
 cites: 
   - "[[BUG-052]]"
   - "[[BUG-087]]"
@@ -12,7 +19,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-44_dashboard_backlog_board_and_sprint_planner.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "9d2bc8c9597007f7d12cf32c477364a29752960b"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-44"
@@ -22,7 +29,7 @@ last_report_ingest_commit: "fc6bdeec9ef2b5e8e2a11dc76e70c8c973df97a7"
 
 # SPRINT-44: Dashboard Backlog Board and Sprint Planner
 
-**Status:** Completed · **Sprint:** SPRINT-44 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-11-10 → 2026-11-14 · **Gate:** pass
 
 ## Goal
 Ship `cleargate dashboard`: one local page where the owner sees every open work item, assembles the next sprint, and follows the running one, with `cleargate sprint add|remove` as the single write path for sprint membership.
@@ -47,6 +54,7 @@ Ship `cleargate dashboard`: one local page where the owner sees every open work 
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (7): [[EPIC-062]], [[STORY-062-01]], [[STORY-062-02]], [[STORY-062-03]], [[STORY-062-04]], [[STORY-062-05]], [[STORY-062-06]]
 - Cites (4): [[BUG-052]], [[BUG-087]], [[BUG-118]], [[BUG-119]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->

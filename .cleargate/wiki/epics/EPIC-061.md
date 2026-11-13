@@ -33,7 +33,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-061_cli_repo_hygiene_and_layout.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "bde3df00c4e5fa7a80394a55aca94c02660df348"
 repo: "planning"
 ---

@@ -17,7 +17,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-030_AI_Driven_Sprint_Planning.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "f66e7744668126504eed66de8d74c5743f50136e"
 repo: "planning"
 ---

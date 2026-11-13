@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-10"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-014]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-10_Execution_V2_Polish.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "89539e8bfcdb817b90712e9e148c6e392145214e"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-10"
@@ -18,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-10: Execution v2 Polish & Efficiency Fixes
 
-**Status:** Completed · **Sprint:** SPRINT-10 · **Gate:** not run
+**Status:** Completed · **Dates:** not scheduled · **Gate:** not run
 
 ## Goal
 Ship **EPIC-014 (v2 Polish)** — close the 12 friction points SPRINT-09 + CG_TEST SPRINT-01 exposed in the v2 execution scaffold, decomposed across 10 stories in two milestones.
@@ -46,6 +47,7 @@ After this sprint: the orchestrator no longer invokes `run_script.sh` by hand fo
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-014]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

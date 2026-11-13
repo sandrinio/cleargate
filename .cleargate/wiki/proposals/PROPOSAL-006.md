@@ -8,7 +8,7 @@ cited_by: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-006_Scaffold_Manifest_And_Uninstall.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "c5daa2e17d44c5de50c683745851916812069428"
 repo: "planning"
 ---

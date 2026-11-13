@@ -2,13 +2,16 @@
 type: sprint
 id: "SPRINT-16"
 parent: ""
-children: []
+children: 
+  - "[[CR-019]]"
+  - "[[EPIC-016]]"
+  - "[[EPIC-023]]"
 cites: []
 cited_by: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-16_Upgrade_UX_And_MCP_Native_Slice.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "a743603981ddb8788e7bde8cc42dc1fe5ef1a8f4"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-16"
@@ -18,7 +21,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-16: Upgrade UX + MCP-Native Source of Truth (slice 1)
 
-**Status:** Abandoned · **Sprint:** SPRINT-16 · **Gate:** not run
+**Status:** Abandoned · **Dates:** 2026-05-13 → 2026-05-26 · **Gate:** not run
 
 ## Goal
 Two anchor epics, each previously locked at the architectural level, now executing:
@@ -43,6 +46,7 @@ Two anchor epics, each previously locked at the architectural level, now executi
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (3): [[CR-019]], [[EPIC-016]], [[EPIC-023]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

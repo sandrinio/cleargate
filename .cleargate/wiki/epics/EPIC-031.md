@@ -17,7 +17,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-031_Test_Suite_Wall_Time_Reduction.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-31"

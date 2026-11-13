@@ -4,11 +4,12 @@ id: "PROPOSAL-005"
 parent: ""
 children: []
 cites: []
-cited_by: []
+cited_by: 
+  - "[[BUG-124]]"
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-04"
@@ -60,4 +61,5 @@ Extend every ClearGate work-item template with two new capabilities:
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Cited by (1): [[BUG-124]]
 <!-- END relations -->

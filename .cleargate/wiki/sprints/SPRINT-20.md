@@ -2,13 +2,20 @@
 type: sprint
 id: "SPRINT-20"
 parent: ""
-children: []
+children: 
+  - "[[BUG-025]]"
+  - "[[CR-026]]"
+  - "[[CR-027]]"
+  - "[[CR-028]]"
+  - "[[EPIC-026]]"
+  - "[[STORY-026-01]]"
+  - "[[STORY-026-02]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "48d4662ae95734288afb720f8f820383c5d15ee5"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-20"
@@ -18,7 +25,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-20: Skill Adoption + Tooling Cleanup (Post-SDLC-Trilogy)
 
-**Status:** Completed · **Sprint:** SPRINT-20 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-05-16 → 2026-05-29 · **Gate:** not run
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Milestone |
@@ -43,6 +50,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (7): [[BUG-025]], [[CR-026]], [[CR-027]], [[CR-028]], [[EPIC-026]], [[STORY-026-01]], [[STORY-026-02]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

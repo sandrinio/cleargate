@@ -3,13 +3,15 @@ type: sprint
 id: "SPRINT-17"
 parent: ""
 children: 
+  - "[[CR-020]]"
   - "[[CR-023]]"
+  - "[[EPIC-024]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-17_Plan_Phase_Delivery.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "6a2695bb2500db987244fd5cd4a467a58b6c9566"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-17"
@@ -19,7 +21,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-17: Sprint 1 — Plan Phase Delivery
 
-**Status:** Completed · **Sprint:** SPRINT-17 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-05-02 → 2026-05-15 · **Gate:** not run
 
 ## Goal
 Land the **Plan-phase** layer of the SDLC redesign:
@@ -47,7 +49,7 @@ Land the **Plan-phase** layer of the SDLC redesign:
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (1): [[CR-023]]
+- Children (3): [[CR-020]], [[CR-023]], [[EPIC-024]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

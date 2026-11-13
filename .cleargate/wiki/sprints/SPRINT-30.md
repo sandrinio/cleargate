@@ -2,13 +2,22 @@
 type: sprint
 id: "SPRINT-30"
 parent: ""
-children: []
+children: 
+  - "[[BUG-031]]"
+  - "[[BUG-032]]"
+  - "[[CR-068]]"
+  - "[[CR-069]]"
+  - "[[CR-070]]"
+  - "[[CR-071]]"
+  - "[[CR-072]]"
+  - "[[CR-073]]"
+  - "[[EPIC-021]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "db53f81843ad19394191eb9fe3a8628ddc7c3061"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-30"
@@ -18,7 +27,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-30: Solo Onboarding Dogfood Hardening
 
-**Status:** Completed · **Sprint:** SPRINT-30 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-19 → 2026-06-02 · **Gate:** pass
 
 ## Goal
 Ship BUG-031 + CR-068 + CR-069 + CR-070 — the four findings produced by pdf_processor's first install + first sprint — plus any additional findings filed during pdf_processor SPRINT-02. Net result: the next solo developer who runs `cleargate init` gets a hardened first-touch experience.
@@ -46,6 +55,7 @@ Ship BUG-031 + CR-068 + CR-069 + CR-070 — the four findings produced by pdf_pr
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (9): [[BUG-031]], [[BUG-032]], [[CR-068]], [[CR-069]], [[CR-070]], [[CR-071]], [[CR-072]], [[CR-073]], [[EPIC-021]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

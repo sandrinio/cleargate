@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-11"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-015]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-11_Wiki_Hygiene.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-11"
@@ -18,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-11: Wiki Index Hygiene & Scale
 
-**Status:** Completed · **Sprint:** SPRINT-11 · **Gate:** not run
+**Status:** Completed · **Dates:** not scheduled · **Gate:** not run
 
 ## Goal
 Ship **EPIC-015** — reshape `.cleargate/wiki/index.md` from a flat 151-row table into a scale-ready hierarchical index, land a status-audit CLI that reconciles stale frontmatter (SPRINT-10, EPIC-001, EPIC-008, EPIC-009 and their stranded child stories), add a token-budget lint to block index bloat at the gate, and wire a sprint-close stamp so the drift we just fixed stays fixed.
@@ -40,6 +41,7 @@ After this sprint: agents reading `index.md` at session start see an Active surf
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-015]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

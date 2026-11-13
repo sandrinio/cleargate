@@ -2,7 +2,8 @@
 type: sprint
 id: "SPRINT-41"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-058]]"
 cites: 
   - "[[BUG-024]]"
   - "[[BUG-067]]"
@@ -38,7 +39,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "6152464d5852f1bccc42d4b56df816054613b129"
 repo: "planning"
 report_raw_path: ".cleargate/sprint-runs/SPRINT-41/SPRINT-41_REPORT.md"
@@ -47,7 +48,7 @@ last_report_ingest_commit: "0ea4fd7df6d503be54e81a70e3e46417864e774b"
 
 # SPRINT-41: Multi-Host Adapters & Frontmatter Locator
 
-**Status:** Completed · **Sprint:** none · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-09-08 → 2026-10-09 · **Gate:** pass
 
 ## Goal
 Fix the position-dependent frontmatter locator across all three call sites, then land EPIC-058's foundation milestones — scaffold relocation, host registry, `--host` selectors — with the clean-room verification harness that proves Claude Code is unregressed.
@@ -77,6 +78,7 @@ Fix the position-dependent frontmatter locator across all three call sites, then
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-058]]
 - Cites (24): [[BUG-024]], [[BUG-067]], [[BUG-068]], [[BUG-069]], [[BUG-085]], [[BUG-089]], [[BUG-090]], [[BUG-091]], [[BUG-096]], [[BUG-097]], [[BUG-098]], [[CR-026]], [[CR-108]], [[CR-123]], [[CR-124]], [[EPIC-055]], [[EPIC-058]], [[PROPOSAL-074]], [[SPRINT-34]], [[STORY-058-01]], +4 more
 - Cited by (6): [[BUG-067]], [[BUG-087]], [[BUG-090]], [[BUG-096]], [[BUG-098]], [[BUG-099]]
 <!-- END relations -->

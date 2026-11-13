@@ -8,7 +8,7 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-008_Project_Config_MCP_Authority.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "24c383f4fdb142f48f20a752f8bff2f11e043115"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-06"

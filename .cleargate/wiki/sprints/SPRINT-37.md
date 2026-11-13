@@ -8,7 +8,7 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-37_Connector_M2_Daemon_Hardening.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-37"
@@ -16,7 +16,7 @@ sprint_cleargate_id: "SPRINT-37"
 
 # SPRINT-37: Connector M2 — Daemon Hardening (Production Posture)
 
-**Status:** Draft · **Sprint:** SPRINT-37 · **Gate:** fail: discovery-checked
+**Status:** Draft · **Dates:** 2026-07-07 → 2026-07-21 · **Gate:** fail: discovery-checked
 
 ## Goal
 Harden the M0 daemon to production posture across seven axes — real-credential register (fail-closed), reconnect + re-attach + full-jitter backoff + heartbeat, resume-from-`seq` + `turn_id` idempotency, runtime version-drift guard + CI fixtures, sessions-via-`--resume` + metrics derivation, sandbox enforcement, and a **gating** Linux/Docker no-orphan teardown verification — extending the on-disk `connector/daemon/**` modules (M0 turn-path shipped in SPRINT-35), retiring the shared-secret stub, with all code under `connector/**` (EPIC-027 plane-sibling boundary) and local-only (not pushed).

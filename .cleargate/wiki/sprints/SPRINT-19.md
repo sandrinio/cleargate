@@ -3,13 +3,17 @@ type: sprint
 id: "SPRINT-19"
 parent: ""
 children: 
+  - "[[BUG-024]]"
   - "[[BUG-025]]"
+  - "[[CR-022]]"
+  - "[[CR-024]]"
+  - "[[CR-025]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-19_Gate_4_Close_QA_Context_Initiative.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "be268872b9164ccc7b6d2dfc2fef032663546e5d"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-19"
@@ -19,7 +23,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-19: Sprint 3 — Gate 4 Close + QA Context + Initiative Rename + Token-Ledger Spike
 
-**Status:** Completed · **Sprint:** SPRINT-19 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-05-02 → 2026-05-15 · **Gate:** not run
 
 ## Deliverables
 | Item                                                                         | Type | Title                                                       | Lane     | Complexity | Parallel?  | Bounce Exposure | Milestone |
@@ -38,7 +42,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (1): [[BUG-025]]
+- Children (5): [[BUG-024]], [[BUG-025]], [[CR-022]], [[CR-024]], [[CR-025]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

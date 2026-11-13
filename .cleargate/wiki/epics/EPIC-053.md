@@ -19,7 +19,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-053_Downstream_DB_Collision_Detection.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "d3ca3bef420c543e8cc459e9333b736e15a556ba"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-36"

@@ -2,13 +2,17 @@
 type: sprint
 id: "SPRINT-23"
 parent: ""
-children: []
+children: 
+  - "[[CR-045]]"
+  - "[[CR-046]]"
+  - "[[CR-047]]"
+  - "[[CR-048]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-23_SDLC_Hardening_Tooling.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "c7bd5c5cdaa03b33e2c2a7a317612a7da61a35a1"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-23"
@@ -18,7 +22,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-23: SDLC Hardening — Cross-Cutting Tooling
 
-**Status:** Completed · **Sprint:** SPRINT-23 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-05 → 2026-05-16 · **Gate:** pass
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Wave |
@@ -35,6 +39,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (4): [[CR-045]], [[CR-046]], [[CR-047]], [[CR-048]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

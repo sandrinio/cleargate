@@ -2,13 +2,14 @@
 type: sprint
 id: "SPRINT-08"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-011]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-08_End_To_End_Production_Readiness.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-08"
@@ -18,7 +19,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-08: End-to-End Production Readiness
 
-**Status:** Completed · **Sprint:** SPRINT-08 · **Gate:** not run
+**Status:** Completed · **Dates:** from 2026-04-20 · **Gate:** not run
 
 ## Goal
 Ship **EPIC-011 (End-to-End Production Readiness)** — close the four remaining onboarding blockers (CLI wire-up · service-token middleware · bootstrap-root CLI · Coolify deploy execution) so that a brand-new user can run `npm install cleargate && cleargate init && cleargate join <invite-url> && cleargate sync` against a production `mcp.cleargate.<domain>` + `admin.cleargate.<domain>` in under 5 minutes. After this sprint, ClearGate v1-alpha is demonstrably shippable.
@@ -36,6 +37,7 @@ Ship **EPIC-011 (End-to-End Production Readiness)** — close the four remaining
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-011]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

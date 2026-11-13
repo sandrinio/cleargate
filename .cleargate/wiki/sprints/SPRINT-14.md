@@ -3,13 +3,20 @@ type: sprint
 id: "SPRINT-14"
 parent: ""
 children: 
+  - "[[BUG-008]]"
+  - "[[BUG-009]]"
+  - "[[CR-008]]"
+  - "[[CR-009]]"
+  - "[[CR-010]]"
+  - "[[EPIC-022]]"
+  - "[[PROPOSAL-013]]"
   - "[[STORY-014-01]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-14_Process_v2.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "89539e8bfcdb817b90712e9e148c6e392145214e"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-14"
@@ -19,7 +26,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-14: Process v2 — Planning-First Enforcement, Lane Classifier, Advisory Gates
 
-**Status:** Completed · **Sprint:** SPRINT-14 · **Gate:** not run
+**Status:** Completed · **Dates:** 2026-04-27 → 2026-05-10 · **Gate:** not run
 
 ## Goal
 Promote ClearGate's process layer from "documentation-as-rules" to "machine-enforced rules." Three things land together:
@@ -44,7 +51,7 @@ This is intentionally an ambitious sprint. Path B (split across SPRINT-14/15) wa
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (1): [[STORY-014-01]]
+- Children (8): [[BUG-008]], [[BUG-009]], [[CR-008]], [[CR-009]], [[CR-010]], [[EPIC-022]], [[PROPOSAL-013]], [[STORY-014-01]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

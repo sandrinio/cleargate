@@ -10,7 +10,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-40_field_defect_remediation.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "a6e6d2b749ca8aac494c2d5ffd3c13bbe825fb38"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-40"
@@ -20,7 +20,7 @@ last_report_ingest_commit: "b99863b7a923f80c9de4ee3e837fcdcc00856d7c"
 
 # SPRINT-40: Field-Defect Remediation
 
-**Status:** Completed · **Sprint:** SPRINT-40 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-08-31 → 2026-09-04 · **Gate:** pass
 
 ## Goal
 Restore the agent-dispatch telemetry that a host tool rename silently broke, so sprint accounting and the pre-dispatch flashcard gate work again.

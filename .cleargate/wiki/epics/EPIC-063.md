@@ -33,6 +33,7 @@ cites:
   - "[[EPIC-052]]"
   - "[[PROPOSAL-012]]"
 cited_by: 
+  - "[[BUG-126]]"
   - "[[CR-126]]"
   - "[[CR-127]]"
   - "[[CR-128]]"
@@ -54,7 +55,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-063_wiki_ingest_pipeline_wired_end_to_end.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "61ca756c65394d2d560fe76753cbf93a3cd2dc71"
 repo: "planning"
 last_contradict_sha: "9b2bd8027fc7661744d38af20e103146cf01e9b5a1f435bde0c90a4c1c570755"
@@ -100,5 +101,5 @@ The wiki is meant to be what the orchestrator (the agent the owner talks to) rea
 - Parent: none
 - Children (16): [[CR-127]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
 - Cites (12): [[BUG-085]], [[BUG-086]], [[CR-063]], [[CR-093]], [[CR-103]], [[CR-112]], [[CR-126]], [[EPIC-015]], [[EPIC-020]], [[EPIC-024]], [[EPIC-052]], [[PROPOSAL-012]]
-- Cited by (18): [[CR-126]], [[CR-127]], [[CR-128]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
+- Cited by (19): [[BUG-126]], [[CR-126]], [[CR-127]], [[CR-128]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
 <!-- END relations -->

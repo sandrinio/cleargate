@@ -26,12 +26,13 @@ children:
   - "[[STORY-008-07]]"
 cites: []
 cited_by: 
+  - "[[BUG-124]]"
   - "[[CR-125]]"
   - "[[STORY-060-03]]"
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-008_Token_Cost_And_Readiness_Gates.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "2691d20a51eb6e8211a9ec862c0ec0ddf8c09601"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-04"
@@ -78,5 +79,5 @@ All 6 questions resolved 2026-04-19 by Vibe Coder (accept all AI recommendations
 ## Relations
 - Parent: none
 - Children (21): [[BUG-008]], [[CR-008]], [[CR-010]], [[CR-027]], [[CR-028]], [[CR-030]], [[CR-031]], [[CR-032]], [[CR-033]], [[CR-034]], [[CR-035]], [[CR-036]], [[CR-038]], [[CR-125]], [[STORY-008-01]], [[STORY-008-02]], [[STORY-008-03]], [[STORY-008-04]], [[STORY-008-05]], [[STORY-008-06]], +1 more
-- Cited by (2): [[CR-125]], [[STORY-060-03]]
+- Cited by (3): [[BUG-124]], [[CR-125]], [[STORY-060-03]]
 <!-- END relations -->

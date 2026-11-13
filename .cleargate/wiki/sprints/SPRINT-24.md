@@ -2,13 +2,17 @@
 type: sprint
 id: "SPRINT-24"
 parent: ""
-children: []
+children: 
+  - "[[CR-049]]"
+  - "[[CR-050]]"
+  - "[[CR-051]]"
+  - "[[CR-052]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-24_Loop_Tightening.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "7e6385bcbc4a018586e14c9a6555d28952dd8bbe"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-24"
@@ -18,7 +22,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-24: Tighten the Loop — Carry-over Cleanup + TPV Dogfood
 
-**Status:** Completed · **Sprint:** SPRINT-24 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-05 → 2026-05-16 · **Gate:** pass
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Wave |
@@ -35,6 +39,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (4): [[CR-049]], [[CR-050]], [[CR-051]], [[CR-052]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

@@ -19,7 +19,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-032_Code_Map_Awareness_Layer.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "eb44e22d41c078a7f8efd139e15a6dfee49f91c2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-30"

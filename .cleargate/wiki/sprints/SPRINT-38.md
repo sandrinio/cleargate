@@ -2,7 +2,8 @@
 type: sprint
 id: "SPRINT-38"
 parent: ""
-children: []
+children: 
+  - "[[EPIC-051]]"
 cites: []
 cited_by: 
   - "[[CR-107]]"
@@ -10,7 +11,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-38_Enforcement_Integrity_Restoration.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "7e88816746b8ec8d0bc9de8ae06915ce3fcaff0c"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-38"
@@ -20,7 +21,7 @@ last_report_ingest_commit: "7e88816746b8ec8d0bc9de8ae06915ce3fcaff0c"
 
 # SPRINT-38: Enforcement Integrity Restoration
 
-**Status:** Completed · **Sprint:** SPRINT-38 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-07-17 → 2026-07-31 · **Gate:** pass
 
 ## Goal
 Restore enforcement integrity across the ClearGate scaffold: every gate documented "always enforced" must block on violation, all dead `execution_mode`/v1/v2 vocabulary is purged from shipping surfaces, and a drift guard prevents the canonical↔live↔root divergence that CR-074 exposed.
@@ -45,6 +46,7 @@ Restore enforcement integrity across the ClearGate scaffold: every gate document
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (1): [[EPIC-051]]
 - Cited by (2): [[CR-107]], [[EPIC-055]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->

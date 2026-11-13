@@ -5,11 +5,49 @@
 
 Every answered Q/A decision in the delivery corpus, newest first, with the architecture rules of open epics. A block ends with `- Supersedes:` when the item says it supersedes another. Open questions and unanswered placeholders are not listed.
 
+### [[BUG-093]] — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses (2026-11-13)
+- Q: Should the fix reuse `mergeSettings(removeClearGateHooks(ours), theirs)`, the form SPRINT-41 M5 AD-4 specifies for Codex, or merge per matcher inside the… ([[BUG-093]]) → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-095]] — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block (2026-11-13)
+- Q: Should upgrade re-pin only `mcpServers.cleargate` in `.mcp.json` (surgery, the user's other servers kept), or re-deliver the file? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should upgrade also refresh `.cleargate/config.example.yml`, which is `INTENTIONALLY_UNTRACKED` too and which `init` skips once it exists? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Once upgrade refreshes these files, what do the README and CHANGELOG say? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-120]] — `cleargate upgrade` without a terminal stops halfway, exits 0, and leaves the hooks on the new pin and the manifest on the old version (2026-11-13)
+- Q: What should `upgrade` do when it has merge prompts to ask and stdin is not a terminal (an agent, CI,… ([[BUG-120]]) → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should `upgrade` prompt for merge-3way files the user never changed? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should the README document non-interactive upgrades? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-121]] — `upgrade` and re-running `init` replace a repo's own gate commands with detected ones (2026-11-13)
+- Q: Whose value wins for `qa.test`, `qa.typecheck` and `arch.typecheck` when `gate-checks.json` already has one? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should a value that was empty and is now filled by detection be announced? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-122]] — `init` and `upgrade` record different install state, so the next dry run misreports `.claude/settings.json` (2026-11-13)
+- Q: What sha should the install snapshot hold for `.claude/settings.json`, whose user hooks ClearGate means to keep ([[BUG-093]] covers the events… ([[BUG-122]]) → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: What should the snapshot's dates mean after an upgrade or a re-run `init`? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-123]] — The decisions page misses a common question form, and the brief's Decisions line repeats, cuts and orders entries badly (2026-11-13)
+- Q: What should one entry on the brief's Decisions line show? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: How are the "latest five" chosen among items answered on the same day? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should the decisions page parse free-form answer records (a numbered list such as `1. **TLS:** on the upload listener…` under… ([[BUG-123]]) → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-124]] — Brief, index and doctor labels say things that are not true (2026-11-13)
+- Q: How should the Waiting line count open questions? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: What should "0 unlabelled contradictions" say when open drafts have never been checked? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: Should the index's archive `[expand](archive/<bucket>.md)` links be written or dropped? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-125]] — The wiki ignores a sprint plan's member lists, so planned work shows "no sprint" and sprint pages have no children (2026-11-13)
+- Q: Where does the wiki take sprint membership from? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+- Q: What should a sprint's own page and index row show where an item shows its sprint? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[BUG-126]] — The contradiction check cannot be completed for a story draft when stories are not in the wiki (the default) (2026-11-13)
+- Q: For a draft whose bucket `wiki.ingest_buckets` excludes (stories, by default), what does the check read and where is it recorded? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
 ### [[CR-126]] — Every Epic Must Answer "How Do We Test This?" (2026-11-12)
 - Q: Should the requirement apply to the 14 open Draft epics as well as new ones? They will start failing the… ([[CR-126]]) → Agreed 2026-11-12: apply to open epics. See Q3 for how this lands on the 7 that already have stories.
 - Q: Should CRs get the same `Real-host proof` row? The CR template's §4 already declares unit, integration and E2E counts, but… ([[CR-126]]) → Agreed 2026-11-12: not in this CR; a follow-up CR extends the real-host row to CRs and bugs.
-- Q: (no question text) → Owner delegated the call on 2026-11-12 ("you make decisions"). Decided as recommended: epics with at least one story file are exempt. EPIC-052, 053, 055, 056 and 057 were reverted to 🔴 the same day rather than at the predicate's commit,… ([[CR-126]])
-- Q: (no question text) → Owner raised it on 2026-11-12, and the call was delegated ("make decisions on your own"). Decided as recommended.
+- Q: 7 of the 14 open epics already have stories (EPIC-031, 047, 048, 058, 059, 060, 061). EPIC-059's stories are in… ([[CR-126]]) → Owner delegated the call on 2026-11-12 ("you make decisions"). Decided as recommended: epics with at least one story file are exempt. EPIC-052, 053, 055, 056 and 057 were reverted to 🔴 the same day rather than at the predicate's commit,… ([[CR-126]])
+- Q: "shouldn't we also be capturing journeys in the epic? would help with testing strategy and end to end tests." → Owner raised it on 2026-11-12, and the call was delegated ("make decisions on your own"). Decided as recommended.
 
 ### [[CR-131]] — Generic Coding Standards Knowledge Doc for Execution Agents (2026-11-12)
 - Q: File name and location: `.cleargate/knowledge/coding-standards.md` or a root-level `CG_CODING_STANDARDS.md`? → ✅ accepted as Recommended (sandrinio 2026-11-12)
@@ -46,13 +84,13 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: How much history should the page hold? The corpus has about 280 answered `**Human decision:**` lines and 347 `<rule>` lines… ([[STORY-063-10]]) → Owner approved 2026-11-12: every answered decision from every item; architecture rules only from open epics; long entries cut with "…" and a link to the item's page (R6); a `warn:` line above 8,000 tokens, never a failure (R9).
 
 ### [[STORY-063-11]] — Session Brief Injected at Session Start (2026-11-12)
-- Q: (no question text) → Owner approved 2026-11-12: latest git tag plus commits since, per repo in the new `wiki.brief.release_repos` key (default `["."]`), computed live in `doctor --session-start`. It falls back to an ingest-time value marked "as of <date>" only if measured over the 100… ([[STORY-063-11]])
-- Q: (no question text) → Owner approved 2026-11-12: `doctor --session-start` prints the brief and refreshes the active-sprint and release lines live (R4).
-- Q: (no question text) → Owner approved 2026-11-12: "Last closed" shows the report status, its `**Stories:**` line and the carried count now (R2 item 4). A structured `goal_verdict` field goes to a follow-up CR (§1.3).
+- Q: Release state has to work in any target repo, not just ClearGate's. What should it read? → Owner approved 2026-11-12: latest git tag plus commits since, per repo in the new `wiki.brief.release_repos` key (default `["."]`), computed live in `doctor --session-start`. It falls back to an ingest-time value marked "as of <date>" only if measured over the 100… ([[STORY-063-11]])
+- Q: Should `session-start.sh` just `cat wiki/brief.md`, or should `doctor --session-start` print it with live sections? → Owner approved 2026-11-12: `doctor --session-start` prints the brief and refreshes the active-sprint and release lines live (R4).
+- Q: Sprint reports carry no structured goal verdict. SPRINT-44's report has `status: "Shipped"` and a `**Stories:**` line; "goal met" lives only… ([[STORY-063-11]]) → Owner approved 2026-11-12: "Last closed" shows the report status, its `**Stories:**` line and the carried count now (R2 item 4). A structured `goal_verdict` field goes to a follow-up CR (§1.3).
 
 ### [[STORY-063-12]] — Truth Oracle and Orientation Eval (2026-11-12)
-- Q: (no question text) → Owner approved 2026-11-12: `claude-opus-5-5` for the gating run; `--model` allows cheaper smoke runs that are labelled `smoke` and never count (R9).
-- Q: (no question text) → Owner approved 2026-11-12: keep it as one story (L3, medium bounce exposure).
+- Q: Which model runs the eval? → Owner approved 2026-11-12: `claude-opus-5-5` for the gating run; `--model` allows cheaper smoke runs that are labelled `smoke` and never count (R9).
+- Q: The oracle (deterministic, in `npm test`) and the eval (live, manual) share the fixture corpus and the line contract, but… ([[STORY-063-12]]) → Owner approved 2026-11-12: keep it as one story (L3, medium bounce exposure).
 
 ### [[STORY-062-01]] — Dashboard Runs Without a Sprint, With a Tab Shell (2026-11-10)
 - Q: Should `sprint init` still auto-open the dashboard now that it no longer belongs to one sprint? → Accepted with the EPIC-062 recommendations (owner 2026-11-10).
@@ -94,11 +132,11 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: The guard (R10) will flag legitimate default-tier tests that only *mention* a pattern in a comment. Allow an inline opt-out… ([[STORY-061-02]]) → Recommended answer accepted (owner, 2026-11-07, "approved").
 
 ### [[STORY-061-03]] — cleargate-cli clean tree and CI (2026-11-07)
-- Q: (no question text) → Recommended answer accepted (owner, 2026-11-07, "approved").
-- Q: (no question text) → Recommended answer accepted (owner, 2026-11-07, "approved").
-- Q: (no question text) → Recommended answer accepted (owner, 2026-11-07, "approved").
-- Q: (no question text) → Recommended answer accepted (owner, 2026-11-07, "approved").
-- Q: (no question text) → Recommended answer accepted (owner, 2026-11-07, "approved").
+- Q: Run gitleaks through its pinned container image, or through `gitleaks/gitleaks-action`? → Recommended answer accepted (owner, 2026-11-07, "approved").
+- Q: What if a clean-machine failure's root cause is in production code (`src/`), not the test? Example: the keychain store on… ([[STORY-061-03]]) → Recommended answer accepted (owner, 2026-11-07, "approved").
+- Q: Which OS should CI run on? → Recommended answer accepted (owner, 2026-11-07, "approved").
+- Q: The cli repo has 17 local `story/*` branches. Which should be deleted? → Recommended answer accepted (owner, 2026-11-07, "approved").
+- Q: The workflow only runs on GitHub after cli `main` is pushed. The private repo's Actions minutes apply, and the suite… ([[STORY-061-03]]) → Recommended answer accepted (owner, 2026-11-07, "approved").
 
 ### [[CR-125]] — `existing-surfaces-verified` Checks Cited Symbols (2026-10-28)
 - Q: Does a missing symbol fail the predicate, or only warn? → Accepted 2026-10-28 (owner): fail, the same as a missing path.
@@ -239,15 +277,15 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Fold in the three Gherkin defects from the same audit? → Include, 2026-09-25. Adjusted by the type decision above: CR and Bug now gain real Gherkin blocks, so their "1 per Gherkin scenario" rows become correct and stay as written; QA's `§4` pointer becomes per-type instead of a flat `§2.1`.
 
 ### [[STORY-058-12]] — Host dispatch-mode split — Claude wave dispatch stays, serial fallback for hosts without a Workflow primitive (2026-09-11)
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: retain M6 after M5.
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: emit the shared GREEN / ESCALATED / BLOCKED verdict and halt synchronously on a true blocker.
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: ship two files, with an explicit instruction to read dispatch-serial.md; no source fork.
+- Q: does this land in a new milestone M6, or fold into M5 beside the Codex payload stories? → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: retain M6 after M5.
+- Q: should a serial run still emit the `launch_wave` verdict shape (GREEN / ESCALATED / BLOCKED + blocker discriminant), even though… ([[STORY-058-12]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: emit the shared GREEN / ESCALATED / BLOCKED verdict and halt synchronously on a true blocker.
+- Q: does the portable surface ship as two files mirroring the Claude layout (core `SKILL.md` + `dispatch-serial.md`), or as one concatenated… ([[STORY-058-12]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: ship two files, with an explicit instruction to read dispatch-serial.md; no source fork.
 
 ### [[STORY-058-13]] — Clean-room Codex loop-completion evidence — one real story, end to end (2026-09-11)
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: standalone 0.154.0-alpha.6.2 is authoritative; embedded same-version testing is secondary.
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: retain M6, with -12 before -13.
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: human-granted workspace trust and trust for the exact hook content/hashes, then scripted execution; bypass testing is secondary and labelled.
-- Q: (no question text) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: require both loop transport and enforcement parity; disclose gaps, but do not close this story or pass the sprint's Codex-port goal until mandatory enforcement is proven.
+- Q: which Codex artifact is authoritative for this evidence — a newly pinned standalone install, or the ChatGPT-app-embedded `0.154.0-alpha.6.2` already on… ([[STORY-058-13]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: standalone 0.154.0-alpha.6.2 is authoritative; embedded same-version testing is secondary.
+- Q: new milestone M6, or fold into M5 beside the Codex payload stories? → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: retain M6, with -12 before -13.
+- Q: is a human-witnessed trust grant followed by a scripted `codex exec` run acceptable evidence, or must every check stay fully… ([[STORY-058-13]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: human-granted workspace trust and trust for the exact hook content/hashes, then scripted execution; bypass testing is secondary and labelled.
+- Q: does "the loop ran under Codex" require the flashcard write-gate and dispatch attribution to actually fire, or is completing the… ([[STORY-058-13]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: require both loop transport and enforcement parity; disclose gaps, but do not close this story or pass the sprint's Codex-port goal until mandatory enforcement is proven.
 
 ### [[EPIC-058]] — Additive Multi-Host Execution Adapters (2026-09-04)
 - Rule: All production implementation and canonical npm payload sources MUST live inside the standalone `cleargate-cli` repository; the outer meta-repo and sibling `cleargate-planning/` directory MUST NOT be build-time dependencies.
@@ -464,17 +502,17 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Should `CLEARGATE_ADVISORY=1` also soften the file-surface gate (a second bypass alongside `SKIP_SURFACE_GATE=1`)? → Q1 = NARROW (final, gate review 2026-07-17). `CLEARGATE_ADVISORY=1` softens ONLY `cleargate sprint preflight`, never this gate. Do NOT add a `CLEARGATE_ADVISORY` soft-bypass path or gherkin scenario. `SKIP_SURFACE_GATE=1` is the sole bypass.
 
 ### [[STORY-051-02]] — Retire the Test-Ratchet Pre-Commit Gate from the Payload (2026-07-17)
-- Q: (no question text) → **RETIRE.** Remove the test-ratchet hook from the pre-commit payload entirely; do NOT repair it to node:test. Ensure typecheck + node:test still run in pre-commit; delete/park `test_ratchet.mjs` + its baseline references + its bash test; document the retirement in `cleargate-enforcement.md`. This… ([[STORY-051-02]])
+- Q: Repair the test-ratchet (rewire to node:test + ship a baseline), or retire it from the pre-commit payload entirely? → **RETIRE.** Remove the test-ratchet hook from the pre-commit payload entirely; do NOT repair it to node:test. Ensure typecheck + node:test still run in pre-commit; delete/park `test_ratchet.mjs` + its baseline references + its bash test; document the retirement in `cleargate-enforcement.md`. This… ([[STORY-051-02]])
 
 ### [[STORY-051-03]] — Give the Decomposition & Sprint-Readiness Gates a Work List (2026-07-17)
-- Q: (no question text) → KEEP the criterion, RETARGETED to the sprint's decomposition evidence (its `epics:`/`proposals:` list) rather than an upstream approval doc. Documented in readiness-gates.md.
-- Q: (no question text) → FAIL CLOSED — exit non-zero on missing inputs (`declaredNone`) or a reconciler exception (`error`), UNLESS `--allow-drift` is passed.
+- Q: Keep the sprint-readiness `context_source` criterion for the sprint bucket, or drop it (a sprint has no upstream approval doc the… ([[STORY-051-03]]) → KEEP the criterion, RETARGETED to the sprint's decomposition evidence (its `epics:`/`proposals:` list) rather than an upstream approval doc. Documented in readiness-gates.md.
+- Q: Should the decomposition + lifecycle-init gates fail closed on missing inputs or a reconciler exception, instead of the current silent… ([[STORY-051-03]]) → FAIL CLOSED — exit non-zero on missing inputs (`declaredNone`) or a reconciler exception (`error`), UNLESS `--allow-drift` is passed.
 
 ### [[STORY-051-04]] — Remove the CLEARGATE_EXEC_MODE=v1 Silent Bypass from assert_story_files (2026-07-17)
 - Q: Should the standalone `assert_story_files.mjs` honor `CLEARGATE_ADVISORY=1` as a break-glass the way `init_sprint.mjs` already does? → Deferred to EPIC-051's open question Q1 (still unresolved at the epic level — Q1 asks whether `CLEARGATE_ADVISORY` becomes the universal strength knob across all gates). This story removes the dead lever only; it does not add a new one, so… ([[STORY-051-04]])
 
 ### [[STORY-051-05]] — Sweep Dead execution_mode/v1/v2 Vocabulary from Shipping Surfaces (2026-07-17)
-- Q: (no question text) → NARROW. The protocol §preflight rewrite states a failing per-item gate hard-blocks (always enforced); it does **not** claim `CLEARGATE_ADVISORY` softens per-item gates. `file_surface_diff.sh` (STORY-051-01) and `test_ratchet.mjs` (STORY-051-02) are EXCLUDED from this sweep's worklist.
+- Q: Does `CLEARGATE_ADVISORY=1` become the universal strength knob, or is enforcement narrowed so it only softens `cleargate sprint preflight`? → NARROW. The protocol §preflight rewrite states a failing per-item gate hard-blocks (always enforced); it does **not** claim `CLEARGATE_ADVISORY` softens per-item gates. `file_surface_diff.sh` (STORY-051-01) and `test_ratchet.mjs` (STORY-051-02) are EXCLUDED from this sweep's worklist.
 - Q: Where is the boundary between "dead switch vocab to delete" and "legitimate version/retirement vocab to keep"? → adopt the exemption set in §1.3 and encode it as the grep gate's exclusion filter (§3.2). This keeps the gate precise and prevents over-scrubbing.
 
 ### [[STORY-051-06]] — Add a Canonical↔Live↔Root Drift Guard to `cleargate doctor` (2026-07-17)
@@ -484,12 +522,12 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Duplicate check + Ambiguity Gate are documented as enforced ("auditable evidence" / "evaluated literally") but no script checks either. Add… ([[STORY-051-07]]) → ADD REAL TEETH (Epic §6 Q4, resolved 2026-07-17). Build both predicates + the `## Prior work` template section, wire them into the epic/story/cr/bug gates, then align the CLAUDE.md duplicate-check and Ambiguity-Gate wording to describe the real machine checks. No downgrade.
 
 ### [[STORY-051-08]] — Narrow Break-Glass Semantics — Scope CLEARGATE_ADVISORY & Guard --assume-ack (2026-07-17)
-- Q: (no question text) → NARROW — `CLEARGATE_ADVISORY` softens only `cleargate sprint preflight`; narrow the §15 "all CLI gates" claim to match; do NOT add the lever to other gates.
-- Q: (no question text) → ADD CI-TOKEN GUARD — `close_sprint.mjs --assume-ack` refuses (exits non-zero) unless `CLEARGATE_CI_ACK=1` is set.
-- Q: (no question text) → RATIFIED (Gate 1, 2026-07-17) — narrow §15 to enumerate the true honor sites (`cleargate sprint preflight` + the `cleargate sprint init` story-file assertion, and note the `pending-task-sentinel.sh:129` hook honor-site) and disclaim file-surface / decomposition / lifecycle-init / close. No honor… ([[STORY-051-08]])
+- Q: Should `CLEARGATE_ADVISORY` become a universal strength knob threaded through all gates, or should §15 be narrowed to its true scope? → NARROW — `CLEARGATE_ADVISORY` softens only `cleargate sprint preflight`; narrow the §15 "all CLI gates" claim to match; do NOT add the lever to other gates.
+- Q: Should `--assume-ack` get mechanical teeth, or be relabeled an unenforceable trust gate? → ADD CI-TOKEN GUARD — `close_sprint.mjs --assume-ack` refuses (exits non-zero) unless `CLEARGATE_CI_ACK=1` is set.
+- Q: The resolved Q1 shorthand says "ONLY `cleargate sprint preflight`," but grounding found a second CLI honor site: `init_sprint.mjs:140` downgrades the… ([[STORY-051-08]]) → RATIFIED (Gate 1, 2026-07-17) — narrow §15 to enumerate the true honor sites (`cleargate sprint preflight` + the `cleargate sprint init` story-file assertion, and note the `pending-task-sentinel.sh:129` hook honor-site) and disclaim file-surface / decomposition / lifecycle-init / close. No honor… ([[STORY-051-08]])
 
 ### [[STORY-051-09]] — Fix Doc Contradictions, Gate-Numbering Canon & Phantom References (2026-07-17)
-- Q: (no question text) → **FOUR-GATE MODEL is canonical.** Adopt protocol §4 (Brief / Sprint-Ready / Execution / Close) as the numbered spine and re-map the CLAUDE.md + §9 three-gate references (Initiative / Ambiguity / Push) *onto* it — not the reverse. Surface any unclean… ([[STORY-051-09]])
+- Q: Which gate-numbering model wins repo-wide — protocol §4's four-gate model (Brief / Sprint-Ready / Execution / Close) or the CLAUDE.md… ([[STORY-051-09]]) → **FOUR-GATE MODEL is canonical.** Adopt protocol §4 (Brief / Sprint-Ready / Execution / Close) as the numbered spine and re-map the CLAUDE.md + §9 three-gate references (Initiative / Ambiguity / Push) *onto* it — not the reverse. Surface any unclean… ([[STORY-051-09]])
 
 ### [[EPIC-048]] — Connector Daemon (2026-06-06)
 - Q: "Reuse `cleargate-cli/src/auth/*` by importing it, or factor it into a shared `@cleargate/auth` lib both the CLI and daemon depend on?" → **Import directly** for M2 (keep the sprint scoped to the daemon); a shared `@cleargate/auth` lib is a later clean-up CR. **Caveat (Architect SDR must confirm):** the imported auth subtree must be **PM-SDK-clean** (EPIC-027) — if it transitively pulls a PM-tool… ([[EPIC-048]])
@@ -543,8 +581,8 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Where does the list of config roots to provision come from — a new `config.yml` key, or a fixed convention? → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
 
 ### [[CR-080]] — Fix script-wrapper correctness — pre_gate_runner.sh relative-path doubling (F5) + run_script.sh ambient-env drop (F8) (2026-06-03)
-- Q: (no question text) → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
-- Q: (no question text) → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
+- Q: Should `pre_gate_runner.sh` normalize the worktree argument with `realpath` at entry, or wrap each subsequent `cd "$WORKTREE"` in a subshell so… ([[CR-080]]) → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
+- Q: Does `run_script.sh` *intentionally* sandbox the child environment (i.e. is the env drop a deliberate allowlist), or is the drop an… ([[CR-080]]) → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
 
 ### [[CR-081]] — QA-loop hardening — semantic QA-Red fixture lint + accept red-now-green as the green test (2026-06-03)
 - Q: Should the semantic-fixture lint extend the existing §C.3.5 TPV gate (one more dispatch path) or ship as a standalone stock… ([[CR-081]]) → Accepted 2026-06-03 (owner: "accept all") — adopt the Recommended answer above.
@@ -884,4 +922,4 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 
 ## Unresolved conflicts
 
-_None._
+- [[BUG-121]] vs [[BUG-037]] · BUG-037 fix is "re-run detection" vs BUG-121 says it replaces repo commands

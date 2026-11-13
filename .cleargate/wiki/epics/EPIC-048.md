@@ -17,7 +17,7 @@ cited_by: []
 status: "In Review"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-048_Connector_Daemon.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "ec5e6d5673cec3082c3761ae296d81d819ac08f7"
 repo: "planning"
 ---

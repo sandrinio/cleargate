@@ -14,7 +14,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-28_Reconcile_Finish_Harvest.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "77b6da7136ff086393fcd6ad3a9b57aa7a13de62"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-28"
@@ -24,7 +24,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-28: Reconcile, Finish, Harvest
 
-**Status:** Completed · **Sprint:** SPRINT-28 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-19 → 2026-06-01 · **Gate:** pass
 
 ## Goal
 Ship three foundations (CR-066 parent reconciliation, CR-067 vocab unification, EPIC-028 vitest elimination) plus EPIC-010 closeout (STORY-010-02), BUG-004 fix, and STORY-028-01 reconciler harvest. Close the books before SPRINT-29 pulls EPIC-012 harvest + EPIC-021 audit forward.

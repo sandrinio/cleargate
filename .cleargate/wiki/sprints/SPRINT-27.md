@@ -26,7 +26,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-27_MCP_Type_Agnostic_And_Console_Connection.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "46d8e1d2bd30047a674f31bb09b263dbdfbe39de"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-27"
@@ -36,7 +36,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-27: MCP Type-Agnostic Sync + Sprint Artifact Push + Admin-Console Connection UX
 
-**Status:** Completed · **Sprint:** SPRINT-27 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-19 → 2026-06-01 · **Gate:** pass
 
 ## Goal
 Ship EPIC-027 Phase 1 (open-type validator, gate-policy split, error taxonomy, codebase/PM-tool boundary lock), prove the type-agnostic foundation end-to-end via sprint artifact sync (CR-063 wiki + CR-064 MCP push), and ship the admin-console connection-UX quartet (CR-061 3-tab modal, CR-062 invite resend + email, CR-065 stdio service-token bridge, BUG-030 member-delete FK fix).

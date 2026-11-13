@@ -21,7 +21,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-34_Polyglot_Portability_Hardening.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-34"
@@ -31,7 +31,7 @@ last_report_ingest_commit: "a06160cd6d6b5743501f46d7a77155617b88a5b1"
 
 # SPRINT-34: Polyglot Portability Hardening
 
-**Status:** Completed · **Sprint:** SPRINT-34 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-06-03T00:00:00Z → 2026-06-04T00:00:00Z · **Gate:** pass
 
 ## Goal
 Harden ClearGate so a fresh install runs a sprint end-to-end on an arbitrary (non-node, worktree-isolated) target repo without orchestrator hand-fixes — fixing the 11 portability/loop defects the SPRINT-66 polyglot dogfood surfaced — and ship the two carried hygiene CRs.

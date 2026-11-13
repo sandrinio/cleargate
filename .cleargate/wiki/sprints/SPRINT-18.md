@@ -4,12 +4,14 @@ id: "SPRINT-18"
 parent: ""
 children: 
   - "[[BUG-024]]"
+  - "[[CR-023]]"
+  - "[[EPIC-025]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-18_Prepare_Close_Observe_Mechanics.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "3ae5ef2cf5a385103ec34cf51646410f1e5802c8"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-18"
@@ -19,7 +21,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 
 # SPRINT-18: Sprint 2 — Prepare / Close / Observe Mechanics
 
-**Status:** Completed · **Sprint:** SPRINT-18 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-05-02 → 2026-05-15 · **Gate:** pass
 
 ## Deliverables
 | Item | Type | Title | Lane | Complexity | Parallel? | Bounce Exposure | Milestone |
@@ -51,7 +53,7 @@ last_report_ingest_commit: "6883a94781e46a04f797d1e76e74a69b95c21b33"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (1): [[BUG-024]]
+- Children (3): [[BUG-024]], [[CR-023]], [[EPIC-025]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

@@ -7,10 +7,10 @@
 
 ### Sprints
 
-- [[SPRINT-31]] — Draft · SPRINT-31 — Test Speed - Runner Split + Scoped QA — Cut sprint-execution test wall time by ≥ 50% on cleargate-cli/ by splitting
-- [[SPRINT-37]] — Draft · SPRINT-37 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
-- [[SPRINT-42]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
-- [[SPRINT-43]] — Draft · SPRINT-43 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
+- [[SPRINT-31]] — Draft · 2026-05-25 → 2026-05-28 — Test Speed - Runner Split + Scoped QA — Cut sprint-execution test wall time by ≥ 50% on cleargate-cli/ by splitting
+- [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
+- [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
+- [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
 
 ### Epics
 
@@ -123,9 +123,6 @@
   - [[CR-119]] — Triaged · no sprint — The story template's §3.1 cannot express a greenfield story
   - [[CR-128]] — Draft · no sprint — CRs and Bugs Declare What Proves It Works in the Real Host
   - [[CR-130]] — Draft · no sprint — The Bug Template Gets a Root Cause Section
-- area: upgrade
-  - [[BUG-093]] — Draft · no sprint — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses
-  - [[BUG-095]] — Draft · no sprint — `cleargate upgrade` never refreshes `.mcp.json`'s pinned CLI or the CLAUDE.md block
 - area: wiki
   - [[CR-127]] — Draft · no sprint — Lint the Pushed Item's Own Wiki Page at Push
 - area: worktree-lifecycle
@@ -133,11 +130,11 @@
 
 ## Archive
 
-- Epics: 35 Completed · 3 Abandoned · [expand](archive/epics.md)
-- Sprints: 37 Completed · 3 Abandoned · [expand](archive/sprints.md)
-- Proposals: 8 Abandoned · 2 Completed · [expand](archive/proposals.md)
-- CRs: 108 Completed · 1 Abandoned · [expand](archive/crs.md)
-- Bugs: 57 Completed · 1 Abandoned · [expand](archive/bugs.md)
+- Epics: 35 Completed · 3 Abandoned
+- Sprints: 37 Completed · 3 Abandoned
+- Proposals: 8 Abandoned · 2 Completed
+- CRs: 108 Completed · 1 Abandoned
+- Bugs: 66 Completed · 1 Abandoned
 
 ## Contradictions
 

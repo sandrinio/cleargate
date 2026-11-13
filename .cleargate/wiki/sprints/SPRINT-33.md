@@ -2,13 +2,15 @@
 type: sprint
 id: "SPRINT-33"
 parent: ""
-children: []
+children: 
+  - "[[CR-070]]"
+  - "[[EPIC-043]]"
 cites: []
 cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md"
-last_ingest: "2026-11-12T21:25:29.802Z"
+last_ingest: "2026-11-13T01:02:08.963Z"
 last_ingest_commit: "6e23e2f35012c083f40fa1e641c3590d25abffec"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-33"
@@ -18,7 +20,7 @@ last_report_ingest_commit: "6e23e2f35012c083f40fa1e641c3590d25abffec"
 
 # SPRINT-33: Framework Hygiene & Gate Correctness
 
-**Status:** Completed · **Sprint:** SPRINT-33 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-06-02 → 2026-06-13 · **Gate:** pass
 
 ## Goal
 Repair the gates that don't gate, reconcile templates↔predicates, cut the session/loop token taxes, and add the `/simplify` consolidation pass — executing EPIC-043 (all 8 workstreams) plus the Approved CR-070.
@@ -41,6 +43,7 @@ Repair the gates that don't gate, reconcile templates↔predicates, cut the sess
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
+- Children (2): [[CR-070]], [[EPIC-043]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report
