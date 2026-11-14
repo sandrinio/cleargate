@@ -62,13 +62,14 @@ As the orchestrator of a sprint on a repository that is not an npm project, I wa
 - Requirement 6: No scan result authors a lifecycle transition without a story id. The fast-lane branch that calls `update_state.mjs ... "Architect Passed"` (line 411) also requires `STORY_ID` non-empty explicitly. Now that `OVERALL_EXIT` can be 0 in a worktree, this guard must not depend on the lane lookup that happens to precede it (BUG-087 "Ship with").
 - Requirement 7: `init_gate_config.sh` (the fallback seeder, lines 24, 27, 30) seeds empty strings for `typecheck` and `test`, matching the shipped `gate-checks.json`. With Requirement 1 in place the seeded `npm run typecheck` would turn into a permanent FAIL in every non-npm repository that falls through to the seeder. `cleargate init` already writes the stack's real commands through `applyTestStack` (`src/commands/init.ts:428`), so the seeder is only reached when the file is missing.
 - Requirement 8: Stack-neutral. No new line reads `package.json` to decide whether to run a configured command.
+- Requirement 9 (Gate 2 spec clarification (SPRINT-46 SDR, owner approved 2026-11-15), decision 3): `CLEARGATE_SCAN_NO_LANE_ROUTING=1` in the environment skips the lane-aware routing block after the scan (`pre_gate_runner.sh` "Lane-aware post-scan routing (STORY-022-04)", lines 399-440): no `update_state.mjs` call (neither "Architect Passed" nor `--lane-demote`), no `append_ld_event` line in the sprint markdown, and the scan exits with `OVERALL_EXIT`. The CR-120 `pre-gate.jsonl` line is still written. Unset, or any value other than `1`, leaves the routing exactly as today. STORY-066-08's `merge_story.mjs` sets it, so the merge script is the only writer of demotion and state on the merge path.
 
 ### 1.3 Out of Scope
 - Stack-specific defaults for `debug_patterns` and the TODO grep (JS-only file globs, field finding W-D1 tail). `init` seeding Go patterns is a separate item.
 - A `--out` or `--report-dir` flag so the report never lands in the worktree (W010-6, W010-1). `seal_red.mjs` (STORY-066-07) and `merge_story.mjs` (STORY-066-08) move the report themselves.
 - Judging failures against the sprint baseline (STORY-066-04 writes it; STORY-066-08 and -09 read it). This story reports what the command did.
 - `new_deps_check` for Go (`go.mod`), Python or Rust manifests.
-- The lane-aware routing after the scan (lines 399-440). Unchanged.
+- The lane-aware routing after the scan (lines 399-440). Unchanged, except for the opt-out switch in Requirement 9.
 
 ### 1.4 Open Questions
 
@@ -182,6 +183,8 @@ In `pre_gate_runner.sh`: replace the three guarded blocks (lines 79-95, 184-199,
 
 In `init_gate_config.sh`: `typecheck` and `test` become `""` in both blocks.
 
+Requirement 9: immediately before the `LANE="standard"` line, `if [[ "${CLEARGATE_SCAN_NO_LANE_ROUTING:-}" = "1" ]]; then exit "${OVERALL_EXIT}"; fi`. It sits after the CR-120 jsonl block, so the scan record is kept.
+
 Tests build a real git repository in a temp directory, copy the three scripts and a `gate-checks.json` into `<tmp>/.cleargate/scripts/` (the runner reads its config from its own directory), add a worktree, and spawn `bash pre_gate_runner.sh`. No mocks. The Go fixture is `go.mod`, `main.go` and a shell script standing in for the toolchain, so the test needs no Go install and no network.
 
 ### 3.3 API Contract (if applicable)
@@ -198,6 +201,7 @@ Tests build a real git repository in a temp directory, copy the three scripts an
 - [ ] Make `new_deps` report `[N/A]` when there is no `package.json` -> Requirement 4
 - [ ] Require `STORY_ID` in the fast-lane transition branch -> Requirement 6
 - [ ] Seed empty `typecheck` and `test` in `init_gate_config.sh` -> Requirement 7
+- [ ] Add the `CLEARGATE_SCAN_NO_LANE_ROUTING=1` early exit before the lane routing, with one integration case: a fast-lane story in a fixture `state.json` whose scan fails keeps lane `fast` and the sprint markdown gains no LD line when the switch is set -> Requirement 9
 - [ ] Write the integration tests on an npm fixture and a Go fixture, including the 60-line tail and the `--prefix` case -> scenarios 1-5
 
 ## 4. Quality Gates
@@ -209,7 +213,7 @@ Tests build a real git repository in a temp directory, copy the three scripts an
 | Test Type | Minimum Count | Notes |
 |---|---|---|
 | Unit tests | 3 | `resolve_check_target`: `--prefix` form, `cd <dir> &&` form, no directory. Sourced and called from node:test through `bash -c`. |
-| Integration tests | 5 | One per Gherkin scenario, in `cleargate-cli/test/pre-gate-any-stack.integration.node.test.ts`, real git repo and worktree, Go fixture with no `package.json`, plus one npm fixture proving no regression for `npm test`. |
+| Integration tests | 6 | One per Gherkin scenario, in `cleargate-cli/test/pre-gate-any-stack.integration.node.test.ts`, real git repo and worktree, Go fixture with no `package.json`, plus one npm fixture proving no regression for `npm test`, plus one for the Requirement 9 switch (no state write, no LD line, `pre-gate.jsonl` line still written). |
 | E2E / acceptance tests | 0 | Covered by the integration tests; the real-host proof is the dispenser_adapter pilot sprint in the Epic. |
 
 ### 4.2 Definition of Done (The Gate)

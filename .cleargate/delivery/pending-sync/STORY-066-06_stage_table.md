@@ -68,6 +68,7 @@ As the sprint Orchestrator, I want the list of stages each lane runs to live in 
 - **Requirement 7: the verdict carries what ran.** `validateVerdicts` (both `wave` and `serial` mode) requires `lane` (non-empty string) and `stages_run` (array of strings). Every entry of `stages_run` must be a name in the lane's own stage list (the lane normalised as above); a name may repeat (a bounce reruns the Developer). A GREEN verdict's `stages_run` must contain every `kind: 'agent'` stage whose `when` is `always` for its lane. A non-GREEN verdict is checked for shape and membership only. Errors keep the existing form `Malformed segment verdict for <storyId>: <reason>.`
 - **Requirement 8: no QA commit on the fast lane.** Today a GREEN verdict needs a non-empty `qaSha` (`launch_wave.mjs:182-193`). The fast lane has no QA dispatch, so when the lane's stage list has no `qa` agent stage `qaSha` may be `null`; for any other lane it stays required. (This closes a gap the shared contract leaves; see §1.4.)
 - **Requirement 9: documentation of the field.** The verdict table in `cleargate-protocol.md` (§23, lines 882-894) gains the `lane` and `stages_run` rows and the `qaSha` note. The `launch_wave.mjs` header verdict schema block gains the same.
+- **Requirement 10: the clean-room verdict (Gate 2 spec clarification (SPRINT-46 SDR, owner approved 2026-11-15), decision 5).** `cleargate-cli/scripts/clean-room/loop-script.mjs` (`buildLoopRoutes`, the `recordPipeline` printf at line 214) hand-builds a GREEN serial verdict that `codex-loop-harness.red.node.test.ts` (test 20d) validates with `validateVerdicts` in `npm test`, and that the clean-room Codex loop records as a release gate. Its JSON literal gains `"lane":"standard","stages_run":["qa-red","developer","qa-verify"]`. No other change to the file, and the test file is not edited.
 
 ### 1.3 Out of Scope
 - `wave_runner.js` and any use of `stagesFor` beyond the two scripts ([[STORY-066-11]]).
@@ -168,7 +169,7 @@ Feature: Stage table
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs` |
-| Related Files | `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md` |
+| Related Files | `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md`, `cleargate-cli/scripts/clean-room/loop-script.mjs` |
 | Existing tests updated (verdict fixtures only) | `cleargate-cli/test/scripts/wave-execution-barrier.red.node.test.ts`, `cleargate-cli/test/scripts/dispatch-verdict-modes.red.node.test.ts`, `cleargate-cli/test/scripts/dispatch-serial-cli.red.node.test.ts`, `cleargate-cli/test/scripts/dispatch-serial.red.node.test.ts`, `cleargate-cli/test/scripts/bug-034-flashcard-gate-restore.node.test.ts`, `cleargate-cli/test/scripts/codex-loop-evidence.red.node.test.ts`, `cleargate-cli/test/scripts/flashcard-gate-parity.red.node.test.ts` |
 | New tests | `cleargate-cli/test/scripts/segment-stages.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs`, `cleargate-cli/test/scripts/segment-stages.node.test.ts` |
@@ -196,6 +197,7 @@ Feature: Stage table
 - [ ] Extend `launchWave` and `validateVerdicts` in `launch_wave.mjs` (lanes, stages, `lane`/`stages_run`, the qa-less `qaSha` rule, header comment).
 - [ ] Extend `dispatchSerial` and `runNext` in `dispatch_serial.mjs`.
 - [ ] Add `lane` and `stages_run` to the seven fixture builders listed in §3.1 and add accept and reject cases to `dispatch-verdict-modes`.
+- [ ] Add `lane` and `stages_run` to the clean-room `recordPipeline` verdict in `scripts/clean-room/loop-script.mjs`; confirm `codex-loop-harness.red.node.test.ts` test 20d passes unedited -> Requirement 10
 - [ ] Add the two rows and the `qaSha` note to the protocol §23 table; run `npm run typecheck` and the scripts test suite.
 
 ## 4. Quality Gates

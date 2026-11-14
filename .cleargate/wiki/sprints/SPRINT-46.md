@@ -27,10 +27,10 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md"
-last_ingest: "2026-11-14T20:08:30.539Z"
-last_ingest_commit: ""
+last_ingest: "2026-11-14T20:43:13.835Z"
+last_ingest_commit: "c811caa1022d57b1d6410c64f9acc1c8e0c97513"
 repo: "planning"
-last_contradict_sha: "677a59b2c9e40679738ac91f73c4db51f6fba1a752eed027a0940ca17136cd4c"
+last_contradict_sha: "4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db"
 ---
 
 # SPRINT-46: Build Step Sized by Risk

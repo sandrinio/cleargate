@@ -1,0 +1,371 @@
+{
+  "schema_version": 2,
+  "sprint": "SPRINT-46",
+  "generated_at": "2026-11-14T20:25:11Z",
+  "generated_by": "architect-synth",
+  "role": "architect-synth",
+  "story_count_in_milestone": 10,
+  "story_count_planned": 10,
+  "complete": true,
+  "launchable": true,
+  "launchable_when": "The owner confirms at Gate 2 that SPRINT-46 builds in nested cli worktrees, the layout approved as ruling (a) for SPRINT-44 and re-confirmed for SPRINT-45. Each ruling covered its own sprint only. When confirmed, the orchestrator sets launchable to true and fills in ruling. If the owner declines, all ten items are refused under BUG-046 (see refused_if_gate_2_declines) and this plan must not be used.",
+  "ruling": {
+    "status": "confirmed",
+    "precedent": "SPRINT-44 Gate 2 ruling (a), 2026-11-10; re-confirmed for SPRINT-45 at Gate 2, 2026-11-14 ('approved. please execute')",
+    "decision_requested": "Build all ten items in nested cli worktrees OUTER/.worktrees/<ID>/cleargate-cli under detached outer hosts, with contracts C1 and C2, merging locally into cli main.",
+    "decision": "Owner approved at Gate 2, 2026-11-15 (\"approved\", on the recommendation to accept decisions 1-11 as recommended). Nested cli worktrees for SPRINT-46 only; contracts C1 and C2 as written.",
+    "plan_text_correction": "The sprint plan's Risks row says stories 'run on branches in the cli main checkout'. SPRINT-45 actually ran in nested cli worktrees, and ten parallel builds cannot share one checkout. Correct that row to the nested-worktree layout. Done: the Risks row was corrected at Gate 2."
+  },
+  "execution": {
+    "mode": "contract-first-dag",
+    "launch_wave_compatible": false,
+    "note": "The waves are run by hand with parallel Agent dispatches (SPRINT-44 and SPRINT-45 precedent). This file is the plan of record, not a launch_wave.mjs input. launch_wave.mjs cuts only outer-repo worktrees.",
+    "sprint_lines": {
+      "cli": "main (local; tip f846d9a at plan time; 40 commits ahead of origin)",
+      "outer": "sprint/S-46, once cleargate sprint init cuts it. There is no outer code change; outer hosts are detached."
+    },
+    "build_lanes": 5,
+    "lane_schedule": {
+      "kickoff": [
+        "STORY-066-03",
+        "STORY-066-04",
+        "STORY-066-05",
+        "STORY-066-07",
+        "STORY-066-08"
+      ],
+      "next_free_lanes_in_order": [
+        "STORY-066-11",
+        "STORY-066-06",
+        "STORY-066-09",
+        "STORY-066-10",
+        "STORY-066-12"
+      ],
+      "why": "03, 04, 05 and 07 each head a two-step chain to STORY-066-11's integration (03/04 -> 08, 07 -> 09, 05 -> 10). 08 is high-exposure and on the critical path and builds from C2, so it starts at kickoff. 11 is the other high-exposure critical-path item. 06 only gates 11's integration, and its skeleton already exists as C1, so it has slack. 09 and 10 cannot integrate before their upstreams merge. 12 integrates last. The owner may raise build_lanes; the order holds."
+    },
+    "milestone_plans": "This sprint runs on the current loop, so Phase B applies. Every item builds at once, so dispatch the M1 (066-03..07), M2 (066-08..10) and M3 (066-11, 066-12) Architect plans in parallel at kickoff, after C0. Each item's first dispatch waits only for its own milestone's plan. Milestones are groupings, not build separators. M2 and M3 plans are written against C1, C2 and the pinned_interfaces below.",
+    "merge_lane": "One item at a time. DevOps merges story/<ID> into cli main with --no-ff (local only, no push, no publish), then runs the full npm test, plus the integration suites for the known-red check (see dist_rule for where). Teardown after merge, with both git status --porcelain empty: remove the cli worktree first, then the outer host.",
+    "merge_order": [
+      "STORY-066-03",
+      "STORY-066-04",
+      "STORY-066-07",
+      "STORY-066-05",
+      "STORY-066-06",
+      "STORY-066-08",
+      "STORY-066-09",
+      "STORY-066-10",
+      "STORY-066-11",
+      "STORY-066-12"
+    ],
+    "merge_order_rule": "The merge lane takes items as they pass QA-Verify, subject to upstream (stories.<ID>.upstream is authoritative; waves[] is a view). Among layer-0 items, when two are ready at once the critical path goes first: 03 and 04 (they unblock 08), then 07 (unblocks 09), 05 (unblocks 10 and 09), and 06 (unblocks 11). 08, 09 and 10 are fail-safe-serialized: they merge one at a time, never together. They share no edge, so a ready one merges ahead of one that is not ready; on a tie the order is 08, 09, 10. 11 merges after all five of its upstreams; 12 merges last. Swapping the merge order of two items with no upstream between them makes the later one re-integrate main and re-run QA-Verify (flashcard 2026-11-10 #merge #contract); preview with git merge-tree.",
+    "contract_step_C0": "One Developer dispatch in a throwaway cli worktree OUTER/.worktrees/S46-C0/cleargate-cli (detached outer host). Create it with -b contract/S-46-stages main and commit C1. Then git switch -c contract/S-46-baseline main (from main; C2 is not stacked on C1) and commit C2. Run check_before_handoff on both branches, then remove the worktree; the branches stay. Each commit stays inside its owner's declared surface. Subjects start chore(EPIC-066): contract Cn skeleton, so the lifecycle reconciler expects nothing from them.",
+    "worktree_layout": {
+      "cli": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>/cleargate-cli. Create with: git -C /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli worktree add <that path> -b story/<ID> <stories.<ID>.base>",
+      "outer": "Host directory /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>, detached at the outer sprint line. No item has an outer change.",
+      "setup": "By the orchestrator, one at a time: ln -s OUTER/cleargate-cli/node_modules <cli wt>/node_modules; ln -s OUTER/.claude <outer host>/.claude (/.claude is in OUTER/.git/info/exclude); (cd <cli wt> && npm run prebuild). Never npm install or npm ci in a worktree. No agent edits files in the cli main checkout.",
+      "task_breakdown": "Outer hosts are detached, so Developers cannot tick Task Breakdown rows in the item files. The orchestrator ticks them at merge (flashcard 2026-09-27 #worktree #task-breakdown).",
+      "hooks": "The cli repo has no git hooks (no pre-commit, no core.hooksPath). The outer repo's red-immutability and file-surface gates therefore do not fire on cli commits. Each item's section 3.1 is enforced by QA-Verify's diff review and the merge lane, and sealed-red ownership is by role (see stories notes)."
+    },
+    "tests": "Build lanes run npm run typecheck and targeted test files only (npm run test:file -- <file>). The full npm test runs only in the merge lane. Never run two full suites at once: cr097 and cr101 bind fixed ports. Run full suites with a short private TMPDIR. A throwaway cli worktree has no dist, so build dist there before comparing dist-spawning tests (flashcard 2026-11-14 #worktree #test-harness).",
+    "integration": "An item integrates only after every upstream item has merged into cli main. In its cli worktree: git merge --no-ff main. On a conflict in a shared file the owner's region wins and the item re-applies its own insertions. A conflict inside an existing or red test goes to QA-Red, never the Developer. Never hand-merge a generated file: run npm run gen:codex and confirm prebuild's build-codex-payload.mjs --check passes (npm run gen:codex -- --check ignores --check; flashcard 2026-11-10 #codegen #gen-codex). Then re-run prebuild, typecheck and the item's targeted tests, and run QA-Verify on the integrated tree. If main moves before the merge, integrate again.",
+    "codex_generated_companions": "Each generated file has one source. Two of them have two editors this sprint, and both pairs are serialized by an upstream edge. qa.toml (from qa.md): STORY-066-07, then STORY-066-09; 09 regenerates at integration. architect.toml (from architect.md): STORY-066-05, then STORY-066-12; 12 regenerates at integration. One editor each: devops.toml (066-08); developer.toml, architect-synth.toml, core/.agents/skills/sprint-execution/SKILL.md and core/.agents/skills/sprint-execution/dispatch-serial.md (066-12); reporter.toml (066-12, only if open decision 6 adds reporter.md). Every pair is already in its owner's section 3.1.",
+    "known_red_after_merge": {
+      "status": "confirmed at Gate 2 (2026-11-15): record each in sprint section 6 as known-red; do not hand-port live",
+      "reason": "Rule 5 freezes live /.claude/** and live .cleargate/{scripts,knowledge,templates} until Gate 4. Canonical-live parity breaks at the first canonical merge, not at close. The live copy was re-synced to f846d9a before kickoff (d669ddee), so every parity check is green at the start.",
+      "expected": [
+        "test/scaffold/canonical-live-parity.red.integration.node.test.ts 5a (.cleargate/templates/*.md): red from the STORY-066-05 merge (Sprint Plan Template.md, story.md).",
+        "canonical-live-parity 5b (.cleargate/knowledge/*.md): red from the first of the STORY-066-05 merge (cleargate-enforcement.md) and the STORY-066-06 merge (cleargate-protocol.md).",
+        "canonical-live-parity 5c (.claude/agents/*.md): red in the merge lane from the STORY-066-05 merge (architect.md). It returns early in a worktree (flashcard 2026-09-26 #test-harness #worktree).",
+        "test/agents/qa-content.integration.node.test.ts slice parity (Capability Surface + Pack-First Ingest + Lane-Aware Playbook): red in the merge lane from the STORY-066-09 merge.",
+        "doctor scaffold drift lines and the SessionStart drift banner: from the first merge onwards.",
+        "Not expected: canonical-live-parity scenarios 1-3 and 5d. No item edits write_dispatch.sh, validate_state.mjs, test_flashcard_gate.sh or token-ledger.sh."
+      ]
+    },
+    "dist_rule": {
+      "status": "confirmed at Gate 2 (2026-11-15)",
+      "fact": "Five live hooks run OUTER/cleargate-cli/dist/cli.js. STORY-066-04 changes src/commands/sprint.ts (sprint init), so a dist rebuild (BD) on cli main would change this sprint's own loop.",
+      "recommended": "No BD on cli main during the sprint. Run each post-merge full suite in a throwaway cli worktree at main's tip, where prebuild and build are safe (flashcard 2026-09-26 #worktree #build)."
+    },
+    "proof_runs": [
+      "Run proofs with the canonical scripts by path from a cli tree, never the live copies (rule 5). Evidence goes to sprint-runs/SPRINT-46/evidence/.",
+      "Goal check (a): wave_runner.js dry run with stub agents over a three-wave fixture plan holding one item per lane, from the integrated cli main tree (STORY-066-11's integration test is the harness).",
+      "Goal check (b): canonical pre_gate_runner.sh qa on a fresh copy of dispenser_adapter, never the real repo; one run clean, one with a test broken on purpose.",
+      "Goal check (c): assign_lane.mjs over the SPRINT-43..46 item files (read-only) and dispenser_adapter SPRINT-04 stories (read-only copy); no --write against this sprint's waves.json, which init_sprint has already read.",
+      "STORY-066-04's kickoff proof runs on a fixture sprint in a temp git repository, never through this sprint's own sprint init (which uses the installed release)."
+    ]
+  },
+  "contracts": [
+    {
+      "id": "C1",
+      "branch": "contract/S-46-stages",
+      "repo": "cli",
+      "base": "main",
+      "owner_story": "STORY-066-06",
+      "created_by": "Developer contract dispatch C0, commit 1 of 2. Subject: chore(EPIC-066): contract C1 skeleton (STORY-066-06 segment_stages)",
+      "create_when": "after Gate 2 and sprint init, before any build dispatch",
+      "skeleton": "cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs only: a pure module with no imports and no host or file access, carrying the complete table below. The table is data, not logic, and STORY-066-06 R2 names it the shared contract, so the skeleton returns the frozen values rather than an empty stub. launch_wave.mjs and dispatch_serial.mjs are not touched by C0.",
+      "frozen_exports": [
+        "cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs: export const STAGE_NAMES: readonly string[] = Object.freeze(['story-plan', 'qa-red', 'architect-tpv', 'developer', 'qa-verify', 'architect-review', 'merge']), in this order.",
+        "cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs: export function stagesFor(lane: unknown): ReadonlyArray<Readonly<Stage>>. Synchronous; returns a fresh frozen array of frozen objects on every call. Stage = { name: string, kind: 'agent' | 'barrier-script', agent?: 'architect' | 'qa' | 'developer', mode?: string, when: 'always' | 'scan-flagged', script?: string }.",
+        "Stage definitions: story-plan = agent architect, mode STORY-PLAN; qa-red = agent qa, mode RED; architect-tpv = agent architect, mode TPV; developer = agent developer, no mode; qa-verify = agent qa, mode VERIFY; architect-review = agent architect, mode POST-FLIGHT; merge = kind barrier-script, script 'merge_story.mjs'. All other stages are kind agent.",
+        "Lane lists: fast = developer, merge. standard = qa-red, architect-tpv (scan-flagged), developer, qa-verify, architect-review (scan-flagged), merge. runtime = story-plan, qa-red, architect-tpv (scan-flagged), developer, qa-verify, architect-review (always), merge. Any stage not marked scan-flagged is when 'always'. An unknown, missing or non-string lane, or a name that is not an own key (e.g. 'constructor'), returns the standard list.",
+        "cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs: export function laneOf(storyId: string, ctx: { state?: object | null, plan?: object | null }): string. Returns state.stories[storyId].lane when it is a string, else plan.lane_assignments[storyId], else 'standard'. It does not validate the name.",
+        "Interface implemented by STORY-066-06, not by the skeleton: the segment verdict gains lane: string and stages_run: string[]. validateVerdicts(verdicts, { mode: 'wave' | 'serial' }) requires both in both modes. Every stages_run entry must be a stage name of the verdict's normalised lane, and names may repeat. A GREEN verdict's stages_run contains every kind 'agent', when 'always' stage of its lane. qaSha may be null on a GREEN verdict only when the lane's stages include no qa agent stage. Errors keep the form 'Malformed segment verdict for <storyId>: <reason>.'",
+        "Interface implemented by STORY-066-06: launchWave({ ..., lanes }), with segments carrying lane and stages, and segmentRunner(story, runId, { lane, stages }); dispatchSerial({ ..., lanes }); the dispatch line of node dispatch_serial.mjs next gains lane and stages."
+      ],
+      "freeze_rules": "STORY-066-06 owns the file and its tests. It may restructure internals (STAGE_DEFS, LANE_STAGES) and add JSDoc. It never renames, reorders, adds or removes a stage name. It never changes a lane's list, a when, an agent, mode or script value, the standard fallback, or laneOf's precedence, and never makes either function async. EPIC-065's prove stage is a later contract change, not this sprint's.",
+      "consumers": [
+        "STORY-066-11",
+        "STORY-066-12"
+      ],
+      "check_before_handoff": "node --check on the file. Importing it gives STAGE_NAMES and stagesFor('fast' | 'standard' | 'runtime' | 'constructor' | undefined) exactly as above, Object.isFrozen holds on each array and stage, and laneOf follows its precedence. npm run typecheck clean; npm run prebuild passes.",
+      "qa_red_note": "STORY-066-06's QA-Red will find its module-level segment_stages tests green at the C1 base, by design (GREEN-AT-BASELINE, as in cr078_init). The failing part of its red set is the launcher, dispatcher, verdict and protocol behaviour."
+    },
+    {
+      "id": "C2",
+      "branch": "contract/S-46-baseline",
+      "repo": "cli",
+      "base": "main",
+      "owner_story": "STORY-066-04",
+      "created_by": "Developer contract dispatch C0, commit 2 of 2, on its own branch from main (not stacked on C1). Subject: chore(EPIC-066): contract C2 skeleton (STORY-066-04 record_baseline)",
+      "create_when": "immediately after C1",
+      "skeleton": "cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs only. It needs to exist at 066-08's base because merge_story.mjs imports it statically. Without the file, merge_story.mjs cannot load before 066-04 merges.",
+      "frozen_exports": [
+        "cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs: export function extractFailing(output: string): string[]. Synchronous; returns sorted, de-duplicated identifiers, or [] when none are parsed. The stub returns []. Callers treat an unparsed failure as new, so the stub is fail-safe.",
+        "cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs: CLI `node record_baseline.mjs <sprint-id>`. Always exits 0 and prints one status line. main() sits behind an entry-point guard, so importing the module runs nothing. The stub prints 'baseline: skipped — contract C2 stub (STORY-066-04 not integrated)' and writes nothing.",
+        "File interface implemented by STORY-066-04: <sprintDir>/baseline.json = { sprint_id: string, base_sha: string, command: string, exit_code: number, failing: string[], tail: string[] (at most 40 lines), recorded_at: string (ISO-8601) }, written atomically. An absent file means no baseline: every failure counts (STORY-066-08 R2)."
+      ],
+      "freeze_rules": "STORY-066-04 replaces both bodies. It never renames or retypes extractFailing and never makes it async. It never changes the CLI's exit-0 rule or removes or retypes a baseline.json key; it may add keys.",
+      "consumers": [
+        "STORY-066-08"
+      ],
+      "check_before_handoff": "node --check. Importing the module and calling extractFailing('x') returns [] with nothing printed (the main guard holds). `node record_baseline.mjs SPRINT-00` exits 0 and writes no file. npm run typecheck clean; npm run prebuild passes."
+    }
+  ],
+  "pinned_interfaces": {
+    "note": "Cross-story interfaces that need no branch: they are CLIs, text output or prompt output. Each is pinned in its owner's section 3.2 or 3.3. The consumer builds against the pin; its end-to-end check goes green on the integrated tree.",
+    "P1": "pre_gate_runner.sh report (owner STORY-066-03; consumers STORY-066-08, STORY-066-12): '[FAIL] <check>: exit code N' followed by up to 40 lines prefixed '  | '; '[N/A] <check>: <reason>' never sets the exit; '[INFO] <check>: not configured'; exit 0/1/2 unchanged. Proposed addition (open decision 3): env CLEARGATE_SCAN_NO_LANE_ROUTING=1 skips the STORY-022-04 lane-aware routing block (no demotion, no LD append, no 'Architect Passed' transition) and exits with OVERALL_EXIT; merge_story.mjs sets it.",
+    "P2": "seal_red.mjs (owner STORY-066-07; consumers STORY-066-11, STORY-066-12): `node seal_red.mjs <ID> --worktree <path> --sprint-branch <branch> -- <file>...`; exit 0 clean, 1 flagged, 2 could not run; stdout one JSON line { id, sealed_sha, scan_exit, flags, tests, scenarios, resealed? }.",
+    "P3": "merge_story.mjs (owner STORY-066-08; consumer STORY-066-12): `merge_story.mjs <ID> --sprint <SPRINT-NN> [--worktree <path>]`; exit 0 merged, 2 usage or precondition, 3 pre-merge check failed, 4 conflict, 5 post-merge test failed; stdout { id, step, exit, tail, conflict_files? }.",
+    "P4": "QA-Verify output and pack (owner STORY-066-09; consumers STORY-066-11, STORY-066-12): DEFECT_IN: none | code | red-test | spec, with precedence spec > red-test > code; DEFECTS:, COMMANDS_RUN:, PROOF:. Pack key commands = { source, typecheck, test, proof: { tier, command } }.",
+    "P5": "update_state.mjs (owner STORY-066-10; consumer STORY-066-12): `<ID> --qa-bounce [--defect-in code|red-test|spec]`; exit 2 on a bad value; spec escalates at once.",
+    "P6": "assign_lane.mjs (owner STORY-066-05; consumer STORY-066-12): `assign_lane.mjs <item-file>... [--write <waves.json>]`; stdout JSON array of { id, lane, signals, reason }; waves.json lane_signals = { <ID>: { lane, signals, reason } }.",
+    "P7": "wave_runner_args.mjs and wave_runner.js (owner STORY-066-11; consumer STORY-066-12): `wave_runner_args.mjs --sprint <ID> --wave <id> [--validate <verdicts.json>]`; the runner returns { verdicts, waiting }, and each verdict carries lane and stages_run."
+  },
+  "contract_change_rule": "If a QA-Verify or post-flight bounce changes a frozen export or a pinned interface, record the new SHA or text in sprint section 6. Each consumer adjusts at integration (QA-Red handles tests). Never cherry-pick. A contract on an owner's Dev commit lacks main's later merges; fast-forward it to the owner's integrated commit (flashcard 2026-09-27 #contract #worktree).",
+  "stories": {
+    "STORY-066-03": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owns pre_gate_runner.sh, pre_gate_common.sh and init_gate_config.sh, with no overlap. Critical-path head (-> 08). If open decision 3 is accepted, it also adds the CLEARGATE_SCAN_NO_LANE_ROUTING opt-out (P1) and a test for it. The live scan used by this sprint's merges is unchanged until Gate 4 (rule 5)."
+    },
+    "STORY-066-04": {
+      "base": "contract/S-46-baseline",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owner of C2. It builds from its own contract, so the skeleton is a shared ancestor for STORY-066-08's merge. Its prep_qa_context.mjs region is buildBaseline (:262), proseBaseline (:623) and the baseline block of the schema comment (:42-46). 066-09 and 066-12 edit other regions of the same file. It changes src/commands/sprint.ts: see dist_rule. It does not add qa.baseline_command to the shipped gate-checks.json, because the key is optional."
+    },
+    "STORY-066-05": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Its update_state.mjs region is the --lane branch (:358-366) and the usage line '--lane <standard|fast>' (:179). 066-10 owns the --qa-bounce branch and its usage line (:177). Its architect.md regions are SDR item 4 (:102) and Lane Classification (:174-196); 066-12 owns :24-68 and SDR item 1. Its Sprint Plan Template region is section 2.4; 066-12 owns section 2.1. It regenerates architect.toml (one source), and 066-12 regenerates it again at integration. cr078_init.test.sh pins lane 'fast' read from waves.json with no lane_signals, which R6 leaves unchanged; if it does need an edit, add it to section 3.1 first."
+    },
+    "STORY-066-06": {
+      "base": "contract/S-46-stages",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owner of C1. Section 3.1 is missing cleargate-cli/scripts/clean-room/loop-script.mjs, which must be added before build (open decision 5). Its scripted serial verdict at :214 has no lane or stages_run. test/scripts/codex-loop-harness.red.node.test.ts runs in npm test and calls validateVerdicts on it, and the release gate's clean-room Codex loop records it through dispatch_serial.mjs record. Add \"lane\":\"standard\",\"stages_run\":[\"qa-red\",\"developer\",\"qa-verify\"]. Its six earlier-sprint .red fixture edits (plus bug-034-flashcard-gate-restore) are test edits and go in the QA-Red commit, not the Developer's. cleargate-protocol.md: its region is the section 23 verdict table (:882-894). Gate 2: surface gains cleargate-cli/scripts/clean-room/loop-script.mjs."
+    },
+    "STORY-066-07": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Its qa.md region is Mode: RED (:37-58), including the RED output shape at :50-58. 066-09 owns Mode: VERIFY and the standard Output shape (:146-158), so the regions are disjoint. qa.toml is generated: 066-09 regenerates it at integration and never merges it by hand. seal-red.integration runs a real pre_gate_runner.sh arch, whose behaviour 066-03 changes. Whichever of 03 and 07 merges second re-runs that test on the integrated tree. Keep the fixture's arch.typecheck empty so the result does not depend on 03."
+    },
+    "STORY-066-08": {
+      "base": "contract/S-46-baseline",
+      "upstream": [
+        "STORY-066-03",
+        "STORY-066-04"
+      ],
+      "repo": "cli",
+      "note": "parallel_eligible n: fail-safe-serialized in its own integration wave. It consumes C2 (owner 066-04) and P1 (owner 066-03). Before integration, extractFailing returns [] (fail-safe), so test the baseline judge through an injected-parser seam. The Go-fixture cases need 066-03's scan and go green only on the integrated tree, while the npm-fixture cases can go green now. Open decision 3 (scan lane routing) and open decision 4 (R5's git stash against flashcard 2026-09-26 'Never stash') must be settled by CR:spec-clarification before build. Its gate-checks.json edit adds optional merge.prebuild and merge.post_test keys; an upgraded target keeps its own gate-checks.json (init keeps it from 0.30.1), so absent keys read as empty."
+    },
+    "STORY-066-09": {
+      "base": "main",
+      "upstream": [
+        "STORY-066-04",
+        "STORY-066-05",
+        "STORY-066-07"
+      ],
+      "repo": "cli",
+      "note": "parallel_eligible n: fail-safe-serialized in its own integration wave. 07 is a real collision: qa.toml is a single-writer generated file, so regenerate it at integration. 04 is a dependency: the VERIFY text reads 04's pack baseline section, and the two share prep_qa_context.mjs in disjoint regions (09 owns buildLane :477-500, proseLane :697-709, jsonPayload :832-846, bundleParts :848-865, the lane and commands parts of the schema comment). 05 is an order edge added by synthesis: 09 removes the not-yet-runtime-aware heuristic 'now that runtime is a real lane value (STORY-066-05)'. It changes no layer and can be dropped if 05 stalls. Known-red: qa-content slice parity from this merge."
+    },
+    "STORY-066-10": {
+      "base": "main",
+      "upstream": [
+        "STORY-066-05"
+      ],
+      "repo": "cli",
+      "note": "parallel_eligible n: fail-safe-serialized in its own integration wave. Shares update_state.mjs with 05 in disjoint lines (see 05's note). This is not a real collision; both stories sequence 05 first. by_lane reads the runtime value that 05 adds. Its sprint-metrics.red.node.test.ts edit is an earlier-sprint sealed red test, so it goes in the QA-Red commit."
+    },
+    "STORY-066-11": {
+      "base": "contract/S-46-stages",
+      "upstream": [
+        "STORY-066-06",
+        "STORY-066-07",
+        "STORY-066-08",
+        "STORY-066-09",
+        "STORY-066-10"
+      ],
+      "repo": "cli",
+      "note": "parallel_eligible n: fail-safe-serialized in its own integration wave. Consumes C1 (owner 06) and P2 (07) and P4 (09). 08 and 10 are order edges from the approved decomposition with no code coupling: the runner stops before the merge barrier-script, and --defect-in is out of scope. Either can be dropped by the owner if it stalls. It does not edit launch_wave.mjs: it imports four existing exports (storyBases, worktreeAddCommand, mintRunId, validateVerdicts) and BOUNCE_CAP. The sprint plan's 2.2 row 'launch_wave.mjs 06 -> 11' is not a shared file. Before integration, main's validateVerdicts rejects a fast-lane GREEN verdict with a null qaSha, so the --validate fast-lane case goes green only after 06 integrates."
+    },
+    "STORY-066-12": {
+      "base": "contract/S-46-stages",
+      "upstream": [
+        "STORY-066-03",
+        "STORY-066-04",
+        "STORY-066-05",
+        "STORY-066-06",
+        "STORY-066-07",
+        "STORY-066-08",
+        "STORY-066-09",
+        "STORY-066-10",
+        "STORY-066-11"
+      ],
+      "repo": "cli",
+      "note": "parallel_eligible n: fail-safe-serialized in the last integration wave. 05 is a real collision: architect.toml is a single-writer generated file, so regenerate it at integration. 06 owns C1, which its docs-match test imports. Every other edge is a dependency: its tests run merge_story.mjs (08) and wave_runner_args.mjs (11) and assert the merged code. Build timing is open decision 7. Recommended: build from C1 at kickoff against P1-P7, then run Task Breakdown row 1 ('confirm 03-11 merged; copy commands from real usage') at integration, where the docs-match test is the gate. It shares prep_qa_context.mjs (plan_path :220-255), architect.md, Sprint Plan Template.md and, under open decision 6, cleargate-protocol.md and story.md, each in regions no other item edits. Its codex-sprint-execution-render.red literal edits go in the QA-Red commit. Gate 2: surface gains reporter.md, reporter.toml, cleargate-protocol.md (:28, :951), core/.cleargate/README.md, hosts/claude/CLAUDE.md, templates/story.md (:137)."
+    }
+  },
+  "waves": [
+    {
+      "wave": "wave1",
+      "stories": [
+        "STORY-066-03",
+        "STORY-066-04",
+        "STORY-066-05",
+        "STORY-066-06",
+        "STORY-066-07"
+      ],
+      "parallel": true,
+      "rationale": "Integration layer 0: no upstream. No real collision among them: every shared file is in a later item, and the only paths two of them touch are in disjoint regions. 04 builds from C2 and 06 from C1, which they own. Merge 03 and 04 first; they unblock 08."
+    },
+    {
+      "wave": "wave2",
+      "stories": [
+        "STORY-066-08"
+      ],
+      "parallel": false,
+      "rationale": "parallel_eligible=n — fail-safe-serialized, own trailing integration wave. Integration layer 1: upstream STORY-066-03 (P1, its scan) and STORY-066-04 (owner of C2, which it builds from). Critical path."
+    },
+    {
+      "wave": "wave3",
+      "stories": [
+        "STORY-066-09"
+      ],
+      "parallel": false,
+      "rationale": "parallel_eligible=n — fail-safe-serialized, own trailing integration wave. Integration layer 1: upstream STORY-066-07 (real collision: single-writer generated artifact qa.toml), STORY-066-04 (pack baseline section), STORY-066-05 (order edge). Builds from main. No edge to 08 or 10: merges in ready order among waves 2-4."
+    },
+    {
+      "wave": "wave4",
+      "stories": [
+        "STORY-066-10"
+      ],
+      "parallel": false,
+      "rationale": "parallel_eligible=n — fail-safe-serialized, own trailing integration wave. Integration layer 1: upstream STORY-066-05 (update_state.mjs, disjoint branches; runtime lane). Builds from main. No edge to 08 or 09."
+    },
+    {
+      "wave": "wave5",
+      "stories": [
+        "STORY-066-11"
+      ],
+      "parallel": false,
+      "rationale": "parallel_eligible=n — fail-safe-serialized, own trailing integration wave. Integration layer 2: upstream STORY-066-06 (owner of C1, which it builds from), STORY-066-07 (P2), STORY-066-09 (P4), STORY-066-08 and STORY-066-10 (order edges). Critical path."
+    },
+    {
+      "wave": "wave6",
+      "stories": [
+        "STORY-066-12"
+      ],
+      "parallel": false,
+      "rationale": "parallel_eligible=n — fail-safe-serialized, own trailing integration wave. Integration layer 3: upstream all nine others. STORY-066-05 is a real collision (single-writer generated artifact architect.toml) and STORY-066-06 owns C1, which it builds from. Docs-match tests assert the merged code of the rest. Merges last."
+    }
+  ],
+  "lane_assignments": {
+    "STORY-066-03": "standard",
+    "STORY-066-04": "standard",
+    "STORY-066-05": "standard",
+    "STORY-066-06": "standard",
+    "STORY-066-07": "standard",
+    "STORY-066-08": "standard",
+    "STORY-066-09": "standard",
+    "STORY-066-10": "standard",
+    "STORY-066-11": "standard",
+    "STORY-066-12": "standard"
+  },
+  "predicate_notes": {
+    "tiny_sprint_floor": "not applied: N = 10",
+    "reachability_BUG_046": "Every digest carries a non-empty unreachable_surface. Every path is inside the nested cleargate-cli repo, which an outer worktree cannot see. Under outer-worktree dispatch all ten are refused (refused_if_gate_2_declines, verbatim strings). The plan builds in nested cli worktrees, where every declared path exists, at the orchestrator's direction and per the SPRINT-44 and SPRINT-45 owner rulings. launchable stays false until Gate 2 confirms the layout for SPRINT-46.",
+    "empty_surface_guard_BUG_033": "Did not fire: every digest has a non-empty (file_surface ∪ file_creates). STORY-066-10 has file_creates [] but six file_surface entries.",
+    "db_axis": "Vacuous: db_write_set is empty for all ten.",
+    "fail_safe_parallel_eligible_n": "066-08, 066-09, 066-10, 066-11 and 066-12 declare parallel_eligible n. Each gets its own trailing serial wave, after layer 0, ordered consistently with upstream. Their fail-safe order is in waves[] only. integrationReady reads upstream, so every required order is also an edge (flashcard 2026-09-26 #sdr #waves). 08, 09 and 10 deliberately carry no edge among themselves.",
+    "real_collisions": "Two, both of kind 2 (single-writer generated artifact): qa.toml (066-07, 066-09) and architect.toml (066-05, 066-12). There are no ordered journals and no lockfile (package-lock.json is gitignored in cli, and no item adds a dependency). There is no kind-3 overlap: the shared files update_state.mjs, prep_qa_context.mjs, qa.md, architect.md and Sprint Plan Template.md are edited in disjoint regions, checked against the files at f846d9a.",
+    "contract_edges": "STORY-066-08 -> STORY-066-04 (C2). STORY-066-11 -> STORY-066-06 (C1). STORY-066-12 -> STORY-066-06 (C1).",
+    "dependency_edges": "From the EPIC-066 decomposition and the stories' bodies: 08 -> 03 (scan behaviour, P1); 09 -> 04 (pack baseline); 10 -> 05; 11 -> 07 (P2), 09 (P4); 12 -> 03, 04, 07, 08, 09, 10, 11 (documents and asserts their merged code).",
+    "order_edges": "11 -> 08 and 11 -> 10 (approved decomposition; no code coupling). 09 -> 05 (added by synthesis from 09's own text). None of them changes a layer.",
+    "critical_path": "{03, 04} -> 08 -> 11 -> 12 (highest exposure: 08 and 11 are high in plan section 1). Chains of equal length: 07 -> 09 -> 11 -> 12 and 05 -> 10 -> 11 -> 12.",
+    "new_files": "All seven new scripts (assign_lane.mjs, segment_stages.mjs, seal_red.mjs, merge_story.mjs, record_baseline.mjs, wave_runner.js, wave_runner_args.mjs) are absent on cli main at f846d9a, and each has exactly one creator. Two of them start on a contract branch, and their owners build from it, so there is no add/add conflict at integration. Every existing import the new scripts name exists at f846d9a: launch_wave.mjs storyBases, integrationReady, worktreeAddCommand, mintRunId, validateVerdicts; constants.mjs BOUNCE_CAP; lib/work-item-id.mjs extractWorkItemIds; collision_surface.sh; run_script.sh.",
+    "digest_corrections": [
+      "Stripped the 'Yes — ' prefix (BUG-129 class, flashcard 2026-11-10 #sdr #collision-surface) from file_surface entries of 066-03, 066-04, 066-06 and 066-12. The real paths were already in file_creates.",
+      "066-04's file_surface listed the new file record_baseline.mjs with the prefix. It is a create and lives on C2.",
+      "066-11's surface does not include launch_wave.mjs; the plan's section 2.2 row for it is withdrawn (import, not edit).",
+      "Added by synthesis (section 3.1 amendments before build, open decisions 5 and 6): 066-06 needs scripts/clean-room/loop-script.mjs. 066-12 needs reporter.md, reporter.toml, cleargate-protocol.md, core/.cleargate/README.md, hosts/claude/CLAUDE.md and templates/story.md, if the owner widens it.",
+      "066-08's exports_consumed 'record_baseline.mjs: extractFailing' resolves to C2. EPIC-066 section 4 says extractFailing serves 08 and 09, but 09 imports nothing: it reads the pack's baseline section."
+    ]
+  },
+  "open_decisions_for_gate_2": [
+    "1. Confirm nested cli worktrees for SPRINT-46 (ruling (a) layout). This clears the BUG-046 refusal for this sprint only. Correct the Risks row that says 'branches in the cli main checkout'.",
+    "2. Confirm C1 as a data-complete skeleton (the stage table is the contract) and C2 as a stub (extractFailing returns []), frozen as written.",
+    "3. Scan lane routing vs merge_story.mjs: run from the main checkout, pre_gate_runner.sh resolves STORY_ID from story/<ID> and state from .active, then applies STORY-022-04 routing. For a fast item, a failing scan is demoted by the scan and again by merge_story R4, appends an LD line to the authored sprint markdown (which R5 then refuses as authored dirt, exit 2, on every later merge), and gets demoted even when the baseline excuses the failure; a passing scan writes 'Architect Passed'. Recommended: CR:spec-clarification so that 066-03 adds CLEARGATE_SCAN_NO_LANE_ROUTING=1 (skip the routing block) and 066-08 sets it, making merge_story.mjs the only writer of demotion and state.",
+    "4. 066-08 R5 stashes derived files in the main checkout. Flashcard 2026-09-26 #worktree #git #danger: the stash stack is shared by every worktree; never stash. Recommended: CR:spec-clarification to copy the allowlisted paths aside and restore them after the merge, with the same rule that the merged side wins for wiki paths. Alternative: keep stash but pop by the exact ref recorded at push, after checking its message.",
+    "5. Add scripts/clean-room/loop-script.mjs to 066-06's section 3.1 (its verdict literal at :214 must gain lane and stages_run, or codex-loop-harness.red fails in npm test and the clean-room release gate breaks).",
+    "6. Doc drift no story owns: reporter.md:39-40 (+ reporter.toml) still quotes GOAL_RELATION from each milestone plan, which 066-12 removes, so SPRINT-47's Reporter would find none. cleargate-protocol.md:28 and :951, core/.cleargate/README.md:48 and hosts/claude/CLAUDE.md:20 still say DevOps merges. templates/story.md:137 points at the milestone plan. Recommended: widen 066-12's section 3.1 by CR:spec-clarification. Alternative: intake for SPRINT-47 (reporter.md at least should not wait).",
+    "7. 066-12 build timing. (A, recommended) build from C1 at kickoff against P1-P7, and confirm against merged code at integration. (B) as written: start its build after 066-11 merges, which adds a full build cycle to the tail.",
+    "8. Merge-lane known reds (canonical-live-parity 5a, 5b, 5c; qa-content slice parity; doctor drift): record each in section 6 and do not hand-port live.",
+    "9. No BD on cli main during the sprint; run post-merge full suites in a throwaway worktree at main's tip.",
+    "10. Earlier-sprint sealed red tests edited by 066-06 (six .red files), 066-10 (sprint-metrics.red) and 066-12 (codex-sprint-execution-render.red) are written in each item's QA-Red commit, never the Developer's. The cli repo has no commit hooks, so this rule is by role only.",
+    "11. build_lanes = 5 with the kickoff order in execution.lane_schedule; the owner may raise it."
+  ],
+  "refused": [],
+  "refused_if_gate_2_declines": {
+    "STORY-066-03": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh, cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_common.sh, cleargate-cli/scaffold/core/.cleargate/scripts/init_gate_config.sh",
+    "STORY-066-04": "unreachable file surface — refused: cleargate-cli/src/commands/sprint.ts, cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs, cleargate-cli/test/scripts/record-baseline.node.test.ts, cleargate-cli/test/sprint-kickoff-baseline.integration.node.test.ts, cleargate-cli/test/scripts/prep-qa-context-baseline.node.test.ts",
+    "STORY-066-05": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/assign_lane.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/state.schema.json, cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/init_sprint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/constants.mjs, cleargate-cli/scaffold/hosts/claude/.claude/agents/architect.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/architect.toml, cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md, cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md, cleargate-cli/scaffold/core/.cleargate/templates/story.md, cleargate-cli/test/scripts/assign-lane.node.test.ts, cleargate-cli/test/scripts/assign-lane-init-sprint.integration.node.test.ts, cleargate-cli/test/scripts/test_dogfood_lane_fast.node.test.ts",
+    "STORY-066-06": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs, cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md, cleargate-cli/test/scripts/wave-execution-barrier.red.node.test.ts, cleargate-cli/test/scripts/dispatch-verdict-modes.red.node.test.ts, cleargate-cli/test/scripts/dispatch-serial-cli.red.node.test.ts, cleargate-cli/test/scripts/dispatch-serial.red.node.test.ts, cleargate-cli/test/scripts/bug-034-flashcard-gate-restore.node.test.ts, cleargate-cli/test/scripts/codex-loop-evidence.red.node.test.ts, cleargate-cli/test/scripts/flashcard-gate-parity.red.node.test.ts, cleargate-cli/test/scripts/segment-stages.node.test.ts",
+    "STORY-066-07": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs, cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml, cleargate-cli/test/scripts/seal-red.integration.node.test.ts, cleargate-cli/test/scripts/qa-red-lint-volume.node.test.ts, cleargate-cli/test/agents/qa-red-seal-content.node.test.ts",
+    "STORY-066-08": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs, cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/devops.toml, cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json, cleargate-cli/test/scripts/merge-story.node.test.ts, cleargate-cli/test/scripts/merge-story.integration.node.test.ts",
+    "STORY-066-09": "unreachable file surface — refused: cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md, cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs, cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml, cleargate-cli/scaffold/core/.cleargate/scripts/test/test_prep_qa_context.sh, cleargate-cli/test/agents/qa-content.integration.node.test.ts, cleargate-cli/test/scripts/prep-qa-context-commands.node.test.ts, cleargate-cli/test/agents/qa-verify-run-and-probe.node.test.ts",
+    "STORY-066-10": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/state-events.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs, cleargate-cli/test/scripts/test_update_state.integration.node.test.ts, cleargate-cli/test/scripts/sprint-metrics.red.node.test.ts, cleargate-cli/test/fixtures/sprint-metrics/builders.ts",
+    "STORY-066-11": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs, cleargate-cli/scaffold/core/.cleargate/config.example.yml, cleargate-cli/test/scripts/wave-runner.node.test.ts, cleargate-cli/test/integration/wave-runner.integration.node.test.ts",
+    "STORY-066-12": "unreachable file surface — refused: cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md, cleargate-cli/scaffold/hosts/claude/.claude/agents/architect.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/architect.toml, cleargate-cli/scaffold/hosts/claude/.claude/agents/architect-synth.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/architect-synth.toml, cleargate-cli/scaffold/hosts/claude/.claude/agents/developer.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/developer.toml, cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md, cleargate-cli/scripts/build-codex-payload.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs, cleargate-cli/test/scripts/codex-sprint-execution-render.red.node.test.ts, cleargate-cli/test/docs/loop-spec-three-paths.node.test.ts"
+  },
+  "gate_2_resolution": {
+    "at": "2026-11-15",
+    "by": "owner (sandrinio)",
+    "decisions": {
+      "1": "accepted: nested cli worktrees, this sprint only",
+      "2": "accepted: C1 data-complete, C2 stub, frozen",
+      "3": "accepted: STORY-066-03 Requirement 9 (CLEARGATE_SCAN_NO_LANE_ROUTING=1); STORY-066-08 Requirement 2 sets it",
+      "4": "accepted: STORY-066-08 Requirement 5 sets derived files aside and writes them back; no git stash",
+      "5": "accepted: STORY-066-06 Requirement 10 adds scripts/clean-room/loop-script.mjs to its surface",
+      "6": "accepted: STORY-066-12 Requirement 10 widens its surface to reporter.md/.toml, cleargate-protocol.md, core README, hosts/claude/CLAUDE.md, templates/story.md",
+      "7": "accepted (A): STORY-066-12 builds from C1 at kickoff; confirms against merged code at integration",
+      "8": "accepted: known reds recorded in section 6, no hand-port of live",
+      "9": "accepted: no dist rebuild on cli main during the sprint",
+      "10": "accepted: earlier sprints red-test edits go in the QA-Red commit",
+      "11": "accepted: 5 build lanes, kickoff order as planned"
+    }
+  }
+}
