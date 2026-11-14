@@ -109,7 +109,7 @@ Downstream readers that must keep working: `prep_reporter_context.mjs`, `reporte
 - `cleargate-cli/scaffold/core/.cleargate/scripts/surface-whitelist.txt` — add rows for the subagent ledger, metrics and pre-gate JSONL outputs beside the existing token-ledger row
 - `cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh` — the `pre-gate.jsonl` line
 - `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` — the `description` format line
-- `cleargate-cli/test/scripts/subagent-ledger.node.test.ts` (new) and `cleargate-cli/test/fixtures/subagent-ledger/` (new)
+- `cleargate-cli/test/scripts/subagent-ledger.red.node.test.ts` (new) and `cleargate-cli/test/fixtures/subagent-ledger/` (new); `cleargate-cli/test/snapshots/hooks-snapshots.node.test.ts` and `cleargate-cli/test/snapshots/hooks/token-ledger.cr-120.sh` (new) — the byte-for-byte hook lock moves to CR-120; `cleargate-cli/test/scaffold/skill-md-serial-pointers.red.node.test.ts` — Test 20 re-scoped to P1/P2 placement only. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 - `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md` and `cleargate-cli/scaffold/hosts/codex/.codex/hooks/token-ledger.sh` — generated Codex copies, regenerated with `npm run gen:codex`, never hand-edited (CR:spec-clarification 2026-11-14 from the SPRINT-45 design review: `prebuild` runs `build-codex-payload.mjs --check`)
 
 **Do NOT modify:**
@@ -127,14 +127,15 @@ Downstream readers that must keep working: `prep_reporter_context.mjs`, `reporte
 - [ ] Wire the single call site in `count_tokens.mjs`
 - [ ] Add `"measures": "orchestrator-window"` to `token-ledger.sh`'s emitted rows
 - [ ] Label the column in `lib/ledger-digest.mjs`
-- [ ] Add the two `surface-whitelist.txt` rows
+- [ ] Add the three `surface-whitelist.txt` rows (subagent-ledger.jsonl, metrics.json, pre-gate.jsonl)
 - [ ] Add the `description` format line to SKILL.md
+- [ ] Run `npm run gen:codex`; move the token-ledger.sh snapshot lock to token-ledger.cr-120.sh; re-scope skill-md-serial-pointers Test 20
 - [ ] Add the `pre-gate.jsonl` write to `pre_gate_runner.sh`
 - [ ] Keep every edit in the canonical scaffold; no live-copy edits
 
 ## 4. Verification Protocol
 
-**Command/Test:** `cd cleargate-cli && node --test --import tsx/esm test/scripts/subagent-ledger.node.test.ts` (amended 2026-11-14: node:test in the cli repo replaces the bash harness).
+**Command/Test:** `cd cleargate-cli && npm run test:file -- test/scripts/subagent-ledger.red.node.test.ts` (amended 2026-11-14: node:test in the cli repo replaces the bash harness).
 
 The fixture is a synthetic session with two top-level `agent-*.jsonl` + `.meta.json` pairs, one carrying a duplicated `message.id`, plus a `workflows/wf_fixture/` run with three agents (QA-Red, Build, Verify). It asserts:
 - rows are emitted per dispatch, workflow-run agents included, with `run_id` and `workflow_phase` set;

@@ -4,11 +4,11 @@
   "sprint_status": "Active",
   "stories": {
     "CR-120": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:48:02.830Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -16,11 +16,11 @@
       "lane_demotion_reason": null
     },
     "STORY-064-01": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:48:02.936Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "STORY-064-02": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:28:54.839Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -40,11 +40,11 @@
       "lane_demotion_reason": null
     },
     "BUG-117": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:46:56.620Z",
       "notes": "",
       "lane": "fast",
       "lane_assigned_by": "sdr-lane-audit",
@@ -52,11 +52,11 @@
       "lane_demotion_reason": null
     },
     "BUG-133": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:48:03.041Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "BUG-134": {
-      "state": "Ready to Bounce",
+      "state": "Bouncing",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T08:13:39.707Z",
+      "updated_at": "2026-11-14T08:48:03.164Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -76,6 +76,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition BUG-134 → Ready to Bounce",
-  "updated_at": "2026-11-14T08:13:39.707Z"
+  "last_action": "transition BUG-134 → Bouncing",
+  "updated_at": "2026-11-14T08:48:03.164Z"
 }

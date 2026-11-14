@@ -9,12 +9,12 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 
 ### [[BUG-133]] — Upgrade output buries the files that lost local edits (2026-11-14)
-- Q: What should upgrade print for an `always` file whose content is already the package's? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
-- Q: What should the dry-run label be for a locally edited `always` or `pin-aware` file? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: What should upgrade print for an `always` file whose content is already the package's? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). The dry run applies the same rule: a file the run would leave unchanged gets no per-file line, except a host surgery target (.claude/settings.json, .mcp.json, CLAUDE.md), whose line §4 keeps; one… ([[BUG-133]])
+- Q: What should the dry-run label be for a locally edited `always` or `pin-aware` file? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). A locally edited merge-3way file reads `→ asks: keep, take or edit` without --yes and `→ overwritten, local edits lost` with --yes. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 - Q: How much of the changelog should upgrade print? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
 
 ### [[BUG-134]] — Upgrade reorders the hooks in .claude/settings.json (2026-11-14)
-- Q: What order should the merged file have? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: What order should the merged file have? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Events keep the user's placement: an event only the user has stays before the ClearGate event it preceded; an event upstream adds takes upstream's position. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 ### [[CR-120]] — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs` (2026-11-14)
 - Q: Should this replace `token-ledger.jsonl` or sit beside it? → Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).

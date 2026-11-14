@@ -1,0 +1,190 @@
+  ✖ ## 1. Build the packed artifact names `npm pack` 
+  ✖ ## 2. Install the artifact names the identity gate `command -v cleargate` 
+  ✖ ## 4. Machine checks (cleargate verify-install) names the driver 
+  ✖ ## Location names ~/Documents/Dev/, disposable, and recreated per run 
+  ✖ ## Why not /tmp or inside the repository names /private/tmp 
+  ✖ ## Why not the in-repo dogfood instance names it as gitignored 
+  ✖ Scenario 1: Init into blank Node repo succeeds 
+  ✖ Scenario 2: Init into bare Go repo succeeds 
+  ✖ Step 4 announcement mentions SPRINT-18_REPORT.md (not plain REPORT.md) 
+  ✖ Step 8 header line contains sprint ID "SPRINT-19 closed" 
+  ✖ archives sprint with stamps and exits 0 on happy path 
+  ✖ both protocol files are byte-identical 
+  ✖ bug: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ cr: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ dogfood protocol contains Abandoned definition 
+  ✖ epic: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ error names the missing "Lane Audit" section verbatim 
+  ✖ every "npm publish" occurrence sits on a line that also says No or never 
+  ✖ every pinned H2 heading is present 
+  ✖ exit code is 0 when Step 2.7 skips via test seam 
+  ✖ exit code is 0 when Step 2.8 skips via test seam 
+  ✖ exit code is 0 whether Step 7 skips or warns 
+  ✖ exit code is still 0 when sprint_trends.mjs is missing (non-fatal) 
+  ✖ exits 0 (activation gate not met — no lane=fast story) 
+  ✖ exits 0 and prints inert message 
+  ✖ exits 0 for a v1 state.json (no v2 validation triggered) 
+  ✖ exits 0 when REPORT.md has all v2.1 sections 
+  ✖ exits 0 when all stories are Done and Step 2.6 finds no drift 
+  ✖ exits 0 when closed with --assume-ack 
+  ✖ exits 1 when stories are not terminal (pre-existing Step 2 block) 
+  ✖ hotfix: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ improvement-suggestions.md contains "## FLASHCARD Cleanup Candidates" section 
+  ✖ improvement-suggestions.md contains "## Skill Creation Candidates" section 
+  ✖ improvement-suggestions.md contains "## Trends" section after pipeline runs 
+  ✖ improvement-suggestions.md contains CAND-SPRINT-19-F entry for stale flashcard 
+  ✖ improvement-suggestions.md contains CAND-SPRINT-TEST-S entry 
+  ✖ initiative: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ invokes run_script.sh pre_gate_runner.sh arch with worktree and branch 
+  ✖ invokes run_script.sh pre_gate_runner.sh qa with worktree and branch 
+  ✖ item 6 contains SPRINT-20 as next sprint ID 
+  ✖ pipeline exits 0 when Step 3.5 finishes (pass or warn) 
+  ✖ pipeline proceeds past Step 2.7 (Step 3 message also appears) 
+  ✖ pipeline proceeds past Step 2.8 (Step 3 message also appears) 
+  ✖ section contains placeholder "_No candidates detected this sprint._" when FLASHCARD.md is empty 
+  ✖ section contains placeholder "_No candidates detected this sprint._" when no ledger or matching flashcards 
+  ✖ spike: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ sprint: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ sprint_status stays Completed even if Step 7 warns (Step 5 already flipped it) 
+  ✖ state.json sprint_status is flipped to Completed 
+  ✖ stderr contains "Resolve: merge sprint/S-19" hint 
+  ✖ stderr contains "Step 2.7 failed: leftover worktree at .worktrees/STORY-019-01" 
+  ✖ stderr contains "Step 2.7 failed: leftover worktree" (STORY-070-01: always blocks) 
+  ✖ stderr contains "Step 2.8 failed" (STORY-070-01: always blocks on unmerged) 
+  ✖ stderr contains "Step 2.8 failed: sprint/S-19 not merged to main" 
+  ✖ stderr contains "Step 3.5 FAILED" when prep_reporter_context.mjs fails (STORY-070-01: always fatal) 
+  ✖ stderr contains "Step 6.5 warning" when sprint_trends.mjs is missing 
+  ✖ stderr contains git worktree remove hint 
+  ✖ stderr contains §5 missing message 
+  ✖ stderr explains the ^SPRINT-\d{2,3}$ convention 
+  ✖ stderr mentions the offending path name 
+  ✖ stdout contains "Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam)" 
+  ✖ stdout contains "Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam)" 
+  ✖ stdout contains "Step 6.5:" message 
+  ✖ stdout contains "Step 6.6:" message 
+  ✖ stdout contains "Step 6.7:" message 
+  ✖ stdout contains "Step 7 skipped: CLI binary not found" when dist/cli.js absent 
+  ✖ stdout contains "Step 7" (either passed or skipped or warned) 
+  ✖ stdout contains all 6 handoff list items 
+  ✖ stdout or stderr contains "Step 3.5" message 
+  ✖ story: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+  ✖ the doc file exists at .cleargate/knowledge/clean-room-verification.md 
+  ✖ the pin-rendered stamp-and-gate hook records stamp=0 gate=0 and preserves the exact authored suffix 
+  ✖ v2.1 validation passes (Step 2.5 pass logged to stdout) 
+  ✖ writes SPRINT-18_REPORT.md when piped via stdin 
+  ✖ writes plain REPORT.md (not SPRINT-TEST_REPORT.md) for non-numeric sprint IDs 
+✖ ## 1. Build the packed artifact names `npm pack` 
+✖ ## 2. Install the artifact names the identity gate `command -v cleargate` 
+✖ ## 4. Machine checks (cleargate verify-install) names the driver 
+✖ ## Location names ~/Documents/Dev/, disposable, and recreated per run 
+✖ ## Why not /tmp or inside the repository names /private/tmp 
+✖ ## Why not the in-repo dogfood instance names it as gitignored 
+✖ BUG-067 fresh authoring chain 
+✖ BUG-067 rendered hook process smoke (not a live-host witness) 
+✖ D1: the procedure doc exists and carries its pinned sections (Gherkin 5) 
+✖ D2: no bare npm publish outside the forbidding sentence 
+✖ E2E: Full fixture run with real wiki handlers 
+✖ Fixture A: Blank Node 
+✖ Fixture B: Bare Go 
+✖ Scenario 10: Step 3.5 always blocks when prep_reporter_context.mjs fails (STORY-070-01) 
+✖ Scenario 11: Step 7 skipped when cleargate-cli/dist/cli.js does not exist 
+✖ Scenario 12: Step 7 warns and continues when sync work-items exits non-zero 
+✖ Scenario 13: Step 5 wait-for-ack prompt shows SPRINT-<#>_REPORT.md filename 
+✖ Scenario 14: Sprint ID with no numeric portion (SPRINT-TEST) uses plain REPORT.md 
+✖ Scenario 15: Step 2.7 skipped when CLEARGATE_SKIP_WORKTREE_CHECK=1 (test seam) 
+✖ Scenario 16: Step 2.7 blocks under v2 when leftover worktree present (CLEARGATE_FORCE_WORKTREE_PATHS env seam) 
+✖ Scenario 17: Step 2.7 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01) 
+✖ Scenario 18: Step 2.8 skipped via CLEARGATE_SKIP_MERGE_CHECK=1 (test seam) 
+✖ Scenario 19: Step 2.8 blocks under v2 when sprint branch unmerged (CLEARGATE_FORCE_MERGE_STATUS=unmerged seam) 
+✖ Scenario 1: Init into blank Node repo succeeds 
+✖ Scenario 1: Protocol files list Abandoned 
+✖ Scenario 20: Step 2.8 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01) 
+✖ Scenario 21: Step 6.5 sprint_trends stub writes Trends section 
+✖ Scenario 22: Step 6.5 sprint_trends warns + continues if stub fails 
+✖ Scenario 23: Step 6.6 skill candidates section emitted (placeholder when empty) 
+✖ Scenario 24: Step 6.6 surfaces CAND entry when ledger has ≥3× repeated tuple 
+✖ Scenario 25: Step 6.7 FLASHCARD cleanup section emitted (placeholder when empty) 
+✖ Scenario 26: Step 6.7 surfaces stale candidate when keyword has zero grep hits across last 3 sprint dirs 
+✖ Scenario 27: Step 8 prints 6-item handoff list (CR-022 §3 M4) 
+✖ Scenario 28: Step 8 mentions incremented next-sprint ID (CR-022 §3 M4) 
+✖ Scenario 2: Init into bare Go repo succeeds 
+✖ Scenario 2: close_sprint accepts a v1 report unchanged (legacy-pass) 
+✖ Scenario 3: close_sprint accepts a v2 report with no fast-lane stories 
+✖ Scenario 4: close_sprint rejects a v2 report missing required sections 
+✖ Scenario 5: close_sprint rejects non-conformant sprint-run path 
+✖ Scenario 6: Reporter writes Lane Audit + Hotfix Audit on a sprint with a fast-lane story 
+✖ Scenario 7: SPRINT-18+ sprints write SPRINT-<#>_REPORT.md (not REPORT.md) 
+✖ Scenario 8: SPRINT-01..17 archived REPORT.md keeps old name (backwards-compat) 
+✖ Scenario 9: Step 3.5 invokes prep_reporter_context.mjs and prints step message 
+✖ Step 4 announcement mentions SPRINT-18_REPORT.md (not plain REPORT.md) 
+✖ Step 8 header line contains sprint ID "SPRINT-19 closed" 
+✖ archives sprint with stamps and exits 0 on happy path 
+✖ both protocol files are byte-identical 
+✖ bug: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ close_sprint.mjs: clean sprint (no lifecycle drift) 
+✖ cr: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ dogfood protocol contains Abandoned definition 
+✖ epic: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ error names the missing "Lane Audit" section verbatim 
+✖ every "npm publish" occurrence sits on a line that also says No or never 
+✖ every pinned H2 heading is present 
+✖ exit code is 0 when Step 2.7 skips via test seam 
+✖ exit code is 0 when Step 2.8 skips via test seam 
+✖ exit code is 0 whether Step 7 skips or warns 
+✖ exit code is still 0 when sprint_trends.mjs is missing (non-fatal) 
+✖ exits 0 (activation gate not met — no lane=fast story) 
+✖ exits 0 and prints inert message 
+✖ exits 0 for a v1 state.json (no v2 validation triggered) 
+✖ exits 0 when REPORT.md has all v2.1 sections 
+✖ exits 0 when all stories are Done and Step 2.6 finds no drift 
+✖ exits 0 when closed with --assume-ack 
+✖ exits 1 when stories are not terminal (pre-existing Step 2 block) 
+✖ failing tests:
+✖ gate arch — v1-inert path 
+✖ gate arch — v2-active path 
+✖ gate qa — v2-active path 
+✖ hotfix: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ improvement-suggestions.md contains "## FLASHCARD Cleanup Candidates" section 
+✖ improvement-suggestions.md contains "## Skill Creation Candidates" section 
+✖ improvement-suggestions.md contains "## Trends" section after pipeline runs 
+✖ improvement-suggestions.md contains CAND-SPRINT-19-F entry for stale flashcard 
+✖ improvement-suggestions.md contains CAND-SPRINT-TEST-S entry 
+✖ initiative: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ invokes run_script.sh pre_gate_runner.sh arch with worktree and branch 
+✖ invokes run_script.sh pre_gate_runner.sh qa with worktree and branch 
+✖ item 6 contains SPRINT-20 as next sprint ID 
+✖ pipeline exits 0 when Step 3.5 finishes (pass or warn) 
+✖ pipeline proceeds past Step 2.7 (Step 3 message also appears) 
+✖ pipeline proceeds past Step 2.8 (Step 3 message also appears) 
+✖ section contains placeholder "_No candidates detected this sprint._" when FLASHCARD.md is empty 
+✖ section contains placeholder "_No candidates detected this sprint._" when no ledger or matching flashcards 
+✖ spike: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ sprint: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ sprint_status stays Completed even if Step 7 warns (Step 5 already flipped it) 
+✖ state.json sprint_status is flipped to Completed 
+✖ stderr contains "Resolve: merge sprint/S-19" hint 
+✖ stderr contains "Step 2.7 failed: leftover worktree at .worktrees/STORY-019-01" 
+✖ stderr contains "Step 2.7 failed: leftover worktree" (STORY-070-01: always blocks) 
+✖ stderr contains "Step 2.8 failed" (STORY-070-01: always blocks on unmerged) 
+✖ stderr contains "Step 2.8 failed: sprint/S-19 not merged to main" 
+✖ stderr contains "Step 3.5 FAILED" when prep_reporter_context.mjs fails (STORY-070-01: always fatal) 
+✖ stderr contains "Step 6.5 warning" when sprint_trends.mjs is missing 
+✖ stderr contains git worktree remove hint 
+✖ stderr contains §5 missing message 
+✖ stderr explains the ^SPRINT-\d{2,3}$ convention 
+✖ stderr mentions the offending path name 
+✖ stdout contains "Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam)" 
+✖ stdout contains "Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam)" 
+✖ stdout contains "Step 6.5:" message 
+✖ stdout contains "Step 6.6:" message 
+✖ stdout contains "Step 6.7:" message 
+✖ stdout contains "Step 7 skipped: CLI binary not found" when dist/cli.js absent 
+✖ stdout contains "Step 7" (either passed or skipped or warned) 
+✖ stdout contains all 6 handoff list items 
+✖ stdout or stderr contains "Step 3.5" message 
+✖ story: new -> stamp -> stamp-tokens -> gate/cache keeps the unstripped template document intact 
+✖ the doc file exists at .cleargate/knowledge/clean-room-verification.md 
+✖ the pin-rendered stamp-and-gate hook records stamp=0 gate=0 and preserves the exact authored suffix 
+✖ v2.1 validation passes (Step 2.5 pass logged to stdout) 
+✖ writes SPRINT-18_REPORT.md when piped via stdin 
+✖ writes plain REPORT.md (not SPRINT-TEST_REPORT.md) for non-numeric sprint IDs 

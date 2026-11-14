@@ -15,8 +15,8 @@ cited_by: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-45_measured_loop_and_safe_upgrade.md"
-last_ingest: "2026-11-14T08:14:42.874Z"
-last_ingest_commit: "ccd4e95e1f4598758cf5dddd36759cf74a5b9fd6"
+last_ingest: "2026-11-14T08:17:44.953Z"
+last_ingest_commit: "142051ec0b6bf4188349733d5edcee083a99f3d9"
 repo: "planning"
 last_contradict_sha: "9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe"
 ---

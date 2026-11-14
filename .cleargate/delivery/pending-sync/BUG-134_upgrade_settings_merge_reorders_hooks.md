@@ -48,7 +48,7 @@ last_contradict_sha: "4fc37402096e4f61ca75b17610053576ee3e61e8c7c1c2c7e299f95ea6
 
 - **Question:** What order should the merged file have?
 - **Recommended:** Upstream's order for ClearGate's groups and hooks, with each of the user's hooks kept right after the ClearGate hooks of the group it was in, and the user's own groups kept after upstream's groups in their original relative order. That is what a fresh `init` plus the user's hooks produces, so a repo that changed nothing gets the same bytes from every upgrade.
-- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Events keep the user's placement: an event only the user has stays before the ClearGate event it preceded; an event upstream adds takes upstream's position. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 ## 1. The Anomaly (Expected vs. Actual)
 **Expected Behavior:** After upgrade, `git diff .claude/settings.json` shows only the hooks ClearGate added, removed or changed. The order of everything else is unchanged.
@@ -88,6 +88,7 @@ PreToolUse 'AskUserQuestion' ['pre-tool-use-autonomy.sh']
 - `cleargate-cli/src/lib/settings-json-surgery.ts` (if the merge needs each removed hook's former position).
 - `cleargate-cli/src/commands/upgrade.ts` (the settings.json call site only).
 - `cleargate-cli/src/hosts/claude.ts` and `cleargate-cli/src/hosts/codex.ts` — added 2026-11-14 from the SPRINT-45 design review: these hold the real merge call sites (`removeClearGateHooks` then `mergeSettings`, claude.ts:363-368, codex.ts:313-316). The upgrade command file has no direct call.
+- Only upgrade's take path changes: a new `mergeUpstreamSettings` in `merge-settings.ts`, called from `mergeSurgeryTarget` in `hosts/claude.ts` and `hosts/codex.ts`. `mergeSettings`, the install paths and `upgrade.ts` are unchanged. New integration red: `cleargate-cli/test/commands/upgrade-settings-order.red.integration.node.test.ts`. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 **Do NOT modify:** which hooks are ClearGate's (`clearGateHooksProjection`, BUG-122); the keep-user-hooks rule (BUG-093); `init` into a settings.json with no ClearGate hooks (BUG-092).
 

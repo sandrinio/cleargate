@@ -48,11 +48,11 @@ last_contradict_sha: "5dde0f455476545b5e85ee45c3cf09672b683556f2ba765a5e4e224438
 
 - **Question:** What should upgrade print for an `always` file whose content is already the package's?
 - **Recommended:** Nothing per file; one summary line at the end: `[always] 38 unchanged, 19 updated (15 had local edits)`. Each updated file keeps its own line, and a file with local edits says so: `[always] overwritten (local edits replaced): <path>`.
-- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). The dry run applies the same rule: a file the run would leave unchanged gets no per-file line, except a host surgery target (.claude/settings.json, .mcp.json, CLAUDE.md), whose line §4 keeps; one line `[dry-run] <U> unchanged (not listed)` precedes `N files planned`. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 - **Question:** What should the dry-run label be for a locally edited `always` or `pin-aware` file?
 - **Recommended:** `state=user-modified → overwritten, local edits lost` instead of `→ clean`. CR-115's grouped warning still lists these files at the top; this fixes the per-file line it leaves unchanged.
-- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). A locally edited merge-3way file reads `→ asks: keep, take or edit` without --yes and `→ overwritten, local edits lost` with --yes. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 - **Question:** How much of the changelog should upgrade print?
 - **Recommended:** Print the plan first. After it, print only each version's `### Upgrade notes` subsection for the versions in range, newest first, followed by one line naming the package's `CHANGELOG.md` for the full notes. Superseded notes stay in the changelog but are not printed as steps to follow.
@@ -98,6 +98,7 @@ Go repo report: "~60 `[always] overwritten:` lines, 8 files actually differed".
 **Investigate / Modify:**
 - `cleargate-cli/src/commands/upgrade.ts` (`applyAlwaysOverwrite`, the dry-run label for `always`/`pin-aware` files, §1b changelog print).
 - `cleargate-cli/src/lib/changelog.ts` (`sliceChangelog`: return the Upgrade notes subsection).
+- `cleargate-cli/src/lib/changelog.ts`: add `extractUpgradeNotes`; `sliceChangelog`'s locked return is unchanged. Tests re-scoped by QA-Red: `cleargate-cli/test/commands/upgrade-changelog.node.test.ts` (notes now follow the plan; fixture sections carry `### Upgrade notes`), `cleargate-cli/test/commands/upgrade-state-parity.red.node.test.ts` (a file neither run changes gets no line). New: `cleargate-cli/test/commands/upgrade-output.red.integration.node.test.ts`. The goal-check reason: Goal Acceptance Check 2 ("the dry run lists only files that change"). *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 Clarifications from the SPRINT-45 design review (2026-11-14):
 - `upgrade.ts:1127` prints a second `[always] overwritten:` line, for the example config. The same changed-bytes rule applies to it.

@@ -64,6 +64,7 @@ As the Reporter at sprint close, I want each item's dispatches, rework rounds, w
   - So does a short form equal to a roster ID with its type prefix removed (`003-01` matches `STORY-003-01`; `001` alone matches nothing).
   - A description naming no roster item is **sprint-level** when its `workflow_phase` or description says plan, design review, SDR, reader, synth, preflight, close or report.
   - Otherwise it is **unattributed**.
+  - A description naming two or more roster items (full IDs or short forms), or a short form shared by two roster items, is **unattributed**. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 - **R4 — Rework rules.** Amended 2026-11-14 after the holdout recount showed "dispatches minus one" overcounting 15 against 4 and 31 against 8.
   - **Kinds of dispatch.** A dispatch is a round candidate only if it is completed (`completed: true` in contract C1) and its role is one of:
     - `qa` doing red tests (phase `QA-Red`, or a description saying QA-Red/red);
@@ -93,7 +94,7 @@ As the Reporter at sprint close, I want each item's dispatches, rework rounds, w
 - **R7 — Sprint window.** Start is the earliest `ts` in `events.jsonl`. End is the latest `ts` there, or now if the sprint is not Completed.
 - **R8 — Disagreement.** Each item records its `state.json` `qa_bounces` and `arch_bounces`. `disagrees` is true when dispatch-derived rework and git-derived rework differ, or when either differs from `qa_bounces + arch_bounces`.
 - **R9 — Degradation.** With no dispatch rows (transcripts gone, reader failed), every item reports `dispatch_source: "not measured"` and its rework from git alone. Missing git repos degrade the same way. Neither case throws.
-- **R10 — Output shape.** `metrics.json` follows contract C2 in the sprint plan: `schema`, `sprint_id`, `generated_at`, `sources`, `items`, `sprint_level`, `unattributed`, `totals`. Each item carries `dispatches`, `rework`, `git`, `wall_ms`, `tokens`, `models`, `state_counters`, `disagrees`, `dispatch_source`. No prompt or message text is copied.
+- **R10 — Output shape.** `metrics.json` follows contract C2 in the sprint plan: `schema`, `sprint_id`, `generated_at`, `sources`, `items`, `sprint_level`, `unattributed`, `totals`. Each item carries `dispatches`, `rework`, `git`, `wall_ms`, `tokens`, `models`, `state_counters`, `disagrees`, `dispatch_source`. No prompt or message text is copied. `totals.dispatches` and `totals.tokens` cover every subagent dispatch read (items, sprint-level and unattributed), so `unattributed.share = unattributed.tokens / totals.tokens`; `totals.rework` sums the items' `rework.total`; `sources.repos` lists only the repos actually read, and a skipped path appears only in `sources.warnings`. *(CR:spec-clarification SC-3, SPRINT-45 M2 plan, 2026-11-14; no C2 key renamed or retyped.)*
 
 ### 1.3 Out of Scope
 - Reading transcript files directly. That is CR-120's reader; this story imports it.
@@ -205,7 +206,7 @@ Feature: Per-item metrics derived from transcripts and git
 |---|---|
 | Primary File | `cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs` |
 | Related Files | `cleargate-cli/scaffold/core/.cleargate/config.example.yml` |
-| Test Files | `cleargate-cli/test/scripts/sprint-metrics.node.test.ts`, `cleargate-cli/test/fixtures/sprint-metrics/` |
+| Test Files | `cleargate-cli/test/scripts/sprint-metrics.red.node.test.ts`, `cleargate-cli/test/scripts/sprint-metrics.red.integration.node.test.ts` (green only after CR-120 integrates), `cleargate-cli/test/fixtures/sprint-metrics/` |
 | New Files Needed | Yes — `sprint_metrics.mjs`, its test file and fixture tree |
 
 ### 3.2 Technical Logic
