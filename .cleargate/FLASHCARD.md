@@ -1,3 +1,6 @@
+2026-11-14 · #qa #worktree · baseline worktree for path-dependent integration tests must sit under the outer host, not /private/tmp (306 false fails)
+2026-11-14 · #qa #test-harness · `npm test` skips *.integration.node.test.ts; baseline-failures lists omit ~105 integration reds — baseline integration separately
+2026-11-14 · #gherkin #qa-red · A 'no line says X' clause must not be a substring of the required label: 'no local edits lost' contains X.
 2026-11-14 · #upgrade #settings · Pair an upstream hook group only with an ours group holding a ClearGate hook; matcher-only pairing folds the user's own groups.
 2026-11-14 · #upgrade #settings · Dedupe hooks on string commands only: prompt/agent hooks have no command; undefined===undefined drops the second.
 2026-11-14 · #qa-red #settings · A cmds() helper using .find() reads only the first group per matcher; a red built on it forces group folding.

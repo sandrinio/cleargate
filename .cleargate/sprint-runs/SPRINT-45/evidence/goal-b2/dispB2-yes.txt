@@ -1,0 +1,77 @@
+[always] overwritten: .claude/agents/cleargate-wiki-ingest.md
+[always] overwritten: .claude/agents/cleargate-wiki-query.md
+[always] overwritten: .claude/agents/reporter.md
+[pin] rewritten with pin 0.30.1: .claude/hooks/pending-task-sentinel.sh
+[pin] rewritten with pin 0.30.1: .claude/hooks/post-shell-ingest.sh
+[pin] rewritten with pin 0.30.1: .claude/hooks/pre-edit-gate.sh
+[pin] rewritten with pin 0.30.1: .claude/hooks/session-start.sh
+[pin] rewritten with pin 0.30.1: .claude/hooks/stamp-and-gate.sh
+[always] overwritten: .claude/hooks/token-ledger.sh
+[take] .claude/settings.json  state=upstream-changed (unchanged locally)
+[always] overwritten: .claude/skills/sprint-execution/SKILL.md
+[take] .cleargate/knowledge/cleargate-protocol.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/knowledge/readiness-gates.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/README.md  state=upstream-changed (unchanged locally)
+[always] overwritten: .cleargate/scripts/count_tokens.mjs
+[always] overwritten: .cleargate/scripts/dedupe_frontmatter.mjs
+[always] overwritten: .cleargate/scripts/gate-checks.json
+[always] overwritten: .cleargate/scripts/lib/ledger-digest.mjs
+[always] overwritten: .cleargate/scripts/pre_gate_runner.sh
+[always] overwritten: .cleargate/scripts/prep_reporter_context.mjs
+[always] overwritten: .cleargate/scripts/sprint_metrics.mjs
+[always] overwritten: .cleargate/scripts/subagent-ledger.mjs
+[always] overwritten: .cleargate/scripts/surface-whitelist.txt
+[take] .cleargate/templates/Bug.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/CR.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/epic.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/initiative.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/Sprint Plan Template.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/sprint_report.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/story.md  state=upstream-changed (unchanged locally)
+[upgrade] gate-checks.json: qa.test "" → "go test ./..." (detected); qa.typecheck "" → "go vet ./..." (detected); arch.typecheck "" → "go vet ./..." (detected)
+[mcp] repinned .mcp.json: cleargate@0.27.0 → cleargate@0.30.1
+[block] refreshed the ClearGate block in CLAUDE.md; moves the block to the top; 67 lines of your content follow it
+[always] overwritten: .cleargate/config.example.yml
+[always] 44 unchanged, 15 updated (0 had local edits)
+[upgrade] complete.
+[upgrade] hint: more hosts are available — add one with `cleargate host add <name>`.
+---
+## [0.30.1] — 2026-11-13
+
+### Upgrade notes
+- **Upgrade with `npx cleargate@latest upgrade --dry-run`, then `npx cleargate@latest upgrade`**
+  (`--yes` without a terminal). Upgrade now refreshes the CLAUDE.md block, the `.mcp.json` pin and
+  `config.example.yml`; the "re-run `cleargate init`" step in the 0.29.0 and 0.30.0 notes is no
+  longer needed.
+- **Run `cleargate wiki build` once:** the brief, the index and sprint pages change shape.
+- **A repo whose `.claude/settings.json` changed since its last install record is asked about it
+  once** (or, without a terminal, told to pass `--yes`). Older records cannot tell your hooks from
+  ClearGate's; your hooks are kept either way.
+## [0.30.0] — 2026-11-13
+
+### Upgrade notes
+- **Run `cleargate wiki build` once after upgrading** (see above).
+- **Release lookups add a git call per tagged repo at session start.** They overlap the rest of
+  `doctor --session-start`. Measured on this repo against 0.28.0, session start takes about 35 ms
+  longer at the median, and 25–85 ms longer at the 95th percentile depending on machine load.
+- **Release gate:** each brief fact was checked against an independent shell oracle
+  (`scripts/brief-oracle.sh`, STORY-063-12), and a 12-question orientation eval ran in a clean room
+  with live headless Claude Code sessions (`scripts/clean-room/orientation-eval.mjs`). On 0.28.0,
+  Opus answered 10 of 12 and needed tool calls for every brief question. On 0.30.0 it answered 11
+  of 12 with no tool calls for any brief question; the twelfth named every waiting item but
+  shortened one ID.
+## [0.29.0] — 2026-11-12
+
+### Upgrade notes
+- **Codex:** the new `Bash` hook is a new entry in `.codex/hooks.json`; Codex asks you to trust it
+  before it runs.
+- **First Bash call after upgrading:** the shell hook has no snapshot yet, so it ingests every
+  uncommitted work item under `.cleargate/delivery/` once. Expect one burst of `✅`/`🔎` lines.
+- **Release gate:** proven in a clean room against the packed artifact with live headless Claude Code
+  sessions (`scripts/clean-room/ingest-loop.mjs`, STORY-063-07): directive delivered, contradiction
+  subagent dispatched and committed, shell move re-ingested, sprint report kept, alarm raised.
+Full release notes: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/c4ede09a-83a2-42d8-bef2-7869c2129d06/scratchpad/proof/rc2/node_modules/cleargate/CHANGELOG.md
+
+⚠ Restart Claude Code in this repo to load the new configs:
+    .claude/settings.json (loaded once at session start)
+    .mcp.json (loaded once at session start)
