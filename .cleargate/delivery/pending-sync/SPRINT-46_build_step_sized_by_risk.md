@@ -6,14 +6,14 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: manual
-status: Draft
+status: Active
 start_date: 2026-11-15
 end_date: 2026-11-19
 synced_at: null
 created_at: 2026-11-14T19:47:49.526Z
-updated_at: 2026-11-14T19:47:49.526Z
+updated_at: 2026-11-14T20:47:45Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: 7683c00f-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
@@ -45,7 +45,7 @@ context_source: |
   Carries the two prerequisites moved from EPIC-065 (stack-neutral pre-gate scan, kickoff baseline)
   inside STORY-066-03/04. BUG-087 is absorbed by STORY-066-03; BUG-086, BUG-107 and BUG-116 by
   STORY-066-08. Re-cuts SPRINT-43 per INITIATIVE-002 §6: BUG-087 and BUG-086 move here.
-last_contradict_sha: "4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db"
+last_contradict_sha: 4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db
 stamp_error: no ledger rows for work_item_id SPRINT-46
 draft_tokens:
   input: null
@@ -84,17 +84,17 @@ Make the build step fit the item: a script assigns fast, standard or runtime fro
 
 ## 1. Consolidated Deliverables
 
-The Proof column applies INITIATIVE-002 rule 1 by hand, as in SPRINT-45. Lanes are set at the Sprint
+<!-- cleargate:ignore-ids -->The Proof column applies INITIATIVE-002 rule 1 by hand, as in SPRINT-45.<!-- /cleargate:ignore-ids --> Lanes are set at the Sprint
 Design Review by the current rubric; this sprint runs on the current loop.
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure | Proof (tier — check) |
 |---|---|---|---|---|---|---|
-| `STORY-066-03` | Pre-gate scan runs configured commands on any stack (absorbs BUG-087) | standard | M1 | y | med | Real run — `pre_gate_runner.sh qa` on a copy of dispenser_adapter runs `make check`; meta-repo worktree reports `n/a`, not FAIL |
+| `STORY-066-03` | Pre-gate scan runs configured commands on any stack <!-- cleargate:ignore-ids -->(absorbs BUG-087)<!-- /cleargate:ignore-ids --> | standard | M1 | y | med | Real run — `pre_gate_runner.sh qa` on a copy of dispenser_adapter runs `make check`; meta-repo worktree reports `n/a`, not FAIL |
 | `STORY-066-04` | Kickoff baseline | standard | M1 | y | low | Real run — kickoff on a fixture sprint writes `baseline.json` with a known pre-existing failure |
-| `STORY-066-05` | Computed lanes | standard | M1 | y | med | Real run — `assign_lane.mjs` over SPRINT-43..46 items and dispenser_adapter SPRINT-04 stories |
+| `STORY-066-05` | Computed lanes | standard | M1 | y | med | <!-- cleargate:ignore-ids -->Real run — `assign_lane.mjs` over SPRINT-43..46 items and dispenser_adapter SPRINT-04 stories<!-- /cleargate:ignore-ids --> |
 | `STORY-066-06` | Stage table | standard | M1 | y | low | Unit — `stagesFor` per lane; verdict validation with `lane` and `stages_run` |
 | `STORY-066-07` | QA-Red seals its own tests | standard | M1 | y | med | Integration — `seal_red.mjs` on a fixture repo commits, scans and flags an oversized red set |
-| `STORY-066-08` | Merge by script (absorbs BUG-086, BUG-107, BUG-116) | standard | M2 | n (after 03, 04) | high | Integration — `merge_story.mjs` on npm and Go fixture repos: clean, failing check, conflict, residue |
+| `STORY-066-08` | Merge by script <!-- cleargate:ignore-ids -->(absorbs BUG-086, BUG-107, BUG-116)<!-- /cleargate:ignore-ids --> | standard | M2 | n (after 03, 04) | high | Integration — `merge_story.mjs` on npm and Go fixture repos: clean, failing check, conflict, residue |
 | `STORY-066-09` | QA-Verify runs the item | standard | M2 | n (after 04, 07) | med | Unit + docs-match-code — pack `commands` section; `DEFECT_IN` in the VERIFY output contract |
 | `STORY-066-10` | Rework by defect location | standard | M2 | n (after 05) | low | Unit — `--defect-in` events; `sprint_metrics.mjs` split on a fixture sprint |
 | `STORY-066-11` | Shipped wave runner | standard | M3 | n (after 06–10) | high | Integration — dry run with stub agents over a three-wave fixture plan, one item per lane |
@@ -303,7 +303,7 @@ This replaces the INITIATIVE-002 rollout order (prove in dispenser, then release
 
 - [x] **Gate 1** — EPIC-066 (approved 2026-11-14) and the ten roster items approved (owner, 2026-11-15: "sound great. now, plan the sprint please").
 - [x] **Gate 2** (Sprint Ready) — SDR §2 confirmed; Goal Acceptance Check confirmed (owner, 2026-11-15: "approved").
-- [ ] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-46` and devops reachable.
+- [x] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-46` 5/5 and devops reachable (2026-11-15).
 - [ ] **Gate 4** (close) — after all items merge and the walkthrough.
 
 ## 6. Execution Log
@@ -311,3 +311,5 @@ This replaces the INITIATIVE-002 rollout order (prove in dispenser, then release
 - 2026-11-14 · Planned. EPIC-066 approved by the owner ("as you recommend"); roster drafted.
 - 2026-11-15 · Gate 1. Owner approved the ten stories and the plan, and asked for git push and npm publish at close (Gate 4 steps above).
 - 2026-11-15 · Gate 2. SDR written (architect-reader ×10, architect-synth); owner approved the plan, the nested-cli layout for this sprint, the Goal Acceptance Check and decisions 1–11 as recommended. Spec clarifications applied: STORY-066-03 R9 (scan routing switch), STORY-066-06 R10 (clean-room verdict), STORY-066-08 R2/R5 (switch; set-aside instead of `git stash`), STORY-066-12 R10 (old-loop wording) and build timing (A). All four re-gated 🟢. `waves.json` set `launchable: true`.
+- 2026-11-15 · kickoff · preflight 5/5, devops reachable, `sprint/S-46` cut, sprint init (10 items, all standard), Goal Acceptance Check and Cross-Cutting Rules written to `sprint-context.md`, status Active. §1 non-selecting IDs (intro, absorbed bugs, the 066-05 proof cell) wrapped in `cleargate:ignore-ids` so the decomposition gate reads only the roster.
+- 2026-11-15 · outer commit · `SKIP_SURFACE_GATE=1` used for orchestrator bookkeeping commits on `sprint/S-46` (sprint file, `sprint-runs/**`, wiki, ledger): the gate judges the latest `state.json` item and blocks sprint artifacts as off-surface (same as SPRINT-44 and SPRINT-45). No item code is ever committed this way.

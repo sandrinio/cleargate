@@ -7,8 +7,8 @@
 The sprint `.cleargate/sprint-runs/.active` names, validated against its plan file.
 
 
+- [[SPRINT-46]] — Active
 
-_No sprints currently in flight._
 
 
 ## Planned Sprints
@@ -23,8 +23,6 @@ Non-terminal sprints other than the active one.
 - [[SPRINT-42]] — status: Draft
 
 - [[SPRINT-43]] — status: Draft
-
-- [[SPRINT-46]] — status: Draft
 
 
 

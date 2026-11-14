@@ -69,7 +69,7 @@ parent_cleargate_id: "INITIATIVE-002"
 
 # EPIC-066: Build Step Sized by Risk
 
-**Status:** Draft · **Sprint:** SPRINT-46 (planned) · **Gate:** pass
+**Status:** Draft · **Sprint:** SPRINT-46 · **Gate:** pass
 
 ## Objective
 The per-item build step runs one of three paths chosen by a script from risk signals (fast: Developer, script check, script merge; standard: QA-Red, Developer, QA-Verify, script merge; runtime: story plan, then standard, then Architect review); the stage list per lane ships as code that the wave launcher and the serial dispatcher both read; no agent is dispatched for work a script can do;
