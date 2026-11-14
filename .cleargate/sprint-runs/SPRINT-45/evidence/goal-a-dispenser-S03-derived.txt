@@ -1,0 +1,17 @@
+STORY-003-01 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":0,"merged":1} n 12
+STORY-003-02 4 r2/d2/v0 git {"red_written":1,"red_corrected":2,"build":1,"rework":0,"integrate":1,"merged":1} n 16
+STORY-003-03 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":1,"merged":1} n 13
+STORY-003-04 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":1,"merged":1} n 13
+STORY-003-05 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":1,"integrate":1,"merged":1} n 13
+STORY-003-06 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":1,"merged":1} n 13
+STORY-003-07 3 r2/d1/v0 git {"red_written":1,"red_corrected":2,"build":1,"rework":1,"integrate":1,"merged":1} n 16
+STORY-003-08 0 r0/d0/v0 git {"red_written":1,"red_corrected":0,"build":1,"rework":0,"integrate":1,"merged":1} n 10
+STORY-003-09 0 r0/d0/v0 git {"red_written":1,"red_corrected":0,"build":1,"rework":0,"integrate":0,"merged":1} n 9
+STORY-003-10 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":0,"merged":1} n 13
+STORY-003-11 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":0,"merged":1} n 12
+STORY-003-12 0 r0/d0/v0 git {"red_written":1,"red_corrected":0,"build":1,"rework":0,"integrate":1,"merged":1} n 10
+STORY-003-13 4 r2/d2/v0 git {"red_written":1,"red_corrected":2,"build":1,"rework":0,"integrate":1,"merged":1} n 16
+STORY-003-14 3 r1/d2/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":1,"integrate":1,"merged":1} n 15
+STORY-003-15 1 r1/d0/v0 git {"red_written":1,"red_corrected":0,"build":1,"rework":0,"integrate":1,"merged":0} n 8
+BUG-001 0 r0/d0/v0 git {"red_written":0,"red_corrected":0,"build":1,"rework":0,"integrate":0,"merged":1} n 5
+BUG-002 2 r1/d1/v0 git {"red_written":1,"red_corrected":1,"build":1,"rework":0,"integrate":0,"merged":1} n 13

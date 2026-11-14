@@ -1,0 +1,15 @@
+# Suite after STORY-064-02 + STORY-064-01-r2 (cli main 9462dcf), throwaway /private/tmp/s45-verify-N, TMPDIR=/private/tmp/s45t-N
+## build: prebuild, typecheck, build exit 0
+## targeted (11 files incl. integration, 044... CLEARGATE_CI_ACK=1)
+ℹ tests 186
+ℹ pass 186
+ℹ fail 0
+ℹ skipped 0
+## full npm test
+ℹ tests 5555
+ℹ suites 1654
+ℹ pass 5553
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+NEW_FAILURES: 0

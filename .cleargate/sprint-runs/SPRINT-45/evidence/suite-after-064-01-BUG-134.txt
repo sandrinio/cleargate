@@ -1,0 +1,14 @@
+# Suite after STORY-064-01 + BUG-134 (cli main 6ad41e8), throwaway worktree /private/tmp/s45-verify-M
+## Full npm test (excludes *.integration.node.test.ts)
+ℹ tests 5535
+ℹ suites 1645
+ℹ pass 5533
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+failures: none (0 x lines; CR-120 plan-endpoint EADDRNOTAVAIL flake did not recur)
+## Targeted (incl. integration files)
+ℹ tests 160
+ℹ pass 160
+ℹ fail 0
+ℹ skipped 0

@@ -6,12 +6,12 @@
 
 
 - [[SPRINT-45]]
-  - [[CR-120]] — Ready to Bounce
-  - [[STORY-064-01]] — Ready to Bounce
-  - [[STORY-064-02]] — Ready to Bounce
-  - [[BUG-117]] — Ready to Bounce
-  - [[BUG-133]] — Ready to Bounce
-  - [[BUG-134]] — Ready to Bounce
+  - [[CR-120]] — Done
+  - [[STORY-064-01]] — Done
+  - [[STORY-064-02]] — Done
+  - [[BUG-117]] — Done
+  - [[BUG-133]] — Done
+  - [[BUG-134]] — Done
 
 
 

@@ -1,3 +1,13 @@
+2026-11-14 · #upgrade #settings · Pair an upstream hook group only with an ours group holding a ClearGate hook; matcher-only pairing folds the user's own groups.
+2026-11-14 · #upgrade #settings · Dedupe hooks on string commands only: prompt/agent hooks have no command; undefined===undefined drops the second.
+2026-11-14 · #qa-red #settings · A cmds() helper using .find() reads only the first group per matcher; a red built on it forces group folding.
+2026-11-14 · #scripts #wrapper · run_script.sh execs "$@" verbatim: pass 'bash <abs path>/pre_gate_runner.sh', not the bare script name.
+2026-11-14 · #qa-red #test-harness · zsh expands `echo == x` as `=cmd` and BSD sed needs `-i ''`; use perl -pi and quote `=` in shell steps
+2026-11-14 · #qa-red #scripts · spec-silent seam shapes (mergedAt, now, roster type) go in the QA-Red report as assumed shapes so Dev and Verify see them
+2026-11-14 · #upgrade #settings · mergeUpstreamSettings: ours-only events stay first if no shared predecessor, last if no shared successor, else before the successor
+2026-11-14 · #qa-red #upgrade · assert 'N files planned' only in unit reds; real-install counts include non-listed action lines
+2026-11-14 · #qa-red #test-harness · avoid trailing '---' in changelog-section fixtures when the extractor's boundary is unspecified
+2026-11-14 · #qa-red #upgrade · a red that must reach upgrade's take path deletes a ClearGate hook group (hooks-only hash); adding user hooks stays clean
 2026-11-14 · #ledger #transcripts · Workflow .meta.json has no toolUseId/finished; dedupe falls back to agent id. Match interrupts only in user text blocks.
 2026-11-14 · #ledger #transcripts · ~46% of subagent assistant lines repeat a message.id with identical usage; count usage once per id, tool_use per block id.
 2026-11-14 · #codex #skill · '/workflows' is a banned Codex-render token: a SKILL.md line outside A2 naming subagents/workflows fails prebuild --check.

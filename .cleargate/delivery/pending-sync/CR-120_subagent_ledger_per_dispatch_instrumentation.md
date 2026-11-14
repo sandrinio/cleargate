@@ -119,19 +119,19 @@ Downstream readers that must keep working: `prep_reporter_context.mjs`, `reporte
 
 ## Task Breakdown
 
-- [ ] Write `subagent-ledger.mjs`: walk the `subagents/` dir recursively (including `workflows/<run-id>/`), read `agent-*.jsonl` + `.meta.json` pairs, dedupe by `message.id`
-- [ ] Skip meta files without a transcript; dedupe by `toolUseId` across sessions; set `completed` from interruption/cancel markers
-- [ ] Export `discoverSessions` and `readDispatches` with the contract C1 row shape; ledger `transcript` paths first, window-bounded project-directory scan as fallback
-- [ ] Emit one row per dispatch to a sibling `subagent-ledger.jsonl`
-- [ ] Degrade to a warning and exit 0 if the host moves the `subagents/` path — this must never fail a Gate-4 close
-- [ ] Wire the single call site in `count_tokens.mjs`
-- [ ] Add `"measures": "orchestrator-window"` to `token-ledger.sh`'s emitted rows
-- [ ] Label the column in `lib/ledger-digest.mjs`
-- [ ] Add the three `surface-whitelist.txt` rows (subagent-ledger.jsonl, metrics.json, pre-gate.jsonl)
-- [ ] Add the `description` format line to SKILL.md
-- [ ] Run `npm run gen:codex`; move the token-ledger.sh snapshot lock to token-ledger.cr-120.sh; re-scope skill-md-serial-pointers Test 20
-- [ ] Add the `pre-gate.jsonl` write to `pre_gate_runner.sh`
-- [ ] Keep every edit in the canonical scaffold; no live-copy edits
+- [x] Write `subagent-ledger.mjs`: walk the `subagents/` dir recursively (including `workflows/<run-id>/`), read `agent-*.jsonl` + `.meta.json` pairs, dedupe by `message.id`
+- [x] Skip meta files without a transcript; dedupe by `toolUseId` across sessions; set `completed` from interruption/cancel markers
+- [x] Export `discoverSessions` and `readDispatches` with the contract C1 row shape; ledger `transcript` paths first, window-bounded project-directory scan as fallback
+- [x] Emit one row per dispatch to a sibling `subagent-ledger.jsonl`
+- [x] Degrade to a warning and exit 0 if the host moves the `subagents/` path — this must never fail a Gate-4 close
+- [x] Wire the single call site in `count_tokens.mjs`
+- [x] Add `"measures": "orchestrator-window"` to `token-ledger.sh`'s emitted rows
+- [x] Label the column in `lib/ledger-digest.mjs`
+- [x] Add the three `surface-whitelist.txt` rows (subagent-ledger.jsonl, metrics.json, pre-gate.jsonl)
+- [x] Add the `description` format line to SKILL.md
+- [x] Run `npm run gen:codex`; move the token-ledger.sh snapshot lock to token-ledger.cr-120.sh; re-scope skill-md-serial-pointers Test 20
+- [x] Add the `pre-gate.jsonl` write to `pre_gate_runner.sh`
+- [x] Keep every edit in the canonical scaffold; no live-copy edits
 
 ## 4. Verification Protocol
 
