@@ -15,10 +15,12 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-45_measured_loop_and_safe_upgrade.md"
-last_ingest: "2026-11-14T12:59:55.138Z"
+last_ingest: "2026-11-14T13:04:21.969Z"
 last_ingest_commit: ""
 repo: "planning"
 last_contradict_sha: "9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-45/SPRINT-45_REPORT.md"
+last_report_ingest_commit: "d6a2009862610c558f6143c294fac643bf8cf7c8"
 ---
 
 # SPRINT-45: Measured Loop and Safe Upgrade
@@ -45,3 +47,12 @@ Make the sprint report's rework and cost figures come from what actually happene
 - Parent: none
 - Children (7): [[BUG-117]], [[BUG-133]], [[BUG-134]], [[CR-120]], [[EPIC-064]], [[STORY-064-01]], [[STORY-064-02]]
 <!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Draft · **Report:** .cleargate/sprint-runs/SPRINT-45/SPRINT-45_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-45/improvement-suggestions.md
+
+### Carried Over
+- Stories: none.
+- Carried findings (not roster items): R4 files post-merge rounds as `post_merge` (see §4/§6); `test_close_sprint_v21` Scenario 10 is stale and 105 integration reds predate the sprint and are unlisted; Reporter bundle ~197 KB vs 160 KB budget (deferred with owner sign-off); OpenRouter pricing-refresh CR to be drafted after close.
+- Not done by design: no live re-sync at Gate 4. It follows the dispenser_adapter verdict (RC installed there after its SPRINT-03 closes). Live-vs-canonical drift (six canonical files, doctor scaffold-drift lines, parity reds 5a/5d, `sprint-execution-mirror`, `template-stubs.integration:211`) is **expected**, not a defect (rules 9 and 17).
+<!-- END sprint-report -->

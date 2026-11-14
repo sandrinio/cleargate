@@ -7,7 +7,7 @@
 The sprint `.cleargate/sprint-runs/.active` names, validated against its plan file.
 
 
-- [[SPRINT-45]] — Active
+- [[SPRINT-45]] — Completed
 
 
 
