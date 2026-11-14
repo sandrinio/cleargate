@@ -35,6 +35,7 @@
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
+- [[EPIC-065]] — Draft · no sprint — Proof Decides Done — Every sprint goal and every story, CR and bug declares a proof
 
 ### Proposals and initiatives
 

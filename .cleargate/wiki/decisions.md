@@ -25,6 +25,15 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Should the derived rework replace the state.json counters in the report, or sit beside them? → Beside, with the derived number leading and the counter named only where it disagrees. Recommended by the agent and covered by the owner's acceptance of INITIATIVE-002 §6 on 2026-11-14; confirm at this Brief.
 - Q: Which sprints form the evidence set? → SPRINT-44 here and dispenser_adapter SPRINT-01 to SPRINT-03. They are recent enough that their transcripts still exist, and Claude ran them, so no Codex dispatches are missing. doc_processor's recent sprints used Codex for production code and are left out.
 
+### [[EPIC-065]] — Proof Decides Done (2026-11-14)
+- Rule: Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
+- Rule: Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script, not by an LLM agent.
+- Rule: Stack-neutral: no step may depend on package.json or Node in the target's own code. Proof commands come from the item or from gate-checks.json, whatever the language.
+- Rule: Scripts and templates change in cleargate-cli/scaffold/core; agent prompts and the skill change in scaffold/hosts/claude AND their scaffold/hosts/codex counterparts in the same story.
+- Rule: No new state.json work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
+- Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
+- Supersedes: [[CR-128]]
+
 ### [[STORY-064-01]] — Per-Item Metrics Derived From Transcripts and Git (2026-11-14)
 - Q: When dispatch-derived and git-derived rework differ, which one does `total` report? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
 

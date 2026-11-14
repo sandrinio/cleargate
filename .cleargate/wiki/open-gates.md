@@ -19,6 +19,8 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[EPIC-050]] — epic · status: Draft — fail: parent-approved, existing-surfaces-verified
 
+- [[EPIC-065]] — epic · status: Draft — fail: interrogation-resolved
+
 - [[SPRINT-31]] — sprint · status: Draft — pass
 
 - [[SPRINT-37]] — sprint · status: Draft — fail: discovery-checked
