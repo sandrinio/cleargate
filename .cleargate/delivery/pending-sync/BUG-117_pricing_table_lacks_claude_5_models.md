@@ -2,24 +2,26 @@
 bug_id: BUG-117
 parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
-sprint_cleargate_id: SPRINT-43
+sprint_cleargate_id: SPRINT-45
 carry_over: false
 status: Draft
 severity: P3-Low
 reporter: orchestrator
-approved: false
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-14T00:00:00Z
 lane: fast
 area: cli,instrumentation
 context_source: "Owner, 2026-10-04: 'also make sure we're latest models. Opus 5.5 and Sonnet'. Owner chose 'Pricing table only' (agent aliases opus/sonnet/haiku already resolve to Opus 5.5 / Sonnet 5.5 / Haiku 4.5; no agent-tier change). Verified 2026-10-04: cleargate-cli/src/lib/pricing.ts and a live tsx repro; SPRINT-41 token-ledger model census. Prices from the claude-api reference model table (cached 2026-09-25)."
 created_at: 2026-10-04T00:00:00Z
-updated_at: 2026-10-04T00:00:00Z
+updated_at: 2026-11-13T23:02:53Z
 created_at_version: cleargate@0.26.1
-updated_at_version: cleargate@0.26.1
+updated_at_version: 37c2b2f1-dirty
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-10-08T13:22:52Z
+  last_gate_check: 2026-11-13T23:02:54Z
   transition: ready-for-fix
 pushed_by: null
 pushed_at: null
@@ -38,6 +40,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-10-03T23:24:33Z
   sessions: []
+last_contradict_sha: "8f2013bd2344ed2eceefa915e725eaa093b091f48ee42f6348f797623946083d"
 ---
 
 # BUG-117: The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know
@@ -45,8 +48,8 @@ draft_tokens:
 ### Open Questions
 
 - **Question:** Add every Claude 5 model, or only the ones this repo runs?
-- **Recommended:** Add the current three: Opus 5.5, Sonnet 5.5 and Fable 5.1. Opus 5.5 is the only model in the SPRINT-41 ledger, and Sonnet 5.5 is what the `sonnet` alias resolves to. Add older generations only when a ledger row needs one.
-- **Human decision:** {populated during Brief review}
+- **Recommended:** Add the current Claude 5 models: Opus 5.5, Sonnet 5.5, Haiku 5.5 and Fable 5.2, and keep Fable 5.1, which is still served. Opus 5.5 is the only model in the SPRINT-41 ledger, and Sonnet 5.5 is what the `sonnet` alias resolves to. Add older generations only when a ledger row needs one.
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 
 ## 1. The Anomaly (Expected vs. Actual)
 
@@ -75,19 +78,21 @@ cleargate-cli/src/lib/pricing.ts:4   * Numbers from Anthropic public pricing as 
 cleargate-cli/src/commands/doctor.ts:969-973  computeUsd(...) → unknownModel → stderr warning, usd 0
 ```
 
-Correct table (USD per 1M tokens). The input and output prices and the stated cache-read prices come from the claude-api reference model table, cached 2026-09-25. Cache creation is the 5-minute write at 1.25× input, the multiplier the existing table already uses. Any cache read the reference does not state is 0.1× input.
+Correct table (USD per 1M tokens). The input and output prices and the stated cache-read prices come from the claude-api reference model table, cached 2026-11-03 (re-checked at SPRINT-45 kickoff). Cache creation is the 5-minute write at 1.25× input, the multiplier the existing table already uses. Any cache read the reference does not state is 0.1× input.
 
 | Model | input | output | cache_read | cache_creation |
 |---|---|---|---|---|
 | `claude-opus-5-5` | 4.00 | 20.00 | 0.20 | 5.00 |
-| `claude-sonnet-5-5` | 2.00 | 10.00 | 0.20 | 2.50 |
+| `claude-sonnet-5-5` | 2.00 | 10.00 | 0.10 | 2.50 |
+| `claude-haiku-5-5` | 0.10 | 0.50 | 0.01 | 0.125 |
+| `claude-fable-5-2` | 8.00 | 40.00 | 0.20 | 10.00 |
 | `claude-fable-5-1` | 10.00 | 50.00 | 0.25 | 12.50 |
 | `claude-opus-4-7` | 5.00 | 25.00 | 0.50 | 6.25 |
 | `claude-sonnet-4-6` | 3.00 | 15.00 | 0.30 | 3.75 |
 | `claude-sonnet-4-5` | 3.00 | 15.00 | 0.30 | 3.75 |
 | `claude-haiku-4-5` | 1.00 | 5.00 | 0.10 | 1.25 |
 
-Agent model tiers are out of scope. `.claude/agents/*.md` already use the `opus`/`sonnet`/`haiku` aliases, which resolve to the current generation.
+Haiku 5.5's prices are for prompts up to 100K tokens; the table does not model the higher long-prompt rate. Agent model tiers are out of scope. `.claude/agents/*.md` already use the `opus`/`sonnet`/`haiku` aliases, which resolve to the current generation.
 
 ## 4. Execution Sandbox (Suspected Blast Radius)
 
@@ -121,6 +126,8 @@ Feature: The pricing table knows current models
       | model             | input_price |
       | claude-opus-5-5   | 4           |
       | claude-sonnet-5-5 | 2           |
+      | claude-haiku-5-5  | 0.1         |
+      | claude-fable-5-2  | 8           |
       | claude-fable-5-1  | 10          |
       | claude-opus-4-7   | 5           |
       | claude-haiku-4-5  | 1           |
@@ -134,7 +141,7 @@ Feature: The pricing table knows current models
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 6 | Five outline rows plus the unknown-model case, in the existing pricing test file. |
+| Unit tests | 8 | Seven outline rows plus the unknown-model case, in the existing pricing test file. |
 | Integration tests | 0 | Pure function; no I/O. |
 | E2E / acceptance tests | 0 | `doctor --pricing` behaviour is covered by the unit cases through its single call site. |
 
@@ -151,7 +158,7 @@ Feature: The pricing table knows current models
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -160,4 +167,4 @@ Requirements to pass to Green (Ready for Fix):
 - [x] Actual vs. Expected behavior is explicitly defined.
 - [x] Raw error logs/evidence are attached.
 - [x] Verification command (failing test) is provided.
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter.

@@ -20,6 +20,7 @@ cites:
   - "[[STORY-060-05]]"
 cited_by: 
   - "[[CR-126]]"
+  - "[[INITIATIVE-002]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-060_fresh_context_review_before_approval.md"
@@ -66,5 +67,5 @@ _(empty — two questions resolved by the owner 2026-10-28: epics and CRs get th
 - Parent: none
 - Children (5): [[STORY-060-01]], [[STORY-060-02]], [[STORY-060-03]], [[STORY-060-04]], [[STORY-060-05]]
 - Cites (9): [[CR-033]], [[CR-122]], [[EPIC-058]], [[EPIC-059]], [[STORY-060-01]], [[STORY-060-02]], [[STORY-060-03]], [[STORY-060-04]], [[STORY-060-05]]
-- Cited by (1): [[CR-126]]
+- Cited by (2): [[CR-126]], [[INITIATIVE-002]]
 <!-- END relations -->

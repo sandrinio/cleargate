@@ -31,6 +31,7 @@ cited_by:
   - "[[CR-105]]"
   - "[[CR-112]]"
   - "[[CR-123]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-054-01]]"
   - "[[STORY-054-02]]"
   - "[[STORY-054-03]]"
@@ -89,5 +90,5 @@ ClearGate has exactly one granularity between "epic" and "commit": the Story. Th
 - Parent: none
 - Children (14): [[BUG-042]], [[BUG-043]], [[BUG-055]], [[BUG-059]], [[BUG-060]], [[CR-105]], [[CR-112]], [[STORY-054-01]], [[STORY-054-02]], [[STORY-054-03]], [[STORY-054-04]], [[STORY-054-05]], [[STORY-054-06]], [[STORY-054-07]]
 - Cites (4): [[BUG-041]], [[CR-039]], [[EPIC-033]], [[EPIC-052]]
-- Cited by (15): [[BUG-042]], [[BUG-043]], [[BUG-055]], [[BUG-059]], [[BUG-088]], [[CR-105]], [[CR-112]], [[CR-123]], [[STORY-054-01]], [[STORY-054-02]], [[STORY-054-03]], [[STORY-054-04]], [[STORY-054-05]], [[STORY-054-06]], [[STORY-054-07]]
+- Cited by (16): [[BUG-042]], [[BUG-043]], [[BUG-055]], [[BUG-059]], [[BUG-088]], [[CR-105]], [[CR-112]], [[CR-123]], [[INITIATIVE-002]], [[STORY-054-01]], [[STORY-054-02]], [[STORY-054-03]], [[STORY-054-04]], [[STORY-054-05]], [[STORY-054-06]], [[STORY-054-07]]
 <!-- END relations -->

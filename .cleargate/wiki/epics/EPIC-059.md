@@ -22,7 +22,9 @@ cites:
 cited_by: 
   - "[[BUG-052]]"
   - "[[CR-131]]"
+  - "[[CR-132]]"
   - "[[EPIC-060]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-060-01]]"
   - "[[STORY-060-02]]"
   - "[[STORY-060-04]]"
@@ -73,5 +75,5 @@ _(empty — three questions resolved by the owner 2026-10-08; answers integrated
 - Parent: none
 - Children (4): [[STORY-059-01]], [[STORY-059-02]], [[STORY-059-03]], [[STORY-059-04]]
 - Cites (11): [[BUG-052]], [[BUG-109]], [[BUG-113]], [[CR-090]], [[CR-124]], [[EPIC-030]], [[STORY-031-04]], [[STORY-059-01]], [[STORY-059-02]], [[STORY-059-03]], [[STORY-059-04]]
-- Cited by (7): [[BUG-052]], [[CR-131]], [[EPIC-060]], [[STORY-060-01]], [[STORY-060-02]], [[STORY-060-04]], [[STORY-060-05]]
+- Cited by (9): [[BUG-052]], [[CR-131]], [[CR-132]], [[EPIC-060]], [[INITIATIVE-002]], [[STORY-060-01]], [[STORY-060-02]], [[STORY-060-04]], [[STORY-060-05]]
 <!-- END relations -->

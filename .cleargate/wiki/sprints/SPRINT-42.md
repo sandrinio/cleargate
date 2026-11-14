@@ -13,6 +13,8 @@ cites:
   - "[[BUG-118]]"
   - "[[BUG-119]]"
 cited_by: 
+  - "[[BUG-136]]"
+  - "[[INITIATIVE-002]]"
   - "[[SPRINT-31]]"
 status: "Draft"
 remote_id: ""
@@ -46,5 +48,5 @@ sprint_cleargate_id: "SPRINT-42"
 - Parent: none
 - Children (6): [[BUG-052]], [[EPIC-059]], [[STORY-059-01]], [[STORY-059-02]], [[STORY-059-03]], [[STORY-059-04]]
 - Cites (2): [[BUG-118]], [[BUG-119]]
-- Cited by (1): [[SPRINT-31]]
+- Cited by (3): [[BUG-136]], [[INITIATIVE-002]], [[SPRINT-31]]
 <!-- END relations -->

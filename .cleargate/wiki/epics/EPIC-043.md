@@ -52,6 +52,7 @@ cited_by:
   - "[[EPIC-052]]"
   - "[[EPIC-053]]"
   - "[[EPIC-061]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-054-03]]"
 status: "Completed"
 remote_id: ""
@@ -100,5 +101,5 @@ A source-level review found the framework's core is sound but carries removable 
 ## Relations
 - Parent: none
 - Children (42): [[BUG-036]], [[BUG-037]], [[BUG-038]], [[BUG-039]], [[BUG-050]], [[BUG-051]], [[BUG-052]], [[BUG-053]], [[BUG-054]], [[BUG-056]], [[BUG-057]], [[BUG-058]], [[BUG-061]], [[BUG-062]], [[BUG-063]], [[BUG-064]], [[BUG-065]], [[BUG-066]], [[BUG-117]], [[CR-075]], +22 more
-- Cited by (6): [[BUG-066]], [[CR-131]], [[EPIC-052]], [[EPIC-053]], [[EPIC-061]], [[STORY-054-03]]
+- Cited by (7): [[BUG-066]], [[CR-131]], [[EPIC-052]], [[EPIC-053]], [[EPIC-061]], [[INITIATIVE-002]], [[STORY-054-03]]
 <!-- END relations -->

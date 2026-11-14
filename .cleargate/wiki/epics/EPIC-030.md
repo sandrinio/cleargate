@@ -8,8 +8,10 @@ cites:
   - "[[CR-071]]"
   - "[[PROPOSAL-013]]"
 cited_by: 
+  - "[[BUG-136]]"
   - "[[EPIC-059]]"
   - "[[EPIC-062]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-059-01]]"
   - "[[STORY-062-02]]"
   - "[[STORY-062-03]]"
@@ -68,5 +70,5 @@ Today's sprint planning has four soft spots that compound into bad sprints:
 ## Relations
 - Parent: none
 - Cites (3): [[CR-017]], [[CR-071]], [[PROPOSAL-013]]
-- Cited by (6): [[EPIC-059]], [[EPIC-062]], [[STORY-059-01]], [[STORY-062-02]], [[STORY-062-03]], [[STORY-062-04]]
+- Cited by (8): [[BUG-136]], [[EPIC-059]], [[EPIC-062]], [[INITIATIVE-002]], [[STORY-059-01]], [[STORY-062-02]], [[STORY-062-03]], [[STORY-062-04]]
 <!-- END relations -->

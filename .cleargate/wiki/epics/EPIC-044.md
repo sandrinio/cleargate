@@ -10,6 +10,8 @@ cited_by:
   - "[[CR-074]]"
   - "[[CR-120]]"
   - "[[CR-122]]"
+  - "[[EPIC-064]]"
+  - "[[INITIATIVE-002]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-044_Agent_Dispatch_Reliability_And_Token_Efficiency.md"
@@ -55,5 +57,5 @@ The sprint loop has two efficiency/reliability ceilings the hygiene epic (EPIC-0
 ## Relations
 - Parent: none
 - Children (1): [[CR-074]]
-- Cited by (4): [[BUG-088]], [[CR-074]], [[CR-120]], [[CR-122]]
+- Cited by (6): [[BUG-088]], [[CR-074]], [[CR-120]], [[CR-122]], [[EPIC-064]], [[INITIATIVE-002]]
 <!-- END relations -->

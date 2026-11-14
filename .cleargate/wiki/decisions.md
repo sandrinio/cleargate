@@ -5,6 +5,39 @@
 
 Every answered Q/A decision in the delivery corpus, newest first, with the architecture rules of open epics. A block ends with `- Supersedes:` when the item says it supersedes another. Open questions and unanswered placeholders are not listed.
 
+### [[BUG-117]] — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know (2026-11-14)
+- Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
+
+### [[BUG-133]] — Upgrade output buries the files that lost local edits (2026-11-14)
+- Q: What should upgrade print for an `always` file whose content is already the package's? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: What should the dry-run label be for a locally edited `always` or `pin-aware` file? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: How much of the changelog should upgrade print? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+
+### [[BUG-134]] — Upgrade reorders the hooks in .claude/settings.json (2026-11-14)
+- Q: What order should the merged file have? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+
+### [[CR-120]] — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs` (2026-11-14)
+- Q: Should this replace `token-ledger.jsonl` or sit beside it? → Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+- Q: Where does the new script get invoked? → `count_tokens.mjs`, as recommended; STORY-064-01 also imports the reader directly (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+- Q: Do workflow-run agents count? (Added 2026-11-14.) → Yes, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+
+### [[EPIC-064]] — Sprint Numbers From What Happened (2026-11-14)
+- Q: Should the derived rework replace the state.json counters in the report, or sit beside them? → Beside, with the derived number leading and the counter named only where it disagrees. Recommended by the agent and covered by the owner's acceptance of INITIATIVE-002 §6 on 2026-11-14; confirm at this Brief.
+- Q: Which sprints form the evidence set? → SPRINT-44 here and dispenser_adapter SPRINT-01 to SPRINT-03. They are recent enough that their transcripts still exist, and Claude ran them, so no Codex dispatches are missing. doc_processor's recent sprints used Codex for production code and are left out.
+- Rule: Read-only derivation. Never write events.jsonl, never add an event kind, never edit state-events.mjs: fold() moves updated_at before its kind switch, so an unknown kind breaks every later update_state.mjs call (CR-120 §3).
+- Rule: state.json qa_bounces/arch_bounces are left as they are. The report shows derived numbers and names the counter only where the two disagree.
+- Rule: Never fail a close. A missing transcript directory, a missing repo or an unparseable row is a warning plus exit 0 and a visible "not measured" line, never a throw.
+- Rule: Canonical edits only: cleargate-cli/scaffold/core/.cleargate/** and cleargate-cli/scaffold/hosts/claude/.claude/**. The live copies in the meta-repo change only at the Gate-4 re-sync.
+- Rule: No new runtime dependency. Node built-ins only; tests are *.node.test.ts under node:test in cleargate-cli/test/.
+- Rule: Existing CLI shapes stay: count_tokens.mjs and prep_reporter_context.mjs keep their positional &lt;sprint-id&gt; with no required flags (close_sprint.mjs Step 3.5 calls them).
+- Rule: close_sprint.mjs requiredMetricRows (Fast-Track Ratio, Fast-Track Demotion Rate, Hotfix Count, Hotfix-to-Story Ratio, Hotfix Cap Breaches, LD events) must still be present in the report template.
+
+### [[STORY-064-01]] — Per-Item Metrics Derived From Transcripts and Git (2026-11-14)
+- Q: When dispatch-derived and git-derived rework differ, which one does `total` report? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+
+### [[STORY-064-02]] — Sprint Report Reads Derived Metrics (2026-11-14)
+- Q: Keep the counter-based first-pass rate during the transition? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+
 ### [[BUG-093]] — `cleargate upgrade` take-theirs merge drops user hooks under any event ClearGate also uses (2026-11-13)
 - Q: Should the fix reuse `mergeSettings(removeClearGateHooks(ours), theirs)`, the form SPRINT-41 M5 AD-4 specifies for Codex, or merge per matcher inside the… ([[BUG-093]]) → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
 
@@ -42,6 +75,17 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 
 ### [[BUG-126]] — The contradiction check cannot be completed for a story draft when stories are not in the wiki (the default) (2026-11-13)
 - Q: For a draft whose bucket `wiki.ingest_buckets` excludes (stories, by default), what does the check read and where is it recorded? → Recommended option accepted (sandrinio 2026-11-13: "i want you to fix them all and make a new release").
+
+### [[INITIATIVE-002]] — Evidence-First Execution Loop (2026-11-13)
+- Q: In what order are the six workstreams built? → Measurement (WS-4) and evidence tiers (WS-1) first. Without measurement nothing else can be judged, and evidence is where the defects are.
+- Q: Does [[EPIC-055]] (parallel wave scheduling) proceed? Measured wave width is 1.0–1.8 and contract-first is unproven. → Pause [[EPIC-055]] until WS-4 can show integration queue time. [[CR-124]] stays as shipped.
+- Q: [[CR-024]] locked three lanes, but one is used in practice (1 fast-lane item in 77 here). Keep them? → Keep the three names. Replace the assignment rubric with risk signals the data supports (UI surface, subsystems crossed, scenario count) and make `runtime` a real state value.
+- Q: [[EPIC-032]] locked the code map as opt-in and off in target repositories. How are file surfaces generated? → From git and search at plan time, without the code map. The lock stands.
+- Q: Does test-first by a separate agent stay? → Keep QA-Red. Adopt the rule that sealed reds assert properties rather than exact shapes. Add holdout scenarios only for items whose tier is a real run.
+- Q: May the owner's walkthrough remain the only proof for UI work? → An agent browser check comes first where the repository has a browser harness. Otherwise the proof is the human tier, and the plan says so.
+- Q: [[SPRINT-42]] and [[SPRINT-43]] are drafted and overlap WS-2, WS-3 and WS-4. Run them first? → No. Fold them under this initiative and re-cut their rosters after decomposition.
+- Q: Are the targets marked (proposed) in §5 and the pilots confirmed? → Yes. Pilots are doc_processor (active, on 0.30.1) and dispenser_adapter (Go).
+- Q: Are supported override points that survive an upgrade part of this initiative? → No. They stay with [[CR-115]] and [[CR-132]]; this initiative only names the override points.
 
 ### [[CR-126]] — Every Epic Must Answer "How Do We Test This?" (2026-11-12)
 - Q: Should the requirement apply to the 14 open Draft epics as well as new ones? They will start failing the… ([[CR-126]]) → Agreed 2026-11-12: apply to open epics. See Q3 for how this lands on the 7 that already have stories.
@@ -923,3 +967,7 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 ## Unresolved conflicts
 
 - [[BUG-121]] vs [[BUG-037]] · BUG-037 fix is "re-run detection" vs BUG-121 says it replaces repo commands
+- [[BUG-129]] vs [[BUG-062]] · §3.1 cells with spaces: reject vs read the first backticked span
+- [[CR-120]] vs [[BUG-085]] · CR-120 says BUG-085 is Draft; BUG-085 is Completed
+- [[CR-120]] vs [[BUG-087]] · CR-120 places BUG-087 in SPRINT-42; BUG-087 says SPRINT-43
+- [[STORY-064-01]] vs [[EPIC-064]] · repo list: reuses wiki.brief.release_repos vs new metrics.repos key

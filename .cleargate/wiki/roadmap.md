@@ -24,6 +24,8 @@ Non-terminal sprints other than the active one.
 
 - [[SPRINT-43]] — status: Draft
 
+- [[SPRINT-45]] — status: Draft
+
 
 
 ## Shipped Sprints
@@ -142,6 +144,8 @@ _No active epics._
 - [[EPIC-060]] — status: Draft
 
 - [[EPIC-061]] — status: Draft
+
+- [[EPIC-064]] — status: Draft
 
 
 

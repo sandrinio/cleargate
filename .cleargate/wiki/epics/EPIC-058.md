@@ -36,6 +36,8 @@ cited_by:
   - "[[BUG-102]]"
   - "[[EPIC-060]]"
   - "[[EPIC-061]]"
+  - "[[EPIC-064]]"
+  - "[[INITIATIVE-002]]"
   - "[[SPRINT-41]]"
   - "[[STORY-058-01]]"
   - "[[STORY-058-02]]"
@@ -102,5 +104,5 @@ No unresolved questions. The following decisions are integrated throughout this 
 - Parent: none
 - Children (21): [[BUG-100]], [[BUG-101]], [[BUG-103]], [[BUG-105]], [[BUG-110]], [[BUG-114]], [[BUG-115]], [[BUG-116]], [[STORY-058-01]], [[STORY-058-02]], [[STORY-058-03]], [[STORY-058-04]], [[STORY-058-05]], [[STORY-058-06]], [[STORY-058-07]], [[STORY-058-08]], [[STORY-058-09]], [[STORY-058-10]], [[STORY-058-11]], [[STORY-058-12]], +1 more
 - Cites (5): [[BUG-043]], [[CR-105]], [[PROPOSAL-074]], [[SPRINT-34]], [[STORY-058-12]]
-- Cited by (22): [[BUG-067]], [[BUG-100]], [[BUG-102]], [[EPIC-060]], [[EPIC-061]], [[SPRINT-41]], [[STORY-058-01]], [[STORY-058-02]], [[STORY-058-03]], [[STORY-058-04]], [[STORY-058-05]], [[STORY-058-06]], [[STORY-058-07]], [[STORY-058-08]], [[STORY-058-09]], [[STORY-058-10]], [[STORY-058-11]], [[STORY-058-12]], [[STORY-058-13]], [[STORY-060-01]], +2 more
+- Cited by (24): [[BUG-067]], [[BUG-100]], [[BUG-102]], [[EPIC-060]], [[EPIC-061]], [[EPIC-064]], [[INITIATIVE-002]], [[SPRINT-41]], [[STORY-058-01]], [[STORY-058-02]], [[STORY-058-03]], [[STORY-058-04]], [[STORY-058-05]], [[STORY-058-06]], [[STORY-058-07]], [[STORY-058-08]], [[STORY-058-09]], [[STORY-058-10]], [[STORY-058-11]], [[STORY-058-12]], +4 more
 <!-- END relations -->

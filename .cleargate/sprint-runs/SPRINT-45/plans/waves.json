@@ -1,0 +1,247 @@
+{
+  "schema_version": 2,
+  "sprint": "SPRINT-45",
+  "generated_at": "2026-11-13T23:17:52Z",
+  "generated_by": "architect-synth",
+  "role": "architect-synth",
+  "story_count_in_milestone": 6,
+  "story_count_planned": 6,
+  "complete": true,
+  "launchable": true,
+  "launchable_when": "The owner confirms at Gate 2 that SPRINT-45 builds in nested cli worktrees, the layout approved for SPRINT-44 as ruling (a). That ruling covered SPRINT-44 only. When confirmed, the orchestrator sets launchable to true and fills in ruling. If the owner declines, all six items are refused under BUG-046 (see predicate_notes.reachability_BUG_046) and this plan must not be used.",
+  "ruling": {
+    "status": "confirmed at Gate 2 (owner, 2026-11-14)",
+    "precedent": "SPRINT-44 Gate 2, 2026-11-10, owner ruling (a): nested cli worktrees",
+    "decision_requested": "Build all six items in nested cli worktrees OUTER/.worktrees/<ID>/cleargate-cli under detached outer hosts, with contracts C1 and C2, merging locally into cli main.",
+    "decision": "Confirmed for SPRINT-45 (owner, 2026-11-14: \"approved. please execute\"); hand Agent dispatches."
+  },
+  "execution": {
+    "mode": "contract-first-dag",
+    "launch_wave_compatible": false,
+    "note": "The waves are run by hand with parallel Agent dispatches (SPRINT-44 precedent). This file is the plan of record, not a launch_wave.mjs input. launch_wave.mjs cuts only outer-repo worktrees.",
+    "sprint_lines": {
+      "cli": "main (local; tip dbccc79 at plan time)",
+      "outer": "sprint/S-45, once cleargate sprint init cuts it. There is no outer code change; outer hosts are detached."
+    },
+    "build_lanes": 4,
+    "lane_schedule": {
+      "kickoff": [
+        "CR-120",
+        "STORY-064-01",
+        "BUG-133",
+        "BUG-134"
+      ],
+      "next_free_lanes_in_order": [
+        "STORY-064-02",
+        "BUG-117"
+      ],
+      "why": "The owners of C1 and C2 start first: they are the critical path. STORY-064-02 integrates last but is on the critical path's tail, so it takes the first free lane. BUG-117 is a fast-lane, single-table change with no dependants except STORY-064-02's order edge."
+    },
+    "merge_lane": "One item at a time. DevOps merges story/<ID> into cli main with --no-ff (local only, no push, no publish), then runs the full npm test (see dist_rule for where). Teardown after merge, with both git status --porcelain empty: remove the cli worktree first, then the outer host.",
+    "merge_order": [
+      "CR-120",
+      "STORY-064-01",
+      "BUG-117",
+      "BUG-133",
+      "BUG-134",
+      "STORY-064-02"
+    ],
+    "merge_order_rule": "The merge lane takes items as they pass QA-Verify, subject to upstream. When two are ready at once, the critical path goes first: CR-120, then STORY-064-01. BUG-133 merges before BUG-134 when both are ready. STORY-064-02 merges last.",
+    "contract_step_C0": "One Developer dispatch in a throwaway cli worktree OUTER/.worktrees/S45-C0/cleargate-cli (detached outer host). Create the worktree with -b contract/S-45-ledger main and commit C1. Then git switch -c contract/S-45-metrics and commit C2 on top. Run check_before_handoff on both branches, then remove the worktree; the branches stay. Each commit stays inside its owner's declared surface. Subjects start chore(EPIC-064): contract Cn skeleton, so the lifecycle reconciler expects nothing from them.",
+    "worktree_layout": {
+      "cli": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>/cleargate-cli. Create with: git -C /Users/ssuladze/Documents/Dev/ClearGate/cleargate-cli worktree add <that path> -b story/<ID> <stories.<ID>.base>",
+      "outer": "Host directory /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/<ID>, detached at the outer sprint line. No item has an outer change.",
+      "setup": "By the orchestrator, one at a time: ln -s OUTER/cleargate-cli/node_modules <cli wt>/node_modules; ln -s OUTER/.claude <outer host>/.claude (/.claude is in OUTER/.git/info/exclude); (cd <cli wt> && npm run prebuild). Never npm install or npm ci in a worktree. No agent edits files in the cli main checkout.",
+      "task_breakdown": "Outer hosts are detached, so Developers cannot tick Task Breakdown rows in the item files. The orchestrator ticks them at merge (flashcard 2026-09-27 #worktree #task-breakdown)."
+    },
+    "tests": "Build lanes run npm run typecheck and targeted test files only (npm run test:file -- <file>). The full npm test runs only in the merge lane. Never run two full suites at once: cr097 and cr101 bind fixed ports. Run full suites with a short private TMPDIR.",
+    "integration": "An item integrates only after every upstream item has merged into cli main. In its cli worktree: git merge --no-ff main. On a conflict, the owner's file wins and the item re-applies its own insertions. A conflict inside an existing or red test goes to QA-Red, never the Developer. Then run npm run gen:codex and confirm it leaves no diff, re-run prebuild, typecheck and the item's targeted tests, and run QA-Verify on the integrated tree. If main moves before the merge, integrate again.",
+    "codex_generated_companions": "prebuild runs build-codex-payload.mjs --check, so a commit that edits a Claude source without its generated Codex copy fails prebuild. Each generated file has exactly one source and one owner: CR-120 owns scaffold/core/.agents/skills/sprint-execution/SKILL.md (rendered from the Claude SKILL.md) and scaffold/hosts/codex/.codex/hooks/token-ledger.sh (verbatim copy); STORY-064-02 owns scaffold/hosts/codex/.codex/agents/reporter.toml. Run npm run gen:codex after editing the source. All three paths must join the owner's section 3.1 by CR:spec-clarification before build (SPRINT-44 precedent).",
+    "known_red_after_merge": {
+      "status": "confirmed at Gate 2 (owner, 2026-11-14): record each in sprint section 6 as known-red; do not hand-port live",
+      "reason": "Rule 5 freezes live /.claude/** and live .cleargate/{scripts,knowledge,templates} for the whole sprint, and the live re-sync waits for the dispenser verdict. Canonical-live parity therefore breaks at the first canonical merge, not at close.",
+      "expected": [
+        "test/scaffold/canonical-live-parity.red.integration.node.test.ts 5d (.claude/hooks/token-ledger.sh): red from the CR-120 merge. It is not skipped in a worktree that has the /.claude symlink.",
+        "canonical-live-parity 5a (.cleargate/templates/*.md, sprint_report.md): red from the STORY-064-02 merge. 5a has no worktree skip.",
+        "canonical-live-parity 5c (.claude/agents/*.md, reporter.md): red in the merge lane from the STORY-064-02 merge.",
+        "doctor scaffold drift lines and the SessionStart drift banner: from the CR-120 merge onwards (new scripts missing live; changed scripts, hook, skill, template, agent, config.example.yml)."
+      ],
+      "recommended": "At the merge that causes each one, record it as known-red in sprint section 6. DevOps confirms the full-suite failures are exactly the listed assertions. Do not hand-port live (rule 5)."
+    },
+    "dist_rule": {
+      "status": "confirmed at Gate 2 (owner, 2026-11-14): no BD on cli main during the sprint",
+      "fact": "Five live hooks run OUTER/cleargate-cli/dist/cli.js: session-start.sh:13, pre-edit-gate.sh:87, post-shell-ingest.sh:24, pending-task-sentinel.sh:279, stamp-and-gate.sh. A dist rebuild (BD) on cli main changes the live loop mid-sprint.",
+      "recommended": "No BD on cli main during the sprint. Run each post-merge full suite in a throwaway cli worktree at main's tip, where prebuild and build are safe (flashcard 2026-09-26 #worktree #build). Build packed RCs in item worktrees."
+    },
+    "proof_runs": [
+      "Run proofs with the canonical scripts by path from a cli tree, never the live copies (rule 5). prep_reporter_context.mjs:54 and count_tokens.mjs:45 resolve REPO_ROOT from their own location, so set CLEARGATE_SPRINT_DIR (and CLEARGATE_PENDING_SYNC_DIR for prep_reporter_context.mjs) to the target sprint.",
+      "sprint_metrics.mjs always writes <sprintDir>/metrics.json (STORY-064-01 R1). A run against SPRINT-44 writes into the outer tree; commit it as evidence or restore it.",
+      "npm pack runs no lifecycle script (there is no prepack or prepare). Run npm run prebuild && npm run build in the item worktree before packing. Run the RC against a fresh copy of dispenser_adapter, never the real repo.",
+      "QA-Red and Developer never read sprint-runs/SPRINT-45/holdout/. QA-Verify or the orchestrator compares against the recount and writes the result to sprint-runs/SPRINT-45/evidence/.",
+      "Transcript fixtures under test/fixtures/subagent-ledger/ and test/fixtures/sprint-metrics/ are synthetic or scrubbed: no prompt text, user paths or names (the same rule as STORY-064-01 R10)."
+    ]
+  },
+  "contracts": [
+    {
+      "id": "C1",
+      "branch": "contract/S-45-ledger",
+      "repo": "cli",
+      "base": "main",
+      "owner_story": "CR-120",
+      "created_by": "Developer contract dispatch C0, commit 1 of 2. Subject: chore(EPIC-064): contract C1 skeleton (CR-120 subagent-ledger)",
+      "create_when": "after Gate 2 and sprint init, before any build dispatch",
+      "frozen_exports": [
+        "cleargate-cli/scaffold/core/.cleargate/scripts/subagent-ledger.mjs: @typedef DispatchRow {schema: 1, session_id: string, agent_id: string, tool_use_id: string, completed: boolean, run_id: string | null, agent_type: string, workflow_phase: string | null, description: string, model: string, started_at: string, ended_at: string, wall_ms: number, turns: number, tool_uses: number, usage: {input: number, output: number, cache_read: number, cache_creation: number}}. run_id is the workflow run id, or null for a top-level dispatch. workflow_phase comes from .meta.json, or is null. completed is false when the transcript records a user interruption or a cancelled hook. started_at and ended_at are ISO-8601 timestamps.",
+        "cleargate-cli/scaffold/core/.cleargate/scripts/subagent-ledger.mjs: export function discoverSessions(sprintDir: string, opts?: object): string[]. Synchronous. The stub returns [].",
+        "cleargate-cli/scaffold/core/.cleargate/scripts/subagent-ledger.mjs: export function readDispatches(sessionDirs: string[], opts?: object): DispatchRow[]. Synchronous. The stub returns []."
+      ],
+      "freeze_rules": "CR-120 replaces both bodies. It may add optional opts fields (for example a transcripts root behind CLEARGATE_TRANSCRIPTS_ROOT) and may add row fields. It never removes, renames or retypes a frozen name or field, never makes either function async, and never adds a required parameter. If CR-120 needs async or a nullable field, the contract is amended before C0 runs, never after.",
+      "consumers": [
+        "STORY-064-01",
+        "C2"
+      ],
+      "check_before_handoff": "node --check on the file; importing it and calling both functions returns []; npm run typecheck clean; npm run prebuild passes."
+    },
+    {
+      "id": "C2",
+      "branch": "contract/S-45-metrics",
+      "repo": "cli",
+      "base": "contract/S-45-ledger",
+      "owner_story": "STORY-064-01",
+      "created_by": "Developer contract dispatch C0, commit 2 of 2, on top of C1. Subject: chore(EPIC-064): contract C2 skeleton (STORY-064-01 sprint_metrics)",
+      "create_when": "immediately after C1",
+      "frozen_exports": [
+        "cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs: CLI `node sprint_metrics.mjs <sprint-id> [--json]`. CLEARGATE_SPRINT_DIR overrides the sprint directory, as in count_tokens.mjs:100. Exits 0 whenever it runs, degraded sources included. Exits 2 on a usage error, with nothing on stdout. With --json, stdout is exactly one C2 document.",
+        "C2 document: {schema: 1, sprint_id: string, generated_at: string (ISO-8601), sources: {sessions: number, dispatches: number, repos: string[], warnings: string[]}, items: Record<string, Item>, sprint_level: {dispatches: number, tokens: number}, unattributed: {dispatches: number, tokens: number, share: number}, totals: {dispatches: number, rework: number, tokens: number}}. items is keyed by roster ID.",
+        "Item: {dispatches: {total: number, by_role: Record<string, number>, by_phase: Record<string, number>}, rework: {red_corrections: number, dev_reruns: number, verify_reruns: number, total: number}, interrupted: number, post_merge: number, git: {red_written: number, red_corrected: number, build: number, rework: number, integrate: number, merged: number}, wall_ms: number, tokens: {input: number, output: number, cache_read: number, cache_creation: number, total: number}, models: string[], state_counters: {qa_bounces: number, arch_bounces: number}, disagrees: boolean, dispatch_source: string}. interrupted counts dispatches with completed false; post_merge counts dispatches that start after the item's first merge(story/<ID>) commit; every git field is a commit count.",
+        "Degraded marker: dispatch_source \"not measured\" (STORY-064-01 R9) is the only reserved value, and sources.warnings then includes \"dispatch data: not measured\". When an item's dispatch_source is \"not measured\", consumers show its dispatch and token figures as \"not measured\", never as 0, and rework.total comes from git.",
+        "unattributed.share is a fraction in [0, 1]: unattributed subagent tokens divided by all subagent tokens. The sprint metric is share <= 0.05.",
+        "Stub: with --json it prints {schema: 1, sprint_id: <arg>, generated_at: <now>, sources: {sessions: 0, dispatches: 0, repos: [], warnings: [\"contract C2 stub — STORY-064-01 not integrated\", \"dispatch data: not measured\"]}, items: {}, sprint_level: {dispatches: 0, tokens: 0}, unattributed: {dispatches: 0, tokens: 0, share: 0}, totals: {dispatches: 0, rework: 0, tokens: 0}}. Without --json it prints one line. It writes nothing to disk."
+      ],
+      "freeze_rules": "STORY-064-01 replaces the stub body, adds the metrics.json write (R1), and may add keys. It never removes, renames or retypes a frozen key, and never changes the exit codes, the env override or the meaning of \"not measured\".",
+      "consumers": [
+        "STORY-064-02"
+      ],
+      "check_before_handoff": "node --check; with CLEARGATE_SPRINT_DIR set to an empty scratch dir, `sprint_metrics.mjs SPRINT-44 --json` prints one document that parses with schema 1 and exits 0; with no arguments it exits 2; npm run typecheck clean; npm run prebuild passes."
+    }
+  ],
+  "contract_change_rule": "If a QA-Verify or post-flight bounce changes a frozen export, record the new SHA in sprint section 6. Each consumer adjusts at integration (QA-Red handles tests). Never cherry-pick.",
+  "stories": {
+    "CR-120": {
+      "base": "contract/S-45-ledger",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owner of C1. It builds from its own contract, so the skeleton is a shared ancestor for every later merge. Add its two generated Codex companions to section 3.1 before build (execution.codex_generated_companions). Its SKILL.md edit is rendered for Codex by renderCodexSprintExecution: anchors A1-A6 must stay unique and in order, and no banned token (Workflow tool, launch_wave, RUN_ID, parallel(), C.0.1, C.0.2 and others) may survive the render. A workflow-runs text could easily name one. test/hooks/token-ledger-delta.integration runs the LIVE hook (flashcard 2026-09-26 #test-harness #worktree), so CR-120 tests the canonical hook by path. prep_reporter_context.mjs:247 reads count_tokens.mjs --json, an interface no contract freezes: keep its keys and add only. No new hook event kind (sprint constraint)."
+    },
+    "BUG-117": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "No overlap with any item. The only consumer of src/lib/pricing.ts is src/commands/doctor.ts:15; no ledger or reporter script reads it. Fast lane under sprint rule 3, but check 4 of the seven-check rubric fails as written (one Scenario Outline plus one Scenario). The owner confirms the fast lane at Gate 2; otherwise it becomes standard and nothing else in the plan changes."
+    },
+    "BUG-133": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Owns the upgrade.ts edits: the dry-run state label (:834-846) and the [always] print site (:1127). Shares upgrade.ts with BUG-134, but this is not a real collision: upgrade.ts has no mergeSettings or removeClearGateHooks call (only a header comment at :14). BUG-134's call sites are hosts/claude.ts:127, :241 and :364-368, and hosts/codex.ts:115-117, :229 and :313-314. Its red tests go in a new *.red.node.test.ts file, not appended to a shared upgrade test file."
+    },
+    "BUG-134": {
+      "base": "main",
+      "upstream": [],
+      "repo": "cli",
+      "note": "Real edits are in merge-settings.ts, settings-json-surgery.ts, hosts/claude.ts and hosts/codex.ts. If it touches upgrade.ts at all, the change is outside BUG-133's regions; it merges after BUG-133 and re-applies its change at integration. Flashcard 2026-09-27 #codex #upgrade: upgrade never calls the codex adapter's install. If upgrade never reaches codex.ts:313, the upgrade --yes proof does not exercise the codex half, so that half needs its own test. Flashcard 2026-11-13 #upgrade #hash: a hooks-only settings hash must reach MANIFEST, snapshot and the current-file sha."
+    },
+    "STORY-064-01": {
+      "base": "contract/S-45-metrics",
+      "upstream": [
+        "CR-120"
+      ],
+      "repo": "cli",
+      "note": "Owner of C2; consumes C1 (owner CR-120). Before integration, readDispatches returns [] from the C1 stub, so only the R9 'not measured' path runs end to end. Test the R3-R8 aggregation by feeding DispatchRow fixtures through the story's own seam. The holdout real run goes green only on the integrated tree. Resolve the project root for the R6 repo list from the sprint directory or cwd, never from the script's own location: a run from the canonical path would otherwise take cleargate-cli/scaffold/core as the project. No file overlap with CR-120."
+    },
+    "STORY-064-02": {
+      "base": "contract/S-45-metrics",
+      "upstream": [
+        "CR-120",
+        "STORY-064-01",
+        "BUG-117",
+        "BUG-133",
+        "BUG-134"
+      ],
+      "repo": "cli",
+      "note": "Consumes C2 (owner STORY-064-01), which is stacked on C1 (owner CR-120), so both owners are upstream. parallel_eligible is n and the sprint plan says it integrates last. The three bug edges are order edges that encode that trailing position (flashcard 2026-09-26 #sdr #waves); it shares no file with any bug, and the owner may drop an edge if a bug stalls. Add scaffold/hosts/codex/.codex/agents/reporter.toml to section 3.1 before build. Forward CLEARGATE_SPRINT_DIR to the sprint_metrics.mjs child, as prep_reporter_context.mjs already does for count_tokens.mjs (:15, :247). Before integration, the C2 stub prints a valid 'not measured' document, so 'Metrics not measured never fail the bundle' can go green. The metrics-available path runs from a fixture document through the story's own seam. Proof: the SPRINT-44 bundle exists at merge; the SPRINT-45 bundle exists only at close, so rule 1's evidence for this item completes at close."
+    }
+  },
+  "waves": [
+    {
+      "wave": "wave1",
+      "stories": [
+        "CR-120",
+        "BUG-117",
+        "BUG-133",
+        "BUG-134"
+      ],
+      "parallel": true,
+      "rationale": "Integration layer 0: no upstream. The only shared path is upgrade.ts (BUG-133, BUG-134), edited in disjoint regions, so it is not a real collision. No journal, lockfile or shared generated file. Merge CR-120 first; it unblocks STORY-064-01."
+    },
+    {
+      "wave": "wave2",
+      "stories": [
+        "STORY-064-01"
+      ],
+      "parallel": false,
+      "rationale": "Integration layer 1: upstream CR-120, the owner of contract C1, which it consumes. Builds now from contract C2."
+    },
+    {
+      "wave": "wave3",
+      "stories": [
+        "STORY-064-02"
+      ],
+      "parallel": false,
+      "rationale": "Integration layer 2, trailing: upstream STORY-064-01 (owner of C2) and CR-120 (owner of C1, under C2). parallel_eligible=n and 'integrates last', encoded as order edges to BUG-117, BUG-133 and BUG-134. Builds now from contract C2."
+    }
+  ],
+  "lane_assignments": {
+    "CR-120": "standard",
+    "STORY-064-01": "standard",
+    "STORY-064-02": "standard",
+    "BUG-117": "fast",
+    "BUG-133": "standard",
+    "BUG-134": "standard"
+  },
+  "predicate_notes": {
+    "tiny_sprint_floor": "not applied: N = 6",
+    "reachability_BUG_046": "The digests as passed carry no unreachable_surface field. The orchestrator reports that the readers classified every path as unreachable from an outer worktree, because every path is inside the nested cleargate-cli repo. Under outer-worktree dispatch all six items would be refused with 'unreachable file surface — refused: <paths>' (record table in SDR section 2). This plan builds in nested cli worktrees, where every declared path exists. That layout was approved for SPRINT-44 only, so launchable stays false until Gate 2 confirms it for SPRINT-45.",
+    "empty_surface_guard_BUG_033": "Did not fire: every digest has a non-empty (file_surface ∪ file_creates). STORY-064-02 has file_creates [] but five file_surface entries.",
+    "db_axis": "Vacuous: db_write_set is empty for all six.",
+    "real_collisions": "None. No item appends to an ordered journal. No two items regenerate the same lockfile or generated file: each Codex output has one source and one owner, and gen:codex rewrites unchanged targets byte-for-byte. The one shared path, upgrade.ts, has disjoint edit regions.",
+    "contract_edges": "STORY-064-01 -> CR-120 (C1). STORY-064-02 -> STORY-064-01 (C2) and CR-120 (C1, under C2).",
+    "order_edges": "STORY-064-02 -> BUG-117, BUG-133, BUG-134: these encode its fail-safe trailing position, not a collision.",
+    "digest_corrections": [
+      "Applied by the orchestrator before synthesis: CR-120 lost cleargate-planning/ and metrics.json (prose tokens, BUG-129 class) and gained file_creates. BUG-134 gained src/hosts/claude.ts and src/hosts/codex.ts.",
+      "Added by synthesis (amendments to section 3.1 before build, not new overlaps): CR-120 needs scaffold/core/.agents/skills/sprint-execution/SKILL.md and scaffold/hosts/codex/.codex/hooks/token-ledger.sh. STORY-064-02 needs scaffold/hosts/codex/.codex/agents/reporter.toml.",
+      "STORY-064-02's exports_consumed path 'sprint_metrics.mjs' resolves to cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs (STORY-064-01's create).",
+      "C1 and C2 were taken from the sprint plan as of 2026-11-13T23:17Z: DispatchRow has tool_use_id and completed; Item has interrupted and post_merge."
+    ]
+  },
+  "open_decisions_for_gate_2": [
+    "1. Confirm nested cli worktrees for SPRINT-45 (the SPRINT-44 ruling (a) layout). This clears the BUG-046 refusal for this sprint only.",
+    "2. Merge-lane known reds: canonical-live-parity 5d from the CR-120 merge, and 5a and 5c from the STORY-064-02 merge, plus doctor drift from the first merge. Recommended: record each in section 6; do not hand-port live.",
+    "3. dist on cli main is live (five hooks run it). Recommended: no BD during the sprint; run post-merge full suites in a throwaway worktree on main.",
+    "4. BUG-117 stays fast although rubric check 4 fails as written (one outline plus one scenario).",
+    "5. Confirm the C1 and C2 typing as frozen here: synchronous reader functions; the C2 CLI exit codes and env override; 'not measured' rendering; share as a token fraction."
+  ],
+  "refused": [],
+  "gate_2_decisions": {
+    "decided_at": "2026-11-14",
+    "by": "owner",
+    "quote": "approved. please execute",
+    "answers": [
+      "1 confirmed",
+      "2 confirmed (record known reds, no hand-port)",
+      "3 confirmed (no BD; full suites in throwaway worktree)",
+      "4 confirmed (BUG-117 fast)",
+      "5 confirmed (C1/C2 typing frozen as written)"
+    ]
+  }
+}

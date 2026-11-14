@@ -34,6 +34,7 @@ cites:
   - "[[PROPOSAL-012]]"
 cited_by: 
   - "[[BUG-126]]"
+  - "[[BUG-136]]"
   - "[[CR-126]]"
   - "[[CR-127]]"
   - "[[CR-128]]"
@@ -101,5 +102,5 @@ The wiki is meant to be what the orchestrator (the agent the owner talks to) rea
 - Parent: none
 - Children (16): [[CR-127]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
 - Cites (12): [[BUG-085]], [[BUG-086]], [[CR-063]], [[CR-093]], [[CR-103]], [[CR-112]], [[CR-126]], [[EPIC-015]], [[EPIC-020]], [[EPIC-024]], [[EPIC-052]], [[PROPOSAL-012]]
-- Cited by (19): [[BUG-126]], [[CR-126]], [[CR-127]], [[CR-128]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
+- Cited by (20): [[BUG-126]], [[BUG-136]], [[CR-126]], [[CR-127]], [[CR-128]], [[CR-129]], [[CR-130]], [[STORY-063-01]], [[STORY-063-02]], [[STORY-063-03]], [[STORY-063-04]], [[STORY-063-05]], [[STORY-063-06]], [[STORY-063-07]], [[STORY-063-08]], [[STORY-063-09]], [[STORY-063-10]], [[STORY-063-11]], [[STORY-063-12]], [[STORY-063-13]]
 <!-- END relations -->

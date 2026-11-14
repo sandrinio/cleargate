@@ -12,6 +12,7 @@ children:
 cites: []
 cited_by: 
   - "[[CR-087]]"
+  - "[[INITIATIVE-002]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-045_Polyglot_Portability_And_Parallel_Dogfood_Hardening.md"
@@ -59,5 +60,5 @@ ClearGate's stated goal is to ship to *many* repos (memory `project_codemap_gene
 ## Relations
 - Parent: none
 - Children (6): [[CR-077]], [[CR-078]], [[CR-079]], [[CR-080]], [[CR-081]], [[CR-082]]
-- Cited by (1): [[CR-087]]
+- Cited by (2): [[CR-087]], [[INITIATIVE-002]]
 <!-- END relations -->

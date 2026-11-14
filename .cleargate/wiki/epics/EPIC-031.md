@@ -10,6 +10,7 @@ children:
   - "[[STORY-031-05]]"
 cites: []
 cited_by: 
+  - "[[INITIATIVE-002]]"
   - "[[SPRINT-31]]"
   - "[[STORY-031-03]]"
   - "[[STORY-031-04]]"
@@ -62,5 +63,5 @@ Resolved at draft time — no remaining open questions for the human. (Ambiguity
 ## Relations
 - Parent: none
 - Children (5): [[STORY-031-01]], [[STORY-031-02]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
-- Cited by (4): [[SPRINT-31]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
+- Cited by (5): [[INITIATIVE-002]], [[SPRINT-31]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
 <!-- END relations -->

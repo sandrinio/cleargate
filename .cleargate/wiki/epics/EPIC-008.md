@@ -27,6 +27,7 @@ children:
 cites: []
 cited_by: 
   - "[[BUG-124]]"
+  - "[[BUG-136]]"
   - "[[CR-125]]"
   - "[[STORY-060-03]]"
 status: "Abandoned"
@@ -79,5 +80,5 @@ All 6 questions resolved 2026-04-19 by Vibe Coder (accept all AI recommendations
 ## Relations
 - Parent: none
 - Children (21): [[BUG-008]], [[CR-008]], [[CR-010]], [[CR-027]], [[CR-028]], [[CR-030]], [[CR-031]], [[CR-032]], [[CR-033]], [[CR-034]], [[CR-035]], [[CR-036]], [[CR-038]], [[CR-125]], [[STORY-008-01]], [[STORY-008-02]], [[STORY-008-03]], [[STORY-008-04]], [[STORY-008-05]], [[STORY-008-06]], +1 more
-- Cited by (3): [[BUG-124]], [[CR-125]], [[STORY-060-03]]
+- Cited by (4): [[BUG-124]], [[BUG-136]], [[CR-125]], [[STORY-060-03]]
 <!-- END relations -->

@@ -13,6 +13,7 @@ cited_by:
   - "[[CR-103]]"
   - "[[EPIC-052]]"
   - "[[EPIC-053]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-032-01]]"
   - "[[STORY-032-02]]"
   - "[[STORY-032-03]]"
@@ -64,5 +65,5 @@ The Architect agent currently rediscovers source structure on every dispatch —
 ## Relations
 - Parent: none
 - Children (4): [[CR-091]], [[STORY-032-01]], [[STORY-032-02]], [[STORY-032-03]]
-- Cited by (7): [[CR-091]], [[CR-103]], [[EPIC-052]], [[EPIC-053]], [[STORY-032-01]], [[STORY-032-02]], [[STORY-032-03]]
+- Cited by (8): [[CR-091]], [[CR-103]], [[EPIC-052]], [[EPIC-053]], [[INITIATIVE-002]], [[STORY-032-01]], [[STORY-032-02]], [[STORY-032-03]]
 <!-- END relations -->

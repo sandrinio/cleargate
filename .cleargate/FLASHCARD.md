@@ -1,3 +1,7 @@
+2026-11-14 · #ledger #transcripts · Resumed sessions copy subagent .meta.json without the .jsonl; count agents with a transcript, dedupe by toolUseId.
+2026-11-14 · #ledger #workflow · Workflow agents' transcripts live at <session>/subagents/workflows/<run>/; wf_*.json agentCount under-reports resumed runs.
+2026-11-14 · #measurement #rework · 'Dispatches minus one' overcounts rework ~4x: exclude pass N, Integrate, Pre-verify, interrupted and post-merge replays.
+2026-11-14 · #gate #initiative #drafting · Initiative gate counts sections by position: a `## 0.` or any heading before `## 1.` fails user-flow/success-criteria; put extras after §6.
 2026-11-13 · #upgrade #hash · A hooks-only settings hash must reach MANIFEST, snapshot AND current-file sha, or every install reads both-changed.
 2026-11-13 · #upgrade #tty · promptMergeChoice heard data/error only: stdin EOF never settled, upgrade exited 0 halfway; one chunk ate later answers.
 2026-11-13 · #upgrade #drift · upgrade writes .drift-state.json with the PRE-run install sha: taken files read both-changed until doctor refreshes.

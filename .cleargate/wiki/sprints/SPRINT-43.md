@@ -6,8 +6,6 @@ children:
   - "[[BUG-086]]"
   - "[[BUG-087]]"
   - "[[BUG-088]]"
-  - "[[BUG-117]]"
-  - "[[CR-120]]"
   - "[[CR-121]]"
   - "[[CR-122]]"
   - "[[EPIC-031]]"
@@ -19,10 +17,11 @@ cites:
   - "[[EPIC-055]]"
 cited_by: 
   - "[[CR-131]]"
+  - "[[INITIATIVE-002]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-43_execution_loop_efficiency_and_dev_context.md"
-last_ingest: "2026-11-13T01:02:08.963Z"
+last_ingest: "2026-11-13T23:02:52.346Z"
 last_ingest_commit: "7ba61eb5110056cbc5302b31b3248bf5e2331090"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-43"
@@ -54,7 +53,7 @@ sprint_cleargate_id: "SPRINT-43"
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (11): [[BUG-086]], [[BUG-087]], [[BUG-088]], [[BUG-117]], [[CR-120]], [[CR-121]], [[CR-122]], [[EPIC-031]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
+- Children (9): [[BUG-086]], [[BUG-087]], [[BUG-088]], [[CR-121]], [[CR-122]], [[EPIC-031]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
 - Cites (2): [[BUG-085]], [[EPIC-055]]
-- Cited by (1): [[CR-131]]
+- Cited by (2): [[CR-131]], [[INITIATIVE-002]]
 <!-- END relations -->

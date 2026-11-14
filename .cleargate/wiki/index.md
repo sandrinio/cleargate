@@ -11,6 +11,7 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
+- [[SPRINT-45]] — Draft · 2026-11-14 → 2026-11-17 — Measured Loop and Safe Upgrade — Make the sprint report's rework and cost figures come from what actually
 
 ### Epics
 
@@ -35,6 +36,8 @@
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
+- [[EPIC-064]] — Draft · SPRINT-45 — Sprint Numbers From What Happened — Derive per-item dispatches, rework rounds, wall time and tokens from the host's
+  - [[CR-120]] — Draft · SPRINT-45 — Measure the Subagent, Not the Orchestrator - `subagent-ledger.mjs`
 
 ### Proposals and initiatives
 
@@ -45,6 +48,7 @@
 - [[PROPOSAL-029]] — Ready · SPRINT-29 — EPIC-029: Delivery Folder Umbrella Restructure — With 27 items in pending-sync/ and 302 in archive/, both humans and
 - [[PROPOSAL-074]] — Draft · no sprint — EPIC-074: Antigravity 2.0 Host Port - Full-Parity Scaffold — ClearGate's planning surface is host-agnostic, but its *execution* surface is Claude Code-native,
 - [[INITIATIVE-001]] — In Triage · no sprint — Broker / Rendezvous Plane for Local Claude Code Connectors — The Connector, a planned (not yet built) local service that wraps a
+- [[INITIATIVE-002]] — Triaged · no sprint — Evidence-First Execution Loop — Happy path, from the owner's side: Plan
 
 ### By area
 
@@ -57,15 +61,20 @@
 - area: cli
   - [[BUG-091]] — Draft · no sprint — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
   - [[BUG-094]] — Draft · no sprint — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
-  - [[BUG-117]] — Draft · SPRINT-43 — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know
+  - [[BUG-117]] — Draft · SPRINT-45 — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know
 - area: cli-resolver
   - [[BUG-104]] — Triaged · SPRINT-41 — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
 - area: cli-upgrade
+  - [[BUG-133]] — Draft · SPRINT-45 — Upgrade output buries the files that lost local edits
+  - [[BUG-134]] — Draft · SPRINT-45 — Upgrade reorders the hooks in .claude/settings.json
   - [[CR-115]] — Approved · no sprint — `cleargate upgrade` announces what it is about to overwrite, before it overwrites it
+  - [[CR-132]] — Draft · no sprint — Upgrade merges local edits against the installed version instead of replacing them
 - area: codex-adapter
   - [[BUG-112]] — Triaged · SPRINT-41 — Codex agents are told to call `Skill(flashcard, "check")`, a Claude tool call, so Codex invents a `cleargate flashcard` command
 - area: dispatch-serial
   - [[BUG-102]] — Triaged · SPRINT-41 — The serial driver needs a waves.json that the tiny-sprint rule omits, and its verdicts never move state.json
+- area: doctor
+  - [[BUG-130]] — Draft · no sprint — doctor reports a gate failure the item no longer has
 - area: framework
   - [[CR-085-Drive-Execution-Loop-States-Live]] — Draft · no sprint — CR-085: Drive Execution-Loop Lifecycle States Live (In-Progress + Intermediate)
 - area: gate-predicates
@@ -91,6 +100,7 @@
   - [[BUG-064]] — Draft · no sprint — `existing-surfaces-verified` invents a phantom path from any dot-directory citation and blocks the gate on it
   - [[BUG-065]] — Draft · no sprint — `proposal` is a registered, actively-used work-item type with no authoring template
   - [[BUG-066]] — Draft · no sprint — `test_close_pipeline.sh` reports PASS for scenarios that never execute `close_sprint.mjs`
+  - [[BUG-136]] — Draft · no sprint — The two readiness predicates that read the wiki index never match it
   - [[CR-109]] — Draft · SPRINT-39 — Machine fields move out of the work-item document
   - [[CR-112]] — Draft · SPRINT-39 — Heading-anchored predicates replace positional `section(N)`
   - [[CR-113]] — Draft · no sprint — One bounded-marker grammar
@@ -103,17 +113,21 @@
   - [[BUG-109]] — Triaged · SPRINT-41 — `run_script.sh` records QA-Red's intended red test runs as script incidents, unattributed
 - area: serial-dispatch
   - [[BUG-111]] — Triaged · SPRINT-41 — `dispatch_serial.mjs` rejects an unknown wave id without naming the valid ones
+- area: session-brief
+  - [[BUG-127]] — Draft · no sprint — The brief says "no goal" for every sprint plan made from the template
+  - [[BUG-128]] — Draft · no sprint — The brief's Planned line counts 0/0 for a sprint plan that lists its members
 - area: sprint-close
   - [[BUG-118]] — Triaged · no sprint — Sprint close marks carried-over (Parking Lot) items Completed and archives them
   - [[BUG-119]] — Triaged · no sprint — Sprint close halts on incomplete parents that have nothing to do with the closing sprint
   - [[CR-129]] — Draft · no sprint — Record the Sprint Goal Verdict as a Structured Field
+- area: sprint-design-review
+  - [[BUG-129]] — Draft · no sprint — collision_surface.sh reads §3.1 cell notes as part of the path, so the design review refuses every story
 - area: sprint-execution
   - [[BUG-086]] — Draft · SPRINT-43 — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
   - [[BUG-087]] — Draft · SPRINT-43 — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
   - [[BUG-088]] — Draft · SPRINT-43 — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
   - [[BUG-108]] — Triaged · SPRINT-41 — The QA role requires a context pack that the sprint-execution skill never tells the orchestrator to build
   - [[BUG-113]] — Triaged · SPRINT-41 — Nothing checks QA-Red's sealed tests against the item's declared Test Layers minimums before the Developer starts
-  - [[CR-120]] — Draft · SPRINT-43 — Measure the Subagent, Not the Orchestrator - `subagent-ledger.mjs`
   - [[CR-121]] — Draft · SPRINT-43 — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
   - [[CR-122]] — Draft · SPRINT-43 — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
 - area: sprint-scripts
@@ -124,7 +138,11 @@
   - [[CR-128]] — Draft · no sprint — CRs and Bugs Declare What Proves It Works in the Real Host
   - [[CR-130]] — Draft · no sprint — The Bug Template Gets a Root Cause Section
 - area: wiki
+  - [[BUG-135]] — Draft · no sprint — wiki build says "malformed frontmatter" without saying what is wrong
   - [[CR-127]] — Draft · no sprint — Lint the Pushed Item's Own Wiki Page at Push
+- area: wiki-contradict
+  - [[BUG-131]] — Draft · no sprint — An empty neighbourhood still asks for an agent run, and a prose "no contradictions" answer fails the commit
+  - [[BUG-132]] — Draft · no sprint — A sprint plan's contradiction check has no pages to compare against
 - area: worktree-lifecycle
   - [[BUG-107]] — Triaged · SPRINT-41 — ClearGate's own runtime output makes every story worktree unclean, so DevOps teardown needs `git worktree remove --force`
 

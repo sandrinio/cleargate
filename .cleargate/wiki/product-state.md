@@ -6,11 +6,11 @@
 
 | Type | Total | Open | Shipped |
 |------|-------|--------|---------|
-| Epics | 52 | 14 | 37 |
-| Sprints | 44 | 4 | 37 |
+| Epics | 53 | 15 | 37 |
+| Sprints | 45 | 5 | 37 |
 | Proposals | 16 | 6 | 14 |
-| CRs | 126 | 17 | 94 |
-| Bugs | 113 | 46 | 55 |
+| CRs | 127 | 18 | 94 |
+| Bugs | 123 | 56 | 55 |
 | Spikes | 0 | 0 | 0 |
 
 ## Open Epics
@@ -43,6 +43,8 @@
 - [[EPIC-060]] — status: Draft
 
 - [[EPIC-061]] — status: Draft
+
+- [[EPIC-064]] — status: Draft
 
 
 
@@ -420,6 +422,8 @@
 - [[EPIC-062]] (epics) — Completed
 
 - [[EPIC-063]] (epics) — Completed
+
+- [[INITIATIVE-002]] (initiatives) — Triaged
 
 - [[PROPOSAL-001]] (proposals) — Abandoned
 

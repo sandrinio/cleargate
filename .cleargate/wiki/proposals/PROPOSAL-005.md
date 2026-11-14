@@ -6,6 +6,7 @@ children: []
 cites: []
 cited_by: 
   - "[[BUG-124]]"
+  - "[[BUG-136]]"
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-005_Token_Cost_And_Readiness_Gates.md"
@@ -61,5 +62,5 @@ Extend every ClearGate work-item template with two new capabilities:
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Cited by (1): [[BUG-124]]
+- Cited by (2): [[BUG-124]], [[BUG-136]]
 <!-- END relations -->

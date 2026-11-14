@@ -27,6 +27,8 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[SPRINT-43]] — sprint · status: Draft — pass
 
+- [[SPRINT-45]] — sprint · status: Draft — pass
+
 - [[PROPOSAL-009]] — proposal · status: Draft — pass
 
 - [[PROPOSAL-029]] — proposal · status: Ready — fail: parent-approved, reuse-audit-recorded, simplest-form-justified
@@ -34,6 +36,8 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 - [[PROPOSAL-074]] — proposal · status: Draft — fail: parent-approved, reuse-audit-recorded, simplest-form-justified
 
 - [[INITIATIVE-001]] — initiative · status: In Triage — fail: success-criteria-populated
+
+- [[INITIATIVE-002]] — initiative · status: Triaged — pass
 
 - [[CR-083-Document-Connection-Identity-Routes-OpenAPI]] — cr · status: Draft — fail: existing-surfaces-verified
 
@@ -47,8 +51,6 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[CR-119]] — cr · status: Triaged — pass
 
-- [[CR-120]] — cr · status: Draft — pass
-
 - [[CR-121]] — cr · status: Draft — pass
 
 - [[CR-122]] — cr · status: Draft — pass
@@ -60,6 +62,8 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 - [[CR-129]] — cr · status: Draft — pass
 
 - [[CR-130]] — cr · status: Draft — pass
+
+- [[CR-132]] — cr · status: Draft — pass
 
 - [[BUG-050]] — bug · status: Draft — pass
 
@@ -111,7 +115,21 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[BUG-094]] — bug · status: Draft — pass
 
-- [[BUG-117]] — bug · status: Draft — pass
+- [[BUG-127]] — bug · status: Draft — pass
+
+- [[BUG-128]] — bug · status: Draft — pass
+
+- [[BUG-129]] — bug · status: Draft — pass
+
+- [[BUG-130]] — bug · status: Draft — pass
+
+- [[BUG-131]] — bug · status: Draft — pass
+
+- [[BUG-132]] — bug · status: Draft — pass
+
+- [[BUG-135]] — bug · status: Draft — pass
+
+- [[BUG-136]] — bug · status: Draft — pass
 
 
 

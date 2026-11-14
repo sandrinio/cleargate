@@ -1,22 +1,24 @@
 ---
 cr_id: CR-120
-parent_ref: null
-parent_cleargate_id: null
-sprint_cleargate_id: SPRINT-43
+parent_ref: EPIC-064
+parent_cleargate_id: EPIC-064
+sprint_cleargate_id: SPRINT-45
 carry_over: false
 status: Draft
-approved: false
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-14T00:00:00Z
 context_source: "2026-09-06 execution-efficiency audit: all 4,437 ledger rows carry claude-opus-*, zero Sonnet rows; SPRINT-39 orchestrator transcript sums to the exact figure SPRINT-39_REPORT.md:305 publishes as sprint total"
 area: sprint-execution,instrumentation,ledger,reporting
 created_at: 2026-09-06T00:00:00Z
-updated_at: 2026-09-06T00:00:00Z
+updated_at: 2026-11-14T00:00:00Z
 created_at_version: cleargate@0.26.1
 updated_at_version: cleargate@0.26.1
 server_pushed_at_version: null
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-09-06T16:38:42Z
+  last_gate_check: 2026-11-14T08:11:14Z
   transition: ready-to-apply
 pushed_by: null
 pushed_at: null
@@ -35,6 +37,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-09-06T16:38:42Z
   sessions: []
+last_contradict_sha: 1fa52c9c3c277ba6f52ad437f75a367d523de7fae4e6aa1701686d1f9152185c
 ---
 
 # CR-120: Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs`
@@ -43,11 +46,15 @@ draft_tokens:
 
 - **Question:** Should this replace `token-ledger.jsonl` or sit beside it?
 - **Recommended:** Beside it. `token-ledger.jsonl` has consumers (`count_tokens.mjs`, `lib/ledger-digest.mjs`, `prep_reporter_context.mjs`, `stamp-tokens.ts`, the dashboard) and a `surface-whitelist.txt` row. A sibling `subagent-ledger.jsonl` gets 100% of the benefit with none of the migration risk. The existing ledger gains one honest label; it is not deleted.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
 
 - **Question:** Where does the new script get invoked?
 - **Recommended:** One existing call site — `count_tokens.mjs`, which already owns the `<sprint-id>` CLI and the `--json` digest that `prep_reporter_context.mjs` consumes. Runs once at Gate 4, measured at 0.89 s for 158 agents. No hook, no emitter, no schema migration.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** `count_tokens.mjs`, as recommended; STORY-064-01 also imports the reader directly (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
+
+- **Question:** Do workflow-run agents count? (Added 2026-11-14.)
+- **Recommended:** Yes. Every story stage runs inside a workflow run, and those agents write their transcripts one level deeper, at `<session>/subagents/workflows/<run-id>/agent-*.jsonl` + `.meta.json`, with `agentType`, `workflowPhase` and `description` (verified on dispenser_adapter session 3a9277ef, 12 agents in run wf_01856b8c-d1a). A top-level-only walk would miss every QA-Red, Developer and QA-Verify dispatch.
+- **Human decision:** Yes, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
 
 ## 1. The Context Override (Old vs. New)
 
@@ -60,6 +67,7 @@ draft_tokens:
 
 **New Logic (The New Truth):**
 
+- **Amended 2026-11-14 (EPIC-064).** The reader walks `subagents/` recursively, so workflow-run agents under `subagents/workflows/<run-id>/` are read too. Each row adds `session_id`, `agent_id`, `run_id` (the workflow run id, or null for a top-level dispatch) and `workflow_phase` (from `.meta.json`, or null). Sessions are discovered from the distinct `transcript` paths in the sprint's `token-ledger.jsonl`. If there are none, the fallback scans the host's project transcript directory (`CLEARGATE_TRANSCRIPTS_ROOT` overrides it for tests) and keeps agents whose first timestamp falls in the sprint window (earliest to latest `events.jsonl` `ts`). The reader counts only agents that have a transcript (a `.meta.json` without its `.jsonl` is a copy that a resumed session carried over), counts each `toolUseId` once across sessions, and sets `completed: false` when the transcript records a user interruption or a cancelled hook. Each row also carries `tool_use_id` and `completed`. The module exports `discoverSessions(sprintDir, opts)` and `readDispatches(sessionDirs, opts)` with the frozen row shape of contract C1 in the SPRINT-45 plan; STORY-064-01 imports them.
 - A new read-only `.cleargate/scripts/subagent-ledger.mjs` (~30 lines) walks `dirname(transcript)/basename(transcript,'.jsonl')/subagents/`, reading the `agent-<id>.jsonl` + `agent-<id>.meta.json` pairs the host already writes (158 pairs survived on disk for SPRINT-39, 10 days later), dedupes by `message.id`, and emits one row per dispatch: `{agent_type, description, model, started_at, ended_at, wall_ms, turns, tool_uses, usage{...}}` into a sibling `subagent-ledger.jsonl`.
 - Every row `token-ledger.sh` emits gains `"measures": "orchestrator-window"`, and `lib/ledger-digest.mjs` labels the column accordingly. The number stops being wrong by pretending to be something else.
 - One SKILL.md line fixes the Agent `description` format to `<stage> <WORK-ITEM-ID>[ — note]`. 148 of 158 SPRINT-39 descriptions already parse; the rule takes the join to 100% at zero runtime cost.
@@ -71,7 +79,7 @@ draft_tokens:
 - [ ] Invalidate/Update Epic: none.
 - [ ] Database schema impacts? No — JSONL files on disk only.
 
-Downstream readers to verify, not change: `count_tokens.mjs`, `.cleargate/scripts/lib/ledger-digest.mjs`, `prep_reporter_context.mjs`, `reporter.md` §5, the sprint dashboard. Adding a field to existing rows and adding a sibling file must leave all of them working.
+Downstream readers that must keep working: `prep_reporter_context.mjs`, `reporter.md` §5, the sprint dashboard (verify, not change; STORY-064-02 changes the first two separately). `count_tokens.mjs` (one call site) and `lib/ledger-digest.mjs` (one column label) change minimally and keep their existing JSON keys. Adding a field to existing rows and adding a sibling file must leave all of them working. (Wording refreshed 2026-11-14.)
 
 ## Existing Surfaces
 
@@ -88,18 +96,21 @@ Downstream readers to verify, not change: `count_tokens.mjs`, `.cleargate/script
 
 - none found for subagent-level instrumentation — the `cleargate-wiki-query` pass returned no prior item.
 - [[EPIC-044]] — Completed, "Agent Dispatch Reliability & Token Efficiency". Covers token efficiency at the dispatch level, not subagent granularity. This CR supplies the measurement EPIC-044 optimised without.
-- [[BUG-087]] — sibling in SPRINT-42; the `pre-gate.jsonl` line in this CR is what would have surfaced BUG-087's defect years earlier.
-- [[BUG-085]] — Draft. Same family of "the thing we believe is running is not". Not a dependency.
+- [[BUG-087]] — planned in SPRINT-43 (refreshed 2026-11-14); the `pre-gate.jsonl` line in this CR is what would have surfaced BUG-087's defect years earlier.
+- [[BUG-085]] — Completed (refreshed 2026-11-14). Same family of "the thing we believe is running is not". Not a dependency.
 
 ## 3. Execution Sandbox
 
-**Modify:**
-- `.cleargate/scripts/subagent-ledger.mjs` (new) and its canonical mirror
-- `.cleargate/scripts/count_tokens.mjs` and canonical — one call site
-- `.cleargate/scripts/lib/ledger-digest.mjs` and canonical — column label
-- `.claude/hooks/token-ledger.sh` and canonical — add the `measures` field only
-- `.cleargate/scripts/surface-whitelist.txt` and canonical — add `subagent-ledger.jsonl` and `pre-gate.jsonl` rows beside the existing `token-ledger.jsonl` row
-- `cleargate-planning/.claude/skills/sprint-execution/SKILL.md` and live — the `description` format line
+**Modify** (canonical only, amended 2026-11-14 — the old planning snapshot is frozen since STORY-058-01; live copies change at the Gate-4 re-sync):
+- `cleargate-cli/scaffold/core/.cleargate/scripts/subagent-ledger.mjs` (new)
+- `cleargate-cli/scaffold/core/.cleargate/scripts/count_tokens.mjs` — one call site
+- `cleargate-cli/scaffold/core/.cleargate/scripts/lib/ledger-digest.mjs` — column label
+- `cleargate-cli/scaffold/hosts/claude/.claude/hooks/token-ledger.sh` — add the `measures` field only
+- `cleargate-cli/scaffold/core/.cleargate/scripts/surface-whitelist.txt` — add rows for the subagent ledger, metrics and pre-gate JSONL outputs beside the existing token-ledger row
+- `cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh` — the `pre-gate.jsonl` line
+- `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` — the `description` format line
+- `cleargate-cli/test/scripts/subagent-ledger.node.test.ts` (new) and `cleargate-cli/test/fixtures/subagent-ledger/` (new)
+- `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md` and `cleargate-cli/scaffold/hosts/codex/.codex/hooks/token-ledger.sh` — generated Codex copies, regenerated with `npm run gen:codex`, never hand-edited (CR:spec-clarification 2026-11-14 from the SPRINT-45 design review: `prebuild` runs `build-codex-payload.mjs --check`)
 
 **Do NOT modify:**
 - `events.jsonl`, or `state-events.mjs`. `fold()`'s `maxTs = event.ts` assignment runs BEFORE the kind switch, so an unrecognised kind is not identity — `updated_at` still moves, `checkFoldDrift`'s byte-exact compare then fails, and `update_state.mjs:313` hard-exits 1 on every subsequent state write. That surfaces at the DevOps merge step, after a whole wave's work is complete, with remediation text telling the operator to delete the event log. The CR-106 purity contract is test-pinned at `state-scripts.test.mjs:1034`.
@@ -108,7 +119,9 @@ Downstream readers to verify, not change: `count_tokens.mjs`, `.cleargate/script
 
 ## Task Breakdown
 
-- [ ] Write `subagent-ledger.mjs`: walk the `subagents/` dir, read `agent-*.jsonl` + `.meta.json` pairs, dedupe by `message.id`
+- [ ] Write `subagent-ledger.mjs`: walk the `subagents/` dir recursively (including `workflows/<run-id>/`), read `agent-*.jsonl` + `.meta.json` pairs, dedupe by `message.id`
+- [ ] Skip meta files without a transcript; dedupe by `toolUseId` across sessions; set `completed` from interruption/cancel markers
+- [ ] Export `discoverSessions` and `readDispatches` with the contract C1 row shape; ledger `transcript` paths first, window-bounded project-directory scan as fallback
 - [ ] Emit one row per dispatch to a sibling `subagent-ledger.jsonl`
 - [ ] Degrade to a warning and exit 0 if the host moves the `subagents/` path — this must never fail a Gate-4 close
 - [ ] Wire the single call site in `count_tokens.mjs`
@@ -117,21 +130,27 @@ Downstream readers to verify, not change: `count_tokens.mjs`, `.cleargate/script
 - [ ] Add the two `surface-whitelist.txt` rows
 - [ ] Add the `description` format line to SKILL.md
 - [ ] Add the `pre-gate.jsonl` write to `pre_gate_runner.sh`
-- [ ] Mirror every script to canonical
+- [ ] Keep every edit in the canonical scaffold; no live-copy edits
 
 ## 4. Verification Protocol
 
-**Command/Test:** `bash .cleargate/scripts/test/cr120_subagent_ledger.red.sh`
+**Command/Test:** `cd cleargate-cli && node --test --import tsx/esm test/scripts/subagent-ledger.node.test.ts` (amended 2026-11-14: node:test in the cli repo replaces the bash harness).
 
-The harness builds a `mktemp -d` fixture containing a synthetic `subagents/` directory with two `agent-*.jsonl` + `.meta.json` pairs, one carrying a duplicated `message.id`, and asserts: rows are emitted per dispatch; the duplicate is counted once; a missing `subagents/` directory yields a warning and exit 0; `token-ledger.jsonl` rows carry `measures`.
+The fixture is a synthetic session with two top-level `agent-*.jsonl` + `.meta.json` pairs, one carrying a duplicated `message.id`, plus a `workflows/wf_fixture/` run with three agents (QA-Red, Build, Verify). It asserts:
+- rows are emitted per dispatch, workflow-run agents included, with `run_id` and `workflow_phase` set;
+- the duplicate is counted once, and a meta-only copy of an agent in a second session is not counted;
+- an interrupted transcript yields `completed: false`;
+- a missing `subagents/` directory yields a warning and exit 0;
+- `discoverSessions` finds the session from a `token-ledger.jsonl` `transcript` path, and from the window-bounded fallback scan when the ledger has none;
+- `token-ledger.jsonl` rows carry `measures`.
 
 **Test layers.** Declare all three below.
 
 | Test Type | Minimum Count | Notes |
 |---|---|---|
-| Unit tests | 4 | pair-walk, `message.id` dedupe, missing-dir degradation, row shape |
+| Unit tests | 6 | pair-walk, workflow-run walk, `message.id` dedupe, missing-dir degradation, row shape, session discovery (ledger and fallback) |
 | Integration tests | 0 | No Postgres/Redis surface; the transcript pairs are plain files |
-| E2E / acceptance tests | 4 | 1 per assertion above, via the bash harness |
+| E2E / acceptance tests | 5 | 1 per assertion above, through the script's CLI as a child process |
 
 **Cross-check available:** the parent transcript's `duration_ms` and `tool_uses` are accurate to 0.04% and make a cheap validation of the new rows. Do NOT use its `<usage><subagent_tokens>` as a cost figure — measured, that field is the agent's final-turn context, not cumulative spend (qa sums to 8.5M by that field against 400.9M measured).
 
@@ -142,7 +161,7 @@ The harness builds a `mktemp -d` fixture containing a synthetic `subagents/` dir
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
@@ -151,7 +170,7 @@ Requirements to pass to Green (Ready for Execution):
 - [x] All impacted downstream Epics/Stories are identified and reverted to 🔴 High Ambiguity. *(None impacted — §2 states this explicitly; no item depends on the ledger's per-agent semantics.)*
 - [x] Execution Sandbox contains exact file paths.
 - [x] Verification command is provided.
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter.
 - [x] Existing Surfaces cites at least one source-tree path the CR extends.
 
-> The single unchecked box is the Gate-1 human decision, plus the two §0.5 questions.
+> The single unchecked box is the Gate-1 human decision. The three §0.5 questions carry recommended answers to confirm with the SPRINT-45 Brief.

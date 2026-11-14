@@ -11,13 +11,13 @@ start_date: 2026-10-19
 end_date: 2026-10-30
 synced_at: null
 created_at: 2026-10-08T00:00:00Z
-updated_at: 2026-10-08T00:00:00Z
+updated_at: 2026-11-13T23:02:51Z
 created_at_version: cleargate@0.27.0
-updated_at_version: cleargate@0.27.0
+updated_at_version: 37c2b2f1-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-10-08T13:21:47Z
+  last_gate_check: 2026-11-13T23:02:51Z
   transition: ready-for-execution
 epics:
   - EPIC-031
@@ -30,9 +30,7 @@ bugs:
   - BUG-086
   - BUG-087
   - BUG-088
-  - BUG-117
 crs:
-  - CR-120
   - CR-121
   - CR-122
 area: sprint-execution,test-runner,instrumentation,agent-prompts,perf,dx

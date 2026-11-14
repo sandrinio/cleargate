@@ -15,6 +15,7 @@ cited_by:
   - "[[CR-111]]"
   - "[[CR-126]]"
   - "[[EPIC-061]]"
+  - "[[INITIATIVE-002]]"
   - "[[STORY-061-01]]"
   - "[[STORY-061-02]]"
   - "[[STORY-061-03]]"
@@ -64,5 +65,5 @@ There is no CI in any ClearGate repo — `ls .github/workflows` returns nothing 
 ## Relations
 - Parent: none
 - Cites (6): [[CR-107]], [[CR-126]], [[EPIC-028]], [[EPIC-055]], [[EPIC-061]], [[STORY-061-03]]
-- Cited by (7): [[CR-110]], [[CR-111]], [[CR-126]], [[EPIC-061]], [[STORY-061-01]], [[STORY-061-02]], [[STORY-061-03]]
+- Cited by (8): [[CR-110]], [[CR-111]], [[CR-126]], [[EPIC-061]], [[INITIATIVE-002]], [[STORY-061-01]], [[STORY-061-02]], [[STORY-061-03]]
 <!-- END relations -->
