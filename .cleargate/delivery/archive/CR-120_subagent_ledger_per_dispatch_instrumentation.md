@@ -4,7 +4,7 @@ parent_ref: EPIC-064
 parent_cleargate_id: EPIC-064
 sprint_cleargate_id: SPRINT-45
 carry_over: false
-status: Draft
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-14T00:00:00Z

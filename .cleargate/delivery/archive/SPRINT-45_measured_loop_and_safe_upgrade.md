@@ -44,7 +44,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: manual
-status: Active
+status: Completed
 start_date: 2026-11-14
 end_date: 2026-11-17
 synced_at: null
@@ -323,6 +323,12 @@ These are integration layers. All six items build at once after C0, within the 4
 
 ## 6. Execution Log
 
+- 2026-11-14 · Gate 4 prep · `close_sprint.mjs` was run with no flags. Close is halted for the owner.
+  - **Run 1:** the report must exist first (v2.1).
+  - **Bundle and Reporter:** the live `prep_reporter_context.mjs` wrote the live bundle (94 KB, no Measured Metrics: live is frozen by rule 9). The Reporter ran with the canonical Measured Metrics section as its second input (OD-C) and wrote `SPRINT-45_REPORT.md`. §3 rework, first-pass and cost rows came from Measured Metrics, so goal check (c) holds. The Reporter's verdict is partial: check 1 misses on dispenser S02's share 0.075; checks 2 and 3 hold. The Reporter tried a `cleargate push` of the report, which the pre-member state refused; no effect.
+  - **Run 2:** 2.5 passed. 2.6d archived the six items Completed. 2.6c flipped EPIC-064 and SPRINT-45 to Completed, both correct. It also flipped EPIC-058 (its body defers `.codex/rules/**` scope to before epic close) and EPIC-061 (S2-S6 and S8-S11 undrafted). The orchestrator restored both to pending-sync Draft, with their wiki pages; SPRINT-44 had the same false flips. 2.6c then halted on 16 unrelated parents (BUG-119 class).
+  - **Run 3:** `CLEARGATE_SKIP_PARENT_ROLLUP=1`, per the SPRINT-41/44 precedent and the broker-epics memory. 2.6 lifecycle clean (31 artifacts). 2.6b false-positived on the 15 SPRINT-41 Parking Lot bugs BUG-102..116, the same as SPRINT-44 (follow-up bug still open).
+  - **Next:** after the owner's Gate-4 authorization, run 4 adds `CLEARGATE_SKIP_LIFECYCLE_CHECK=1` (2.6 already clean). 2.8 needs `sprint/S-45` merged to main, which waits for that authorization.
 - 2026-11-14 · Goal check (c), step 1 · ran the canonical `prep_reporter_context.mjs` by path from cli main f846d9a, with `CLEARGATE_SPRINT_DIR`/`CLEARGATE_PENDING_SYNC_DIR` set to SPRINT-45. Bundle 87 KB, kept as `evidence/STORY-064-02/SPRINT-45.reporter-context.canonical.md`. Measured Metrics: 43 dispatches, 76.8M subagent tokens, 4 rework rounds (BUG-134 2, 064-01 1, 064-02 1), 9 git rework commits, first-pass 3 of 6, unattributed share 5.6%.
   - FINDING (carried, not this roster): R4 counts a dispatch after an item's first merge as a replay (`post_merge`), never as a round. So the walkthrough UR:bug round (BUG-133 r2) and 064-01 r2 show derived 0, with only git disagreeing (BUG-133 git 3).
   - Post-merge rework is visible only through the disagreement line.

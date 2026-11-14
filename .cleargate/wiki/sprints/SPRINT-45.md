@@ -12,18 +12,18 @@ children:
   - "[[STORY-064-02]]"
 cites: []
 cited_by: []
-status: "Active"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-45_measured_loop_and_safe_upgrade.md"
-last_ingest: "2026-11-14T12:54:32.611Z"
-last_ingest_commit: "38840af279ae93adeaf954c1fbe556732cbc5a97"
+raw_path: ".cleargate/delivery/archive/SPRINT-45_measured_loop_and_safe_upgrade.md"
+last_ingest: "2026-11-14T12:59:55.138Z"
+last_ingest_commit: ""
 repo: "planning"
 last_contradict_sha: "9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe"
 ---
 
 # SPRINT-45: Measured Loop and Safe Upgrade
 
-**Status:** Active · **Dates:** 2026-11-14 → 2026-11-17 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-11-14 → 2026-11-17 · **Gate:** pass
 
 ## Goal
 Make the sprint report's rework and cost figures come from what actually happened (the host's subagent transcripts and git), and make `cleargate upgrade` safe for repos with local edits, proven against a holdout recount of SPRINT-44 and dispenser_adapter's sprints.

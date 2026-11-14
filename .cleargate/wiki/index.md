@@ -11,7 +11,6 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
-- [[SPRINT-45]] — Active · 2026-11-14 → 2026-11-17 — Measured Loop and Safe Upgrade — Make the sprint report's rework and cost figures come from what actually
 
 ### Epics
 
@@ -36,8 +35,6 @@
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
-- [[EPIC-064]] — Draft · SPRINT-45 — Sprint Numbers From What Happened — Derive per-item dispatches, rework rounds, wall time and tokens from the host's
-  - [[CR-120]] — Draft · SPRINT-45 — Measure the Subagent, Not the Orchestrator - `subagent-ledger.mjs`
 
 ### Proposals and initiatives
 
@@ -61,12 +58,9 @@
 - area: cli
   - [[BUG-091]] — Draft · no sprint — `doctor --check-scaffold` reports a pristine install's gate-checks.json as upstream-changed
   - [[BUG-094]] — Draft · no sprint — `cleargate state validate <sprint-id>` always fails after the CR-117 port of `validate_state.mjs`
-  - [[BUG-117]] — Draft · SPRINT-45 — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know
 - area: cli-resolver
   - [[BUG-104]] — Triaged · SPRINT-41 — An older `cleargate` on PATH silently grades a newer scaffold, and the failure reads as a ClearGate defect
 - area: cli-upgrade
-  - [[BUG-133]] — Draft · SPRINT-45 — Upgrade output buries the files that lost local edits
-  - [[BUG-134]] — Draft · SPRINT-45 — Upgrade reorders the hooks in .claude/settings.json
   - [[CR-115]] — Approved · no sprint — `cleargate upgrade` announces what it is about to overwrite, before it overwrites it
   - [[CR-132]] — Draft · no sprint — Upgrade merges local edits against the installed version instead of replacing them
 - area: codex-adapter
@@ -148,11 +142,11 @@
 
 ## Archive
 
-- Epics: 35 Completed · 3 Abandoned
-- Sprints: 37 Completed · 3 Abandoned
+- Epics: 36 Completed · 3 Abandoned
+- Sprints: 38 Completed · 3 Abandoned
 - Proposals: 8 Abandoned · 2 Completed
-- CRs: 108 Completed · 1 Abandoned
-- Bugs: 66 Completed · 1 Abandoned
+- CRs: 109 Completed · 1 Abandoned
+- Bugs: 69 Completed · 1 Abandoned
 
 ## Contradictions
 

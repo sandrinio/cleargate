@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-45
 carry_over: false
 area: cli-upgrade
-status: Draft
+status: "Completed"
 severity: P3-Low
 reporter: orchestrator (field upgrade watch 0.27.0 → 0.30.1 in a Python target repo, replayed on a scratch copy, 2026-11-13)
 approved: true

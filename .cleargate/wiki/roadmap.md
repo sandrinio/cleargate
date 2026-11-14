@@ -31,6 +31,8 @@ Non-terminal sprints other than the active one.
 Terminal sprints (not Abandoned), newest first.
 
 
+- [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
+
 - [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
 - [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
@@ -143,8 +145,6 @@ _No active epics._
 
 - [[EPIC-061]] — status: Draft
 
-- [[EPIC-064]] — status: Draft
-
 
 
 ## Shipped Epics
@@ -219,5 +219,7 @@ _No active epics._
 - [[EPIC-062]] — status: Completed
 
 - [[EPIC-063]] — status: Completed
+
+- [[EPIC-064]] — status: Completed
 
 

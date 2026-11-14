@@ -32,10 +32,10 @@
 ## Recently Completed Sprints
 
 
+- [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
+
 - [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
 - [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
-
-- [[SPRINT-40]] — completed: 2026-09-02T02:30:00Z
 
 

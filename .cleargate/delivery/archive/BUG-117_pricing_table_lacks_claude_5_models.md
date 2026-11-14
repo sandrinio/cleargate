@@ -4,7 +4,7 @@ parent_ref: EPIC-043
 parent_cleargate_id: EPIC-043
 sprint_cleargate_id: SPRINT-45
 carry_over: false
-status: Draft
+status: "Completed"
 severity: P3-Low
 reporter: orchestrator
 approved: true
