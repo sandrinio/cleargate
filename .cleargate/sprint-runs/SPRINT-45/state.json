@@ -1,0 +1,81 @@
+{
+  "schema_version": 3,
+  "sprint_id": "SPRINT-45",
+  "sprint_status": "Active",
+  "stories": {
+    "CR-120": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T09:36:57.134Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-064-01": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T09:52:00.401Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-064-02": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T10:05:12.328Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-117": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:46:56.620Z",
+      "notes": "",
+      "lane": "fast",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-133": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T09:20:15.192Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-134": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 1,
+      "worktree": null,
+      "updated_at": "2026-11-14T09:52:00.612Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "transition STORY-064-02 → Done",
+  "updated_at": "2026-11-14T10:05:12.328Z"
+}

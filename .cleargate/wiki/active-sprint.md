@@ -5,8 +5,14 @@
 ## Current Sprint
 
 
+- [[SPRINT-45]]
+  - [[CR-120]] — Done
+  - [[STORY-064-01]] — Done
+  - [[STORY-064-02]] — Done
+  - [[BUG-117]] — Done
+  - [[BUG-133]] — Done
+  - [[BUG-134]] — Done
 
-_No active sprint found._
 
 
 
@@ -21,17 +27,15 @@ _No active sprint found._
 
 - [[SPRINT-43]] — status: Draft
 
-- [[SPRINT-45]] — status: Draft
-
 
 
 ## Recently Completed Sprints
 
 
+- [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
+
 - [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
 - [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
-
-- [[SPRINT-40]] — completed: 2026-09-02T02:30:00Z
 
 

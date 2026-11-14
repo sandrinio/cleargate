@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-064
 parent_cleargate_id: EPIC-064
 sprint_cleargate_id: SPRINT-45
 carry_over: false
-status: Draft
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-14T00:00:00Z
@@ -36,16 +36,22 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-064-01
+last_contradict_sha: 72ee6d1855762516f6a9562f8486578de0f740c568c8700cc6587d54bf8dffa2
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-13T22:58:57Z
-  sessions: []
-last_contradict_sha: "72ee6d1855762516f6a9562f8486578de0f740c568c8700cc6587d54bf8dffa2"
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-14T09:41:37Z
+  sessions:
+    - session: c4ede09a-83a2-42d8-bef2-7869c2129d06
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-13T23:04:40Z
 ---
 
 # STORY-064-01: Per-Item Metrics Derived From Transcripts and Git
@@ -62,15 +68,21 @@ As the Reporter at sprint close, I want each item's dispatches, rework rounds, w
 - **R3 — Dispatches.** Dispatch rows come from CR-120's exported reader (`readDispatches`, contract C1 in the sprint plan). Each row is matched to a roster item by its `description`:
   - An exact roster ID in the description matches.
   - So does a short form equal to a roster ID with its type prefix removed (`003-01` matches `STORY-003-01`; `001` alone matches nothing).
-  - A description naming no roster item is **sprint-level** when its `workflow_phase` or description says plan, design review, SDR, reader, synth, preflight, close or report.
+  - A description naming no roster item is **sprint-level** when its `workflow_phase` or description says plan, design review, SDR, reader, synth, preflight, close or report. It is also sprint-level when one of these holds:
+    - it names a sprint stage from the sprint-execution playbook: a milestone (`M<N>`), contract, consolidation, cleanup, simplify, walkthrough, wiki or contradiction;
+    - it names the sprint's own ID;
+    - its agent type only ever does sprint-level work: `architect-reader`, `architect-synth`, `reporter`, `cleargate-wiki-query`, `cleargate-wiki-contradict` or `code-simplifier`, with or without a plugin prefix such as `code-simplifier:`.
+    
+    *(CR:spec-clarification SC-4, SPRINT-45, 2026-11-14: the SPRINT-44 integration smoke classed six sprint-stage dispatches as unattributed. Those were the contract step C0, an M2 amendment, QA consolidation, a cleanup pass and two wiki queries.)*
   - Otherwise it is **unattributed**.
+  - A description naming two or more roster items (full IDs or short forms), or a short form shared by two roster items, is **unattributed**. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 - **R4 — Rework rules.** Amended 2026-11-14 after the holdout recount showed "dispatches minus one" overcounting 15 against 4 and 31 against 8.
   - **Kinds of dispatch.** A dispatch is a round candidate only if it is completed (`completed: true` in contract C1) and its role is one of:
     - `qa` doing red tests (phase `QA-Red`, or a description saying QA-Red/red);
     - `developer` building (phase `Build`, or a top-level developer dispatch);
     - `qa` verifying (phase `Verify`, or a description saying verify).
   - **Never rounds.** Dispatches in phases `Integrate`, `Pre-verify` (or a description with `pre`), `Prepare`, `Wiring`, `Post-flight`, `Merge`, `Contract` and `Plan`, and every non-`qa`/`developer` helper, count as dispatches but never as rounds.
-  - **Planned passes.** A description carrying `pass N` marks planned contract-first work: each distinct pass expects one dispatch per role.
+  - **Planned passes.** A description carrying `pass N` marks planned contract-first work: each distinct pass expects one dispatch per role. The distinct passes are counted per item, across its red and Build dispatches together, not per role. If QA-Red names `pass 1` and `pass 2`, the item expects two red and two Build dispatches, even when the second Developer dispatch's description omits `pass 2`. *(CR:spec-clarification SC-6, SPRINT-45 goal check, 2026-11-14: dispenser SPRINT-01's contract two-pass items 001-02 and 001-03 otherwise counted a planned Developer pass as one rework round each.)*
   - **Post-integration verify.** A verify dispatch that follows an `Integrate` dispatch for the same item, with no Build dispatch in between, is planned, not a re-verify.
   - **Post-merge replay.** A dispatch whose first timestamp is after the item's first `merge(story/<ID>)` commit is a replay. It is counted in `post_merge`, never as a round.
   - **Counts.** After those exclusions:
@@ -90,10 +102,10 @@ As the Reporter at sprint close, I want each item's dispatches, rework rounds, w
 
   Git-derived rework is `red_corrected + rework`.
 - **R6 — Repo list.** `["."]` plus `wiki.brief.release_repos` from `.cleargate/config.yml` when present, de-duplicated, resolved against the project root. A path that is not a git repository is skipped with a warning.
-- **R7 — Sprint window.** Start is the earliest `ts` in `events.jsonl`. End is the latest `ts` there, or now if the sprint is not Completed.
+- **R7 — Sprint window.** Start is the earliest `ts` in `events.jsonl`. End is the latest `ts` there, or now if the sprint is not Completed. Every dispatch counts only when its first timestamp falls in the window, whether its session came from the ledger or from the fallback scan. A session the ledger names can also hold an earlier or later sprint's agents. *(CR:spec-clarification SC-5, SPRINT-45 goal check, 2026-11-14: in dispenser SPRINT-02, a ledger-named session also held SPRINT-03's workflows. They entered SPRINT-02's totals, and unattributed.share read 0.481.)*
 - **R8 — Disagreement.** Each item records its `state.json` `qa_bounces` and `arch_bounces`. `disagrees` is true when dispatch-derived rework and git-derived rework differ, or when either differs from `qa_bounces + arch_bounces`.
 - **R9 — Degradation.** With no dispatch rows (transcripts gone, reader failed), every item reports `dispatch_source: "not measured"` and its rework from git alone. Missing git repos degrade the same way. Neither case throws.
-- **R10 — Output shape.** `metrics.json` follows contract C2 in the sprint plan: `schema`, `sprint_id`, `generated_at`, `sources`, `items`, `sprint_level`, `unattributed`, `totals`. Each item carries `dispatches`, `rework`, `git`, `wall_ms`, `tokens`, `models`, `state_counters`, `disagrees`, `dispatch_source`. No prompt or message text is copied.
+- **R10 — Output shape.** `metrics.json` follows contract C2 in the sprint plan: `schema`, `sprint_id`, `generated_at`, `sources`, `items`, `sprint_level`, `unattributed`, `totals`. Each item carries `dispatches`, `rework`, `git`, `wall_ms`, `tokens`, `models`, `state_counters`, `disagrees`, `dispatch_source`. No prompt or message text is copied. `totals.dispatches` and `totals.tokens` cover every subagent dispatch read (items, sprint-level and unattributed), so `unattributed.share = unattributed.tokens / totals.tokens`; `totals.rework` sums the items' `rework.total`; `sources.repos` lists only the repos actually read, and a skipped path appears only in `sources.warnings`. *(CR:spec-clarification SC-3, SPRINT-45 M2 plan, 2026-11-14; no C2 key renamed or retyped.)*
 
 ### 1.3 Out of Scope
 - Reading transcript files directly. That is CR-120's reader; this story imports it.
@@ -152,7 +164,17 @@ Feature: Per-item metrics derived from transcripts and git
       | 003-01 QA-Red r1         | QA-Red  | unattributed  |
       | SDR reader STORY-003-01  | Plan    | STORY-003-01  |
       | M1 plan                  | Plan    | sprint-level  |
+      | Developer contract step C0 | Contract | sprint-level |
+      | Architect amend M2 for stale claims |  | sprint-level |
+      | QA consolidation full-suite run |    | sprint-level  |
       | Generate sample week     |         | unattributed  |
+
+  @data
+  Scenario: Sprint-only agent types are sprint-level
+    Given a dispatch by agent type "cleargate-wiki-query" described "Prior-work query: dashboard board"
+    And a dispatch by agent type "code-simplifier:code-simplifier" described "Cleanup pass on sprint diff"
+    When each is matched against a roster that neither names
+    Then both are sprint-level
 
   @rules
   Scenario Outline: Planned and infrastructure dispatches are not rework
@@ -205,7 +227,7 @@ Feature: Per-item metrics derived from transcripts and git
 |---|---|
 | Primary File | `cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs` |
 | Related Files | `cleargate-cli/scaffold/core/.cleargate/config.example.yml` |
-| Test Files | `cleargate-cli/test/scripts/sprint-metrics.node.test.ts`, `cleargate-cli/test/fixtures/sprint-metrics/` |
+| Test Files | `cleargate-cli/test/scripts/sprint-metrics.red.node.test.ts`, `cleargate-cli/test/scripts/sprint-metrics.red.integration.node.test.ts` (green only after CR-120 integrates), `cleargate-cli/test/fixtures/sprint-metrics/` |
 | New Files Needed | Yes — `sprint_metrics.mjs`, its test file and fixture tree |
 
 ### 3.2 Technical Logic

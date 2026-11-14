@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-45
 carry_over: false
 area: cli-upgrade
-status: Draft
+status: "Completed"
 severity: P2-Medium
 reporter: orchestrator (field upgrade watch 0.27.0 → 0.30.1 in a Python target repo, replayed on a scratch copy; same output reported from a Go target repo, 2026-11-13)
 approved: true
@@ -30,16 +30,29 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id BUG-133
+last_contradict_sha: 5dde0f455476545b5e85ee45c3cf09672b683556f2ba765a5e4e22443898abce
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-13T09:21:46Z
-  sessions: []
-last_contradict_sha: "5dde0f455476545b5e85ee45c3cf09672b683556f2ba765a5e4e22443898abce"
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-14T11:17:06Z
+  sessions:
+    - session: 72e522d7-caa6-4837-81f5-8fa60f84f8b5
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-13T09:27:06Z
+    - session: c4ede09a-83a2-42d8-bef2-7869c2129d06
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-13T23:05:42Z
 ---
 
 # BUG-133: Upgrade output buries the files that lost local edits
@@ -48,11 +61,11 @@ last_contradict_sha: "5dde0f455476545b5e85ee45c3cf09672b683556f2ba765a5e4e224438
 
 - **Question:** What should upgrade print for an `always` file whose content is already the package's?
 - **Recommended:** Nothing per file; one summary line at the end: `[always] 38 unchanged, 19 updated (15 had local edits)`. Each updated file keeps its own line, and a file with local edits says so: `[always] overwritten (local edits replaced): <path>`.
-- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). The dry run applies the same rule: a file the run would leave unchanged gets no per-file line, except a host surgery target (.claude/settings.json, .mcp.json, CLAUDE.md), whose line §4 keeps; one line `[dry-run] <U> unchanged (not listed)` precedes `N files planned`. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 - **Question:** What should the dry-run label be for a locally edited `always` or `pin-aware` file?
 - **Recommended:** `state=user-modified → overwritten, local edits lost` instead of `→ clean`. CR-115's grouped warning still lists these files at the top; this fixes the per-file line it leaves unchanged.
-- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- **Human decision:** As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). A locally edited merge-3way file reads `→ asks: keep, take or edit` without --yes and `→ overwritten, local edits lost` with --yes. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 - **Question:** How much of the changelog should upgrade print?
 - **Recommended:** Print the plan first. After it, print only each version's `### Upgrade notes` subsection for the versions in range, newest first, followed by one line naming the package's `CHANGELOG.md` for the full notes. Superseded notes stay in the changelog but are not printed as steps to follow.
@@ -98,10 +111,17 @@ Go repo report: "~60 `[always] overwritten:` lines, 8 files actually differed".
 **Investigate / Modify:**
 - `cleargate-cli/src/commands/upgrade.ts` (`applyAlwaysOverwrite`, the dry-run label for `always`/`pin-aware` files, §1b changelog print).
 - `cleargate-cli/src/lib/changelog.ts` (`sliceChangelog`: return the Upgrade notes subsection).
+- `cleargate-cli/src/lib/changelog.ts`: add `extractUpgradeNotes`; `sliceChangelog`'s locked return is unchanged. Tests re-scoped by QA-Red: `cleargate-cli/test/commands/upgrade-changelog.node.test.ts` (notes now follow the plan; fixture sections carry `### Upgrade notes`), `cleargate-cli/test/commands/upgrade-state-parity.red.node.test.ts` (a file neither run changes gets no line). New: `cleargate-cli/test/commands/upgrade-output.red.integration.node.test.ts`. The goal-check reason: Goal Acceptance Check 2 ("the dry run lists only files that change"). *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 Clarifications from the SPRINT-45 design review (2026-11-14):
 - `upgrade.ts:1127` prints a second `[always] overwritten:` line, for the example config. The same changed-bytes rule applies to it.
 - The dry-run label (`upgrade.ts:834-846`) projects `→ clean` for every non-clean file, whatever its policy. The truthful label applies to any file whose local edits the run would replace, not only `always`/`pin-aware` files.
+
+SC-7, from the SPRINT-45 walkthrough (UR:bug, owner OK 2026-11-14). Goal check 2 on two dispenser_adapter copies found a false warning. Both runs said `gate-checks.json` would lose local edits: the dry run said `→ overwritten, local edits lost`, and `--yes` printed `[always] overwritten (local edits replaced)`. Upgrade then wrote the repo's gate commands back. On the copy at current HEAD the file came out byte-identical; on the copy at its 0.28.0 install, detection only filled empty values. The cause: upgrade overwrites `.cleargate/scripts/gate-checks.json` and then re-applies the gate-command plan (BUG-037/BUG-121: non-empty `qa.test`, `qa.typecheck` and `arch.typecheck` are kept, empty ones filled by detection). Both outputs judge the file against the raw package file. They also judge it against an install sha that is stale, because the snapshot records the package sha and not the restored file. Rule, for this file only (the one file upgrade post-processes):
+- **Would it change?** Both runs compare the file on disk with what upgrade leaves behind: the package file with the gate-command plan applied, written the way `applyTestStack` writes it. When the plan changes no field, that is the package bytes. Equal (bytes and mode) → unchanged: no per-file line, counted in `[dry-run] <U> unchanged (not listed)` and in the real run's `[always] <U> unchanged …` summary.
+- **Local edits.** The three gate-command fields are never local edits, because upgrade keeps or fills them. The file has local edits only when, with those three fields set aside, its parsed JSON differs from the package's. Only then do the runs print `→ overwritten, local edits lost` and `[always] overwritten (local edits replaced): <path>`.
+- **Changes, but no local edits:** the dry-run label is `state=<state> → updated, no local edits lost`, and the real run prints `[always] overwritten: <path>` and counts it as updated. The existing `gate-checks.json: kept … / … (detected)` line is unchanged.
+- Out of scope: re-hashing the install snapshot after the restore, and what upgrade writes to the file.
 
 **Do NOT modify:** what upgrade writes (CR-115 and CR-132 own write behaviour); the no-TTY refusal (BUG-120); the settings.json, `.mcp.json` and CLAUDE.md lines (BUG-093, BUG-095).
 
@@ -144,6 +164,32 @@ Feature: Upgrade output shows what changed
     When cleargate upgrade --dry-run runs
     Then the first output line is a plan line
     And only "Upgrade notes" subsections follow, then a line naming CHANGELOG.md
+
+  @rules
+  Scenario: gate-checks.json whose only difference is its gate commands is unchanged (SC-7)
+    Given an install whose gate-checks.json equals the package file with non-empty qa.test, qa.typecheck and arch.typecheck, as applyTestStack writes it
+    And the install snapshot records the package sha for it
+    When cleargate upgrade --dry-run runs
+    Then no line names .cleargate/scripts/gate-checks.json with an action
+    And it is counted in "[dry-run] <U> unchanged (not listed)"
+    When cleargate upgrade --yes runs
+    Then no "[always]" line names it, the summary counts it as unchanged, and the file is byte-identical afterwards
+
+  @rules
+  Scenario: gate-checks.json that changes without local edits is not called lost (SC-7)
+    Given an install whose gate-checks.json has empty gate commands and a repo whose test stack detection fills them
+    When cleargate upgrade --dry-run runs
+    Then its line reads "→ updated, no local edits lost" and no line says "overwritten, local edits lost" for it
+    When cleargate upgrade --yes runs
+    Then a line reads "[always] overwritten: .cleargate/scripts/gate-checks.json" and no line says "local edits replaced" for it
+
+  @rules
+  Scenario: gate-checks.json with an edit outside the gate commands still warns (SC-7)
+    Given an install whose gate-checks.json has a changed qa.debug_patterns list
+    When cleargate upgrade --dry-run runs
+    Then its line reads "→ overwritten, local edits lost"
+    When cleargate upgrade --yes runs
+    Then a line reads "[always] overwritten (local edits replaced): .cleargate/scripts/gate-checks.json"
 ```
 
 | Test Type | Minimum Count | Notes |

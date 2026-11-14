@@ -1,0 +1,2 @@
+✖ missing expectSha => 422 and zero handler calls  (test/dashboard/plan-endpoint.red.node.test.ts; EADDRNOTAVAIL 127.0.0.1 ephemeral port; passes 24/24 alone: flake)
+full npm test (default, excludes *.integration.node.test.ts): 5450 tests, 5447 pass, 1 fail, 2 skipped

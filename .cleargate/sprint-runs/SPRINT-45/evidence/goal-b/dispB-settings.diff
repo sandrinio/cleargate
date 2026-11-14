@@ -1,0 +1,20 @@
+diff --git a/.claude/settings.json b/.claude/settings.json
+index c249c1f..51f63a3 100644
+--- a/.claude/settings.json
++++ b/.claude/settings.json
+@@ -63,6 +63,15 @@
+             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/stamp-and-gate.sh"
+           }
+         ]
++      },
++      {
++        "matcher": "Bash",
++        "hooks": [
++          {
++            "type": "command",
++            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/post-shell-ingest.sh"
++          }
++        ]
+       }
+     ],
+     "SessionStart": [

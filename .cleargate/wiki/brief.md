@@ -5,8 +5,8 @@
 <!-- live:active-sprint -->
 Waiting on you: 21 failing gates (BUG-057, CR-083-Document-Connection-Identity-Routes-OpenAPI, EPIC-030, EPIC-047, EPIC-048 +16 more) · 114 open questions in 52 items (BUG-048, BUG-050, BUG-051, BUG-053, BUG-054 +47 more) · 5 unlabelled contradictions (BUG-121, BUG-129, CR-120, CR-120, STORY-064-01; 54 drafts never checked) · 5 unfinished close checklists (SPRINT-16, SPRINT-23, SPRINT-28, SPRINT-36, SPRINT-39)
 P0/P1 bugs: 16 — BUG-030 `DELETE /admin-api/v1/members/:mid` Returns 500 When Member Has Authored Items; BUG-050 `countDeclaredItems` scores a bare `**Label:**` line as a declared item,; BUG-053 Commits made inside cleargate-cli are completely ungated; BUG-054 Nine of twelve gate criteria pass on their own unedited; BUG-055 A spike charter pushes successfully under the literal cleargate_id "unknown" +11 more
-Last closed: SPRINT-44 (2026-11-10) — Shipped — 4 planned / 6 shipped (4 planned + 2 added mid-sprint at the walkthrough) / 0 carried over
+Last closed: SPRINT-45 (2026-11-14) — Draft — 6 planned / 6 shipped / 0 carried over
 Carried, no sprint: 18 — BUG-102, BUG-103, BUG-104, BUG-105, BUG-106 +13 more
-Planned: SPRINT-31 — 2/4 🟢; SPRINT-37 — 0/0 🟢; SPRINT-42 — 5/6 🟢; SPRINT-43 — 3/8 🟢; SPRINT-45 — 3/7 🟢
-Decisions: [[CR-120]] Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14); [[CR-120]] `count_tokens.mjs`, as recommended, STORY-064-01 also imports the reader directly (owner confirmed in…; [[CR-120]] Yes. Every story stage runs inside a workflow run, and those agents…; [[BUG-134]] As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14); [[BUG-133]] As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14)
+Planned: SPRINT-31 — 2/4 🟢; SPRINT-37 — 0/0 🟢; SPRINT-42 — 5/6 🟢; SPRINT-43 — 3/8 🟢
+Decisions: [[CR-120]] Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14); [[CR-120]] `count_tokens.mjs`, as recommended, STORY-064-01 also imports the reader directly (owner confirmed in…; [[CR-120]] Yes. Every story stage runs inside a workflow run, and those agents…; [[BUG-134]] As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Events keep the…; [[BUG-133]] As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). The dry run…
 <!-- live:release -->

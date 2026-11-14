@@ -4,7 +4,7 @@ parent_ref: INITIATIVE-002
 parent_cleargate_id: INITIATIVE-002
 sprint_cleargate_id: SPRINT-45
 carry_over: false
-status: Draft
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-14T00:00:00Z

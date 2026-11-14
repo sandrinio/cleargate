@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "sprint_id": "SPRINT-45",
+  "generated_at": "2026-11-14T12:52:57.230Z",
+  "sources": {
+    "sessions": 1,
+    "dispatches": 43,
+    "repos": [
+      ".",
+      "cleargate-cli",
+      "mcp"
+    ],
+    "warnings": []
+  },
+  "items": {
+    "CR-120": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2323097,
+      "tokens": {
+        "input": 160,
+        "output": 61251,
+        "cache_read": 4692195,
+        "cache_creation": 384045,
+        "total": 5137651
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-064-01": {
+      "dispatches": {
+        "total": 7,
+        "by_role": {
+          "qa": 5,
+          "developer": 2
+        },
+        "by_phase": {
+          "(none)": 7
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 1
+      },
+      "interrupted": 0,
+      "post_merge": 3,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 2,
+        "build": 1,
+        "rework": 2,
+        "integrate": 0,
+        "merged": 2
+      },
+      "wall_ms": 2919662,
+      "tokens": {
+        "input": 172,
+        "output": 102806,
+        "cache_read": 4930894,
+        "cache_creation": 582579,
+        "total": 5616451
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-064-02": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 2
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 1,
+        "verify_reruns": 0,
+        "total": 1
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 417132,
+      "tokens": {
+        "input": 80,
+        "output": 32026,
+        "cache_read": 1855490,
+        "cache_creation": 244657,
+        "total": 2132253
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "BUG-117": {
+      "dispatches": {
+        "total": 3,
+        "by_role": {
+          "developer": 1,
+          "qa": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 3
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 0,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 1714112,
+      "tokens": {
+        "input": 76,
+        "output": 14501,
+        "cache_read": 1463531,
+        "cache_creation": 143620,
+        "total": 1621728
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "BUG-133": {
+      "dispatches": {
+        "total": 9,
+        "by_role": {
+          "qa": 5,
+          "developer": 2,
+          "devops": 2
+        },
+        "by_phase": {
+          "(none)": 9
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 5,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 2,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 2
+      },
+      "wall_ms": 2916470,
+      "tokens": {
+        "input": 272,
+        "output": 94199,
+        "cache_read": 6789742,
+        "cache_creation": 548930,
+        "total": 7433143
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "BUG-134": {
+      "dispatches": {
+        "total": 7,
+        "by_role": {
+          "qa": 4,
+          "developer": 2,
+          "architect": 1
+        },
+        "by_phase": {
+          "(none)": 7
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 1,
+        "verify_reruns": 0,
+        "total": 2
+      },
+      "interrupted": 1,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2959824,
+      "tokens": {
+        "input": 208,
+        "output": 91660,
+        "cache_read": 5997384,
+        "cache_creation": 615983,
+        "total": 6705235
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    }
+  },
+  "sprint_level": {
+    "dispatches": 6,
+    "tokens": 43846819
+  },
+  "unattributed": {
+    "dispatches": 3,
+    "tokens": 4309088,
+    "share": 0.056106186725909286
+  },
+  "totals": {
+    "dispatches": 43,
+    "rework": 4,
+    "tokens": 76802368
+  }
+}

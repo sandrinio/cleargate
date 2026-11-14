@@ -1,0 +1,17 @@
+[dry-run] .claude/agents/reporter.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/hooks/token-ledger.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/settings.json  action=merge-3way  state=clean
+[dry-run] .claude/skills/sprint-execution/SKILL.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/count_tokens.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/gate-checks.json  action=overwrite  state=user-modified → overwritten, local edits lost
+[dry-run] .cleargate/scripts/lib/ledger-digest.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/pre_gate_runner.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/prep_reporter_context.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/sprint_metrics.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/subagent-ledger.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/surface-whitelist.txt  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/templates/sprint_report.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] gate-checks.json: kept qa.test "make check"; kept qa.typecheck "go vet ./..."; kept arch.typecheck "go vet ./..."
+[dry-run] .cleargate/config.example.yml  action=overwrite
+[dry-run] 67 unchanged (not listed)
+[dry-run] 13 files planned. No changes made.

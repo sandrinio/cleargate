@@ -1,3 +1,28 @@
+2026-11-14 · #qa #worktree · baseline worktree for path-dependent integration tests must sit under the outer host, not /private/tmp (306 false fails)
+2026-11-14 · #qa #test-harness · `npm test` skips *.integration.node.test.ts; baseline-failures lists omit ~105 integration reds — baseline integration separately
+2026-11-14 · #gherkin #qa-red · A 'no line says X' clause must not be a substring of the required label: 'no local edits lost' contains X.
+2026-11-14 · #upgrade #settings · Pair an upstream hook group only with an ours group holding a ClearGate hook; matcher-only pairing folds the user's own groups.
+2026-11-14 · #upgrade #settings · Dedupe hooks on string commands only: prompt/agent hooks have no command; undefined===undefined drops the second.
+2026-11-14 · #qa-red #settings · A cmds() helper using .find() reads only the first group per matcher; a red built on it forces group folding.
+2026-11-14 · #scripts #wrapper · run_script.sh execs "$@" verbatim: pass 'bash <abs path>/pre_gate_runner.sh', not the bare script name.
+2026-11-14 · #qa-red #test-harness · zsh expands `echo == x` as `=cmd` and BSD sed needs `-i ''`; use perl -pi and quote `=` in shell steps
+2026-11-14 · #qa-red #scripts · spec-silent seam shapes (mergedAt, now, roster type) go in the QA-Red report as assumed shapes so Dev and Verify see them
+2026-11-14 · #upgrade #settings · mergeUpstreamSettings: ours-only events stay first if no shared predecessor, last if no shared successor, else before the successor
+2026-11-14 · #qa-red #upgrade · assert 'N files planned' only in unit reds; real-install counts include non-listed action lines
+2026-11-14 · #qa-red #test-harness · avoid trailing '---' in changelog-section fixtures when the extractor's boundary is unspecified
+2026-11-14 · #qa-red #upgrade · a red that must reach upgrade's take path deletes a ClearGate hook group (hooks-only hash); adding user hooks stays clean
+2026-11-14 · #ledger #transcripts · Workflow .meta.json has no toolUseId/finished; dedupe falls back to agent id. Match interrupts only in user text blocks.
+2026-11-14 · #ledger #transcripts · ~46% of subagent assistant lines repeat a message.id with identical usage; count usage once per id, tool_use per block id.
+2026-11-14 · #codex #skill · '/workflows' is a banned Codex-render token: a SKILL.md line outside A2 naming subagents/workflows fails prebuild --check.
+2026-11-14 · #hooks #snapshot · hooks-snapshots pins canonical token-ledger.sh byte-for-byte; a hook edit adds token-ledger.<item>.sh and demotes the old lock.
+2026-11-14 · #upgrade #settings · Real installs put user-only events (Stop) first; a settings merge must anchor them, not append after ClearGate's events.
+2026-11-14 · #upgrade #qa-red · Dry-run clean lines are pinned by install-state-parity/field-path (settings.json) and state-parity (CRLF merge-3way).
+2026-11-14 · #scripts #git · git -C <subdir> reads the PARENT repo when the subdir has no .git; check rev-parse --show-toplevel == realpath first.
+2026-11-14 · #worktree #test-harness · A throwaway cli worktree has no dist: ~80 dist-spawning tests fail; build dist there (never in CLI main) before comparing.
+2026-11-14 · #test-harness #templates · template-stubs.integration:211 compares live vs canonical sprint_report.md, no worktree skip; red with parity 5a.
+2026-11-14 · #reporter #test-harness · prep_reporter_context.mjs runs main() unguarded; test a child-script section by swapping the sibling in a staged copy.
+2026-11-14 · #reporter #docs · prep_reporter_context.mjs:32 says missing ledger exits 1; BUG-081 made it warn + exit 0. Only count_tokens.mjs exits 1.
+2026-11-14 · #reporter #canonical · Canonical prep run by path resolves REPO_ROOT to scaffold/core: seed FLASHCARD, no git log, archive unseen.
 2026-11-14 · #ledger #transcripts · Resumed sessions copy subagent .meta.json without the .jsonl; count agents with a transcript, dedupe by toolUseId.
 2026-11-14 · #ledger #workflow · Workflow agents' transcripts live at <session>/subagents/workflows/<run>/; wf_*.json agentCount under-reports resumed runs.
 2026-11-14 · #measurement #rework · 'Dispatches minus one' overcounts rework ~4x: exclude pass N, Integrate, Pre-verify, interrupted and post-merge replays.

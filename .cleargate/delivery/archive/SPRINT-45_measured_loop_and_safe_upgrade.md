@@ -44,25 +44,18 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: manual
-status: Draft
+status: Completed
 start_date: 2026-11-14
 end_date: 2026-11-17
 synced_at: null
 created_at: 2026-11-13T23:00:46.015Z
-updated_at: 2026-11-13T23:00:46.015Z
+updated_at: 2026-11-14T08:14:41Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
+updated_at_version: ccd4e95e-dirty
 cached_gate_result:
   pass: true
   failing_criteria: []
-  last_gate_check: 2026-11-13T23:02:35Z
+  last_gate_check: 2026-11-14T08:58:28Z
   transition: ready-for-execution
 epics:
   - EPIC-064
@@ -85,7 +78,16 @@ context_source: |
   Decomposes EPIC-064 (INITIATIVE-002 WS-4, triaged 2026-11-14) into STORY-064-01/02 plus the
   amended CR-120. Carries BUG-117 (from SPRINT-43, folded per INITIATIVE-002 §6) and BUG-133/134
   (upgrade safety needed before the dispenser_adapter pilot).
-last_contradict_sha: "9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe"
+last_contradict_sha: 9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe
+stamp_error: no ledger rows for work_item_id SPRINT-45
+draft_tokens:
+  input: null
+  output: null
+  cache_creation: null
+  cache_read: null
+  model: null
+  last_stamp: 2026-11-14T12:54:31Z
+  sessions: []
 ---
 
 # SPRINT-45: Measured Loop and Safe Upgrade
@@ -107,13 +109,13 @@ Make the sprint report's rework and cost figures come from what actually happene
 
 ## 1. Consolidated Deliverables
 
-The Proof column applies INITIATIVE-002 rule 1 by hand: the tier, and the check that produces the evidence.
+<!-- cleargate:ignore-ids -->The Proof column applies INITIATIVE-002 rule 1 by hand: the tier, and the check that produces the evidence. Sprint 44 below is the last closed sprint, used as evidence, not a roster item.<!-- /cleargate:ignore-ids -->
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure | Proof (tier — check) |
 |---|---|---|---|---|---|---|
-| `CR-120` | Measure the subagent, not the orchestrator — dispatch ledger incl. workflow runs | standard | M1 | y | med | Real run — reader on SPRINT-44 and dispenser_adapter sessions; dispatch counts match the holdout recount |
+| `CR-120` | Measure the subagent, not the orchestrator — dispatch ledger incl. workflow runs | standard | M1 | y | med | Real run — reader on sprint 44 and dispenser_adapter sessions; dispatch counts match the holdout recount |
 | `STORY-064-01` | Per-item metrics derived from transcripts and git | standard | M1 | y (on contract C1) | med | Real run — `sprint_metrics.mjs` on the evidence set vs the holdout recount (10% / ±1 per item) |
-| `STORY-064-02` | Sprint report reads derived metrics | standard | M2 | n (after 064-01) | low | Real run — bundle for SPRINT-44 and SPRINT-45's own close |
+| `STORY-064-02` | Sprint report reads derived metrics | standard | M2 | n (after 064-01) | low | Real run — bundle for sprint 44 and this sprint's own close |
 | `BUG-117` | Pricing table lacks Claude 5 models | fast | M1 | y | low | Unit — pricing lookups for every Claude 5 model id |
 | `BUG-133` | Upgrade output hides lost local edits | standard | M1 | y | med | Real run — packed RC, `upgrade --dry-run` on a copy of dispenser_adapter |
 | `BUG-134` | Upgrade settings merge reorders hooks | standard | M1 | y | low | Real run — packed RC, `upgrade --yes` on a copy of dispenser_adapter; `settings.json` diff shows only ClearGate hooks |
@@ -316,11 +318,60 @@ These are integration layers. All six items build at once after C0, within the 4
 
 - [x] **Gate 1** — EPIC-064 and the six roster items approved (owner, 2026-11-14: "approved. please execute").
 - [x] **Gate 2** (Sprint Ready) — SDR §2 confirmed; Goal Acceptance Check confirmed (owner, 2026-11-14).
-- [ ] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-45` and devops reachability.
+- [x] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-45` 5/5 and devops reachable (2026-11-14).
 - [ ] **Gate 4** (close) — after all items merge and the walkthrough.
 
 ## 6. Execution Log
 
+- 2026-11-14 · Gate 4 prep · `close_sprint.mjs` was run with no flags. Close is halted for the owner.
+  - **Run 1:** the report must exist first (v2.1).
+  - **Bundle and Reporter:** the live `prep_reporter_context.mjs` wrote the live bundle (94 KB, no Measured Metrics: live is frozen by rule 9). The Reporter ran with the canonical Measured Metrics section as its second input (OD-C) and wrote `SPRINT-45_REPORT.md`. §3 rework, first-pass and cost rows came from Measured Metrics, so goal check (c) holds. The Reporter's verdict is partial: check 1 misses on dispenser S02's share 0.075; checks 2 and 3 hold. The Reporter tried a `cleargate push` of the report, which the pre-member state refused; no effect.
+  - **Run 2:** 2.5 passed. 2.6d archived the six items Completed. 2.6c flipped EPIC-064 and SPRINT-45 to Completed, both correct. It also flipped EPIC-058 (its body defers `.codex/rules/**` scope to before epic close) and EPIC-061 (S2-S6 and S8-S11 undrafted). The orchestrator restored both to pending-sync Draft, with their wiki pages; SPRINT-44 had the same false flips. 2.6c then halted on 16 unrelated parents (BUG-119 class).
+  - **Run 3:** `CLEARGATE_SKIP_PARENT_ROLLUP=1`, per the SPRINT-41/44 precedent and the broker-epics memory. 2.6 lifecycle clean (31 artifacts). 2.6b false-positived on the 15 SPRINT-41 Parking Lot bugs BUG-102..116, the same as SPRINT-44 (follow-up bug still open).
+  - **Next:** after the owner's Gate-4 authorization, run 4 adds `CLEARGATE_SKIP_LIFECYCLE_CHECK=1` (2.6 already clean). 2.8 needs `sprint/S-45` merged to main, which waits for that authorization.
+- 2026-11-14 · Goal check (c), step 1 · ran the canonical `prep_reporter_context.mjs` by path from cli main f846d9a, with `CLEARGATE_SPRINT_DIR`/`CLEARGATE_PENDING_SYNC_DIR` set to SPRINT-45. Bundle 87 KB, kept as `evidence/STORY-064-02/SPRINT-45.reporter-context.canonical.md`. Measured Metrics: 43 dispatches, 76.8M subagent tokens, 4 rework rounds (BUG-134 2, 064-01 1, 064-02 1), 9 git rework commits, first-pass 3 of 6, unattributed share 5.6%.
+  - FINDING (carried, not this roster): R4 counts a dispatch after an item's first merge as a replay (`post_merge`), never as a round. So the walkthrough UR:bug round (BUG-133 r2) and 064-01 r2 show derived 0, with only git disagreeing (BUG-133 git 3).
+  - Post-merge rework is visible only through the disagreement line.
+- 2026-11-14 · D.5 · consolidation merged to cli main f846d9a. Its tree is identical to the QA-tested 7d93c52, so no re-run.
+  - Teardown found integration-test pollution in the outer host: EPIC-058 and EPIC-061 flipped to Completed and moved to archive/. Restored in the host by the orchestrator's authorization; the main checkout was never affected.
+  - No `.worktrees/` left; `consolidation/S-45` deleted.
+- 2026-11-14 · D.5 · `code-simplifier` 7d93c52 (4 files, +46/−45, no tests): `gate-checks.json`'s local-edits check now runs once in the dry-run label; `gateCommandsOf` is shared by `readGateCommands` and `projectGateChecks`; `prep_reporter_context.mjs` drops a duplicate try/catch; `subagent-ledger.mjs` adds a `compareStrings` helper. C1/C2 names and output strings are unchanged, and `gen:codex` shows no diff. No red file is in the commit (checked). QA Consolidation PASS: full suite 5562/0 fail/2 skipped, the same as 8de3d7c. All 104 integration files were also run: 111 failing tests, an identical set at 8de3d7c and 7d93c52.
+  - Rule-17 known reds firing: parity 5a and 5d, sprint-execution-mirror, template-stubs :211. Parity 5c passes.
+  - Baseline: 2.
+  - The rest (105) predate the sprint and are untouched by its diff. 9 of those files were re-run at dbccc79 with the same failures. The biggest groups: codemod-vitest-to-node-test.red 27, bootstrap-root 25 (Postgres), admin-vitest-conversion.red 6, readme-qa-doc-truth 5.
+  - `test_close_sprint_v21` Scenario 10 assumes `prep_reporter_context.mjs` exits 1 on a missing ledger. That was already untrue at dbccc79 (BUG-081), so it is not a SPRINT-45 regression; it is carried as a finding.
+  - `npm test` skips integration files, so the dbccc79 baseline never listed them.
+  - Two QA flashcards approved. Consolidation merge dispatched.
+- 2026-11-14 · D.5 · Consolidation started. `code-simplifier` is on `consolidation/S-45`, off cli main 8de3d7c, in a nested worktree (`.worktrees/S-45-consolidation`). Scope: the sprint's non-test source in `dbccc79..8de3d7c`; red tests and frozen C1/C2 exports are off limits.
+- 2026-11-14 · Goal check (b) re-run · RC packed from cli main 8de3d7c (never published) on two fresh dispenser clones at 189bae7 and a30b5c4. A: 12 planned + 68 unchanged; gate-checks.json is no longer listed and comes out byte-identical. B: gate-checks.json `→ updated, no local edits lost`; the settings.json diff is identical to the 9462dcf run (ClearGate's Bash group only, order unchanged). No "local edits lost" line on either. The walkthrough UR:bug is resolved. Evidence: `evidence/goal-check-b.md` re-run section, `evidence/goal-b2/`.
+- 2026-11-14 · BUG-133 r2 · merged to cli main 8de3d7c (3 files, +357/−18). Full suite at the tip with dist built: 5562 tests, 0 fail, 2 skipped (+7 = the new red file). Upgrade integration files: 16/16. State unchanged (Done). Worktrees and branch removed.
+- 2026-11-14 · BUG-133 r2 · QA PASS 7/7: 200 targeted tests with dist built in the worktree; both upgrade integration reds pass with dist, so the Developer's failures were a missing dist. Hand run: unedited gate commands → not listed and byte-identical; edited `debug_patterns` → lost/replaced lines. Post-merge pre-gate scan clean (4 passed) → no Architect post-flight. Flashcards: the Developer's card was approved but rewritten as the orchestrator's `#gherkin #qa-red` card, because the verbatim text ran past 120 characters and both variants carried the same lesson. FLASHCARD-REJECT 2026-11-14 — "upgrade integration reds that spawn dist/cli.js fail with no dist…" — reason: duplicates the 2026-11-14 `#worktree #test-harness` card. DevOps merge dispatched.
+- 2026-11-14 · BUG-133 r2 · The Developer stopped on a spec gap. SC-7 scenario 2, written by the orchestrator, required the label `→ updated, no local edits lost` while also forbidding any `local edits lost` line. Spec corrected to `overwritten, local edits lost` (CR:spec-clarification). QA-Red re-scoped one assertion, e89a249. Developer 17c6c54: one gate plan shared by both runs; `projectGateChecks` and `applyTestStack` share one serialiser; gate fields are excluded from the local-edits check; the plan computation is wrapped so detection can never fail an upgrade (added at the orchestrator's review). Red file 7/7. The Developer used a bare `git stash`/`pop` once for a baseline check, against the shared-stash rule. It restored cleanly and the stack holds only an old BUG-043 entry. QA-Verify dispatched.
+- 2026-11-14 · BUG-133 r2 · QA-Red 60bd3a1 (`upgrade-gate-checks-output.red.node.test.ts`: 4 failing, 3 guards). Pre-gate scan clean (4 passed) → TPV skipped; Developer dispatched. The orchestrator's first scan passed the nested cli path, so `npm --prefix cleargate-cli` exited 254 and two script incidents were written (20261114T1120*-91f575d77fda). The re-run on the outer host path was clean. Orchestrator path error, not a defect.
+- 2026-11-14 · Phase D walkthrough · owner: "i'll go with what you recommend". UR:bug (Bug-Fix Tax 1): the gate-checks.json false "local edits lost / replaced" labels → BUG-133 r2 under CR:spec-clarification SC-7, on `story/BUG-133-r2` off cli main 9462dcf. UR:review-feedback ×2, deferred with the owner's sign-off: dispenser S02 `unattributed.share` 0.075 is accepted as measured, so check 1 is partial on S02 with no rule change; the ~197 KB Reporter bundle (160 KB budget, over before this sprint) is deferred. CR:scope-change: the OpenRouter pricing refresh is drafted after close. Recorded in `sprint-runs/SPRINT-45/intake.md`.
+- 2026-11-14 · outer commit · `SKIP_SURFACE_GATE=1` used for the chore(SPRINT-45) artifact commit: the gate judges the latest state.json item (STORY-064-02) and blocks sprint-run reports, evidence, plans and spec edits that are no story's surface. Other pre-commit hooks ran.
+- 2026-11-14 · Phase D · All six items Done. Walkthrough invitation sent with Goal checks (a) and (b) evidence; halted for the owner.
+- 2026-11-14 · Goal check (b) · packed RC from cli main 9462dcf (never published) on two dispenser clones. HEAD (0.30.1): dry run 13 planned + "67 unchanged (not listed)", `--yes` leaves settings.json byte-identical. 234e09f^ (0.28.0): dry run 30 planned + "50 unchanged", `--yes` adds only ClearGate's PostToolUse Bash group; event order unchanged, Stop first. Both name gate-checks.json as "local edits lost", but its values are kept → walkthrough finding. Evidence: `evidence/goal-check-b.md`, `evidence/goal-b/`.
+- 2026-11-14 · STORY-064-02 + 064-01 r2 · merged to cli main 9cd1402 and 9462dcf. Full suite 5555 tests, 0 fail, 2 skipped; targeted 186/186 including integration files. STORY-064-02 Done. No worktrees left; story and contract branches deleted.
+- 2026-11-14 · Goal check (a) · `sprint_metrics.mjs` (with SC-4..SC-6) against the holdout, on scratch copies: SPRINT-44 3/3 (6/6 items exact, share 0), dispenser S01 4/4 (11/11, share 0), S02 8/8 (11/11, **share 0.075** — SPIKE-001 prototype work in the same session, which the recount also lists as non-sprint), S03 **untuned** at cutoff 09:40Z 31/31 (15 exact, 2 within ±1, 225 = 225 dispatches, share 0). state.json counters read 0 on every dispenser sprint. Evidence: `evidence/goal-check-a.md`.
+- 2026-11-14 · STORY-064-01 r2 · goal-check defects in the merged story, fixed in-sprint on `story/STORY-064-01-r2` (off 6ad41e8): SC-5 window every dispatch (dispenser S02 read share 0.481 and 432 dispatches from S03 workflows in a ledger-named session), SC-6 planned passes per item (S01 001-02/03 counted a planned Developer pass). QA-Red b2456f6 (4 failing), Developer 7458176 (sprint_metrics.mjs only), QA PASS (115 tests). STORY-064-02: integrated b6d2c99 onto 6ad41e8, QA PASS 4/4 (93 tests; Measured Metrics section 1.4 KB; the 160 KB bundle overshoot predates the story). Both merging in one DevOps run.
+- 2026-11-14 · STORY-064-01 + BUG-134 · merged to cli main 8ea7218 and 6ad41e8. Full suite at the tip: 5535 tests, 0 fail, 2 skipped. Both Done; worktrees and branches removed.
+- 2026-11-14 · STORY-064-01 · Integrated c65d8cf onto 681cb7c; the four integration reds pass against the real reader. SPRINT-44 smoke: rework 3 (equals the holdout's judged 3; per item 1/0/0/2/0/0), but unattributed.share 0.0915 from six sprint-stage dispatches (contract C0, M2 amend, QA consolidation, cleanup pass, two wiki queries). CR:spec-clarification SC-4 (R3 sprint-level widened to playbook stages, the sprint's own ID and sprint-only agent types) → QA-Red fe29a94 (9 failing) → Developer e2a8cdf → smoke share 0.000, rework 3. Disclosure: SC-4 was informed by SPRINT-44 descriptions; dispenser SPRINT-03 stays the untuned check. QA PASS 17/17 (155 tests; C2 keys unchanged; no prompt text in output). State → Architect Passed.
+- 2026-11-14 · CR-120 · merged to cli main 681cb7c (31 files). Full suite: 5450 tests, 1 fail (plan-endpoint EADDRNOTAVAIL, passes 24/24 alone → flake). hooks-snapshots and serial-pointers Test 20 green. `npm test` skips `*.integration.node.test.ts`, so integration files (including the rule-17 known reds) are run separately at D.5. Live mirrors now differ for six canonical files (rule 9, not re-synced). State Done; Task Breakdown ticked. DevOps ran 16 min (budget 5; full suite) — flagged ran-long. STORY-064-01 + BUG-134 merge dispatched as one DevOps run (disjoint files, one full suite).
+- 2026-11-14 · BUG-133 · merged to cli main 169480e (6 files, +927/−74). Full suite at the tip with dist built: 5417 tests, 5414 pass, 1 fail, 2 skipped. The one failure is `init-fixture-cleanup.red` "cleans up even when the child throws" (ENOTEMPTY on a shared /tmp dir; passes 3/3 alone) → flake, not upgrade-related. A short TMPDIR was needed: the scratchpad path is too long for tsx's IPC socket (EINVAL), which likely explains much of the 80-failure dbccc79 baseline. The new comparison baseline is `evidence/suite-after-BUG-133.txt`. State Done; worktrees and branch removed. DevOps ran 19.5 min (budget 5; full suite included) — flagged ran-long. CR-120 DevOps merge dispatched.
+- 2026-11-14 · BUG-134 · Developer rework 26384c7 (merge-settings.ts only; PF-2 pairing, PF-3 string-command dedupe); integrated f72138f onto cli main 169480e, no conflict. QA PASS 5/5 (127 tests; probes a–e idempotent; dispenser HEAD no diff, 234e09f^ gains only ClearGate's PostToolUse Bash group with Stop first). Architect re-check PASS. State → Architect Passed. Accepted edge, per the bug's decision ("user groups after upstream's groups") and red 3b: a user group that sat before ClearGate's same-key group moves after it.
+- 2026-11-14 · CR-120 · QA PASS 6/6 (121 targeted; red tests and fixtures untouched; C1 names and shapes as frozen, one additive export `writeSubagentLedger`; hand run on synthetic fixtures: 6 dispatches, 2 sessions, 2 interrupted). State → Architect Passed (scan clean, no post-flight). Re-integrated d2682b5 onto cli main 169480e (164 targeted green). `portable-skills.red` failed once then passed twice unchanged — flaky, cause not found; watch it in the post-merge suite. Merge waits for the BUG-133 DevOps run to finish.
+- 2026-11-14 · BUG-134 · Architect post-flight FAIL (arch_bounces 1): event placement accepted (PF-1); group folding rejected (PF-2, it moves a user's own same-matcher group into ClearGate's); the dedupe dropped command-less hooks (PF-3). QA-Verify stopped as moot. QA-Red re-scope ab0ffa6 (red 3 re-scoped; 3b, 3c, 9b added; 4 fail for the stated reasons, 15 pass). Developer rework dispatched against M1's post-flight amendments. Four flashcards approved.
+- 2026-11-14 · STORY-064-01 · Developer 80c1b96 (107 targeted green; 4 integration reds wait for CR-120's reader, as planned). Pre-gate scan clean; red tests untouched. Plan deviation ruled by the orchestrator: `matchItem` takes the union of full-ID and short-form candidates, where M1 R3 step 2 tried short forms only when no full ID matched. Spec R3 as clarified (C-2, "two or more roster items (full IDs or short forms) … is unattributed") and the red test both require the union, so the spec governs and M1's step 2 is superseded. Integration waits for the CR-120 merge.
+- 2026-11-14 · BUG-133 · QA PASS 4/4 (84 tests; hand dry run on a scratch fixture lists the edited file and summarises 76 unchanged). State → Architect Passed; DevOps merge dispatched. CR-120 integrated a6f3bc7 (135 targeted green), pre-gate scan clean → QA-Verify dispatched.
+- 2026-11-14 · CR-120 · Developer 2e0d9bb (121 targeted tests green; prebuild and gen:codex clean). Smoke on SPRINT-44 via count_tokens.mjs: 60 dispatches from one ledger session, 104.2M tokens, 0 interrupted; the written subagent-ledger.jsonl was removed and the SPRINT-44 dir is clean. Integration with cli main cd54e93 dispatched.
+- 2026-11-14 · BUG-133 · Developer b310e09; integrated be392bd (cd54e93 merged, no conflict; 84 targeted tests green). Pre-gate scan clean (4 passed) → TPV skipped. QA-Verify dispatched.
+- 2026-11-14 · BUG-134 · QA-Red 5d74393; Developer 4e6631a; integrated e4a4094 (69/69). Two plan deviations (three-way event-placement rule; same-matcher groups fold into the matched upstream group) sent to an Architect post-flight alongside QA-Verify.
+- 2026-11-14 · M1 · Architect M1 plan (541 lines, 30 min — 3x budget, flagged ran-long). CR:spec-clarifications C-1..C-4 applied to CR-120, STORY-064-01, BUG-133 (C-3 dry run omits unchanged files — implements Goal check 2), BUG-134. Extra known red: sprint-execution-mirror.integration from the CR-120 merge. QA-Red dispatched for CR-120, STORY-064-01, BUG-133, BUG-134.
+- 2026-11-14 · BUG-117 · merged to cli main cd54e93 (QA PASS 8/8; fast lane). Full suite at the tip in a throwaway tree: 80 failures, all pre-existing at dbccc79 with dist built (evidence/baseline-failures-dbccc79.txt). State Done.
+- 2026-11-14 · STORY-064-02 · M2 plan; SC-1/SC-2 (and SC-3 on STORY-064-01) applied; known red added: template-stubs.integration :211 from the 064-02 merge. QA-Red 76ecb21 (14 failing + 1 guard); pre-gate scan clean → TPV skipped; Developer a694218 (77 targeted tests green). Waits for upstream before integration.
+- 2026-11-14 · C0 · contracts committed in cli: C1 `contract/S-45-ledger` e1e8ad0 (subagent-ledger.mjs stub), C2 `contract/S-45-metrics` 4720d79 on C1 (sprint_metrics.mjs stub); checks 10/10 verified by the orchestrator; C0 worktree removed. Build worktrees cut: CR-120 (C1), STORY-064-01 (C2), BUG-117/133/134 (cli main dbccc79). BUG-117 Developer dispatched (fast lane); Architect M1 and M2 plans dispatched.
+- 2026-11-14 · kickoff · preflight 5/5, devops reachable, `sprint/S-45` cut, sprint init (6 items; BUG-117 fast), status Active (outer 142051ec).
 - 2026-11-14 · Gate 1 + Gate 2 · owner approved all eight Brief decisions ("approved. please execute"): the seven items with their recorded answers; Goal Acceptance Check (a) metrics vs holdout within 10% / ±1 per item and ≥95% tokens attributed, (b) packed RC dry-run and `--yes` on a copy of dispenser_adapter, (c) SPRINT-45 report §3 from Measured Metrics; nested-cli worktree layout with hand dispatches; three canonical-live parity failures (5d after CR-120, 5a and 5c after STORY-064-02) expected; no `dist` rebuild during the sprint, full suites in a throwaway worktree; BUG-117 stays fast; contract typings frozen; planning committed to `main`. CR:spec-clarification at kickoff: BUG-117 table re-grounded against the claude-api reference cached 2026-11-03 (Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read 0.20 → 0.10).
 - 2026-11-14 · SDR · architect-reader ×6 → architect-synth; §2 inserted; `plans/waves.json` (schema 2, launchable: false). CR:spec-clarification: generated Codex copies added to CR-120 and STORY-064-02 surfaces; BUG-134 surface gains hosts/claude.ts and hosts/codex.ts.
 - 2026-11-14 · holdout · baseline recount of SPRINT-44 and dispenser_adapter SPRINT-01/02 written to `sprint-runs/SPRINT-45/holdout/recount.md`. It showed "dispatches minus one" overcounting rework about 4x; STORY-064-01 R4 and CR-120 amended before build (CR:spec-clarification).

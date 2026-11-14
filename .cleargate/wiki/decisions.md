@@ -9,12 +9,12 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 
 ### [[BUG-133]] — Upgrade output buries the files that lost local edits (2026-11-14)
-- Q: What should upgrade print for an `always` file whose content is already the package's? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
-- Q: What should the dry-run label be for a locally edited `always` or `pin-aware` file? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: What should upgrade print for an `always` file whose content is already the package's? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). The dry run applies the same rule: a file the run would leave unchanged gets no per-file line, except a host surgery target (.claude/settings.json, .mcp.json, CLAUDE.md), whose line §4 keeps; one… ([[BUG-133]])
+- Q: What should the dry-run label be for a locally edited `always` or `pin-aware` file? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). A locally edited merge-3way file reads `→ asks: keep, take or edit` without --yes and `→ overwritten, local edits lost` with --yes. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 - Q: How much of the changelog should upgrade print? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
 
 ### [[BUG-134]] — Upgrade reorders the hooks in .claude/settings.json (2026-11-14)
-- Q: What order should the merged file have? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14).
+- Q: What order should the merged file have? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Events keep the user's placement: an event only the user has stays before the ClearGate event it preceded; an event upstream adds takes upstream's position. *(CR:spec-clarification, SPRINT-45 M1 plan, 2026-11-14.)*
 
 ### [[CR-120]] — Measure the Subagent, Not the Orchestrator — `subagent-ledger.mjs` (2026-11-14)
 - Q: Should this replace `token-ledger.jsonl` or sit beside it? → Beside it, as recommended (owner confirmed in the SPRINT-45 Brief, 2026-11-14).
@@ -24,13 +24,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 ### [[EPIC-064]] — Sprint Numbers From What Happened (2026-11-14)
 - Q: Should the derived rework replace the state.json counters in the report, or sit beside them? → Beside, with the derived number leading and the counter named only where it disagrees. Recommended by the agent and covered by the owner's acceptance of INITIATIVE-002 §6 on 2026-11-14; confirm at this Brief.
 - Q: Which sprints form the evidence set? → SPRINT-44 here and dispenser_adapter SPRINT-01 to SPRINT-03. They are recent enough that their transcripts still exist, and Claude ran them, so no Codex dispatches are missing. doc_processor's recent sprints used Codex for production code and are left out.
-- Rule: Read-only derivation. Never write events.jsonl, never add an event kind, never edit state-events.mjs: fold() moves updated_at before its kind switch, so an unknown kind breaks every later update_state.mjs call (CR-120 §3).
-- Rule: state.json qa_bounces/arch_bounces are left as they are. The report shows derived numbers and names the counter only where the two disagree.
-- Rule: Never fail a close. A missing transcript directory, a missing repo or an unparseable row is a warning plus exit 0 and a visible "not measured" line, never a throw.
-- Rule: Canonical edits only: cleargate-cli/scaffold/core/.cleargate/** and cleargate-cli/scaffold/hosts/claude/.claude/**. The live copies in the meta-repo change only at the Gate-4 re-sync.
-- Rule: No new runtime dependency. Node built-ins only; tests are *.node.test.ts under node:test in cleargate-cli/test/.
-- Rule: Existing CLI shapes stay: count_tokens.mjs and prep_reporter_context.mjs keep their positional &lt;sprint-id&gt; with no required flags (close_sprint.mjs Step 3.5 calls them).
-- Rule: close_sprint.mjs requiredMetricRows (Fast-Track Ratio, Fast-Track Demotion Rate, Hotfix Count, Hotfix-to-Story Ratio, Hotfix Cap Breaches, LD events) must still be present in the report template.
 
 ### [[STORY-064-01]] — Per-Item Metrics Derived From Transcripts and Git (2026-11-14)
 - Q: When dispatch-derived and git-derived rework differ, which one does `total` report? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).

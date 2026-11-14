@@ -1,0 +1,2 @@
+✖ cleans up even when the child throws after the scenario runs
+✖ failing tests:
