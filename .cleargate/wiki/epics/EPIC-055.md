@@ -21,11 +21,15 @@ cited_by:
   - "[[CR-124]]"
   - "[[EPIC-056]]"
   - "[[EPIC-057]]"
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
   - "[[SPRINT-39]]"
   - "[[SPRINT-41]]"
   - "[[SPRINT-43]]"
   - "[[STORY-058-12]]"
+  - "[[STORY-066-06]]"
+  - "[[STORY-066-08]]"
+  - "[[STORY-066-11]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md"
@@ -74,5 +78,5 @@ Sprint plans already declare cross-milestone concurrency that the execution mach
 - Parent: none
 - Children (1): [[CR-124]]
 - Cites (7): [[BUG-033]], [[BUG-034]], [[CR-106]], [[CR-124]], [[CR-126]], [[EPIC-033]], [[SPRINT-38]]
-- Cited by (13): [[BUG-044]], [[BUG-046]], [[BUG-049]], [[BUG-062]], [[CR-106]], [[CR-124]], [[EPIC-056]], [[EPIC-057]], [[INITIATIVE-002]], [[SPRINT-39]], [[SPRINT-41]], [[SPRINT-43]], [[STORY-058-12]]
+- Cited by (17): [[BUG-044]], [[BUG-046]], [[BUG-049]], [[BUG-062]], [[CR-106]], [[CR-124]], [[EPIC-056]], [[EPIC-057]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-39]], [[SPRINT-41]], [[SPRINT-43]], [[STORY-058-12]], [[STORY-066-06]], [[STORY-066-08]], [[STORY-066-11]]
 <!-- END relations -->

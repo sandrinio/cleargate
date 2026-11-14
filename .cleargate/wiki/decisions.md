@@ -5,6 +5,45 @@
 
 Every answered Q/A decision in the delivery corpus, newest first, with the architecture rules of open epics. A block ends with `- Supersedes:` when the item says it supersedes another. Open questions and unanswered placeholders are not listed.
 
+### [[STORY-066-03]] — Pre-gate scan runs configured commands on any stack (2026-11-15)
+- Q: BUG-087 proposes also requiring the named `npm run <script>` key to exist. Do we? → Accept the recommendation (default; EPIC-066 decision of record is stack neutrality).
+- Q: BUG-087 says `qa` mode is never used by the loop. EPIC-066 makes `merge_story.mjs` run `pre_gate_runner.sh qa`. Does that change what… ([[STORY-066-03]]) → Accept the recommendation.
+
+### [[STORY-066-04]] — Kickoff baseline (2026-11-15)
+- Q: The Epic's contract names `<sprintDir>/baseline.json` written by "kickoff" and its §4 says `src/commands/sprint.ts` runs `qa.test`. Should the run live in… ([[STORY-066-04]]) → Accept the recommendation. (This adds `record_baseline.mjs`, which the Epic's Owns column does not list.)
+- Q: `prep_qa_context.mjs` already has a baseline section reading `.baseline-failures.json`, a file nothing writes. Replace or extend? → Accept the recommendation.
+
+### [[STORY-066-05]] — Computed lanes (2026-11-15)
+- Q: `architect-synth.md:167` still shows the synth writing `lane_assignments` into `waves.json`, and this story does not edit it. Which write wins? → Accepted per EPIC-066 §6 (owner, 2026-11-14): lane signals as listed, Architect raises only.
+- Q: A Scenario Outline counts once, so an item with one Outline and many Examples rows can be `fast`. Is that… ([[STORY-066-05]]) → Accepted.
+
+### [[STORY-066-06]] — Stage table (2026-11-15)
+- Q: The shared contract makes `lane` and `stages_run` required, and `qaSha` is required on every GREEN verdict today. A fast-lane item… ([[STORY-066-06]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+- Q: Seven test files build verdicts by hand and will fail once `lane` and `stages_run` are required: `wave-execution-barrier.red`, `dispatch-verdict-modes.red`, `dispatch-serial-cli.red`, `dispatch-serial.red`,… ([[STORY-066-06]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+
+### [[STORY-066-07]] — QA-Red seals its own tests (2026-11-15)
+- Q: The brief's contract says the scan reports the volume check, but the scan cannot know the item's scenario count on… ([[STORY-066-07]]) → Accepted as recommended (contract-conformant; no contradiction with the epic).
+
+### [[STORY-066-08]] — Merge by Script (2026-11-15)
+- Q: How does the script tell a baseline failure from a new one? `pre_gate_runner.sh` reports only the test command's exit code… ([[STORY-066-08]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15. STORY-066-04 exports the parser as `extractFailing` from `scaffold/core/.cleargate/scripts/record_baseline.mjs`.
+- Q: The brief says the script handles "the cases that block DevOps today" but is silent on the story-file dirt BUG-086's… ([[STORY-066-08]]) → Resolved in drafting per the recommendation (BUG-086's own recommended answer); confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+
+### [[STORY-066-09]] — QA-Verify runs the item and states DEFECT_IN (2026-11-15)
+- Q: The item's "own proof command" has no home until EPIC-065 adds `## Proof`. What does the pack read now? → Accepted as recommended (contract-conformant; no contradiction with the epic).
+
+### [[STORY-066-10]] — Rework Routed by Defect Location (2026-11-15)
+- Q: Does a `spec` defect count as a bounce and escalate at once, or follow the cap like the others? The… ([[STORY-066-10]]) → Resolved by the drafter on the epic's wording ("a `spec` defect halts for the owner"); confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+
+### [[STORY-066-11]] — Shipped wave runner, loop.models, last retry one tier up (2026-11-15)
+- Q: The epic's Data Changes lists `loop.models.{developer, qa_red, qa_verify, architect}`; the build contract keys models by stage name (`qa-red`, `qa-verify`, ...)… ([[STORY-066-11]]) → Resolved in drafting (the contract overrides the epic's illustrative list); confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+- Q: `validateVerdicts` in wave mode (`launch_wave.mjs:216-228`) requires numeric `tokens.*`; the script cannot read agent usage, and a zero object would be… ([[STORY-066-11]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+- Q: A Workflow script may not be able to `import`; `wave_runner.js` also needs `stagesFor`. Is the args builder the right seam? → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+
+### [[STORY-066-12]] — Loop spec — three paths, no milestone plan, story-plan mode (2026-11-15)
+- Q: The runner is a Workflow script and cannot set env, while `SKILL.md:281` says `launch_wave.mjs` owns the `SKIP_FLASHCARD_GATE=1` save, set and… ([[STORY-066-12]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+- Q: `architect-synth.md` is not on EPIC-066's target list, yet it names the milestone plan file (`:196`) and is the producer of… ([[STORY-066-12]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+- Q: Existing sealed tests pin text this story rewrites: `test/scripts/codex-sprint-execution-render.red.node.test.ts` (the R3 replacement and the canonical A3 line, `:54`, `:122`) and… ([[STORY-066-12]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
+
 ### [[BUG-117]] — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know (2026-11-14)
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 
@@ -26,6 +65,8 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Which sprints form the evidence set? → SPRINT-44 here and dispenser_adapter SPRINT-01 to SPRINT-03. They are recent enough that their transcripts still exist, and Claude ran them, so no Codex dispatches are missing. doc_processor's recent sprints used Codex for production code and are left out.
 
 ### [[EPIC-065]] — Proof Decides Done (2026-11-14)
+- Q: The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic… ([[EPIC-065]]) → Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
+- Q: Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in… ([[EPIC-065]]) → One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
 - Rule: Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
 - Rule: Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script, not by an LLM agent.
 - Rule: Stack-neutral: no step may depend on package.json or Node in the target's own code. Proof commands come from the item or from gate-checks.json, whatever the language.
@@ -33,6 +74,26 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Rule: No new state.json work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
 - Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
 - Supersedes: [[CR-128]]
+
+### [[EPIC-066]] — Build Step Sized by Risk (2026-11-14)
+- Q: "Make it work in next sprint" can mean two things. (a) SPRINT-46 here builds this epic on the current loop,… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). SPRINT-46 builds this epic on the current loop. After its close and the live re-sync, SPRINT-47 here is the first sprint on the new loop. The owner added on 2026-11-15: push both repositories and publish to… ([[EPIC-066]])
+- Q: SPRINT-46 roster. EPIC-065 is drafted at eight stories and this epic is about seven. Your earlier order was evidence first.… ([[EPIC-066]]) → As recommended (owner, 2026-11-14), with the owner's direction to put first whatever the loop change depends on. SPRINT-46 carries this epic, including the two prerequisites moved in from EPIC-065 (stack-neutral pre-gate scan, kickoff baseline) and BUG-087, BUG-086, BUG-107 and BUG-116… ([[EPIC-066]])
+- Q: Lane rubric. Recommended signals: `fast` = at most two acceptance scenarios, one subsystem, no UI surface, no forbidden surface (schema,… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). `fast`: at most two acceptance scenarios, one subsystem, no UI surface, no forbidden surface, no new dependency, proof tier `unit` when declared. `runtime`: a UI surface, or two or more subsystems, or proof tier `container` or… ([[EPIC-066]])
+- Q: Remove the per-milestone Architect plan entirely, with a story plan of at most 150 lines for `runtime` items only? The… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). The per-milestone plan is removed; `runtime` items get a story plan of at most 150 lines as the first stage of their own segment.
+- Q: Fast-lane items have no QA-Red and no QA-Verify; the Developer writes the regression test and `merge_story.mjs` runs the checks. Today's… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). No QA-Red and no QA-Verify on the fast lane; the Developer writes the regression test first and `merge_story.mjs` runs the check; a failed check demotes the item to `standard`; the first-pass-rate tripwire in §1 applies.
+- Q: Merge by script, with the DevOps agent only on a conflict or a post-merge failure. The handoff note kept the… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). Merge by script; the DevOps agent only on a conflict or a post-merge failure.
+- Q: QA-Red volume cap: one test per scenario plus named edge cases, flagged above twice the scenario count. I earlier suggested… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). One test per scenario plus named edge cases, flagged above twice the scenario count; the cap and defect routing live in this epic.
+- Q: A different model for checking. The research found vendor claims but no controlled study, so it is a config knob… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). `loop.models` is a config knob; the shipped default runs QA-Verify on `runtime` items on Opus while the Developer stays on Sonnet; other lanes unchanged.
+- Q: Escalation. Recommended: the bounce cap stays at three, and the last Developer retry before escalation runs one model tier up.… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). The cap stays at three; the last Developer retry before escalation runs one model tier up.
+- Q: The targets marked (proposed) in §1: at least a quarter of items on the fast lane, and median red-test lines… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). Both targets confirmed and written into §1 without the (proposed) mark.
+- Q: Short item templates for small bugs and CRs are the other half of WS-2 and are left out so this… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). Short item templates for small bugs and CRs become a follow-up CR, drafted after SPRINT-47 shows how the fast lane behaves.
+- Rule: Keep the three lane names `fast`, `standard`, `runtime` (owner decision, INITIATIVE-002 §6). `runtime` becomes a real `state.json` value. No new state and no new work unit (EPIC-054 lock).
+- Rule: One source for "which stages does this lane run": `segment_stages.mjs`. The skill, `launch_wave.mjs`, `dispatch_serial.mjs` and the shipped runner read it; none of them restates the list.
+- Rule: A stage that is a fixed command sequence is a script. An agent may call the script as its last step, or the orchestrator runs it at the barrier; it is never a dispatch of its own.
+- Rule: Merges stay serial and stay at the barrier (EPIC-055, CR-124). This epic changes who runs the merge, not when.
+- Rule: Stack-neutral: no script added here may depend on `package.json` or Node in the target's own code. Commands come from `gate-checks.json`.
+- Rule: Scripts change in cleargate-cli/scaffold/core; prompts and the skill change in scaffold/hosts/claude, scaffold/core/.agents and the scaffold/hosts/codex counterparts in the same story.
+- Rule: QA-Red stays a separate agent and its tests stay sealed (owner decision). This epic limits how much it writes; EPIC-065 owns what its assertions may pin and the holdout scenarios.
 
 ### [[STORY-064-01]] — Per-Item Metrics Derived From Transcripts and Git (2026-11-14)
 - Q: When dispatch-derived and git-derived rework differ, which one does `total` report? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).

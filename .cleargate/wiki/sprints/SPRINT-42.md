@@ -14,8 +14,10 @@ cites:
   - "[[BUG-119]]"
 cited_by: 
   - "[[BUG-136]]"
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
   - "[[SPRINT-31]]"
+  - "[[SPRINT-46]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-42_planning_catches_what_execution_stopped_for.md"
@@ -48,5 +50,5 @@ sprint_cleargate_id: "SPRINT-42"
 - Parent: none
 - Children (6): [[BUG-052]], [[EPIC-059]], [[STORY-059-01]], [[STORY-059-02]], [[STORY-059-03]], [[STORY-059-04]]
 - Cites (2): [[BUG-118]], [[BUG-119]]
-- Cited by (3): [[BUG-136]], [[INITIATIVE-002]], [[SPRINT-31]]
+- Cited by (5): [[BUG-136]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-31]], [[SPRINT-46]]
 <!-- END relations -->

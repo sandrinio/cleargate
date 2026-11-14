@@ -5,6 +5,7 @@ parent: ""
 children: 
   - "[[EPIC-064]]"
   - "[[EPIC-065]]"
+  - "[[EPIC-066]]"
 cites: 
   - "[[BUG-052]]"
   - "[[BUG-062]]"
@@ -49,6 +50,9 @@ cites:
   - "[[SPRINT-43]]"
 cited_by: 
   - "[[EPIC-065]]"
+  - "[[EPIC-066]]"
+  - "[[SPRINT-46]]"
+  - "[[STORY-066-05]]"
 status: "Triaged"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/INITIATIVE-002_evidence_first_execution_loop.md"
@@ -123,7 +127,7 @@ Wiki query run 2026-11-14. The redesign does not start from zero.
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (2): [[EPIC-064]], [[EPIC-065]]
+- Children (3): [[EPIC-064]], [[EPIC-065]], [[EPIC-066]]
 - Cites (41): [[BUG-052]], [[BUG-062]], [[BUG-068]], [[BUG-069]], [[BUG-114]], [[BUG-117]], [[BUG-129]], [[CR-024]], [[CR-077]], [[CR-082]], [[CR-091]], [[CR-106]], [[CR-110]], [[CR-111]], [[CR-115]], [[CR-119]], [[CR-120]], [[CR-121]], [[CR-124]], [[CR-125]], +21 more
-- Cited by (1): [[EPIC-065]]
+- Cited by (4): [[EPIC-065]], [[EPIC-066]], [[SPRINT-46]], [[STORY-066-05]]
 <!-- END relations -->

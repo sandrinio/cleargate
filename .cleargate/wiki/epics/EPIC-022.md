@@ -14,7 +14,10 @@ children:
   - "[[STORY-099-01]]"
 cites: []
 cited_by: 
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
+  - "[[STORY-066-05]]"
+  - "[[STORY-066-12]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-022_Sprint_Lane_Classifier_And_Hotfix_Path.md"
@@ -62,5 +65,5 @@ SPRINT-12 and SPRINT-13 each carried ≥1 story (BUG-006, BUG-007, CR-007 Resend
 ## Relations
 - Parent: none
 - Children (9): [[STORY-022-01]], [[STORY-022-02]], [[STORY-022-03]], [[STORY-022-04]], [[STORY-022-05]], [[STORY-022-06]], [[STORY-022-07]], [[STORY-022-08]], [[STORY-099-01]]
-- Cited by (1): [[INITIATIVE-002]]
+- Cited by (4): [[EPIC-066]], [[INITIATIVE-002]], [[STORY-066-05]], [[STORY-066-12]]
 <!-- END relations -->

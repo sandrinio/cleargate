@@ -41,10 +41,12 @@ children:
 cites: []
 cited_by: 
   - "[[EPIC-064]]"
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
   - "[[PROPOSAL-074]]"
   - "[[STORY-064-01]]"
   - "[[STORY-064-02]]"
+  - "[[STORY-066-08]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-013_Execution_Phase_v2.md"
@@ -90,5 +92,5 @@ Through SPRINT-01 → SPRINT-08 we learned our execution loop is under-mechanize
 ## Relations
 - Parent: none
 - Children (35): [[BUG-002]], [[BUG-005]], [[BUG-026]], [[BUG-029]], [[CR-014]], [[CR-037]], [[CR-039]], [[CR-042]], [[CR-043]], [[CR-044]], [[CR-045]], [[CR-046]], [[CR-047]], [[CR-048]], [[CR-049]], [[CR-050]], [[CR-051]], [[CR-052]], [[CR-053]], [[CR-054]], +15 more
-- Cited by (5): [[EPIC-064]], [[INITIATIVE-002]], [[PROPOSAL-074]], [[STORY-064-01]], [[STORY-064-02]]
+- Cited by (7): [[EPIC-064]], [[EPIC-066]], [[INITIATIVE-002]], [[PROPOSAL-074]], [[STORY-064-01]], [[STORY-064-02]], [[STORY-066-08]]
 <!-- END relations -->

@@ -1,7 +1,7 @@
 ---
 bug_id: BUG-087
 parent_cleargate_id: null
-sprint_cleargate_id: SPRINT-43
+sprint_cleargate_id: SPRINT-46
 carry_over: false
 status: Draft
 severity: P2-Medium

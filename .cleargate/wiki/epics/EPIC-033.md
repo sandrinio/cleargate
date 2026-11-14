@@ -17,11 +17,15 @@ cited_by:
   - "[[EPIC-054]]"
   - "[[EPIC-055]]"
   - "[[EPIC-057]]"
+  - "[[EPIC-066]]"
   - "[[STORY-033-02]]"
   - "[[STORY-033-03]]"
   - "[[STORY-033-04]]"
   - "[[STORY-054-07]]"
   - "[[STORY-058-12]]"
+  - "[[STORY-066-06]]"
+  - "[[STORY-066-11]]"
+  - "[[STORY-066-12]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-033_Parallel_Wave_Sprint_Execution.md"
@@ -74,5 +78,5 @@ The five-dispatch sprint loop runs strictly serially. The Orchestrator babysits 
 - Parent: none
 - Children (4): [[STORY-033-01]], [[STORY-033-02]], [[STORY-033-03]], [[STORY-033-04]]
 - Cites (1): [[BUG-029]]
-- Cited by (12): [[BUG-046]], [[BUG-049]], [[CR-074]], [[EPIC-053]], [[EPIC-054]], [[EPIC-055]], [[EPIC-057]], [[STORY-033-02]], [[STORY-033-03]], [[STORY-033-04]], [[STORY-054-07]], [[STORY-058-12]]
+- Cited by (16): [[BUG-046]], [[BUG-049]], [[CR-074]], [[EPIC-053]], [[EPIC-054]], [[EPIC-055]], [[EPIC-057]], [[EPIC-066]], [[STORY-033-02]], [[STORY-033-03]], [[STORY-033-04]], [[STORY-054-07]], [[STORY-058-12]], [[STORY-066-06]], [[STORY-066-11]], [[STORY-066-12]]
 <!-- END relations -->

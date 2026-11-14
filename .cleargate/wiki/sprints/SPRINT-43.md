@@ -3,8 +3,6 @@ type: sprint
 id: "SPRINT-43"
 parent: ""
 children: 
-  - "[[BUG-086]]"
-  - "[[BUG-087]]"
   - "[[BUG-088]]"
   - "[[CR-121]]"
   - "[[CR-122]]"
@@ -17,11 +15,13 @@ cites:
   - "[[EPIC-055]]"
 cited_by: 
   - "[[CR-131]]"
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
+  - "[[SPRINT-46]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-43_execution_loop_efficiency_and_dev_context.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-14T19:54:14.293Z"
 last_ingest_commit: "ccd4e95e1f4598758cf5dddd36759cf74a5b9fd6"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-43"
@@ -41,19 +41,17 @@ sprint_cleargate_id: "SPRINT-43"
 |---|---|---|---|---|---|
 | STORY-031-03 | Story | standard | M1 | n | low |
 | STORY-031-04 | Story | standard | M1 | n | low |
-| BUG-086 | Bug | standard | M1 | y | low |
 | BUG-088 | Bug | fast | M1 | y | low |
 | BUG-117 | Bug | fast | M1 | y | low |
 | STORY-031-05 | Story | standard | M2 | y | med |
 | CR-120 | CR | standard | M2 | y | med |
-| BUG-087 | Bug | standard | M3 | y | med |
 | CR-121 | CR | standard | M3 | y | low |
 | CR-122 | CR | fast | M3 | y | low |
 
 <!-- BEGIN relations -->
 ## Relations
 - Parent: none
-- Children (9): [[BUG-086]], [[BUG-087]], [[BUG-088]], [[CR-121]], [[CR-122]], [[EPIC-031]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
+- Children (7): [[BUG-088]], [[CR-121]], [[CR-122]], [[EPIC-031]], [[STORY-031-03]], [[STORY-031-04]], [[STORY-031-05]]
 - Cites (2): [[BUG-085]], [[EPIC-055]]
-- Cited by (2): [[CR-131]], [[INITIATIVE-002]]
+- Cited by (4): [[CR-131]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-46]]
 <!-- END relations -->

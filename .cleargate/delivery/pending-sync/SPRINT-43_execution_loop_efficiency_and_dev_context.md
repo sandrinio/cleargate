@@ -27,8 +27,6 @@ stories:
   - STORY-031-04
   - STORY-031-05
 bugs:
-  - BUG-086
-  - BUG-087
   - BUG-088
 crs:
   - CR-121
@@ -87,16 +85,16 @@ It runs after SPRINT-42 (EPIC-059), which lands first on the same two prompt fil
 
 ## 1. Consolidated Deliverables
 
+> Re-cut 2026-11-14 (INITIATIVE-002 §6): BUG-086 and BUG-087 moved to SPRINT-46, absorbed by STORY-066-08 and STORY-066-03. Text below that still names them describes the original plan.
+
 | ID | Type | Lane | Milestone | Parallel? | Bounce exposure |
 |---|---|---|---|---|---|
 | STORY-031-03 | Story | standard | M1 | n | low |
 | STORY-031-04 | Story | standard | M1 | n | low |
-| BUG-086 | Bug | standard | M1 | y | low |
 | BUG-088 | Bug | fast | M1 | y | low |
 | BUG-117 | Bug | fast | M1 | y | low |
 | STORY-031-05 | Story | standard | M2 | y | med |
 | CR-120 | CR | standard | M2 | y | med |
-| BUG-087 | Bug | standard | M3 | y | med |
 | CR-121 | CR | standard | M3 | y | low |
 | CR-122 | CR | fast | M3 | y | low |
 

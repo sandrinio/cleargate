@@ -15,14 +15,24 @@ cites:
   - "[[CR-129]]"
   - "[[EPIC-056]]"
   - "[[EPIC-058]]"
+  - "[[EPIC-066]]"
   - "[[INITIATIVE-002]]"
-cited_by: []
+cited_by: 
+  - "[[EPIC-066]]"
+  - "[[SPRINT-46]]"
+  - "[[STORY-066-03]]"
+  - "[[STORY-066-04]]"
+  - "[[STORY-066-05]]"
+  - "[[STORY-066-06]]"
+  - "[[STORY-066-07]]"
+  - "[[STORY-066-09]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md"
-last_ingest: "2026-11-14T19:10:53.964Z"
-last_ingest_commit: ""
+last_ingest: "2026-11-14T19:54:13.719Z"
+last_ingest_commit: "51efa56fc170045ffda6935622f3ffd8917322fb"
 repo: "planning"
+last_contradict_sha: "6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a468beb"
 parent_cleargate_id: "INITIATIVE-002"
 ---
 
@@ -38,35 +48,38 @@ Every sprint goal and every story, CR and bug declares a proof tier (unit, conta
 In every repository that runs ClearGate, "QA passed" is not the same as "it works". doc_processor
 found about 130 bugs at owner walkthroughs against about 35 QA bounces; new_app found more than 70
 defects in live runs after every agent check passed; this repository found about 47 bugs only by
-real runs (INITIATIVE-002, "Evidence this rests on"). Where a real-run check existed, escapes fell.
+real runs
 
-[+1,109 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
+[+1,199 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
 
 ## Scope
 **In:**
 - [ ] Tier vocabulary `unit | container | live | human`, declared on the sprint goal (Goal
-      Acceptance Check) and on every story, CR and bug (frontmatter `proof_tier` plus a `## Proof`
-      section:
+      Acceptance Check) and on every story, CR and bug (frontmatter
 **Out:**
 - Building a browser harness for any repository (only the config hook that runs one if present).
-- The CI verification layer (EPIC-056) and environment independence of the container tier.
 
-[+2,508 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
+[+2,609 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
 
 ## Architecture rules
 - Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
-- Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent.
 
-[+658 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
+[+744 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
+
+## Decisions
+- The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic… → Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
+- Size.
+
+[+340 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
 
 ## Open questions
-- Tier names. Recommended: `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a database, docker compose, an end-to-end make target), `live` (a live service, device or real host session the agents can reach), `human` (the owner's check is the evidence). Keep these four?
-- Where an item declares its proof.
+- Tier names. Recommended: `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a database, docker compose, an end-to-end make target), `live` (a live service, device or real host session the agents can reach), `human` (the owner's check is the evidence).
 
-[+2,414 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
+[+1,853 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md]
 
 <!-- BEGIN relations -->
 ## Relations
 - Parent: [[INITIATIVE-002]]
-- Cites (12): [[BUG-054]], [[BUG-066]], [[BUG-113]], [[CR-082]], [[CR-110]], [[CR-111]], [[CR-126]], [[CR-128]], [[CR-129]], [[EPIC-056]], [[EPIC-058]], [[INITIATIVE-002]]
+- Cites (13): [[BUG-054]], [[BUG-066]], [[BUG-113]], [[CR-082]], [[CR-110]], [[CR-111]], [[CR-126]], [[CR-128]], [[CR-129]], [[EPIC-056]], [[EPIC-058]], [[EPIC-066]], [[INITIATIVE-002]]
+- Cited by (8): [[EPIC-066]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-09]]
 <!-- END relations -->

@@ -11,6 +11,7 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
+- [[SPRINT-46]] — Draft · 2026-11-15 → 2026-11-19 — Build Step Sized by Risk — Make the build step fit the item: a script assigns fast, standard
 
 ### Epics
 
@@ -36,6 +37,7 @@
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
 - [[EPIC-065]] — Draft · no sprint — Proof Decides Done — Every sprint goal and every story, CR and bug declares a proof
+- [[EPIC-066]] — Draft · SPRINT-46 (planned) — Build Step Sized by Risk — The per-item build step runs one of three paths chosen by a
 
 ### Proposals and initiatives
 
@@ -118,8 +120,8 @@
 - area: sprint-design-review
   - [[BUG-129]] — Draft · no sprint — collision_surface.sh reads §3.1 cell notes as part of the path, so the design review refuses every story
 - area: sprint-execution
-  - [[BUG-086]] — Draft · SPRINT-43 — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
-  - [[BUG-087]] — Draft · SPRINT-43 — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
+  - [[BUG-086]] — Draft · SPRINT-46 — DevOps Story Merges Fail on the Orchestrator's Own Wiki Dirt
+  - [[BUG-087]] — Draft · SPRINT-46 — The Pre-Gate Typecheck Always FAILs in a Worktree Because `--prefix` Points Outside It
   - [[BUG-088]] — Draft · SPRINT-43 — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
   - [[BUG-108]] — Triaged · SPRINT-41 — The QA role requires a context pack that the sprint-execution skill never tells the orchestrator to build
   - [[BUG-113]] — Triaged · SPRINT-41 — Nothing checks QA-Red's sealed tests against the item's declared Test Layers minimums before the Developer starts

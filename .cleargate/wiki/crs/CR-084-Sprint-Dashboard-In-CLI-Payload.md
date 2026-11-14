@@ -15,6 +15,7 @@ cited_by:
   - "[[STORY-062-03]]"
   - "[[STORY-062-05]]"
   - "[[STORY-063-05]]"
+  - "[[STORY-066-04]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/CR-084-Sprint-Dashboard-In-CLI-Payload.md"
@@ -53,5 +54,5 @@ parent_cleargate_id: "EPIC-026"
 ## Relations
 - Parent: [[EPIC-026]]
 - Cites (2): [[PROPOSAL-009]], [[STORY-006-03]]
-- Cited by (8): [[CR-097]], [[CR-101]], [[CR-102]], [[EPIC-062]], [[STORY-062-01]], [[STORY-062-03]], [[STORY-062-05]], [[STORY-063-05]]
+- Cited by (9): [[CR-097]], [[CR-101]], [[CR-102]], [[EPIC-062]], [[STORY-062-01]], [[STORY-062-03]], [[STORY-062-05]], [[STORY-063-05]], [[STORY-066-04]]
 <!-- END relations -->

@@ -14,6 +14,7 @@ cites:
   - "[[EPIC-055]]"
 cited_by: 
   - "[[BUG-087]]"
+  - "[[STORY-066-03]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-057_Multi_Repo_Story_Execution.md"
@@ -61,5 +62,5 @@ ClearGate's execution model assumes one repo and one worktree per story. Real re
 ## Relations
 - Parent: none
 - Cites (8): [[BUG-033]], [[BUG-041]], [[BUG-045]], [[BUG-046]], [[CR-108]], [[CR-126]], [[EPIC-033]], [[EPIC-055]]
-- Cited by (1): [[BUG-087]]
+- Cited by (2): [[BUG-087]], [[STORY-066-03]]
 <!-- END relations -->

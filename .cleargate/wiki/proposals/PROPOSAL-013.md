@@ -17,7 +17,7 @@ sprint_cleargate_id: "SPRINT-12"
 
 # PROPOSAL-013: Sprint Planning Fast-Track Lane
 
-**Status:** Completed · **Sprint:** SPRINT-12 · **Gate:** pass
+**Status:** Completed · **Sprint:** SPRINT-001 · **Gate:** pass
 
 ## Initiative & Context
 ### 1.1 Objective

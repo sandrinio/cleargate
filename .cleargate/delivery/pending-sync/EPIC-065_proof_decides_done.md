@@ -40,6 +40,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-11-14T19:10:28Z
   sessions: []
+last_contradict_sha: "6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a468beb"
 ---
 
 # EPIC-065: Proof Decides Done
@@ -71,7 +72,6 @@ draft_tokens:
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs" action="modify" />
-    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh" action="modify" />
     <file path="cleargate-cli/src/lib/readiness-predicates.ts" action="modify" />
     <file path="cleargate-cli/src/init/detect-test-stack.ts" action="modify" />
     <file path="cleargate-cli/src/commands/sprint.ts" action="modify" />
@@ -132,11 +132,8 @@ release carrying this epic, here and in the dispenser_adapter pilot):
 - [ ] Close and report: close_sprint's deferred-verification step becomes the evidence step for all
       items; an item without evidence is listed as "built, not proven at tier X" and needs the
       human's ack; the report gets a per-item proof table and a recorded goal verdict (absorbs CR-129).
-- [ ] Proof runs at all: `pre_gate_runner.sh` runs any configured command whatever the stack, keeps
-      the last 40 lines of output on failure, and treats a configured-but-skipped command as FAIL
-      (field finding W-D1).
-- [ ] The sprint base is tested once at kickoff and the failing set is recorded as the sprint's
-      baseline, so QA and the evidence step can tell old failures from new (field finding W010-3).
+- [ ] The evidence step reads the sprint's kickoff `baseline.json` (built by [[EPIC-066]]) so an old
+      failure on the sprint base is not recorded against an item.
 
 **❌ OUT-OF-SCOPE (Do NOT Build This)**
 - Building a browser harness for any repository (only the config hook that runs one if present).
@@ -144,6 +141,9 @@ release carrying this epic, here and in the dispenser_adapter pilot):
 - Lane rubric and short paths for small items (WS-2), generated file surfaces (WS-5), sprint
   composition and the approve command (WS-3), the remaining measurement work (WS-4).
 - Parallel wave scheduling (EPIC-055, paused by owner decision).
+- The stack-neutral pre-gate scan (W-D1) and the kickoff baseline (W010-3): moved to [[EPIC-066]]
+  by owner decision 2026-11-14, because the new build step depends on them. They ship in SPRINT-46,
+  before this epic.
 - Re-grading archived items: completed work keeps its records as they are.
 
 ## 3. The Reality Check (Context)
@@ -205,15 +205,14 @@ release carrying this epic, here and in the dispenser_adapter pilot):
 - `cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs` — evidence section in the Reporter's bundle.
 - `cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs` — a QA-Red view of the item without `@holdout` scenarios.
 - `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs` — verdict field `evidence` (path or `pending:<tier>`), validated.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh` — drop the `package.json` guards for configured commands; keep 40 lines of failing output; skipped-configured is FAIL.
 - `cleargate-cli/src/init/detect-test-stack.ts` — seed `gate-checks.json` `proof.unit` and `proof.container` from the stack.
-- `cleargate-cli/src/commands/sprint.ts` — preflight: every item declares a tier; kickoff baseline run of `qa.test` on the base, failing set written to `<sprintDir>/baseline.json`.
+- `cleargate-cli/src/commands/sprint.ts` — preflight: every item declares a tier. (The kickoff baseline is built by EPIC-066.)
 - `cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md`, `devops.md`, `reporter.md`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` and the Codex `qa.toml`, `devops.toml`, `reporter.toml` — prove step, holdouts, property-not-shape rule, Done timing, OD-4 amended.
 
 **Data Changes:**
 - Work-item frontmatter: `proof_tier: unit | container | live | human` (stories, CRs, bugs).
 - `gate-checks.json`: `proof: { unit, container, browser? }`.
-- New files per sprint: `evidence/<ID>.json`, `baseline.json`. `deferred-verify/` is read for one release, then retired.
+- New files per sprint: `evidence/<ID>.json`. `deferred-verify/` is read for one release, then retired.
 - `state.json`: optional per-story `evidence` pointer (additionalProperties already allowed; no new state).
 
 ## 5. Acceptance Criteria
@@ -258,22 +257,7 @@ Feature: Proof decides Done
     Then the @holdout scenario is absent from it
     And QA-Verify writes and runs a test for the @holdout scenario at the prove step
 
-  Scenario: The pre-gate scan runs the configured test in a Go repository
-    Given a repository with no package.json whose gate-checks.json sets qa.test to "make check"
-    When pre_gate_runner.sh runs in qa mode
-    Then it runs "make check"
-    And on failure the scan report contains the last 40 lines of its output
 
-  Scenario: A configured command that is skipped fails the scan
-    Given gate-checks.json sets qa.typecheck to "go vet ./..."
-    When the scan cannot run it
-    Then the scan records FAIL for typecheck, not INFO
-
-  Scenario: Old failures on the sprint base are known before building
-    Given make check fails on the sprint base in internal/seccheck
-    When the sprint kicks off
-    Then baseline.json lists that failure
-    And QA-Verify does not count it against a story whose branch did not touch it
 ```
 
 ## Testing Strategy
@@ -322,9 +306,9 @@ Feature: Proof decides Done
 - **AI Question:** INITIATIVE-002 lists EPIC-056 (CI verification layer) as a dependency for environment independence. Recommended: do not block on it; the container tier runs the target's own command (`make e2e`, a compose target) from `gate-checks.json`, and EPIC-056 stays separate. Agree?
 - **Human Answer:** Unresolved
 - **AI Question:** The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic because proof needs tests that actually run. Keep them here rather than in the later per-stack workstream (WS-6)?
-- **Human Answer:** Unresolved
+- **Human Answer:** Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
 - **AI Question:** Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in the loop; holdouts and the red-test rule; close and report; stack-neutral pre-gate scan; kickoff baseline. Run it as one sprint (recommended; SPRINT-45 ran six, dispenser runs fifteen), or split the prove step and holdouts into a second sprint?
-- **Human Answer:** Unresolved
+- **Human Answer:** One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
 
 > The literal token `Unresolved` above is load-bearing: the `interrogation-resolved` readiness
 > criterion checks that the body does NOT contain it. Leave it in place while the question is open

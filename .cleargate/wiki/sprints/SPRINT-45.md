@@ -11,7 +11,8 @@ children:
   - "[[STORY-064-01]]"
   - "[[STORY-064-02]]"
 cites: []
-cited_by: []
+cited_by: 
+  - "[[SPRINT-46]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-45_measured_loop_and_safe_upgrade.md"
@@ -46,6 +47,7 @@ Make the sprint report's rework and cost figures come from what actually happene
 ## Relations
 - Parent: none
 - Children (7): [[BUG-117]], [[BUG-133]], [[BUG-134]], [[CR-120]], [[EPIC-064]], [[STORY-064-01]], [[STORY-064-02]]
+- Cited by (1): [[SPRINT-46]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report
