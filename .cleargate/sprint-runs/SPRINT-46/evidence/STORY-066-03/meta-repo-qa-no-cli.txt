@@ -1,0 +1,3 @@
+[N/A] typecheck: target cleargate-cli is not in the worktree
+[N/A] test: target cleargate-cli is not in the worktree
+Summary: 0

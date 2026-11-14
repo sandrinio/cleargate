@@ -1,0 +1,18 @@
+# ClearGate Pre-Gate Scan Report
+Mode: qa
+Worktree: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy
+Branch: sprint/S-04
+Timestamp: 2026-11-14T21:35:03Z
+---
+[PASS] typecheck: go vet ./...
+[FAIL] debug_patterns: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/prep_doc_refresh.mjs:368:  console.log(`Found ${changedFiles.length} changed files in sprint window.`);|/U
+/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/prep_doc_refresh.mjs:368:  console.log(`Found ${changedFiles.length} changed files in sprint window.`);
+/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/prep_doc_refresh.mjs:375:  console.log(`Wrote ${outFile}`);
+/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/dedupe_frontmatter.mjs:195:    console.log(`would-rewrite: ${relPath} (duplicate keys: ${dupeSummary})`);
+/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/dedupe_frontmatter.mjs:216:  console.log(`rewritten: ${relPath} (removed duplicate keys: ${dupeSummary})`);
+/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/dedupe_frontmatter.mjs:220:console.log(
+[WARN] todo_patterns: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/da-copy/.cleargate/scripts/update_state.mjs:366:    // TODO(STORY-022-04): cross-read sprint plan to enforce rubric §6 contradiction c
+[FAIL] test: exit code 2
+  | Makefile:22: *** make check needs OWL_TEST_DATABASE_URL, the URL of a PostgreSQL 18 server the tests may use (they create roles and databases in it).  Stop.
+---
+Summary: 1 passed, 2 failed, 1 warnings

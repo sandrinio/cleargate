@@ -1,0 +1,34 @@
+# ClearGate Pre-Gate Scan Report
+Mode: arch
+Worktree: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta
+Branch: sprint/S-46
+Timestamp: 2026-11-14T21:36:18Z
+---
+[N/A] typecheck: target cleargate-cli is not in the worktree
+[PASS] new_deps: no new runtime deps
+[PASS] stray_env_files: no stray .env files
+[INFO] file_count_report: directory file counts:
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta: 8 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning: 4 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.claude: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate: 4 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/docs: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/scripts: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate: 20 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/field-trials: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/sprint-runs: 0 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/wiki: 9 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/knowledge: 7 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/scripts: 37 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/delivery: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/templates: 10 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/.cleargate/reports: 1 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/assets: 8 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/assets/png: 15 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/sql: 0 files
+  /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/sql/hotfixes: 1 files
+[PASS] qa_red_lint: no semantic fixture issues
+---
+Summary: 3 passed, 0
+0 failed, 0
+0 warnings

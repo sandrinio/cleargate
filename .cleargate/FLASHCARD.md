@@ -1,3 +1,21 @@
+2026-11-15 · #qa #metrics · sprint_metrics.mjs rewrites <sprint>/metrics.json; run it on closed sprints only via CLEARGATE_SPRINT_DIR on a copy
+2026-11-15 · #test-harness #merge · doctor-session-brief-f2.red timing tests fail under multi-lane load, pass 4/4 alone; re-run alone before calling it a regression
+2026-11-15 · #qa #test-harness · agent-developer-section Scenario 2 asserts live against its own message string; always red when live exists
+2026-11-15 · #qa #worktree · a base worktree without prebuild fails payload-parity tests; diff test names, don't count failures
+2026-11-15 · #qa #proof-run · dispenser make check needs OWL_TEST_DATABASE_URL; use `make seccheck` for pass/fail rehearsals without Postgres
+2026-11-15 · #qa-red #docs-match · A docs-match negative check must doctor the cell, not the row tail: append before the trailing ` |` or the matcher never sees it
+2026-11-15 · #qa-red #test-harness · a red test reusing the default stub result for a scan-flagged stage never dispatches it; flag the seal in that case
+2026-11-15 · #test-harness #qa-red · test_update_state.integration runs outer live update_state.mjs (:134); canonical changes need runCanonical spawn
+2026-11-15 · #qa #test-harness · node 24+ `node --test test/` treats the dir as a file (load error); fixtures need a glob like test/*.test.mjs
+2026-11-15 · #qa #test-harness · zsh unmatched glob inside $(ls …) leaves $F empty; `npm run test:file --` then runs the WHOLE suite
+2026-11-15 · #qa-red #test-harness · vm-harness reds: stamp `meta` via `globalThis.__meta =` in the export swap to read meta.phases without importing the .js
+2026-11-15 · #scripts #merge · pre_gate_runner's test FAIL line has no tail pre-066-03; a test-only failure with no baseline must still refuse the merge
+2026-11-15 · #qa-red #test-harness · prep_qa_context fixture: pass sprint dir and pending-sync dir via CLEARGATE_* env and --output; the staged script reads gate-checks.json from its own dir
+2026-11-15 · #bash #pre-gate · `[[ c ]] && X` as a function's last line returns 1 when c is false; set -e kills the caller. Use if/then.
+2026-11-15 · #test-harness #baseline · node:test spec output prints both `✖ <file>` and `test at file:1:1` for a load error; keep only the latter.
+2026-11-15 · #qa-red #scripts · `seal_red.mjs` imports `qa_red_lint.mjs` and `lib/work-item-id.mjs`; a fixture that copies scripts must copy `lib/` too.
+2026-11-15 · #qa-red #test-harness · importing a script that runs main() at load time exits the test runner; probe exports via a child-process import
+2026-11-15 · #qa-red #test-harness · Seams the plan leaves open (tail as array vs string, porcelain XY form) must be pinned in the Red handoff
 2026-11-14 · #qa #worktree · baseline worktree for path-dependent integration tests must sit under the outer host, not /private/tmp (306 false fails)
 2026-11-14 · #qa #test-harness · `npm test` skips *.integration.node.test.ts; baseline-failures lists omit ~105 integration reds — baseline integration separately
 2026-11-14 · #gherkin #qa-red · A 'no line says X' clause must not be a substring of the required label: 'no local edits lost' contains X.
