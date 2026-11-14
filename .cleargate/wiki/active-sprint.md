@@ -5,8 +5,14 @@
 ## Current Sprint
 
 
+- [[SPRINT-45]]
+  - [[CR-120]] — Ready to Bounce
+  - [[STORY-064-01]] — Ready to Bounce
+  - [[STORY-064-02]] — Ready to Bounce
+  - [[BUG-117]] — Ready to Bounce
+  - [[BUG-133]] — Ready to Bounce
+  - [[BUG-134]] — Ready to Bounce
 
-_No active sprint found._
 
 
 
@@ -20,8 +26,6 @@ _No active sprint found._
 - [[SPRINT-42]] — status: Draft
 
 - [[SPRINT-43]] — status: Draft
-
-- [[SPRINT-45]] — status: Draft
 
 
 

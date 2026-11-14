@@ -11,7 +11,7 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
-- [[SPRINT-45]] — Draft · 2026-11-14 → 2026-11-17 — Measured Loop and Safe Upgrade — Make the sprint report's rework and cost figures come from what actually
+- [[SPRINT-45]] — Active · 2026-11-14 → 2026-11-17 — Measured Loop and Safe Upgrade — Make the sprint report's rework and cost figures come from what actually
 
 ### Epics
 

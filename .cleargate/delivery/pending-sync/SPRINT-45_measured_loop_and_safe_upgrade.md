@@ -44,14 +44,14 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: manual
-status: Draft
+status: Active
 start_date: 2026-11-14
 end_date: 2026-11-17
 synced_at: null
 created_at: 2026-11-13T23:00:46.015Z
-updated_at: 2026-11-13T23:00:46.015Z
+updated_at: 2026-11-14T08:14:41Z
 created_at_version: strategy-phase-pre-init
-updated_at_version: strategy-phase-pre-init
+updated_at_version: ccd4e95e-dirty
 draft_tokens:
   input: null
   output: null
@@ -85,7 +85,7 @@ context_source: |
   Decomposes EPIC-064 (INITIATIVE-002 WS-4, triaged 2026-11-14) into STORY-064-01/02 plus the
   amended CR-120. Carries BUG-117 (from SPRINT-43, folded per INITIATIVE-002 §6) and BUG-133/134
   (upgrade safety needed before the dispenser_adapter pilot).
-last_contradict_sha: "9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe"
+last_contradict_sha: 9f4323fce86953e6a8c25dfc6074064025057e9cbf36a85baad100dd56b430fe
 ---
 
 # SPRINT-45: Measured Loop and Safe Upgrade
@@ -107,13 +107,13 @@ Make the sprint report's rework and cost figures come from what actually happene
 
 ## 1. Consolidated Deliverables
 
-The Proof column applies INITIATIVE-002 rule 1 by hand: the tier, and the check that produces the evidence.
+<!-- cleargate:ignore-ids -->The Proof column applies INITIATIVE-002 rule 1 by hand: the tier, and the check that produces the evidence. Sprint 44 below is the last closed sprint, used as evidence, not a roster item.<!-- /cleargate:ignore-ids -->
 
 | Story ID | Title | Lane | Milestone | Parallel? | Bounce Exposure | Proof (tier — check) |
 |---|---|---|---|---|---|---|
-| `CR-120` | Measure the subagent, not the orchestrator — dispatch ledger incl. workflow runs | standard | M1 | y | med | Real run — reader on SPRINT-44 and dispenser_adapter sessions; dispatch counts match the holdout recount |
+| `CR-120` | Measure the subagent, not the orchestrator — dispatch ledger incl. workflow runs | standard | M1 | y | med | Real run — reader on sprint 44 and dispenser_adapter sessions; dispatch counts match the holdout recount |
 | `STORY-064-01` | Per-item metrics derived from transcripts and git | standard | M1 | y (on contract C1) | med | Real run — `sprint_metrics.mjs` on the evidence set vs the holdout recount (10% / ±1 per item) |
-| `STORY-064-02` | Sprint report reads derived metrics | standard | M2 | n (after 064-01) | low | Real run — bundle for SPRINT-44 and SPRINT-45's own close |
+| `STORY-064-02` | Sprint report reads derived metrics | standard | M2 | n (after 064-01) | low | Real run — bundle for sprint 44 and this sprint's own close |
 | `BUG-117` | Pricing table lacks Claude 5 models | fast | M1 | y | low | Unit — pricing lookups for every Claude 5 model id |
 | `BUG-133` | Upgrade output hides lost local edits | standard | M1 | y | med | Real run — packed RC, `upgrade --dry-run` on a copy of dispenser_adapter |
 | `BUG-134` | Upgrade settings merge reorders hooks | standard | M1 | y | low | Real run — packed RC, `upgrade --yes` on a copy of dispenser_adapter; `settings.json` diff shows only ClearGate hooks |
@@ -316,7 +316,7 @@ These are integration layers. All six items build at once after C0, within the 4
 
 - [x] **Gate 1** — EPIC-064 and the six roster items approved (owner, 2026-11-14: "approved. please execute").
 - [x] **Gate 2** (Sprint Ready) — SDR §2 confirmed; Goal Acceptance Check confirmed (owner, 2026-11-14).
-- [ ] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-45` and devops reachability.
+- [x] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-45` 5/5 and devops reachable (2026-11-14).
 - [ ] **Gate 4** (close) — after all items merge and the walkthrough.
 
 ## 6. Execution Log

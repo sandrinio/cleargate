@@ -1,0 +1,81 @@
+{
+  "schema_version": 3,
+  "sprint_id": "SPRINT-45",
+  "sprint_status": "Active",
+  "stories": {
+    "CR-120": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-064-01": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-064-02": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-117": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "fast",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-133": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-134": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-14T08:13:39.707Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "sdr-lane-audit",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "transition BUG-134 → Ready to Bounce",
+  "updated_at": "2026-11-14T08:13:39.707Z"
+}
