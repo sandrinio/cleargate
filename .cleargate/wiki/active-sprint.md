@@ -5,14 +5,8 @@
 ## Current Sprint
 
 
-- [[SPRINT-45]]
-  - [[CR-120]] — Done
-  - [[STORY-064-01]] — Done
-  - [[STORY-064-02]] — Done
-  - [[BUG-117]] — Done
-  - [[BUG-133]] — Done
-  - [[BUG-134]] — Done
 
+_No active sprint found._
 
 
 

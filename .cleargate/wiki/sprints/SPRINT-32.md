@@ -16,7 +16,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-32_Parallel_Waves_And_Code_Map.md"
-last_ingest: "2026-11-13T01:02:08.963Z"
+last_ingest: "2026-11-14T13:05:19.016Z"
 last_ingest_commit: "22b2db2d6a2697c471c85cb18ed53bc17ad6ca9b"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-32"

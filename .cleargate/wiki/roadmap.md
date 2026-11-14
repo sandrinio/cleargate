@@ -7,8 +7,8 @@
 The sprint `.cleargate/sprint-runs/.active` names, validated against its plan file.
 
 
-- [[SPRINT-45]] — Completed
 
+_No sprints currently in flight._
 
 
 ## Planned Sprints

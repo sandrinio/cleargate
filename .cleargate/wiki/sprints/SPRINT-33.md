@@ -10,7 +10,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-33_Framework_Hygiene_And_Gate_Correctness.md"
-last_ingest: "2026-11-13T01:02:08.963Z"
+last_ingest: "2026-11-14T13:05:19.016Z"
 last_ingest_commit: "6e23e2f35012c083f40fa1e641c3590d25abffec"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-33"

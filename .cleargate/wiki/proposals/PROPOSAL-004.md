@@ -8,7 +8,7 @@ cited_by: []
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-004_Public_Discoverability.md"
-last_ingest: "2026-11-13T01:02:08.963Z"
+last_ingest: "2026-11-14T13:05:19.016Z"
 last_ingest_commit: "c5daa2e17d44c5de50c683745851916812069428"
 repo: "planning"
 ---
