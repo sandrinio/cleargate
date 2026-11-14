@@ -195,14 +195,14 @@ Tests build a real git repository in a temp directory, copy the three scripts an
 
 ## Task Breakdown
 
-- [ ] Add `N/A` to the `record_result` header comment and confirm `print_summary` and the CR-120 extractor ignore it -> Requirement 5
-- [ ] Add `resolve_check_target` and `run_configured_check` to `pre_gate_common.sh` -> Requirements 2, 3, 4
-- [ ] Replace the three package.json-guarded blocks in `run_qa` and `run_arch` with the helper -> Requirement 1
-- [ ] Make `new_deps` report `[N/A]` when there is no `package.json` -> Requirement 4
-- [ ] Require `STORY_ID` in the fast-lane transition branch -> Requirement 6
-- [ ] Seed empty `typecheck` and `test` in `init_gate_config.sh` -> Requirement 7
-- [ ] Add the `CLEARGATE_SCAN_NO_LANE_ROUTING=1` early exit before the lane routing, with one integration case: a fast-lane story in a fixture `state.json` whose scan fails keeps lane `fast` and the sprint markdown gains no LD line when the switch is set -> Requirement 9
-- [ ] Write the integration tests on an npm fixture and a Go fixture, including the 60-line tail and the `--prefix` case -> scenarios 1-5
+- [x] Add `N/A` to the `record_result` header comment and confirm `print_summary` and the CR-120 extractor ignore it -> Requirement 5
+- [x] Add `resolve_check_target` and `run_configured_check` to `pre_gate_common.sh` -> Requirements 2, 3, 4
+- [x] Replace the three package.json-guarded blocks in `run_qa` and `run_arch` with the helper -> Requirement 1
+- [x] Make `new_deps` report `[N/A]` when there is no `package.json` -> Requirement 4
+- [x] Require `STORY_ID` in the fast-lane transition branch -> Requirement 6
+- [x] Seed empty `typecheck` and `test` in `init_gate_config.sh` -> Requirement 7
+- [x] Add the `CLEARGATE_SCAN_NO_LANE_ROUTING=1` early exit before the lane routing, with one integration case: a fast-lane story in a fixture `state.json` whose scan fails keeps lane `fast` and the sprint markdown gains no LD line when the switch is set -> Requirement 9
+- [x] Write the integration tests on an npm fixture and a Go fixture, including the 60-line tail and the `--prefix` case -> scenarios 1-5
 
 ## 4. Quality Gates
 

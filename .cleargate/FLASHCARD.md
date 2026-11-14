@@ -1,3 +1,10 @@
+2026-11-15 · #template #qa · template rows are anchors (probe-items.mjs declareProbeSprint + sealed reds); grep tests/scripts for old text first
+2026-11-15 · #merge #orchestrator · merge_story `post_merge_test: excused` + a NOT TESTED tail line = merged with no test run; report it, never call it tested
+2026-11-15 · #qa-red #test-harness · multi-case git-fixture block: a failing early case hides later cases' harness bugs; order riskiest first
+2026-11-15 · #pre-gate #scan · pre_gate_runner.sh qa greps the whole worktree when nothing is staged; in a target it flags ClearGate scripts
+2026-11-15 · #git #scripts · `git grep -e <p> --` with an empty path list searches the whole tree; skip the call when no path qualifies
+2026-11-15 · #qa #test-harness · fixture merge runs: run the staged scripts copy inside the fixture repo, since root derives from scriptDir
+2026-11-15 · #test-harness #merge · scan and shell tests leave residue in the tree they run in (_off-sprint/pre-gate.jsonl, scaffold sprint-runs/); clean before teardown
 2026-11-15 · #qa #metrics · sprint_metrics.mjs rewrites <sprint>/metrics.json; run it on closed sprints only via CLEARGATE_SPRINT_DIR on a copy
 2026-11-15 · #test-harness #merge · doctor-session-brief-f2.red timing tests fail under multi-lane load, pass 4/4 alone; re-run alone before calling it a regression
 2026-11-15 · #qa #test-harness · agent-developer-section Scenario 2 asserts live against its own message string; always red when live exists

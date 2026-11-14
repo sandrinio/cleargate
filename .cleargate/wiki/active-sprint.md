@@ -6,11 +6,11 @@
 
 
 - [[SPRINT-46]]
-  - [[STORY-066-03]] — Ready to Bounce
+  - [[STORY-066-03]] — Done
   - [[STORY-066-04]] — Done
   - [[STORY-066-05]] — Ready to Bounce
   - [[STORY-066-06]] — Ready to Bounce
-  - [[STORY-066-07]] — Ready to Bounce
+  - [[STORY-066-07]] — Done
   - [[STORY-066-08]] — Ready to Bounce
   - [[STORY-066-09]] — Ready to Bounce
   - [[STORY-066-10]] — Ready to Bounce

@@ -6,9 +6,9 @@ sprint_cleargate_id: null
 carry_over: false
 status: Draft
 approved: true
-approved_by: "sandrinio"
-approved_at: "2026-11-15T09:00:00Z"
-ambiguity: "🟢 Low"
+approved_by: sandrinio
+approved_at: 2026-11-15T09:00:00Z
+ambiguity: 🟢 Low
 context_source: EPIC-066 (approved 2026-11-14; §2 merge_story.mjs bullet, §6 owner answers on merge by script and fast-lane demotion); BUG-086, BUG-107 and BUG-116 read in full; devops.md nine steps and SKILL.md §C.7 read at canonical main
 actor: Orchestrator running the sprint barrier
 complexity_label: L3
@@ -36,15 +36,21 @@ last_remote_update: null
 source: local-authored
 last_synced_status: null
 last_synced_body_sha: null
-stamp_error: no ledger rows for work_item_id STORY-066-08
 draft_tokens:
-  input: null
-  output: null
-  cache_creation: null
-  cache_read: null
-  model: null
-  last_stamp: 2026-11-14T19:53:50Z
-  sessions: []
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-14T22:40:30Z
+  sessions:
+    - session: 5ceeac69-149c-4c13-bbec-09ab2d997749
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-14T19:55:53Z
 ---
 
 # STORY-066-08: Merge by Script
@@ -65,6 +71,8 @@ As the orchestrator running a sprint barrier, I want one script that checks, mer
 - Requirement 7: No report requirement ([[BUG-116]]). The script reads no `*-dev.md`, `*-qa.md` or `*-arch.md`. Whether the reports exist is the orchestrator's check before it calls the script. The script's only precondition on the story is that `story/<ID>` exists and is ahead of `sprint/S-NN`.
 - Requirement 8: Prebuild and post-merge test come from config, not from a stack guess. `gate-checks.json` gains two optional keys, `merge.prebuild` and `merge.post_test`. A non-empty `merge.prebuild` runs after the merge. The post-merge test runs `merge.post_test` when set, else `qa.test`; when both are empty the step records `skipped` in the JSON and the merge still lands. A failing post-merge test exits 5 and leaves the merge in place (DevOps decides whether to revert).
 - Requirement 9: `devops.md` and `devops.toml` are rewritten for the narrowed role: the agent is dispatched only on exit 4 (resolve nothing; diagnose and report the conflict files, as today) or exit 5 (diagnose the post-merge failure). Its inventory and Step 1 stop requiring `STORY-NNN-NN-arch.md` for every standard-lane story: the report is required only when the pre-gate scan flagged ([[BUG-116]], matching SKILL.md:508). Steps 2 to 9 are replaced by "the script already ran these; read its JSON".
+- Requirement 10 (mid-sprint amendment, owner approved 2026-11-15: "Amend 08 before merge"): the pre-merge check judges only what the item changed. A debug-pattern or TODO hit in a file the item did not change (relative to `sprint/S-NN`) never refuses a merge. Cause: with nothing staged, `pre_gate_runner.sh qa` greps the whole worktree, including ClearGate's own installed `.cleargate/scripts/*.mjs`, so every merge in a repo with ClearGate installed is refused (evidence: `sprint-runs/SPRINT-46/evidence/STORY-066-03/dispenser-qa-asconfigured-make-check.txt`). A hit in a file the item changed still refuses, as Requirement 2 says.
+- Requirement 11 (same amendment): a test failure with no test names that matches the baseline is baseline. When `baseline.json` has `failing: []` and a non-zero `exit_code`, a run that fails with the same exit code and the same last non-empty output line is excused, both pre-merge and post-merge, with its own `reason`. The JSON `tail` says the configured test stopped before running any test, so nobody reads the merge as tested. A run that fails differently still refuses. Cause: dispenser's `make check` exits 2 at a database guard with no test names (QA-Verify 08, UNNAMED_BASELINE_FAILURE). Exit 3 returns the item to a Developer who cannot fix a missing database, so the item bounces until it escalates.
 
 ### 1.3 Out of Scope
 - `SKILL.md` §C.7 and both `dispatch-serial.md` files (STORY-066-12 owns them; until it lands the skill still tells the orchestrator to dispatch DevOps, and this story must not edit it).
@@ -208,6 +216,9 @@ Flow:
 - [ ] Write `merge-story.node.test.ts` (pure helpers: classifier, baseline judge, exit mapping) and `merge-story.integration.node.test.ts` (fixture git repos, npm and Go, no `package.json` in the Go one): clean, failing check, conflict, post-merge failure, baseline failure, authored dirt, real dirt in worktree
 - [ ] Rewrite `devops.md` and `devops.toml` for exit 4 and 5 only, with the scan-gated arch report -> Requirement 9
 - [ ] Typecheck, run both test files, and run `cleargate-cli` `npm run prebuild` to confirm the payload composes
+- [ ] Count a debug-pattern hit only in files the item changed vs `sprint/S-NN`; drop the scan's untouched-file entry; demote only on a real refusal -> Requirement 10
+- [ ] Excuse an unnamed test failure matching the baseline exit code and last line, pre-merge and post-merge, with reason `baseline-unnamed` and a `NOT TESTED` tail line -> Requirement 11
+- [ ] Run the two Amendment A red files and the sealed 08, 03 and 04 reds on the integrated tree -> Requirement 10, Requirement 11
 
 ## 4. Quality Gates
 
