@@ -66,7 +66,13 @@ template_version: 2
 <!-- Tallies use the locked event-type vocabulary:
      Bug-Fix Tax = (CR:bug count + UR:bug count) / total story count × 100
      Enhancement Tax = UR:review-feedback count / total story count × 100
-     First-pass success rate = stories with qa_bounces=0 AND arch_bounces=0 / total stories × 100
+     First-pass success rate = items with measured rework total 0 / total items × 100
+       (source: the bundle's ## Measured Metrics section)
+     First-pass success rate (state.json counters) = stories with qa_bounces=0 AND arch_bounces=0 / total stories × 100
+       (kept for one release, for comparison)
+     Rework rounds, Git rework commits, Subagent tokens and Unattributed share (measured) come from
+       ## Measured Metrics; write "not measured" where it says so, never 0.
+     Orchestrator window tokens (ledger) comes from ## Token Ledger Digest (orchestrator window).
      Token divergence: compare ledger-primary vs task-notification-tertiary; flag if delta >20% -->
 
 | Metric | Value |
@@ -83,6 +89,8 @@ template_version: 2
 | LD events | N |
 | Total QA bounces | N |
 | Total Arch bounces | N |
+| Rework rounds (measured) | N |
+| Git rework commits (measured) | N |
 | CR:bug events | N |
 | CR:spec-clarification events | N |
 | CR:scope-change events | N |
@@ -95,6 +103,10 @@ template_version: 2
 | **Bug-Fix Tax** | N% |
 | **Enhancement Tax** | N% |
 | **First-pass success rate** | N% |
+| First-pass success rate (state.json counters) | N% |
+| Subagent tokens (measured) | N tokens |
+| Unattributed share (measured) | N% |
+| Orchestrator window tokens (ledger) | N tokens |
 | Token source: ledger-primary | N tokens |
 | Token source: story-doc-secondary | N tokens |
 | Token source: task-notification-tertiary | N tokens |

@@ -12,24 +12,28 @@
  *   CLEARGATE_SPRINT_DIR      — override the sprint-runs/<sprint-id> directory
  *   CLEARGATE_PENDING_SYNC_DIR — override .cleargate/delivery/pending-sync/ (for test isolation)
  *
- * Both env overrides are forwarded to child process (count_tokens.mjs --json) via process.env.
+ * Both env overrides are forwarded to the child processes (count_tokens.mjs --json,
+ * sprint_metrics.mjs --json) via process.env.
  *
  * Output bundle sections (in order):
  *   1. Sprint Plan Slices       — §1 Consolidated Deliverables, §2 Execution Strategy, §5 (from sprint plan)
  *   2. State.json Summary       — one-liner per story: ID | state | lane | qa_bounces=N arch_bounces=N
  *   3. Milestone Plans          — plans/M*.md verbatim, or one-liner if absent
  *   4. Git Log Digest           — git log --stat sprint/S-NN ^main (silent fail if branch absent)
- *   5. Token Ledger Digest      — count_tokens.mjs --json output embedded as markdown
- *   6. Flashcard Slice          — FLASHCARD.md entries in [start_date, end_date] window;
+ *   5. Token Ledger Digest (orchestrator window) — count_tokens.mjs --json output embedded as markdown
+ *   6. Measured Metrics         — sprint_metrics.mjs --json (contract C2) as markdown
+ *   7. Flashcard Slice          — FLASHCARD.md entries in [start_date, end_date] window;
  *                                  Strategy-3 fallback (git log --grep) when:
  *                                    - date filter returns 0 rows AND
  *                                    - sprint_status === 'Completed' (gated to avoid false
  *                                      positives during active execution per M1 gotcha #6)
- *   7. REPORT template pointer  — one line citing the template path
+ *   8. REPORT template pointer  — one line citing the template path
  *
  * Exit codes:
  *   0 — success
- *   1 — token-ledger.jsonl missing (hard error per story R4)
+ *   1 — the bundle could not be written (uncaught fs error)
+ *       A missing token-ledger.jsonl and a failed sprint_metrics.mjs both still exit 0
+ *       (warning / "not measured" line; BUG-081).
  *   2 — usage error (missing sprint-id)
  *
  * CLI shape is locked (positional <sprint-id> only; no required flags):
@@ -256,7 +260,7 @@ function buildTokenLedgerDigest(sprintId, sprintDir) {
       }
     );
     const digest = JSON.parse(output.trim());
-    const lines = ['## Token Ledger Digest', ''];
+    const lines = ['## Token Ledger Digest (orchestrator window)', ''];
 
     const total = digest.total;
     if (total === 0) {
@@ -346,11 +350,192 @@ function buildTokenLedgerDigest(sprintId, sprintDir) {
 
     return lines.join('\n') + '\n';
   } catch (err) {
-    return `## Token Ledger Digest\n\nFailed to run count_tokens.mjs: ${err.message}\n`;
+    return `## Token Ledger Digest (orchestrator window)\n\nFailed to run count_tokens.mjs: ${err.message}\n`;
   }
 }
 
-// ── Section 6: Flashcard Slice ────────────────────────────────────────────────
+// ── Section 6: Measured Metrics (contract C2) ─────────────────────────────────
+
+const NOT_MEASURED = 'not measured';
+
+function mmNum(v) {
+  return typeof v === 'number' && Number.isFinite(v) ? v.toLocaleString('en-US') : NOT_MEASURED;
+}
+
+function mmCut(str, n = 160) {
+  return String(str).slice(0, n);
+}
+
+function mmFirstLine(err) {
+  return String((err && err.message) || err).split('\n')[0];
+}
+
+function mmFailure(reason) {
+  return `## Measured Metrics\n\ndispatch data: not measured (sprint_metrics.mjs ${mmCut(reason)})\n`;
+}
+
+/**
+ * Render the C2 document. Renders C2 fields only; never re-derives.
+ */
+function renderMeasuredMetrics(doc) {
+  const sources = doc.sources && typeof doc.sources === 'object' ? doc.sources : {};
+  const warnings = Array.isArray(sources.warnings) ? sources.warnings : [];
+  const repos = Array.isArray(sources.repos) ? sources.repos : [];
+  const items = doc.items;
+  const ids = Object.keys(items).sort();
+
+  const DNM =
+    warnings.includes('dispatch data: not measured') ||
+    ids.some((id) => items[id] && items[id].dispatch_source === 'not measured');
+  const GNM = repos.length === 0;
+
+  const gitSum = (it) => {
+    const g = it && it.git;
+    if (GNM || !g || !Number.isFinite(g.red_corrected) || !Number.isFinite(g.rework)) return null;
+    return g.red_corrected + g.rework;
+  };
+  const gitStr = (it) => {
+    const v = gitSum(it);
+    return v === null ? NOT_MEASURED : String(v);
+  };
+  const totalGit = () => {
+    if (GNM) return NOT_MEASURED;
+    let sum = 0;
+    for (const id of ids) {
+      const v = gitSum(items[id]);
+      if (v === null) return NOT_MEASURED;
+      sum += v;
+    }
+    return mmNum(sum);
+  };
+
+  const lines = ['## Measured Metrics', ''];
+  lines.push(`_Source: sprint_metrics.mjs --json (schema 1, generated ${doc.generated_at})_`, '');
+
+  if (DNM) {
+    lines.push('dispatch data: not measured', '');
+  } else {
+    const dispatches = mmNum(sources.dispatches);
+    lines.push(`Sources: ${mmNum(sources.sessions)} sessions, ${dispatches} dispatch rows, ${repos.length} repos.`, '');
+  }
+
+  // Item table
+  if (ids.length === 0) {
+    lines.push('No roster items in the metrics document.', '');
+  } else {
+    lines.push('| Item | Dispatches | Rework red/dev/verify/total | Git rework | Wall time | Tokens | Models |');
+    lines.push('|---|---|---|---|---|---|---|');
+    for (const id of ids) {
+      const it = items[id] || {};
+      const itemDNM = it.dispatch_source === 'not measured';
+      const rw = it.rework || {};
+      let dispatches, rework, wall, tokens, models;
+      if (itemDNM) {
+        dispatches = wall = tokens = models = NOT_MEASURED;
+        rework = GNM ? NOT_MEASURED : `git: ${mmNum(rw.total)}`;
+      } else {
+        dispatches = mmNum(it.dispatches && it.dispatches.total);
+        rework = `${mmNum(rw.red_corrections)}/${mmNum(rw.dev_reruns)}/${mmNum(rw.verify_reruns)}/${mmNum(rw.total)}`;
+        wall = Number.isFinite(it.wall_ms) ? `${Math.round(it.wall_ms / 60000)}m` : NOT_MEASURED;
+        tokens = mmNum(it.tokens && it.tokens.total);
+        const ms = Array.isArray(it.models) ? it.models : [];
+        models = ms.length === 0 ? '-' : ms.length > 3 ? `${ms.slice(0, 3).join(', ')} +${ms.length - 3}` : ms.join(', ');
+      }
+      lines.push(`| ${id} | ${dispatches} | ${rework} | ${gitStr(it)} | ${wall} | ${tokens} | ${models} |`);
+    }
+    lines.push('');
+  }
+
+  const totals = doc.totals && typeof doc.totals === 'object' ? doc.totals : {};
+  if (DNM) {
+    const reworkTotal = GNM ? NOT_MEASURED : mmNum(totals.rework);
+    lines.push(`Rework (git): ${reworkTotal} rework rounds, ${totalGit()} git rework commits.`, '');
+  } else {
+    lines.push(
+      `Totals: ${mmNum(totals.dispatches)} dispatches, ${mmNum(totals.tokens)} subagent tokens, ` +
+        `${mmNum(totals.rework)} rework rounds, ${totalGit()} git rework commits.`,
+      ''
+    );
+  }
+
+  // First-pass
+  if (DNM && GNM) {
+    lines.push(`First-pass (measured rework total 0): ${NOT_MEASURED}.`, '');
+  } else {
+    const k = ids.filter((id) => items[id] && items[id].rework && items[id].rework.total === 0).length;
+    lines.push(`First-pass (measured rework total 0): ${k} of ${ids.length} items.`, '');
+  }
+
+  if (!DNM) {
+    const sl = doc.sprint_level || {};
+    const ua = doc.unattributed || {};
+    lines.push(`Sprint-level: ${mmNum(sl.dispatches)} dispatches, ${mmNum(sl.tokens)} tokens.`);
+    const share = Number.isFinite(ua.share) ? `${(ua.share * 100).toFixed(1)}%` : NOT_MEASURED;
+    lines.push(`Unattributed: ${mmNum(ua.dispatches)} dispatches, ${mmNum(ua.tokens)} tokens, share ${share}.`, '');
+  }
+
+  // Disagreements
+  const dis = ids.filter((id) => items[id] && items[id].disagrees === true);
+  if (dis.length === 0) {
+    lines.push('Disagreements: none.', '');
+  } else {
+    lines.push('Disagreements:');
+    for (const id of dis) {
+      const it = items[id];
+      const derived = it.dispatch_source === 'not measured' ? NOT_MEASURED : mmNum(it.rework && it.rework.total);
+      const sc = it.state_counters || {};
+      const counter = Number.isFinite(sc.qa_bounces) && Number.isFinite(sc.arch_bounces)
+        ? String(sc.qa_bounces + sc.arch_bounces)
+        : NOT_MEASURED;
+      lines.push(`- ${id}: derived ${derived}, git ${gitStr(it)}, state.json counter ${counter}`);
+    }
+    lines.push('');
+  }
+
+  // Warnings
+  const rest = warnings.filter((w) => w !== 'dispatch data: not measured');
+  if (rest.length > 0) {
+    lines.push(`Warnings (${rest.length}):`);
+    for (const w of rest.slice(0, 5)) lines.push(`- ${mmCut(w)}`);
+    if (rest.length > 5) lines.push(`- …and ${rest.length - 5} more (see metrics.json)`);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function buildMeasuredMetrics(sprintId) {
+  try {
+    const script = path.join(__dirname, 'sprint_metrics.mjs');
+    if (!fs.existsSync(script)) return mmFailure('not found');
+    let output;
+    try {
+      output = execSync(`node "${script}" "${sprintId}" --json`, {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        env: process.env, // Forward CLEARGATE_SPRINT_DIR / PENDING_SYNC_DIR / TRANSCRIPTS_ROOT
+        timeout: 120000,
+        maxBuffer: 16 * 1024 * 1024,
+      });
+    } catch (err) {
+      return mmFailure(`failed: ${mmFirstLine(err)}`);
+    }
+    let doc;
+    try {
+      doc = JSON.parse(output.trim());
+    } catch {
+      return mmFailure('unreadable output');
+    }
+    if (!doc || doc.schema !== 1 || !doc.items || typeof doc.items !== 'object' || Array.isArray(doc.items)) {
+      return mmFailure('unreadable output');
+    }
+    return renderMeasuredMetrics(doc);
+  } catch (err) {
+    return mmFailure(`render failed: ${mmFirstLine(err)}`);
+  }
+}
+
+// ── Section 7: Flashcard Slice ────────────────────────────────────────────────
 
 /**
  * Flashcard date-window filter with Strategy-3 fallback.
@@ -512,6 +697,7 @@ function main() {
   sections.push(buildMilestonePlans(sprintDir, sprintId));
   sections.push(buildGitLogDigest(sprintId));
   sections.push(buildTokenLedgerDigest(sprintId, sprintDir));
+  sections.push(buildMeasuredMetrics(sprintId));
   sections.push(buildFlashcardSlice(startDate, endDate, sprintId, sprintStatus));
 
   // REPORT template pointer

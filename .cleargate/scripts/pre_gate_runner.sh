@@ -382,6 +382,20 @@ if [[ -f "${ACTIVE_FILE}" ]]; then
   SPRINT_MD="$(ls "${REPO_ROOT_FOR_LANE}/.cleargate/delivery/pending-sync/${SPRINT_ID}_"*.md 2>/dev/null | head -1 || true)"
 fi
 
+# CR-120: one pre-gate.jsonl line per scan (survives the worktree teardown). Never changes the scan exit.
+{
+  flagged=()
+  while IFS= read -r _chk; do
+    [[ -n "${_chk}" ]] && flagged+=("${_chk}")
+  done < <(sed -n -E 's/^\[(FAIL|WARN)\] ([^:]+):.*/\2/p' "${REPORT_FILE}" 2>/dev/null | awk '!seen[$0]++' || true)
+  _pg_dir="${REPO_ROOT_FOR_LANE}/.cleargate/sprint-runs/${SPRINT_ID:-_off-sprint}"
+  mkdir -p "${_pg_dir}" 2>/dev/null &&
+    node -e '
+      const [mode, item, exit, ...checks] = process.argv.slice(1);
+      process.stdout.write(JSON.stringify({ ts: new Date().toISOString(), mode, item: item || null, exit: Number(exit), flagged_checks: checks }) + "\n");
+    ' "${MODE}" "${STORY_ID}" "${OVERALL_EXIT}" ${flagged[@]+"${flagged[@]}"} >> "${_pg_dir}/pre-gate.jsonl" 2>/dev/null
+} || true
+
 LANE="standard"
 if [[ -n "${STORY_ID}" && -n "${STATE_JSON}" ]]; then
   LANE="$(resolve_lane "${STATE_JSON}" "${STORY_ID}")"

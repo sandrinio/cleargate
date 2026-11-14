@@ -21,6 +21,9 @@
 #   brief:
 #     release_repos: ["."]
 
+# metrics:
+#   # No keys. sprint_metrics.mjs classifies commits in "." plus wiki.brief.release_repos (above).
+
 # gates:
 #   precommit: "<command run before every commit — typecheck + tests>"
 #   test: "<command to run the test suite>"

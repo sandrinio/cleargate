@@ -23,6 +23,12 @@
 import fs from 'node:fs';
 
 /**
+ * What the token-ledger.jsonl columns measure: the orchestrator's transcript window per
+ * dispatch, not the subagent's own spend (CR-120). Per-dispatch figures live in subagent-ledger.mjs.
+ */
+export const LEDGER_MEASURES = 'orchestrator-window';
+
+/**
  * Parse a JSONL file, returning an array of parsed objects.
  * Skips malformed lines with a stderr warning.
  * Returns [] if the file does not exist (caller decides if that is an error).
@@ -120,7 +126,7 @@ export function aggregate(rows) {
   }
 
   const anomalies = detectAnomalies(by_work_item);
-  return { total, by_agent, by_work_item, anomalies };
+  return { total, by_agent, by_work_item, anomalies, measures: LEDGER_MEASURES };
 }
 
 /**
