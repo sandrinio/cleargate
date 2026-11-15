@@ -26,7 +26,7 @@
   - [[STORY-066-19]] — Done
   - [[STORY-066-20]] — Done
   - [[STORY-066-21]] — Done
-  - [[STORY-066-22]] — Ready to Bounce
+  - [[STORY-066-22]] — Done
 
 
 

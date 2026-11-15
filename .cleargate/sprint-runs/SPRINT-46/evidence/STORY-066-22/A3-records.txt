@@ -1,0 +1,2 @@
+{"ts":"2026-11-15T19:24:59.559Z","mode":"seal","item":"STORY-001-04","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"b839eda73b11e6edb2f695260c504c2faf5904c3"}
+28:[PASS] qa_red_lint: no semantic fixture issues

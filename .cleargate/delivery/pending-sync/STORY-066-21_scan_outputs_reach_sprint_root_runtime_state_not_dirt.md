@@ -187,8 +187,8 @@ Feature: Scan outputs reach the sprint root and runtime state is not dirt
 ```
 
 ### 2.2 Verification Steps (Manual)
-- [ ] Scratch replay (story plan, Proof): with the canonical scripts, the 4a sequence in both layouts (runtime state committed at kickoff, seal from inside the story worktree, merge). The records are in the sprint root, the worktree is clean, and the merge exits 0. A hand-placed 4a residue is carried, and the sprint-2 `.active` merge passes. Evidence goes to `evidence/STORY-066-21/`.
-- [ ] Goal check (d) run 5 on RC 0.31.0-rc.5, both layouts:
+- [x] Scratch replay (story plan, Proof): with the canonical scripts, the 4a sequence in both layouts (runtime state committed at kickoff, seal from inside the story worktree, merge). The records are in the sprint root, the worktree is clean, and the merge exits 0. A hand-placed 4a residue is carried, and the sprint-2 `.active` merge passes. Evidence goes to `evidence/STORY-066-21/`.
+- [x] Goal check (d) run 5 on RC 0.31.0-rc.5, both layouts (met in two runs: run 5a met it in the worktree layout on rc.5; in the plain layout, run 5b's three hand steps came from the driver dropping `--settings` (S38), and run 7 on rc.7 met it — rc.7 includes this story; field-trials "Run 5 result", "Run 7 result"):
   - run 3's criteria 1–10 and the section C bar;
   - every seal's report and `mode:"seal"` line are in the sprint root;
   - no merge exit 2 at precondition, and no hand move of worktree files;
@@ -253,7 +253,7 @@ The story plan (`.cleargate/sprint-runs/SPRINT-46/plans/STORY-066-21.md`) govern
 - [x] All Gherkin scenarios from §2.1 covered.
 - [x] These existing tests stay green with no edit: `seal-red.integration`, `seal-red-expected-red.red` (unit and integration), `merge-story.red` (unit and integration), `merge-story-resume.red.integration`, `merge-story-amend-a.red` (unit and integration), `merge-story-test-waiver.red.integration`, `subagent-ledger.red` (CR-120), `pre-gate-any-stack.red.integration`, `wave-runner.red.integration`, `qa-red-seal-content`, `skill-md-conditional-architect.red` and `codex-sprint-execution-render.red`. `build-codex-payload.mjs --check` passes.
 - [x] Scratch replay evidence in `evidence/STORY-066-21/` meets every pass condition in the story plan's Proof section.
-- [ ] Goal check (d) run 5 passes on an RC that includes this story (0.31.0-rc.5), in both layouts.
+- [x] Goal check (d) run 5 passes on an RC that includes this story (0.31.0-rc.5), in both layouts. Worktree layout: run 5a on rc.5. Plain layout: run 7 on rc.7, which includes this story (run 5b's misses were the driver's, S38).
 - [x] Peer/Architect Review passed.
 
 ## Existing Surfaces

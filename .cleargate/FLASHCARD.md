@@ -1,3 +1,7 @@
+2026-11-15 · #sandbox #proof-run · replays pinned to sandbox SHAs need the old sandbox; setup renames it to *-runN, so repoint SB there, never delete first
+2026-11-15 · #gate4 #scripts · per-story copy-together lists miss transitive imports (lib/sprint-root, dispatch_serial exports); re-sync live scripts as one tree
+2026-11-15 · #qa-red #scripts · seal_red.mjs imports readBaseText from qa_red_lint.mjs; Gate 4 re-sync must copy both files together
+2026-11-15 · #qa-red #scripts · the scratch seal-root's scripts go stale at each cli merge (missing lib/sprint-root.mjs): rsync from cli main before sealing
 2026-11-15 · #test-harness #merge · integration suite in the S46-tip outer host moves EPIC-058/061 to archive; git checkout -- . && git clean -fdq there before the next merge
 2026-11-15 · #merge #test-harness · outer-host tip layout hides rule-18 live-vs-canonical parity reds; judge a post-merge suite by diffing failing names vs the reference
 2026-11-15 · #test-harness #merge · a tracked file rewritten in a worktree is ' M' not '??'; untracked-only carry/drop gates never see it

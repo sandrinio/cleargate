@@ -165,12 +165,12 @@ Feature: QA-Red volume counts its own tests and a lint flag never halts the wave
 ```
 
 ### 2.2 Verification Steps (Manual)
-- [ ] Replays (story plan, Proof; scoping §6), with no model calls:
+- [x] Replays (story plan, Proof; scoping §6), with no model calls:
   - A: the 5a case in a scratch copy of the worktree-layout sandbox.
   - B: the run-6 case in a scratch copy of the plain sandbox.
   - C: the runner fed run 6's three journal results verbatim.
   - Pass conditions are listed in the story plan. Evidence goes to `evidence/STORY-066-22/`.
-- [ ] Goal check (d) run 7 on RC 0.31.0-rc.7, plain layout:
+- [x] Goal check (d) run 7 on RC 0.31.0-rc.7, plain layout:
   - run 3's criteria 1–10 and the section C bar;
   - no `spec-contradiction` in the transcript;
   - 001-04's seal lines carry no `qa_red_lint` unless 001-04 added more than twice its scenario count.
@@ -211,14 +211,14 @@ The story plan (`.cleargate/sprint-runs/SPRINT-46/plans/STORY-066-22.md`) govern
 
 ## Task Breakdown
 
-- [ ] QA-Red: three new red files, 4 tests (T-V1, T-V2, T-R1, T-D1); seal -> Scenarios 1-4
-- [ ] `qa_red_lint.mjs`: `rVolume` `baseText`, `readBaseText`, `CLEARGATE_RED_BASE` in `main()` and the flag suffix -> Requirement 1; Scenarios 1, 2
-- [ ] `seal_red.mjs`: merge-base into `CLEARGATE_RED_BASE`; JSON `tests` as the per-file delta -> Requirement 2; Scenarios 1, 2
-- [ ] `wave_runner.js`: QA-Red prompt sentence (`:65`) and the lint-only BLOCKED backstop (`:138`) -> Requirements 3, 4; Scenarios 3, 4
-- [ ] qa.md steps 8, 9 and the BLOCKED line; SKILL §C.3 paragraph -> Requirement 3; Scenario 4
-- [ ] `npm run gen:codex`; `npm run prebuild` -> Requirement 3; Scenario 4
-- [ ] `npm run typecheck`, the new reds and the plan's regression list -> all
-- [ ] QA-Verify on the story tree, then replays A–C into `evidence/STORY-066-22/` -> all
+- [x] QA-Red: three new red files, 4 tests (T-V1, T-V2, T-R1, T-D1); seal -> Scenarios 1-4
+- [x] `qa_red_lint.mjs`: `rVolume` `baseText`, `readBaseText`, `CLEARGATE_RED_BASE` in `main()` and the flag suffix -> Requirement 1; Scenarios 1, 2
+- [x] `seal_red.mjs`: merge-base into `CLEARGATE_RED_BASE`; JSON `tests` as the per-file delta -> Requirement 2; Scenarios 1, 2
+- [x] `wave_runner.js`: QA-Red prompt sentence (`:65`) and the lint-only BLOCKED backstop (`:138`) -> Requirements 3, 4; Scenarios 3, 4
+- [x] qa.md steps 8, 9 and the BLOCKED line; SKILL §C.3 paragraph -> Requirement 3; Scenario 4
+- [x] `npm run gen:codex`; `npm run prebuild` -> Requirement 3; Scenario 4
+- [x] `npm run typecheck`, the new reds and the plan's regression list -> all
+- [x] QA-Verify on the story tree, then replays A–C into `evidence/STORY-066-22/` -> all
 
 ## 4. Quality Gates
 
@@ -233,12 +233,12 @@ The story plan (`.cleargate/sprint-runs/SPRINT-46/plans/STORY-066-22.md`) govern
 | E2E / acceptance tests | 4 | One per Gherkin scenario; the release-gate proof is Goal check (d) run 7. |
 
 ### 4.2 Definition of Done (The Gate)
-- [ ] Minimum test expectations (§4.1) met.
-- [ ] All Gherkin scenarios from §2.1 covered.
-- [ ] These existing tests stay green with no edit: `seal-red.integration`, `qa-red-lint-volume`, `qa-red-seal-content`, `seal-red-expected-red.red` (unit and integration), `sprint-root-outputs.red.integration`, `expected-red-not-a-flag.red`, `wave-runner.red` (unit and integration), `wave-runner-sandbox-fixes.red`, `wave-runner-item-rerun.red.integration`, `codex-sprint-execution-render.red` and `codex-agents-codegen.red`. `build-codex-payload.mjs --check` passes.
-- [ ] Replay evidence in `evidence/STORY-066-22/` meets every pass condition in the story plan's Proof section.
-- [ ] Goal check (d) run 7 passes on rc.7 (plain).
-- [ ] Peer/Architect Review passed.
+- [x] Minimum test expectations (§4.1) met.
+- [x] All Gherkin scenarios from §2.1 covered.
+- [x] These existing tests stay green with no edit: `seal-red.integration`, `qa-red-lint-volume`, `qa-red-seal-content`, `seal-red-expected-red.red` (unit and integration), `sprint-root-outputs.red.integration`, `expected-red-not-a-flag.red`, `wave-runner.red` (unit and integration), `wave-runner-sandbox-fixes.red`, `wave-runner-item-rerun.red.integration`, `codex-sprint-execution-render.red` and `codex-agents-codegen.red`. `build-codex-payload.mjs --check` passes.
+- [x] Replay evidence in `evidence/STORY-066-22/` meets every pass condition in the story plan's Proof section.
+- [x] Goal check (d) run 7 passes on rc.7 (plain).
+- [x] Peer/Architect Review passed.
 
 ## Existing Surfaces
 

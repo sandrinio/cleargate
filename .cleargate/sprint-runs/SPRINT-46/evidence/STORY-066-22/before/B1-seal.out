@@ -1,0 +1,2 @@
+{"id":"STORY-001-04","sealed_sha":"640c89994ae05425a977a88cb0f87e176e4d95fc","scan_exit":1,"flags":["qa_red_lint"],"tests":8,"scenarios":3}
+exit 1

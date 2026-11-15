@@ -27,8 +27,8 @@ cited_by: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md"
-last_ingest: "2026-11-15T19:07:40.856Z"
-last_ingest_commit: "b48d5e55735baa82f558685f99c3efd569d74c9a"
+last_ingest: "2026-11-15T20:30:11.293Z"
+last_ingest_commit: "5a0b09b3026375057aab2d2dd3aaa67ce43a8aae"
 repo: "planning"
 last_contradict_sha: "4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db"
 ---

@@ -84,6 +84,12 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Should check (d) use `merge_story`'s `classifyDirtyPath` or a path-prefix rule? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-2).
 - Q: How should the orchestrator learn that a seal was an expected red, when the runner's red schema drops `expected_red`? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-3).
 
+### [[STORY-066-22]] — QA-Red counts only the tests it adds, and a flagged seal never halts the wave (2026-11-15)
+- Q: How should the count separate this item's tests from tests another item sealed in a file it edits? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation (OD-1).
+- Q: Should the runner also treat a QA-Red BLOCKED that cites only lint flags as a flagged seal, or rely on… ([[STORY-066-22]]) → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-2).
+- Q: Does this story also fix the story-plan path wording (`wave_runner.js:62`, S38)? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-3).
+- Q: STORY-066-07 says QA-Red "does not return `QA-RED: WRITTEN`" on exit 1. Does this story override that? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-4).
+
 ### [[BUG-117]] — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know (2026-11-14)
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 

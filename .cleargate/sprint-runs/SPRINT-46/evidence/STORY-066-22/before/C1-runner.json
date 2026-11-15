@@ -1,0 +1,40 @@
+{
+  "calls": [
+    "log: wave_runner: 1 started, 0 waiting",
+    "QA-Red: QA-Red STORY-001-04",
+    "Build: Developer STORY-001-04",
+    "QA-Red: QA-Red STORY-001-04 pass 2"
+  ],
+  "verdict": {
+    "verdict": "BLOCKED",
+    "storyId": "STORY-001-04",
+    "runId": "run-SPRINT-01-STORY-001-04-replay",
+    "devSha": null,
+    "qaSha": "67b65e32841764a30d0663edfa21ff98ee3c3821",
+    "flashcards_flagged": [
+      "2026-11-15 · #test-harness · A story that changes a usage string breaks earlier stories' sealed red tests; QA-Red must re-seal them"
+    ],
+    "counters": {
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "breaker_hits": 0
+    },
+    "tokens": {
+      "metering": "unavailable"
+    },
+    "lane": "standard",
+    "stages_run": [
+      "qa-red",
+      "developer",
+      "qa-red"
+    ],
+    "defects_in": [
+      "red-test"
+    ],
+    "blocker": {
+      "type": "spec-contradiction",
+      "message": "STORY-001-04: I updated TestRedBadArguments (main_red_test.go:82) to expect \"usage: tally [--json] [--top N] <file>\\n\" and re-sealed it with main_top_red_test.go as b842a61. seal_red.mjs counted 8 tests against 3 scenarios, which trips the R-volume cap of 6. The count includes the 5 tests inherited from STORY-001-03's sealed main_red_test.go, because that file has to be in the seal list. The only ways under the cap are to delete or merge STORY-001-03's tests, or to fold my 3 top tests into one. I did not do either. The commit is valid and contains the corrected assertion. Orchestrator decision needed: either accept qa_red_lint as inherited-volume noise and proceed to Architect TPV, or authorize collapsing the three top scenarios into fewer tests. No re-seal count remains unused beyond one more."
+    }
+  }
+}
+exit 0
