@@ -278,16 +278,24 @@ function buildGitLogDigest(sprintId) {
   const branchName = `sprint/S-${numMatch[1]}`;
 
   try {
-    const output = execSync(
-      `git -C "${REPO_ROOT}" log --stat "${branchName}" ^main 2>/dev/null`,
-      { stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' }
-    );
+    const git = (args) =>
+      execSync(`git -C "${REPO_ROOT}" ${args} 2>/dev/null`, { stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' });
+    let output = git(`log --stat "${branchName}" ^main`);
+    let label = `${branchName} ^main`;
+    if (!output || !output.trim()) {
+      // HOTFIX-003: a branch already merged into main leaves `^main` empty; show what that merge brought in.
+      const merge = git(`log --merges --ancestry-path --format=%H "${branchName}..main"`).trim().split('\n').pop();
+      if (merge) {
+        output = git(`log --stat "${merge}^1..${branchName}"`);
+        label = `${branchName}, merged into main at ${merge.slice(0, 7)} (the commits that merge brought in)`;
+      }
+    }
     if (!output || !output.trim()) {
       return `## Git Log Digest\n\nGit log unavailable for ${branchName} (no commits or branch not found).\n`;
     }
     // Truncate to first ~4KB to avoid ballooning the bundle
     const truncated = output.length > 4096 ? output.slice(0, 4096) + '\n...[truncated]\n' : output;
-    return `## Git Log Digest\n\n_Branch: ${branchName} ^main_\n\n\`\`\`\n${truncated}\`\`\`\n`;
+    return `## Git Log Digest\n\n_Branch: ${label}_\n\n\`\`\`\n${truncated}\`\`\`\n`;
   } catch {
     return `## Git Log Digest\n\nGit log unavailable for ${branchName} (branch not found).\n`;
   }
@@ -295,7 +303,7 @@ function buildGitLogDigest(sprintId) {
 
 // ── Section 5: Token Ledger Digest ────────────────────────────────────────────
 
-function buildTokenLedgerDigest(sprintId, sprintDir) {
+function buildTokenLedgerDigest(sprintId, sprintDir, measuredTokens = null) {
   const countTokensScript = path.join(__dirname, 'count_tokens.mjs');
 
   try {
@@ -393,6 +401,11 @@ function buildTokenLedgerDigest(sprintId, sprintDir) {
     if (sessionTotalsSource !== 'session-totals') {
       lines.push(`**Note:** ${sessionTotalsSource}`);
     }
+    // HOTFIX-003: each row is the orchestrator's window for one dispatch; windows overlap when dispatches
+    // run in parallel or in the background, so the row sum over-counts. The measured figure does not overlap.
+    lines.push('ledger_rows_note: rows are overlapping orchestrator windows; their sum is an upper bound, not a total');
+    lines.push(`measured_subagent_tokens: ${typeof measuredTokens === 'number'
+      ? `${measuredTokens.toLocaleString()} (sprint_metrics.mjs, per dispatch, no overlap)` : 'not measured'}`);
     lines.push('');
     // ── end CR-035 ────────────────────────────────────────────────────────────
 
@@ -575,32 +588,38 @@ function renderMeasuredMetrics(doc) {
   return lines.join('\n');
 }
 
-function buildMeasuredMetrics(sprintId) {
+/** Runs sprint_metrics.mjs --json once; returns { doc } or { failure } (HOTFIX-003: shared with the ledger digest). */
+function fetchMeasuredDoc(sprintId) {
+  const script = path.join(__dirname, 'sprint_metrics.mjs');
+  if (!fs.existsSync(script)) return { failure: 'not found' };
+  let output;
   try {
-    const script = path.join(__dirname, 'sprint_metrics.mjs');
-    if (!fs.existsSync(script)) return mmFailure('not found');
-    let output;
-    try {
-      output = execSync(`node "${script}" "${sprintId}" --json`, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        encoding: 'utf8',
-        env: process.env, // Forward CLEARGATE_SPRINT_DIR / PENDING_SYNC_DIR / TRANSCRIPTS_ROOT
-        timeout: 120000,
-        maxBuffer: 16 * 1024 * 1024,
-      });
-    } catch (err) {
-      return mmFailure(`failed: ${mmFirstLine(err)}`);
-    }
-    let doc;
-    try {
-      doc = JSON.parse(output.trim());
-    } catch {
-      return mmFailure('unreadable output');
-    }
-    if (!doc || doc.schema !== 1 || !doc.items || typeof doc.items !== 'object' || Array.isArray(doc.items)) {
-      return mmFailure('unreadable output');
-    }
-    return renderMeasuredMetrics(doc);
+    output = execSync(`node "${script}" "${sprintId}" --json`, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      encoding: 'utf8',
+      env: process.env, // Forward CLEARGATE_SPRINT_DIR / PENDING_SYNC_DIR / TRANSCRIPTS_ROOT
+      timeout: 120000,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+  } catch (err) {
+    return { failure: `failed: ${mmFirstLine(err)}` };
+  }
+  let doc;
+  try {
+    doc = JSON.parse(output.trim());
+  } catch {
+    return { failure: 'unreadable output' };
+  }
+  if (!doc || doc.schema !== 1 || !doc.items || typeof doc.items !== 'object' || Array.isArray(doc.items)) {
+    return { failure: 'unreadable output' };
+  }
+  return { doc };
+}
+
+function buildMeasuredMetrics(sprintId, fetched = fetchMeasuredDoc(sprintId)) {
+  try {
+    if (fetched.failure) return mmFailure(fetched.failure);
+    return renderMeasuredMetrics(fetched.doc);
   } catch (err) {
     return mmFailure(`render failed: ${mmFirstLine(err)}`);
   }
@@ -768,8 +787,10 @@ function main() {
   sections.push(buildTestGate(sprintDir));
   sections.push(buildMilestonePlans(sprintDir, sprintId));
   sections.push(buildGitLogDigest(sprintId));
-  sections.push(buildTokenLedgerDigest(sprintId, sprintDir));
-  sections.push(buildMeasuredMetrics(sprintId));
+  const measured = fetchMeasuredDoc(sprintId);
+  const measuredTokens = measured.doc?.totals?.tokens;
+  sections.push(buildTokenLedgerDigest(sprintId, sprintDir, typeof measuredTokens === 'number' ? measuredTokens : null));
+  sections.push(buildMeasuredMetrics(sprintId, measured));
   sections.push(buildFlashcardSlice(startDate, endDate, sprintId, sprintStatus));
 
   // REPORT template pointer

@@ -17,7 +17,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-15_Process_v3.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "89539e8bfcdb817b90712e9e148c6e392145214e"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-15"

@@ -39,7 +39,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-41_multi_host_adapters_and_frontmatter_locator.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "6152464d5852f1bccc42d4b56df816054613b129"
 repo: "planning"
 report_raw_path: ".cleargate/sprint-runs/SPRINT-41/SPRINT-41_REPORT.md"

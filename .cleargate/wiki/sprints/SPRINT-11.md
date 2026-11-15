@@ -9,7 +9,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-11_Wiki_Hygiene.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-11"

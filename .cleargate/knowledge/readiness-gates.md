@@ -310,7 +310,7 @@ STORY-051-03 (Q7), as amended by CR-098: `discovery-checked` is self-referential
     - id: files-touched-declared
       check: "section(3) has ≥1 declared-item"
     - id: verification-steps-nonempty
-      check: "section(4) has ≥1 unchecked-checkbox"
+      check: "section(4) has ≥1 declared-item"
     - id: severity-set
       check: "frontmatter(.).severity != null"
     - id: no-tbds

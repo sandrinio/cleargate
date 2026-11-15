@@ -33,7 +33,7 @@ cited_by:
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-008_Token_Cost_And_Readiness_Gates.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "2691d20a51eb6e8211a9ec862c0ec0ddf8c09601"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-04"

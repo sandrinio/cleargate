@@ -17,7 +17,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-047_Connection_Identity_And_Credentials.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "a640863cd4532ce2a199d0bb477d74902e776586"
 repo: "planning"
 parent_cleargate_id: "INITIATIVE-001"

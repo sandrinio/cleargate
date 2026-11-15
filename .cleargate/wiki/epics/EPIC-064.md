@@ -19,7 +19,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-064_sprint_numbers_from_what_happened.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "d6a2009862610c558f6143c294fac643bf8cf7c8"
 repo: "planning"
 last_contradict_sha: "bec43140215186b4f361e25a5fdc354166333018d5cfe3957180f3acc3c9328c"

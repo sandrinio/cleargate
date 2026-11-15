@@ -15,7 +15,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-20_Skill_Adoption_And_Tooling_Cleanup.md"
-last_ingest: "2026-11-15T21:31:06.985Z"
+last_ingest: "2026-11-15T22:01:22.099Z"
 last_ingest_commit: "48d4662ae95734288afb720f8f820383c5d15ee5"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-20"
