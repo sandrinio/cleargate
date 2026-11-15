@@ -11,7 +11,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-38_Enforcement_Integrity_Restoration.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-15T20:36:15.252Z"
 last_ingest_commit: "7e88816746b8ec8d0bc9de8ae06915ce3fcaff0c"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-38"

@@ -133,13 +133,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: Escalation. Recommended: the bounce cap stays at three, and the last Developer retry before escalation runs one model tier up.… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). The cap stays at three; the last Developer retry before escalation runs one model tier up.
 - Q: The targets marked (proposed) in §1: at least a quarter of items on the fast lane, and median red-test lines… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). Both targets confirmed and written into §1 without the (proposed) mark.
 - Q: Short item templates for small bugs and CRs are the other half of WS-2 and are left out so this… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). Short item templates for small bugs and CRs become a follow-up CR, drafted after SPRINT-47 shows how the fast lane behaves.
-- Rule: Keep the three lane names `fast`, `standard`, `runtime` (owner decision, INITIATIVE-002 §6). `runtime` becomes a real `state.json` value. No new state and no new work unit (EPIC-054 lock).
-- Rule: One source for "which stages does this lane run": `segment_stages.mjs`. The skill, `launch_wave.mjs`, `dispatch_serial.mjs` and the shipped runner read it; none of them restates the list.
-- Rule: A stage that is a fixed command sequence is a script. An agent may call the script as its last step, or the orchestrator runs it at the barrier; it is never a dispatch of its own.
-- Rule: Merges stay serial and stay at the barrier (EPIC-055, CR-124). This epic changes who runs the merge, not when.
-- Rule: Stack-neutral: no script added here may depend on `package.json` or Node in the target's own code. Commands come from `gate-checks.json`.
-- Rule: Scripts change in cleargate-cli/scaffold/core; prompts and the skill change in scaffold/hosts/claude, scaffold/core/.agents and the scaffold/hosts/codex counterparts in the same story.
-- Rule: QA-Red stays a separate agent and its tests stay sealed (owner decision). This epic limits how much it writes; EPIC-065 owns what its assertions may pin and the holdout scenarios.
 
 ### [[STORY-064-01]] — Per-Item Metrics Derived From Transcripts and Git (2026-11-14)
 - Q: When dispatch-derived and git-derived rework differ, which one does `total` report? → Accepted at Gate 1 (owner confirmed in the SPRINT-45 Brief, 2026-11-14).

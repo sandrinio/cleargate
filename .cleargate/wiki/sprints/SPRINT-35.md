@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-35_Connector_M0_Walking_Skeleton.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-15T20:36:15.252Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-35"

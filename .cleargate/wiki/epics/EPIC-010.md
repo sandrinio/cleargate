@@ -18,7 +18,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-010_Multi_Participant_MCP_Sync.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-15T20:36:15.252Z"
 last_ingest_commit: "a743603981ddb8788e7bde8cc42dc1fe5ef1a8f4"
 repo: "planning"
 ---

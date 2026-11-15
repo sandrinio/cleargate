@@ -18,7 +18,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-051_Enforcement_Integrity_Restoration.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-15T20:36:15.252Z"
 last_ingest_commit: "e5444d52a21b1661b98f32112a6b97573dde56b6"
 repo: "planning"
 ---

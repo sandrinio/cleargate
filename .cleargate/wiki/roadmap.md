@@ -7,8 +7,8 @@
 The sprint `.cleargate/sprint-runs/.active` names, validated against its plan file.
 
 
-- [[SPRINT-46]] — Active
 
+_No sprints currently in flight._
 
 
 ## Planned Sprints
@@ -30,6 +30,8 @@ Non-terminal sprints other than the active one.
 
 Terminal sprints (not Abandoned), newest first.
 
+
+- [[SPRINT-46]] — completed: 2026-11-16T00:00:00Z
 
 - [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
 
@@ -147,8 +149,6 @@ _No active epics._
 
 - [[EPIC-065]] — status: Draft
 
-- [[EPIC-066]] — status: Draft
-
 
 
 ## Shipped Epics
@@ -225,5 +225,7 @@ _No active epics._
 - [[EPIC-063]] — status: Completed
 
 - [[EPIC-064]] — status: Completed
+
+- [[EPIC-066]] — status: Completed
 
 

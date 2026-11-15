@@ -5,29 +5,8 @@
 ## Current Sprint
 
 
-- [[SPRINT-46]]
-  - [[STORY-066-03]] — Done
-  - [[STORY-066-04]] — Done
-  - [[STORY-066-05]] — Done
-  - [[STORY-066-06]] — Done
-  - [[STORY-066-07]] — Done
-  - [[STORY-066-08]] — Done
-  - [[STORY-066-09]] — Done
-  - [[STORY-066-10]] — Done
-  - [[STORY-066-11]] — Done
-  - [[STORY-066-12]] — Done
-  - [[STORY-066-13]] — Done
-  - [[STORY-066-14]] — Done
-  - [[STORY-066-15]] — Done
-  - [[BUG-114]] — Done
-  - [[STORY-066-16]] — Done
-  - [[STORY-066-17]] — Done
-  - [[STORY-066-18]] — Done
-  - [[STORY-066-19]] — Done
-  - [[STORY-066-20]] — Done
-  - [[STORY-066-21]] — Done
-  - [[STORY-066-22]] — Done
 
+_No active sprint found._
 
 
 
@@ -47,10 +26,10 @@
 ## Recently Completed Sprints
 
 
+- [[SPRINT-46]] — completed: 2026-11-16T00:00:00Z
+
 - [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
 
 - [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
-
-- [[SPRINT-41]] — completed: 2026-10-04T07:00:00Z
 
 

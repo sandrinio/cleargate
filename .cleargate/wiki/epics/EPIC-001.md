@@ -17,7 +17,7 @@ cited_by:
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-001_Document_Metadata_Lifecycle.md"
-last_ingest: "2026-11-14T13:05:19.016Z"
+last_ingest: "2026-11-15T20:36:15.252Z"
 last_ingest_commit: "2691d20a51eb6e8211a9ec862c0ec0ddf8c09601"
 repo: "planning"
 ---

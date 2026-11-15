@@ -24,18 +24,20 @@ cites:
   - "[[SPRINT-43]]"
   - "[[SPRINT-45]]"
 cited_by: []
-status: "Active"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md"
-last_ingest: "2026-11-15T20:30:11.293Z"
-last_ingest_commit: "5a0b09b3026375057aab2d2dd3aaa67ce43a8aae"
+raw_path: ".cleargate/delivery/archive/SPRINT-46_build_step_sized_by_risk.md"
+last_ingest: "2026-11-15T20:36:15.252Z"
+last_ingest_commit: "66e3803832a5759bb8ab4562bf48d67ca6039142"
 repo: "planning"
 last_contradict_sha: "4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-46/SPRINT-46_REPORT.md"
+last_report_ingest_commit: "66e3803832a5759bb8ab4562bf48d67ca6039142"
 ---
 
 # SPRINT-46: Build Step Sized by Risk
 
-**Status:** Active · **Dates:** 2026-11-15 → 2026-11-19 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-11-15 → 2026-11-19 · **Gate:** pass
 
 ## Goal
 Make the build step fit the item: a script assigns fast, standard or runtime from risk signals, a shipped runner runs the plan as written, scripts replace the agents that only ran commands, and QA-Verify runs the item and names where a defect is, proven by a dry run of the shipped runner, a real scan of a copy of dispenser_adapter, and lane assignment on the last four sprints' items.
@@ -54,7 +56,7 @@ Design Review by the current rubric; this sprint runs on the current loop.
 | `STORY-066-08` | Merge by script <!-- cleargate:ignore-ids -->(absorbs BUG-086, BUG-107, BUG-116)<!-- /cleargate:ignore-ids --> | standard | M2 | n (after 03, 04) | high | Integration — `merge_story.mjs` on npm and Go fixture repos: clean, failing check, conflict, residue |
 | `STORY-066-09` | QA-Verify runs the item | standard | M2 | n (after 04, 07) | med | Unit + docs-match-code — pack `commands` section; `DEFECT_IN` in the VERIFY output contract |
 
-[+4,318 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md]
+[+4,318 bytes not shown — read .cleargate/delivery/archive/SPRINT-46_build_step_sized_by_risk.md]
 
 <!-- BEGIN relations -->
 ## Relations
@@ -62,3 +64,10 @@ Design Review by the current rubric; this sprint runs on the current loop.
 - Children (11): [[EPIC-066]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]]
 - Cites (8): [[BUG-086]], [[BUG-087]], [[EPIC-065]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-42]], [[SPRINT-43]], [[SPRINT-45]]
 <!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Shipped · **Report:** .cleargate/sprint-runs/SPRINT-46/SPRINT-46_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-46/improvement-suggestions.md
+
+### Carried Over
+- None. All 21 items are Done. Findings deferred to later sprints are in `intake.md` (58 lines; low/medium, most from sandbox runs 1-7 and post-flights). Gate 4 re-sync notes (copy-together lists: `lib/sprint-root.mjs`, `seal_red.mjs`, `pre_gate_runner.sh`, `merge_story.mjs`, `validate_bounce_readiness.mjs`, `qa_red_lint.mjs`, `wave_runner.js`, `record_baseline.mjs`, `assign_lane.mjs`, `lib/sprint-finish.mjs`) are recorded in sprint-context Mid-Sprint Amendments, rule 11.
+<!-- END sprint-report -->

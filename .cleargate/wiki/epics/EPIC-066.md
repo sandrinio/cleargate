@@ -82,11 +82,11 @@ cited_by:
   - "[[STORY-066-20]]"
   - "[[STORY-066-21]]"
   - "[[STORY-066-22]]"
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md"
-last_ingest: "2026-11-14T20:08:29.305Z"
-last_ingest_commit: ""
+raw_path: ".cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md"
+last_ingest: "2026-11-15T20:36:15.252Z"
+last_ingest_commit: "66e3803832a5759bb8ab4562bf48d67ca6039142"
 repo: "planning"
 last_contradict_sha: "ca2ecc15f77301b4125a1b88bce5dddcf1ceffec354821d02b22bb4918d7cb62"
 parent_cleargate_id: "INITIATIVE-002"
@@ -94,12 +94,10 @@ parent_cleargate_id: "INITIATIVE-002"
 
 # EPIC-066: Build Step Sized by Risk
 
-**Status:** Draft · **Sprint:** SPRINT-46 · **Gate:** pass
+**Status:** Completed · **Sprint:** none · **Gate:** pass
 
 ## Objective
-The per-item build step runs one of three paths chosen by a script from risk signals (fast: Developer, script check, script merge; standard: QA-Red, Developer, QA-Verify, script merge; runtime: story plan, then standard, then Architect review); the stage list per lane ships as code that the wave launcher and the serial dispatcher both read; no agent is dispatched for work a script can do;
-
-[+123 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md]
+The per-item build step runs one of three paths chosen by a script from risk signals (fast: Developer, script check, script merge; standard: QA-Red, Developer, QA-Verify, script merge; runtime: story plan, then standard, then Architect review); the stage list per lane ships as code that the wave launcher and the serial dispatcher both read; no agent is dispatched for work a script can do; QA-Verify runs the item instead of tracing it and names where a defect lives; the per-milestone Architect plan is removed.
 
 ## Problem & Value
 **Why are we doing this?**
@@ -108,7 +106,7 @@ fast lane was used once in 77 items here, although bugs bounce less than stories
 new_app). The per-milestone Architect plan blocks every story in the milestone: dispenser M1 took 24
 minutes against a 10-minute budget and produced a 60 KB plan.
 
-[+2,360 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md]
+[+2,360 bytes not shown — read .cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md]
 
 ## Scope
 **In:**
@@ -119,18 +117,18 @@ and QA-Verify's run both depend on tests that actually run:
 - Proof tiers, the evidence file, the Done guard, holdout scenarios and the property-not-shape rule
   for red tests ([[EPIC-065]], next sprint).
 
-[+5,212 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md]
+[+5,212 bytes not shown — read .cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md]
 
 ## Architecture rules
 - Keep the three lane names `fast`, `standard`, `runtime` (owner decision, INITIATIVE-002 §6). `runtime` becomes a real `state.json` value. No new state and no new work unit (EPIC-054 lock).
 - One source for "which stages does this lane run": `segment_stages.mjs`. The skill, `launch_wave.mjs`, `dispatch_serial.mjs` and the shipped runner read it; none of them restates the list.
 
-[+804 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md]
+[+804 bytes not shown — read .cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md]
 
 ## Decisions
 - "Make it work in next sprint" can mean two things. (a) SPRINT-46 here builds this epic on the current loop,… → As recommended (owner, 2026-11-14). SPRINT-46 builds this epic on the current loop. After its close and the live re-sync, SPRINT-47 here is the first sprint on the new loop.
 
-[+3,447 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md]
+[+3,447 bytes not shown — read .cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md]
 
 <!-- BEGIN relations -->
 ## Relations

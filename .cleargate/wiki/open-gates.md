@@ -29,8 +29,6 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[SPRINT-43]] — sprint · status: Draft — pass
 
-- [[SPRINT-46]] — sprint · status: Active — pass
-
 - [[PROPOSAL-009]] — proposal · status: Draft — pass
 
 - [[PROPOSAL-029]] — proposal · status: Ready — fail: parent-approved, reuse-audit-recorded, simplest-form-justified
