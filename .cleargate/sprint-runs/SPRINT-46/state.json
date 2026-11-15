@@ -230,8 +230,32 @@
       "lane_assigned_by": "assign-lane-script",
       "lane_demoted_at": null,
       "lane_demotion_reason": null
+    },
+    "STORY-066-21": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 1,
+      "worktree": null,
+      "updated_at": "2026-11-15T18:38:23.858Z",
+      "notes": "iteration 4, added mid-sprint 2026-11-15 under the owner /goal delegation (run 4 findings S34/S35; plans/iteration-4-scoping.md)",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-22": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T19:07:32.006Z",
+      "notes": "iteration 5, added mid-sprint 2026-11-15 under the owner /goal delegation (run 6 finding S41; plans/iteration-5-scoping.md)",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-066-18 → Done",
-  "updated_at": "2026-11-15T16:05:11.691Z"
+  "last_action": "transition STORY-066-22 → Ready to Bounce",
+  "updated_at": "2026-11-15T19:07:32.006Z"
 }

@@ -1,0 +1,3 @@
+Error: git working tree is dirty. Uncommitted changes:
+?? .cleargate/sprint-runs/
+exit 1

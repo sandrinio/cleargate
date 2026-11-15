@@ -1,0 +1,5 @@
+STORY-901-02-pre-arch-scan.txt
+{"ts":"2026-11-15T18:10:36.936Z","mode":"arch","item":null,"exit":1,"flagged_checks":["typecheck"]}
+{"ts":"2026-11-15T18:10:36.942Z","mode":"seal","item":"STORY-901-02","exit":0,"raw_exit":1,"flagged_checks":[],"sealed_sha":"b12d95f0280246e47c2ab415b25245d58142959f","expected_red":["internal/tally/top_red_test.go:9:9: undefined: TopN"]}
+parent:
+ls: /private/tmp/qv21b.mZNf/cg-proof-21-9mpb/parent/.cleargate/sprint-runs: No such file or directory

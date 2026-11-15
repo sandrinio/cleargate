@@ -1,0 +1,1 @@
+{"id":"STORY-901-01","step":"precondition","exit":2,"tail":["uncommitted work in the worktree:","  ?? .cleargate/sprint-runs/SPRINT-01/pre-gate.jsonl","  ?? .cleargate/sprint-runs/SPRINT-01/reports/STORY-901-01-pre-arch-scan.txt"]}

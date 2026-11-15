@@ -1,0 +1,5 @@
+merge_story: pre-merge check for STORY-901-04
+merge_story: merging story/STORY-901-04 into sprint/S-01
+merge_story: post-merge test
+merge_story: teardown
+exit 0

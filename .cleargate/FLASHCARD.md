@@ -1,3 +1,17 @@
+2026-11-15 · #test-harness #merge · integration suite in the S46-tip outer host moves EPIC-058/061 to archive; git checkout -- . && git clean -fdq there before the next merge
+2026-11-15 · #merge #test-harness · outer-host tip layout hides rule-18 live-vs-canonical parity reds; judge a post-merge suite by diffing failing names vs the reference
+2026-11-15 · #test-harness #merge · a tracked file rewritten in a worktree is ' M' not '??'; untracked-only carry/drop gates never see it
+2026-11-15 · #scripts #merge · merge carry: never append a worktree's events.jsonl to the root; fold drift strands the merge at step state
+2026-11-15 · #git #test-harness · git -C <repo> worktree add <rel> resolves <rel> against <repo>, not the shell cwd; pass absolute paths
+2026-11-15 · #state #scripts · state.json must equal fold(events.jsonl) to the ms; register a mid-sprint item via one atomicWrite(fold(...)), not two writes
+2026-11-15 · #qa #proof-run · replay state() must rm events.jsonl before each hand-written state.json, or a later merge's state step fails with fold drift
+2026-11-15 · #test-harness #scripts · cr081/cr079 shell tests, when run, leave scaffold/core/.cleargate/sprint-runs/ untracked; delete before commit
+2026-11-15 · #qa-red #scripts · a classified seal's report ends with the scan's Summary footer, so an appended trailer is the last lines only after the footer
+2026-11-15 · #qa-red #test-harness · seal_red scan_exit 0 and exit 0 for an expected red: assert the raw `[FAIL] typecheck` line separately from flags
+2026-11-15 · #worktree #scripts · a story worktree's own .cleargate/scripts copy resolves SCRIPT_DIR/../.. to the worktree; seal outputs land there or vanish
+2026-11-15 · #worktree #scripts · in a Claude worktree session, --git-common-dir's parent is the parent checkout on main, not the sprint root
+2026-11-15 · #merge #close · close 7.8 commits an empty .active; sprint 2 init makes it " M" and merge_story's root check calls it authored
+2026-11-15 · #test-harness #worktree · full-suite integration needs an outer-host layout (root CLAUDE.md, package.json, live files); a cli-only worktree fails ~200 extra tests
 2026-11-15 · #cli #test-harness · a user hint in cli src must not spell 'node .cleargate/scripts/…': test/cli Scenario 4 greps dist/cli.js; write 'bash .cleargate/scripts/run_script.sh x.mjs'
 2026-11-15 · #qa #proof-run · sprint init proof fixture needs a §1 Consolidated Deliverables section + stub story with a ## heading; rm events.jsonl before hand-writing state.json
 2026-11-15 · #close #worktree · Claude worktree sessions start on worktree-<name>; A.2/merge_story move them to sprint/S-NN, so close D-3 passes

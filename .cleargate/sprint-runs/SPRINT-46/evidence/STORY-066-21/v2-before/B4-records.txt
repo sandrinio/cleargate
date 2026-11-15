@@ -1,0 +1,4 @@
+ls: /private/tmp/qv21/cg-proof-21-K0KA/parent/.claude/worktrees/s/.cleargate/sprint-runs/SPRINT-01/reports: No such file or directory
+tail: /private/tmp/qv21/cg-proof-21-K0KA/parent/.claude/worktrees/s/.cleargate/sprint-runs/SPRINT-01/pre-gate.jsonl: No such file or directory
+parent:
+ls: /private/tmp/qv21/cg-proof-21-K0KA/parent/.cleargate/sprint-runs: No such file or directory

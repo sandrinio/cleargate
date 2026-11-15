@@ -79,6 +79,11 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: How does an orchestrator in a Claude Code session open the flashcard-gate window, given the hook reads only its own… ([[STORY-066-20]]) → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
 - Q: Does the sealed `loop-spec-three-paths.red` test pin the env-var wording? → Resolved by the orchestrator under the owner's delegation per the recommendation.
 
+### [[STORY-066-21]] — Scan outputs reach the sprint root and runtime state is not dirt (2026-11-15)
+- Q: Which checkout is the sprint root for a script copy inside a story worktree? The parent of `--git-common-dir`, or the… ([[STORY-066-21]]) → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation (OD-1).
+- Q: Should check (d) use `merge_story`'s `classifyDirtyPath` or a path-prefix rule? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-2).
+- Q: How should the orchestrator learn that a seal was an expected red, when the runner's red schema drops `expected_red`? → Resolved by the orchestrator under the owner's delegation per the recommendation (OD-3).
+
 ### [[BUG-117]] — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know (2026-11-14)
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 

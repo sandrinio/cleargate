@@ -26,6 +26,8 @@ children:
   - "[[STORY-066-18]]"
   - "[[STORY-066-19]]"
   - "[[STORY-066-20]]"
+  - "[[STORY-066-21]]"
+  - "[[STORY-066-22]]"
 cites: 
   - "[[BUG-074]]"
   - "[[BUG-075]]"
@@ -78,6 +80,8 @@ cited_by:
   - "[[STORY-066-18]]"
   - "[[STORY-066-19]]"
   - "[[STORY-066-20]]"
+  - "[[STORY-066-21]]"
+  - "[[STORY-066-22]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-066_build_step_sized_by_risk.md"
@@ -131,7 +135,7 @@ and QA-Verify's run both depend on tests that actually run:
 <!-- BEGIN relations -->
 ## Relations
 - Parent: [[INITIATIVE-002]]
-- Children (23): [[BUG-137]], [[BUG-138]], [[BUG-139]], [[CR-133]], [[CR-134]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], +3 more
+- Children (25): [[BUG-137]], [[BUG-138]], [[BUG-139]], [[CR-133]], [[CR-134]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], +5 more
 - Cites (30): [[BUG-074]], [[BUG-075]], [[BUG-086]], [[BUG-087]], [[BUG-102]], [[BUG-107]], [[BUG-113]], [[BUG-116]], [[CR-024]], [[CR-078]], [[CR-081]], [[CR-082]], [[CR-110]], [[CR-120]], [[CR-121]], [[CR-122]], [[CR-124]], [[EPIC-013]], [[EPIC-022]], [[EPIC-031]], +10 more
-- Cited by (20): [[EPIC-065]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], [[STORY-066-18]], [[STORY-066-19]], [[STORY-066-20]]
+- Cited by (22): [[EPIC-065]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], [[STORY-066-18]], [[STORY-066-19]], [[STORY-066-20]], +2 more
 <!-- END relations -->
