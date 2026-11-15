@@ -1,0 +1,2 @@
+{"id":"STORY-909-01","sealed_sha":"5121b5036b256bf15962b22289a898067a3df188","scan_exit":0,"flags":[],"tests":2,"scenarios":2,"expected_red":["internal/tally/top_test.go:5:32: undefined: TopN"],"scan_exit_raw":1}
+exit=0

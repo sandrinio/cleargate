@@ -1,0 +1,201 @@
+# integrated tree acd3e14 (main ff4f258), Amendment A recovery proof
+################ rework (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scaffold/core/.cleargate/scripts)
+
+== H plain: pre-merge-commit hook exits 1, then the re-run
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 40a97dcdc3587adeb66c00c4efc56a960f3f7272
+close_sprint: Step 7.8 FAILED:
+  merging sprint/S-99 into main in /private/tmp/s17a.WRDD/h failed
+  | MERGE HOOK BLOCKS
+  | Not committing merge; use 'git commit' to complete the merge.
+  restored: /private/tmp/s17a.WRDD/h is back on sprint/S-99
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+[H-ack1 exit=1]
+HEAD=sprint/S-99 MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+main unchanged
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 8c51cdd28c328fa8b0827554def9049b95b53ed0
+Step 7.8: sprint/S-99 merged to main at 531b4bbc2e18f08b85925995e47243ffa61ce63a (in /private/tmp/s17a.WRDD/h)
+Step 7.8: sprint/S-99 deleted
+  7. Finish: done at Step 7.8
+[H-ack2 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[]
+*   merge: sprint/S-99 → main
+|\  
+| * chore(SPRINT-99): close — sprint_status Completed, close artefacts
+| * chore(SPRINT-99): close — sprint_status Completed, close artefacts
+| * feat: STORY-907-01 sprint work
+|/  
+* init
+
+== C plain: conflict race (post-commit hook moves main after the close commit), then the re-runs
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 7c4ea0d32914a4ffec9a96770e12d04fafe82108
+close_sprint: Step 7.8 FAILED:
+  merging sprint/S-99 into main in /private/tmp/s17a.WRDD/c conflicted on: src/feature.txt (merge aborted)
+  | Auto-merging src/feature.txt
+  | CONFLICT (content): Merge conflict in src/feature.txt
+  | Automatic merge failed; fix conflicts and then commit the result.
+  restored: /private/tmp/s17a.WRDD/c is back on sprint/S-99
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+[C-ack1 exit=1]
+HEAD=sprint/S-99 MERGE_HEAD=no main=main moved (race) branch=sprint/S-99  tracked-dirty=[]
+Step 2.8 failed: sprint/S-99 does not merge cleanly into main; conflicting paths:
+  src/feature.txt
+  Resolve: merge main into sprint/S-99 and resolve the conflicts, then re-run close_sprint.mjs.
+[C-ack2-refused-at-2.8 exit=1]
+HEAD=sprint/S-99 MERGE_HEAD=no main=main moved (race) branch=sprint/S-99  tracked-dirty=[]
+-- resolve as 2.8 says: merge main into sprint/S-99
+resolved-committed
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at a2f5636246f9df1586cfd7c86a8c65b1ed043617
+Step 7.8: sprint/S-99 merged to main at cf8665209ce1c2b628bf427c21c58a24fcf4f4b7 (in /private/tmp/s17a.WRDD/c)
+Step 7.8: sprint/S-99 deleted
+  7. Finish: done at Step 7.8
+[C-ack3 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[]
+
+== X plain: untracked file in root blocks 'git checkout main' (path added on main only), then the re-run
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 38c99665c76f6ea7d1a0aa6bdaf54ba5aae039d5
+Step 7.8 warning: untracked files outside .cleargate/ were left uncommitted: notes.txt
+close_sprint: Step 7.8 FAILED:
+  git checkout main failed in /private/tmp/s17a.WRDD/x
+  | error: The following untracked working tree files would be overwritten by checkout:
+  | 	notes.txt
+  | Please move or remove them before you switch branches.
+  | Aborting
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+[X-ack1 exit=1]
+HEAD=sprint/S-99 MERGE_HEAD=no main=main adds notes.txt branch=sprint/S-99  tracked-dirty=[]
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 8ec0c9f45ef06bb0f3dbb9a0f458521d68ab8675
+Step 7.8: sprint/S-99 merged to main at 606230e5671172c87b674dea8318bf909657a24b (in /private/tmp/s17a.WRDD/x)
+Step 7.8: sprint/S-99 deleted
+  7. Finish: done at Step 7.8
+[X-ack2 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[]
+
+== U plain: untracked file lands on main after the checkout (post-checkout hook) — merge and restore both refused
+[U-ack1 exit=1]
+close_sprint: Step 7.8 FAILED:
+  merging sprint/S-99 into main in /private/tmp/s17a.WRDD/u failed
+  | error: The following untracked working tree files would be overwritten by merge:
+  | 	.cleargate/sprint-runs/SPRINT-99/SPRINT-99_REPORT.md
+  | Please move or remove them before you merge.
+  | Aborting
+  | Merge with strategy ort failed.
+  git checkout sprint/S-99 failed in /private/tmp/s17a.WRDD/u; it is left on main:
+  | error: The following untracked working tree files would be overwritten by checkout:
+  | 	.cleargate/sprint-runs/SPRINT-99/SPRINT-99_REPORT.md
+  | Please move or remove them before you switch branches.
+  | Aborting
+  recover: clear what git reports above, then run: git -C /private/tmp/s17a.WRDD/u checkout sprint/S-99
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+HEAD=main MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+recovery command: [git -C /private/tmp/s17a.WRDD/u checkout sprint/S-99]
+Switched to branch 'sprint/S-99'
+ran the printed command
+HEAD=sprint/S-99 MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 359b319ab56da3088442706713efae5be92a9856
+Step 7.8: sprint/S-99 merged to main at c73babbba740c04c020c27c8a94ed9e45402c1cb (in /private/tmp/s17a.WRDD/u)
+Step 7.8: sprint/S-99 deleted
+  7. Finish: done at Step 7.8
+[U-ack2 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[]
+
+== W worktree: untracked file in the parent collides with a close artefact (R-6), then the re-run
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 333b3c53c06c04aadfda498ea2096d03884d6302
+close_sprint: Step 7.8 FAILED:
+  merging sprint/S-99 into main in /private/tmp/s17a.WRDD/w failed
+  | error: The following untracked working tree files would be overwritten by merge:
+  | 	.cleargate/sprint-runs/SPRINT-99/SPRINT-99_REPORT.md
+  | Please move or remove them before you merge.
+  | Aborting
+  | Merge with strategy ort failed.
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+[W-ack1 exit=1]
+W: HEAD=sprint/S-99 MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+P: HEAD=main MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at a27d87c6bcd141dcf607133e16d838ec52a0ee07
+Step 7.8: sprint/S-99 merged to main at f993348c03ab5995628a6fb5589abe3d2fdfe882 (in /private/tmp/s17a.WRDD/w)
+Step 7.8: sprint/S-99 kept — checked out at /private/tmp/s17a.WRDD/w/.claude/worktrees/s99. After leaving it: git branch -d sprint/S-99
+  7. Finish: done at Step 7.8. After leaving /private/tmp/s17a.WRDD/w/.claude/worktrees/s99: git branch -d sprint/S-99
+[W-ack2 exit=0]
+P: HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch=sprint/S-99  tracked-dirty=[]
+merge: sprint/S-99 → main
+chore(SPRINT-99): close — sprint_status Completed, close artefacts
+chore(SPRINT-99): close — sprint_status Completed, close artefacts
+feat: STORY-907-01 sprint work
+
+== V worktree: pre-merge-commit hook in the parent, then the re-run
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 0664edb182eef309a9ddb6b530caf2d9c19c99c3
+close_sprint: Step 7.8 FAILED:
+  merging sprint/S-99 into main in /private/tmp/s17a.WRDD/v failed
+  | MERGE HOOK BLOCKS
+  | Not committing merge; use 'git commit' to complete the merge.
+  sprint_status is already Completed. Fix the cause, then re-run the ack pass: Steps 5 and 7.8 finish what is left.
+[V-ack1 exit=1]
+W: HEAD=sprint/S-99 MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+P: HEAD=main MERGE_HEAD=no main=init branch=sprint/S-99  tracked-dirty=[]
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active is already empty.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 6a192bb523a3c33822bc975dd2a618e164601422
+Step 7.8: sprint/S-99 merged to main at 1440624c5b811803bcff0b7888ae1142f028f7ad (in /private/tmp/s17a.WRDD/v)
+Step 7.8: sprint/S-99 kept — checked out at /private/tmp/s17a.WRDD/v/.claude/worktrees/s99. After leaving it: git branch -d sprint/S-99
+  7. Finish: done at Step 7.8. After leaving /private/tmp/s17a.WRDD/v/.claude/worktrees/s99: git branch -d sprint/S-99
+[V-ack2 exit=0]
+P: HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch=sprint/S-99  tracked-dirty=[]
+
+== OK plain happy path (I3), then a second ack (A2)
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 97a8b3bd794731a2e4e55766435b707e3a150294
+Step 7.8: sprint/S-99 merged to main at f00207e6bcff81d374ab1fade4d7eac31b56e0b8 (in /private/tmp/s17a.WRDD/ok)
+Step 7.8: sprint/S-99 deleted
+  7. Finish: done at Step 7.8
+[OK-ack1 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[]
+Step 2.8 warning: git merge check unavailable (refs/heads/sprint/S-99 not found). Skipping merge verification.
+Step 5: .active is already empty.
+Step 7.8 skipped: Step 2.8 could not check sprint/S-99 (refs/heads/sprint/S-99 not found).
+  7. Finish: skipped at Step 7.8 (Step 2.8 could not check sprint/S-99 (refs/heads/sprint/S-99 not found))
+[OK-ack2 exit=0]
+HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch= tracked-dirty=[ M .cleargate/sprint-runs/SPRINT-99/state.json;]
+
+== OKW worktree happy path (I4)
+Step 2.8 passed: refs/heads/sprint/S-99 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 5: .active cleared (was SPRINT-99)
+Step 7.8: finishing — commit close artefacts, merge sprint/S-99 into main...
+Step 7.8: committed close artefacts on sprint/S-99 at 968e4e0b37d97e90b2d353b63fabf964a670ecff
+Step 7.8: sprint/S-99 merged to main at f14cb2c00b5c8bca0856cd179ca9ba3de1c960a1 (in /private/tmp/s17a.WRDD/okw)
+Step 7.8: sprint/S-99 kept — checked out at /private/tmp/s17a.WRDD/okw/.claude/worktrees/s99. After leaving it: git branch -d sprint/S-99
+  7. Finish: done at Step 7.8. After leaving /private/tmp/s17a.WRDD/okw/.claude/worktrees/s99: git branch -d sprint/S-99
+[OKW-ack1 exit=0]
+P: HEAD=main MERGE_HEAD=no main=merge: sprint/S-99 → main branch=sprint/S-99  tracked-dirty=[]

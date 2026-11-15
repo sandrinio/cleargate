@@ -1,0 +1,5 @@
+A1 labels: QA-Red STORY-A | Developer STORY-A | QA-Verify STORY-A | QA-Verify STORY-A pass 2
+A1 verdict: {"verdict":"GREEN","storyId":"STORY-A","runId":"run-SPRINT-99-STORY-A-aaaaaaaa","devSha":"dev1","qaSha":"seal1","flashcards_flagged":[],"counters":{"qa_bounces":0,"arch_bounces":0,"breaker_hits":0},"tokens":{"metering":"unavailable"},"lane":"standard","stages_run":["qa-red","developer","qa-verify","qa-verify"],"defects_in":[]}
+A3 first label: QA-Verify STORY-E | has Rework input: x -> true
+A1b labels: QA-Red STORY-F | Architect STORY-F | Developer STORY-F | QA-Verify STORY-F | QA-Verify STORY-F pass 2 | Architect STORY-F | Developer STORY-F pass 2 | QA-Verify STORY-F pass 3 | QA-Verify STORY-F pass 4 | Architect STORY-F pass 2
+A1b verdict: GREEN "" {"qa_bounces":0,"arch_bounces":1,"breaker_hits":0}

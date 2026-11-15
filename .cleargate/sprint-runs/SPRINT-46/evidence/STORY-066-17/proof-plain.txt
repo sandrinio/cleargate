@@ -1,0 +1,152 @@
+# integrated tree acd3e14 (main ff4f258)
+## before: cli main's close_sprint.mjs, no report
+Step 1-2 passed: all 1 stories are terminal.
+close_sprint: v2.1 validation requires SPRINT-01_REPORT.md at /private/tmp/s17p.7RF2/before/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+  Run the Reporter agent first, then re-run close_sprint.mjs.
+[before exit=1]
+## 1 no-flag, no report
+Step 1-2 passed: all 1 stories are terminal.
+Step 2.7: checking for leftover worktrees...
+Step 2.7 passed: no leftover worktrees.
+Step 2.8: checking refs/heads/sprint/S-01 merges into refs/heads/main...
+Step 2.8 passed: refs/heads/sprint/S-01 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 2.5 deferred: SPRINT-01_REPORT.md not written yet — the Reporter writes it at Step 4; it is validated before the ack prompt.
+Step 2.6d: back-syncing same-sprint story frontmatter...
+Step 2.6d: STORY-001-01 status Approved → Completed (state.json: Done) → archived at archive/STORY-001-01_proof_item.md
+Step 2.6d passed: 1 story/stories back-synced and archived.
+Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).
+Step 2.6: running lifecycle reconciliation...
+Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.9: checking deferred verifications...
+Step 2.9 passed: no deferred verifications declared.
+Step 3: running prefill_report.mjs...
+No agent reports found in /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01; nothing to prefill.
+Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).
+Step 3.6: writing the doc-refresh checklist (prep_doc_refresh.mjs)...
+Found 4 changed files in sprint window.
+Wrote /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md
+Step 3.6 passed: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md written.
+Step 4: preconditions satisfied — orchestrator should now spawn the Reporter agent.
+        The Reporter writes SPRINT-01_REPORT.md using the sprint_report.md template.
+        Expected output: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+
+Waiting for Reporter to produce SPRINT-01_REPORT.md...
+After Reporter succeeds, re-run with --assume-ack to complete the close.
+--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).
+[1 exit=0]
+## 2 no-flag, report
+Step 1-2 passed: all 1 stories are terminal.
+Step 2.7: checking for leftover worktrees...
+Step 2.7 passed: no leftover worktrees.
+Step 2.8: checking refs/heads/sprint/S-01 merges into refs/heads/main...
+Step 2.8 passed: refs/heads/sprint/S-01 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.
+Step 2.6d: back-syncing same-sprint story frontmatter...
+Step 2.6d passed: no same-sprint story backsync needed (1 already terminal, 0 pending non-Done).
+Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).
+Step 2.6: running lifecycle reconciliation...
+Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.9: checking deferred verifications...
+Step 2.9 passed: no deferred verifications declared.
+Step 3: running prefill_report.mjs...
+No agent reports found in /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01; nothing to prefill.
+Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).
+Step 3.6 passed: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md already written (kept).
+Step 4: preconditions satisfied — orchestrator should now spawn the Reporter agent.
+        The Reporter writes SPRINT-01_REPORT.md using the sprint_report.md template.
+        Expected output: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+
+SPRINT-01_REPORT.md found at /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+Review the report, then confirm close by re-running with --assume-ack
+--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).
+On --assume-ack close will: commit close artefacts on sprint/S-01 in /private/tmp/s17p.7RF2/plain; merge sprint/S-01 into main in /private/tmp/s17p.7RF2/plain after git checkout main; clear .active (reads SPRINT-01); delete sprint/S-01.
+Doc-refresh checklist: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md
+[2 exit=0]
+- [ ] `CLAUDE.md` "Active state" section — **trigger:** any EPIC / CR / Bug / Hotfix archived this sprint, OR any stack version bumped
+363ca1ac29b5e1caa3a8633f00c7cbc1d06d496c
+## 3 ack
+Step 1-2 passed: all 1 stories are terminal.
+Step 2.7: checking for leftover worktrees...
+Step 2.7 passed: no leftover worktrees.
+Step 2.8: checking refs/heads/sprint/S-01 merges into refs/heads/main...
+Step 2.8 passed: refs/heads/sprint/S-01 merges cleanly into refs/heads/main; Step 7.8 merges it on the ack.
+Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.
+Step 2.6d: back-syncing same-sprint story frontmatter...
+Step 2.6d passed: no same-sprint story backsync needed (1 already terminal, 0 pending non-Done).
+Step 2.6c skipped: CLEARGATE_SKIP_PARENT_ROLLUP=1 set (test seam).
+Step 2.6: running lifecycle reconciliation...
+Step 2.6 skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b skipped: CLEARGATE_SKIP_LIFECYCLE_CHECK=1 set (test seam).
+Step 2.9: checking deferred verifications...
+Step 2.9 passed: no deferred verifications declared.
+Step 3: running prefill_report.mjs...
+No agent reports found in /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01; nothing to prefill.
+Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).
+Step 3.6 passed: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md already written (kept).
+Step 4: preconditions satisfied — orchestrator should now spawn the Reporter agent.
+        The Reporter writes SPRINT-01_REPORT.md using the sprint_report.md template.
+        Expected output: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+Step 5: flipping sprint_status to "Completed"...
+sprint_status flipped to "Completed" at 2026-11-15T13:12:19.916Z
+Step 5: .active cleared (was SPRINT-01)
+Step 6: running suggest_improvements.mjs...
+Idempotent: no new suggestions to add for sprint SPRINT-01.
+Existing file has 0 suggestion(s).
+Step 6.5: running sprint_trends.mjs (stub)...
+sprint_trends: stub — full implementation deferred to CR-027 (counted 0 closed sprints).
+Step 6.6: scanning for skill candidates...
+suggest_improvements: skill-candidates section written to /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/improvement-suggestions.md
+Step 6.7: scanning FLASHCARD.md for cleanup candidates...
+suggest_improvements --flashcard-cleanup: FLASHCARD.md not found at /private/tmp/s17p.7RF2/plain/.cleargate/FLASHCARD.md, skipping
+Step 7: pushing per-artifact status updates to MCP...
+Error: No stored credentials for profile 'default'. Run `cleargate join <invite-url>` first, or export CLEARGATE_MCP_TOKEN.
+Step 7 warning: sync work-items failed: Command failed: node "/private/tmp/s17p.7RF2/plain/node_modules/cleargate/dist/cli.js" sync work-items
+Run `cleargate sync work-items` manually to retry.
+Step 7.4: pushing sprint plan + report to MCP...
+Step 7.4a skipped: sprint plan file not found.
+cleargate push: requires membership. Run: cleargate join <invite-url>
+Step 7.4b warning: sprint report push failed: Command failed: node "/private/tmp/s17p.7RF2/plain/node_modules/cleargate/dist/cli.js" push "/private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md"
+Step 7.5: ingesting sprint report into wiki...
+wiki ingest: malformed frontmatter in /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md: parseFrontmatter: input does not start with ---
+Step 7.5 warning: wiki ingest sprint report failed: Command failed: node "/private/tmp/s17p.7RF2/plain/node_modules/cleargate/dist/cli.js" wiki ingest "/private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md"
+Run `cleargate wiki ingest <report-path>` manually to retry.
+Step 7.8: finishing — commit close artefacts, merge sprint/S-01 into main...
+Step 7.8: committed close artefacts on sprint/S-01 at 9b16d4f68d1edfc242a3e0c3a8135c49d63fff91
+Step 7.8: sprint/S-01 merged to main at 3d89a7688d248c7d5b9a0a2b7637c039cb132c6a (in /private/tmp/s17p.7RF2/plain)
+Step 7.8: sprint/S-01 deleted
+
+SPRINT-01 closed. Next steps:
+  1. Review SPRINT-01_REPORT.md
+  2. Review improvement-suggestions.md (sections: Suggestions / Skill Candidates / FLASHCARD Cleanup)
+  3. Approve or reject Skill Candidates → run /improve or cleargate skill create <name>
+  4. Approve or reject FLASHCARD cleanup entries → run /improve or cleargate flashcard prune
+  5. Push approved status changes to MCP if Step 7 warned (`cleargate sync work-items`)
+  6. Initialize next sprint: `cleargate sprint init SPRINT-02 --stories <ids>`
+  7. Finish: done at Step 7.8
+
+Artifacts:
+  report:               /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+  improvement-suggestions: /private/tmp/s17p.7RF2/plain/.cleargate/sprint-runs/SPRINT-01/improvement-suggestions.md
+[3 exit=0]
+## verify
+*   3d89a76 merge: sprint/S-01 → main
+|\  
+| * 9b16d4f chore(SPRINT-01): close — sprint_status Completed, close artefacts
+| * 2e5d24e feat: STORY-001-01 sprint work
+|/  
+* 363ca1a init: cleargate scripts installed
+main .active=[]
+closing .active=[]
+.cleargate/delivery/archive/.gitkeep
+.cleargate/delivery/archive/STORY-001-01_proof_item.md
+.cleargate/sprint-runs/SPRINT-01/.doc-refresh-checklist.md
+.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+.cleargate/sprint-runs/SPRINT-01/improvement-suggestions.md
+.cleargate/sprint-runs/SPRINT-01/state.json
+status: "Completed"
+status(/private/tmp/s17p.7RF2/plain):

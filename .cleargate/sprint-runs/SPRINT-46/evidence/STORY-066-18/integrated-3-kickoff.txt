@@ -1,0 +1,25 @@
+# integrated tree 4368a53 (story/STORY-066-18 + main fd3c471), 2026-11-15T13:52:37Z
+# kickoff via: cleargate sprint init SPRINT-01 --stories STORY-001-01 --allow-drift --no-dashboard (dist of the story worktree)
+[cleargate sprint init] decomposition gate: sprint declares no epics or proposals — waived via --allow-drift.
+Initialized state.json for sprint SPRINT-01 with 1 stories
+Lanes: STORY-001-01 standard (assign-lane-script)
+WARN: sprint-context.md template not found at /private/tmp/q18b.OQMr/cgp.xwVQ/.cleargate/templates/sprint_context.md; skipping sprint-context.md write.
+→ Load skill: sprint-execution
+baseline: reused the preflight probe of be235f4 (0 failing, exit 2) -> /private/tmp/q18b.OQMr/cgp.xwVQ/.cleargate/sprint-runs/SPRINT-01/baseline.json
+exit 0
+{
+  "sprint_id": "SPRINT-01",
+  "base_sha": "be235f4e8fdc1177d954763d873d96bb35ab148b",
+  "command": "sh guard.sh",
+  "exit_code": 2,
+  "failing": [],
+  "tail": [
+    "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop."
+  ],
+  "recorded_at": "2026-11-15T13:52:42.094Z",
+  "source": "preflight"
+}
+runs=       2
+# direct record_baseline.mjs (plan step 3)
+baseline: reused the preflight probe of be235f4 (0 failing, exit 2) -> /private/tmp/q18b.OQMr/cgp.xwVQ/.cleargate/sprint-runs/SPRINT-01/baseline.json
+runs=       2

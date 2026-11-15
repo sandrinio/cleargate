@@ -1,0 +1,31 @@
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/merge-story-resume.red.integration.node.test.ts test/docs/agent-environment-rule.red.node.test.ts
+
+▶ STORY-066-14 Scenario 5: agents never invent environment values
+  ✔ U1: qa.md / developer.md and the Codex renders carry the environment rule and the incident-files rule (0.6425ms)
+  ✔ U2: SKILL.md (claude and core .agents) records owner instructions before the next dispatch; §C.7 exit-2 row names teardown (0.29025ms)
+✔ STORY-066-14 Scenario 5: agents never invent environment values (1.449666ms)
+▶ STORY-066-14 Sc1 — teardown survives a deleted tracked incident file
+  ✔ I1: a tracked incident file deleted in the worktree is skipped; new incident files are still collected (5416.702084ms)
+✔ STORY-066-14 Sc1 — teardown survives a deleted tracked incident file (5417.286708ms)
+▶ STORY-066-14 Sc2 — a re-run after the merge landed finishes teardown and state
+  ✔ I2: resumed run exits 0 with the resumed line and adds no commit (2225.849125ms)
+  ✔ I3: resumed run with the worktree directory already deleted prunes the registration and deletes the branch (2499.366666ms)
+✔ STORY-066-14 Sc2 — a re-run after the merge landed finishes teardown and state (4725.438625ms)
+▶ STORY-066-14 Sc3 — a story branch with no work is still refused
+  ✔ I4: a branch at a commit already on the sprint branch exits 2 "not ahead" (1729.314959ms)
+  ✔ I5: another story's merged tip (D-1) and a missing branch with no merge (D-2) are both refused (2590.486209ms)
+✔ STORY-066-14 Sc3 — a story branch with no work is still refused (4319.95775ms)
+▶ STORY-066-14 Sc4 — an error after the merge names its step and the way to finish
+  ✔ I6: (a) a pre-merge error stays "precondition"; (b) a teardown error after the merge is step "teardown" with the landed line (9469.695167ms)
+  ✔ I7: the S11 recovery chain: teardown error, then a state error, then a clean re-run to Done (7166.775875ms)
+✔ STORY-066-14 Sc4 — an error after the merge names its step and the way to finish (16636.676125ms)
+ℹ tests 9
+ℹ suites 5
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31620.431792

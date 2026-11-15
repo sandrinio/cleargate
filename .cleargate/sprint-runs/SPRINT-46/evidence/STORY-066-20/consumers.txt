@@ -1,0 +1,280 @@
+fatal: not a git repository (or any of the parent directories): .git
+fatal: not a git repository (or any of the parent directories): .git
+▶ state update — always-active path (STORY-070-01)
+  ✔ spawns the script and propagates exit 0 (2.364584ms)
+  ✔ always spawns a subprocess regardless of sprint fixture (0.25ms)
+✔ state update — always-active path (STORY-070-01) (3.147292ms)
+▶ state update — v2-active path
+  ✔ invokes run_script.sh update_state.mjs with story-id and new-state (0.281583ms)
+  ✔ propagates exit code from script (0.140667ms)
+✔ state update — v2-active path (0.51575ms)
+▶ state validate — always-active path (STORY-070-01)
+  ✔ spawns the script and propagates exit 0 (0.209125ms)
+✔ state validate — always-active path (STORY-070-01) (0.255625ms)
+▶ state validate — v2-active path
+  ✔ invokes run_script.sh validate_state.mjs with sprint-id (0.180042ms)
+✔ state validate — v2-active path (0.253291ms)
+▶ Scenario: state update reads .active when no --sprint flag (STORY-014-06)
+  ✔ routes to v2 using the sprint ID from .active sentinel (494.156ms)
+✔ Scenario: state update reads .active when no --sprint flag (STORY-014-06) (494.233791ms)
+▶ Scenario: state update --sprint flag overrides sentinel (STORY-014-06)
+  ✔ uses the explicit --sprint SPRINT-NEW over .active = SPRINT-OLD (534.211709ms)
+✔ Scenario: state update --sprint flag overrides sentinel (STORY-014-06) (534.27775ms)
+▶ Scenario: state update with no sprint context (STORY-070-01 + BUG-039)
+  ✔ refuses with a one-line message instead of spawning a doomed child (1.4625ms)
+✔ Scenario: state update with no sprint context (STORY-070-01 + BUG-039) (1.526666ms)
+▶ CR-050 state update — canonical call form (args[1]=node, args[2]=abs-path)
+  ✔ state update passes node as arg[1] after run_script.sh (CR-050 migration) (1.7435ms)
+✔ CR-050 state update — canonical call form (args[1]=node, args[2]=abs-path) (2.24075ms)
+▶ CR-050 state validate — canonical call form (args[1]=node, args[2]=abs-path)
+  ✔ state validate passes node as arg[1] after run_script.sh (CR-050 migration) (0.166834ms)
+✔ CR-050 state validate — canonical call form (args[1]=node, args[2]=abs-path) (0.222208ms)
+▶ CR-055 state — wrapScript end-to-end: real wrapper integration
+  ✔ wrapper exits 0 when invoked with node -e process.exit(0) (state explicit-node interface) (776.768416ms)
+✔ CR-055 state — wrapScript end-to-end: real wrapper integration (776.850208ms)
+▶ STORY-064-02 Sc1 (@paths): bundle carries a Measured Metrics section
+  ✔ section follows the renamed digest heading and lists both items (unit: rendering) (937.818166ms)
+  ✔ forwards CLEARGATE_SPRINT_DIR to sprint_metrics.mjs and renders the measured summary lines (707.560584ms)
+✔ STORY-064-02 Sc1 (@paths): bundle carries a Measured Metrics section (1645.862917ms)
+▶ STORY-064-02 Sc2 (@rules): only disagreeing items name their counter
+  ✔ STORY-A line present, no line for agreeing STORY-B (unit: filter) (787.700125ms)
+  ✔ no disagreement renders the single line "Disagreements: none." (754.016ms)
+✔ STORY-064-02 Sc2 (@rules): only disagreeing items name their counter (1541.913416ms)
+▶ STORY-064-02 Sc3 (@paths): metrics not measured never fail the bundle
+  ✔ real C2 script (stub or integrated): exit 0, states "dispatch data: not measured", no fake zeros (integration) (871.534541ms)
+  ✔ Case N with items: rework falls back to git, no Sprint-level / Unattributed lines (891.564375ms)
+✔ STORY-064-02 Sc3 (@paths): metrics not measured never fail the bundle (1763.256916ms)
+▶ STORY-064-02 R2: sprint_metrics.mjs failure degrades to one line, exit 0
+  ✔ non-zero exit (1128.285292ms)
+  ✔ unparseable output (812.595459ms)
+  ✔ script missing (566.300166ms)
+✔ STORY-064-02 R2: sprint_metrics.mjs failure degrades to one line, exit 0 (2507.374959ms)
+▶ STORY-064-02 R1 budget: 50 items stay under 12 KB
+  ✔ 50-item fixture, all disagreeing, 6 warnings (746.797625ms)
+✔ STORY-064-02 R1 budget: 50 items stay under 12 KB (746.868042ms)
+▶ Scenario: A workflow-run red-test correction is counted from dispatches (end to end, real reader)
+  ✔ 60 synthetic transcripts: STORY-003-01 -> red_corrections 1, dev_reruns 0, verify_reruns 0, total 1; under 10 s (1541.15275ms)
+  ✔ privacy: no transcript text and no description text reaches stdout, stderr or metrics.json (1968.146542ms)
+✔ Scenario: A workflow-run red-test correction is counted from dispatches (end to end, real reader) (3509.852375ms)
+▶ R4 end to end — interrupted, planned and post-merge dispatches through the real reader
+  ✔ STORY-002-07: interrupted Build, pre-verify, integrate and post-merge replay are never rounds and are reported beside the counts (2470.095958ms)
+  ✔ human table lists every roster item with measured figures (no "not measured" when transcripts exist) (2162.285417ms)
+✔ R4 end to end — interrupted, planned and post-merge dispatches through the real reader (4632.516167ms)
+▶ Scenario: Missing transcripts fall back to git and never fail (fixture session tree + git)
+  ✔ a session without subagents/ plus a git fixture -> exit 0, warning, every item "not measured", total from git (1435.30575ms)
+✔ Scenario: Missing transcripts fall back to git and never fail (fixture session tree + git) (1435.382292ms)
+▶ R3 matchItem — Descriptions are matched to the roster or classed
+  ✔ "BUG-001 developer c1" / "Build" -> BUG-001 (9.216458ms)
+  ✔ "003-01 QA-Red r1" / "QA-Red" -> unattributed (0.21125ms)
+  ✔ "SDR reader STORY-003-01" / "Plan" -> STORY-003-01 (0.131917ms)
+  ✔ "M1 plan" / "Plan" -> sprint-level (0.147709ms)
+  ✔ "Developer contract step C0" / "Contract" -> sprint-level (0.2255ms)
+  ✔ "Architect amend M2 for stale claims" / "" -> sprint-level (0.159792ms)
+  ✔ "QA consolidation full-suite run" / "" -> sprint-level (0.095375ms)
+  ✔ "Generate sample week" / "" -> unattributed (0.131375ms)
+  ✔ short form equal to the ID minus its type prefix matches when unambiguous (0.133416ms)
+  ✔ a bare numeric tail ("001") matches nothing (0.122625ms)
+  ✔ C-2: a description naming two roster items (full IDs) is unattributed (0.103292ms)
+  ✔ C-2: a description naming two roster items (short forms) is unattributed (0.101459ms)
+  ✔ a short form glued to other alphanumerics does not match (0.083625ms)
+  ✔ sprint-level keywords match at a word start (phase or description); "explanation" does not (0.106ms)
+  ✔ an ID outside the roster is never an item (0.087666ms)
+✔ R3 matchItem — Descriptions are matched to the roster or classed (11.79375ms)
+▶ R3 SC-4 — sprint-level by stage keyword, own sprint ID, or sprint-only agent type
+  ✔ SC-4 keywords: walkthrough and contradiction (item-less) are sprint-level (0.099625ms)
+  ✔ SC-4 sprint-stage keywords: cleanup, simplify, wiki, consolidation, contract, M<N> (0.102083ms)
+  ✔ SC-4 a description naming the sprint own ID with no item is sprint-level (pinned via runSprintMetrics, since matchItem has no sprint-id input) (1533.219417ms)
+  ✔ SC-4 agent type cleargate-wiki-query + "Prior-work query: dashboard board" is sprint-level (0.198625ms)
+  ✔ SC-4 agent type code-simplifier:code-simplifier + "Cleanup pass on sprint diff" is sprint-level (0.101959ms)
+  ✔ SC-4 agent type alone decides (neutral description), bare and plugin-prefixed (0.103166ms)
+  ✔ SC-4 [guard] an item-naming description from a sprint-only agent type is still attributed to the item (0.097292ms)
+  ✔ SC-4 [guard] "Generate sample week" with agent type developer stays unattributed (0.073375ms)
+✔ R3 SC-4 — sprint-level by stage keyword, own sprint ID, or sprint-only agent type (1534.128292ms)
+▶ R4 roundKind
+  ✔ maps role/phase/description to red | build | verify | null (0.331583ms)
+  ✔ never-round phases and non-qa/developer roles are not rounds; incomplete rows are not rounds (0.122708ms)
+✔ R4 roundKind (0.4905ms)
+▶ R4 computeRework — Planned and infrastructure dispatches are not rework
+  ✔ extra "002-07 QA-Red pass 2 r1" (QA-Red, 10:00, completed true) -> total 0, bucket dispatches (0.316375ms)
+  ✔ extra "002-07 integrate" (Integrate, 10:30, completed true) -> total 0, bucket dispatches (0.119959ms)
+  ✔ extra "002-07 QA-Verify pre c1" (Pre-verify, 10:40, completed true) -> total 0, bucket dispatches (0.095459ms)
+  ✔ extra "002-07 developer c2" (Build, 10:50, completed false) -> total 0, bucket interrupted (0.076917ms)
+  ✔ extra "002-07 developer c1" (Build, 12:30, completed true) -> total 0, bucket post_merge (0.069375ms)
+  ✔ the same outline end to end: extra dispatch lands in the named bucket of metrics.json (7843.711542ms)
+✔ R4 computeRework — Planned and infrastructure dispatches are not rework (7844.486208ms)
+▶ R4 computeRework — counting rules
+  ✔ genuine repeats count: 2 reds, 2 builds, 2 verifies -> 1 each, total 3 (0.418791ms)
+  ✔ floors at 0 and unsorted input is ordered by started_at (0.147459ms)
+  ✔ planned passes: pass 1 and pass 2 builds are not reruns; a repeat inside a pass is (0.102959ms)
+  ✔ post-integration verify (Integrate after the last Build) is planned, not a re-verify (0.086167ms)
+  ✔ a verify after a rebuild with no Integrate in between is a re-verify (0.093333ms)
+  ✔ interrupted rows are counted in interrupted and never as rounds (0.096667ms)
+✔ R4 computeRework — counting rules (1.054708ms)
+▶ R5 classifyCommits
+  ✔ classifies by subject prefix, oldest first, regardless of input order (0.2255ms)
+  ✔ a merge(story/<ID>): feat(...) subject is merged, not a build (0.085292ms)
+  ✔ a (rework) subject that is the first build counts as build only; a later fix(...) is rework (0.104541ms)
+  ✔ the same subject committed in two repos counts once (0.082541ms)
+  ✔ integrate subjects are classified; commits outside the window or naming non-roster items are ignored (0.08775ms)
+  ✔ a null window keeps every commit (0.063292ms)
+✔ R5 classifyCommits (0.723917ms)
+▶ R6 readRepoList / readGitCommits
+  ✔ readRepoList: "." first, then block-list entries, deduped by resolved path (2.3995ms)
+  ✔ readRepoList: flow list and missing config (1.77225ms)
+  ✔ readGitCommits reads commits as {date, subject, repo} and lists only repos actually read (668.826583ms)
+  ✔ a release repo that is a plain subdirectory is skipped with a warning (R6) (769.851625ms)
+  ✔ no readable repo -> "git data: not measured" warning, no throw (136.171166ms)
+✔ R6 readRepoList / readGitCommits (1579.163541ms)
+▶ R7 sprintWindow
+  ✔ Completed sprint: earliest to latest ts (0.186875ms)
+  ✔ Active sprint: end is now (0.285084ms)
+  ✔ no events -> null (0.069625ms)
+✔ R7 sprintWindow (0.589708ms)
+▶ Scenario: A workflow-run red-test correction is counted from dispatches
+  ✔ STORY-003-01 -> red_corrections 1, dev_reruns 0, verify_reruns 0, total 1; general-purpose is a dispatch, not a round (1452.947125ms)
+  ✔ roster and totals: only state.json stories are items; totals/sprint_level/unattributed per SC-3 (2014.100542ms)
+  ✔ disagrees: dispatch rework 1 vs git 0 vs counters 0 -> true; all agree -> false (1061.690416ms)
+✔ Scenario: A workflow-run red-test correction is counted from dispatches (4528.869ms)
+▶ Scenario: Git rework is classified and a disagreeing counter is flagged
+  ✔ STORY-003-01 git = red_written 1, red_corrected 1, build 1, rework 1, merged 1; disagrees true; duplicate subject across repos counts once (2668.118083ms)
+  ✔ measured dispatch rework, git rework and counters all equal -> disagrees false; post-merge dispatch is post_merge, not a round (2438.541709ms)
+✔ Scenario: Git rework is classified and a disagreeing counter is flagged (5106.775625ms)
+▶ R9 degradation — never throws, never renders "not measured" as 0
+  ✔ no dispatch rows -> every item "not measured", warning present, rework.total from git (2788.621833ms)
+  ✔ a throwing reader degrades to not measured with a warning, no throw (6214.077167ms)
+  ✔ missing git repo degrades without throwing (git warning, dispatch data still used) (222.744917ms)
+  ✔ missing state.json -> warning, empty roster, no throw; missing sprint dir -> no metrics.json, no throw (283.265708ms)
+✔ R9 degradation — never throws, never renders "not measured" as 0 (9508.907ms)
+▶ R10 / Gherkin 5 — contract C2 shape, privacy
+  ✔ metrics.json carries every C2 key with the right type; share in [0,1]; no description/transcript text (1351.219875ms)
+✔ R10 / Gherkin 5 — contract C2 shape, privacy (1351.284584ms)
+▶ CLI — canonical script by path
+  ✔ [guard] usage: no args -> exit 2 with empty stdout; first arg --json -> exit 2 (400.114916ms)
+  ✔ Scenario: JSON output follows contract C2 — stdout is one document and equals metrics.json (7109.604292ms)
+  ✔ Scenario: Missing transcripts fall back to git and never fail (4140.186542ms)
+  ✔ human table (no --json): one line per roster item, "not measured" in the dispatch columns when degraded, exit 0 (3121.275542ms)
+  ✔ [guard] never exits non-zero on a degraded source: no git, no state events, no ledger (228.122292ms)
+✔ CLI — canonical script by path (14999.658917ms)
+▶ STORY-066-10 Scenario: The sprint metrics split rework by defect location
+  ✔ M1: two code, one red-test and one unlocated bounce -> by_defect_in { code: 2, red-test: 1, spec: 0, unknown: 1 } on the item and in totals (163.884209ms)
+  ✔ M1b: duplicate run_id counts once, a non-roster story is ignored, an invalid defect_in counts as unknown (177.064833ms)
+✔ STORY-066-10 Scenario: The sprint metrics split rework by defect location (341.049583ms)
+▶ STORY-066-10 Scenario: The sprint metrics report dispatches per item by lane
+  ✔ M2: a fast item with 1 dispatch and two standard items with 3 each -> by_lane fast { 1, 1, 1 }, standard { 2, 6, 3 }; item.lane defaults to standard (184.153167ms)
+  ✔ M3: the table names each item's lane and prints one "by lane:" line per lane; unmeasured dispatches print "not measured", never 0 (535.808333ms)
+✔ STORY-066-10 Scenario: The sprint metrics report dispatches per item by lane (720.046792ms)
+▶ Scenario 2: v1 state.json migrates additively on first read under new code
+  ✔ exits 0 after migrating v1 state.json (278.943833ms)
+  ✔ on-disk state.json is updated to schema_version: 3 (v1→v2 + v2→v3 migration) (268.249125ms)
+  ✖ every story has lane: "standard" and lane_assigned_by: "migration-default" (286.147875ms)
+  ✖ no other pre-existing field on any story is mutated (215.547666ms)
+  ✔ emits a stderr log line for the migration with sprint ID and story count (202.944291ms)
+✖ Scenario 2: v1 state.json migrates additively on first read under new code (1252.519458ms)
+▶ Scenario 3: --lane sets the field on a single story
+  ✔ exits 0 when --lane fast is applied to an existing story (241.078875ms)
+  ✔ STORY-TEST-01 lane becomes "fast" (226.235458ms)
+  ✔ STORY-TEST-01 lane_assigned_by becomes "human-override" (203.059833ms)
+  ✔ STORY-TEST-02 is not mutated (237.171583ms)
+  ✔ rejects an invalid lane value with exit 2 (192.172208ms)
+✔ Scenario 3: --lane sets the field on a single story (1100.030209ms)
+▶ Scenario 4: --lane-demote flips lane to standard with reason
+  ✔ exits 0 (226.536333ms)
+  ✔ lane becomes "standard" (208.56425ms)
+  ✔ lane_demoted_at is populated with an ISO timestamp (238.45225ms)
+  ✔ lane_demotion_reason is "pre-gate scanner failed" (274.663042ms)
+  ✔ qa_bounces and arch_bounces are reset to 0 (208.391625ms)
+  ✔ rejects --lane-demote with no reason argument (exit 2) (207.006209ms)
+✔ Scenario 4: --lane-demote flips lane to standard with reason (1363.848208ms)
+▶ Scenario 5: Idempotency — re-reading a v3 state.json does not double-migrate
+  ✔ no migration log line is emitted for a v3 state.json (293.464875ms)
+  ✖ on-disk state.json is byte-equal after a no-op invocation (190.892041ms)
+  ✔ running update twice on a v3 file produces no additional migration log (426.126708ms)
+✖ Scenario 5: Idempotency — re-reading a v3 state.json does not double-migrate (910.608167ms)
+▶ STORY-066-10 --qa-bounce --defect-in (canonical update_state.mjs)
+  ✔ S1 U1: --defect-in red-test is recorded, state unchanged, message says the item returns to QA-Red (185.296584ms)
+  ✔ S1 U2: --defect-in code is recorded and the message says the item returns to the Developer (169.71525ms)
+  ✔ S2 U3: --qa-bounce with no --defect-in still works and records defect_in "unknown" (200.409375ms)
+  ✔ S2 U4: a pre-release log (qa-bounce with no defect_in) folds to the same state and takes a new located bounce (209.972083ms)
+  ✔ S3 U5: an unknown or missing location exits 2, writes no event, leaves state.json byte-identical (419.9805ms)
+  ✔ S3 U6: --defect-in spec escalates at once (qa_bounces 1), and the event log folds to Escalated (175.132875ms)
+✔ STORY-066-10 --qa-bounce --defect-in (canonical update_state.mjs) (1360.715542ms)
+ℹ tests 122
+ℹ suites 38
+ℹ pass 119
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47971.057667
+
+✖ failing tests:
+
+test at test/scripts/test_update_state.integration.node.test.ts:1:5419
+✖ every story has lane: "standard" and lane_assigned_by: "migration-default" (286.147875ms)
+  AssertionError [ERR_ASSERTION]: standard
+  + actual - expected
+  
+  + 'standard'
+  - 'STORY-TEST-01 lane'
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-20/cleargate-cli/test/scripts/test_update_state.integration.node.test.ts:196:14)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'standard',
+    expected: 'STORY-TEST-01 lane',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/scripts/test_update_state.integration.node.test.ts:1:6002
+✖ no other pre-existing field on any story is mutated (215.547666ms)
+  AssertionError [ERR_ASSERTION]: Ready to Bounce
+  + actual - expected
+  
+  + 'Ready to Bounce'
+  - 'STORY-TEST-01.state'
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-20/cleargate-cli/test/scripts/test_update_state.integration.node.test.ts:214:16)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'Ready to Bounce',
+    expected: 'STORY-TEST-01.state',
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/scripts/test_update_state.integration.node.test.ts:1:12700
+✖ on-disk state.json is byte-equal after a no-op invocation (190.892041ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  ... Skipped lines
+  
+    '{\n' +
+      '  "schema_version": 3,\n' +
+      '  "sprint_id": "SPRINT-TEST",\n' +
+      '  "sprint_status": "Active",\n' +
+      '  "stories": {\n' +
+  ...
+      '  },\n' +
+  +   '  "last_action": "transition STORY-TEST-01 → Ready to Bounce",\n' +
+  -   '  "last_action": "init",\n' +
+      '  "updated_at": "2026-01-01T00:00:00.000Z"\n' +
+      '}\n'
+  
+      at TestContext.<anonymous> (/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-20/cleargate-cli/test/scripts/test_update_state.integration.node.test.ts:444:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '{\n  "schema_version": 3,\n  "sprint_id": "SPRINT-TEST",\n  "sprint_status": "Active",\n  "stories": {\n    "STORY-TEST-01": {\n      "state": "Ready to Bounce",\n      "qa_bounces": 0,\n      "arch_bounces": 0,\n      "worktree": null,\n      "updated_at": "2026-01-01T00:00:00.000Z",\n      "notes": "",\n      "lane": "standard",\n      "lane_assigned_by": "migration-default",\n      "lane_demoted_at": null,\n      "lane_demotion_reason": null\n    }\n  },\n  "last_action": "transition STORY-TEST-01 → Ready to Bounce",\n  "updated_at": "2026-01-01T00:00:00.000Z"\n}\n',
+    expected: '{\n  "schema_version": 3,\n  "sprint_id": "SPRINT-TEST",\n  "sprint_status": "Active",\n  "stories": {\n    "STORY-TEST-01": {\n      "state": "Ready to Bounce",\n      "qa_bounces": 0,\n      "arch_bounces": 0,\n      "worktree": null,\n      "updated_at": "2026-01-01T00:00:00.000Z",\n      "notes": "",\n      "lane": "standard",\n      "lane_assigned_by": "migration-default",\n      "lane_demoted_at": null,\n      "lane_demotion_reason": null\n    }\n  },\n  "last_action": "init",\n  "updated_at": "2026-01-01T00:00:00.000Z"\n}\n',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

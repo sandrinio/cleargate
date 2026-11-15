@@ -1,0 +1,304 @@
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/wave-runner.red.node.test.ts test/integration/wave-runner.red.integration.node.test.ts test/agents/qa-red-seal-content.node.test.ts test/agents/qa-verify-run-and-probe.red.node.test.ts test/docs/loop-spec-three-paths.red.node.test.ts test/docs/contract-first-dag-text.red.node.test.ts test/scripts/wave-execution-barrier.red.node.test.ts test/scripts/codex-sprint-execution-render.red.node.test.ts test/scripts/codex-agents-codegen.red.node.test.ts test/scripts/subagent-ledger.red.node.test.ts test/commands/init-codex-sprint-execution.red.node.test.ts test/scaffold/skill-md-conditional-architect.red.node.test.ts test/scaffold/skill-md-consolidation-d5.red.node.test.ts test/scaffold/skill-md-serial-pointers.red.node.test.ts test/scripts/prep-qa-context-baseline.red.node.test.ts test/scripts/prep-qa-context-commands.red.node.test.ts
+
+▶ STORY-066-07 qa Mode: RED seal text
+  ✔ Sc1: qa.md and qa.toml RED slices name the seal step, output fields, volume rule and CR-111 clause (0.876417ms)
+✔ STORY-066-07 qa Mode: RED seal text (1.378ms)
+▶ STORY-066-09 Scenario 2: no heuristic text in the agent prompt
+  ✔ B1a: neither qa.md nor qa.toml contains "not-yet-runtime-aware" (0.8485ms)
+  ✔ B1b: qa.toml equals renderAgentToml(qa.md) (regenerated, not hand-edited) (6.124875ms)
+✔ STORY-066-09 Scenario 2: no heuristic text in the agent prompt (7.539542ms)
+▶ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect
+  ✔ B2: VERIFY text has the run-and-probe dispatch line and the commands.* keys; output shape has the new fields (0.340625ms)
+✔ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect (0.410375ms)
+▶ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect
+  ✔ B3: precedence spec > red-test > code, DEFECTS line format, red-test definition (0.438084ms)
+✔ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect (0.493209ms)
+▶ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item
+  ✔ B4: the scenario-only sentence is in the VERIFY text and Guardrails carries the rule (0.234458ms)
+✔ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item (0.292625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 34 — hosts:['codex']: .agents/skills/sprint-execution/{SKILL.md,dispatch-serial.md} exist, no banned token, no .claude/, entryOwner core (206.545292ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution/dispatch-serial.md exists and equals canonical (119.345625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 36 — hosts:['claude','codex']: both dispatch-serial.md files are byte-identical, and the Claude SKILL.md equals canonical (with its pointers) (192.657042ms)
+▶ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab
+  ✔ T1 (red): architect-reader digest gains exports_provided / exports_consumed (0.815292ms)
+  ✔ T2 (red): architect-synth — Real-collision predicate, Contract formation, schema_version 2 shape (0.507583ms)
+  ✔ T3a (red): SKILL.md — new §C.0.2 Contract-first build and integration, correctly placed and worded (0.396667ms)
+  ✔ T3b (anchor): every -12 anchor line occurs exactly once; §A.4 stays free of the 9 -12 banned tokens (1.365208ms)
+  ✔ T3c (red): SKILL §A.4 names the real-collision predicate and the digest/schema fields (0.303459ms)
+  ✔ T4c: canonical cleargate-enforcement.md names the real-collision predicate (EPIC-061 R3-split) (0.267125ms)
+  ✔ T5c: canonical Sprint Plan Template §2.1 is a contract-first DAG example (EPIC-061 R3-split) (0.19ms)
+  ✔ T5b (anchor): the three declareProbeSprint template anchors survive (0.162916ms)
+  ✔ T6 (anchor): none of the 7 CR-124 files trips the dead execution-mode vocabulary gate (3.47125ms)
+  ✔ T7 (red): architect.md §2.1 names the contract-first DAG and per-story upstream (0.285ms)
+✔ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab (8.51275ms)
+▶ Scenario 1 — each path lists exactly the stages stagesFor returns
+  ✔ T1 — the paths table in the Claude and generated .agents SKILL equals stagesFor; every STAGE_NAMES entry heads a stage note (5.640792ms)
+✔ Scenario 1 — each path lists exactly the stages stagesFor returns (6.165542ms)
+▶ Scenario 2 — no milestone plan remains; the story plan has its own mode
+  ✔ T2 — no milestone-plan token in either SKILL or the four prompts; Phase B survives only as a one-line stub (3.017959ms)
+  ✔ T3 — architect.md has Mode: STORY-PLAN (150 lines, plans/<ID>.md, Task Breakdown) matching the runtime stage; GOAL_RELATION lives in the SDR and template §2.1 (1.611166ms)
+✔ Scenario 2 — no milestone plan remains; the story plan has its own mode (4.732666ms)
+▶ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure
+  ✔ T4 — §C.7 is the merge_story.mjs exit table; seal_red / DEFECT_IN notes; flashcard gate restored before the first merge (1.103625ms)
+  ✔ T5 [integration-gated: STORY-066-08, 066-11, 066-10, 066-07] — the real scripts' usage matches the §C text (250.343334ms)
+✔ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure (251.701417ms)
+▶ Scenario 4 — every host reads the same spec
+  ✔ T6 — --check exits 0; developer.md plan input and fast-lane rule; dispatch-serial.md step 3 and §5; Codex twins carry the change (131.689958ms)
+  ▶ T7 — prep_qa_context / prep_reporter_context follow the plan move
+    ✔ prep_qa_context: plans/<ID>.md first, then a plans/M*.md section; reporter: ## Story Plans after milestone plans (10558.67725ms)
+  ✔ T7 — prep_qa_context / prep_reporter_context follow the plan move (10594.555833ms)
+✔ Scenario 4 — every host reads the same spec (10726.469583ms)
+▶ Scenario 5 — a spec that disagrees with the code fails the build
+  ✔ T8a (guard, passes by design) — the matcher accepts a table built from stagesFor and throws naming the bad lane or stage on a doctored one (1.9805ms)
+  ✔ T8b — a temp copy of the real SKILL.md whose runtime row names `prove`, or whose fast row lacks `merge`, fails the docs-match (5.432417ms)
+✔ Scenario 5 — a spec that disagrees with the code fails the build (7.509791ms)
+▶ STORY-066-11 wave runner integration (red)
+  ✔ I1 @data (Goal check a): three-wave dry run, one item per lane, 1/3/5 dispatches [integration-gated: 066-06/07/09] (1028.283167ms)
+  ✔ I2 @rules: args CLI on a git Go repo with no package.json: models, stages, base, file, exits (828.427459ms)
+✔ STORY-066-11 wave runner integration (red) (1857.512792ms)
+▶ S1: SKILL.md §C.6 Architect post-flight is conditional on a pre-gate flag
+  ✔ §C.6 must NOT unconditionally spawn Architect when scan is clean (exit 0) (1.10225ms)
+  ✔ §C.3.5 must NOT unconditionally spawn the Architect Mode: TPV (clean scan must skip) (1.159375ms)
+✔ S1: SKILL.md §C.6 Architect post-flight is conditional on a pre-gate flag (2.795708ms)
+▶ S2: SKILL.md documents clean-path ≤5 dispatch count
+  ✔ SKILL.md must state that a clean standard-lane story dispatches ≤5 agents (0.744917ms)
+✔ S2: SKILL.md documents clean-path ≤5 dispatch count (0.841125ms)
+▶ S3: Safeguard sentence present in BOTH SKILL.md AND architect.md
+  ✔ SKILL.md contains the non-removable safeguard sentence (all key terms) (1.371375ms)
+  ✔ architect.md contains the non-removable safeguard sentence (all key terms) (3.86625ms)
+✔ S3: Safeguard sentence present in BOTH SKILL.md AND architect.md (5.355333ms)
+▶ S4: architect.md has a post-flight block with conditional contract
+  ✔ architect.md contains a post-flight section (heading or labelled block) (0.410333ms)
+  ✔ architect.md post-flight block states dispatch is conditional on a pre-gate flag (0.2165ms)
+  ✔ architect.md ## Mode: TPV states dispatch is conditional on a scan flag (0.223542ms)
+✔ S4: architect.md has a post-flight block with conditional contract (0.99075ms)
+▶ S5: Canonical is the edit source-of-truth; payload parity after prebuild
+  ✔ canonical SKILL.md exists and is the source-of-truth for this story (0.1045ms)
+  ✔ canonical architect.md exists and is the source-of-truth for this story (0.134959ms)
+  ✔ payload SKILL.md is byte-identical to canonical (after prebuild) (2.191083ms)
+  ✔ GATE-4 NOTE: live↔canonical drift is intentionally deferred (not a per-story fail) (0.085542ms)
+✔ S5: Canonical is the edit source-of-truth; payload parity after prebuild (2.626042ms)
+▶ S6: §C.7 arch.md requirement is conditional on pre-gate scan having flagged
+  ✔ §C.7 required-reports table: arch.md row must include a conditional caveat (not "v2 standard-lane only") (0.504125ms)
+  ✔ §C.7 DevOps context-pack: arch.md line must include a conditional caveat (0.317416ms)
+  ✔ §C.7 DevOps ACTION step 1: must NOT unconditionally halt on absent arch.md (0.279375ms)
+✔ S6: §C.7 arch.md requirement is conditional on pre-gate scan having flagged (1.170375ms)
+▶ S7: fully-clean dispatch count is 4 (not 5) in SKILL.md §C.6 and architect.md
+  ✔ SKILL.md §C.6 must state the fully-clean dispatch count as 4, not 5 (0.406ms)
+  ✔ architect.md Mode: Post-Flight must state the fully-clean dispatch count as 4, not 5 (0.155709ms)
+  ✔ SKILL.md §C.6 header line must reflect ≤4 (not ≤5) for fully-clean standard-lane story (0.534167ms)
+✔ S7: fully-clean dispatch count is 4 (not 5) in SKILL.md §C.6 and architect.md (1.152959ms)
+▶ S1: Phase D.5 — Consolidation sits between §6 and §7 in SKILL.md
+  ✔ Phase D.5 heading exists in canonical SKILL.md (0.921166ms)
+  ✔ Phase D.5 appears AFTER §6 Sprint Walkthrough heading by index (0.959375ms)
+  ✔ Phase D.5 appears BEFORE §7 Gate 4 Close heading by index (0.357834ms)
+  ✔ D.5 block names /simplify or code-simplifier on git diff main...sprint/S-NN (0.352791ms)
+✔ S1: Phase D.5 — Consolidation sits between §6 and §7 in SKILL.md (3.147708ms)
+▶ S2: D.5 prose states *.red.node.test.ts immutability during consolidation
+  ✔ D.5 block states *.red.node.test.ts MUST NOT appear in the consolidation commit (0.360417ms)
+  ✔ D.5 block instructs Orchestrator to verify no *.red.node.test.ts in consolidation commit (0.312792ms)
+✔ S2: D.5 prose states *.red.node.test.ts immutability during consolidation (0.756208ms)
+▶ S3: D.5 prose has green→keep / red→revert decision branch
+  ✔ D.5 block states green full-suite re-run keeps the consolidation commit (0.325833ms)
+  ✔ D.5 block states red full-suite re-run triggers git revert on sprint/S-NN (0.280125ms)
+  ✔ D.5 block states the revert is logged in sprint §4 Execution Log (0.312958ms)
+  ✔ D.5 block states the sprint closes on the un-simplified still-green diff on red (0.322875ms)
+✔ S3: D.5 prose has green→keep / red→revert decision branch (1.369417ms)
+▶ S4: canonical qa.md has a Consolidation-mode dispatch note
+  ✔ qa.md contains a Consolidation-mode heading or labelled block (0.206833ms)
+  ✔ qa.md Consolidation-mode note states the re-run is read-only and no code edits (0.17575ms)
+  ✔ qa.md Consolidation-mode note states the sole question is full-suite green after /simplify (0.164875ms)
+✔ S4: canonical qa.md has a Consolidation-mode dispatch note (0.61475ms)
+▶ S5: Canonical source-of-truth carries D.5 block and qa.md note; live drift is Gate-4-deferred
+  ✔ canonical SKILL.md exists (the edit target for this story) (0.063542ms)
+  ✔ canonical qa.md exists (the edit target for this story) (0.0365ms)
+  ✔ canonical SKILL.md contains Phase D.5 — Consolidation block (0.2175ms)
+  ✔ canonical qa.md contains Consolidation-mode note (0.107833ms)
+✔ S5: Canonical source-of-truth carries D.5 block and qa.md note; live drift is Gate-4-deferred (0.485459ms)
+✔ Test 20 — P1 and P2 appear verbatim, each directly after its anchor plus one blank line (2.043084ms)
+✔ Test 21 (anchor, re-scoped EPIC-066 M3 C-9) — the five anchor headings each occur once, in order (0.526459ms)
+▶ Test 22 — prebuild output matches canonical
+  ✔ templates/cleargate-planning/.claude/skills/sprint-execution/{SKILL.md,dispatch-serial.md} equal canonical (skip if templates are absent) (0.779583ms)
+✔ Test 22 — prebuild output matches canonical (0.918542ms)
+▶ Test 1 — one .codex/agents/<name>.toml per canonical agent
+  ✔ exactly 11 canonical agents, and every one has a generated TOML file on disk (0.801459ms)
+  ✔ no extra .toml files under scaffold/hosts/codex/.codex/agents beyond the 11 canonical agents (0.224209ms)
+✔ Test 1 — one .codex/agents/<name>.toml per canonical agent (1.520791ms)
+▶ Test 2 — generated TOML parses to exactly {name, description, developer_instructions}, equal to source
+  ✔ architect.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (21.702458ms)
+  ✔ architect-reader.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.576458ms)
+  ✔ architect-synth.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (2.550208ms)
+  ✔ cleargate-wiki-contradict.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.147ms)
+  ✔ cleargate-wiki-ingest.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.078916ms)
+  ✔ cleargate-wiki-lint.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.067875ms)
+  ✔ cleargate-wiki-query.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (0.888709ms)
+  ✔ developer.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.159ms)
+  ✔ devops.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.073792ms)
+  ✔ qa.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.818083ms)
+  ✔ reporter.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.832959ms)
+✔ Test 2 — generated TOML parses to exactly {name, description, developer_instructions}, equal to source (36.284208ms)
+▶ Test 3 — no model, no tools; pinned GENERATED header
+  ✔ architect.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.384375ms)
+  ✔ architect-reader.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.096708ms)
+  ✔ architect-synth.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.103375ms)
+  ✔ cleargate-wiki-contradict.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.086459ms)
+  ✔ cleargate-wiki-ingest.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.09075ms)
+  ✔ cleargate-wiki-lint.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.113666ms)
+  ✔ cleargate-wiki-query.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.096875ms)
+  ✔ developer.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.103666ms)
+  ✔ devops.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.095083ms)
+  ✔ qa.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.124167ms)
+  ✔ reporter.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.124584ms)
+✔ Test 3 — no model, no tools; pinned GENERATED header (1.571125ms)
+▶ Test 4 — planCodexPayload determinism (agent + portable-skill entries)
+  ✔ two calls deep-equal for every hosts/codex/.codex/agents/** and core/.agents/skills/** entry (14.0695ms)
+  ✔ --check exits 1 on a hand-edited generated agent TOML (283.585333ms)
+✔ Test 4 — planCodexPayload determinism (agent + portable-skill entries) (297.783458ms)
+▶ [TPV re-seal] Test 4c — --check flags extras under the generated dirs and a stale portable skill
+  ✔ --check exits 1 and names the file for an extra .codex/agents TOML (489.394334ms)
+  ✔ --check exits 1 and names the file for an extra file under core/.agents/skills (583.768042ms)
+  ✔ --check exits 1 and names the file for a stale portable skill copy (514.257875ms)
+✔ [TPV re-seal] Test 4c — --check flags extras under the generated dirs and a stale portable skill (1587.553958ms)
+▶ Test 5 — an escaping fixture body round-trips exactly
+  ✔ a body with a triple-quote sequence, a backslash, a tab and a CR survives --write and re-parses byte-identical (188.747375ms)
+✔ Test 5 — an escaping fixture body round-trips exactly (188.816709ms)
+✔ Test 31 — renderCodexSprintExecution(canonical) is deterministic, contains R1-R5, drops every banned token, keeps the frontmatter and every non-A1-A4 line in order (8.422375ms)
+✔ Test 32 — deleting an anchor line throws "anchor not found"; duplicating A3 throws "anchor not unique"; a banned token surviving throws "banned token survived" (4.834083ms)
+✔ Test 33 — planCodexPayload plans both sprint-execution entries; the generated files match; --check exits 0/1 (293.304334ms)
+▶ prep_qa_context baseline section (STORY-066-04 scenario 5)
+  ✔ baseline.json source: source/failing/command in JSON; prose names the command and says outside failures are unknown (2363.960916ms)
+  ✔ legacy-only keeps working (GUARD for fallback); neither file -> baseline_unavailable true and source "none" (5988.644459ms)
+✔ prep_qa_context baseline section (STORY-066-04 scenario 5) (8353.219667ms)
+▶ STORY-066-09 Scenario 1: the pack carries the commands QA-Verify must run
+  ✔ A1: commands equals the pinned object; ## Commands sits after ## Lane and before ## Dev Handoff (2652.842ms)
+  ✔ A2: no proof declared gives proof nulls; absent / unparseable gate-checks gives source absent; "" is null (10532.724167ms)
+✔ STORY-066-09 Scenario 1: the pack carries the commands QA-Verify must run (13186.17975ms)
+▶ STORY-066-09 Scenario 2: the runtime lane is no longer a heuristic
+  ✔ A3: standard lane + diff touching cleargate-cli/src/commands/ gives lane.source "state.json" and no Heuristic prose (2451.645917ms)
+✔ STORY-066-09 Scenario 2: the runtime lane is no longer a heuristic (2451.750542ms)
+▶ CR-120 unit — readDispatches / discoverSessions
+  ✔ 1. pair walk: top-level dispatches t1, t2, b1 are read with run_id null (15.003875ms)
+  ✔ 2. workflow walk: w1-w3 carry run_id wf_fixture and workflow_phase; journal.jsonl is not an agent (7.0565ms)
+  ✔ 3. dedupe: msg_1 counted once (turns 2, tool_uses 3, usage sums); meta-only copy and resumed full copy add no row; 6 rows (7.800791ms)
+  ✔ 3b. a second workflow agent of the same id in another session dedupes by agent id when there is no toolUseId (7.592209ms)
+  ✔ 4. completed: false for the interrupted t2 and the hook_cancelled b1; true for the rest (a tool_result quoting the words does not count) (6.729917ms)
+  ✔ 5. a session dir without subagents/ yields a warning and no throw (6.193292ms)
+  ✔ 6. row shape: every C1 typedef key present with its type, schema 1, tool_use_id "" for workflow rows, rows sorted by started_at then agent_id (6.069625ms)
+  ✔ 6a. discovery from ledger transcript paths: report.source ledger, sessions in first-seen order (5.261458ms)
+  ✔ 6b. ledger without usable transcripts falls back to CLEARGATE_TRANSCRIPTS_ROOT, window applied by readDispatches (6.814ms)
+  ✔ 6b2. the fallback root can come from the CLEARGATE_TRANSCRIPTS_ROOT env var (5.142917ms)
+  ✔ 6c. no ledger sessions and no events.jsonl: source none, [], a warning, never an unbounded scan (5.277625ms)
+  ✔ 6d. a ledger-discovered session whose transcript dir is gone falls through to the fallback (7.32975ms)
+  ✔ 7. writeSubagentLedger writes one line per row, and with zero rows never creates or truncates the file (10.3255ms)
+  ✔ 8. the module is synchronous and has no CLI main: readers return arrays, not promises (6.832708ms)
+✔ CR-120 unit — readDispatches / discoverSessions (104.434375ms)
+▶ CR-120 CLI — count_tokens.mjs --json
+  ✔ 1. subagent.dispatches === 6, old keys unchanged, top-level measures, subagent-ledger.jsonl has 6 lines (181.435209ms)
+  ✔ 2. the duplicated msg_1 and the resumed copy are counted once in subagent.tokens (162.241542ms)
+  ✔ 3. missing subagents/: exit 0, status "not measured" (never 0), a stderr warning, no ledger file (162.992583ms)
+  ✔ 4. fallback discovery through the CLI (ledger rows without transcript + events.jsonl window) (170.3785ms)
+  ✔ 4b. empty ledger branch keeps total: 0 (a number) and still carries the subagent key (154.522917ms)
+  ✔ 4c. missing token-ledger.jsonl still exits 1; no sprint-id still exits 2 (CLI shape locked) (295.238584ms)
+  ✔ 4d. human output labels the orchestrator-window breakdown and prints the transcript dispatch summary (173.614625ms)
+  ✔ 5. privacy: neither stdout, the subagent ledger file, nor stderr contains the fixture marker (227.234ms)
+✔ CR-120 CLI — count_tokens.mjs --json (1527.973ms)
+▶ CR-120 — lib/ledger-digest.mjs labels the orchestrator-window column
+  ✔ LEDGER_MEASURES === "orchestrator-window" and aggregate() returns it as measures (1.339792ms)
+✔ CR-120 — lib/ledger-digest.mjs labels the orchestrator-window column (1.38375ms)
+▶ CR-120 hook — token-ledger.sh rows carry measures
+  ✔ 5. canonical hook run by path: the last ledger row has measures === "orchestrator-window" (1027.532125ms)
+  ✔ canonical and Codex token-ledger.sh both carry the measures field, and the Codex copy is verbatim (0.884417ms)
+✔ CR-120 hook — token-ledger.sh rows carry measures (1028.475375ms)
+▶ CR-120 — pre_gate_runner.sh appends one pre-gate.jsonl line per scan
+  ✔ a failing typecheck scan appends {mode, item, exit:1, flagged_checks incl. typecheck}; a second run appends a second line (4288.037916ms)
+  ✔ a scan that cannot run (bad mode, exit 2) writes no line (1003.771958ms)
+  ✔ guard: the write never changes the scan exit (exit stays 1 for the failing scan, 0 would stay 0) (2371.288042ms)
+✔ CR-120 — pre_gate_runner.sh appends one pre-gate.jsonl line per scan (7663.77725ms)
+▶ CR-120 — whitelist rows and the SKILL.md description-format paragraph
+  ✔ surface-whitelist.txt contains the three new patterns (0.284667ms)
+  ✔ canonical SKILL.md has the paragraph verbatim, after the Registration constraint paragraph + blank line, before ### Wall-clock budgets (1.192458ms)
+  ✔ the rendered Codex SKILL.md copy contains the paragraph too and none of the banned tokens leaked in (0.832417ms)
+✔ CR-120 — whitelist rows and the SKILL.md description-format paragraph (2.402584ms)
+▶ CR-120 — canonical and live scripts stay distinct (guard)
+  ✔ guard: the tests above address the canonical hook and scripts, never the live meta-repo copies (0.085458ms)
+✔ CR-120 — canonical and live scripts stay distinct (guard) (0.118875ms)
+▶ STORY-033-04 [U1] Validator accepts a well-formed verdict array
+  ✔ validateVerdicts([GREEN, BLOCKED]) does not throw when both verdicts are schema-valid (3.87825ms)
+✔ STORY-033-04 [U1] Validator accepts a well-formed verdict array (4.353ms)
+▶ STORY-033-04 [U2] Validator rejects a verdict missing tokens, names the storyId
+  ✔ validateVerdicts throws when a verdict is missing the tokens field (0.485542ms)
+✔ STORY-033-04 [U2] Validator rejects a verdict missing tokens, names the storyId (0.564291ms)
+▶ STORY-033-04 [U3] Validator rejects a non-GREEN verdict without blocker
+  ✔ validateVerdicts throws when a BLOCKED verdict has no blocker field (0.271042ms)
+  ✔ validateVerdicts throws when an ESCALATED verdict has no blocker field (0.187167ms)
+✔ STORY-033-04 [U3] Validator rejects a non-GREEN verdict without blocker (0.557291ms)
+▶ STORY-033-04 [U4] Error message names the offending storyId
+  ✔ the Error thrown by validateVerdicts includes the offending storyId in its message (0.203458ms)
+  ✔ ERROR names the storyId even when mixed with a GREEN verdict (0.211625ms)
+✔ STORY-033-04 [U4] Error message names the offending storyId (0.527792ms)
+▶ STORY-033-04 [C1] launch_wave.mjs exists and exports validateVerdicts
+  ✔ launch_wave.mjs exists at .cleargate/scripts/launch_wave.mjs (0.113459ms)
+  ✔ launch_wave.mjs is a non-empty file (not a stub) (0.082334ms)
+✔ STORY-033-04 [C1] launch_wave.mjs exists and exports validateVerdicts (0.263875ms)
+▶ STORY-033-04 [C2] SKILL.md Phase C contains wave-launch language
+  ✔ SKILL.md references launch_wave.mjs in Phase C (0.091542ms)
+  ✔ SKILL.md references resumeFromRunId in Phase C (0.076375ms)
+  ✔ SKILL.md Phase C contains idempotent segment language (0.654292ms)
+✔ STORY-033-04 [C2] SKILL.md Phase C contains wave-launch language (1.174916ms)
+▶ STORY-033-04 [C3] SKILL.md Phase C contains between-wave flashcard-gate language
+  ✔ SKILL.md contains SKIP_FLASHCARD_GATE reference (0.06125ms)
+  ✔ SKILL.md contains between-wave flashcard gate language (0.142417ms)
+  ✔ SKILL.md contains .processed-<hash> marker language for between-wave flashcard processing (0.04725ms)
+✔ STORY-033-04 [C3] SKILL.md Phase C contains between-wave flashcard-gate language (0.504958ms)
+▶ STORY-033-04 [C4] SKILL.md Phase C contains serial barrier merge language
+  ✔ SKILL.md contains serial barrier merge description (0.276042ms)
+  ✔ SKILL.md describes that no two worktrees merge concurrently (0.143542ms)
+✔ STORY-033-04 [C4] SKILL.md Phase C contains serial barrier merge language (0.621041ms)
+▶ STORY-033-04 [C5] cleargate-protocol.md has §23 Parallel-Wave Execution Contract
+  ✔ protocol.md contains a ## 23. section (0.225583ms)
+  ✔ protocol §23 is titled "Execution Contract" (CR-074) (0.12275ms)
+  ✔ protocol §23 documents the verdict schema fields (0.219792ms)
+  ✔ protocol §23 references the RUN_ID attribution invariant (0.049ms)
+✔ STORY-033-04 [C5] cleargate-protocol.md has §23 Parallel-Wave Execution Contract (1.715291ms)
+▶ [C6] CR-074 — execution has no kill-switch and no mode selector
+  ✔ CLEARGATE_PARALLEL_WAVES does NOT appear in SKILL.md or protocol.md (0.077083ms)
+  ✔ the v2-serial / v2-parallel topology selector does NOT appear in SKILL.md or protocol.md (0.201083ms)
+  ✔ execution runs unconditionally through the Workflow tool (/workflows) (0.09175ms)
+✔ [C6] CR-074 — execution has no kill-switch and no mode selector (0.782875ms)
+▶ STORY-066-11 shipped wave runner (red)
+  ✔ U1 @paths: A standard / B fast / C waits on unmerged upstream; verdict envelope (8.075083ms)
+  ✔ U2 @paths: runner source stays a self-contained script with no policy of its own (4.549875ms)
+  ✔ U3 @data: each lane dispatches exactly its always-stages; a flagged seal adds the scan stages (7.977167ms)
+  ✔ U4 @rules: shipped default model, resolution order, config scan, unknown lane (10.3445ms)
+  ✔ U5 @rules: last Developer retry before the cap runs one tier up; cap 1 never tiers; no defect_in = code (7.841458ms)
+  ✔ U6 @rules: a spec defect blocks the segment for the owner (1.110208ms)
+  ✔ U7 @rules: a red-test defect re-dispatches QA-Red, then the Developer, then QA-Verify (1.033083ms)
+✔ STORY-066-11 shipped wave runner (red) (41.646ms)
+ℹ tests 168
+ℹ suites 53
+ℹ pass 168
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55025.781708

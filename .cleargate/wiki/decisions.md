@@ -44,6 +44,41 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: `architect-synth.md` is not on EPIC-066's target list, yet it names the milestone plan file (`:196`) and is the producer of… ([[STORY-066-12]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
 - Q: Existing sealed tests pin text this story rewrites: `test/scripts/codex-sprint-execution-render.red.node.test.ts` (the R3 replacement and the canonical A3 line, `:54`, `:122`) and… ([[STORY-066-12]]) → Resolved in drafting per the recommendation; confirmed by the owner with the SPRINT-46 Brief, 2026-11-15.
 
+### [[STORY-066-13]] — Sandbox loop fixes: QA context pack, plan-aware QA-Red, red-test blocks, environment fails, single-item re-run (2026-11-15)
+- Q: Should the runner run `prep_qa_context.mjs` itself instead of telling QA to? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: On a `none` FAIL, re-run QA-Verify or return BLOCKED at once? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+- Q: `--from` after the red stage needs the sealed red SHA. Read it from git in the builder, or pass it… ([[STORY-066-13]]) → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-14]] — Merge teardown survives incident files and can resume; agents never invent environment values (2026-11-15)
+- Q: How does the re-run tell "already merged" from "a branch with no work", since both are "not ahead"? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: Should the re-run also run the post-merge test? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-15]] — The sprint report shows dispatches by lane and rework by defect location (2026-11-15)
+- Q: Add a Lane column to the per-item table, or separate lines? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+
+### [[STORY-066-16]] — Kickoff assigns lanes without a re-init (2026-11-15)
+- Q: Move `sprint init` after the design review so `waves.json` exists, or compute lanes at init? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: A raise recorded with `update_state --lane` is stamped `human-override`. Acceptable? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-17]] — Close finishes the sprint from either layout with no hand git step (2026-11-15)
+- Q: Merge into the parent checkout on the ack (`git -C <W> merge --no-ff`), or print the command for the human? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: Does close commit its own artefacts? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+- Q: Does the 2.8 meaning change, and the CLAUDE.md clause with it? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-18]] — Preflight stops a sprint whose test gate cannot run unless a named waiver is recorded; merges and the report name the waiver (2026-11-15)
+- Q: Where does the waiver live? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: Does preflight run the configured test, and for how long? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+- Q: A merge whose test stopped before any test and no waiver: refuse or excuse? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+- Q: How does sandbox run 3 get past its own preflight? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-19]] — Red tests that only name not-yet-written symbols do not trigger Architect passes; seal_red resolves --worktree from the repo root (2026-11-15)
+- Q: Change the shared scan or only the seal? → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: A misspelt reference to an existing symbol also reads `undefined:` and now skips Architect TPV. Acceptable? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
+### [[STORY-066-20]] — Loop papercuts: --validate takes the Workflow return, incident JSON stays valid with tabs, a marker file opens the flashcard-gate window, D.5 checks the qa-red commits' files (2026-11-15)
+- Q: How does an orchestrator in a Claude Code session open the flashcard-gate window, given the hook reads only its own… ([[STORY-066-20]]) → Resolved by the orchestrator under the owner's delegation (/goal, 2026-11-15) per the recommendation.
+- Q: Does the sealed `loop-spec-three-paths.red` test pin the env-var wording? → Resolved by the orchestrator under the owner's delegation per the recommendation.
+
 ### [[BUG-117]] — The Pricing Table Knows No Claude 5 Model, and Misprices Two It Does Know (2026-11-14)
 - Q: Add every Claude 5 model, or only the ones this repo runs? → As recommended (owner approved with the SPRINT-45 Brief, 2026-11-14). Re-grounded at kickoff against the claude-api reference cached 2026-11-03: Fable 5.2 and Haiku 5.5 added, Sonnet 5.5 cache read corrected to 0.10.
 

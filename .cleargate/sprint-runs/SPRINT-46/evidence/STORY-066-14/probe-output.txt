@@ -1,0 +1,30 @@
+=== Probe A: S11 deleted tracked incident file (905-01)
+{"id":"STORY-905-01","step":"done","exit":0,"tail":[],"post_merge_test":"pass"}
+exit=0
+state=Done
+=== Probe B: half-finished (905-02): hand merge, worktree+branch remain
+state_before=QA Passed
+{"id":"STORY-905-02","step":"done","exit":0,"tail":["resumed: story/STORY-905-02 was already merged into sprint/S-99; teardown and state only"],"post_merge_test":"skipped"}
+exit=0
+sprint HEAD unchanged: yes
+state=Done
+=== Probe C: re-run again (branch gone, already Done)
+{"id":"STORY-905-02","step":"done","exit":0,"tail":["resumed: story/STORY-905-02 was already merged into sprint/S-99; teardown and state only"],"post_merge_test":"skipped"}
+exit=0
+=== Probe D: no-work branch (905-03)
+{"id":"STORY-905-03","step":"precondition","exit":2,"tail":["story/STORY-905-03 is not ahead of sprint/S-99"]}
+exit=2
+state=QA Passed
+=== Probe E: no args
+Usage: node merge_story.mjs <ID> --sprint <SPRINT-NN> [--worktree <path>]
+Exit codes:
+  0  merged (a re-run after the merge landed: teardown and state only)
+  2  usage or precondition; or teardown/state failed after the merge landed (re-run to finish)
+  3  pre-merge check failed
+  4  merge conflict
+  5  post-merge test failed
+{"id":null,"step":"precondition","exit":2,"tail":["Usage: node merge_story.mjs <ID> --sprint <SPRINT-NN> [--worktree <path>]","Exit codes:","  0  merged (a re-run after the merge landed: teardown and state only)","  2  usage or precondition; or teardown/state failed after the merge landed (re-run to finish)","  3  pre-merge check failed","  4  merge conflict","  5  post-merge test failed"]}
+exit=2
+ M .cleargate/sprint-runs/SPRINT-99/state.json
+?? .cleargate/sprint-runs/SPRINT-99/events.jsonl
+?? .cleargate/sprint-runs/_off-sprint/

@@ -1,0 +1,43 @@
+▶ Scenario 1 — each path lists exactly the stages stagesFor returns
+  ✔ T1 — the paths table in the Claude and generated .agents SKILL equals stagesFor; every STAGE_NAMES entry heads a stage note (15.543042ms)
+✔ Scenario 1 — each path lists exactly the stages stagesFor returns (16.070375ms)
+▶ Scenario 2 — no milestone plan remains; the story plan has its own mode
+  ✔ T2 — no milestone-plan token in either SKILL or the four prompts; Phase B survives only as a one-line stub (7.100625ms)
+  ✔ T3 — architect.md has Mode: STORY-PLAN (150 lines, plans/<ID>.md, Task Breakdown) matching the runtime stage; GOAL_RELATION lives in the SDR and template §2.1 (1.861042ms)
+✔ Scenario 2 — no milestone plan remains; the story plan has its own mode (9.085708ms)
+▶ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure
+  ✔ T4 — §C.7 is the merge_story.mjs exit table; seal_red / DEFECT_IN notes; flashcard gate restored before the first merge (1.403167ms)
+  ✔ T5 [integration-gated: STORY-066-08, 066-11, 066-10, 066-07] — the real scripts' usage matches the §C text (404.613583ms)
+✔ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure (406.160792ms)
+▶ Scenario 4 — every host reads the same spec
+  ✔ T6 — --check exits 0; developer.md plan input and fast-lane rule; dispatch-serial.md step 3 and §5; Codex twins carry the change (185.589625ms)
+  ▶ T7 — prep_qa_context / prep_reporter_context follow the plan move
+    ✔ prep_qa_context: plans/<ID>.md first, then a plans/M*.md section; reporter: ## Story Plans after milestone plans (11675.39825ms)
+  ✔ T7 — prep_qa_context / prep_reporter_context follow the plan move (11722.893584ms)
+✔ Scenario 4 — every host reads the same spec (11908.666125ms)
+▶ Scenario 5 — a spec that disagrees with the code fails the build
+  ✔ T8a (guard, passes by design) — the matcher accepts a table built from stagesFor and throws naming the bad lane or stage on a doctored one (1.693541ms)
+  ✔ T8b — a temp copy of the real SKILL.md whose runtime row names `prove`, or whose fast row lacks `merge`, fails the docs-match (5.263958ms)
+✔ Scenario 5 — a spec that disagrees with the code fails the build (7.075708ms)
+✔ @paths the marker allows the spawn, removing it blocks again, and SKIP_FLASHCARD_GATE=1 still allows (claude hook) (5943.939875ms)
+✔ @paths the generated Codex hook honours the same marker (2812.353167ms)
+▶ STORY-066-20 B7: D.5 checks the files of the qa-red commits (red)
+  ✔ @data the SKILL commands list the Go red file and flag a consolidation that edits it; a consolidation touching no red file gives an empty result (7488.046541ms)
+  ✔ @data D.5.1 keeps the immutability wording but no longer relies on the .red.node.test.ts-only grep, in the Claude and the Codex SKILL (0.822209ms)
+✔ STORY-066-20 B7: D.5 checks the files of the qa-red commits (red) (7489.434125ms)
+▶ STORY-066-20 B4: run_script.sh incident JSON with tabs and ESC (red)
+  ✔ @data tab and ESC in stdout/stderr and in an argument leave a parseable incident that keeps them (2433.497625ms)
+  ✔ @data a stray control character (\x01) is deleted, not written raw (2651.84125ms)
+✔ STORY-066-20 B4: run_script.sh incident JSON with tabs and ESC (red) (5085.973958ms)
+▶ STORY-066-20 S21: --validate takes the Workflow return (red)
+  ✔ @interfaces the bare array, {verdicts} and {result:{verdicts,waiting}} all validate (exit 0); a malformed wrapped verdict still exits 1 naming it (821.050458ms)
+  ✔ @interfaces the usage text names all three accepted shapes (233.744792ms)
+✔ STORY-066-20 S21: --validate takes the Workflow return (red) (1055.36925ms)
+ℹ tests 17
+ℹ suites 9
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12710.29025

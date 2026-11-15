@@ -1,0 +1,1614 @@
+=== UNIT ===
+
+> cleargate@0.30.1 test
+> CLEARGATE_CI_ACK=1 node scripts/run-default-tests.mjs '!test/**/*.integration.node.test.ts' '!test/fixtures/**'
+
+▶ redactSensitive
+  ✔ R-1: redacts token key (1.210833ms)
+  ✔ R-2: redacts refresh_token and invite_token nested, leaves other keys intact (0.08975ms)
+  ✔ R-3: redacts token in array items (0.077709ms)
+✔ redactSensitive (1.888875ms)
+▶ AdminApiClient
+  ✔ C-1: createProject calls POST /admin-api/v1/projects with correct headers and body (2.295084ms)
+  ✔ C-2: inviteMember converts camelCase to snake_case in wire body (0.812041ms)
+  ✔ C-2b: inviteMember omits display_name when displayName is absent (0.15325ms)
+  ✔ C-3: revokeToken calls DELETE with no Content-Type header and resolves to undefined (0.188ms)
+  ✔ C-4: 401 response throws AdminApiError with kind=auth and status=401 (0.212792ms)
+  ✔ C-5: 403 response throws AdminApiError with kind=forbidden (0.149708ms)
+  ✔ C-6: 404 response throws AdminApiError with kind=not_found (0.142667ms)
+  ✔ C-7: 400 response throws AdminApiError with kind=invalid_request and details (0.129208ms)
+  ✔ C-8: fetch throws → AdminApiError with kind=network and status=null (0.209667ms)
+✔ AdminApiClient (4.896917ms)
+▶ loadAdminAuth
+  ✔ A-1: env present returns token from env and does not read file (1.49025ms)
+  ✔ A-2: env absent, valid file returns token from file (1.109875ms)
+  ✔ A-3: env absent, file absent throws literal error message (0.383791ms)
+  ✔ A-4: malformed JSON in file throws error with file path (0.276125ms)
+  ✔ A-5: file with extra unknown key fails strict validation and throws (0.7265ms)
+  ✔ chmod warn: world-readable file triggers warn callback (0.581792ms)
+✔ loadAdminAuth (5.173083ms)
+▶ STORY-066-07 qa Mode: RED seal text
+  ✔ Sc1: qa.md and qa.toml RED slices name the seal step, output fields, volume rule and CR-111 clause (0.754417ms)
+✔ STORY-066-07 qa Mode: RED seal text (1.191958ms)
+▶ STORY-066-09 Scenario 2: no heuristic text in the agent prompt
+  ✔ B1a: neither qa.md nor qa.toml contains "not-yet-runtime-aware" (0.780209ms)
+  ✔ B1b: qa.toml equals renderAgentToml(qa.md) (regenerated, not hand-edited) (4.991084ms)
+✔ STORY-066-09 Scenario 2: no heuristic text in the agent prompt (6.317166ms)
+▶ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect
+  ✔ B2: VERIFY text has the run-and-probe dispatch line and the commands.* keys; output shape has the new fields (0.30525ms)
+✔ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect (0.370375ms)
+▶ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect
+  ✔ B3: precedence spec > red-test > code, DEFECTS line format, red-test definition (0.40725ms)
+✔ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect (0.462083ms)
+▶ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item
+  ✔ B4: the scenario-only sentence is in the VERIFY text and Guardrails carries the rule (0.195458ms)
+✔ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item (0.301167ms)
+▶ STORY-025-05 Scenario 1: reporter.md has Capability Surface section
+  ✔ contains a "## Capability Surface" heading (exactly once) (0.749625ms)
+  ✔ Capability Surface table has a Scripts row (0.159084ms)
+  ✔ Capability Surface table has a Skills row (0.13725ms)
+  ✔ Capability Surface table has a Hooks observing row (0.1125ms)
+  ✔ Capability Surface table has a Default input row (0.108291ms)
+  ✔ Capability Surface table has an Output row (0.131292ms)
+✔ STORY-025-05 Scenario 1: reporter.md has Capability Surface section (2.042833ms)
+▶ STORY-025-05 Scenario 2: Capability Surface table cites scripts and default input
+  ✔ Scripts row mentions "prep_reporter_context.mjs" (0.202042ms)
+  ✔ Scripts row mentions "count_tokens.mjs" (0.14075ms)
+  ✔ Default input row mentions ".reporter-context.md" (0.143334ms)
+✔ STORY-025-05 Scenario 2: Capability Surface table cites scripts and default input (0.601ms)
+▶ STORY-025-05 Scenario 3: reporter.md has Post-Output Brief section
+  ✔ contains a "## Post-Output Brief" heading (exactly once) (0.214542ms)
+  ✔ Post-Output Brief section contains "Ready to authorize close (Gate 4)?" (0.116916ms)
+✔ STORY-025-05 Scenario 3: reporter.md has Post-Output Brief section (0.390958ms)
+▶ STORY-025-05 Scenario 4: Brief replaces legacy --assume-ack prompt
+  ✔ reporter.md has no --assume-ack as an operational command (only allowed in explanatory prose) (0.169542ms)
+✔ STORY-025-05 Scenario 4: Brief replaces legacy --assume-ack prompt (0.195375ms)
+▶ STORY-025-05 Scenario 5: Output path uses new naming convention
+  ✔ Capability Surface Output row cites "SPRINT-<#>_REPORT.md" (0.13675ms)
+  ✔ Capability Surface slice has no standalone REPORT.md (not preceded by SPRINT-<#>_) (0.823542ms)
+✔ STORY-025-05 Scenario 5: Output path uses new naming convention (1.001416ms)
+▶ STORY-064-02 Sc4 (@rules): template rows
+  ✔ guard: every close_sprint.mjs requiredMetricRows row is still in the template (0.742334ms)
+  ✔ template has the measured rows and the counter-based first-pass row (0.075833ms)
+  ✔ guard: counter rows kept; first-pass comment redefined (0.057708ms)
+✔ STORY-064-02 Sc4 (@rules): template rows (1.422125ms)
+▶ STORY-064-02 Sc4 (@rules): reporter.md step 6
+  ✔ step 6 names the ## Measured Metrics bundle section and the not-measured rule (0.086167ms)
+  ✔ step 2 pointer follows the renamed digest heading (0.0535ms)
+✔ STORY-064-02 Sc4 (@rules): reporter.md step 6 (0.217375ms)
+▶ acquireAccessToken
+  ✔ Scenario: env short-circuit — returns env token without calling fetch (0.841083ms)
+  ✔ Scenario: keychain fallback — calls fetch when env is empty (25.463166ms)
+  ✔ Scenario: no stored credentials — throws AcquireError with correct message (1.000375ms)
+  ✔ Scenario: revoked refresh token — throws AcquireError with token_revoked code (0.291917ms)
+  ✔ invalid_token (401 without token_revoked) — throws AcquireError with invalid_token code (0.244375ms)
+  ✔ transport error — throws AcquireError with transport code (0.261209ms)
+  ✔ Scenario: cache hit — second call does not call fetch again (0.237541ms)
+  ✔ Scenario R1: different profiles get separate cache entries — two fetch calls (0.313875ms)
+  ✔ Scenario: cache expires 60s before token exp — re-fetches after window passes (0.3135ms)
+  ✔ no exp in JWT payload — does not cache; always re-fetches (0.372917ms)
+  ✔ Scenario: forceRefresh bypasses valid cache entry (0.258875ms)
+✔ acquireAccessToken (30.25975ms)
+(node:62841) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:62841) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+▶ createTokenStore factory
+  ✔ Test 15: probe success returns keychain backend with no warning (43.143875ms)
+  ✔ Test 16: keychain constructor throw returns file backend and emits keychain unavailable warning (1.206375ms)
+  ✔ Test 17: forceBackend skips probe entirely (0.448916ms)
+✔ createTokenStore factory (45.385375ms)
+▶ FileTokenStore
+  ✔ Test 1: save then load round-trips token (8.155625ms)
+  ✔ Test 2: load on never-saved profile returns null (0.548708ms)
+  ✔ Test 3: remove on existing profile clears it, file still exists (1.715709ms)
+  ✔ Test 4: remove on missing profile is a no-op (0.472334ms)
+  ✔ Test 5: auth file has mode 0600 after save (1.142416ms)
+  ✔ Test 6: parent directory has mode 0700 after first save (1.0115ms)
+  ✔ Test 7: saving staging does not clobber default profile (1.9725ms)
+  ✔ Test 8: second save for same profile replaces first value (1.650917ms)
+  ✔ Test 9: malformed JSON in auth file throws with file path in message (1.4665ms)
+  ✔ Test 10: unknown top-level key in auth file throws (zod strict) (1.488792ms)
+  ✔ Test 11: wrong version in auth file throws with "upgrade" hint (1.282292ms)
+✔ FileTokenStore (21.858583ms)
+(node:62856) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:62856) DeprecationWarning: mock.module(): options.namedExports is deprecated. Use options.exports instead.
+▶ KeychainTokenStore (mocked @napi-rs/keyring)
+  ✔ Test 12: save/load round-trips token via mocked Entry (0.760291ms)
+  ✔ Test 13: getPassword returning null surfaces as null from load (0.11975ms)
+  ✔ Test 14: remove on missing profile does not throw (0.128333ms)
+✔ KeychainTokenStore (mocked @napi-rs/keyring) (1.529708ms)
+▶ refreshAccessToken
+  ✔ returns parsed body on 200 (25.616916ms)
+  ✔ throws RefreshError on 401 invalid_token (0.656ms)
+  ✔ throws on malformed body (0.332542ms)
+✔ refreshAccessToken (27.186334ms)
+▶ AuthFetcher
+  ✔ caches access token and persists rotated refresh token on first call (1.3335ms)
+  ✔ refreshes when within skew window of expiry (0.69ms)
+  ✔ invalidate() forces refresh on next call (0.41375ms)
+  ✔ throws RefreshError when keychain has no refresh token (0.264458ms)
+  ✔ coalesces concurrent getAccessToken calls into a single network request (8.143709ms)
+✔ AuthFetcher (11.110709ms)
+▶ requireToken
+  ✔ Test 18: missing token throws exact error message (0.873167ms)
+  ✔ Test 19: present token is returned verbatim (0.103833ms)
+✔ requireToken (1.51075ms)
+▶ CR-065 ServiceTokenFetcher — module exports
+  ✔ ServiceTokenFetcher is exported from the module (0.476667ms)
+  ✔ ServiceTokenFetcher can be instantiated with a string token (0.100917ms)
+✔ CR-065 ServiceTokenFetcher — module exports (1.052208ms)
+▶ CR-065 ServiceTokenFetcher#getAccessToken — returns verbatim token
+  ✔ returns the exact string passed to the constructor (0.1905ms)
+  ✔ returns the token as a Promise<string> (0.057541ms)
+✔ CR-065 ServiceTokenFetcher#getAccessToken — returns verbatim token (0.315792ms)
+▶ CR-065 ServiceTokenFetcher — TokenFetcher interface shape
+  ✔ has a getAccessToken method (satisfies TokenFetcher interface) (0.073917ms)
+✔ CR-065 ServiceTokenFetcher — TokenFetcher interface shape (0.11775ms)
+▶ CR-065 ServiceTokenFetcher — static / no rotation
+  ✔ returns the same token on repeated calls (no rotation or caching side effects) (0.110083ms)
+  ✔ returns same token on sequential calls (0.06075ms)
+✔ CR-065 ServiceTokenFetcher — static / no rotation (0.265375ms)
+▶ CHANGELOG.md format contract (STORY-016-03)
+  ✔ Scenario: CHANGELOG exists and parses — at least one ## [X.Y.Z] heading found, no parse error (2.028834ms)
+  ✔ Scenario: Topmost version matches package.json — first ## [X.Y.Z] heading equals package.json version (0.499875ms)
+  ✔ Scenario: Versions descending — each ## [X.Y.Z] heading is strictly less than its predecessor by semver (0.41175ms)
+  ✔ Scenario: Tarball includes CHANGELOG — npm pack --dry-run output lists CHANGELOG.md (785.69ms)
+  ✔ Scenario: Tarball excludes sourcemaps and ships payload once (CR-076 — Gate-4-guarded) (658.7235ms)
+✔ CHANGELOG.md format contract (STORY-016-03) (1448.112792ms)
+▶ cleargate CLI
+  ▶ Scenario: Help lists all subcommands
+    ✔ --help exits 0 (174.897458ms)
+    ✔ --help stdout lists join (185.7835ms)
+    ✔ --help stdout lists whoami (177.635666ms)
+    ✔ --help stdout lists stamp (178.38025ms)
+    ✔ --help stdout lists wiki (167.175791ms)
+    ✔ --help --all stdout lists admin (CR-011: admin hidden in pre-member state; visible with --all) (176.542375ms)
+  ✔ Scenario: Help lists all subcommands (1061.07775ms)
+  ▶ Scenario: Version flag
+    ✔ --version prints the package.json version (179.8205ms)
+  ✔ Scenario: Version flag (179.961791ms)
+  ▶ Scenario: Unknown subcommand errors cleanly
+    ✔ cleargate nonsense exits 1 (206.013792ms)
+    ✔ cleargate nonsense stderr suggests cleargate --help (316.751833ms)
+  ✔ Scenario: Unknown subcommand errors cleanly (523.037833ms)
+  ▶ Scenario: join missing positional exits 1
+    ✔ cleargate join (no arg) exits 1 (290.242083ms)
+    ✔ cleargate join (no arg) stderr mentions join (261.020791ms)
+  ✔ Scenario: join missing positional exits 1 (551.441333ms)
+  ▶ Scenario: No CLI collision (STORY-013-08)
+    ✔ --help lists sprint command group (246.63375ms)
+    ✔ --help lists story command group (182.555208ms)
+    ✔ --help lists state command group (188.487417ms)
+    ✔ gate --help lists qa subcommand (196.135041ms)
+    ✔ gate --help lists arch subcommand (175.600958ms)
+    ✔ gate --help still lists check subcommand (no collision) (194.431208ms)
+    ✔ gate --help still lists explain subcommand (no collision) (245.774959ms)
+    ✔ no duplicate subcommand names in gate group (192.582167ms)
+  ✔ Scenario: No CLI collision (STORY-013-08) (1622.532167ms)
+  ▶ Scenario: Sprint/state wrappers always run the pipeline (STORY-070-01)
+    ✔ sprint init no longer prints the retired v1-inert message (199.444209ms)
+    ✔ sprint close no longer prints the retired v1-inert message (220.907334ms)
+    ✔ state validate no longer prints the retired v1-inert message (211.161791ms)
+  ✔ Scenario: Sprint/state wrappers always run the pipeline (STORY-070-01) (631.677875ms)
+  ▶ Scenario: No direct node .mjs calls in CLI code (Scenario 4)
+    ✔ dist/cli.js does not contain direct node .cleargate/scripts invocations (2.539625ms)
+  ✔ Scenario: No direct node .mjs calls in CLI code (Scenario 4) (2.60525ms)
+✔ cleargate CLI (4572.83125ms)
+▶ adminLoginHandler
+  ✔ L-1: happy path — start → pending → success → writes admin-auth.json (5.674041ms)
+  ✔ L-2: start network failure → exit 3 (1.231084ms)
+  ✔ L-3: poll access_denied → exit 5 with "access denied" message (1.099417ms)
+  ✔ L-4: polling calls fetch once per interval cycle (4.795709ms)
+  ✔ L-5: non-admin user → exit 4 with not authorized message (1.76175ms)
+  ✔ L-6: device code expired → exit 5 with expired message (1.769709ms)
+  ✔ L-7: admin_token NEVER appears in stdout or stderr (2.028583ms)
+  ✔ L-8: user denies in browser → exit 5 (1.177959ms)
+  ✔ L-9: server returns 503 on start → exit 6 (0.343042ms)
+  ✔ L-11: slow_down — interval bumps up on retry_after increase, never decreases (0.557541ms)
+  ✔ L-10: admin-auth.json has { version: 1, token } and is chmod 600 (2.197125ms)
+✔ adminLoginHandler (23.450583ms)
+▶ adminLoginHandler stdout snapshot
+  ✔ L-snapshot: happy path stdout is byte-identical to pre-refactor output (6.891292ms)
+✔ adminLoginHandler stdout snapshot (7.464583ms)
+▶ Scenario: pre-member state gates sync commands
+  ✔ cleargate push exits 2 with cleargate join redirect message in pre-member state (5.99425ms)
+  ✔ cleargate push is in the gated set and triggers pre-member exit 2 (0.514459ms)
+  ✔ cleargate pull is in the gated set and triggers pre-member exit 2 (0.398125ms)
+  ✔ cleargate sync is in the gated set and triggers pre-member exit 2 (0.399458ms)
+  ✔ cleargate sync-log is in the gated set and triggers pre-member exit 2 (0.396708ms)
+  ✔ cleargate conflicts is in the gated set and triggers pre-member exit 2 (0.42175ms)
+  ✔ admin login is in the open subset and is NOT gated (0.103042ms)
+  ✔ admin bootstrap-root is in the gated set (0.074083ms)
+✔ Scenario: pre-member state gates sync commands (8.885959ms)
+▶ Scenario: open-subset commands pass through without gating
+  ✔ init is in the open subset and not in GATED_COMMANDS (0.161333ms)
+  ✔ join is in the open subset and not in GATED_COMMANDS (0.080584ms)
+  ✔ whoami is in the open subset and not in GATED_COMMANDS (0.0495ms)
+  ✔ doctor is in the open subset and not in GATED_COMMANDS (0.057583ms)
+  ✔ stamp is in the open subset and not in GATED_COMMANDS (0.040667ms)
+  ✔ scaffold-lint is in the open subset and not in GATED_COMMANDS (0.050792ms)
+  ✔ upgrade is in the open subset and not in GATED_COMMANDS (0.062583ms)
+  ✔ uninstall is in the open subset and not in GATED_COMMANDS (0.040875ms)
+  ✔ sprint, story, state subcommands are in the open subset (0.062042ms)
+  ✔ wiki and gate subcommands are in the open subset (0.054333ms)
+✔ Scenario: open-subset commands pass through without gating (0.809833ms)
+▶ Scenario: member state allows gated commands
+  ✔ getMembershipState returns member → gating check passes (2.191625ms)
+✔ Scenario: member state allows gated commands (2.245792ms)
+▶ Scenario: expired JWT causes pre-member gating
+  ✔ returns pre-member for expired JWT, which would trigger gating (0.860459ms)
+✔ Scenario: expired JWT causes pre-member gating (0.895167ms)
+▶ STORY-043-09 CLI Surface Hygiene — RED tests
+  ▶ Scenario A: plumbing commands carry { hidden: true }
+    ✔ stamp: .command() carries { hidden: true } (comment-independent) (0.694292ms)
+    ✔ stamp-tokens: .command() carries { hidden: true } (comment-independent) (0.110834ms)
+    ✔ state update: .command() carries { hidden: true } (comment-independent) (0.100834ms)
+    ✔ state validate: .command() carries { hidden: true } (comment-independent) (0.0925ms)
+    ✔ wiki ingest: .command() carries { hidden: true } (comment-independent) (0.082458ms)
+    ✔ gate qa: .command() carries { hidden: true } (comment-independent) (0.098958ms)
+    ✔ gate arch: .command() carries { hidden: true } (comment-independent) (0.089416ms)
+    ✔ reconcile-lifecycle: .command() carries { hidden: true } (comment-independent) (0.11575ms)
+  ✔ Scenario A: plumbing commands carry { hidden: true } (1.867958ms)
+  ▶ Scenario B: plumbing command .action() handlers are preserved
+    ✔ stamp: .action( handler is present in cli.ts (callability preserved) (0.18925ms)
+    ✔ stamp-tokens: .action( handler is present in cli.ts (callability preserved) (0.115833ms)
+    ✔ state update: .action( handler is present in cli.ts (callability preserved) (0.104209ms)
+    ✔ state validate: .action( handler is present in cli.ts (callability preserved) (0.0905ms)
+    ✔ wiki ingest: .action( handler is present in cli.ts (callability preserved) (0.093292ms)
+    ✔ gate qa: .action( handler is present in cli.ts (callability preserved) (0.063958ms)
+    ✔ gate arch: .action( handler is present in cli.ts (callability preserved) (0.071291ms)
+    ✔ reconcile-lifecycle: .action( handler is present in cli.ts (callability preserved) (0.060625ms)
+  ✔ Scenario B: plumbing command .action() handlers are preserved (0.925916ms)
+  ✔ Scenario C: story complete description contains no "stub" substring (0.076625ms)
+  ✔ Scenario D: cleargate-cli/src/lib/triage-classifier.ts does not exist (orphan deleted) (0.08725ms)
+✔ STORY-043-09 CLI Surface Hygiene — RED tests (3.293375ms)
+▶ Scenario: conflicts command lists unresolved
+  ✔ lists: stdout contains both items, no files modified (7.981125ms)
+✔ Scenario: conflicts command lists unresolved (8.471625ms)
+▶ Scenario: conflicts command with empty conflicts
+  ✔ emptyFile: prints "No unresolved conflicts", exits 0 (1.391041ms)
+✔ Scenario: conflicts command with empty conflicts (1.490209ms)
+▶ Scenario: conflicts command without .conflicts.json
+  ✔ noFile: exits 0 with helpful message (0.747208ms)
+✔ Scenario: conflicts command without .conflicts.json (0.828625ms)
+▶ STORY-063-06 doctor --session-start — the alarm line (R1, R4)
+  ✔ Scenario "A missing stamp is reported": EPIC-X Draft, 2 days old, page without a stamp → ONE line naming EPIC-X (6.583542ms)
+  ✔ Scenario "A stale stamp is reported": CR-Y checked, then its body edited 3 days ago → the line names CR-Y (3.169ms)
+  ✔ Scenario "At most five IDs, oldest first": seven unchecked candidates → count 7, the five oldest, one line (5.856417ms)
+  ✔ Scenario "The window and filter exclude the rest": BUG-A 2h, BUG-B 10d, EPIC-C approved, STORY-D → none named; a control draft is (5.171667ms)
+  ✔ Scenario "Nothing unchecked prints nothing": every in-window draft stamped → no line; removing one stamp brings it back (4.503916ms)
+  ✔ the injected `now` drives the window (fixtures sit in 2031; the real clock is years away) (3.1055ms)
+✔ STORY-063-06 doctor --session-start — the alarm line (R1, R4) (29.014792ms)
+▶ STORY-063-06 doctor --session-start — placement (R5)
+  ✔ the alarm comes after the membership + resolver lines (3.424792ms)
+  ✔ order: drift line < alarm < stale-sentinel block (6.387916ms)
+  ✔ order without drift: the alarm still precedes the stale-sentinel block (3.034875ms)
+✔ STORY-063-06 doctor --session-start — placement (R5) (13.051375ms)
+▶ STORY-063-06 doctor --session-start — informational only (R5, error scenario)
+  ✔ outcome stays {configError:false, blocker:false} with an unchecked draft present, and the line printed (2.567792ms)
+  ✔ exit code is identical with and without the unchecked draft (doctorHandler --session-start) (4.885542ms)
+  ✔ Scenario "Error — missing or malformed wiki page": counts as unchecked, banner intact, no blocker (4.732709ms)
+  ✔ a broken config.yml does not take the banner down (the alarm is skipped or degraded, never a throw) (3.153625ms)
+✔ STORY-063-06 doctor --session-start — informational only (R5, error scenario) (15.452791ms)
+▶ STORY-063-06 doctor — scope guard (out of scope: plain `doctor` listing)
+  ✔ plain `cleargate doctor` (hook-health mode) prints no alarm line, while --session-start does on the same repo (2.870834ms)
+✔ STORY-063-06 doctor — scope guard (out of scope: plain `doctor` listing) (2.911875ms)
+(node:63226) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ Scenario: Clean scaffold reports no drift (normalization + live-only tolerance)
+  ✔ reports zero drift when live matches canonical modulo normalization, with a live-only extra file tolerated (2.149167ms)
+✔ Scenario: Clean scaffold reports no drift (normalization + live-only tolerance) (6.720083ms)
+▶ Scenario: Stale live copy fails the guard and names the path
+  ✔ names the drifted path with reason content-mismatch (0.710958ms)
+✔ Scenario: Stale live copy fails the guard and names the path (4.518833ms)
+▶ Scenario: Root CLAUDE.md block drift fails the guard
+  ✔ names CLAUDE.md with reason claude-md-block-mismatch (0.726125ms)
+✔ Scenario: Root CLAUDE.md block drift fails the guard (5.637708ms)
+▶ Scenario: Target repo without canonical skips cleanly
+  ✔ returns skipped:true with no drift and performs no comparison (0.103917ms)
+✔ Scenario: Target repo without canonical skips cleanly (0.61475ms)
+▶ Scenario: Stale live copy fails the guard and names the path (CLI)
+  ✔ names the drifted path and exits non-zero, without the [advisory] prefix (lags BD until rebuilt from post-BUG-085 main) (201.144166ms)
+✔ Scenario: Stale live copy fails the guard and names the path (CLI) (206.5735ms)
+▶ Scenario: Advisory opt-out downgrades drift to non-blocking
+  ✔ prints [advisory]-prefixed drift and does not set the drift-driven exit (lags BD until rebuilt from post-BUG-085 main) (167.838625ms)
+✔ Scenario: Advisory opt-out downgrades drift to non-blocking (172.784166ms)
+▶ Scenario: drift guard is report-only — no mutation of canonical, live, or root CLAUDE.md
+  ✔ leaves canonical qa.md, live qa.md, and root CLAUDE.md byte-identical before/after a drift-detecting run (lags BD until rebuilt from post-BUG-085 main) (161.166334ms)
+✔ Scenario: drift guard is report-only — no mutation of canonical, live, or root CLAUDE.md (165.484917ms)
+▶ Scenario 11: default (hook-health) mode drift reporting
+  ✔ drift → a scaffold drift: line and exit(1) (2.288ms)
+  ✔ CLEARGATE_ADVISORY=1 → [advisory] prefix and exit(0) (0.50875ms)
+✔ Scenario 11: default (hook-health) mode drift reporting (7.031708ms)
+▶ Scenario 11b: allowed-only drift never blocks and prints nothing
+  ✔ no scaffold drift: line at all, and exit(0) (0.956625ms)
+✔ Scenario 11b: allowed-only drift never blocks and prints nothing (4.998375ms)
+▶ Scenario 12: --session-start ClearGate drift: line placement (M3-A46)
+  ✔ line 1 is ClearGate state:, line 2 includes cleargate CLI:, and line 3 is the exact ClearGate drift: text (51.202333ms)
+  ✔ allowed-only drift (gate-checks.json) → no ClearGate drift: line (TPV R4) (28.528959ms)
+  ✔ no scaffold → no drift line (regression anchor: session-start must stay silent for target-repo installs) (34.286292ms)
+✔ Scenario 12: --session-start ClearGate drift: line placement (M3-A46) (118.17125ms)
+▶ BUG-098: doctor advisory + pricing behind <instructions>
+  ✔ D4 [red]: retired execution_mode advisory counts an instructions-led sprint file (3.900458ms)
+  ✔ D5 [red]: runPricing on an instructions-led item with draft_tokens — success shape, no exit (2.842ms)
+  ✔ D6 [anchor]: a file with no frontmatter → exit 2, "file has no frontmatter" (0.576833ms)
+✔ BUG-098: doctor advisory + pricing behind <instructions> (7.908333ms)
+▶ BUG-124 Sc6: a gate that later passed is not a hook failure
+  ✔ a gate=1 entry followed by an all-zero one for the same file -> no line names that file (3.425333ms)
+  ✔ three failing entries superseded by clean runs of their own files -> doctor shows no failure at all (1.893833ms)
+  ✔ only the same file supersedes: a clean run of another file leaves the gate line in place (1.552166ms)
+  ✔ a later gate-only entry gives exactly one "gate check failing at …" line, worded as a readiness result (1.485167ms)
+  ✔ the gate exit code is printed as given (gate=2) (1.3425ms)
+  ✔ repeated failing entries for one file print one line, the latest one (1.254792ms)
+  ✔ a fixed-then-broken-again file: pass, fail, pass, fail -> one gate line (the last failure) (1.324459ms)
+  ✔ the surviving lines print in chronological order of the latest entry per file, not first appearance (1.273958ms)
+✔ BUG-124 Sc6: a gate that later passed is not a hook failure (14.204333ms)
+▶ BUG-124 Sc6: a real hook failure is still printed
+  ✔ ingest=1 -> "⚠ hook failure at <ts>: stamp=0 gate=0 ingest=1 file=<file>", unchanged (1.233083ms)
+  ✔ stamp=1 -> the same line shape (1.379458ms)
+  ✔ gate=1 together with ingest=1 is a hook failure (and carries gate=1), not a gate line (1.310792ms)
+  ✔ an ingest failure that a later clean run of the same file supersedes is not printed (1.219541ms)
+  ✔ a gate-only entry superseded by a LATER ingest failure of the same file is a hook failure (1.187459ms)
+  ✔ hook failures and gate lines mix, one per file, in chronological order (1.148625ms)
+✔ BUG-124 Sc6: a real hook failure is still printed (7.619084ms)
+▶ BUG-124 Sc6: the 24 hour window applies to the latest entry
+  ✔ control: a gate=1 entry older than 24 h prints nothing (1.385917ms)
+  ✔ an old failing entry and a clean in-window one for the same file -> nothing (1.225292ms)
+  ✔ an old clean entry and an in-window gate-only one -> the gate line (1.219125ms)
+  ✔ unparseable lines are ignored and do not hide the entries around them (1.193042ms)
+✔ BUG-124 Sc6: the 24 hour window applies to the latest entry (5.086375ms)
+(node:63269) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ Scenario: --session-start emits pre-member banner
+  ✔ first line is the pre-member banner when no auth file is present (26.532708ms)
+  ✔ first line is the pre-member banner when JWT is expired (24.95975ms)
+✔ Scenario: --session-start emits pre-member banner (52.035959ms)
+▶ Scenario: --session-start emits member banner
+  ✔ first line is the member banner with project_id when JWT is valid (23.795709ms)
+  ✔ banner precedes the resolver-status line (is the first line) (13.090458ms)
+✔ Scenario: --session-start emits member banner (37.018417ms)
+(node:63281) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ STORY-016-02: doctor --session-start update notifier
+  ✔ Notifier prints when latest > installed (16.234625ms)
+  ✔ No notifier when up to date (15.582417ms)
+  ✔ No notifier on opt-out (15.26825ms)
+  ✔ Notifier does not change exit code (outcome.blocker unmodified) (14.150292ms)
+  ✔ Notifier fires for fresh install with no pending-sync/ dir (10.86875ms)
+  ✔ No notifier when checkLatestVersion returns from: "error" with null latest (11.025167ms)
+✔ STORY-016-02: doctor --session-start update notifier (83.92625ms)
+▶ Scenario 2 — Gherkin 1: doctor --check-scaffold reports core once, each adapter separately, in order
+  ✔ claude + codex installed, all clean: core/claude/codex lines appended once each, in that order (8.438834ms)
+✔ Scenario 2 — Gherkin 1: doctor --check-scaffold reports core once, each adapter separately, in order (8.974583ms)
+▶ Scenario 3 — Gherkin 4: drift is attributed to the owning host
+  ✔ modifying .codex/thing.md reports 1 user-modified on the codex line only, and .drift-state.json records owner codex (2.464917ms)
+✔ Scenario 3 — Gherkin 4: drift is attributed to the owning host (2.549709ms)
+▶ Scenario 4 — --host filter
+  ✔ --host codex narrows the whole report to codex (top line included); the written cache stays full (2.421042ms)
+  ✔ --host copilot (not installed) exits 2 and names the installed set (1.1475ms)
+  ✔ a --host flag combined with a non-check-scaffold mode exits 2 (0.786125ms)
+✔ Scenario 4 — --host filter (4.505625ms)
+▶ Scenario 5 — Rule-2 guard: production registry, claude-only install
+  ✔ stdout equals the pre-07 output plus exactly two appended lines (core, claude) (1.585667ms)
+✔ Scenario 5 — Rule-2 guard: production registry, claude-only install (1.67825ms)
+▶ M3-A33 New test 4b — legacy (no-owner) cached drift-state; --host validates before the cache
+  ✔ a pre-07-shaped .drift-state.json (DriftMapEntry without owner) still prints attributed per-owner lines (1.648375ms)
+  ✔ --host copilot on a fresh (within-24h) cache still exits 2 — never silently replays the cache (1.177708ms)
+✔ M3-A33 New test 4b — legacy (no-owner) cached drift-state; --host validates before the cache (2.915292ms)
+▶ TPV R5 — doctor counts only selectEntriesForHosts(pkg, installed)
+  ✔ R2, hosts=[claude], a package holding a codex entry: stdout counts core + claude only (2.083625ms)
+  ✔ a legacy snapshot (no hosts, no owner) under a claude-only registry: owners attributed by path, stamped into the cache (1.634375ms)
+✔ TPV R5 — doctor counts only selectEntriesForHosts(pkg, installed) (3.796459ms)
+▶ doctor --pricing
+  ✔ outputs USD string (nonzero) given populated draft_tokens with known model (3.455167ms)
+  ✔ exits 1 and emits stamp-tokens hint when draft_tokens is null/empty (0.844416ms)
+  ✔ warns about unknown model and shows $0.0000 (0.814083ms)
+  ✔ exits 2 with error when file does not exist (STORY-014-01: file-not-found is config-error) (0.359917ms)
+  ✔ exits 2 with error when filePath is empty string (STORY-014-01: missing arg is config-error) (0.334958ms)
+✔ doctor --pricing (6.432625ms)
+▶ Scenario: doctor surfaces retired execution_mode field advisory
+  ✔ doctor runs and produces output (209.358875ms)
+  ✔ doctor output mentions execution_mode retired-field advisory (178.053333ms)
+✔ Scenario: doctor surfaces retired execution_mode field advisory (390.55375ms)
+▶ Scenario: doctor advisory-only — does not auto-strip execution_mode field
+  ✔ the pending-sync sprint file is unmodified after doctor runs (advisory-only per story §1.2.7) (187.736958ms)
+✔ Scenario: doctor advisory-only — does not auto-strip execution_mode field (189.394375ms)
+▶ STORY-063-11-F2 zero spawns for a provably tag-less repo (G-M2-79 proof)
+  ✖ release_repos [notags, tagged]: exactly ONE describe (for tagged); the line is unchanged (3743.24325ms)
+✖ STORY-063-11-F2 zero spawns for a provably tag-less repo (G-M2-79 proof) (3744.261042ms)
+(node:63339) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ STORY-063-11-F2 start order: the lookup is started before the first stdout line (G-M2-79 step 3)
+  ✔ the describe for the tagged repo is already running when runSessionStart emits its first line (1661.673958ms)
+✔ STORY-063-11-F2 start order: the lookup is started before the first stdout line (G-M2-79 step 3) (1661.9ms)
+▶ STORY-063-11-F2 no spawn on the not-built and no-.cleargate paths (guards: hold at baseline)
+  ✔ GUARD: .cleargate/ present, no brief.md -> the not-built line and zero git invocations (293.645459ms)
+  ✔ GUARD: no .cleargate/ -> no brief and zero git invocations (282.70725ms)
+✔ STORY-063-11-F2 no spawn on the not-built and no-.cleargate paths (guards: hold at baseline) (576.525458ms)
+session-start p95: with brief 1.9 ms, without 2.3 ms, delta -0.4 ms (budget 70)
+▶ STORY-063-11 R4 / G-M2-65: session-start added wall time (exec-free)
+  ✔ p95(with brief) - p95(without) over 20 interleaved pairs is at most 70 ms (120.3175ms)
+✔ STORY-063-11 R4 / G-M2-65: session-start added wall time (exec-free) (120.828333ms)
+▶ STORY-063-11 Gherkin 1: every section is printed while a sprint is active
+  ✔ stdout carries "ClearGate brief:" then the 8 prefixed lines in order (46.626167ms)
+  ✔ "Active sprint:" is computed live: ID, 15-word goal, sprint_status/last_action, state counts (20.136166ms)
+  ✔ the compile-time lines are printed exactly as brief.md holds them (21.224292ms)
+  ✔ G-M2-21: the live active sprint is removed from the printed Planned; brief.md on disk still lists it (28.431166ms)
+  ✔ the file H1, the note line and both markers never reach stdout (19.164833ms)
+  ✔ the printed prefixed lines stay within 1,500 tokens (G5c: wc -c of the 8 prefixed lines <= 6,000 B) (22.053042ms)
+✔ STORY-063-11 Gherkin 1: every section is printed while a sprint is active (158.387875ms)
+▶ STORY-063-11 R4: the brief is the last block, on every path through runSessionStart
+  ✔ it follows the state banner, the resolver line and the "N items blocked:" list; nothing prints after it but brief lines (20.030125ms)
+  ✔ G-M2-24: no blocked items (an early return today) still prints the brief (6.199542ms)
+  ✔ G-M2-24: an unreadable pending-sync directory (the other early return) still prints the brief (5.720708ms)
+  ✔ the brief carries no clock-dependent fact: runSessionStart with a `now` that throws still prints it (18.836958ms)
+✔ STORY-063-11 R4: the brief is the last block, on every path through runSessionStart (51.0075ms)
+▶ STORY-063-11 Gherkin 2: no active sprint
+  ✔ .active absent: "Active sprint: none" and Planned lists SPRINT-42 — 5/5 🟢 (7.503458ms)
+  ✔ .active "": "Active sprint: none" and Planned lists SPRINT-42 — 5/5 🟢 (7.252167ms)
+  ✔ .active "\n": "Active sprint: none" and Planned lists SPRINT-42 — 5/5 🟢 (6.996ms)
+  ✔ live refresh: the sentinel is removed after the build -> the printed Planned lists the sprint again, with no ingest (17.409417ms)
+✔ STORY-063-11 Gherkin 2: no active sprint (39.297834ms)
+▶ STORY-063-11 R4: sections 1 and 8 are live (state.json and git change without any ingest)
+  ✔ state.json edited after the build -> the next session prints the new phase and counts; brief.md is byte-identical (18.49325ms)
+  ✔ a new commit after the build moves the printed Release line with no ingest (420.922791ms)
+✔ STORY-063-11 R4: sections 1 and 8 are live (state.json and git change without any ingest) (439.577625ms)
+▶ STORY-063-11 D8 through doctor: release_repos
+  ✔ default ["."]: the project root is a repo with a tag and 2 commits after it -> "Release: <dir>: <tag> + 2 commits" (BUG-124: the default "." is named by the project directory) (321.10875ms)
+  ✔ a path that is not a git repo -> "Release: <repo> unavailable"; an untagged repo -> "<repo> no tags"; a tagged one reads tag + n (352.902875ms)
+  ✔ a repo that does not exist at all is "unavailable" too (19.449917ms)
+  ✔ a malformed config.yml never breaks session start: the Release line falls back to ["."] (named by the directory), the brief still prints (18.866458ms)
+✔ STORY-063-11 D8 through doctor: release_repos (712.525625ms)
+▶ STORY-063-11 Gherkin 5: missing or stale inputs never break session start
+  ✔ no wiki/brief.md (but .cleargate/ exists): one line "ClearGate brief: not built — run `cleargate wiki build`", exit 0 (2.844875ms)
+  ✔ no .cleargate/ at all: nothing about the brief is printed (G-M2-24) (1.191041ms)
+  ✔ .active names SPRINT-99 with no plan file: "Active sprint: none (stale sentinel names SPRINT-99)", the existing stale warning is unchanged, exit 0 (6.840208ms)
+  ✔ A3 / blueprint 10: state.json as a DIRECTORY (EISDIR) and as malformed JSON both print exactly "Active sprint: SPRINT-9 — <goal> — state unknown" (16.792708ms)
+  ✔ the brief never changes an exit code: the same fixture exits the same with and without brief.md (blocked items -> 1) (19.612333ms)
+  ✔ runSessionStart leaves outcome untouched when it prints the not-built line (no configError, no blocker) (2.756084ms)
+✔ STORY-063-11 Gherkin 5: missing or stale inputs never break session start (50.2205ms)
+▶ STORY-063-11 R3 / G-M2-23: the printed brief stays within the cap, live lines included
+  ✔ a 1,200-byte goal and a near-budget brief: the live active line is cut to its 400-byte reserve and ends with "…"; the prefixed lines stay <= 1,500 tokens (58.928ms)
+✔ STORY-063-11 R3 / G-M2-23: the printed brief stays within the cap, live lines included (58.991333ms)
+▶ STORY-063-11 Gherkin 1 / R6 pointer: the meta-repo release config key (default and override)
+  ✔ wiki.brief.release_repos set to two repos prints both, in order, in one "Release:" line (223.412542ms)
+✔ STORY-063-11 Gherkin 1 / R6 pointer: the meta-repo release config key (default and override) (223.5235ms)
+(node:64983) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ doctor --session-start
+  ✔ names both failing IDs when 2 items fail and 1 passes (30.205375ms)
+  ✔ shows 10 items and overflow pointer when 15 items are blocked (28.447ms)
+  ✔ emits only the resolver-status line when zero items are blocked (26.680459ms)
+  ✔ blocked-items output is ≤ 400 chars (100-token proxy) for 3 failing items (25.925125ms)
+  ✔ emits only the resolver-status line when pending-sync directory does not exist (15.422208ms)
+  ✔ includes first failing criterion id in per-item line (18.422459ms)
+  ✔ skips items with pass=null (pre-migration drafts) (21.037416ms)
+  ✔ CR-009: resolver-status line is emitted by runSessionStart (CR-011: after state banner) (32.124542ms)
+  ✔ CR-009: resolver-status line is emitted even when zero items are blocked (18.522333ms)
+✔ doctor --session-start (217.685208ms)
+▶ CR-009 emitResolverStatusLine
+  ✔ emits "local dist" line when cleargate-cli/dist/cli.js exists under cwd (1.04175ms)
+  ✔ emits pin version when hook script has cleargate-pin comment (19.254125ms)
+✔ CR-009 emitResolverStatusLine (20.403833ms)
+▶ CR-008 Phase A: planning-first reminder block
+  ✔ CR-008 scenario 1: empty pending-sync + no .active sentinel → planning-first reminder emitted (17.663042ms)
+  ✔ CR-008 scenario 2: one approved story in pending-sync → planning-first reminder suppressed (13.088042ms)
+  ✔ CR-008 scenario 3: sprint-active sentinel present + empty pending-sync → planning-first reminder suppressed (17.128083ms)
+  ✔ CR-008: planning-first reminder is emitted when pending-sync has items but none approved (20.162875ms)
+  ✔ CR-008: planning-first reminder text matches PLANNING_FIRST_REMINDER constant (17.605125ms)
+  ✔ CR-008: resolver-status line is emitted before reminder (CR-011: state banner is first) (15.638834ms)
+  ✔ CR-008: pending-sync dir absent → planning-first reminder is NOT emitted (early return path) (31.522625ms)
+  ✔ D2 [red] BUG-090: an <instructions>-led approved story suppresses the planning-first reminder (31.480458ms)
+  ✔ D3 [red] BUG-090: an <instructions>-led blocked item is named with its failing criterion (38.727041ms)
+✔ CR-008 Phase A: planning-first reminder block (203.331125ms)
+▶ STORY-014-01: --session-start mode preserves exit-code hierarchy
+  ✔ outcome.blocker is set when runSessionStart encounters blocked items (26.555375ms)
+  ✔ outcome.blocker is false when no blocked items exist (2.271791ms)
+✔ STORY-014-01: --session-start mode preserves exit-code hierarchy (28.926334ms)
+▶ Scenario: Clean repo reports clean
+  ✔ all manifest files match package SHAs — summary reports 0/0/0/N clean (10.421666ms)
+✔ Scenario: Clean repo reports clean (10.974083ms)
+▶ Scenario: User-modified file detected
+  ✔ user edited file after install — shows in summary as user-modified (2.76575ms)
+✔ Scenario: User-modified file detected (2.862ms)
+▶ Scenario: Upstream-changed surfaces pointer
+  ✔ package has newer SHA than install snapshot — prints upgrade pointer (2.709375ms)
+✔ Scenario: Upstream-changed surfaces pointer (2.791041ms)
+▶ Scenario: user-artifact skipped silently
+  ✔ FLASHCARD.md with user-artifact tier does NOT appear in drift output (2.348875ms)
+✔ Scenario: user-artifact skipped silently (2.417334ms)
+▶ Scenario: Daily throttle
+  ✔ last_refreshed 10 minutes ago + --session-start-mode → cache reused, no SHA recompute (1.610625ms)
+✔ Scenario: Daily throttle (1.686125ms)
+▶ Scenario: Interactive mode bypasses throttle
+  ✔ last_refreshed recent but no --session-start-mode → recomputes and updates last_refreshed (2.907583ms)
+✔ Scenario: Interactive mode bypasses throttle (2.993916ms)
+(node:65022) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+▶ Scenario: Verbose listing
+  ✔ -v emits per-file lines with state + short-hash triple for non-clean files (2.539ms)
+✔ Scenario: Verbose listing (2.59725ms)
+▶ selectMode dispatcher
+  ✔ check-scaffold + session-start combo throws (0.283459ms)
+  ✔ returns check-scaffold when only checkScaffold flag is set (0.074291ms)
+  ✔ returns hook-health when no mode flag is set (0.102166ms)
+✔ selectMode dispatcher (0.517916ms)
+▶ shouldUseCache
+  ✔ returns true when cache is fresh and sessionStartMode is set (0.086041ms)
+  ✔ returns false when sessionStartMode is not set (interactive) (0.070666ms)
+  ✔ returns false when cache is older than 24 hours even with sessionStartMode (0.064417ms)
+✔ shouldUseCache (0.259625ms)
+▶ Scenario: Doctor reports hook health
+  ✔ hook-log failure within 24h is named with ISO timestamp; failures older than 24h are excluded (1.494167ms)
+✔ Scenario: Doctor reports hook health (1.521166ms)
+▶ parseHookLogLine
+  ✔ parses a valid log line (0.08375ms)
+  ✔ returns null for a non-matching line (stdout noise from hook steps) (0.05275ms)
+✔ parseHookLogLine (0.171ms)
+▶ formatVerboseLine
+  ✔ formats a drift entry with 6-char short hashes (0.069416ms)
+✔ formatVerboseLine (0.093042ms)
+▶ CR-008 globMatch
+  ✔ matches exact file names (0.144667ms)
+  ✔ does not match different file names (0.061417ms)
+  ✔ matches wildcard * within a directory segment (0.056958ms)
+  ✔ wildcard * does not cross directory boundaries (0.062875ms)
+  ✔ matches double-star ** across directories (0.058834ms)
+  ✔ returns false when no match on ** (0.05075ms)
+✔ CR-008 globMatch (0.512208ms)
+▶ CR-008 runCanEdit
+  ✔ CR-008 Gate A: no approved stories → exits 1, reason no_approved_stories (0.947458ms)
+  ✔ D1 [red] BUG-090: an <instructions>-led approved story unblocks --can-edit (no positional sniff) (2.612834ms)
+  ✔ CR-008 Gate A: no pending-sync dir → exits 1, reason no_approved_stories (0.361ms)
+  ✔ CR-008 Gate B: approved story with implementation_files not covering file → exits 1 (1.167083ms)
+  ✔ CR-008 Gate B: approved story covers file → exits 0 (allowed) (0.926916ms)
+  ✔ CR-008: approved story with no implementation_files → any file is allowed (1.172334ms)
+  ✔ CR-008: sprint-active sentinel → always allowed regardless of stories (1.079541ms)
+  ✔ CR-008: approved story covers file via glob wildcard → allowed (0.93175ms)
+✔ CR-008 runCanEdit (9.319125ms)
+▶ STORY-014-01 Scenario 1: Clean repo exits 0
+  ✔ exits 0 when no blockers and no config errors (1.977167ms)
+✔ STORY-014-01 Scenario 1: Clean repo exits 0 (2.017ms)
+▶ STORY-014-01 Scenario 2: Blocked items exit 1
+  ✔ exits 1 when at least one pending-sync item has cached_gate_result.pass=false (2.90475ms)
+✔ STORY-014-01 Scenario 2: Blocked items exit 1 (2.939292ms)
+▶ STORY-014-01 Scenario 3: Missing .cleargate exits 2
+  ✔ exits 2 when cwd has no .cleargate/ (0.241125ms)
+✔ STORY-014-01 Scenario 3: Missing .cleargate exits 2 (0.267583ms)
+▶ STORY-014-01 Scenario 4: Missing manifest exits 2
+  ✔ exits 2 when .cleargate/.install-manifest.json is absent (1.0395ms)
+✔ STORY-014-01 Scenario 4: Missing manifest exits 2 (1.059125ms)
+▶ STORY-014-01 Scenario 5: Hook resolver complete failure exits 2
+  ✔ exits 2 when emitResolverStatusLine reports not-resolvable (18.217042ms)
+✔ STORY-014-01 Scenario 5: Hook resolver complete failure exits 2 (18.2635ms)
+▶ STORY-014-01 Scenario 6: --session-start preserves exit-code hierarchy
+  ✔ exits 1 when --session-start runs against a repo with one blocked item (2.059042ms)
+✔ STORY-014-01 Scenario 6: --session-start preserves exit-code hierarchy (2.098375ms)
+▶ BUG-023 regression: pin-aware hook files classified clean after fresh install
+  ✔ pin-aware hook file is classified clean when install snapshot carries pin_version (10.932791ms)
+  ✔ pin-aware hook file without pin_version in snapshot falls back to reporting user-modified (backwards compat) (2.402458ms)
+✔ BUG-023 regression: pin-aware hook files classified clean after fresh install (13.4185ms)
+▶ STORY-014-01 Help-text snapshot: doctor --help documents exit codes
+  ✔ cli.ts doctor command addHelpText contains the Exit codes block (0.583208ms)
+✔ STORY-014-01 Help-text snapshot: doctor --help documents exit codes (0.6105ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-121 Sc1: set commands are kept
+  ✔ upgrade --yes keeps make check / make lint in a Go repo (213.74825ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ init keeps make check / make lint in a Go repo (33.133084ms)
+✔ BUG-121 Sc1: set commands are kept (247.504958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-121 Sc2: empty commands are filled and announced
+  ✔ upgrade --yes fills qa.test "" with go test ./... and says so (138.632958ms)
+✔ BUG-121 Sc2: empty commands are filled and announced (138.780166ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-121 Sc3: a repo detection cannot read keeps its commands
+  ✔ init keeps ./run-tests.sh in a repo with no recognised stack (30.492916ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ upgrade --yes keeps ./run-tests.sh in a repo with no recognised stack (121.514875ms)
+✔ BUG-121 Sc3: a repo detection cannot read keeps its commands (152.210083ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-121 Sc4: the dry run names the change
+  ✔ upgrade --dry-run prints [dry-run] gate-checks.json: … and writes nothing (32.240583ms)
+✔ BUG-121 Sc4: the dry run names the change (32.386417ms)
+▶ BUG-121 units: planGateCommands
+  ✔ non-empty prior values are kept, empty ones take the detected value, in field order (0.264625ms)
+  ✔ every prior value set: all three are kept, none replaced (0.09875ms)
+  ✔ an unresolved stack never blanks a non-empty prior value (0.084833ms)
+  ✔ a null prior (no file) detects all three (0.108542ms)
+✔ BUG-121 units: planGateCommands (0.641583ms)
+▶ BUG-121 units: formatGateChanges
+  ✔ joins detected and kept parts with "; " in field order (0.11325ms)
+  ✔ returns null when there is nothing to say (0.067709ms)
+✔ BUG-121 units: formatGateChanges (0.218917ms)
+▶ BUG-121 units: readGateCommands
+  ✔ reads the three fields; a missing field reads ""; absent or unparseable file is null (0.613042ms)
+✔ BUG-121 units: readGateCommands (0.635667ms)
+▶ BUG-121 units: applyTestStack
+  ✔ with explicit prior values it writes them back over a payload-overwritten file and returns the changes (0.518125ms)
+  ✔ two-argument form (BUG-037 callers) keeps non-empty values already in the file (0.37725ms)
+  ✔ a user-formatted file with nothing to change stays byte-identical (0.336125ms)
+✔ BUG-121 units: applyTestStack (1.271209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-121 init output
+  ✔ a changed field replaces "Skipped (exists) …" with the gate-checks.json line (31.550875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ nothing changed: the Skipped (exists) line stays and no gate-checks.json line is added (25.674792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ a fresh install prints no gate-checks.json line and detects the stack (26.269959ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ init --force keeps prior values and reports gate-checks.json like plain init (nothing changed) (35.674125ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ init --force with an empty field prints the gate-checks.json line in place of "Skipped (exists) …" (31.781916ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ a user-formatted gate-checks.json with nothing to change is byte-identical after init (28.680375ms)
+✔ BUG-121 init output (179.970041ms)
+▶ Scenario: Check passing Epic
+  ✔ exit 0 and cached_gate_result.pass = true (12.697708ms)
+✔ Scenario: Check passing Epic (13.265459ms)
+▶ Scenario: Check failing Story (enforcing)
+  ✔ exit non-zero, stdout lists failing criteria, cached_gate_result.pass = false (3.966333ms)
+✔ Scenario: Check failing Story (enforcing) (4.059834ms)
+▶ Scenario: Check failing Proposal (advisory)
+  ✔ exit 0, stdout prefixes ⚠, cached_gate_result.pass = false (2.516167ms)
+✔ Scenario: Check failing Proposal (advisory) (2.623041ms)
+▶ Scenario: Verbose output
+  ✔ stdout contains full predicate evaluation per failing criterion (2.417958ms)
+✔ Scenario: Verbose output (2.519375ms)
+▶ Scenario: Explain is read-only and cheap
+  ✔ output ≤50 LLM-tokens and no predicate re-evaluation (frontmatter unchanged) (1.623042ms)
+✔ Scenario: Explain is read-only and cheap (1.717666ms)
+▶ Scenario: Explicit transition override
+  ✔ evaluation runs against the specified transition even when already passed (2.085084ms)
+✔ Scenario: Explicit transition override (2.172ms)
+▶ explain with no cached result
+  ✔ prints hint and exits 0 (1.233625ms)
+✔ explain with no cached result (1.30225ms)
+▶ check on file with no ID frontmatter
+  ✔ errors with "unable to detect work-item type" (0.809042ms)
+✔ check on file with no ID frontmatter (0.842042ms)
+▶ type-detection unit test
+  ✔ detects proposal from proposal_id key (0.121667ms)
+  ✔ detects epic from epic_id key (0.082667ms)
+  ✔ detects story from story_id key (0.049709ms)
+  ✔ detects cr from cr_id key (0.051791ms)
+  ✔ detects bug from bug_id key (0.043959ms)
+  ✔ returns null when no known ID key present (0.047959ms)
+  ✔ detectWorkItemType from string prefix (0.101541ms)
+✔ type-detection unit test (0.581542ms)
+▶ transition-inference
+  ✔ Epic with no cached gate → picks ready-for-decomposition (first) (2.968167ms)
+  ✔ Epic already passed decomposition → picks ready-for-coding (1.714834ms)
+✔ transition-inference (4.780792ms)
+▶ BUG-008 smoke: readiness-gates.md after fix parses cleanly
+  ✔ readiness-gates.md parses all gate blocks with no errors (CR-027 adds sprint=7th, CR-030 adds initiative=8th, STORY-043-04 adds hotfix=9th, STORY-054-02 adds spike=10th+11th) (0.966375ms)
+  ✔ all criterion check strings in readiness-gates.md parse via parsePredicate without throwing (1.10175ms)
+  ✔ EPIC-021-style fixture: parent_ref unset with approved_by + approved_at passes parent-approved (2.212375ms)
+  ✔ CR-010-style fixture: prose "TBD resolution" in body passes no-tbds marker predicate (3.559625ms)
+  ✔ CR-011-style fixture: §2 Blast Radius with items passes blast-radius-populated (2.815292ms)
+✔ BUG-008 smoke: readiness-gates.md after fix parses cleanly (10.841ms)
+▶ CR-030 γ: OR-group evaluator — parent-approved
+  ✔ Epic with Proposal parent (approved: true, no status) → gate passes for parent-approved concern (5.311625ms)
+  ✔ Epic with Initiative parent (status: Triaged, no approved) → gate passes for parent-approved concern (2.023708ms)
+  ✔ Epic with no valid parent (file missing) → gate fails with OR-group-failed error (1.825041ms)
+  ✔ R1 [red] (BUG-098): instructions-led Proposal parent (approved: true) → gate passes for parent-approved concern (2.115041ms)
+  ✔ R2 [red] (BUG-098): instructions-led Initiative parent (status: Triaged) → gate passes for parent-approved concern (1.83325ms)
+✔ CR-030 γ: OR-group evaluator — parent-approved (13.321583ms)
+▶ BUG-097: gate check -v on a pass
+  ✔ G1: prints per-criterion [pass] lines after the summary, in order (1.910542ms)
+✔ BUG-097: gate check -v on a pass (1.983667ms)
+▶ BUG-097: gate check -v on a failure (anchor)
+  ✔ G2: failure lines still come before the per-criterion detail lines (1.774916ms)
+✔ BUG-097: gate check -v on a failure (anchor) (1.843417ms)
+▶ BUG-097: gate check -v on an advisory gate (anchor)
+  ✔ G3: warning lines still come before the per-criterion detail lines (3.046042ms)
+✔ BUG-097: gate check -v on an advisory gate (anchor) (3.126208ms)
+▶ CR-050 gate qa — canonical call form (args[1]=bash, args[2]=abs-path)
+  ✔ gate qa passes bash as arg[1] after run_script.sh (CR-050 migration) (0.786459ms)
+✔ CR-050 gate qa — canonical call form (args[1]=bash, args[2]=abs-path) (1.271458ms)
+▶ CR-050 gate arch — canonical call form (args[1]=bash, args[2]=abs-path)
+  ✔ gate arch passes bash as arg[1] after run_script.sh (CR-050 migration) (0.147958ms)
+✔ CR-050 gate arch — canonical call form (args[1]=bash, args[2]=abs-path) (0.201292ms)
+▶ CR-055 gate — wrapScript end-to-end: real wrapper integration
+  ✔ wrapper exits 0 when invoked with bash -c exit 0 (gate explicit-bash interface) (372.861458ms)
+✔ CR-055 gate — wrapScript end-to-end: real wrapper integration (372.937625ms)
+▶ R1: archive/ holds HOTFIX-001, pending-sync/ empty -> next is HOTFIX-002
+  ✔ allocates HOTFIX-002, not a collision with the archived HOTFIX-001 (5.802667ms)
+✔ R1: archive/ holds HOTFIX-001, pending-sync/ empty -> next is HOTFIX-002 (6.287583ms)
+▶ R2: pending-sync/ HOTFIX-002, archive/ HOTFIX-005 -> next is HOTFIX-006 (union, not per-dir)
+  ✔ allocates HOTFIX-006, the union max + 1 (2.945166ms)
+✔ R2: pending-sync/ HOTFIX-002, archive/ HOTFIX-005 -> next is HOTFIX-006 (union, not per-dir) (3.014917ms)
+▶ R3: archive/ absent entirely -> no throw, allocation proceeds from pending-sync/ alone
+  ✔ does not throw; allocates HOTFIX-001 from an empty pending-sync/ (2.204416ms)
+✔ R3: archive/ absent entirely -> no throw, allocation proceeds from pending-sync/ alone (2.290166ms)
+▶ R4: malformed filenames in both dirs are ignored, not parsed as 0 or NaN
+  ✔ HOTFIX-notes.md (pending) and a lowercase entry (archive) do not affect the max (2.634209ms)
+✔ R4: malformed filenames in both dirs are ignored, not parsed as 0 or NaN (2.713916ms)
+▶ R5: HOTFIX-009 present -> next is HOTFIX-010, not HOTFIX-10
+  ✔ preserves 3-digit zero-padding across the 009->010 boundary (2.124542ms)
+✔ R5: HOTFIX-009 present -> next is HOTFIX-010, not HOTFIX-10 (2.212333ms)
+▶ R6: archive/ HOTFIX-001 backdated 30 days -> next is still HOTFIX-002 (allocator ignores mtime)
+  ✔ allocates HOTFIX-002 regardless of the archived entry's age (2.336125ms)
+✔ R6: archive/ HOTFIX-001 backdated 30 days -> next is still HOTFIX-002 (allocator ignores mtime) (2.400542ms)
+▶ R7: 3 hotfixes archived 30 days ago -> the cap does NOT block a new hotfix
+  ✔ cap check counts 0 active (all 3 archived entries are outside the 7-day window) (2.675709ms)
+✔ R7: 3 hotfixes archived 30 days ago -> the cap does NOT block a new hotfix (2.730708ms)
+▶ R9: pending-sync/ absent entirely, archive/ holds HOTFIX-001 -> next is HOTFIX-002
+  ✔ does not throw and does not lose the archive-dir max (2.099584ms)
+✔ R9: pending-sync/ absent entirely, archive/ holds HOTFIX-001 -> next is HOTFIX-002 (2.140542ms)
+▶ R10: pending-sync/ holds HOTFIX-009, archive/ absent entirely -> next is HOTFIX-010
+  ✔ does not lose the pending-dir max when archive/ throws (1.925083ms)
+✔ R10: pending-sync/ holds HOTFIX-009, archive/ absent entirely -> next is HOTFIX-010 (1.968333ms)
+▶ R11: archive/ holds unpadded HOTFIX-12 -> next is HOTFIX-013 (fixed-literal 3-digit pad)
+  ✔ pads to 3 digits regardless of the width of the scanned stem (2.234916ms)
+✔ R11: archive/ holds unpadded HOTFIX-12 -> next is HOTFIX-013 (fixed-literal 3-digit pad) (2.28725ms)
+▶ R12: archive/ holds dash-separated HOTFIX-007-dash-slug.md -> next is HOTFIX-008
+  ✔ the shared id grammar (not a hand-rolled underscore-only regex) parses the dash separator (2.313208ms)
+✔ R12: archive/ holds dash-separated HOTFIX-007-dash-slug.md -> next is HOTFIX-008 (2.379542ms)
+▶ R13: archive/ holds bare HOTFIX-013.md (no separator) -> next is HOTFIX-014
+  ✔ the shared id grammar parses a bare id with no separator before the extension (2.663417ms)
+✔ R13: archive/ holds bare HOTFIX-013.md (no separator) -> next is HOTFIX-014 (2.71475ms)
+▶ R14: archive/ holds only non-HOTFIX ids (STORY-999-01, CR-500) -> next is HOTFIX-001
+  ✔ the type filter survives the directory-union widening (2.414334ms)
+✔ R14: archive/ holds only non-HOTFIX ids (STORY-999-01, CR-500) -> next is HOTFIX-001 (2.445166ms)
+▶ R15: §2 protocol verbatim — create, mv to archive/, create -> HOTFIX-002
+  ✔ the second invocation sees the first id after it moves to archive/ (2.889083ms)
+✔ R15: §2 protocol verbatim — create, mv to archive/, create -> HOTFIX-002 (2.9315ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 34 — hosts:['codex']: .agents/skills/sprint-execution/{SKILL.md,dispatch-serial.md} exist, no banned token, no .claude/, entryOwner core (105.261292ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution/dispatch-serial.md exists and equals canonical (58.595208ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 36 — hosts:['claude','codex']: both dispatch-serial.md files are byte-identical, and the Claude SKILL.md equals canonical (with its pointers) (89.409209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Test 26 — Gherkin 1: hosts:["codex"] install shape
+  ✔ .codex/hooks.json, .codex/config.toml, AGENTS.md block, 6 hook scripts at 0755; no .claude/** (118.185084ms)
+✔ Test 26 — Gherkin 1: hosts:["codex"] install shape (118.894416ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 27 — Gherkin 5: stdout contains the four Codex: lines verbatim (88.831375ms)
+✔ Test 28 — a malformed .codex/config.toml refuses before any write (preflight) (76.490917ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ [TPV R-I5] --from-source (no host flag) installs from a cleargate-from-source-* view of the scaffold and removes it (59.433291ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 29 — hosts:["all"] vs no flag: every no-flag file byte-identical except the two volatile snapshots (180.472625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 30 — additive: --host codex over a claude install leaves claude byte-unchanged (2 passes) (134.228667ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ cleargate init --from-source
+  ✔ Scenario 1: Local core/host path composes into an owned temp payload, copies scaffold byte-for-byte, generates MANIFEST.json, cleans up, and leaves the source untouched (62.29975ms)
+  ✔ Scenario 2: Missing path exits with code 2 and clear stderr message (0.65875ms)
+  ✔ Scenario 3: Path missing required subdirs errors with exit 2 and names missing dirs (0.961375ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ Scenario 4: Absent --from-source uses npm-resolved payloadDir (regression) (75.739667ms)
+✔ cleargate init --from-source (140.440625ms)
+▶ resolveScaffoldRoot
+  ✔ returns npm-package source when fromSource is undefined (0.130791ms)
+  ✔ returns npm-package source when fromSource is empty string (falsy) (0.05475ms)
+  ✔ throws ScaffoldSourceError with PATH_MISSING when path does not exist (0.337334ms)
+  ✔ throws ScaffoldSourceError with LAYOUT_INVALID when required items are missing (0.52425ms)
+  ✔ returns from-source with absolute payloadDir when valid scaffold path provided (1.454916ms)
+  ✔ resolves relative paths relative to the cwd option (1.486ms)
+✔ resolveScaffoldRoot (4.15625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ STORY-058-06 scenario 19: --from-source snapshot has owner + hosts
+  ✔ initHandler({ fromSource: <CLI_ROOT>/scaffold }) writes a snapshot whose every entry has owner and whose hosts is ["claude"] (109.943834ms)
+✔ STORY-058-06 scenario 19: --from-source snapshot has owner + hosts (110.08275ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ STORY-072-01 — expanded default .gitignore
+  ✔ scenario 1: .env is gitignored after fresh init (396.276125ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 2: .env.example is NOT gitignored (allowlist preserved) (388.416291ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 3: Python and Node markers present in .gitignore (334.21225ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 4: existing ClearGate blocks preserved in expanded .gitignore (366.174417ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 5: re-init preserves user customization in .gitignore (852.319042ms)
+✔ STORY-072-01 — expanded default .gitignore (2338.48225ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 8 — no flag installs only claude (Gherkin 1)
+  ✔ claude installs once, codex 0 times; no .codex/** or .agents/** land; .claude/** and CLAUDE.md present (82.868417ms)
+✔ Scenario 8 — no flag installs only claude (Gherkin 1) (83.51175ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 9 — repeated/comma-separated hosts install each adapter exactly once (Gherkin 2)
+  ✔ hosts: ["claude", "codex,claude"] installs claude and codex once each; both owned/shared payloads land (26.036791ms)
+✔ Scenario 9 — repeated/comma-separated hosts install each adapter exactly once (Gherkin 2) (26.175292ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 10 — hosts: ["codex"] never installs claude and omits .claude/**
+  ✔ claude install 0 times; no .claude/**, CLAUDE.md or .mcp.json; .cleargate/** (core) and .codex/fake.toml present (18.003208ms)
+✔ Scenario 10 — hosts: ["codex"] never installs claude and omits .claude/** (18.13775ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 11 — hosts: ["all"] installs every registered adapter once (§4.1 acceptance)
+  ✔ all 3 adapters in R3 install exactly once; every owned-root payload file lands (24.542667ms)
+✔ Scenario 11 — hosts: ["all"] installs every registered adapter once (§4.1 acceptance) (24.655917ms)
+▶ Scenario 12 — invalid selectors reject before any write (Gherkin 4/5)
+  ✔ hosts: ["cursor"] -> ExitSignal(2), stderr names "cursor", fixture stays empty (33.931ms)
+  ✔ hosts: [""] -> ExitSignal(2), stderr names the empty value, fixture stays empty (0.809125ms)
+  ✔ M2-A9: hosts: ["cursor"] + --from-source exits 2 with no from-source tempdir alive at exit(), no stdout, no target write (1.550708ms)
+✔ Scenario 12 — invalid selectors reject before any write (Gherkin 4/5) (36.458417ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 13 — case/comma/dedupe equivalence to plain claude (production registry, no baseline needed)
+  ✔ "fresh": hosts undefined / ["claude"] / [" CLAUDE ", "claude,claude"] produce identical records (68.998083ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ "user-content": hosts undefined / ["claude"] / [" CLAUDE ", "claude,claude"] produce identical records (73.781583ms)
+✔ Scenario 13 — case/comma/dedupe equivalence to plain claude (production registry, no baseline needed) (142.931583ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ M2-A15 — default-path routing witness (no seam)
+  ✔ default (no-seam) init routes through the production claudeAdapter.install (25.481167ms)
+✔ M2-A15 — default-path routing witness (no seam) (25.681583ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 11 — no flag, production registry
+  ✔ hosts is ["claude"] and is the LAST key; every entry has owner; the path set matches the payload manifest (85.475458ms)
+✔ Scenario 11 — no flag, production registry (86.053584ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 12 — R2, hosts: ["all"]
+  ✔ snapshot hosts is exactly ["claude","codex"]; all 4 stub entries are present (55.550041ms)
+✔ Scenario 12 — R2, hosts: ["all"] (55.69525ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 13 — R2, hosts: ["claude"]
+  ✔ snapshot hosts is ["claude"]; .codex/fake.toml and .agents/** are excluded (25.087667ms)
+✔ Scenario 13 — R2, hosts: ["claude"] (25.222208ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 14 — R2, hosts: ["codex"]
+  ✔ snapshot hosts is ["codex"]; .claude/agents/a.md is excluded (18.993958ms)
+✔ Scenario 14 — R2, hosts: ["codex"] (19.111208ms)
+▶ Scenario 15 — SANCTIONED_BASELINE_DELTAS neutralizes exactly its own row
+  ✔ a baseline differing from the record ONLY by the sanctioned hosts-key delta passes (1.357667ms)
+  ✔ a byte change on a DIFFERENT (unsanctioned) file fails, naming that path (5.1175ms)
+  ✔ the sanctioned file drifting to a THIRD (unexpected) hash fails, naming that path (1.207459ms)
+✔ Scenario 15 — SANCTIONED_BASELINE_DELTAS neutralizes exactly its own row (7.85ms)
+▶ Scenario 15 (TPV E2) — a sanctioned row never passes on the baseline hash
+  ✔ a record still holding the BASELINE hash (delta not landed, or reverted) fails, naming that path (0.975292ms)
+✔ Scenario 15 (TPV E2) — a sanctioned row never passes on the baseline hash (1.026584ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 21 — M3-A2: snapshot hosts is the installed set, not this run's selection
+  ✔ 21(a): claude then codex — hosts is ["claude","codex"]; claude entry survives; .claude/** untouched by pass 2 (35.6875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ 21(b): claude+codex then no flag — hosts stays ["claude","codex"]; .codex/fake.toml survives byte-unchanged (36.335667ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ 21(c): a fresh dir with hosts: ["codex"] gives hosts ["codex"] (kills the installedHosts(null) mutant) (17.41225ms)
+✔ Scenario 21 — M3-A2: snapshot hosts is the installed set, not this run's selection (89.655ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario 21(e) (TPV E4) — re-init never carries an entry the payload stopped shipping
+  ✔ 21(e): claude then claude, the payload dropped a core file — its entry is gone from the snapshot (35.814292ms)
+✔ Scenario 21(e) (TPV E4) — re-init never carries an entry the payload stopped shipping (35.90675ms)
+▶ Scenario 21(d) — mergeInstalledHosts unit
+  ✔ registry-order union of prior+added, with a not-yet-registered prior host appended (0.185333ms)
+✔ Scenario 21(d) — mergeInstalledHosts unit (0.221875ms)
+▶ STORY-068-01: no DEP0190 + grep-gate npm script
+  ✔ Scenario 1: fresh init produces clean transcript — no DEP0190 or DeprecationWarning (832.764291ms)
+  ✔ Scenario 2: check:no-shell-true-in-init npm script exists and exits 0 (542.035167ms)
+✔ STORY-068-01: no DEP0190 + grep-gate npm script (1764.308875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario: init prompts and writes participant.json
+  ✔ interactive happy path writes email with source=prompted (353.088125ms)
+✔ Scenario: init prompts and writes participant.json (353.771334ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Scenario: init non-interactive accepts git default
+  ✔ --yes flag uses git email with source=inferred and never invokes promptEmail (359.5405ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ subsequent init run skips participant prompt when file exists (346.913792ms)
+✔ Scenario: init non-interactive accepts git default (706.672667ms)
+▶ STORY-069-01 Scenario 1: fresh init emits banner on stderr
+  ✔ fresh init — stderr contains "Restart Claude Code" and "/mcp" after "Done." (512.85ms)
+✔ STORY-069-01 Scenario 1: fresh init emits banner on stderr (667.919584ms)
+▶ STORY-069-01 Scenario 2: idempotent re-init does NOT emit banner
+  ✔ idempotent re-init (unchanged .mcp.json) — stderr does NOT contain "Restart Claude Code" (406.133084ms)
+✔ STORY-069-01 Scenario 2: idempotent re-init does NOT emit banner (864.251792ms)
+▶ STORY-069-01 Scenario 3: re-init with .mcp.json change re-emits banner
+  ✔ re-init with changed .mcp.json (mcpServers.cleargate.command tampered) — stderr contains "Restart Claude Code" (423.311834ms)
+✔ STORY-069-01 Scenario 3: re-init with .mcp.json change re-emits banner (946.75725ms)
+▶ BUG-040: root .gitignore is generated, not shipped
+  ✔ Scenario 1: no pre-existing .gitignore → file created with block + starter patterns (0.761792ms)
+  ✔ Scenario 2: the seed omits build-output patterns (CR-090 objection) (0.072375ms)
+  ✔ Scenario 3: .env allowlist lines come AFTER the .env patterns (0.067958ms)
+  ✔ Scenario 4: pre-existing .gitignore → user content preserved byte-for-byte (0.141917ms)
+  ✔ Scenario 5: re-init → block rewritten in place, never duplicated (0.104333ms)
+  ✔ Scenario 6: user edits outside the block survive re-init (0.087375ms)
+  ✔ Scenario 7: a stale block is refreshed in place, keeping surrounding content (0.07275ms)
+  ✔ Scenario 8: an empty existing file gets the block without a leading blank line (0.053625ms)
+  ✔ Scenario 9: the block carries ONLY ClearGate-owned paths (0.80175ms)
+✔ BUG-040: root .gitignore is generated, not shipped (2.807291ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ cleargate init
+  ✔ scenario 1: greenfield — creates full scaffold on empty dir (275.457875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 2: re-run idempotent — no duplicate block in CLAUDE.md, no duplicate hook (663.480375ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 3: existing CLAUDE.md without markers — CR-105: block leads, user content follows (387.897333ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 4: existing CLAUDE.md with markers — replaces block body, preserves surrounding content (347.32ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 5: existing settings.json with SubagentStop — merges PostToolUse, preserves SubagentStop (520.87925ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 6: existing PostToolUse with different matcher — appends Edit|Write entry, preserves Bash entry (469.475667ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 1: fresh init writes .install-manifest.json with correct fields (566.953209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 2: init detects .uninstalled marker and prompts; Y preserves + removes marker (492.447208ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 3: N choice proceeds normally, preserved files untouched, marker removed (358.14325ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 4: atomic snapshot write — if rename throws, final file does not exist (690.985625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-009-03 scenario 5: missing preserved path logs warning but init does NOT fail (435.5385ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 1: stamp-and-gate.sh has no __CLEARGATE_VERSION__ placeholder after init (119.677958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 2: session-start.sh has no __CLEARGATE_VERSION__ placeholder after init (58.7595ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 3: --pin 0.6.0-beta stamps the custom version in both hooks (85.95175ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 4: probe success (status=0) — init prints green status line (107.169833ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-009 scenario 5 (post-BUG-015): probe failure prints yellow warning and continues init (no exit) (88.083041ms)
+  ✔ CR-093 snapshot file exists (historical baseline — superseded by STORY-058-10) (0.4685ms)
+  ✔ STORY-058-10 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.253ms)
+  ✔ STORY-058-11 snapshot file exists (historical baseline — superseded by STORY-063-02) (0.230625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-063-02 snapshot: rendered stamp-and-gate.sh byte-equals the story-063-02 snapshot lock (75.880417ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-063-03 snapshot: rendered post-shell-ingest.sh (new hook) byte-equals the story-063-03 snapshot lock (149.510625ms)
+  ✔ CR-008 snapshot file exists (historical baseline — superseded by BUG-036) (0.472375ms)
+  ✔ BUG-036 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.4685ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ STORY-058-11 snapshot: rendered session-start.sh byte-equals the story-058-11 snapshot lock (109.715292ms)
+  ✔ CR-008 collision-check: session-start.cr-008.sh differs from cr-009 by exactly one line (line 18) (0.965875ms)
+  ✔ CR-008 pre-edit-gate lock exists (historical baseline — superseded by BUG-038) (0.336667ms)
+  ✔ BUG-038 snapshot file exists (historical baseline — superseded by BUG-089) (0.2575ms)
+  ✔ BUG-089 snapshot file exists (historical baseline — superseded by STORY-058-10) (0.233208ms)
+  ✔ STORY-058-10 snapshot file exists (historical baseline — superseded by STORY-058-11) (0.221208ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+wiki build: OK (1 pages written)
+  ✔ STORY-058-11 snapshot: rendered pre-edit-gate.sh byte-equals the story-058-11 snapshot lock (90.095ms)
+  ✔ CR-008 snapshot: stamp-and-gate.cr-008.sh is byte-identical to cr-009 lock (CR-008 does not touch it) (0.772958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ scenario 7: bootstrap pass — wiki build runs on pre-seeded delivery items (634.600958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 5: idempotent re-init suppresses restart warning (493.497958ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 6: real hooks change emits restart warning (330.619917ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ CR-059 scenario 7: malformed settings.json triggers conservative restart warning (264.483ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ BUG-023: init writes pin_version into install snapshot (273.755375ms)
+✔ cleargate init (8097.517917ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 F1: upgrade re-adds a missing snapshot entry exactly as init writes it
+  ✔ re-added entry carries the package entry fields (incl. owner) and sits in init order (186.821875ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ parity: after that upgrade --yes, a re-run init leaves the files array deep-equal (129.42375ms)
+✔ BUG-122 F1: upgrade re-adds a missing snapshot entry exactly as init writes it (316.888458ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 Sc1: settings.json with a user Stop hook reads clean after the command
+  ✔ after `upgrade --yes` (take path, user hook kept) the dry run labels settings clean (208.029792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ after a re-run `init` (user hook merged in) the dry run labels settings clean (50.624125ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ no user hooks: settings reads clean after upgrade --yes and after a re-run init (170.184291ms)
+✔ BUG-122 Sc1: settings.json with a user Stop hook reads clean after the command (429.541291ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 Sc2: an edited ClearGate hook is drift
+  ✔ a changed ClearGate PostToolUse command reads user-modified, and the projection sees it (41.953416ms)
+✔ BUG-122 Sc2: an edited ClearGate hook is drift (42.092209ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 Sc3: snapshot dates keep their meaning
+  ✔ fresh init has no upgraded_at (18.20125ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ upgrade --yes keeps installed_at, takes the package generated_at, sets upgraded_at after installed_at (131.572542ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ a re-run init keeps installed_at, takes the package generated_at, sets upgraded_at (176.4515ms)
+  ✔ withUpgradedAt inserts upgraded_at directly after installed_at and replaces an existing one in place (0.31ms)
+✔ BUG-122 Sc3: snapshot dates keep their meaning (326.843ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 Sc4: upgrade writes payload modes
+  ✔ a 0644 dedupe_frontmatter.mjs is 0755 after `upgrade --yes` (155.961167ms)
+✔ BUG-122 Sc4: upgrade writes payload modes (156.139708ms)
+▶ BUG-122 units: clearGateHooksProjection (G-R-2)
+  ✔ CLAUDE_SETTINGS_PATH is .claude/settings.json (0.272541ms)
+  ✔ projection is the sorted, deduped (event, matcher, command) triples of ClearGate hooks (0.16775ms)
+  ✔ user hooks, ordering, type, timeout and entry-level keys do not change the projection (0.138542ms)
+  ✔ an edited ClearGate command, matcher or event changes the projection (0.1435ms)
+  ✔ no ClearGate hooks projects to a single newline; malformed JSON projects to null (0.08575ms)
+  ✔ sorting is C order, not locale order (0.080959ms)
+✔ BUG-122 units: clearGateHooksProjection (G-R-2) (0.98175ms)
+▶ BUG-122 units: package, install and current hashes share one space (G-R-3)
+  ✔ the builder hashes settings.json by its projection (MANIFEST.json, composed payload) (0.309791ms)
+  ✔ computeCurrentSha ignores user hooks in settings.json and equals the package sha (2.167667ms)
+  ✔ computeCurrentSha falls back to the raw hash when settings.json is not valid JSON (0.944459ms)
+✔ BUG-122 units: package, install and current hashes share one space (G-R-3) (3.499166ms)
+▶ BUG-122 units: snapshots older than 0.30.1 hold a raw hash (G-R-4)
+  ✔ effectiveInstallSha maps a raw install sha equal to the file to the projection hash (2.413ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ legacy raw snapshot equal to the file, package unchanged -> dry run reads clean (42.230458ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ legacy raw snapshot equal to the file, package changed -> dry run reads upstream-changed (60.422375ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ legacy raw snapshot that differs from the file (edited after the record) -> both-changed (60.285083ms)
+✔ BUG-122 units: snapshots older than 0.30.1 hold a raw hash (G-R-4) (165.579625ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ BUG-122 units: the snapshot hash recorded by upgrade equals the package hash (G-R-5)
+  ✔ after the take path with a user hook, the recorded settings sha is the package sha (132.261917ms)
+✔ BUG-122 units: the snapshot hash recorded by upgrade equals the package hash (G-R-5) (132.384542ms)
+▶ JC-01: cleargate join <url> --auth github happy path
+  ✔ JC-01: GitHub happy path → seats refresh_token (34.793917ms)
+  ✔ JC-01b: stdout contains browser instructions and success message (1.587792ms)
+✔ JC-01: cleargate join <url> --auth github happy path (37.288792ms)
+▶ JC-02: cleargate join <url> --auth email happy path
+  ✔ JC-02: email happy path — reads OTP from stdin, seats refresh_token (1.801292ms)
+  ✔ JC-02b: stdout contains sent_to hint and Enter code prompt (1.155125ms)
+  ✔ JC-02c: OTP never appears in stderr (FLASHCARD #plaintext-redact) (1.226458ms)
+✔ JC-02: cleargate join <url> --auth email happy path (4.319708ms)
+▶ JC-03: cleargate join <url> (no --auth) + TTY + interactive picker
+  ✔ JC-03: picker choice 2 (email) → proceeds with email flow (7.778917ms)
+✔ JC-03: cleargate join <url> (no --auth) + TTY + interactive picker (7.893333ms)
+▶ JC-04: server returns 400 provider_not_allowed on /challenge
+  ✔ JC-04: exits 9 with provider hint (0.655834ms)
+✔ JC-04: server returns 400 provider_not_allowed on /challenge (0.723833ms)
+▶ JC-05: wrong OTP code → 3 retries then exit 12
+  ✔ JC-05: 3 wrong attempts → exits 12 with "3 tries" message (1.1165ms)
+  ✔ JC-05b: retry stderr messages count down (0.756875ms)
+✔ JC-05: wrong OTP code → 3 retries then exit 12 (1.9425ms)
+▶ JC-06: challenge_expired on /complete → exits 3
+  ✔ JC-06: exits 3 with "code expired" message (0.674917ms)
+✔ JC-06: challenge_expired on /complete → exits 3 (0.752333ms)
+▶ JC-07: --non-interactive without --auth → exits 1
+  ✔ JC-07: exits 1 with "--auth required" message (0.49175ms)
+✔ JC-07: --non-interactive without --auth → exits 1 (0.536209ms)
+▶ JC-08: --auth email --non-interactive without --code → exits 1
+  ✔ JC-08: exits 1 with "--code required" message (0.308291ms)
+✔ JC-08: --auth email --non-interactive without --code → exits 1 (0.333209ms)
+▶ JC-09: plaintext-redact (FLASHCARD #cli #plaintext-redact)
+  ✔ JC-09: GitHub access_token never appears in stdout/stderr (3.059208ms)
+  ✔ JC-09b: email OTP never appears in stdout/stderr (1.325167ms)
+  ✔ JC-09c: refresh_token never appears in stdout/stderr (2.832125ms)
+✔ JC-09: plaintext-redact (FLASHCARD #cli #plaintext-redact) (7.340958ms)
+▶ JC-10: server returns 400 identity_proof_required → exits 11 with upgrade hint
+  ✔ JC-10: exits 11 with upgrade message (2.240917ms)
+✔ JC-10: server returns 400 identity_proof_required → exits 11 with upgrade hint (2.310625ms)
+▶ JC-11: --auth github --non-interactive → exits 1 (requires browser)
+  ✔ JC-11: exits 1 with browser required message (0.322333ms)
+✔ JC-11: --auth github --non-interactive → exits 1 (requires browser) (0.358083ms)
+▶ JC-02-CI: --auth email --non-interactive --code 123456
+  ✔ JC-02-CI: CI mode with --code → succeeds without stdin prompt (1.027916ms)
+✔ JC-02-CI: --auth email --non-interactive --code 123456 (1.050792ms)
+▶ R-1: happy path — full URL (two-step flow)
+  ✔ R-1: calls /challenge then /complete, saves refresh token (3.168125ms)
+✔ R-1: happy path — full URL (two-step flow) (3.20925ms)
+▶ R-2: happy path — bare UUID
+  ✔ R-2: calls /challenge with base URL from mcpUrlFlag (3.631542ms)
+✔ R-2: happy path — bare UUID (3.704042ms)
+▶ R-3: bare UUID — no mcpUrl
+  ✔ R-3: exits 5 when mcpUrl is absent (0.434667ms)
+✔ R-3: bare UUID — no mcpUrl (0.464833ms)
+▶ R-4: invalid URL format
+  ✔ R-4: exits 5 for gibberish input (0.307041ms)
+✔ R-4: invalid URL format (0.330916ms)
+▶ R-5: URL with wrong path
+  ✔ R-5: exits 5 for /invite/ path (0.366334ms)
+✔ R-5: URL with wrong path (0.396708ms)
+▶ R-6: 410 invite_expired on /challenge
+  ✔ R-6: exits 3 with invite expired message (0.450292ms)
+✔ R-6: 410 invite_expired on /challenge (0.492333ms)
+▶ R-7: 410 invite_already_consumed on /challenge
+  ✔ R-7: exits 3 with already consumed message (0.38875ms)
+✔ R-7: 410 invite_already_consumed on /challenge (0.414208ms)
+▶ R-8: 404 on /challenge
+  ✔ R-8: exits 4 with invite not found (0.350792ms)
+✔ R-8: 404 on /challenge (0.374291ms)
+▶ R-9: 429 on /challenge
+  ✔ R-9: exits 8 with retry hint (0.361291ms)
+✔ R-9: 429 on /challenge (0.386ms)
+▶ R-10: 5xx on /challenge
+  ✔ R-10: exits 6 on 503 (0.369792ms)
+✔ R-10: 5xx on /challenge (0.38975ms)
+▶ R-11: network failure on /challenge
+  ✔ R-11: exits 2 with cannot reach message (0.29825ms)
+✔ R-11: network failure on /challenge (0.317666ms)
+▶ R-13: --profile staging routes save correctly
+  ✔ R-13: calls store.save with (staging, token) (4.864209ms)
+✔ R-13: --profile staging routes save correctly (4.935666ms)
+▶ R-14: refresh_token never leaks to stdout/stderr
+  ✔ R-14: refresh_token not in any output (1.356667ms)
+✔ R-14: refresh_token never leaks to stdout/stderr (1.397583ms)
+▶ R-15: hostname appears in success message
+  ✔ R-15: stdout uses supplied hostname (2.735208ms)
+✔ R-15: hostname appears in success message (2.782125ms)
+▶ R-16: unhandled exception from store.save exits 99
+  ✔ R-16: exits 99 when store.save rejects (2.198292ms)
+✔ R-16: unhandled exception from store.save exits 99 (2.253083ms)
+▶ URL edge case: query params stripped from fetch URL
+  ✔ challenge URL is clean — built from origin + /join/ + token (2.784083ms)
+✔ URL edge case: query params stripped from fetch URL (2.851958ms)
+▶ URL edge case: trailing segment rejected
+  ✔ exits 5 for path /join/<uuid>/trailing (0.37775ms)
+✔ URL edge case: trailing segment rejected (0.406959ms)
+▶ 403 email_mismatch on /complete
+  ✔ exits 10 with re-issue message (1.099375ms)
+✔ 403 email_mismatch on /complete (1.159084ms)

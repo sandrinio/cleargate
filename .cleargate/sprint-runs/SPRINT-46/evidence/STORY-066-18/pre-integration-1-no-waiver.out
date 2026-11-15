@@ -1,0 +1,5 @@
+# pre-integration proof: CLI=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-18/cleargate-cli (story tree at ec9981b, main without 066-16/066-17); 2026-11-15T12:24:31Z
+Step 0: refreshed 0 items, 0 errors.
+
+test gate: probing the configured test command (at most 20 minutes; reused for the same HEAD and command)
+exit 1

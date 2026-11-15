@@ -1,0 +1,15 @@
+# pre-integration proof: CLI=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-18/cleargate-cli (story tree at ec9981b, main without 066-16/066-17); 2026-11-15T12:24:31Z
+Step 0: refreshed 0 items, 0 errors.
+
+test gate: probing the configured test command (at most 20 minutes; reused for the same HEAD and command)
+test gate: WAIVED — "sh guard.sh" stopped before running any test (exit 2: "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop."); waiver: "no PostgreSQL on this machine"
+cleargate sprint preflight: all five checks pass for SPRINT-01
+→ Load skill: sprint-execution
+exit 0
+Step 0: refreshed 0 items, 0 errors.
+
+test gate: probing the configured test command (at most 20 minutes; reused for the same HEAD and command)
+test gate: WAIVED — "sh guard.sh" stopped before running any test (exit 2: "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop."); waiver: "no PostgreSQL on this machine"
+cleargate sprint preflight: all five checks pass for SPRINT-01
+→ Load skill: sprint-execution
+exit 0 runs=       2

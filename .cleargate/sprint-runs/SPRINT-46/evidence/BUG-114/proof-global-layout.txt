@@ -1,0 +1,44 @@
+BUG-114 proof run, QA-Verify 2026-11-15T09:33:14Z
+worktree HEAD: 9954d54; base script from /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/S46-sandbox/cleargate-cli @ ad5110c
+sha256 base script: 0f837a9a4d2f7701  fixed: 530e83ccca8668cf
+first cleargate on PATH: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/b114p.Uca5/bin/cleargate -> /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/cleargate-cli/dist/cli.js
+no node_modules/cleargate: ls: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/b114p.Uca5/repo/node_modules: No such file or directory; no cleargate-cli: ls: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/b114p.Uca5/repo/cleargate-cli: No such file or directory
+pkg version: 0.30.1
+
+===== [repo-before] =====
+Step 1-2 passed: all 1 stories are terminal.
+cleargate CLI dist not found.
+  Looked for: <root>/cleargate-cli/dist/cli.js (meta-repo) and
+              <root>/node_modules/cleargate/dist/cli.js (installed)
+  Fix: npm install cleargate  (or `npm run build` in cleargate-cli/ when developing ClearGate itself)
+  The lifecycle/orphan/parent-rollup/backsync/merge gates require a built CLI dist.
+[repo-before] exit=1
+
+===== [repo] =====
+Step 1-2 passed: all 1 stories are terminal.
+close_sprint: using the cleargate dist behind PATH: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/cleargate-cli/dist (cleargate 0.30.1)
+Step 2.6d: back-syncing same-sprint story frontmatter...
+Step 2.6d passed: no same-sprint story backsync needed (0 already terminal, 0 pending non-Done).
+Step 2.6c: rolling up parent statuses...
+Step 2.6c passed: 0 parent(s) auto-flipped; no halts.
+Step 2.6: running lifecycle reconciliation...
+lifecycle: clean (0 artifacts reconciled)
+Step 2.6 passed: lifecycle reconciliation clean.
+Step 2.6b: checking for cross-sprint orphan drift...
+Step 2.6b passed: no cross-sprint orphan drift.
+Step 2.7: checking for leftover worktrees...
+Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam).
+Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam).
+Step 2.9: checking deferred verifications...
+Step 2.9 passed: no deferred verifications declared.
+Step 3: running prefill_report.mjs...
+No agent reports found in /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/b114p.Uca5/repo/.cleargate/sprint-runs/SPRINT-01; nothing to prefill.
+Step 3.5 skipped: CLEARGATE_SKIP_BUNDLE_CHECK=1 set (test seam).
+Step 4: preconditions satisfied — orchestrator should now spawn the Reporter agent.
+        The Reporter writes SPRINT-01_REPORT.md using the sprint_report.md template.
+        Expected output: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/BUG-114/b114p.Uca5/repo/.cleargate/sprint-runs/SPRINT-01/SPRINT-01_REPORT.md
+
+Waiting for Reporter to produce SPRINT-01_REPORT.md...
+After Reporter succeeds, re-run with --assume-ack to complete the close.
+--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).
+[repo] exit=0

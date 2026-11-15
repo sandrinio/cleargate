@@ -1,0 +1,14 @@
+# integrated tree 4368a53 (story/STORY-066-18 + main fd3c471), 2026-11-15T13:53:03Z
+# before = scripts of ec9981b (pre-Amendment B), after = scripts of the integrated HEAD
+=== before: probe through run_script.sh (RUN_SCRIPT_ACTIVE=1 set by the wrapper; CLEARGATE_REPO_ROOT set as the preflight does)
+{"command":"sh envcheck.sh","exit_code":1,"failing":2,"ran":true,"last_line":"not ok 2 - CLEARGATE_REPO_ROOT reached the test command","cached":false}
+exit 0
+=== before: merge with leaked env (RUN_SCRIPT_ACTIVE=1 CLEARGATE_REPO_ROOT=root NODE_TEST_CONTEXT=child-v8), no baseline.json, no waiver
+{"id":"STORY-908-01","step":"pre-merge","exit":3,"tail":["[FAIL] test: exit code 1","  | not ok 1 - RUN_SCRIPT_ACTIVE reached the test command","  | not ok 2 - CLEARGATE_REPO_ROOT reached the test command","  | not ok 3 - NODE_TEST_CONTEXT reached the test command"]}
+exit 3
+=== after: probe through run_script.sh (RUN_SCRIPT_ACTIVE=1 set by the wrapper; CLEARGATE_REPO_ROOT set as the preflight does)
+{"command":"sh envcheck.sh","exit_code":0,"failing":0,"ran":true,"last_line":"ok 1 - clean env","cached":false}
+exit 0
+=== after: merge with leaked env (RUN_SCRIPT_ACTIVE=1 CLEARGATE_REPO_ROOT=root NODE_TEST_CONTEXT=child-v8), no baseline.json, no waiver
+{"id":"STORY-908-01","step":"done","exit":0,"tail":["ok 1 - clean env"],"post_merge_test":"pass"}
+exit 0

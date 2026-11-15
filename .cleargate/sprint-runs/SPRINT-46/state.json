@@ -122,8 +122,116 @@
       "lane_assigned_by": "sdr-lane-audit",
       "lane_demoted_at": null,
       "lane_demotion_reason": null
+    },
+    "STORY-066-13": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 1,
+      "worktree": null,
+      "updated_at": "2026-11-15T09:57:08.516Z",
+      "notes": "added mid-sprint 2026-11-15 under the owner /goal delegation: Goal check (d) sandbox findings S1,S3-S6",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-14": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T10:20:02.911Z",
+      "notes": "added mid-sprint 2026-11-15 under the owner /goal delegation: Goal check (d) sandbox findings S9,S11,S12; upstream STORY-066-13 (shared prompt files)",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "BUG-114": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T10:46:20.197Z",
+      "notes": "pulled into SPRINT-46 2026-11-15 under the owner /goal delegation: Goal check (d) run 1 close blocked (S14); parked in SPRINT-41 M7-C",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-15": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T09:35:05.060Z",
+      "notes": "added mid-sprint 2026-11-15 under the owner /goal delegation: Goal check (d) sandbox finding S16 (criterion 9)",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-16": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T13:14:24.252Z",
+      "notes": "iteration 3, added mid-sprint 2026-11-15 under the owner /goal delegation (section C bar; plans/iteration-3-scoping.md)",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-17": {
+      "state": "Done",
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T14:00:35.735Z",
+      "notes": "iteration 3, added mid-sprint 2026-11-15 under the owner /goal delegation (section C bar; plans/iteration-3-scoping.md)",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-18": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T16:05:11.691Z",
+      "notes": "iteration 3, added mid-sprint 2026-11-15 under the owner /goal delegation (section C bar; plans/iteration-3-scoping.md)",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-19": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T12:13:10.436Z",
+      "notes": "iteration 3, added mid-sprint 2026-11-15 under the owner /goal delegation (section C bar; plans/iteration-3-scoping.md)",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-066-20": {
+      "state": "Done",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-15T12:47:53.044Z",
+      "notes": "iteration 3, added mid-sprint 2026-11-15 under the owner /goal delegation (section C bar; plans/iteration-3-scoping.md)",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-066-12 → Done",
-  "updated_at": "2026-11-15T07:35:39.824Z"
+  "last_action": "transition STORY-066-18 → Done",
+  "updated_at": "2026-11-15T16:05:11.691Z"
 }

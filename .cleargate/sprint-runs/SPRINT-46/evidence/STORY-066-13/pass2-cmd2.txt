@@ -1,0 +1,25 @@
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/wave-runner-sandbox-fixes.red.node.test.ts test/integration/wave-runner-item-rerun.red.integration.node.test.ts
+
+▶ STORY-066-13 single-item re-run and relative-path pack (red)
+  ✔ I1 @paths @interfaces: --item STORY-903-02 --from developer re-runs one blocked item from git state (3520.323875ms)
+  ✔ I2 @rules (regression pin, passes at baseline by D-1): prep_qa_context.mjs resolves a relative worktree path from the repo root (2047.058792ms)
+✔ STORY-066-13 single-item re-run and relative-path pack (red) (5568.02075ms)
+▶ STORY-066-13 sandbox loop fixes (red)
+  ✔ U1 @rules: QA-Verify prompt builds the pack first; qa.md and qa.toml pack-absent fallback runs prep itself (7.735333ms)
+  ✔ U2 @data: QA-Red prompt names the story plan on runtime, not on standard; qa.md RED step allows the plan (3.2655ms)
+  ✔ U3 @paths: a Developer Red-Test block goes back to QA-Red, counted as a red-test bounce (2.985416ms)
+  ✔ U4 @paths: Spec-Gap and a no-red-stage lane keep their BLOCKED verdicts; Spec-Gap after a Red-Test route still blocks (4.38925ms)
+  ✔ U5 @rules: a defect_in none FAIL re-runs QA-Verify once, with no Developer pass and no bounce (1.247875ms)
+  ✔ U6 @rules: two consecutive none FAILs block; SKILL.md A.5 and C.5 carry the baseline and none rules (3.48725ms)
+  ✔ U7 @paths: a mid-lane start runs from startAt and keeps the seeded SHAs; SKILL re-approach drops resumeFromRunId (1.908ms)
+✔ STORY-066-13 sandbox loop fixes (red) (25.796417ms)
+ℹ tests 9
+ℹ suites 2
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6194.02875

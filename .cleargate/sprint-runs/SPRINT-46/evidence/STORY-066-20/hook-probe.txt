@@ -1,0 +1,4 @@
+no marker: exit 2
+with .wave-open: exit 0
+marker removed: exit 2
+SKIP env=1: exit 0

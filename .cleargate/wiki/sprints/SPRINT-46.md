@@ -27,8 +27,8 @@ cited_by: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md"
-last_ingest: "2026-11-15T07:39:40.738Z"
-last_ingest_commit: "7acbc8fc2a51333f422224567eae8b12db68e128"
+last_ingest: "2026-11-15T16:07:42.298Z"
+last_ingest_commit: "0844dd1fc692bbf2bfa840723e87ef283d96a3d2"
 repo: "planning"
 last_contradict_sha: "4d498cf6a2e74d3e7f1e446187c5bcea29f1e600414d61f63ba94f89e5d959db"
 ---
@@ -54,7 +54,7 @@ Design Review by the current rubric; this sprint runs on the current loop.
 | `STORY-066-08` | Merge by script <!-- cleargate:ignore-ids -->(absorbs BUG-086, BUG-107, BUG-116)<!-- /cleargate:ignore-ids --> | standard | M2 | n (after 03, 04) | high | Integration — `merge_story.mjs` on npm and Go fixture repos: clean, failing check, conflict, residue |
 | `STORY-066-09` | QA-Verify runs the item | standard | M2 | n (after 04, 07) | med | Unit + docs-match-code — pack `commands` section; `DEFECT_IN` in the VERIFY output contract |
 
-[+510 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md]
+[+3,566 bytes not shown — read .cleargate/delivery/pending-sync/SPRINT-46_build_step_sized_by_risk.md]
 
 <!-- BEGIN relations -->
 ## Relations

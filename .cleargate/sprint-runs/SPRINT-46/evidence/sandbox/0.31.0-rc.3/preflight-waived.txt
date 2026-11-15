@@ -1,0 +1,7 @@
+Step 0: refreshed 4 items, 0 errors.
+
+test gate: probing the configured test command (at most 20 minutes; reused for the same HEAD and command)
+test gate: WAIVED — "make check" stopped before running any test (exit 2: "make: *** [test] Error 2"); waiver: "make check needs TALLY_DB_URL (a Postgres URL) that the sandbox does not provide; tests cannot run here (owner-approved for the SPRINT-46 sandbox runs)"
+cleargate sprint preflight: all five checks pass for SPRINT-01
+→ Load skill: sprint-execution
+preflight exit 0

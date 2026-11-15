@@ -1,3 +1,41 @@
+2026-11-15 · #cli #test-harness · a user hint in cli src must not spell 'node .cleargate/scripts/…': test/cli Scenario 4 greps dist/cli.js; write 'bash .cleargate/scripts/run_script.sh x.mjs'
+2026-11-15 · #qa #proof-run · sprint init proof fixture needs a §1 Consolidated Deliverables section + stub story with a ## heading; rm events.jsonl before hand-writing state.json
+2026-11-15 · #close #worktree · Claude worktree sessions start on worktree-<name>; A.2/merge_story move them to sprint/S-NN, so close D-3 passes
+2026-11-15 · #close #worktree #wiki · parent's post-shell-ingest writes .cleargate/wiki/* after its HEAD moves; untracked → 7.8 merge collides
+2026-11-15 · #close #git · Step 7.8 commits every tracked edit + untracked .cleargate/** (add -u, add -A); review git status before the ack
+2026-11-15 · #qa #proof-run · probe scripts with a restricted PATH lack /sbin/md5; a before/after md5 diff of error text is a false alarm, use cksum
+2026-11-15 · #qa #close · a CLEARGATE_SPRINT_DIR probe dir must be named SPRINT-NN or the naming check refuses it before the closeOwnsRepo path
+2026-11-15 · #qa-red #scripts · seal_red --worktree must be the cli checkout root (its own git toplevel), paths relative to it; the meta path hits gitignored cleargate-cli/
+2026-11-15 · #test-harness #qa-red · test:file output is long; redirect to a file and grep for ✖/ℹ, since the tool can background a slow run
+2026-11-15 · #qa-red #scripts · seal_red.mjs refuses any seal once a Developer commit exists (C-15); amendment reds need an orchestrator waiver + manual qa-red commit + separate arch scan
+2026-11-15 · #qa-red #test-harness · tsx needs a TMPDIR short enough for its unix socket (EINVAL on the long scratchpad path); use /private/tmp/<short>
+2026-11-15 · #git #close · untracked file at a branch-tracked path refuses merge AND checkout back; print the recovery cmd, never -f
+2026-11-15 · #test-harness #git · fake a merge race: post-commit hook moves main via read-tree/commit-tree/update-ref on a temp index
+2026-11-15 · #test-harness #git · in-process lib tests that merge/checkout must pin process.env GIT_CONFIG_GLOBAL; a global hooksPath runs
+2026-11-15 · #run_script #baseline · strip RUN_SCRIPT_ACTIVE/CLEARGATE_REPO_ROOT from configured test cmds in record_baseline, merge_story shell AND pre_gate test together — one-sided strip ⇒ merges exit 5
+2026-11-15 · #git #test-harness · fake old git with a PATH shim that answers `--path-format=absolute --git-common-dir` with 2 lines; rev-parse echoes unknown flags
+2026-11-15 · #init #lanes #dogfood · init_sprint.mjs imports assign_lane.mjs statically: porting init alone fails at module link (exit 1). Sync both.
+2026-11-15 · #lanes #sdr · Kickoff lanes come from assign_lane at A.3; an SDR raise reaches state.json only via update_state --lane, never waves.json.
+2026-11-15 · #run_script #baseline · test cmd spawned under run_script.sh inherits RUN_SCRIPT_ACTIVE=1 + CLEARGATE_REPO_ROOT; strip in record_baseline AND merge_story shell together or merges refuse
+2026-11-15 · #preflight #orchestrator · preflight/sprint init may run the suite ≤20 min; Claude Bash foreground caps 600 s (default 120 s) — run them in background
+2026-11-15 · #git · rev-parse echoes unknown flags: on git <2.31 --path-format=absolute output is 2 lines; check path.isAbsolute before writing
+2026-11-15 · #close #git · a close that checks out main and then fails must restore the sprint branch; on main the re-run dies 'sprint directory not found'
+2026-11-15 · #qa #proof-run · extracting a plan's bash block by line range: check the closing fence is excluded; bash runs a partial script before the syntax error
+2026-11-15 · #qa #test-harness · init throw-path probe: patch the scratch copy of assign_lane.mjs computeSignals to throw; never edit the worktree
+2026-11-15 · #test-harness #close · close_sprint tests under bare node --test lack CLEARGATE_CI_ACK=1 (test:file sets it); the ack guard exits 2, looks like a regression
+2026-11-15 · #qa #proof-run · plan proof scripts: save them to a file and run with bash; pasting into zsh breaks heredoc quoting and word splitting
+2026-11-15 · #qa-red #test-harness · reconcileCurrentSprintStories takes {deliveryRoot, sprintRunsRoot, sprintId}, not repoRoot; flipped items are {id}
+2026-11-15 · #templates #hotfix · templates/hotfix.md ships lane: "hotfix"; a lane back-sync must not overwrite a frontmatter value that is not a lane name
+2026-11-15 · #close #dist #test-harness · close 2.6d imports dist/lib/lifecycle-reconcile.js: a reconciler src change is invisible to close tests until dist is rebuilt
+2026-11-15 · #lanes #init-sprint · laneOf reads state.json before waves.json: a lane raised in waves.json after init never runs; record it via update_state --lane
+2026-11-15 · #qa-red #scripts · meta-repo seal before re-sync: run cli main's seal_red.mjs from a scratch root symlinking delivery/ + sprint-runs/
+2026-11-15 · #qa-red #scripts · cli repo has no sprint/S-NN ref; seal_red --sprint-branch must be the cli base (main)
+2026-11-15 · #test-harness #npm-scripts · npm run test:file quotes its args: several files become one bad path; one file per call or npx tsx --test
+2026-11-15 · #upgrade #gate-checks · cleargate upgrade overwrites gate-checks.json (always policy); any new qa.* key must be restored explicitly
+2026-11-15 · #test-harness #merge · another lane's pkill -f 'tsx --test' kills the merge lane's suite mid-run; check both summaries before classifying
+2026-11-15 · #git #close · git merge-tree --write-tree exits 1 for a conflict AND for a bad ref; verify refs first, a conflict prints a tree OID line 1.
+2026-11-15 · #close #test-harness · close_sprint 2.7/2.8 now precede the dist gate: a fixture inside a checkout with .worktrees/STORY-* stops at 2.7.
+2026-11-15 · #close #test-harness · close's .active clear and Step 7.8 git run only when sprintDir is REPO_ROOT's own; a tmp CLEARGATE_SPRINT_DIR never commits.
 2026-11-15 · #template #qa · template rows are anchors (probe-items.mjs declareProbeSprint + sealed reds); grep tests/scripts for old text first
 2026-11-15 · #merge #orchestrator · merge_story `post_merge_test: excused` + a NOT TESTED tail line = merged with no test run; report it, never call it tested
 2026-11-15 · #qa-red #test-harness · multi-case git-fixture block: a failing early case hides later cases' harness bugs; order riskiest first
