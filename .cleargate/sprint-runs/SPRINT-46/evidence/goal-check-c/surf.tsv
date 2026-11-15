@@ -1,0 +1,414 @@
+cg_SPRINT-43	BUG-088	cleargate-planning/.claude/agents/{architect,qa,developer,devops,reporter}.md
+cg_SPRINT-43	BUG-088	cleargate-planning/.claude/skills/sprint-execution/SKILL.md:242
+cg_SPRINT-43	BUG-088	cleargate-planning/.claude/skills/sprint-execution/SKILL.md:165
+cg_SPRINT-43	CR-121	cleargate-planning/.claude/hooks/pending-task-sentinel.sh
+cg_SPRINT-43	CR-121	.cleargate/scripts/close_sprint.mjs
+cg_SPRINT-43	CR-121	cleargate-planning/.claude/skills/sprint-execution/SKILL.md:560
+cg_SPRINT-43	CR-122	cleargate-planning/.claude/agents/developer.md
+cg_SPRINT-43	CR-122	cleargate-planning/.claude/agents/qa.md
+cg_SPRINT-43	CR-122	.cleargate/scripts/update_state.mjs
+cg_SPRINT-43	STORY-031-03	.cleargate/templates/sprint_context.md
+cg_SPRINT-43	STORY-031-03	cleargate-planning/.cleargate/templates/sprint_context.md
+cg_SPRINT-43	STORY-031-03	cleargate-planning/.claude/agents/devops.md
+cg_SPRINT-43	STORY-031-03	.claude/agents/devops.md
+cg_SPRINT-43	STORY-031-03	cleargate-planning/.claude/skills/sprint-execution/SKILL.md
+cg_SPRINT-43	STORY-031-04	cleargate-planning/.claude/agents/qa.md
+cg_SPRINT-43	STORY-031-04	.claude/agents/qa.md
+cg_SPRINT-43	STORY-031-04	cleargate-planning/.claude/skills/sprint-execution/SKILL.md
+cg_SPRINT-43	STORY-031-05	.cleargate/scripts/init_sprint.mjs
+cg_SPRINT-43	STORY-031-05	cleargate-planning/.cleargate/scripts/init_sprint.mjs
+cg_SPRINT-43	STORY-031-05	.cleargate/scripts/test/test_init_sprint_carry_forward.sh
+cg_SPRINT-43	STORY-031-05	Yes — .cleargate/scripts/test/test_init_sprint_carry_forward.sh
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/dashboard/daemon.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/dashboard/serve.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/dashboard/render.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/commands/sprint.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/cli.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/scaffold/core/.gitignore
+cg_SPRINT-44	STORY-062-01	cleargate-cli/src/commands/init.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/test/dashboard/serve.node.test.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/test/dashboard/cr101.node.test.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/test/dashboard/render.node.test.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/test/dashboard/dashboard-lifecycle.red.node.test.ts
+cg_SPRINT-44	STORY-062-01	cleargate-cli/test/dashboard/tab-shell.red.node.test.ts
+cg_SPRINT-44	STORY-062-01	./.gitignore (meta-repo; committed to the outer repo
+cg_SPRINT-44	STORY-062-02	cleargate-cli/src/dashboard/backlog.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/src/dashboard/serve.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/src/dashboard/render.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/test/dashboard/backlog.node.test.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/test/dashboard/render.node.test.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/test/dashboard/backlog.red.node.test.ts
+cg_SPRINT-44	STORY-062-02	cleargate-cli/test/dashboard/backlog-tab.red.node.test.ts
+cg_SPRINT-44	STORY-062-02	Yes — cleargate-cli/src/dashboard/backlog.ts
+cg_SPRINT-44	STORY-062-03	cleargate-cli/src/commands/sprint-scope.ts
+cg_SPRINT-44	STORY-062-03	cleargate-cli/src/cli.ts
+cg_SPRINT-44	STORY-062-03	cleargate-cli/test/commands/sprint-scope.node.test.ts
+cg_SPRINT-44	STORY-062-03	cleargate-cli/test/commands/sprint-scope.red.node.test.ts
+cg_SPRINT-44	STORY-062-03	Yes — cleargate-cli/src/commands/sprint-scope.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/src/dashboard/plan.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/src/dashboard/serve.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/src/dashboard/render.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-dashboard/SKILL.md
+cg_SPRINT-44	STORY-062-04	cleargate-cli/scaffold/core/.agents/skills/sprint-dashboard/SKILL.md
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan.red.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan-endpoint.red.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan-roundtrip.red.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan-tab.red.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/serve.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/render.node.test.ts
+cg_SPRINT-44	STORY-062-04	cleargate-cli/test/dashboard/plan-stale-claims.red.node.test.ts
+cg_SPRINT-44	STORY-062-04	Yes — cleargate-cli/src/dashboard/plan.ts
+cg_SPRINT-44	STORY-062-05	cleargate-cli/src/dashboard/serve.ts
+cg_SPRINT-44	STORY-062-05	cleargate-cli/src/dashboard/render.ts
+cg_SPRINT-44	STORY-062-05	cleargate-cli/src/dashboard/collect.ts
+cg_SPRINT-44	STORY-062-05	cleargate-cli/test/dashboard/ticket-view.red.node.test.ts
+cg_SPRINT-44	STORY-062-05	cleargate-cli/test/dashboard/host-guard.red.node.test.ts
+cg_SPRINT-44	STORY-062-06	cleargate-cli/src/dashboard/render.ts
+cg_SPRINT-44	STORY-062-06	cleargate-cli/test/dashboard/backlog-status-filter.red.node.test.ts
+cg_SPRINT-45	STORY-064-01	cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs
+cg_SPRINT-45	STORY-064-01	cleargate-cli/scaffold/core/.cleargate/config.example.yml
+cg_SPRINT-45	STORY-064-01	cleargate-cli/test/scripts/sprint-metrics.red.node.test.ts
+cg_SPRINT-45	STORY-064-01	cleargate-cli/test/scripts/sprint-metrics.red.integration.node.test.ts (green only after CR-120 integrates)
+cg_SPRINT-45	STORY-064-01	cleargate-cli/test/fixtures/sprint-metrics/
+cg_SPRINT-45	STORY-064-01	Yes — sprint_metrics.mjs
+cg_SPRINT-45	STORY-064-02	cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs
+cg_SPRINT-45	STORY-064-02	cleargate-cli/scaffold/core/.cleargate/templates/sprint_report.md
+cg_SPRINT-45	STORY-064-02	cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md
+cg_SPRINT-45	STORY-064-02	cleargate-cli/scaffold/hosts/codex/.codex/agents/reporter.toml (generated by npm run gen:codex
+cg_SPRINT-45	STORY-064-02	cleargate-cli/test/scripts/prep-reporter-measured-metrics.red.node.test.ts
+cg_SPRINT-45	STORY-064-02	cleargate-cli/test/agents/reporter-measured-metrics.red.node.test.ts
+cg_SPRINT-45	STORY-064-02	cleargate-cli/test/scripts/test_prep_reporter_context.node.test.ts
+cg_SPRINT-45	STORY-064-02	cleargate-cli/test/agents/reporter-content.node.test.ts
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.cleargate/scripts/subagent-ledger.mjs
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.cleargate/scripts/count_tokens.mjs
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.cleargate/scripts/lib/ledger-digest.mjs
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/hosts/claude/.claude/hooks/token-ledger.sh
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.cleargate/scripts/surface-whitelist.txt
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
+cg_SPRINT-45	CR-120	cleargate-cli/test/scripts/subagent-ledger.red.node.test.ts
+cg_SPRINT-45	CR-120	cleargate-cli/test/fixtures/subagent-ledger/
+cg_SPRINT-45	CR-120	cleargate-cli/test/snapshots/hooks-snapshots.node.test.ts
+cg_SPRINT-45	CR-120	cleargate-cli/test/snapshots/hooks/token-ledger.cr-120.sh
+cg_SPRINT-45	CR-120	cleargate-cli/test/scaffold/skill-md-serial-pointers.red.node.test.ts
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md
+cg_SPRINT-45	CR-120	cleargate-cli/scaffold/hosts/codex/.codex/hooks/token-ledger.sh
+cg_SPRINT-45	BUG-117	cleargate-cli/src/lib/pricing.ts
+cg_SPRINT-45	BUG-117	cleargate-cli/test/lib/pricing.node.test.ts
+cg_SPRINT-45	BUG-133	cleargate-cli/src/commands/upgrade.ts
+cg_SPRINT-45	BUG-133	cleargate-cli/src/lib/changelog.ts
+cg_SPRINT-45	BUG-133	cleargate-cli/test/commands/upgrade-changelog.node.test.ts
+cg_SPRINT-45	BUG-133	cleargate-cli/test/commands/upgrade-state-parity.red.node.test.ts
+cg_SPRINT-45	BUG-133	cleargate-cli/test/commands/upgrade-output.red.integration.node.test.ts
+cg_SPRINT-45	BUG-133	gate-checks.json: kept … / … (detected)
+cg_SPRINT-45	BUG-134	cleargate-cli/src/init/merge-settings.ts
+cg_SPRINT-45	BUG-134	cleargate-cli/src/lib/settings-json-surgery.ts
+cg_SPRINT-45	BUG-134	cleargate-cli/src/commands/upgrade.ts
+cg_SPRINT-45	BUG-134	cleargate-cli/src/hosts/claude.ts
+cg_SPRINT-45	BUG-134	cleargate-cli/src/hosts/codex.ts
+cg_SPRINT-45	BUG-134	merge-settings.ts
+cg_SPRINT-45	BUG-134	hosts/claude.ts
+cg_SPRINT-45	BUG-134	hosts/codex.ts
+cg_SPRINT-45	BUG-134	upgrade.ts
+cg_SPRINT-45	BUG-134	cleargate-cli/test/commands/upgrade-settings-order.red.integration.node.test.ts
+cg_SPRINT-46	STORY-066-03	cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh
+cg_SPRINT-46	STORY-066-03	cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_common.sh
+cg_SPRINT-46	STORY-066-03	cleargate-cli/scaffold/core/.cleargate/scripts/init_gate_config.sh
+cg_SPRINT-46	STORY-066-03	Yes — cleargate-cli/test/pre-gate-any-stack.integration.node.test.ts
+cg_SPRINT-46	STORY-066-04	cleargate-cli/src/commands/sprint.ts
+cg_SPRINT-46	STORY-066-04	cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs
+cg_SPRINT-46	STORY-066-04	Yes — cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs
+cg_SPRINT-46	STORY-066-04	cleargate-cli/test/scripts/record-baseline.node.test.ts
+cg_SPRINT-46	STORY-066-04	cleargate-cli/test/sprint-kickoff-baseline.integration.node.test.ts
+cg_SPRINT-46	STORY-066-04	cleargate-cli/test/scripts/prep-qa-context-baseline.node.test.ts
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/scripts/assign_lane.mjs
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/scripts/state.schema.json
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/scripts/init_sprint.mjs
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/scripts/constants.mjs
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/hosts/claude/.claude/agents/architect.md
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/hosts/codex/.codex/agents/architect.toml
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-enforcement.md
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md
+cg_SPRINT-46	STORY-066-05	cleargate-cli/scaffold/core/.cleargate/templates/story.md
+cg_SPRINT-46	STORY-066-05	cleargate-cli/test/scripts/assign-lane.node.test.ts
+cg_SPRINT-46	STORY-066-05	cleargate-cli/test/scripts/assign-lane-init-sprint.integration.node.test.ts
+cg_SPRINT-46	STORY-066-05	cleargate-cli/test/scripts/test_dogfood_lane_fast.node.test.ts
+cg_SPRINT-46	STORY-066-05	Yes — cleargate-cli/scaffold/core/.cleargate/scripts/assign_lane.mjs
+cg_SPRINT-46	STORY-066-06	cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs
+cg_SPRINT-46	STORY-066-06	cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs
+cg_SPRINT-46	STORY-066-06	cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs
+cg_SPRINT-46	STORY-066-06	cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md
+cg_SPRINT-46	STORY-066-06	cleargate-cli/scripts/clean-room/loop-script.mjs
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/wave-execution-barrier.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/dispatch-verdict-modes.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/dispatch-serial-cli.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/dispatch-serial.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/bug-034-flashcard-gate-restore.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/codex-loop-evidence.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/flashcard-gate-parity.red.node.test.ts
+cg_SPRINT-46	STORY-066-06	cleargate-cli/test/scripts/segment-stages.node.test.ts
+cg_SPRINT-46	STORY-066-06	Yes — cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs
+cg_SPRINT-46	STORY-066-07	cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs
+cg_SPRINT-46	STORY-066-07	cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs
+cg_SPRINT-46	STORY-066-07	cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md
+cg_SPRINT-46	STORY-066-07	cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml
+cg_SPRINT-46	STORY-066-07	cleargate-cli/test/scripts/seal-red.integration.node.test.ts
+cg_SPRINT-46	STORY-066-07	cleargate-cli/test/scripts/qa-red-lint-volume.node.test.ts
+cg_SPRINT-46	STORY-066-07	cleargate-cli/test/agents/qa-red-seal-content.node.test.ts
+cg_SPRINT-46	STORY-066-08	cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs
+cg_SPRINT-46	STORY-066-08	cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md
+cg_SPRINT-46	STORY-066-08	cleargate-cli/scaffold/hosts/codex/.codex/agents/devops.toml
+cg_SPRINT-46	STORY-066-08	cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json
+cg_SPRINT-46	STORY-066-08	cleargate-cli/test/scripts/merge-story.node.test.ts
+cg_SPRINT-46	STORY-066-08	cleargate-cli/test/scripts/merge-story.integration.node.test.ts
+cg_SPRINT-46	STORY-066-09	cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md
+cg_SPRINT-46	STORY-066-09	cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs
+cg_SPRINT-46	STORY-066-09	cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml
+cg_SPRINT-46	STORY-066-09	cleargate-cli/scaffold/core/.cleargate/scripts/test/test_prep_qa_context.sh
+cg_SPRINT-46	STORY-066-09	cleargate-cli/test/agents/qa-content.integration.node.test.ts
+cg_SPRINT-46	STORY-066-09	cleargate-cli/test/scripts/prep-qa-context-commands.node.test.ts
+cg_SPRINT-46	STORY-066-09	cleargate-cli/test/agents/qa-verify-run-and-probe.node.test.ts
+cg_SPRINT-46	STORY-066-09	Yes — prep-qa-context-commands.node.test.ts and qa-verify-run-and-probe.node.test.ts
+cg_SPRINT-46	STORY-066-10	cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs
+cg_SPRINT-46	STORY-066-10	cleargate-cli/scaffold/core/.cleargate/scripts/state-events.mjs
+cg_SPRINT-46	STORY-066-10	cleargate-cli/scaffold/core/.cleargate/scripts/sprint_metrics.mjs
+cg_SPRINT-46	STORY-066-10	cleargate-cli/test/scripts/test_update_state.integration.node.test.ts
+cg_SPRINT-46	STORY-066-10	cleargate-cli/test/scripts/sprint-metrics.red.node.test.ts
+cg_SPRINT-46	STORY-066-10	cleargate-cli/test/fixtures/sprint-metrics/builders.ts
+cg_SPRINT-46	STORY-066-11	cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js
+cg_SPRINT-46	STORY-066-11	cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs
+cg_SPRINT-46	STORY-066-11	cleargate-cli/scaffold/core/.cleargate/config.example.yml
+cg_SPRINT-46	STORY-066-11	cleargate-cli/test/scripts/wave-runner.node.test.ts
+cg_SPRINT-46	STORY-066-11	cleargate-cli/test/integration/wave-runner.integration.node.test.ts
+cg_SPRINT-46	STORY-066-11	Yes — wave_runner.js
+cg_SPRINT-46	STORY-066-11	wave_runner_args.mjs
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/agents/architect.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/codex/.codex/agents/architect.toml
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/agents/architect-synth.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/codex/.codex/agents/architect-synth.toml
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/agents/developer.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/codex/.codex/agents/developer.toml
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/templates/Sprint Plan Template.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scripts/build-codex-payload.mjs
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs
+cg_SPRINT-46	STORY-066-12	cleargate-cli/test/scripts/codex-sprint-execution-render.red.node.test.ts
+cg_SPRINT-46	STORY-066-12	cleargate-cli/test/docs/loop-spec-three-paths.node.test.ts
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/codex/.codex/agents/reporter.toml
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/README.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/hosts/claude/CLAUDE.md
+cg_SPRINT-46	STORY-066-12	cleargate-cli/scaffold/core/.cleargate/templates/story.md
+cg_SPRINT-46	STORY-066-12	Yes — cleargate-cli/test/docs/loop-spec-three-paths.node.test.ts
+da_SPRINT-04	STORY-004-01	internal/netconf/netconf.go
+da_SPRINT-04	STORY-004-01	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-01	internal/store/network.go
+da_SPRINT-04	STORY-004-01	internal/store/migrations/00012_closes.sql (new)
+da_SPRINT-04	STORY-004-01	internal/readings/readings.go
+da_SPRINT-04	STORY-004-01	internal/readings/settings.go (new: Series
+da_SPRINT-04	STORY-004-01	internal/netconf/closes_keys_red_test.go (new)
+da_SPRINT-04	STORY-004-01	internal/store/closes_settings_red_test.go (new)
+da_SPRINT-04	STORY-004-01	internal/readings/settings_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-01	internal/store/testdata/closes_network.json (new
+da_SPRINT-04	STORY-004-01	internal/readings/settings.go
+da_SPRINT-04	STORY-004-02	internal/api/readings.go
+da_SPRINT-04	STORY-004-02	internal/api/closes.go
+da_SPRINT-04	STORY-004-02	internal/readings/readings.go
+da_SPRINT-04	STORY-004-02	internal/readings/close.go
+da_SPRINT-04	STORY-004-02	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-02	api/openapi.yaml
+da_SPRINT-04	STORY-004-02	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-02	internal/api/region_red_test.go (new)
+da_SPRINT-04	STORY-004-02	internal/api/region_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-02	internal/readings/region_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-02	internal/netconf/region_names_red_test.go (new)
+da_SPRINT-04	STORY-004-02	none new: the demo network (testdata/networks/demo.json) and internal/api/testdata/fuelings_network.json
+da_SPRINT-04	STORY-004-03	internal/readings/chain.go (new)
+da_SPRINT-04	STORY-004-03	internal/dec/dec.go (two methods added: Mul
+da_SPRINT-04	STORY-004-03	internal/readings/chain_red_test.go (new)
+da_SPRINT-04	STORY-004-03	internal/dec/mul_red_test.go (new)
+da_SPRINT-04	STORY-004-04	internal/readings/chainload.go (new)
+da_SPRINT-04	STORY-004-04	internal/readings/readings.go
+da_SPRINT-04	STORY-004-04	internal/readings/close.go
+da_SPRINT-04	STORY-004-04	internal/sim/expect.go
+da_SPRINT-04	STORY-004-04	internal/api/readings.go
+da_SPRINT-04	STORY-004-04	internal/api/words.go
+da_SPRINT-04	STORY-004-04	api/openapi.yaml
+da_SPRINT-04	STORY-004-04	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-04	test/e2e/harness_test.go
+da_SPRINT-04	STORY-004-04	test/e2e/week_test.go
+da_SPRINT-04	STORY-004-04	test/e2e/compare_test.go
+da_SPRINT-04	STORY-004-04	docs/features.md
+da_SPRINT-04	STORY-004-04	internal/readings/chainload_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-04	internal/readings/readings_integration_red_test.go (R8's row)
+da_SPRINT-04	STORY-004-04	internal/readings/close_integration_red_test.go (rows that assert rule 3's old words
+da_SPRINT-04	STORY-004-04	internal/sim/expect_derived_red_test.go (new)
+da_SPRINT-04	STORY-004-04	internal/api/readings_kind_red_test.go (new)
+da_SPRINT-04	STORY-004-04	internal/readings/testdata/network.json (station S2 with P3N1 and its onboarding reading)
+da_SPRINT-04	STORY-004-05	internal/readings/settled.go (new)
+da_SPRINT-04	STORY-004-05	internal/store/migrations/00013_status_marks.sql (new)
+da_SPRINT-04	STORY-004-05	internal/ingest/statestore.go
+da_SPRINT-04	STORY-004-05	internal/readings/close.go
+da_SPRINT-04	STORY-004-05	internal/readings/readings.go
+da_SPRINT-04	STORY-004-05	internal/api/closes.go
+da_SPRINT-04	STORY-004-05	internal/api/readings.go
+da_SPRINT-04	STORY-004-05	internal/api/words.go
+da_SPRINT-04	STORY-004-05	api/openapi.yaml
+da_SPRINT-04	STORY-004-05	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-05	test/e2e/compare_test.go (the CSV key lists only)
+da_SPRINT-04	STORY-004-05	docs/features.md (F6's row: "marked complete or provisional" now true through the API)
+da_SPRINT-04	STORY-004-05	internal/readings/settled_red_test.go
+da_SPRINT-04	STORY-004-05	internal/readings/settled_integration_red_test.go
+da_SPRINT-04	STORY-004-05	internal/ingest/status_marks_integration_red_test.go
+da_SPRINT-04	STORY-004-05	internal/api/closes_state_red_test.go
+da_SPRINT-04	STORY-004-05	internal/api/closes_state_integration_red_test.go
+da_SPRINT-04	STORY-004-05	internal/readings/testdata/settled_network.json (new: station S with controller C1; a highway station; a second operator for isolation)
+da_SPRINT-04	STORY-004-05	Yes — settled.go
+da_SPRINT-04	STORY-004-06	internal/readings/revised.go (new)
+da_SPRINT-04	STORY-004-06	internal/readings/close.go
+da_SPRINT-04	STORY-004-06	internal/readings/readings.go
+da_SPRINT-04	STORY-004-06	internal/readings/chainload.go (STORY-004-04's chain loader
+da_SPRINT-04	STORY-004-06	internal/api/closes.go
+da_SPRINT-04	STORY-004-06	internal/api/words.go
+da_SPRINT-04	STORY-004-06	api/openapi.yaml
+da_SPRINT-04	STORY-004-06	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-06	test/e2e/compare_test.go (skip the two new row kinds)
+da_SPRINT-04	STORY-004-06	internal/readings/revised_red_test.go
+da_SPRINT-04	STORY-004-06	internal/readings/revised_integration_red_test.go
+da_SPRINT-04	STORY-004-06	internal/api/closes_revised_red_test.go
+da_SPRINT-04	STORY-004-06	internal/readings/testdata/settled_network.json (STORY-004-05's station S
+da_SPRINT-04	STORY-004-07	internal/readings/series.go (new)
+da_SPRINT-04	STORY-004-07	internal/readings/close.go
+da_SPRINT-04	STORY-004-07	internal/readings/window.go
+da_SPRINT-04	STORY-004-07	internal/readings/readings.go (rule 6 in the package comment)
+da_SPRINT-04	STORY-004-07	internal/sim/expect.go
+da_SPRINT-04	STORY-004-07	internal/api/closes.go
+da_SPRINT-04	STORY-004-07	internal/api/words.go
+da_SPRINT-04	STORY-004-07	api/openapi.yaml
+da_SPRINT-04	STORY-004-07	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-07	docs/features.md (F7's status)
+da_SPRINT-04	STORY-004-07	internal/readings/series_red_test.go
+da_SPRINT-04	STORY-004-07	internal/readings/series_integration_red_test.go
+da_SPRINT-04	STORY-004-07	internal/sim/expect_close_red_test.go
+da_SPRINT-04	STORY-004-07	internal/api/closes_series_red_test.go
+da_SPRINT-04	STORY-004-07	internal/api/closes_series_integration_red_test.go
+da_SPRINT-04	STORY-004-07	internal/readings/testdata/series_network.json (new: stations S
+da_SPRINT-04	STORY-004-07	Yes — series.go
+da_SPRINT-04	STORY-004-08	internal/readings/close.go (NozzleClose
+da_SPRINT-04	STORY-004-08	internal/readings/figures.go (new: the figures of R2–R6 from a nozzle's links)
+da_SPRINT-04	STORY-004-08	internal/readings/readings.go (package comment: rules 7 and 8)
+da_SPRINT-04	STORY-004-08	internal/readings/chain.go (only if Link.Modulus is missing
+da_SPRINT-04	STORY-004-08	internal/api/closes.go
+da_SPRINT-04	STORY-004-08	internal/api/words.go
+da_SPRINT-04	STORY-004-08	api/openapi.yaml
+da_SPRINT-04	STORY-004-08	internal/api/apigen/apigen.gen.go (regenerated)
+da_SPRINT-04	STORY-004-08	internal/sim/expect.go (the ledger's rules and sums
+da_SPRINT-04	STORY-004-08	internal/readings/figures_red_test.go (new: S1–S5 as unit tests)
+da_SPRINT-04	STORY-004-08	internal/readings/close_fuller_integration_red_test.go (new: S1–S5 against PostgreSQL)
+da_SPRINT-04	STORY-004-08	internal/api/closes_fuller_red_test.go (new: S6)
+da_SPRINT-04	STORY-004-08	internal/sim/expect_fuller_red_test.go (new: R8)
+da_SPRINT-04	STORY-004-08	test/e2e/compare_test.go (the close CSV key list at :838: the new columns and the row kinds row_nozzle_segment
+da_SPRINT-04	STORY-004-08	docs/features.md (F6's description gains the new figures; its status stays "In progress")
+da_SPRINT-04	STORY-004-08	docs/site/features.html (rebuilt by python3 docs/site/build.py)
+da_SPRINT-04	STORY-004-08	Yes — internal/readings/figures.go and the four test files
+da_SPRINT-04	STORY-004-09	internal/readings/metercheck.go (new)
+da_SPRINT-04	STORY-004-09	internal/api/metercheck.go (new)
+da_SPRINT-04	STORY-004-09	internal/api/words.go
+da_SPRINT-04	STORY-004-09	api/openapi.yaml
+da_SPRINT-04	STORY-004-09	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-09	docs/features.md
+da_SPRINT-04	STORY-004-09	internal/readings/metercheck_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-09	internal/api/metercheck_red_test.go (new)
+da_SPRINT-04	STORY-004-09	internal/api/metercheck_csv_red_test.go (new)
+da_SPRINT-04	STORY-004-09	internal/api/testdata/metercheck_network.json (new: stations S and S2 in two regions
+da_SPRINT-04	STORY-004-10	internal/readings/check.go (new)
+da_SPRINT-04	STORY-004-10	internal/api/check.go (new)
+da_SPRINT-04	STORY-004-10	internal/api/words.go
+da_SPRINT-04	STORY-004-10	api/openapi.yaml
+da_SPRINT-04	STORY-004-10	internal/api/apigen/apigen.gen.go (regenerated by make api-gen)
+da_SPRINT-04	STORY-004-10	docs/features.md (F4's status)
+da_SPRINT-04	STORY-004-10	internal/readings/check_red_test.go (new)
+da_SPRINT-04	STORY-004-10	internal/readings/check_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-10	internal/api/check_red_test.go (new)
+da_SPRINT-04	STORY-004-10	internal/api/check_integration_red_test.go (new)
+da_SPRINT-04	STORY-004-10	internal/readings/testdata/check_network.json (new: station S with spike 4's nozzles and offsets
+da_SPRINT-04	STORY-004-11	internal/sim/day.go
+da_SPRINT-04	STORY-004-11	internal/netconf/netconf.go
+da_SPRINT-04	STORY-004-11	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-11	internal/sim/sender.go
+da_SPRINT-04	STORY-004-11	internal/sim/run.go
+da_SPRINT-04	STORY-004-11	internal/sim/ledger.go
+da_SPRINT-04	STORY-004-11	internal/sim/expect.go
+da_SPRINT-04	STORY-004-11	internal/sim/expect_closes.go (new)
+da_SPRINT-04	STORY-004-11	internal/sim/wire.go
+da_SPRINT-04	STORY-004-11	internal/adapter/pts2/sim/supplies.go
+da_SPRINT-04	STORY-004-11	internal/sim/uncounted_red_test.go
+da_SPRINT-04	STORY-004-11	internal/sim/expect_closes_red_test.go
+da_SPRINT-04	STORY-004-11	internal/sim/uncounted_acceptance_red_test.go
+da_SPRINT-04	STORY-004-11	internal/netconf/sim_keys_uncounted_red_test.go
+da_SPRINT-04	STORY-004-11	internal/adapter/pts2/sim/supplies_flags_red_test.go
+da_SPRINT-04	STORY-004-11	internal/sim/testdata/closes.json (new); internal/sim/testdata/whole_station.json
+da_SPRINT-04	STORY-004-11	test/e2e/testdata/week.json
+da_SPRINT-04	STORY-004-11	test/e2e/testdata/week-whole-station.json
+da_SPRINT-04	STORY-004-11	test/e2e/testdata/sprint2-network.json (read only
+da_SPRINT-04	STORY-004-11	Yes — internal/sim/expect_closes.go
+da_SPRINT-04	STORY-004-11	internal/sim/testdata/closes.json and the test files
+da_SPRINT-04	STORY-004-12	internal/sim/day.go
+da_SPRINT-04	STORY-004-12	internal/netconf/netconf.go
+da_SPRINT-04	STORY-004-12	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-12	internal/sim/ledger.go
+da_SPRINT-04	STORY-004-12	internal/sim/expect.go
+da_SPRINT-04	STORY-004-12	internal/sim/expect_closes.go
+da_SPRINT-04	STORY-004-12	internal/sim/meter_faults_red_test.go
+da_SPRINT-04	STORY-004-12	internal/sim/expect_meter_faults_red_test.go
+da_SPRINT-04	STORY-004-12	internal/sim/meter_faults_acceptance_red_test.go
+da_SPRINT-04	STORY-004-12	internal/netconf/sim_keys_meter_faults_red_test.go
+da_SPRINT-04	STORY-004-12	internal/sim/testdata/closes.json (four stations added); internal/sim/testdata/whole_station.json
+da_SPRINT-04	STORY-004-12	test/e2e/testdata/week.json
+da_SPRINT-04	STORY-004-12	test/e2e/testdata/week-whole-station.json
+da_SPRINT-04	STORY-004-12	test/e2e/testdata/sprint2-network.json (read only
+da_SPRINT-04	STORY-004-13	internal/sim/script.go (new)
+da_SPRINT-04	STORY-004-13	internal/netconf/netconf.go
+da_SPRINT-04	STORY-004-13	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-13	internal/sim/day.go
+da_SPRINT-04	STORY-004-13	internal/sim/timeline.go
+da_SPRINT-04	STORY-004-13	internal/sim/run.go
+da_SPRINT-04	STORY-004-13	internal/sim/sender.go
+da_SPRINT-04	STORY-004-13	internal/sim/script_red_test.go (new)
+da_SPRINT-04	STORY-004-13	internal/sim/script_acceptance_red_test.go (new)
+da_SPRINT-04	STORY-004-13	internal/netconf/script_keys_red_test.go (new)
+da_SPRINT-04	STORY-004-13	internal/sim/testdata/scripted.json (new
+da_SPRINT-04	STORY-004-13	Yes — internal/sim/script.go
+da_SPRINT-04	STORY-004-14	internal/sim/expect_closes.go
+da_SPRINT-04	STORY-004-14	internal/netconf/netconf.go
+da_SPRINT-04	STORY-004-14	internal/netconf/validate.go
+da_SPRINT-04	STORY-004-14	internal/sim/day.go
+da_SPRINT-04	STORY-004-14	internal/sim/timeline.go
+da_SPRINT-04	STORY-004-14	internal/sim/sender.go
+da_SPRINT-04	STORY-004-14	internal/sim/expect_closes_cut_red_test.go (new)
+da_SPRINT-04	STORY-004-14	internal/sim/offline_busy_cut_acceptance_red_test.go (new)
+da_SPRINT-04	STORY-004-14	internal/netconf/cut_keys_red_test.go (new)
+da_SPRINT-04	STORY-004-14	internal/sim/testdata/closes.json (stations l-001
+da_SPRINT-04	STORY-004-15	test/e2e/spike4_red_test.go (new: S1
+da_SPRINT-04	STORY-004-15	test/e2e/spike4_test.go (new: the case
+da_SPRINT-04	STORY-004-15	test/e2e/closes_red_test.go (new: S3
+da_SPRINT-04	STORY-004-15	test/e2e/closes_test.go (new: the identity
+da_SPRINT-04	STORY-004-15	test/e2e/compare_test.go (the fuller close
+da_SPRINT-04	STORY-004-15	test/e2e/m1_red_test.go (S6's p95 at the end of TestM1_S3_DemoNetwork)
+da_SPRINT-04	STORY-004-15	test/e2e/golden_red_test.go (the identity and the baseline over the golden day)
+da_SPRINT-04	STORY-004-15	test/e2e/week_red_test.go (the identity in TestWkWeek; the import test covers the new files)
+da_SPRINT-04	STORY-004-15	test/e2e/harness_test.go (running owl-sim on a scripted file
+da_SPRINT-04	STORY-004-15	test/e2e/testdata/spike4-network.json (new)
+da_SPRINT-04	STORY-004-15	test/e2e/testdata/spike4/ (new: one scripted file or one per step for each station)
+da_SPRINT-04	STORY-004-15	test/e2e/testdata/baseline-58a6d1c/ (new: readings and closes of main)
+da_SPRINT-04	STORY-004-15	test/e2e/testdata/make-baseline.sh (new: the script that made them)
+da_SPRINT-04	STORY-004-15	docs/features.md (the status of F2
+da_SPRINT-04	STORY-004-15	internal/sim/testdata/closes.json (or the file the Sprint Design Review names for 11
+da_SPRINT-04	STORY-004-15	internal/sim/testdata/whole_station.json

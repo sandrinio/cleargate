@@ -1,0 +1,6 @@
+PASS: F5-1: relative-worktree-path — report written at correct absolute location
+PASS: F5-2: absolute-worktree-path — report written at correct location
+PASS: F8-3: CLEARGATE_STATE_FILE forwarded to child — got '/tmp/cr080-probe-22839.json'
+PASS: F8-4: allowlist opt-in — full pass-through preserved when RUN_SCRIPT_ENV_ALLOWLIST set
+
+cr080_wrapper.test.sh: 4 passed, 0 failed

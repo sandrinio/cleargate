@@ -1,0 +1,45 @@
+{
+  "calls": [
+    "log: wave_runner: 1 started, 0 waiting",
+    "QA-Red: QA-Red STORY-001-04",
+    "Build: Developer STORY-001-04",
+    "QA-Red: QA-Red STORY-001-04 pass 2",
+    "log: wave_runner: STORY-001-04 QA-Red returned BLOCKED on a seal flagged only by qa_red_lint; routed as a flagged seal",
+    "Wiring: Architect STORY-001-04",
+    "Build: Developer STORY-001-04 pass 2",
+    "Verify: QA-Verify STORY-001-04",
+    "Post-flight: Architect STORY-001-04"
+  ],
+  "verdict": {
+    "verdict": "GREEN",
+    "storyId": "STORY-001-04",
+    "runId": "run-SPRINT-01-STORY-001-04-replay",
+    "devSha": "devsha",
+    "qaSha": "b842a61aee477ff73ceda5692ee87c63c2793462",
+    "flashcards_flagged": [
+      "2026-11-15 · #test-harness · A story that changes a usage string breaks earlier stories' sealed red tests; QA-Red must re-seal them"
+    ],
+    "counters": {
+      "qa_bounces": 1,
+      "arch_bounces": 0,
+      "breaker_hits": 0
+    },
+    "tokens": {
+      "metering": "unavailable"
+    },
+    "lane": "standard",
+    "stages_run": [
+      "qa-red",
+      "developer",
+      "qa-red",
+      "architect-tpv",
+      "developer",
+      "qa-verify",
+      "architect-review"
+    ],
+    "defects_in": [
+      "red-test"
+    ]
+  }
+}
+exit 0

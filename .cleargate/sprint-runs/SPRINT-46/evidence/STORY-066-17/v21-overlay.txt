@@ -1,0 +1,59 @@
+# integrated tree acd3e14 (v21 overlay, D-19; host clean before and after)
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec --test-name-pattern=Scenario (13|15|16|17|18|19|20|27|28) test/scripts/test_close_sprint_v21.integration.node.test.ts
+
+▶ Scenario 13: Step 5 wait-for-ack prompt shows SPRINT-<#>_REPORT.md filename
+  ✔ Step 4 announcement mentions SPRINT-18_REPORT.md (not plain REPORT.md) (1503.323625ms)
+✔ Scenario 13: Step 5 wait-for-ack prompt shows SPRINT-<#>_REPORT.md filename (1503.858667ms)
+▶ Scenario 15: Step 2.7 skipped when CLEARGATE_SKIP_WORKTREE_CHECK=1 (test seam)
+  ✔ stdout contains "Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam)" (2217.308ms)
+  ✔ exit code is 0 when Step 2.7 skips via test seam (2142.18675ms)
+  ✔ pipeline proceeds past Step 2.7 (Step 3 message also appears) (2149.355125ms)
+  ✔ state.json sprint_status is flipped to Completed (2174.044292ms)
+✔ Scenario 15: Step 2.7 skipped when CLEARGATE_SKIP_WORKTREE_CHECK=1 (test seam) (8683.169875ms)
+▶ Scenario 16: Step 2.7 blocks under v2 when leftover worktree present (CLEARGATE_FORCE_WORKTREE_PATHS env seam)
+  ✔ exits 1 when a STORY-prefixed leftover worktree is injected under v2 (125.916833ms)
+  ✔ stderr contains "Step 2.7 failed: leftover worktree at .worktrees/STORY-019-01" (145.175917ms)
+  ✔ stderr contains git worktree remove hint (125.062834ms)
+  ✔ state.json sprint_status stays Active (not flipped to Completed) (153.290208ms)
+✔ Scenario 16: Step 2.7 blocks under v2 when leftover worktree present (CLEARGATE_FORCE_WORKTREE_PATHS env seam) (549.677333ms)
+▶ Scenario 17: Step 2.7 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01)
+  ✔ exit code is 1 when leftover worktree present (always enforced — STORY-070-01) (133.105625ms)
+  ✔ stderr contains "Step 2.7 failed: leftover worktree" (STORY-070-01: always blocks) (143.755042ms)
+  ✔ pipeline does NOT proceed past Step 2.7 (exits on leftover worktree) (125.615792ms)
+  ✔ state.json sprint_status stays Active (pipeline blocked) (127.640792ms)
+✔ Scenario 17: Step 2.7 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01) (530.28225ms)
+▶ Scenario 18: Step 2.8 skipped via CLEARGATE_SKIP_MERGE_CHECK=1 (test seam)
+  ✔ stdout contains "Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam)" (2185.625625ms)
+  ✔ exit code is 0 when Step 2.8 skips via test seam (2089.047125ms)
+  ✔ pipeline proceeds past Step 2.8 (Step 3 message also appears) (2253.672334ms)
+  ✔ state.json sprint_status is flipped to Completed (2115.840666ms)
+✔ Scenario 18: Step 2.8 skipped via CLEARGATE_SKIP_MERGE_CHECK=1 (test seam) (8644.325208ms)
+▶ Scenario 19: Step 2.8 blocks under v2 when sprint branch unmerged (CLEARGATE_FORCE_MERGE_STATUS=unmerged seam)
+  ✔ exits 1 when sprint branch is unmerged under v2 (131.742291ms)
+  ✔ stderr contains "Step 2.8 failed: sprint/S-19 not merged to main" (143.713958ms)
+  ✔ stderr contains "Resolve: merge sprint/S-19" hint (138.999458ms)
+  ✔ state.json sprint_status stays Active (not flipped to Completed) (140.621625ms)
+✔ Scenario 19: Step 2.8 blocks under v2 when sprint branch unmerged (CLEARGATE_FORCE_MERGE_STATUS=unmerged seam) (555.230084ms)
+▶ Scenario 20: Step 2.8 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01)
+  ✔ exit code is 1 when sprint branch unmerged (always enforced — STORY-070-01) (151.68875ms)
+  ✔ stderr contains "Step 2.8 failed" (STORY-070-01: always blocks on unmerged) (124.412292ms)
+  ✔ pipeline does NOT proceed past Step 2.8 (exits on unmerged branch) (142.055709ms)
+  ✔ state.json sprint_status stays Active (pipeline blocked) (133.468542ms)
+✔ Scenario 20: Step 2.8 always enforced — blocks even when state.json had execution_mode: "v1" (STORY-070-01) (551.774083ms)
+▶ Scenario 27: Step 8 prints 6-item handoff list (CR-022 §3 M4)
+  ✔ stdout contains all 6 handoff list items (1701.446041ms)
+  ✔ Step 8 header line contains sprint ID "SPRINT-19 closed" (1627.873166ms)
+✔ Scenario 27: Step 8 prints 6-item handoff list (CR-022 §3 M4) (3329.410334ms)
+▶ Scenario 28: Step 8 mentions incremented next-sprint ID (CR-022 §3 M4)
+  ✔ item 6 contains SPRINT-20 as next sprint ID (1598.963417ms)
+✔ Scenario 28: Step 8 mentions incremented next-sprint ID (CR-022 §3 M4) (1599.029042ms)
+ℹ tests 28
+ℹ suites 9
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26202.453208

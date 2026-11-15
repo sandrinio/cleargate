@@ -1,0 +1,1 @@
+{"id":"STORY-905-01","step":"done","exit":0,"tail":["carried from the worktree: 1 file(s)","not carried (per-checkout state, removed with the worktree): .cleargate/sprint-runs/SPRINT-01/state.json","not carried (per-checkout state, removed with the worktree): .cleargate/sprint-runs/SPRINT-01/events.jsonl"],"post_merge_test":"pass"}

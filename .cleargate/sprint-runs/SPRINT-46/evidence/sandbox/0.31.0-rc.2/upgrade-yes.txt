@@ -1,0 +1,57 @@
+[always] overwritten: .claude/agents/architect-synth.md
+[always] overwritten: .claude/agents/architect.md
+[always] overwritten: .claude/agents/developer.md
+[always] overwritten: .claude/agents/devops.md
+[always] overwritten: .claude/agents/qa.md
+[always] overwritten: .claude/agents/reporter.md
+[pin] rewritten with pin 0.31.0-rc.2: .claude/hooks/pending-task-sentinel.sh
+[pin] rewritten with pin 0.31.0-rc.2: .claude/hooks/post-shell-ingest.sh
+[pin] rewritten with pin 0.31.0-rc.2: .claude/hooks/pre-edit-gate.sh
+[pin] rewritten with pin 0.31.0-rc.2: .claude/hooks/session-start.sh
+[pin] rewritten with pin 0.31.0-rc.2: .claude/hooks/stamp-and-gate.sh
+[always] overwritten: .claude/hooks/token-ledger.sh
+[always] overwritten: .claude/skills/sprint-execution/dispatch-serial.md
+[always] overwritten: .claude/skills/sprint-execution/SKILL.md
+[take] .cleargate/knowledge/cleargate-enforcement.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/knowledge/cleargate-protocol.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/README.md  state=upstream-changed (unchanged locally)
+[always] overwritten: .cleargate/scripts/assign_lane.mjs
+[always] overwritten: .cleargate/scripts/close_sprint.mjs
+[always] overwritten: .cleargate/scripts/constants.mjs
+[always] overwritten: .cleargate/scripts/count_tokens.mjs
+[always] overwritten: .cleargate/scripts/dispatch_serial.mjs
+[always] overwritten (local edits replaced): .cleargate/scripts/gate-checks.json
+[always] overwritten: .cleargate/scripts/init_gate_config.sh
+[always] overwritten: .cleargate/scripts/init_sprint.mjs
+[always] overwritten: .cleargate/scripts/launch_wave.mjs
+[always] overwritten: .cleargate/scripts/lib/ledger-digest.mjs
+[always] overwritten: .cleargate/scripts/merge_story.mjs
+[always] overwritten: .cleargate/scripts/pre_gate_common.sh
+[always] overwritten: .cleargate/scripts/pre_gate_runner.sh
+[always] overwritten: .cleargate/scripts/prep_qa_context.mjs
+[always] overwritten: .cleargate/scripts/prep_reporter_context.mjs
+[always] overwritten: .cleargate/scripts/qa_red_lint.mjs
+[always] overwritten: .cleargate/scripts/record_baseline.mjs
+[always] overwritten: .cleargate/scripts/seal_red.mjs
+[always] overwritten: .cleargate/scripts/segment_stages.mjs
+[always] overwritten: .cleargate/scripts/sprint_metrics.mjs
+[always] overwritten: .cleargate/scripts/state-events.mjs
+[always] overwritten: .cleargate/scripts/state.schema.json
+[always] overwritten: .cleargate/scripts/subagent-ledger.mjs
+[always] overwritten: .cleargate/scripts/surface-whitelist.txt
+[always] overwritten: .cleargate/scripts/update_state.mjs
+[always] overwritten: .cleargate/scripts/wave_runner_args.mjs
+[always] overwritten: .cleargate/scripts/wave_runner.js
+[take] .cleargate/templates/Sprint Plan Template.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/sprint_report.md  state=upstream-changed (unchanged locally)
+[take] .cleargate/templates/story.md  state=upstream-changed (unchanged locally)
+[upgrade] gate-checks.json: kept qa.test "make check"; kept qa.typecheck "go vet ./..."; kept arch.typecheck "go vet ./..."
+[mcp] repinned .mcp.json: cleargate@0.30.1 → cleargate@0.31.0-rc.2
+[block] refreshed the ClearGate block in CLAUDE.md
+[always] overwritten: .cleargate/config.example.yml
+[always] 29 unchanged, 37 updated (1 had local edits)
+[upgrade] complete.
+[upgrade] hint: more hosts are available — add one with `cleargate host add <name>`.
+
+⚠ Restart Claude Code in this repo to load the new config:
+    .mcp.json (loaded once at session start)

@@ -1,0 +1,11 @@
+events before: none
+root events.jsonl:
+{"ts":"2026-11-15T00:00:00.000Z","sprint_id":"SPRINT-01","sprint_status":"Active","story_id":"STORY-905-01","from":null,"to":"QA Passed","actor":"migration","run_id":"genesis:SPRINT-01:STORY-905-01","wave":null,"reason":null,"kind":"transition","initial":{"qa_bounces":0,"arch_bounces":0,"worktree":null,"notes":"","lane":"standard","lane_assigned_by":"architect","lane_demoted_at":null,"lane_demotion_reason":null}}
+{"ts":"2026-11-15T18:40:18.351Z","sprint_id":"SPRINT-01","sprint_status":"Active","story_id":"STORY-905-01","from":"QA Passed","to":"Done","actor":"system","run_id":"1794768018351-41294-czhicg","wave":null,"reason":null,"kind":"transition"}
+report:
+WT REPORT
+worktree dir exists?
+ls: .worktrees/STORY-905-01: No such file or directory
+validate_state:
+state.json at /private/tmp/cg-e-Hwsv/E1/.cleargate/sprint-runs/SPRINT-01/state.json is valid (schema_version=3)
+exit 0

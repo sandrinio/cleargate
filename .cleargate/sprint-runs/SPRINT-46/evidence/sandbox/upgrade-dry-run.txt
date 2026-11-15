@@ -1,0 +1,53 @@
+[dry-run] .claude/agents/architect-synth.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/agents/architect.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/agents/developer.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/agents/devops.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/agents/qa.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/agents/reporter.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/hooks/pending-task-sentinel.sh  action=pin-aware  state=clean
+[dry-run] .claude/hooks/post-shell-ingest.sh  action=pin-aware  state=clean
+[dry-run] .claude/hooks/pre-edit-gate.sh  action=pin-aware  state=clean
+[dry-run] .claude/hooks/session-start.sh  action=pin-aware  state=clean
+[dry-run] .claude/hooks/stamp-and-gate.sh  action=pin-aware  state=clean
+[dry-run] .claude/hooks/token-ledger.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/settings.json  action=merge-3way  state=clean
+[dry-run] .claude/skills/sprint-execution/dispatch-serial.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .claude/skills/sprint-execution/SKILL.md  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/knowledge/cleargate-enforcement.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] .cleargate/knowledge/cleargate-protocol.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] .cleargate/README.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/assign_lane.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/constants.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/count_tokens.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/dispatch_serial.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/gate-checks.json  action=overwrite  state=both-changed → overwritten, local edits lost
+[dry-run] .cleargate/scripts/init_gate_config.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/init_sprint.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/launch_wave.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/lib/ledger-digest.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/merge_story.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/pre_gate_common.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/pre_gate_runner.sh  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/prep_qa_context.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/prep_reporter_context.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/qa_red_lint.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/record_baseline.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/seal_red.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/segment_stages.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/sprint_metrics.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/state-events.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/state.schema.json  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/subagent-ledger.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/surface-whitelist.txt  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/update_state.mjs  action=overwrite  state=upstream-changed → clean
+[dry-run] .cleargate/scripts/wave_runner_args.mjs  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/scripts/wave_runner.js  action=overwrite  state=untracked → clean
+[dry-run] .cleargate/templates/Sprint Plan Template.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] .cleargate/templates/sprint_report.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] .cleargate/templates/story.md  action=merge-3way  state=upstream-changed → clean
+[dry-run] gate-checks.json: kept qa.test "make check"; kept qa.typecheck "go vet ./..."; kept arch.typecheck "go vet ./..."
+[dry-run] .mcp.json  action=repin  cleargate@0.30.1 → cleargate@0.31.0-rc.1
+[dry-run] CLAUDE.md  action=block-refresh
+[dry-run] .cleargate/config.example.yml  action=overwrite
+[dry-run] 40 unchanged (not listed)
+[dry-run] 47 files planned. No changes made.

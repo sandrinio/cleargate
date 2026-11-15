@@ -1,0 +1,4 @@
+
+> cleargate@0.30.1 typecheck
+> tsc --noEmit
+

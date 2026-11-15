@@ -1,0 +1,26 @@
+$ --item STORY-903-02 --from architect-review
+exit=2 stdout=
+stderr=wave_runner_args.mjs: --from architect-review would skip qa-verify; start at qa-verify or earlier
+Usage: node .cleargate/scripts/wave_runner_args.mjs --sprint <SPRINT-ID> --wave <wave-id> [--item <ID> [--from <stage>] [--issue <text>]] [--validate <verdicts.json>]
+  Prints the args for wave_runner.js as one JSON line (exit 0).
+  --item <ID>  args for that one item of the wave (re-run a blocked item; usage error when it is not in the wave or is Done)
+  --from <stage>  needs --item; the agent stage of its lane to start at, never later than qa-verify (after qa-red it reuses the newest qa-red(<ID>) commit on story/<ID>)
+  --issue <text>  needs --item; the rework input for the first stage
+  --validate <verdicts.json>  check the runner's return (or a bare verdict array) with validateVerdicts in serial mode: exit 0 valid, 1 invalid
+The repo root is ORCHESTRATOR_PROJECT_DIR, else the git top level of the cwd. Usage errors exit 2 with nothing on stdout.
+$ --item STORY-903-02 --from qa-verify
+exit=2 stdout=
+stderr=wave_runner_args.mjs: --from qa-verify would skip story-plan but plans/STORY-903-02.md does not exist
+Usage: node .cleargate/scripts/wave_runner_args.mjs --sprint <SPRINT-ID> --wave <wave-id> [--item <ID> [--from <stage>] [--issue <text>]] [--validate <verdicts.json>]
+  Prints the args for wave_runner.js as one JSON line (exit 0).
+  --item <ID>  args for that one item of the wave (re-run a blocked item; usage error when it is not in the wave or is Done)
+  --from <stage>  needs --item; the agent stage of its lane to start at, never later than qa-verify (after qa-red it reuses the newest qa-red(<ID>) commit on story/<ID>)
+  --issue <text>  needs --item; the rework input for the first stage
+  --validate <verdicts.json>  check the runner's return (or a bare verdict array) with validateVerdicts in serial mode: exit 0 valid, 1 invalid
+The repo root is ORCHESTRATOR_PROJECT_DIR, else the git top level of the cwd. Usage errors exit 2 with nothing on stdout.
+$ --item STORY-903-02 --from qa-verify
+exit=0 stdout={"sprintId":"SPRINT-99","sprintBranch":"sprint/S-99","bounceCap":3,"merged":[],"worktreeCommands":[],"items":[{"id":"STORY-903-02","lane":"runtime","base":"main","upstream":[],"stages":[{"name":"story-plan","kind":"agent","agent":"architect","mode":"STORY-PLAN","when":"always"},{"name":"qa-red","kind":"agent","agent":"qa","mode":"RED","when":"always"},{"name":"architect-tpv","kind":"agent","agent"
+stderr=
+--- stage names:
+story-plan,qa-red,architect-tpv,developer,qa-verify,architect-review,merge
+qa-verify cee0d9e6d9aa846174d7a5b0497f1a1221675c38 eb97569e857e0122bed5ad7f55bc2e5ae1ddefdf

@@ -192,13 +192,13 @@ Feature: Stage table
 
 ## Task Breakdown
 
-- [ ] Write `segment-stages.node.test.ts`: the Outline table, unknown and hostile lane names, frozen output, `laneOf` precedence, and a source scan proving neither script holds a stage-name literal.
-- [ ] Create `segment_stages.mjs` with the definitions, the lane lists, `stagesFor`, `STAGE_NAMES` and `laneOf`.
-- [ ] Extend `launchWave` and `validateVerdicts` in `launch_wave.mjs` (lanes, stages, `lane`/`stages_run`, the qa-less `qaSha` rule, header comment).
-- [ ] Extend `dispatchSerial` and `runNext` in `dispatch_serial.mjs`.
-- [ ] Add `lane` and `stages_run` to the seven fixture builders listed in §3.1 and add accept and reject cases to `dispatch-verdict-modes`.
-- [ ] Add `lane` and `stages_run` to the clean-room `recordPipeline` verdict in `scripts/clean-room/loop-script.mjs`; confirm `codex-loop-harness.red.node.test.ts` test 20d passes unedited -> Requirement 10
-- [ ] Add the two rows and the `qaSha` note to the protocol §23 table; run `npm run typecheck` and the scripts test suite.
+- [x] Write `segment-stages.node.test.ts`: the Outline table, unknown and hostile lane names, frozen output, `laneOf` precedence, and a source scan proving neither script holds a stage-name literal.
+- [x] Create `segment_stages.mjs` with the definitions, the lane lists, `stagesFor`, `STAGE_NAMES` and `laneOf`.
+- [x] Extend `launchWave` and `validateVerdicts` in `launch_wave.mjs` (lanes, stages, `lane`/`stages_run`, the qa-less `qaSha` rule, header comment).
+- [x] Extend `dispatchSerial` and `runNext` in `dispatch_serial.mjs`.
+- [x] Add `lane` and `stages_run` to the seven fixture builders listed in §3.1 and add accept and reject cases to `dispatch-verdict-modes`.
+- [x] Add `lane` and `stages_run` to the clean-room `recordPipeline` verdict in `scripts/clean-room/loop-script.mjs`; confirm `codex-loop-harness.red.node.test.ts` test 20d passes unedited -> Requirement 10
+- [x] Add the two rows and the `qaSha` note to the protocol §23 table; run `npm run typecheck` and the scripts test suite.
 
 ## 4. Quality Gates
 

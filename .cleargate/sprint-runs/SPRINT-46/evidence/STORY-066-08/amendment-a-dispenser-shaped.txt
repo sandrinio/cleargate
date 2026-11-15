@@ -1,0 +1,37 @@
+case b STORY-910-02 exit=3
+{"id":"STORY-910-02","step":"pre-merge","exit":3,"tail":["[FAIL] debug_patterns: hits in files this item changed (vs sprint/S-46)","  | tools/new.mjs:1:console.log(\"dbg\");","[FAIL] test: exit code 2","  | Makefile:21: *** make check needs FIXTURE_DB_URL, FIXTURE_REDIS_URL set. Stop.  Stop."]}
+state: {"state":"QA Passed","lane":"standard","reason":null}
+worktree_exists: yes
+--- stderr(b):
+merge_story: pre-merge check for STORY-910-02
+
+case c STORY-910-03 exit=3
+{"id":"STORY-910-03","step":"pre-merge","exit":3,"tail":["Makefile:21: *** make check needs FIXTURE_DB_URL, FIXTURE_REDIS_URL, and more set. Stop.  Stop."]}
+state: {"state":"QA Passed","lane":"standard","reason":null}
+worktree_exists: yes
+--- stderr(c):
+merge_story: pre-merge check for STORY-910-03
+merge_story: baseline judgement: unparsed
+
+case a STORY-910-01 exit=0
+{"id":"STORY-910-01","step":"done","exit":0,"tail":["Makefile:21: *** make check needs FIXTURE_DB_URL, FIXTURE_REDIS_URL set. Stop.  Stop.","NOT TESTED (pre-merge): \"make check\" stopped before running any test (exit 2; exit code and last line match baseline.json); excused as baseline-unnamed","NOT TESTED (post-merge): \"make check\" stopped before running any test (exit 2; exit code and last line match baseline.json); excused as baseline-unnamed"],"post_merge_test":"excused"}
+state: {"state":"Done","lane":"standard","reason":null}
+worktree_exists: no
+--- stderr(a):
+merge_story: pre-merge check for STORY-910-01
+merge_story: baseline judgement: baseline-unnamed
+merge_story: merging story/STORY-910-01 into sprint/S-46
+merge_story: post-merge test
+merge_story: teardown
+
+case d STORY-910-04 exit=0
+{"id":"STORY-910-04","step":"done","exit":0,"tail":["Makefile:21: *** make check needs FIXTURE_DB_URL, FIXTURE_REDIS_URL set. Stop.  Stop.","NOT TESTED (pre-merge): \"make check\" stopped before running any test (exit 2; exit code and last line match baseline.json); excused as baseline-unnamed","NOT TESTED (post-merge): \"make check\" stopped before running any test (exit 2; exit code and last line match baseline.json); excused as baseline-unnamed"],"post_merge_test":"excused"}
+state: {"state":"Done","lane":"fast","reason":null}
+worktree_exists: no
+--- stderr(d):
+merge_story: pre-merge check for STORY-910-04
+merge_story: baseline judgement: baseline-unnamed
+merge_story: merging story/STORY-910-04 into sprint/S-46
+merge_story: post-merge test
+merge_story: teardown
+

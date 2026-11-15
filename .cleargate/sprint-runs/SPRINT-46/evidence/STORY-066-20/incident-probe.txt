@@ -1,0 +1,5 @@
+run_script exit 1
+PARSE OK
+"--- FAIL:\tTestTop\nFAIL\tpkg\t0.1s\n\u001b[31mred\u001b[0m\nctl\n"
+"err\tx\n\n"
+ctrl deleted ESC preserved

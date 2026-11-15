@@ -26,6 +26,8 @@ cited_by:
   - "[[STORY-066-06]]"
   - "[[STORY-066-07]]"
   - "[[STORY-066-09]]"
+  - "[[STORY-066-18]]"
+  - "[[STORY-066-22]]"
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md"
@@ -81,5 +83,5 @@ real runs
 ## Relations
 - Parent: [[INITIATIVE-002]]
 - Cites (13): [[BUG-054]], [[BUG-066]], [[BUG-113]], [[CR-082]], [[CR-110]], [[CR-111]], [[CR-126]], [[CR-128]], [[CR-129]], [[EPIC-056]], [[EPIC-058]], [[EPIC-066]], [[INITIATIVE-002]]
-- Cited by (8): [[EPIC-066]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-09]]
+- Cited by (10): [[EPIC-066]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-09]], [[STORY-066-18]], [[STORY-066-22]]
 <!-- END relations -->

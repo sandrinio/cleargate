@@ -1,0 +1,7 @@
+
+> cleargate@0.30.1 prebuild
+> node scripts/build-codex-payload.mjs --check && node scripts/copy-planning-payload.mjs && tsx scripts/build-manifest.ts
+
+[prebuild] cleargate-planning payload composed: 98 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-14/cleargate-cli/templates/cleargate-planning
+[prebuild] scaffold split view composed: 118 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-14/cleargate-cli/templates/scaffold
+[build-manifest] 92 files → /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-14/cleargate-cli/templates/cleargate-planning/MANIFEST.json

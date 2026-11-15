@@ -1,0 +1,2 @@
+?? .cleargate/sprint-runs/SPRINT-01/pre-gate.jsonl
+?? .cleargate/sprint-runs/SPRINT-01/reports/STORY-901-02-pre-arch-scan.txt

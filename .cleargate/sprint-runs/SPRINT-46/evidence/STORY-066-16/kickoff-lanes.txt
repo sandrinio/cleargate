@@ -1,0 +1,95 @@
+STORY-066-16 kickoff-lanes proof — integrated tree a8dc6a3 (QA-Verify), 2026-11-15T12:33:37Z
+no --force anywhere in this transcript (checked by grep at the end)
+=== P1: init, no waves.json, installed layout (no env override) ===
+$ node .cleargate/scripts/init_sprint.mjs SPRINT-01 --stories STORY-901-01,STORY-901-02,STORY-901-03,STORY-901-04
+WARN: Goal Acceptance Check unresolved — populate sprint-context.md §Goal Acceptance Check
+Initialized state.json for sprint SPRINT-01 with 4 stories
+Lanes: STORY-901-01 fast (assign-lane-script), STORY-901-02 standard (assign-lane-script), STORY-901-03 runtime (assign-lane-script), STORY-901-04 standard (assign-lane-script)
+[exit 0]
+
+--- P1 cross-check: assign_lane.mjs lanes
+STORY-901-01 fast
+STORY-901-02 standard
+STORY-901-03 runtime
+STORY-901-04 standard
+--- state.json lanes:
+STORY-901-01 fast assign-lane-script
+STORY-901-02 standard assign-lane-script
+STORY-901-03 runtime assign-lane-script
+STORY-901-04 standard assign-lane-script
+events.jsonl lines:        4
+
+=== P2: A.4 raise via update_state.mjs --lane ===
+$ node .cleargate/scripts/update_state.mjs STORY-901-02 --lane runtime
+Updated STORY-901-02: lane="runtime", lane_assigned_by="human-override"
+[exit 0]
+
+events.jsonl lines:        5; .active=SPRINT-01
+STORY-901-01 fast assign-lane-script
+STORY-901-02 runtime human-override
+STORY-901-03 runtime assign-lane-script
+STORY-901-04 standard assign-lane-script
+
+=== P3: second init without --force is refused ===
+$ node .cleargate/scripts/init_sprint.mjs SPRINT-01 --stories STORY-901-01,STORY-901-02,STORY-901-03,STORY-901-04
+state.json already exists at /private/tmp/claude-501/q16t/fx.p2fc/.cleargate/sprint-runs/SPRINT-01/state.json; pass --force to overwrite
+[exit 1]
+
+(state after refusal, unchanged:)
+STORY-901-01 fast assign-lane-script
+STORY-901-02 runtime human-override
+STORY-901-03 runtime assign-lane-script
+STORY-901-04 standard assign-lane-script
+
+=== P4: copy of P1 fixture + plans/waves.json (waves.json wins) ===
+$ node .cleargate/scripts/init_sprint.mjs SPRINT-01 --stories STORY-901-01,STORY-901-02,STORY-901-03,STORY-901-04
+WARN: Goal Acceptance Check unresolved — populate sprint-context.md §Goal Acceptance Check
+Initialized state.json for sprint SPRINT-01 with 4 stories
+Lanes: STORY-901-01 runtime (sdr-lane-audit), STORY-901-02 standard (migration-default), STORY-901-03 standard (migration-default), STORY-901-04 standard (migration-default)
+[exit 0]
+
+=== B11 dist probe (built dist/lib/lifecycle-reconcile.js) ===
+flipped: [{"id":"STORY-906-03","type":"STORY","old_status":"Draft","new_status":"Completed","file_path":"archive/STORY-906-03_probe.md","archived":true},{"id":"STORY-906-06","type":"STORY","old_status":"Draft","new_status":"Completed","file_path":"archive/STORY-906-06_probe.md","archived":true},{"id":"HOTFIX-906","type":"HOTFIX","old_status":"Draft","new_status":"Completed","file_path":"archive/HOTFIX-906_probe.md","archived":true},{"id":"STORY-906-07","type":"STORY","old_status":"Draft","new_status":"Completed","file_path":"archive/STORY-906-07_probe.md","archived":true}]
+--- archive/STORY-906-03_probe.md
+---
+story_id: "STORY-906-03"
+status: "Completed"
+approved: true
+lane: "runtime"
+---
+
+# STORY-906-03: Probe
+--- archive/STORY-906-06_probe.md
+---
+story_id: "STORY-906-06"
+status: "Completed"
+approved: true
+---
+
+# STORY-906-06: Probe
+--- archive/HOTFIX-906_probe.md
+---
+story_id: "HOTFIX-906"
+status: "Completed"
+approved: true
+lane: "hotfix"
+---
+
+# HOTFIX-906: Probe
+--- archive/STORY-906-07_probe.md
+---
+story_id: "STORY-906-07"
+status: "Completed"
+approved: true
+lane: "standard"
+---
+
+# STORY-906-07: Probe
+
+--- transcript grep for --force (expect none beyond this note and P3's message):
+2:no --force anywhere in this transcript (checked by grep at the end)
+33:=== P3: second init without --force is refused ===
+35:state.json already exists at /private/tmp/claude-501/q16t/fx.p2fc/.cleargate/sprint-runs/SPRINT-01/state.json; pass --force to overwrite
+89:--- transcript grep for --force (expect none beyond this note and P3's message):
+
+NOTE (QA): the only --force mentions above are this header and P3's refusal message; no command in P1-P4 or the dist probe passes --force.

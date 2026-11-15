@@ -1,0 +1,5 @@
+qa_red_lint CLEARGATE_RED_BASE hits: 2
+seal_red readBaseText hits: 2
+wave_runner backstop hits: 1
+qa.toml 'until the seal is clean' hits: 0
+qa.md 'until the seal is clean' hits: 0

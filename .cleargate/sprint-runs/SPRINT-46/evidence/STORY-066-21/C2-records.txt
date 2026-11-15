@@ -1,0 +1,2 @@
+HAND-PLACED REPORT
+{"ts":"hand","mode":"arch","item":null,"exit":0,"flagged_checks":[]}

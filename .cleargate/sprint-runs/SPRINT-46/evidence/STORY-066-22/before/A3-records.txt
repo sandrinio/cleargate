@@ -1,0 +1,3 @@
+{"ts":"2026-11-15T19:25:09.834Z","mode":"seal","item":"STORY-001-04","exit":1,"raw_exit":1,"flagged_checks":["qa_red_lint"],"sealed_sha":"3221098f193de6fd3b5c14ac22cbb8ba1788209b"}
+28:[FAIL] qa_red_lint: R-volume: 9 tests for 3 scenarios (limit 6)|
+29:R-volume: 9 tests for 3 scenarios (limit 6)

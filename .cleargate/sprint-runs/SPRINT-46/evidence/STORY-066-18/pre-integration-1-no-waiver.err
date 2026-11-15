@@ -1,0 +1,10 @@
+cleargate sprint preflight: 1/6 checks failed for SPRINT-01
+
+  ✓ Previous sprint Completed — skipped (no preceding sprint)
+  ✓ No leftover worktrees — no leftover .worktrees/STORY-* paths
+  ✓ Sprint branch ref free — refs/heads/sprint/S-01 does not exist
+  ✓ main is clean — main is clean
+  ✓ Per-item readiness gates — all in-scope items pass readiness gates
+  ✗ Test gate: "sh guard.sh" stopped before running any test (exit 2: "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop.")
+    Make it run here, or record why it cannot: add "test_waiver": "<reason>" under "qa" in .cleargate/scripts/gate-checks.json and commit it.
+    No qa.test_waiver is recorded, so every merge whose test stops this way is refused.

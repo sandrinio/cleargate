@@ -1,0 +1,19 @@
+# ClearGate Pre-Gate Scan Report
+Mode: qa
+Worktree: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta
+Branch: sprint/S-46
+Timestamp: 2026-11-14T21:36:24Z
+---
+[N/A] typecheck: target cleargate-cli is not in the worktree
+[FAIL] debug_patterns: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning
+/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate/scripts/pre
+/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate/scripts/pre
+/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate/scripts/ded
+/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate/scripts/ded
+/private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/.cleargate/scripts/ded
+
+[WARN] todo_patterns: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/x/meta/cleargate-planning/
+[N/A] test: target cleargate-cli is not in the worktree
+---
+Summary: 0
+0 passed, 1 failed, 1 warnings

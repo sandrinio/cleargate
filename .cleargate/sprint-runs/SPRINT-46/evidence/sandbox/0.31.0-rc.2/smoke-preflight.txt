@@ -1,0 +1,4 @@
+Step 0: refreshed 4 items, 0 errors.
+
+cleargate sprint preflight: all five checks pass for SPRINT-01
+→ Load skill: sprint-execution

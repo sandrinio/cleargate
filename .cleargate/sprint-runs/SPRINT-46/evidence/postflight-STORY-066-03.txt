@@ -1,0 +1,42 @@
+# ClearGate Pre-Gate Scan Report
+Mode: arch
+Worktree: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03
+Branch: sprint/S-46
+Timestamp: 2026-11-14T21:40:55Z
+---
+[PASS] typecheck: npm --prefix cleargate-cli run typecheck
+[PASS] new_deps: no new runtime deps
+[PASS] stray_env_files: no stray .env files
+[INFO] file_count_report: directory file counts:
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03: 9 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-planning: 4 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-planning/.claude: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-planning/.cleargate: 4 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/docs: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/scripts: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli: 11 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/test: 7 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/examples: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/scripts: 20 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/templates: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/.cleargate: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/scaffold: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/cleargate-cli/src: 2 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate: 20 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/field-trials: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/sprint-runs: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/wiki: 9 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/knowledge: 7 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/scripts: 37 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/delivery: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/templates: 10 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/.cleargate/reports: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/assets: 8 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/assets/png: 15 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/sql: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-03/sql/hotfixes: 1 files
+[PASS] qa_red_lint: no semantic fixture issues
+---
+Summary: 4 passed, 0
+0 failed, 0
+0 warnings

@@ -1,0 +1,6 @@
+merge_story: pre-merge check for STORY-908-01
+merge_story: baseline judgement: baseline-unnamed
+merge_story: merging story/STORY-908-01 into sprint/S-01
+merge_story: post-merge test
+merge_story: teardown
+exit 0

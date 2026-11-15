@@ -1,0 +1,12 @@
+# pre-integration proof: CLI=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-18/cleargate-cli (story tree at ec9981b, main without 066-16/066-17); 2026-11-15T12:24:31Z
+WARN: token-ledger.jsonl not found at /private/tmp/q18.QeMX/cg-proof-18-o8pf/.cleargate/sprint-runs/SPRINT-01/token-ledger.jsonl
+  Proceeding without cost data. The sprint report will record the ledger as
+  ABSENT — not zero, not incomplete. If this is unexpected, the SubagentStop
+  hook did not fire for this sprint; see ORCHESTRATOR_PROJECT_DIR when driving
+  a sprint from another repo.
+Bundle ready: 2KB at /private/tmp/q18.QeMX/cg-proof-18-o8pf/.cleargate/sprint-runs/SPRINT-01/.reporter-context.md
+## Test Gate
+
+WAIVED — "sh guard.sh" stopped before running any test at kickoff (exit 2: "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop."). Waiver: "no PostgreSQL on this machine". Merges whose test stopped the same way were recorded NOT TESTED.
+
+## Milestone Plans

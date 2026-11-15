@@ -1,0 +1,233 @@
+  ✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-05-dev.md exists
+  ✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-06-dev.md exists
+  ✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-07-dev.md exists
+  ✖ 3 fires produce per-turn deltas; sum(delta) == last session_total
+  ✖ @testing-library/svelte is still present in admin/package.json devDependencies
+  ✖ S-1: vendored Zod schemas field sets match OpenAPI snapshot
+  ✖ Scenario 1: Init into blank Node repo succeeds
+  ✖ Scenario 1: Install + doctor + upgrade-dry-run all clean
+  ✖ Scenario 2: Init into bare Go repo succeeds
+  ✖ Scenario 2: live developer.md is byte-identical to scaffold (mirror discipline)
+  ✖ Scenario 2: protocol §24 contains rubric, demotion mechanics, forbidden surfaces, and LD event registration
+  ✖ Scenario 3: diff between dogfood and scaffold protocol files is empty (byte-identical)
+  ✖ Scenario 4: §24 body is ≤30 lines (heading inclusive)
+  ✖ U10: empty string is rejected
+  ✖ U11: all-hyphens handle is rejected
+  ✖ U1: single letter handle is valid
+  ✖ U2: hyphenated handle is valid
+  ✖ U3: alphanumeric handle is valid
+  ✖ U4: complex valid handle
+  ✖ U5: 39-char handle (max valid) is valid
+  ✖ U6: 40-char handle (too long) is rejected
+  ✖ U7: leading hyphen is rejected
+  ✖ U8: trailing hyphen is rejected
+  ✖ U9: handle with space is rejected
+  ✖ admin/package.json "test" script contains node:test runner invocation
+  ✖ admin/package.json "test" script does NOT contain "vitest"
+  ✖ admin/package.json does NOT have vitest in devDependencies
+  ✖ all three version strings parse as semver
+  ✖ cleargate-cli/package.json "test" script includes --test-concurrency=1 --experimental-test-module-mocks (T2b — STORY-028-05-arch-1 inherited baseline)
+  ✖ cli/mcp major.minor pair is in SUPPORTED_PAIRS
+  ✖ codemod exits 0
+  ✖ codemod exits 0 (all files auto-converted)
+  ✖ codemod exits 0 (all-auto: no vi.* calls)
+  ✖ codemod exits 0 (hooks fixture is auto-convertible)
+  ✖ codemod exits 0 (spec file is auto-convertible)
+  ✖ codemod script exists at cleargate-cli/scripts/codemod-vitest-to-node-test.mjs
+  ✖ count of *.node.test.ts files across mcp/ is >= 68 (50 converted + 18 pre-existing)
+  ✖ count of *.node.test.ts files in admin/ (excl node_modules) is >= 34
+  ✖ every story has lane: "standard" and lane_assigned_by: "migration-default"
+  ✖ exit code is 0 when zero MANUAL-FIX-REQUIRED files
+  ✖ exits 0 and prints inert message
+  ✖ exits 0 when all stories are Done and Step 2.6 finds no drift
+  ✖ grep for `from 'vitest'` in cleargate-cli/src/ test/ scripts/ returns ZERO matches (Scenario: All 138 files converted) — excludes examples/ and test/fixtures/
+  ✖ grep for vi.(fn|mock|spyOn|stubGlobal|useFakeTimers|useRealTimers|advanceTimersByTime|hoisted) returns ZERO matches (Scenario: vitest.config.ts deleted, package.json clean) — excludes examples/ and test/fixtures/
+  ✖ improvement-suggestions.md contains CAND-SPRINT-TEST-S entry
+  ✖ input.spec.ts is renamed to input.node.test.ts (no .spec.ts remains)
+  ✖ input.vitest.test.ts is renamed to input.node.test.ts (original removed)
+  ✖ invokes run_script.sh pre_gate_runner.sh arch with worktree and branch
+  ✖ invokes run_script.sh pre_gate_runner.sh qa with worktree and branch
+  ✖ live hook matches bug-027.sh snapshot byte-for-byte
+  ✖ live template Bug.md — parseFrontmatter returns all 6 new keys
+  ✖ live template CR.md — parseFrontmatter returns all 6 new keys
+  ✖ live template epic.md — parseFrontmatter returns all 6 new keys
+  ✖ live template story.md — parseFrontmatter returns all 6 new keys
+  ✖ mcp/package.json does NOT contain vitest in devDependencies (Scenario: package.json clean)
+  ✖ mcp/package.json test script does NOT invoke vitest (Scenario: package.json clean)
+  ✖ no other pre-existing field on any story is mutated
+  ✖ on-disk state.json is byte-equal after a no-op invocation
+  ✖ output contains assert.deepStrictEqual (toEqual converted)
+  ✖ output contains assert.ok (toBeTruthy/toBeFalsy converted)
+  ✖ output contains assert.strictEqual (toBe converted)
+  ✖ output contains assert.throws (toThrow converted)
+  ✖ output contains beforeEach and afterEach (hooks preserved)
+  ✖ output does NOT contain vitest import
+  ✖ output imports assert from 'node:assert/strict'
+  ✖ output imports from 'node:test' not 'vitest'
+  ✖ output matches expected.node.test.ts (after prettier normalization)
+  ✖ output matches expected.node.test.ts (all assert.* mappings correct)
+  ✖ output matches expected.node.test.ts (spec rename output correct)
+  ✖ output matches expected.node.test.ts fixture
+  ✖ passes through strings without postgres URLs unchanged
+  ✖ pipeline exits 1 when Step 3.5 fails (always fatal — STORY-070-01)
+  ✖ resolver returns EPIC-002 (from prior ledger row), NOT EPIC-001 (from transcript)
+  ✖ returns EPIC-002 when transcript has EPIC-001 before EPIC-002 but prior ledger row says EPIC-002
+  ✖ returns EPIC-002 when transcript mentions EPIC-001 only in archive path references
+  ✖ returns work_item_id from dispatch-marker log, not transcript grep, when .active is absent
+  ✖ s1_d: README file-the-work step instructs filing a ClearGate "Epic/Story" [baseline fail: 0 occurrences]
+  ✖ s1_e: README close step says to run close_sprint.mjs with "no flags" [baseline fail: says "--assume-ack"]
+  ✖ s2_a: README has a Quickstart section [baseline fail: section absent]
+  ✖ s2_b: Quickstart section covers Story, Gate 1, and push [baseline fail: section absent]
+  ✖ s2_c: Quickstart section explicitly defers sprints, five-agent loop, and Gates 2-4 [baseline fail: section absent]
+  ✖ scrubs password from postgres:// URL in error messages
+  ✖ scrubs postgresql:// URLs too
+  ✖ sprint_status stays Active when Step 3.5 fails (pipeline blocked)
+  ✖ stderr contains "Step 3.5 FAILED" when prep_reporter_context.mjs fails (STORY-070-01: always fatal)
+  ✖ this repo's .cleargate/config.yml has gates.precommit with typecheck + test
+  ✖ wiki/index.md contains a "Hotfix Ledger" heading
+  ✖ wiki/index.md links to topics/hotfix-ledger
+✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-05-dev.md exists
+✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-06-dev.md exists
+✖ .cleargate/sprint-runs/SPRINT-28/reports/STORY-028-07-dev.md exists
+✖ 3 fires produce per-turn deltas; sum(delta) == last session_total
+✖ @testing-library/svelte is still present in admin/package.json devDependencies
+✖ BUG-027 Scenario 1: sentinel-first resolution — prior ledger row overrides transcript grep
+✖ BUG-027 Scenario 2: multi-epic transcript — sentinel+dispatch-marker overrides lexical-first grep
+✖ BUG-027 Scenario 3: no-sentinel fallback — dispatch-marker log overrides transcript grep
+✖ BUG-027 Scenario 4: snapshot-lock supersede — token-ledger.bug-027.sh must exist
+✖ Developer agent — Lane-Aware Execution (STORY-022-05)
+✖ Dogfood install end-to-end
+✖ Fixture A: Blank Node
+✖ Fixture B: Bare Go
+✖ G1: empty table creates first root admin
+✖ G2: same handle re-run is a no-op (idempotent)
+✖ G3: refuses to create second root without --force
+✖ G4: --force promotes existing non-root user to root
+✖ G5: missing DATABASE_URL errors with clear message
+✖ G6: --database-url flag overrides env DATABASE_URL
+✖ G7: unreachable database exits with code 3
+✖ G8: invalid handle rejected before DB round-trip (pgClientFactory never called)
+✖ G9: DATABASE_URL password scrubbed from error output
+✖ Protocol §24 — Lane Routing (STORY-022-01)
+✖ S-1: vendored Zod schemas field sets match OpenAPI snapshot
+✖ S1: README no longer contradicts the shipped framework (happy path)
+✖ S2: README carries a single-item Quickstart that defers the deep loop
+✖ STORY-014-02: version-alignment invariants (R-11)
+✖ STORY-028-04 Scenario 1 — AUTO-CONVERTIBLE plain suite
+✖ STORY-028-04 Scenario 2 — all 8 matchers
+✖ STORY-028-04 Scenario 4 — import from 'vitest' rewrite
+✖ STORY-028-04 Scenario 4b — .spec.ts rename to .node.test.ts
+✖ STORY-028-04 Scenario 5 — beforeEach/afterEach hooks
+✖ STORY-028-04 Scenario 8 — exit code 0 on all-auto directory
+✖ STORY-028-05 — Dev report attached
+✖ STORY-028-05 — mcp/package.json vitest dep removed
+✖ STORY-028-05 — test file count preserved (no tests deleted)
+✖ STORY-028-06 — Dev report attached
+✖ STORY-028-06 — cleargate-cli/package.json vitest dep removed + test script updated
+✖ STORY-028-06 — no vi.* mock patterns remain in cleargate-cli/ (excl examples + fixtures)
+✖ STORY-028-06 — no vitest imports remain in cleargate-cli/ (excl examples + fixtures)
+✖ STORY-028-07 — T2a: admin/package.json vitest devDep removed
+✖ STORY-028-07 — T2b: admin/package.json test script uses node:test runner
+✖ STORY-028-07 — T2c: @testing-library/svelte retained in admin/package.json
+✖ STORY-028-07 — T5: test file count preserved (>= 34 *.node.test.ts in admin/)
+✖ STORY-028-07 — T6: Dev report attached
+✖ Scenario 10: Step 3.5 always blocks when prep_reporter_context.mjs fails (STORY-070-01)
+✖ Scenario 1: Init into blank Node repo succeeds
+✖ Scenario 1: Install + doctor + upgrade-dry-run all clean
+✖ Scenario 1: single-session multi-fire
+✖ Scenario 24: Step 6.6 surfaces CAND entry when ledger has ≥3× repeated tuple
+✖ Scenario 2: Init into bare Go repo succeeds
+✖ Scenario 2: live developer.md is byte-identical to scaffold (mirror discipline)
+✖ Scenario 2: protocol §24 contains rubric, demotion mechanics, forbidden surfaces, and LD event registration
+✖ Scenario 2: v1 state.json migrates additively on first read under new code
+✖ Scenario 3: diff between dogfood and scaffold protocol files is empty (byte-identical)
+✖ Scenario 4: §24 body is ≤30 lines (heading inclusive)
+✖ Scenario 5: Idempotency — re-reading a v3 state.json does not double-migrate
+✖ Scenario 5: wiki/index.md has Hotfix Ledger section linking to hotfix-ledger.md
+✖ Scenario 7: Meta-repo workflow preserved
+✖ Scenario: Templates parseable via parseFrontmatter contain new fields in FM
+✖ U10: empty string is rejected
+✖ U11: all-hyphens handle is rejected
+✖ U1: single letter handle is valid
+✖ U2: hyphenated handle is valid
+✖ U3: alphanumeric handle is valid
+✖ U4: complex valid handle
+✖ U5: 39-char handle (max valid) is valid
+✖ U6: 40-char handle (too long) is rejected
+✖ U7: leading hyphen is rejected
+✖ U8: trailing hyphen is rejected
+✖ U9: handle with space is rejected
+✖ admin/package.json "test" script contains node:test runner invocation
+✖ admin/package.json "test" script does NOT contain "vitest"
+✖ admin/package.json does NOT have vitest in devDependencies
+✖ all three version strings parse as semver
+✖ cleargate-cli/package.json "test" script includes --test-concurrency=1 --experimental-test-module-mocks (T2b — STORY-028-05-arch-1 inherited baseline)
+✖ cli/mcp major.minor pair is in SUPPORTED_PAIRS
+✖ close_sprint.mjs: clean sprint (no lifecycle drift)
+✖ codemod exits 0
+✖ codemod exits 0 (all files auto-converted)
+✖ codemod exits 0 (all-auto: no vi.* calls)
+✖ codemod exits 0 (hooks fixture is auto-convertible)
+✖ codemod exits 0 (spec file is auto-convertible)
+✖ codemod script exists at cleargate-cli/scripts/codemod-vitest-to-node-test.mjs
+✖ count of *.node.test.ts files across mcp/ is >= 68 (50 converted + 18 pre-existing)
+✖ count of *.node.test.ts files in admin/ (excl node_modules) is >= 34
+✖ every story has lane: "standard" and lane_assigned_by: "migration-default"
+✖ exit code is 0 when zero MANUAL-FIX-REQUIRED files
+✖ exits 0 and prints inert message
+✖ exits 0 when all stories are Done and Step 2.6 finds no drift
+✖ failing tests:
+✖ gate arch — v1-inert path
+✖ gate arch — v2-active path
+✖ gate qa — v2-active path
+✖ grep for `from 'vitest'` in cleargate-cli/src/ test/ scripts/ returns ZERO matches (Scenario: All 138 files converted) — excludes examples/ and test/fixtures/
+✖ grep for vi.(fn|mock|spyOn|stubGlobal|useFakeTimers|useRealTimers|advanceTimersByTime|hoisted) returns ZERO matches (Scenario: vitest.config.ts deleted, package.json clean) — excludes examples/ and test/fixtures/
+✖ handle validation (isValidHandle)
+✖ improvement-suggestions.md contains CAND-SPRINT-TEST-S entry
+✖ input.spec.ts is renamed to input.node.test.ts (no .spec.ts remains)
+✖ input.vitest.test.ts is renamed to input.node.test.ts (original removed)
+✖ invokes run_script.sh pre_gate_runner.sh arch with worktree and branch
+✖ invokes run_script.sh pre_gate_runner.sh qa with worktree and branch
+✖ live hook matches bug-027.sh snapshot byte-for-byte
+✖ live template Bug.md — parseFrontmatter returns all 6 new keys
+✖ live template CR.md — parseFrontmatter returns all 6 new keys
+✖ live template epic.md — parseFrontmatter returns all 6 new keys
+✖ live template story.md — parseFrontmatter returns all 6 new keys
+✖ mcp/package.json does NOT contain vitest in devDependencies (Scenario: package.json clean)
+✖ mcp/package.json test script does NOT invoke vitest (Scenario: package.json clean)
+✖ no other pre-existing field on any story is mutated
+✖ on-disk state.json is byte-equal after a no-op invocation
+✖ output contains assert.deepStrictEqual (toEqual converted)
+✖ output contains assert.ok (toBeTruthy/toBeFalsy converted)
+✖ output contains assert.strictEqual (toBe converted)
+✖ output contains assert.throws (toThrow converted)
+✖ output contains beforeEach and afterEach (hooks preserved)
+✖ output does NOT contain vitest import
+✖ output imports assert from 'node:assert/strict'
+✖ output imports from 'node:test' not 'vitest'
+✖ output matches expected.node.test.ts (after prettier normalization)
+✖ output matches expected.node.test.ts (all assert.* mappings correct)
+✖ output matches expected.node.test.ts (spec rename output correct)
+✖ output matches expected.node.test.ts fixture
+✖ passes through strings without postgres URLs unchanged
+✖ pipeline exits 1 when Step 3.5 fails (always fatal — STORY-070-01)
+✖ real corpus: `- Q:` entries == independent answered-decision count; open-epic rules match; EPIC-063 supersedes EPIC-020; ingest == build; size warning only
+✖ real corpus: no false `- Supersedes:` (STORY-063-10 none); EPIC-063 keeps [[EPIC-020]]; exactly 1 on the page
+✖ resolver returns EPIC-002 (from prior ledger row), NOT EPIC-001 (from transcript)
+✖ returns EPIC-002 when transcript has EPIC-001 before EPIC-002 but prior ledger row says EPIC-002
+✖ returns EPIC-002 when transcript mentions EPIC-001 only in archive path references
+✖ returns work_item_id from dispatch-marker log, not transcript grep, when .active is absent
+✖ s1_d: README file-the-work step instructs filing a ClearGate "Epic/Story" [baseline fail: 0 occurrences]
+✖ s1_e: README close step says to run close_sprint.mjs with "no flags" [baseline fail: says "--assume-ack"]
+✖ s2_a: README has a Quickstart section [baseline fail: section absent]
+✖ s2_b: Quickstart section covers Story, Gate 1, and push [baseline fail: section absent]
+✖ s2_c: Quickstart section explicitly defers sprints, five-agent loop, and Gates 2-4 [baseline fail: section absent]
+✖ scrubPassword
+✖ scrubs password from postgres:// URL in error messages
+✖ scrubs postgresql:// URLs too
+✖ snapshot-drift
+✖ sprint_status stays Active when Step 3.5 fails (pipeline blocked)
+✖ stderr contains "Step 3.5 FAILED" when prep_reporter_context.mjs fails (STORY-070-01: always fatal)
+✖ this repo's .cleargate/config.yml has gates.precommit with typecheck + test
+✖ wiki/index.md contains a "Hotfix Ledger" heading
+✖ wiki/index.md links to topics/hotfix-ledger

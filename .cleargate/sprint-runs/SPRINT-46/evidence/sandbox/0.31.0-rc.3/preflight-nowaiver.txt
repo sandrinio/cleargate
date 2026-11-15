@@ -1,0 +1,14 @@
+Step 0: refreshed 4 items, 0 errors.
+
+test gate: probing the configured test command (at most 20 minutes; reused for the same HEAD and command)
+cleargate sprint preflight: 1/6 checks failed for SPRINT-01
+
+  ✓ Previous sprint Completed — skipped (no preceding sprint)
+  ✓ No leftover worktrees — no leftover .worktrees/STORY-* paths
+  ✓ Sprint branch ref free — refs/heads/sprint/S-01 does not exist
+  ✓ main is clean — main is clean
+  ✓ Per-item readiness gates — all in-scope items pass readiness gates
+  ✗ Test gate: "make check" stopped before running any test (exit 2: "make: *** [test] Error 2")
+    Make it run here, or record why it cannot: add "test_waiver": "<reason>" under "qa" in .cleargate/scripts/gate-checks.json and commit it.
+    No qa.test_waiver is recorded, so every merge whose test stops this way is refused.
+preflight exit 1

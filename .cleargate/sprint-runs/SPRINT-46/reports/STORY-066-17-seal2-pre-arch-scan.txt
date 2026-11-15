@@ -1,0 +1,66 @@
+# ClearGate Pre-Gate Scan Report
+Mode: arch
+Worktree: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli
+Branch: main
+Timestamp: 2026-11-15T13:02:47Z
+---
+[INFO] typecheck: not configured
+[PASS] new_deps: no new runtime deps
+[PASS] stray_env_files: no stray .env files
+[INFO] file_count_report: directory file counts:
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli: 11 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test: 8 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/init: 9 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/admin-auth: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/util: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/snapshots: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/auth: 7 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/integration: 6 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/agents: 6 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/wiki: 74 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/docs: 26 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/dashboard: 21 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/hooks: 28 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/examples: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/scripts: 113 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/lib: 62 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/fixtures: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/commands: 116 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/hosts: 11 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/scaffold: 18 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/e2e: 11 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/helpers: 7 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/test/admin-api: 3 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/dist: 17 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/dist/auth: 12 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/dist/lib: 8 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/dist/admin-api: 4 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/examples: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/examples/red-green-example: 4 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scripts: 20 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scripts/clean-room: 13 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/templates: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/templates/cleargate-planning: 3 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/templates/synthesis: 6 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/templates/scaffold: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/.cleargate: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/.cleargate/reports: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scaffold: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scaffold/core: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/scaffold/hosts: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src: 2 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/init: 7 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/util: 1 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/auth: 10 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/wiki: 12 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/dashboard: 9 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/hooks: 4 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/lib: 50 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/commands: 37 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/hosts: 6 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-17/cleargate-cli/src/admin-api: 6 files
+[PASS] qa_red_lint: no semantic fixture issues
+---
+Summary: 3 passed, 0
+0 failed, 0
+0 warnings

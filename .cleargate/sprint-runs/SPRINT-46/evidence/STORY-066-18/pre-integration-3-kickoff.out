@@ -1,0 +1,15 @@
+# pre-integration proof: CLI=/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-18/cleargate-cli (story tree at ec9981b, main without 066-16/066-17); 2026-11-15T12:24:31Z
+baseline: reused the preflight probe of 6a5a424 (0 failing, exit 2) -> /private/tmp/q18.QeMX/cg-proof-18-o8pf/.cleargate/sprint-runs/SPRINT-01/baseline.json
+{
+  "sprint_id": "SPRINT-01",
+  "base_sha": "6a5a424f1911aee6d05576adeb91fde7b9e7793b",
+  "command": "sh guard.sh",
+  "exit_code": 2,
+  "failing": [],
+  "tail": [
+    "Makefile:22: *** make check needs OWL_TEST_DATABASE_URL.  Stop."
+  ],
+  "recorded_at": "2026-11-15T12:24:40.347Z",
+  "source": "preflight"
+}
+runs=       2

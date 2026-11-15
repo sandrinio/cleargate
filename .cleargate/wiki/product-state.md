@@ -9,8 +9,8 @@
 | Epics | 55 | 16 | 38 |
 | Sprints | 46 | 5 | 38 |
 | Proposals | 16 | 6 | 14 |
-| CRs | 127 | 17 | 95 |
-| Bugs | 123 | 53 | 58 |
+| CRs | 129 | 19 | 95 |
+| Bugs | 126 | 56 | 58 |
 | Spikes | 0 | 0 | 0 |
 
 ## Open Epics

@@ -1,0 +1,1 @@
+{"id":"STORY-901-04","step":"precondition","exit":2,"tail":["authored changes in the main checkout; commit or revert them first:","   M .cleargate/sprint-runs/.active"]}

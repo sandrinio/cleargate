@@ -1,0 +1,14 @@
+wtCmds []
+[('STORY-903-02', 'qa-verify', '5826442fe2b20e7dc33a69ade1166b6e68e7651a', '1cac98fbecc327855fcede0a752af1ab80a4ed7c', 'x')]
+1cac98f feat: dev
+5826442 qa-red(STORY-903-02): write failing tests
+aac23f5 init
+done-item exit=2 out=       0 wave_runner_args.mjs: --item STORY-903-01 is Done
+from-no-item exit=2 out=       0 wave_runner_args.mjs: --from and --issue need --item
+bad-stage exit=2 out=       0 wave_runner_args.mjs: --from bogus is not an agent stage of lane 'standard' (qa-red, architect-tpv, developer, qa-verify, architect-review)
+item+issue exit=0 hi None
+issue-no-item exit=2 out=       0
+no-seal exit=2 out=       0 wave_runner_args.mjs: no qa-red(STORY-903-09) commit on story/STORY-903-09
+from qa-red exit=0 qa-red None None
+all-wave wtCmds ['git worktree add .worktrees/STORY-903-09 -b story/STORY-903-09 sprint/S-99']
+['STORY-903-02', 'STORY-903-09']

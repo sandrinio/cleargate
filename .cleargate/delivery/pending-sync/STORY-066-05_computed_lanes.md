@@ -59,6 +59,7 @@ As the sprint Orchestrator, I want a script to compute each item's lane from its
   1. `runtime` when `ui_surface` is true, or `subsystems >= 2`, or `proof_tier` is `container` or `live`.
   2. `fast` when `scenarios <= 2` AND `subsystems == 1` AND `ui_surface` false AND `forbidden_surface` false AND `new_dependency` false AND `proof_tier` is absent or `unit`.
   3. Otherwise `standard`. This includes `subsystems == 0`: an item with no parsable file surface cannot be proven small, so it is never `fast` (the over-serialize direction of `collision_surface.sh`'s fail-safe contract).
+  4. (Mid-sprint amendment, owner approved 2026-11-15: "Fix now in SPRINT-46".) Rule 2 needs `scenarios >= 1`. An item with no parsed scenario (`scenarios == 0`: for example a bug or CR written without a Gherkin block) cannot be proven small, so it is never `fast`; it falls to rule 3 (`standard`), or rule 1 when a runtime signal holds. The reason string says so. Cause: Goal check (c) found CR-120 (a large CR, no Gherkin, one subsystem) and BUG-088 assigned `fast`, which skips QA-Red and QA-Verify.
 - **Requirement 3: how each signal is computed from the item file** (the decision this story owns; the code uses no judgement, only the file):
   - `scenarios`: the number of lines matching `^\s*Scenario( Outline)?:` inside fenced code blocks tagged `gherkin`. A Scenario Outline counts once. A bug or CR with no Gherkin block gives 0.
   - **surface**: the file paths `collision_surface.sh <item-file>` prints on stdout (spawned with `bash`, located next to `assign_lane.mjs`). Reusing it keeps one parser for "what files does this item touch" (the §3.1 table, the Bug/CR sandbox bullets, multi-column cells). Its stderr annotations are ignored. Test files are dropped from the surface before the signals below (a path with a `test`, `tests`, `__tests__` or `fixtures` directory segment, or a `.test.`, `.spec.` or `_test.` file name), because a test always accompanies its code and must not count as a second subsystem.
@@ -202,13 +203,13 @@ Feature: Computed lanes
 
 ## Task Breakdown
 
-- [ ] Write `assign-lane.node.test.ts` for `computeSignals` and `laneFor` over the Outline table in §2.1, including a Go-layout fixture and the no-surface case.
-- [ ] Create `assign_lane.mjs` with the signals, the three rules, the CLI and `--write` (keeps a higher existing lane).
-- [ ] Add `runtime` to `state.schema.json`, `update_state.mjs --lane`, the `init_sprint.mjs` fallback regex and the `constants.mjs` comment; add the two `lane_assigned_by` values.
-- [ ] Add the floor and raise-only logic to `init_sprint.mjs`; write the integration test over a fixture sprint.
-- [ ] Rewrite the Lane Classification section and SDR item 4 in `architect.md` and `architect.toml`.
-- [ ] Rewrite `cleargate-enforcement.md` §9, the `Sprint Plan Template.md` §2.4 table and the `story.md` lane line.
-- [ ] Fix existing tests that pin the two-value enum; run `npm run typecheck` and the scripts test suite.
+- [x] Write `assign-lane.node.test.ts` for `computeSignals` and `laneFor` over the Outline table in §2.1, including a Go-layout fixture and the no-surface case.
+- [x] Create `assign_lane.mjs` with the signals, the three rules, the CLI and `--write` (keeps a higher existing lane).
+- [x] Add `runtime` to `state.schema.json`, `update_state.mjs --lane`, the `init_sprint.mjs` fallback regex and the `constants.mjs` comment; add the two `lane_assigned_by` values.
+- [x] Add the floor and raise-only logic to `init_sprint.mjs`; write the integration test over a fixture sprint.
+- [x] Rewrite the Lane Classification section and SDR item 4 in `architect.md` and `architect.toml`.
+- [x] Rewrite `cleargate-enforcement.md` §9, the `Sprint Plan Template.md` §2.4 table and the `story.md` lane line.
+- [x] Fix existing tests that pin the two-value enum; run `npm run typecheck` and the scripts test suite.
 
 ## 4. Quality Gates
 

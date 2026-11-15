@@ -1,0 +1,5 @@
+STORY-901-01-pre-arch-scan.txt
+{"ts":"2026-11-15T17:35:51.149Z","mode":"arch","item":null,"exit":1,"flagged_checks":["typecheck"]}
+{"ts":"2026-11-15T17:35:51.156Z","mode":"seal","item":"STORY-901-01","exit":0,"raw_exit":1,"flagged_checks":[],"sealed_sha":"d2d972858f7e2fcfc508e33ad93c35ed32444733","expected_red":["internal/tally/top_red_test.go:9:9: undefined: TopN"]}
+[INFO] expected_red: seal_red.mjs read this typecheck failure as the expected red (only not-yet-written symbols in the sealed red files); seal scan_exit 0 (raw 1). Not a flag; no Architect pass.
+  | internal/tally/top_red_test.go:9:9: undefined: TopN

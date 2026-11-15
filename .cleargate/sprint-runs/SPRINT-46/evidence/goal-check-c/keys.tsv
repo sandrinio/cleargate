@@ -1,0 +1,43 @@
+cg_SPRINT-43	BUG-088	1	cleargate-planning 
+cg_SPRINT-43	CR-121	2	.cleargate cleargate-planning 
+cg_SPRINT-43	CR-122	2	.cleargate cleargate-planning 
+cg_SPRINT-43	STORY-031-03	4	.claude .cleargate cleargate-planning 
+cg_SPRINT-43	STORY-031-04	2	.claude cleargate-planning 
+cg_SPRINT-43	STORY-031-05	3	.cleargate Yes — .cleargate cleargate-planning 
+cg_SPRINT-44	STORY-062-01	4	. cleargate-cli 
+cg_SPRINT-44	STORY-062-02	3	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-44	STORY-062-03	3	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-44	STORY-062-04	4	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-44	STORY-062-05	2	cleargate-cli 
+cg_SPRINT-44	STORY-062-06	2	cleargate-cli 
+cg_SPRINT-45	STORY-064-01	3	. cleargate-cli 
+cg_SPRINT-45	STORY-064-02	2	cleargate-cli 
+cg_SPRINT-45	CR-120	2	cleargate-cli 
+cg_SPRINT-45	BUG-117	2	cleargate-cli 
+cg_SPRINT-45	BUG-133	3	cleargate-cli gate-checks.json: kept …  
+cg_SPRINT-45	BUG-134	4	. cleargate-cli hosts 
+cg_SPRINT-46	STORY-066-03	2	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-46	STORY-066-04	4	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-46	STORY-066-05	3	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-46	STORY-066-06	4	Yes — cleargate-cli cleargate-cli 
+cg_SPRINT-46	STORY-066-07	2	cleargate-cli 
+cg_SPRINT-46	STORY-066-08	2	cleargate-cli 
+cg_SPRINT-46	STORY-066-09	3	. cleargate-cli 
+cg_SPRINT-46	STORY-066-10	2	cleargate-cli 
+cg_SPRINT-46	STORY-066-11	3	. cleargate-cli 
+cg_SPRINT-46	STORY-066-12	4	Yes — cleargate-cli cleargate-cli 
+da_SPRINT-04	STORY-004-01	3	internal 
+da_SPRINT-04	STORY-004-02	5	api internal none new: the demo network (testdata 
+da_SPRINT-04	STORY-004-03	2	internal 
+da_SPRINT-04	STORY-004-04	6	api docs internal test 
+da_SPRINT-04	STORY-004-05	8	. api docs internal test 
+da_SPRINT-04	STORY-004-06	4	api internal test 
+da_SPRINT-04	STORY-004-07	6	. api docs internal 
+da_SPRINT-04	STORY-004-08	8	Yes — internal api docs internal test 
+da_SPRINT-04	STORY-004-09	4	api docs internal 
+da_SPRINT-04	STORY-004-10	4	api docs internal 
+da_SPRINT-04	STORY-004-11	5	Yes — internal internal test 
+da_SPRINT-04	STORY-004-12	3	internal test 
+da_SPRINT-04	STORY-004-13	3	Yes — internal internal 
+da_SPRINT-04	STORY-004-14	2	internal 
+da_SPRINT-04	STORY-004-15	3	docs internal test 

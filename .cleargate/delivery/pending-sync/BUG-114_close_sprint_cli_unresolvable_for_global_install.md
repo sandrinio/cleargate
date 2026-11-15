@@ -17,13 +17,6 @@ updated_at: 2026-09-27T08:58:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
-draft_tokens:
-  input: null
-  output: null
-  cache_read: null
-  cache_creation: null
-  model: null
-  sessions: []
 pushed_by: null
 pushed_at: null
 last_pulled_by: null
@@ -37,6 +30,21 @@ cached_gate_result:
   failing_criteria: []
   last_gate_check: 2026-09-27T09:01:06Z
   transition: ready-for-fix
+draft_tokens:
+  input: 0
+  output: 0
+  cache_creation: 0
+  cache_read: 0
+  model: claude-opus-5-5
+  last_stamp: 2026-11-15T09:23:15Z
+  sessions:
+    - session: 5ceeac69-149c-4c13-bbec-09ab2d997749
+      model: claude-opus-5-5
+      input: 0
+      output: 0
+      cache_read: 0
+      cache_creation: 0
+      ts: 2026-11-15T08:59:11Z
 ---
 
 # BUG-114: `close_sprint.mjs` cannot find a globally installed CLI, so Gate 4 is unreachable for global and npx users
@@ -86,11 +94,13 @@ close_sprint.mjs:235  function resolveCliBin(repoRoot, rel = 'cli.js') { const c
 
 ## Task Breakdown
 
-> **Binding plan:** `.cleargate/sprint-runs/SPRINT-41/plans/M7.md` addendum 2026-09-27T09:41Z (A2/A4/A7, errata A1). The plan wins where it differs from this file.
+> **Binding plan:** `.cleargate/sprint-runs/SPRINT-46/plans/BUG-114.md` (pulled into SPRINT-46 on 2026-11-15 after Goal check (d) run 1, finding S14; it replaces SPRINT-41 `plans/M7.md` §M7-C). The plan wins where it differs from this file. Canonical files only; the live twin follows at the SPRINT-46 Gate 4 re-sync.
 
-- [ ] QA-Red (lane M7-C): close-sprint-cli-resolution red (4); re-scope close-sprint-hardening S1a–S1d and bug076_077_close_path.red.sh #5 (both copies) to a hermetic PATH; BUG-090 close_sprint row append 0f837a9a…
-- [ ] close_sprint.mjs pathCliDist (first PATH cleargate, realpath → <pkg>/dist, name check) as resolveCliBin's third candidate; three-place message; PATH-dist stdout line; :771 text; twin
-- [ ] Typecheck, targeted, every close_sprint spawner with the ambient PATH, M2 pair
+- [x] QA-Red seal 1: `test/helpers/hermetic-path.ts` (`hermeticPath`) and `test/scripts/close-sprint-cli-resolution.red.node.test.ts` T1–T4 (T2/T3 red, T1/T4 green at ad5110c) -> §5 scenarios 1–3
+- [x] QA-Red seal 2 (counts unchanged): `PATH: hermeticPath()` in every close_sprint spawn env of hardening-043-05.red (5), step-2-6c.red, step-2-6c-archive, close-sprint-backsync, assume-ack-guard, fence.red; canonical `bug076_077_close_path.red.sh` #5 runs `PATH=/usr/bin:/bin "$NODE"`
+- [x] close_sprint.mjs: `localCliDist`, `probePathCli` and `resolveCliBin` (local, then PATH dist) with the once-only PATH-dist stdout line; 2.6d/2.6c script-root operands use `localCliDist`; three-place not-found message with PATH diagnostic; `:771` text -> §5 scenarios 1–3
+- [x] Typecheck, `node --check`, build in the worktree, new red solo, witness list with the ambient PATH, canonical shell test
+- [x] QA-Verify: witness list, live-parity reds classified (rule 11), proof run → `evidence/BUG-114/proof-global-layout.txt`
 
 ## 5. Verification Protocol (The Failing Test)
 **Command:** `cd cleargate-cli && npm run test:file -- test/scripts/close-sprint-cli-resolution.red.node.test.ts` (solo).

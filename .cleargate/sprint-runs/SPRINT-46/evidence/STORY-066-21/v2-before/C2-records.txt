@@ -1,0 +1,2 @@
+cat: .cleargate/sprint-runs/SPRINT-01/reports/STORY-901-03-pre-arch-scan.txt: No such file or directory
+tail: .cleargate/sprint-runs/SPRINT-01/pre-gate.jsonl: No such file or directory

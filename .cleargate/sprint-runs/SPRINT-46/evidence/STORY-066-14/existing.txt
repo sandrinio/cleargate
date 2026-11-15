@@ -1,0 +1,218 @@
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/merge-story.red.node.test.ts test/scripts/merge-story.red.integration.node.test.ts test/scripts/merge-story-amend-a.red.node.test.ts test/scripts/merge-story-amend-a.red.integration.node.test.ts test/docs/loop-spec-three-paths.red.node.test.ts test/agents/qa-verify-run-and-probe.red.node.test.ts test/docs/test-layers-declared-doctrine.red.node.test.ts test/docs/contract-first-dag-text.red.node.test.ts test/scaffold/skill-md-serial-pointers.red.node.test.ts test/scripts/codex-sprint-execution-render.red.node.test.ts test/scripts/codex-agents-codegen.red.node.test.ts test/commands/init-codex-sprint-execution.red.node.test.ts test/commands/lifecycle-codex.red.node.test.ts
+
+▶ STORY-066-09 Scenario 2: no heuristic text in the agent prompt
+  ✔ B1a: neither qa.md nor qa.toml contains "not-yet-runtime-aware" (1.593333ms)
+  ✔ B1b: qa.toml equals renderAgentToml(qa.md) (regenerated, not hand-edited) (5.6215ms)
+✔ STORY-066-09 Scenario 2: no heuristic text in the agent prompt (7.773875ms)
+▶ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect
+  ✔ B2: VERIFY text has the run-and-probe dispatch line and the commands.* keys; output shape has the new fields (0.338292ms)
+✔ STORY-066-09 Scenario 3: a passing run-and-probe says there is no defect (0.413709ms)
+▶ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect
+  ✔ B3: precedence spec > red-test > code, DEFECTS line format, red-test definition (0.387041ms)
+✔ STORY-066-09 Scenario 4: a wrong red test is reported as a red-test defect (0.450208ms)
+▶ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item
+  ✔ B4: the scenario-only sentence is in the VERIFY text and Guardrails carries the rule (0.191ms)
+✔ STORY-066-09 Scenario 5: a finding that breaks no scenario does not fail the item (0.256792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 34 — hosts:['codex']: .agents/skills/sprint-execution/{SKILL.md,dispatch-serial.md} exist, no banned token, no .claude/, entryOwner core (155.849459ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 35 — hosts:['claude']: no .agents/; .claude/skills/sprint-execution/dispatch-serial.md exists and equals canonical (65.2515ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 36 — hosts:['claude','codex']: both dispatch-serial.md files are byte-identical, and the Claude SKILL.md equals canonical (with its pointers) (142.29775ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 31 — upgrade no-prune: with claude+codex installed, upgrade --yes deletes no codex file (336.293333ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 32 — doctor --check-scaffold prints the codex per-owner clean line with N > 0 (135.215125ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+▶ Test 33 — host add/remove codex
+  ✔ host add codex on a claude install → codex surfaces exist, claude byte-unchanged (170.796792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ [TPV R-L3] host add codex refuses a malformed .codex/config.toml before any write (preflight → exit 2) (174.421083ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+  ✔ host remove codex on claude+codex → codex-owned files gone, claude byte-unchanged, AGENTS.md keeps user prose with zero marker lines (204.529416ms)
+✔ Test 33 — host add/remove codex (550.078792ms)
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
+✔ Test 34 — full uninstall of claude+codex calls codexAdapter.remove exactly once (653.824167ms)
+▶ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab
+  ✔ T1 (red): architect-reader digest gains exports_provided / exports_consumed (0.761333ms)
+  ✔ T2 (red): architect-synth — Real-collision predicate, Contract formation, schema_version 2 shape (0.447041ms)
+  ✔ T3a (red): SKILL.md — new §C.0.2 Contract-first build and integration, correctly placed and worded (0.3725ms)
+  ✔ T3b (anchor): every -12 anchor line occurs exactly once; §A.4 stays free of the 9 -12 banned tokens (0.788041ms)
+  ✔ T3c (red): SKILL §A.4 names the real-collision predicate and the digest/schema fields (0.287875ms)
+  ✔ T4c: canonical cleargate-enforcement.md names the real-collision predicate (EPIC-061 R3-split) (0.257833ms)
+  ✔ T5c: canonical Sprint Plan Template §2.1 is a contract-first DAG example (EPIC-061 R3-split) (0.166208ms)
+  ✔ T5b (anchor): the three declareProbeSprint template anchors survive (0.152625ms)
+  ✔ T6 (anchor): none of the 7 CR-124 files trips the dead execution-mode vocabulary gate (3.356209ms)
+  ✔ T7 (red): architect.md §2.1 names the contract-first DAG and per-story upstream (0.286416ms)
+✔ contract-first-dag-text (CR-124): reader/synth/SKILL/enforcement/template/architect/vocab (7.586042ms)
+▶ Scenario 1 — each path lists exactly the stages stagesFor returns
+  ✔ T1 — the paths table in the Claude and generated .agents SKILL equals stagesFor; every STAGE_NAMES entry heads a stage note (4.96625ms)
+✔ Scenario 1 — each path lists exactly the stages stagesFor returns (5.508875ms)
+▶ Scenario 2 — no milestone plan remains; the story plan has its own mode
+  ✔ T2 — no milestone-plan token in either SKILL or the four prompts; Phase B survives only as a one-line stub (2.133541ms)
+  ✔ T3 — architect.md has Mode: STORY-PLAN (150 lines, plans/<ID>.md, Task Breakdown) matching the runtime stage; GOAL_RELATION lives in the SDR and template §2.1 (1.515417ms)
+✔ Scenario 2 — no milestone plan remains; the story plan has its own mode (3.750083ms)
+▶ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure
+  ✔ T4 — §C.7 is the merge_story.mjs exit table; seal_red / DEFECT_IN notes; flashcard gate restored before the first merge (1.346584ms)
+  ✔ T5 [integration-gated: STORY-066-08, 066-11, 066-10, 066-07] — the real scripts' usage matches the §C text (252.432375ms)
+✔ Scenario 3 — the merge is a script; DevOps only on a conflict or post-merge failure (253.885084ms)
+▶ Scenario 4 — every host reads the same spec
+  ✔ T6 — --check exits 0; developer.md plan input and fast-lane rule; dispatch-serial.md step 3 and §5; Codex twins carry the change (106.979209ms)
+  ▶ T7 — prep_qa_context / prep_reporter_context follow the plan move
+    ✔ prep_qa_context: plans/<ID>.md first, then a plans/M*.md section; reporter: ## Story Plans after milestone plans (8117.341041ms)
+  ✔ T7 — prep_qa_context / prep_reporter_context follow the plan move (8148.900792ms)
+✔ Scenario 4 — every host reads the same spec (8256.046708ms)
+▶ Scenario 5 — a spec that disagrees with the code fails the build
+  ✔ T8a (guard, passes by design) — the matcher accepts a table built from stagesFor and throws naming the bad lane or stage on a doctored one (1.630167ms)
+  ✔ T8b — a temp copy of the real SKILL.md whose runtime row names `prove`, or whose fast row lacks `merge`, fails the docs-match (3.144708ms)
+✔ Scenario 5 — a spec that disagrees with the code fails the build (4.861166ms)
+✔ T4: test-layers-declared is registered in the story ready-for-execution gate block (0.950834ms)
+✔ T4: test-layers-declared is registered in the cr ready-to-apply gate block (0.214083ms)
+✔ T4: test-layers-declared is registered in the bug ready-for-fix gate block (0.156125ms)
+✔ T4 (A6, NEW): canonical readiness-gates.md parses as valid YAML across every fenced block — zero throws, 11 blocks (6.418417ms)
+✔ T7: developer.md documents both *.integration.node.test.ts and *.red.integration.node.test.ts, in real prose (A7c) (0.395458ms)
+✔ T7: qa.md documents both *.integration.node.test.ts and *.red.integration.node.test.ts, in real prose (A7c) (0.203167ms)
+✔ T7: SKILL.md §C.3 documents both naming forms (scoped to the C.3 section, not the whole file) (0.274458ms)
+✔ T7 (A7a, NEW): SKILL.md §C.3 own "File-naming:" sentence itself qualifies the *.red.node.test.ts claim (0.27125ms)
+✔ T10: cr-026-integration.node.test.ts (the hyphen form) is documented — regardless of whether the file still exists (A7b) (0.382667ms)
+✔ T11: readiness-gates.md Predicate Vocabulary says "exactly 11 predicate shapes" and lists #11 (0.198833ms)
+✔ T11 (A5, NEW): readiness-predicates.ts:3's own docstring count moves from 11 to 12 — the SECOND, independent count site (1.155709ms)
+✔ Test 20 — P1 and P2 appear verbatim, each directly after its anchor plus one blank line (2.410459ms)
+✔ Test 21 (anchor, re-scoped EPIC-066 M3 C-9) — the five anchor headings each occur once, in order (0.472875ms)
+▶ Test 22 — prebuild output matches canonical
+  ✔ templates/cleargate-planning/.claude/skills/sprint-execution/{SKILL.md,dispatch-serial.md} equal canonical (skip if templates are absent) (1.039625ms)
+✔ Test 22 — prebuild output matches canonical (1.182208ms)
+▶ Test 1 — one .codex/agents/<name>.toml per canonical agent
+  ✔ exactly 11 canonical agents, and every one has a generated TOML file on disk (0.789125ms)
+  ✔ no extra .toml files under scaffold/hosts/codex/.codex/agents beyond the 11 canonical agents (0.247916ms)
+✔ Test 1 — one .codex/agents/<name>.toml per canonical agent (1.574209ms)
+▶ Test 2 — generated TOML parses to exactly {name, description, developer_instructions}, equal to source
+  ✔ architect.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (16.588625ms)
+  ✔ architect-reader.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.303292ms)
+  ✔ architect-synth.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (3.537958ms)
+  ✔ cleargate-wiki-contradict.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (0.959083ms)
+  ✔ cleargate-wiki-ingest.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.0585ms)
+  ✔ cleargate-wiki-lint.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.031209ms)
+  ✔ cleargate-wiki-query.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (0.90725ms)
+  ✔ developer.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.122166ms)
+  ✔ devops.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (0.988417ms)
+  ✔ qa.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.975458ms)
+  ✔ reporter.toml: parses, has exactly the 3 keys, and they equal the canonical frontmatter + body (1.595958ms)
+✔ Test 2 — generated TOML parses to exactly {name, description, developer_instructions}, equal to source (31.514083ms)
+▶ Test 3 — no model, no tools; pinned GENERATED header
+  ✔ architect.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.416208ms)
+  ✔ architect-reader.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.216083ms)
+  ✔ architect-synth.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.161292ms)
+  ✔ cleargate-wiki-contradict.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.285042ms)
+  ✔ cleargate-wiki-ingest.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.151959ms)
+  ✔ cleargate-wiki-lint.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.102583ms)
+  ✔ cleargate-wiki-query.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.17525ms)
+  ✔ developer.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.1395ms)
+  ✔ devops.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.095709ms)
+  ✔ qa.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.133ms)
+  ✔ reporter.toml: has no "model"/"tools" key and line 1 is the pinned GENERATED comment (0.116208ms)
+✔ Test 3 — no model, no tools; pinned GENERATED header (2.182083ms)
+▶ Test 4 — planCodexPayload determinism (agent + portable-skill entries)
+  ✔ two calls deep-equal for every hosts/codex/.codex/agents/** and core/.agents/skills/** entry (17.496917ms)
+  ✔ --check exits 1 on a hand-edited generated agent TOML (368.478083ms)
+✔ Test 4 — planCodexPayload determinism (agent + portable-skill entries) (386.095208ms)
+▶ [TPV re-seal] Test 4c — --check flags extras under the generated dirs and a stale portable skill
+  ✔ --check exits 1 and names the file for an extra .codex/agents TOML (565.2925ms)
+  ✔ --check exits 1 and names the file for an extra file under core/.agents/skills (549.298333ms)
+  ✔ --check exits 1 and names the file for a stale portable skill copy (555.795416ms)
+✔ [TPV re-seal] Test 4c — --check flags extras under the generated dirs and a stale portable skill (1670.530917ms)
+▶ Test 5 — an escaping fixture body round-trips exactly
+  ✔ a body with a triple-quote sequence, a backslash, a tab and a CR survives --write and re-parses byte-identical (178.483417ms)
+✔ Test 5 — an escaping fixture body round-trips exactly (178.55425ms)
+✔ Test 31 — renderCodexSprintExecution(canonical) is deterministic, contains R1-R5, drops every banned token, keeps the frontmatter and every non-A1-A4 line in order (8.255292ms)
+✔ Test 32 — deleting an anchor line throws "anchor not found"; duplicating A3 throws "anchor not unique"; a banned token surviving throws "banned token survived" (5.399083ms)
+✔ Test 33 — planCodexPayload plans both sprint-execution entries; the generated files match; --check exits 0/1 (359.533834ms)
+▶ STORY-066-08 Amendment A — R10 only files the item changed count
+  ✔ I1 (A7): a debug-pattern hit in an untouched tracked file does not refuse; the item merges as fast (8838.647291ms)
+  ✔ I2 (A8): a debug-pattern hit in a file the item changed refuses (exit 3), demotes, and names only the changed file (5740.792417ms)
+✔ STORY-066-08 Amendment A — R10 only files the item changed count (14580.072209ms)
+▶ STORY-066-08 Amendment A — R11 unnamed baseline failure excused (Go, dispenser shape)
+  ✔ I3 (A9–A11): the guard failure matching baseline merges with NOT TESTED lines; a changed guard line or exit code refuses (17067.982083ms)
+✔ STORY-066-08 Amendment A — R11 unnamed baseline failure excused (Go, dispenser shape) (17068.18325ms)
+▶ STORY-066-08 Amendment A — R11 judgeTestFailure baseline-unnamed (A1–A6)
+  ✔ A1–A6: an unnamed failure matching baseline exit code and last line is excused; every other shape keeps its old verdict (16.877292ms)
+✔ STORY-066-08 Amendment A — R11 judgeTestFailure baseline-unnamed (A1–A6) (17.380875ms)
+▶ STORY-066-08 S1 — clean merge and dirt rules
+  ✔ T1: a clean story merges with no agent; orchestrator wiki/ledger dirt survives byte-for-byte; the script never stashes (8025.400875ms)
+  ✔ T2: authored dirt in the main checkout, or real uncommitted work in the worktree, exits 2 and touches nothing (5052.368792ms)
+✔ STORY-066-08 S1 — clean merge and dirt rules (13078.515333ms)
+▶ STORY-066-08 S2 — a failing check refuses the merge and demotes a fast item
+  ✔ T3: fast item whose test fails exits 3 and is demoted (counters reset); a standard item is refused with no state change (8949.021208ms)
+  ✔ T4: on a Go repo with an active sprint the scan runs the command; exit 3, exactly one demotion, sprint markdown untouched (5271.871375ms)
+✔ STORY-066-08 S2 — a failing check refuses the merge and demotes a fast item (14221.075375ms)
+▶ STORY-066-08 S3 — a conflict stops the script and loses nothing
+  ✔ T5: both sides change line 1 -> exit 4, conflict_files, merge aborted, sprint branch clean, worktree and branch kept, wiki edit intact (7594.324875ms)
+✔ STORY-066-08 S3 — a conflict stops the script and loses nothing (7594.418459ms)
+▶ STORY-066-08 S4 — post-merge test
+  ✔ T7: a failing post-merge test exits 5, leaves the merge in place, keeps the worktree, does not advance state (13313.101542ms)
+  ✔ T8: with qa.test and merge.* all empty the post-merge step is skipped and the merge still lands (Go, no package.json) (17686.875542ms)
+✔ STORY-066-08 S4 — post-merge test (31000.196459ms)
+▶ STORY-066-08 S5 — a failure already on the sprint base is excused
+  ✔ T10: a branch failing only the baseline test merges (post_merge_test excused); one more new failure exits 3 (25431.440083ms)
+✔ STORY-066-08 S5 — a failure already on the sprint base is excused (25431.54775ms)
+▶ STORY-066-08 S3 — pure helpers (T6)
+  ✔ exports the exit table and the classifier/residue/report/result helpers; classifyDirtyPath and isWorktreeResidue follow the tables (17.245084ms)
+✔ STORY-066-08 S3 — pure helpers (T6) (17.770709ms)
+▶ STORY-066-08 S5 — judgeTestFailure (T9, injected-parser seam)
+  ✔ excuses only a failure whose every identifier is on the baseline (1.122375ms)
+✔ STORY-066-08 S5 — judgeTestFailure (T9, injected-parser seam) (1.198291ms)
+ℹ tests 94
+ℹ suites 29
+ℹ pass 94
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 140192.801459

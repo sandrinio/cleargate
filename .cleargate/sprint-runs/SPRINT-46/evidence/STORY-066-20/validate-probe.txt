@@ -1,0 +1,7 @@
+w exit 0
+b exit 0
+o exit 0
+bad exit 1
+wave_runner_args.mjs: Malformed segment verdict for <unknown-storyId>: 'verdict' must be one of GREEN, ESCALATED, BLOCKED (got undefined).
+Usage: node .cleargate/scripts/wave_runner_args.mjs --sprint <SPRINT-ID> --wave <wave-id> [--item <ID> [--from <stage>] [--issue <text>]] [--validate <verdicts.json>]
+  --validate <verdicts.json>  check the runner's return with validateVerdicts in serial mode: exit 0 valid, 1 invalid. Takes a bare verdict array, {verdicts} (an object with a verdicts array) or the Workflow return {result:{verdicts}} (with its waiting list)

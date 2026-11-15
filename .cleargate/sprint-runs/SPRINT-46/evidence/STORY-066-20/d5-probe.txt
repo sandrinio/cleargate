@@ -1,0 +1,8 @@
+red-files:
+internal/tally/top_test.go
+src/a.red.node.test.ts
+consolidation touching red + non-red:
+internal/tally/top_test.go
+grep exit 0
+consolidation w/o red file:
+grep exit 1

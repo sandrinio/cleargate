@@ -184,13 +184,13 @@ Feature: QA-Red seals its own tests
 
 ## Task Breakdown
 
-- [ ] Refactor `qa_red_lint.mjs`: entry-point guard, export `countTests` and `countScenarios`, add the volume check driven by the two environment variables -> Scenarios 2-4
-- [ ] Write `test/scripts/qa-red-lint-volume.node.test.ts` first (counting outline, 2x boundary at 8 of 4, absent variables) -> Scenario 3
-- [ ] Write `seal_red.mjs`: argv parse, file checks, commit with explicit pathspec, counts, scan with environment, report move, JSON and exit codes -> Scenarios 1, 5
-- [ ] Add the re-seal rule with `SKIP_RED_GATE=1` and its refusal after a Developer commit -> Scenarios 2, 5
-- [ ] Write `test/scripts/seal-red.integration.node.test.ts` against a temp git repository (npm layout and a Go layout with no `package.json`) -> Scenarios 1, 2, 4, 5
-- [ ] Edit `qa.md` Mode: RED, run `npm run gen:codex`, write `test/agents/qa-red-seal-content.node.test.ts` -> Scenario 1
-- [ ] Run `npm run typecheck` and the three new test files; confirm the existing `qa-content` and `cr081_qa_red_lint.red.sh` checks still pass
+- [x] Refactor `qa_red_lint.mjs`: entry-point guard, export `countTests` and `countScenarios`, add the volume check driven by the two environment variables -> Scenarios 2-4
+- [x] Write `test/scripts/qa-red-lint-volume.node.test.ts` first (counting outline, 2x boundary at 8 of 4, absent variables) -> Scenario 3
+- [x] Write `seal_red.mjs`: argv parse, file checks, commit with explicit pathspec, counts, scan with environment, report move, JSON and exit codes -> Scenarios 1, 5
+- [x] Add the re-seal rule with `SKIP_RED_GATE=1` and its refusal after a Developer commit -> Scenarios 2, 5
+- [x] Write `test/scripts/seal-red.integration.node.test.ts` against a temp git repository (npm layout and a Go layout with no `package.json`) -> Scenarios 1, 2, 4, 5
+- [x] Edit `qa.md` Mode: RED, run `npm run gen:codex`, write `test/agents/qa-red-seal-content.node.test.ts` -> Scenario 1
+- [x] Run `npm run typecheck` and the three new test files; confirm the existing `qa-content` and `cr081_qa_red_lint.red.sh` checks still pass
 
 ## 4. Quality Gates
 

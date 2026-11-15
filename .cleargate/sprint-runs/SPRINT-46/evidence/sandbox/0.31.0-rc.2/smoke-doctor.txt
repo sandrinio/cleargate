@@ -1,0 +1,1 @@
+[doctor] Hook config present in .claude/settings.json.

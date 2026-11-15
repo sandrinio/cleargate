@@ -1,0 +1,72 @@
+
+> cleargate@0.30.1 test:file
+> CLEARGATE_CI_ACK=1 tsx --test --test-concurrency=1 --experimental-test-module-mocks --test-reporter=spec test/scripts/seal-red-expected-red.red.node.test.ts test/scripts/seal-red-expected-red.red.integration.node.test.ts test/scripts/seal-red.integration.node.test.ts test/agents/qa-red-seal-content.node.test.ts test/scripts/segment-stages.red.node.test.ts test/scripts/wave-runner.red.node.test.ts test/scripts/wave-runner-sandbox-fixes.red.node.test.ts test/integration/wave-runner.red.integration.node.test.ts test/integration/wave-runner-item-rerun.red.integration.node.test.ts
+
+▶ STORY-066-07 qa Mode: RED seal text
+  ✔ Sc1: qa.md and qa.toml RED slices name the seal step, output fields, volume rule and CR-111 clause (0.837792ms)
+✔ STORY-066-07 qa Mode: RED seal text (1.319583ms)
+▶ STORY-066-13 single-item re-run and relative-path pack (red)
+  ✔ I1 @paths @interfaces: --item STORY-903-02 --from developer re-runs one blocked item from git state (1593.796666ms)
+  ✔ I2 @rules (regression pin, passes at baseline by D-1): prep_qa_context.mjs resolves a relative worktree path from the repo root (2084.359417ms)
+✔ STORY-066-13 single-item re-run and relative-path pack (red) (3678.845208ms)
+▶ STORY-066-11 wave runner integration (red)
+  ✔ I1 @data (Goal check a): three-wave dry run, one item per lane, 1/3/5 dispatches [integration-gated: 066-06/07/09] (937.849958ms)
+  ✔ I2 @rules: args CLI on a git Go repo with no package.json: models, stages, base, file, exits (821.939041ms)
+✔ STORY-066-11 wave runner integration (red) (1760.562583ms)
+▶ STORY-066-19 seal_red expected-red classification
+  ✔ Sc3 (rules, riskiest first): a redeclaration in the red file keeps the flag and adds no expected_red (2176.203792ms)
+  ✔ Sc3 (rules): an undefined symbol in a file that is not a sealed red file keeps the flag (2832.18625ms)
+  ✔ Sc1 (paths): a Go red test that only names an undefined symbol seals clean (exit 0, expected_red, scan_exit_raw 1) (3306.994333ms)
+  ✔ Sc2 (data): tsc TS2304 in a red file seals clean (2389.059125ms)
+  ✔ Sc2 (data): tsc TS2307 (cannot find module) in a red file seals clean (3214.758167ms)
+✔ STORY-066-19 seal_red expected-red classification (13919.752584ms)
+▶ STORY-066-19 classifyExpectedRed
+  ✔ Go and tsc undefined-symbol diagnostics in sealed files classify as expected-red; noise lines are allowed (373.604875ms)
+  ✔ anything else returns null: non-red path, redeclaration, syntax error beside an undefined symbol (323.053ms)
+  ✔ a block of 40 lines (possibly truncated) returns null; 39 lines of the same shape classify (202.0055ms)
+✔ STORY-066-19 classifyExpectedRed (899.388666ms)
+▶ STORY-066-07 seal_red.mjs
+  ✔ Sc1: clean set is committed (exactly the listed files, spaced path) and scanned in one call (2774.013958ms)
+  ✔ Sc2: oversized set flags qa_red_lint (exit 1); a trimmed re-seal before the Developer exits 0 with resealed (5238.345666ms)
+  ✔ Sc4: a bare pre_gate_runner.sh arch applies the volume rule only when the variables are set (4548.456458ms)
+  ✔ Sc5: a missing file exits 2 naming it and commits nothing (2305.032584ms)
+  ✔ Sc5: a re-seal after a Developer commit exits 2 and commits nothing (3405.907833ms)
+✔ STORY-066-07 seal_red.mjs (18272.323709ms)
+▶ STORY-066-19 B10 seal_red --worktree resolves from the repo root
+  ✔ B10: a relative --worktree absent under cwd resolves against the main checkout and seals (3242.183625ms)
+  ✔ B10: a relative value that exists in neither place exits 2 naming both paths (965.72375ms)
+✔ STORY-066-19 B10 seal_red --worktree resolves from the repo root (4208.048291ms)
+✔ Sc1 (guard) — stagesFor returns the §1.2 table per lane; last stage is merge/barrier-script (3.275792ms)
+✔ Sc1 data — hostile lanes fall back to standard; output fresh and frozen; laneOf precedence; normaliseLane (0.940917ms)
+✔ Sc2 — launchWave plan-only and with a segmentRunner carries lane and stages per story (4.398042ms)
+✔ Sc2 (guard) — launch_wave.mjs and dispatch_serial.mjs hold no stage name as a string literal (1.357ms)
+✔ Sc3 — dispatchSerial plan-only steps and dispatchStory carry lane and stages (5.263625ms)
+✔ Sc3 — `dispatch_serial.mjs next` prints lane and stages: state, else waves.json, else standard (1779.687375ms)
+✔ Sc4 — verdicts that name what ran are accepted in wave and serial mode (fast qaSha null; bounce repeats) (1.272417ms)
+✔ Sc5 — missing required stage, foreign stage and missing lane are each rejected naming the cause (0.855125ms)
+▶ STORY-066-13 sandbox loop fixes (red)
+  ✔ U1 @rules: QA-Verify prompt builds the pack first; qa.md and qa.toml pack-absent fallback runs prep itself (8.093375ms)
+  ✔ U2 @data: QA-Red prompt names the story plan on runtime, not on standard; qa.md RED step allows the plan (3.743917ms)
+  ✔ U3 @paths: a Developer Red-Test block goes back to QA-Red, counted as a red-test bounce (3.688125ms)
+  ✔ U4 @paths: Spec-Gap and a no-red-stage lane keep their BLOCKED verdicts; Spec-Gap after a Red-Test route still blocks (5.031792ms)
+  ✔ U5 @rules: a defect_in none FAIL re-runs QA-Verify once, with no Developer pass and no bounce (1.206917ms)
+  ✔ U6 @rules: two consecutive none FAILs block; SKILL.md A.5 and C.5 carry the baseline and none rules (1.758792ms)
+  ✔ U7 @paths: a mid-lane start runs from startAt and keeps the seeded SHAs; SKILL re-approach drops resumeFromRunId (1.878709ms)
+✔ STORY-066-13 sandbox loop fixes (red) (26.205417ms)
+▶ STORY-066-11 shipped wave runner (red)
+  ✔ U1 @paths: A standard / B fast / C waits on unmerged upstream; verdict envelope (7.696042ms)
+  ✔ U2 @paths: runner source stays a self-contained script with no policy of its own (4.966ms)
+  ✔ U3 @data: each lane dispatches exactly its always-stages; a flagged seal adds the scan stages (7.208875ms)
+  ✔ U4 @rules: shipped default model, resolution order, config scan, unknown lane (9.026667ms)
+  ✔ U5 @rules: last Developer retry before the cap runs one tier up; cap 1 never tiers; no defect_in = code (7.758958ms)
+  ✔ U6 @rules: a spec defect blocks the segment for the owner (1.412416ms)
+  ✔ U7 @rules: a red-test defect re-dispatches QA-Red, then the Developer, then QA-Verify (2.427ms)
+✔ STORY-066-11 shipped wave runner (red) (41.335458ms)
+ℹ tests 42
+ℹ suites 9
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47036.128708

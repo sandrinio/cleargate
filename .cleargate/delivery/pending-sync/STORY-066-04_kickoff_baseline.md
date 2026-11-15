@@ -188,12 +188,12 @@ Feature: Kickoff baseline
 
 ## Task Breakdown
 
-- [ ] Write `record_baseline.mjs` with `extractFailing`, the command choice, the atomic write and the main guard -> Requirements 2, 3, 4, 5, 7
-- [ ] Call it from `sprintInitHandler` after a successful init, with the `CLEARGATE_NO_BASELINE` switch and a `baselineFn` seam -> Requirements 1, 7
-- [ ] Extend `buildBaseline`, `proseBaseline` and the schema comment in `prep_qa_context.mjs`, keeping the legacy fallback -> Requirement 8
-- [ ] Write the parser tests from real node:test and Go output samples, including a `:1:1` load error -> scenario 1
-- [ ] Write the init integration test on a real git repository with `qa.test` failing, missing and empty -> scenarios 1-4
-- [ ] Write the pack test for the three baseline states -> scenario 5
+- [x] Write `record_baseline.mjs` with `extractFailing`, the command choice, the atomic write and the main guard -> Requirements 2, 3, 4, 5, 7
+- [x] Call it from `sprintInitHandler` after a successful init, with the `CLEARGATE_NO_BASELINE` switch and a `baselineFn` seam -> Requirements 1, 7
+- [x] Extend `buildBaseline`, `proseBaseline` and the schema comment in `prep_qa_context.mjs`, keeping the legacy fallback -> Requirement 8
+- [x] Write the parser tests from real node:test and Go output samples, including a `:1:1` load error -> scenario 1
+- [x] Write the init integration test on a real git repository with `qa.test` failing, missing and empty -> scenarios 1-4
+- [x] Write the pack test for the three baseline states -> scenario 5
 
 ## 4. Quality Gates
 

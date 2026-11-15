@@ -1,0 +1,11 @@
+{
+  "ts": "2026-11-15T11:48:42Z",
+  "command": "./go.sh",
+  "args": ["a\tb"],
+  "cwd": "/Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-066-20/qa-probe.rssn",
+  "exit_code": 1,
+  "stdout": "--- FAIL:\tTestTop\nFAIL\tpkg\t0.1s\n\u001b[31mred\u001b[0m\nctl\n",
+  "stderr": "err\tx\n\n",
+  "agent_type": null,
+  "work_item_id": null
+}
