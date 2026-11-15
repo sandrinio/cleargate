@@ -1,3 +1,4 @@
+2026-11-16 · #test-harness #release · cli unit tests calling sprintInitHandler spawn the baseline if the outer repo has record_baseline.mjs; stub baselineFn
 2026-11-15 · #sandbox #proof-run · replays pinned to sandbox SHAs need the old sandbox; setup renames it to *-runN, so repoint SB there, never delete first
 2026-11-15 · #gate4 #scripts · per-story copy-together lists miss transitive imports (lib/sprint-root, dispatch_serial exports); re-sync live scripts as one tree
 2026-11-15 · #qa-red #scripts · seal_red.mjs imports readBaseText from qa_red_lint.mjs; Gate 4 re-sync must copy both files together
