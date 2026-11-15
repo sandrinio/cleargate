@@ -81,7 +81,10 @@ cat > "${FIX}/.cleargate/sprint-runs/SPRINT-99/state.json" <<'JSON'
 JSON
 printf '# SPRINT-99 report\n' > "${FIX}/.cleargate/sprint-runs/SPRINT-99/SPRINT-99_REPORT.md"
 # Deliberately NO cleargate-cli/ AND no node_modules/cleargate/ — neither location.
-OUT="$(cd "${FIX}" && CLEARGATE_REPO_ROOT="${FIX}" node "${CLOSE_SCRIPT}" SPRINT-99 2>&1 || true)"
+# BUG-114: close_sprint.mjs falls back to the first `cleargate` on PATH; scrub PATH so a
+# global install cannot satisfy the dist gate this assertion is about.
+NODE="$(command -v node)"
+OUT="$(cd "${FIX}" && CLEARGATE_REPO_ROOT="${FIX}" PATH="/usr/bin:/bin" "${NODE}" "${CLOSE_SCRIPT}" SPRINT-99 2>&1 || true)"
 if grep -q "node_modules/cleargate/dist/cli.js" <<<"${OUT}"; then
   ok "BUG-076: not-found error names the consumer install location"
 else

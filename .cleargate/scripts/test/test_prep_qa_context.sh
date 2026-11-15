@@ -210,9 +210,9 @@ run_scenario_1() {
     rm -rf "${tmpdir}" "${pendingsync_dir}" "${worktree_dir}"; return
   fi
 
-  # Check all 8 section headers
+  # Check all 9 section headers
   local section
-  for section in "Worktree + Commit" "Spec Sources" "Baseline" "Adjacent Files" "Cross-Story Map" "Flashcard Slice" "Lane" "Dev Handoff"; do
+  for section in "Worktree + Commit" "Spec Sources" "Baseline" "Adjacent Files" "Cross-Story Map" "Flashcard Slice" "Lane" "Commands" "Dev Handoff"; do
     if ! grep -qF "${section}" "${output_path}"; then
       fail "Scenario 1: happy path — missing section '${section}' in bundle" "$(head -30 "${output_path}")"
       rm -rf "${tmpdir}" "${pendingsync_dir}" "${worktree_dir}"; return
@@ -235,7 +235,7 @@ process.stdout.write(String(obj.schema_version) + '\\n');
     rm -rf "${tmpdir}" "${pendingsync_dir}" "${worktree_dir}"; return
   fi
 
-  pass "Scenario 1: prep_qa_context happy path — all 8 sections, ≤20KB, schema_version:1"
+  pass "Scenario 1: prep_qa_context happy path — all 9 sections, ≤20KB, schema_version:1"
   rm -rf "${tmpdir}" "${pendingsync_dir}" "${worktree_dir}"
 }
 

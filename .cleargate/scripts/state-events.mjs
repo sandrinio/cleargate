@@ -38,6 +38,11 @@ import { SCHEMA_VERSION, BOUNCE_CAP } from './constants.mjs';
 // `transition`; the other four kinds cover the remaining action branches update_state.mjs
 // supports. Events with no `kind` field (hand-built fixtures predating this pin) default to
 // `transition` -- see fold() below.
+// STORY-066-10: where a QA-Verify defect lives. `qa-bounce` events carry one of these (or
+// `unknown` when the bounce named none; events written before this release have no field and read
+// as `unknown`).
+export const DEFECT_IN_VALUES = Object.freeze(['code', 'red-test', 'spec']);
+
 export const EVENT_SCHEMA = {
   kinds: ['transition', 'qa-bounce', 'arch-bounce', 'lane', 'lane-demote'],
   // Base fields present on every event (C3: sprint_status is carried per-event, not just
@@ -46,7 +51,8 @@ export const EVENT_SCHEMA = {
   // Genesis events (from: null) additionally carry an `initial` payload holding whatever
   // non-transition fields (qa_bounces, arch_bounces, worktree, notes, lane*) the story needs that
   // the base shape does not cover (C2). Action-kind events may carry kind-specific extra fields
-  // (qa_bounces / arch_bounces / lane / on lane-demote, `reason` doubles as the demotion reason).
+  // (qa_bounces / arch_bounces / lane / on lane-demote, `reason` doubles as the demotion reason;
+  // `defect_in` on qa-bounce: code | red-test | spec | unknown, absent on older events = unknown).
 };
 
 // Legacy-immutability predicate (Task Breakdown / item's own § RESOLVED ruling): a CLOSED sprint
@@ -233,7 +239,7 @@ export function fold(events) {
     switch (kind) {
       case 'qa-bounce': {
         story.qa_bounces = event.qa_bounces;
-        if (story.qa_bounces >= BOUNCE_CAP) story.state = 'Escalated';
+        if (story.qa_bounces >= BOUNCE_CAP || event.to === 'Escalated') story.state = 'Escalated';
         story.updated_at = event.ts;
         lastAction = `qa-bounce ${storyId}: qa_bounces=${story.qa_bounces}`;
         break;

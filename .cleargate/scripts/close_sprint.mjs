@@ -5,16 +5,24 @@
  * Usage: node close_sprint.mjs <sprint-id> [--assume-ack]
  *        node close_sprint.mjs <sprint-id> --report-body-stdin   (STORY-014-10)
  *
- * Steps:
- *   1. Load and validate state.json via validateState
- *   2. Refuse if any story state is not in TERMINAL_STATES (exit non-zero, list offenders)
- *   3. Invoke prefill_report.mjs on all agent reports
- *   3.5 Build curated Reporter context bundle via prep_reporter_context.mjs (non-fatal)
- *   4. Orchestrator spawns Reporter separately (script validates preconditions only)
- *   5. On Reporter success + user ack (or --assume-ack flag), flip sprint_status -> "Completed"
- *   6. Invoke suggest_improvements.mjs unconditionally
- *   7. Auto-push per-artifact status updates to MCP via cleargate sync work-items (non-fatal)
- *   8. Verbose post-close handoff list (6-item next-steps block to stdout)
+ * Steps (STORY-066-17: the read-only checks run before any writer):
+ *   1.   Load and validate state.json via validateState
+ *   2.   Refuse if any story state is not in TERMINAL_STATES (exit non-zero, list offenders)
+ *   2.7  No leftover story worktrees (read-only)
+ *   2.8  sprint/S-NN is merged to main or merges cleanly, and the checkout that will receive
+ *        the merge has no tracked changes (read-only; lib/sprint-finish.mjs planFinish)
+ *   2.5  v2.1 report validation (fast lane); a missing report is deferred in the no-flag pass
+ *   2.6d/2.6c/2.6/2.6b  writers, then judges (BUG-077); 2.9 deferred verification
+ *   3.   Invoke prefill_report.mjs on all agent reports
+ *   3.5  Build curated Reporter context bundle via prep_reporter_context.mjs
+ *   3.6  Write .doc-refresh-checklist.md once via prep_doc_refresh.mjs (non-fatal)
+ *   4.   Orchestrator spawns Reporter separately (script validates preconditions only)
+ *   5.   On Reporter success + user ack (--assume-ack): flip sprint_status -> "Completed"; clear .active
+ *   6.   Invoke suggest_improvements.mjs unconditionally (6.5–6.7 fold into it)
+ *   7.   Auto-push per-artifact status updates to MCP (7.4 push, 7.5 wiki ingest; non-fatal)
+ *   7.8  Finish: commit close artefacts, merge sprint/S-NN into main where main is checked out,
+ *        verify, delete or keep the branch (lib/sprint-finish.mjs runFinish)
+ *   8.   Verbose post-close handoff list (7 items)
  *
  * Report filename: SPRINT-<#>_REPORT.md for new sprints (SPRINT-18+).
  *   Backwards-compat: if SPRINT-<#>_REPORT.md is absent but REPORT.md exists (legacy
@@ -27,7 +35,7 @@
  * waiting for a Reporter-produced file. Replaces the Step-4 gate; implies ack.
  * Refuses empty stdin or pre-existing report file.
  *
- * Does NOT archive the sprint file (pending-sync -> archive stays human per EPIC-013 §4.5 step 7).
+ * The sprint plan is archived by Step 2.6c's parent rollup (BUG-078), not by hand.
  *
  * Reuse: TERMINAL_STATES, VALID_STATES from constants.mjs
  *        validateState from validate_state.mjs
@@ -44,13 +52,15 @@
  *                                          Step 2.7 instead of running git worktree list.
  *                                          Used to exercise the block / advisory paths
  *                                          without a real .worktrees/STORY-* directory.
- *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 entirely (test environments where git
- *                                      refs are absent or merge state is irrelevant).
- *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject merge status for Step 2.8 without
- *                                                  running git merge-base. Used to exercise
- *                                                  the block / advisory paths.
- *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT for Step 2.8 git commands
- *                                      (used in tests that need a controlled git repo).
+ *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 and Step 7.8 entirely (test environments where
+ *                                      git refs are absent or merge state is irrelevant).
+ *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject the Step 2.8 verdict without running git;
+ *                                                  Step 7.8 is skipped.
+ *   CLEARGATE_REPO_ROOT=<path>       — override REPO_ROOT (Step 2.8/7.8 git, delivery paths, .active).
+ *   CLEARGATE_SKIP_DOC_REFRESH=1     — skip Step 3.6 (STORY-066-17).
+ *   Step 5's .active clear and Step 7.8 act only when the sprint dir is
+ *   <REPO_ROOT>/.cleargate/sprint-runs/<id>: a CLEARGATE_SPRINT_DIR elsewhere never commits,
+ *   merges or clears .active in REPO_ROOT.
  *   CLEARGATE_SKIP_SPRINT_TRENDS=1   — skip Step 6.5 entirely (test environments).
  *   CLEARGATE_SKIP_SKILL_CANDIDATES=1 — skip Step 6.6 entirely (test environments).
  *   CLEARGATE_SKIP_FLASHCARD_CLEANUP=1 — skip Step 6.7 entirely (test environments).
@@ -83,6 +93,7 @@ import { validateState } from './validate_state.mjs';
 import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 import { reportFilename } from './lib/report-filename.mjs';
 import { locateFrontmatterFence } from './assert_story_files.mjs';
+import { planFinish, runFinish } from './lib/sprint-finish.mjs';
 
 /**
  * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
@@ -223,17 +234,20 @@ function isSquashMerged(sprintBranch, mainRef, repoRoot) {
 }
 
 /**
- * BUG-076: resolve the built CLI, wherever it actually lives.
+ * BUG-076 / BUG-114: resolve the built CLI, wherever it actually lives.
  *
- * `cleargate-cli/dist/cli.js` exists ONLY in the ClearGate meta-repo, where the
- * CLI source tree sits beside the planning scaffold. Every consumer install has
- * the CLI under `node_modules/cleargate/dist/`. Hard-coding the meta-repo path
- * made Gate-4 close structurally unreachable for the users the framework ships
- * to: the sprint would execute fully and then refuse to close.
- *
- * Returns an absolute path, or null when no built CLI can be found.
+ * Three layouts, in this order:
+ *   1. <root>/cleargate-cli/dist/          — the ClearGate meta-repo (dogfood)
+ *   2. <root>/node_modules/cleargate/dist/ — cleargate installed in the target repo
+ *   3. the dist behind the first `cleargate` on PATH — a global install
+ *      (`npm i -g cleargate` links <prefix>/bin/cleargate to
+ *      <prefix>/lib/node_modules/cleargate/dist/cli.js).
+ * Hard-coding layout 1 (BUG-076), then layouts 1–2 (BUG-114), left Gate-4 close
+ * unreachable for the users the framework ships to.
  */
-function resolveCliBin(repoRoot, rel = 'cli.js') {
+
+/** BUG-114: layouts 1–2 under one root. Returns an absolute path, or null. */
+function localCliDist(repoRoot, rel = 'cli.js') {
   const candidates = [
     path.join(repoRoot, 'cleargate-cli', 'dist', rel),          // meta-repo dogfood
     path.join(repoRoot, 'node_modules', 'cleargate', 'dist', rel), // consumer install
@@ -242,6 +256,67 @@ function resolveCliBin(repoRoot, rel = 'cli.js') {
     if (fs.existsSync(c)) return c;
   }
   return null;
+}
+
+/** @type {{ bin: string | null, real: string | null, dist: string | null, version: string } | undefined} */
+let pathCliProbe;
+
+/**
+ * BUG-114: the first `cleargate` on PATH, in shell order (empty entries, non-files
+ * and non-executables are skipped). It is a dist only when its real path is
+ * <pkg>/dist/cli.js and <pkg>/package.json names `cleargate`. A wrapper script or
+ * shim ends the lookup: later PATH entries are never consulted. Probed once; never throws.
+ */
+function probePathCli() {
+  if (pathCliProbe !== undefined) return pathCliProbe;
+  pathCliProbe = { bin: null, real: null, dist: null, version: 'unknown' };
+  for (const dir of String(process.env.PATH ?? '').split(path.delimiter)) {
+    if (dir === '') continue;
+    const bin = path.join(dir, 'cleargate');
+    try {
+      if (!fs.statSync(bin).isFile()) continue;
+      fs.accessSync(bin, fs.constants.X_OK);
+    } catch {
+      continue;
+    }
+    pathCliProbe.bin = bin;
+    try {
+      const real = fs.realpathSync(bin);
+      pathCliProbe.real = real;
+      const dist = path.dirname(real);
+      if (path.basename(real) === 'cli.js' && path.basename(dist) === 'dist') {
+        const pkg = JSON.parse(fs.readFileSync(path.join(dist, '..', 'package.json'), 'utf8'));
+        if (pkg && pkg.name === 'cleargate') {
+          pathCliProbe.dist = dist;
+          if (typeof pkg.version === 'string' && pkg.version !== '') pathCliProbe.version = pkg.version;
+        }
+      }
+    } catch { /* not a dist */ }
+    break;
+  }
+  return pathCliProbe;
+}
+
+let pathDistAnnounced = false;
+
+/**
+ * Returns an absolute path to <dist>/<rel>, or null when no built CLI holds it.
+ * Layouts 1–2 under repoRoot win; the PATH dist is the last resort.
+ */
+function resolveCliBin(repoRoot, rel = 'cli.js') {
+  const local = localCliDist(repoRoot, rel);
+  if (local !== null) return local;
+  const probe = probePathCli();
+  if (probe.dist === null) return null;
+  const candidate = path.join(probe.dist, rel);
+  if (!fs.existsSync(candidate)) return null;
+  if (!pathDistAnnounced) {
+    pathDistAnnounced = true;
+    process.stdout.write(
+      `close_sprint: using the cleargate dist behind PATH: ${probe.dist} (cleargate ${probe.version})\n`,
+    );
+  }
+  return candidate;
 }
 
 /**
@@ -359,6 +434,17 @@ async function main() {
     process.exit(1);
   }
 
+  // STORY-066-17: Step 5 (.active) and Step 7.8 (commit, merge) act on REPO_ROOT only when the
+  // sprint dir is REPO_ROOT's own. A run whose CLEARGATE_SPRINT_DIR points elsewhere (tests) never
+  // commits, merges or clears .active in the repository the script sits in.
+  const ownSprintDir = path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
+  let closeOwnsRepo = false;
+  try {
+    closeOwnsRepo = fs.realpathSync(sprintDir) === fs.realpathSync(ownSprintDir);
+  } catch {
+    closeOwnsRepo = false;
+  }
+
   const stateFile = process.env.CLEARGATE_STATE_FILE
     ? path.resolve(process.env.CLEARGATE_STATE_FILE)
     : path.join(sprintDir, 'state.json');
@@ -417,6 +503,236 @@ async function main() {
 
   process.stdout.write(`Step 1-2 passed: all ${Object.keys(state.stories || {}).length} stories are terminal.\n`);
 
+  // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
+  // Block close if any .worktrees/STORY-* path is present.
+  // Always enforced (STORY-070-01: execution_mode retired).
+  // Skip if git worktree list is unavailable (non-fatal — tests run against tmpdirs).
+  // Test seams: CLEARGATE_SKIP_WORKTREE_CHECK=1 bypasses entirely;
+  //             CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 injects fake paths (no git call).
+  process.stdout.write('Step 2.7: checking for leftover worktrees...\n');
+  {
+    if (process.env.CLEARGATE_SKIP_WORKTREE_CHECK === '1') {
+      process.stdout.write('Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam).\n');
+    } else {
+      let leftoverWorktrees = [];
+      let worktreeListAvailable = true;
+
+      if (process.env.CLEARGATE_FORCE_WORKTREE_PATHS) {
+        // Test seam: inject fake worktree paths without running git
+        leftoverWorktrees = process.env.CLEARGATE_FORCE_WORKTREE_PATHS
+          .split(',')
+          .map((p) => p.trim())
+          .filter(Boolean);
+      } else {
+        try {
+          const output = execSync('git worktree list --porcelain', {
+            cwd: REPO_ROOT,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+          });
+          for (const line of output.split('\n')) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('worktree ')) continue;
+            const wtPath = trimmed.slice('worktree '.length);
+            if (/[/\\]\.worktrees[/\\]STORY-/.test(wtPath)) {
+              const m = /(\.(worktrees)[/\\]STORY-.+)$/.exec(wtPath);
+              leftoverWorktrees.push(m ? m[1] : wtPath);
+            }
+          }
+        } catch {
+          worktreeListAvailable = false;
+        }
+      }
+
+      // Step 2.7 always enforced (STORY-070-01: execution_mode retired).
+
+      if (!worktreeListAvailable) {
+        process.stdout.write('Step 2.7 skipped: git worktree list unavailable (non-fatal).\n');
+      } else if (leftoverWorktrees.length === 0) {
+        process.stdout.write('Step 2.7 passed: no leftover worktrees.\n');
+      } else {
+        // Always block close on leftover worktrees
+        process.stderr.write(
+          `close_sprint: Step 2.7 failed: leftover worktree at ${leftoverWorktrees[0]}\n` +
+          `  ${leftoverWorktrees.length === 1 ? '' : `(plus ${leftoverWorktrees.length - 1} more)\n  `}` +
+          `Run \`git worktree remove ${leftoverWorktrees[0]}\` if abandoned, or merge the work in progress.\n` +
+          `  All worktrees must be closed before sprint close.\n`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
+  // ── Step 2.8: sprint/S-NN merges into main (read-only; Step 7.8 merges on the ack) ──
+  // STORY-066-17: runs before the dist assertion and every writer (2.6d/2.6c), in both passes, so a
+  // close that cannot proceed writes nothing. Local path (default): planFinish (lib/sprint-finish.mjs)
+  // passes when sprint/S-NN is already an ancestor of main, or `git merge-tree --write-tree` merges
+  // it cleanly (git < 2.38: warn, no pre-check), and a receiving checkout other than REPO_ROOT has no
+  // tracked changes; REPO_ROOT must be on sprint/S-NN or main. Its plan drives the Gate 4 prompt and
+  // Step 7.8. No git, a missing ref, or a nested root fails open with a warning, as before.
+  // Unchanged (today's code, verbatim): CLEARGATE_SKIP_MERGE_CHECK=1 skips 2.8 and 7.8;
+  // CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects the verdict and skips 7.8; CR-107
+  // vcs.sprint_pr: true requires the PR already merged (gh/origin fail-CLOSED gate, origin/main
+  // fallback, squash note) and Step 7.8 prints `skipped: vcs.sprint_pr`.
+  /** @type {import('./lib/sprint-finish.mjs').FinishPlan | null} */
+  let finishPlan = null;
+  /** @type {string | null} why Step 7.8 will not run */
+  let finishSkip = null;
+  {
+    if (process.env.CLEARGATE_SKIP_MERGE_CHECK === '1') {
+      process.stdout.write('Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam).\n');
+      finishSkip = 'CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam)';
+    } else {
+      // vcs.sprint_pr fail-CLOSED gate — placed BEFORE the sprintNumMatch
+      // test so a non-numeric sprint-id cannot bypass it.
+      const vcsSprintPr = readVcsSprintPr(REPO_ROOT);
+      if (vcsSprintPr) {
+        if (!isGhOnPath()) {
+          process.stderr.write(
+            `Step 2.8 failed: vcs.sprint_pr is enabled but the gh CLI is not on PATH.\n` +
+            `  Install the GitHub CLI (https://cli.github.com), or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
+          );
+          process.exit(1);
+        }
+        if (!hasOriginRemote(REPO_ROOT)) {
+          process.stderr.write(
+            `Step 2.8 failed: vcs.sprint_pr is enabled but no 'origin' remote is configured.\n` +
+            `  Add a GitHub 'origin' remote, or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
+          );
+          process.exit(1);
+        }
+      }
+
+      const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
+      if (!sprintNumMatch) {
+        process.stdout.write(`Step 2.8 skipped: sprint-id "${sprintId}" has no numeric portion.\n`);
+        finishSkip = `sprint-id "${sprintId}" has no numeric portion`;
+      } else {
+        const sprintBranch = `refs/heads/sprint/S-${sprintNumMatch[1]}`;
+        let mainRef = 'refs/heads/main';
+        // Step 2.8 always enforced (STORY-070-01: execution_mode retired).
+        const forcedStatus = process.env.CLEARGATE_FORCE_MERGE_STATUS;
+        if (vcsSprintPr || forcedStatus === 'merged' || forcedStatus === 'unmerged') {
+          finishSkip = vcsSprintPr ? 'vcs.sprint_pr' : `CLEARGATE_FORCE_MERGE_STATUS=${forcedStatus} set (test seam)`;
+          process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainRef}...\n`);
+
+          let isMerged = false;
+          let mergeCheckAvailable = true;
+
+          if (forcedStatus === 'merged') {
+            isMerged = true;
+          } else if (forcedStatus === 'unmerged') {
+            isMerged = false;
+          } else {
+            try {
+              execSync(
+                `git merge-base --is-ancestor ${sprintBranch} ${mainRef}`,
+                { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
+              );
+              isMerged = true;
+            } catch (mergeErr) {
+              const exitStatus = /** @type {any} */ (mergeErr).status;
+              if (exitStatus === 1) {
+                isMerged = false;
+                // CR-107 F2b: local refs/heads/main goes stale after a PR is
+                // merged on GitHub, until the human pulls. Fall back to
+                // refs/remotes/origin/main — ONLY as a fallback, never a
+                // replacement — and only when vcs.sprint_pr is enabled, so
+                // the vcs.sprint_pr:false path stays byte-identical to today.
+                if (vcsSprintPr && hasOriginRemote(REPO_ROOT)) {
+                  const originRef = 'refs/remotes/origin/main';
+                  try {
+                    execSync(
+                      `git merge-base --is-ancestor ${sprintBranch} ${originRef}`,
+                      { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
+                    );
+                    isMerged = true;
+                    mainRef = originRef;
+                  } catch {
+                    // Still not merged (or origin/main unresolvable). The
+                    // local check already established a verdict, so this
+                    // fallback never triggers the git-unavailable fail-open
+                    // below — it can only confirm a merge, not un-confirm one.
+                  }
+                }
+              } else {
+                // exit 128: refs missing or other git failure — fail-open with warning
+                mergeCheckAvailable = false;
+                process.stderr.write(
+                  `Step 2.8 warning: git merge-base check unavailable (${/** @type {Error} */ (mergeErr).message}). ` +
+                  `Skipping merge verification.\n`
+                );
+              }
+            }
+          }
+
+          if (!mergeCheckAvailable) {
+            // fail-open: refs missing or git unavailable — continue to Step 3
+          } else if (isMerged) {
+            process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainRef}.\n`);
+          } else {
+            // Always enforced (STORY-070-01: execution_mode retired)
+            let unmergedLog = '';
+            if (!forcedStatus) {
+              try {
+                unmergedLog = execSync(
+                  `git log ${mainRef}..${sprintBranch} --oneline`,
+                  { encoding: 'utf8', cwd: REPO_ROOT, env: process.env }
+                );
+              } catch { /* unmerged-log fetch failed — proceed without */ }
+            }
+            // CR-107 F2a: squash/rebase merges leave no merge commit, so
+            // --is-ancestor correctly (if unhelpfully) reports "not merged"
+            // for a sprint that WAS merged that way. Name it explicitly via a
+            // real probe, never a static string — and only when vcs.sprint_pr
+            // is enabled and no forced status short-circuited the real check.
+            let squashNote = '';
+            if (vcsSprintPr && !forcedStatus && isSquashMerged(sprintBranch, mainRef, REPO_ROOT)) {
+              squashNote =
+                `  This sprint looks squash- or rebase-merged: its changes are already reachable from ` +
+                `${mainRef}, but no merge commit makes ${sprintBranch} an ancestor. Squash and rebase ` +
+                `merge strategies are unsupported when vcs.sprint_pr is enabled — merge the pull request ` +
+                `with a merge commit instead (gh pr merge --merge).\n`;
+            }
+            process.stderr.write(
+              `Step 2.8 failed: sprint/S-${sprintNumMatch[1]} not merged to main.\n` +
+              (unmergedLog ? `  Unmerged commits:\n${unmergedLog}` : '') +
+              squashNote +
+              `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
+            );
+            process.exit(1);
+          }
+        } else {
+          process.stdout.write(`Step 2.8: checking ${sprintBranch} merges into ${mainRef}...\n`);
+          const plan = planFinish({ root: REPO_ROOT, sprintBranch: `sprint/S-${sprintNumMatch[1]}` });
+          for (const w of plan.warnings) process.stderr.write(`Step 2.8 warning: ${w}\n`);
+          if (plan.unavailable) {
+            // fail-open, as before: no git, a missing ref or a nested root — continue; Step 7.8 skips
+            process.stderr.write(
+              `Step 2.8 warning: git merge check unavailable (${plan.error}). Skipping merge verification.\n`
+            );
+            finishSkip = `Step 2.8 could not check sprint/S-${sprintNumMatch[1]} (${plan.error})`;
+          } else if (!plan.ok) {
+            process.stderr.write(
+              `Step 2.8 failed: ${plan.error}\n` +
+              plan.details.map((d) => `  ${d}\n`).join('') +
+              `  Resolve: ${plan.resolve}, then re-run close_sprint.mjs.\n`
+            );
+            process.exit(1);
+          } else {
+            process.stdout.write(
+              plan.merged
+                ? `Step 2.8 passed: ${sprintBranch} is merged to ${mainRef}.\n`
+                : `Step 2.8 passed: ${sprintBranch} merges cleanly into ${mainRef}; Step 7.8 merges it on the ack.\n`
+            );
+            if (closeOwnsRepo) finishPlan = plan;
+            else finishSkip = `sprint dir ${sprintDir} is not ${ownSprintDir}`;
+          }
+        }
+      }
+    }
+  }
+
   // ── Step 2.5: v2.1 validation — activation-gated ──────────────────────────
   // Activation gate: at least one story has lane: 'fast'
   // (schema_version is always >= 3 post-STORY-070-01 migrator)
@@ -438,6 +754,14 @@ async function main() {
 
     // Read SPRINT-<#>_REPORT.md (with legacy REPORT.md fallback for pre-CR-021 sprints)
     const reportFile2 = reportFilename(sprintDir, sprintId, { forRead: true });
+    if (!fs.existsSync(reportFile2) && !assumeAck) {
+      // STORY-066-17 (S25): the no-flag pass runs before the Reporter. Step 4 asks for the report;
+      // the next no-flag pass validates it before the ack prompt. The ack pass still exits 1 below.
+      process.stdout.write(
+        `Step 2.5 deferred: ${path.basename(reportFile2)} not written yet — the Reporter writes it at Step 4; ` +
+        'it is validated before the ack prompt.\n'
+      );
+    } else {
     if (!fs.existsSync(reportFile2)) {
       process.stderr.write(
         `close_sprint: v2.1 validation requires ${path.basename(reportFile2)} at ${reportFile2}\n` +
@@ -479,6 +803,7 @@ async function main() {
     }
 
     process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
+    } // end Step 2.5 deferral else
   }
 
   // ── WS8(e) Dist Fail-Closed Assertion ────────────────────────────────────
@@ -493,11 +818,17 @@ async function main() {
   if (process.env.CLEARGATE_SKIP_LIFECYCLE_CHECK !== '1') {
     const cliBinEarly = resolveCliBin(REPO_ROOT);
     if (cliBinEarly === null) {
+      const probe = probePathCli();
       process.stderr.write(
         `cleargate CLI dist not found.\n` +
-        `  Looked for: <root>/cleargate-cli/dist/cli.js (meta-repo) and\n` +
-        `              <root>/node_modules/cleargate/dist/cli.js (installed)\n` +
-        `  Fix: npm install cleargate  (or \`npm run build\` in cleargate-cli/ when developing ClearGate itself)\n` +
+        `  Looked for: <root>/cleargate-cli/dist/cli.js (meta-repo),\n` +
+        `              <root>/node_modules/cleargate/dist/cli.js (installed), and\n` +
+        `              the first \`cleargate\` on PATH, if it resolves to <package>/dist/cli.js (global install)\n` +
+        (probe.bin !== null
+          ? `  The first \`cleargate\` on PATH is ${probe.bin} (resolves to ${probe.real ?? probe.bin}), which is not <package>/dist/cli.js, so it is not used.\n`
+          : '') +
+        `  Fix: npm i -g cleargate, or npm install cleargate in this repo  (or \`npm run build\` in cleargate-cli/ when developing ClearGate itself)\n` +
+        `  An npx-only setup leaves no dist on disk: install cleargate, then re-run.\n` +
         `  The lifecycle/orphan/parent-rollup/backsync/merge gates require a built CLI dist.\n`
       );
       process.exit(1);
@@ -545,7 +876,8 @@ async function main() {
       // BUG-076: resolve via the same multi-root lookup as every other CLI
       // reference. SCRIPTS_DIR/../.. is the meta-repo layout only; a consumer
       // install has the lib under node_modules/cleargate/dist/.
-      (resolveCliBin(path.resolve(SCRIPTS_DIR, '..', '..'), path.join('lib', 'lifecycle-reconcile.js'))
+      // BUG-114: the script-root lookup is local-only, so a REPO_ROOT install wins over the PATH dist.
+      (localCliDist(path.resolve(SCRIPTS_DIR, '..', '..'), path.join('lib', 'lifecycle-reconcile.js'))
         ?? resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js'))
         ?? '/nonexistent-cleargate-lib')
     ).catch(() => null);
@@ -625,7 +957,7 @@ async function main() {
     // not a fixture tmpdir override (CLEARGATE_REPO_ROOT may point elsewhere in tests).
     const scriptRepoRoot26c = path.resolve(SCRIPTS_DIR, '..', '..');
     const reconcilerMod26c = await import(
-      (resolveCliBin(scriptRepoRoot26c, path.join('lib', 'lifecycle-reconcile.js')) ?? resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
+      (localCliDist(scriptRepoRoot26c, path.join('lib', 'lifecycle-reconcile.js')) ?? resolveCliBin(REPO_ROOT, path.join('lib', 'lifecycle-reconcile.js')) ?? '')
     ).catch(() => null);
 
     if (!reconcilerMod26c || typeof reconcilerMod26c.walkActiveParents !== 'function') {
@@ -768,7 +1100,7 @@ async function main() {
           process.exit(1);
         }
       } else {
-        process.stdout.write('Step 2.6 skipped: no built CLI found in cleargate-cli/dist or node_modules/cleargate/dist (non-fatal).\n');
+        process.stdout.write('Step 2.6 skipped: no built CLI found in cleargate-cli/dist, node_modules/cleargate/dist or behind PATH (non-fatal).\n');
       }
     } catch (step26Err) {
       // Unexpected error — fail-open (log but do not block)
@@ -836,203 +1168,6 @@ async function main() {
   // was Done in state.json. The two steps have no dependency in this direction,
   // so swapping them makes the rollup see the truth it was always meant to read.
 
-  // ── Step 2.7: Worktree-Closed Check (CR-022 M1) ──────────────────────────
-  // Block close if any .worktrees/STORY-* path is present.
-  // Always enforced (STORY-070-01: execution_mode retired).
-  // Skip if git worktree list is unavailable (non-fatal — tests run against tmpdirs).
-  // Test seams: CLEARGATE_SKIP_WORKTREE_CHECK=1 bypasses entirely;
-  //             CLEARGATE_FORCE_WORKTREE_PATHS=p1,p2 injects fake paths (no git call).
-  process.stdout.write('Step 2.7: checking for leftover worktrees...\n');
-  {
-    if (process.env.CLEARGATE_SKIP_WORKTREE_CHECK === '1') {
-      process.stdout.write('Step 2.7 skipped: CLEARGATE_SKIP_WORKTREE_CHECK=1 set (test seam).\n');
-    } else {
-      let leftoverWorktrees = [];
-      let worktreeListAvailable = true;
-
-      if (process.env.CLEARGATE_FORCE_WORKTREE_PATHS) {
-        // Test seam: inject fake worktree paths without running git
-        leftoverWorktrees = process.env.CLEARGATE_FORCE_WORKTREE_PATHS
-          .split(',')
-          .map((p) => p.trim())
-          .filter(Boolean);
-      } else {
-        try {
-          const output = execSync('git worktree list --porcelain', {
-            cwd: REPO_ROOT,
-            encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'ignore'],
-          });
-          for (const line of output.split('\n')) {
-            const trimmed = line.trim();
-            if (!trimmed.startsWith('worktree ')) continue;
-            const wtPath = trimmed.slice('worktree '.length);
-            if (/[/\\]\.worktrees[/\\]STORY-/.test(wtPath)) {
-              const m = /(\.(worktrees)[/\\]STORY-.+)$/.exec(wtPath);
-              leftoverWorktrees.push(m ? m[1] : wtPath);
-            }
-          }
-        } catch {
-          worktreeListAvailable = false;
-        }
-      }
-
-      // Step 2.7 always enforced (STORY-070-01: execution_mode retired).
-
-      if (!worktreeListAvailable) {
-        process.stdout.write('Step 2.7 skipped: git worktree list unavailable (non-fatal).\n');
-      } else if (leftoverWorktrees.length === 0) {
-        process.stdout.write('Step 2.7 passed: no leftover worktrees.\n');
-      } else {
-        // Always block close on leftover worktrees
-        process.stderr.write(
-          `close_sprint: Step 2.7 failed: leftover worktree at ${leftoverWorktrees[0]}\n` +
-          `  ${leftoverWorktrees.length === 1 ? '' : `(plus ${leftoverWorktrees.length - 1} more)\n  `}` +
-          `Run \`git worktree remove ${leftoverWorktrees[0]}\` if abandoned, or merge the work in progress.\n` +
-          `  All worktrees must be closed before sprint close.\n`
-        );
-        process.exit(1);
-      }
-    }
-  }
-
-  // ── Step 2.8: Sprint branch merged to main (verify-only, NO auto-merge) ──────
-  // CR-022 §1: verify-only — script asserts merge ancestry, does NOT run the merge.
-  // On miss: list unmerged commits + exit 1 (always enforced).
-  // Skip when sprintId has no numeric portion (e.g. SPRINT-TEST fixture) —
-  // UNLESS vcs.sprint_pr is enabled, in which case the fail-CLOSED gh/origin
-  // gate below still runs regardless (CR-107: a vcs-gated refusal must not
-  // be reachable-around via this skip).
-  // Test seams: CLEARGATE_SKIP_MERGE_CHECK=1 bypasses entirely;
-  //             CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged injects status without git call.
-  // CR-107: `vcs.sprint_pr` (read from REPO_ROOT/.cleargate/config.yml, no
-  // YAML dependency) gates a merge-via-pull-request path. Fail-CLOSED on an
-  // absent `gh` binary or an absent `origin` remote — never silently fall
-  // through to the local-merge assumption (unlike Step 2.7's `git worktree
-  // list` degradation above, which is intentionally fail-open).
-  {
-    if (process.env.CLEARGATE_SKIP_MERGE_CHECK === '1') {
-      process.stdout.write('Step 2.8 skipped: CLEARGATE_SKIP_MERGE_CHECK=1 set (test seam).\n');
-    } else {
-      // vcs.sprint_pr fail-CLOSED gate — placed BEFORE the sprintNumMatch
-      // test so a non-numeric sprint-id cannot bypass it.
-      const vcsSprintPr = readVcsSprintPr(REPO_ROOT);
-      if (vcsSprintPr) {
-        if (!isGhOnPath()) {
-          process.stderr.write(
-            `Step 2.8 failed: vcs.sprint_pr is enabled but the gh CLI is not on PATH.\n` +
-            `  Install the GitHub CLI (https://cli.github.com), or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
-          );
-          process.exit(1);
-        }
-        if (!hasOriginRemote(REPO_ROOT)) {
-          process.stderr.write(
-            `Step 2.8 failed: vcs.sprint_pr is enabled but no 'origin' remote is configured.\n` +
-            `  Add a GitHub 'origin' remote, or set vcs.sprint_pr: false in .cleargate/config.yml.\n`
-          );
-          process.exit(1);
-        }
-      }
-
-      const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
-      if (!sprintNumMatch) {
-        process.stdout.write(`Step 2.8 skipped: sprint-id "${sprintId}" has no numeric portion.\n`);
-      } else {
-        const sprintBranch = `refs/heads/sprint/S-${sprintNumMatch[1]}`;
-        let mainRef = 'refs/heads/main';
-        process.stdout.write(`Step 2.8: verifying ${sprintBranch} merged to ${mainRef}...\n`);
-
-        // Step 2.8 always enforced (STORY-070-01: execution_mode retired).
-        const forcedStatus = process.env.CLEARGATE_FORCE_MERGE_STATUS;
-        let isMerged = false;
-        let mergeCheckAvailable = true;
-
-        if (forcedStatus === 'merged') {
-          isMerged = true;
-        } else if (forcedStatus === 'unmerged') {
-          isMerged = false;
-        } else {
-          try {
-            execSync(
-              `git merge-base --is-ancestor ${sprintBranch} ${mainRef}`,
-              { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
-            );
-            isMerged = true;
-          } catch (mergeErr) {
-            const exitStatus = /** @type {any} */ (mergeErr).status;
-            if (exitStatus === 1) {
-              isMerged = false;
-              // CR-107 F2b: local refs/heads/main goes stale after a PR is
-              // merged on GitHub, until the human pulls. Fall back to
-              // refs/remotes/origin/main — ONLY as a fallback, never a
-              // replacement — and only when vcs.sprint_pr is enabled, so
-              // the vcs.sprint_pr:false path stays byte-identical to today.
-              if (vcsSprintPr && hasOriginRemote(REPO_ROOT)) {
-                const originRef = 'refs/remotes/origin/main';
-                try {
-                  execSync(
-                    `git merge-base --is-ancestor ${sprintBranch} ${originRef}`,
-                    { stdio: 'pipe', cwd: REPO_ROOT, env: process.env }
-                  );
-                  isMerged = true;
-                  mainRef = originRef;
-                } catch {
-                  // Still not merged (or origin/main unresolvable). The
-                  // local check already established a verdict, so this
-                  // fallback never triggers the git-unavailable fail-open
-                  // below — it can only confirm a merge, not un-confirm one.
-                }
-              }
-            } else {
-              // exit 128: refs missing or other git failure — fail-open with warning
-              mergeCheckAvailable = false;
-              process.stderr.write(
-                `Step 2.8 warning: git merge-base check unavailable (${/** @type {Error} */ (mergeErr).message}). ` +
-                `Skipping merge verification.\n`
-              );
-            }
-          }
-        }
-
-        if (!mergeCheckAvailable) {
-          // fail-open: refs missing or git unavailable — continue to Step 3
-        } else if (isMerged) {
-          process.stdout.write(`Step 2.8 passed: ${sprintBranch} is merged to ${mainRef}.\n`);
-        } else {
-          // Always enforced (STORY-070-01: execution_mode retired)
-          let unmergedLog = '';
-          if (!forcedStatus) {
-            try {
-              unmergedLog = execSync(
-                `git log ${mainRef}..${sprintBranch} --oneline`,
-                { encoding: 'utf8', cwd: REPO_ROOT, env: process.env }
-              );
-            } catch { /* unmerged-log fetch failed — proceed without */ }
-          }
-          // CR-107 F2a: squash/rebase merges leave no merge commit, so
-          // --is-ancestor correctly (if unhelpfully) reports "not merged"
-          // for a sprint that WAS merged that way. Name it explicitly via a
-          // real probe, never a static string — and only when vcs.sprint_pr
-          // is enabled and no forced status short-circuited the real check.
-          let squashNote = '';
-          if (vcsSprintPr && !forcedStatus && isSquashMerged(sprintBranch, mainRef, REPO_ROOT)) {
-            squashNote =
-              `  This sprint looks squash- or rebase-merged: its changes are already reachable from ` +
-              `${mainRef}, but no merge commit makes ${sprintBranch} an ancestor. Squash and rebase ` +
-              `merge strategies are unsupported when vcs.sprint_pr is enabled — merge the pull request ` +
-              `with a merge commit instead (gh pr merge --merge).\n`;
-          }
-          process.stderr.write(
-            `Step 2.8 failed: sprint/S-${sprintNumMatch[1]} not merged to main.\n` +
-            (unmergedLog ? `  Unmerged commits:\n${unmergedLog}` : '') +
-            squashNote +
-            `  Resolve: merge sprint/S-${sprintNumMatch[1]} → main, then re-run close_sprint.mjs.\n`
-          );
-          process.exit(1);
-        }
-      }
-    }
-  }
 
   // ── Step 2.9: Deferred-Verification Close Gate (CR-082) ─────────────────────
   // Block close if any story in this sprint declares a deferred_verification entry
@@ -1323,6 +1458,30 @@ async function main() {
     }
   }
 
+  // ── Step 3.6: Doc-refresh checklist (STORY-066-17, S28) ───────────────────
+  // Written once: never overwritten, because the orchestrator ticks it at Gate 4. Non-fatal.
+  // Step 7.8 commits it with the other close artefacts.
+  const checklistPath = path.join(sprintDir, '.doc-refresh-checklist.md');
+  if (process.env.CLEARGATE_SKIP_DOC_REFRESH === '1') {
+    process.stdout.write('Step 3.6 skipped: CLEARGATE_SKIP_DOC_REFRESH=1 set (test seam).\n');
+  } else if (fs.existsSync(checklistPath)) {
+    process.stdout.write(`Step 3.6 passed: ${checklistPath} already written (kept).\n`);
+  } else {
+    process.stdout.write('Step 3.6: writing the doc-refresh checklist (prep_doc_refresh.mjs)...\n');
+    try {
+      invokeScript('prep_doc_refresh.mjs', [sprintId], {
+        CLEARGATE_REPO_ROOT: REPO_ROOT,
+        CLEARGATE_SPRINT_DIR: sprintDir,
+      });
+      if (!fs.existsSync(checklistPath)) throw new Error(`checklist not written at ${checklistPath}`);
+      process.stdout.write(`Step 3.6 passed: ${checklistPath} written.\n`);
+    } catch (err) {
+      process.stderr.write(
+        `Step 3.6 warning: prep_doc_refresh.mjs failed (non-fatal): ${/** @type {Error} */ (err).message}\n`
+      );
+    }
+  }
+
   // ── Step 4: Orchestrator spawns Reporter separately ───────────────────────
   // This script only validates preconditions; it does NOT fork the Reporter agent.
   const reportFile = reportFilename(sprintDir, sprintId);
@@ -1372,10 +1531,19 @@ async function main() {
       process.exit(0);
     }
     // In non-assume-ack mode with existing report, prompt user
+    // STORY-066-17: the finish plan and the checklist path follow the pinned prompt line.
+    const finishLine = finishPlan !== null
+      ? finishPlan.text
+      : `Finish (Step 7.8): will not run — ${finishSkip ?? 'Step 2.8 produced no finish plan'}.`;
+    const checklistLine = fs.existsSync(checklistPath)
+      ? `Doc-refresh checklist: ${checklistPath}`
+      : 'Doc-refresh checklist: not written (Step 3.6 was skipped or failed)';
     process.stdout.write(
       `\n${reportBasename} found at ${reportFileForCheck}\n` +
       'Review the report, then confirm close by re-running with --assume-ack\n' +
-      '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n'
+      '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n' +
+      `${finishLine}\n` +
+      `${checklistLine}\n`
     );
     process.exit(0);
   }
@@ -1388,6 +1556,26 @@ async function main() {
   state.updated_at = now;
   atomicWrite(stateFile, state);
   process.stdout.write(`sprint_status flipped to "Completed" at ${now}\n`);
+  // STORY-066-17 (S27): close clears the sentinel init set. Atomic; never creates the file.
+  // Runs before Step 7.8, so the close commit happens with no active sprint (D-9).
+  {
+    const activePath = path.join(REPO_ROOT, '.cleargate', 'sprint-runs', '.active');
+    if (!closeOwnsRepo) {
+      process.stdout.write(`Step 5: .active left as is (sprint dir is not ${ownSprintDir}).\n`);
+    } else if (!fs.existsSync(activePath)) {
+      process.stdout.write(`Step 5: no .active at ${activePath}; nothing to clear.\n`);
+    } else {
+      const was = fs.readFileSync(activePath, 'utf8').trim();
+      if (was === sprintId) {
+        atomicWriteString(activePath, '');
+        process.stdout.write(`Step 5: .active cleared (was ${sprintId})\n`);
+      } else if (was === '') {
+        process.stdout.write('Step 5: .active is already empty.\n');
+      } else {
+        process.stdout.write(`Step 5: .active left as is (reads ${was}, not ${sprintId}).\n`);
+      }
+    }
+  }
 
   // ── Step 6: Invoke suggest_improvements.mjs unconditionally ───────────────
   process.stdout.write('Step 6: running suggest_improvements.mjs...\n');
@@ -1554,8 +1742,36 @@ async function main() {
     process.stderr.write('Run `cleargate wiki ingest <report-path>` manually to retry.\n');
   }
 
+  // ── Step 7.8: Finish — commit, merge sprint→main, verify, branch (STORY-066-17) ──
+  // After Step 7.5 and before Step 8; nothing after it writes tracked files (Step 8 only prints).
+  let finishItem7;
+  if (finishPlan === null) {
+    const reason = finishSkip ?? 'Step 2.8 produced no finish plan';
+    process.stdout.write(`Step 7.8 skipped: ${reason}.\n`);
+    finishItem7 = `Finish: skipped at Step 7.8 (${reason})`;
+  } else {
+    process.stdout.write(
+      `Step 7.8: finishing — commit close artefacts, merge ${finishPlan.sprintBranch} into main...\n`
+    );
+    const fin = runFinish(finishPlan, { sprintId });
+    for (const l of fin.lines) process.stdout.write(`${l}\n`);
+    for (const w of fin.warnings) process.stderr.write(`Step 7.8 warning: ${w}\n`);
+    if (!fin.ok) {
+      process.stderr.write(
+        'close_sprint: Step 7.8 FAILED:\n' +
+        fin.errors.map((e) => `  ${e}\n`).join('') +
+        '  sprint_status is already Completed. Fix the cause, then re-run the ack pass: ' +
+        'Steps 5 and 7.8 finish what is left.\n'
+      );
+      process.exit(1);
+    }
+    finishItem7 = fin.keptAt
+      ? `Finish: done at Step 7.8. After leaving ${fin.keptAt}: git branch -d ${finishPlan.sprintBranch}`
+      : 'Finish: done at Step 7.8';
+  }
+
   // ── Step 8: Verbose post-close handoff list ───────────────────────────────
-  // Prints 6 explicit next-step items to stdout (CR-022 §3 M4).
+  // Prints 7 explicit next-step items to stdout (CR-022 §3 M4; item 7 STORY-066-17).
   {
     const sprintNumMatch = /^SPRINT-(\d{2,3})$/.exec(sprintId);
     const nextSprintNum = sprintNumMatch
@@ -1582,6 +1798,7 @@ async function main() {
     process.stdout.write(
       `  6. Initialize next sprint: \`cleargate sprint init ${nextSprintId} --stories <ids>\`\n`,
     );
+    process.stdout.write(`  7. ${finishItem7}\n`);
 
     // Surface artifact paths for convenience
     process.stdout.write(`\nArtifacts:\n`);

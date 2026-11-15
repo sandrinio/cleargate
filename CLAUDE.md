@@ -11,7 +11,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Triage first, draft second.** Every user request gets classified (Epic / Story / CR / Bug / Spike / Pull / Push) *before* any drafting. If the type is ambiguous, ask ONE targeted question — do not guess.
 
-**Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / DevOps / Reporter). The skill is the canonical sprint-loop spec (Architect → QA-Red → Developer → QA-Verify → Reporter, with DevOps for merge/teardown); the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
+**Sprint execution.** When a sprint is active, the orchestration playbook lives at `.claude/skills/sprint-execution/SKILL.md` — load it before dispatching any execution agent (Architect / Developer / QA / DevOps / Reporter). The skill is the canonical sprint-loop spec (Architect → QA-Red → Developer → QA-Verify → Reporter, merging by script); the always-on CLAUDE.md keeps only the halt-rules and the load-skill contract.
 
 **Skill auto-load directive.** When the SessionStart banner emits `Load skill: <name>`, invoke the Skill tool to load it before continuing. Claude Code's description-match auto-load is advisory; this rule is the contract.
 
@@ -29,7 +29,7 @@ This repository uses **ClearGate** — a standalone planning framework for AI co
 
 **Boundary gates (CR-017).** `cleargate sprint init` runs the decomposition gate; `close_sprint.mjs` runs the lifecycle reconciler. Both block.
 
-**Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously. `close_sprint.mjs` now refuses `--assume-ack` unless `CLEARGATE_CI_ACK=1` (CI-only); the token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI. Pre-close enforces Steps 2.7 (no leftover worktrees) + 2.8 (sprint branch merged to main); failure halts close. Post-close prints a 6-item handoff list (Step 8) summarizing commits, merge state, wiki ingest, flashcards, artifacts, and next-sprint preflight.
+**Sprint close is Gate-4-class (CR-019).** Run `close_sprint.mjs` with no flags first; surface the prompt verbatim; halt. Never pass `--assume-ack` autonomously. `close_sprint.mjs` now refuses `--assume-ack` unless `CLEARGATE_CI_ACK=1` (CI-only); the token is never set unprompted by an agent — it is set for a single invocation only after an explicit human close authorization (Gate 4), or by CI. Pre-close enforces Steps 2.7 (no leftover worktrees) + 2.8 (sprint branch merges cleanly into main; the ack pass merges it); failure halts close. Post-close prints a 7-item handoff list (Step 8) summarizing commits, merge state, wiki ingest, flashcards, artifacts, next-sprint preflight, and the finish.
 
 **Drafting work items:**
 - Run `cleargate new <type> "<slug>"` to scaffold the frontmatter, id, and file path (types: `epic`, `story`, `cr`, `bug`, `sprint`, `initiative`, `spike`, `hotfix`; `story` additionally requires `--epic <EPIC-NNN>`), then author the body. `cleargate new` reads `.cleargate/templates/` internally — do not hand-copy a template file.

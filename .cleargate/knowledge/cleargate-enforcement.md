@@ -396,14 +396,15 @@ Advisory pushes (gate_status='open') are recorded in `audit_log` with `result='o
 
 ## 9. Lane Routing (source: protocol §24)
 
-A story is eligible for `lane: fast` only if all seven checks pass (any false → `standard`):
-1. **Size cap.** ≤2 files AND ≤50 LOC net (tests count; generated files do not).
-2. **No forbidden surfaces.** Story does not modify: `mcp/src/db/` / `**/migrations/` (schema); `mcp/src/auth/` / `mcp/src/admin-api/auth-*` (auth); `cleargate.config.json` / `mcp/src/config.ts` (runtime config); `mcp/src/adapters/` (adapter API); `cleargate-planning/MANIFEST.json` (scaffold manifest); security-relevant code (token handling, invite verification, gate enforcement).
-3. **No new dependency.** No new package added to any `package.json`.
-4. **Single acceptance scenario or doc-only.** Exactly one `Scenario:` block (or zero for doc-only). `Scenario Outline:` or multiple scenarios → `standard`.
-5. **Existing tests cover the runtime change.** Named test file exists and includes the affected module, OR story is doc/comment/non-runtime config only.
-6. **`expected_bounce_exposure: low`.** `med` or `high` is auto-`standard`.
-7. **No epic-spanning subsystem touches.** All affected files live under the parent epic's declared scope directories.
+Lanes are `fast`, `standard` and `runtime`. `assign_lane.mjs` computes each item's lane from its own file; the same file always gives the same lane, with a printed reason.
+
+**Signals** (from the item file; surface = the paths `collision_surface.sh` prints, test files dropped): `scenarios` (Scenario lines in `gherkin` fences; an Outline counts once); `subsystems` (distinct first-two-directory keys of the surface); `ui_surface` (UI file extensions or `ui`/`components`/`pages`/`views`/`frontend`/`static`/`public` directories; `.md` never counts); `forbidden_surface` (schema/migration, auth, runtime config, adapters, scaffold manifest, token/invite code, per `FORBIDDEN_SURFACE_PATTERNS`); `new_dependency` (a dependency manifest in the surface; lock files do not count); `proof_tier` (frontmatter `proof_tier:`, else null).
+
+**Rules** (first match wins): (1) `runtime` when `ui_surface`, or `subsystems >= 2`, or `proof_tier` is `container` or `live`. (2) `fast` when `scenarios <= 2`, `subsystems == 1`, no `ui_surface`, `forbidden_surface` or `new_dependency`, and `proof_tier` is absent or `unit`. (3) Otherwise `standard`; an item with no parsable file surface (`subsystems == 0`) is never `fast`.
+
+**Raise, never lower.** `assign_lane.mjs --write <waves.json>` records the computed lane in `lane_signals[id]` (the floor) and keeps `lane_assignments[id]` at the higher of the floor and any existing value. The Architect may raise a lane with a ≤80-char reason; `init_sprint.mjs` refuses a lane below the floor (`WARN: <id> lane lowered to <x> refused; computed <y>`) and records `lane_assigned_by` as `assign-lane-script` (at the floor) or `architect` (above it). With no `lane_signals` (a plan written before this release) behaviour is unchanged.
+
+**Human override.** The owner lowers or raises a lane at any time with `update_state.mjs <ID> --lane <standard|fast|runtime>`, recorded as `lane_assigned_by: human-override`.
 
 **Demotion mechanics.** Demotion is one-way (`fast → standard`). Trigger: pre-gate scanner failure OR post-merge test failure on a fast-lane story. On demotion: set `lane = "standard"`, write `lane_demoted_at` (ISO-8601), `lane_demotion_reason`, reset `qa_bounces = 0` and `arch_bounces = 0` (see STORY-022-02 schema). Architect plan is invoked and QA spawned per standard contract.
 
@@ -485,8 +486,8 @@ Sprint close is a **Gate-4 action** — the same posture as the Gate-1-green `cl
 
 ### §12.2 Two-Step Protocol
 
-1. **Step A — Orchestrator:** runs `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags. The script validates Steps 1–2.6, prefills the report stub if missing, and exits 0 with the exact prompt: `Review the report, then confirm close by re-running with --assume-ack`. The orchestrator surfaces this prompt verbatim to the human and **halts**.
-2. **Step B — Human:** reviews `REPORT.md`, then either runs `node .cleargate/scripts/close_sprint.mjs <sprint-id> --assume-ack` themselves, or explicitly tells the orchestrator "approved, close it" — at which point the orchestrator may pass the flag on the human's behalf.
+1. **Step A — Orchestrator:** runs `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags. The read-only checks run first (Steps 1–2, 2.7, 2.8), then Step 2.5, the 2.6d/2.6c/2.6/2.6b reconciliation, Step 2.9, Steps 3–3.6 (Reporter bundle, doc-refresh checklist). Without a report it stops at Step 4 and asks for the Reporter (exit 0). Once the Reporter has written `SPRINT-<#>_REPORT.md`, the same no-flag run validates it and exits 0 with the exact prompt `Review the report, then confirm close by re-running with --assume-ack`, followed by the finish plan (`On --assume-ack close will: …`) and `Doc-refresh checklist: <path>`. The orchestrator surfaces this prompt verbatim to the human and **halts**.
+2. **Step B — Human:** reviews `SPRINT-<#>_REPORT.md` and the finish plan, then either runs `node .cleargate/scripts/close_sprint.mjs <sprint-id> --assume-ack` themselves, or explicitly tells the orchestrator "approved, close it" — at which point the orchestrator may pass the flag on the human's behalf. The ack pass flips `sprint_status`, clears `.active` (Step 5) and finishes the sprint at Step 7.8: it commits the close artefacts, merges `sprint/S-NN` into `main` in the checkout that has `main`, and deletes the branch or prints its delete command. No hand `git` step remains.
 
 ### §12.3 Flag Reservation
 
@@ -497,7 +498,7 @@ Sprint close is a **Gate-4 action** — the same posture as the Gate-1-green `cl
 ## 13. Sprint Execution Gate (Gate 3) (source: new in CR-021)
 
 Before sprint state transitions Ready → Active, the orchestrator MUST invoke
-`cleargate sprint preflight <sprint-id>` and verify all four checks pass:
+`cleargate sprint preflight <sprint-id>` and verify every check passes:
 
 1. **Previous sprint Completed.** Scan `.cleargate/wiki/active-sprint.md` and
    `pending-sync/SPRINT-*.md`. The sprint immediately preceding `<sprint-id>`
@@ -515,12 +516,39 @@ Before sprint state transitions Ready → Active, the orchestrator MUST invoke
 4. **`main` is clean.** Run `git status --porcelain` on a `main` checkout.
    No uncommitted changes (modified, untracked, staged) may exist.
 
+**Test gate** (STORY-066-18; runs only after every check above passes, so a slow test never runs
+to report a dirty `main`). Preflight runs the configured test command once — `qa.baseline_command`,
+else `qa.test`, from `.cleargate/scripts/gate-checks.json`, with a 20-minute limit — through
+`node .cleargate/scripts/record_baseline.mjs --probe`. The probe prints one JSON line
+`{ command, exit_code, failing, ran, last_line, cached }` (or `{ skipped }` when no command is
+configured) and caches the run in `<git-common-dir>/cleargate/test-probe.json`: inside `.git`, so it
+never dirties the tree, and shared by every worktree. A re-run for the same HEAD and command reuses
+the cache, except a stop with no waiver, which is probed again. The kickoff baseline
+(`record_baseline.mjs <sprint-id>`) reuses it and writes `baseline.json` with `source: "preflight"`,
+so the suite runs once per kickoff.
+
+- Tests ran (exit 0, or at least one failing test named) → pass: `test gate: "<cmd>" ran (…)`.
+- The command stopped before running any test (no failing test named, a timeout, or not found) →
+  fail, `✗ Test gate: "<cmd>" stopped before running any test (exit N: "<last line>")`, unless
+  `qa.test_waiver` is set → pass: `test gate: WAIVED — …; waiver: "<reason>"`.
+- `CLEARGATE_NO_BASELINE=1` skips the probe: `test gate: skipped (CLEARGATE_NO_BASELINE=1) — not a waiver`.
+
+**`qa.test_waiver`** is a string beside `qa.test` in `gate-checks.json`; non-empty after trim is a
+waiver. It is recorded once and committed, and preflight, `merge_story.mjs` and
+`prep_reporter_context.mjs` read it live (`baseline.json` holds no copy). `cleargate init` never
+overwrites `gate-checks.json`, and `cleargate upgrade` keeps the key. In `merge_story.mjs`, a merge
+test that stops the way `baseline.json` records (same exit code and last line, no test named) is
+excused only under the waiver — tail `NOT TESTED (<stage>): … excused under waiver "<reason>"` — and
+refused without one — tail `not excused: … no qa.test_waiver is recorded in gate-checks.json`
+(pre-merge exit 3, post-merge exit 5). The sprint report's `Test gate` row names the waiver.
+
 On any failure, the script exits 1 with a punch list. The orchestrator surfaces
 the failure verbatim to the human and halts. Resolution is per-item:
 - Prev sprint not closed → run `cleargate sprint close <prev-id>` first
 - Leftover worktree → `git worktree remove` if abandoned, or merge if work in progress
 - Branch ref exists → investigate; force-deletion only with explicit human approval
 - Dirty main → human commits / stashes / discards as appropriate
+- Test gate stopped → make the configured test run here, or add `"test_waiver": "<reason>"` under `"qa"` in `.cleargate/scripts/gate-checks.json` and commit it; never change `qa.test` to get past the gate
 
 This gate is **always enforced** (STORY-070-01: single always-enforced behavior).
 
@@ -537,12 +565,14 @@ Before any close action, the script verifies no leftover story worktrees remain.
 - **Always enforced:** any leftover worktree halts the close (exit 1) with `Step 2.7 failed: leftover worktree at <path>`. Resolution: `git worktree remove` the abandoned worktree, or merge the in-flight story first.
 - **Test seams:** `CLEARGATE_SKIP_WORKTREE_CHECK=1` (full bypass), `CLEARGATE_FORCE_WORKTREE_PATHS` (test injection).
 
-### §14.2 Step 2.8 — Sprint-Merged-to-Main Verify
+### §14.2 Step 2.8 — Sprint branch merges into main; Step 7.8 — Finish
 
-Verifies the sprint branch (`sprint/S-NN`) tip is an ancestor of `main`. Runs `git merge-base --is-ancestor <sprint-tip> <main-tip>`.
+Step 2.8 is read-only and runs in both passes before any step that writes (ahead of the dist assertion and Step 2.6d). It passes when `sprint/S-NN` is already an ancestor of `main` (`git merge-base --is-ancestor`), or `git merge-tree --write-tree refs/heads/main refs/heads/sprint/S-NN` exits 0, and the checkout that will receive the merge has no tracked changes: a worktree other than the closing checkout that has `main` checked out must show an empty `git status --porcelain --untracked-files=no`. When the closing checkout has `main`, or no checkout does, Step 7.8 commits in that checkout before it merges, so it is not checked. The closing checkout must be on `sprint/S-NN` or `main`.
 
-- **Always enforced:** unmerged sprint halts the close (exit 1) with `Step 2.8 failed: sprint branch not merged to main`. Resolution: merge `sprint/S-NN` into `main` first.
-- **Test seams:** `CLEARGATE_SKIP_MERGE_CHECK=1`, `CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged`, `CLEARGATE_REPO_ROOT` (test override).
+- **Always enforced:** a conflicting merge halts the close (exit 1) naming the conflicting paths; a dirty receiving checkout halts it naming that checkout; a detached HEAD or another branch in the closing checkout halts it. git older than 2.38 warns and skips the mergeability pre-check (Step 7.8 still aborts the merge on a conflict). A missing ref or an unreadable repository fails open with a warning, and Step 7.8 is then skipped.
+- **Step 7.8 (ack pass, after Step 7.5):** commits the close artefacts in the closing checkout (`git add -A -- .cleargate`, `git add -u`; `chore(<id>): close — sprint_status Completed, close artefacts`; never `--no-verify`), merges `sprint/S-NN` into `main` with `--no-ff -m "merge: sprint/S-NN → main"` in the checkout that has `main` (`git -C <checkout>`; when no checkout has `main`, `git checkout main` first in the closing checkout), verifies the ancestry, then deletes `sprint/S-NN`, or keeps it and prints `git branch -d sprint/S-NN` while a worktree still has it checked out. A failure exits 1 with `sprint_status` already `Completed` and the closing checkout back on the branch it started on; re-running the ack pass finishes it (the re-run may add a second close commit). When git refuses to check that branch back out, the error names the branch the checkout is left on and prints the `git -C <checkout> checkout sprint/S-NN` command to run before the re-run.
+- **`vcs.sprint_pr: true` (CR-107):** unchanged — Step 2.8 requires the pull request already merged (merge-commit strategy; `origin/main` fallback), and Step 7.8 prints `skipped: vcs.sprint_pr`.
+- **Test seams:** `CLEARGATE_SKIP_MERGE_CHECK=1` skips Step 2.8 and Step 7.8; `CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged` injects the Step 2.8 verdict and skips Step 7.8; `CLEARGATE_REPO_ROOT` (test override). Step 5's `.active` clear and Step 7.8 act only when the sprint dir is `<REPO_ROOT>/.cleargate/sprint-runs/<id>`.
 
 ### §14.3 Steps 6.5 / 6.6 / 6.7 — Post-close additions
 
@@ -555,7 +585,7 @@ Each step has its own skip seam (`CLEARGATE_SKIP_SPRINT_TRENDS=1`, `CLEARGATE_SK
 
 ### §14.4 Step 8 — Verbose post-close handoff list
 
-Prints a 6-item handoff to stdout summarizing: (1) commits in sprint, (2) merge state, (3) wiki ingest status, (4) flashcard count, (5) artifacts written, (6) next-sprint preflight reminder. The next-sprint ID is computed by parsing the numeric portion of the closing sprint and incrementing it (e.g., SPRINT-19 → SPRINT-20).
+Prints a 7-item handoff to stdout summarizing: (1) commits in sprint, (2) merge state, (3) wiki ingest status, (4) flashcard count, (5) artifacts written, (6) next-sprint preflight reminder, (7) the Step 7.8 finish (done, the kept branch's delete command, or why it was skipped). The next-sprint ID is computed by parsing the numeric portion of the closing sprint and incrementing it (e.g., SPRINT-19 → SPRINT-20).
 
 This step replaces the prior 3-line "pipeline complete" summary with explicit action-oriented output for the conversational orchestrator to relay to the human.
 

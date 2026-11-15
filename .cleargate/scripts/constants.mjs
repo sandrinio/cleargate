@@ -15,8 +15,8 @@
  *       "worktree": null,            // string|null — path to worktree checkout
  *       "updated_at": "<ISO-8601>",  // string
  *       "notes": "",                 // string
- *       "lane": "standard",          // default "standard"
- *       "lane_assigned_by": "architect" | "human-override" | "migration-default",
+ *       "lane": "standard",          // "standard" | "fast" | "runtime"; default "standard"
+ *       "lane_assigned_by": "architect" | "human-override" | "migration-default" | "assign-lane-script" | "sdr-lane-audit",
  *       "lane_demoted_at": "<ISO-8601>" | null,
  *       "lane_demotion_reason": string | null
  *     }

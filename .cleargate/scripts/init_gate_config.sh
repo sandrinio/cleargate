@@ -21,13 +21,13 @@ cat > "$CONFIG_PATH" << 'EOF'
 {
   "schema_version": 1,
   "qa": {
-    "typecheck": "npm run typecheck",
+    "typecheck": "",
     "debug_patterns": ["console.log", "console.debug", "debugger"],
     "todo_patterns": ["TODO", "FIXME", "XXX"],
-    "test": "npm test"
+    "test": ""
   },
   "arch": {
-    "typecheck": "npm run typecheck",
+    "typecheck": "",
     "new_deps_check": true,
     "stray_env_files": [".env", ".env.local", ".env.production"],
     "file_count_report": true

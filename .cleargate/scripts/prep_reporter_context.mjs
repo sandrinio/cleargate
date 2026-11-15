@@ -18,16 +18,17 @@
  * Output bundle sections (in order):
  *   1. Sprint Plan Slices       — §1 Consolidated Deliverables, §2 Execution Strategy, §5 (from sprint plan)
  *   2. State.json Summary       — one-liner per story: ID | state | lane | qa_bounces=N arch_bounces=N
- *   3. Milestone Plans          — plans/M*.md verbatim, or one-liner if absent
- *   4. Git Log Digest           — git log --stat sprint/S-NN ^main (silent fail if branch absent)
- *   5. Token Ledger Digest (orchestrator window) — count_tokens.mjs --json output embedded as markdown
- *   6. Measured Metrics         — sprint_metrics.mjs --json (contract C2) as markdown
- *   7. Flashcard Slice          — FLASHCARD.md entries in [start_date, end_date] window;
+ *   3. Test Gate                — one line from baseline.json and the live gate-checks.json qa.test_waiver (STORY-066-18)
+ *   4. Milestone Plans          — plans/M*.md verbatim, or one-liner if absent
+ *   5. Git Log Digest           — git log --stat sprint/S-NN ^main (silent fail if branch absent)
+ *   6. Token Ledger Digest (orchestrator window) — count_tokens.mjs --json output embedded as markdown
+ *   7. Measured Metrics         — sprint_metrics.mjs --json (contract C2) as markdown
+ *   8. Flashcard Slice          — FLASHCARD.md entries in [start_date, end_date] window;
  *                                  Strategy-3 fallback (git log --grep) when:
  *                                    - date filter returns 0 rows AND
  *                                    - sprint_status === 'Completed' (gated to avoid false
  *                                      positives during active execution per M1 gotcha #6)
- *   8. REPORT template pointer  — one line citing the template path
+ *   9. REPORT template pointer  — one line citing the template path
  *
  * Exit codes:
  *   0 — success
@@ -49,7 +50,9 @@ import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseJsonl } from './lib/ledger-digest.mjs';
+import { extractWorkItemIds } from './lib/work-item-id.mjs';
 import { locateFrontmatterFence } from './assert_story_files.mjs';
+import { testsRan, lastLine } from './record_baseline.mjs';
 
 // Bundle-size budget: ≤160KB target (CR-022 M5 raise from 80KB; SPRINT-18 hit 138KB).
 const MAX_BUNDLE_BYTES = 160 * 1024; // 163840
@@ -189,31 +192,76 @@ function buildStateJsonSummary(sprintDir) {
   return lines.join('\n');
 }
 
+// ── Section 3: Test Gate (STORY-066-18) ──────────────────────────────────────
+
+/** P8: qa.test_waiver from this repo's gate-checks.json (beside this script), trimmed; '' when absent. */
+function readTestWaiver() {
+  try {
+    const g = JSON.parse(fs.readFileSync(path.join(__dirname, 'gate-checks.json'), 'utf8'));
+    const w = g && g.qa && g.qa.test_waiver;
+    return typeof w === 'string' ? w.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
+function buildTestGate(sprintDir) {
+  const head = '## Test Gate\n\n';
+  let b = null;
+  try {
+    b = JSON.parse(fs.readFileSync(path.join(sprintDir, 'baseline.json'), 'utf8'));
+  } catch {
+    b = null;
+  }
+  if (!b || typeof b !== 'object' || !Number.isInteger(b.exit_code) || !Array.isArray(b.failing)) {
+    return `${head}No baseline — baseline.json was not recorded for this sprint.\n`;
+  }
+  const cmd = String(b.command ?? '');
+  if (b.exit_code === 0) return `${head}Passed — "${cmd}" ran at kickoff (exit 0).\n`;
+  if (testsRan(b)) {
+    const n = b.failing.length;
+    return `${head}Ran — "${cmd}" ran at kickoff with ${n} failing test${n === 1 ? '' : 's'} named (exit ${b.exit_code}); merges excused only those.\n`;
+  }
+  const stopped = `"${cmd}" stopped before running any test at kickoff (exit ${b.exit_code}: "${lastLine(b.tail)}")`;
+  const waiver = readTestWaiver();
+  if (waiver) {
+    return `${head}WAIVED — ${stopped}. Waiver: "${waiver}". Merges whose test stopped the same way were recorded NOT TESTED.\n`;
+  }
+  return `${head}STOPPED — ${stopped} and no qa.test_waiver is recorded; merges whose test stopped the same way were refused.\n`;
+}
+
 // ── Section 3: Milestone Plans ────────────────────────────────────────────────
 
 function buildMilestonePlans(sprintDir, sprintId) {
   const plansDir = path.join(sprintDir, 'plans');
+  const names = fs.existsSync(plansDir) ? fs.readdirSync(plansDir).sort() : [];
+  const planFiles = names.filter(f => /^M\d+\.md$/.test(f));
+  // A story plan is a .md file whose stem is exactly one work-item id.
+  const storyPlans = names.filter(f => {
+    if (!f.endsWith('.md')) return false;
+    const stem = f.slice(0, -3);
+    const ids = extractWorkItemIds(stem);
+    return ids.length === 1 && ids[0] === stem;
+  });
 
-  if (!fs.existsSync(plansDir)) {
+  if (planFiles.length === 0 && storyPlans.length === 0) {
     return `## Milestone Plans\n\nNo milestone plans for ${sprintId}.\n`;
   }
 
-  const planFiles = fs.readdirSync(plansDir)
-    .filter(f => /^M\d+\.md$/.test(f))
-    .sort();
-
-  if (planFiles.length === 0) {
-    return `## Milestone Plans\n\nNo milestone plans for ${sprintId}.\n`;
+  const parts = [];
+  if (planFiles.length > 0) {
+    parts.push('## Milestone Plans', '');
+    for (const file of planFiles) {
+      const content = fs.readFileSync(path.join(plansDir, file), 'utf8');
+      parts.push(`### ${file}`, '', content.trimEnd(), '');
+    }
   }
-
-  const parts = ['## Milestone Plans', ''];
-  for (const file of planFiles) {
-    const filePath = path.join(plansDir, file);
-    const content = fs.readFileSync(filePath, 'utf8');
-    parts.push(`### ${file}`);
-    parts.push('');
-    parts.push(content.trimEnd());
-    parts.push('');
+  if (storyPlans.length > 0) {
+    parts.push('## Story Plans', '');
+    for (const file of storyPlans) {
+      const content = fs.readFileSync(path.join(plansDir, file), 'utf8');
+      parts.push(`### ${file}`, '', content.trimEnd(), '');
+    }
   }
 
   return parts.join('\n');
@@ -456,6 +504,29 @@ function renderMeasuredMetrics(doc) {
         `${mmNum(totals.rework)} rework rounds, ${totalGit()} git rework commits.`,
       ''
     );
+    // STORY-066-15: dispatches by lane and rework by defect location (measured dispatch data only).
+    const byLane = doc.by_lane && typeof doc.by_lane === 'object' ? doc.by_lane : {};
+    const laneOrder = ['fast', 'standard', 'runtime'];
+    const laneNames = [
+      ...laneOrder.filter((l) => Object.prototype.hasOwnProperty.call(byLane, l)),
+      ...Object.keys(byLane).filter((l) => !laneOrder.includes(l)).sort(),
+    ];
+    for (const lane of laneNames) {
+      const ln = byLane[lane] || {};
+      lines.push(
+        `By lane: ${lane} \u2014 ${mmNum(ln.items)} items, ${mmNum(ln.dispatches)} dispatches, ${mmNum(ln.per_item)} per item.`
+      );
+    }
+    const rb = totals.rework_by_defect_in;
+    if (rb && typeof rb === 'object') {
+      lines.push(
+        `Rework by defect location: code ${mmNum(rb.code)}, red-test ${mmNum(rb['red-test'])}, ` +
+          `spec ${mmNum(rb.spec)}, unknown ${mmNum(rb.unknown)}.`
+      );
+    } else {
+      lines.push('Rework by defect location: not measured.');
+    }
+    lines.push('');
   }
 
   // First-pass
@@ -694,6 +765,7 @@ function main() {
 
   sections.push(buildSprintPlanSlices(sprintId));
   sections.push(buildStateJsonSummary(sprintDir));
+  sections.push(buildTestGate(sprintDir));
   sections.push(buildMilestonePlans(sprintDir, sprintId));
   sections.push(buildGitLogDigest(sprintId));
   sections.push(buildTokenLedgerDigest(sprintId, sprintDir));

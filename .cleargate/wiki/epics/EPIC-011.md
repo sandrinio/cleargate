@@ -12,7 +12,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-011_End_To_End_Production_Readiness.md"
-last_ingest: "2026-11-15T20:36:15.252Z"
+last_ingest: "2026-11-15T20:37:32.192Z"
 last_ingest_commit: "2691d20a51eb6e8211a9ec862c0ec0ddf8c09601"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-06"

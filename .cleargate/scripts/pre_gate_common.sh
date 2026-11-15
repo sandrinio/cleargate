@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # pre_gate_common.sh — Shared helpers for pre_gate_runner.sh
 # Sourced by pre_gate_runner.sh. Do NOT execute directly.
-# Handles Node+TS stacks only (no Python/Rust/Go/Java/Swift detectors).
+# Stack-neutral: the commands to run come from gate-checks.json, never from stack detection.
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ get_staged_diff() {
 # ---------------------------------------------------------------------------
 # record_result <report_file> <check_name> <status> [details]
 # Appends one result line to the report.
-# status: PASS | FAIL | WARN | INFO
+# status: PASS | FAIL | WARN | INFO | N/A
 # ---------------------------------------------------------------------------
 record_result() {
   local report_file="$1"
@@ -51,6 +51,60 @@ record_result() {
   local status="$3"
   local details="${4:-}"
   echo "[${status}] ${check_name}: ${details}" >> "$report_file"
+}
+
+# ---------------------------------------------------------------------------
+# resolve_check_target <worktree> <cmd>
+# Prints the directory a command needs: the dir of a literal `--prefix <dir>`
+# token, or of a leading `cd <dir> &&`. Prints nothing for any other form, and
+# for absolute dirs or dirs with $, quotes or backslashes (the command then
+# runs, so a wrong guess is a visible FAIL, never a silent N/A).
+# ---------------------------------------------------------------------------
+resolve_check_target() {
+  local cmd="${2:-}" dir=""
+  if [[ "$cmd" =~ (^|[[:space:]])--prefix[[:space:]]+([^[:space:]]+) ]]; then
+    dir="${BASH_REMATCH[2]}"
+  elif [[ "$cmd" =~ ^[[:space:]]*cd[[:space:]]+([^[:space:]]+)[[:space:]]*\&\& ]]; then
+    dir="${BASH_REMATCH[1]}"
+  fi
+  case "$dir" in
+    ""|/*|*\$*|*\"*|*\'*|*\\*) return 0 ;;
+  esac
+  printf '%s\n' "$dir"
+}
+
+# ---------------------------------------------------------------------------
+# run_configured_check <report> <name> <cmd> <worktree>
+# Runs one configured command and records the result.
+# Returns 0 pass, 1 fail, 3 N/A. Callers must capture it (rc=0; ... || rc=$?)
+# because a bare non-zero return kills the caller under set -e.
+# ---------------------------------------------------------------------------
+run_configured_check() {
+  local report="$1" name="$2" cmd="$3" wt="$4"
+  if [[ -z "$cmd" ]]; then
+    record_result "$report" "$name" "INFO" "not configured"
+    return 0
+  fi
+  local target
+  target="$(resolve_check_target "$wt" "$cmd")"
+  if [[ -n "$target" && ! -d "${wt}/${target}" ]]; then
+    record_result "$report" "$name" "N/A" "target ${target} is not in the worktree"
+    return 3
+  fi
+  if [[ ! -d "$wt" ]]; then
+    record_result "$report" "$name" "FAIL" "worktree ${wt} is not a directory"
+    return 1
+  fi
+  local out
+  local rc=0
+  out=$( ( set +e +u +o pipefail; cd "$wt" && eval "$cmd" ) 2>&1 ) || rc=$?
+  if [[ $rc -eq 0 ]]; then
+    record_result "$report" "$name" "PASS" "$cmd"
+    return 0
+  fi
+  record_result "$report" "$name" "FAIL" "exit code ${rc}"
+  printf '%s\n' "$out" | tail -n 40 | sed 's/^/  | /' >> "$report"
+  return 1
 }
 
 # ---------------------------------------------------------------------------

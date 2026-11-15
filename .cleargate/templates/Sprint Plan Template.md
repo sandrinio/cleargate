@@ -97,6 +97,7 @@ Example:
 - Contract C1 `contract/S-NN-api` (base sprint/S-NN; owner STORY-NNN-01; frozen: `src/api.ts: getThing(id: string): Promise<Thing>`)
 - Build now: STORY-NNN-01 (base sprint/S-NN) ‖ STORY-NNN-02 (base contract/S-NN-api)
 - Integrate: STORY-NNN-02 after STORY-NNN-01 merges
+- GOAL_RELATION: advances | off critical path (one line per milestone)
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
 {List files touched by more than one story. For each shared file, specify which story lands first and why.}
@@ -110,11 +111,11 @@ Example:
 - None identified. (Replace with actual warnings if applicable.)
 
 ### 2.4 Lane Audit
-{Architect populates one row per fast-lane story during Sprint Design Review. Empty by default — rows added only for non-`standard` lanes.}
+{Lanes are computed by `assign_lane.mjs`; list every item with its computed lane and signals. The Architect may raise a lane (never lower one) and gives the reason in the last column.}
 
-| Story | Lane | Rationale (≤80 chars) |
-|---|---|---|
-| `STORY-NNN-NN` | fast | <one-line rationale> |
+| Story | Lane | Signals | Raised by Architect (reason ≤80 chars) |
+|---|---|---|---|
+| `STORY-NNN-NN` | fast | scenarios 1, subsystems 1 | — |
 
 ### 2.5 ADR-Conflict Flags
 {Any story whose implementation conflicts with an Architectural Decision Record in `.cleargate/knowledge/` or prior sprint decisions. One bullet per flag.}

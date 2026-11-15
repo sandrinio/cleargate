@@ -43,7 +43,14 @@
 //   "baseline": {
 //     "main_head_sha": "string",
 //     "baseline_unavailable": "boolean",
-//     "failures": [{"file": "string", "count": "integer"}]
+//     "failures": [{"file": "string", "count": "integer"}],
+//     "source": "baseline.json|.baseline-failures.json|none",
+//     "base_sha": "string|null",
+//     "command": "string|null",
+//     "exit_code": "integer|null",
+//     "failing": ["string"],
+//     "tail": ["string"],
+//     "recorded_at": "string|null"
 //   },
 //   "adjacent": {
 //     "touched_files": ["string"],
@@ -59,7 +66,13 @@
 //   },
 //   "lane": {
 //     "value": "fast|standard|runtime",
-//     "source": "state.json|default|not-yet-runtime-aware"
+//     "source": "state.json|default"
+//   },
+//   "commands": {
+//     "source": "gate-checks.json|absent",
+//     "typecheck": "string|null",
+//     "test": "string|null",
+//     "proof": { "tier": "string|null", "command": "string|null" }
 //   },
 //   "dev_handoff": {
 //     "format": "structured|legacy|absent",
@@ -221,7 +234,14 @@ function buildSpecSources(storyId, sprintId, sprintDir) {
   let planPath = null;
   const specPointers = [];
   const plansDir = path.join(sprintDir, 'plans');
-  if (fs.existsSync(plansDir)) {
+  // A story plan (plans/<ID>.md, runtime lane) wins over a milestone plan.
+  const storyPlan = path.join(plansDir, `${storyId}.md`);
+  if (fs.existsSync(storyPlan)) {
+    planPath = storyPlan;
+    const n = fs.readFileSync(storyPlan, 'utf8').split('\n').length;
+    specPointers.push({ section: 'Story plan', path: storyPlan, line_range: `1-${n}` });
+  }
+  if (!planPath && fs.existsSync(plansDir)) {
     const planFiles = fs.readdirSync(plansDir)
       .filter(f => /^M\d+\.md$/.test(f))
       .sort();
@@ -261,30 +281,51 @@ function buildSpecSources(storyId, sprintId, sprintDir) {
 
 function buildBaseline(sprintDir, worktreePath) {
   const mainHeadSha = gitExec('rev-parse main', worktreePath) || 'unknown';
+  const empty = {
+    main_head_sha: mainHeadSha,
+    baseline_unavailable: true,
+    failures: [],
+    source: 'none',
+    base_sha: null,
+    command: null,
+    exit_code: null,
+    failing: [],
+    tail: [],
+    recorded_at: null,
+  };
 
-  const baselinePath = path.join(sprintDir, '.baseline-failures.json');
-  if (!fs.existsSync(baselinePath)) {
-    return {
-      main_head_sha: mainHeadSha,
-      baseline_unavailable: true,
-      failures: [],
-    };
+  // STORY-066-04: kickoff baseline written by record_baseline.mjs takes precedence.
+  const kickoffPath = path.join(sprintDir, 'baseline.json');
+  if (fs.existsSync(kickoffPath)) {
+    try {
+      const b = JSON.parse(fs.readFileSync(kickoffPath, 'utf8'));
+      const failing = Array.isArray(b.failing) ? b.failing.map(String) : [];
+      return {
+        main_head_sha: mainHeadSha,
+        baseline_unavailable: false,
+        failures: failing.map((f) => ({ file: f, count: 1 })),
+        source: 'baseline.json',
+        base_sha: typeof b.base_sha === 'string' ? b.base_sha : null,
+        command: typeof b.command === 'string' ? b.command : null,
+        exit_code: typeof b.exit_code === 'number' ? b.exit_code : null,
+        failing,
+        tail: Array.isArray(b.tail) ? b.tail.map(String) : [],
+        recorded_at: typeof b.recorded_at === 'string' ? b.recorded_at : null,
+      };
+    } catch {
+      // fall through to the legacy file
+    }
   }
 
+  const legacyPath = path.join(sprintDir, '.baseline-failures.json');
+  if (!fs.existsSync(legacyPath)) return empty;
+
   try {
-    const parsed = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
+    const parsed = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
     const failures = Array.isArray(parsed) ? parsed : (parsed.failures || []);
-    return {
-      main_head_sha: mainHeadSha,
-      baseline_unavailable: false,
-      failures,
-    };
+    return { ...empty, baseline_unavailable: false, failures, source: '.baseline-failures.json' };
   } catch {
-    return {
-      main_head_sha: mainHeadSha,
-      baseline_unavailable: true,
-      failures: [],
-    };
+    return empty;
   }
 }
 
@@ -474,21 +515,14 @@ function buildFlashcardSlice(touchedFiles) {
 
 // ── Section 7: Lane ───────────────────────────────────────────────────────────
 
-function buildLane(storyId, sprintDir, touchedFiles) {
+function buildLane(storyId, sprintDir) {
   const stateFile = path.join(sprintDir, 'state.json');
   if (fs.existsSync(stateFile)) {
     try {
       const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
       const storyEntry = (state.stories || {})[storyId];
       if (storyEntry && storyEntry.lane !== undefined) {
-        const laneValue = storyEntry.lane;
-        // Heuristic: flag not-yet-runtime-aware if standard + touches CLI commands
-        const touchesCli = touchedFiles.some(f => f.startsWith('cleargate-cli/src/commands/'));
-        const source =
-          laneValue === 'standard' && touchesCli
-            ? 'not-yet-runtime-aware'
-            : 'state.json';
-        return { value: laneValue, source };
+        return { value: storyEntry.lane, source: 'state.json' };
       }
     } catch {
       // fallthrough
@@ -496,6 +530,68 @@ function buildLane(storyId, sprintDir, touchedFiles) {
   }
 
   return { value: 'standard', source: 'default' };
+}
+
+// ── Section 7b: Commands ──────────────────────────────────────────────────────
+
+function nonBlankOrNull(v) {
+  return typeof v === 'string' && v.trim() !== '' ? v : null;
+}
+
+/**
+ * First non-blank line inside the first fenced block under a `## Proof` heading
+ * (the heading is only recognised outside fences). null when there is none.
+ */
+function parseProofCommand(content) {
+  let inFence = false;
+  let inProof = false;
+  let inProofFence = false;
+  for (const line of content.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      if (inProofFence) return null; // first block closed without a command
+      if (!inFence && inProof) {
+        inProofFence = true;
+      }
+      inFence = !inFence;
+      continue;
+    }
+    if (inProofFence) {
+      if (line.trim() !== '') return line.trim();
+      continue;
+    }
+    if (inFence) continue;
+    if (/^##\s+Proof\s*$/.test(line)) inProof = true;
+    else if (inProof && /^#{1,2}\s/.test(line)) inProof = false;
+  }
+  return null;
+}
+
+function buildCommands(storyPath) {
+  let source = 'absent';
+  let typecheck = null;
+  let test = null;
+  try {
+    const gc = JSON.parse(fs.readFileSync(path.join(__dirname, 'gate-checks.json'), 'utf8'));
+    source = 'gate-checks.json';
+    const qa = (gc && gc.qa) || {};
+    typecheck = nonBlankOrNull(qa.typecheck);
+    test = nonBlankOrNull(qa.test);
+  } catch {
+    // missing or unparseable: soft-degrade (R4)
+  }
+
+  let tier = null;
+  let command = null;
+  if (storyPath) {
+    try {
+      const content = fs.readFileSync(storyPath, 'utf8');
+      tier = parseFrontmatter(content).proof_tier ?? null;
+      command = parseProofCommand(content);
+    } catch {
+      // item file unreadable: proof stays null
+    }
+  }
+  return { source, typecheck, test, proof: { tier, command } };
 }
 
 // ── Section 8: Dev Handoff ────────────────────────────────────────────────────
@@ -627,6 +723,21 @@ function proseBaseline(b) {
     lines.push('- **Baseline cache:** unavailable');
     lines.push('');
     lines.push('_Baseline cache stale or absent — recompute via `cleargate gate test` on main._');
+  } else if (b.source === 'baseline.json') {
+    lines.push(`- **Baseline command:** \`${b.command}\` (exit ${b.exit_code}, base \`${b.base_sha}\`, recorded ${b.recorded_at})`);
+    lines.push(`- **Known failures:** ${b.failing.length}`);
+    for (const f of b.failing.slice(0, 30)) lines.push(`  - \`${f}\``);
+    if (b.failing.length > 30) lines.push(`  - and ${b.failing.length - 30} more`);
+    lines.push('');
+    lines.push(`_The baseline covers only what \`${b.command}\` ran; failures outside it are unknown._`);
+    if (b.exit_code !== 0 && b.failing.length === 0 && b.tail.length > 0) {
+      lines.push('');
+      lines.push('The command failed and no failing identifiers were parsed; tail of its output:');
+      lines.push('');
+      lines.push('```');
+      for (const t of b.tail) lines.push(t);
+      lines.push('```');
+    }
   } else {
     lines.push(`- **Baseline cache:** available (${b.failures.length} known failure(s))`);
     for (const f of b.failures) {
@@ -698,13 +809,19 @@ function proseLane(l) {
   const lines = ['## Lane', ''];
   lines.push(`- **Value:** \`${l.value}\``);
   lines.push(`- **Source:** \`${l.source}\``);
-  if (l.source === 'not-yet-runtime-aware') {
-    lines.push('');
-    lines.push(
-      '_Heuristic: story lane is `standard` but touches CLI command files — ' +
-      'QA may want to apply `runtime` playbook depth. See CR-024 M8 for lane-playbook dispatch._'
-    );
-  }
+  lines.push('');
+  return lines.join('\n');
+}
+
+function proseCommands(c) {
+  const lines = ['## Commands', ''];
+  lines.push(`- **Source:** \`${c.source}\``);
+  lines.push(`- **Typecheck:** ${c.typecheck ? `\`${c.typecheck}\`` : '_not configured_'}`);
+  lines.push(`- **Test:** ${c.test ? `\`${c.test}\`` : '_not configured_'}`);
+  lines.push(
+    `- **Proof:** ${c.proof.command ? `\`${c.proof.command}\`` : '_none declared_'}` +
+    (c.proof.tier ? ` (tier: ${c.proof.tier})` : '')
+  );
   lines.push('');
   return lines.join('\n');
 }
@@ -825,7 +942,8 @@ function main() {
   const adjacent = buildAdjacent(worktreePath);
   const crossStoryMap = buildCrossStoryMap(sprintDir, adjacent.touched_files, storyId);
   const flashcardSlice = buildFlashcardSlice(adjacent.touched_files);
-  const lane = buildLane(storyId, sprintDir, adjacent.touched_files);
+  const lane = buildLane(storyId, sprintDir);
+  const commands = buildCommands(specSources.story_path);
   const devHandoff = buildDevHandoff(worktreePath, devHandoffJsonPath);
 
   // Build machine-readable JSON block
@@ -841,6 +959,7 @@ function main() {
     cross_story_map: crossStoryMap,
     flashcard_slice: flashcardSlice,
     lane,
+    commands,
     dev_handoff: devHandoff,
   };
 
@@ -861,6 +980,7 @@ function main() {
     proseCrossStoryMap(crossStoryMap),
     proseFlashcardSlice(flashcardSlice),
     proseLane(lane),
+    proseCommands(commands),
     proseDevHandoff(devHandoff),
   ];
 

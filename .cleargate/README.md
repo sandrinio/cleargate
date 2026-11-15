@@ -45,7 +45,7 @@ system, CI, test runner, or deployment tooling — those stay yours.
 
 **Plan** → work items land as markdown in `delivery/pending-sync/`.
 **Execute** → a five-agent loop (Architect → QA-Red → Developer → QA-Verify →
-Reporter, with DevOps for merge and teardown) works one story at a time.
+Reporter, merging by script) works one story at a time.
 **Deliver** → `cleargate push` syncs items to your ClearGate project.
 
 Everything is plain markdown in your repo. It diffs, it reviews, it merges.

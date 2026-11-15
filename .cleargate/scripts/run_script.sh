@@ -160,8 +160,9 @@ _truncate_stream() {
   fi
 }
 
-STDOUT_CAPTURED="$(_truncate_stream "$STDOUT_TMP")"
-STDERR_CAPTURED="$(_truncate_stream "$STDERR_TMP")"
+# The trailing "x" keeps the stream's own trailing newlines ($(...) would strip them).
+STDOUT_CAPTURED="$(_truncate_stream "$STDOUT_TMP"; printf x)"; STDOUT_CAPTURED="${STDOUT_CAPTURED%x}"
+STDERR_CAPTURED="$(_truncate_stream "$STDERR_TMP"; printf x)"; STDERR_CAPTURED="${STDERR_CAPTURED%x}"
 
 # Build filename: <ts>-<hash>.json
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -172,6 +173,21 @@ INCIDENT_FILE="${INCIDENTS_DIR}/${TS_FILE}-${HASH}.json"
 
 # Ensure incident directory exists
 mkdir -p "$INCIDENTS_DIR"
+
+# JSON-encode a string: delete stray C0 controls, then escape \ " and the JSON short escapes (B4: Go output carries raw TAB/ESC).
+_json_str() {
+  local s="$1"
+  s="$(printf '%sX' "$s" | LC_ALL=C tr -d '\000-\010\013\016-\032\034-\037')"; s="${s%X}"  # X sentinel keeps trailing newlines
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  s="${s//$'\f'/\\f}"
+  s="${s//$'\b'/\\b}"
+  s="${s//$'\033'/\\u001b}"
+  printf '%s' "$s"
+}
 
 # Collect context
 COMMAND="$1"
@@ -184,11 +200,7 @@ for ARG in "$@"; do
   else
     ARGS_JSON="${ARGS_JSON},"
   fi
-  # JSON-escape the arg: replace \ with \\, " with \", newlines with \n
-  ARG_ESCAPED="${ARG//\\/\\\\}"
-  ARG_ESCAPED="${ARG_ESCAPED//\"/\\\"}"
-  ARG_ESCAPED="${ARG_ESCAPED//$'\n'/\\n}"
-  ARGS_JSON="${ARGS_JSON}\"${ARG_ESCAPED}\""
+  ARGS_JSON="${ARGS_JSON}\"$(_json_str "$ARG")\""
 done
 ARGS_JSON="${ARGS_JSON}]"
 
@@ -201,24 +213,14 @@ WORK_ITEM_ID_VAL="${WORK_ITEM_ID:-}"
 if [[ -z "$AGENT_TYPE_VAL" ]]; then
   AGENT_TYPE_JSON="null"
 else
-  AGENT_TYPE_JSON="\"${AGENT_TYPE_VAL}\""
+  AGENT_TYPE_JSON="\"$(_json_str "$AGENT_TYPE_VAL")\""
 fi
 
 if [[ -z "$WORK_ITEM_ID_VAL" ]]; then
   WORK_ITEM_ID_JSON="null"
 else
-  WORK_ITEM_ID_JSON="\"${WORK_ITEM_ID_VAL}\""
+  WORK_ITEM_ID_JSON="\"$(_json_str "$WORK_ITEM_ID_VAL")\""
 fi
-
-# JSON-encode captured streams (escape backslash, double-quote, and newlines)
-_json_str() {
-  local s="$1"
-  s="${s//\\/\\\\}"
-  s="${s//\"/\\\"}"
-  s="${s//$'\n'/\\n}"
-  s="${s//$'\r'/\\r}"
-  printf '%s' "$s"
-}
 
 STDOUT_JSON="$(_json_str "$STDOUT_CAPTURED")"
 STDERR_JSON="$(_json_str "$STDERR_CAPTURED")"

@@ -10,14 +10,15 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as defaultLedger from './subagent-ledger.mjs';
-import { atomicWrite, TERMINAL_SPRINT_STATUSES } from './state-events.mjs';
+import { atomicWrite, TERMINAL_SPRINT_STATUSES, DEFECT_IN_VALUES } from './state-events.mjs';
 import { extractWorkItemIds } from './lib/work-item-id.mjs';
 import { parseJsonl } from './lib/ledger-digest.mjs';
 
 /**
  * @typedef {Object} MetricsItem
  * @property {{total: number, by_role: Record<string, number>, by_phase: Record<string, number>}} dispatches
- * @property {{red_corrections: number, dev_reruns: number, verify_reruns: number, total: number}} rework
+ * @property {{red_corrections: number, dev_reruns: number, verify_reruns: number, total: number, by_defect_in: Record<string, number>}} rework  by_defect_in: qa-bounce events by location (code, red-test, spec, unknown)
+ * @property {string} lane  from state.json, `standard` when absent
  * @property {number} interrupted  dispatches with completed false
  * @property {number} post_merge  dispatches starting after the item's first merge(story/<ID>) commit
  * @property {{red_written: number, red_corrected: number, build: number, rework: number, integrate: number, merged: number}} git  commit counts
@@ -38,7 +39,8 @@ import { parseJsonl } from './lib/ledger-digest.mjs';
  * @property {Record<string, MetricsItem>} items  keyed by roster ID
  * @property {{dispatches: number, tokens: number}} sprint_level
  * @property {{dispatches: number, tokens: number, share: number}} unattributed  share in [0, 1]
- * @property {{dispatches: number, rework: number, tokens: number}} totals
+ * @property {{dispatches: number, rework: number, tokens: number, rework_by_defect_in: Record<string, number>}} totals
+ * @property {Record<string, {items: number, dispatches: number|string, per_item: number|string}>} by_lane  dispatches per item by lane; `not measured` when no dispatch was measured
  */
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -368,10 +370,13 @@ export function sprintWindow(events, state, now) {
 
 const rowTokens = (u) => (u?.input ?? 0) + (u?.output ?? 0) + (u?.cache_read ?? 0) + (u?.cache_creation ?? 0);
 
-function emptyItem(counters, git) {
+const zeroSplit = () => ({ code: 0, 'red-test': 0, spec: 0, unknown: 0 });
+
+function emptyItem(counters, git, lane = 'standard') {
   return {
+    lane,
     dispatches: { total: 0, by_role: {}, by_phase: {} },
-    rework: { red_corrections: 0, dev_reruns: 0, verify_reruns: 0, total: 0 },
+    rework: { red_corrections: 0, dev_reruns: 0, verify_reruns: 0, total: 0, by_defect_in: zeroSplit() },
     interrupted: 0,
     post_merge: 0,
     git,
@@ -387,7 +392,7 @@ function emptyItem(counters, git) {
 /**
  * @returns {MetricsDocument}
  */
-export function buildMetrics({ sprintId, now, roster, counters, rows, gitByItem, gitMeasured, sessions, repos, warnings }) {
+export function buildMetrics({ sprintId, now, roster, counters, rows, gitByItem, gitMeasured, sessions, repos, warnings, defectByItem = {}, laneByItem = {} }) {
   const measured = rows.length > 0;
   const byItem = new Map(roster.map((id) => [id, []]));
   let sprintLevel = { dispatches: 0, tokens: 0 };
@@ -405,17 +410,19 @@ export function buildMetrics({ sprintId, now, roster, counters, rows, gitByItem,
 
   const items = {};
   let reworkTotal = 0;
+  const reworkSplit = zeroSplit();
   for (const id of roster) {
     const g = gitByItem[id] ?? { ...emptyGit(), first_merge_at: null };
     const git = { red_written: g.red_written, red_corrected: g.red_corrected, build: g.build, rework: g.rework, integrate: g.integrate, merged: g.merged };
     const c = counters[id];
-    const item = emptyItem(c, git);
+    const item = emptyItem(c, git, laneByItem[id] || 'standard');
+    const split = { ...zeroSplit(), ...(defectByItem[id] ?? {}) };
     const gitRework = git.red_corrected + git.rework;
     const counterRework = c.qa_bounces + c.arch_bounces;
     if (measured) {
       const itemRows = byItem.get(id);
       const rw = computeRework(itemRows, { mergedAt: g.first_merge_at });
-      item.rework = { red_corrections: rw.red_corrections, dev_reruns: rw.dev_reruns, verify_reruns: rw.verify_reruns, total: rw.total };
+      item.rework = { red_corrections: rw.red_corrections, dev_reruns: rw.dev_reruns, verify_reruns: rw.verify_reruns, total: rw.total, by_defect_in: split };
       item.interrupted = rw.interrupted;
       item.post_merge = rw.post_merge;
       const roles = {}; const phases = {}; const models = new Set();
@@ -436,11 +443,26 @@ export function buildMetrics({ sprintId, now, roster, counters, rows, gitByItem,
       item.dispatch_source = 'transcripts';
       item.disagrees = rw.total !== counterRework || (gitMeasured && rw.total !== gitRework);
     } else {
-      item.rework = { red_corrections: git.red_corrected, dev_reruns: git.rework, verify_reruns: 0, total: gitRework };
+      item.rework = { red_corrections: git.red_corrected, dev_reruns: git.rework, verify_reruns: 0, total: gitRework, by_defect_in: split };
       item.disagrees = gitMeasured && gitRework !== counterRework;
     }
     reworkTotal += item.rework.total;
+    for (const k of Object.keys(reworkSplit)) reworkSplit[k] += split[k];
     items[id] = item;
+  }
+
+  const laneAcc = {};
+  for (const it of Object.values(items)) {
+    const a = (laneAcc[it.lane] ??= { items: 0, dispatches: 0 });
+    a.items += 1;
+    a.dispatches += it.dispatches.total;
+  }
+  const by_lane = {};
+  for (const lane of Object.keys(laneAcc).sort()) {
+    const a = laneAcc[lane];
+    by_lane[lane] = measured
+      ? { items: a.items, dispatches: a.dispatches, per_item: Math.round((a.dispatches / a.items) * 100) / 100 }
+      : { items: a.items, dispatches: NOT_MEASURED, per_item: NOT_MEASURED };
   }
 
   return {
@@ -451,7 +473,8 @@ export function buildMetrics({ sprintId, now, roster, counters, rows, gitByItem,
     items,
     sprint_level: sprintLevel,
     unattributed: { ...unattributed, share: totalTokens > 0 ? unattributed.tokens / totalTokens : 0 },
-    totals: { dispatches: rows.length, rework: reworkTotal, tokens: totalTokens },
+    totals: { dispatches: rows.length, rework: reworkTotal, tokens: totalTokens, rework_by_defect_in: reworkSplit },
+    by_lane,
   };
 }
 
@@ -483,6 +506,26 @@ export function runSprintMetrics(sprintId, opts = {}) {
   try { events = parseJsonl(path.join(sprintDir, 'events.jsonl')); } catch { /* no window */ }
   const window = sprintWindow(events, state, now);
 
+  // STORY-066-10: qa-bounce events by defect location (roster items only, run_id-deduped; a
+  // missing or invalid location counts as `unknown`) and each item's lane.
+  const defectByItem = {};
+  const seenRuns = new Set();
+  for (const ev of events) {
+    if (ev?.run_id != null) {
+      if (seenRuns.has(ev.run_id)) continue;
+      seenRuns.add(ev.run_id);
+    }
+    if (ev?.kind !== 'qa-bounce' || !(ev.story_id in counters)) continue;
+    const loc = DEFECT_IN_VALUES.includes(ev.defect_in) ? ev.defect_in : 'unknown';
+    const split = (defectByItem[ev.story_id] ??= zeroSplit());
+    split[loc] += 1;
+  }
+  const laneByItem = {};
+  for (const id of roster) {
+    const l = stories[id]?.lane;
+    laneByItem[id] = typeof l === 'string' && l ? l : 'standard';
+  }
+
   let gitByItem = {};
   let gitMeasured = false;
   let repos = [];
@@ -512,7 +555,7 @@ export function runSprintMetrics(sprintId, opts = {}) {
   }
   if (rows.length === 0) warnings.push(`dispatch data: ${NOT_MEASURED}`);
 
-  const doc = buildMetrics({ sprintId, now, roster, counters, rows, gitByItem, gitMeasured, sessions, repos, warnings });
+  const doc = buildMetrics({ sprintId, now, roster, counters, rows, gitByItem, gitMeasured, sessions, repos, warnings, defectByItem, laneByItem });
 
   if (fs.existsSync(sprintDir)) {
     try { atomicWrite(path.join(sprintDir, 'metrics.json'), doc); } catch (err) {
@@ -538,10 +581,13 @@ function formatTable(doc) {
       : `${it.rework.total} (r${it.rework.red_corrections}/d${it.rework.dev_reruns}/v${it.rework.verify_reruns})`;
     const tokens = nm ? NOT_MEASURED : String(it.tokens.total);
     lines.push(
-      `${id}  dispatches=${disp}  rework=${rw}  git_rework=${it.git.red_corrected + it.git.rework}  ` +
+      `${id}  lane=${it.lane}  dispatches=${disp}  rework=${rw}  git_rework=${it.git.red_corrected + it.git.rework}  ` +
       `interrupted=${nm ? NOT_MEASURED : it.interrupted}  post_merge=${nm ? NOT_MEASURED : it.post_merge}  ` +
       `tokens=${tokens}  source=${it.dispatch_source}  disagrees=${it.disagrees}`,
     );
+  }
+  for (const [lane, b] of Object.entries(doc.by_lane ?? {})) {
+    lines.push(`by lane: ${lane} items=${b.items} dispatches=${b.dispatches} per_item=${b.per_item}`);
   }
   lines.push(`sprint-level: ${doc.sprint_level.dispatches} dispatches, ${doc.sprint_level.tokens} tokens`);
   lines.push(`unattributed: ${doc.unattributed.dispatches} dispatches, ${doc.unattributed.tokens} tokens, share ${doc.unattributed.share.toFixed(3)}`);
@@ -585,7 +631,8 @@ function main() {
       items: {},
       sprint_level: { dispatches: 0, tokens: 0 },
       unattributed: { dispatches: 0, tokens: 0, share: 0 },
-      totals: { dispatches: 0, rework: 0, tokens: 0 },
+      totals: { dispatches: 0, rework: 0, tokens: 0, rework_by_defect_in: zeroSplit() },
+      by_lane: {},
     };
   }
 

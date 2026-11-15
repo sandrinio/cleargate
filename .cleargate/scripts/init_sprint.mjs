@@ -22,6 +22,11 @@
  * first write, not merely "compatible with it". Both files are written via the same atomic
  * tmp+rename helper (state-events.mjs's atomicWrite / writeEventsFile), collapsing the inline
  * tmp+rename this file used to duplicate for state.json.
+ *
+ * STORY-066-16: sprint init runs before the Sprint Design Review writes plans/waves.json. With no
+ * waves.json, each id's lane is computed from its item file (.cleargate/delivery/{pending-sync,
+ * archive}) by assign_lane.mjs and stamped `assign-lane-script`; a §2.4 Lane Audit row may raise it,
+ * never lower it. One `Lanes:` stdout line reports the result.
  */
 
 import fs from 'node:fs';
@@ -30,6 +35,8 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES } from './constants.mjs';
 import { atomicWrite, writeEventsFile, synthesizeGenesisEvents, fold } from './state-events.mjs';
+import { matchesId } from './lib/work-item-id.mjs';
+import { assignLaneForFile, LANE_RANK } from './assign_lane.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Resolve repo root: .cleargate/scripts/ -> ../../ (two levels up)
@@ -99,6 +106,25 @@ function findSprintFile(repoRoot, sprintId) {
       (e) => (e === `${sprintId}.md` || e.startsWith(prefix)) && e.endsWith('.md')
     );
     if (match) return path.join(dir, match);
+  }
+  return null;
+}
+
+/**
+ * STORY-066-16: the item file for `id` in pending-sync/ or archive/ (`matchesId`, as seal_red.mjs
+ * finds it), or null.
+ */
+function findItemFile(repoRoot, id) {
+  for (const sub of ['pending-sync', 'archive']) {
+    const dir = path.join(repoRoot, '.cleargate', 'delivery', sub);
+    let names;
+    try {
+      names = fs.readdirSync(dir).sort();
+    } catch {
+      continue;
+    }
+    const hit = names.find((n) => matchesId(n, id));
+    if (hit) return path.join(dir, hit);
   }
   return null;
 }
@@ -190,10 +216,12 @@ function main() {
 
   // --- CR-078 F2: Ingest SDR lane assignments ---
   // Read lane assignments from plans/waves.json (canonical machine-readable source).
-  // Falls back to parsing the Sprint Plan §2.4 Lane Audit table when waves.json is absent.
+  // Falls back to parsing the Sprint Plan §2.4 Lane Audit table when waves.json has no lanes, and,
+  // when waves.json does not exist, computes each item's lane as the floor (STORY-066-16, below).
   // Emits a WARN (not a hard fail) when neither source declares any lane.
   const wavesJsonPath = path.join(sprintDir, 'plans', 'waves.json');
   let laneAssignments = {};
+  let laneSignals = {};
   let laneSourceFound = false;
 
   // Try waves.json first
@@ -204,6 +232,11 @@ function main() {
       if (wavesData.lane_assignments && typeof wavesData.lane_assignments === 'object') {
         laneAssignments = wavesData.lane_assignments;
         laneSourceFound = Object.keys(laneAssignments).length > 0;
+      }
+      // STORY-066-05: `lane_signals[id].lane` is the computed lane (the floor, written by assign_lane.mjs).
+      if (wavesData.lane_signals && typeof wavesData.lane_signals === 'object') {
+        laneSignals = wavesData.lane_signals;
+        if (Object.keys(laneSignals).length > 0) laneSourceFound = true;
       }
     } catch (err) {
       process.stderr.write(`WARN: could not parse plans/waves.json: ${err.message}\n`);
@@ -216,7 +249,7 @@ function main() {
       const planContent = fs.readFileSync(sprintFilePath, 'utf8');
       // Match the §2.4 Lane Audit table rows: `| Story-ID | lane | rationale |`
       // Accepts both backtick-wrapped and bare story IDs in the first column.
-      const tableRowRe = /^\|\s*`?([A-Z][-A-Z0-9]*(?:-\d+)?(?:-\d+)?)`?\s*\|\s*(fast|standard)\s*\|/gm;
+      const tableRowRe = /^\|\s*`?([A-Z][-A-Z0-9]*(?:-\d+)?(?:-\d+)?)`?\s*\|\s*(fast|standard|runtime)\s*\|/gm;
       let match;
       while ((match = tableRowRe.exec(planContent)) !== null) {
         const storyId = match[1].trim();
@@ -226,6 +259,27 @@ function main() {
       }
     } catch (err) {
       process.stderr.write(`WARN: could not read sprint plan for lane audit: ${err.message}\n`);
+    }
+  }
+
+  // STORY-066-16: sprint init runs at SKILL A.3, before the A.4 review writes waves.json. With no
+  // waves.json, each id's lane is computed from its own item file with assign_lane.mjs; that lane is
+  // the floor the raise-never-lower block below judges a §2.4 table lane against. An id with no item
+  // file keeps the table lane, else standard. A waves.json that exists is never second-guessed.
+  if (!fs.existsSync(wavesJsonPath)) {
+    for (const id of storyIds) {
+      const itemFile = findItemFile(REPO_ROOT, id);
+      if (!itemFile) continue;
+      let computed = null;
+      try {
+        computed = assignLaneForFile(itemFile);
+      } catch (err) {
+        process.stderr.write(`WARN: could not compute the lane of ${id}: ${err.message}\n`);
+      }
+      if (computed && Object.hasOwn(LANE_RANK, computed.lane)) {
+        laneSignals[id] = { lane: computed.lane, signals: computed.signals, reason: computed.reason };
+        laneSourceFound = true;
+      }
     }
   }
 
@@ -241,8 +295,30 @@ function main() {
     // Apply SDR lane assignment when available; carry-over lanes take precedence over
     // sdr-lane-audit (they were already explicitly set in the previous sprint).
     const sdrLane = laneAssignments[id];
-    const assignedLane = carry.lane ?? sdrLane ?? 'standard';
-    const assignedBy = carry.lane_assigned_by ?? (sdrLane ? 'sdr-lane-audit' : 'migration-default');
+    // STORY-066-05: raise, never lower. With a computed floor, the Architect's lane may only be
+    // equal or higher; a lower one is refused. No floor for this id: unchanged behaviour.
+    const floor = laneSignals[id]?.lane;
+    let resolvedLane = sdrLane;
+    let resolvedBy = sdrLane ? 'sdr-lane-audit' : 'migration-default';
+    if (Object.hasOwn(LANE_RANK, floor)) {
+      let requested = sdrLane;
+      if (requested !== undefined && !Object.hasOwn(LANE_RANK, requested)) {
+        process.stderr.write(`WARN: ${id} lane ${requested} is not a lane name; read as standard\n`);
+        requested = 'standard';
+      }
+      if (requested === undefined || LANE_RANK[requested] < LANE_RANK[floor]) {
+        if (requested !== undefined) {
+          process.stderr.write(`WARN: ${id} lane lowered to ${requested} refused; computed ${floor}\n`);
+        }
+        resolvedLane = floor;
+        resolvedBy = 'assign-lane-script';
+      } else {
+        resolvedLane = requested;
+        resolvedBy = LANE_RANK[requested] > LANE_RANK[floor] ? 'architect' : 'assign-lane-script';
+      }
+    }
+    const assignedLane = carry.lane ?? resolvedLane ?? 'standard';
+    const assignedBy = carry.lane_assigned_by ?? resolvedBy;
     stories[id] = {
       state: carry.state ?? 'Ready to Bounce',
       qa_bounces: carry.qa_bounces ?? 0,
@@ -369,6 +445,9 @@ function main() {
   fs.renameSync(activeTmp, activeFile);
 
   process.stdout.write(`Initialized state.json for sprint ${sprintId} with ${storyIds.length} stories\n`);
+  process.stdout.write(
+    `Lanes: ${storyIds.map((id) => `${id} ${stories[id].lane} (${stories[id].lane_assigned_by})`).join(', ')}\n`
+  );
 }
 
 main();

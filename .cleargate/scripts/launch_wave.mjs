@@ -29,8 +29,11 @@
  *     storyId: string,
  *     runId: string,
  *     devSha: string,
- *     qaSha: string,
+ *     qaSha: string,            // may be null when the lane runs no QA stage (stagesFor(lane))
  *     archSha?: string,
+ *     lane: string,             // the lane the segment ran (fast | standard | runtime)
+ *     stages_run: string[],     // stage names run, each in stagesFor(lane); repeats allowed (a bounce);
+ *                               // a GREEN verdict holds every `when: 'always'` agent stage of the lane
  *     flashcards_flagged: string[],
  *     counters: { qa_bounces: number, arch_bounces: number, breaker_hits: number },
  *     tokens: { input, output, cache_creation, cache_read, model },
@@ -49,6 +52,7 @@
  */
 
 import crypto from 'node:crypto';
+import { stagesFor, normaliseLane } from './segment_stages.mjs';
 
 // ---------------------------------------------------------------------------
 // Constants — the verdict discriminated-union vocabulary (protocol §23).
@@ -179,7 +183,13 @@ function verdictMalformationReason(v, mode = 'wave') {
 
   // Required scalar fields. Serial mode: a non-GREEN verdict may carry a null SHA.
   const nullableShas = mode === 'serial' && verdict.verdict !== 'GREEN';
+  // STORY-066-06: a lane whose stage list has no QA agent stage has no QA commit to name.
+  const qaLess =
+    typeof verdict.lane === 'string' &&
+    verdict.lane !== '' &&
+    !stagesFor(verdict.lane).some((s) => s.kind === 'agent' && s.agent === 'qa');
   for (const field of REQUIRED_SCALAR_FIELDS) {
+    if (field === 'qaSha' && qaLess && verdict.qaSha === null) continue;
     if (nullableShas && SERIAL_NULLABLE_SHA_FIELDS.includes(field)) {
       if (verdict[field] === null) continue;
       if (typeof verdict[field] !== 'string' || verdict[field] === '') {
@@ -242,6 +252,30 @@ function verdictMalformationReason(v, mode = 'wave') {
     }
     if (typeof b.message !== 'string' || b.message === '') {
       return `'blocker.message' must be a non-empty string`;
+    }
+  }
+
+  // STORY-066-06: the verdict names the lane it ran and the stages it ran, read against the table.
+  if (typeof verdict.lane !== 'string' || verdict.lane === '') {
+    return `missing or empty required field 'lane'`;
+  }
+  const stagesRun = verdict.stages_run;
+  if (!Array.isArray(stagesRun) || !stagesRun.every((x) => typeof x === 'string')) {
+    return `'stages_run' must be an array of strings`;
+  }
+  const lane = normaliseLane(verdict.lane);
+  const laneStages = stagesFor(lane);
+  const laneNames = laneStages.map((s) => s.name);
+  for (const name of stagesRun) {
+    if (!laneNames.includes(name)) {
+      return `'stages_run' names '${name}', which is not a stage of lane '${lane}'`;
+    }
+  }
+  if (verdict.verdict === 'GREEN') {
+    for (const s of laneStages) {
+      if (s.kind === 'agent' && s.when === 'always' && !stagesRun.includes(s.name)) {
+        return `GREEN verdict's 'stages_run' lacks required stage '${s.name}' of lane '${lane}'`;
+      }
     }
   }
 
@@ -322,14 +356,17 @@ export function validateVerdicts(verdicts, options) {
  * @param {string} args.sprintBranch
  * @param {{ wave: string, stories: string[], parallel: boolean }} args.wave  one wave from waves.json
  * @param {(thunks: Array<() => Promise<object>>) => Promise<object[]>} [args.parallel]  parallel() seam
- * @param {(story: string, runId: string) => Promise<object>} [args.segmentRunner]       per-segment seam
+ * @param {(story: string, runId: string, ctx: { lane: string, stages: ReadonlyArray<object> }) => Promise<object>} [args.segmentRunner]
+ *        per-segment seam; the third argument is optional to use (STORY-066-06)
  * @param {NodeJS.ProcessEnv} [args.env]  env handle for the gate save/restore (defaults to process.env)
  * @param {Record<string,string>} [args.bases]  per-story worktree base refs (from `storyBases(plan)`);
  *                                              a story without a non-empty entry is cut from `sprintBranch`
+ * @param {Record<string,string>} [args.lanes]  per-story lane names; each segment carries the normalised
+ *                                              lane and its `stagesFor(lane)` stage list (STORY-066-06)
  * @returns {Promise<object[]>}  the validated array of segment verdicts
  * @throws {Error} from validateVerdicts when any verdict is malformed — gate is restored first.
  */
-export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner, env = process.env, bases = {} }) {
+export async function launchWave({ sprintId, sprintBranch, wave, parallel, segmentRunner, env = process.env, bases = {}, lanes = {} }) {
   const stories = (wave && Array.isArray(wave.stories) ? wave.stories : []).slice();
 
   // CR-124: a story's worktree base is its declared base (a contract branch or the sprint
@@ -345,7 +382,11 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
   const worktreeCommands = stories.map((story) => worktreeAddCommand(story, baseFor(story)));
 
   // Build one thunk per story; each mints its own distinct RUN_ID.
-  const segmentPlan = stories.map((story) => ({ story, runId: mintRunId(story, sprintId) }));
+  const laneFor = (story) => normaliseLane(lanes ? lanes[story] : undefined);
+  const segmentPlan = stories.map((story) => {
+    const lane = laneFor(story);
+    return { story, runId: mintRunId(story, sprintId), lane, stages: stagesFor(lane) };
+  });
 
   if (typeof parallel !== 'function' || typeof segmentRunner !== 'function') {
     // No live runtime seam supplied (the seam-not-supplied / plan-only case). Return the plan so a
@@ -355,6 +396,8 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
       storyId: seg.story,
       runId: seg.runId,
       worktreeCommand: worktreeAddCommand(seg.story, baseFor(seg.story)),
+      lane: seg.lane,
+      stages: seg.stages,
       planned: true,
     }));
   }
@@ -366,7 +409,7 @@ export async function launchWave({ sprintId, sprintBranch, wave, parallel, segme
   const priorGate = env.SKIP_FLASHCARD_GATE;
   env.SKIP_FLASHCARD_GATE = '1';
   try {
-    const thunks = segmentPlan.map((seg) => () => segmentRunner(seg.story, seg.runId));
+    const thunks = segmentPlan.map((seg) => () => segmentRunner(seg.story, seg.runId, { lane: seg.lane, stages: seg.stages }));
     const verdicts = await parallel(thunks);
     // Designed throw site (names the offending storyId). Inside the try so the finally below
     // restores the gate before the Error propagates to the Orchestrator.

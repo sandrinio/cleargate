@@ -8,7 +8,7 @@
  *   (a) state.json exists and is valid
  *   (b) story is present in state.json
  *   (c) story state is "Ready to Bounce"
- *   (d) git working tree is clean (git status --porcelain returns empty)
+ *   (d) git working tree is clean, apart from ClearGate runtime state under .cleargate/{sprint-runs,wiki,hook-log}/ (STORY-066-21; BUG-074, BUG-103)
  *
  * Exits non-zero on any failure, with detail on stderr.
  * Exits 0 if all checks pass.
@@ -17,11 +17,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { validateState } from './validate_state.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const RUNTIME_PREFIXES = ['.cleargate/sprint-runs/', '.cleargate/wiki/', '.cleargate/hook-log/'];
 
 function usage() {
   process.stderr.write('Usage: node validate_bounce_readiness.mjs <STORY-ID>\n');
@@ -83,22 +84,27 @@ function main() {
     process.exit(1);
   }
 
-  // (d) git working tree is clean
-  let gitOutput;
+  // (d) git working tree is clean, apart from ClearGate runtime state
+  let raw;
   try {
-    gitOutput = execSync('git status --porcelain', {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    });
+    raw = execFileSync('git', ['status', '--porcelain=v1', '-z', '--untracked-files=all'], { cwd: REPO_ROOT, encoding: 'utf8' });
   } catch (err) {
     process.stderr.write(`Error: failed to run git status: ${err.message}\n`);
     process.exit(1);
   }
-
-  if (gitOutput.trim().length > 0) {
-    process.stderr.write(
-      `Error: git working tree is dirty. Uncommitted changes:\n${gitOutput}`
-    );
+  const parts = raw.split('\0');
+  const dirty = [];
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (!p) continue;
+    const status = p.slice(0, 2);
+    const rel = p.slice(3);
+    if (status[0] === 'R' || status[0] === 'C' || status[1] === 'R' || status[1] === 'C') i++;
+    if (RUNTIME_PREFIXES.some((x) => rel.startsWith(x))) continue;
+    dirty.push(`${status} ${rel}`);
+  }
+  if (dirty.length > 0) {
+    process.stderr.write(`Error: git working tree is dirty. Uncommitted changes:\n${dirty.join('\n')}\n`);
     process.exit(1);
   }
 

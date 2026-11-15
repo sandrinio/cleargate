@@ -91,6 +91,18 @@
 #   #          automatically by provision_worktree_config.sh).
 #   # copy:    copies the file so the worktree can hold a divergent config.
 
+# loop:
+#   # Models for the shipped wave runner (wave_runner.js, STORY-066-11). Keys are stage names from
+#   # segment_stages.mjs: story-plan, qa-red, architect-tpv, developer, qa-verify, architect-review.
+#   # Values: haiku | sonnet | opus. Per item and stage: models_by_lane.<lane>.<stage>, then
+#   # models.<stage>, then the agent file's own model. The last Developer retry before the bounce
+#   # cap runs one tier up (haiku -> sonnet -> opus).
+#   models:
+#     developer: sonnet
+#   models_by_lane:
+#     runtime:
+#       qa-verify: opus   # shipped default, applied when this key is absent
+
 # vcs:
 #   # CR-107: sprint->main merge goes through a GitHub pull request instead
 #   # of a local `git merge`. The PR is opened at the start of the sprint

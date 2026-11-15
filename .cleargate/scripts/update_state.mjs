@@ -4,9 +4,9 @@
  *
  * Usage:
  *   node update_state.mjs <STORY-ID> <new-state>          — transition to a new state
- *   node update_state.mjs <STORY-ID> --qa-bounce          — increment qa_bounces counter
+ *   node update_state.mjs <STORY-ID> --qa-bounce [--defect-in code|red-test|spec] — increment qa_bounces counter
  *   node update_state.mjs <STORY-ID> --arch-bounce        — increment arch_bounces counter
- *   node update_state.mjs <STORY-ID> --lane <standard|fast> — set lane for a story
+ *   node update_state.mjs <STORY-ID> --lane <standard|fast|runtime> — set lane for a story
  *   node update_state.mjs <STORY-ID> --lane-demote <reason> — demote story from fast lane
  *
  * CR-106: state.json is a DERIVED CACHE. `events.jsonl` (beside state.json) is the truth --
@@ -54,6 +54,7 @@ import {
   fold,
   synthesizeGenesisEvents,
   TERMINAL_SPRINT_STATUSES,
+  DEFECT_IN_VALUES,
   atomicWrite,
 } from './state-events.mjs';
 
@@ -175,9 +176,9 @@ function usage() {
   process.stderr.write(
     'Usage:\n' +
     '  node update_state.mjs <STORY-ID> <new-state>\n' +
-    '  node update_state.mjs <STORY-ID> --qa-bounce\n' +
+    '  node update_state.mjs <STORY-ID> --qa-bounce [--defect-in code|red-test|spec]\n' +
     '  node update_state.mjs <STORY-ID> --arch-bounce\n' +
-    '  node update_state.mjs <STORY-ID> --lane <standard|fast>\n' +
+    '  node update_state.mjs <STORY-ID> --lane <standard|fast|runtime>\n' +
     '  node update_state.mjs <STORY-ID> --lane-demote <reason>\n'
   );
   process.exit(2);
@@ -255,6 +256,16 @@ function main() {
 
   const storyId = args[0];
   const action = args[1];
+
+  // STORY-066-10: validate --defect-in before the lock, any read, or any write.
+  let defectIn = 'unknown';
+  if (action === '--qa-bounce' && args.length > 2) {
+    if (args.length !== 4 || args[2] !== '--defect-in' || !DEFECT_IN_VALUES.includes(args[3])) {
+      process.stderr.write(`Error: --defect-in requires one of ${DEFECT_IN_VALUES.join(', ')}\n`);
+      process.exit(2);
+    }
+    defectIn = args[3];
+  }
 
   const stateFile = resolveStateFile();
 
@@ -357,9 +368,9 @@ function main() {
 
   if (action === '--lane') {
     const laneValue = args[2];
-    if (!laneValue || !['standard', 'fast'].includes(laneValue)) {
+    if (!laneValue || !["standard", "fast", "runtime"].includes(laneValue)) {
       process.stderr.write(
-        `Error: --lane requires a value of "standard" or "fast"\n`
+        `Error: --lane requires a value of "standard", "fast" or "runtime"\n`
       );
       process.exit(2);
     }
@@ -389,12 +400,17 @@ function main() {
       process.exit(1);
     }
     const newQaBounces = story.qa_bounces + 1;
-    const resultingState = newQaBounces >= BOUNCE_CAP ? 'Escalated' : story.state;
+    const resultingState =
+      defectIn === 'spec' || newQaBounces >= BOUNCE_CAP ? 'Escalated' : story.state;
     actionEvent = baseEventFields(doc, storyId, {
       ts: now, actor: 'qa', kind: 'qa-bounce', from: story.state, to: resultingState,
-      qa_bounces: newQaBounces,
+      qa_bounces: newQaBounces, defect_in: defectIn,
     });
-    message = `Updated ${storyId}: qa_bounces=${newQaBounces}, state=${resultingState}\n`;
+    const route =
+      resultingState === 'Escalated' ? 'halts for the owner'
+        : defectIn === 'red-test' ? 'returns to QA-Red'
+          : 'returns to the Developer';
+    message = `Updated ${storyId}: qa_bounces=${newQaBounces}, state=${resultingState}, defect_in=${defectIn}; ${route}\n`;
 
   } else if (action === '--arch-bounce') {
     if (story.state === 'Escalated') {

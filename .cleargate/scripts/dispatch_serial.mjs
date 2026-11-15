@@ -43,6 +43,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { mintRunId, validateVerdicts, worktreeAddCommand } from './launch_wave.mjs';
+import { stagesFor, laneOf, normaliseLane } from './segment_stages.mjs';
 import { extractWorkItemIds } from './lib/work-item-id.mjs';
 import { pendingFlashcards } from './lib/flashcard-gate.mjs';
 
@@ -196,7 +197,7 @@ function appendVerdict(logFile, verdict) {
 }
 
 /** The repo root: ORCHESTRATOR_PROJECT_DIR, else the git top level of `cwd`. */
-function resolveRepoRoot(env, cwd = process.cwd()) {
+export function resolveRepoRoot(env, cwd = process.cwd()) {
   const fromEnv = env.ORCHESTRATOR_PROJECT_DIR;
   if (typeof fromEnv === 'string' && fromEnv !== '') return path.resolve(fromEnv);
   return execFileSync('git', ['rev-parse', '--show-toplevel'], {
@@ -242,7 +243,9 @@ function defaultSeams({ sprintId, wave, env }) {
  * @param {{ wave?: string, stories: string[] }} args.wave  one wave from waves.json
  * @param {object[]} [args.verdicts]               verdicts already recorded for this wave
  * @param {boolean} [args.resume]                  re-dispatch the blocked story (first dispatch only)
- * @param {(storyId: string) => Promise<object>} [args.dispatchStory]  runs one story, returns its verdict
+ * @param {Record<string,string>} [args.lanes]      per-story lane names (default 'standard'); steps and the
+ *   dispatchStory call carry the normalised lane and its `stagesFor(lane)` list (STORY-066-06)
+ * @param {(storyId: string, ctx: { lane: string, stages: ReadonlyArray<object> }) => Promise<object>} [args.dispatchStory]  runs one story, returns its verdict
  * @param {(cmd: string, storyId: string) => Promise<void>} [args.createWorktree]
  * @param {(storyId: string) => Promise<boolean>} [args.worktreeExists]
  * @param {(a: { sprintId: string, storyId: string }) => Promise<{ ok: boolean, unprocessed?: object[], unparseable?: string[] }>} [args.flashcardGate]
@@ -264,14 +267,19 @@ export async function dispatchSerial({
   flashcardGate,
   recordVerdict,
   env = process.env,
+  lanes = {},
 }) {
   assertWaveStories(wave);
+  const laneFor = (storyId) => normaliseLane(lanes ? lanes[storyId] : undefined);
 
   if (typeof dispatchStory !== 'function') {
     // Plan only: nothing is dispatched, no seam is called, env is untouched.
     return {
       status: 'planned',
-      steps: wave.stories.map((storyId) => ({ storyId, worktreeCommand: worktreeAddCommand(storyId, sprintBranch) })),
+      steps: wave.stories.map((storyId) => {
+        const lane = laneFor(storyId);
+        return { storyId, worktreeCommand: worktreeAddCommand(storyId, sprintBranch), lane, stages: stagesFor(lane) };
+      }),
     };
   }
 
@@ -315,7 +323,8 @@ export async function dispatchSerial({
     const cmd = worktreeAddCommand(storyId, sprintBranch);
     if (!(await seams.worktreeExists(storyId))) await seams.createWorktree(cmd, storyId);
 
-    const v = await dispatchStory(storyId);
+    const lane = laneFor(storyId);
+    const v = await dispatchStory(storyId, { lane, stages: stagesFor(lane) });
     validateVerdicts([v], { mode: 'serial' });
     if (v.storyId !== storyId) {
       throw new Error(`Malformed segment verdict for ${storyId}: verdict names storyId '${v.storyId}'.`);
@@ -417,11 +426,20 @@ function loadWave(flags) {
   } catch (err) {
     throw new UsageError(`cannot read ${logFile}: ${err.message}`);
   }
-  return { sprintId, sprintBranch, waveId, wave, repoRoot, sprintDir, logFile, verdicts };
+  return { sprintId, sprintBranch, waveId, wave, plan, repoRoot, sprintDir, logFile, verdicts };
 }
 
 function print(obj) {
   process.stdout.write(`${JSON.stringify(obj)}\n`);
+}
+
+/** Parsed JSON file, or null when it is missing or unreadable (the lane then falls back, no error). */
+function readJsonOrNull(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return null;
+  }
 }
 
 function runNext(flags) {
@@ -449,9 +467,13 @@ function runNext(flags) {
   } catch (err) {
     throw new UsageError(`git worktree list failed in ${ctx.repoRoot}: ${err.message}`);
   }
+  const state = readJsonOrNull(path.join(ctx.sprintDir, 'state.json'));
+  const lane = normaliseLane(laneOf(a.storyId, { state, plan: ctx.plan }));
   print({
     action: 'dispatch',
     storyId: a.storyId,
+    lane,
+    stages: stagesFor(lane),
     runId: mintRunId(a.storyId, ctx.sprintId),
     worktreeCommand: worktreeAddCommand(a.storyId, ctx.sprintBranch),
     worktreeExists: exists,

@@ -82,6 +82,8 @@ template_version: 2
 | Stories escalated | N |
 | Stories carried over | N |
 | Fast-Track Ratio | N% |
+| Dispatches by lane | fast N / standard N / runtime N (copy the bundle's `By lane:` lines; "not measured" where it says so) |
+| Rework by defect location | code N / red-test N / spec N / unknown N (copy the bundle's line; "not measured" where it says so) |
 | Fast-Track Demotion Rate | N% |
 | Hotfix Count (sprint window) | N |
 | Hotfix-to-Story Ratio | N |

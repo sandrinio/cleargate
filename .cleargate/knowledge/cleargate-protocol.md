@@ -25,7 +25,7 @@ ClearGate operates in five named phases. Every work item moves through them in o
 |---|---|---|
 | **Plan** | Triage user request → draft work item using template → present Brief → resolve open questions → ambiguity 🟢 | **Gate 1 — Brief** (per work item; implicitly grants MCP push) |
 | **Prepare** | Sprint planning. AI auto-picks sprint number, drafts Sprint Plan as Brief, Architect writes §2 Sprint Design Review. | **Gate 2 — Sprint Ready** (plan quality) → **Gate 3 — Sprint Execution** (env health) |
-| **Execute** | Four-agent loop: Architect (per-milestone plan) → Developer → QA → (Reporter at end). One story = one worktree = one commit. | (transitions to Observe when all stories merge to sprint branch) |
+| **Execute** | Four-agent loop on one of three build paths by lane (`segment_stages.mjs`, SKILL §C): Architect (Sprint Design Review; a story plan only for `runtime`) → Developer → QA → (Reporter at end); `merge_story.mjs` merges, DevOps only on a conflict or post-merge failure. One story = one worktree = one commit. | (transitions to Observe when all stories merge to sprint branch) |
 | **Observe** | User walkthrough on sprint branch. Feedback classified `UR:bug` or `UR:review-feedback`. Bugs fixed before merge to main. | (transitions to Close when all `UR:bug` resolved) |
 | **Close** | Lifecycle reconciler → Reporter writes `SPRINT-<#>_REPORT.md` → status flips Completed. | **Gate 4 — Close-Ack** |
 
@@ -886,11 +886,13 @@ Every segment returns exactly one verdict object. The discriminant is `verdict`:
 | `storyId` | string | always | the story this segment executed (e.g. `STORY-033-04`) |
 | `runId` | string | always | the segment's stable, distinct `RUN_ID` |
 | `devSha` | string | always | Developer commit SHA |
-| `qaSha` | string | always | QA-Verify commit SHA |
+| `qaSha` | string \| null | always | QA-Verify commit SHA; `null` is accepted only when the lane's stage list (`stagesFor(lane)`) has no `qa` agent stage (the fast lane) |
 | `archSha` | string | optional | Architect-pass SHA (standard lane only) |
 | `flashcards_flagged` | string[] | always (may be empty) | cards processed at the between-wave barrier |
 | `counters` | `{ qa_bounces, arch_bounces, breaker_hits }` | always | all three numeric |
 | `tokens` | `{ input, output, cache_creation, cache_read, model }` | always | per-segment cost the ledger consumes |
+| `lane` | string | always | the lane the segment ran (`fast`, `standard` or `runtime`; an unknown name is read as `standard`) |
+| `stages_run` | string[] | always | stage names run, each a name in `stagesFor(lane)`; repeats allowed (a bounce reruns the Developer); a GREEN verdict holds every `when: 'always'` agent stage of its lane |
 | `blocker` | `{ type, message }` | **required iff `verdict != GREEN`** | `type` ∈ the five §22 true-blocker kinds |
 
 A `blocker.type` is one of the five §22 true-blocker kinds: `destructive`, `secret`,
@@ -898,7 +900,7 @@ A `blocker.type` is one of the five §22 true-blocker kinds: `destructive`, `sec
 (`validateVerdicts`, exported from `.cleargate/scripts/launch_wave.mjs`) accepts a
 well-formed verdict array and **raises a validation Error naming the offending `storyId`**
 on any malformed verdict (missing required field, unknown `verdict` discriminant, or a
-non-GREEN verdict without a valid `blocker`). The named segment is marked `ESCALATED` and
+non-GREEN verdict without a valid `blocker`, or a `stages_run` that names a stage outside its lane or misses a required one). The named segment is marked `ESCALATED` and
 gets **no ledger row**; sibling GREEN verdicts consolidate normally.
 
 ### 23.2 RUN_ID attribution invariant
@@ -948,7 +950,7 @@ Hosts without a Workflow primitive run every wave one story at a time through `.
 - **Verdict (§23.1).** Same envelope, validated by `validateVerdicts(verdicts, { mode: 'serial' })`. `tokens` is either the measured object or exactly `{ "metering": "unavailable" }`; a non-GREEN verdict may carry `devSha: null` / `qaSha: null` when no commit exists. GREEN still requires both SHAs. The default mode is unchanged.
 - **Attribution (§23.2).** There is no RUN_ID-keyed barrier row. The host's own dispatch hook chain attributes each role dispatch; when the host exposes no verifiable usage, nothing is written to the usage ledger — never a zero row.
 - **Flashcards (§23.3).** The gate runs between every pair of consecutive stories (`cleargate-enforcement.md` §4.3) and is never suppressed.
-- **Merge (§23.3).** DevOps merges each GREEN story as soon as it passes — one worktree at a time.
+- **Merge (§23.3).** `merge_story.mjs` merges each GREEN story as soon as it passes — one worktree at a time; the DevOps agent runs only on exit 4 (conflict) or 5 (post-merge test failure).
 - **Blockers (§23.4).** A non-GREEN verdict halts the loop synchronously in the orchestrator's own turn; `dispatch_serial.mjs next --resume` re-dispatches only the blocked story after the human resolves it.
 
 ## Guidance Surface Reach

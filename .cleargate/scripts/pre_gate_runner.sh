@@ -6,6 +6,9 @@
 #   0 — all checks pass → orchestrator proceeds to spawn QA/Architect
 #   1 — checks failed  → orchestrator returns story to Developer
 #   2 — scan couldn't run (missing config, missing worktree, bad args)
+#
+# Configured commands (gate-checks.json) run on any stack. The scan has no
+# timeout of its own; callers own the wall-clock budget.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -79,19 +82,9 @@ run_qa() {
   # 1. Typecheck
   local typecheck_cmd
   typecheck_cmd="$(read_config_field "qa.typecheck" "$CONFIG_FILE")"
-  if [[ -n "$typecheck_cmd" && -f "${WORKTREE}/package.json" ]]; then
-    local tc_out tc_exit
-    tc_exit=0
-    tc_out=$(cd "$WORKTREE" && eval "$typecheck_cmd" 2>&1) || tc_exit=$?
-    if [[ $tc_exit -eq 0 ]]; then
-      record_result "$REPORT_FILE" "typecheck" "PASS" "$typecheck_cmd"
-    else
-      record_result "$REPORT_FILE" "typecheck" "FAIL" "$(echo "$tc_out" | head -5)"
-      OVERALL_EXIT=1
-    fi
-  else
-    record_result "$REPORT_FILE" "typecheck" "INFO" "skipped (no package.json or cmd empty)"
-  fi
+  local chk_rc=0
+  run_configured_check "$REPORT_FILE" "typecheck" "$typecheck_cmd" "$WORKTREE" || chk_rc=$?
+  if [[ $chk_rc -eq 1 ]]; then OVERALL_EXIT=1; fi
 
   # 2. Debug pattern grep (staged diff)
   local debug_patterns_json
@@ -184,18 +177,12 @@ run_qa() {
   # 4. npm test
   local test_cmd
   test_cmd="$(read_config_field "qa.test" "$CONFIG_FILE")"
-  if [[ -n "$test_cmd" && -f "${WORKTREE}/package.json" ]]; then
-    local test_exit=0
-    cd "$WORKTREE" && eval "$test_cmd" > /dev/null 2>&1 || test_exit=$?
-    if [[ $test_exit -eq 0 ]]; then
-      record_result "$REPORT_FILE" "test" "PASS" "$test_cmd"
-    else
-      record_result "$REPORT_FILE" "test" "FAIL" "exit code ${test_exit}"
-      OVERALL_EXIT=1
-    fi
-  else
-    record_result "$REPORT_FILE" "test" "INFO" "skipped (no package.json or cmd empty)"
-  fi
+  local chk_rc=0
+  # STORY-066-18 amendment B: the test never inherits ClearGate's own process variables
+  # (record_baseline.mjs COMMAND_ENV_DROP); the subshell leaves the rest of the scan unchanged.
+  ( unset NODE_TEST_CONTEXT RUN_SCRIPT_ACTIVE CLEARGATE_REPO_ROOT
+    run_configured_check "$REPORT_FILE" "test" "$test_cmd" "$WORKTREE" ) || chk_rc=$?
+  if [[ $chk_rc -eq 1 ]]; then OVERALL_EXIT=1; fi
 }
 
 # ---------------------------------------------------------------------------
@@ -205,18 +192,9 @@ run_arch() {
   # 1. Typecheck
   local typecheck_cmd
   typecheck_cmd="$(read_config_field "arch.typecheck" "$CONFIG_FILE")"
-  if [[ -n "$typecheck_cmd" && -f "${WORKTREE}/package.json" ]]; then
-    local tc_exit=0
-    cd "$WORKTREE" && eval "$typecheck_cmd" > /dev/null 2>&1 || tc_exit=$?
-    if [[ $tc_exit -eq 0 ]]; then
-      record_result "$REPORT_FILE" "typecheck" "PASS" "$typecheck_cmd"
-    else
-      record_result "$REPORT_FILE" "typecheck" "FAIL" "exit code ${tc_exit}"
-      OVERALL_EXIT=1
-    fi
-  else
-    record_result "$REPORT_FILE" "typecheck" "INFO" "skipped (no package.json or cmd empty)"
-  fi
+  local chk_rc=0
+  run_configured_check "$REPORT_FILE" "typecheck" "$typecheck_cmd" "$WORKTREE" || chk_rc=$?
+  if [[ $chk_rc -eq 1 ]]; then OVERALL_EXIT=1; fi
 
   # 2. New runtime deps vs branch^
   local new_deps_check
@@ -247,7 +225,11 @@ run_arch() {
       record_result "$REPORT_FILE" "new_deps" "PASS" "no new runtime deps"
     fi
   else
-    record_result "$REPORT_FILE" "new_deps" "INFO" "skipped"
+    if [[ "$new_deps_check" == "true" ]]; then
+      record_result "$REPORT_FILE" "new_deps" "N/A" "no package.json in the worktree"
+    else
+      record_result "$REPORT_FILE" "new_deps" "INFO" "skipped"
+    fi
   fi
 
   # 3. Stray .env* files
@@ -364,7 +346,11 @@ cat "$REPORT_FILE" >&2
 # Lane-aware post-scan routing (STORY-022-04)
 # Resolve REPO_ROOT from SCRIPT_DIR (scripts/ lives two levels below repo root)
 # ---------------------------------------------------------------------------
-REPO_ROOT_FOR_LANE="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# STORY-066-21: a copy inside a story worktree resolves to the sprint root
+REPO_ROOT_FOR_LANE="$(node "${SCRIPT_DIR}/lib/sprint-root.mjs" "${SCRIPT_DIR}/../.." 2>/dev/null || true)"
+if [[ -z "${REPO_ROOT_FOR_LANE}" || ! -d "${REPO_ROOT_FOR_LANE}" ]]; then
+  REPO_ROOT_FOR_LANE="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+fi
 ACTIVE_FILE="${REPO_ROOT_FOR_LANE}/.cleargate/sprint-runs/.active"
 
 STORY_ID=""
@@ -396,6 +382,8 @@ fi
     ' "${MODE}" "${STORY_ID}" "${OVERALL_EXIT}" ${flagged[@]+"${flagged[@]}"} >> "${_pg_dir}/pre-gate.jsonl" 2>/dev/null
 } || true
 
+if [[ "${CLEARGATE_SCAN_NO_LANE_ROUTING:-}" = "1" ]]; then exit "${OVERALL_EXIT}"; fi
+
 LANE="standard"
 if [[ -n "${STORY_ID}" && -n "${STATE_JSON}" ]]; then
   LANE="$(resolve_lane "${STATE_JSON}" "${STORY_ID}")"
@@ -405,7 +393,7 @@ if [[ "${LANE}" = "fast" ]]; then
   if [[ "${OVERALL_EXIT}" -eq 0 ]]; then
     # Fast lane + scanner pass: skip QA spawn signal
     printf 'pre-gate: lane=fast -> skipping QA spawn for %s\n' "${STORY_ID}"
-    if [[ -n "${STATE_JSON}" ]]; then
+    if [[ -n "${STORY_ID}" && -n "${STATE_JSON}" ]]; then
       # Positional invocation: node update_state.mjs <STORY-ID> <new-state>
       CLEARGATE_STATE_FILE="${STATE_JSON}" \
         node "${SCRIPT_DIR}/update_state.mjs" "${STORY_ID}" "Architect Passed" \

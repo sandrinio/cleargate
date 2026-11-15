@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "cleargate@0.30.1",
+        "cleargate@0.31.0",
         "mcp",
         "serve"
       ]

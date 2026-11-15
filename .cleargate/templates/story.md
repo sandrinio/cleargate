@@ -44,7 +44,7 @@ Performance inheritance (run during epic-decomposition):
 §0.1 v2 Decomposition Signals:
   `parallel_eligible`: "y" if this story can run concurrently with other stories in the same milestone; "n" if it has a strict predecessor dependency. Default "y". Set by Architect during Sprint Design Review.
   `expected_bounce_exposure`: "low" | "med" | "high" — predicted re-work risk derived from §2.1 scenario count + §3 file-count + ambiguity level. Default "low". Set by Architect. Used by orchestrator to sequence high-exposure stories before low-exposure ones to surface risk early.
-  `lane`: "standard" | "fast" — Architect-set during Sprint Design Review per the seven-check rubric in cleargate-enforcement.md §9. Default "standard". Absent in pre-EPIC-022 stories means standard per the migration default in update_state.mjs.
+  `lane`: "standard" | "fast" | "runtime" — computed by `assign_lane.mjs` from the item's signals (cleargate-enforcement.md §9); the Architect may only raise it; the owner overrides with `update_state.mjs --lane`. Default "standard". Absent in pre-EPIC-022 stories means standard per the migration default in update_state.mjs.
   All three fields are always-on signals; defaults apply for stories authored before SPRINT-09.
 
 POST-WRITE BRIEF
@@ -134,7 +134,7 @@ As a {Persona}, I want to {Action}, so that {Benefit}.
 
 ### 1.5 Risks
 
-> Risks specific to this Story (cross-story risks belong in the milestone plan).
+> Risks specific to this Story (cross-story risks belong in the Sprint Design Review).
 
 - **Risk:** {what could go wrong}
 - **Mitigation:** {agent's proposed mitigation}

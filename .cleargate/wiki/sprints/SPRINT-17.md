@@ -11,7 +11,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-17_Plan_Phase_Delivery.md"
-last_ingest: "2026-11-15T20:36:15.252Z"
+last_ingest: "2026-11-15T20:37:32.192Z"
 last_ingest_commit: "6a2695bb2500db987244fd5cd4a467a58b6c9566"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-17"

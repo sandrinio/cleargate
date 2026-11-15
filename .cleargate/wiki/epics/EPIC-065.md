@@ -31,7 +31,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-065_proof_decides_done.md"
-last_ingest: "2026-11-15T20:36:15.252Z"
+last_ingest: "2026-11-15T20:37:32.192Z"
 last_ingest_commit: "c811caa1022d57b1d6410c64f9acc1c8e0c97513"
 repo: "planning"
 last_contradict_sha: "6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a468beb"

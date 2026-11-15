@@ -26,7 +26,10 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
+// STORY-066-17: close_sprint.mjs Step 3.6 passes its REPO_ROOT and sprint dir (test fixtures too).
+const REPO_ROOT = process.env.CLEARGATE_REPO_ROOT
+  ? path.resolve(process.env.CLEARGATE_REPO_ROOT)
+  : path.resolve(__dirname, '..', '..');
 
 /** @typedef {{ surface: string, trigger: RegExp | null, triggerDesc: string }} Item */
 /** @typedef {{ name: string, items: Item[] }} Category */
@@ -212,7 +215,7 @@ const CATEGORIES = [
 
 /**
  * Get changed files for a sprint using available strategies.
- * Strategy 1: git log sprint/<sprint-id> ^main --name-only (if branch exists)
+ * Strategy 1: git log sprint/S-<NN> ^main --name-only (if the sprint branch exists)
  * Strategy 2: git log --since <start_date> --name-only (from sprint frontmatter)
  * Strategy 3: git log --grep <sprint-id> --name-only (commit-message grep fallback)
  *
@@ -221,24 +224,29 @@ const CATEGORIES = [
  * @returns {string[]} deduped array of changed file paths
  */
 function getChangedFiles(sprintId, sprintDir) {
-  // Strategy 1: sprint branch
-  try {
-    const branchCheck = execSync(`git rev-parse --verify "refs/heads/sprint/${sprintId}"`, {
-      cwd: REPO_ROOT,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).toString().trim();
-    if (branchCheck) {
-      const out = execSync(
-        `git log "sprint/${sprintId}" ^main --name-only --format=""`,
-        { cwd: REPO_ROOT, stdio: ['pipe', 'pipe', 'pipe'] }
-      ).toString();
-      const files = out.split('\n').map(f => f.trim()).filter(Boolean);
-      if (files.length > 0) {
-        return [...new Set(files)];
+  // Strategy 1: sprint branch. SPRINT-NN runs on sprint/S-NN (the same derivation as
+  // close_sprint.mjs Step 2.8); a sprint-id with no numeric portion has no sprint branch.
+  const sprintNum = /^SPRINT-(\d{2,3})$/.exec(sprintId);
+  if (sprintNum) {
+    const sprintBranch = `sprint/S-${sprintNum[1]}`;
+    try {
+      const branchCheck = execSync(`git rev-parse --verify "refs/heads/${sprintBranch}"`, {
+        cwd: REPO_ROOT,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }).toString().trim();
+      if (branchCheck) {
+        const out = execSync(
+          `git log "${sprintBranch}" ^main --name-only --format=""`,
+          { cwd: REPO_ROOT, stdio: ['pipe', 'pipe', 'pipe'] }
+        ).toString();
+        const files = out.split('\n').map(f => f.trim()).filter(Boolean);
+        if (files.length > 0) {
+          return [...new Set(files)];
+        }
       }
+    } catch {
+      // branch does not exist — fall through to next strategy
     }
-  } catch {
-    // branch does not exist — fall through to next strategy
   }
 
   // Strategy 2: --since <start_date> from sprint frontmatter
@@ -357,7 +365,9 @@ function main() {
     process.exit(2);
   }
 
-  const sprintDir = path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
+  const sprintDir = process.env.CLEARGATE_SPRINT_DIR
+    ? path.resolve(process.env.CLEARGATE_SPRINT_DIR)
+    : path.join(REPO_ROOT, '.cleargate', 'sprint-runs', sprintId);
   if (!fs.existsSync(sprintDir)) {
     console.error(`Error: sprint state.json not found at ${path.join(sprintDir, 'state.json')}`);
     console.error(`Sprint directory does not exist: ${sprintDir}`);

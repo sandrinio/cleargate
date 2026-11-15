@@ -28,6 +28,17 @@
  *   duplicated across ≥2 rows in the same render-input literal within the test
  *   body. Recommends queryAllByText(<s>)[0] / getByTestId(...).
  *
+ * R-volume (STORY-066-07): when CLEARGATE_RED_SCENARIOS is a positive integer and
+ *   CLEARGATE_RED_FILES (newline-separated, relative to <dir>) is set, the listed
+ *   files are counted (by name, not by glob) and more than 2x the scenario count
+ *   is flagged: `R-volume: <T> tests for <S> scenarios (limit <2S>)`. Absent
+ *   variables mean the rule is not applied. Types other than ts/tsx/js/mjs/py/go
+ *   count 0 and are named on stderr as uncounted.
+ *   With CLEARGATE_RED_BASE (a commit; seal_red.mjs sets it) each listed file counts only the tests it gained since
+ *   that commit, so a file another item sealed adds only this item's tests (STORY-066-22).
+ *
+ * The module is import-safe: the CLI runs only when it is the entry point.
+ *
  * No-false-flag guarantee: a file with no out-of-set Literal AND no
  * duplicate-string getByText/queryByText → zero flags → exit 0.
  * This specifically ensures CR-082's plain node:test file exits 0.
@@ -35,6 +46,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 // ---------------------------------------------------------------------------
 // Rule registry — {id, description, scan(fileText) -> [{line, message}]}
@@ -333,48 +346,179 @@ function collectRedTestFiles(dir) {
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Volume helpers (STORY-066-07)
 // ---------------------------------------------------------------------------
-const [, , dirArg] = process.argv;
+const COUNTED_EXT = ['.ts', '.tsx', '.js', '.mjs', '.py', '.go'];
 
-if (!dirArg) {
-  process.stderr.write('Usage: node qa_red_lint.mjs <dir>\n');
-  process.exit(2);
-}
-
-const targetDir = path.resolve(dirArg);
-
-if (!fs.existsSync(targetDir)) {
-  process.stderr.write(`qa_red_lint: directory does not exist: ${targetDir}\n`);
-  process.exit(2);
-}
-
-const testFiles = collectRedTestFiles(targetDir);
-
-let totalFlags = 0;
-
-for (const filePath of testFiles) {
-  let fileText;
-  try {
-    fileText = fs.readFileSync(filePath, 'utf8');
-  } catch (err) {
-    process.stderr.write(`qa_red_lint: cannot read ${filePath}: ${err.message}\n`);
-    continue;
+/**
+ * Count test declarations in one file by language.
+ * @param {string} fileName
+ * @param {string} text
+ * @returns {number}
+ */
+export function countTests(fileName, text) {
+  const ext = path.extname(fileName).toLowerCase();
+  let re;
+  if (['.ts', '.tsx', '.js', '.mjs'].includes(ext)) {
+    re = /^\s*(test|it)(\.(only|skip|todo|each))?\s*[(`]/;
+  } else if (ext === '.py') {
+    re = /^\s*(async\s+)?def test_/;
+  } else if (ext === '.go') {
+    re = /^func Test/;
+  } else {
+    return 0;
   }
+  let n = 0;
+  for (const line of text.split('\n')) if (re.test(line)) n++;
+  return n;
+}
 
-  for (const rule of RULES) {
-    let ruleFlags;
-    try {
-      ruleFlags = rule.scan(fileText);
-    } catch {
-      // Never crash on malformed input — rule scan failure is non-fatal
+/**
+ * Count Scenario / Scenario Outline lines inside fenced gherkin blocks.
+ * @param {string} markdown
+ * @returns {number}
+ */
+export function countScenarios(markdown) {
+  let n = 0;
+  let inGherkin = false;
+  let inOther = false;
+  for (const line of markdown.split('\n')) {
+    const fence = /^\s*```\s*([A-Za-z0-9_-]*)/.exec(line);
+    if (fence) {
+      if (inGherkin || inOther) {
+        inGherkin = false;
+        inOther = false;
+      } else if (fence[1].toLowerCase() === 'gherkin') {
+        inGherkin = true;
+      } else {
+        inOther = true;
+      }
       continue;
     }
-    for (const flag of ruleFlags) {
-      process.stderr.write(`${filePath}:${flag.line}: [${rule.id}] ${flag.message}\n`);
+    if (inGherkin && /^\s*Scenario(\s+Outline)?:/.test(line)) n++;
+  }
+  return n;
+}
+
+/**
+ * Volume rule over an explicit list of files. A file with `baseText` counts only the tests it
+ * gained over that text, floored at 0 (STORY-066-22); without it the whole file counts.
+ * @param {{files: {name: string, text: string, baseText?: string}[], scenarios: number}} input
+ * @returns {{tests: number, flag: string|null, uncounted: string[]}}
+ */
+export function rVolume({ files, scenarios }) {
+  let tests = 0;
+  const uncounted = [];
+  for (const f of files) {
+    const ext = path.extname(f.name).toLowerCase();
+    if (!COUNTED_EXT.includes(ext)) {
+      uncounted.push(f.name);
+      continue;
+    }
+    tests += Math.max(0, countTests(f.name, f.text) - countTests(f.name, f.baseText ?? ''));
+  }
+  const limit = 2 * scenarios;
+  const flag =
+    scenarios > 0 && tests > limit
+      ? `R-volume: ${tests} tests for ${scenarios} scenarios (limit ${limit})`
+      : null;
+  return { tests, flag, uncounted };
+}
+
+/**
+ * A listed file's text at commit `base` (STORY-066-22); '' when git fails or the file is absent there.
+ * @param {string} dir worktree top
+ * @param {string} base commit
+ * @param {string} rel path relative to dir
+ * @returns {string}
+ */
+export function readBaseText(dir, base, rel) {
+  const env = { ...process.env };
+  delete env.GIT_DIR;
+  delete env.GIT_WORK_TREE;
+  delete env.GIT_INDEX_FILE;
+  const spec = `${base}:./${String(rel).split(path.sep).join('/')}`;
+  const r = spawnSync('git', ['-C', dir, 'show', spec], { encoding: 'utf8', env, maxBuffer: 64 * 1024 * 1024 });
+  return r.status === 0 && typeof r.stdout === 'string' ? r.stdout : '';
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+function main() {
+  const [, , dirArg] = process.argv;
+
+  if (!dirArg) {
+    process.stderr.write('Usage: node qa_red_lint.mjs <dir>\n');
+    process.exit(2);
+  }
+
+  const targetDir = path.resolve(dirArg);
+
+  if (!fs.existsSync(targetDir)) {
+    process.stderr.write(`qa_red_lint: directory does not exist: ${targetDir}\n`);
+    process.exit(2);
+  }
+
+  const testFiles = collectRedTestFiles(targetDir);
+
+  let totalFlags = 0;
+
+  for (const filePath of testFiles) {
+    let fileText;
+    try {
+      fileText = fs.readFileSync(filePath, 'utf8');
+    } catch (err) {
+      process.stderr.write(`qa_red_lint: cannot read ${filePath}: ${err.message}\n`);
+      continue;
+    }
+
+    for (const rule of RULES) {
+      let ruleFlags;
+      try {
+        ruleFlags = rule.scan(fileText);
+      } catch {
+        // Never crash on malformed input — rule scan failure is non-fatal
+        continue;
+      }
+      for (const flag of ruleFlags) {
+        process.stderr.write(`${filePath}:${flag.line}: [${rule.id}] ${flag.message}\n`);
+        totalFlags++;
+      }
+    }
+  }
+
+  // R-volume — explicit file list, only when both variables are present.
+  const scenarios = Number.parseInt(process.env.CLEARGATE_RED_SCENARIOS ?? '', 10);
+  const listed = process.env.CLEARGATE_RED_FILES;
+  const base = (process.env.CLEARGATE_RED_BASE ?? '').trim();
+  if (Number.isInteger(scenarios) && scenarios > 0 && listed) {
+    const files = [];
+    for (const rel of listed.split('\n').filter(Boolean)) {
+      try {
+        const text = fs.readFileSync(path.resolve(targetDir, rel), 'utf8');
+        files.push(base ? { name: rel, text, baseText: readBaseText(targetDir, base, rel) } : { name: rel, text });
+      } catch (err) {
+        process.stderr.write(`qa_red_lint: cannot read ${rel}: ${err.message}\n`);
+      }
+    }
+    const v = rVolume({ files, scenarios });
+    for (const u of v.uncounted) process.stderr.write(`qa_red_lint: uncounted ${u}\n`);
+    if (v.flag) {
+      process.stderr.write(`${v.flag}${base ? `; counted: tests added since ${base.slice(0, 7)}` : ''}\n`);
       totalFlags++;
     }
   }
+
+  process.exit(totalFlags > 0 ? 1 : 0);
 }
 
-process.exit(totalFlags > 0 ? 1 : 0);
+let isMain = false;
+try {
+  isMain =
+    !!process.argv[1] &&
+    fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+} catch {
+  isMain = false;
+}
+if (isMain) main();

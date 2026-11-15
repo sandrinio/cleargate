@@ -104,12 +104,12 @@
         },
         "lane": {
           "type": "string",
-          "enum": ["standard", "fast"],
+          "enum": ["standard", "fast", "runtime"],
           "description": "Execution lane for this story. Default 'standard'. Set by Architect at sprint design or via --lane flag."
         },
         "lane_assigned_by": {
           "type": "string",
-          "enum": ["architect", "human-override", "migration-default"],
+          "enum": ["architect", "human-override", "migration-default", "assign-lane-script", "sdr-lane-audit"],
           "description": "Who assigned the lane value. 'migration-default' for stories migrated from v1."
         },
         "lane_demoted_at": {
