@@ -5,7 +5,7 @@ parent_cleargate_id: null
 sprint_cleargate_id: SPRINT-41
 carry_over: true
 area: sprint-close
-status: Triaged
+status: "Completed"
 severity: P1-High
 reporter: orchestrator (SPRINT-41 Codex dogfood run r8, issue I25)
 approved: true

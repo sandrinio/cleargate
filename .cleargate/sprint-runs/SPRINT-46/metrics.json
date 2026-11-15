@@ -1,0 +1,1018 @@
+{
+  "schema": 1,
+  "sprint_id": "SPRINT-46",
+  "generated_at": "2026-11-15T20:34:36.484Z",
+  "sources": {
+    "sessions": 1,
+    "dispatches": 150,
+    "repos": [
+      ".",
+      "cleargate-cli",
+      "mcp"
+    ],
+    "warnings": []
+  },
+  "items": {
+    "STORY-066-03": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2262691,
+      "tokens": {
+        "input": 154,
+        "output": 38364,
+        "cache_read": 4010247,
+        "cache_creation": 249580,
+        "total": 4298345
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-04": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2370955,
+      "tokens": {
+        "input": 116,
+        "output": 34616,
+        "cache_read": 2748341,
+        "cache_creation": 342294,
+        "total": 3125367
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-05": {
+      "dispatches": {
+        "total": 11,
+        "by_role": {
+          "qa": 5,
+          "developer": 3,
+          "devops": 3
+        },
+        "by_phase": {
+          "(none)": 11
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 7,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 2,
+        "build": 1,
+        "rework": 2,
+        "integrate": 0,
+        "merged": 3
+      },
+      "wall_ms": 5083467,
+      "tokens": {
+        "input": 248,
+        "output": 64101,
+        "cache_read": 5137931,
+        "cache_creation": 629468,
+        "total": 5831748
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-06": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2188372,
+      "tokens": {
+        "input": 122,
+        "output": 36590,
+        "cache_read": 3021491,
+        "cache_creation": 247412,
+        "total": 3305615
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-07": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2420287,
+      "tokens": {
+        "input": 110,
+        "output": 37135,
+        "cache_read": 2492806,
+        "cache_creation": 218946,
+        "total": 2748997
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-08": {
+      "dispatches": {
+        "total": 9,
+        "by_role": {
+          "qa": 4,
+          "developer": 3,
+          "architect": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 9
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 2,
+        "verify_reruns": 1,
+        "total": 4
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 4132675,
+      "tokens": {
+        "input": 314,
+        "output": 179324,
+        "cache_read": 11186666,
+        "cache_creation": 807768,
+        "total": 12174072
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-09": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2238665,
+      "tokens": {
+        "input": 120,
+        "output": 33135,
+        "cache_read": 2936822,
+        "cache_creation": 236866,
+        "total": 3206943
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-10": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2407750,
+      "tokens": {
+        "input": 128,
+        "output": 39309,
+        "cache_read": 3465950,
+        "cache_creation": 284273,
+        "total": 3789660
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-11": {
+      "dispatches": {
+        "total": 6,
+        "by_role": {
+          "qa": 3,
+          "developer": 2,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 6
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 1686132,
+      "tokens": {
+        "input": 128,
+        "output": 64143,
+        "cache_read": 3142683,
+        "cache_creation": 443054,
+        "total": 3650008
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-12": {
+      "dispatches": {
+        "total": 6,
+        "by_role": {
+          "qa": 3,
+          "developer": 2,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 6
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 1,
+        "verify_reruns": 1,
+        "total": 2
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2983761,
+      "tokens": {
+        "input": 310,
+        "output": 108454,
+        "cache_read": 11830105,
+        "cache_creation": 559592,
+        "total": 12498461
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-13": {
+      "dispatches": {
+        "total": 10,
+        "by_role": {
+          "cleargate-wiki-query": 1,
+          "architect": 3,
+          "qa": 3,
+          "developer": 2,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 10
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 1,
+        "total": 1
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 3981477,
+      "tokens": {
+        "input": 426,
+        "output": 226365,
+        "cache_read": 19500728,
+        "cache_creation": 1058746,
+        "total": 20786265
+      },
+      "models": [
+        "claude-haiku-5-5",
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-14": {
+      "dispatches": {
+        "total": 5,
+        "by_role": {
+          "architect": 1,
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 5
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 33575963,
+      "tokens": {
+        "input": 246,
+        "output": 135930,
+        "cache_read": 13502745,
+        "cache_creation": 670918,
+        "total": 14309839
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "BUG-114": {
+      "dispatches": {
+        "total": 6,
+        "by_role": {
+          "architect": 2,
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 6
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 3983965,
+      "tokens": {
+        "input": 380,
+        "output": 206769,
+        "cache_read": 24757251,
+        "cache_creation": 740994,
+        "total": 25705394
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-15": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 1995019,
+      "tokens": {
+        "input": 94,
+        "output": 25915,
+        "cache_read": 2248013,
+        "cache_creation": 250778,
+        "total": 2524800
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-16": {
+      "dispatches": {
+        "total": 7,
+        "by_role": {
+          "general-purpose": 1,
+          "architect": 2,
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 7
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 6046866,
+      "tokens": {
+        "input": 520,
+        "output": 265389,
+        "cache_read": 32672560,
+        "cache_creation": 1156614,
+        "total": 34095083
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-17": {
+      "dispatches": {
+        "total": 10,
+        "by_role": {
+          "architect": 3,
+          "qa": 4,
+          "developer": 2,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 10
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 1,
+        "verify_reruns": 1,
+        "total": 3
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 8308320,
+      "tokens": {
+        "input": 846,
+        "output": 553883,
+        "cache_read": 68977620,
+        "cache_creation": 1736142,
+        "total": 71268491
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 1,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-18": {
+      "dispatches": {
+        "total": 11,
+        "by_role": {
+          "architect": 2,
+          "qa": 4,
+          "developer": 3,
+          "devops": 2
+        },
+        "by_phase": {
+          "(none)": 11
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 1,
+        "verify_reruns": 1,
+        "total": 3
+      },
+      "interrupted": 0,
+      "post_merge": 2,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 2,
+        "build": 1,
+        "rework": 2,
+        "integrate": 0,
+        "merged": 2
+      },
+      "wall_ms": 15772444,
+      "tokens": {
+        "input": 800,
+        "output": 458130,
+        "cache_read": 56328068,
+        "cache_creation": 1847618,
+        "total": 58634616
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-19": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2208685,
+      "tokens": {
+        "input": 116,
+        "output": 36824,
+        "cache_read": 2791168,
+        "cache_creation": 247742,
+        "total": 3075850
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-20": {
+      "dispatches": {
+        "total": 4,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 4
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2879429,
+      "tokens": {
+        "input": 202,
+        "output": 56649,
+        "cache_read": 6473535,
+        "cache_creation": 386295,
+        "total": 6916681
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-21": {
+      "dispatches": {
+        "total": 9,
+        "by_role": {
+          "qa": 4,
+          "developer": 2,
+          "architect": 2,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 9
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 1,
+        "verify_reruns": 1,
+        "total": 3
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 4371012,
+      "tokens": {
+        "input": 372,
+        "output": 181174,
+        "cache_read": 14580513,
+        "cache_creation": 785646,
+        "total": 15547705
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-066-22": {
+      "dispatches": {
+        "total": 5,
+        "by_role": {
+          "qa": 2,
+          "developer": 1,
+          "architect": 1,
+          "devops": 1
+        },
+        "by_phase": {
+          "(none)": 5
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2351456,
+      "tokens": {
+        "input": 200,
+        "output": 89004,
+        "cache_read": 7611096,
+        "cache_creation": 566274,
+        "total": 8266574
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    }
+  },
+  "sprint_level": {
+    "dispatches": 15,
+    "tokens": 169813657
+  },
+  "unattributed": {
+    "dispatches": 4,
+    "tokens": 8902702,
+    "share": 0.018004283892969854
+  },
+  "totals": {
+    "dispatches": 150,
+    "rework": 16,
+    "tokens": 494476873
+  }
+}
