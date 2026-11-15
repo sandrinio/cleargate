@@ -1,0 +1,19 @@
+# ClearGate Pre-Gate Scan Report
+Mode: qa
+Worktree: /private/tmp/gbufSX/da
+Branch: cg-base
+Timestamp: 2026-11-15T21:17:03Z
+---
+[PASS] typecheck: go vet ./...
+[FAIL] debug_patterns: /private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:239:    console.log(`baseline: skipped — ${cfg.skip}`);|/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:249:    console.log(`baseline: reused the preflight probe of ${head.slice(0, 7)} (${hit.failing.length} failing, exit ${hit.exit_code}) -> ${file}`);|/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:252:  console.log(`recording baseline: ${cfg.command}`);|/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:258:  console.log(`baseline: ${r.failing.length} failing (exit ${r.exit_code}) -> ${file}`);|/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:269:    console.log('baseline: skipped — no sprint id given');||
+/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:239:    console.log(`baseline: skipped — ${cfg.skip}`);
+/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:249:    console.log(`baseline: reused the preflight probe of ${head.slice(0, 7)} (${hit.failing.length} failing, exit ${hit.exit_code}) -> ${file}`);
+/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:252:  console.log(`recording baseline: ${cfg.command}`);
+/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:258:  console.log(`baseline: ${r.failing.length} failing (exit ${r.exit_code}) -> ${file}`);
+/private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:269:    console.log('baseline: skipped — no sprint id given');
+
+[WARN] todo_patterns: /private/tmp/gbufSX/da/.cleargate/scripts/record_baseline.mjs:48:    let m = line.match(/^\s*not ok \d+ - (.+?)(\s+#\s+(?:TODO|SKIP)\b.*)?$/);|/private/tmp/gbufSX/da/.cleargate/scripts/update_state.mjs:377:    // TODO(STORY-022-04): cross-read sprint plan to enforce rubric §6 contradiction check|/private/tmp/gbufSX/da/.cleargate/scripts/count_tokens.mjs:22: *     - STORY-XXX-YY: 4.2× higher than median story cost||
+[PASS] test: make check
+---
+Summary: 2 passed, 1 failed, 1 warnings
+exit 1
