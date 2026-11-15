@@ -8,3 +8,15 @@ Real run: assign_lane.mjs on 066-05 -> standard (scenarios 5>2), 066-06 -> runti
 Surface: diff f846d9a..5712818 = §3.1 files + the red files from 71530d1 only. Claude/Codex architect rubric text identical; architect-synth untouched. Headings kept (C-8).
 Task Breakdown rows: unticked (detached host, rule 20; orchestrator ticks).
 Note: a scoped glob mistake ran the whole suite briefly; killed; nothing written to the tree.
+
+## Amendment A verification
+
+Mode: VERIFY. Worktree story/STORY-066-05 at 7fa70a3 (QA-Red cb5d98a, base 4d1fbb2).
+
+- typecheck: pass (exit 0). prebuild: pass (exit 0).
+- Targeted files (amend-a red, assign-lane red, init-sprint red integration, dogfood lane fast): 16 pass, 0 fail, 0 skipped.
+- Surface: `git diff --name-only 4d1fbb2 7fa70a3` = `scaffold/core/.cleargate/scripts/assign_lane.mjs` + `test/scripts/assign-lane-amend-a.red.node.test.ts` only. Developer commit touches no test.
+- Rule 4 trace: `laneFor` adds `if (s.scenarios === 0) return standard` after the three runtime checks (ui_surface, subsystems >= 2, proof_tier container|live) and before the `scenarios > 2` and `subsystems === 0` rules. Rule order unchanged; runtime still first; `subsystems == 0` rule intact. Header comment updated.
+- Real run over Goal check (c) lists SPRINT-43..46 (script from this worktree, stdin closed), compared to evidence/goal-check-c/cg_SPRINT-4*.json: only BUG-088 and CR-120 changed (fast -> standard, scenarios 0). BUG-117 stays fast (2 scenarios). CR-121/CR-122 (0 scenarios, subsystems 2) stay runtime. All other items unchanged; item counts match (6/6/6/10).
+
+Verdict: PASS.

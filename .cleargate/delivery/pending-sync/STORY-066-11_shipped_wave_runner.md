@@ -196,16 +196,16 @@ Feature: Shipped wave runner
 
 ## Task Breakdown
 
-- [ ] Confirm `segment_stages.mjs` (066-06) exports `stagesFor`/`STAGE_NAMES` and that `seal_red.mjs` (066-07) and the QA-Verify output (066-09) use the contract field names; write the two adapters at the top of the runner against them -> Requirement 3
-- [ ] Add `loop` block to `config.example.yml` (models, models_by_lane, shipped `runtime.qa-verify: opus`) -> Requirement 5
-- [ ] Write `wave_runner_args.mjs`: waves.json + state.json + `stagesFor` + config line-scan, with `--validate` -> Requirements 2, 5
-- [ ] Write the model resolver and `tierUp` in the args builder and runner; unit tests for resolution order and the haiku/sonnet/opus table -> Requirements 5, 6
-- [ ] Write `wave_runner.js`: segment walk over `args.stages`, barrier-script stop, scan-flagged gate, description form, phase map -> Requirements 1, 3, 4
-- [ ] Add rework routing on `DEFECT_IN`, the bounce cap and the spec-defect halt -> Requirement 7
-- [ ] Add upstream gating, the `waiting` list, and the verdict envelope with `lane`, `stages_run`, `tokens: { metering: 'unavailable' }` -> Requirement 8
-- [ ] Write unit and contract tests (stub `agent`/`parallel`/`log`/`args` through `node:vm`; no-import and no-literal-stage-list assertions) -> Scenarios 1-5
-- [ ] Write the integration test: build args from a three-wave fixture plan with computed lanes, run the runner with stub agents, assert the dispatch sequence per lane and the verdict fields -> Scenarios 1, 2
-- [ ] Run `npm run typecheck` and the affected tests in `cleargate-cli`; confirm the new scripts appear in the composed payload (`npm run prebuild`) and `cleargate verify-install` lists them
+- [x] Confirm `segment_stages.mjs` (066-06) exports `stagesFor`/`STAGE_NAMES` and that `seal_red.mjs` (066-07) and the QA-Verify output (066-09) use the contract field names; write the two adapters at the top of the runner against them -> Requirement 3
+- [x] Add `loop` block to `config.example.yml` (models, models_by_lane, shipped `runtime.qa-verify: opus`) -> Requirement 5
+- [x] Write `wave_runner_args.mjs`: waves.json + state.json + `stagesFor` + config line-scan, with `--validate` -> Requirements 2, 5
+- [x] Write the model resolver and `tierUp` in the args builder and runner; unit tests for resolution order and the haiku/sonnet/opus table -> Requirements 5, 6
+- [x] Write `wave_runner.js`: segment walk over `args.stages`, barrier-script stop, scan-flagged gate, description form, phase map -> Requirements 1, 3, 4
+- [x] Add rework routing on `DEFECT_IN`, the bounce cap and the spec-defect halt -> Requirement 7
+- [x] Add upstream gating, the `waiting` list, and the verdict envelope with `lane`, `stages_run`, `tokens: { metering: 'unavailable' }` -> Requirement 8
+- [x] Write unit and contract tests (stub `agent`/`parallel`/`log`/`args` through `node:vm`; no-import and no-literal-stage-list assertions) -> Scenarios 1-5
+- [x] Write the integration test: build args from a three-wave fixture plan with computed lanes, run the runner with stub agents, assert the dispatch sequence per lane and the verdict fields -> Scenarios 1, 2
+- [x] Run `npm run typecheck` and the affected tests in `cleargate-cli`; confirm the new scripts appear in the composed payload (`npm run prebuild`) and `cleargate verify-install` lists them
 
 ## 4. Quality Gates
 

@@ -32,3 +32,31 @@ Root cause: 05 changed the Sprint Plan Template fast-lane row from
 
 ## Script Incidents
 none
+
+## Second pass (post-merge fix re-merge) — DONE
+
+role: devops
+
+- Fix commits on story/STORY-066-05: QA-Red e3b89c9 (two sealed literals re-anchored, rule 16), Developer f2ebd41 (`scripts/clean-room/probe-items.mjs` FAST_LANE_ROW re-anchored).
+- Integration (main 18cbdd4 was not an ancestor): story-wt merge 9880fec, clean, no new content; gen:codex left no diff, prebuild OK, typecheck clean.
+- Targeted (6 files: contract-first-dag-text.red, clean-room-evidence.red, sprint-init-fresh-install.red.integration, assign-lane.red, assign-lane-init-sprint.red.integration, test_dogfood_lane_fast): 85/85 pass.
+- Merge into cli main: 00848ec (`merge(story/STORY-066-05): STORY-066-05 post-merge fix — re-anchor probe-items fast-lane row`). Local only, no push, no dist build in cli main.
+- Suite (tip tree at 00848ec, evidence/suite-after-STORY-066-05-fix.txt): unit 5573/5575 pass (2 skipped, 0 fail); integration 758/880 pass, 80 fail.
+- Classification: diff of failing names vs first-pass suite: fixed = T5b, E5-5, E5-6, I1, I2 (plus parents E5, BUG-090 (b) e2e); new failures = none. Every remaining failure was already present in the first pass (baseline lists or rule-18 known reds: canonical-live parity 5a/5b/S1c, template-stubs, T4/T5, Test 27, enforcement.md byte-identical, qa-content Capability Surface + CR-024 S2 Scenario 6). No regressions. Note: the first unit/integration run was split because the `====` separator broke the shell; unit result is in the file's first part, integration after `#### INTEGRATION ####`.
+- Tip tree residue (moved delivery files) cleaned with checkout/clean in the tip tree only.
+- Teardown: both porcelains empty; cli worktree and outer host removed; `.claude` symlink removed; branch story/STORY-066-05 deleted (was 9880fec). cli main porcelain empty.
+- State: STORY-066-05 = Done (state.json confirmed).
+- Proof: reports/STORY-066-05-qa.md real run; full past-sprint run is Goal check (c) after the tenth merge.
+
+## Script Incidents
+none
+
+## Third pass — Amendment A (zero parsed scenarios is never `fast`)
+
+- Integration: cli main had moved to 75fe664 (11 merged); `merge(main)` into story/STORY-066-05 = 33f62a2, clean (5 files, wave_runner additions only). `gen:codex` left no diff; prebuild + typecheck clean.
+- Targeted (post-integration, all pass): assign-lane-amend-a.red 3/3, assign-lane.red 5/5, assign-lane-init-sprint.red.integration 3/3, test_dogfood_lane_fast 5/5, wave-runner.red 7/7.
+- Merge SHA on cli main: e006598 (`merge(story/STORY-066-05): STORY-066-05 amendment A — zero parsed scenarios is never fast`; 2 files, +86/-2: assign_lane.mjs, amend-a red test). Local only; no push, no dist build in main.
+- Tip-tree suite (evidence/suite-after-STORY-066-05-amend-a.txt): unit 5606/5608 pass, 0 fail (post-11 tip: 5603/5605, 0 fail; +3 = new amend-a tests); integration 771/899 pass, 86 fail, identical to post-11 tip (771/899/86). Failing-name diff vs suite-after-STORY-066-11.txt: no new names. Regressions: none. Load flakes: none.
+- Teardown: story cli wt, outer host and tip tree porcelain empty; cli wt removed, `.claude` symlink removed, outer host removed, branch story/STORY-066-05 deleted (was 33f62a2).
+- State: STORY-066-05 was already Done; `update_state.mjs ... Done` returned "No-op: already in state Done" (rc 0). Still Done.
+- Proof: QA's real-run evidence (QA report "## Amendment A verification": PASS) shows only BUG-088 and CR-120 change lane under the amended rule.

@@ -205,20 +205,20 @@ Flow:
 
 ## Task Breakdown
 
-- [ ] Add the optional `merge.prebuild` and `merge.post_test` keys to `gate-checks.json` (empty defaults) and read them in the script -> Requirement 8
-- [ ] Scaffold `merge_story.mjs`: argv parsing, root and sprint-dir resolution, JSON result writer, exit codes -> Requirement 3
-- [ ] Preconditions and the dirty-tree classifier with the allowlist and set-aside/write-back (no `git stash`) -> Requirement 5
-- [ ] Pre-merge step: run `pre_gate_runner.sh qa`, parse the report, judge against `baseline.json` using 066-04's parser -> Requirement 2
-- [ ] Fast-lane demotion on exit 3 via `update_state.mjs --lane-demote` -> Requirement 4
-- [ ] Merge step, conflict detection, `git merge --abort`, `conflict_files` -> Requirement 3
-- [ ] Prebuild and post-merge test steps with exit 5 -> Requirement 8
-- [ ] Teardown with residue-aware `--force`, incident copy, branch delete, state transition -> Requirement 6
-- [ ] Write `merge-story.node.test.ts` (pure helpers: classifier, baseline judge, exit mapping) and `merge-story.integration.node.test.ts` (fixture git repos, npm and Go, no `package.json` in the Go one): clean, failing check, conflict, post-merge failure, baseline failure, authored dirt, real dirt in worktree
-- [ ] Rewrite `devops.md` and `devops.toml` for exit 4 and 5 only, with the scan-gated arch report -> Requirement 9
-- [ ] Typecheck, run both test files, and run `cleargate-cli` `npm run prebuild` to confirm the payload composes
-- [ ] Count a debug-pattern hit only in files the item changed vs `sprint/S-NN`; drop the scan's untouched-file entry; demote only on a real refusal -> Requirement 10
-- [ ] Excuse an unnamed test failure matching the baseline exit code and last line, pre-merge and post-merge, with reason `baseline-unnamed` and a `NOT TESTED` tail line -> Requirement 11
-- [ ] Run the two Amendment A red files and the sealed 08, 03 and 04 reds on the integrated tree -> Requirement 10, Requirement 11
+- [x] Add the optional `merge.prebuild` and `merge.post_test` keys to `gate-checks.json` (empty defaults) and read them in the script -> Requirement 8
+- [x] Scaffold `merge_story.mjs`: argv parsing, root and sprint-dir resolution, JSON result writer, exit codes -> Requirement 3
+- [x] Preconditions and the dirty-tree classifier with the allowlist and set-aside/write-back (no `git stash`) -> Requirement 5
+- [x] Pre-merge step: run `pre_gate_runner.sh qa`, parse the report, judge against `baseline.json` using 066-04's parser -> Requirement 2
+- [x] Fast-lane demotion on exit 3 via `update_state.mjs --lane-demote` -> Requirement 4
+- [x] Merge step, conflict detection, `git merge --abort`, `conflict_files` -> Requirement 3
+- [x] Prebuild and post-merge test steps with exit 5 -> Requirement 8
+- [x] Teardown with residue-aware `--force`, incident copy, branch delete, state transition -> Requirement 6
+- [x] Write `merge-story.node.test.ts` (pure helpers: classifier, baseline judge, exit mapping) and `merge-story.integration.node.test.ts` (fixture git repos, npm and Go, no `package.json` in the Go one): clean, failing check, conflict, post-merge failure, baseline failure, authored dirt, real dirt in worktree
+- [x] Rewrite `devops.md` and `devops.toml` for exit 4 and 5 only, with the scan-gated arch report -> Requirement 9
+- [x] Typecheck, run both test files, and run `cleargate-cli` `npm run prebuild` to confirm the payload composes
+- [x] Count a debug-pattern hit only in files the item changed vs `sprint/S-NN`; drop the scan's untouched-file entry; demote only on a real refusal -> Requirement 10
+- [x] Excuse an unnamed test failure matching the baseline exit code and last line, pre-merge and post-merge, with reason `baseline-unnamed` and a `NOT TESTED` tail line -> Requirement 11
+- [x] Run the two Amendment A red files and the sealed 08, 03 and 04 reds on the integrated tree -> Requirement 10, Requirement 11
 
 ## 4. Quality Gates
 

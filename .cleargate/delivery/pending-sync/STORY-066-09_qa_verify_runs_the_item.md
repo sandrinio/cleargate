@@ -182,13 +182,13 @@ Feature: QA-Verify runs the item and names where the defect is
 
 ## Task Breakdown
 
-- [ ] Write `test/scripts/prep-qa-context-commands.node.test.ts` first (commands present, proof present, proof absent, gate-checks absent, lane source never the heuristic) -> Scenarios 1, 2
-- [ ] Add `buildCommands`, the JSON key, `proseCommands` and the bundle slot; remove the lane heuristic and update the schema comment -> Scenarios 1, 2
-- [ ] Update `test_prep_qa_context.sh` section-header check to expect the Commands section -> Scenario 1
-- [ ] Rewrite `qa.md` Mode: VERIFY, Workflow, Output shape, Lane-Aware Playbook and Guardrails per §3.2; run `npm run gen:codex` -> Scenarios 3, 4, 5
-- [ ] Write `test/agents/qa-verify-run-and-probe.node.test.ts` (doc-lint: run-and-probe line, `DEFECT_IN` values and precedence, scenario-only rule, no heuristic text in `qa.md` or `qa.toml`) -> Scenarios 2-5
-- [ ] Update `qa-content.integration.node.test.ts` only where a stale phrase is asserted; keep the slice-parity test unchanged
-- [ ] Run `npm run typecheck`, the new tests, `qa-content`, and `test_prep_qa_context.sh`
+- [x] Write `test/scripts/prep-qa-context-commands.node.test.ts` first (commands present, proof present, proof absent, gate-checks absent, lane source never the heuristic) -> Scenarios 1, 2
+- [x] Add `buildCommands`, the JSON key, `proseCommands` and the bundle slot; remove the lane heuristic and update the schema comment -> Scenarios 1, 2
+- [x] Update `test_prep_qa_context.sh` section-header check to expect the Commands section -> Scenario 1
+- [x] Rewrite `qa.md` Mode: VERIFY, Workflow, Output shape, Lane-Aware Playbook and Guardrails per §3.2; run `npm run gen:codex` -> Scenarios 3, 4, 5
+- [x] Write `test/agents/qa-verify-run-and-probe.node.test.ts` (doc-lint: run-and-probe line, `DEFECT_IN` values and precedence, scenario-only rule, no heuristic text in `qa.md` or `qa.toml`) -> Scenarios 2-5
+- [x] Update `qa-content.integration.node.test.ts` only where a stale phrase is asserted; keep the slice-parity test unchanged
+- [x] Run `npm run typecheck`, the new tests, `qa-content`, and `test_prep_qa_context.sh`
 
 ## 4. Quality Gates
 

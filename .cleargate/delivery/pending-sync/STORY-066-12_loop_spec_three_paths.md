@@ -181,20 +181,20 @@ n/a — documentation. The commands it documents are specified in STORY-066-06, 
 
 ## Task Breakdown
 
-- [ ] Build timing (Gate 2 spec clarification (SPRINT-46 SDR, owner approved 2026-11-15), decision 7): build from contract C1 at kickoff, drafting against each story's §3.3; at integration (after STORY-066-03 to 066-11 merge) re-read the real usage and correct any difference before the docs-match test runs
-- [ ] Confirm STORY-066-03 to 066-11 are merged and read the real usage of `segment_stages.mjs`, `seal_red.mjs`, `merge_story.mjs`, `wave_runner_args.mjs`, `update_state.mjs --defect-in`; every command in the new text is copied from them -> Requirements 2, 3, 4
-- [ ] Edit `architect.md`: remove the milestone-plan job and template, add `Mode: STORY-PLAN` (at most 150 lines, `plans/<ID>.md`, Task Breakdown rows), move `GOAL_RELATION` into the SDR section; reword `architect-synth.md:196` -> Requirement 6
-- [ ] Edit `developer.md`: plan input from `plans/<ID>.md` else the SDR block; fast-lane regression test first and `merge_story.mjs` as its gate -> Requirement 7
-- [ ] Edit `Sprint Plan Template.md` §2.1 to show `GOAL_RELATION` per milestone -> Requirement 6
-- [ ] Rewrite `SKILL.md` §1 roster and budgets, replace §4 with the removed-stub, adjust §A.4/§A.5 and §8 -> Requirement 1
-- [ ] Rewrite `SKILL.md` §C intro with the three-paths table, §C.0.1 (shipped runner, barrier steps, flashcard-gate window per Open Question 1), §C.0.2 tail -> Requirement 2
-- [ ] Rewrite `SKILL.md` §C.3 to §C.6 as the stage notes (seal_red last step, scan-gated TPV, plan input, run-and-probe, `DEFECT_IN` routing, architect-review) -> Requirement 3
-- [ ] Rewrite `SKILL.md` §C.7 around `merge_story.mjs`; delete the nine-step ACTIONS block and the DevOps Escape Hatch; update the forbidden-patterns line -> Requirement 4
-- [ ] Update both `dispatch-serial.md` (§2 step 3, §5 verdict fields) -> Requirement 5
-- [ ] Reword `reporter.md` (GOAL_RELATION source), `cleargate-protocol.md:28` and `:951`, `core/.cleargate/README.md:48`, the `hosts/claude/CLAUDE.md:20` block and `templates/story.md:137`; regenerate `reporter.toml` -> Requirement 10
-- [ ] `prep_qa_context.mjs` plan lookup (`plans/<ID>.md`, then `plans/M*.md`) and `prep_reporter_context.mjs` `## Story Plans` section, with a unit test for each -> Requirement 9
-- [ ] Update the generator's R3 and R6 and the two pinned literals in `codex-sprint-execution-render.red.node.test.ts`; run `npm run gen:codex`, then `node scripts/build-codex-payload.mjs --check` -> Requirement 8
-- [ ] Write `test/docs/loop-spec-three-paths.node.test.ts` (checks a to g above) and run it with the affected existing tests (`test/docs/*`, `test/scripts/codex-sprint-execution-render.red.node.test.ts`, `serial-dispatch-docs`) plus `npm run typecheck` -> Scenarios 1-5
+- [x] Build timing (Gate 2 spec clarification (SPRINT-46 SDR, owner approved 2026-11-15), decision 7): build from contract C1 at kickoff, drafting against each story's §3.3; at integration (after STORY-066-03 to 066-11 merge) re-read the real usage and correct any difference before the docs-match test runs
+- [x] Confirm STORY-066-03 to 066-11 are merged and read the real usage of `segment_stages.mjs`, `seal_red.mjs`, `merge_story.mjs`, `wave_runner_args.mjs`, `update_state.mjs --defect-in`; every command in the new text is copied from them -> Requirements 2, 3, 4
+- [x] Edit `architect.md`: remove the milestone-plan job and template, add `Mode: STORY-PLAN` (at most 150 lines, `plans/<ID>.md`, Task Breakdown rows), move `GOAL_RELATION` into the SDR section; reword `architect-synth.md:196` -> Requirement 6
+- [x] Edit `developer.md`: plan input from `plans/<ID>.md` else the SDR block; fast-lane regression test first and `merge_story.mjs` as its gate -> Requirement 7
+- [x] Edit `Sprint Plan Template.md` §2.1 to show `GOAL_RELATION` per milestone -> Requirement 6
+- [x] Rewrite `SKILL.md` §1 roster and budgets, replace §4 with the removed-stub, adjust §A.4/§A.5 and §8 -> Requirement 1
+- [x] Rewrite `SKILL.md` §C intro with the three-paths table, §C.0.1 (shipped runner, barrier steps, flashcard-gate window per Open Question 1), §C.0.2 tail -> Requirement 2
+- [x] Rewrite `SKILL.md` §C.3 to §C.6 as the stage notes (seal_red last step, scan-gated TPV, plan input, run-and-probe, `DEFECT_IN` routing, architect-review) -> Requirement 3
+- [x] Rewrite `SKILL.md` §C.7 around `merge_story.mjs`; delete the nine-step ACTIONS block and the DevOps Escape Hatch; update the forbidden-patterns line -> Requirement 4
+- [x] Update both `dispatch-serial.md` (§2 step 3, §5 verdict fields) -> Requirement 5
+- [x] Reword `reporter.md` (GOAL_RELATION source), `cleargate-protocol.md:28` and `:951`, `core/.cleargate/README.md:48`, the `hosts/claude/CLAUDE.md:20` block and `templates/story.md:137`; regenerate `reporter.toml` -> Requirement 10
+- [x] `prep_qa_context.mjs` plan lookup (`plans/<ID>.md`, then `plans/M*.md`) and `prep_reporter_context.mjs` `## Story Plans` section, with a unit test for each -> Requirement 9
+- [x] Update the generator's R3 and R6 and the two pinned literals in `codex-sprint-execution-render.red.node.test.ts`; run `npm run gen:codex`, then `node scripts/build-codex-payload.mjs --check` -> Requirement 8
+- [x] Write `test/docs/loop-spec-three-paths.node.test.ts` (checks a to g above) and run it with the affected existing tests (`test/docs/*`, `test/scripts/codex-sprint-execution-render.red.node.test.ts`, `serial-dispatch-docs`) plus `npm run typecheck` -> Scenarios 1-5
 
 ## 4. Quality Gates
 

@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-05": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-14T23:48:03.905Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -40,11 +40,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-06": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T00:13:30.801Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -64,11 +64,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-08": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T00:42:39.699Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -76,11 +76,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-09": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T01:10:52.974Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -88,11 +88,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-10": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T01:37:21.595Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -100,11 +100,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-11": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T06:44:34.220Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -112,11 +112,11 @@
       "lane_demotion_reason": null
     },
     "STORY-066-12": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-14T20:46:24.517Z",
+      "updated_at": "2026-11-15T07:35:39.824Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "sdr-lane-audit",
@@ -124,6 +124,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-066-07 → Done",
-  "updated_at": "2026-11-14T22:57:04.128Z"
+  "last_action": "transition STORY-066-12 → Done",
+  "updated_at": "2026-11-15T07:35:39.824Z"
 }

@@ -7,7 +7,7 @@ carry_over: false
 status: Draft
 approved: true
 approved_by: "fixture"
-approved_at: "2026-11-15T10:00:00Z"
+approved_at: "2026-11-15T06:00:00Z"
 ambiguity: 🟢 Low
 context_source: "EPIC-001 (pre-approved fixture) / verified against cmd/tally/main.go in the seeded repo"
 actor: CLI user
@@ -19,8 +19,8 @@ proof_tier: live
 area: sandbox
 db_write_set: []
 deferred_verification: []
-created_at: 2026-11-15T10:00:00.000Z
-updated_at: 2026-11-15T10:00:00.000Z
+created_at: 2026-11-15T06:00:00.000Z
+updated_at: 2026-11-15T06:00:00.000Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

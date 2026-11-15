@@ -46,3 +46,10 @@ Base has no prebuild (templates/ absent) so a few base-only reds are env artefac
 flashcards_flagged:
   - "2026-11-15 · #qa #test-harness · agent-developer-section Scenario 2 asserts live against its own message string; always red when live exists"
   - "2026-11-15 · #qa #worktree · a base worktree without prebuild fails payload-parity tests; diff test names, don't count failures"
+
+## Second pass — integrated tree
+role: qa · Mode: VERIFY · worktree .worktrees/STORY-066-12/cleargate-cli @ c4cab66 (main 75fe664, 03-11 merged)
+- typecheck: pass. Group 1 (loop-spec-three-paths.red, codex-sprint-execution-render.red, skill-md-serial-pointers.red): 15/15 pass, T5 now green. Group 2: 44/44. Group 3: 125/125. prebuild (incl. build-codex-payload --check): exit 0. gen:codex: no diff; git status --porcelain empty.
+- Scenario 3 / T5: executes real merge_story.mjs (no args: exit 2, usage names --sprint/--worktree and exit codes 0,2,3,4,5), wave_runner_args.mjs usage flags, seal_red.mjs presence, update_state.mjs `--defect-in`. Read-through: SKILL §C.7 table 0/2/3/4/5 matches MERGE_EXIT; exit 3 text (fast demoted via --lane-demote, other lanes to Developer) matches merge_story.mjs:338-345; 4 conflict and 5 post-merge match; nothing contradicts post_merge_test / NOT TESTED. §C.0.1 flags match wave_runner_args usage; defects_in replay matches update_state usage; seal_red keys match C.3/C.3.5. Stage table equals segment_stages.mjs stagesFor (incl. `when`).
+- Regions: architect.md keeps 05's assign_lane Lane Audit/Lane Classification and 12's STORY-PLAN/TPV/Post-Flight; Sprint Plan template keeps 05's Lane Audit row text and 12's GOAL_RELATION; story.md keeps 05's lane text; prep_qa_context.mjs keeps 04's baseline block (source baseline.json), 09's commands/proof block, 12's story-plan-first block.
+- Regressions: none. Nit unchanged: two DevOps mentions in C.7 prose outside the table.
