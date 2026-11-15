@@ -19,7 +19,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-21_Framework_Hardening_Test_Surfaced.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "28642e312bd5eb624293c5f36e7225c80b0f1f58"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-21"

@@ -9,7 +9,7 @@ cited_by: []
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/CR-083-Document-Connection-Identity-Routes-OpenAPI.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "1ed0fb723bbcefc386f623e2587d4d155fcc4295"
 repo: "planning"
 parent_cleargate_id: "EPIC-047"

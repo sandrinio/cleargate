@@ -8,7 +8,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-06_Admin_UI.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "df788e44cbb85fc71c13016b80799a517cde93db"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-06"

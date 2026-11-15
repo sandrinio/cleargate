@@ -1,0 +1,14 @@
+# ClearGate Pre-Gate Scan Report
+Mode: qa
+Worktree: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/hfd/da
+Branch: HEAD
+Timestamp: 2026-11-15T21:29:35Z
+---
+[INFO] typecheck: not configured
+[PASS] debug_patterns: no debug statements found
+[PASS] todo_patterns: no TODO/FIXME/XXX found
+[INFO] test: not configured
+---
+Summary: 2 passed, 0
+0 failed, 0
+0 warnings

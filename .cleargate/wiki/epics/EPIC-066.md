@@ -85,7 +85,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-066_build_step_sized_by_risk.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "66e3803832a5759bb8ab4562bf48d67ca6039142"
 repo: "planning"
 last_contradict_sha: "ca2ecc15f77301b4125a1b88bce5dddcf1ceffec354821d02b22bb4918d7cb62"

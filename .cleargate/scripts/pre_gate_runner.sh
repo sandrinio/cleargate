@@ -86,6 +86,10 @@ run_qa() {
   run_configured_check "$REPORT_FILE" "typecheck" "$typecheck_cmd" "$WORKTREE" || chk_rc=$?
   if [[ $chk_rc -eq 1 ]]; then OVERALL_EXIT=1; fi
 
+  # ClearGate's own installed files are not the item's code (HOTFIX-002): skip them in the pattern greps.
+  local own_dirs=(--exclude-dir=.cleargate --exclude-dir=.claude --exclude-dir=.codex --exclude-dir=.agents)
+  local own_paths=(':(exclude,glob)**/.cleargate/**' ':(exclude,glob)**/.claude/**' ':(exclude,glob)**/.codex/**' ':(exclude,glob)**/.agents/**')
+
   # 2. Debug pattern grep (staged diff)
   local debug_patterns_json
   debug_patterns_json="$(read_config_field "qa.debug_patterns" "$CONFIG_FILE")"
@@ -106,7 +110,7 @@ run_qa() {
       local matches
       # Search all tracked files (not just diff) for the pattern since in test
       # scenarios the file is committed but we want to detect it
-      matches="$(git -C "$WORKTREE" grep -n "$pattern" -- 2>/dev/null || true)"
+      matches="$(git -C "$WORKTREE" grep -n "$pattern" -- . "${own_paths[@]}" 2>/dev/null || true)"
       if [[ -n "$matches" ]]; then
         found_details+="$(echo "$matches" | head -5)"$'\n'
         pattern_found=1
@@ -128,7 +132,7 @@ run_qa() {
       local matches
       matches="$(grep -rn "$pattern" "${WORKTREE}" \
         --include="*.js" --include="*.ts" --include="*.mjs" --include="*.cjs" \
-        --exclude-dir=".git" --exclude-dir="node_modules" \
+        --exclude-dir=".git" --exclude-dir="node_modules" "${own_dirs[@]}" \
         2>/dev/null || true)"
       if [[ -n "$matches" ]]; then
         found_details+="$(echo "$matches" | head -5)"$'\n'
@@ -161,7 +165,7 @@ run_qa() {
     local matches
     matches="$(grep -rn "$pattern" "${WORKTREE}" \
       --include="*.js" --include="*.ts" --include="*.mjs" \
-      --exclude-dir=".git" --exclude-dir="node_modules" \
+      --exclude-dir=".git" --exclude-dir="node_modules" "${own_dirs[@]}" \
       2>/dev/null || true)"
     if [[ -n "$matches" ]]; then
       todo_details+="$(echo "$matches" | head -3)"$'\n'

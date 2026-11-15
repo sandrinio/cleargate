@@ -11,7 +11,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-18_Prepare_Close_Observe_Mechanics.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "3ae5ef2cf5a385103ec34cf51646410f1e5802c8"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-18"

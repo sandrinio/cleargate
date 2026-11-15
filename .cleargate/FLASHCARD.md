@@ -1,3 +1,4 @@
+2026-11-16 · #gate #templates · readiness checkbox counts match only lines starting `- [ ]`; numbered `1. - [ ]` template rows never count
 2026-11-16 · #test-harness #release · cli unit tests calling sprintInitHandler spawn the baseline if the outer repo has record_baseline.mjs; stub baselineFn
 2026-11-15 · #sandbox #proof-run · replays pinned to sandbox SHAs need the old sandbox; setup renames it to *-runN, so repoint SB there, never delete first
 2026-11-15 · #gate4 #scripts · per-story copy-together lists miss transitive imports (lib/sprint-root, dispatch_serial exports); re-sync live scripts as one tree

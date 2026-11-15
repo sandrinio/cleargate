@@ -33,7 +33,7 @@ cited_by:
 status: "Draft"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/EPIC-055_Parallel_Wave_Scheduling.md"
-last_ingest: "2026-11-15T20:37:32.192Z"
+last_ingest: "2026-11-15T21:31:06.985Z"
 last_ingest_commit: "d3ca3bef420c543e8cc459e9333b736e15a556ba"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-39"
