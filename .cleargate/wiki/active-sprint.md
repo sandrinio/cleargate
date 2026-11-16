@@ -11,7 +11,7 @@
   - [[STORY-065-03]] — Done
   - [[STORY-065-04]] — Done
   - [[STORY-065-05]] — Done
-  - [[STORY-065-06]] — Ready to Bounce
+  - [[STORY-065-06]] — Done
 
 
 

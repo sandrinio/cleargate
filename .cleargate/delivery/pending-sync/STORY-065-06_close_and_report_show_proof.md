@@ -168,12 +168,12 @@ Feature: Close and report show proof
 | Report frontmatter | read | None | — | `goal_verdict: met\|partial\|missed`, `goal_verdict_basis: string`, `goal_verdict_acked_at: ISO` |
 
 ## Task Breakdown
-- [ ] Red tests for the five scenarios (unit with temp sprint dirs; one integration close of a fixture sprint with one unproven item).
-- [ ] Step 2.9 evidence step with the one-release `deferred-verify/` fallback; Step 2 accepts Sprint Review.
-- [ ] Ack-pass writes: `unproven.json`, `carry_over` + `proof_pending`, `goal_verdict_acked_at`.
-- [ ] Step 2.5 verdict enum check.
-- [ ] Bundle Evidence section.
-- [ ] Report template; `reporter.md`, `reporter.toml`, both skills' §E.2.
+- [x] Red tests for the five scenarios (unit with temp sprint dirs; one integration close of a fixture sprint with one unproven item).
+- [x] Step 2.9 evidence step with the one-release `deferred-verify/` fallback; Step 2 accepts Sprint Review.
+- [x] Ack-pass writes: `unproven.json`, `carry_over` + `proof_pending`, `goal_verdict_acked_at`.
+- [x] Step 2.5 verdict enum check.
+- [x] Bundle Evidence section.
+- [x] Report template; `reporter.md`, `reporter.toml`, both skills' §E.2.
 
 ## 4. Quality Gates
 

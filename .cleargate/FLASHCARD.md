@@ -1,3 +1,5 @@
+2026-11-16 · #qa #test-harness · scratchpad is shared across agents: put fixture scripts in a fresh subdir, not bare run.sh/fx.sh/f1 names
+2026-11-16 · #qa #test-harness · record_evidence.mjs resolves its repo root from the script's own location; stage scripts into the fixture repo
 2026-11-16 · #skill #proof · prove barrier must pass an untiered item (recorder exit 2 "no proof tier") to merge, else P4 untiered→Done is dead
 2026-11-16 · #qa #skill · stale gitignored templates/cleargate-planning fails serial-pointers T22 and conditional-architect S5; run `npm run prebuild` before judging
 2026-11-16 · #schema #frontmatter · cleargate new leaves <instructions> above ---; line-1-only readers (readProofTier) miss proof_tier the gate sees

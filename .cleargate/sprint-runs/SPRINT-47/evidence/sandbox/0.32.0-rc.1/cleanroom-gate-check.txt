@@ -1,0 +1,22 @@
+Gate: story.ready-for-execution (enforcing)
+❌ existing-surfaces-verified: cited paths do not exist on disk: ./name.ext, path/to/file.ext
+❌ prior-work-recorded: ## Prior work has no [[ID]] wikilink or "none found" sentinel
+❌ task-breakdown-complete: ## Task Breakdown is present but carries no `- [ ]` task rows
+❌ test-layers-declared: test-layers-declared: "Unit tests" count "{N}" is not a non-negative integer
+❌ spidr-coverage: spidr-coverage: Paths Cover cell "{T or F}" is not exactly T or F
+❌ proof-declared: proof-declared: proof_tier is missing — set unit, container, live or human (copy proof_tier and ## Proof from the item template)
+  [pass] parent-epic-ref-set: frontmatter(.).parent_epic_ref != "null" → actual: "EPIC-001"
+  [pass] no-tbds: no 'TBD' markers found in body
+  [pass] implementation-files-declared: section 3 has 4 declared-item (≥1 required)
+  [pass] dod-declared: section 5 has 3 listed-item (≥1 required)
+  [pass] gherkin-present: 'Scenario:' found 3 times
+  [pass] discovery-checked: frontmatter(.).context_source != "null" → actual: "approved Epic / verified codebase grounding + recorded direct approval"
+  [pass] reuse-audit-recorded: '## Existing Surfaces' found 1 time
+  [fail] existing-surfaces-verified: cited paths do not exist on disk: ./name.ext, path/to/file.ext
+  [pass] simplest-form-justified: '## Why not simpler?' found 1 time
+  [fail] prior-work-recorded: ## Prior work has no [[ID]] wikilink or "none found" sentinel
+  [pass] ambiguity-gate-resolved: status 🔴 (not 🟢) — no self-contradiction
+  [fail] task-breakdown-complete: ## Task Breakdown is present but carries no `- [ ]` task rows
+  [fail] test-layers-declared: test-layers-declared: "Unit tests" count "{N}" is not a non-negative integer
+  [fail] spidr-coverage: spidr-coverage: Paths Cover cell "{T or F}" is not exactly T or F
+  [fail] proof-declared: proof-declared: proof_tier is missing — set unit, container, live or human (copy proof_tier and ## Proof from the item template)

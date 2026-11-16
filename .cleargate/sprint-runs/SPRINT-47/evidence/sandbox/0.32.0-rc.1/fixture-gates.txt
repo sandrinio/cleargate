@@ -1,0 +1,6 @@
+EPIC-001_tally_output_and_filters.md: ✅ epic.ready-for-decomposition passed (13 criteria)
+SPRINT-01_tally_output_and_filters.md: ✅ sprint.ready-for-execution passed (2 criteria)
+STORY-001-01_min_count_filter.md: ✅ story.ready-for-execution passed (15 criteria)
+STORY-001-02_sql_output.md: ✅ story.ready-for-execution passed (15 criteria)
+STORY-001-03_help_text.md: ✅ story.ready-for-execution passed (15 criteria)
+STORY-001-04_named_table.md: ✅ story.ready-for-execution passed (15 criteria)

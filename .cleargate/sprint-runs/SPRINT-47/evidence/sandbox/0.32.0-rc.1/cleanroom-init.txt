@@ -1,0 +1,114 @@
+[cleargate init] Target: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/cr47AVFH
+[cleargate init] Test stack: go test ./...
+[cleargate init] Created .claude/agents/architect-reader.md
+[cleargate init] Created .claude/agents/architect-synth.md
+[cleargate init] Created .claude/agents/architect.md
+[cleargate init] Created .claude/agents/cleargate-wiki-contradict.md
+[cleargate init] Created .claude/agents/cleargate-wiki-ingest.md
+[cleargate init] Created .claude/agents/cleargate-wiki-lint.md
+[cleargate init] Created .claude/agents/cleargate-wiki-query.md
+[cleargate init] Created .claude/agents/developer.md
+[cleargate init] Created .claude/agents/devops.md
+[cleargate init] Created .claude/agents/qa.md
+[cleargate init] Created .claude/agents/reporter.md
+[cleargate init] Created .claude/hooks/lib/harness.sh
+[cleargate init] Created .claude/hooks/pending-task-sentinel.sh
+[cleargate init] Created .claude/hooks/post-shell-ingest.sh
+[cleargate init] Created .claude/hooks/pre-commit-surface-gate.sh
+[cleargate init] Created .claude/hooks/pre-commit.sh
+[cleargate init] Created .claude/hooks/pre-edit-gate.sh
+[cleargate init] Created .claude/hooks/pre-tool-use-autonomy.sh
+[cleargate init] Created .claude/hooks/pre-tool-use-task.sh
+[cleargate init] Created .claude/hooks/session-start.sh
+[cleargate init] Created .claude/hooks/stamp-and-gate.sh
+[cleargate init] Created .claude/hooks/token-ledger.sh
+[cleargate init] Created .claude/settings.json
+[cleargate init] Created .claude/skills/flashcard/SKILL.md
+[cleargate init] Created .claude/skills/sprint-dashboard/SKILL.md
+[cleargate init] Created .claude/skills/sprint-execution/SKILL.md
+[cleargate init] Created .claude/skills/sprint-execution/dispatch-serial.md
+[cleargate init] Created .cleargate/FLASHCARD.md
+[cleargate init] Created .cleargate/README.md
+[cleargate init] Created .cleargate/config.example.yml
+[cleargate init] Created .cleargate/config.yml
+[cleargate init] Created .cleargate/delivery/archive/.gitkeep
+[cleargate init] Created .cleargate/delivery/pending-sync/.gitkeep
+[cleargate init] Created .cleargate/knowledge/cleargate-enforcement.md
+[cleargate init] Created .cleargate/knowledge/cleargate-protocol.md
+[cleargate init] Created .cleargate/knowledge/mid-sprint-triage-rubric.md
+[cleargate init] Created .cleargate/knowledge/readiness-gates.md
+[cleargate init] Created .cleargate/knowledge/sprint-closeout-checklist.md
+[cleargate init] Created .cleargate/scripts/_migrate-schema-v3.mjs
+[cleargate init] Created .cleargate/scripts/assert_story_files.mjs
+[cleargate init] Created .cleargate/scripts/assign_lane.mjs
+[cleargate init] Created .cleargate/scripts/close_sprint.mjs
+[cleargate init] Created .cleargate/scripts/collision_surface.sh
+[cleargate init] Created .cleargate/scripts/constants.mjs
+[cleargate init] Created .cleargate/scripts/count_tokens.mjs
+[cleargate init] Created .cleargate/scripts/dedupe_frontmatter.mjs
+[cleargate init] Created .cleargate/scripts/dispatch_serial.mjs
+[cleargate init] Created .cleargate/scripts/file_surface_diff.sh
+[cleargate init] Created .cleargate/scripts/gate-checks.json
+[cleargate init] Created .cleargate/scripts/init_gate_config.sh
+[cleargate init] Created .cleargate/scripts/init_sprint.mjs
+[cleargate init] Created .cleargate/scripts/launch_wave.mjs
+[cleargate init] Created .cleargate/scripts/lib/flashcard-gate.mjs
+[cleargate init] Created .cleargate/scripts/lib/ledger-digest.mjs
+[cleargate init] Created .cleargate/scripts/lib/proof.mjs
+[cleargate init] Created .cleargate/scripts/lib/report-filename.mjs
+[cleargate init] Created .cleargate/scripts/lib/sprint-finish.mjs
+[cleargate init] Created .cleargate/scripts/lib/sprint-root.mjs
+[cleargate init] Created .cleargate/scripts/lib/work-item-id.mjs
+[cleargate init] Created .cleargate/scripts/merge_story.mjs
+[cleargate init] Created .cleargate/scripts/pre_gate_common.sh
+[cleargate init] Created .cleargate/scripts/pre_gate_runner.sh
+[cleargate init] Created .cleargate/scripts/prefill_report.mjs
+[cleargate init] Created .cleargate/scripts/prep_doc_refresh.mjs
+[cleargate init] Created .cleargate/scripts/prep_qa_context.mjs
+[cleargate init] Created .cleargate/scripts/prep_reporter_context.mjs
+[cleargate init] Created .cleargate/scripts/provision_worktree_config.sh
+[cleargate init] Created .cleargate/scripts/qa_red_lint.mjs
+[cleargate init] Created .cleargate/scripts/record_baseline.mjs
+[cleargate init] Created .cleargate/scripts/record_evidence.mjs
+[cleargate init] Created .cleargate/scripts/run_script.sh
+[cleargate init] Created .cleargate/scripts/seal_red.mjs
+[cleargate init] Created .cleargate/scripts/segment_stages.mjs
+[cleargate init] Created .cleargate/scripts/sprint_metrics.mjs
+[cleargate init] Created .cleargate/scripts/sprint_trends.mjs
+[cleargate init] Created .cleargate/scripts/state-events.mjs
+[cleargate init] Created .cleargate/scripts/state.schema.json
+[cleargate init] Created .cleargate/scripts/subagent-ledger.mjs
+[cleargate init] Created .cleargate/scripts/suggest_improvements.mjs
+[cleargate init] Created .cleargate/scripts/surface-whitelist.txt
+[cleargate init] Created .cleargate/scripts/update_state.mjs
+[cleargate init] Created .cleargate/scripts/validate_bounce_readiness.mjs
+[cleargate init] Created .cleargate/scripts/validate_state.mjs
+[cleargate init] Created .cleargate/scripts/wave_runner.js
+[cleargate init] Created .cleargate/scripts/wave_runner_args.mjs
+[cleargate init] Created .cleargate/scripts/write_dispatch.sh
+[cleargate init] Created .cleargate/templates/Bug.md
+[cleargate init] Created .cleargate/templates/CR.md
+[cleargate init] Created .cleargate/templates/Sprint Plan Template.md
+[cleargate init] Created .cleargate/templates/epic.md
+[cleargate init] Created .cleargate/templates/hotfix.md
+[cleargate init] Created .cleargate/templates/initiative.md
+[cleargate init] Created .cleargate/templates/spike.md
+[cleargate init] Created .cleargate/templates/sprint_context.md
+[cleargate init] Created .cleargate/templates/sprint_report.md
+[cleargate init] Created .cleargate/templates/story.md
+[cleargate init] .claude/settings.json unchanged (hooks block already current)
+[cleargate init] Created CLAUDE.md (with bounded block)
+[cleargate init] Created .mcp.json (cleargate MCP server registered).
+[cleargate init] Created .cleargate/.gitignore (protects .participant.json)
+[cleargate init] Created .gitignore (ignores .worktrees/, node_modules/, .env)
+[cleargate init] Bootstrap: no items to ingest, skipping build
+[cleargate init] Wrote install snapshot: .cleargate/.install-manifest.json
+[cleargate init] 🟢 cleargate CLI resolved via PATH (global install)
+[cleargate init] Participant identity: x@example.test (inferred)
+[cleargate init] Done. Start with .cleargate/README.md (Quickstart) — file a Story, approve it at Gate 1, then run cleargate push.
+
+───────────────────────────────────────────────────────────────────
+⚠  Restart Claude Code in this repo to load the cleargate MCP server.
+   Without restart: push/pull/sync MCP tools will not be available.
+   Verify after restart: run /mcp inside Claude Code.
+───────────────────────────────────────────────────────────────────
