@@ -66,6 +66,7 @@ As the orchestrator running a sprint, I want a prove step that runs every item's
   - when `gate-checks.json` `proof.browser` is set, runs it once and shows the owner its result beside the human items;
   - for each `human` item, shows the owner its `## Proof` steps; on the owner's confirmation runs `record_evidence.mjs <ID> --human "<the owner's words>"`, then `update_state.mjs <ID> Done`.
   - Items still unproven go to close as "built, not proven" (STORY-065-06).
+- **R4a — Earlier pins and the Codex text (Gate 2, decision 7).** `test/scripts/segment-stages.red.node.test.ts` (exact lane lists) and `loop-spec-three-paths.red` T1 gain `prove`, edited in this item's QA-Red commit. The Codex rendering replaces §C.0 and its §C.7 merge text wholesale, so the prove step is added to the R3 replacement text in `cleargate-cli/scripts/build-codex-payload.mjs` and the rendered files are regenerated with `npm run gen:codex`; the six renderer anchor lines stay verbatim.
 - **R5 — The agents' proof run stays a check.** The SKILL says QA-Verify's `PROOF:` line is the agent's own run, and the evidence file from the prove stage is the record the Done guard reads.
 
 ### 1.3 Out of Scope
@@ -155,7 +156,7 @@ Feature: Prove stage in the build loop
 | Item | Value |
 |---|---|
 | Primary File | `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs` |
-| Related Files | `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js`, `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md` |
+| Related Files | `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js`, `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs`, `cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md`, `cleargate-cli/scripts/build-codex-payload.mjs`, `cleargate-cli/test/scripts/segment-stages.red.node.test.ts` |
 | New Files Needed | Yes — `cleargate-cli/test/scripts/prove-stage.red.node.test.ts` |
 
 ### 3.2 Technical Logic

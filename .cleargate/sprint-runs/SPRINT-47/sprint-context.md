@@ -14,60 +14,83 @@ Make proof decide Done: every item declares a proof tier, a script records each 
 
 ## Goal Acceptance Check
 
-_(populated by orchestrator at §A.5, confirmed by the human at the same halt that confirms the sprint plan)_
-
-The concrete condition that is true when the Sprint Goal is met. Either a named command, artifact, or observable state — or the literal token `not-mechanically-verifiable` followed by the qualitative evidence standing in for it. Both are valid. Silence is not.
+Confirmed by the owner at Gate 2 (2026-11-16, "go"). Tier: live. Run before Gate 4:
+- (a) cli `npm test` has 0 failures at the final cli `main`, and `npm run test:integration` fails only on tests in the kickoff list `evidence/baseline-failures-99cbfd7.txt`.
+- (b) Clean-room: the packed release candidate installed into a temp Go repo whose `Makefile` has an `e2e:` target seeds `proof.unit` `go test ./...` and `proof.container` `make e2e`; `cleargate new story` shows `proof_tier` and `## Proof`; `cleargate gate check` names `proof-declared` on the unedited story.
+- (c) Sandbox end-to-end run on the release candidate (plain layout, as SPRINT-46 run 7): a throwaway Go repo with four items — one `unit`; one `container` against a Postgres 18 container with one `@holdout` scenario; one `human`; one `container` item whose first proof fails on purpose. Pass when every item has `evidence/<ID>.json` or is listed "built, not proven"; the failed proof blocked that merge and the item went back to the Developer; the holdout was absent from the QA-Red and Developer prompts and its test landed in a `qa-red(<ID>): amendment` commit; the human item waited in Sprint Review until the walkthrough confirmation; the report has the proof table and `goal_verdict`; the run halted only at plan confirmation, the walkthrough and Gate 4.
 
 ## Locked Versions
-
-Frozen dependency versions for this sprint. Orchestrator populates from `package.json` snapshots at sprint init; Developers must not upgrade these mid-sprint without an explicit CR.
 
 | Package | Version |
 |---------|---------|
 | Node    | `>=24.0.0` |
 | TypeScript | `^5.8.0` |
-| (add rows per workspace below) |  |
+| cleargate (cli) | `0.31.2` at sprint start (cli `main` 99cbfd7, pushed). Release 0.32.0 at Gate 4 only, with the owner's go. |
+
+No item adds a runtime dependency. Node built-ins only; shell scripts stay POSIX bash.
 
 ## Test Stack
 
-Repo-derived test conventions. Written best-effort by `cleargate init` (detector); the
-orchestrator may correct any field per-sprint. Agents read this block as OVERRIDING their
-built-in defaults — Developer/QA/Architect use these values, not any hardcoded runner.
-
 | Field | Value |
 |-------|-------|
-| Backend runner    | _(e.g. `pytest -q` · `go test ./...` · `npm test` · populate at init)_ |
-| Frontend runner   | _(e.g. js unit runner — blank if single-stack)_ |
-| Typecheck command | _(e.g. `mypy .` · `tsc --noEmit` · blank if none)_ |
-| Red-test naming   | _(e.g. `*.red.test.tsx` · `test_*_red.py` · `*_red_test.go` · populate at init)_ |
+| Backend runner    | Full suite: `npm test` in a cli tree (merge lane only). Single files: `npm run test:file -- <file>`. `npm test` skips `*.integration.node.test.ts`; run those by file. |
+| Frontend runner   | none |
+| Typecheck command | `npm run typecheck` (`tsc --noEmit`) in the cli worktree (the seal's scan records typecheck N/A in this layout, so build lanes run it themselves) |
+| Red-test naming   | `*.red.node.test.ts` (integration-layer reds: `*.red.integration.node.test.ts`) |
 
-_If unresolved at init: leave the table stubbed. The pre-gate scan emits a one-line
-"test_stack unresolved — populate sprint_context.md §Test Stack" advisory and treats the
-typecheck/test gate as advisory (not FAIL) until populated. (§0.5 backstop decision.)_
+Run full suites with a short private `TMPDIR`. Never run two full suites at once. A throwaway cli worktree has no `dist`: build it there (never in cli `main`) before dist-spawning tests. Full-suite integration needs an outer-host layout (flashcard 2026-11-15 #test-harness #worktree).
 
 ## Cross-Cutting Rules
 
-Sprint-wide architecture rules and UI/API tokens that every story must honour. Populated from the parent Epic's `<architecture_rules>` block.
+From EPIC-065 `<architecture_rules>`:
 
-1. (rule 1)
-2. (rule 2)
-3. (rule 3)
+1. Generalise what exists: the evidence file generalises CR-082's `deferred-verify/<ID>.json`; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" is the existing `Sprint Review` state.
+2. Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script.
+3. Stack-neutral: no step depends on `package.json` or Node in the target's own code; proof commands come from the item or `gate-checks.json`.
+4. Scripts and templates change in `cleargate-cli/scaffold/core`; prompts and the skill change in `scaffold/hosts/claude` and their Codex counterparts in the same story. Generated files (`scaffold/core/.agents/skills/sprint-execution/*.md`, `scaffold/hosts/codex/.codex/agents/*.toml`) are regenerated with `npm run gen:codex`, never hand-edited or hand-merged.
+5. No new `state.json` work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
+6. An init/upgrade change is not Done until a clean-room install shows it (EPIC-058 rule 1; STORY-065-02).
+
+Hand-applied INITIATIVE-002 rules (sprint plan, Execution Guidelines):
+
+7. **Proof per item.** An item is Done only when the evidence in its sprint-plan Proof column exists: the orchestrator records the QA-Verify proof result in `sprint-runs/SPRINT-47/evidence/<ID>-proof.md`, then runs live `update_state.mjs <ID> Done`.
+8. **Fixed roster.** The six items are the roster. Anything found mid-sprint goes to `sprint-runs/SPRINT-47/intake.md` and enters only with the owner's recorded OK in sprint §6.
+9. **Lanes by risk.** Lanes are `assign_lane.mjs`'s; 065-04 raised to runtime by the Architect (Gate 2 decision 8).
+10. **Recount at close.** The orchestrator records a hand recount of rework from git and dispatch metadata beside `sprint_metrics.mjs` in the close Brief.
+11. **Loop unchanged under the sprint.** No edit to live `/.claude/**` or live `.cleargate/{scripts,knowledge,templates}` until Gate 4. The sprint changes `merge_story.mjs`, `update_state.mjs`, `close_sprint.mjs`, `seal_red.mjs` and `segment_stages.mjs`, which its own loop runs; the live copies stay 0.31.2. At Gate 4 (owner's go only): live re-sync from cli `main`, release 0.32.0 (push cli + tag, npm publish, GitHub release), archive CR-128/CR-129 as absorbed, push the meta-repo.
+
+Execution (owner, Gate 2 2026-11-16, "go"; the nested-cli layout of SPRINT-44..46; plan of record `plans/waves.json`):
+
+12. **Worktrees.** `OUTER` = `/Users/ssuladze/Documents/Dev/ClearGate`, `CLI` = `OUTER/cleargate-cli`. Each item has a detached outer host `OUTER/.worktrees/<ID>` (`git worktree add --detach … sprint/S-47`; no item has an outer change) and a nested cli worktree `OUTER/.worktrees/<ID>/cleargate-cli` (`git -C CLI worktree add <abs path> -b story/<ID> <base from waves.json>`). Setup, by the orchestrator, serially: `ln -s CLI/node_modules <cli wt>/node_modules`; `ln -s OUTER/.claude <outer host>/.claude`; `(cd <cli wt> && npm run prebuild)`. Never `npm install`/`npm ci` in a worktree. **No agent edits files in the cli main checkout.**
+13. **Stages, by hand** (the shipped runner and `merge_story.mjs` address one repo). Per lane, from live 0.31.2 `stagesFor`: runtime = story-plan → qa-red → [architect-tpv if the seal flags] → developer → qa-verify → architect-review → merge; standard = qa-red → [architect-tpv if flagged] → developer → qa-verify → [architect-review if flagged] → merge. QA-Red's last step is the live seal against the cli worktree: `ORCHESTRATOR_PROJECT_DIR=OUTER bash OUTER/.cleargate/scripts/run_script.sh node OUTER/.cleargate/scripts/seal_red.mjs <ID> --worktree OUTER/.worktrees/<ID>/cleargate-cli --sprint-branch <base> -- <files>`. QA-Verify runs live `prep_qa_context.mjs <ID> OUTER/.worktrees/<ID>/cleargate-cli` first. Dispatch descriptions are `<stage> <ID>` (CR-120); briefs name the work-item id on line 1. Bounce cap 3.
+14. **Concurrency.** At most 5 build lanes and 1 merge lane. Build lanes run typecheck plus targeted test files only.
+15. **Contract C1 `contract/S-47-evidence`** (owner STORY-065-02, base cli `main`; consumers 03, 04, 06): `scaffold/core/.cleargate/scripts/lib/proof.mjs` — `PROOF_TIERS` (frozen `['unit','container','live','human']`), `isProofTier(x)`, `parseProofCommand(content): string|null` (a `{…}` placeholder line returns null), `readProofTier(content): string|null` (raw), `findItemFile(repoRoot, id): string|null`, `evidencePath(sprintDir, id)`, `readEvidence(sprintDir, id): Evidence|null` (never throws), `proofStatus(evidence, tier) → {ok, reason: missing|pending|fail|tier|null, recorded_tier}`; the evidence JSON shape and the `record_evidence.mjs` CLI and exit codes 0/1/2 (C1 stub always exits 2). Full text in `waves.json` `contracts`. Owners replace stub bodies; never rename, retype or make async a frozen export.
+16. **Integration.** An item integrates only after every `upstream` item has merged into cli `main`: in its cli worktree `git merge --no-ff main`; the owner's region wins and the item re-applies its insertions; a conflict inside an existing or red test goes to QA-Red, never the Developer. Never hand-merge a generated file: `npm run gen:codex`, then prebuild (`build-codex-payload.mjs --check`). Then typecheck and the item's tests, then QA-Verify on the integrated tree. If `main` moves before the merge, integrate again.
+17. **Sealed red tests from earlier sprints** are edited in the item's QA-Red commit, never the Developer's (Gate 2 decision 9): 065-04 `test/scripts/segment-stages.red.node.test.ts` (lane lists gain `prove`) and `loop-spec-three-paths.red` T1; any item touching the SKILL keeps the six renderer anchor lines verbatim (`codex-sprint-execution-render.red` Test 32). The cli repo has no git hooks: QA-Verify's diff review enforces each item's §3.1.
+18. **Merge.** Default order 02, 01, 05, 04, 03, 06, as items pass QA-Verify, subject to `upstream`. DevOps merges `story/<ID>` into cli `main` with `--no-ff` (local only — no push, no publish). **No `dist` rebuild on cli `main`.** The post-merge full suite runs in a throwaway cli worktree at `main`'s tip (outer-host layout). Teardown: both `git status --porcelain` empty, remove the cli worktree first, then the outer host.
+19. **Known reds.** Canonical-live parity breaks by design (rule 11): `canonical-live-parity` 5a (templates) from the first of the 01/06 merges; 5b (knowledge) from the first of 01/03; 5c (agents) from the first of 03/05/06; `qa-content` slice parity from the 05 merge; doctor drift lines and the SessionStart drift banner from the first merge. Scenarios 1–3 and 5d stay green. Pre-existing integration failures at cli 99cbfd7 are listed in `evidence/baseline-failures-99cbfd7.txt`. Each new known red is logged in sprint §6 when it starts. Never hand-port live.
+20. **Detached hosts.** The Developer cannot tick Task Breakdown rows in the item file; the orchestrator ticks them at merge.
+21. **Proof runs.** Run proofs with the canonical scripts by path from a cli tree, never the live copies. Fixture repos for proofs are temp git repos, never this sprint's own tree.
 
 ## Active FLASHCARD Tags
 
-FLASHCARD tags that appear in any story's `<agent_context>` for this sprint. Auto-populated by grepping `.cleargate/FLASHCARD.md` at sprint init. Agents: grep the flashcard file for each tag listed here before starting work.
-
-- `#tag1` — one-line summary of the most recent card
-- `#tag2` — one-line summary
+- `#worktree` — nested cli worktrees under detached outer hosts; `git -C <repo> worktree add` resolves relative paths against `<repo>`, pass absolute paths; never `git stash`.
+- `#test-harness` — `npm test` skips integration files; full-suite integration needs the outer-host layout; reds spawning real git can flake under load; cr081/cr079 shell tests leave `scaffold/core/.cleargate/sprint-runs/` untracked.
+- `#merge` — judge a post-merge suite by diffing failing names against the reference list; the integration suite in an outer host moves EPIC-058/061 to archive (clean it before the next merge).
+- `#codex #gen-codex` — generated Codex files fail `prebuild --check` when stale; regenerate, never hand-edit.
+- `#qa-red` — seal `scan_exit` 0 for an expected red: assert the raw `[FAIL] typecheck` line separately from flags.
 
 ## Adjacent Implementations (Reuse First)
 
-Exported helpers and modules from already-merged stories in this sprint. The Architect updates this section after each story merges. Developers check here before writing new helpers — if the module already exists, import it; duplication is a kick-back criterion.
-
 | Story | Module / Export | Path |
 |-------|----------------|------|
-| (populated as stories merge) | | |
+| (existing) | `parseProofCommand`, `buildCommands` (moving to `lib/proof.mjs` via C1) | `cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs` |
+| (existing) | `findItemFile`, `matchesId` | `cleargate-cli/scaffold/core/.cleargate/scripts/init_sprint.mjs`, `scripts/lib/work-item-id.mjs` |
+| (existing) | `extractFailing`, `commandEnv`, `lastLine`, `testsRan` | `cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs` |
+| (existing) | `STAGE_NAMES`, `STAGE_DEFS`, `LANE_STAGES`, `stagesFor`, `laneOf` | `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs` |
+| (existing) | `countScenarios`, R-volume | `cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs` |
+| (existing) | `renderCodexSprintExecution`, R2/R3 replacement texts | `cleargate-cli/scripts/build-codex-payload.mjs` |
 
 ## Mid-Sprint Amendments
 
-_(populated by Architect on CR:scope-change or CR:approach-change; never rewrite, only append. Format: '<ISO-ts> · <ID> · <one-line note>')_
+- 2026-11-16 · Gate 2 · decisions 1–11 approved as recommended (owner: "go"). Spec clarifications applied to the items: STORY-065-02 (C1 exports; `{…}` placeholder rule, decision 4), STORY-065-03 (untiered item → Done at merge, decision 5), STORY-065-04 (surface widened to `segment-stages.red` and the Codex R3 text, decision 7), STORY-065-06 (untiered items not unproven; CR-082 failure output kept, decision 6).

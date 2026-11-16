@@ -19,18 +19,18 @@ cites:
   - "[[INITIATIVE-002]]"
   - "[[SPRINT-46]]"
 cited_by: []
-status: "Draft"
+status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-47_proof_decides_done.md"
-last_ingest: "2026-11-16T08:44:29.469Z"
-last_ingest_commit: "656252583236b4415acdb508778a0d3f8cd7d23f"
+last_ingest: "2026-11-16T09:25:38.203Z"
+last_ingest_commit: "28fcd46c7a52f876c3a24600fb340320d77139c4"
 repo: "planning"
 last_contradict_sha: "c14c59842c9b56819cd6b7bb72245c47089b0f027339d852bc9a9c20c3c4876f"
 ---
 
 # SPRINT-47: Proof Decides Done
 
-**Status:** Draft · **Dates:** 2026-11-17 → 2026-11-21 · **Gate:** pass
+**Status:** Active · **Dates:** 2026-11-17 → 2026-11-21 · **Gate:** pass
 
 ## Goal
 Make proof decide Done: every item declares a proof tier, a script records each proof as evidence, an item becomes Done only when evidence for its tier exists, and close and the report show the tier promised and the evidence produced, or "built, not proven at tier X".

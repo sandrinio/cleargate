@@ -7,7 +7,7 @@
   "story_count_in_milestone": 6,
   "story_count_planned": 6,
   "complete": true,
-  "launchable": false,
+  "launchable": true,
   "launchable_when": "The owner confirms at Gate 2 that SPRINT-47 builds in nested cli worktrees and runs each lane's stagesFor stages by hand on the live 0.31.2 scripts (open decisions 1 and 2). The same layout was approved for SPRINT-44 (ruling (a)), SPRINT-45 and SPRINT-46; each ruling covered its own sprint only. When confirmed, the orchestrator sets launchable to true and fills in ruling.decision. If the owner declines, all six items are refused under BUG-046 (see refused_if_gate_2_declines) and this plan must not be used.",
   "ruling": {
     "status": "requested",
@@ -79,7 +79,7 @@
       "STORY-065-06"
     ],
     "merge_order_rule": "The merge lane takes items as they pass QA-Verify, subject to upstream (stories.<ID>.upstream is authoritative; waves[] is a view). In layer 0, when items are ready together: 02 first (it unblocks 03, 04 and 06), then 01 (it unblocks 04 and 06), then 05. In layer 1, on a tie 04 goes before 03 (04 unblocks 06). 06 merges last. Swapping the merge order of two items with no upstream between them makes the later one re-integrate main and re-run QA-Verify (flashcard 2026-11-10 #merge #contract); preview with git merge-tree.",
-    "codex_generated_companions": "Every generated file has one source and is regenerated, never hand-edited (scripts/build-codex-payload.mjs). core/.agents/skills/sprint-execution/SKILL.md is rendered from hosts/claude/.claude/skills/sprint-execution/SKILL.md. It has three editors, 01, 04 and 06, serialized by the edges 01 -> 04 -> 06; each regenerates it in its own commit and again at integration. core/.agents/skills/sprint-execution/dispatch-serial.md is a byte copy of the Claude file; 04 is its only editor. Agent tomls, one editor each: devops.toml (03); qa.toml and developer.toml (05); reporter.toml (06). Renderer rules for every SKILL edit: the six anchor lines stay verbatim, including the A3 line '**Serial barrier merge.** ...', which codex-sprint-execution-render.red Test 32 quotes exactly. The block from '### C.0 Execution — run each wave via `/workflows`' to '### C.1' is Claude-only: Codex replaces it with R2, so section C.0.1 text never reaches Codex. The banned tokens (/workflows, Workflow tool, parallel(), launch_wave, resumeFromRunId, RUN_ID, mintRunId, SKIP_FLASHCARD_GATE=1, Between-wave relocation, C.0.1, C.0.2) must not appear outside that block and the A3/A4 lines, or prebuild's --check fails.",
+    "codex_generated_companions": "Every generated file has one source and is regenerated, never hand-edited (scripts/build-codex-payload.mjs). core/.agents/skills/sprint-execution/SKILL.md is rendered from hosts/claude/.claude/skills/sprint-execution/SKILL.md. It has three editors, 01, 04 and 06, serialized by the edges 01 -> 04 -> 06; each regenerates it in its own commit and again at integration. core/.agents/skills/sprint-execution/dispatch-serial.md is a byte copy of the Claude file; 04 is its only editor. Agent tomls, one editor each: devops.toml (03); qa.toml and developer.toml (05); reporter.toml (06). Renderer rules for every SKILL edit: the six anchor lines stay verbatim, including the A3 line '**Serial barrier merge.** ...', which codex-sprint-execution-render.red Test 32 quotes exactly. The block from '### C.0 Execution \u2014 run each wave via `/workflows`' to '### C.1' is Claude-only: Codex replaces it with R2, so section C.0.1 text never reaches Codex. The banned tokens (/workflows, Workflow tool, parallel(), launch_wave, resumeFromRunId, RUN_ID, mintRunId, SKIP_FLASHCARD_GATE=1, Between-wave relocation, C.0.1, C.0.2) must not appear outside that block and the A3/A4 lines, or prebuild's --check fails.",
     "known_red_after_merge": {
       "status": "proposed; confirm at Gate 2 (open decision 10)",
       "reason": "Rule 5 freezes live /.claude/** and live .cleargate/{scripts,knowledge,templates} until Gate 4, so canonical-live parity breaks at the first canonical merge, not at close.",
@@ -240,12 +240,78 @@
     "STORY-065-06": "standard"
   },
   "lane_signals": {
-    "STORY-065-01": { "lane": "runtime", "signals": { "scenarios": 6, "subsystems": 2, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "subsystems: 2 (cleargate-cli/scaffold, cleargate-cli/src)" },
-    "STORY-065-02": { "lane": "runtime", "signals": { "scenarios": 5, "subsystems": 2, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "subsystems: 2 (cleargate-cli/scaffold, cleargate-cli/src)" },
-    "STORY-065-03": { "lane": "standard", "signals": { "scenarios": 6, "subsystems": 1, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "scenarios: 6 (> 2)" },
-    "STORY-065-04": { "lane": "standard", "signals": { "scenarios": 5, "subsystems": 1, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "scenarios: 5 (> 2)" },
-    "STORY-065-05": { "lane": "standard", "signals": { "scenarios": 5, "subsystems": 1, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "scenarios: 5 (> 2)" },
-    "STORY-065-06": { "lane": "standard", "signals": { "scenarios": 5, "subsystems": 1, "ui_surface": false, "forbidden_surface": false, "new_dependency": false, "proof_tier": null }, "reason": "scenarios: 5 (> 2)" }
+    "STORY-065-01": {
+      "lane": "runtime",
+      "signals": {
+        "scenarios": 6,
+        "subsystems": 2,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "subsystems: 2 (cleargate-cli/scaffold, cleargate-cli/src)"
+    },
+    "STORY-065-02": {
+      "lane": "runtime",
+      "signals": {
+        "scenarios": 5,
+        "subsystems": 2,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "subsystems: 2 (cleargate-cli/scaffold, cleargate-cli/src)"
+    },
+    "STORY-065-03": {
+      "lane": "standard",
+      "signals": {
+        "scenarios": 6,
+        "subsystems": 1,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "scenarios: 6 (> 2)"
+    },
+    "STORY-065-04": {
+      "lane": "standard",
+      "signals": {
+        "scenarios": 5,
+        "subsystems": 1,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "scenarios: 5 (> 2)"
+    },
+    "STORY-065-05": {
+      "lane": "standard",
+      "signals": {
+        "scenarios": 5,
+        "subsystems": 1,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "scenarios: 5 (> 2)"
+    },
+    "STORY-065-06": {
+      "lane": "standard",
+      "signals": {
+        "scenarios": 5,
+        "subsystems": 1,
+        "ui_surface": false,
+        "forbidden_surface": false,
+        "new_dependency": false,
+        "proof_tier": null
+      },
+      "reason": "scenarios: 5 (> 2)"
+    }
   },
   "lane_raises": {
     "STORY-065-04": "standard -> runtime: stage table all lanes read; amends earlier sealed pins and Codex R3"
@@ -253,7 +319,7 @@
   "predicate_notes": {
     "tiny_sprint_floor": "not applied: N = 6",
     "reachability_BUG_046": "Every digest has a non-empty unreachable_surface: every path is inside the nested cleargate-cli repo, which an outer worktree cannot see. Its file_creates are equally unreachable (flashcard 2026-09-24 #sdr #collision-surface). Under outer-worktree dispatch all six are refused (refused_if_gate_2_declines, verbatim strings). The plan builds in nested cli worktrees, where every declared path exists, at the orchestrator's direction and on the SPRINT-44..46 precedent. launchable stays false until Gate 2 confirms the layout for SPRINT-47.",
-    "empty_surface_guard_BUG_033": "Did not fire: every digest has a non-empty (file_surface ∪ file_creates).",
+    "empty_surface_guard_BUG_033": "Did not fire: every digest has a non-empty (file_surface \u222a file_creates).",
     "db_axis": "Vacuous: db_write_set is empty for all six.",
     "fail_safe_parallel_eligible_n": "None: all six declare parallel_eligible y, and every digest has its required fields.",
     "real_collisions": "One path, kind 2 (single-writer generated artifact): cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, rendered from the Claude SKILL.md by renderCodexSprintExecution (scripts/build-codex-payload.mjs:334, :417-419), with editors 01, 04 and 06, ordered 01 -> 04 -> 06. No kind 1: no migrations or ordered journals, and no new protocol section number. No lockfile: package-lock.json is tracked at 99cbfd7, but no item adds a dependency; MANIFEST.json goes to the gitignored payload. No kind 3: the shared source files (Claude SKILL.md for 01/04/06; wave_runner.js and wave_runner_args.mjs for 04/05) are edited in disjoint regions, checked against the files at 99cbfd7.",
@@ -262,7 +328,7 @@
     "critical_path": "02 -> 04 -> 06 (02 runtime, 04 raised to runtime, 06 standard; 04 and 06 are med exposure). Equal or shorter chains: 01 -> 04 -> 06 and 02 -> 03.",
     "new_files": "record_evidence.mjs and lib/proof.mjs are absent on cli main at 99cbfd7 and have one creator (02). Both start on C1 and 02 builds from C1, so there is no add/add conflict at integration. Every existing import they name exists at 99cbfd7: lib/work-item-id.mjs matchesId (:50); record_baseline.mjs extractFailing (:45) and commandEnv (:102). parseProofCommand (prep_qa_context.mjs:545) and findItemFile (init_sprint.mjs:117) exist but are module-private, so C1 creates their exports.",
     "digest_corrections": [
-      "Stripped the 'Yes — ' prefix (flashcard 2026-11-10 #sdr #collision-surface) from file_surface entries of 065-02 (record_evidence.mjs), 065-03 (done-guard.red) and 065-06 (close-evidence-step.red). The real paths were already in file_creates.",
+      "Stripped the 'Yes \u2014 ' prefix (flashcard 2026-11-10 #sdr #collision-surface) from file_surface entries of 065-02 (record_evidence.mjs), 065-03 (done-guard.red) and 065-06 (close-evidence-step.red). The real paths were already in file_creates.",
       "Added by synthesis, per orchestrator note 1: exports_consumed for 065-03 (lib/proof.mjs findItemFile, readProofTier, readEvidence, proofStatus, evidencePath; the Evidence shape), 065-04 (record_evidence.mjs CLI and exit codes; the prove stage's script name) and 065-06 (the same as 065-03). The readers reported [].",
       "065-02's exports_provided are pinned with signatures in C1, which adds isProofTier, evidencePath, readEvidence and proofStatus (open decision 3).",
       "065-04's wave_runner.js, wave_runner_args.mjs, launch_wave.mjs and dispatch_serial.mjs entries are verify-only (section 3.2 'no change expected'). 065-05 owns the edits to the first two.",
@@ -285,11 +351,16 @@
   ],
   "refused": [],
   "refused_if_gate_2_declines": {
-    "STORY-065-01": "unreachable file surface — refused: cleargate-cli/src/lib/readiness-predicates.ts, cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md, cleargate-cli/scaffold/core/.cleargate/templates/story.md, cleargate-cli/scaffold/core/.cleargate/templates/CR.md, cleargate-cli/scaffold/core/.cleargate/templates/Bug.md, cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md, cleargate-cli/src/commands/sprint.ts, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts",
-    "STORY-065-02": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/record_evidence.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/lib/proof.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/init_sprint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json, cleargate-cli/src/init/detect-test-stack.ts, cleargate-cli/src/commands/upgrade.ts, cleargate-cli/test/scripts/record-evidence.red.node.test.ts, cleargate-cli/test/init/gate-checks-proof.red.node.test.ts",
-    "STORY-065-03": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs, cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/devops.toml, cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md",
-    "STORY-065-04": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md",
-    "STORY-065-05": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js, cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md, cleargate-cli/scaffold/hosts/claude/.claude/agents/developer.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml, cleargate-cli/scaffold/hosts/codex/.codex/agents/developer.toml, cleargate-cli/test/scripts/seal-red-amendment.red.node.test.ts",
-    "STORY-065-06": "unreachable file surface — refused: cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs, cleargate-cli/scaffold/core/.cleargate/templates/sprint_report.md, cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/reporter.toml, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/test/scripts/close-evidence.red.integration.node.test.ts"
+    "STORY-065-01": "unreachable file surface \u2014 refused: cleargate-cli/src/lib/readiness-predicates.ts, cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md, cleargate-cli/scaffold/core/.cleargate/templates/story.md, cleargate-cli/scaffold/core/.cleargate/templates/CR.md, cleargate-cli/scaffold/core/.cleargate/templates/Bug.md, cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md, cleargate-cli/src/commands/sprint.ts, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts",
+    "STORY-065-02": "unreachable file surface \u2014 refused: cleargate-cli/scaffold/core/.cleargate/scripts/record_evidence.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/lib/proof.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/init_sprint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json, cleargate-cli/src/init/detect-test-stack.ts, cleargate-cli/src/commands/upgrade.ts, cleargate-cli/test/scripts/record-evidence.red.node.test.ts, cleargate-cli/test/init/gate-checks-proof.red.node.test.ts",
+    "STORY-065-03": "unreachable file surface \u2014 refused: cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs, cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/devops.toml, cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md",
+    "STORY-065-04": "unreachable file surface \u2014 refused: cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/dispatch_serial.mjs, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/dispatch-serial.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/dispatch-serial.md",
+    "STORY-065-05": "unreachable file surface \u2014 refused: cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js, cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md, cleargate-cli/scaffold/hosts/claude/.claude/agents/developer.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml, cleargate-cli/scaffold/hosts/codex/.codex/agents/developer.toml, cleargate-cli/test/scripts/seal-red-amendment.red.node.test.ts",
+    "STORY-065-06": "unreachable file surface \u2014 refused: cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs, cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs, cleargate-cli/scaffold/core/.cleargate/templates/sprint_report.md, cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md, cleargate-cli/scaffold/hosts/codex/.codex/agents/reporter.toml, cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md, cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md, cleargate-cli/test/scripts/close-evidence.red.integration.node.test.ts"
+  },
+  "gate_2": {
+    "approved": "2026-11-16",
+    "by": "owner",
+    "decisions": "all eleven as recommended"
   }
 }

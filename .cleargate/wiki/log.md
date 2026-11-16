@@ -1915,3 +1915,8 @@
   action: "update"
   target: "SPRINT-47"
   path: ".cleargate/delivery/pending-sync/SPRINT-47_proof_decides_done.md"
+- timestamp: "2026-11-16T09:25:38.203Z"
+  actor: "cleargate wiki ingest"
+  action: "update"
+  target: "SPRINT-47"
+  path: ".cleargate/delivery/pending-sync/SPRINT-47_proof_decides_done.md"

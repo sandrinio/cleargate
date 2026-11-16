@@ -6,7 +6,7 @@ carry_over: false
 lifecycle_init_mode: block
 remote_id: null
 source_tool: manual
-status: Draft
+status: Active
 start_date: 2026-11-17
 end_date: 2026-11-21
 synced_at: null
@@ -200,7 +200,7 @@ No item declares `proof_tier` (drafted before the predicate exists). After init 
 | wave2 | STORY-065-03, STORY-065-04 | Yes | Integration layer 1. 03 upstream 02 (builds now from C1). 04 upstream 02 (C1) and 01 (real collision: the generated `.agents` SKILL.md). No shared path between 03 and 04; on a tie, merge 04 first. |
 | wave3 | STORY-065-06 | No | Integration layer 2. Upstream 04 and 01 (real collision: the generated `.agents` SKILL.md) and 02 (C1). Merges last. |
 
-### Gate 2 decisions (pending the owner; full text in `waves.json` `open_decisions_for_gate_2`)
+### Gate 2 decisions (resolved 2026-11-16: owner approved all eleven as recommended, "go"; full text in `waves.json` `open_decisions_for_gate_2`)
 
 1. Use nested cli worktrees for SPRINT-47.
 2. Run the stages by hand on the live 0.31.2 scripts; merge by DevOps into cli `main`.
@@ -285,8 +285,8 @@ No item declares `proof_tier` (drafted before the predicate exists). After init 
 ## 5. Gate Checklist
 
 - [x] **Gate 1** — EPIC-065 and the six roster items approved (owner, 2026-11-16: "approve as recommended").
-- [ ] **Gate 2** (Sprint Ready) — SDR §2 and the Goal Acceptance Check confirmed.
-- [ ] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-47`.
+- [x] **Gate 2** (Sprint Ready) — SDR §2, decisions 1–11 and the Goal Acceptance Check confirmed (owner, 2026-11-16: "go").
+- [x] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-47` all pass, devops reachable (2026-11-16).
 - [ ] **Gate 4** (close) — after all items merge and the walkthrough.
 
 ## 6. Execution Log
@@ -295,3 +295,4 @@ No item declares `proof_tier` (drafted before the predicate exists). After init 
 - 2026-11-16 · Gate 1. Owner approved the six stories, their seven open questions, the sandbox release gate and no extra roster items ("approve as recommended").
 - 2026-11-16 · Gate 3 checks run early: `cleargate sprint preflight SPRINT-47` all pass (test gate `npm --prefix cleargate-cli test` exit 0); devops reachable; a stale `.pending-task` sentinel from a finished subagent was removed before the clean-main check. `sprint/S-47` cut from main.
 - 2026-11-16 · SDR written (architect-reader ×6, architect-synth): one contract (C1 `contract/S-47-evidence`), three integration layers, 065-04 raised to runtime; 11 decisions for Gate 2.
+- 2026-11-16 · Gate 2. Owner approved §2, decisions 1–11 and the Goal Acceptance Check ("go"). Spec clarifications applied: STORY-065-02 R6, STORY-065-03 R1a, STORY-065-04 R4a (+ surface), STORY-065-06 R1a. Goal Acceptance Check and Cross-Cutting Rules 1–21 written to `sprint-context.md`; status Active.

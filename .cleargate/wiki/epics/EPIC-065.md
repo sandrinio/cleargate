@@ -54,7 +54,7 @@ parent_cleargate_id: "INITIATIVE-002"
 
 # EPIC-065: Proof Decides Done
 
-**Status:** Approved · **Sprint:** SPRINT-47 (planned) · **Gate:** pass
+**Status:** Approved · **Sprint:** SPRINT-47 · **Gate:** pass
 
 ## Objective
 Every sprint goal and every story, CR and bug declares a proof tier (unit, container, live, human) and how it is proven; a script records the proof as an evidence file; an item reaches Done only when evidence for its declared tier exists; sprint close and the report show, per item and for the goal, the tier promised and the evidence produced, or "built, not proven at tier X".
