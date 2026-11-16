@@ -22,8 +22,8 @@ cited_by: []
 status: "Active"
 remote_id: ""
 raw_path: ".cleargate/delivery/pending-sync/SPRINT-47_proof_decides_done.md"
-last_ingest: "2026-11-16T10:16:13.378Z"
-last_ingest_commit: "514e8cf265444f04cbf46071a1cd4c15034b723b"
+last_ingest: "2026-11-16T10:36:21.055Z"
+last_ingest_commit: "a46f2b8a1c17e07a78bea50cb6e765bb65e3df0b"
 repo: "planning"
 last_contradict_sha: "c14c59842c9b56819cd6b7bb72245c47089b0f027339d852bc9a9c20c3c4876f"
 ---

@@ -1,3 +1,5 @@
+2026-11-16 · #skill #proof · prove barrier must pass an untiered item (recorder exit 2 "no proof tier") to merge, else P4 untiered→Done is dead
+2026-11-16 · #qa #skill · stale gitignored templates/cleargate-planning fails serial-pointers T22 and conditional-architect S5; run `npm run prebuild` before judging
 2026-11-16 · #schema #frontmatter · cleargate new leaves <instructions> above ---; line-1-only readers (readProofTier) miss proof_tier the gate sees
 2026-11-16 · #test-harness #security · `k in obj` on parsed user JSON hits the prototype chain; use Object.hasOwn and skip __proto__
 2026-11-16 · #regex #crlf · a '- **Label:** (.*)$' regex on body.split('\n') never matches a CRLF line; split on /\r?\n/ like parseProofCommand

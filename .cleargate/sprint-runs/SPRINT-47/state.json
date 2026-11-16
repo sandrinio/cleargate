@@ -28,11 +28,11 @@
       "lane_demotion_reason": null
     },
     "STORY-065-03": {
-      "state": "Ready to Bounce",
+      "state": "Done",
       "qa_bounces": 0,
       "arch_bounces": 0,
       "worktree": null,
-      "updated_at": "2026-11-16T08:43:32.902Z",
+      "updated_at": "2026-11-16T10:36:18.223Z",
       "notes": "",
       "lane": "standard",
       "lane_assigned_by": "assign-lane-script",
@@ -42,9 +42,9 @@
     "STORY-065-04": {
       "state": "Ready to Bounce",
       "qa_bounces": 1,
-      "arch_bounces": 0,
+      "arch_bounces": 1,
       "worktree": null,
-      "updated_at": "2026-11-16T09:56:25.370Z",
+      "updated_at": "2026-11-16T10:42:08.026Z",
       "notes": "",
       "lane": "runtime",
       "lane_assigned_by": "architect",
@@ -76,6 +76,6 @@
       "lane_demotion_reason": null
     }
   },
-  "last_action": "transition STORY-065-02 → Done",
-  "updated_at": "2026-11-16T10:29:59.825Z"
+  "last_action": "arch-bounce STORY-065-04: arch_bounces=1",
+  "updated_at": "2026-11-16T10:42:08.026Z"
 }
