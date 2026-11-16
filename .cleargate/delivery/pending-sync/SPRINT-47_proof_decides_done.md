@@ -151,7 +151,7 @@ Pending the Sprint Design Review.
 2. Release `cleargate` 0.32.0 (new features, so a minor bump): CHANGELOG, `release(cleargate): v0.32.0 — <summary>`, tag, push cli `main` and the tag, `npm publish`, GitHub release with the registry tarball (checked against the publish shasum).
 3. Archive CR-128 and CR-129 as absorbed (`superseded_by`), push the meta-repo `main`.
 
-**Goal Acceptance Check** (proposed; confirmed at Gate 2) — Tier: live:
+**Goal Acceptance Check** (proposed; confirmed at Gate 2; the sandbox run as the release gate approved 2026-11-16, decision 8) — Tier: live:
 - (a) cli `npm test` has 0 failures at the final cli `main`, and `npm run test:integration` fails only on tests in the kickoff baseline list.
 - (b) Clean-room: the packed release candidate installed into a temp Go repo whose `Makefile` has an `e2e:` target seeds `proof.unit` `go test ./...` and `proof.container` `make e2e`; `cleargate new story` shows `proof_tier` and `## Proof`; `cleargate gate check` names `proof-declared` on the unedited story.
 - (c) Sandbox end-to-end run on the release candidate (plain layout, as SPRINT-46 run 7), a throwaway Go repo with four items: one `unit`; one `container` against a Postgres 18 container with one `@holdout` scenario; one `human`; one `container` item whose first proof fails on purpose. Pass when: every item has `evidence/<ID>.json` or is listed "built, not proven"; the failed proof blocked that merge and the item went back to the Developer; the holdout was absent from the QA-Red and Developer prompts and its test landed in a `qa-red(<ID>): amendment` commit; the human item waited in Sprint Review until the walkthrough confirmation; the report has the proof table and `goal_verdict`; the run halted only at plan confirmation, the walkthrough and Gate 4.
@@ -168,12 +168,12 @@ Pending the Sprint Design Review.
 
 - [x] All work items have their type's required sections.
 - [x] No epic without child stories — EPIC-065 has STORY-065-01..06.
-- [ ] All work items 🟢 — awaiting the owner's answers to the stories' open questions.
+- [x] All work items 🟢 — owner approved STORY-065-01..06 and their open questions as recommended (2026-11-16).
 - [ ] Gate 2 SDR §2 Execution Strategy written by Architect.
 
 ## 5. Gate Checklist
 
-- [ ] **Gate 1** — EPIC-065 approved (2026-11-16); the six stories await approval.
+- [x] **Gate 1** — EPIC-065 and the six roster items approved (owner, 2026-11-16: "approve as recommended").
 - [ ] **Gate 2** (Sprint Ready) — SDR §2 and the Goal Acceptance Check confirmed.
 - [ ] **Gate 3** (preflight) — `cleargate sprint preflight SPRINT-47`.
 - [ ] **Gate 4** (close) — after all items merge and the walkthrough.
@@ -181,3 +181,4 @@ Pending the Sprint Design Review.
 ## 6. Execution Log
 
 - 2026-11-16 · Planned. EPIC-065 §6 answered as recommended by the owner ("happy with recommendations"); surfaces re-mapped at cli 99cbfd7; six stories drafted, every story gate passes.
+- 2026-11-16 · Gate 1. Owner approved the six stories, their seven open questions, the sandbox release gate and no extra roster items ("approve as recommended").

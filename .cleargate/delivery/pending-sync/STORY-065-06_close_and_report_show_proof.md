@@ -4,9 +4,11 @@ parent_epic_ref: EPIC-065
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
-ambiguity: 🟡 Medium
+status: Ready
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-16T09:00:00Z
+ambiguity: 🟢 Low
 context_source: EPIC-065 (approved 2026-11-16) §2 scope and §6 answers; surfaces re-mapped at cleargate-cli 99cbfd7 on 2026-11-16 after SPRINT-46; SPRINT-46 intake items folded in are named in Prior work
 actor: Owner closing a sprint; the Reporter
 complexity_label: L3
@@ -69,10 +71,10 @@ As the owner closing a sprint, I want close and the report to show, per item and
 
 - **Question:** What happens to an unproven item's work item at close: stay open for a later proof (R3), or close as Completed with the gap only in the report?
 - **Recommended:** Stay open (`carry_over: true`, `proof_pending: <tier>`). Completed means Done, and Done now means proven; closing it would make the record say the opposite of the evidence.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
 - **Question:** CR-129 asked for `goal_verdict_acked_by` (who acked). Record a name, or only the time?
 - **Recommended:** Only the time (`goal_verdict_acked_at`). The ack is always the owner's, and a name in a pushed report is personal data the record does not need.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
 
 ### 1.5 Risks
 
@@ -212,7 +214,7 @@ Feature: Close and report show proof
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

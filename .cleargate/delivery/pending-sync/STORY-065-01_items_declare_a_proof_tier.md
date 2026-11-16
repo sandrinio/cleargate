@@ -4,9 +4,11 @@ parent_epic_ref: EPIC-065
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
-ambiguity: 🟡 Medium
+status: Ready
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-16T09:00:00Z
+ambiguity: 🟢 Low
 context_source: EPIC-065 (approved 2026-11-16) §2 scope and §6 answers; surfaces re-mapped at cleargate-cli 99cbfd7 on 2026-11-16 after SPRINT-46; SPRINT-46 intake items folded in are named in Prior work
 actor: Owner and orchestrator planning a sprint; the readiness gate and preflight
 complexity_label: L3
@@ -74,7 +76,7 @@ As the owner planning a sprint, I want every story, CR and bug to say before it 
 
 - **Question:** Should the cut-over read `created_at` (an ISO timestamp every item carries) or `created_at_version`?
 - **Recommended:** `created_at`. The `test-layers-declared` comment (`readiness-predicates.ts:1270-1272`) records that a `created_at_version` compare cannot be built, because `>=` coerces with `Number()`.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
 
 ### 1.5 Risks
 
@@ -216,7 +218,7 @@ N/A — no endpoint. The predicate's id is `proof-declared`; STORY-065-02 and 06
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

@@ -4,9 +4,11 @@ parent_epic_ref: EPIC-065
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
-ambiguity: 🟡 Medium
+status: Ready
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-16T09:00:00Z
+ambiguity: 🟢 Low
 context_source: EPIC-065 (approved 2026-11-16) §2 scope and §6 answers; surfaces re-mapped at cleargate-cli 99cbfd7 on 2026-11-16 after SPRINT-46; SPRINT-46 intake items folded in are named in Prior work
 actor: Orchestrator running waves and the walkthrough (both hosts)
 complexity_label: L3
@@ -75,7 +77,7 @@ As the orchestrator running a sprint, I want a prove step that runs every item's
 
 - **Question:** Should a failed proof count against the item's QA bounce cap?
 - **Recommended:** Yes. A failed proof after QA-Verify passed is the case this epic exists to catch, and it is a code defect found late; counting it keeps the existing escalation path instead of adding a new counter.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
 
 ### 1.5 Risks
 
@@ -210,7 +212,7 @@ N/A — calls `record_evidence.mjs` per STORY-065-02 (exit 0 / 1 / 2).
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 

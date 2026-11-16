@@ -24,6 +24,25 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
 - Supersedes: [[CR-128]]
 
+### [[STORY-065-01]] — Items Declare a Proof Tier (2026-11-16)
+- Q: Should the cut-over read `created_at` (an ISO timestamp every item carries) or `created_at_version`? → As recommended (owner, 2026-11-16: "approve as recommended").
+
+### [[STORY-065-02]] — Record Evidence for a Proof (2026-11-16)
+- Q: Should a baseline-excused unit proof count as `pass`? → As recommended (owner, 2026-11-16: "approve as recommended").
+
+### [[STORY-065-03]] — Done Waits for Evidence (2026-11-16)
+- Q: Should `CLEARGATE_ADVISORY=1` (the break-glass) let `update_state.mjs` write Done without evidence? → As recommended (owner, 2026-11-16: "approve as recommended").
+
+### [[STORY-065-04]] — Prove Stage in the Build Loop (2026-11-16)
+- Q: Should a failed proof count against the item's QA bounce cap? → As recommended (owner, 2026-11-16: "approve as recommended").
+
+### [[STORY-065-05]] — Holdout Scenarios and Property Tests (2026-11-16)
+- Q: [[CR-122]] (Draft) proposes letting the Developer read the red tests. Does that conflict with hiding holdouts? → As recommended (owner, 2026-11-16: "approve as recommended").
+
+### [[STORY-065-06]] — Close and Report Show Proof (2026-11-16)
+- Q: What happens to an unproven item's work item at close: stay open for a later proof (R3), or close as… ([[STORY-065-06]]) → As recommended (owner, 2026-11-16: "approve as recommended").
+- Q: CR-129 asked for `goal_verdict_acked_by` (who acked). Record a name, or only the time? → As recommended (owner, 2026-11-16: "approve as recommended").
+
 ### [[STORY-066-03]] — Pre-gate scan runs configured commands on any stack (2026-11-15)
 - Q: BUG-087 proposes also requiring the named `npm run <script>` key to exist. Do we? → Accept the recommendation (default; EPIC-066 decision of record is stack neutrality).
 - Q: BUG-087 says `qa` mode is never used by the loop. EPIC-066 makes `merge_story.mjs` run `pre_gate_runner.sh qa`. Does that change what… ([[STORY-066-03]]) → Accept the recommendation.

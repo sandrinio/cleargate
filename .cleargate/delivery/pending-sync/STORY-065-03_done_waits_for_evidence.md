@@ -4,9 +4,11 @@ parent_epic_ref: EPIC-065
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
-ambiguity: 🟡 Medium
+status: Ready
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-16T09:00:00Z
+ambiguity: 🟢 Low
 context_source: EPIC-065 (approved 2026-11-16) §2 scope and §6 answers; surfaces re-mapped at cleargate-cli 99cbfd7 on 2026-11-16 after SPRINT-46; SPRINT-46 intake items folded in are named in Prior work
 actor: merge_story.mjs and the orchestrator moving items to Done
 complexity_label: L2
@@ -68,7 +70,7 @@ As the owner, I want an item to become Done only when evidence for its declared 
 
 - **Question:** Should `CLEARGATE_ADVISORY=1` (the break-glass) let `update_state.mjs` write Done without evidence?
 - **Recommended:** No. The close ack already lets the owner accept an unproven item as "built, not proven" (STORY-065-06), so there is no case where Done must be written without evidence; a bypass would make Done mean nothing again.
-- **Human decision:** {populated during Brief review}
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
 
 ### 1.5 Risks
 
@@ -199,7 +201,7 @@ N/A — reads the `evidence/<ID>.json` contract defined in STORY-065-02 (`status
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🟡 Medium Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
