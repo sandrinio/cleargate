@@ -169,10 +169,13 @@ Feature: Prove stage in the build loop
 N/A — calls `record_evidence.mjs` per STORY-065-02 (exit 0 / 1 / 2).
 
 ## Task Breakdown
-- [ ] Red tests: the Outline; GREEN verdict stops before prove and validates on both paths; skill text pins for the failed-proof and cannot-run rules and the walkthrough proof.
-- [ ] `segment_stages.mjs` stage and lanes.
-- [ ] Runner, args, `launch_wave.mjs` and `dispatch_serial.mjs`: verify, adjust only if a test shows the need.
-- [ ] SKILL §C.0.1, §C.7, §D and both `dispatch-serial.md` copies, Claude and Codex.
+- [ ] QA-Red: write prove-stage.red (6 scenarios), edit sealed segment-stages.red :48-51 and codex-sprint-execution-render.red R3 :54, then seal -> R1, R2, R3, R4, R4a, R5
+- [ ] segment_stages.mjs: `prove` in STAGE_NAMES, STAGE_DEFS and every lane before `merge` -> R1
+- [ ] Verify that wave_runner.js, wave_runner_args.mjs, launch_wave.mjs and dispatch_serial.mjs stay unchanged under the tests -> R2
+- [ ] Claude SKILL: §5 table, §C.0.1 step 8, §C.6 clean path, new §C.6.5, §C.7 state sentence, §D walkthrough proof, §8 row -> R3, R4, R5
+- [ ] dispatch-serial.md step 3 and §3 merge row -> R3
+- [ ] build-codex-payload.mjs R3, then npm run gen:codex and npm run prebuild -> R4a
+- [ ] npm run typecheck; test:file prove-stage, segment-stages, codex-sprint-execution-render, loop-spec-three-paths, wave-runner, dispatch-serial-doc, skill-md-serial-pointers, skill-md-conditional-architect, expected-red-not-a-flag, test-gate-amend-b, prep-reporter-test-gate, agent-environment-rule, contract-first-dag-text, wave-runner-sandbox-fixes -> all
 
 ## 4. Quality Gates
 

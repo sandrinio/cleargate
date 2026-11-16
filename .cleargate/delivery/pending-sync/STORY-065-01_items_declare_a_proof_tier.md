@@ -170,12 +170,16 @@ Feature: Items declare a proof tier
 N/A — no endpoint. The predicate's id is `proof-declared`; STORY-065-02 and 065-04 read `proof_tier` and the `## Proof` command with the existing `parseProofCommand` rule.
 
 ## Task Breakdown
-- [ ] Red tests: the Outline's three rows pass; container without holdout fails; unedited template fails; pre-cut-over item passes; preflight names `CR-E: proof-declared`.
-- [ ] Templates: `proof_tier` key, `## Proof` section after the verification section, `@holdout` guidance in the three Gherkin sections; `Tier:` line in `sprint_context.md`.
-- [ ] `proof-declared` evaluator, cut-over constant, dispatch entry; registry and vocabulary entry 14.
-- [ ] Preflight rule in `evaluateItem`.
-- [ ] SKILL §A.5 sentence in both hosts.
-- [ ] Pinning test cases; before/after gate sweep over `pending-sync/` recorded in the dev report.
+- [ ] QA-Red: write `test/lib/proof-declared.red.node.test.ts` (scenarios 1-6) -> R1 R2 R3 R4
+- [ ] QA-Red: write `test/commands/preflight-proof-tier.red.node.test.ts` (scenarios 7-8) -> R5
+- [ ] QA-Red: add 3 placement cases to the pinning test, bump the 4 count pins, add `proof_tier` to both preflight item writers -> R1 R4 R5
+- [ ] Templates: `proof_tier` key, `## Proof` section and holdout paragraph in story.md, CR.md and Bug.md; Tier line in sprint_context.md -> R1 R2 R3
+- [ ] `readiness-predicates.ts`: exports, cut-over, union member, parser branch 14, `evalProofDeclared`, switch case, docstring 15 -> R4
+- [ ] `readiness-gates.md`: count 14, vocabulary entry 14, `proof-declared` in the story, cr and bug blocks -> R4
+- [ ] `sprint.ts` `evaluateItem` proof-tier rule and hint line; SKILL A.1 item-5 clause -> R5
+- [ ] SKILL §A.5 tier sentence; `npm run gen:codex`; `npm run prebuild` passes `--check` -> R3
+- [ ] `npm run typecheck`; targeted tests (the 4 new or edited files above, `readiness-predicates*.ts`, `gate-unit`, `gate-cache-staleness.red`, `init-sprint-context.red`, `codex-sprint-execution-render.red`, `prep-reporter-test-gate.red`, `wave-runner-sandbox-fixes.red`, `assign-lane.red`, `e2e/spidr-coverage.red.integration`) -> R1-R5
+- [ ] R6 sweep. Make two fresh copies of OUTER `.cleargate/delivery` under a short private TMPDIR, each `git init`. Give `before` the gates doc from `git show 99cbfd7:scaffold/core/.cleargate/knowledge/readiness-gates.md` and `after` the worktree's. Run an in-process tsx script (kept in scratch, never committed) that calls `gateCheckHandler` with a fixed `now` on every STORY, CR and BUG. Diff `pass` and the failing-criteria id sets; the result must be 0 changed. Record it in the dev report. -> R6
 
 ## 4. Quality Gates
 

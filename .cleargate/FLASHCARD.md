@@ -1,3 +1,10 @@
+2026-11-16 · #upgrade #qa-red · a new GATE_FIELDS entry breaks ~9 exact plan/line asserts in sealed gate-commands-kept.red; QA-Red amends
+2026-11-16 · #upgrade #gate-checks · once the projection holds the waiver, upgrade takes the unchanged path: print the kept-waiver line without a write
+2026-11-16 · #scripts #timeout · spawnSync timeout kills bash only; a grandchild holding the pipe blocks it. Use detached spawn plus a process-group kill
+2026-11-16 · #gate #counts #qa-red · predicate counts are also pinned literally: doctrine.red :330/:360, testing-strategy.red :403/:407; bump in QA-Red
+2026-11-16 · #preflight #test-harness · a new check-5 item rule reddens sprint-preflight.node.test.ts bare-fm item writers (:593, :866); scope by id type
+2026-11-16 · #skill #test-harness · loop-spec T4 pins §C.7 exit rows to exactly 0,2,3,4,5; a new stage's exit table needs its own §C heading
+2026-11-16 · #stages #test-harness · segment-stages Sc2 forbids a quoted stage name in launch_wave.mjs/dispatch_serial.mjs; a new stage never adds a literal there
 2026-11-16 · #reporter #tokens · token-ledger rows are overlapping orchestrator windows; never sum them as a total, use sprint_metrics tokens
 2026-11-16 · #gate #templates · readiness checkbox counts match only lines starting `- [ ]`; numbered `1. - [ ]` template rows never count
 2026-11-16 · #test-harness #release · cli unit tests calling sprintInitHandler spawn the baseline if the outer repo has record_baseline.mjs; stub baselineFn

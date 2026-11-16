@@ -61,6 +61,7 @@ As the orchestrator, I want one script that runs an item's proof (or records the
   - The tier comes from `--tier`, else the item's frontmatter `proof_tier` (item file found in `pending-sync/` or `archive/` the way `init_sprint.mjs` `findItemFile` finds it). No tier → exit 2, nothing written.
   - The command comes from the arguments after `--`, else the item's `## Proof` command (`parseProofCommand`), else `gate-checks.json` `proof.<tier>`, else, for `unit` only, `qa.test`. No command for `unit`/`container` → exit 2, nothing written.
   - For `live` or `human` with no command and no `--human`, it writes `status: "pending"` and exits 0 (the prove stage uses this; STORY-065-04).
+  - **Clarification (2026-11-16, CR:spec-clarification from the STORY-065-04 plan):** when `--worktree` is passed (the prove stage at the merge barrier), a `live` or `human` item records `status: "pending"` and runs nothing, even when it has a `## Proof` command; a `live` command runs only without `--worktree` (the walkthrough call, from the sprint branch checkout). Exit codes and exports are unchanged. A `human` item never runs a command, with or without `--worktree`: only `--human "<note>"` records its proof; without it the recorder records `pending`.
   - It runs the command with `bash -c` in `--worktree` (default: repo root), records the exit code, and keeps the last 40 output lines with the value of any environment variable whose name contains `TOKEN`, `SECRET`, `KEY` or `PASSWORD` replaced by `***`. A run is bounded by `CLEARGATE_PROOF_TIMEOUT_S` (default 1800); a timeout records `status: "fail"` with `timed_out: true`.
   - **Baseline:** when the command equals `baseline.json`'s `command` and every failing test it names already failed in the baseline, it records `status: "pass"` with `excused: "baseline"` and the names, using `record_baseline.mjs`'s `extractFailing` (an old failure on the sprint base is not held against the item).
   - It writes `<sprintDir>/evidence/<ID>.json` atomically: `{schema_version: 1, id, tier, status: pass|fail|pending, command | note, exit_code, timed_out, excused, tail[], sha, recorded_at, recorded_by: "record_evidence.mjs", mode: command|human|pending, duration_ms}`, where `sha` is `git rev-parse HEAD` in the run directory. It prints the same object as one JSON line on stdout.
@@ -179,13 +180,16 @@ Feature: Record evidence for a proof
 | `evidence/<ID>.json` (file) | read | None | — | `{schema_version, id, tier, status, command\|note, exit_code, timed_out, excused, tail[], sha, recorded_at, recorded_by, mode, duration_ms}` — the contract STORY-065-03, 065-04 and 065-06 read |
 
 ## Task Breakdown
-- [ ] Red tests for the five scenarios (fixture repo with a fake proof command; Go-shaped fixture for init).
-- [ ] `lib/proof.mjs`; `prep_qa_context.mjs` imports it and gains the `proof.<tier>` fallback.
-- [ ] `record_evidence.mjs`: argument parsing, tier and command resolution, run with timeout, masking, baseline excuse, atomic write, JSON line, exit codes.
-- [ ] `gate-checks.json` default `proof` block.
-- [ ] `detect-test-stack.ts` seeding and `GATE_FIELDS`.
-- [ ] `upgrade.ts` user-key merge and byte-identical skip.
-- [ ] Clean-room: `cleargate init` from the packed tarball in a temp Go repo shows the seeded block (EPIC-058 rule 1).
+- [ ] QA-Red: `record-evidence.red.node.test.ts` and `gate-checks-proof.red.node.test.ts` (scenarios 1–6, timeout, no-tier); amend the sealed `gate-commands-kept.red` assertions for the two proof fields -> R1, R4, R5
+- [ ] `lib/proof.mjs`: add `resolveProofCommand`; frozen exports unchanged -> R2, R6
+- [ ] `prep_qa_context.mjs`: import `parseProofCommand`, `readProofTier` and `resolveProofCommand`; delete the private copy -> R2
+- [ ] `init_sprint.mjs`: import `findItemFile` from `lib/proof.mjs`; delete the private copy and the `matchesId` import -> R2, R6
+- [ ] `record_evidence.mjs`: arguments, sprint dir, tier, command chain, async run with process-group timeout, masking, baseline excuse, atomic write, JSON line, exit codes, realpath entry guard -> R1, R6
+- [ ] `gate-checks.json`: default `proof` block -> R3
+- [ ] `detect-test-stack.ts`: `containerProofCmd`; `GATE_FIELDS` gains two; render, project, local-edits, `keepUserGateKeys`, `readGateChecksRaw` -> R4, R5
+- [ ] `upgrade.ts`: prior raw read; projection with prior; skip the write when unchanged; `keepUserGateKeys`; waiver line rule -> R5
+- [ ] Typecheck, plus targeted tests: the two new reds; `gate-commands-kept.red`, `upgrade-gate-checks-output.red`, `upgrade-keeps-test-waiver.red`, `upgrade-preserves-gate-commands`, `init-test-stack-detect.red`, `prep-qa-context-commands.red`, `prep-qa-context-baseline.red`, `init-sprint-context.red`, `pre-gate-any-stack.red.integration` -> R1-R6
+- [ ] Clean-room `cleargate init` from the packed tarball in a temp Go repo, recorded in the dev report -> R4
 
 ## 4. Quality Gates
 
