@@ -1,3 +1,9 @@
+2026-11-16 · #test-harness #security · `k in obj` on parsed user JSON hits the prototype chain; use Object.hasOwn and skip __proto__
+2026-11-16 · #regex #crlf · a '- **Label:** (.*)$' regex on body.split('\n') never matches a CRLF line; split on /\r?\n/ like parseProofCommand
+2026-11-16 · #contract #holdout · 05's scanGherkinScenarios accepts stacked tag lines and any @-led line, which P2 doesn't; the 01 gate is the narrower reader
+2026-11-16 · #scripts #spawn · async spawn resolves on 'close': a background child holding stdout turns exit 0 into a timeout; kill the group on 'exit'
+2026-11-16 · #upgrade #gate-checks #security · merging user JSON keys with `k in base` follows __proto__ and pollutes Object.prototype; use Object.hasOwn, skip __proto__
+2026-11-16 · #test-harness #skill · a new table row `| 2 |` placed before §C.7 in SKILL.md hijacks tests that take the first `| 2 |` line of the whole file
 2026-11-16 · #upgrade #qa-red · a new GATE_FIELDS entry breaks ~9 exact plan/line asserts in sealed gate-commands-kept.red; QA-Red amends
 2026-11-16 · #upgrade #gate-checks · once the projection holds the waiver, upgrade takes the unchanged path: print the kept-waiver line without a write
 2026-11-16 · #scripts #timeout · spawnSync timeout kills bash only; a grandchild holding the pipe blocks it. Use detached spawn plus a process-group kill

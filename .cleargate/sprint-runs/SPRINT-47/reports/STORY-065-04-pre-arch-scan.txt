@@ -2,7 +2,7 @@
 Mode: arch
 Worktree: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli
 Branch: contract/S-47-evidence
-Timestamp: 2026-11-16T09:44:09Z
+Timestamp: 2026-11-16T09:59:06Z
 ---
 [N/A] typecheck: target cleargate-cli is not in the worktree
 [PASS] new_deps: no new runtime deps
@@ -40,6 +40,7 @@ Timestamp: 2026-11-16T09:44:09Z
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/templates/synthesis: 6 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/templates/scaffold: 0 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/.cleargate: 0 files
+  /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/.cleargate/sprint-runs: 0 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/.cleargate/reports: 1 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/scaffold: 0 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-04/cleargate-cli/scaffold/core: 1 files

@@ -154,11 +154,11 @@ Feature: Holdout scenarios and property tests
 N/A — `seal_red.mjs` keeps its JSON line; `amendment` is additive.
 
 ## Task Breakdown
-- [ ] Red tests for the five scenarios.
-- [ ] Holdout parser and tag-aware `countScenarios` in `qa_red_lint.mjs`; `seal_red.mjs` uses the visible count.
-- [ ] `seal_red.mjs --amendment`.
-- [ ] View file in `wave_runner_args.mjs`; per-role Item file in `wave_runner.js`.
-- [ ] `qa.md`/`qa.toml` RED and VERIFY rules; `developer.md`/`developer.toml` read rule.
+- [x] Red tests for the five scenarios.
+- [x] Holdout parser and tag-aware `countScenarios` in `qa_red_lint.mjs`; `seal_red.mjs` uses the visible count.
+- [x] `seal_red.mjs --amendment`.
+- [x] View file in `wave_runner_args.mjs`; per-role Item file in `wave_runner.js`.
+- [x] `qa.md`/`qa.toml` RED and VERIFY rules; `developer.md`/`developer.toml` read rule.
 
 ## 4. Quality Gates
 

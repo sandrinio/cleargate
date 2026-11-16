@@ -169,6 +169,120 @@ Feature: Items declare a proof tier
 ### 3.3 API Contract (if applicable)
 N/A — no endpoint. The predicate's id is `proof-declared`; STORY-065-02 and 065-04 read `proof_tier` and the `## Proof` command with the existing `parseProofCommand` rule.
 
+## 4. Quality Gates`; CR: after `## 4. Verification Protocol`; bug: after `## 5. Verification Protocol (The Failing Test)`). That placement shifts none of the positional `section(N)` criteria in `readiness-gates.md` (story 3 and 5, CR 3 and 6, bug 2). The section holds:
+  - `- **Tier:**` (repeats the frontmatter value for the reader),
+  - `- **Expected result:**` what a pass looks like,
+  - `- **Why human:**` (only for `human`: why no agent can reach the check),
+  - `- **Steps:**` (for `live` and `human`, when the proof is not one command),
+  - one fenced block whose first non-blank line is the proof command — the format `prep_qa_context.mjs` `parseProofCommand` already reads. For `unit` and `container` the block may be omitted; the command then comes from `gate-checks.json` `proof.<tier>` (STORY-065-02).
+- **R2 — Holdout guidance.** The Gherkin section of each template says: an item whose tier is `container` or `live` tags at least one scenario `@holdout` on the line above `Scenario:`; QA-Red and the Developer never see it, and QA-Verify writes and runs its test (STORY-065-05).
+- **R3 — Goal tier.** `templates/sprint_context.md` `## Goal Acceptance Check` gains a `- **Tier:**` line, and SKILL §A.5 (Claude `SKILL.md` and the Codex rendering under `scaffold/core/.agents/skills/sprint-execution/`) asks for the goal's tier when the check is derived.
+- **R4 — Predicate `proof-declared`.** A closed-set predicate in `readiness-predicates.ts`, registered for story `ready-for-execution`, CR `ready-to-apply` and bug `ready-for-fix`, documented as vocabulary entry 14 (the header's "exactly 13 predicate shapes" becomes 14). It passes for an item whose `created_at` is before the cut-over constant `PROOF_DECLARED_CUTOVER` (an ISO date set to the day this story merges). Otherwise it requires: `proof_tier` is one of the four values; a `## Proof` section exists; `Expected result` is filled; `human` has a filled `Why human`; `live` has a command block or filled `Steps`; `container` and `live` have at least one `@holdout`-tagged scenario. A `{…}` placeholder counts as empty, so an unedited template fails (BUG-054's rule). The failure detail names the first missing part.
+- **R5 — Preflight.** `cleargate sprint preflight` check 5 also fails any non-terminal in-scope item without a valid `proof_tier`, whatever its `created_at`, with `<ID>: proof-declared`.
+- **R6 — No existing item changes.** A before/after `cleargate gate check` sweep over every item in `pending-sync/` shows no changed result.
+
+### 1.3 Out of Scope
+- Recording or running proofs (STORY-065-02), the Done guard (065-03), the prove stage (065-04), hiding holdouts (065-05), close and report (065-06).
+- Hotfixes: they keep `## 3. Verification Steps` and get no tier.
+- Epics and initiatives: their Testing Strategy already carries the real-host level (CR-126).
+
+### 1.4 Open Questions
+
+- **Question:** Should the cut-over read `created_at` (an ISO timestamp every item carries) or `created_at_version`?
+- **Recommended:** `created_at`. The `test-layers-declared` comment (`readiness-predicates.ts:1270-1272`) records that a `created_at_version` compare cannot be built, because `>=` coerces with `Number()`.
+- **Human decision:** As recommended (owner, 2026-11-16: "approve as recommended").
+
+### 1.5 Risks
+
+- **Risk:** The new section is placed where `section(N)` counts it and a positional criterion silently reads the wrong section.
+- **Mitigation:** R1 fixes the placement; the gate-section pinning test (`test/docs/gate-section-index-pinning.node.test.ts`) gains one case per template proving the indexes are unchanged.
+- **Risk:** Items drafted between the cut-over and a host's upgrade fail a gate they cannot see in their old template.
+- **Mitigation:** The failure detail names the missing part and the template section to copy; `cleargate upgrade` brings the new templates.
+
+## 2. The Truth (Executable Tests)
+
+### 2.1 Acceptance Criteria (Gherkin)
+
+**SPIDR coverage.**
+
+| Axis | Cover | Reason |
+|---|---|---|
+| Paths | T | An item passes by command, or by steps plus reason (human). |
+| Interfaces | T | The readiness gate (`cleargate gate check`) and sprint preflight both enforce it. |
+| Data | T | Three item types and four tiers, through one Outline. |
+| Rules | T | Cut-over rule, holdout rule, unedited-template rule. |
+
+```gherkin
+Feature: Items declare a proof tier
+
+  @data @paths
+  Scenario Outline: A new item that declares its proof passes proof-declared
+    Given a <type> created after the cut-over with proof_tier "<tier>" and a filled Proof section <proof>
+    When cleargate gate check runs on it
+    Then proof-declared passes
+
+    Examples:
+      | type  | tier      | proof                                                     |
+      | story | unit      | with no command block (gate-checks proof.unit is used)    |
+      | CR    | container | with the command "make e2e" and one @holdout scenario     |
+      | bug   | human     | with Why human "agents cannot reach the controller" and Steps |
+
+  @rules
+  Scenario: A container item without a holdout scenario fails
+    Given a story created after the cut-over with proof_tier "container" and no @holdout scenario
+    When cleargate gate check runs on it
+    Then proof-declared fails with "container tier needs at least one @holdout scenario"
+
+  @rules
+  Scenario: An unedited template fails
+    Given a story created by "cleargate new story" after the cut-over and not edited
+    Then the story shows a proof_tier key, a "## Proof" section after "## 4. Quality Gates" and the @holdout guidance
+    When cleargate gate check runs on it
+    Then proof-declared fails with "proof_tier is missing"
+
+  @paths
+  Scenario: The sprint goal names a tier
+    Given a sprint initialised by init_sprint.mjs
+    Then sprint-context.md's Goal Acceptance Check has a "Tier:" line
+
+  @rules
+  Scenario: Items created before the cut-over are unchanged
+    Given every item in pending-sync was created before the cut-over
+    When cleargate gate check runs on each of them before and after this change
+    Then no item's gate result changes
+
+  @interfaces
+  Scenario: An item without a tier cannot enter a sprint
+    Given CR-E was created before the cut-over and has no proof_tier
+    And CR-E is in scope of a sprint plan
+    When cleargate sprint preflight runs for that sprint
+    Then check 5 fails with "CR-E: proof-declared"
+```
+
+### 2.2 Verification Steps (Manual)
+- [ ] `cleargate new story --epic EPIC-065 x` in a temp copy shows `proof_tier` and `## Proof`; `cleargate gate check` names `proof-declared`.
+- [ ] A fresh `sprint-context.md` written by `init_sprint.mjs` shows the `Tier:` line under Goal Acceptance Check.
+
+## 3. The Implementation Guide
+
+### 3.1 Context & Files
+
+| Item | Value |
+|---|---|
+| Primary File | `cleargate-cli/src/lib/readiness-predicates.ts` |
+| Related Files | `cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md`, `cleargate-cli/scaffold/core/.cleargate/templates/story.md`, `cleargate-cli/scaffold/core/.cleargate/templates/CR.md`, `cleargate-cli/scaffold/core/.cleargate/templates/Bug.md`, `cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md`, `cleargate-cli/src/commands/sprint.ts`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md`, `cleargate-cli/test/docs/gate-section-index-pinning.node.test.ts` |
+| New Files Needed | Yes — `cleargate-cli/test/lib/proof-declared.red.node.test.ts`, `cleargate-cli/test/commands/preflight-proof-tier.red.node.test.ts` |
+
+### 3.2 Technical Logic
+- Add `proof-declared` to the closed-set dispatch (`readiness-predicates.ts:188-214`) beside `test-layers-declared`. It receives `ParsedDoc {fm, body, absPath}`. Read `fm.created_at` (string or Date); compare with `PROOF_DECLARED_CUTOVER` as dates; before the cut-over return pass with detail `pre-cutover`.
+- Locate `## Proof` with the same fence-aware scan `parseProofCommand` uses (`prep_qa_context.mjs:545-569`): heading recognised outside fences, section ends at the next `#`/`##` heading. Read the bullet values; treat `{…}` and empty as missing.
+- Holdout count: lines `@holdout` (alone or among other tags) directly above a `Scenario:`/`Scenario Outline:` line inside a fenced `gherkin` block.
+- Preflight: inside `evaluateItem` (`sprint.ts:~1673-1710`), after the terminal-status skip, push `{id, reason: 'proof-declared', failingCriteria: ['proof-declared']}` when `fm.proof_tier` is not one of the four values.
+- Update `readiness-gates.md`: add `- id: proof-declared` / `check: "proof-declared"` to the three blocks and the vocabulary entry; bump the count line.
+
+### 3.3 API Contract (if applicable)
+N/A — no endpoint. The predicate's id is `proof-declared`; STORY-065-02 and 065-04 read `proof_tier` and the `## Proof` command with the existing `parseProofCommand` rule.
+
 ## Task Breakdown
 - [ ] QA-Red: write `test/lib/proof-declared.red.node.test.ts` (scenarios 1-6) -> R1 R2 R3 R4
 - [ ] QA-Red: write `test/commands/preflight-proof-tier.red.node.test.ts` (scenarios 7-8) -> R5

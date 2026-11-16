@@ -2,7 +2,7 @@
 Mode: arch
 Worktree: /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-02/cleargate-cli
 Branch: contract/S-47-evidence
-Timestamp: 2026-11-16T09:47:47Z
+Timestamp: 2026-11-16T09:49:06Z
 ---
 [N/A] typecheck: target cleargate-cli is not in the worktree
 [PASS] new_deps: no new runtime deps
@@ -55,8 +55,8 @@ Timestamp: 2026-11-16T09:47:47Z
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-02/cleargate-cli/src/commands: 37 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-02/cleargate-cli/src/hosts: 6 files
   /Users/ssuladze/Documents/Dev/ClearGate/.worktrees/STORY-065-02/cleargate-cli/src/admin-api: 6 files
-[FAIL] qa_red_lint: R-volume: 11 tests for 5 scenarios (limit 10); counted: tests added since 37efc13|
-R-volume: 11 tests for 5 scenarios (limit 10); counted: tests added since 37efc13
+[PASS] qa_red_lint: no semantic fixture issues
 ---
-Summary: 2 passed, 1 failed, 0
+Summary: 3 passed, 0
+0 failed, 0
 0 warnings
