@@ -45,7 +45,7 @@ context_source: |
   Absorbs CR-128 (into STORY-065-01) and CR-129 (into STORY-065-06). Folds in two SPRINT-46 intake
   items: upgrade keeping user keys in gate-checks.json (STORY-065-02) and a seal for new red files
   after the Developer's commit (STORY-065-05). First sprint here on the new loop (cleargate 0.31.2).
-last_contradict_sha: "8602281229209ffa67d2519a1bd438d6a60591fea806b13ba184270807116032"
+last_contradict_sha: "c14c59842c9b56819cd6b7bb72245c47089b0f027339d852bc9a9c20c3c4876f"
 ---
 
 # SPRINT-47: Proof Decides Done
@@ -86,22 +86,133 @@ Make proof decide Done: every item declares a proof tier, a script records each 
 | `STORY-065-06` | Close and report show proof <!-- cleargate:ignore-ids -->(absorbs CR-129)<!-- /cleargate:ignore-ids --> | standard | SDR | after 02's contract | med | Unit + integration — a fixture sprint closed end to end with one unproven item; Step 2.5 on the new report template |
 
 ## 2. Execution Strategy
-*(Written by the Architect during the Sprint Design Review at kickoff: architect-reader ×6, then architect-synth, which writes §§2.1–2.5, the Wave Assignment table and `plans/waves.json`. Expected shape, for review only: one contract, `contract/S-47-evidence` — the `evidence/<ID>.json` schema and `lib/proof.mjs` exports owned by STORY-065-02 — consumed by 065-03, 065-04 and 065-06; SKILL.md is shared by 065-01, 065-04 and 065-06 in different sections.)*
+*(Written by the Architect during the Sprint Design Review, architect-reader ×6 → architect-synth, 2026-11-16. `plans/waves.json` schema_version 2; `launchable: false` until Gate 2 confirms the layout; `refused_if_gate_2_declines` carries the six BUG-046 strings.)*
 
 ### 2.1 Phase Plan
-Pending the Sprint Design Review.
+
+**Shape.** Contract-first build-then-integrate DAG. All six items build at once, each in its own worktree cut from its `base`; only `upstream` orders integration, and merges are serial. One contract, one real collision. No item is fail-safe-serialized: every item declares `parallel_eligible: y`, none writes to a database, none has an empty surface.
+
+| Item | Lane | Base | Upstream | Layer |
+|---|---|---|---|---|
+| STORY-065-01 | runtime | cli `main` | — | 0 |
+| STORY-065-02 | runtime | `contract/S-47-evidence` (owner) | — | 0 |
+| STORY-065-05 | standard | cli `main` | — | 0 |
+| STORY-065-03 | standard | `contract/S-47-evidence` | 02 (C1) | 1 |
+| STORY-065-04 | runtime (raised) | `contract/S-47-evidence` | 02 (C1); 01 (generated `.agents` SKILL.md) | 1 |
+| STORY-065-06 | standard | `contract/S-47-evidence` | 02 (C1); 04 and 01 (generated `.agents` SKILL.md) | 2 |
+
+- GOAL_RELATION wave1 (01, 02, 05): advances — the declared tier, the recorder, holdouts (Goal check c).
+- GOAL_RELATION wave2 (03, 04): advances — Done waits for evidence; the prove step.
+- GOAL_RELATION wave3 (06): advances — close and the report show proof and the verdict.
+- Critical path: 02 → 04 → 06. Equal or shorter: 01 → 04 → 06, 02 → 03.
+
+**Contract C1: `contract/S-47-evidence`** (cli, base `main`, owner STORY-065-02; consumers 03, 04, 06). A Developer dispatch (C0) creates it after Gate 2 and sprint init, before any build, in a throwaway worktree `OUTER/.worktrees/S47-C0/cleargate-cli`, as one commit `chore(EPIC-065): contract C1 skeleton (STORY-065-02 lib/proof + record_evidence)` adding two new files inside 02's surface.
+
+- **`scaffold/core/.cleargate/scripts/lib/proof.mjs`** — full logic (small and pure; two functions are verbatim moves). Exports:
+  - `PROOF_TIERS`, frozen, `['unit','container','live','human']`
+  - `isProofTier(x): boolean`
+  - `parseProofCommand(content): string|null` — verbatim from `prep_qa_context.mjs:545-567`; a `{…}` placeholder line returns null
+  - `readProofTier(content): string|null` — the raw frontmatter value, not validated, so the guard fails closed on a bad value
+  - `findItemFile(repoRoot, id): string|null` — verbatim from `init_sprint.mjs:117-130`
+  - `evidencePath(sprintDir, id)`
+  - `readEvidence(sprintDir, id): Evidence|null` — null when missing, unreadable or malformed; never throws
+  - `proofStatus(evidence, tier) → {ok, reason: missing|pending|fail|tier|null, recorded_tier}`, checked in that order
+- **Evidence file** `<sprintDir>/evidence/<ID>.json`, written atomically and only by the recorder. Keys (always present): `schema_version: 1`, `id`, `tier`, `status: pass|fail|pending`, `mode: command|human|pending`, `command|null`, `note|null`, `exit_code|null`, `timed_out`, `excused: 'baseline'|null`, `excused_failing: string[]`, `tail` (≤ 40 lines, secrets masked), `sha|null`, `recorded_at`, `recorded_by: 'record_evidence.mjs'`, `duration_ms`. 02 may add keys, never remove or retype one.
+- **`record_evidence.mjs`** CLI: `<ID> [--tier T] [--worktree W] [-- cmd…]` or `<ID> --human "<note>"`. Exit 0 pass or pending, exit 1 proof failed (both write the file and print it as one JSON line); exit 2 could not run (nothing written, empty stdout, one stderr line `record_evidence: <reason>`). Reads `CLEARGATE_PROOF_TIMEOUT_S` and `CLEARGATE_SPRINT_DIR`; entry-point guard. **In C1 it is a stub that always exits 2** ("contract C1 stub") — fail safe: the barrier halts instead of merging.
+- **What 02 may change:** it owns both files; it never renames, retypes or makes async a frozen export, and never changes an exit code or the `proofStatus` order. Its QA-Red finds the `lib/proof.mjs` tests already passing at the C1 base, by design.
+
+**Pinned interfaces** (no branch; full text in `waves.json`):
+- **P1 — `## Proof` format** (owner 01; readers 02's parser and 01's predicate): heading exactly `## Proof`; the command is the first line of the first fenced block under it; a `{…}` placeholder counts as empty.
+- **P2 — holdout rule** (owner 05, mirrored in 01's TypeScript predicate): only the single tag line directly above `Scenario:` / `Scenario Outline:`, only inside gherkin fences.
+- **P3 — `prove` stage** (owner 04): `{kind: 'barrier-script', when: 'always', script: 'record_evidence.mjs'}`, directly before `merge` in every lane.
+- **P4 — Done choice at merge** (owner 03): pass → Done; a declared tier without passing evidence → Sprint Review; no declared tier → Done. The merge result gains `state` and `evidence`.
+- **P5 — Sprint Review at the walkthrough and close** (owners 04 §D, 06): items without a tier are not guarded; a legacy `deferred_verification` with no green result keeps CR-082's output for one release.
+
+**Layout and stage route** (Gate 2 decisions 1 and 2). Every path is inside the nested `cleargate-cli` repo.
+- **Worktrees:** a detached outer host `OUTER/.worktrees/<ID>` plus a cli worktree `OUTER/.worktrees/<ID>/cleargate-cli` on `story/<ID>` from its base; the orchestrator sets them up one at a time (symlink `node_modules` and `/.claude`, then `npm run prebuild`).
+- **Stages:** each lane's stages from the live 0.31.2 `stagesFor`, dispatched by hand (the shipped runner cannot address a nested repo).
+  - **story-plan** (runtime only): the Architect writes `plans/<ID>.md`.
+  - **qa-red** ends with the live seal against the cli worktree: `seal_red.mjs <ID> --worktree OUTER/.worktrees/<ID>/cleargate-cli --sprint-branch <base>` (verified: its git steps run in the cli repo, its records land in OUTER's sprint dir, the scan records typecheck as N/A, so build lanes run `npm run typecheck` themselves).
+  - **architect-tpv**, and **architect-review** on the standard lane, run only when the seal flags (exit 2 included); runtime items always get architect-review.
+  - **qa-verify** runs the live `prep_qa_context.mjs` and the item's Proof column check.
+- **Merge:** one DevOps dispatch at a time into cli `main` with `--no-ff`, local only. `merge_story.mjs` cannot be used (one repo root, a fixed `sprint/S-47` branch, the sprint dir from the same checkout); this route is recorded in §6 as the layout's edge case.
+- **After the merge:** the full suite in a throwaway worktree at `main`'s tip; no dist rebuild on cli `main`. Teardown: cli worktree first, then the outer host.
+- **Proof (rule 1):** the orchestrator writes the QA-Verify PROOF result to `evidence/<ID>-proof.md`, then runs live `update_state.mjs <ID> Done`.
+- **Kickoff baseline:** recorded at 99cbfd7 in `evidence/baseline-failures-99cbfd7.txt`.
+
+**Lanes:** 5 build lanes, 1 merge lane. C0 first; at kickoff 02, 01, 04, 06, 05; 03 takes the next free lane.
 
 ### 2.2 Merge Ordering (Shared-File Surface Analysis)
-Pending the Sprint Design Review.
+
+Default merge order **02, 01, 05, 04, 03, 06**, taken as items pass QA-Verify, subject to `upstream`. Ties: layer 0 02 then 01; layer 1 04 before 03.
+
+| Shared File | Stories Touching It | Merge Order | Rationale |
+|---|---|---|---|
+| `scaffold/core/.agents/skills/sprint-execution/SKILL.md` (generated) | 01, 04, 06 | 01 → 04 → 06 | **Real collision (single-writer generated file).** Rendered from the Claude SKILL by `renderCodexSprintExecution` (`build-codex-payload.mjs:334,417`); each story regenerates it in its own commit and again at integration; never hand-merged. |
+| `scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` | 01 (§A.5 :227-245), 04 (§5 table :254-258, §C.0.1 :272-287, new `stage \`prove\`` note, §C.7 :492-511, §D :599-617), 06 (§E.2 :684-713) | 01 → 04 → 06 | Sections do not overlap; follows the generated file's order; each later story re-applies its insertions. |
+| `scaffold/core/.cleargate/scripts/wave_runner.js` | 05 (`promptFor` :50-55, qa-verify schema :32-40), 04 (verify-only, :98-115) | 05 any time | Regions do not overlap; 04 expects no change, and any it needs stays in :98-115. |
+| `scaffold/core/.cleargate/scripts/wave_runner_args.mjs` | 05 (item args :160-176, `view_file`), 04 (verify-only) | 05 any time | Already skips non-agent stages (:47, :161, :176); 04 needs no edit. |
+| `lib/proof.mjs`, `record_evidence.mjs` (new) | C1 → 02 | C1, then 02 | 02 replaces the stub; the skeleton is the shared ancestor of 03, 04 and 06, so no add/add conflict. |
+| Agent `.toml` files (generated) | `devops.toml` 03; `qa.toml`, `developer.toml` 05; `reporter.toml` 06 | — | One editor each. |
 
 ### 2.3 Shared-Surface Warnings
-Pending the Sprint Design Review.
+
+- **01/04/06, SKILL rendering.** Keep the six renderer anchor lines verbatim, including the A3 line `**Serial barrier merge.** …` that `codex-sprint-execution-render.red` Test 32 quotes exactly. §C.0 (§C.0.1, §C.0.2) is Claude-only — Codex replaces it with R2 — so the tokens `C.0.1`, `launch_wave`, `RUN_ID` and `/workflows` may not appear outside it, or prebuild's `--check` fails. Codex's §C.7 gets R3 ("merges each GREEN story … as soon as that story passes"), so decision 7 changes R3 to name the prove step.
+- **04, earlier sealed tests.** `test/scripts/segment-stages.red.node.test.ts:48-51` pins exact lane lists that will now include `prove`; edited in 04's QA-Red commit. `loop-spec-three-paths.red` T1 needs `prove` in the §5 paths table of both SKILL renderings and a `stage \`prove\`` note in §C.
+- **03/04, Done at merge.** §C.7 says the script "marks the item `Done`"; 04 rewrites it to match P4, and 03's `devops.md` (exit-5 rule) states the same rule.
+- **03, untiered items.** As written, R1 sends every item without evidence to Sprint Review. SPRINT-46's sealed merge tests use untiered fixtures that expect Done at seven points: `merge-story.red.integration` :167, :312; `merge-story-resume.red.integration` :156, :175, :192, :287; `merge-story-carry-state.red.integration` :130. Decision 5 makes R1 match R3.
+- **06, close.** `close-sprint-fence.red` (:211, :225-226) pins CR-082's Step 2.9 failure text (decision 6b). Ack-pass writes stay after the ack check (:1533-1550). An item without a tier is not listed as unproven (decision 6a).
+- **01/05, the holdout rule in two languages.** 01 implements it in TypeScript, 05 in `.mjs`; both test the same two tag shapes (P2), or a container item can pass the gate yet show no holdout to 05's view, or the reverse.
+- **01/02, `## Proof` format.** 02's parser ignores a `{…}` placeholder (P1, decision 4); otherwise an unedited template block would run as a bash command.
+- **01/02, `init_sprint.mjs`.** 01 places `- **Tier:**` after the Goal Acceptance Check placeholder; `init_sprint.mjs:48-49` mirrors that placeholder and reads the section's first non-empty line (:413), so the file stays 02's (its `findItemFile` region only).
+- **02/03/06, one evidence rule.** 03 and 06 import `readEvidence`, `proofStatus` and `readProofTier` from `lib/proof.mjs` and never parse evidence themselves. `seal_red.mjs` keeps its own `findItemFile` (05's file); removing that duplicate is not in the roster.
+- **Live loop.** The sprint edits `merge_story.mjs`, `update_state.mjs`, `close_sprint.mjs`, `seal_red.mjs` and `segment_stages.mjs`, which its own loop runs: canonical only (rule 5). The sprint does not use `merge_story.mjs`; the live seal and `update_state.mjs` stay 0.31.2 until Gate 4.
+- **Known reds in the merge lane** (recorded in §6 as they start; never hand-ported): `canonical-live-parity` 5a (templates) from the first of the 01/06 merges; 5b (knowledge) from the first of 01/03; 5c (agents) from the first of 03/05/06; `qa-content` slice parity from the 05 merge; doctor drift lines from the first merge. Scenarios 1–3 and 5d stay green.
 
 ### 2.4 Lane Audit
-Pending the Sprint Design Review; computed lanes are in §1.
+
+| Story | Lane | Signals | Raised by Architect (reason ≤80 chars) |
+|---|---|---|---|
+| `STORY-065-01` | runtime | subsystems 2 (scaffold, src); scenarios 6 | — |
+| `STORY-065-02` | runtime | subsystems 2 (scaffold, src); scenarios 5 | — |
+| `STORY-065-03` | standard | scenarios 6 | — |
+| `STORY-065-04` | runtime | scenarios 5 (computed standard) | stage table all lanes read; amends earlier sealed pins and Codex R3 |
+| `STORY-065-05` | standard | scenarios 5 | — |
+| `STORY-065-06` | standard | scenarios 5 | — |
+
+No item declares `proof_tier` (drafted before the predicate exists). After init the raise is applied with `update_state.mjs STORY-065-04 --lane runtime` (flashcard 2026-11-15 #lanes #sdr).
 
 ### 2.5 ADR-Conflict Flags
-Pending the Sprint Design Review.
+
+- **OD-4 reversed (065-06):** the goal verdict is recorded in the report frontmatter; deliberate, owner-approved (EPIC-065 §6, CR-129 absorbed). SKILL §E.2 and `reporter.md`/`.toml` change together.
+- **Merge route (layout):** the SKILL says `merge_story.mjs` is the one route; this sprint merges by DevOps dispatch because the script cannot reach cli `main`. Same precedent as SPRINT-46; recorded in §6.
+- **EPIC-054 lock (no new state or work unit):** respected — Sprint Review exists; `evidence/`, `unproven.json`, `carry_over`, `proof_pending` live in sprint artifacts or item frontmatter, not `state.json`.
+- **EPIC-055 / CR-124 (serial merges):** respected — the prove step runs at the serial barrier.
+- **Generated Codex files are never hand-edited** (flashcard 2026-09-27 #codex #gen-codex): respected — 04's Codex change goes into the R3 generator text.
+- **BUG-075:** 03 guards only the edge into Done. **CR-082:** `deferred-verify/` read for one more release (06). **`CLEARGATE_ADVISORY`** does not bypass the Done guard (owner decision on 065-03), consistent with "advisory softens gate strength only".
+- **node:test only, real infrastructure:** every new test is `*.node.test.ts`; the container-tier sandbox proof uses a real Postgres 18 container on OrbStack.
+
+### Wave Assignment
+
+| Wave | Stories | Parallel? | Rationale |
+|------|---------|-----------|-----------|
+| wave1 | STORY-065-01, STORY-065-02, STORY-065-05 | Yes | Integration layer 0: no upstream, no real collision. 02 builds from C1, which it owns. Merge 02, then 01. |
+| wave2 | STORY-065-03, STORY-065-04 | Yes | Integration layer 1. 03 upstream 02 (builds now from C1). 04 upstream 02 (C1) and 01 (real collision: the generated `.agents` SKILL.md). No shared path between 03 and 04; on a tie, merge 04 first. |
+| wave3 | STORY-065-06 | No | Integration layer 2. Upstream 04 and 01 (real collision: the generated `.agents` SKILL.md) and 02 (C1). Merges last. |
+
+### Gate 2 decisions (pending the owner; full text in `waves.json` `open_decisions_for_gate_2`)
+
+1. Use nested cli worktrees for SPRINT-47.
+2. Run the stages by hand on the live 0.31.2 scripts; merge by DevOps into cli `main`.
+3. Approve C1 as written (it adds four exports to 02 and names the `excused_failing` key).
+4. Add the `{…}` placeholder rule to `parseProofCommand` (STORY-065-02).
+5. STORY-065-03: an item with no proof tier goes to Done at merge (R1 matches R3).
+6. STORY-065-06: items with no tier are not counted as unproven, and the legacy deferred-verify failure output is kept.
+7. Widen STORY-065-04's surface to `segment-stages.red` and the Codex R3 text in `build-codex-payload.mjs`.
+8. Raise STORY-065-04 to runtime.
+9. Edits to earlier-sprint sealed red tests go in each item's QA-Red commit.
+10. Accept the known reds, no dist rebuild on cli `main` during the sprint, and the kickoff baseline at 99cbfd7.
+11. Run 5 build lanes and 1 merge lane in the kickoff order above.
 
 ## Risks & Dependencies
 
@@ -169,7 +280,7 @@ Pending the Sprint Design Review.
 - [x] All work items have their type's required sections.
 - [x] No epic without child stories — EPIC-065 has STORY-065-01..06.
 - [x] All work items 🟢 — owner approved STORY-065-01..06 and their open questions as recommended (2026-11-16).
-- [ ] Gate 2 SDR §2 Execution Strategy written by Architect.
+- [x] Gate 2 SDR §2 Execution Strategy written by Architect (2026-11-16; `plans/waves.json` schema_version 2).
 
 ## 5. Gate Checklist
 
@@ -182,3 +293,5 @@ Pending the Sprint Design Review.
 
 - 2026-11-16 · Planned. EPIC-065 §6 answered as recommended by the owner ("happy with recommendations"); surfaces re-mapped at cli 99cbfd7; six stories drafted, every story gate passes.
 - 2026-11-16 · Gate 1. Owner approved the six stories, their seven open questions, the sandbox release gate and no extra roster items ("approve as recommended").
+- 2026-11-16 · Gate 3 checks run early: `cleargate sprint preflight SPRINT-47` all pass (test gate `npm --prefix cleargate-cli test` exit 0); devops reachable; a stale `.pending-task` sentinel from a finished subagent was removed before the clean-main check. `sprint/S-47` cut from main.
+- 2026-11-16 · SDR written (architect-reader ×6, architect-synth): one contract (C1 `contract/S-47-evidence`), three integration layers, 065-04 raised to runtime; 11 decisions for Gate 2.

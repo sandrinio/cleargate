@@ -1,0 +1,81 @@
+{
+  "schema_version": 3,
+  "sprint_id": "SPRINT-47",
+  "sprint_status": "Active",
+  "stories": {
+    "STORY-065-01": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-065-02": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "runtime",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-065-03": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-065-04": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "runtime",
+      "lane_assigned_by": "architect",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-065-05": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    },
+    "STORY-065-06": {
+      "state": "Ready to Bounce",
+      "qa_bounces": 0,
+      "arch_bounces": 0,
+      "worktree": null,
+      "updated_at": "2026-11-16T08:43:32.902Z",
+      "notes": "",
+      "lane": "standard",
+      "lane_assigned_by": "assign-lane-script",
+      "lane_demoted_at": null,
+      "lane_demotion_reason": null
+    }
+  },
+  "last_action": "transition STORY-065-06 → Ready to Bounce",
+  "updated_at": "2026-11-16T08:43:32.902Z"
+}
