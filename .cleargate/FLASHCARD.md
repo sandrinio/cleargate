@@ -1,3 +1,4 @@
+2026-11-16 · #schema #frontmatter · cleargate new leaves <instructions> above ---; line-1-only readers (readProofTier) miss proof_tier the gate sees
 2026-11-16 · #test-harness #security · `k in obj` on parsed user JSON hits the prototype chain; use Object.hasOwn and skip __proto__
 2026-11-16 · #regex #crlf · a '- **Label:** (.*)$' regex on body.split('\n') never matches a CRLF line; split on /\r?\n/ like parseProofCommand
 2026-11-16 · #contract #holdout · 05's scanGherkinScenarios accepts stacked tag lines and any @-led line, which P2 doesn't; the 01 gate is the narrower reader

@@ -180,16 +180,16 @@ Feature: Record evidence for a proof
 | `evidence/<ID>.json` (file) | read | None | — | `{schema_version, id, tier, status, command\|note, exit_code, timed_out, excused, tail[], sha, recorded_at, recorded_by, mode, duration_ms}` — the contract STORY-065-03, 065-04 and 065-06 read |
 
 ## Task Breakdown
-- [ ] QA-Red: `record-evidence.red.node.test.ts` and `gate-checks-proof.red.node.test.ts` (scenarios 1–6, timeout, no-tier); amend the sealed `gate-commands-kept.red` assertions for the two proof fields -> R1, R4, R5
-- [ ] `lib/proof.mjs`: add `resolveProofCommand`; frozen exports unchanged -> R2, R6
-- [ ] `prep_qa_context.mjs`: import `parseProofCommand`, `readProofTier` and `resolveProofCommand`; delete the private copy -> R2
-- [ ] `init_sprint.mjs`: import `findItemFile` from `lib/proof.mjs`; delete the private copy and the `matchesId` import -> R2, R6
-- [ ] `record_evidence.mjs`: arguments, sprint dir, tier, command chain, async run with process-group timeout, masking, baseline excuse, atomic write, JSON line, exit codes, realpath entry guard -> R1, R6
-- [ ] `gate-checks.json`: default `proof` block -> R3
-- [ ] `detect-test-stack.ts`: `containerProofCmd`; `GATE_FIELDS` gains two; render, project, local-edits, `keepUserGateKeys`, `readGateChecksRaw` -> R4, R5
-- [ ] `upgrade.ts`: prior raw read; projection with prior; skip the write when unchanged; `keepUserGateKeys`; waiver line rule -> R5
-- [ ] Typecheck, plus targeted tests: the two new reds; `gate-commands-kept.red`, `upgrade-gate-checks-output.red`, `upgrade-keeps-test-waiver.red`, `upgrade-preserves-gate-commands`, `init-test-stack-detect.red`, `prep-qa-context-commands.red`, `prep-qa-context-baseline.red`, `init-sprint-context.red`, `pre-gate-any-stack.red.integration` -> R1-R6
-- [ ] Clean-room `cleargate init` from the packed tarball in a temp Go repo, recorded in the dev report -> R4
+- [x] QA-Red: `record-evidence.red.node.test.ts` and `gate-checks-proof.red.node.test.ts` (scenarios 1–6, timeout, no-tier); amend the sealed `gate-commands-kept.red` assertions for the two proof fields -> R1, R4, R5
+- [x] `lib/proof.mjs`: add `resolveProofCommand`; frozen exports unchanged -> R2, R6
+- [x] `prep_qa_context.mjs`: import `parseProofCommand`, `readProofTier` and `resolveProofCommand`; delete the private copy -> R2
+- [x] `init_sprint.mjs`: import `findItemFile` from `lib/proof.mjs`; delete the private copy and the `matchesId` import -> R2, R6
+- [x] `record_evidence.mjs`: arguments, sprint dir, tier, command chain, async run with process-group timeout, masking, baseline excuse, atomic write, JSON line, exit codes, realpath entry guard -> R1, R6
+- [x] `gate-checks.json`: default `proof` block -> R3
+- [x] `detect-test-stack.ts`: `containerProofCmd`; `GATE_FIELDS` gains two; render, project, local-edits, `keepUserGateKeys`, `readGateChecksRaw` -> R4, R5
+- [x] `upgrade.ts`: prior raw read; projection with prior; skip the write when unchanged; `keepUserGateKeys`; waiver line rule -> R5
+- [x] Typecheck, plus targeted tests: the two new reds; `gate-commands-kept.red`, `upgrade-gate-checks-output.red`, `upgrade-keeps-test-waiver.red`, `upgrade-preserves-gate-commands`, `init-test-stack-detect.red`, `prep-qa-context-commands.red`, `prep-qa-context-baseline.red`, `init-sprint-context.red`, `pre-gate-any-stack.red.integration` -> R1-R6
+- [x] Clean-room `cleargate init` from the packed tarball in a temp Go repo, recorded in the dev report -> R4
 
 ## 4. Quality Gates
 
