@@ -23,7 +23,8 @@ cites:
   - "[[SPRINT-42]]"
   - "[[SPRINT-43]]"
   - "[[SPRINT-45]]"
-cited_by: []
+cited_by: 
+  - "[[SPRINT-47]]"
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-46_build_step_sized_by_risk.md"
@@ -63,6 +64,7 @@ Design Review by the current rubric; this sprint runs on the current loop.
 - Parent: none
 - Children (11): [[EPIC-066]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]]
 - Cites (8): [[BUG-086]], [[BUG-087]], [[EPIC-065]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-42]], [[SPRINT-43]], [[SPRINT-45]]
+- Cited by (1): [[SPRINT-47]]
 <!-- END relations -->
 <!-- BEGIN sprint-report -->
 ## Sprint Report

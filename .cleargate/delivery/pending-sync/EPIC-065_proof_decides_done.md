@@ -4,11 +4,13 @@ parent_ref: INITIATIVE-002
 parent_cleargate_id: INITIATIVE-002
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
-approved: false
-ambiguity: 🔴 High
+status: Approved
+approved: true
+approved_by: sandrinio
+approved_at: 2026-11-16T03:00:00Z
+ambiguity: 🟢 Low
 area: sprint-execution,templates,gates,agent-prompts,scripts
-context_source: INITIATIVE-002 workstream WS-1 and the owner's nine decisions of 2026-11-14; the SPRINT-45 release-candidate field trial in dispenser_adapter (.cleargate/field-trials/2026-11-dispenser-sprint45-rc.md, findings W-D1 and W010-3); canonical cleargate-cli main at f846d9a, surfaces mapped 2026-11-14
+context_source: INITIATIVE-002 workstream WS-1 and the owner's nine decisions of 2026-11-14; the SPRINT-45 release-candidate field trial in dispenser_adapter (.cleargate/field-trials/2026-11-dispenser-sprint45-rc.md, findings W-D1 and W010-3); canonical cleargate-cli main at f846d9a, surfaces mapped 2026-11-14 and re-mapped 2026-11-16 at 99cbfd7 after SPRINT-46; §6 answered as recommended by the owner 2026-11-16
 owner: sandrinio
 target_date: null
 created_at: 2026-11-14T19:04:01.387Z
@@ -17,11 +19,9 @@ created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
 cached_gate_result:
-  pass: false
-  failing_criteria:
-    - id: interrogation-resolved
-      detail: 11 occurrences at §12
-  last_gate_check: 2026-11-14T19:10:43Z
+  pass: true
+  failing_criteria: []
+  last_gate_check: 2026-11-16T07:38:44Z
   transition: ready-for-decomposition
 pushed_by: null
 pushed_at: null
@@ -40,7 +40,7 @@ draft_tokens:
   model: null
   last_stamp: 2026-11-14T19:10:28Z
   sessions: []
-last_contradict_sha: "6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a468beb"
+last_contradict_sha: 6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a468beb
 ---
 
 # EPIC-065: Proof Decides Done
@@ -67,20 +67,26 @@ last_contradict_sha: "6cf4b7f1365529740a7d5fcebbef5735f4403ecdab53373d049827c42a
     <file path="cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/record_evidence.mjs" action="create" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs" action="modify" />
     <file path="cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs" action="modify" />
-    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs" action="modify" />
-    <file path="cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs" action="modify" />
     <file path="cleargate-cli/src/lib/readiness-predicates.ts" action="modify" />
     <file path="cleargate-cli/src/init/detect-test-stack.ts" action="modify" />
+    <file path="cleargate-cli/src/commands/upgrade.ts" action="modify" />
     <file path="cleargate-cli/src/commands/sprint.ts" action="modify" />
     <file path="cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md" action="modify" />
-    <file path="cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md" action="modify" />
     <file path="cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md" action="modify" />
     <file path="cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md" action="modify" />
     <file path="cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml" action="modify" />
-    <file path="cleargate-cli/scaffold/hosts/codex/.codex/agents/devops.toml" action="modify" />
+    <file path="cleargate-cli/scaffold/hosts/codex/.codex/agents/reporter.toml" action="modify" />
+    <file path="cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md" action="modify" />
   </target_files>
 </agent_context>
 ```
@@ -158,20 +164,22 @@ release carrying this epic, here and in the dispenser_adapter pilot):
 
 ## Existing Surfaces
 
-> Mapped 2026-11-14 against canonical `cleargate-cli` main (f846d9a).
+> Re-mapped 2026-11-16 against canonical `cleargate-cli` main (99cbfd7), after SPRINT-46 rewrote the build loop.
+> The 2026-11-14 map (f846d9a) is superseded: `launch_wave.mjs` is no longer the runner path and DevOps no longer sets Done.
 
-
-- **Surface:** `cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md:15-19` — Goal Acceptance Check (CR-110): a command, artifact or observable state, or `not-mechanically-verifiable` plus qualitative evidence. No tier.
-- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:217-233` (§A.5 records the check) and `:728-757` (§E.2: the verdict reads the check; OD-4 keeps it chat-only).
-- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md:149,158-165` — `PASS-PENDING-SMOKE` for a story's `deferred_verification` entry (CR-082); `cleargate-cli/scaffold/core/.cleargate/templates/story.md:84` declares it; `cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs:1037-1233` (Step 2.9) blocks close unless `deferred-verify/<ID>.json` is green. Nothing writes that file today, and DevOps sets Done regardless.
-- **Surface:** `cleargate-cli/scaffold/core/.cleargate/templates/epic.md:177-205` — epic Testing Strategy with a "Real-host end-to-end" level and journeys (CR-126; predicate `testing-strategy-complete`, `cleargate-cli/src/lib/readiness-predicates.ts` ~1586-1700). Epic-only and free text.
-- **Surface:** `cleargate-cli/src/lib/readiness-predicates.ts` ~1277-1336 `evalTestLayersDeclared` and `cleargate-cli/scaffold/core/.cleargate/templates/story.md:209-215`, `cleargate-cli/scaffold/core/.cleargate/templates/CR.md:154-160`, `cleargate-cli/scaffold/core/.cleargate/templates/Bug.md:142-148` — Unit / Integration / E2E counts (CR-111). No tier.
-- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/constants.mjs:35-61` — states and transitions; `Sprint Review → Done` exists and the skill never uses `Sprint Review`. `cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs` writes Done with no evidence precondition (`cleargate-cli/scaffold/hosts/claude/.claude/agents/devops.md:59,165-172`).
-- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs:26-72` — verdict fields `storyId, runId, devSha, qaSha`; no evidence field; no stage names.
-- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_runner.sh:81-82,186-187,207-208,223-224` — every command step guarded by `-f package.json`; skip logged as INFO; test output sent to `/dev/null`. `read_config_field` in `cleargate-cli/scaffold/core/.cleargate/scripts/pre_gate_common.sh:12-22`.
-- **Surface:** `cleargate-cli/src/init/detect-test-stack.ts` — seeds `gate-checks.json` from the detected stack (BUG-133 kept owner edits on upgrade).
-- **Surface:** `cleargate-cli/scripts/clean-room/` and `cleargate-cli/src/commands/verify-install.ts` — clean-room install drivers and evidence (STORY-058-08/09), the strongest existing real-run precedent.
-- **Coverage of this epic's scope:** partial, about 40%. The goal check, the deferred-verify close step, the unused `Sprint Review` state and the clean-room drivers carry the shape; the tier field, the recorder, the Done guard, holdouts and the stack-neutral runner are new.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs:545-591` — already reads `proof_tier` from the item frontmatter and the first line of the first fenced block under `## Proof` (`parseProofCommand`) into `commands.proof {tier, command}`. The `## Proof` format this epic declares is the one this parser reads.
+- **Surface:** `cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md:66-95` (VERIFY) — step 2 already runs `commands.proof.command` and reports `PROOF: pass|fail|n/a`; the qa-verify schema in `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js:32-40` carries `proof`, which nothing reads. The agent's run is not recorded as evidence.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/assign_lane.mjs:92-136` — reads `proof_tier`; `container` or `live` puts an item on the `runtime` lane, a tier other than `unit` keeps it off `fast`.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs:22-60` — the stage table (`STAGE_NAMES`, `STAGE_DEFS`, `LANE_STAGES`, `stagesFor`). Every stage is an agent except `merge` (`kind: 'barrier-script'`, `merge_story.mjs`). `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js:109` stops at the first barrier-script; the orchestrator runs it (SKILL §C.0.1, §C.7).
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs:377` — writes `Done` straight after the merge via `update_state.mjs`; `:417-422` reads the kickoff `baseline.json` and `qa.test_waiver`.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/constants.mjs:35-61` — states and `STATE_TRANSITIONS`; `Sprint Review → Done` exists, no script moves an item into `Sprint Review`, and `cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs:425-448` checks only that the target state is valid (`STATE_TRANSITIONS` is not consulted; [[BUG-075]]).
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs:1172-1388` — Step 2.9, the CR-082 deferred-verification gate, reads `deferred-verify/<ID>.json`; nothing in `src/` or `scaffold/` writes that file. Step 2 (`:488-504`) refuses a non-terminal item; the no-flag pass halts for the ack at `:1533-1546`.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/record_baseline.mjs:21-29,229` — `baseline.json` `{sprint_id, base_sha, command, exit_code, failing[], tail[], recorded_at}`; read by `merge_story.mjs`, `prep_qa_context.mjs` and `prep_reporter_context.mjs`.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner.js:58-65` — QA-Red and the Developer get `Item file: <path>`, the raw item; `cleargate-cli/scaffold/core/.cleargate/scripts/seal_red.mjs:192` counts scenarios with `countScenarios` (`cleargate-cli/scaffold/core/.cleargate/scripts/qa_red_lint.mjs:381`), which is not tag-aware.
+- **Surface:** `cleargate-cli/src/init/detect-test-stack.ts:152,203,233-304` and `cleargate-cli/src/commands/upgrade.ts:787-796,1236-1264` — init seeds only `qa.test`, `qa.typecheck`, `arch.typecheck`; upgrade overwrites `gate-checks.json` and restores those three plus `qa.test_waiver`, so any other user key (a `proof` block included) is lost.
+- **Surface:** `cleargate-cli/src/lib/readiness-predicates.ts:48,188-214,1270-1285` — predicate grammar and dispatch; no predicate applies a `created_at` cut-over today (the `test-layers-declared` comment records why a `created_at_version` compare cannot work). `cleargate-cli/src/commands/sprint.ts:1637-1784` — preflight check 5 reads each item's cached gate result.
+- **Surface:** `cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md:15-19` (Goal Acceptance Check, no tier); `cleargate-cli/scaffold/hosts/claude/.claude/agents/reporter.md:44-45` and `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md:709-712` (OD-4: the verdict is never written to the report).
+- **Coverage of this epic's scope:** partial, about 45%. The `## Proof` reader, the QA-Verify proof run, the tier-driven lane, the stage table, the baseline and the deferred-verify close gate carry the shape; the recorder, the Done guard, the prove stage, holdout filtering and the proof table are new.
 
 ## Prior work
 
@@ -194,26 +202,23 @@ release carrying this epic, here and in the dispenser_adapter pilot):
 ## 4. Technical Grounding (The "Shadow Spec")
 
 **Affected Files:**
-- `cleargate-cli/scaffold/core/.cleargate/templates/story.md`, `CR.md`, `Bug.md` — `proof_tier` frontmatter; `## Proof` section (tier, command or steps, expected result, reason when the tier is human because agents cannot reach it); `@holdout` guidance in the Gherkin section.
+- `cleargate-cli/scaffold/core/.cleargate/templates/story.md`, `CR.md`, `Bug.md` — `proof_tier` frontmatter; `## Proof` section (tier, a fenced block whose first line is the command, expected result, reason when the tier is `human`); `@holdout` guidance in the Gherkin section. A new `## ` heading shifts positional `section(N)` criteria, so `readiness-gates.md` indexes and `test/docs/gate-section-index-pinning.node.test.ts` move with it.
 - `cleargate-cli/scaffold/core/.cleargate/templates/sprint_context.md` — Goal Acceptance Check gains `Tier:`.
-- `cleargate-cli/scaffold/core/.cleargate/templates/sprint_report.md` — per-item proof table; `goal_verdict` and `goal_verdict_basis` frontmatter (CR-129).
-- `cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md`, `cleargate-cli/src/lib/readiness-predicates.ts` — new predicate `proof-declared` (story, CR, bug at ready-for-execution), with a created_at cut-over.
-- `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md` — Done means evidence for the declared tier exists.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/record_evidence.mjs` (new) — `record_evidence.mjs <ID> [--tier T] [-- <command>]` or `--human "<what the owner checked>"`; writes `evidence/<ID>.json`.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/update_state.mjs` — guard on `Sprint Review → Done`.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs` — Step 2.9 becomes the evidence step for every item; lists "built, not proven at tier X".
-- `cleargate-cli/scaffold/core/.cleargate/scripts/prep_reporter_context.mjs` — evidence section in the Reporter's bundle.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/prep_qa_context.mjs` — a QA-Red view of the item without `@holdout` scenarios.
-- `cleargate-cli/scaffold/core/.cleargate/scripts/launch_wave.mjs` — verdict field `evidence` (path or `pending:<tier>`), validated.
-- `cleargate-cli/src/init/detect-test-stack.ts` — seed `gate-checks.json` `proof.unit` and `proof.container` from the stack.
-- `cleargate-cli/src/commands/sprint.ts` — preflight: every item declares a tier. (The kickoff baseline is built by EPIC-066.)
-- `cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md`, `devops.md`, `reporter.md`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md` and the Codex `qa.toml`, `devops.toml`, `reporter.toml` — prove step, holdouts, property-not-shape rule, Done timing, OD-4 amended.
+- `cleargate-cli/scaffold/core/.cleargate/knowledge/readiness-gates.md`, `cleargate-cli/src/lib/readiness-predicates.ts` — closed-set predicate `proof-declared` (story, CR, bug at their ready transitions): a valid tier, a `## Proof` section with a command or steps, a reason for `human`, and at least one `@holdout` scenario for `container` and `live`; applied to items whose `created_at` is on or after the release cut-over date.
+- `cleargate-cli/src/commands/sprint.ts` — preflight check 5 also requires `proof_tier` on every item entering the sprint, whatever its age.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/record_evidence.mjs` (new) — `record_evidence.mjs <ID> [--tier T] [--worktree W] [-- <command>]` or `--human "<what the owner checked>"`; writes `<sprintDir>/evidence/<ID>.json`.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/gate-checks.json`, `cleargate-cli/src/init/detect-test-stack.ts`, `cleargate-cli/src/commands/upgrade.ts` — `proof: {unit, container, browser}` seeded from the detected stack; upgrade keeps every user key the package does not define and every user value under `proof`.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/segment_stages.mjs`, `wave_runner_args.mjs`, `wave_runner.js` — a `prove` barrier-script stage before `merge` on every lane.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/merge_story.mjs`, `update_state.mjs`, `cleargate-cli/scaffold/core/.cleargate/knowledge/cleargate-protocol.md` — merge leaves an item without passing evidence in `Sprint Review`; `update_state.mjs` refuses `Done` without it; the protocol defines Done by evidence.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/wave_runner_args.mjs`, `seal_red.mjs`, `qa_red_lint.mjs` — a holdout-free item view for the story plan, QA-Red and the Developer; tag-aware scenario count; a seal mode for QA-Verify's holdout tests added after the Developer's commit.
+- `cleargate-cli/scaffold/core/.cleargate/scripts/close_sprint.mjs`, `prep_reporter_context.mjs`, `cleargate-cli/scaffold/core/.cleargate/templates/sprint_report.md` — Step 2.9 becomes the evidence step for every item; per-item proof table; `goal_verdict` and `goal_verdict_basis` frontmatter (CR-129).
+- `cleargate-cli/scaffold/hosts/claude/.claude/agents/qa.md`, `reporter.md`, `cleargate-cli/scaffold/hosts/claude/.claude/skills/sprint-execution/SKILL.md`, and the Codex `cleargate-cli/scaffold/hosts/codex/.codex/agents/qa.toml`, `reporter.toml`, `cleargate-cli/scaffold/core/.agents/skills/sprint-execution/SKILL.md` — prove stage and walkthrough proof, holdouts, property-not-shape rule, Done timing, OD-4 reversed.
 
 **Data Changes:**
-- Work-item frontmatter: `proof_tier: unit | container | live | human` (stories, CRs, bugs).
-- `gate-checks.json`: `proof: { unit, container, browser? }`.
-- New files per sprint: `evidence/<ID>.json`. `deferred-verify/` is read for one release, then retired.
-- `state.json`: optional per-story `evidence` pointer (additionalProperties already allowed; no new state).
+- Work-item frontmatter: `proof_tier: unit | container | live | human` (stories, CRs, bugs). Hotfixes keep their own `## 3. Verification Steps` and get no tier.
+- `gate-checks.json`: `proof: { unit, container, browser }` (empty string = not configured).
+- `<sprintDir>/evidence/<ID>.json`: `{ id, tier, status: pass|fail|pending, command | note, exit_code, tail (≤40 lines, secrets redacted), sha, recorded_at, recorded_by }`. `deferred-verify/` is read by close for one release, then retired.
+- `state.json`: no new state and no new field; a merged item without evidence sits in the existing `Sprint Review`.
 
 ## 5. Acceptance Criteria
 
@@ -290,43 +295,38 @@ Feature: Proof decides Done
 ## 6. AI Interrogation Loop (Human Input Required)
 
 - **AI Question:** Tier names. Recommended: `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a database, docker compose, an end-to-end make target), `live` (a live service, device or real host session the agents can reach), `human` (the owner's check is the evidence). Keep these four?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). The four tiers are `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a database, docker compose, an end-to-end make target), `live` (a live service, device or real host session the agents can reach) and `human` (the owner's check is the evidence).
 - **AI Question:** Where an item declares its proof. Recommended: frontmatter `proof_tier` plus a short `## Proof` section (command or steps, expected result, and a reason when the tier is human). This supersedes CR-128's "Real-host proof" count row, so CR-128 closes as absorbed. Agree?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). An item declares `proof_tier` in its frontmatter and a short `## Proof` section: the command or steps, the expected result, and a reason when the tier is `human`. CR-128 closes as absorbed.
 - **AI Question:** When an item is Done. Recommended: a merged item waits in the existing `Sprint Review` state until its evidence exists; only then Done. Human-tier items reach Done at the walkthrough. The weaker alternative is Done at merge with evidence checked only at close, which is what CR-082 does today. Take the recommended?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). A merged item waits in the existing `Sprint Review` state until its evidence exists, and only then becomes Done. A human-tier item becomes Done at the walkthrough.
 - **AI Question:** Who runs a command-tier proof. Recommended: the script (`record_evidence.mjs`), not an agent, in the prove step after QA-Verify. Agents are used only for holdout tests and browser checks. Agree?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). The script (`record_evidence.mjs`) runs a command-tier proof in the prove step after QA-Verify. Agents are used only for holdout tests and browser checks.
 - **AI Question:** Holdouts. Recommended: the drafter tags at least one Gherkin scenario `@holdout` on every container or live item; QA-Red and the Developer never see it; QA-Verify writes and runs it at the prove step. None for unit or human items. Agree, including the minimum of one?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). Every container or live item tags at least one Gherkin scenario `@holdout`. QA-Red and the Developer never see it; QA-Verify writes and runs its test at the prove step. Unit and human items have none.
 - **AI Question:** The existing backlog. Recommended: `proof-declared` applies only to items created after this release, so about 120 CRs and 106 bugs do not turn red; preflight requires a tier on every item that enters a sprint, old or new. Agree?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). `proof-declared` applies only to items created after this release, so the existing CRs and bugs do not turn red. Preflight requires a tier on every item that enters a sprint, old or new.
 - **AI Question:** CR-129 reverses the OD-4 rule ("the goal verdict is spoken in the Brief, never written into the report"). Recommended: absorb CR-129 and record `goal_verdict` in the report frontmatter, because a tier on the goal is only useful if its outcome is recorded. Reverse OD-4?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). CR-129 is absorbed and OD-4 is reversed: the report records `goal_verdict` (and its basis) in its frontmatter.
 - **AI Question:** INITIATIVE-002 lists EPIC-056 (CI verification layer) as a dependency for environment independence. Recommended: do not block on it; the container tier runs the target's own command (`make e2e`, a compose target) from `gate-checks.json`, and EPIC-056 stays separate. Agree?
-- **Human Answer:** Unresolved
+- **Human Answer:** As recommended (owner, 2026-11-16: "happy with recommendations"). Not a dependency. The container tier runs the target's own command (`make e2e`, a compose target) from `gate-checks.json`; EPIC-056 stays separate.
 - **AI Question:** The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic because proof needs tests that actually run. Keep them here rather than in the later per-stack workstream (WS-6)?
 - **Human Answer:** Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
 - **AI Question:** Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in the loop; holdouts and the red-test rule; close and report; stack-neutral pre-gate scan; kickoff baseline. Run it as one sprint (recommended; SPRINT-45 ran six, dispenser runs fifteen), or split the prove step and holdouts into a second sprint?
 - **Human Answer:** One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
 
-> The literal token `Unresolved` above is load-bearing: the `interrogation-resolved` readiness
-> criterion checks that the body does NOT contain it. Leave it in place while the question is open
-> and the epic cannot pass its gate; remove it only by writing the actual answer. Do not delete the
-> token while leaving the question unanswered — that defeats the criterion.
-
 ---
 
 ## ClearGate Ambiguity Gate (🟢 / 🟡 / 🔴)
-**Current Status: 🔴 High Ambiguity**
+**Current Status: 🟢 Low Ambiguity**
 
 *Evaluate each criterion against its literal text. If you substituted an interpretation, leave the box unchecked and surface the substitution in the Brief.*
 
 Requirements to pass to Green (Ready for Coding Agent):
-- [ ] `approved: true` is set in the YAML frontmatter.
+- [x] `approved: true` is set in the YAML frontmatter.
 - [x] The `<agent_context>` block is complete and validated.
-- [ ] §4 Technical Grounding contains 100% real, verified file paths.
-- [ ] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).
+- [x] §4 Technical Grounding contains 100% real, verified file paths.
+- [x] §6 AI Interrogation Loop is empty (all human answers integrated into the spec).
 - [x] 0 "TBDs" exist in the document.
 - [x] Existing Surfaces cites at least one source-tree path or explicitly states "none — net-new."
 - [x] Why not simpler? has both sub-bullets answered.

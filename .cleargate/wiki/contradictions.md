@@ -39,3 +39,9 @@ findings: []
   ingest_sha: "94dc7b4021728553228bbc00232c7061e12fb9f2b051758c62acacd7f57100c4"
   truncated: false
   label: null
+- draft: "[[STORY-065-06]]"
+  neighbor: "[[CR-129]]"
+  claim: "ack stamp: `goal_verdict_acked_by` vs `goal_verdict_acked_at` only"
+  ingest_sha: "35c90892292056555a9b4497f22fe84333d38c8d6d898a7f8fef686a2dcbcd72"
+  truncated: false
+  label: null

@@ -21,6 +21,8 @@ _No active sprint found._
 
 - [[SPRINT-43]] — status: Draft
 
+- [[SPRINT-47]] — status: Draft
+
 
 
 ## Recently Completed Sprints

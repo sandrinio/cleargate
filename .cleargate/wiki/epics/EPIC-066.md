@@ -62,6 +62,8 @@ cites:
 cited_by: 
   - "[[EPIC-065]]"
   - "[[SPRINT-46]]"
+  - "[[SPRINT-47]]"
+  - "[[STORY-065-04]]"
   - "[[STORY-066-03]]"
   - "[[STORY-066-04]]"
   - "[[STORY-066-05]]"
@@ -135,5 +137,5 @@ and QA-Verify's run both depend on tests that actually run:
 - Parent: [[INITIATIVE-002]]
 - Children (25): [[BUG-137]], [[BUG-138]], [[BUG-139]], [[CR-133]], [[CR-134]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], +5 more
 - Cites (30): [[BUG-074]], [[BUG-075]], [[BUG-086]], [[BUG-087]], [[BUG-102]], [[BUG-107]], [[BUG-113]], [[BUG-116]], [[CR-024]], [[CR-078]], [[CR-081]], [[CR-082]], [[CR-110]], [[CR-120]], [[CR-121]], [[CR-122]], [[CR-124]], [[EPIC-013]], [[EPIC-022]], [[EPIC-031]], +10 more
-- Cited by (22): [[EPIC-065]], [[SPRINT-46]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], [[STORY-066-18]], [[STORY-066-19]], [[STORY-066-20]], +2 more
+- Cited by (24): [[EPIC-065]], [[SPRINT-46]], [[SPRINT-47]], [[STORY-065-04]], [[STORY-066-03]], [[STORY-066-04]], [[STORY-066-05]], [[STORY-066-06]], [[STORY-066-07]], [[STORY-066-08]], [[STORY-066-09]], [[STORY-066-10]], [[STORY-066-11]], [[STORY-066-12]], [[STORY-066-13]], [[STORY-066-14]], [[STORY-066-15]], [[STORY-066-16]], [[STORY-066-17]], [[STORY-066-18]], +4 more
 <!-- END relations -->

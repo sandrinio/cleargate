@@ -7,7 +7,7 @@
 | Type | Total | Open | Shipped |
 |------|-------|--------|---------|
 | Epics | 55 | 15 | 39 |
-| Sprints | 46 | 4 | 39 |
+| Sprints | 47 | 5 | 39 |
 | Proposals | 16 | 6 | 14 |
 | CRs | 129 | 19 | 95 |
 | Bugs | 126 | 55 | 59 |
@@ -44,7 +44,7 @@
 
 - [[EPIC-061]] — status: Draft
 
-- [[EPIC-065]] — status: Draft
+- [[EPIC-065]] — status: Approved
 
 
 

@@ -11,6 +11,7 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
+- [[SPRINT-47]] — Draft · 2026-11-17 → 2026-11-21 — Proof Decides Done — Make proof decide Done: every item declares a proof tier, a script
 
 ### Epics
 
@@ -34,7 +35,7 @@
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
 - [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
-- [[EPIC-065]] — Draft · no sprint — Proof Decides Done — Every sprint goal and every story, CR and bug declares a proof
+- [[EPIC-065]] — Approved · SPRINT-47 (planned) — Proof Decides Done — Every sprint goal and every story, CR and bug declares a proof
 
 ### Proposals and initiatives
 

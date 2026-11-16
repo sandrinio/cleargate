@@ -5,6 +5,25 @@
 
 Every answered Q/A decision in the delivery corpus, newest first, with the architecture rules of open epics. A block ends with `- Supersedes:` when the item says it supersedes another. Open questions and unanswered placeholders are not listed.
 
+### [[EPIC-065]] — Proof Decides Done (2026-11-16)
+- Q: Tier names. Recommended: `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). The four tiers are `unit` (the repo's own test runner, no outside services), `container` (real dependencies started for the run: a database, docker compose, an end-to-end make target), `live` (a live service, device… ([[EPIC-065]])
+- Q: Where an item declares its proof. Recommended: frontmatter `proof_tier` plus a short `## Proof` section (command or steps, expected result,… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). An item declares `proof_tier` in its frontmatter and a short `## Proof` section: the command or steps, the expected result, and a reason when the tier is `human`. CR-128 closes as absorbed.
+- Q: When an item is Done. Recommended: a merged item waits in the existing `Sprint Review` state until its evidence exists;… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). A merged item waits in the existing `Sprint Review` state until its evidence exists, and only then becomes Done. A human-tier item becomes Done at the walkthrough.
+- Q: Who runs a command-tier proof. Recommended: the script (`record_evidence.mjs`), not an agent, in the prove step after QA-Verify. Agents are… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). The script (`record_evidence.mjs`) runs a command-tier proof in the prove step after QA-Verify. Agents are used only for holdout tests and browser checks.
+- Q: Holdouts. Recommended: the drafter tags at least one Gherkin scenario `@holdout` on every container or live item; QA-Red and the… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). Every container or live item tags at least one Gherkin scenario `@holdout`. QA-Red and the Developer never see it; QA-Verify writes and runs its test at the prove step. Unit and human items… ([[EPIC-065]])
+- Q: The existing backlog. Recommended: `proof-declared` applies only to items created after this release, so about 120 CRs and 106 bugs… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). `proof-declared` applies only to items created after this release, so the existing CRs and bugs do not turn red. Preflight requires a tier on every item that enters a sprint, old or new.
+- Q: CR-129 reverses the OD-4 rule ("the goal verdict is spoken in the Brief, never written into the report"). Recommended: absorb… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). CR-129 is absorbed and OD-4 is reversed: the report records `goal_verdict` (and its basis) in its frontmatter.
+- Q: INITIATIVE-002 lists EPIC-056 (CI verification layer) as a dependency for environment independence. Recommended: do not block on it; the container… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). Not a dependency. The container tier runs the target's own command (`make e2e`, a compose target) from `gate-checks.json`; EPIC-056 stays separate.
+- Q: The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic… ([[EPIC-065]]) → Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
+- Q: Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in… ([[EPIC-065]]) → One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
+- Rule: Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
+- Rule: Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script, not by an LLM agent.
+- Rule: Stack-neutral: no step may depend on package.json or Node in the target's own code. Proof commands come from the item or from gate-checks.json, whatever the language.
+- Rule: Scripts and templates change in cleargate-cli/scaffold/core; agent prompts and the skill change in scaffold/hosts/claude AND their scaffold/hosts/codex counterparts in the same story.
+- Rule: No new state.json work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
+- Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
+- Supersedes: [[CR-128]]
+
 ### [[STORY-066-03]] — Pre-gate scan runs configured commands on any stack (2026-11-15)
 - Q: BUG-087 proposes also requiring the named `npm run <script>` key to exist. Do we? → Accept the recommendation (default; EPIC-066 decision of record is stack neutrality).
 - Q: BUG-087 says `qa` mode is never used by the loop. EPIC-066 makes `merge_story.mjs` run `pre_gate_runner.sh qa`. Does that change what… ([[STORY-066-03]]) → Accept the recommendation.
@@ -109,17 +128,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 ### [[EPIC-064]] — Sprint Numbers From What Happened (2026-11-14)
 - Q: Should the derived rework replace the state.json counters in the report, or sit beside them? → Beside, with the derived number leading and the counter named only where it disagrees. Recommended by the agent and covered by the owner's acceptance of INITIATIVE-002 §6 on 2026-11-14; confirm at this Brief.
 - Q: Which sprints form the evidence set? → SPRINT-44 here and dispenser_adapter SPRINT-01 to SPRINT-03. They are recent enough that their transcripts still exist, and Claude ran them, so no Codex dispatches are missing. doc_processor's recent sprints used Codex for production code and are left out.
-
-### [[EPIC-065]] — Proof Decides Done (2026-11-14)
-- Q: The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic… ([[EPIC-065]]) → Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
-- Q: Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in… ([[EPIC-065]]) → One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
-- Rule: Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
-- Rule: Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script, not by an LLM agent.
-- Rule: Stack-neutral: no step may depend on package.json or Node in the target's own code. Proof commands come from the item or from gate-checks.json, whatever the language.
-- Rule: Scripts and templates change in cleargate-cli/scaffold/core; agent prompts and the skill change in scaffold/hosts/claude AND their scaffold/hosts/codex counterparts in the same story.
-- Rule: No new state.json work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
-- Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
-- Supersedes: [[CR-128]]
 
 ### [[EPIC-066]] — Build Step Sized by Risk (2026-11-14)
 - Q: "Make it work in next sprint" can mean two things. (a) SPRINT-46 here builds this epic on the current loop,… ([[EPIC-066]]) → As recommended (owner, 2026-11-14). SPRINT-46 builds this epic on the current loop. After its close and the live re-sync, SPRINT-47 here is the first sprint on the new loop. The owner added on 2026-11-15: push both repositories and publish to… ([[EPIC-066]])
@@ -1073,3 +1081,4 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - [[CR-120]] vs [[BUG-085]] · CR-120 says BUG-085 is Draft; BUG-085 is Completed
 - [[CR-120]] vs [[BUG-087]] · CR-120 places BUG-087 in SPRINT-42; BUG-087 says SPRINT-43
 - [[STORY-064-01]] vs [[EPIC-064]] · repo list: reuses wiki.brief.release_repos vs new metrics.repos key
+- [[STORY-065-06]] vs [[CR-129]] · ack stamp: `goal_verdict_acked_by` vs `goal_verdict_acked_at` only
