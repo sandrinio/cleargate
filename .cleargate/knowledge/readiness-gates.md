@@ -6,7 +6,7 @@ This file is the single source of truth for ClearGate's machine-checkable readin
 
 ## Predicate Vocabulary
 
-There are exactly **13 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
+There are exactly **14 predicate shapes**. No other shapes are recognized; a check string that does not match one of these forms throws a parse error at evaluation time.
 
 **1. `frontmatter(<ref>).<field> <op> <value>`**
 Reads a frontmatter field from a document. `<ref>` is either `.` (the document being evaluated) or a frontmatter key that **names another document** (e.g. `parent_ref`). `<op>` is one of `==`, `!=`, `>=`, `<=`. `<value>` is a literal string, number, or boolean. Example: `frontmatter(parent_ref).approved == true` reads the document named by the evaluated document's `parent_ref` key and asserts its `approved` field equals `true`.
@@ -101,6 +101,9 @@ fails, naming Paths.
 
 **13. `testing-strategy-complete`**
 Closed-set predicate (no parameters). CR-126: an epic must answer "how do we test this?" in a `## Testing Strategy` section (heading-anchored, so numeric prefixes are tolerated). Registered on the epic `ready-for-decomposition` gate only. **Exemption first:** an epic that already has at least one story file under `.cleargate/delivery/{pending-sync,archive}/` (parent epic derived from the story id) passes with the detail `decomposed before CR-126`, so epics decomposed before the rule are not disturbed. Otherwise fails, naming the defect, when: the section is absent; any of the seven labelled lines (`What "working" means`, `Oracle`, `Known-positive case`, `Known-negative case`, `Baseline`, `Release gate`, `Regression guard`) is missing, empty or still a whole-value `{…}` placeholder; any of the five level rows (`Unit`, `Contract`, `Integration`, `Real-host end-to-end`, `Eval`) is missing or has an empty or `{…}` cell in `What it proves`, `Where the tests live` or `Who runs them, when` (a row whose first answer cell is `n/a` + a dash + a reason passes, other cells ignored); the `### User journeys` subsection is absent or its table has no data row; or a journey row has an empty or `{…}` cell, naming the journey and the column (a table whose only row has a Journey cell of `n/a` + a dash + a reason passes). Reads `doc.body`, plus the delivery directories for the exemption. Fails on the unedited shipped epic template. Example: a section with all seven lines, five answered level rows and one fully answered journey passes with `all 7 lines, 5 levels and 1 journey(s) answered`; the same section with an empty `Walked by` cell fails, naming the journey and `Walked by`. Tests: `test/lib/readiness-predicates-testing-strategy.red.node.test.ts`.
+
+**14. `proof-declared`**
+Closed-set predicate (no parameters). STORY-065-01: an item must say, before it is built, how it will be proven and at which tier. Registered identically against story `ready-for-execution`, cr `ready-to-apply` and bug `ready-for-fix`, never against epics. **Cut-over first:** an item whose `created_at` is earlier than the constant `PROOF_DECLARED_CUTOVER` (a UTC ISO timestamp in `src/lib/readiness-predicates.ts`) passes with the detail `pre-cutover`, so items drafted before the rule are not disturbed; a missing or unparseable `created_at` means the rule applies. Otherwise fails, naming the first defect, when: `proof_tier` is absent or blank; `proof_tier` is not one of `unit`, `container`, `live`, `human`; the `## Proof` section (heading-anchored, outside fences) is absent; its `Expected result` line is empty or a whole-value `{…}` placeholder; the tier is `human` and `Why human` is empty or a placeholder; the tier is `live` and the section has neither a proof command (the first non-blank line of its fenced block, unless a whole `{…}` placeholder) nor a filled `Steps`; or the tier is `container` or `live` and no scenario is tagged `@holdout` on the single tag line directly above `Scenario:` / `Scenario Outline:` inside a ` ```gherkin ` fence. Reads `doc.fm` and `doc.body` only. Fails on the unedited shipped story, CR and bug templates (their `proof_tier` is blank). Example: a post-cut-over story with `proof_tier: "unit"` and a filled Expected result passes with `unit proof declared`; the same story with `proof_tier: "container"` and no `@holdout` scenario fails with `container tier needs at least one @holdout scenario`. Tests: `test/lib/proof-declared.red.node.test.ts`.
 
 ---
 
@@ -218,6 +221,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "test-layers-declared"
     - id: spidr-coverage
       check: "spidr-coverage"
+    - id: proof-declared
+      check: "proof-declared"
 ```
 
 ```yaml
@@ -247,6 +252,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "test-layers-declared"
     - id: spidr-coverage
       check: "spidr-coverage"
+    - id: proof-declared
+      check: "proof-declared"
 ```
 
 ```yaml
@@ -272,6 +279,8 @@ The asymmetry exists because Proposal documents are human-authored strategy arti
       check: "test-layers-declared"
     - id: spidr-coverage
       check: "spidr-coverage"
+    - id: proof-declared
+      check: "proof-declared"
 ```
 
 ```yaml

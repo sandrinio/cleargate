@@ -82,6 +82,7 @@ expected_bounce_exposure: "low"
 lane: "standard"
 db_write_set: []  # advisory-v1 (EPIC-033 wave-planner axis 4): list table names this story writes to; default [] = no DB collision contribution; absent treated as [] by architect-synth predicate
 deferred_verification: []  # optional. Heavy checks owed, run post-merge. Each: { description: <human string>, command: <shell, run from repo root>, blocks: close }. Absent/empty = no obligation (common case; fully backward-compatible).
+proof_tier: ""  # unit | container | live | human — how this item is proven; fill ## Proof to match
 created_at: "{ISO}"
 updated_at: "{ISO}"
 created_at_version: "strategy-phase-pre-init"
@@ -155,6 +156,8 @@ before this item is written.
 | Data | {T or F} | {…} |
 | Rules | {T or F} | {…} |
 
+**Holdout.** When `proof_tier` is `container` or `live`, tag at least one scenario `@holdout` on the tag line directly above `Scenario:` (other tags may share the line, e.g. `@rules @holdout`). QA-Red and the Developer never see it; QA-Verify writes and runs its test.
+
 ```gherkin
 Feature: {Story Name}
 
@@ -219,6 +222,17 @@ Feature: {Story Name}
 - [ ] Minimum test expectations (§4.1) met.
 - [ ] All Gherkin scenarios from §2.1 covered.
 - [ ] Peer/Architect Review passed.
+
+## Proof
+
+- **Tier:** {unit | container | live | human — the same value as proof_tier}
+- **Expected result:** {what a pass looks like}
+- **Why human:** {human tier only: why no agent can reach the check}
+- **Steps:** {live and human tiers, when the proof is not one command}
+
+```bash
+{proof command, first non-blank line; omit this block for unit or container to use gate-checks.json proof.<tier>}
+```
 
 ## Existing Surfaces
 

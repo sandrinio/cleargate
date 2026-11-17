@@ -9,7 +9,7 @@
 | Epics | 55 | 12 | 42 |
 | Sprints | 47 | 4 | 40 |
 | Proposals | 16 | 6 | 14 |
-| CRs | 129 | 19 | 95 |
+| CRs | 129 | 17 | 97 |
 | Bugs | 126 | 55 | 59 |
 | Spikes | 0 | 0 | 0 |
 
@@ -352,6 +352,10 @@
 - [[CR-124]] (crs) — Completed
 
 - [[CR-126]] (crs) — Completed
+
+- [[CR-128]] (crs) — Completed
+
+- [[CR-129]] (crs) — Completed
 
 - [[EPIC-000]] (epics) — Completed
 

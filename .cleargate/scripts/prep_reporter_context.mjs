@@ -19,6 +19,7 @@
  *   1. Sprint Plan Slices       — §1 Consolidated Deliverables, §2 Execution Strategy, §5 (from sprint plan)
  *   2. State.json Summary       — one-liner per story: ID | state | lane | qa_bounces=N arch_bounces=N
  *   3. Test Gate                — one line from baseline.json and the live gate-checks.json qa.test_waiver (STORY-066-18)
+ *      Evidence                 — one row per item (tier, status, evidence path, recorded_by, sha) + the goal's tier (STORY-065-06)
  *   4. Milestone Plans          — plans/M*.md verbatim, or one-liner if absent
  *   5. Git Log Digest           — git log --stat sprint/S-NN ^main (silent fail if branch absent)
  *   6. Token Ledger Digest (orchestrator window) — count_tokens.mjs --json output embedded as markdown
@@ -53,6 +54,7 @@ import { parseJsonl } from './lib/ledger-digest.mjs';
 import { extractWorkItemIds } from './lib/work-item-id.mjs';
 import { locateFrontmatterFence } from './assert_story_files.mjs';
 import { testsRan, lastLine } from './record_baseline.mjs';
+import { readEvidence, readProofTier, findItemFile, isProofTier, proofStatus } from './lib/proof.mjs';
 
 // Bundle-size budget: ≤160KB target (CR-022 M5 raise from 80KB; SPRINT-18 hit 138KB).
 const MAX_BUNDLE_BYTES = 160 * 1024; // 163840
@@ -228,6 +230,60 @@ function buildTestGate(sprintDir) {
     return `${head}WAIVED — ${stopped}. Waiver: "${waiver}". Merges whose test stopped the same way were recorded NOT TESTED.\n`;
   }
   return `${head}STOPPED — ${stopped} and no qa.test_waiver is recorded; merges whose test stopped the same way were refused.\n`;
+}
+
+// ── Section: Evidence (STORY-065-06) ─────────────────────────────────────────
+
+/** The goal's tier from sprint-context.md's Goal Acceptance Check ("Tier: live"), or null. */
+function readGoalTier(sprintDir) {
+  try {
+    const raw = fs.readFileSync(path.join(sprintDir, 'sprint-context.md'), 'utf8');
+    const a = raw.search(/^##\s+Goal Acceptance Check/m);
+    if (a < 0) return null;
+    const rest = raw.slice(a);
+    const m = /\bTier:?\**\s*`?(unit|container|live|human)\b/i.exec(rest);
+    return m ? m[1].toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** One row per item: id, declared tier, status, evidence path, recorded_by, sha; plus the goal's tier. */
+function buildEvidence(sprintDir) {
+  const head = '## Evidence\n\n';
+  let stories = {};
+  try {
+    stories = JSON.parse(fs.readFileSync(path.join(sprintDir, 'state.json'), 'utf8')).stories || {};
+  } catch {
+    stories = {};
+  }
+  const goal = readGoalTier(sprintDir);
+  const lines = [`Goal tier: ${goal ?? 'not declared'}`, ''];
+  const ids = Object.keys(stories);
+  if (ids.length === 0) {
+    lines.push('(No items in state.json)');
+    return head + lines.join('\n') + '\n';
+  }
+  lines.push('| Item | Tier | Status | Evidence | Recorded by | SHA |', '|---|---|---|---|---|---|');
+  for (const id of ids) {
+    let tier = null;
+    try {
+      const f = findItemFile(REPO_ROOT, id);
+      if (f) tier = readProofTier(fs.readFileSync(f, 'utf8'));
+    } catch {
+      tier = null;
+    }
+    const ev = readEvidence(sprintDir, id);
+    let status;
+    if (ev) {
+      status = ev.status;
+      if (isProofTier(tier) && !proofStatus(ev, tier).ok && ev.status === 'pass') status = 'pass (tier mismatch)';
+    } else {
+      status = tier ? 'missing' : 'no proof tier declared';
+    }
+    lines.push(`| ${id} | ${tier ?? '-'} | ${status} | ${ev ? `evidence/${id}.json` : '-'} | ${ev?.recorded_by ?? '-'} | ${ev?.sha ?? '-'} |`);
+  }
+  return head + lines.join('\n') + '\n';
 }
 
 // ── Section 3: Milestone Plans ────────────────────────────────────────────────
@@ -785,6 +841,7 @@ function main() {
   sections.push(buildSprintPlanSlices(sprintId));
   sections.push(buildStateJsonSummary(sprintDir));
   sections.push(buildTestGate(sprintDir));
+  sections.push(buildEvidence(sprintDir));
   sections.push(buildMilestonePlans(sprintDir, sprintId));
   sections.push(buildGitLogDigest(sprintId));
   const measured = fetchMeasuredDoc(sprintId);

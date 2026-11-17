@@ -642,7 +642,8 @@ Raw work-item frontmatter `status:` values must be drawn from this canonical set
 | `Planned` | Sprint planned; not yet started |
 | `Active` | Work in progress |
 | `Completed` | Shipped (sprints, epics) |
-| `Done` | Shipped (stories) — treated as alias of `Completed` for terminal-status checks |
+| `Sprint Review` | Stories: merged, awaiting proof at its declared tier |
+| `Done` | Shipped (stories): merged and proven — `evidence/<ID>.json` records a pass at the declared tier (an item with no `proof_tier` is Done at merge); treated as alias of `Completed` for terminal-status checks |
 | `Abandoned` | Work deliberately stopped without shipping. The artifact stays in `archive/` for historical record. Not eligible for the Active index. |
 | `Closed` | Closed without shipping (administrative close) |
 | `Resolved` | Bug or CR confirmed resolved |

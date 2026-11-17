@@ -26,6 +26,7 @@ import {
 } from './launch_wave.mjs';
 import { sprintBranchFor, resolveRepoRoot } from './dispatch_serial.mjs';
 import { extractWorkItemIds, matchesId } from './lib/work-item-id.mjs';
+import { withholdHoldouts } from './qa_red_lint.mjs';
 
 export const USAGE = `Usage: node .cleargate/scripts/wave_runner_args.mjs --sprint <SPRINT-ID> --wave <wave-id> [--item <ID> [--from <stage>] [--issue <text>]] [--validate <verdicts.json>]
   Prints the args for wave_runner.js as one JSON line (exit 0).
@@ -116,7 +117,7 @@ export function resolveModel(cfg, lane, stage) {
 }
 
 /**
- * @param {{ plan: object, state: object|null, sprintId: string, waveId: string, configText?: string, findFile?: (id: string) => string|null,
+ * @param {{ plan: object, state: object|null, sprintId: string, waveId: string, configText?: string, findFile?: (id: string) => string|null, findView?: (id: string, file: string|null) => string|null,
  *   item?: string|null, from?: string|null, issue?: string|null, worktreeExists?: (id: string) => boolean,
  *   sealedRed?: (id: string) => string|null, branchTip?: (id: string) => string|null, planExists?: (id: string) => boolean }} o
  */
@@ -127,6 +128,7 @@ export function buildWaveArgs({
   waveId,
   configText = '',
   findFile = () => null,
+  findView = (id, file) => file,
   item = null,
   from = null,
   issue = null,
@@ -141,14 +143,14 @@ export function buildWaveArgs({
   const bases = storyBases(plan);
   const cfg = readLoopConfig(configText);
   const merged = Object.entries(state?.stories ?? {})
-    .filter(([, v]) => v && v.state === 'Done')
+    .filter(([, v]) => v && (v.state === 'Done' || v.state === 'Sprint Review'))
     .map(([id]) => id)
     .sort();
   const mergedSet = new Set(merged);
   let ids = (wave.stories ?? []).filter((id) => !mergedSet.has(id));
   if (item) {
     if (!(wave.stories ?? []).includes(item)) throw new Error(`--item ${item} is not in wave '${waveId}'`);
-    if (mergedSet.has(item)) throw new Error(`--item ${item} is Done`);
+    if (mergedSet.has(item)) throw new Error(`--item ${item} is already merged (${state?.stories?.[item]?.state})`);
     ids = [item];
   }
   const items = ids.map((id) => {
@@ -168,6 +170,7 @@ export function buildWaveArgs({
       models,
       runId: mintRunId(id, sprintId),
       file: findFile(id),
+      view_file: findView(id, findFile(id)),
     };
   });
   if (item) {
@@ -316,6 +319,20 @@ export function main(argv = process.argv.slice(2), env = process.env) {
       waveId: flags.wave,
       configText,
       findFile,
+      findView: (id, file) => {
+        if (!file) return file;
+        let body;
+        try {
+          body = fs.readFileSync(path.join(root, file), 'utf8');
+        } catch {
+          return file;
+        }
+        const view = withholdHoldouts(body);
+        if (view === null) return file;
+        const rel = `.cleargate/sprint-runs/${flags.sprint}/.item-view-${id}.md`;
+        fs.writeFileSync(path.join(root, rel), view);
+        return rel;
+      },
       item: flags.item ?? null,
       from: flags.from ?? null,
       issue: flags.issue ?? null,

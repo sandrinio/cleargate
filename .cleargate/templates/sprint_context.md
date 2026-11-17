@@ -18,6 +18,8 @@ _(populated by orchestrator at §A.5, confirmed by the human at the same halt th
 
 The concrete condition that is true when the Sprint Goal is met. Either a named command, artifact, or observable state — or the literal token `not-mechanically-verifiable` followed by the qualitative evidence standing in for it. Both are valid. Silence is not.
 
+- **Tier:** _(unit | container | live | human — chosen with the check at §A.5)_
+
 ## Locked Versions
 
 Frozen dependency versions for this sprint. Orchestrator populates from `package.json` snapshots at sprint init; Developers must not upgrade these mid-sprint without an explicit CR.

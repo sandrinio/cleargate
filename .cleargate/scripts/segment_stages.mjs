@@ -14,6 +14,7 @@
  *   - laneOf(storyId, { state, plan }): precedence state, then plan, then 'standard'.
  * Neither function becomes async.
  * Additive (STORY-066-06, C-10): normaliseLane(lane), the lane name stagesFor would use.
+ * Additive (STORY-065-04): the 'prove' barrier-script stage, before 'merge' in every lane.
  *
  * Stage = { name, kind: 'agent' | 'barrier-script', agent?, mode?, when: 'always' | 'scan-flagged', script? }
  */
@@ -25,6 +26,7 @@ export const STAGE_NAMES = Object.freeze([
   'developer',
   'qa-verify',
   'architect-review',
+  'prove',
   'merge',
 ]);
 
@@ -35,18 +37,20 @@ const STAGE_DEFS = {
   developer: { name: 'developer', kind: 'agent', agent: 'developer' },
   'qa-verify': { name: 'qa-verify', kind: 'agent', agent: 'qa', mode: 'VERIFY' },
   'architect-review': { name: 'architect-review', kind: 'agent', agent: 'architect', mode: 'POST-FLIGHT' },
+  prove: { name: 'prove', kind: 'barrier-script', script: 'record_evidence.mjs' },
   merge: { name: 'merge', kind: 'barrier-script', script: 'merge_story.mjs' },
 };
 
 // A bare string is `when: 'always'`; [name, when] overrides it.
 const LANE_STAGES = {
-  fast: ['developer', 'merge'],
+  fast: ['developer', 'prove', 'merge'],
   standard: [
     'qa-red',
     ['architect-tpv', 'scan-flagged'],
     'developer',
     'qa-verify',
     ['architect-review', 'scan-flagged'],
+    'prove',
     'merge',
   ],
   runtime: [
@@ -56,6 +60,7 @@ const LANE_STAGES = {
     'developer',
     'qa-verify',
     'architect-review',
+    'prove',
     'merge',
   ],
 };

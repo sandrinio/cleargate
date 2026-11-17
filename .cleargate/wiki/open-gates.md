@@ -55,10 +55,6 @@ Open items of every ingested type whose `approved` is not `true`, with their rea
 
 - [[CR-127]] — cr · status: Draft — pass
 
-- [[CR-128]] — cr · status: Draft — pass
-
-- [[CR-129]] — cr · status: Draft — pass
-
 - [[CR-130]] — cr · status: Draft — pass
 
 - [[CR-132]] — cr · status: Draft — pass

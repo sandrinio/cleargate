@@ -2,12 +2,17 @@
 /**
  * seal_red.mjs — QA-Red commits its own failing tests and runs the wiring scan (STORY-066-07).
  *
- * Usage: node seal_red.mjs <ID> --worktree <path> --sprint-branch <branch> -- <file>...
+ * Usage: node seal_red.mjs <ID> --worktree <path> --sprint-branch <branch> [--amendment] -- <file>...
  *
  * Files come after `--` as separate argv entries; git is run with argv arrays, never a
  * shell string, so spaced paths and zsh-expanded lists reach git unchanged.
  *
- * stdout: one JSON line { id, sealed_sha, scan_exit, flags, tests, scenarios, resealed? }
+ * --amendment (STORY-065-05): seal tests added after the Developer's commit (QA-Verify's holdout
+ *   tests, Architect-added red files). Every file must be new and none may be a file a qa-red(<ID>)
+ *   commit already sealed; else exit 2 naming the file and nothing is committed. The commit subject
+ *   is `qa-red(<ID>): amendment`, R-volume is skipped, and the JSON line carries amendment: true.
+ *
+ * stdout: one JSON line { id, sealed_sha, scan_exit, flags, tests, scenarios, resealed?, amendment? }
  *   whenever a commit was made. Exit 0 scan clean, 1 scan flagged, 2 could not run.
  * Records land in the sprint root even when this copy runs inside a story worktree (STORY-066-21).
  * R-volume counts only the tests the item added since it left the sprint branch (STORY-066-22).
@@ -51,6 +56,7 @@ function parseArgs(argv) {
   const id = argv[0];
   let worktree = null;
   let branch = null;
+  let amendment = false;
   const files = [];
   let i = 1;
   for (; i < argv.length; i++) {
@@ -58,9 +64,10 @@ function parseArgs(argv) {
     if (a === '--') { files.push(...argv.slice(i + 1)); break; }
     if (a === '--worktree') worktree = argv[++i];
     else if (a === '--sprint-branch') branch = argv[++i];
+    else if (a === '--amendment') amendment = true;
     else fail(`unknown argument: ${a}`);
   }
-  return { id, worktree, branch, files };
+  return { id, worktree, branch, files, amendment };
 }
 
 function findItemFile(id) {
@@ -143,9 +150,9 @@ function resolveWorktree(worktree) {
 }
 
 function main() {
-  const { id, worktree, branch, files } = parseArgs(process.argv.slice(2));
+  const { id, worktree, branch, files, amendment } = parseArgs(process.argv.slice(2));
   if (!id || id.startsWith('--') || !worktree || !branch || files.length === 0) {
-    fail('usage: seal_red.mjs <ID> --worktree <path> --sprint-branch <branch> -- <file>...');
+    fail('usage: seal_red.mjs <ID> --worktree <path> --sprint-branch <branch> [--amendment] -- <file>...');
   }
   const wt = resolveWorktree(worktree);
   for (const f of files) {
@@ -158,7 +165,18 @@ function main() {
   const subjects = log.stdout.split('\n').filter(Boolean).reverse(); // oldest first
   const firstRed = subjects.findIndex((s) => s.startsWith('qa-red('));
   let resealed = false;
-  if (firstRed >= 0) {
+  if (amendment) {
+    if (firstRed < 0) fail(`--amendment refused: no qa-red(${id}) commit on this branch to amend`);
+    const sealedFiles = new Set(
+      git(wt, ['log', '--format=', '--name-only', '--basic-regexp', `--grep=^qa-red(${id})`, `${branch}..HEAD`])
+        .stdout.split('\n').filter(Boolean),
+    );
+    for (const f of files) {
+      const rel = path.relative(wt, path.resolve(wt, f)).split(path.sep).join('/');
+      if (sealedFiles.has(rel)) fail(`--amendment refused: ${rel} was already sealed by a qa-red(${id}) commit`);
+      if (git(wt, ['cat-file', '-e', `HEAD:${rel}`]).status === 0) fail(`--amendment refused: ${rel} is not a new file`);
+    }
+  } else if (firstRed >= 0) {
     if (subjects.slice(firstRed).some((s) => !s.startsWith('qa-red('))) {
       fail('re-seal refused: a non-qa-red commit follows the first qa-red commit (Developer has started)');
     }
@@ -174,8 +192,8 @@ function main() {
   if (add.status !== 0) fail(`git add failed: ${add.stderr.trim()}`);
   const commit = git(
     wt,
-    ['commit', '-m', `qa-red(${id}): write failing tests`, '--', ...files],
-    resealed ? { SKIP_RED_GATE: '1' } : {},
+    ['commit', '-m', amendment ? `qa-red(${id}): amendment` : `qa-red(${id}): write failing tests`, '--', ...files],
+    resealed || amendment ? { SKIP_RED_GATE: '1' } : {},
   );
   if (commit.status !== 0) fail(`git commit failed: ${commit.stderr.trim()} ${commit.stdout.trim()}`);
   const sha = git(wt, ['rev-parse', 'HEAD']).stdout.trim();
@@ -189,11 +207,11 @@ function main() {
       : countTests(f, text);
   });
   const itemFile = findItemFile(id);
-  const scenarios = itemFile ? countScenarios(fs.readFileSync(itemFile, 'utf8')) : 0;
+  const scenarios = itemFile ? countScenarios(fs.readFileSync(itemFile, 'utf8'), { excludeHoldout: true }) : 0;
 
   // Scan.
   const scanEnv = { ...process.env };
-  if (scenarios > 0) {
+  if (scenarios > 0 && !amendment) {
     scanEnv.CLEARGATE_RED_FILES = rels.join('\n');
     scanEnv.CLEARGATE_RED_SCENARIOS = String(scenarios);
     if (redBase) scanEnv.CLEARGATE_RED_BASE = redBase;
@@ -249,6 +267,7 @@ function main() {
   }
 
   const sealLine = { ts: new Date().toISOString(), mode: 'seal', item: id, exit: scanExitFinal, raw_exit: scanExit, flagged_checks: flags, sealed_sha: sha };
+  if (amendment) sealLine.amendment = true;
   if (expectedRed) sealLine.expected_red = expectedRed;
   try {
     const dir = path.join(ROOT, '.cleargate', 'sprint-runs', sprint || '_off-sprint');
@@ -259,6 +278,7 @@ function main() {
   const out = { id, sealed_sha: sha, scan_exit: scanExitFinal, flags, tests, scenarios };
   if (expectedRed) { out.expected_red = expectedRed; out.scan_exit_raw = scanExit; }
   if (resealed) out.resealed = true;
+  if (amendment) out.amendment = true;
   process.stdout.write(`${JSON.stringify(out)}\n`);
   if (scanExitFinal === 0) process.exit(0);
   if (scanExitFinal === 1) process.exit(1);

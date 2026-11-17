@@ -4,15 +4,15 @@ status: "Draft"
 generated_at: "2026-11-16T18:30:00Z"
 generated_by: "Reporter agent"
 template_version: 2
-goal_verdict: "partial"
-goal_verdict_basis: "(b) and (c) met; (a) unit met, (a) integration awaits the Gate 4 re-sync re-run (parity reds by design)"
+goal_verdict: "met"
+goal_verdict_basis: "(a), (b) and (c) met; (a) integration met on the post-re-sync re-run at Gate 4 (57 fail, all in the 99cbfd7 baseline, none new)"
 ---
 
 <!-- role: reporter -->
 
 # SPRINT-47 Report: Proof Decides Done
 
-**Status:** Partial (goal verdict `partial` pending one re-run; release 0.32.0 not yet published, it ships at Gate 4 on the owner's go)
+**Status:** Completed (goal verdict `met` after the Gate 4 re-run; released as 0.32.0 at Gate 4, see §4 "Release and Gate 4 state")
 **Window:** 2026-11-16 to 2026-11-16 (1 calendar day; first story commit 37efc13, final cli main b4702a5)
 **Stories:** 6 planned / 6 shipped / 0 carried over
 
@@ -23,11 +23,11 @@ goal_verdict_basis: "(b) and (c) met; (a) unit met, (a) integration awaits the G
 | Check | Condition | Status at report time | Evidence |
 |---|---|---|---|
 | (a) unit | cli `npm test` has 0 failures at final cli `main` | Met: 5741 tests, 5739 pass, 0 fail, 2 skipped (cli b4702a5) | `evidence/final-b4702a5-unit.log` |
-| (a) integration | `npm run test:integration` fails only on tests in the kickoff list | Not yet literally met: 959 run, 87 fail vs 64 at baseline 99cbfd7. Every failure name not in the baseline is a live-vs-canonical parity check that breaks by design until the Gate 4 live re-sync (rules 19, 11). The integration half is re-run after the re-sync. | `evidence/baseline-failures-99cbfd7.txt`, `evidence/final-failures-b4702a5.txt`, `evidence/final-b4702a5-integration.log` |
+| (a) integration | `npm run test:integration` fails only on tests in the kickoff list | Met at Gate 4: after the live re-sync, 959 run, 57 fail vs 64 at baseline 99cbfd7; 133 failing names, every one in the baseline list, none new, 12 gone (cli a77d36f built as 0.32.0). At report time it was 87 fail: the extra names were live-vs-canonical parity checks that break by design until the re-sync (rules 19, 11). | `evidence/baseline-failures-99cbfd7.txt`, `evidence/gate4-failures-a77d36f.txt`, `evidence/gate4-a77d36f-integration.log`; before the re-sync: `evidence/final-failures-b4702a5.txt` |
 | (b) clean-room | Packed RC 0.32.0-rc.1 (from b4702a5) installed into a temp Go repo with an `e2e:` target | Met: proof block seeded `{unit: "go test ./...", container: "make e2e"}`; `cleargate new story` shows `proof_tier`, `## Proof` and holdout guidance; `gate check` names `proof-declared` | `evidence/sandbox/0.32.0-rc.1/` |
 | (c) sandbox end to end | Four-item run on the RC with Postgres 18 | Met: all six criteria held | `.cleargate/field-trials/2026-11-sandbox-s47.md` |
 
-Verdict: **partial**. The orchestrator updates `goal_verdict` to `met` after the post-re-sync integration re-run if it clears.
+Verdict: **met** (updated by the orchestrator at Gate 4, 2026-11-17, after the post-re-sync integration re-run cleared; the Reporter's verdict at report time was `partial`).
 
 **GOAL_RELATION per milestone:** the sprint plan's Sprint Design Review block (§2.1) is not part of the reporter bundle, so the per-milestone `GOAL_RELATION` lines could not be quoted verbatim. The bundle slice for plan §2 is empty. See Brief footnote.
 
@@ -241,8 +241,12 @@ Highest impact first.
 - (low) Align `scanGherkinScenarios` with pinned P2; stale `.pending-task-*.json` sentinels make preflight check 4 report a dirty main; `cleargate-protocol.md` §23 barrier order omits the prove step.
 - Sandbox note: the orchestrator's probing printed `TALLY_DB_URL` (masked as `***@`) in shell output; the sandbox DB port was also served by a local Homebrew Postgres, so container proofs used `docker exec` (unaffected).
 
-### Release and Gate 4 state (not yet done)
-- 0.32.0 is NOT published. At Gate 4, on the owner's go only: live re-sync from cli `main`, release 0.32.0 (cli push and tag, npm publish, GitHub release), archive CR-128 and CR-129 as absorbed, push both repos.
+### Release and Gate 4 state (done 2026-11-17, owner: "release it please. close the sprint.")
+- Close ack pass (live 0.31.2 scripts, before the re-sync): sprint/S-47 merged to meta-repo main at 4f226642; `CLEARGATE_SKIP_PARENT_ROLLUP=1` and `CLEARGATE_SKIP_LIFECYCLE_CHECK=1` as at the no-flag pass (BUG-119 class and the SPRINT-41 Parking Lot false positive).
+- Live re-sync from cli main built as 0.32.0: `init --yes` added `lib/proof.mjs` and `record_evidence.mjs`; the other 24 drifted files byte-copied from the composed payload; `doctor` drift 0. `gate-checks.json` unchanged (no root test stack; the unit proof falls back to `qa.test`).
+- Gate 4 suites on cli a77d36f built as 0.32.0: unit 5741 tests, 0 fail (`evidence/gate4-a77d36f-unit.log`); integration 57 fail, all in the 99cbfd7 baseline, none new (`evidence/gate4-failures-a77d36f.txt`). `goal_verdict` flipped to `met`.
+- Released: cleargate 0.32.0 on npm (`latest`), release commit 43fc45d tagged `v0.32.0` and pushed with cli main; 263 files, 999.0 kB packed, shasum 507de089d47a814efbbf18cea729b4853f8ced11; prepublishOnly suite 5741 tests, 0 fail; outer `delivery/` unchanged across the publish.
+- CR-128 (absorbed by STORY-065-01) and CR-129 (absorbed by STORY-065-06) archived as Completed with `superseded_by`.
 - After the re-sync, meta-repo items drafted with the old live template fail `proof-declared`; SPRINT-48 preflight requires `proof_tier` on every in-scope story, CR and bug, whatever its age. Intended; tell the owner at SPRINT-48 planning.
 - Known reds that clear at the re-sync (rule 19): `canonical-live-parity` 5a/5b/5c, `qa-content` slice parity, `template-stubs.integration`, `gate-section-index-pinning.live.integration` S1c, `sprint-execution-mirror.integration`, doctor drift lines.
 - D.5.2 full-suite re-run on c782d3d: GREEN — unit 5741 tests, 0 fail (`evidence/consolidate-c782d3d-unit.log`); integration 959 run, 87 fail, the same 178 failing names as b4702a5, none new, none gone (`evidence/consolidate-failures-c782d3d.txt`). Consolidation kept and merged into cli `main` (orchestrator, local).

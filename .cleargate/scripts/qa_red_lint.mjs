@@ -374,17 +374,29 @@ export function countTests(fileName, text) {
 }
 
 /**
- * Count Scenario / Scenario Outline lines inside fenced gherkin blocks.
- * @param {string} markdown
- * @returns {number}
+ * Scenarios inside fenced `gherkin` blocks (STORY-065-05). A tag line is a line of `@tags`; the
+ * tag lines directly above a `Scenario`/`Scenario Outline` line belong to it. `@holdout` may sit
+ * among other tags. `start` is the first tag line (or the Scenario line); `end` is the exclusive
+ * line index where the block stops (the next scenario's first tag line, a Rule/Background/Feature
+ * line, or the fence end).
+ * @param {string[]} lines
+ * @returns {{start: number, end: number, holdout: boolean}[]}
  */
-export function countScenarios(markdown) {
-  let n = 0;
+function scanGherkinScenarios(lines) {
+  const out = [];
+  const TAG = /^\s*@\S/;
+  const SCEN = /^\s*Scenario(\s+Outline)?:/;
+  const STOP = /^\s*(Rule|Background|Feature):/;
   let inGherkin = false;
   let inOther = false;
-  for (const line of markdown.split('\n')) {
-    const fence = /^\s*```\s*([A-Za-z0-9_-]*)/.exec(line);
+  const close = (fenceLine) => {
+    // blocks still open end at the fence line
+    for (let k = out.length - 1; k >= 0 && out[k].end === -1; k--) out[k].end = fenceLine;
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const fence = /^\s*```\s*([A-Za-z0-9_-]*)/.exec(lines[i]);
     if (fence) {
+      if (inGherkin) close(i);
       if (inGherkin || inOther) {
         inGherkin = false;
         inOther = false;
@@ -395,9 +407,61 @@ export function countScenarios(markdown) {
       }
       continue;
     }
-    if (inGherkin && /^\s*Scenario(\s+Outline)?:/.test(line)) n++;
+    if (!inGherkin) continue;
+    if (STOP.test(lines[i])) {
+      close(i);
+      continue;
+    }
+    if (TAG.test(lines[i])) {
+      let j = i;
+      while (j < lines.length && TAG.test(lines[j])) j++;
+      if (j < lines.length && SCEN.test(lines[j])) {
+        close(i);
+        const holdout = lines.slice(i, j).some((l) => /(^|\s)@holdout(\s|$)/.test(l));
+        out.push({ start: i, end: -1, holdout });
+        i = j; // the Scenario line itself
+      } else {
+        i = j - 1; // tags above Examples/other: part of the current block
+      }
+      continue;
+    }
+    if (SCEN.test(lines[i])) {
+      close(i);
+      out.push({ start: i, end: -1, holdout: false });
+    }
   }
-  return n;
+  return out;
+}
+
+/**
+ * Count `Scenario`/`Scenario Outline` lines inside gherkin fences.
+ * @param {string} markdown
+ * @param {{excludeHoldout?: boolean}} [opts] leave out scenarios tagged `@holdout` (STORY-065-05)
+ * @returns {number}
+ */
+export function countScenarios(markdown, opts = {}) {
+  const all = scanGherkinScenarios(markdown.split('\n'));
+  return opts.excludeHoldout ? all.filter((s) => !s.holdout).length : all.length;
+}
+
+/**
+ * The item text with each `@holdout` scenario block replaced by one line
+ * `# holdout scenario withheld (1)`; null when the item has none.
+ * @param {string} markdown
+ * @returns {string|null}
+ */
+export function withholdHoldouts(markdown) {
+  const lines = markdown.split('\n');
+  const hidden = scanGherkinScenarios(lines).filter((s) => s.holdout);
+  if (hidden.length === 0) return null;
+  const out = [];
+  let at = 0;
+  for (const h of hidden) {
+    out.push(...lines.slice(at, h.start), '# holdout scenario withheld (1)');
+    at = h.end;
+  }
+  out.push(...lines.slice(at));
+  return out.join('\n');
 }
 
 /**

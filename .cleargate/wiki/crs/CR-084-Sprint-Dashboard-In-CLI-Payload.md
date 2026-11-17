@@ -19,7 +19,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/CR-084-Sprint-Dashboard-In-CLI-Payload.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "c5ef4013065ba78f372bac93c7fd4419d0e326f8"
 repo: "planning"
 parent_cleargate_id: "EPIC-026"

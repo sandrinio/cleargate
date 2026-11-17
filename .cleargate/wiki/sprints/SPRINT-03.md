@@ -9,7 +9,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-03_CLI_Packages.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "e2fef1f5c8d58f66c94aa3418a1150ece11573d2"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-03"

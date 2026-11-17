@@ -3,6 +3,8 @@ sprint_id: "SPRINT-NN"
 status: "Draft"
 generated_at: "<ISO-8601>"
 generated_by: "Reporter agent"
+goal_verdict: ""        # met | partial | missed — derived from the Goal Acceptance Check, spoken first in the close Brief
+goal_verdict_basis: ""  # one sentence: the evidence the verdict rests on
 template_version: 2
 ---
 
@@ -35,6 +37,13 @@ template_version: 2
 ### Carried Over
 <!-- Stories that did not reach Done/Escalated/Parking Lot. If none, state "None." -->
 - None
+
+### Proof
+<!-- One row per item from the bundle's ## Evidence section. Result: `proven` or `not reached at tier <X>`. -->
+| Item | Tier | Evidence | Result |
+|---|---|---|---|
+| STORY-NNN-NN | unit | evidence/STORY-NNN-NN.json | proven |
+| STORY-NNN-NN | live | evidence/STORY-NNN-NN.json | not reached at tier live |
 
 ---
 

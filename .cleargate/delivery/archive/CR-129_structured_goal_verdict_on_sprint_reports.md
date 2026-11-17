@@ -4,12 +4,13 @@ parent_ref: EPIC-063
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
+superseded_by: STORY-065-06
 approved: false
-context_source: "Filed 2026-11-12 as the follow-up to STORY-063-11 §1.4 Q3 (owner approved the M2 recommendations: the brief shows report status, stories line and carried count now; a follow-up CR adds a structured goal verdict). Grounded against cleargate-cli main (sprint_report.md, reporter.md, reporter.toml, sprint-execution SKILL.md, close_sprint.mjs) and archived CR-110 on 2026-11-12. Filed for triage, not approved."
+context_source: "Filed 2026-11-12 as the follow-up to STORY-063-11 §1.4 Q3 (owner approved the M2 recommendations: the brief shows report status, stories line and carried count now; a follow-up CR adds a structured goal verdict). Grounded against cleargate-cli main (sprint_report.md, reporter.md, reporter.toml, sprint-execution SKILL.md, close_sprint.mjs) and archived CR-110 on 2026-11-12. Filed for triage, not approved. Absorbed 2026-11-17 at SPRINT-47 Gate 4: STORY-065-06 (SPRINT-47, released in cleargate 0.32.0) added a structured `goal_verdict` (`met | partial | missed`) to the sprint report, which covers this CR."
 area: sprint-close,reporter,templates
 created_at: 2026-11-12T00:00:00Z
-updated_at: 2026-11-12T00:00:00Z
+updated_at: 2026-11-17T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null

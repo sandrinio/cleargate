@@ -57,7 +57,7 @@ cited_by:
 status: "Triaged"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/INITIATIVE-002_evidence_first_execution_loop.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "ccd4e95e1f4598758cf5dddd36759cf74a5b9fd6"
 repo: "planning"
 ---

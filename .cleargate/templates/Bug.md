@@ -38,6 +38,7 @@ severity: "P0-Critical | P1-High | P2-Medium | P3-Low"
 reporter: "{name}"
 approved: false
 context_source: "approved Epic / verified codebase grounding + recorded direct approval"
+proof_tier: ""  # unit | container | live | human — how this item is proven; fill ## Proof to match
 created_at: "{ISO}"
 updated_at: "{ISO}"
 created_at_version: "strategy-phase-pre-init"
@@ -125,6 +126,8 @@ before this item is written.
 | Data | {T or F} | {…} |
 | Rules | {T or F} | {…} |
 
+**Holdout.** When `proof_tier` is `container` or `live`, tag at least one scenario `@holdout` on the tag line directly above `Scenario:` (other tags may share the line, e.g. `@rules @holdout`). QA-Red and the Developer never see it; QA-Verify writes and runs its test.
+
 ```gherkin
 Feature: {Bug Name}
 
@@ -146,6 +149,17 @@ Feature: {Bug Name}
 | Unit tests | {N} | {e.g., "1 per changed function"} |
 | Integration tests | {N} | {e.g., "1 per *.integration.node.test.ts scenario — real Postgres/Redis, no mocks"} |
 | E2E / acceptance tests | {N} | {e.g., "1 per Gherkin scenario"} |
+
+## Proof
+
+- **Tier:** {unit | container | live | human — the same value as proof_tier}
+- **Expected result:** {what a pass looks like}
+- **Why human:** {human tier only: why no agent can reach the check}
+- **Steps:** {live and human tiers, when the proof is not one command}
+
+```bash
+{proof command, first non-blank line; omit this block for unit or container to use gate-checks.json proof.<tier>}
+```
 
 ---
 

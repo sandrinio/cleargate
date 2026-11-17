@@ -33,8 +33,8 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-061_cli_repo_hygiene_and_layout.md"
-last_ingest: "2026-11-16T18:17:47.227Z"
-last_ingest_commit: "09c30fd5b9fc11f8a58110c3e214966c9ce13dfc"
+last_ingest: "2026-11-17T10:51:24.246Z"
+last_ingest_commit: "7bef129d7f8f48786f094c50f38a1b1e0f509be7"
 repo: "planning"
 ---
 

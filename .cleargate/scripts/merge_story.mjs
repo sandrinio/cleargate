@@ -32,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 import { extractFailing, commandEnv, lastLine } from './record_baseline.mjs';
 import { sprintBranchFor } from './dispatch_serial.mjs';
 import { extractWorkItemIds } from './lib/work-item-id.mjs';
+import { findItemFile, readProofTier, isProofTier, readEvidence, proofStatus, evidencePath } from './lib/proof.mjs';
 
 export const MERGE_EXIT = Object.freeze({ MERGED: 0, PRECONDITION: 2, CHECK_FAILED: 3, CONFLICT: 4, POST_TEST_FAILED: 5 });
 
@@ -174,8 +175,10 @@ function changedFileDebugHits({ worktree, base, story, patterns }) {
   return { hits, error: null };
 }
 
-export function buildResult({ id, step, exit, tail, conflict_files, post_merge_test }) {
+export function buildResult({ id, step, exit, tail, conflict_files, post_merge_test, state, evidence }) {
   const result = { id, step, exit, tail: (tail ?? []).slice(-TAIL_LINES) };
+  if (state !== undefined) result.state = state;
+  if (evidence !== undefined) result.evidence = evidence;
   if (conflict_files !== undefined) result.conflict_files = conflict_files;
   if (post_merge_test !== undefined) result.post_merge_test = post_merge_test;
   return result;
@@ -342,6 +345,7 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
     const landedLine = `merge commit ${mergeSha} has landed on ${sprintBranch}; re-run ${rerun} to finish teardown and state`;
     const after = (step, tail) => buildResult({ id, step, exit: MERGE_EXIT.PRECONDITION, tail: [...tail, ...notices, landedLine] });
     let step = 'teardown';
+    const proofInfo = { state: 'Done', evidence: null, tail: [] };
     try {
       log(resumed ? `${storyBranch} already merged (${mergeSha}); teardown and state only` : 'teardown');
       if (fs.existsSync(worktree)) {
@@ -374,7 +378,20 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
         if (bd.status !== 0) return after('teardown', lines(bd.text));
       }
       step = 'state';
-      const up = run('node', [path.join(scriptDir, 'update_state.mjs'), id, 'Done'], { cwd: root, env: { ...env, CLEARGATE_STATE_FILE: stateFile } });
+      // STORY-065-03 (R1/R1a): a tiered item moves to Done only on passing evidence at its tier;
+      // otherwise it waits in Sprint Review. An untiered item goes to Done as before.
+      let tier = null;
+      try { const f = findItemFile(root, id); if (f) tier = readProofTier(fs.readFileSync(f, 'utf8')); } catch { tier = null; }
+      const ev = readEvidence(sprintDir, id);
+      proofInfo.evidence = ev ? evidencePath(sprintDir, id) : null;
+      if (isProofTier(tier)) {
+        const ps = proofStatus(ev, tier);
+        if (!ps.ok) {
+          proofInfo.state = 'Sprint Review';
+          proofInfo.tail = [`awaiting proof: ${tier} (${ps.reason === 'tier' ? `tier ${ps.recorded_tier}` : ps.reason})`];
+        }
+      }
+      const up = run('node', [path.join(scriptDir, 'update_state.mjs'), id, proofInfo.state], { cwd: root, env: { ...env, CLEARGATE_STATE_FILE: stateFile } });
       if (up.status !== 0) return after('state', lines(up.text));
     } catch (err) {
       return after(step, [`unexpected error: ${err.message}`]);
@@ -382,10 +399,11 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
     if (resumed) {
       return buildResult({
         id, step: 'done', exit: MERGE_EXIT.MERGED, post_merge_test: 'skipped',
-        tail: [`resumed: ${storyBranch} was already merged into ${sprintBranch}; teardown and state only`],
+        state: proofInfo.state, evidence: proofInfo.evidence,
+        tail: [`resumed: ${storyBranch} was already merged into ${sprintBranch}; teardown and state only`, ...proofInfo.tail],
       });
     }
-    return fail('done', MERGE_EXIT.MERGED, postTail, { post_merge_test: postMerge });
+    return fail('done', MERGE_EXIT.MERGED, [...postTail, ...proofInfo.tail], { post_merge_test: postMerge, state: proofInfo.state, evidence: proofInfo.evidence });
   };
 
   // 2. Preconditions.

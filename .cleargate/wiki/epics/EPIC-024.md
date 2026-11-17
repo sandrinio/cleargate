@@ -15,7 +15,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-024_AI_Orientation_Surface_Slim.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "7cbc665f6f3a6c98cfacf10f23c14b95ebf481a9"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-15"

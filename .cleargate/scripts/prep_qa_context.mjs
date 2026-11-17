@@ -102,6 +102,7 @@ import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { VALID_STATES, TERMINAL_STATES } from './constants.mjs';
+import { readProofTier, resolveProofCommand } from './lib/proof.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -538,40 +539,13 @@ function nonBlankOrNull(v) {
   return typeof v === 'string' && v.trim() !== '' ? v : null;
 }
 
-/**
- * First non-blank line inside the first fenced block under a `## Proof` heading
- * (the heading is only recognised outside fences). null when there is none.
- */
-function parseProofCommand(content) {
-  let inFence = false;
-  let inProof = false;
-  let inProofFence = false;
-  for (const line of content.split(/\r?\n/)) {
-    if (/^\s*(```|~~~)/.test(line)) {
-      if (inProofFence) return null; // first block closed without a command
-      if (!inFence && inProof) {
-        inProofFence = true;
-      }
-      inFence = !inFence;
-      continue;
-    }
-    if (inProofFence) {
-      if (line.trim() !== '') return line.trim();
-      continue;
-    }
-    if (inFence) continue;
-    if (/^##\s+Proof\s*$/.test(line)) inProof = true;
-    else if (inProof && /^#{1,2}\s/.test(line)) inProof = false;
-  }
-  return null;
-}
-
 function buildCommands(storyPath) {
   let source = 'absent';
   let typecheck = null;
   let test = null;
+  let gc = null;
   try {
-    const gc = JSON.parse(fs.readFileSync(path.join(__dirname, 'gate-checks.json'), 'utf8'));
+    gc = JSON.parse(fs.readFileSync(path.join(__dirname, 'gate-checks.json'), 'utf8'));
     source = 'gate-checks.json';
     const qa = (gc && gc.qa) || {};
     typecheck = nonBlankOrNull(qa.typecheck);
@@ -585,8 +559,8 @@ function buildCommands(storyPath) {
   if (storyPath) {
     try {
       const content = fs.readFileSync(storyPath, 'utf8');
-      tier = parseFrontmatter(content).proof_tier ?? null;
-      command = parseProofCommand(content);
+      tier = readProofTier(content);
+      command = resolveProofCommand(content, tier, gc);
     } catch {
       // item file unreadable: proof stays null
     }

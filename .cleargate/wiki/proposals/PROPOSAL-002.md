@@ -11,7 +11,7 @@ cited_by:
 status: "Abandoned"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-002_Knowledge_Wiki.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "c5daa2e17d44c5de50c683745851916812069428"
 repo: "planning"
 ---

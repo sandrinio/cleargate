@@ -53,7 +53,9 @@ const text = (v) => (Array.isArray(v) ? v.join('; ') : v == null ? '' : String(v
 function promptFor(item, stage, ad, label, st) {
   const id = item.id
   const hasPlan = item.stages.some((s) => (ADAPTERS[s.name] || {}).role === 'plan')
-  const file = item.file ? item.file : 'find ' + id + '_*.md under .cleargate/delivery/'
+  const seesView = ad.role === 'plan' || ad.role === 'red' || ad.role === 'red-check' || ad.role === 'build'
+  const given = seesView && item.view_file ? item.view_file : item.file
+  const file = given ? given : 'find ' + id + '_*.md under .cleargate/delivery/'
   const lines = [
     label,
     'Sprint ' + A.sprintId + '. Item ' + id + ' (lane ' + item.lane + '). Item file: ' + file + '. Worktree: .worktrees/' + id + ' (branch story/' + id + ', base ' + item.base + '). Read .cleargate/sprint-runs/' + A.sprintId + '/sprint-context.md first.',

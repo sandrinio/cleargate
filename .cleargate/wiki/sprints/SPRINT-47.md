@@ -22,12 +22,12 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-47_proof_decides_done.md"
-last_ingest: "2026-11-17T10:49:57.748Z"
-last_ingest_commit: ""
+last_ingest: "2026-11-17T10:51:24.246Z"
+last_ingest_commit: "7bef129d7f8f48786f094c50f38a1b1e0f509be7"
 repo: "planning"
 last_contradict_sha: "c14c59842c9b56819cd6b7bb72245c47089b0f027339d852bc9a9c20c3c4876f"
 report_raw_path: ".cleargate/sprint-runs/SPRINT-47/SPRINT-47_REPORT.md"
-last_report_ingest_commit: ""
+last_report_ingest_commit: "7bef129d7f8f48786f094c50f38a1b1e0f509be7"
 ---
 
 # SPRINT-47: Proof Decides Done

@@ -59,8 +59,8 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-058_Additive_Multi_Host_Execution_Adapters.md"
-last_ingest: "2026-11-16T18:17:46.582Z"
-last_ingest_commit: ""
+last_ingest: "2026-11-17T10:51:24.246Z"
+last_ingest_commit: "7bef129d7f8f48786f094c50f38a1b1e0f509be7"
 repo: "planning"
 ---
 

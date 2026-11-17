@@ -12,7 +12,7 @@ cited_by:
 status: "Approved"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/PROPOSAL-012_Wiki_Contradiction_Detection.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "6aff4e920b21cae00c271fb74009ee9e3ed09312"
 repo: "planning"
 ---

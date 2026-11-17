@@ -17,7 +17,7 @@ cited_by: []
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/SPRINT-30_Solo_Onboarding_Dogfood_Hardening.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "db53f81843ad19394191eb9fe3a8628ddc7c3061"
 repo: "planning"
 sprint_cleargate_id: "SPRINT-30"

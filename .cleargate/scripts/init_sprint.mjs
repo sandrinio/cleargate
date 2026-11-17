@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES } from './constants.mjs';
 import { atomicWrite, writeEventsFile, synthesizeGenesisEvents, fold } from './state-events.mjs';
-import { matchesId } from './lib/work-item-id.mjs';
+import { findItemFile } from './lib/proof.mjs';
 import { assignLaneForFile, LANE_RANK } from './assign_lane.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -106,25 +106,6 @@ function findSprintFile(repoRoot, sprintId) {
       (e) => (e === `${sprintId}.md` || e.startsWith(prefix)) && e.endsWith('.md')
     );
     if (match) return path.join(dir, match);
-  }
-  return null;
-}
-
-/**
- * STORY-066-16: the item file for `id` in pending-sync/ or archive/ (`matchesId`, as seal_red.mjs
- * finds it), or null.
- */
-function findItemFile(repoRoot, id) {
-  for (const sub of ['pending-sync', 'archive']) {
-    const dir = path.join(repoRoot, '.cleargate', 'delivery', sub);
-    let names;
-    try {
-      names = fs.readdirSync(dir).sort();
-    } catch {
-      continue;
-    }
-    const hit = names.find((n) => matchesId(n, id));
-    if (hit) return path.join(dir, hit);
   }
   return null;
 }

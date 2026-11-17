@@ -48,6 +48,7 @@ import { fileURLToPath } from 'node:url';
 import { SCHEMA_VERSION, VALID_STATES, TERMINAL_STATES, BOUNCE_CAP } from './constants.mjs';
 import { validateState, validateShapeIgnoringVersion, checkFoldDrift } from './validate_state.mjs';
 import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
+import { findItemFile, readProofTier, isProofTier, readEvidence, proofStatus, evidencePath } from './lib/proof.mjs';
 import {
   appendEvent,
   readEvents,
@@ -249,6 +250,24 @@ function baseEventFields(doc, storyId, overrides) {
   };
 }
 
+// STORY-065-03 (R2/R3): Done waits for evidence. An item that declares a proof tier becomes Done
+// only when <sprintDir>/evidence/<ID>.json records a pass at that tier. Items without a (valid)
+// tier are not guarded. Returns the refusal message, or null.
+function doneGuardRefusal(stateFile, storyId) {
+  const sprintDir = path.dirname(stateFile);
+  const derivedRoot = path.resolve(sprintDir, '..', '..', '..');
+  let file = findItemFile(derivedRoot, storyId);
+  if (!file) file = findItemFile(process.cwd(), storyId);
+  if (!file) return null;
+  let tier = null;
+  try { tier = readProofTier(fs.readFileSync(file, 'utf8')); } catch { return null; }
+  if (!isProofTier(tier)) return null;
+  const st = proofStatus(readEvidence(sprintDir, storyId), tier);
+  if (st.ok) return null;
+  const why = st.reason === 'tier' ? `tier ${st.recorded_tier}` : st.reason;
+  return `Error: ${storyId} has no ${tier}-tier evidence (${evidencePath(sprintDir, storyId)}: ${why})\n`;
+}
+
 function main() {
   const args = process.argv.slice(2);
 
@@ -434,6 +453,14 @@ function main() {
         `Error: invalid state "${newState}"; valid states: ${VALID_STATES.join(', ')}\n`
       );
       process.exit(1);
+    }
+
+    if (newState === 'Done') {
+      const refusal = doneGuardRefusal(stateFile, storyId);
+      if (refusal) {
+        process.stderr.write(refusal);
+        process.exit(1);
+      }
     }
 
     // Idempotency: if state is already the target, no-op -- true zero-write no-op unless a

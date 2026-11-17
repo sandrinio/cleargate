@@ -109,7 +109,6 @@
 - area: sprint-close
   - [[BUG-118]] — Triaged · no sprint — Sprint close marks carried-over (Parking Lot) items Completed and archives them
   - [[BUG-119]] — Triaged · no sprint — Sprint close halts on incomplete parents that have nothing to do with the closing sprint
-  - [[CR-129]] — Draft · no sprint — Record the Sprint Goal Verdict as a Structured Field
 - area: sprint-design-review
   - [[BUG-129]] — Draft · no sprint — collision_surface.sh reads §3.1 cell notes as part of the path, so the design review refuses every story
 - area: sprint-execution
@@ -133,7 +132,6 @@
   - [[BUG-075]] — Triaged · no sprint — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing - a story can reach `Done` without QA
 - area: templates
   - [[CR-119]] — Triaged · no sprint — The story template's §3.1 cannot express a greenfield story
-  - [[CR-128]] — Draft · no sprint — CRs and Bugs Declare What Proves It Works in the Real Host
   - [[CR-130]] — Draft · no sprint — The Bug Template Gets a Root Cause Section
 - area: wiki
   - [[BUG-135]] — Draft · no sprint — wiki build says "malformed frontmatter" without saying what is wrong
@@ -149,7 +147,7 @@
 - Epics: 40 Completed · 3 Abandoned
 - Sprints: 40 Completed · 3 Abandoned
 - Proposals: 8 Abandoned · 2 Completed
-- CRs: 109 Completed · 1 Abandoned
+- CRs: 111 Completed · 1 Abandoned
 - Bugs: 70 Completed · 1 Abandoned
 
 ## Contradictions

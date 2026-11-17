@@ -57,7 +57,7 @@ cited_by:
 status: "Completed"
 remote_id: ""
 raw_path: ".cleargate/delivery/archive/EPIC-043_Framework_Hygiene_And_Efficiency_Remediation.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
+last_ingest: "2026-11-17T10:51:24.246Z"
 last_ingest_commit: "5f8134f8b1ea5ad975d5687114fbf0f84ca1f53e"
 repo: "planning"
 ---

@@ -94,6 +94,7 @@ import { migrateStateToV3 } from './_migrate-schema-v3.mjs';
 import { reportFilename } from './lib/report-filename.mjs';
 import { locateFrontmatterFence } from './assert_story_files.mjs';
 import { planFinish, runFinish } from './lib/sprint-finish.mjs';
+import { readEvidence, readProofTier, findItemFile, isProofTier, proofStatus } from './lib/proof.mjs';
 
 /**
  * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
@@ -338,6 +339,30 @@ function fenceYaml(raw) {
   return { span, yaml: raw.slice(span.yamlStart, span.yamlEnd) };
 }
 
+/**
+ * STORY-065-06: set top-level frontmatter keys in place (replace the line, else insert before the
+ * closing fence). Returns the new text, or null when the file has no readable frontmatter.
+ * @param {string} raw
+ * @param {Record<string,string>} kv values are written verbatim
+ * @returns {string|null}
+ */
+function setFrontmatterKeys(raw, kv) {
+  const fm = fenceYaml(raw);
+  if (!fm) return null;
+  const eol = fm.span.eol || '\n';
+  let yaml = raw.slice(fm.span.yamlStart, fm.span.yamlEnd);
+  for (const [k, v] of Object.entries(kv)) {
+    const rx = new RegExp(`^${k}\\s*:.*$`, 'm');
+    if (rx.test(yaml)) {
+      yaml = yaml.replace(rx, `${k}: ${v}`);
+    } else {
+      const trail = /\s*$/.exec(yaml)?.[0] || eol;
+      yaml = `${yaml.replace(/\s*$/, '')}${eol}${k}: ${v}${trail}`;
+    }
+  }
+  return raw.slice(0, fm.span.yamlStart) + yaml + raw.slice(fm.span.yamlEnd);
+}
+
 /** BUG-083: read just the `status:` value from a file's frontmatter. Null if unreadable. */
 function readFmStatus(filePath) {
   try {
@@ -488,7 +513,8 @@ async function main() {
   // ── Step 2: Refuse if any story not in TERMINAL_STATES ────────────────────
   const nonTerminal = [];
   for (const [storyId, story] of Object.entries(state.stories || {})) {
-    if (!TERMINAL_STATES.includes(story.state)) {
+    // STORY-065-06 R2: a merged item awaiting proof may reach close; the ack pass records the gap.
+    if (!TERMINAL_STATES.includes(story.state) && story.state !== 'Sprint Review') {
       nonTerminal.push(`${storyId}: ${story.state} — not terminal`);
     }
   }
@@ -800,6 +826,21 @@ async function main() {
         `close_sprint: §5 missing: ${missingSections.map((rx) => rx.source).join(', ')}\n`
       );
       process.exit(1);
+    }
+
+    // STORY-065-06 R6: a present goal_verdict must be one of the three values; an absent key passes.
+    {
+      const fmV = fenceYaml(report);
+      const mV = fmV ? fmV.yaml.match(/^goal_verdict\s*:(.*)$/m) : null;
+      if (mV) {
+        const v = mV[1].replace(/\s+#.*$/, '').trim().replace(/^(["'])(.*)\1$/, '$2').trim();
+        if (!['met', 'partial', 'missed'].includes(v)) {
+          process.stderr.write(
+            `close_sprint: goal_verdict "${v}" in ${path.basename(reportFile2)} is not one of met | partial | missed\n`
+          );
+          process.exit(1);
+        }
+      }
     }
 
     process.stdout.write('Step 2.5 passed: v2.1 validation — all required §3 metrics and §5 sections present.\n');
@@ -1169,7 +1210,50 @@ async function main() {
   // so swapping them makes the rollup see the truth it was always meant to read.
 
 
-  // ── Step 2.9: Deferred-Verification Close Gate (CR-082) ─────────────────────
+  // ── Step 2.9: evidence (STORY-065-06) ───────────────────────────────────────
+  // Every item except Parking Lot: proven at its declared tier (evidence/<ID>.json, read through
+  // lib/proof.mjs), or built, not proven. An item with no proof_tier is never unproven (Done at merge).
+  // Reads only; the ack pass records the gap. A green deferred-verify/<ID>.json still counts for
+  // one release (CR-082). The CR-082 failure gate below is unchanged.
+  const unprovenItems = [];
+  process.stdout.write('Step 2.9: evidence...\n');
+  for (const [itemId, item] of Object.entries(state.stories || {})) {
+    if (/** @type {any} */ (item).state === 'Parking Lot') continue;
+    let raw = '';
+    try {
+      const f = findItemFile(REPO_ROOT, itemId);
+      if (f) raw = fs.readFileSync(f, 'utf8');
+    } catch {
+      raw = '';
+    }
+    const tier = readProofTier(raw);
+    if (!isProofTier(tier)) {
+      let legacyGreen = false;
+      if (/^deferred_verification\s*:\s*(\n\s*-\s|\[\s*\{)/m.test(raw)) {
+        try {
+          const dv = JSON.parse(fs.readFileSync(path.join(sprintDir, 'deferred-verify', `${itemId}.json`), 'utf8'));
+          legacyGreen = dv.status === 'green' && dv.exit_code === 0;
+        } catch {
+          legacyGreen = false;
+        }
+      }
+      process.stdout.write(
+        legacyGreen
+          ? `${itemId}: proven (deferred-verify, CR-082)\n`
+          : `${itemId}: no proof tier declared (not guarded)\n`
+      );
+      continue;
+    }
+    const res = proofStatus(readEvidence(sprintDir, itemId), tier);
+    if (res.ok) {
+      process.stdout.write(`${itemId}: proven at ${tier} (evidence/${itemId}.json)\n`);
+    } else {
+      unprovenItems.push({ id: itemId, tier, reason: res.reason });
+      process.stdout.write(`${itemId} built, not proven at tier ${tier} (${res.reason})\n`);
+    }
+  }
+
+  // ── Step 2.9 (CR-082): Deferred-Verification Close Gate ─────────────────────
   // Block close if any story in this sprint declares a deferred_verification entry
   // with blocks: close and does NOT have a matching green result artifact.
   // NO-OP when no story declares any deferred_verification (the common case — SPRINT-34's path).
@@ -1538,14 +1622,51 @@ async function main() {
     const checklistLine = fs.existsSync(checklistPath)
       ? `Doc-refresh checklist: ${checklistPath}`
       : 'Doc-refresh checklist: not written (Step 3.6 was skipped or failed)';
+    const unprovenLine = unprovenItems.length > 0
+      ? `Unproven: ${unprovenItems.length} — ${unprovenItems.map((u) => u.id).join(', ')}; they are recorded as built, not proven\n`
+      : '';
     process.stdout.write(
       `\n${reportBasename} found at ${reportFileForCheck}\n` +
+      unprovenLine +
       'Review the report, then confirm close by re-running with --assume-ack\n' +
       '--assume-ack is refused unless CLEARGATE_CI_ACK=1 (enforcement §12.3).\n' +
       `${finishLine}\n` +
       `${checklistLine}\n`
     );
     process.exit(0);
+  }
+
+  // ── Ack-pass writes (STORY-065-06 R2, R3, R6) ────────────────────────────
+  // Only here, after the ack check: never in the no-flag pass.
+  {
+    atomicWriteString(path.join(sprintDir, 'unproven.json'), JSON.stringify(unprovenItems, null, 2) + '\n');
+    for (const u of unprovenItems) {
+      try {
+        const f = findItemFile(REPO_ROOT, u.id);
+        if (!f) continue;
+        const raw = fs.readFileSync(f, 'utf8');
+        const next = setFrontmatterKeys(raw, { carry_over: 'true', proof_pending: u.tier });
+        if (next !== null) atomicWriteString(f, next);
+      } catch (err) {
+        process.stderr.write(`Warning: could not mark ${u.id} carry_over/proof_pending: ${/** @type {Error} */ (err).message}\n`);
+      }
+    }
+    if (unprovenItems.length > 0) {
+      process.stdout.write(`Ack pass: ${unprovenItems.length} unproven item(s) recorded in unproven.json and left open.\n`);
+    }
+    try {
+      const rf = reportFilename(sprintDir, sprintId, { forRead: true });
+      if (fs.existsSync(rf)) {
+        const raw = fs.readFileSync(rf, 'utf8');
+        const fmR = fenceYaml(raw);
+        if (fmR && /^goal_verdict\s*:/m.test(fmR.yaml)) {
+          const next = setFrontmatterKeys(raw, { goal_verdict_acked_at: `"${new Date().toISOString()}"` });
+          if (next !== null) atomicWriteString(rf, next);
+        }
+      }
+    } catch (err) {
+      process.stderr.write(`Warning: could not stamp goal_verdict_acked_at: ${/** @type {Error} */ (err).message}\n`);
+    }
   }
 
   // ── Step 5: Flip sprint_status to "Completed" ────────────────────────────

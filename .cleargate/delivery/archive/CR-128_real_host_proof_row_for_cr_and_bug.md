@@ -4,12 +4,13 @@ parent_ref: CR-126
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Draft
+status: Completed
+superseded_by: STORY-065-01
 approved: false
-context_source: "Filed 2026-11-12 as the follow-up to CR-126 §0.5 Q2 (owner agreed: epics first in CR-126, CRs and bugs in a follow-up). Grounded against cleargate-cli main (CR.md, Bug.md, readiness-predicates.ts, readiness-gates.md) on 2026-11-12. Filed for triage, not approved; depends on CR-126 landing first."
+context_source: "Filed 2026-11-12 as the follow-up to CR-126 §0.5 Q2 (owner agreed: epics first in CR-126, CRs and bugs in a follow-up). Grounded against cleargate-cli main (CR.md, Bug.md, readiness-predicates.ts, readiness-gates.md) on 2026-11-12. Filed for triage, not approved; depends on CR-126 landing first. Absorbed 2026-11-17 at SPRINT-47 Gate 4: STORY-065-01 (SPRINT-47, released in cleargate 0.32.0) gave the CR and Bug templates a `proof_tier` field and a `## Proof` section, checked by the `proof-declared` gate criterion, which covers this CR's real-host proof row."
 area: templates,readiness-gates
 created_at: 2026-11-12T00:00:00Z
-updated_at: 2026-11-12T00:00:00Z
+updated_at: 2026-11-17T00:00:00Z
 created_at_version: strategy-phase-pre-init
 updated_at_version: strategy-phase-pre-init
 server_pushed_at_version: null
