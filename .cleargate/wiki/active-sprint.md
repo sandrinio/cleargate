@@ -21,17 +21,15 @@ _No active sprint found._
 
 - [[SPRINT-43]] — status: Draft
 
-- [[SPRINT-47]] — status: Draft
-
 
 
 ## Recently Completed Sprints
 
 
+- [[SPRINT-47]] — completed: 2026-11-16T18:30:00Z
+
 - [[SPRINT-46]] — completed: 2026-11-16T00:00:00Z
 
 - [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
-
-- [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
 

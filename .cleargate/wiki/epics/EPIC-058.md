@@ -56,17 +56,17 @@ cited_by:
   - "[[STORY-060-01]]"
   - "[[STORY-063-07]]"
   - "[[STORY-063-12]]"
-status: "Draft"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md"
-last_ingest: "2026-11-15T22:01:22.099Z"
-last_ingest_commit: "eac91c203dc0dc96a8db12fbb5cd29c53d069690"
+raw_path: ".cleargate/delivery/archive/EPIC-058_Additive_Multi_Host_Execution_Adapters.md"
+last_ingest: "2026-11-16T18:17:46.582Z"
+last_ingest_commit: ""
 repo: "planning"
 ---
 
 # EPIC-058: Additive Multi-Host Execution Adapters
 
-**Status:** Draft · **Sprint:** none · **Gate:** pass
+**Status:** Completed · **Sprint:** none · **Gate:** pass
 
 ## Objective
 Make the npm-installed ClearGate scaffold natively support Claude Code, GitHub Copilot, and OpenAI Codex through additive host adapters that share one `.cleargate/**` core and can coexist in the same target repository.
@@ -75,7 +75,7 @@ Make the npm-installed ClearGate scaffold natively support Claude Code, GitHub C
 **Why are we doing this?**
 ClearGate's planning and enforcement model is broadly host-independent, but the npm package installs only Claude Code primitives: `CLAUDE.md`, `.claude/agents/**`, `.claude/skills/**`, `.claude/settings.json`, Claude hook payload assumptions, and Claude-specific lifecycle surgery.
 
-[+2,250 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
+[+2,250 bytes not shown — read .cleargate/delivery/archive/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
 
 ## Scope
 **In:**
@@ -85,13 +85,13 @@ ClearGate's planning and enforcement model is broadly host-independent, but the 
 - Supporting Antigravity, Cursor, Windsurf, Cline, Aider, or hosts other than Claude Code, GitHub Copilot, and OpenAI Codex.
 - Replacing the target repository's build system, test runner, CI provider, or deployment tooling.
 
-[+3,495 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
+[+3,495 bytes not shown — read .cleargate/delivery/archive/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
 
 ## Architecture rules
 - All production implementation and canonical npm payload sources MUST live inside the standalone `cleargate-cli` repository; the outer meta-repo and sibling `cleargate-planning/` directory MUST NOT be build-time dependencies.
 - Preserve `cleargate init` as byte-compatible Claude installation behavior unless the user supplies a host flag.
 
-[+1,972 bytes not shown — read .cleargate/delivery/pending-sync/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
+[+1,972 bytes not shown — read .cleargate/delivery/archive/EPIC-058_Additive_Multi_Host_Execution_Adapters.md]
 
 ## Decisions
 No unresolved questions. The following decisions are integrated throughout this Epic:

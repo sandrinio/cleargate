@@ -1,0 +1,16 @@
+{"ts":"2026-11-16T09:30:36.079Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:30:36.085Z","mode":"seal","item":"STORY-065-05","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"f744333eb870931db815bd56fcb3269b603cde00"}
+{"ts":"2026-11-16T09:31:46.540Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:31:46.546Z","mode":"seal","item":"STORY-065-06","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"d714e3fd4b6d6de8a1cd014909f7377aeab2610d"}
+{"ts":"2026-11-16T09:44:06.396Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:44:06.401Z","mode":"seal","item":"STORY-065-03","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"9915f3c9c92c3eab20a651544796f8637500cf17"}
+{"ts":"2026-11-16T09:44:21.540Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:44:21.546Z","mode":"seal","item":"STORY-065-04","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"ec39600403039d7a3c68c0982c2a041685017fa9"}
+{"ts":"2026-11-16T09:46:19.154Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:46:19.158Z","mode":"seal","item":"STORY-065-01","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"834fac6fa55ed04d6d30c623bf58d9e19fed21e1"}
+{"ts":"2026-11-16T09:47:55.095Z","mode":"arch","item":null,"exit":1,"flagged_checks":["qa_red_lint"]}
+{"ts":"2026-11-16T09:47:55.100Z","mode":"seal","item":"STORY-065-02","exit":1,"raw_exit":1,"flagged_checks":["qa_red_lint"],"sealed_sha":"7b594db60438ec3d5dde0b0c129b719988ea3bd3"}
+{"ts":"2026-11-16T09:49:18.115Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:49:18.209Z","mode":"seal","item":"STORY-065-02","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"b644eff79115de4cebcae4447b75242e25e0ff89"}
+{"ts":"2026-11-16T09:59:16.646Z","mode":"arch","item":null,"exit":0,"flagged_checks":[]}
+{"ts":"2026-11-16T09:59:16.651Z","mode":"seal","item":"STORY-065-04","exit":0,"raw_exit":0,"flagged_checks":[],"sealed_sha":"b7746b8e8a08522a1d4942421215a3c6f9e1d628"}

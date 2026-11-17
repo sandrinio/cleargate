@@ -1,0 +1,367 @@
+{
+  "schema": 1,
+  "sprint_id": "SPRINT-47",
+  "generated_at": "2026-11-17T10:49:45.462Z",
+  "sources": {
+    "sessions": 1,
+    "dispatches": 44,
+    "repos": [
+      ".",
+      "cleargate-cli",
+      "mcp"
+    ],
+    "warnings": []
+  },
+  "items": {
+    "STORY-065-01": {
+      "lane": "runtime",
+      "dispatches": {
+        "total": 9,
+        "by_role": {
+          "architect": 3,
+          "qa": 4,
+          "developer": 2
+        },
+        "by_phase": {
+          "(none)": 9
+        }
+      },
+      "rework": {
+        "red_corrections": 1,
+        "dev_reruns": 1,
+        "verify_reruns": 1,
+        "total": 3,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 0,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 1,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 3653509,
+      "tokens": {
+        "input": 450,
+        "output": 165116,
+        "cache_read": 20780132,
+        "cache_creation": 841233,
+        "total": 21786931
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-065-02": {
+      "lane": "runtime",
+      "dispatches": {
+        "total": 12,
+        "by_role": {
+          "developer": 4,
+          "architect": 3,
+          "qa": 5
+        },
+        "by_phase": {
+          "(none)": 12
+        }
+      },
+      "rework": {
+        "red_corrections": 2,
+        "dev_reruns": 3,
+        "verify_reruns": 1,
+        "total": 6,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 0,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 3,
+        "build": 1,
+        "rework": 2,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 3242744,
+      "tokens": {
+        "input": 456,
+        "output": 220029,
+        "cache_read": 20016697,
+        "cache_creation": 926328,
+        "total": 21163510
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-065-03": {
+      "lane": "standard",
+      "dispatches": {
+        "total": 3,
+        "by_role": {
+          "qa": 2,
+          "developer": 1
+        },
+        "by_phase": {
+          "(none)": 3
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 0,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 1241705,
+      "tokens": {
+        "input": 108,
+        "output": 31681,
+        "cache_read": 3083194,
+        "cache_creation": 193711,
+        "total": 3308694
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-065-04": {
+      "lane": "runtime",
+      "dispatches": {
+        "total": 10,
+        "by_role": {
+          "architect": 3,
+          "qa": 4,
+          "developer": 3
+        },
+        "by_phase": {
+          "(none)": 10
+        }
+      },
+      "rework": {
+        "red_corrections": 2,
+        "dev_reruns": 2,
+        "verify_reruns": 0,
+        "total": 4,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 1,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 2,
+        "build": 1,
+        "rework": 1,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 2816854,
+      "tokens": {
+        "input": 424,
+        "output": 175372,
+        "cache_read": 18131172,
+        "cache_creation": 876838,
+        "total": 19183806
+      },
+      "models": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 1,
+        "arch_bounces": 1
+      },
+      "disagrees": true,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-065-05": {
+      "lane": "standard",
+      "dispatches": {
+        "total": 3,
+        "by_role": {
+          "qa": 2,
+          "developer": 1
+        },
+        "by_phase": {
+          "(none)": 3
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 0,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 840692,
+      "tokens": {
+        "input": 92,
+        "output": 33202,
+        "cache_read": 2697861,
+        "cache_creation": 223551,
+        "total": 2954706
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    },
+    "STORY-065-06": {
+      "lane": "standard",
+      "dispatches": {
+        "total": 3,
+        "by_role": {
+          "qa": 2,
+          "developer": 1
+        },
+        "by_phase": {
+          "(none)": 3
+        }
+      },
+      "rework": {
+        "red_corrections": 0,
+        "dev_reruns": 0,
+        "verify_reruns": 0,
+        "total": 0,
+        "by_defect_in": {
+          "code": 0,
+          "red-test": 0,
+          "spec": 0,
+          "unknown": 0
+        }
+      },
+      "interrupted": 0,
+      "post_merge": 0,
+      "git": {
+        "red_written": 1,
+        "red_corrected": 0,
+        "build": 1,
+        "rework": 0,
+        "integrate": 0,
+        "merged": 1
+      },
+      "wall_ms": 1089617,
+      "tokens": {
+        "input": 152,
+        "output": 53208,
+        "cache_read": 5585278,
+        "cache_creation": 288191,
+        "total": 5926829
+      },
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "state_counters": {
+        "qa_bounces": 0,
+        "arch_bounces": 0
+      },
+      "disagrees": false,
+      "dispatch_source": "transcripts"
+    }
+  },
+  "sprint_level": {
+    "dispatches": 3,
+    "tokens": 1564549
+  },
+  "unattributed": {
+    "dispatches": 1,
+    "tokens": 1135955,
+    "share": 0.014747877896235741
+  },
+  "totals": {
+    "dispatches": 44,
+    "rework": 13,
+    "tokens": 77024980,
+    "rework_by_defect_in": {
+      "code": 0,
+      "red-test": 1,
+      "spec": 0,
+      "unknown": 0
+    }
+  },
+  "by_lane": {
+    "runtime": {
+      "items": 3,
+      "dispatches": 31,
+      "per_item": 10.33
+    },
+    "standard": {
+      "items": 3,
+      "dispatches": 9,
+      "per_item": 3
+    }
+  }
+}

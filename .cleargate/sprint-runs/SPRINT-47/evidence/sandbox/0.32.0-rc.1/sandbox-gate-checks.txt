@@ -1,0 +1,1 @@
+qa.test: make check | proof: {'unit': 'go test ./...', 'container': '', 'browser': ''}

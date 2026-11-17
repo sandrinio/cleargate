@@ -1,0 +1,5 @@
+[cleargate new] created: /private/tmp/claude-501/-Users-ssuladze-Documents-Dev-ClearGate/5ceeac69-149c-4c13-bbec-09ab2d997749/scratchpad/cr47AVFH/.cleargate/delivery/pending-sync/STORY-001-01_demo_story.md
+85:proof_tier: ""  # unit | container | live | human — how this item is proven; fill ## Proof to match
+159:**Holdout.** When `proof_tier` is `container` or `live`, tag at least one scenario `@holdout` on the tag line directly above `Scenario:` (other tags may share the line, e.g. `@rules @holdout`). QA-Red and the Developer never see it; QA-Verify writes and runs its test.
+226:## Proof
+228:- **Tier:** {unit | container | live | human — the same value as proof_tier}

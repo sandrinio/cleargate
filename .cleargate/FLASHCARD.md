@@ -1,3 +1,21 @@
+2026-11-16 · #qa #test-harness · scratchpad is shared across agents: put fixture scripts in a fresh subdir, not bare run.sh/fx.sh/f1 names
+2026-11-16 · #qa #test-harness · record_evidence.mjs resolves its repo root from the script's own location; stage scripts into the fixture repo
+2026-11-16 · #skill #proof · prove barrier must pass an untiered item (recorder exit 2 "no proof tier") to merge, else P4 untiered→Done is dead
+2026-11-16 · #qa #skill · stale gitignored templates/cleargate-planning fails serial-pointers T22 and conditional-architect S5; run `npm run prebuild` before judging
+2026-11-16 · #schema #frontmatter · cleargate new leaves <instructions> above ---; line-1-only readers (readProofTier) miss proof_tier the gate sees
+2026-11-16 · #test-harness #security · `k in obj` on parsed user JSON hits the prototype chain; use Object.hasOwn and skip __proto__
+2026-11-16 · #regex #crlf · a '- **Label:** (.*)$' regex on body.split('\n') never matches a CRLF line; split on /\r?\n/ like parseProofCommand
+2026-11-16 · #contract #holdout · 05's scanGherkinScenarios accepts stacked tag lines and any @-led line, which P2 doesn't; the 01 gate is the narrower reader
+2026-11-16 · #scripts #spawn · async spawn resolves on 'close': a background child holding stdout turns exit 0 into a timeout; kill the group on 'exit'
+2026-11-16 · #upgrade #gate-checks #security · merging user JSON keys with `k in base` follows __proto__ and pollutes Object.prototype; use Object.hasOwn, skip __proto__
+2026-11-16 · #test-harness #skill · a new table row `| 2 |` placed before §C.7 in SKILL.md hijacks tests that take the first `| 2 |` line of the whole file
+2026-11-16 · #upgrade #qa-red · a new GATE_FIELDS entry breaks ~9 exact plan/line asserts in sealed gate-commands-kept.red; QA-Red amends
+2026-11-16 · #upgrade #gate-checks · once the projection holds the waiver, upgrade takes the unchanged path: print the kept-waiver line without a write
+2026-11-16 · #scripts #timeout · spawnSync timeout kills bash only; a grandchild holding the pipe blocks it. Use detached spawn plus a process-group kill
+2026-11-16 · #gate #counts #qa-red · predicate counts are also pinned literally: doctrine.red :330/:360, testing-strategy.red :403/:407; bump in QA-Red
+2026-11-16 · #preflight #test-harness · a new check-5 item rule reddens sprint-preflight.node.test.ts bare-fm item writers (:593, :866); scope by id type
+2026-11-16 · #skill #test-harness · loop-spec T4 pins §C.7 exit rows to exactly 0,2,3,4,5; a new stage's exit table needs its own §C heading
+2026-11-16 · #stages #test-harness · segment-stages Sc2 forbids a quoted stage name in launch_wave.mjs/dispatch_serial.mjs; a new stage never adds a literal there
 2026-11-16 · #reporter #tokens · token-ledger rows are overlapping orchestrator windows; never sum them as a total, use sprint_metrics tokens
 2026-11-16 · #gate #templates · readiness checkbox counts match only lines starting `- [ ]`; numbered `1. - [ ]` template rows never count
 2026-11-16 · #test-harness #release · cli unit tests calling sprintInitHandler spawn the baseline if the outer repo has record_baseline.mjs; stub baselineFn
