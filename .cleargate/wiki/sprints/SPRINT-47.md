@@ -19,18 +19,20 @@ cites:
   - "[[INITIATIVE-002]]"
   - "[[SPRINT-46]]"
 cited_by: []
-status: "Active"
+status: "Completed"
 remote_id: ""
-raw_path: ".cleargate/delivery/pending-sync/SPRINT-47_proof_decides_done.md"
-last_ingest: "2026-11-16T12:22:36.107Z"
-last_ingest_commit: "7c5a8f0e0ecbe52a439f7d2f71ae8ab327ae1dc3"
+raw_path: ".cleargate/delivery/archive/SPRINT-47_proof_decides_done.md"
+last_ingest: "2026-11-17T10:49:57.748Z"
+last_ingest_commit: ""
 repo: "planning"
 last_contradict_sha: "c14c59842c9b56819cd6b7bb72245c47089b0f027339d852bc9a9c20c3c4876f"
+report_raw_path: ".cleargate/sprint-runs/SPRINT-47/SPRINT-47_REPORT.md"
+last_report_ingest_commit: ""
 ---
 
 # SPRINT-47: Proof Decides Done
 
-**Status:** Active · **Dates:** 2026-11-17 → 2026-11-21 · **Gate:** pass
+**Status:** Completed · **Dates:** 2026-11-17 → 2026-11-21 · **Gate:** pass
 
 ## Goal
 Make proof decide Done: every item declares a proof tier, a script records each proof as evidence, an item becomes Done only when evidence for its tier exists, and close and the report show the tier promised and the evidence produced, or "built, not proven at tier X".
@@ -53,3 +55,10 @@ Make proof decide Done: every item declares a proof tier, a script records each 
 - Children (7): [[EPIC-065]], [[STORY-065-01]], [[STORY-065-02]], [[STORY-065-03]], [[STORY-065-04]], [[STORY-065-05]], [[STORY-065-06]]
 - Cites (7): [[CR-082]], [[CR-128]], [[CR-129]], [[EPIC-065]], [[EPIC-066]], [[INITIATIVE-002]], [[SPRINT-46]]
 <!-- END relations -->
+<!-- BEGIN sprint-report -->
+## Sprint Report
+**Report status:** Draft · **Report:** .cleargate/sprint-runs/SPRINT-47/SPRINT-47_REPORT.md · **Improvement suggestions:** .cleargate/sprint-runs/SPRINT-47/improvement-suggestions.md
+
+### Carried Over
+- None. No story was carried over. Two Gate 4 actions remain by design (see §4): live re-sync, release 0.32.0.
+<!-- END sprint-report -->

@@ -4,7 +4,7 @@ parent_ref: null
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: true
-status: Draft
+status: Completed
 approved: true
 approved_by: sandrinio
 approved_at: 2026-09-04T00:00:00Z

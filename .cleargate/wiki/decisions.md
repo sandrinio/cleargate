@@ -16,12 +16,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: INITIATIVE-002 lists EPIC-056 (CI verification layer) as a dependency for environment independence. Recommended: do not block on it; the container… ([[EPIC-065]]) → As recommended (owner, 2026-11-16: "happy with recommendations"). Not a dependency. The container tier runs the target's own command (`make e2e`, a compose target) from `gate-checks.json`; EPIC-056 stays separate.
 - Q: The two field-trial fixes (the pre-gate scan runs configured commands on any stack; the kickoff baseline) ride in this epic… ([[EPIC-065]]) → Neither: moved to EPIC-066, which ships first in SPRINT-46 (owner approved EPIC-066's sprint plan, 2026-11-14).
 - Q: Size. A first cut gives eight stories: tier declaration and predicate; evidence recorder and config; Done guard; prove step in… ([[EPIC-065]]) → One sprint, SPRINT-47, after EPIC-066; six stories now that the last two moved to EPIC-066 (owner approved EPIC-066's sprint plan, 2026-11-14). The prove step is added as a stage in EPIC-066's `stagesFor` table.
-- Rule: Generalise what exists, do not add a parallel mechanism: the evidence file generalises CR-082's deferred-verify/&lt;ID&gt;.json; the goal tier extends CR-110's Goal Acceptance Check; "merged, awaiting proof" uses the existing `Sprint Review` state in constants.mjs.
-- Rule: Evidence is written only by `record_evidence.mjs`, never hand-authored by an agent. A command-tier proof is run by the script, not by an LLM agent.
-- Rule: Stack-neutral: no step may depend on package.json or Node in the target's own code. Proof commands come from the item or from gate-checks.json, whatever the language.
-- Rule: Scripts and templates change in cleargate-cli/scaffold/core; agent prompts and the skill change in scaffold/hosts/claude AND their scaffold/hosts/codex counterparts in the same story.
-- Rule: No new state.json work unit and no new story state (EPIC-054 lock). Merges stay serial (EPIC-055, CR-124).
-- Rule: An init/upgrade change (seeding the gate-checks proof block) is not Done until a clean-room install shows it (EPIC-058 rule 1).
 - Supersedes: [[CR-128]]
 
 ### [[STORY-065-01]] — Items Declare a Proof Tier (2026-11-16)
@@ -288,16 +282,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Rule: No changes to the five-agent loop — CI supplements QA, it does not replace it
 - Rule: No deployment steps — Coolify owns deploy for mcp and admin; npm publish stays manual
 
-### [[EPIC-061]] — cleargate-cli Hygiene, Layout & Public Release (2026-11-07)
-- Rule: Zero behaviour change. For every story, typecheck is clean and the full `npm test` adds no failing test beyond the failure list recorded at the epic's base commit (§3 Test ratchet).
-- Rule: Payload identity. S1–S4 keep `templates/cleargate-planning/**` byte-identical to the epic's base commit. S10 removes that flat copy. From S10 on, the identity check is the tree that `init --host claude`, `--host codex` and `--host all` produce in a scratch repo, which… ([[EPIC-061]])
-- Rule: No moves inside `scaffold/**`. EPIC-058 owns that layout (core + hosts/claude + hosts/codex).
-- Rule: Moves use `git mv` so history follows the file. One story = one commit on a `story/<ID>` branch in the cleargate-cli repo (Cross-Cutting Rule 10).
-- Rule: `test/helpers/scaffold-roots.ts` is read by the BUG-085 drift check. Keep its path or update every caller in the same commit.
-- Rule: Meta-repo files that hard-code cleargate-cli paths are updated in the same story that moves the path (list in §4).
-- Rule: Outward-facing steps in S11 (GitHub renames, visibility flip, npm publish) run only on an explicit owner go given at that moment. A story's approval does not cover them.
-- Rule: node:test only (`*.node.test.ts`). No vitest.
-
 ### [[STORY-061-01]] — Standalone suite, part 1: `test/scripts/` and `test/helpers/` (2026-11-07)
 - Q: Should meta-repo-subject assertions be skipped with a guard instead of moved to the integration tier? → Recommended answer accepted (owner, 2026-11-07, "approved").
 
@@ -459,19 +443,6 @@ Every answered Q/A decision in the delivery corpus, newest first, with the archi
 - Q: new milestone M6, or fold into M5 beside the Codex payload stories? → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: retain M6, with -12 before -13.
 - Q: is a human-witnessed trust grant followed by a scripted `codex exec` run acceptable evidence, or must every check stay fully… ([[STORY-058-13]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: human-granted workspace trust and trust for the exact hook content/hashes, then scripted execution; bypass testing is secondary and labelled.
 - Q: does "the loop ran under Codex" require the flashcard write-gate and dispatch attribution to actually fire, or is completing the… ([[STORY-058-13]]) → Approved by sandrinio on 2026-09-11T22:19:09Z through “continue please” after the recommended decision brief: require both loop transport and enforcement parity; disclose gaps, but do not close this story or pass the sprint's Codex-port goal until mandatory enforcement is proven.
-
-### [[EPIC-058]] — Additive Multi-Host Execution Adapters (2026-09-04)
-- Rule: All production implementation and canonical npm payload sources MUST live inside the standalone `cleargate-cli` repository; the outer meta-repo and sibling `cleargate-planning/` directory MUST NOT be build-time dependencies.
-- Rule: Preserve `cleargate init` as byte-compatible Claude installation behavior unless the user supplies a host flag.
-- Rule: Use `--host claude`, `--host copilot`, and `--host codex` as explicit additive selectors; `--host portable` expands to Copilot plus Codex, and `--host all` expands to all three.
-- Rule: Repeated host flags and comma-separated host values MUST normalize to a de-duplicated set; installing a new host MUST NOT remove or rewrite another installed host's owned files.
-- Rule: One shared `.cleargate/**` planning, wiki, sprint-state, worktree, and gate surface serves every installed host; only instructions, agents, skills, hooks, permissions, and host-specific MCP configuration vary.
-- Rule: Use `AGENTS.md` as the portable Copilot/Codex bootstrap, `.agents/skills/**` for shared portable skills, `.github/**` for Copilot-native assets, `.codex/**` for Codex-native assets, and retain `CLAUDE.md` plus `.claude/**` for Claude Code.
-- Rule: Host hook files MUST be thin adapters into normalized `cleargate hook` CLI handlers; planning gates, wiki ingest, dispatch attribution, and ledger policy MUST NOT be reimplemented separately per host.
-- Rule: Token usage is recorded only when the host supplies verifiable telemetry; unavailable usage MUST be represented explicitly and MUST NOT be synthesized as zero tokens.
-- Rule: Upgrade, doctor, and uninstall MUST operate per installed-host ownership recorded in the install manifest while preserving user-authored instructions, hooks, agents, skills, and MCP servers.
-- Rule: No change to install, upgrade, doctor, or uninstall is DONE until it has been validated by a CLEAN-ROOM install: a newly created empty directory outside this repository, installed from the packed artifact, exercised by a real host session. Green unit… ([[EPIC-058]])
-- Rule: Claude Code is the REGRESSION BASELINE, not merely one adapter among three. Every clean-room run MUST re-verify the Claude path — no-flag install and `--host all` — and any Claude-observable behavior change is a release blocker regardless of whether Copilot… ([[EPIC-058]])
 
 ### [[STORY-058-01]] — Tracked scaffold/core + scaffold/hosts/claude payload layout (2026-09-04)
 - Q: does `cleargate-planning/` remain in the meta-repo as a deprecated mirror during the transition, or is it deleted the moment nothing… ([[STORY-058-01]]) → Resolved 2026-09-25 by the orchestrator under the owner's autonomy directive (SPRINT-41 kickoff), per the M1 plan: keep `cleargate-planning/` as a deprecated, frozen, read-only snapshot with `DEPRECATED.md`; nobody edits it after this story merges; it is **not** deleted at sprint close.… ([[STORY-058-01]])

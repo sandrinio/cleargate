@@ -5,14 +5,8 @@
 ## Current Sprint
 
 
-- [[SPRINT-47]]
-  - [[STORY-065-01]] — Done
-  - [[STORY-065-02]] — Done
-  - [[STORY-065-03]] — Done
-  - [[STORY-065-04]] — Done
-  - [[STORY-065-05]] — Done
-  - [[STORY-065-06]] — Done
 
+_No active sprint found._
 
 
 
@@ -32,10 +26,10 @@
 ## Recently Completed Sprints
 
 
+- [[SPRINT-47]] — completed: 2026-11-16T18:30:00Z
+
 - [[SPRINT-46]] — completed: 2026-11-16T00:00:00Z
 
 - [[SPRINT-45]] — completed: 2026-11-14T13:05:00Z
-
-- [[SPRINT-44]] — completed: 2026-11-10T18:30:00Z
 
 

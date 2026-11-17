@@ -11,7 +11,6 @@
 - [[SPRINT-37]] — Draft · 2026-07-07 → 2026-07-21 — Connector M2 - Daemon Hardening (Production Posture) — Harden the M0 daemon to production posture across seven axes, real-credential register
 - [[SPRINT-42]] — Draft · 2026-10-08 → 2026-10-16 — Planning Catches What Execution Stopped For — Move to plan confirmation the owner decisions a downstream sprint paid for
 - [[SPRINT-43]] — Draft · 2026-10-19 → 2026-10-30 — Execution-Loop Efficiency + Developer Context — Reclaim the measured waste inside sprint stages, not between them, and fix
-- [[SPRINT-47]] — Active · 2026-11-17 → 2026-11-21 — Proof Decides Done — Make proof decide Done: every item declares a proof tier, a script
 
 ### Epics
 
@@ -26,16 +25,8 @@
 - [[EPIC-055]] — Draft · SPRINT-39 — Parallel wave scheduling - waves become a DAG, not a chain — Replace the serial wave loop with a dependency-DAG scheduler that admits any
 - [[EPIC-056]] — Draft · no sprint — CI verification layer - environment-independent proof that tests pass — Add GitHub Actions workflows to cleargate-cli, cleargate-mcp and cleargate-admin that run typecheck
 - [[EPIC-057]] — Draft · SPRINT-39 — Multi-repo story execution - routing, not just detection — Let a story whose file surface lives outside the worktree-reachable tree execute
-- [[EPIC-058]] — Draft · no sprint — Additive Multi-Host Execution Adapters — Make the npm-installed ClearGate scaffold natively support Claude Code, GitHub Copilot, and
-  - [[BUG-103]] — Triaged · SPRINT-41 — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
-  - [[BUG-105]] — Triaged · SPRINT-41 — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
-  - [[BUG-110]] — Triaged · SPRINT-41 — The state scripts the skill prescribes exit 1 unless `CLEARGATE_STATE_FILE` is set, and no example sets it
-  - [[BUG-115]] — Triaged · SPRINT-41 — Consolidation (§D.5.1) requires a `code-simplifier` agent that ClearGate does not install
-  - [[BUG-116]] — Triaged · SPRINT-41 — DevOps halts on a missing Architect report that the skill says a clean-scan story never has
 - [[EPIC-059]] — Draft · SPRINT-42 — Planning Catches What Execution Stopped For — Add four short process rules to the canonical scaffold, learned from a
 - [[EPIC-060]] — Draft · no sprint — Fresh-Context Review Before Approval — Before the owner approves an epic or CR, and before a sprint's
-- [[EPIC-061]] — Draft · no sprint — cleargate-cli Hygiene, Layout & Public Release — Restructure cleargate-cli so its layout follows its domains and its working tree
-- [[EPIC-065]] — Approved · SPRINT-47 — Proof Decides Done — Every sprint goal and every story, CR and bug declares a proof
 
 ### Proposals and initiatives
 
@@ -65,6 +56,7 @@
   - [[CR-115]] — Approved · no sprint — `cleargate upgrade` announces what it is about to overwrite, before it overwrites it
   - [[CR-132]] — Draft · no sprint — Upgrade merges local edits against the installed version instead of replacing them
 - area: codex-adapter
+  - [[BUG-105]] — Triaged · SPRINT-41 — Codex install papercuts: Claude restart banner on a Codex-only install, hook noise on deleted files, prose slugs rejected
   - [[BUG-112]] — Triaged · SPRINT-41 — Codex agents are told to call `Skill(flashcard, "check")`, a Claude tool call, so Codex invents a `cleargate flashcard` command
 - area: dispatch-serial
   - [[BUG-102]] — Triaged · SPRINT-41 — The serial driver needs a waves.json that the tiny-sprint rule omits, and its verdicts never move state.json
@@ -108,6 +100,7 @@
   - [[BUG-070]] — Triaged · no sprint — The CLI resolver skips `node_modules/.bin`, so a locally-installed project silently runs a different version
 - area: scripts
   - [[BUG-109]] — Triaged · SPRINT-41 — `run_script.sh` records QA-Red's intended red test runs as script incidents, unattributed
+  - [[BUG-110]] — Triaged · SPRINT-41 — The state scripts the skill prescribes exit 1 unless `CLEARGATE_STATE_FILE` is set, and no example sets it
 - area: serial-dispatch
   - [[BUG-111]] — Triaged · SPRINT-41 — `dispatch_serial.mjs` rejects an unknown wave id without naming the valid ones
 - area: session-brief
@@ -125,12 +118,16 @@
   - [[BUG-088]] — Draft · SPRINT-43 — Every Agent Is Ordered to Read a `## Active CRs` Section That Has Never Existed
   - [[BUG-108]] — Triaged · SPRINT-41 — The QA role requires a context pack that the sprint-execution skill never tells the orchestrator to build
   - [[BUG-113]] — Triaged · SPRINT-41 — Nothing checks QA-Red's sealed tests against the item's declared Test Layers minimums before the Developer starts
+  - [[BUG-115]] — Triaged · SPRINT-41 — Consolidation (§D.5.1) requires a `code-simplifier` agent that ClearGate does not install
+  - [[BUG-116]] — Triaged · SPRINT-41 — DevOps halts on a missing Architect report that the skill says a clean-scan story never has
   - [[BUG-138]] — Draft · no sprint — `cleargate sprint archive` run from a worktree session fails at `git checkout main` / `git branch -d` and leaves the sprint half-archived
   - [[BUG-139]] — Draft · no sprint — Close Step 8 handoff lists "push to MCP" as a pending action for a pre-member repo, where it cannot run
   - [[CR-121]] — Draft · SPRINT-43 — Flashcard Write-Gate Becomes Advisory Per-Spawn, Blocking Once at Close
   - [[CR-122]] — Draft · SPRINT-43 — The Developer May Read Its Own Spec, and Is Shown the Permissions It Already Has
   - [[CR-133]] — Draft · no sprint — Fill sprint-context.md §Test Stack from gate-checks.json at sprint init
   - [[CR-134]] — Draft · no sprint — close_sprint.mjs writes statuses and archives only in the ack pass, never before the human's Gate 4 ack
+- area: sprint-execution-skill
+  - [[BUG-103]] — Triaged · SPRINT-41 — The sprint-execution skill gives commands that fail and rules that contradict each other (found by a Codex agent following it literally)
 - area: sprint-scripts
   - [[BUG-074]] — Triaged · no sprint — A state transition dirties the tree and fails the next story's bounce-readiness check
   - [[BUG-075]] — Triaged · no sprint — `STATE_TRANSITIONS` is defined, exported, and enforced by nothing - a story can reach `Done` without QA
@@ -149,8 +146,8 @@
 
 ## Archive
 
-- Epics: 37 Completed · 3 Abandoned
-- Sprints: 39 Completed · 3 Abandoned
+- Epics: 40 Completed · 3 Abandoned
+- Sprints: 40 Completed · 3 Abandoned
 - Proposals: 8 Abandoned · 2 Completed
 - CRs: 109 Completed · 1 Abandoned
 - Bugs: 70 Completed · 1 Abandoned

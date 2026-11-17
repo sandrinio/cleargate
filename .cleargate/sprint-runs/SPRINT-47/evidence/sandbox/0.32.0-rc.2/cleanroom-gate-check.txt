@@ -1,0 +1,7 @@
+Gate: story.ready-for-execution (enforcing)
+❌ existing-surfaces-verified: cited paths do not exist on disk: ./name.ext, path/to/file.ext
+❌ prior-work-recorded: ## Prior work has no [[ID]] wikilink or "none found" sentinel
+❌ task-breakdown-complete: ## Task Breakdown is present but carries no `- [ ]` task rows
+❌ test-layers-declared: test-layers-declared: "Unit tests" count "{N}" is not a non-negative integer
+❌ spidr-coverage: spidr-coverage: Paths Cover cell "{T or F}" is not exactly T or F
+❌ proof-declared: proof-declared: proof_tier is missing — set unit, container, live or human (copy proof_tier and ## Proof from the item template)

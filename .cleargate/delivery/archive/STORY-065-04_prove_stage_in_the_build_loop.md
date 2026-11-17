@@ -4,7 +4,7 @@ parent_epic_ref: EPIC-065
 parent_cleargate_id: null
 sprint_cleargate_id: null
 carry_over: false
-status: Ready
+status: "Completed"
 approved: true
 approved_by: sandrinio
 approved_at: 2026-11-16T09:00:00Z
@@ -15,7 +15,7 @@ complexity_label: L3
 area: sprint-execution,scripts,agent-prompts
 parallel_eligible: y
 expected_bounce_exposure: med
-lane: standard
+lane: "runtime"
 db_write_set: []
 deferred_verification: []
 created_at: 2026-11-16T07:39:06.129Z

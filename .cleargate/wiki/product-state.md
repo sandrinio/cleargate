@@ -6,8 +6,8 @@
 
 | Type | Total | Open | Shipped |
 |------|-------|--------|---------|
-| Epics | 55 | 15 | 39 |
-| Sprints | 47 | 5 | 39 |
+| Epics | 55 | 12 | 42 |
+| Sprints | 47 | 4 | 40 |
 | Proposals | 16 | 6 | 14 |
 | CRs | 129 | 19 | 95 |
 | Bugs | 126 | 55 | 59 |
@@ -36,15 +36,9 @@
 
 - [[EPIC-057]] — status: Draft
 
-- [[EPIC-058]] — status: Draft
-
 - [[EPIC-059]] — status: Draft
 
 - [[EPIC-060]] — status: Draft
-
-- [[EPIC-061]] — status: Draft
-
-- [[EPIC-065]] — status: Approved
 
 
 
@@ -429,11 +423,17 @@
 
 - [[EPIC-054]] (epics) — Completed
 
+- [[EPIC-058]] (epics) — Completed
+
+- [[EPIC-061]] (epics) — Completed
+
 - [[EPIC-062]] (epics) — Completed
 
 - [[EPIC-063]] (epics) — Completed
 
 - [[EPIC-064]] (epics) — Completed
+
+- [[EPIC-065]] (epics) — Completed
 
 - [[EPIC-066]] (epics) — Completed
 
@@ -544,5 +544,7 @@
 - [[SPRINT-45]] (sprints) — Completed
 
 - [[SPRINT-46]] (sprints) — Completed
+
+- [[SPRINT-47]] (sprints) — Completed
 
 
