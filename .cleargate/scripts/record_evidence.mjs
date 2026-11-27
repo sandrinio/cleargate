@@ -17,6 +17,10 @@
  *
  * Env: CLEARGATE_PROOF_TIMEOUT_S (default 1800), CLEARGATE_SPRINT_DIR (test override).
  *
+ * With gate-checks.json `qa.test_scopes` set, a `unit` or `container` proof whose item names no command
+ * of its own runs the scopes the branch's diff against the sprint branch touches (lib/test-scope.mjs; the
+ * selection is printed on stderr). When no scope is selected it keeps the configured proof command.
+ *
  * Evidence file <sprintDir>/evidence/<ID>.json, written atomically (tmp + rename); every key present:
  *   schema_version: 1, id, tier: 'unit'|'container'|'live'|'human', status: 'pass'|'fail'|'pending',
  *   mode: 'command'|'human'|'pending', command: string|null, note: string|null,
@@ -29,9 +33,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
-import { isProofTier, readProofTier, findItemFile, evidencePath, resolveProofCommand } from './lib/proof.mjs';
+import { isProofTier, readProofTier, findItemFile, evidencePath, resolveProofCommand, scopedProofApplies } from './lib/proof.mjs';
 import { sprintRoot } from './lib/sprint-root.mjs';
 import { extractFailing, commandEnv } from './record_baseline.mjs';
+import { parseTestScopes, selectScopes, formatSelection, scopeCommand } from './lib/test-scope.mjs';
+import { sprintBranchFor } from './dispatch_serial.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: record_evidence.mjs <ID> [--tier <t>] [--worktree <dir>] [-- <command...>] | <ID> --human "<note>"';
@@ -263,6 +269,24 @@ async function main(argv) {
     } else {
       const gc = readJson(path.join(SCRIPT_DIR, 'gate-checks.json')) ?? {};
       cmd = args.cmd ?? resolveProofCommand(content, tier, gc);
+      if (args.cmd === null && (tier === 'unit' || tier === 'container')) {
+        // With qa.test_scopes set and no command of its own, the proof runs the scopes the branch's diff touches.
+        const parsed = parseTestScopes(gc.qa);
+        if (parsed.error) throw refuse(`${parsed.error} (.cleargate/scripts/gate-checks.json)`);
+        if (scopedProofApplies(content, tier, parsed.scopes)) {
+          let sel;
+          try {
+            const d = spawnSync('git', ['-C', runDir, 'diff', '--name-only', '-z', '--no-renames', `${sprintBranchFor(path.basename(sprintDir))}...HEAD`], { encoding: 'utf8', maxBuffer: MAX_OUTPUT });
+            sel = d.status === 0 && !d.error
+              ? selectScopes(String(d.stdout).split('\0').filter((p) => p), parsed.scopes)
+              : selectScopes(null, parsed.scopes, { error: d.error?.message ?? `git diff exit ${d.status}` });
+          } catch (err) {
+            sel = selectScopes(null, parsed.scopes, { error: err.message });
+          }
+          process.stderr.write(`record_evidence: ${formatSelection(sel)}\n`);
+          if (sel.scopes.length > 0) cmd = scopeCommand(sel.scopes); // none selected: keep the configured proof, never a silent pass
+        }
+      }
       if (cmd === null) {
         if (tier === 'live') mode = 'pending';
         else throw refuse(`no ${tier} proof command configured for ${id}`);
