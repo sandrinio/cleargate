@@ -145,3 +145,15 @@ export function resolveProofCommand(content, tier, gateChecks) {
   if (tier === 'unit' && gc.qa && typeof gc.qa === 'object') return blank(gc.qa.test);
   return null;
 }
+
+/**
+ * Does a scoped default proof apply? True for a `unit` or `container` item whose `## Proof` names no
+ * command of its own, when gate-checks `qa.test_scopes` holds at least one scope (lib/test-scope.mjs).
+ * An item-specific command always wins, so the item keeps resolveProofCommand's answer.
+ */
+export function scopedProofApplies(content, tier, scopes) {
+  if (tier !== 'unit' && tier !== 'container') return false;
+  if (!Array.isArray(scopes) || scopes.length === 0) return false;
+  const own = typeof content === 'string' ? parseProofCommand(content) : null;
+  return !(typeof own === 'string' && own.trim() !== '');
+}

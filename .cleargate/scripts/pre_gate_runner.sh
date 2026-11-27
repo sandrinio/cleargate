@@ -179,12 +179,22 @@ run_qa() {
   fi
 
   # 4. npm test
+  # A caller that selected test scopes (merge_story.mjs with qa.test_scopes set) passes the command in
+  # CLEARGATE_QA_TEST_COMMAND; an empty value means it selected no suite (NOT TESTED). Unset: qa.test.
   local test_cmd
-  test_cmd="$(read_config_field "qa.test" "$CONFIG_FILE")"
   local chk_rc=0
+  if [[ -n "${CLEARGATE_QA_TEST_COMMAND+set}" ]]; then
+    test_cmd="${CLEARGATE_QA_TEST_COMMAND}"
+    if [[ -z "${test_cmd//[[:space:]]/}" ]]; then
+      record_result "$REPORT_FILE" "test" "INFO" "NOT TESTED: no suite touched (the caller selected no test scope)"
+      return 0
+    fi
+  else
+    test_cmd="$(read_config_field "qa.test" "$CONFIG_FILE")"
+  fi
   # STORY-066-18 amendment B: the test never inherits ClearGate's own process variables
   # (record_baseline.mjs COMMAND_ENV_DROP); the subshell leaves the rest of the scan unchanged.
-  ( unset NODE_TEST_CONTEXT RUN_SCRIPT_ACTIVE CLEARGATE_REPO_ROOT
+  ( unset NODE_TEST_CONTEXT RUN_SCRIPT_ACTIVE CLEARGATE_REPO_ROOT CLEARGATE_QA_TEST_COMMAND
     run_configured_check "$REPORT_FILE" "test" "$test_cmd" "$WORKTREE" ) || chk_rc=$?
   if [[ $chk_rc -eq 1 ]]; then OVERALL_EXIT=1; fi
 }

@@ -9,6 +9,8 @@
  *   1.   Load and validate state.json via validateState
  *   2.   Refuse if any story state is not in TERMINAL_STATES (exit non-zero, list offenders)
  *   2.7  No leftover story worktrees (read-only)
+ *   2.75 With gate-checks.json qa.test_scopes set: the sprint branch HEAD has a passing wave-suite.jsonl row
+ *        (run_wave_suite.mjs), else one close run; a failing row refuses (the one pre-check that writes)
  *   2.8  sprint/S-NN is merged to main or merges cleanly, and the checkout that will receive
  *        the merge has no tracked changes (read-only; lib/sprint-finish.mjs planFinish)
  *   2.5  v2.1 report validation (fast lane); a missing report is deferred in the no-flag pass
@@ -52,6 +54,7 @@
  *                                          Step 2.7 instead of running git worktree list.
  *                                          Used to exercise the block / advisory paths
  *                                          without a real .worktrees/STORY-* directory.
+ *   CLEARGATE_SKIP_WAVE_SUITE_CHECK=1 — skip Step 2.75 entirely (test environments).
  *   CLEARGATE_SKIP_MERGE_CHECK=1     — skip Step 2.8 and Step 7.8 entirely (test environments where
  *                                      git refs are absent or merge state is irrelevant).
  *   CLEARGATE_FORCE_MERGE_STATUS=merged|unmerged — inject the Step 2.8 verdict without running git;
@@ -95,6 +98,7 @@ import { reportFilename } from './lib/report-filename.mjs';
 import { locateFrontmatterFence } from './assert_story_files.mjs';
 import { planFinish, runFinish } from './lib/sprint-finish.mjs';
 import { readEvidence, readProofTier, findItemFile, isProofTier, proofStatus } from './lib/proof.mjs';
+import { closeWaveCheck } from './run_wave_suite.mjs';
 
 /**
  * Migrate a v1 state.json to v2 by injecting lane fields with defaults.
@@ -586,6 +590,29 @@ async function main() {
         );
         process.exit(1);
       }
+    }
+  }
+
+  // ── Step 2.75: full suite on the sprint HEAD ─────────────────────────────
+  // Only when gate-checks.json `qa.test_scopes` is set (merge_story.mjs then runs only the suites each
+  // story touches). The sprint branch HEAD needs a passing row in <sprint dir>/wave-suite.jsonl
+  // (run_wave_suite.mjs), or a passing row for an ancestor when only no-scope paths changed since (the
+  // pass line names that row). A failing row for HEAD refuses with no rerun; no covering row runs the
+  // suite once (wave `close`). Runs in both passes, before Step 2.8, so a close that cannot proceed writes
+  // nothing else. This is the one pre-check that writes (its wave-suite row, even when the run fails).
+  // Test seam: CLEARGATE_SKIP_WAVE_SUITE_CHECK=1 skips it.
+  process.stdout.write('Step 2.75: checking the wave suite on the sprint HEAD...\n');
+  if (process.env.CLEARGATE_SKIP_WAVE_SUITE_CHECK === '1') {
+    process.stdout.write('Step 2.75 skipped: CLEARGATE_SKIP_WAVE_SUITE_CHECK=1 set (test seam).\n');
+  } else {
+    const waveCheck = closeWaveCheck({ root: REPO_ROOT, sprintId, sprintDir, env: process.env });
+    if (waveCheck.skipped) {
+      process.stdout.write(`Step 2.75 skipped: ${waveCheck.lines[0]}.\n`);
+    } else if (waveCheck.ok) {
+      process.stdout.write(`Step 2.75 passed: ${waveCheck.lines[0]}.\n`);
+    } else {
+      process.stderr.write(`close_sprint: Step 2.75 failed: ${waveCheck.lines.join('\n  ')}\n`);
+      process.exit(1);
     }
   }
 

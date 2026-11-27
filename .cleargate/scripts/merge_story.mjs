@@ -19,6 +19,13 @@
  * reason `baseline-unnamed`) is excused only when gate-checks.json `qa.test_waiver` holds a reason
  * (STORY-066-18); without one the merge is refused and the last tail line names the key.
  *
+ * gate-checks.json `qa.test_scopes`, when set, narrows the pre-merge test, its baseline rerun and the
+ * post-merge test to the suites the story's diff (`<sprint>...<story>`) touches (lib/test-scope.mjs); a
+ * path no scope matches selects every scope, and a change made only of `.cleargate/**` and `*.md` runs
+ * no suite and reports `NOT TESTED`. Every result tail names the selection. Unset or empty: `qa.test`
+ * and `merge.post_test` run unchanged. run_wave_suite.mjs runs the full `qa.test` once per wave.
+ * A merge test run that exits 0 and names no failing test passes (a flaky first run is noted).
+ *
  * The orchestrator's derived files (wiki, hook log, ledgers) are copied to a temp directory,
  * the tracked ones are returned to HEAD, and everything is written back afterwards. This script
  * never touches the shared git set-aside stack of other worktrees.
@@ -32,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { extractFailing, commandEnv, lastLine } from './record_baseline.mjs';
 import { sprintBranchFor } from './dispatch_serial.mjs';
 import { extractWorkItemIds } from './lib/work-item-id.mjs';
+import { parseTestScopes, selectScopes, formatSelection, notTestedLine, scopeCommand } from './lib/test-scope.mjs';
 import { findItemFile, readProofTier, isProofTier, readEvidence, proofStatus, evidencePath } from './lib/proof.mjs';
 
 export const MERGE_EXIT = Object.freeze({ MERGED: 0, PRECONDITION: 2, CHECK_FAILED: 3, CONFLICT: 4, POST_TEST_FAILED: 5 });
@@ -140,6 +148,8 @@ export function parseScanReport(text) {
  */
 export function judgeTestFailure(output, baseline, { extract = extractFailing, exitCode } = {}) {
   const ids = extract(output);
+  // A run that exits 0 and names no failing test passed, whatever the baseline holds.
+  if (exitCode === 0 && ids.length === 0) return { excused: true, ids: [], new_ids: [], reason: 'passed' };
   if (!baseline || !Array.isArray(baseline.failing)) return { excused: false, ids, new_ids: ids.slice(), reason: 'no-baseline' };
   if (ids.length === 0) {
     const last = lastLine(output);
@@ -440,12 +450,40 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
   const waiver = typeof gate.qa?.test_waiver === 'string' ? gate.qa.test_waiver.trim() : '';
   const notExcused = (cmd) => `not excused: "${cmd}" stopped before running any test and no qa.test_waiver is recorded in gate-checks.json`;
 
+  // Test scopes: with qa.test_scopes set, each test stage runs only the scopes the story's diff touches.
+  const parsedScopes = parseTestScopes(gate.qa);
+  if (parsedScopes.error) return pre([`${parsedScopes.error} (.cleargate/scripts/gate-checks.json)`]);
+  const scopesOn = parsedScopes.scopes.length > 0;
+  let sel = null;
+  if (scopesOn) {
+    const d = git(root, ['diff', '--name-only', '-z', '--no-renames', `${sprintBranch}...${storyBranch}`]);
+    sel = d.status === 0
+      ? selectScopes(d.stdout.split('\0').filter((p) => p), parsedScopes.scopes)
+      : selectScopes(null, parsedScopes.scopes, { error: lines(d.stderr)[0] ?? `git diff exit ${d.status}` });
+    notices.push(formatSelection(sel));
+    log(formatSelection(sel));
+    if (sel.scopes.length === 0) {
+      notices.push(notTestedLine(sel.untested));
+      log(notTestedLine(sel.untested));
+    }
+  }
+  /** The commands one test stage runs: the configured one (scopes off), else one step per selected scope. */
+  const stepsFor = (full) => {
+    if (!scopesOn) return full ? [{ name: null, command: full }] : [];
+    return sel.scopes.map((s) => ({ name: s.name, command: s.command }));
+  };
+  const rerunSteps = stepsFor(qaTest);
+  const postSteps = stepsFor(postTest);
+
   // 3. Pre-merge check.
   log(`pre-merge check for ${id}`);
   const reportFile = path.join(worktree, '.cleargate', 'reports', 'pre-qa-scan.txt');
   fs.rmSync(reportFile, { force: true });
+  const scanEnv = { ...env, CLEARGATE_SCAN_NO_LANE_ROUTING: '1' };
+  delete scanEnv.CLEARGATE_QA_TEST_COMMAND;
+  if (scopesOn) scanEnv.CLEARGATE_QA_TEST_COMMAND = scopeCommand(sel.scopes); // empty = run no test (NOT TESTED)
   const scan = run('bash', [path.join(scriptDir, 'pre_gate_runner.sh'), 'qa', worktree, storyBranch], {
-    cwd: root, env: { ...env, CLEARGATE_SCAN_NO_LANE_ROUTING: '1' },
+    cwd: root, env: scanEnv,
   });
   if (scan.status !== 0 && scan.status !== 1) return pre([`the pre-merge scan could not run (exit ${scan.status})`, ...lines(scan.text)]);
   let remaining = [];
@@ -478,21 +516,33 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
       tail = remaining.flatMap((f) => [f.line, ...f.tail.map((l) => `  | ${l}`)]);
       if (remaining.length > 0) {
         refuse = remaining.some((f) => f.check !== 'test');
-        if (!refuse && !(baseline && qaTest)) refuse = true;
+        if (!refuse && !(baseline && rerunSteps.length)) refuse = true;
         if (!refuse) {
-          const rerun = shell(qaTest, worktree);
-          const verdict = judgeTestFailure(rerun.text, baseline, { exitCode: rerun.status });
-          log(`baseline judgement: ${verdict.reason}`);
-          tail = lines(rerun.text);
-          refuse = !verdict.excused;
-          if (verdict.reason === 'baseline-unnamed') {
-            if (waiver) {
-              notices.push(`NOT TESTED (pre-merge): "${qaTest}" stopped before running any test (exit ${rerun.status}; exit code and last line match baseline.json); excused under waiver "${waiver}"`);
-            } else {
-              refuse = true;
-              tail = [...tail, notExcused(qaTest)];
+          const firstIds = extractFailing(remaining.filter((f) => f.check === 'test').flatMap((f) => f.tail).join('\n'));
+          const out = [];
+          for (const step of rerunSteps) {
+            const rerun = shell(step.command, worktree);
+            const verdict = judgeTestFailure(rerun.text, baseline, { exitCode: rerun.status });
+            log(`baseline judgement${step.name ? ` (${step.name})` : ''}: ${verdict.reason}`);
+            let stepRefuse = !verdict.excused;
+            const stepTail = [];
+            if (step.name) stepTail.push(`test scope ${step.name}: exit ${rerun.status}`);
+            if (!step.name || verdict.reason !== 'passed') stepTail.push(...lines(rerun.text));
+            if (verdict.reason === 'passed') {
+              notices.push(`pre-merge test failed in the scan and passed on the rerun${step.name ? ` (${step.name})` : ''}; first run: ${firstIds.length ? firstIds.join(', ') : 'no test named'}`);
             }
+            if (verdict.reason === 'baseline-unnamed') {
+              if (waiver) {
+                notices.push(`NOT TESTED (pre-merge): "${step.command}" stopped before running any test (exit ${rerun.status}; exit code and last line match baseline.json); excused under waiver "${waiver}"`);
+              } else {
+                stepRefuse = true;
+                stepTail.push(notExcused(step.command));
+              }
+            }
+            out.push(...stepTail);
+            if (stepRefuse) refuse = true;
           }
+          tail = out;
         }
       }
     }
@@ -543,22 +593,33 @@ function mergeStory({ id, sprintId, worktreeArg, env }) {
       const b = shell(prebuild, root);
       if (b.status !== 0) outcome = fail('post-merge-test', MERGE_EXIT.POST_TEST_FAILED, lines(b.text));
     }
-    if (!outcome && postTest) {
+    if (!outcome && postSteps.length) {
       log('post-merge test');
-      const t = shell(postTest, root);
-      postTail = lines(t.text);
-      let v;
-      if (t.status === 0) postMerge = 'pass';
-      else if ((v = judgeTestFailure(t.text, baseline, { exitCode: t.status })).excused && (v.reason !== 'baseline-unnamed' || waiver)) {
-        postMerge = 'excused';
-        if (v.reason === 'baseline-unnamed') {
-          notices.push(`NOT TESTED (post-merge): "${postTest}" stopped before running any test (exit ${t.status}; exit code and last line match baseline.json); excused under waiver "${waiver}"`);
+      const statuses = [];
+      postTail = [];
+      for (const step of postSteps) {
+        const t = shell(step.command, root);
+        const head = step.name ? [`test scope ${step.name}: exit ${t.status}`] : [];
+        const outLines = lines(t.text);
+        let v;
+        if (t.status === 0) {
+          statuses.push('pass');
+          postTail.push(...head, ...(step.name ? [] : outLines));
+        } else if ((v = judgeTestFailure(t.text, baseline, { exitCode: t.status })).excused && (v.reason !== 'baseline-unnamed' || waiver)) {
+          statuses.push('excused');
+          postTail.push(...head, ...outLines);
+          if (v.reason === 'baseline-unnamed') {
+            notices.push(`NOT TESTED (post-merge): "${step.command}" stopped before running any test (exit ${t.status}; exit code and last line match baseline.json); excused under waiver "${waiver}"`);
+          }
+        } else {
+          statuses.push('fail');
+          postTail.push(...head, ...outLines, ...(v && v.reason === 'baseline-unnamed' ? [notExcused(step.command)] : []));
         }
-      } else {
-        postMerge = 'fail';
-        const failTail = v && v.reason === 'baseline-unnamed' ? [...postTail, notExcused(postTest)] : postTail;
-        outcome = fail('post-merge-test', MERGE_EXIT.POST_TEST_FAILED, failTail, { post_merge_test: 'fail' });
       }
+      if (statuses.includes('fail')) {
+        postMerge = 'fail';
+        outcome = fail('post-merge-test', MERGE_EXIT.POST_TEST_FAILED, postTail, { post_merge_test: 'fail' });
+      } else postMerge = statuses.includes('excused') ? 'excused' : 'pass';
     }
   } catch (err) {
     crash = err;
