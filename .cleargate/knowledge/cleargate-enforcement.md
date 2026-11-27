@@ -486,7 +486,7 @@ Sprint close is a **Gate-4 action** — the same posture as the Gate-1-green `cl
 
 ### §12.2 Two-Step Protocol
 
-1. **Step A — Orchestrator:** runs `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags. The read-only checks run first (Steps 1–2, 2.7, 2.8), then Step 2.5, the 2.6d/2.6c/2.6/2.6b reconciliation, Step 2.9, Steps 3–3.6 (Reporter bundle, doc-refresh checklist). Without a report it stops at Step 4 and asks for the Reporter (exit 0). Once the Reporter has written `SPRINT-<#>_REPORT.md`, the same no-flag run validates it and exits 0 with the exact prompt `Review the report, then confirm close by re-running with --assume-ack`, followed by the finish plan (`On --assume-ack close will: …`) and `Doc-refresh checklist: <path>`. The orchestrator surfaces this prompt verbatim to the human and **halts**.
+1. **Step A — Orchestrator:** runs `node .cleargate/scripts/close_sprint.mjs <sprint-id>` with no flags. The read-only checks run first (Steps 1–2, 2.7), then Step 2.75 (the one pre-check that writes: with `qa.test_scopes` set it needs a passing wave-suite row for the sprint HEAD or runs the full suite once and appends its row; a failing run halts the close, §14.6), then the read-only Step 2.8, then Step 2.5, the 2.6d/2.6c/2.6/2.6b reconciliation, Step 2.9, Steps 3–3.6 (Reporter bundle, doc-refresh checklist). Without a report it stops at Step 4 and asks for the Reporter (exit 0). Once the Reporter has written `SPRINT-<#>_REPORT.md`, the same no-flag run validates it and exits 0 with the exact prompt `Review the report, then confirm close by re-running with --assume-ack`, followed by the finish plan (`On --assume-ack close will: …`) and `Doc-refresh checklist: <path>`. The orchestrator surfaces this prompt verbatim to the human and **halts**.
 2. **Step B — Human:** reviews `SPRINT-<#>_REPORT.md` and the finish plan, then either runs `node .cleargate/scripts/close_sprint.mjs <sprint-id> --assume-ack` themselves, or explicitly tells the orchestrator "approved, close it" — at which point the orchestrator may pass the flag on the human's behalf. The ack pass flips `sprint_status`, clears `.active` (Step 5) and finishes the sprint at Step 7.8: it commits the close artefacts, merges `sprint/S-NN` into `main` in the checkout that has `main`, and deletes the branch or prints its delete command. No hand `git` step remains.
 
 ### §12.3 Flag Reservation
@@ -552,11 +552,54 @@ the failure verbatim to the human and halts. Resolution is per-item:
 
 This gate is **always enforced** (STORY-070-01: single always-enforced behavior).
 
+### §13.1 Merge test scopes (`qa.test_scopes`)
+
+`qa.test_scopes` is an optional list beside `qa.test` in `gate-checks.json`: `{ name, paths,
+command }` entries, `paths` being globs (`**` spans segments, `*` and `?` stay in one; a glob with no
+`/` matches the file name at any depth). Absent, `null` or empty, nothing changes: `qa.test` and
+`merge.post_test` run as before. The shipped `gate-checks.json` has none; a project with separate
+suites adds its own, for example:
+
+```json
+"qa": {
+  "test": "npm --prefix api test && npm --prefix web test",
+  "test_scopes": [
+    { "name": "api", "paths": ["api/**", "shared/**"], "command": "npm --prefix api test" },
+    { "name": "web", "paths": ["web/**", "shared/**"], "command": "npm --prefix web run typecheck && npm --prefix web test" }
+  ]
+}
+```
+
+When set, `merge_story.mjs` selects scopes from `git diff --name-only --no-renames <sprint>...<story>`
+and runs only their commands in the pre-merge scan (through `CLEARGATE_QA_TEST_COMMAND`, which
+`pre_gate_runner.sh qa` honours; empty means no suite, recorded as `[INFO] test: NOT TESTED`), its
+baseline rerun (one run per scope) and the post-merge test (one run per scope).
+- A changed path that no scope matches selects every scope.
+- A diff made only of `.cleargate/**` and `*.md` paths selects none: `NOT TESTED: no suite touched (<paths>)`.
+- An unreadable or empty diff selects every scope.
+- Every result tail names the selection: `test scopes: <names> (<matched|unmatched|docs-only|diff-error|empty-diff>)`.
+
+`record_evidence.mjs` applies the same selection to a `unit` or `container` proof whose item names no
+command of its own (an item-specific `## Proof` command is unchanged; with no scope selected the
+configured proof runs). A malformed value is refused by name (`merge_story.mjs` and
+`record_evidence.mjs` exit 2). `judgeTestFailure` treats a run that exits 0 and names no failing test
+as passed, so a flaky scan followed by a clean rerun merges, with a notice naming the first run's
+failures.
+
+**Wave suite.** With scopes set, `node .cleargate/scripts/run_wave_suite.mjs <SPRINT-ID> <wave>` runs
+`qa.test` once on the sprint branch HEAD after a wave's last merge and appends `{ wave, sha, status,
+exit, failing, new_failures, reason, duration_ms, recorded_at }` to `<sprint dir>/wave-suite.jsonl`.
+Exit 0: pass, only `baseline.json` failures, or `skipped` (scopes off, no row); 1: a new failure, a
+timeout, or a failing run that names no test; 2: usage or a precondition (not on `sprint/S-NN`, a merge
+in progress, authored changes, HEAD moved during the run), no row. A failed run blocks the sprint
+branch moving toward `main` (close Step 2.75, §14.6), not the next wave's merges; open one bug per
+`new_failures` entry.
+
 
 
 ## 14. Sprint Close Gate (Gate 4) — Pre-close + Post-close additions (source: CR-022)
 
-`close_sprint.mjs` runs an 8-step close pipeline. Steps 2.7, 2.8, 6.5, 6.6, 6.7, and 8 were added in SPRINT-19 by CR-022 to harden the close pipeline against the issues observed in SPRINT-18 (worktrees left open, sprint branch unmerged, no post-close handoff visibility).
+`close_sprint.mjs` runs an 8-step close pipeline. Steps 2.7, 2.8, 6.5, 6.6, 6.7, and 8 were added in SPRINT-19 by CR-022 to harden the close pipeline against the issues observed in SPRINT-18 (worktrees left open, sprint branch unmerged, no post-close handoff visibility). Step 2.75 (§14.6) applies only to projects that set `qa.test_scopes`.
 
 ### §14.1 Step 2.7 — Worktree-Closed Pre-close Check
 
@@ -594,6 +637,16 @@ This step replaces the prior 3-line "pipeline complete" summary with explicit ac
 `cleargate sprint archive --allow-wiki-lint-debt` waives wiki-lint findings during archive. Reserved for cases where pre-existing wiki-lint debt blocks otherwise-clean archives (e.g., 34 broken-backlink findings carried since SPRINT-16). Without the flag, lint findings cause `archive` to roll back. The flag emits the verbatim Gherkin message `wiki-lint debt waived via --allow-wiki-lint-debt flag` and continues.
 
 Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_reporter_context.mjs`) to absorb heavy-strategy sprint reports. Override via `VITEST_MAX_FORKS`-style `MAX_BUNDLE_BYTES` future env.
+
+### §14.6 Step 2.75 — Full suite on the sprint HEAD
+
+Runs in both passes, after Step 2.7 and before Step 2.8, only when `qa.test_scopes` is set (§13.1). The sprint branch HEAD needs a row with `exit 0` in `<sprint dir>/wave-suite.jsonl` (`run_wave_suite.mjs`).
+
+- **Passing row for HEAD:** passes, nothing runs.
+- **Newest row for HEAD failed:** halts (exit 1) with `Step 2.75 failed: no passing wave suite for <sha>`, naming its new failures and the remedy `node .cleargate/scripts/run_wave_suite.mjs <id> close`. No automatic rerun.
+- **No row for HEAD:** runs the suite once (wave `close`); a failure, or a precondition exit 2 (the checkout must be on `sprint/S-NN` with no authored changes), halts before Step 2.8.
+- Skipped when the scopes are off or `sprint/S-NN` cannot be resolved. Step 2.75 is the one pre-check that writes (its row).
+- **Test seam:** `CLEARGATE_SKIP_WAVE_SUITE_CHECK=1`.
 
 ---
 
