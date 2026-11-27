@@ -596,8 +596,9 @@ async function main() {
   // ── Step 2.75: full suite on the sprint HEAD ─────────────────────────────
   // Only when gate-checks.json `qa.test_scopes` is set (merge_story.mjs then runs only the suites each
   // story touches). The sprint branch HEAD needs a passing row in <sprint dir>/wave-suite.jsonl
-  // (run_wave_suite.mjs). A failing row for HEAD refuses with no rerun; no row for HEAD runs the suite
-  // once (wave `close`). Runs in both passes, before Step 2.8, so a close that cannot proceed writes
+  // (run_wave_suite.mjs), or a passing row for an ancestor when only no-scope paths changed since (the
+  // pass line names that row). A failing row for HEAD refuses with no rerun; no covering row runs the
+  // suite once (wave `close`). Runs in both passes, before Step 2.8, so a close that cannot proceed writes
   // nothing else. This is the one pre-check that writes (its wave-suite row, even when the run fails).
   // Test seam: CLEARGATE_SKIP_WAVE_SUITE_CHECK=1 skips it.
   process.stdout.write('Step 2.75: checking the wave suite on the sprint HEAD...\n');

@@ -591,8 +591,9 @@ failures.
 exit, failing, new_failures, reason, duration_ms, recorded_at }` to `<sprint dir>/wave-suite.jsonl`.
 Exit 0: pass, only `baseline.json` failures, or `skipped` (scopes off, no row); 1: a new failure, a
 timeout, or a failing run that names no test; 2: usage or a precondition (not on `sprint/S-NN`, a merge
-in progress, authored changes, HEAD moved during the run), no row. A failed run blocks the sprint
-branch moving toward `main` (close Step 2.75, §14.6), not the next wave's merges; open one bug per
+in progress, a tracked change that selects a scope, HEAD moved during the run), no row. Tracked changes
+that select no scope (only `.cleargate/**` and `*.md`) are ignored. A failed run blocks the sprint branch
+moving toward `main` (close Step 2.75, §14.6), not the next wave's merges; open one bug per
 `new_failures` entry.
 
 
@@ -643,8 +644,9 @@ Reporter bundle cap raised from 80KB → 160KB (`MAX_BUNDLE_BYTES` in `prep_repo
 Runs in both passes, after Step 2.7 and before Step 2.8, only when `qa.test_scopes` is set (§13.1). The sprint branch HEAD needs a row with `exit 0` in `<sprint dir>/wave-suite.jsonl` (`run_wave_suite.mjs`).
 
 - **Passing row for HEAD:** passes, nothing runs.
+- **No row for HEAD, passing row for an ancestor:** passes, nothing runs, when `git diff --name-only <row sha> HEAD` is non-empty and selects no scope (only `.cleargate/**` and `*.md` changed, e.g. a doc-refresh commit between the close passes). The pass line names the covering row and the paths since. A failing newest ancestor row, a row that is not an ancestor, an empty diff or a git error never covers HEAD (git errors are logged).
 - **Newest row for HEAD failed:** halts (exit 1) with `Step 2.75 failed: no passing wave suite for <sha>`, naming its new failures and the remedy `node .cleargate/scripts/run_wave_suite.mjs <id> close`. No automatic rerun.
-- **No row for HEAD:** runs the suite once (wave `close`); a failure, or a precondition exit 2 (the checkout must be on `sprint/S-NN` with no authored changes), halts before Step 2.8.
+- **No covering row:** runs the suite once (wave `close`); tracked changes that select no scope do not refuse the run, any other tracked change does (exit 2); a failure, or a precondition exit 2 (the checkout must be on `sprint/S-NN`), halts before Step 2.8.
 - Skipped when the scopes are off or `sprint/S-NN` cannot be resolved. Step 2.75 is the one pre-check that writes (its row).
 - **Test seam:** `CLEARGATE_SKIP_WAVE_SUITE_CHECK=1`.
 

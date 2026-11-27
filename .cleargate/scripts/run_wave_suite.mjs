@@ -19,7 +19,9 @@
  *   2  usage or precondition: no qa.test, malformed qa.test_scopes, the checkout is not on the sprint
  *      branch, a merge is in progress, authored tracked changes, or HEAD moved during the run. No row.
  *
- * close_sprint.mjs Step 2.75 needs a passing row for the sprint branch HEAD (closeWaveCheck).
+ * close_sprint.mjs Step 2.75 needs a passing row covering the sprint branch HEAD (closeWaveCheck): a row for
+ * HEAD, or a passing row for an ancestor when every commit since selects no test scope. Tracked changes that
+ * select no scope (only .cleargate/** or *.md) do not count as authored changes.
  *
  * Env: ORCHESTRATOR_PROJECT_DIR (the checkout, as merge_story.mjs), CLEARGATE_SPRINT_DIR (test override).
  */
@@ -31,7 +33,7 @@ import { fileURLToPath } from 'node:url';
 import { extractFailing, commandEnv } from './record_baseline.mjs';
 import { sprintBranchFor } from './dispatch_serial.mjs';
 import { judgeTestFailure, classifyDirtyPath } from './merge_story.mjs';
-import { parseTestScopes } from './lib/test-scope.mjs';
+import { parseTestScopes, selectScopes } from './lib/test-scope.mjs';
 
 export const WAVE_EXIT = Object.freeze({ OK: 0, FAILED: 1, PRECONDITION: 2 });
 
@@ -85,7 +87,7 @@ function appendRow(sprintDir, row) {
   fs.appendFileSync(file, `${lead}${JSON.stringify(row)}\n`);
 }
 
-function authoredDirt(root) {
+function authoredDirt(root, scopes) {
   const out = git(root, ['status', '--porcelain=v1', '-z', '--untracked-files=all']).stdout.split('\0');
   const dirt = [];
   for (let i = 0; i < out.length; i++) {
@@ -94,7 +96,10 @@ function authoredDirt(root) {
     const status = p.slice(0, 2);
     const rel = p.slice(3);
     if (status[0] === 'R' || status[0] === 'C' || status[1] === 'R' || status[1] === 'C') i++;
-    if (classifyDirtyPath(rel, { tracked: status !== '??' }) === 'authored') dirt.push(`${status} ${rel}`);
+    if (classifyDirtyPath(rel, { tracked: status !== '??' }) !== 'authored') continue;
+    // A tracked change that selects no scope (only .cleargate/** or *.md) cannot change a suite result.
+    if (selectScopes([rel], scopes).scopes.length === 0) continue;
+    dirt.push(`${status} ${rel}`);
   }
   return dirt;
 }
@@ -119,7 +124,7 @@ export function runWaveSuite({ root, sprintId, sprintDir, wave, env = process.en
   const cur = git(root, ['branch', '--show-current']).stdout.trim();
   if (cur !== branch) return pre([`the checkout is on '${cur || '(detached)'}', not ${branch}; check out ${branch} first`]);
   if (git(root, ['rev-parse', '-q', '--verify', 'MERGE_HEAD']).status === 0) return pre(['a merge is in progress in the checkout']);
-  const dirt = authoredDirt(root);
+  const dirt = authoredDirt(root, parsed.scopes);
   if (dirt.length) return pre(['authored changes in the checkout; commit or revert them first:', ...dirt.map((d) => `  ${d}`)]);
 
   const sha = git(root, ['rev-parse', 'HEAD']).stdout.trim();
@@ -167,8 +172,31 @@ export function runWaveSuite({ root, sprintId, sprintDir, wave, env = process.en
 }
 
 /**
+ * The newest row for a proper ancestor of `sha` covers `sha` when it passed and the diff since is non-empty
+ * and selects no scope. A failing row, a non-ancestor, an empty diff or any git error never covers.
+ * @returns {{ row: object, paths: string[] } | null}
+ */
+function ancestorCover({ root, sha, rows, scopes }) {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const row = rows[i];
+    if (typeof row.sha !== 'string' || row.sha === '' || row.sha === sha) continue;
+    const anc = git(root, ['merge-base', '--is-ancestor', row.sha, sha]);
+    if (anc.status === 1) continue;
+    if (anc.status !== 0) { logErr(`git merge-base failed for ${row.sha}; not counted as an ancestor`); continue; }
+    if (row.exit !== 0) return null;
+    const diff = git(root, ['diff', '--name-only', row.sha, sha]);
+    if (diff.status !== 0) { logErr(`git diff failed for ${row.sha}..${sha}`); return null; }
+    const paths = diff.stdout.split('\n').filter((x) => x !== '');
+    if (paths.length === 0 || selectScopes(paths, scopes).scopes.length > 0) return null;
+    return { row, paths };
+  }
+  return null;
+}
+
+/**
  * close_sprint.mjs Step 2.75: the sprint branch HEAD needs a passing wave-suite row. A passing row ends
- * it; a failing row for HEAD refuses (no automatic rerun); no row runs the suite once (wave `close`).
+ * it (so does a passing ancestor row with only no-scope commits since); a failing row for HEAD refuses
+ * (no automatic rerun); no covering row runs the suite once (wave `close`).
  * Skipped when `qa.test_scopes` is off, or when the branch cannot be resolved (fail open, as Step 2.8).
  * @returns {{ ok: boolean, skipped: boolean, lines: string[] }}
  */
@@ -187,6 +215,12 @@ export function closeWaveCheck({ root, sprintId, sprintDir, env = process.env })
   const forHead = rows.filter((x) => x.sha === sha);
   if (forHead.some((x) => x.exit === 0)) return { ok: true, skipped: false, lines: [`wave suite passed for ${sha}`] };
   const last = latestRowFor(rows, sha);
+  if (!last) {
+    const cover = ancestorCover({ root, sha, rows, scopes: parsed.scopes });
+    if (cover) {
+      return { ok: true, skipped: false, lines: [`wave suite passed for ${sha} (covered by the passing row for ${cover.row.sha}; only no-scope paths changed since: ${cover.paths.join(', ')})`] };
+    }
+  }
   const remedy = `run: node .cleargate/scripts/run_wave_suite.mjs ${sprintId} close`;
   if (last && last.exit === 1) {
     const names = Array.isArray(last.new_failures) && last.new_failures.length ? ` (new failures: ${last.new_failures.join(', ')})` : '';
